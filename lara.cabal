@@ -1,0 +1,48 @@
+cabal-version:      3.0
+name:               lara
+version:            0.1.0.0
+synopsis:           Verify research claims with justification logic and neighborhood semantics
+description:        A justification-logic (Logic of Proofs) core that checks whether a
+                    candidate justification term @t@ validly justifies a formula @F@, plus
+                    a non-monotonic argumentation layer for global defeat. The kernel here
+                    is the /trusted core/: small, auditable, and the sole producer of the
+                    sealed @Judgment@ type.
+license:            MIT
+license-file:       LICENSE
+author:             yfhe
+maintainer:         yfhe.prsn@gmail.com
+build-type:         Simple
+extra-doc-files:    README.md
+
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+    hs-source-dirs:   src
+    exposed-modules:  Lara.Term
+                      Lara.Formula
+                      Lara.ConstantSpec
+                      Lara.Kernel
+    build-depends:    base >=4 && <5
+                    , containers
+    default-language: GHC2021
+
+executable lara
+    import:           warnings
+    hs-source-dirs:   app
+    main-is:          Main.hs
+    build-depends:    base >=4 && <5
+                    , lara
+    default-language: GHC2021
+
+test-suite lara-test
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Spec.hs
+    build-depends:    base >=4 && <5
+                    , lara
+                    , containers
+                    , QuickCheck
+    default-language: GHC2021
