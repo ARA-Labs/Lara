@@ -21,7 +21,7 @@ section of the paper.
 
 ## Tier 0 — before M0 corpus annotation (start now)
 
-M0 fixes the warrant schemes, critical questions, and attack typing you annotate the corpus with;
+M0 fixes the inference schemes, critical questions, and attack typing you annotate the corpus with;
 these three define that vocabulary. Getting them wrong pollutes the frozen v0.1 benchmark.
 
 | # | Reading | Depth | Unblocks | Link |
@@ -37,7 +37,7 @@ CQs. #3's Examples 5–6 are *why* §8.1 exists (a conflict behind a strict rule
 you need to spot that pattern if the corpus produces it, since it is the flip criterion to Path A.
 
 **Checkpoint before annotating:** you can, by hand, take resnet claim C02 + experiment E01 and write
-the warrant rule, its critical questions, and classify exploration node N04 as attack-or-no-edge.
+the inference scheme, its critical questions, and classify exploration node N04 as attack-or-no-edge.
 
 ---
 
@@ -52,7 +52,7 @@ the warrant rule, its critical questions, and classify exploration node N04 as a
 | 8 | **Dung 1995**, On the Acceptability of Arguments | skim | grounded labelling as a least fixpoint, for `Lara.Grounded` | doi:10.1016/0004-3702(94)00041-X |
 
 **Why now.** #4 is the closest prior art on machine-readable claims+evidence+support+challenge; LARA
-must state its delta (checked warrant programs + status semantics vs their RDF model). #6/#7 are the
+must state its delta (checked claim-support programs + status semantics vs their RDF model). #6/#7 are the
 single closest system — `gap-resolution.md` already extracted the key finding (Pandžić keeps
 factivity global; LARA confines it to the strict sort), but read them firsthand because a reviewer
 will, and this is the "what's the delta from Pandžić?" defense. #8: you will implement grounded from

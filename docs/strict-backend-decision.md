@@ -1,15 +1,16 @@
 # Strict-certificate backend decision
 
 _Status: settled for language v0.1. Recorded 2026-07-21. This decision supersedes the
-LP-specific strict-witness interface in `spec.md` Section 5, `term-calculus-decision.md`, and
+LP-specific strict-witness interface in `spec.md` Section 5,
+`claim-support-calculus-decision.md`, and
 `gap-resolution.md`. LP remains an optional adapter; it is no longer a foundation of the source
 calculus._
 
 ## 1. Decision
 
-The source language has one warrant-term calculus and one small seam for strict certificates. A
-strict rule instance may carry an opaque certificate checked by a registered backend. The warrant
-calculus knows neither the backend's proof-term grammar nor its axioms.
+The source language has one claim-support calculus and one small seam for strict certificates. A
+strict rule instance may carry an opaque certificate checked by a registered backend. The
+claim-support calculus knows neither the backend's proof-term grammar nor its axioms.
 
 This replaces
 
@@ -31,8 +32,8 @@ The source-level meaning is deliberately narrow:
 
 - a successful check discharges the *deductive validity* of this strict step, conditional on its
   premise conclusions and the declared theory;
-- it does not establish that the premise warrants are true;
-- it does not expose a backend formula or proof term to the warrant language; and
+- it does not establish that the premise support terms' conclusions are true;
+- it does not expose a backend formula or proof term to the support language; and
 - it does not change attack or status semantics.
 
 An unwitnessed strict rule remains permitted as an explicitly trusted policy rule. Reports must
@@ -96,7 +97,7 @@ Every registered backend must establish these obligations:
      consequence using those premises; and
    - weakening: extending `T` or `Delta` with assumptions preserves a consequence.
 
-   A non-monotonic reasoner is not a strict backend; it belongs in the warrant/attack layer.
+   A non-monotonic reasoner is not a strict backend; it belongs in the support/attack layer.
 
 The trusted implementation for a run is the source checker plus the selected backend adapters. A
 backend theorem is evidence about its mathematical checker; conformance of an executable adapter is
@@ -153,7 +154,7 @@ Every strict policy rule declares `allow-trusted : Bool` and a finite allowlist 
 available. This prevents an artifact from downgrading a certificate-required rule to trusted,
 selecting an adapter the policy did not approve, or changing the adapter's background theory.
 
-The backend receives only normalized proposition encodings. It never receives warrant terms,
+The backend receives only normalized proposition encodings. It never receives support terms,
 argument identifiers, attack declarations, provenance, or statuses. Conversely, its returned object
 is only `accept/reject`, dependencies, and diagnostics; no backend proof term can be reinserted as a
 source proposition. This is the factivity firewall.
@@ -251,11 +252,11 @@ obligation 3. No claim about the truth of any `p_i` follows. QED.
 
 ### Corollary 1: soundness of a homogeneous strict-only certified tree
 
-Suppose every internal node of a warrant tree is `Strict-Cert` under the same backend `beta`, and the
+Suppose every internal node of a support tree is `Strict-Cert` under the same backend `beta`, and the
 leaves conclude `l_1,...,l_m`. Then the encoded root is a semantic consequence under `models_beta`
 of the encoded leaves and the union of the declared theory entries.
 
-**Proof sketch.** Induct on the warrant tree. A leaf is an assumption. At an internal node, the
+**Proof sketch.** Induct on the support tree. A leaf is an assumption. At an internal node, the
 induction hypotheses establish the premise conclusions; Theorem 1 establishes the node conclusion
 conditional on those premises. Compose semantic consequence. Normalization coherence ensures that
 the conclusion exported by a child is the formula imported for the corresponding parent premise.
@@ -263,14 +264,14 @@ Backend obligation 6 supplies cut for composing child consequences and weakening
 every local consequence under the union of the tree's declared theories. QED.
 
 The corollary does not apply through a defeasible or `Strict-Trusted` node. Above either kind of node,
-the guarantee returns to policy-relative warrant validity.
+the guarantee returns to policy-relative claim-support validity.
 
 For a tree mixing backends, Theorem 1 applies separately at each node, and the source checker proves
 that child and parent propositions agree under source normalization. A global semantic-consequence
 theorem would additionally require a proved interpretation between the backends' model classes.
 LARA does not assume such an interpretation merely because both adapters are registered.
 
-### Theorem 2: backend replacement preserves warrant status
+### Theorem 2: backend replacement preserves claim status
 
 Let `P_beta` and `P_gamma` be source-identical programs after erasing strict certificate payloads.
 Assume corresponding payloads under backends `beta` and `gamma` accept exactly the same strict
@@ -286,7 +287,7 @@ the same `justified`, `defeated`, `contested`, or `gap` status.
 
 **Proof.**
 
-1. By structural induction on warrant terms, the same leaves and rule instances check in both
+1. By structural induction on support terms, the same leaves and rule instances check in both
    programs. The only differing case is `Strict-Cert`, equalized by the acceptance hypothesis.
 2. Certificate payloads do not occur in conclusions, positions, obligation sets, or attack typing.
    Therefore `eraseCert` gives a bijection between complete argument nodes and typed attacks.
@@ -303,14 +304,14 @@ certificate-size, backend-theory, and dependency reports may differ and remain v
 
 ### Theorem 3: source non-factivity
 
-No source derivation can use backend acceptance to derive a truth judgment for a warranted
+No source derivation can use backend acceptance to derive a truth judgment for a supported
 proposition.
 
 **Proof.** The source calculus has judgments only of the form
 `Sigma; Pi; Gamma; R |- w : p ▷ O`, attack judgments, and status judgments. It has no judgment
-`|- p true` and no rule eliminating a warrant into such a judgment. `Strict-Cert` returns another
-warrant judgment and exports no backend formula constructor. By inversion on the final source rule,
-backend acceptance can therefore produce only a warrant. QED.
+`|- p true` and no rule eliminating support into such a judgment. `Strict-Cert` returns another
+support judgment and exports no backend formula constructor. By inversion on the final source rule,
+backend acceptance can therefore produce only support. QED.
 
 This is a syntactic confinement result. It does not claim that a selected backend is non-factive
 internally; an LP or theorem-prover adapter may be fully factive.
@@ -360,10 +361,10 @@ This does not show that modal logic cannot be extended with names or proof terms
 ordinary S4 alone omits information the checker is required to preserve. S4 remains appropriate
 inside an adapter whose certificate restores that information.
 
-### Proposition 7: factive LP cannot interpret source warrant
+### Proposition 7: factive LP cannot interpret source support
 
-Assume source warrant `w : p` is interpreted as LP assertion `t:p`, and the intended source models
-permit a policy-valid warrant for a proposition that is false in the world. Then LP reflection
+Assume source support `w : p` is interpreted as LP assertion `t:p`, and the intended source models
+permit policy-valid support for a proposition that is false in the world. Then LP reflection
 `t:p -> p` is invalid for that interpretation.
 
 **Proof.** Choose an intended source model with `w : p` accepted and `p` false; such models are
@@ -371,7 +372,7 @@ required because LARA validates structure relative to leaves and policy rather t
 The proposed interpretation makes `t:p` true and `p` false, falsifying `t:p -> p`. QED.
 
 Thus factive LP may certify a strict conditional step but cannot supply the meaning of source
-warrant. J/J4 avoids this particular contradiction by omitting reflection.
+support. J/J4 avoids this particular contradiction by omitting reflection.
 
 ### Proposition 8: monotonic consequence cannot represent defeat-driven retraction
 
@@ -408,7 +409,7 @@ Four design questions require evidence rather than theorem proving:
 1. **Whether LP earns its implementation and explanation cost.** Backend replacement proves that LP
    is not foundational; it cannot prove that LP is useless. Measure the fraction of corpus steps
    requiring `t:F`, `!`, `+`, or realization, and compare certificate size and checking cost.
-2. **Whether a warrant policy is epistemically adequate.** A sound checker can establish correct
+2. **Whether a claim-support policy is epistemically adequate.** A sound checker can establish correct
    instantiation only relative to `Pi`. Policy quality requires expert sourcing, corpus coverage,
    sensitivity analysis, and adjudication.
 3. **Whether natural language was faithfully formalized.** The `nl`/`formal` binding remains an
@@ -423,7 +424,7 @@ validity with empirical adequacy.
 
 ## 8. Consequences
 
-- The paper's foundation is the warrant calculus plus compilation to grounded argumentation, not
+- The paper's foundation is the claim-support calculus plus compilation to grounded argumentation, not
   LP or S4.
 - `spec.md` defines one backend-parametric strict rule and one reference natural-deduction adapter.
 - LP realization moves to optional-adapter metatheory and related work.

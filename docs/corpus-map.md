@@ -12,7 +12,7 @@ for the semantic corpus study. Written 2026-07-21 after inspecting the two upstr
 | [`AmberLJC/ara-paperbench`](https://github.com/AmberLJC/ara-paperbench) | The **corpus**. 32 ARAs, schema-uniform, each `artifacts/<benchmark>/<name>/`. This is the "30-paper corpus" the proposal reuses (`research-proposal.md:395`). |
 
 **The task.** Each corpus artifact is converted into a LARA program: its claims become claim roots,
-its experiments/evidence become leaves and warrant-rule instances, and its exploration trace becomes
+its experiments/evidence become leaves and inference-scheme instances, and its exploration trace becomes
 the typed-attack (defeat) layer. M0 annotates what that conversion must produce *before* the calculus
 freezes, so the frozen v0.1 constructs actually cover the corpus.
 
@@ -53,10 +53,10 @@ untrusted elaborator (spec §11).
 | `logic/claims.md` → `## C0x` **Statement** | `claim c.nl` | §3.1 | verbatim copy |
 | formal content of the Statement | `claim c.formal` (atom) | §3.1 | **untrusted** (LLM), audited on faithfulness axis |
 | NL↔formal correspondence | `claim c.binding` | §3.1 | **untrusted**, human-signed, never checked |
-| **Proof**: `[E01, E02]` | which warrant terms (`arg`) support the claim | §4.4 | structural |
-| **Dependencies**: `C01` | inter-claim edge → a premise warrant of the supporting rule | §6 | structural |
+| **Proof**: `[E01, E02]` | which support terms (`arg`) support the claim | §4.4 | structural |
+| **Dependencies**: `C01` | inter-claim edge → a premise support term of the supporting scheme | §6 | structural |
 | **Evidence basis**: Table 2, Fig. 4 | `leaf` declarations; `refs` → `evidence/` paths | §3 | leaf admission §4.3 |
-| `logic/experiments.md` → Setup / Procedure / Baselines | warrant-**rule** instance (e.g. `controlled_experiment`) + its critical questions (randomization, adequate power, baseline presence) | §4 | policy-relative |
+| `logic/experiments.md` → Setup / Procedure / Baselines | **inference-scheme** instance (e.g. `controlled_experiment`) + its critical questions (randomization, adequate power, baseline presence) | §4 | policy-relative |
 | **Falsification criteria** | the `contrary` proposition / candidate rebut target | §4, §7 | policy `contrary` |
 | `trace/…` node `type: dead_end` + `why_failed` | **typed-attack candidate** (undercut / rebut / undermine) — or **no edge** | §7 | typed constructor required |
 | node `support_level: explicit` vs `inferred` | leaf provenance: `observed`/`attested` vs `assumed` | §3, §4.3 | provenance ≠ attack |
@@ -81,7 +81,7 @@ Per sampled claim, annotate:
    implementation/behavioral (feeds open question §8 #2: which rule schemes).
 2. **Proposition shape** — the `formal` atom's predicate/arity as it would appear in `Sigma`
    (feeds `Lara.Prop` and whether the Phase-0 opaque-identifier nullary case suffices).
-3. **Warrant rule + premises** — which scheme the experiment instantiates; strict vs defeasible
+3. **Inference scheme + premises** — which scheme the experiment instantiates; strict vs defeasible
    (feeds §8 #2 strict/defeasible split).
 4. **Strict certifier/theory** — for each proposed strict step, record the smallest plausible
    certifier: reference natural deduction, a named domain checker, optional LP, or none
@@ -106,7 +106,7 @@ Per sampled claim, annotate:
 
 The annotation directly answers the corpus-gated decision gates in `engineering-plan.md` §6:
 §8 #1 (optional adapter portfolio), §8 #2 (rule schemes → `Lara.Policy`), §8 #3 (defeat typing →
-`Lara.Attack`), §8 #5 (leaf granularity → `Lara.WarrantTerm`), and §8 #7
+`Lara.Attack`), §8 #5 (leaf granularity → `Lara.SupportTerm`), and §8 #7
 (behavioral-vs-empirical routing → optional TL-1).
 
 ## 5. Local inspection

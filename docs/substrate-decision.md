@@ -5,11 +5,11 @@ _Status: settled for Phases 0–2. Recorded 2026-07-20; strict-core description 
 
 ## Decision
 
-- **Trusted core** (warrant checker, strict-backend registry and selected adapters,
+- **Trusted core** (claim-support checker, strict-backend registry and selected adapters,
   argumentation/defeat layer): **Haskell**.
 - **Untrusted front-end** (LLM elaborator, LLM-as-judge, model-checker dispatch, reporting): **Python** (added at Phase 3).
 - **Interface**: JSON over stdio. The language boundary *is* the trust boundary — Python emits
-  warrant programs, opaque strict-certificate payloads, and leaf atoms; the Haskell checker decides
+  claim-support programs, opaque strict-certificate payloads, and leaf atoms; the Haskell checker decides
   validity. Nothing above the leaves runs Python.
 
 ## Why (evidence)

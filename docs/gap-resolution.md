@@ -1,7 +1,8 @@
 # Resolving the two `(Inst)`-checkability gaps: strict certificates and claim targets
 
 _Status: settled for v0.1, backed by targeted research. Recorded 2026-07-20; strict-witness portion
-amended 2026-07-21 by `strict-backend-decision.md`. Extends `term-calculus-decision.md`. All current
+amended 2026-07-21 by `strict-backend-decision.md`. Extends
+`claim-support-calculus-decision.md`. All current
 recommendations are applied to `spec.md`._
 
 Two gaps kept the instantiation rule `(Inst)` from being fully checkable:
@@ -61,7 +62,7 @@ claim c
 ### Forward path (not v0.1)
 
 Policy-declared entailment (`concl(w)` entails `c.formal`) is strictly more expressive but would put
-an entailment procedure in the TCB. Add it later as sugar: an explicit `entails` warrant step whose
+an entailment procedure in the TCB. Add it later as sugar: an explicit `entails` support step whose
 *own* conclusion is discharged against `c.formal` by identity, so the trusted core never grows.
 
 ---
@@ -76,22 +77,22 @@ explicit analogue of modal T — and confines *defeasibility* by two other devic
 license ("warrant") is kept *out of the evidence base* so it can be attacked without inconsistency,
 and retraction happens at the *extension* layer. His `t:F` is therefore
 "factive-within-an-accepted-extension," never globally non-factive. LARA wants a genuinely
-non-factive warrant judgment, so it must depart from him on exactly this axis.
+non-factive support judgment, so it must depart from him on exactly this axis.
 
 The JT-vs-J4 distinction identifies the problem but no longer defines LARA's mechanism. Factivity is
 exactly one axiom (A1), present in JT/LP and absent in J/J4. Rather than choose one justification
-logic for every future strict domain, LARA removes the warrant-level modality and confines every
+logic for every future strict domain, LARA removes the support-level modality and confines every
 strict logic behind the backend interface. This also covers non-JL backends such as arithmetic
 checkers and model checkers.
 
 ### How this maps onto LARA
 
-- **Source warrant calculus.** Non-factive because its only conclusion is "`w` warrants atom `p`";
-  it has no truth judgment and no elimination from warrant to truth.
+- **Source claim-support calculus.** Non-factive because its only conclusion is "`w` supports atom
+  `p`"; it has no truth judgment and no elimination from support to truth.
 - **Strict-certificate backend.** May be factive internally. It receives encoded premise
   conclusions as assumptions and returns acceptance, dependencies, and diagnostics.
-- **Opaque one-way result.** Acceptance creates a strict warrant instance. Backend formulas and
-  proof terms cannot enter source propositions, so a source warrant never becomes a backend truth.
+- **Opaque one-way result.** Acceptance creates a strict support instance. Backend formulas and
+  proof terms cannot enter source propositions, so source support never becomes a backend truth.
 
 The source non-factivity theorem is syntactic: by inversion on the source rules, no rule concludes a
 truth judgment because no such judgment exists. This is stronger and more general than recognizing
@@ -116,7 +117,7 @@ T ; [encode_beta(P₁theta), ..., encode_beta(Pₙtheta)] |=_beta encode_beta(Ct
 
 This is still a **conditional deductive skeleton**, but it does not privilege LP. The backend theorem
 establishes local consequence; premise truth is not exported or assumed by the source checker.
-Warrant-layer defeat propagates through subargument closure regardless of certificate internals.
+Support-layer defeat propagates through subargument closure regardless of certificate internals.
 
 ### The certificate is optional — and trust reduction is backend-neutral
 
@@ -130,7 +131,7 @@ Distinguish two ways a rule can be strict:
 The trust-reduction measure is the fraction of load-bearing strict steps that carry an accepted
 certificate, broken down by backend and theory. Whether LP earns a place is empirical: measure the
 steps that require LP-specific `t:F`, `!`, `+`, or realization. Backend replacement proves that this
-choice does not alter warrant status when adapters accept the same instances; it cannot prove which
+choice does not alter claim-support status when adapters accept the same instances; it cannot prove which
 adapter is useful on the corpus.
 
 ### ASPIC+ guardrails (Thread B)
@@ -165,16 +166,17 @@ adapter is useful on the corpus.
 
 ### One caveat carried from Pandžić
 
-Do not adopt LP sum/accrual `t:F → (t+u):F` at the warrant level (it is already absent in
-`term-calculus-decision.md`): Pandžić notes monotonicity fails once a defeater `u` co-occurs. Sum may
+Do not adopt LP sum/accrual `t:F → (t+u):F` at the support level (it is already absent in
+`claim-support-calculus-decision.md`): Pandžić notes monotonicity fails once a defeater `u`
+co-occurs. Sum may
 exist inside an optional LP certificate, where it cannot merge source argument nodes.
 
 ---
 
 ## Two smaller mismatches (resolved, applied to spec)
 
-1. **Warrant `prop` is atomic.** `->`, `⊥`, modalities, and domain-specific formula formers belong
-   to backend encodings only. At the warrant level, conflict comes from `contrary` (not
+1. **Support `prop` is atomic.** `->`, `⊥`, modalities, and domain-specific formula formers belong
+   to backend encodings only. At the support level, conflict comes from `contrary` (not
    negation-to-falsum) and implication is reified as a named rule (not a proposition), so none is
    needed. `prop ::= atom`.
 2. **`undermine` attacks a leaf's proposition only, not its "admissibility."** Admissibility is
