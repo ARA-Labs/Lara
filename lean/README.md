@@ -29,10 +29,13 @@ lake build
 ## Check the proofs are real
 
 ```sh
-lake env lean AxCheck.lean   # (create with the #print axioms lines; see git history)
+lake env lean AxCheck.lean   # runs `#print axioms` on every main theorem
 ```
 
 Every main theorem depends on at most `propext` (standard) and no `sorry`/`admit`.
+CI enforces this: the `lean` job fails if any theorem's transitive axiom set
+contains `sorryAx` or anything outside the standard trio (`propext`,
+`Classical.choice`, `Quot.sound`).
 
 ## Modeling notes
 
