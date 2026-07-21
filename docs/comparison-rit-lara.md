@@ -2,9 +2,9 @@
 
 _Status: analysis note. First written 2026-07-20; revised 2026-07-21 against the POPL-track
 `docs/spec.md` and `docs/strict-backend-decision.md`. LP is now an optional strict adapter, and the
-evidence→claim warrant lives in a versioned policy of defeasible schemes. Compares the two sibling
+evidence→claim support lives in a versioned policy of defeasible schemes. Compares the two sibling
 projects under `ara/`: `rit` (a verification core built on the Lean kernel) and `lara` (this project,
-a warrant-checking language with a backend-parametric strict seam plus an argumentation layer). Goal:
+a claim-support language with a backend-parametric strict seam plus an argumentation layer). Goal:
 state precisely what each checks, where they agree, where they differ, and where the framing promises
 more than the mechanism delivers._
 
@@ -16,9 +16,9 @@ more than the mechanism delivers._
   verification core turns each claim into a machine-recheckable proof-or-evidence.
   "Trust comes from the verification layer, not the agent." Kernel = **Lean 4** +
   deterministic extractors + sha256 integrity locks.
-- **`lara`** — a small language of proof-carrying, **policy-relative** research warrants. A
-  program declares propositions, evidence leaves, instances of strict or defeasible warrant
-  rules, their obligations, typed attacks, and claim roots. The checker compiles this to a Dung
+- **`lara`** — a small language of proof-carrying, **policy-relative** claim support. A
+  program declares propositions, evidence leaves, instances of strict or defeasible inference
+  schemes, their obligations, typed attacks, and claim roots. The checker compiles this to a Dung
   framework and reports, per claim, one of `justified / gap / defeated / contested`. Strict steps use
   a small certificate interface with a natural-deduction reference adapter and optional LP adapter;
   the empirical evidence→claim step is a **defeasible scheme in a versioned policy `Pi`**, not a
@@ -47,7 +47,7 @@ Take a concrete claim: *"v3 hit the target in 2875 steps, beating the 2900 basel
 The honest one-liner still holds for both: **the checker validates the argument structure —
 that steps instantiate declared rules, obligations are explicit, attacks are type-correct, and
 the status is the grounded result. It does not establish that the evidence is true, nor that the
-declared rule is a correct account of what warrants a claim.** That judgment lives in the leaves
+declared scheme is a correct account of what supports a claim.** That judgment lives in the leaves
 (both systems) and now, for `lara`, also in the policy.
 
 ---
@@ -58,7 +58,7 @@ declared rule is a correct account of what warrants a claim.** That judgment liv
 |---|---|
 | Trust model | Untrusted proposer, tiny trusted checker. Proof-Carrying Code / de Bruijn / LCF lineage. A bad proposal costs one failed check, never a false attestation. |
 | Sealed kernel | `rit` seals the Lean `Judgment`; `lara` seals `Judgment` via a hidden Haskell constructor. The only way to get one is a successful `check`. |
-| Input | Both consume an ARA and decompose it into a graph of claims (`rit`: *claim DAG*; `lara`: *warrant graph / compiled Dung framework*). |
+| Input | Both consume an ARA and decompose it into a graph of claims (`rit`: *claim DAG*; `lara`: *claim-support graph / compiled Dung framework*). |
 | Hume's fork | Both refuse to prove the empirical. Empirical content enters as leaves / groundings; only structural relations are checked. |
 | Dependency exposure | Both surface exactly which unverified inputs a conclusion rests on (`rit`: tiers T0–T4, `#print axioms`; `lara`: the leaf-dependency set `L` and open obligations `O` reported per argument). |
 | Two-axis honesty | Both keep deterministic structural correctness separate from noisy empirical reliability, and never average the two. |
@@ -125,7 +125,7 @@ The natural-deduction adapter and optional LP adapter genuinely have proof-term 
 claim they license is narrower than it sounds, and the whole credibility turns on one word.
 
 **Validity, not soundness.** A strict adapter validates that its encoded conclusion follows from
-encoded premise conclusions and a declared theory; the warrant checker validates rule
+encoded premise conclusions and a declared theory; the claim-support checker validates scheme
 instantiation. Leaves remain **hypotheses**, not theorems. Compilation therefore certifies a
 conditional, not premise truth. LARA's end-to-end guarantee is structural validity relative to the
 selected policy, backend theories, and admitted leaves; completeness is policy-relative.
@@ -148,7 +148,7 @@ critique lives:
    the prose claim. No checker can verify this; `spec.md §11` lists it as an untrusted elaborator
    task evaluated against human annotations. It is the single most load-bearing unchecked step.
 3. **Policy faithfulness.** That the defeasible rule (and its critical questions) is a correct
-   account of what actually warrants the claim. `Pi` is a *trusted input*.
+   account of what actually supports the claim. `Pi` is a *trusted input*.
 
 **Curry-Howard covers adapters, not LARA as a whole.** The clean story ("well-typed proof term
 implies valid derivation") applies to proof-term adapters in `spec.md` Section 5. The defeasible layer
@@ -187,7 +187,7 @@ adapter:
 > A formal system earns its place when it enforces consistency a human cannot audit at scale and
 > emits a portable, re-checkable certificate. `lara`'s scheme/defeat checker plausibly clears
 > this bar; a heavyweight proof kernel over shallow arithmetic (`rit`'s Lean use) does not, and
-> each optional `lara` adapter must show it is used by real warrants.
+> each optional `lara` adapter must show it is used by real support derivations.
 
 ---
 
@@ -242,7 +242,7 @@ differentiates the two projects:
      assumption.
   2. **Which strict adapters earn their keep?** Measure certified strict steps by backend and
      distinguish generic propositional consequence from genuinely LP-, arithmetic-, temporal-, or
-     code-specific checks. Keep adapters optional unless they reduce trust on real warrants.
+     code-specific checks. Keep adapters optional unless they reduce trust on real support derivations.
   3. **Is the concrete syntax the audit surface it needs to be?** Today a `claim` carries only its
      NL string; the formal proposition appears only inside the `supports(...)` argument. Put the
      claim's formal target next to its NL (as `rit`'s `@claim` does) so the highest-risk

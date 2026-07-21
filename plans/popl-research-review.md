@@ -14,15 +14,15 @@ paper.
 
 The strongest POPL version of LARA is:
 
-> A small proof-carrying language for policy-relative research warrants. Programs name evidence
-> leaves, instantiate strict or defeasible warrant schemes, discharge scheme-specific critical
+> A small proof-carrying language for policy-relative claim support. Programs name evidence
+> leaves, instantiate strict or defeasible inference schemes, discharge scheme-specific critical
 > questions, and declare typed rebut/undercut/undermine relations. A checked compilation produces a
 > structured argumentation framework and a replayable claim status. The guarantee is certificate
 > validity, dependency accountability, and policy-relative coverage, not empirical truth.
 
 A backend-parametric strict-certificate interface replaces a built-in LP fragment. The required
 reference adapter is natural deduction; LP should ship only if corpus evidence shows that
-LP-specific modal-deductive structure occurs in real warrants.
+LP-specific modal-deductive structure occurs in real claim-support certificates.
 
 POPL 2027's submission deadline was 2026-07-09, so as of this review the realistic main-conference
 target is POPL 2028. The current POPL call asks for principled, enduring PL contributions and, since
@@ -45,7 +45,7 @@ contribution. Plan the project around a mechanized language result, not only a c
    "baked into the kernel" claim is false.
 
 3. **Empirical support is not deductive implication.** `supported(E,C)` does not entail `C` by LP.
-   A bridge from evidence to claim is a non-logical, usually defeasible warrant rule. It must be
+   A bridge from evidence to claim is a non-logical, usually defeasible inference scheme. It must be
    named, instantiated, and open to undercutting. Otherwise the system certifies a hidden axiom.
 
 4. **No certificate is not underivability.** A checker decides whether a supplied certificate is
@@ -67,15 +67,15 @@ contribution. Plan the project around a mechanized language result, not only a c
 7. **Provenance is not an attack.** `user`, `ai-executed`, or `certified` labels support an admission
    policy and audit report. Low-trust provenance does not logically rebut or undercut an argument.
 
-8. **"Complete warrant" needs a relative definition.** Scientific argument completeness is not
+8. **"Complete support certificate" needs a relative definition.** Scientific argument completeness is not
    mechanically decidable from a finite artifact without a closed-world assumption. A defensible
    definition is scheme-completeness: every premise and critical question required by the selected,
-   versioned warrant policy is discharged or surfaced as a hole.
+   versioned claim-support policy is discharged or surfaced as a hole.
 
 9. **Property testing is not a soundness proof.** QuickCheck is valuable implementation testing.
    POPL-level claims need formal definitions, paper proofs, and preferably mechanized main theorems.
 
-10. **The LLM risk is not confined to leaves.** It also chooses the proposition, warrant scheme,
+10. **The LLM risk is not confined to leaves.** It also chooses the proposition, inference scheme,
     attack type/target, and what to omit. Recent autoformalization work reports a material gap between
     compile success and semantic faithfulness. Evaluate every boundary separately.
 
@@ -85,7 +85,7 @@ contribution. Plan the project around a mechanized language result, not only a c
 
 12. **Composition alone is a weak novelty claim.** Dung/ASPIC+, proof certificates, semantic
     publishing, and untrusted-producer/checker systems all exist. The novelty must live in a precise
-    language abstraction and theorem: for example, a typed compilation from warrant programs to
+    language abstraction and theorem: for example, a typed compilation from claim-support programs to
     structured argumentation that preserves dependency provenance, attack targets, open obligations,
     and claim status.
 
@@ -98,7 +98,7 @@ Keep five syntactic classes distinct:
 ```text
 proposition p   ::= opaque natural-language claim id | typed domain proposition
 leaf        l   ::= observed | attested | assumed | certified
-rule        r   ::= strict scheme | defeasible warrant scheme
+rule        r   ::= strict scheme | defeasible inference scheme
 argument    a   ::= leaf l | apply r [a1, ..., an]
 attack      k   ::= rebut a a | undercut a (a.r) | undermine a l
 obligation  o   ::= need-premise ... | answer-critical-question ...
@@ -147,7 +147,7 @@ AF ⊢ a ⇓ in | out | undec
 W ⊢ p ⇓ justified | defeated | contested | gap
 ```
 
-`Σ` is the fixed proposition signature, `Π` the versioned warrant policy, `Γ` admitted leaves, `R`
+`Σ` is the fixed proposition signature, `Π` the versioned claim-support policy, `Γ` admitted leaves, `R`
 the fixed strict-backend registry, and `O` unresolved obligations. Leaf dependencies are
 `leaves(a)` by structural exactness; strict-certificate dependencies come from registered adapters'
 `uses` functions.
@@ -203,7 +203,7 @@ mechanized proof scripts and non-standard axioms when proofs are a main contribu
 
 - Sample 50–100 claims across the 30-paper corpus, stratified by descriptive, comparative, causal,
   generalization, negative-result, and implementation/behavioral claims.
-- For each, annotate propositions, evidence granularity, warrant scheme, premises, critical
+- For each, annotate propositions, evidence granularity, inference scheme, premises, critical
   questions, rebut/undercut/undermine candidates, unresolved holes, and the smallest plausible
   certifier/theory for each proposed strict step.
 - Double-annotate at least 20–30% and adjudicate disagreements.
@@ -268,7 +268,7 @@ mechanized proof scripts and non-standard axioms when proofs are a main contribu
 
 ### Gold data
 
-The unit should be a claim-warrant instance, not a paper. Report the number of claims, arguments,
+The unit should be a claim-support instance, not a paper. Report the number of claims, arguments,
 leaves, obligations, and attacks. Separate development, tuning, and held-out sets. Use two domain-aware
 annotators on the held-out subset and report agreement per construct; raw status agreement alone can
 hide compensating annotation errors.
@@ -278,7 +278,7 @@ hide compensating annotation errors.
 - **Schema-only:** same JSON fields and references, no logical/policy/attack checking.
 - **LLM-only:** model directly emits status plus prose explanation.
 - **Untyped graph:** nodes and arbitrary attack edges, grounded evaluation only.
-- **No-CQ:** warrant rules without mandatory critical questions.
+- **No-CQ:** inference schemes without mandatory critical questions.
 - **No-defeat:** checked support derivations without attacks.
 - **Human certificate:** upper bound on producer yield and lower bound on required repair.
 
@@ -326,7 +326,7 @@ Do not claim that LARA establishes scientific truth, exhaustive completeness, or
    <https://www.lix.polytechnique.fr/~dale/papers/appa2014.pdf>
 6. **Clark, Ciccarese, and Goble 2014, "Micropublications."** Direct prior work on machine-readable
    scientific claims, evidence, support, challenge, and attribution. LARA must explain the delta:
-   checked warrant programs and status semantics rather than an RDF/OWL representation model.
+   checked claim-support programs and status semantics rather than an RDF/OWL representation model.
    <https://doi.org/10.1186/2041-1480-5-28>
 7. **AIF specification.** Prior typed graph vocabulary for inference, conflict, and preference. Use
    it as an interchange/related-work reference, not as the checking semantics.
@@ -337,7 +337,7 @@ Do not claim that LARA establishes scientific truth, exhaustive completeness, or
 9. **Pandžić 2022, defeasible argumentation in justification logic (two papers).** The closest
    prior art: defeasible arguments as object-level justification terms, with rebutting,
    undercutting, and undermining attacks. Validates the terms-as-arguments design and bounds the
-   novelty claim — see `../docs/term-calculus-decision.md` for the delta LARA must defend.
+   novelty claim — see `../docs/claim-support-calculus-decision.md` for the delta LARA must defend.
    <https://doi.org/10.3233/AAC-200536>, <https://doi.org/10.1007/s10472-021-09765-z>
 
 ### Should cite
@@ -379,7 +379,7 @@ The project is in POPL scope if the paper contributes a principled language and 
 result. The current prototype plus four-state graph engine would be closer to CPP, CADE, COMMA, or a
 workshop. To clear the POPL bar, the submission should lead with:
 
-1. a novel typed warrant-certificate calculus;
+1. a novel typed claim-support calculus;
 2. a semantics-preserving compilation into structured argumentation;
 3. mechanized accountability and status theorems;
 4. an implementation with replayable diagnostics; and
