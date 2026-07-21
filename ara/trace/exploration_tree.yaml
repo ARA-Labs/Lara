@@ -1,0 +1,259 @@
+# Exploration Tree — LARA (claim-support calculus for POPL)
+# Research DAG: nested tree with cross-edges (also_depends_on).
+# Node types: question | experiment | dead_end | decision | pivot
+# Grounded in docs/ decision records, git history, and the design-session trajectory (2026-07-20/21).
+# support_level: explicit = directly in a doc/commit; inferred = reconstructed from the narrative.
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["plans/research-proposal.md §1", "docs/comparison-rit-lara.md §1"]
+    title: "Can the evidence→claim support in a research artifact be made checkable, not just declared?"
+    description: >
+      LLM-produced research artifacts assert claims and gesture at evidence, but "this supports that"
+      is never checked, and a holistic reviewer cannot say which premise is missing or which dead end
+      kills a claim. Can a small trusted checker compile a claim-support certificate to a replayable
+      status object with located failure?
+    children:
+
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["docs/substrate-decision.md §1"]
+        title: "Split on the trust boundary: Haskell trusted core + Python untrusted front-end"
+        choice: "Haskell claim-support checker (trusted); Python LLM elaborator over JSON (untrusted, Phase 3)"
+        alternatives:
+          - "OCaml core (HOL-Light LCF lineage) — flip criterion retained"
+          - "Single-language stack"
+          - "Dependent-typed host (Lean/Coq) as the production checker"
+        evidence: "Five research sweeps converged on a two-language split; dependent types kept off the production path, reserved for the mechanized reference."
+        children:
+
+          - id: N03
+            type: question
+            support_level: explicit
+            source_refs: ["docs/claim-support-calculus-decision.md", "docs/spec.md §3-§7"]
+            title: "What is the shape of the source calculus?"
+            description: "One syntactic category or two (argument calculus + logic sub-fragment)? Factive or non-factive support? How are attacks expressed?"
+            children:
+
+              - id: N04
+                type: decision
+                support_level: explicit
+                source_refs: ["docs/claim-support-calculus-decision.md (Decision 1,3,4)"]
+                title: "One non-factive support-term language; attacks are positional"
+                choice: >
+                  One category w ::= leaf | rule-instance; strict/defeasible is a rule MODE; no
+                  support-level justification operator (non-factive); rebut/undercut/undermine target
+                  root/rule/leaf POSITIONS.
+                alternatives:
+                  - "Two-layer: argumentation calculus + LP sub-fragment as separate source systems"
+                  - "Factive support (LP A1: t:F → F) as in JT/LP"
+                  - "Belief-revision-style undermining (Pandžić)"
+                evidence: >
+                  Factivity is wrong for empirical support; backend combination (LP sum s+t) destroys
+                  defeat granularity; the three ASPIC+ attack types ARE the three term-position kinds,
+                  making attack checking subterm lookup + contrary. Grounds C02.
+                children:
+
+                  - id: N05
+                    type: pivot
+                    support_level: explicit
+                    source_refs: ["docs/strict-backend-decision.md §1", "plans/popl-research-review.md §2 #1", "commit 4072f25"]
+                    title: "PIVOT — LP realization does NOT guarantee ARA lowering; replace the built-in LP fragment with a backend-parametric strict seam"
+                    from: "LP as the built-in strict fragment; Artemov realization (S4 ⊢ F ⟹ LP ⊢ Fʳ) leaned on as a lowering guarantee"
+                    to: >
+                      One opaque strict-certificate interface (strictCheck(β,T,Δ,φ,κ)) with six backend
+                      obligations and a REQUIRED intuitionistic natural-deduction reference adapter; LP
+                      demoted to an OPTIONAL adapter, shipped only if corpus evidence needs it.
+                    trigger: >
+                      Realization's input is an already-formal S4 theorem — it says nothing about
+                      whether the NL claim / evidence / E→C was faithfully formalized. Leaning on it
+                      privileged one logic and over-claimed. Grounds C03, C04, C05; bounds RW10.
+                    children:
+
+                      - id: N06
+                        type: experiment
+                        support_level: explicit
+                        source_refs: ["docs/strict-backend-decision.md §5 (Theorems 1-4, Lemma 5)"]
+                        title: "Paper-prove the backend-parametric metatheory"
+                        result: >
+                          Theorem 1 (strict-step soundness), Theorem 2 (backend replacement preserves
+                          claim status via AF isomorphism + grounded-lfp invariance), Theorem 3 (source
+                          non-factivity by inversion), Theorem 4 (ND soundness by induction) + Lemma 5
+                          (dependency exactness). All paper-proved; slated for Lean 4 mechanization.
+                        evidence: [C03, C04, C05]
+
+              - id: N07
+                type: decision
+                support_level: explicit
+                source_refs: ["docs/gap-resolution.md (Gap 2)", "docs/spec.md §3.1-§3.2"]
+                title: "Claim support = normalized positional identity (no entailment in the TCB)"
+                choice: "w supports c iff concl(w) ≡ c.formal, where ≡ is nf-equality; the NL↔formal binding is audited, never proven"
+                alternatives:
+                  - "Policy-declared entailment (concl(w) entails c.formal) — puts an entailment procedure in the TCB"
+                  - "Support as a proof obligation"
+                evidence: "AIF/Lean positional identity; autoformalization faithfulness (89.5% compile vs 60.5% faithful) proves NL↔formal cannot be proven. Grounds C01, C08."
+
+      - id: N08
+        type: pivot
+        support_level: explicit
+        source_refs: ["commit 4978d99", "commit 8d17605", "commit 63548c1", "commit 2a8fab4", "docs/superpowers/specs/2026-07-21-claim-support-terminology-design.md"]
+        title: "PIVOT — rename 'warrant calculus' → 'claim-support calculus' throughout"
+        from: "warrant / warrant calculus terminology"
+        to: "claim-support terminology (calculus, graph, certificate, status)"
+        trigger: >
+          'Warrant' overloaded (Toulmin sense vs. general support) and read as a stronger epistemic
+          claim than the mechanism delivers; 'claim support' names exactly what is checked. A
+          repository-wide rename across spec, plans, and decision docs.
+
+      - id: N09
+        type: decision
+        support_level: explicit
+        source_refs: ["docs/engineering-plan.md §1-§2", "plans/research-proposal.md §7 (order constraint)"]
+        title: "Corpus-before-calculus: only two carve-outs may proceed before M0"
+        choice: >
+          The M0 semantic corpus study is the true blocker. Only two corpus-independent carve-outs may
+          be built before it: (1) nf/≡ normalizer, (2) the strict-backend interface + ND adapter.
+        alternatives:
+          - "Build the full support-term / policy / attack layers first, then study the corpus"
+        evidence: >
+          Rule schemes, defeat typing, leaf granularity, and behavioral routing are corpus-gated (open
+          questions §8 #2/#3/#5/#7); building them first bakes guesses into the frozen v0.1 benchmark.
+        children:
+
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["src/Lara/Prop.hs", "test/PropSpec.hs", "commit f811575", "evidence/status/test_status.md"]
+            title: "Implement carve-out 1: Lara.Prop (nf/≡) + property suite"
+            result: >
+              162-line Lara.Prop implements nf/≡/canonNum; 8 QuickCheck properties (equivalence laws,
+              nf idempotence, no-argument-reordering, canonNum variant-collapse + idempotence) all pass
+              (100 cases each). Grounds C01 empirically — the "trivial TCB addition" claim.
+            evidence: [C01]
+
+          - id: N11
+            type: decision
+            support_level: explicit
+            source_refs: ["design session 2026-07-21 (IR discussion)"]
+            title: "IR strategy — Haskell AST now; JSON/S-expr lowering deferred; S-expr (not JSON) as the differential anchor"
+            choice: >
+              Write core/check/inference programs as Haskell AST values now (no parser). Add JSON/S-expr
+              codecs later, lowering TO the AST. Use S-expressions (not JSON) as the on-disk
+              differential-testing anchor because it is comment-friendly and shared with Lean.
+            alternatives:
+              - "JSON as the hand-written dev IR (verbose, no comments)"
+              - "S-expressions from the start (parser upfront before the first claim runs)"
+              - "Write a lexer+parser for the presentation syntax first"
+            evidence: "Spec §1 already makes JSON the machine wire format; the checker's real input is the abstract syntax. Grounds C12 (the S-expr codec IS the anchor)."
+
+      - id: N12
+        type: question
+        support_level: explicit
+        source_refs: ["plans/research-proposal.md §5", "docs/mechanization-plan.md", "docs/worked-examples-plan.md"]
+        title: "How is a calculus-contribution paper evaluated when benchmarking is out of scope?"
+        description: "If LARA's contribution is a calculus (not a system with runtime numbers) and benchmarking is ruled out, what carries the empirical weight?"
+        children:
+
+          - id: N13
+            type: decision
+            support_level: explicit
+            source_refs: ["design session 2026-07-21"]
+            title: "Use mechanization + test status as the 'experiments'; benchmarking out of scope for the first submission"
+            choice: "Evaluation = mechanized metatheory (spec §9 results) + worked examples spanning every status/attack + adversarial rejection-class conformance"
+            alternatives:
+              - "Performance benchmarks / runtime tables"
+              - "User study"
+            evidence: "Grounds C10. Raises the weight on the differentiator (E3) and the R-series rejections."
+            children:
+
+              - id: N14
+                type: experiment
+                support_level: explicit
+                source_refs: ["deep-research workflow (104 agents, 24/25 claims confirmed)", "docs/mechanization-plan.md §0/§3", "docs/worked-examples-plan.md §6"]
+                title: "Deep-research the POPL evaluation norms (adversarially verified)"
+                result: >
+                  Mechanized metatheory can BE the evaluation (WebAssembly, FM 2021); POPL AEC excludes
+                  non-mechanized proofs from review; untrusted-producer/checker judged by
+                  verified-success + adversarial zero-false-positive (Clover) + anti-memorization
+                  (LeanDojo), not user studies/latency; differential testing framed N+1 (JEST), not
+                  oracle-free voting (Csmith). Grounds C10, C11, C12.
+                evidence: [C10, C11, C12]
+
+              - id: N15
+                type: decision
+                support_level: explicit
+                source_refs: ["docs/mechanization-plan.md §2-§4"]
+                title: "Mechanization architecture: Lean 4 default, one shared serialized core, backend-as-structure"
+                choice: >
+                  Lean 4 (decide vs Rocq before M1); Haskell checker + Lean model share one serialized
+                  first-order core AST as the differential anchor; backend is a structure carrying its
+                  soundness obligation as a field; grounded lfp via bounded Finset iteration.
+                alternatives:
+                  - "Rocq/Coq"
+                  - "Isabelle"
+                  - "Haskell implementation as its own model (rejected: property tests are not soundness)"
+                evidence: "Mathlib fixpoint machinery; Decidable typeclass makes results executable for the anchor. Grounds C07, C12."
+
+              - id: N16
+                type: dead_end
+                support_level: explicit
+                source_refs: ["docs/mechanization-plan.md §5", "docs/spec.md §9 result 6", "design session 2026-07-21 (metatheory audit)"]
+                title: "Result 6 (status preservation) is unprovable as written — no direct semantics exists to preserve"
+                hypothesis: "Spec §9 result 6 ('preservation between a direct source semantics and the compiled-AF semantics') is provable from the current spec."
+                failure_mode: >
+                  Spec §8 defines ONLY the compiled route (compile → grounded → aggregate). There is no
+                  independently-defined direct source semantics, so result 6 either compares the
+                  compilation to itself (vacuous) or references a semantics that does not exist.
+                lesson: >
+                  Before M1 freeze, define a direct big-step claim-status judgment (W ⊢ p ⇓ status)
+                  WITHOUT the Dung translation, then prove agreement with grounded(compile(W)) and
+                  mechanize both — else the 'semantics-preserving compilation' headline is empty.
+                  Recommended over reframing compilation as definitional (which drops the headline).
+
+              - id: N17
+                type: dead_end
+                support_level: explicit
+                source_refs: ["docs/spec.md §8 (self-flagged open)", "plans/popl-research-review.md §6"]
+                title: "Two definitional points still open — status function not yet total"
+                hypothesis: "The four-state status function is total and deterministic as specified."
+                failure_mode: >
+                  (1) The hole-vs-complete-alternative case (what a claim's status is when one argument
+                  has an open hole but another complete argument is 'in') is explicitly left open in
+                  spec §8. (2) 'contested' = grounded 'undec' is broader than mutual defeat (even/odd
+                  cycles, undec-propagation) and needs SCC-provenance reporting.
+                lesson: >
+                  Both must close before M1 freeze to make the status function total (needed for result
+                  5 determinism, C07). Not a metatheory bug — a definitional/diagnostics obligation.
+
+  - id: N18
+    type: dead_end
+    support_level: explicit
+    source_refs: ["docs/strict-backend-decision.md §4.2", "src/Lara/Kernel.hs", "README.md", "plans/popl-research-review.md §2 #2"]
+    title: "The existing LP checker trusts arbitrary constants — it is a non-conforming adapter seed, not the trusted core"
+    hypothesis: "The Haskell Kernel + ConstantSpec (the original code) is LARA's trusted core."
+    failure_mode: >
+      ConstantSpec accepts arbitrary (constant, formula) pairs and DConst checks only membership; it
+      does not recognize fixed LP axiom schemas (A0–A4). A caller can register c : P and obtain a
+      checked P — so it is only an LP adapter SEED, and violates the strict-backend contract.
+    lesson: >
+      The earlier 'baked into the kernel' claim was false. The code becomes an eligible optional LP
+      adapter only after fixed schema recognition + a conformance argument. Retained as an experimental
+      seed; NOT LARA's trusted run. Bounds C03.
+
+  - id: N19
+    type: dead_end
+    support_level: explicit
+    source_refs: ["docs/gap-resolution.md (One caveat carried from Pandžić)", "docs/claim-support-calculus-decision.md (Decision 5)"]
+    title: "Do NOT adopt LP sum/accrual (t:F → (t+u):F) at the support level"
+    hypothesis: "LP's sum operator could combine alternative supports for a claim into one term."
+    failure_mode: >
+      Sum merges alternative supports into one node, but defeat semantics needs them as SEPARATE AF
+      nodes so an undercut can kill one while the other survives; monotonicity of + also fails once a
+      defeater co-occurs (Pandžić).
+    lesson: >
+      Multiple independent supports are multiple `arg` declarations (separate AF nodes), never one
+      backend-combined term. Sum may exist only inside an optional LP certificate, where it cannot
+      merge source argument nodes. Grounds the design behind C06.
