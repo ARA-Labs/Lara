@@ -27,9 +27,12 @@ test/Spec.hs       QuickCheck properties (eval axis (a): deterministic correctne
 docs/              substrate-decision.md, spec.md
 ```
 
-The trust boundary is `Lara.Kernel`: `Judgment` has no exported constructor, so
-the only way to obtain one is a successful `check`. A `Judgment` is therefore a
-machine-checked certificate that its `t : F` was built solely by the LP rules.
+`Lara.Kernel` is the current strict-fragment checker: `Judgment` has no exported
+constructor, so ordinary clients obtain one through `check`. Its result is
+relative to the supplied `ConstantSpec` and `Context`. The current
+`ConstantSpec` does not yet recognize fixed LP axiom schemas, so it remains
+trusted input; the full LARA trusted boundary described in `docs/spec.md` is
+not yet implemented.
 
 ## Build & test
 
