@@ -1,0 +1,63 @@
+# empirical-v1 — shared claim-support policy for the worked examples
+#
+# A policy is a *versioned trusted input* (spec §4, assumption A2). Artifact programs may
+# instantiate these schemes but may not define or modify them at runtime. Both worked examples
+# in this directory check against this single policy so that the cross-paper example (B) can only
+# form attacks through the *same* declared contrary relation the single-paper example (A) uses.
+#
+# Every attack in the examples is licensed here, not in the artifact program: `undercut` needs an
+# `exception` declaration, `rebut`/`undermine` need a `contrary` pair. This is the point of §7 —
+# an ARA dead end or a reviewer note only becomes an edge if it can construct one of these typed
+# forms against a declaration in THIS file.
+
+policy empirical-v1
+
+# --- Inference schemes -------------------------------------------------------------------------
+
+# The evidence -> empirical-claim bridge is defeasible (observation O4): a positive experimental
+# report presumptively supports an improvement claim, subject to critical questions.
+rule controlled_experiment(M, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, effect(M, Q, D, positive)) ]
+  conclusion = improves(M, Q, D)
+  question randomization    : randomized(Exp)        (mandatory)
+  question adequate_power   : powered(Exp)           (mandatory)
+  question external_validity: generalizes(M, Q, D)   (mandatory)
+
+# A symmetric scheme for a null / negative replication. Concludes the declared contrary of
+# `improves`, so an instance of this scheme rebuts an instance of `controlled_experiment` on the
+# same (M, Q, D) — this is what lets a *second paper* attack the first (example B).
+rule null_result(M, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, effect(M, Q, D, negligible)) ]
+  conclusion = not_improves(M, Q, D)
+  question randomization    : randomized(Exp)        (mandatory)
+  question adequate_power   : powered(Exp)           (mandatory)
+
+# --- Conflict ----------------------------------------------------------------------------------
+
+# The ONLY source of propositional conflict (spec §4, §3.2). Declared in BOTH directions on
+# purpose: v0.1 `contrary` is asymmetric (spec §4.1), and `rebut` needs (concl w, concl u) to be
+# a declared pair. Mutual rebuttal — two papers each defeating the other into a `contested`
+# 2-cycle — therefore requires both orientations. If we later adopt the Path-A involutive
+# contradictory map (spec §8.1 flip criterion) this pair collapses to a single `-improves`.
+contrary improves(M, Q, D)     not_improves(M, Q, D)
+contrary not_improves(M, Q, D) improves(M, Q, D)
+
+# Contrary on a leaf proposition, used by the undermine attack in example A.
+contrary measured(M, Q, D, positive) instrument_artifact(M, Q, D)
+contrary instrument_artifact(M, Q, D) measured(M, Q, D, positive)
+
+# --- Exceptions (undercutting conditions) ------------------------------------------------------
+
+# "Shown otherwise", not "not shown": if the eval distribution provably shifts, the
+# external-validity of a controlled_experiment instance is defeated (an undercut), not merely
+# left open as a gap. Per spec §4.2 a policy chooses, per question, gap-producing (a `question`)
+# vs defeat-producing (an `exception`). external_validity appears as BOTH by design.
+exception controlled_experiment : distribution_shift(M, Q, D)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): none of `improves`, `not_improves`, `measured`,
+# `instrument_artifact` is the consequent of a strict rule or reachable on a strict chain — the
+# only schemes above are defeasible — so every proposition in a `contrary` pair is defeasibly
+# attackable. The policy is therefore accepted; a contrary pair touching a strict-reachable
+# proposition would be rejected at compile time (see the planned R2 example).

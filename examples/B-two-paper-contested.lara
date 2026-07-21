@@ -1,0 +1,110 @@
+# Example B — two papers in the same field, cross-paper defeat and the `contested` flip
+#
+# Purpose: show that "paper + reviews" and "corpus of papers" are NOT a different calculus — they
+# are the SAME Dung framework at a larger population size (spec §8, cross-framework
+# non-monotonicity). Here two independent papers formalize contrary conclusions about the same
+# (M, accuracy, D). Because both land on the SAME atoms under `≡` (spec §3.2), their conclusions
+# are a declared `contrary` pair and each rebuts the other — a 2-cycle that grounded semantics
+# labels `undec`, so the claim is `contested`, not silently "both justified".
+#
+# This example is also the atom-matching stress test (the real cross-corpus risk): if paper_B's
+# claim formalized to `improves(M, acc, D)` with a DIFFERENT accuracy atom or a different D, the
+# contrary pair would not match and NO attack would form — a silent false-independence. The
+# `binding` audit (assumption A3) is where that risk is caught; it is annotated below.
+
+artifact corpus_field_X at sha256:bbbb...
+policy empirical-v1
+use backends [nd@1]
+
+# --- Paper A's positive claim ------------------------------------------------------------------
+
+claim c_pos
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed,
+              rationale = "same (M,accuracy,D) atoms as c_neg; verified identical under nf" }
+
+leaf a_e1 : reports(paperA_exp1, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperA/table_2.csv#row=mean]
+
+leaf a_e2 : randomized(paperA_exp1)
+  kind = attested
+  provenance = user
+  refs = [paperA.pdf#sec=4]
+
+leaf a_e3 : powered(paperA_exp1)
+  kind = attested
+  provenance = user
+  refs = [paperA.pdf#sec=4]
+
+leaf a_e4 : generalizes(M, accuracy, D)
+  kind = attested
+  provenance = user
+  refs = [paperA.pdf#sec=5]
+
+arg pa : supports(c_pos) by controlled_experiment(M, accuracy, D, paperA_exp1)
+  discharge randomization     with a_e2
+  discharge adequate_power    with a_e3
+  discharge external_validity with a_e4
+
+# --- Paper B's contradicting null result -------------------------------------------------------
+
+claim c_neg
+  nl      = "Method M does not improve accuracy on distribution D"
+  formal  = not_improves(M, accuracy, D)
+  binding = { author = bob, audit-status = reviewed,
+              rationale = "failed replication of paperA; SAME M, accuracy metric, and D" }
+
+leaf b_e1 : reports(paperB_exp1, effect(M, accuracy, D, negligible))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperB/table_1.csv#row=mean]
+
+leaf b_e2 : randomized(paperB_exp1)
+  kind = attested
+  provenance = user
+  refs = [paperB.pdf#sec=3]
+
+leaf b_e3 : powered(paperB_exp1)
+  kind = attested
+  provenance = user
+  refs = [paperB.pdf#sec=3]
+
+arg pb : supports(c_neg) by null_result(M, accuracy, D, paperB_exp1)
+  discharge randomization  with b_e2
+  discharge adequate_power with b_e3
+
+# --- The cross-paper conflict ------------------------------------------------------------------
+
+# Mutual rebuttal: pa concludes improves(...), pb concludes not_improves(...), and both
+# orientations are declared contrary in empirical-v1. Neither paper is preferred (v0.1 has no
+# preference ordering wired in yet), so neither defeat is one-sided: a 2-cycle.
+rebut pb pa    # paper B rebuts paper A's positive claim
+rebut pa pb    # paper A rebuts paper B's null claim
+
+status c_pos
+status c_neg
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: two arguments, mutually attacking (a 2-cycle):
+#   pa <-> pb
+# Grounded labelling: neither is `in`, neither is `out` -> both `undec` (spec §8, cycles yield
+# undec, assumption A5).
+# Claim status (spec §8 priority):
+#   c_pos -> contested   (its support pa is undec, none is in)
+#   c_neg -> contested   (its support pb is undec, none is in)
+#
+# Teaching points:
+#  1. No new calculus was needed to go from one paper to two — same AF, one more argument and a
+#     pair of edges. Reviews scale in identically: a reviewer's rebuttal is just another support
+#     term + attack compiled into this graph.
+#  2. `contested` (not "both justified") is the epistemically honest answer to an unresolved
+#     field disagreement, and it fell out of grounded semantics, not a hand-coded rule.
+#  3. The attack ONLY formed because both claims normalize to the same atoms. If a corpus-scale
+#     deployment wants preferences (e.g. larger-N replication wins) instead of a symmetric
+#     2-cycle, that is the spec §8.1 flip criterion / a preference ordering — a known extension
+#     point, recorded, not an ad hoc patch.

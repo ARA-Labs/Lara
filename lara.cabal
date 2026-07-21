@@ -21,6 +21,9 @@ library
     import:           warnings
     hs-source-dirs:   src
     exposed-modules:  Lara.Prop
+                      Lara.AST
+                      Lara.Examples
+                      Lara.Negatives
                       Lara.Term
                       Lara.Formula
                       Lara.ConstantSpec
