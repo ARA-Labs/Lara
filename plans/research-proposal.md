@@ -102,10 +102,15 @@ therefore a checked certificate relative to the supplied `ConstantSpec` and `Con
 yet the final trusted kernel: the current `ConstantSpec` accepts arbitrary `(constant, formula)`
 pairs and does not verify that formulas instantiate LP axiom schemes. A
 QuickCheck suite exercises the deterministic-correctness axis (sum-monotonicity, positive
-introspection, rejection of malformed derivations). Substrate is settled: Haskell core, Python
-front-end at Phase 3, with the language boundary _being_ the trust boundary. Still to come: the
-leaf and warrant-rule interfaces, fixed axiom-schema checking, typed attacks, source syntax/parser,
-the argumentation semantics, and the elaborator.
+introspection, rejection of malformed derivations). The production substrate is settled: an
+end-to-end Haskell compiler/checker, with a Python LLM front-end added after the language boundary
+stabilizes. The assurance substrate is separate: a Lean 4 or Rocq development will define the
+reference calculus and mechanize its main theorems. The proof-assistant model does not automatically
+verify the Haskell executable, so conformance is established through a deliberately narrow core IR,
+executable reference cases, differential/property/mutation testing, and a documented correspondence
+between implementation functions and formal judgments. Still to come: the leaf and warrant-rule
+interfaces, fixed axiom-schema checking, typed attacks, source syntax/parser, the argumentation
+semantics, and the elaborator.
 
 ---
 
@@ -184,7 +189,7 @@ But the analogy breaks in two load-bearing places, and those breaks _are_ the co
 1. **Empirical, untrusted leaves.** Lean's proof leaves are a tiny fixed axiom set (`propext`,
    `Classical.choice`, `Quot.sound`). LARA's leaves are `supported(E,c)` atoms — LLM-judged or
    measured facts about the world, with a graded value and a provenance tag. The kernel is sound only
-   _down to the leaf interface_; the leaves are the interface to the messy world (§3.2).
+   _down to the leaf interface_; the leaves are the interface to the messy world (§3.3).
 2. **A non-monotonic layer on top.** Lean is purely monotonic — proved is proved. LARA wraps the
    monotonic kernel in an argumentation/defeat layer where a dead-end can _retract_ a claim's status.
    LARA is therefore a **monotonic proof-term language embedded in a non-monotonic warrant system**;
@@ -205,7 +210,58 @@ compiler/checker that validates those certificate programs. The readable syntax 
 reviewers can inspect, debug, and audit LARA certificates; it is not the primary authoring interface
 or the contribution by itself.
 
-### 3.2 Three trust tiers: logic, policy, and leaves
+**What “language v0.1” means.** The POPL artifact need not be a production language or promise
+long-term backward compatibility. It does need one frozen, internally coherent research release:
+
+- a versioned concrete syntax, abstract syntax, JSON encoding, and deterministic parse/print story;
+- complete static judgments for leaves, rules, arguments, obligations, and typed attacks;
+- a fixed account of compilation to argumentation frameworks, grounded labelling, and four-state
+  claim aggregation;
+- an explicit policy model, including what policy-complete means and which inputs remain trusted;
+- rejection behavior and source-located diagnostics for every ill-formed construct; and
+- a specification that is implemented by the Haskell compiler/checker and represented in the
+  mechanized reference development.
+
+After the evaluation corpus freezes v0.1, semantic changes require a new language version rather
+than silently changing the benchmark. Surface conveniences may evolve as long as they elaborate to
+the same frozen core. This is enough language maturity for a research paper; an IDE, tactic DSL,
+package manager, optimizer, broad standard library, and production deployment infrastructure are
+not acceptance criteria.
+
+### 3.2 Implementation and assurance architecture
+
+LARA uses two complementary implementations rather than asking one technology to serve every role:
+
+1. **Haskell production implementation.** This is the end-to-end artifact reviewers run: readable
+   syntax and JSON parsers, name resolution/elaboration, static checking, compilation to the warrant
+   graph/argumentation framework, grounded evaluation, diagnostics, canonical printing, and replay.
+   Haskell is appropriate because the core algorithms are small recursive transformations and it
+   supports rapid compiler engineering without making dependent types part of the source language.
+2. **Lean 4 or Rocq reference development.** This contains the mathematical syntax, judgments,
+   compilation relation/function, semantics, and main proofs. Dependent types may index intrinsically
+   well-formed objects inside this development, but LARA v0.1 itself remains a small explicitly
+   checked certificate language. The mechanization is a paper artifact, not the user-facing
+   implementation.
+
+The runnable path is:
+
+`ARA → untrusted Python/LLM producer → LARA source or JSON → Haskell parser/elaborator/checker →`
+`typed core → argumentation framework → grounded status → diagnostic/replay report`.
+
+The proof-assistant development models the frozen core-to-status portion. It need not formalize the
+LLM, Python orchestration, text parser, or presentation layer; those components are evaluated rather
+than proved correct.
+
+The first implementation supplies usability and the full pipeline; the second supplies theorem-level
+assurance about the calculus. Neither substitutes for the other. In particular, QuickCheck does not
+prove soundness, and a theorem about the mechanized model does not apply to the Haskell checker
+without a conformance argument. We will minimize this gap by giving both implementations the same
+first-order core AST and by testing serialized core programs and verdicts across them. Lean 4 is the
+default choice if no collaborator has stronger Rocq expertise, because its executable functional
+definitions are close to the Haskell implementation; this is an engineering preference, not a
+research claim.
+
+### 3.3 Three trust tiers: logic, policy, and leaves
 
 "What is trusted?" has three answers, and keeping them apart is the crux a reviewer will probe.
 
@@ -258,10 +314,10 @@ with its supporting reason and its failure condition.
 structural recursion with no proof search (the derivation is explicit — the de Bruijn criterion). The
 rules fit on a page; `Lara.Kernel` is ~130 lines and its trusted surface is a single sealed type.
 Boolean propositional LP is decidable. _Why this is a good bet:_ smallness is auditable, and a
-standalone checker is easy to audit. Property tests are useful but do not prove soundness. For a POPL
-claim, provide a paper proof and preferably mechanized metatheory for the final calculus, plus a
-conformance argument for the Haskell implementation. _Fails if:_ policy and attack checking make the
-TCB ad hoc; mitigated by specifying the whole language before expanding implementation.
+standalone checker is easy to audit. Property tests are useful but do not prove soundness. For the
+POPL claim, provide paper proofs and mechanized metatheory for the final calculus, plus a conformance
+argument for the Haskell implementation. _Fails if:_ policy and attack checking make the TCB ad hoc;
+mitigated by specifying the whole language before expanding implementation.
 
 **Bet 2 — Soundness can be stated precisely.** The target theorem is certificate soundness: accepted
 programs compile to well-formed argumentation frameworks, every support node depends only on declared
@@ -290,10 +346,12 @@ postulates. A dead end is not automatically a defeater, and provenance is not an
 attack generation remains an unconstrained model judgment; mitigated by typed edge constructors,
 rule-specific critical questions, and a human-labelled attack benchmark.
 
-**The composite bet.** Each layer is individually mature and individually cheap; the novelty is the
-_composition_ and its application to research warrant. We are not betting on a breakthrough in any one
-theory — we are betting that assembling four settled theories along a single trust boundary yields an
-artifact that does something none of them does alone.
+**The composite bet.** The constituent theories are mature enough to reduce foundational risk, but
+their juxtaposition is not by itself a POPL contribution. The technical novelty must be the typed
+warrant-certificate calculus: its policy-generated obligations and attack types, its compilation to
+argumentation frameworks, and its soundness, dependency-accountability, and status-preservation
+results. The ARA application then demonstrates that this calculus captures research-warrant failures
+that proof terms or abstract argument graphs alone do not localize.
 
 ---
 
@@ -368,7 +426,9 @@ metatheory, and evidence that the abstraction handles real warrant structures.
 | `gap` is misreported as underivability.                    | Define gap as an explicit unresolved policy obligation or absent submitted support.                                                                        |
 | Scope creep into a graded/probabilistic core.              | Hard rule: kernel stays boolean; graded lives in the judge as metadata.                                                                                    |
 | Realization is overused as an autoformalization guarantee. | Restrict it to the optional strict modal fragment; do not put it on the ARA lowering critical path.                                                         |
-| Extending Coq/Lean eats months.                            | Standalone Haskell kernel first; logical framework (Twelf/LF, Abella) only if kernel metatheory is later wanted.                                           |
+| Mechanization consumes the compiler schedule.             | Keep Haskell as the production implementation; mechanize only the frozen first-order core and headline theorems; choose Lean 4 by default or Rocq when collaborator expertise dominates. |
+| Mechanized model and Haskell checker diverge.              | Share a serialized first-order core vocabulary; map judgments to implementation functions; run differential, property, golden, and mutation tests.       |
+| Dependent types expand the LARA source language.           | Use them only inside the proof-assistant model or selected internal GADTs; keep v0.1 explicitly checked and first order.                                  |
 | Non-flat ABA breaks the clean Dung correspondence.         | Verify flatness on the corpus before committing the defeat-layer engine.                                                                                   |
 | Temporal logic (TL-1/TL-2) sprawls into a second project.  | Optional, strictly outside the kernel; ship the LLM-judged pipeline end-to-end first.                                                                      |
 
@@ -382,9 +442,9 @@ older operational reading/build plan. The revised spine is:
 | Milestone | Definition of done |
 | --- | --- |
 | M0 — semantic corpus study | 50–100 claims classified by proposition, rule, evidence, attack, and gap shape; two annotators on a subset |
-| M1 — language v0.1 | complete concrete/abstract syntax, well-formedness, policy language, typed attacks, holes, and claim-status aggregation |
-| M2 — metatheory | paper proofs plus mechanization of checker soundness, dependency accountability, status determinism, and compilation correctness |
-| M3 — reference compiler/checker | parser, canonical printer, JSON codec, fixed LP schema checking, warrant compiler, diagnostics, replay bundle |
+| M1 — frozen language v0.1 | versioned concrete/abstract syntax and JSON, static judgments, policy language, typed attacks, holes, AF compilation, claim aggregation, and specified rejection behavior |
+| M2 — mechanized reference core | paper proofs plus Lean 4 or Rocq mechanization of checker soundness, dependency accountability, status determinism, and compilation correctness |
+| M3 — Haskell compiler/checker | parser, elaborator, canonical printer, JSON codec, fixed LP schema checking, warrant compiler, diagnostics, status engine, and replay bundle |
 | M4 — walking skeleton | one real claim end to end with no hand-authored certificate step; all untrusted outputs retained for audit |
 | M5 — evaluation corpus | gold annotations, mutation suite, baselines, ablations, and blinded held-out set frozen before final runs |
 | M6 — full evaluation | all four axes reported; at least five worked cases spanning every status/attack kind |
@@ -417,8 +477,10 @@ These are the decisions that shape the calculus; each is tracked in `../ARA-veri
 7. **Behavioral vs. empirical routing (gates TL-1).** What fraction of corpus claims are behavioral
    (checkable against a model/code) vs. purely empirical? Decide by sampling the corpus before
    building the model-checking backend.
-8. **Trusted base and mechanization.** Which components are trusted, and which proof assistant hosts
-   the reference semantics/metatheory? Decide before calling M1 a trusted kernel.
+8. **Trusted base and mechanization host.** Enumerate the parser/elaborator/checker/compiler/status
+   TCB and choose Lean 4 or Rocq before freezing M1. Lean 4 is the default absent stronger Rocq
+   expertise. Record precisely which definitions are executable, which theorems are mechanized, and
+   how the Haskell functions correspond to them; do not call testing a proof of conformance.
 
 ---
 
