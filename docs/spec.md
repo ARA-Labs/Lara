@@ -35,11 +35,15 @@ a tactic DSL, IDE, package manager, or standard library for the initial contribu
 ## 2. Names and program environment
 
 ```text
-p, q       proposition and claim identifiers
+p          proposition and claim identifiers
+q          critical-question identifiers
 l          leaf identifiers
 r          warrant-rule identifiers
+X          rule parameters
+g, theta   ground terms and ground substitutions
 a, w, u    warrant-term (argument) identifiers
 o          obligation identifiers
+π          positions in warrant terms
 src        artifact source references
 policy     versioned warrant-policy identifiers
 ```
@@ -57,11 +61,16 @@ The digest and policy version are part of replay identity.
 
 ## 3. Propositions and leaves
 
-Phase 0 permits opaque, stable proposition identifiers whose display text is retained for audit.
-Domain-specific typed propositions may be added after the corpus study.
+Propositions are built from a fixed first-order vocabulary in `Sigma`: predicate symbols and term
+constructors with declared arities. Programs may not extend `Sigma`. Phase 0's opaque, stable
+proposition identifiers (display text retained for audit) are the nullary case; richer domain
+vocabularies may be added to `Sigma` after the corpus study.
 
 ```text
-prop ::= atom(p) | false | prop -> prop
+g    ::= k | k(g1, ..., gn)        -- ground terms over constructors in Sigma
+atom ::= pred(g1, ..., gn)         -- pred in Sigma; n = 0 gives the Phase-0 opaque identifiers
+
+prop ::= atom | false | prop -> prop
 
 leaf-kind ::= observed | attested | assumed | certified
 provenance ::= user | ai-executed | checker(name, version)
@@ -88,14 +97,14 @@ A warrant policy defines named rule schemas. Strict rules are deductive. Defeasi
 presumptive support and list critical questions that must be discharged or explicitly left open.
 
 ```text
-rule r(params)
+rule r(X1, ..., Xm)
   mode       = strict | defeasible
-  premises   = [pattern*]
-  conclusion = pattern
-  requires   = [question*]
+  premises   = [Apat*]
+  conclusion = Apat
+  question q : Apat (mandatory | optional)   -- zero or more; mandatory is the default
 
-contrary p q            -- policy-declared conflict between propositions
-exception r : pattern   -- policy-declared undercutting condition for rule r
+contrary Apat Apat   -- policy-declared conflict, closed under ground instantiation
+exception r : Apat   -- policy-declared undercutting condition for rule r
 ```
 
 Policies are versioned trusted inputs. Artifact programs may instantiate but may not define or
@@ -104,8 +113,79 @@ rebut and undermine typing (Section 7) check against it, and full classical nega
 assumed. Strict versus defeasible is a property of the rule looked up in `Pi`, not separate
 program syntax.
 
+### 4.1 Patterns and substitutions
+
 ```text
-arg a : prop by r(a1, ..., an)
+P    ::= X | k | k(P1, ..., Pn)    -- X ranges over the rule's declared parameters
+Apat ::= pred(P1, ..., Pn)
+```
+
+Rule well-formedness: every variable occurring in a rule's premises, conclusion, answer patterns,
+and declared exceptions is among its parameters `X1, ..., Xm`, and every symbol use matches its
+`Sigma` arity. Patterns may be non-linear.
+
+A substitution `theta` maps each parameter of the instantiated rule to a ground term; instances
+are always ground. There is no unification in the trusted checker: the abstract syntax and JSON
+carry `theta` explicitly, and instance checking is substitution application plus syntactic
+identity — premise `i` checks iff `concl(w_i) = P_i theta`, and the instance concludes
+`C theta`.
+
+The presentation syntax may elide `theta` when matching the premise terms' conclusions against
+the premise patterns, left to right, determines it uniquely; parameters left unbound by matching
+must be written explicitly (`by r(a1, a2) where X = g`). Reconstructing an elided `theta` is
+elaborator work and is untrusted; the checker always receives the explicit form.
+
+Variables in a `contrary` declaration are implicitly universally quantified: `contrary A B`
+licenses the ground conflict `(A rho, B rho)` for every ground substitution `rho`. Rebut and
+undermine checking (Section 7) match the two ground propositions against a declared pair under
+one such substitution.
+
+### 4.2 Critical-question discharge
+
+Each question `q` of rule `r` declares an answer pattern `A_q` over `r`'s parameters. In an
+instance with substitution `theta`:
+
+- `q` is discharged by `sigma(q) = w_q` iff `Sigma; Pi; Gamma |- w_q : A_q theta ▷ O_q`. The
+  discharging term is a subterm of the instance: its open obligations join the instance's, and it
+  is addressable by attacks at position `pi.q` (Section 7).
+- an open mandatory `q` (listed in the hole set) contributes a located obligation to `O`; an open
+  optional `q` contributes a diagnostic but no obligation, so it does not by itself exclude the
+  argument from the AF.
+- a question absent from both the discharge map and the hole set is a well-formedness error:
+  every declared question is accounted for, by discharge or by an explicit hole.
+
+Defeater-style critical questions are encoded as `exception` declarations instead: `exception
+r : E` licenses an undercut of exactly those instances of `r` whose substitution `theta` makes
+`E theta` the attacker's conclusion (Section 7). A policy chooses, per question, which failure
+mode is right — "not shown" (a question, gap-producing) or "shown otherwise" (an exception,
+defeat-producing). The example in Section 10 uses both for `external_validity`.
+
+### 4.3 Leaf admission
+
+Admission turns declared leaves into the checking context `Gamma` before any term is checked:
+
+```text
+admission (leaf-kind, provenance) = admit | quarantine | reject
+```
+
+The table is a total map in `Pi` over kind × provenance pairs. A `certified` leaf is additionally
+admitted only if it carries a checker witness `(name, version)` listed in `Pi` and a replayable
+reference. The outcomes:
+
+- `admit` — the leaf enters `Gamma` and is usable by the leaf rule.
+- `quarantine` — the leaf stays out of `Gamma`; its declaration is retained and reported for
+  audit. A term using it fails at that occurrence with a located diagnostic and, like a term with
+  an open mandatory obligation, is excluded from the AF and contributes a `gap` explanation.
+- `reject` — the declaration itself violates policy; the checker rejects the certificate with a
+  located diagnostic.
+
+Admission is per-leaf, happens before argument evaluation, and never creates an attack
+(Section 3).
+
+### 4.4 Instantiation in programs
+
+```text
+arg a : prop by r(a1, ..., an) [where X = g, ...]
   discharge question with argument
   open question as o
 ```
@@ -173,12 +253,14 @@ Abstract warrant-term syntax (one category; mode comes from the rule's declarati
 
 ```text
 w ::= leaf l
-    | r⟨w1, ..., wn ; {q ↦ w_q} ; {o*}⟩
+    | r⟨theta ; w1, ..., wn ; {q ↦ w_q} ; {o*}⟩
 ```
 
-A rule instance carries its premise terms, a discharge map from critical questions to discharging
-warrant terms, and its explicitly open obligations. For a strict-mode `r` the discharge map and
-hole set are empty, and the instance may carry an LP subderivation (Section 5) as its witness.
+A rule instance carries its ground substitution `theta` (Section 4.1), its premise terms, a
+discharge map from critical questions to discharging warrant terms (checked against the questions'
+answer patterns under the same `theta`, Section 4.2), and its explicitly open obligations. For a
+strict-mode `r` the discharge map and hole set are empty, and the instance may carry an LP
+subderivation (Section 5) as its witness.
 
 The main source judgment records open obligations only:
 
@@ -196,8 +278,9 @@ subterm propagates). A complete graph node requires `O = empty`.
 
 ## 7. Typed positional attacks
 
-Attacks address positions in warrant terms. A position `π` is a premise-index path
-(`π ::= ε | π.i`); `w@π` denotes the subterm occurrence at `π`.
+Attacks address positions in warrant terms. A position `π` is a path of premise indices and
+question names (`π ::= ε | π.i | π.q`), so attacks reach discharging subterms (Section 4.2) as
+well as premises; `w@π` denotes the subterm occurrence at `π`.
 
 ```text
 k ::= rebut w u          -- targets the root conclusion of u
@@ -208,9 +291,11 @@ k ::= rebut w u          -- targets the root conclusion of u
 The three attack kinds are exactly the three kinds of positions in a term: the root (its
 conclusion), an internal rule occurrence, and a frontier leaf.
 
-- `rebut w u` requires `contrary(concl(w), concl(u))` to be declared in `Pi`.
-- `undercut w u@π` requires `u@π` to be a rule instance of some `r` and `w` to conclude a
-  policy-declared `exception r` (or failed applicability condition) for that exact instance.
+- `rebut w u` requires `(concl(w), concl(u))` to be a ground instance of a `Pi`-declared
+  contrary pair under one substitution (Section 4.1).
+- `undercut w u@π` requires `u@π` to be an instance of some `r` with substitution `theta` and `w`
+  to conclude `E theta` for a declared `exception r : E`; exact-instance precision comes from
+  `theta`.
 - `undermine w u@π` requires `u@π` to be a leaf `l` and `w` to conclude a `Pi`-declared contrary
   of `l`'s proposition or admissibility.
 
