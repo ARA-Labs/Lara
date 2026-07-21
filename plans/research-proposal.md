@@ -442,9 +442,9 @@ older operational reading/build plan. The revised spine is:
 | Milestone | Definition of done |
 | --- | --- |
 | M0 — semantic corpus study | 50–100 claims classified by proposition, rule, evidence, attack, and gap shape; two annotators on a subset |
-| M1 — frozen language v0.1 | versioned concrete/abstract syntax and JSON, static judgments, policy language, typed attacks, holes, AF compilation, claim aggregation, and specified rejection behavior |
+| M1 — frozen language v0.1 | versioned concrete/abstract syntax and JSON, static judgments, policy language, typed attacks, holes, AF compilation, claim aggregation, and specified rejection behavior; the strict-chain `contrary` well-formedness check (spec §8.1, Path B) and the proposition normalization `nf`/`≡` (spec §3.2) are part of the frozen definition |
 | M2 — mechanized reference core | paper proofs plus Lean 4 or Rocq mechanization of checker soundness, dependency accountability, status determinism, and compilation correctness |
-| M3 — Haskell compiler/checker | parser, elaborator, canonical printer, JSON codec, fixed LP schema checking, warrant compiler, diagnostics, status engine, and replay bundle |
+| M3 — Haskell compiler/checker | parser, elaborator, canonical printer, JSON codec, fixed LP schema checking, warrant compiler, diagnostics, status engine, and replay bundle. **Policy validator (early target):** the spec §8.1 well-formedness check — compute the strict-reachable proposition set and reject any policy whose `contrary` declarations touch it — plus the `nf`/`≡` normalizer |
 | M4 — walking skeleton | one real claim end to end with no hand-authored certificate step; all untrusted outputs retained for audit |
 | M5 — evaluation corpus | gold annotations, mutation suite, baselines, ablations, and blinded held-out set frozen before final runs |
 | M6 — full evaluation | all four axes reported; at least five worked cases spanning every status/attack kind |

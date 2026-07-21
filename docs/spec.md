@@ -104,10 +104,9 @@ claim c
   binding = { author, rationale, audit-status }   -- UNTRUSTED, audited annotation
 ```
 
-`w supports c` holds iff `concl(w) ≡ c.formal`, where `≡` is structural identity up to a fixed,
-total normalization (canonical ordering and alpha-renaming of ground terms). There is no entailment
-step and no solver in the trusted base: support is positional identity, as in AIF inference nodes
-and the theorem-is-the-object convention of proof assistants.
+`w supports c` holds iff `concl(w) ≡ c.formal`, where `≡` is the normalized-identity relation fixed
+in Section 3.2. There is no entailment step and no solver in the trusted base: support is positional
+identity, as in AIF inference nodes and the theorem-is-the-object convention of proof assistants.
 
 `c.binding` — the correspondence between `c.nl` and `c.formal` — is never a checker obligation. It is
 the single most load-bearing unchecked step (Section 11), so it is a first-class, versioned,
@@ -115,6 +114,41 @@ human-signed field evaluated on the semantic-faithfulness axis, never proven. Po
 entailment (`concl(w)` entails `c.formal`) is deferred: when wanted it enters as an explicit warrant
 step whose own conclusion is discharged against `c.formal` by identity, so the trusted core does not
 grow.
+
+### 3.2 Proposition normalization and the identity relation `≡`
+
+`≡` is the trusted-base equality on propositions, so its definition is deliberately minimal. It
+operates on **abstract syntax**, not surface text: the presentation and JSON front ends both decode
+to one AST (Section 1), so whitespace, field order, and encoding differences are gone before `≡` is
+applied. Propositions are **ground first-order atoms** (Section 3) — there are no bound variables at
+the proposition level (rule parameters are ground-substituted away in an instance, Section 4.1), so
+`≡` needs no alpha-renaming and no binder handling.
+
+The normal form `nf(·)` is defined by literal canonicalization plus structural recursion:
+
+```text
+nf(pred(g1, ..., gn)) = pred(nf(g1), ..., nf(gn))
+nf(k(g1, ..., gn))    = k(nf(g1), ..., nf(gn))
+nf(k)                 = canon(k)     -- literal/atom constant canonicalization
+```
+
+`canon` normalizes constant surface forms that denote the same value to one representative — numeric
+literals (`+2.1`, `2.10` → `2.1`), string escaping, and Unicode NFC for identifiers. It does **not**
+reorder arguments: no constructor or predicate is treated as associative, commutative, or symmetric
+in v0.1, so `pred(a, b) ≢ pred(b, a)`. Then
+
+```text
+p ≡ q   iff   nf(p) = nf(q)     (= is syntactic equality on the AST)
+```
+
+`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial
+addition to the TCB. The `contrary` matching of Section 4.1 and the `supports` check of Section 3.1
+both use `≡`.
+
+**Flip criterion.** If the corpus needs symmetric or AC predicates (e.g. an unordered `distinct{a,b}`)
+or binders (quantified propositions), extend `nf` with argument sorting for the declared AC symbols
+and de Bruijn indexing for binders, and re-establish the same properties. This is a normalization
+extension, not a change to the `p ≡ q iff nf(p) = nf(q)` shape.
 
 Confidence values and thresholds are metadata unless the selected policy gives them formal
 admission semantics. Provenance can admit, quarantine, or reject a leaf before argument evaluation;
