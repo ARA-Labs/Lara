@@ -13,22 +13,28 @@
 | # | Result | Status | Grounds | Note |
 |---|--------|--------|---------|------|
 | 1 | Decidability of program + attack checking | spec-only | C02 | decidable functions defined; termination theorem pending mechanization |
-| 2 | Strict-backend isolation | paper-proved | C03 | Theorem 3 (non-factivity) by inversion; structural |
+| 2 | Strict-backend isolation | paper-proved (+Haskell conformance) | C03 | Theorem 3 (non-factivity) by inversion; structural. `Lara.Strict` seals the factivity firewall in code (sealed `StrictJudgment`, opaque `SExpr` cert, no backend formula exported); Lean mechanization still pending M1. |
 | 3 | Dependency accountability (`leaves(w)`, `certDeps`) | spec-only | C08 | inversion lemma stated (spec §6); `Lara.SupportTerm` corpus-gated |
 | 4 | Compilation soundness + subargument closure | spec-only | C02 | the combinatorially fiddly one (positional attacks × closure) |
 | 5 | Grounded determinism + termination | spec-only | C07 | fixed-point argument in spec §8; `Lara.Grounded` not built |
 | 6 | **Status preservation (direct vs compiled)** | **open** | C08 | **UNPROVABLE as written — no direct semantics exists (N16); define before M1** |
 | 7 | Rationality postulates (consistency under §8.1) | spec-only | C09 | Path-B validator stated; `Lara.Policy` early M3 target |
-| 8 | Strict-certificate soundness | paper-proved | C03 | Theorem 1; excludes trusted-policy instances |
+| 8 | Strict-certificate soundness | **mechanized** (+Haskell conformance) | C03 | Theorem 1, `lean/Lara/Strict.lean`: backend-as-structure carrying obligation 3 as a field; `strict_step_sound` is its projection (needs **no** axioms) and `ndBackend` discharges the field via `nd_sound`. Excludes trusted-policy instances. |
 | 9 | Backend replacement | paper-proved | C04 | Theorem 2 (AF isomorphism + grounded-lfp invariance) |
-| 10 | Reference ND adapter soundness + dependency exactness | paper-proved | C05 | Theorem 4 + Lemma 5, by induction |
+| 10 | Reference ND adapter soundness + dependency exactness | **mechanized** (+Haskell conformance) | C05 | Theorem 4 + Lemma 5, `lean/Lara/ND.lean`: `nd_sound` (soundness by induction on typing), `nd_relevance` (only free slots matter — the exactness core), `fv_in_range` + `hyp_out_of_range_untypable` (Lemma 5 in-range half / out-of-range rejection). **Layer-C bridge**: `infer` (Lean port of the Haskell `inferType` algorithm) proved sound+complete for the `HasType` relation (`infer_iff`) and to return exactly `fv` (`infer_deps_eq_fv`), so the metatheory transfers to the *decision procedure*, not just the relation. No `sorry`, `propext`/`Quot.sound` only. Also `Lara.Strict.ND` Haskell + 7 QuickCheck properties. |
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** (+implemented+tested) | C01 | `lean/Lara/Prop.lean`: `nf`/`≡`, equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only. Also `Lara.Prop` Haskell + 8 QuickCheck properties. |
 | 12 | Codec round-trip to α-equivalent AST | spec-only | C12 | test-only (not a soundness result); codec not built |
 
-**Summary**: 1 **mechanized** (result 11, in Lean 4); 4 paper-proved (2, 8, 9, 10); 6 spec-only (1, 3,
-4, 5, 7, 12); 1 open (6). Result 11 is the mechanization warm-up (corpus-independent, frozen); the rest
-of the mechanization starts at M1 freeze (docs/mechanization-plan.md §6). Core results 1–9 +
-reference-adapter 10 must be mechanized for the paper (spec §9 closing note).
+**Summary**: 3 **mechanized** in Lean 4 (results 8, 10, 11 — the two frozen carve-outs); 2 paper-proved
+(2, 9); 6 spec-only (1, 3, 4, 5, 7, 12); 1 open (6). Results 8/10/11 also carry Haskell +
+property-test conformance. Per the mechanization discipline (CLAUDE.md), every frozen,
+corpus-independent result is mechanized as soon as its definitions land — result 11 was the warm-up,
+and carve-out 2 (results 8, 10) followed immediately. The remaining core results (1, 3, 4, 5, 9)
+depend on corpus-gated or compile-gated definitions and mechanize at/after M1 freeze
+(docs/mechanization-plan.md §6). Result 2 (Theorem 3, non-factivity) is paper-proved and enforced
+structurally in both the Haskell (sealed `StrictJudgment`) and Lean (`StrictJudgment` carries only
+source data) but is not yet stated as its own Lean theorem. Haskell conformance is not a substitute
+for the Lean proof.
 
 ## Methodology grounding (C10, C11, C12 — from the deep-research pass, E02)
 

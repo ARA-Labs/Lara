@@ -1,4 +1,14 @@
 
+## Mechanization discipline
+After each stage of work, mechanize everything that is provable now. As soon as a
+definition is frozen and corpus-independent, port it to the Lean development
+(`lean/`) and prove its metatheory — do not defer provable results to a later
+milestone. Keep `AxCheck.lean` covering every new theorem; proofs must stay
+`sorry`-free and within the standard axiom trio (`propext`, `Classical.choice`,
+`Quot.sound`). Haskell property tests are conformance evidence, not soundness;
+the Lean proofs carry soundness, so land them alongside the code that frozen
+definitions enable.
+
 ## ARA: agent-native research artifacts
 This project uses ARA (https://github.com/ARA-Labs/Agent-Native-Research-Artifact).
 Route research work to the matching ARA skill:

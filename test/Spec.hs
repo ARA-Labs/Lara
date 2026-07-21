@@ -23,6 +23,7 @@ import Lara.Kernel
 import Lara.Term (Con (..), Term (..), Var (..))
 
 import PropSpec (propSpecProps)
+import StrictSpec (strictSpecProps)
 
 -- ---------------------------------------------------------------------------
 -- Generators
@@ -169,6 +170,7 @@ main = do
       , run "apply mismatch rejected" (quickCheckResult prop_appMismatchRejected)
       ]
         ++ [run name act | (name, act) <- propSpecProps]
+        ++ [run name act | (name, act) <- strictSpecProps]
   unless (and results) exitFailure
   where
     run name act = do

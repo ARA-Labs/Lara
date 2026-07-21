@@ -16,10 +16,11 @@ The only code that exists is an experimental LP adapter seed — ~483 lines of H
 | `Lara.Kernel` | checks `d ⇒ t : F`, mints the sealed `Judgment` | optional-adapter seed |
 | `Lara.ConstantSpec` | membership check for `(constant, formula)` pairs | **non-conforming adapter** |
 
-The strict-backend registry, natural-deduction reference adapter, and everything in the source
-calculus — propositions/`nf`, leaves, policies, support terms, typed attacks, AF compilation,
-grounded labelling, four-state aggregation, JSON codec, parser/printer, and the untrusted elaborator
-— are **spec-only**. No code yet.
+Carve-out 1 (`Lara.Prop`, `nf`/`≡`) and carve-out 2 (`Lara.Strict` backend registry +
+`Lara.Strict.ND` reference adapter) are now implemented and tested (21 QuickCheck properties pass;
+see `../ara/evidence/status/test_status.md`). Everything else in the source calculus — leaves,
+policies, support terms, typed attacks, AF compilation, grounded labelling, four-state aggregation,
+JSON codec, parser/printer, and the untrusted elaborator — is **spec-only**. No code yet.
 
 Known defect carried in code: `ConstantSpec` accepts arbitrary `(constant, formula)` pairs. The
 existing modules are not the LARA core and do not satisfy the strict-backend contract. They become an
