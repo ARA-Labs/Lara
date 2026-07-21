@@ -70,7 +70,7 @@ vocabularies may be added to `Sigma` after the corpus study.
 g    ::= k | k(g1, ..., gn)        -- ground terms over constructors in Sigma
 atom ::= pred(g1, ..., gn)         -- pred in Sigma; n = 0 gives the Phase-0 opaque identifiers
 
-prop ::= atom | false | prop -> prop
+prop ::= atom                      -- warrant-level propositions are atomic
 
 leaf-kind ::= observed | attested | assumed | certified
 provenance ::= user | ai-executed | checker(name, version)
@@ -82,10 +82,39 @@ leaf l : prop
   metadata   = {...}
 ```
 
-There is no warrant-level justification operator in v0.1: `justified(term, prop)` is removed, and
-`t : F` formulas occur only inside strict LP subderivations (Section 5). The warrant judgment is
-non-factive by construction. Reintroduce an internalized operator only if the corpus study shows
+Warrant-level propositions are atomic. Implication and falsum are formers of the *strict fragment's*
+formula language only (Section 5): at the warrant level, conflict comes from the declared `contrary`
+relation rather than negation-to-falsum, and an implication `E -> C` is reified as a named rule
+rather than asserted as a proposition. There is likewise no warrant-level justification operator in
+v0.1 (`justified(term, prop)` is removed); `t : F` formulas occur only inside strict LP
+subderivations. The warrant judgment is non-factive by construction — the two syntactic categories
+(warrant terms concluding atoms; LP proof terms `t : F`) are the firewall that keeps LP's factivity
+axiom off the warrant level. Reintroduce an internalized operator only if the corpus study shows
 meta-level claims (claims about other arguments) matter.
+
+### 3.1 Claims and the `supports` relation
+
+A claim is a triple: a natural-language string, a formal target, and an untrusted binding between
+them.
+
+```text
+claim c
+  nl      = "..."          -- primary, human-facing text
+  formal  = atom           -- the checkable target proposition
+  binding = { author, rationale, audit-status }   -- UNTRUSTED, audited annotation
+```
+
+`w supports c` holds iff `concl(w) ≡ c.formal`, where `≡` is structural identity up to a fixed,
+total normalization (canonical ordering and alpha-renaming of ground terms). There is no entailment
+step and no solver in the trusted base: support is positional identity, as in AIF inference nodes
+and the theorem-is-the-object convention of proof assistants.
+
+`c.binding` — the correspondence between `c.nl` and `c.formal` — is never a checker obligation. It is
+the single most load-bearing unchecked step (Section 11), so it is a first-class, versioned,
+human-signed field evaluated on the semantic-faithfulness axis, never proven. Policy-declared
+entailment (`concl(w)` entails `c.formal`) is deferred: when wanted it enters as an explicit warrant
+step whose own conclusion is discharged against `c.formal` by identity, so the trusted core does not
+grow.
 
 Confidence values and thresholds are metadata unless the selected policy gives them formal
 admission semantics. Provenance can admit, quarantine, or reject a leaf before argument evaluation;
@@ -247,6 +276,36 @@ as a complete trusted kernel.
 LP is used only for genuinely strict subderivations. A statement such as `supports(E, C) -> C` is not
 a logical axiom; it must be a named defeasible warrant rule in `Pi`.
 
+### 5.1 The strict-rule witness interface
+
+A strict rule `r : P1, ..., Pn ⇒ C` instantiated at `theta` may carry an LP derivation `d` as its
+witness. What the checker verifies is a *conditional deductive skeleton*:
+
+```text
+Sigma_LP ; { x1 : P1 theta, ..., xn : Pn theta }  |-  d ⇒ t : C theta
+```
+
+Each premise term `w_i` enters the witness as a hypothesis `x_i : P_i theta`; the derivation `d`
+builds a justification `t : C theta` for the conclusion. The witness may use logical-axiom constants
+(A0–A4, including factivity A3) freely, because it proves a *logical entailment among propositions*,
+which is legitimately factive. Factivity never reaches the warrant level: the interface consumes
+premise warrants only as hypotheses and emits `t : C theta`, which the strict rule reads as "`C
+theta` is warranted given its premises." No bare `F` escapes the LP fragment, and warrant-level
+defeat still propagates through sub-argument closure regardless of `d`. This is the only bridge
+between the sorts, and it runs one way: a checked strict witness lifts to a warrant; a warrant never
+becomes a free LP truth.
+
+The witness is **optional**, and its presence is graded trust:
+
+- *strict, unwitnessed* — an indefeasible trusted policy schema (an ASPIC+-style strict rule or a
+  declared domain law), part of the policy TCB;
+- *strict, witnessed* — the LP derivation discharges the step to logical axioms, so it is
+  kernel-checked and leaves the policy TCB.
+
+The fraction of load-bearing strict steps that carry a checked witness is the trust-reduction number
+the evaluation reports: LP earns its keep exactly to the extent witnesses are present, and an
+unwitnessed strict rule is honestly marked trusted rather than silently assumed sound.
+
 ## 6. Warrant terms and dependencies
 
 Abstract warrant-term syntax (one category; mode comes from the rule's declaration in `Pi`):
@@ -259,8 +318,8 @@ w ::= leaf l
 A rule instance carries its ground substitution `theta` (Section 4.1), its premise terms, a
 discharge map from critical questions to discharging warrant terms (checked against the questions'
 answer patterns under the same `theta`, Section 4.2), and its explicitly open obligations. For a
-strict-mode `r` the discharge map and hole set are empty, and the instance may carry an LP
-subderivation (Section 5) as its witness.
+strict-mode `r` the discharge map and hole set are empty, and the instance may carry an optional LP
+witness discharging the step to logical axioms (Section 5.1).
 
 The main source judgment records open obligations only:
 
@@ -291,13 +350,21 @@ k ::= rebut w u          -- targets the root conclusion of u
 The three attack kinds are exactly the three kinds of positions in a term: the root (its
 conclusion), an internal rule occurrence, and a frontier leaf.
 
-- `rebut w u` requires `(concl(w), concl(u))` to be a ground instance of a `Pi`-declared
-  contrary pair under one substitution (Section 4.1).
-- `undercut w u@π` requires `u@π` to be an instance of some `r` with substitution `theta` and `w`
-  to conclude `E theta` for a declared `exception r : E`; exact-instance precision comes from
-  `theta`.
+- `rebut w u` requires `u`'s top rule to be **defeasible** and `(concl(w), concl(u))` to be a
+  ground instance of a `Pi`-declared contrary pair under one substitution (Section 4.1).
+- `undercut w u@π` requires `u@π` to be an instance of some **defeasible** rule `r` with
+  substitution `theta` and `w` to conclude `E theta` for a declared `exception r : E`;
+  exact-instance precision comes from `theta`.
 - `undermine w u@π` requires `u@π` to be a leaf `l` and `w` to conclude a `Pi`-declared contrary
-  of `l`'s proposition or admissibility.
+  of `l`'s proposition.
+
+**Strict rules cannot be undercut or rebutted.** Only defeasible rules carry `exception`
+declarations and are rebuttable at their conclusion; a strict rule is deductively valid, so "the
+rule does not apply here" is not a coherent attack (ASPIC+: strict rules are unnamed and their
+inferences are unattackable). A conflict that surfaces only *behind* a strict rule is therefore
+invisible to the attack relation unless it is reachable through a defeasible step — the well-formed­
+ness restriction of Section 8 addresses this. Admissibility of a leaf is never attacked here: it is
+a Section 4.3 pre-evaluation policy decision and creates no attack.
 
 The attack judgment is:
 
@@ -340,6 +407,32 @@ The exact treatment of a hole when another independent complete argument exists 
 recommended outcome is a non-gap status plus a separate incomplete-alternative diagnostic; status
 should not hide holes.
 
+### 8.1 Consistency and the strict-rule well-formedness restriction
+
+Under grounded semantics with an arbitrary declared `contrary` relation and no transposition of
+strict rules, only *sub-argument closure* is guaranteed unconditionally (ASPIC+). *Direct* and
+*indirect* consistency — the property that two contrary claims cannot both be `justified` — can fail
+when a conflict surfaces only after a strict rule, because strict inferences are unattackable
+(Section 7) and the conflict is never registered (Caminada–Amgoud Examples 5–6).
+
+**v0.1 imposes a compile-time well-formedness check (Path B):** no strict-rule consequent, and no
+proposition reachable on a strict chain, may participate in a declared `contrary` pair. Formally,
+let the strict-reachable propositions be the least set containing every strict rule's conclusion
+pattern and closed under strict-rule premises→conclusion; a policy is well-formed only if no member
+appears in any `contrary` declaration. A program instantiating such a policy is rejected at compile
+time otherwise, with a located diagnostic naming the offending rule and contrary pair.
+
+Under this restriction every conflict is rebuttable at a defeasible step, so strict closure
+introduces no new conflict and direct = indirect consistency hold by construction — two contrary
+claims are never jointly `justified`. The cost is an expressiveness limit: strict chains may only
+target uncontested claims.
+
+**Flip criterion.** If the corpus shows strict rules genuinely feeding contested claims, switch to
+Path A — require the contrary relation to be a total, involutive contradictory map (`−φ`, `−−φ = φ`)
+and close strict rules under transposition, which buys all four rationality postulates under grounded
+with negation living in the contrary relation rather than the proposition language. See
+`gap-resolution.md`.
+
 ## 9. Static and semantic results required before freeze
 
 1. Decidability of program and attack checking (including positional attack checking).
@@ -351,9 +444,16 @@ should not hide holes.
    closure introduces edges only onto arguments containing the attacked occurrence.
 5. Termination and determinism of grounded evaluation and claim aggregation.
 6. Status preservation between a direct source semantics and compiled AF semantics.
-7. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
+7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
+   restriction, closure under strict rules and direct/indirect consistency hold under grounded
+   semantics, so two contrary claims are never jointly `justified`.
+8. Strict-witness soundness: a witnessed strict instance's conclusion is an LP consequence of its
+   premise hypotheses, and factivity (A3) is derivable only for strict constants.
+9. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
+   with `c.formal`.
+10. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
 
-Main results 1-6 should be mechanized in a proof assistant. Tests of the Haskell checker are
+Main results 1-8 should be mechanized in a proof assistant. Tests of the Haskell checker are
 conformance evidence, not substitutes for these theorems.
 
 ## 10. Presentation example
@@ -362,7 +462,10 @@ conformance evidence, not substitutes for these theorems.
 artifact paper_17 at sha256:...
 policy empirical-v1
 
-claim c1 : "Method M improves accuracy on distribution D"
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
 
 leaf e1 : reports(exp_3, effect(M, accuracy, D, +2.1))
   kind       = observed
