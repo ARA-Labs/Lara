@@ -214,7 +214,7 @@ But the analogy breaks in two load-bearing places, and those breaks _are_ the co
 **What we are designing:** a small formal language for claim-support certificates. This includes core
 propositions, opaque strict-certificate payloads, declared evidence leaves, strict and defeasible
 inference-scheme instances, critical-question obligations, typed attacks, explicit holes, a canonical
-human-readable syntax, and claim-support-graph semantics mapping checked programs to four statuses. JSON
+human-readable syntax, and claim-support graph semantics mapping checked programs to four statuses. JSON
 may remain the robust wire format between the untrusted producer and the trusted checker, but it is
 not the language specification. The paper needs a real calculus: syntax, judgments, checking rules,
 and semantics.
@@ -375,7 +375,7 @@ rule-specific critical questions, and a human-labelled attack benchmark.
 their juxtaposition is not by itself a POPL contribution. The technical novelty must be the typed
 claim-support calculus: its policy-generated obligations and attack types, its compilation to
 argumentation frameworks, and its soundness, dependency-accountability, and status-preservation
-results. The ARA application then demonstrates that this calculus captures research-support failures
+results. The ARA application then demonstrates that this calculus captures claim-support failures
 that proof terms or abstract argument graphs alone do not localize.
 
 ---
