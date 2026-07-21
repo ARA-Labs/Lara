@@ -1,40 +1,40 @@
-# Term-calculus decision: one warrant-term language
+# Claim-support calculus decision: one support-term language
 
 _Status: settled for language v0.1. Recorded 2026-07-20; amended 2026-07-21 by
 `strict-backend-decision.md`. Supersedes the two-layer reading of `spec.md` (argumentation calculus
-+ LP sub-fragment as separate source systems); `spec.md` Sections 3–7 now reflect one warrant
++ LP sub-fragment as separate source systems); `spec.md` Sections 3–7 now reflect one claim-support
 calculus with a backend-parametric strict-certificate interface._
 
 ## Decision
 
-1. **One syntactic category.** Every argument is a **warrant term**
+1. **One syntactic category.** Every argument is a **support term**
    `w ::= l | r⟨w₁,…,wₙ ; {q ↦ w_q} ; {o}⟩`. Strict and defeasible are a *mode* of the policy
    rule `r`, not separate syntax. A strict instance is the degenerate case (empty
    critical-question map, no holes) and carries either an explicit trust marker or an opaque
    certificate for a registered backend.
 2. **Proof-term traditions supply the term discipline, not LARA's axioms.** The central judgment is
-   `Σ; Π; Γ; R ⊢ w : F ▷ O`, read "w warrants F with open obligations O." The leaf dependency set
+   `Σ; Π; Γ; R ⊢ w : F ▷ O`, read "w supports F with open obligations O." The leaf dependency set
    is `leaves(w)` — the frontier of the term — derived, not tracked. Backend-certificate
    dependencies are reported separately. LP's A0–A4 and realization, when used, belong only to an
    optional LP adapter; they are not axioms of the source calculus.
-3. **The warrant judgment is non-factive.** No warrant-level justification operator
+3. **The support judgment is non-factive.** No support-level justification operator
    (`justified(term, prop)` is removed from v0.1). A strict backend receives only encoded premise
    conclusions and returns acceptance, dependencies, and diagnostics. Its formulas and proof terms
-   cannot enter source syntax, so even a factive backend cannot eliminate a warrant into truth.
+   cannot enter source syntax, so even a factive backend cannot eliminate support into truth.
 4. **Attacks are positional.** `rebut w u` targets the root conclusion; `undercut w u@π` targets
    the rule occurrence at position `π`; `undermine w u@π` targets the leaf occurrence at `π`.
    Rebut and undermine type-check against a policy-declared contrary relation, not full classical
    negation.
-5. **Absent from the warrant level:** backend-specific sum, proof variables, modalities, and
+5. **Absent from the support level:** backend-specific sum, proof variables, modalities, and
    internalized justification operators. Multiple independent supports for a claim are multiple
-   warrant terms (separate AF nodes), never one backend-combined term.
+   support terms (separate AF nodes), never one backend-combined term.
 
 ## Why (evidence)
 
-1. **Factivity is wrong for warrants.** LP A1 (`t:F → F`) says justified implies true — correct
-   for mathematical proof, exactly what LARA's honesty story denies for empirical warrants.
+1. **Factivity is wrong for empirical support.** LP A1 (`t:F → F`) says justified implies true —
+   correct for mathematical proof, exactly what LARA's honesty story denies for empirical support.
    Non-factive J/J4 motivates the source judgment, but LARA is not axiomatized as either: it avoids
-   the warrant-level modality entirely. Adapter opacity is the stronger firewall because it also
+   the support-level modality entirely. Adapter opacity is the stronger firewall because it also
    covers classical provers, model checkers, and future backends.
 2. **Backend combination can destroy defeat granularity.** LP's `s + t` is the concrete example: it
    merges alternative supports into one term; the
@@ -77,12 +77,13 @@ four-state aggregation), never terms-as-arguments per se.
 ## What this dissolves
 
 The question "does LP earn its keep?" no longer determines the core calculus. Backend replacement
-proves that warrant semantics is independent of certificate internals when acceptance profiles
+proves that claim-support semantics is independent of certificate internals when acceptance profiles
 match. The corpus still decides whether the optional LP adapter ships: measure how many strict steps
 need LP-specific `t:F`, `!`, `+`, or realization rather than the reference natural-deduction or a
-domain checker. The pitch is now: *a warrant-term calculus with a small strict-certificate interface
-— terms give syntactic accountability and positional defeat; argumentation gives the non-monotonic
-semantics; registered backends reduce trust in strict steps without defining warrant semantics.*
+domain checker. The pitch is now: *a claim-support calculus with a small strict-certificate
+interface — terms give syntactic accountability and positional defeat; argumentation gives the
+non-monotonic semantics; registered backends reduce trust in strict steps without defining
+claim-support semantics.*
 
 ## Flip criteria
 

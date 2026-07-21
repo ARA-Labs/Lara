@@ -1,9 +1,9 @@
 # lara
 
-A language for typed, policy-relative research warrants with pluggable strict certificates and
-grounded argumentation semantics.
+A language for typed, policy-relative claim-support certificates with pluggable strict certificates
+and grounded argumentation semantics.
 
-`lara` lowers a research artifact into a checkable **warrant graph**: for each
+`lara` lowers a research artifact into a checkable **claim-support graph**: for each
 claim it computes whether the argument from declared evidence to the claim is
 *justified / gap / defeated / contested*, and why. Strict steps use a small
 backend interface with a natural-deduction reference adapter; LP is optional.

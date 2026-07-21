@@ -1,11 +1,11 @@
 cabal-version:      3.0
 name:               lara
 version:            0.1.0.0
-synopsis:           Experimental LP adapter seed for the LARA warrant checker
+synopsis:           Experimental LP adapter seed for the LARA claim-support checker
 description:        The current package checks explicit Logic-of-Proofs derivations and
                     is retained as an experimental optional strict adapter. It is not yet
                     LARA's trusted core: the backend registry, natural-deduction reference
-                    adapter, warrant calculus, and grounded argumentation layer remain to
+                    adapter, claim-support calculus, and grounded argumentation layer remain to
                     be implemented.
 license:            MIT
 license-file:       LICENSE
