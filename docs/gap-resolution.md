@@ -1,7 +1,8 @@
-# Resolving the two `(Inst)`-checkability gaps: strict witnesses and claim targets
+# Resolving the two `(Inst)`-checkability gaps: strict certificates and claim targets
 
-_Status: settled for v0.1, backed by targeted research. Recorded 2026-07-20. Extends
-`term-calculus-decision.md`. All recommendations here are applied to `spec.md`._
+_Status: settled for v0.1, backed by targeted research. Recorded 2026-07-20; strict-witness portion
+amended 2026-07-21 by `strict-backend-decision.md`. Extends `term-calculus-decision.md`. All current
+recommendations are applied to `spec.md`._
 
 Two gaps kept the instantiation rule `(Inst)` from being fully checkable:
 
@@ -65,9 +66,9 @@ an entailment procedure in the TCB. Add it later as sugar: an explicit `entails`
 
 ---
 
-## Gap 1 — the strict-rule witness and where factivity lives
+## Gap 1 — the strict-rule certificate and where factivity lives
 
-### The Pandžić finding (it overturns an assumption)
+### The Pandžić finding
 
 Pandžić's default justification logic is the closest term-based defeasible system, but it is **not
 non-factive**. He keeps factivity (axiom A1, `t:F → F`) globally — the whole logic is JT, the
@@ -77,56 +78,60 @@ and retraction happens at the *extension* layer. His `t:F` is therefore
 "factive-within-an-accepted-extension," never globally non-factive. LARA wants a genuinely
 non-factive warrant judgment, so it must depart from him on exactly this axis.
 
-The standard justification-logic knob he declined to use is the fix: the **JT-vs-J4 split**.
-Factivity is exactly one axiom (A1), present in JT/LP and absent in J/J4 (the belief logics, explicit
-counterparts of modal K/K4). Confine A1 to a *strict sort*; the *defeasible sort* omits it and is
-non-factive by construction. Confinement is enforced through the **constant specification**: only
-strict constants may justify A1 instances.
+The JT-vs-J4 distinction identifies the problem but no longer defines LARA's mechanism. Factivity is
+exactly one axiom (A1), present in JT/LP and absent in J/J4. Rather than choose one justification
+logic for every future strict domain, LARA removes the warrant-level modality and confines every
+strict logic behind the backend interface. This also covers non-JL backends such as arithmetic
+checkers and model checkers.
 
-### How this maps onto LARA (the two categories already are the firewall)
+### How this maps onto LARA
 
-LARA's `term-calculus-decision.md` already split the syntax into two categories: warrant terms (which
-conclude atoms via rule instances) and LP proof terms (`t : F`). That split *is* Pandžić's
-recommended JT/J4 firewall, realized structurally rather than by a shared sort discipline:
+- **Source warrant calculus.** Non-factive because its only conclusion is "`w` warrants atom `p`";
+  it has no truth judgment and no elimination from warrant to truth.
+- **Strict-certificate backend.** May be factive internally. It receives encoded premise
+  conclusions as assumptions and returns acceptance, dependencies, and diagnostics.
+- **Opaque one-way result.** Acceptance creates a strict warrant instance. Backend formulas and
+  proof terms cannot enter source propositions, so a source warrant never becomes a backend truth.
 
-- **Defeasible sort = the warrant-term calculus.** Already non-factive: a term concludes an atom,
-  and `justified` status ≠ truth. There is no `t:F → F` construct at this level to remove.
-- **Strict sort = the embedded LP fragment.** Factive and sound (JT). Its `ConstantSpec` may contain
-  A1 instances; the fixed axiom-schema recognizer (the planned `ConstantSpec` fix) is the exact lever
-  that admits A1 for strict constants and nothing else.
-- **One-directional coercion strict → defeasible.** A checked strict witness lifts to a warrant;
-  a warrant never becomes a free LP truth. This is the only bridge, and it goes one way.
+The source non-factivity theorem is syntactic: by inversion on the source rules, no rule concludes a
+truth judgment because no such judgment exists. This is stronger and more general than recognizing
+A1 only for an LP constant specification.
 
-### The witness interface
+### The certificate interface
 
-A strict rule `r : P₁,…,Pₙ ⇒ C` instantiated at `theta` has, as its optional witness, an LP
-derivation `d` such that
+A strict rule `r : P₁,…,Pₙ ⇒ C` instantiated at `theta` may carry a backend certificate `kappa`:
 
 ```text
-Sigma_LP ; { x₁ : P₁theta, …, xₙ : Pₙtheta }  ⊢  d ⇒ t : Ctheta
+check_beta(T,
+  [encode_beta(P₁theta), ..., encode_beta(Pₙtheta)],
+  encode_beta(Ctheta),
+  kappa) = accept
 ```
 
-— a **conditional deductive skeleton**: given justifications for the premises (LP hypotheses `xᵢ`,
-one per premise term `wᵢ`), `d` builds a justification for the conclusion. The witness may use
-logical-axiom constants (A0–A4, including A1) freely, because it proves a *logical entailment* among
-propositions, which is legitimately factive. No bare `F` ever escapes: the interface consumes premise
-warrants as hypotheses and emits `t : Ctheta`, which the strict rule reads as "`Ctheta` is warranted
-given its premises." Warrant-layer defeat still propagates through sub-argument closure regardless of
-what `d` does internally.
+Every registered backend proves that acceptance implies
 
-### The witness is optional — and that makes LP's role measurable
+```text
+T ; [encode_beta(P₁theta), ..., encode_beta(Pₙtheta)] |=_beta encode_beta(Ctheta).
+```
+
+This is still a **conditional deductive skeleton**, but it does not privilege LP. The backend theorem
+establishes local consequence; premise truth is not exported or assumed by the source checker.
+Warrant-layer defeat propagates through subargument closure regardless of certificate internals.
+
+### The certificate is optional — and trust reduction is backend-neutral
 
 Distinguish two ways a rule can be strict:
 
-- **Strict, unwitnessed** — an indefeasible *trusted policy schema* (an ASPIC+ strict rule; a
-  declared domain law). In the policy TCB.
-- **Strict, witnessed** — the LP derivation discharges the step to logical axioms, so it is
-  *kernel-checked* and leaves the policy TCB.
+- **Strict, trusted-policy** — an indefeasible trusted policy schema or domain law. It remains in the
+  policy TCB and receives no semantic-consequence theorem.
+- **Strict, certified** — a registered backend discharges the instance relative to its declared,
+  digest-addressed theory.
 
-This resolves the standing "does the LP fragment earn its keep?" question (comparison note §9) by
-turning it into a *gradient*: the **trust-reduction number** (research-proposal §5) is literally the
-fraction of load-bearing strict steps that carry a checked witness. LP earns its keep exactly to the
-extent witnesses are present; where they are absent, the rule is honestly marked trusted.
+The trust-reduction measure is the fraction of load-bearing strict steps that carry an accepted
+certificate, broken down by backend and theory. Whether LP earns a place is empirical: measure the
+steps that require LP-specific `t:F`, `!`, `+`, or realization. Backend replacement proves that this
+choice does not alter warrant status when adapters accept the same instances; it cannot prove which
+adapter is useful on the corpus.
 
 ### ASPIC+ guardrails (Thread B)
 
@@ -160,17 +165,18 @@ extent witnesses are present; where they are absent, the rule is honestly marked
 
 ### One caveat carried from Pandžić
 
-Do not adopt LP sum/accrual `t:F → (t+u):F` at the warrant level (it is already dropped in
-`term-calculus-decision.md`): Pandžić notes A2 monotonicity fails once a defeater `u` co-occurs. Sum
-stays inside LP witnesses, where it is sound.
+Do not adopt LP sum/accrual `t:F → (t+u):F` at the warrant level (it is already absent in
+`term-calculus-decision.md`): Pandžić notes monotonicity fails once a defeater `u` co-occurs. Sum may
+exist inside an optional LP certificate, where it cannot merge source argument nodes.
 
 ---
 
 ## Two smaller mismatches (resolved, applied to spec)
 
-1. **Warrant `prop` is atomic.** `->` and `⊥` are the LP fragment's formula formers only. At the
-   warrant level, conflict comes from `contrary` (not negation-to-falsum) and implication is reified
-   as a named rule (not a proposition), so neither is needed. `prop ::= atom`.
+1. **Warrant `prop` is atomic.** `->`, `⊥`, modalities, and domain-specific formula formers belong
+   to backend encodings only. At the warrant level, conflict comes from `contrary` (not
+   negation-to-falsum) and implication is reified as a named rule (not a proposition), so none is
+   needed. `prop ::= atom`.
 2. **`undermine` attacks a leaf's proposition only, not its "admissibility."** Admissibility is
    entirely a §4.3 pre-evaluation policy decision (admit/quarantine/reject) and "never creates an
    attack"; there is no atom to conclude for an admissibility attack, and inventing one would revive
@@ -180,11 +186,11 @@ stays inside LP witnesses, where it is sound.
 
 ## Net effect on `(Inst)` checkability
 
-With Gap 2 (identity-checkable claim targets), Gap 1 (the conditional-skeleton witness with
-factivity confined by the two categories + constant spec), and the ASPIC+ guardrails, `(Inst)` and
-`supports` are fully checkable and the trusted base is: the fixed axiom-schema recognizer, the policy
-validator, the term/attack checker, the normalization function, and the grounded engine — with the
-strict-witness discharge as the mechanism that shrinks the policy TCB rule by rule.
+With Gap 2 (identity-checkable claim targets), Gap 1 (the backend-parametric conditional certificate
+with source-level non-factivity), and the ASPIC+ guardrails, `(Inst)` and `supports` are fully
+checkable. The trusted base for a run is the policy validator, term/attack checker, normalization
+function, grounded engine, and exactly the selected strict-backend adapters. Certified strict steps
+shrink the policy TCB instance by instance; trusted-policy steps remain explicit.
 
 ## Sources
 

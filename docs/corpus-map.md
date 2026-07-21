@@ -83,13 +83,16 @@ Per sampled claim, annotate:
    (feeds `Lara.Prop` and whether the Phase-0 opaque-identifier nullary case suffices).
 3. **Warrant rule + premises** — which scheme the experiment instantiates; strict vs defeasible
    (feeds §8 #2 strict/defeasible split).
-4. **Critical questions** — from Setup/Procedure/Baselines: randomization, power, baselines,
+4. **Strict certifier/theory** — for each proposed strict step, record the smallest plausible
+   certifier: reference natural deduction, a named domain checker, optional LP, or none
+   (`trusted-policy`); identify any required background theory.
+5. **Critical questions** — from Setup/Procedure/Baselines: randomization, power, baselines,
    external validity, etc. Mark each mandatory vs optional, and whether an unmet one is a *gap*
    (question) or a *defeater* (exception) — spec §4.2.
-5. **Leaf granularity** — one atom per (experiment, claim), or per result-cell? (feeds §8 #5).
-6. **Attack candidates** — walk the exploration tree; for each `dead_end`, decide rebut / undercut /
+6. **Leaf granularity** — one atom per (experiment, claim), or per result-cell? (feeds §8 #5).
+7. **Attack candidates** — walk the exploration tree; for each `dead_end`, decide rebut / undercut /
    undermine / **none**, with the target position and the `contrary` pair it needs.
-7. **Holes** — required premises or critical questions the artifact leaves open.
+8. **Holes** — required premises or critical questions the artifact leaves open.
 
 ### Process (from `popl-research-review.md` §5 Phase A)
 
@@ -102,8 +105,9 @@ Per sampled claim, annotate:
 ### What M0 unblocks
 
 The annotation directly answers the corpus-gated decision gates in `engineering-plan.md` §6:
-§8 #2 (rule schemes → `Lara.Policy`), §8 #3 (defeat typing → `Lara.Attack`), §8 #5 (leaf granularity
-→ `Lara.WarrantTerm`), and §8 #7 (behavioral-vs-empirical routing → optional TL-1).
+§8 #1 (optional adapter portfolio), §8 #2 (rule schemes → `Lara.Policy`), §8 #3 (defeat typing →
+`Lara.Attack`), §8 #5 (leaf granularity → `Lara.WarrantTerm`), and §8 #7
+(behavioral-vs-empirical routing → optional TL-1).
 
 ## 5. Local inspection
 

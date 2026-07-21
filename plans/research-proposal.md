@@ -4,8 +4,9 @@
 
 > **The name.** **LARA** = a **L**anguage for formally verifying **ARA** (Agent-Native Research
 > Artifacts). The `L` is the contribution: a small formal language of typed warrant certificates,
-> with a strict proof-term fragment and a structured-argumentation semantics, in which evidence→claim
-> warrants become _checkable objects_ rather than holistically-scored prose. LARA is to an ARA what a
+> with a backend-parametric strict-certificate interface and a structured-argumentation semantics,
+> in which evidence→claim warrants become _checkable objects_ rather than holistically-scored prose.
+> LARA is to an ARA what a
 > type checker is to a program: a deterministic verdict on whether the thing holds together, with a
 > located reason when it does not.
 
@@ -78,10 +79,11 @@ express, and we do so without the logic layer's rigor depending on the model's a
 
 **Four theory lineages** (each researched; see the track guides):
 
-- **Track A — the strict certificate fragment.** Propositional modal logic → S4 → the Logic of Proofs
-  (LP) / Justification Logic. This supplies explicit proof polynomials for strict steps. Sources:
-  Artemov (2001) for the LP rule system and realization; Boxes and Diamonds for the modal core; the
-  Gödel–McKinsey–Tarski translation for the S4↔intuitionistic bridge.
+- **Track A — strict-certificate backends.** A small interface connects strict rule instances to
+  explicit proof certificates. The required reference adapter is intuitionistic natural deduction;
+  LP/Justification Logic remains an optional adapter for explicitly modal steps, and domain adapters
+  may certify arithmetic, temporal, or code-level consequences. Each adapter supplies its own
+  semantics and soundness theorem.
 - **Track B — evidence semantics.** Neighborhood semantics (Pacuit) and van Benthem–Pacuit evidence
   logic. Not implemented in the kernel, but the _design conscience_: the principled account of when
   evidence justifies belief, against which our boolean `supported(E,c)` interface and defeat layer
@@ -94,13 +96,13 @@ express, and we do so without the logic layer's rigor depending on the model's a
   autoformalization precedent (Draft-Sketch-Prove, LeanDojo, Baldur). See
   `Track-D-architecture-guide.md`.
 
-**Current state of the build.** A prototype strict-fragment checker exists. `Lara.Kernel` checks
-explicit LP derivations (`Const`, `Hyp`, `App`, `Sum-L/R`, `Check`) and produces a **sealed
-`Judgment`** — a type whose
+**Current state of the build.** A prototype LP adapter seed exists. `Lara.Kernel` checks explicit LP
+derivations (`Const`, `Hyp`, `App`, `Sum-L/R`, `Check`) and produces a **sealed `Judgment`** — a type
+whose
 constructor is not exported, so the only way to obtain one is a successful `check`. A `Judgment` is
 therefore a checked certificate relative to the supplied `ConstantSpec` and `Context`. This is not
-yet the final trusted kernel: the current `ConstantSpec` accepts arbitrary `(constant, formula)`
-pairs and does not verify that formulas instantiate LP axiom schemes. A
+the LARA core or a conforming adapter: the current `ConstantSpec` accepts arbitrary
+`(constant, formula)` pairs and does not verify that formulas instantiate LP axiom schemes. A
 QuickCheck suite exercises the deterministic-correctness axis (sum-monotonicity, positive
 introspection, rejection of malformed derivations). The production substrate is settled: an
 end-to-end Haskell compiler/checker, with a Python LLM front-end added after the language boundary
@@ -108,9 +110,10 @@ stabilizes. The assurance substrate is separate: a Lean 4 or Rocq development wi
 reference calculus and mechanize its main theorems. The proof-assistant model does not automatically
 verify the Haskell executable, so conformance is established through a deliberately narrow core IR,
 executable reference cases, differential/property/mutation testing, and a documented correspondence
-between implementation functions and formal judgments. Still to come: the leaf and warrant-rule
-interfaces, fixed axiom-schema checking, typed attacks, source syntax/parser, the argumentation
-semantics, and the elaborator.
+between implementation functions and formal judgments. Still to come: the strict-backend interface
+and natural-deduction reference adapter, leaf and warrant-rule interfaces, typed attacks, source
+syntax/parser, argumentation semantics, and the elaborator. LP schema checking is needed only if the
+optional LP adapter ships.
 
 ---
 
@@ -126,22 +129,26 @@ not from the assertion that `evidence → claim` is an S4 theorem. Argument sche
 non-logical warrant rule being used; their critical questions generate explicit completeness
 obligations.
 
-**Step 2 — Justification logic supplies explicit witnesses for strict reasoning.** Where a step is
-genuinely deductive, LP replaces an anonymous S4 modality with an explicit proof polynomial `t : F`,
-built from application (`s · t`), sum (`s + t`), and positive introspection (`!t`). The current
-checker implements this fragment. LARA does not use factivity to turn "experiment E supports C"
-into the truth of `C`; that bridge is a named, defeasible warrant rule in the outer calculus.
+**Step 2 — A strict-certificate interface isolates deductive reasoning.** Where a step is genuinely
+deductive, a registered backend receives encoded premise conclusions, a goal, a digest-addressed
+theory, and an opaque certificate. It must provide deterministic checking, dependency
+accountability, and a soundness theorem. The required reference backend is small intuitionistic
+natural deduction. LP is an optional adapter for explicitly modal reasoning; arithmetic, temporal,
+or code checkers can use the same interface. LARA does not use any backend to turn "experiment E
+supports C" into truth; that bridge is a named, defeasible warrant rule.
 
-**Step 3 — Realization is a bounded auxiliary result, not an autoformalization theorem.** Artemov's
-Realization Theorem says that if `S4 ⊢ F`, then some realization `r` satisfies `LP ⊢ Fʳ`. It applies
-to already-formal S4 theorems; it does not say that an arbitrary natural-language research claim has
-a faithful S4 encoding or a warrant term. A realizer is useful only for LARA's explicitly modal,
-strict sublanguage. The ARA→LARA translation remains an empirical semantic-parsing problem and must
-be evaluated as such.
+**Step 3 — Backend parametricity bounds every strict theory's role.** If two adapters accept the
+same strict instances, structural induction on warrant checking shows that they produce the same
+argument skeletons and attacks; compilation then yields isomorphic Dung frameworks under certificate
+erasure and corresponding unique grounded status. Thus no backend's proof-term language is
+foundational to warrant semantics. Artemov
+realization remains a bounded optional-adapter result: it maps already-formal S4 theorems into LP,
+not natural-language research claims into faithful warrants.
 
-**Step 4 — Argumentation adds the non-monotonic defeat the kernel cannot express.** LP is monotonic:
-adding facts never retracts a conclusion, so the kernel alone can never say "this dead-end kills the
-claim." We therefore layer structured argumentation on top: each checked strict or defeasible
+**Step 4 — Argumentation adds the non-monotonic defeat strict backends cannot express.** Strict
+consequence systems are monotonic: adding premises does not retract a conclusion, so they cannot
+alone say "this dead-end kills the claim." We therefore layer structured argumentation on top: each
+checked strict or defeasible
 argument becomes a node; checked rebut/undercut/undermine declarations become attacks; and a
 **grounded-semantics labelling** assigns each node `in` / `out` / `undec`. This labelling _is_ the
 four-state output after claim-level aggregation. `undec` can arise from unresolved attack structure,
@@ -162,9 +169,10 @@ must be able to retract a warrant without making the status engine non-determini
 split is Proof-Carrying Code, one generation earlier: an untrusted producer ships an object plus a
 checkable certificate, and a small trusted checker validates it before anything is accepted. Our
 whole typed warrant program is the certificate; the LLM proposes it, and rejection costs nothing.
-The trusted base includes the parser, axiom/rule-policy validator, certificate checker, attack
-compiler, and status engine. Merely sealing a Haskell constructor is not a metatheorem. The design is
-de-Bruijn/PCC-style because a replayable proof object is checked independently.
+The trusted base includes the parser, backend registry and selected adapters, rule-policy validator,
+certificate checker, attack compiler, and status engine. Merely sealing a Haskell constructor is not
+a metatheorem. The design is de-Bruijn/PCC-style because a replayable proof object is checked
+independently.
 
 **Step 6 — Evidence semantics is the design conscience for the leaves.** Where do the leaf atoms
 `supported(E,c)` come from, and when does evidence actually justify belief? Neighborhood/evidence
@@ -173,20 +181,20 @@ threshold. LARA therefore treats confidence as metadata unless a named policy gi
 Provenance controls admission and audit; low-trust provenance does not itself attack an argument.
 
 **The synthesis in one sentence.** Structured argumentation supplies the defeasible semantics;
-argument schemes and critical questions define policy-relative coverage; LP supplies explicit
-witnesses for strict subderivations; and proof-carrying architecture makes the complete warrant graph
-replayable without trusting its producer.
+argument schemes and critical questions define policy-relative coverage; registered backends certify
+strict steps through one sound interface; and proof-carrying architecture makes the complete warrant
+graph replayable without trusting its producer.
 
 ### 3.1 What LARA is as a language (and what it is not)
 
 The useful Lean analogy is architectural, not foundational: an untrusted elaborator emits a formal
-object that a smaller checker validates. LP proof polynomials have proof-term structure and are the
-explicit counterpart of S4, but calling the whole LARA system "Lean with the logic swapped out"
-obscures its defeasible rules, external evidence, and graph semantics.
+object that a smaller checker validates. Some strict adapters have proof-term structure, but calling
+the whole LARA system "Lean with the logic swapped out" obscures its defeasible rules, external
+evidence, backend-parametric strict seam, and graph semantics.
 
 |              | Lean                             | LARA                                         |
 | ------------ | -------------------------------- | -------------------------------------------- |
-| Foundation   | dependent type theory            | typed structured argumentation + strict LP fragment |
+| Foundation   | dependent type theory            | typed structured argumentation + strict-certificate interface |
 | Proof object | a term `e : A`                   | a warrant certificate with terms, rules, attacks, holes |
 | Kernel       | checks the term; small, trusted  | parser + policy/derivation/attack checker + status engine |
 | Producer     | elaborator + tactics (untrusted) | LLM elaborator (untrusted)                   |
@@ -200,15 +208,16 @@ But the analogy breaks in two load-bearing places, and those breaks _are_ the co
    _down to the leaf interface_; the leaves are the interface to the messy world (§3.3).
 2. **A non-monotonic layer on top.** Lean is purely monotonic — proved is proved. LARA wraps the
    monotonic kernel in an argumentation/defeat layer where a dead-end can _retract_ a claim's status.
-   LARA is therefore a **monotonic proof-term language embedded in a non-monotonic warrant system**;
-   Lean is only the inner half.
+   LARA therefore combines **monotonic strict-certificate adapters with a non-monotonic warrant
+   system**; Lean is analogous only to a possible inner checker.
 
 **What we are designing:** a small formal language for warrant certificates. This includes core
-propositions and LP terms, declared evidence leaves, strict and defeasible warrant-rule instances,
-critical-question obligations, typed attacks, explicit holes, a canonical human-readable syntax,
-and warrant-graph semantics mapping checked programs to four statuses. JSON may remain the robust wire
-format between the untrusted producer and the trusted checker, but it is not the language
-specification. The paper needs a real calculus: syntax, judgments, checking rules, and semantics.
+propositions, opaque strict-certificate payloads, declared evidence leaves, strict and defeasible
+warrant-rule instances, critical-question obligations, typed attacks, explicit holes, a canonical
+human-readable syntax, and warrant-graph semantics mapping checked programs to four statuses. JSON
+may remain the robust wire format between the untrusted producer and the trusted checker, but it is
+not the language specification. The paper needs a real calculus: syntax, judgments, checking rules,
+and semantics.
 
 **What we are deliberately not designing:** a Lean-style human authoring environment — notation
 engineering, tactics, an IDE, proof scripts, a package ecosystem, or a standard library. Those belong
@@ -241,10 +250,11 @@ not acceptance criteria.
 LARA uses two complementary implementations rather than asking one technology to serve every role:
 
 1. **Haskell production implementation.** This is the end-to-end artifact reviewers run: readable
-   syntax and JSON parsers, name resolution/elaboration, static checking, compilation to the warrant
-   graph/argumentation framework, grounded evaluation, diagnostics, canonical printing, and replay.
-   Haskell is appropriate because the core algorithms are small recursive transformations and it
-   supports rapid compiler engineering without making dependent types part of the source language.
+   syntax and JSON parsers, name resolution/elaboration, the strict-backend registry and reference
+   natural-deduction adapter, static checking, compilation to the warrant graph/argumentation
+   framework, grounded evaluation, diagnostics, canonical printing, and replay. Haskell is
+   appropriate because the core algorithms are small recursive transformations and it supports
+   rapid compiler engineering without making dependent types part of the source language.
 2. **Lean 4 or Rocq reference development.** This contains the mathematical syntax, judgments,
    compilation relation/function, semantics, and main proofs. Dependent types may index intrinsically
    well-formed objects inside this development, but LARA v0.1 itself remains a small explicitly
@@ -254,7 +264,8 @@ LARA uses two complementary implementations rather than asking one technology to
 The runnable path is:
 
 `ARA → untrusted Python/LLM producer → LARA source or JSON → Haskell parser/elaborator/checker →`
-`typed core → argumentation framework → grounded status → diagnostic/replay report`.
+`typed core + selected strict adapters → argumentation framework → grounded status →`
+`diagnostic/replay report`.
 
 The proof-assistant development models the frozen core-to-status portion. It need not formalize the
 LLM, Python orchestration, text parser, or presentation layer; those components are evaluated rather
@@ -273,38 +284,40 @@ research claim.
 
 "What is trusted?" has three answers, and keeping them apart is the crux a reviewer will probe.
 
-- **Tier 1 — logical axioms (the JL/LP schemes).** A0 (propositional tautologies), A1 reflection
-  `t:F→F`, A2 application, A3 proof-checker, A4 sum, plus the rules. These are the _logic itself_:
-  domain-independent and must be recognized by a fixed schema checker. The LLM never invents
-  them. This is the tier the intuition "we formalize to justification logic's axioms" correctly
-  names — it is the language's type system, the analog of Lean's fixed CIC rules.
-- **Tier 2 — warrant policies.** Rules such as "a replicated, adequately powered experiment supports
-  its stated effect claim" are domain-specific and defeasible. They are named policy entries with
-  premise schemas and critical questions, not LP axioms. The checker verifies their instantiation;
-  the paper does not claim that the policy itself is universally correct.
+- **Tier 1 — fixed checking rules and proved adapter contracts.** This includes warrant-term and
+  attack typing, compilation, grounded aggregation, and the strict-certificate interface. Each
+  registered backend fixes its decoder and proposition encoding and must prove that accepted
+  certificates are consequences under its stated semantics. The required reference adapter is
+  natural deduction. LP's A0–A4 belong here only when the optional LP adapter is selected; they are
+  not axioms of LARA itself.
+- **Tier 2 — warrant policies and backend theories.** Rules such as "a replicated, adequately
+  powered experiment supports its stated effect claim" are domain-specific and defeasible. They are
+  named policy entries with premise schemas and critical questions. Likewise, a backend's
+  digest-addressed non-logical theory is a reported trusted dependency unless separately certified.
+  The checker verifies instantiation and certificate use; the paper does not claim that the policy
+  or domain theory is universally correct.
 - **Tier 3 — non-logical premises (the leaves).** A research warrant is **not a tautology**:
-  "experiment E supports claim C" is contingent and is _not derivable from A0–A4_, so it cannot be a
-  JL axiom (JL axioms hold in every model). The empirical content therefore enters the derivation as
-  **leaves** — `supported(E,c)` atoms — supplied per artifact and **audited**, never baked in. In
-  proof-theoretic usage these leaves are also called the "axioms" of that particular derivation,
-  which is why logical and non-logical axioms are easily conflated. The Lean parallel is useful:
-  kernel rules are fixed logic; an `axiom foo : P` declaration reported by `#print axioms` is a
-  supplied, audited premise.
+  "experiment E supports claim C" is contingent and cannot be manufactured by a domain-independent
+  strict checker. The empirical content therefore enters as **leaves** — `supported(E,c)` atoms —
+  supplied per artifact and **audited**, never baked into an adapter. In proof-theoretic usage these
+  leaves are also called the "axioms" of a particular derivation, which is why fixed logical rules,
+  backend theories, and empirical premises must be reported separately.
 
 **What the checker certifies is therefore conditional and policy-relative.** A checked warrant says:
 given these admitted leaves and this declared policy, this argument and attack graph is well formed,
 all reported rule applications match their schemas, and this is its grounded status. It does not
 certify leaf truth, policy adequacy, or translation faithfulness.
 
-**The code does not yet enforce this split.** `Lara.ConstantSpec` is supplied as input and accepts any
-formula; `DConst` checks membership, not whether that formula is an LP axiom instance. Before any
-soundness claim, replace or guard it with a fixed axiom-schema recognizer and enumerate the full TCB.
-Empirical leaves already use the separate `Context` / `Hyp` path, which is the right direction.
+**The code does not yet enforce this split.** It contains only an LP adapter seed.
+`Lara.ConstantSpec` accepts any formula and therefore fails closed registration and adapter
+soundness. Build the backend registry and reference natural-deduction adapter first. Retain LP only
+after fixed schema recognition and a conformance argument. Empirical leaves already use a separate
+`Context` / `Hyp` path, which is the right direction.
 
 **The LLM's job, stated precisely.** It translates the ARA into a LARA program by proposing
-propositions, leaf assertions, rule instances, obligation discharges/holes, and typed attacks. The
-checker validates structure, but faithful translation requires all five outputs to match the source;
-each is measured separately.
+propositions, leaf assertions, rule instances, obligation discharges/holes, strict-backend
+configurations/certificates, and typed attacks. The checker validates structure, but faithful
+translation requires all six outputs to match the source; each is measured separately.
 
 **Leaf admission is a policy decision, not an attack.** Every empirical leaf remains a declared
 hypothesis with provenance. A policy may reject or quarantine a leaf before graph evaluation. Once
@@ -318,25 +331,27 @@ attack. Certified leaves additionally carry a replayable checker witness.
 This section answers **question 2 — why we believe it will work** — as a set of explicit bets, each
 with its supporting reason and its failure condition.
 
-**Bet 1 — The strict fragment is small and already runs.** The `t : F` checker is a straight
-structural recursion with no proof search (the derivation is explicit — the de Bruijn criterion). The
-rules fit on a page; `Lara.Kernel` is ~130 lines and its trusted surface is a single sealed type.
-Boolean propositional LP is decidable. _Why this is a good bet:_ smallness is auditable, and a
-standalone checker is easy to audit. Property tests are useful but do not prove soundness. For the
-POPL claim, provide paper proofs and mechanized metatheory for the final calculus, plus a conformance
-argument for the Haskell implementation. _Fails if:_ policy and attack checking make the TCB ad hoc;
-mitigated by specifying the whole language before expanding implementation.
+**Bet 1 — The strict interface is small and backend soundness composes locally.** The source checker
+calls one total function with a theory, encoded premises, goal, and explicit certificate. The
+reference natural-deduction checker is straight structural recursion with no proof search, and its
+soundness is induction on the certificate derivation. _Why this is a good bet:_ the interface is
+auditable, backend replacement keeps backend internals out of warrant semantics, and additional
+adapters discharge the same local theorem. Property tests remain conformance evidence rather than
+soundness proofs. _Fails if:_ proposition encodings or theory dependencies become implicit;
+mitigated by fixed adapter registration, digest-addressed theories, and dependency reporting.
 
 **Bet 2 — Soundness can be stated precisely.** The target theorem is certificate soundness: accepted
 programs compile to well-formed argumentation frameworks, every support node depends only on declared
 leaves and rule instances, and reported labels equal the chosen semantics. This does not imply claim
-truth. _Fails if:_ arbitrary constants, rules, or attacks enter unchecked; mitigated by fixed logical
-schemas, versioned warrant policies, typed attack rules, and dependency/leaf audits.
+truth. _Fails if:_ arbitrary backends, theories, rules, or attacks enter unchecked; mitigated by
+closed backend registration, digest-addressed theories, versioned warrant policies, typed attack
+rules, and dependency/leaf audits.
 
 **Bet 3 — Layered evaluation keeps formal validity separate from semantic faithfulness.** We report
 metatheory/conformance, semantic translation, certificate utility, and real-artifact outcomes as four
 separate axes. _Why this is a good bet:_ a checker result remains meaningful even when the producer
-is noisy, while the producer is evaluated on proposition, leaf, rule, attack, and omission accuracy.
+is noisy, while the producer is evaluated on proposition, leaf, rule, backend/theory choice, attack,
+and omission accuracy.
 _Fails if:_ any end-to-end headline number launders one layer's errors through another; prevented by
 the reporting design in Section 5.
 
@@ -344,8 +359,9 @@ the reporting design in Section 5.
 Draft-Sketch-Prove, LeanDojo, and Baldur support the untrusted-producer/checked-output pattern.
 Recent autoformalization results also show that compile success can substantially exceed semantic
 faithfulness. _Why this is still a good bet:_ LARA's smaller, schema-guided language and explicit
-abstention provide leverage. _Fails if:_ proposition, rule, and attack extraction remain too
-unfaithful; this is measured rather than assumed away. Realization is not used as mitigation.
+abstention provide leverage. _Fails if:_ proposition, rule, backend encoding/theory selection, and
+attack extraction remain too unfaithful; this is measured rather than assumed away. Realization is
+not used as mitigation.
 
 **Bet 5 — Status computation is cheap; attack semantics is not free.** Grounded labelling is a
 polynomial least-fixpoint computation. The research work is defining which source constructs produce
@@ -371,16 +387,18 @@ end-to-end accuracy number would hide the trust boundaries.
 ### Axis (a) — metatheory and implementation conformance
 
 _The POPL result; independent of LLM accuracy._ Prove progress/decidability of checking,
-certificate-to-graph soundness, leaf-dependency accountability, status determinism/termination, and
-source-to-core compilation correctness. Mechanize the final definitions and main theorems. Test the
+strict-backend isolation and replacement, certificate-to-graph soundness, leaf/backend-dependency
+accountability, status determinism/termination, and source-to-core compilation correctness.
+Mechanize the final definitions, the natural-deduction adapter, and the main theorems. Test the
 Haskell implementation against an executable reference semantics, including randomized differential
 tests and mutation tests for every rejection class.
 
 ### Axis (b) — semantic translation faithfulness
 
 Build a double-annotated gold set and report agreement plus adjudication. Measure proposition
-faithfulness, leaf extraction, warrant-rule selection, typed attack extraction, omission/coverage,
-and abstention separately. Compilation or checker acceptance is not semantic correctness.
+faithfulness, leaf extraction, warrant-rule selection, strict-backend encoding/theory selection,
+typed attack extraction, omission/coverage, and abstention separately. Compilation or checker
+acceptance is not semantic correctness.
 
 ### Axis (c) — certificate utility and defect localization
 
@@ -401,6 +419,8 @@ publish all adjudications.
 - **Trust-reduction number.** The **fraction of load-bearing leaves that can be moved off the LLM** onto a
   checker (certified leaves, if the model-checking backend TL-1 is built) — a direct, quantitative
   measure of how much trust we removed from the model.
+- **Strict-certification rate.** The fraction of load-bearing strict instances discharged by an
+  accepted backend certificate rather than `trusted-policy`, broken down by backend and theory.
 - **Corpus.** Reuse the ARA paper's 30-paper corpus for continuity, but sample claims by type and
   reserve a blinded held-out subset. Thirty papers alone do not guarantee enough independent claims.
 - **Failure-knowledge demonstration (the differentiator).** Show, on real artifacts, cases where a
@@ -429,11 +449,11 @@ metatheory, and evidence that the abstraction handles real warrant structures.
 | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | "You're just typechecking LLM-written formalizations."     | Four-axis eval; semantic faithfulness measured separately from certificate validity.                                                                      |
 | Hallucinated evidence atom → sound proof of a false claim. | Trust boundary stops at leaves; provenance tags; `user`-confirmed provenance required for load-bearing atoms; leaf/axiom audit (the `sorry`-audit lesson). |
-| Arbitrary `ConstantSpec` entries make the kernel unsound.  | Fixed axiom-schema recognizer; versioned policy rules are separate from logical constants.                                                                 |
+| A strict adapter accepts undeclared axioms or theories.    | Closed backend registry; digest-addressed theories; adapter soundness and dependency-accountability obligations.                                           |
 | A dead end is incorrectly treated as an attack.            | Require a typed rebut/undercut/undermine target; no attack from provenance alone.                                                                           |
 | `gap` is misreported as underivability.                    | Define gap as an explicit unresolved policy obligation or absent submitted support.                                                                        |
 | Scope creep into a graded/probabilistic core.              | Hard rule: kernel stays boolean; graded lives in the judge as metadata.                                                                                    |
-| Realization is overused as an autoformalization guarantee. | Restrict it to the optional strict modal fragment; do not put it on the ARA lowering critical path.                                                         |
+| LP realization is overused as an autoformalization guarantee. | Keep LP optional and restrict realization to already-formal modal inputs inside that adapter.                                                           |
 | Mechanization consumes the compiler schedule.             | Keep Haskell as the production implementation; mechanize only the frozen first-order core and headline theorems; choose Lean 4 by default or Rocq when collaborator expertise dominates. |
 | Mechanized model and Haskell checker diverge.              | Share a serialized first-order core vocabulary; map judgments to implementation functions; run differential, property, golden, and mutation tests.       |
 | Dependent types expand the LARA source language.           | Use them only inside the proof-assistant model or selected internal GADTs; keep v0.1 explicitly checked and first order.                                  |
@@ -449,10 +469,10 @@ older operational reading/build plan. The revised spine is:
 
 | Milestone | Definition of done |
 | --- | --- |
-| M0 — semantic corpus study | 50–100 claims classified by proposition, rule, evidence, attack, and gap shape; two annotators on a subset |
+| M0 — semantic corpus study | 50–100 claims classified by proposition, rule, evidence, attack, gap shape, and strict-certifier/theory need; two annotators on a subset |
 | M1 — frozen language v0.1 | versioned concrete/abstract syntax and JSON, static judgments, policy language, typed attacks, holes, AF compilation, claim aggregation, and specified rejection behavior; the strict-chain `contrary` well-formedness check (spec §8.1, Path B) and the proposition normalization `nf`/`≡` (spec §3.2) are part of the frozen definition |
-| M2 — mechanized reference core | paper proofs plus Lean 4 or Rocq mechanization of checker soundness, dependency accountability, status determinism, and compilation correctness |
-| M3 — Haskell compiler/checker | parser, elaborator, canonical printer, JSON codec, fixed LP schema checking, warrant compiler, diagnostics, status engine, and replay bundle. **Policy validator (early target):** the spec §8.1 well-formedness check — compute the strict-reachable proposition set and reject any policy whose `contrary` declarations touch it — plus the `nf`/`≡` normalizer |
+| M2 — mechanized reference core | paper proofs plus Lean 4 or Rocq mechanization of checker soundness, backend replacement/isolation, dependency accountability, status determinism, and compilation correctness; includes the natural-deduction adapter |
+| M3 — Haskell compiler/checker | parser, elaborator, canonical printer, JSON codec, strict-backend registry + natural-deduction adapter, warrant compiler, diagnostics, status engine, and replay bundle. LP schema checking is conditional on shipping the optional LP adapter. **Policy validator (early target):** the spec §8.1 well-formedness check — compute the strict-reachable proposition set and reject any policy whose `contrary` declarations touch it — plus the `nf`/`≡` normalizer |
 | M4 — walking skeleton | one real claim end to end with no hand-authored certificate step; all untrusted outputs retained for audit |
 | M5 — evaluation corpus | gold annotations, mutation suite, baselines, ablations, and blinded held-out set frozen before final runs |
 | M6 — full evaluation | all four axes reported; at least five worked cases spanning every status/attack kind |
@@ -469,8 +489,9 @@ obligations, and trusted base are stable.
 
 These are the decisions that shape the calculus; each is tracked in `../ARA-verification-plan.md` §3.
 
-1. **Semantic center.** Is the source calculus a compact ASPIC+-style system with LP only for strict
-   subproofs? This is the current recommendation; justify any LP-first alternative on corpus data.
+1. **Strict-adapter portfolio.** The source calculus is a compact ASPIC+-style system with a
+   backend-parametric strict seam. Which adapters beyond natural deduction ship in v0.1? Require
+   corpus evidence for LP, arithmetic, temporal, or code adapters.
 2. **Warrant-policy language.** Which rule schemes and critical questions cover the initial claim
    classes, and which are strict versus defeasible?
 3. **Defeat typing.** Precisely type rebut (conclusion), undercut (rule application), and undermine
@@ -485,21 +506,23 @@ These are the decisions that shape the calculus; each is tracked in `../ARA-veri
 7. **Behavioral vs. empirical routing (gates TL-1).** What fraction of corpus claims are behavioral
    (checkable against a model/code) vs. purely empirical? Decide by sampling the corpus before
    building the model-checking backend.
-8. **Trusted base and mechanization host.** Enumerate the parser/elaborator/checker/compiler/status
-   TCB and choose Lean 4 or Rocq before freezing M1. Lean 4 is the default absent stronger Rocq
-   expertise. Record precisely which definitions are executable, which theorems are mechanized, and
-   how the Haskell functions correspond to them; do not call testing a proof of conformance.
+8. **Trusted base and mechanization host.** Enumerate the parser, core checker, compiler, status
+   engine, registry, and selected backend adapters; keep the elaborator explicitly outside the TCB.
+   Choose Lean 4 or Rocq before freezing M1. Lean 4 is the default absent stronger Rocq expertise.
+   Record precisely which definitions are executable, which theorems are mechanized, and how the
+   Haskell functions correspond to them; do not call testing a proof of conformance.
 
 ---
 
 ## 9. Positioning (the one-paragraph pitch for the paper)
 
 Frame the contribution as **a proof-carrying language for policy-relative research warrants**. The
-language makes evidence leaves, warrant-rule instances, critical-question obligations, and typed
-defeaters explicit; its compiler produces a structured argumentation framework; its checker proves
-certificate validity and reports grounded status without claiming empirical truth. Anchor the work
-primarily in structured argumentation, proof certificates/PCC, semantic publishing/provenance, and
-autoformalization faithfulness. LP realization is supporting metatheory for a strict optional
-fragment, not the novelty or the guarantee behind natural-language lowering. The POPL hook is the
-language design plus compilation and accountability theorems; the ARA/LLM pipeline is the demanding
+language makes evidence leaves, warrant-rule instances, strict certificates, critical-question
+obligations, and typed defeaters explicit; its compiler produces a structured argumentation
+framework; its checker proves certificate validity and reports grounded status without claiming
+empirical truth. Anchor the work primarily in structured argumentation, proof certificates/PCC,
+semantic publishing/provenance, and autoformalization faithfulness. Backend replacement is the
+theorem that keeps strict logic modular. LP realization is optional-adapter metatheory, not the
+novelty or the guarantee behind natural-language lowering. The POPL hook is the language design plus
+compilation, replacement, and accountability theorems; the ARA/LLM pipeline is the demanding
 application that demonstrates why those abstractions matter.

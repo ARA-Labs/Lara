@@ -8,21 +8,22 @@ contract every module implements._
 
 ## 0. Current state (2026-07-21)
 
-The only code that exists is the innermost strict layer — ~483 lines of Haskell:
+The only code that exists is an experimental LP adapter seed — ~483 lines of Haskell:
 
 | Module | Role | Status |
 | --- | --- | --- |
-| `Lara.Term`, `Lara.Formula` | LP proof polynomials `t` and formulas `F` | seed |
-| `Lara.Kernel` | checks `d ⇒ t : F`, mints the sealed `Judgment` | seed |
-| `Lara.ConstantSpec` | membership check for `(constant, formula)` pairs | **TCB hole** |
+| `Lara.Term`, `Lara.Formula` | LP proof polynomials `t` and formulas `F` | optional-adapter seed |
+| `Lara.Kernel` | checks `d ⇒ t : F`, mints the sealed `Judgment` | optional-adapter seed |
+| `Lara.ConstantSpec` | membership check for `(constant, formula)` pairs | **non-conforming adapter** |
 
-Everything above the LP kernel — propositions/`nf`, leaves, policies, warrant terms, typed attacks,
-AF compilation, grounded labelling, four-state aggregation, JSON codec, parser/printer, and the
-untrusted elaborator — is **spec-only**. No code yet.
+The strict-backend registry, natural-deduction reference adapter, and everything in the source
+calculus — propositions/`nf`, leaves, policies, warrant terms, typed attacks, AF compilation,
+grounded labelling, four-state aggregation, JSON codec, parser/printer, and the untrusted elaborator
+— are **spec-only**. No code yet.
 
-Known defect carried in code: `ConstantSpec` accepts arbitrary `(constant, formula)` pairs
-(spec §5; `research-proposal.md:291`). Until it is a fixed axiom-schema recognizer, `Lara.Kernel` is
-not a trusted core and must not be described as one.
+Known defect carried in code: `ConstantSpec` accepts arbitrary `(constant, formula)` pairs. The
+existing modules are not the LARA core and do not satisfy the strict-backend contract. They become an
+eligible LP adapter only after fixed schema recognition and a soundness/conformance argument.
 
 ## 1. The dominating constraint: corpus before calculus
 
@@ -36,9 +37,10 @@ sequencing non-negotiable:
 **Decision (2026-07-21): M0 corpus study is the true blocker.** No new upper-layer Haskell begins
 until the corpus fixes the shapes it can change. The corpus-sensitive open questions are §8 #2
 (which rule schemes exist; which are strict vs defeasible), #3 (defeat typing), #5 (leaf
-granularity), and #7 (behavioral-vs-empirical routing, which gates TL-1). Building the warrant-term,
-policy, and attack layers before these are known would bake guesses into the frozen v0.1 calculus
-and the evaluation benchmark.
+granularity), and #7 (behavioral-vs-empirical routing, which gates TL-1). Open question #1 also
+decides which optional strict adapters ship, but does not block the fixed interface or reference
+adapter. Building the warrant-term, policy, and attack layers before these are known would bake
+guesses into the frozen v0.1 calculus and the evaluation benchmark.
 
 ### The two carve-outs that M0 cannot change
 
@@ -47,8 +49,10 @@ in parallel with M0 without violating the constraint:
 
 1. **`nf`/`≡` normalizer** (spec §3.2) — literal canonicalization + structural recursion over ground
    atoms; no argument reordering, no binders. Frozen in commit `124f461`.
-2. **Fixed LP axiom-schema recognizer** (spec §5) — the `ConstantSpec` fix. The A0–A4 schemas are
-   the logic itself (Tier 1, `research-proposal.md:268`); the corpus cannot move them.
+2. **Strict-backend interface + natural-deduction reference adapter** (spec §5;
+   `strict-backend-decision.md`) — the interface, replay/normalization/soundness/dependency
+   obligations, and reference rules are corpus-independent. Corpus evidence decides which optional
+   adapters ship; it does not change the seam.
 
 These are the only Haskell allowed to start before M0 exits. Everything else waits.
 
@@ -59,7 +63,8 @@ Exit criteria (from `popl-research-review.md` §5 Phase A and `research-proposal
 - 50–100 claims sampled across the 30-paper ARA corpus, stratified by claim type (descriptive,
   comparative, causal, generalization, negative-result, implementation/behavioral).
 - Each annotated for: proposition shape, evidence/leaf granularity, warrant scheme + premises,
-  critical questions, rebut/undercut/undermine candidates, and unresolved holes.
+  critical questions, rebut/undercut/undermine candidates, unresolved holes, and for every proposed
+  strict step the smallest plausible certifier/theory (reference ND, domain checker, LP, or none).
 - Double-annotate ≥20–30%; adjudicate disagreements.
 - **Exit gate:** a finite set of constructs covers ≥80% of sampled argument shapes without encoding
   whole reasoning steps as opaque leaves.
@@ -77,9 +82,9 @@ whose shape M0 can change.
 | # | Module | Spec | Depends on | Corpus-gated |
 | --- | --- | --- | --- | --- |
 | 1 | `Lara.Prop` — ground atoms + `nf`/`≡` | §3, §3.2 | — | no (carve-out) |
-| 2 | `Lara.Axiom` — fixed A0–A4 recognizer; re-seal `Kernel` on it | §5 | Kernel | no (carve-out) |
-| 3 | `Lara.Policy` — rule schemas, `contrary`, `exception`, admission table, **§8.1 strict-reachable validator** | §4, §8.1 | Prop | which schemes |
-| 4 | `Lara.WarrantTerm` — `w` AST, `⊢ w : supports(p) ▷ O`, `leaves(w)` | §6, §4.1–4.3 | Prop, Axiom, Policy | granularity |
+| 2 | `Lara.Strict` + `Lara.Strict.ND` — closed registry, backend contract, reference natural-deduction adapter | §5 | Prop | no (carve-out) |
+| 3 | `Lara.Policy` — rule schemas, `contrary`, `exception`, admission table, **§8.1 strict-reachable validator** | §4, §8.1 | Prop, Strict | which schemes |
+| 4 | `Lara.WarrantTerm` — `w` AST, `⊢ w : supports(p) ▷ O`, `leaves(w)`, `certDeps(w)` | §6, §4.1–4.3 | Prop, Strict, Policy | granularity |
 | 5 | `Lara.Attack` — positional `w@π`, rebut/undercut/undermine typing | §7 | WarrantTerm, Policy | taxonomy |
 | 6 | `Lara.Compile` — `compile(P)=AF`, subargument closure | §8 | WarrantTerm, Attack | no |
 | 7 | `Lara.Grounded` — least-fixpoint labelling + four-state aggregation | §8 | Compile | no |
@@ -97,15 +102,17 @@ they come after layers 1–8:
 - `Lara.Json` — producer/checker wire codec (spec §1); can track `WarrantTerm` early.
 - `Lara.Syntax` — presentation parser + canonical printer; codec round-trip to α-equivalent AST
   (spec §9 result 10).
-- **Untrusted Python/LLM elaborator** (Phase E) — explicitly last. It performs the five logged
+- **Untrusted Python/LLM elaborator** (Phase E) — explicitly last. It performs the six logged
   lowering tasks (spec §11) and may never define policy rules or logical schemas at runtime.
 
 Layers 1–2 plus a hand-authored warrant term and a stub policy are the **vertical slice**: run one
-claim end-to-end through 6→7 to prove the pipeline before the real schemes freeze.
+claim end-to-end through 6→7 to prove the pipeline before the real schemes freeze. Port the existing
+LP seed behind `Lara.Strict` only if the corpus justifies a second shipped adapter.
 
 ## 4. Mechanization track (parallel, starts at M1 freeze)
 
-`spec.md §9` lists 10 required results; results 1–8 must be mechanized (Lean 4 default,
+`spec.md §9` lists 12 required results; core results 1–9 plus reference-adapter result 10 must be
+mechanized (Lean 4 default,
 `research-proposal.md:461`; open question §8 #8 decides Lean vs Rocq before M1 freezes). Engineering
 implications:
 
@@ -120,7 +127,8 @@ implications:
 ## 5. Test discipline (all layers)
 
 - **Property tests** (QuickCheck, already wired) per layer for the algebraic laws — e.g. `≡`
-  reflexive/symmetric/transitive/linear; grounded labelling determinism.
+  reflexive/symmetric/transitive/linear; natural-deduction weakening; backend replacement; grounded
+  labelling determinism.
 - **Golden tests**: the three complete + three rejected examples the spec requires
   (`popl-research-review.md` §5 Phase B; spec §10 currently has one incomplete example).
 - **Mutation suite** (M3/Phase D): wrong formulas, undeclared leaves, hidden policy extension, bad
@@ -136,6 +144,7 @@ Property/golden/mutation/differential tests are **conformance evidence, not soun
 | Gate | Blocks | Resolved by |
 | --- | --- | --- |
 | M0 exit (≥80% coverage) | layers 3–5 | corpus study |
+| §8 #1 optional adapter portfolio | LP/domain adapters beyond `Lara.Strict.ND` | M0 |
 | §8 #2 rule schemes | `Lara.Policy` | M0 |
 | §8 #3 defeat typing | `Lara.Attack` | M0 |
 | §8 #5 leaf granularity | `Lara.WarrantTerm` leaf handling | M0 |

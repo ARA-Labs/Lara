@@ -1,10 +1,11 @@
 # LARA language specification (Phase 0 - WIP)
 
 _This is the living specification of the language and trusted checking boundary. The code in
-`src/Lara/` implements only the strict LP seed described in Section 5. The full language is not yet
+`src/Lara/` implements an experimental LP strict-backend seed; the full language is not yet
 implemented or frozen. Sections 3–7 reflect the unified warrant-term calculus recorded in
-`term-calculus-decision.md`: every argument is a term, strict/defeasible is a rule mode, and
-attacks are positional._
+`term-calculus-decision.md` and the backend-parametric strict interface recorded in
+`strict-backend-decision.md`: every argument is a term, strict/defeasible is a rule mode, strict
+certificates are opaque backend payloads, and attacks are positional._
 
 ## 1. Scope and guarantee
 
@@ -20,7 +21,8 @@ The checker validates a submitted certificate; it does not establish empirical t
 search exhaustively for every possible argument. Acceptance means:
 
 1. all references and types are well formed;
-2. strict proof steps and warrant-rule instances check against fixed/versioned schemas;
+2. strict certificates check through fixed/versioned backends and warrant-rule instances check
+   against fixed/versioned schemas;
 3. every dependency and open obligation is explicit;
 4. every attack has a checked source and a type-correct target; and
 5. the reported status is the grounded result for the compiled graph.
@@ -39,6 +41,9 @@ p          proposition and claim identifiers
 q          critical-question identifiers
 l          leaf identifiers
 r          warrant-rule identifiers
+beta       strict-certificate backend identifiers
+T, h       backend theories and their digests
+kappa      opaque strict certificates
 X          rule parameters
 g, theta   ground terms and ground substitutions
 a, w, u    warrant-term (argument) identifiers
@@ -48,16 +53,18 @@ src        artifact source references
 policy     versioned warrant-policy identifiers
 ```
 
-A program is checked against a fixed logical signature `Sigma`, a versioned warrant policy `Pi`, and
-an artifact snapshot `A`:
+A program is checked against a fixed proposition signature `Sigma`, a versioned warrant policy `Pi`,
+a fixed strict-backend registry `R`, and an artifact snapshot `A`:
 
 ```text
 P ::= artifact A at digest
       policy Pi
+      use backends [beta@version*]
       declaration*
 ```
 
-The digest and policy version are part of replay identity.
+Every selected backend must exist in `R`; the selected versions, policy version, artifact digest,
+and policy-allowlisted theory digests are part of replay identity.
 
 ## 3. Propositions and leaves
 
@@ -82,15 +89,17 @@ leaf l : prop
   metadata   = {...}
 ```
 
-Warrant-level propositions are atomic. Implication and falsum are formers of the *strict fragment's*
-formula language only (Section 5): at the warrant level, conflict comes from the declared `contrary`
+Warrant-level propositions are atomic. At this level, conflict comes from the declared `contrary`
 relation rather than negation-to-falsum, and an implication `E -> C` is reified as a named rule
-rather than asserted as a proposition. There is likewise no warrant-level justification operator in
-v0.1 (`justified(term, prop)` is removed); `t : F` formulas occur only inside strict LP
-subderivations. The warrant judgment is non-factive by construction — the two syntactic categories
-(warrant terms concluding atoms; LP proof terms `t : F`) are the firewall that keeps LP's factivity
-axiom off the warrant level. Reintroduce an internalized operator only if the corpus study shows
-meta-level claims (claims about other arguments) matter.
+rather than asserted as a proposition. Strict backends may have richer private formula languages
+(Section 5), but their formulas and proof terms are not source constructs. There is likewise no
+warrant-level justification operator in v0.1 (`justified(term, prop)` is removed).
+
+The warrant judgment is non-factive by construction: a backend receives encoded premise
+conclusions as assumptions and returns only certificate acceptance, dependencies, and diagnostics.
+No backend formula or proof term can be eliminated into a source truth judgment. This source/backend
+interface replaces the former LP-specific syntactic firewall. Reintroduce an internalized operator
+only if the corpus study shows meta-level claims (claims about other arguments) matter.
 
 ### 3.1 Claims and the `supports` relation
 
@@ -164,6 +173,8 @@ rule r(X1, ..., Xm)
   mode       = strict | defeasible
   premises   = [Apat*]
   conclusion = Apat
+  allow-trusted = true | false                  -- strict rules only
+  certifiers    = [(beta@version, theory-digest)*] -- strict rules only
   question q : Apat (mandatory | optional)   -- zero or more; mandatory is the default
 
 contrary Apat Apat   -- policy-declared conflict, closed under ground instantiation
@@ -174,7 +185,13 @@ Policies are versioned trusted inputs. Artifact programs may instantiate but may
 modify rules at runtime. The contrary relation is the only source of propositional conflict:
 rebut and undermine typing (Section 7) check against it, and full classical negation is not
 assumed. Strict versus defeasible is a property of the rule looked up in `Pi`, not separate
-program syntax.
+program syntax. A strict rule is either explicitly trusted by policy or discharged
+instance-by-instance by a registered backend certificate (Section 5).
+
+A strict rule is well formed only if `allow-trusted = true` or `certifiers` is nonempty. An
+instance may use `assurance = trusted` only when `allow-trusted = true`, and may use
+`cert(beta, h, ...)` only when `(beta@version, h)` appears in `certifiers`. Defeasible rules have
+neither field and always use `assurance = none`.
 
 ### 4.1 Patterns and substitutions
 
@@ -208,7 +225,8 @@ one such substitution.
 Each question `q` of rule `r` declares an answer pattern `A_q` over `r`'s parameters. In an
 instance with substitution `theta`:
 
-- `q` is discharged by `sigma(q) = w_q` iff `Sigma; Pi; Gamma |- w_q : A_q theta ▷ O_q`. The
+- `q` is discharged by `sigma(q) = w_q` iff
+  `Sigma; Pi; Gamma; R |- w_q : A_q theta ▷ O_q`. The
   discharging term is a subterm of the instance: its open obligations join the instance's, and it
   is addressable by attacks at position `pi.q` (Section 7).
 - an open mandatory `q` (listed in the hole set) contributes a located obligation to `O`; an open
@@ -261,110 +279,153 @@ An open mandatory obligation excludes that incomplete argument from the compiled
 framework and contributes a located `gap` explanation. Other complete support arguments for the same
 claim remain eligible.
 
-## 5. Strict LP fragment
+## 5. Strict-certificate backends
 
-The strict fragment is the embedded degenerate case of the warrant-term calculus: a strict-mode
-rule instance with an empty critical-question map and no holes may carry an explicit LP
-subderivation as its witness. LP proof polynomials and warrant terms are distinct syntactic
-categories; a defeasible warrant term can never appear inside an LP term or under `t : F`, so
-factivity (axiom A1, `t:F -> F`) is only ever applied to conclusions of strict reasoning. LP sum
-(`+`) and hypothesis variables exist only inside LP subderivations; the warrant level has neither.
+A strict-mode rule instance has an empty critical-question map and no local holes. It is either
+explicitly trusted by policy or carries an opaque certificate for a fixed, versioned backend. The
+source calculus is independent of every backend's formulas, proof terms, axioms, and model theory.
+The full interface and proof obligations are fixed in `strict-backend-decision.md`.
 
-The existing prototype implements LP proof polynomials:
+A backend registry entry provides:
 
 ```text
-t ::= x | c | t . t | t + t | !t
-F ::= p | false | F -> F | t : F
-d ::= const c F | hyp x F | app d d | sumL d t | sumR t d | check d
+encode_beta : prop -> Form_beta
+check_beta  : Theory_beta
+              -> List Form_beta
+              -> Form_beta
+              -> Cert_beta
+              -> accept | reject(error)
+uses_beta   : Cert_beta -> Set Dependency
+models_beta : Theory_beta -> List Form_beta -> Form_beta -> Prop
 ```
 
-Its checking judgment is:
+Every registered backend must have deterministic, terminating replay; preserve and reflect source
+normalization (`p equiv q` iff `encode_beta(p) = encode_beta(q)`);
+prove certificate soundness
 
 ```text
-Sigma; Gamma |- d => t : F
+check_beta(T, Delta, phi, kappa) = accept
+------------------------------------------------
+                 T ; Delta |=_beta phi;
 ```
+
+and account for every free premise or theory dependency used by the certificate. Backend
+implementations, decoders, proposition encodings, and theory formats are fixed by backend id and
+version. Artifact programs may select registered entries but cannot upload a checker, encoding,
+theory language, or axiom schema. Backend consequence must satisfy reflexivity, cut/transitivity,
+and weakening under additional premises/theory entries; non-monotonic reasoning belongs in the
+warrant/attack layer.
+
+For a strict rule `r : P1, ..., Pn => C` at substitution `theta`, a certified instance checks:
 
 ```text
-             axiom-instance(Sigma, c, F)       Gamma(x) = F
-(Const)     -----------------------------     ------------ (Hyp)
-                         c : F                    x : F
-
-                  s : (A -> B)    t : A
-(App)             ----------------------
-                         (s . t) : B
-
-              s : A                              s : A
-(Sum-L)      ---------             (Sum-R)      ---------
-             (s + t):A                           (t + s):A
-
-                         t : A
-(Check)                 ---------
-                        (!t):(t:A)
+Delta = [encode_beta(P1 theta), ..., encode_beta(Pn theta)]
+phi   = encode_beta(C theta)
+theoryDigest(T) = h
+check_beta(T, Delta, phi, kappa) = accept
 ```
 
-`axiom-instance` must recognize fixed LP axiom schemas. The current Haskell `ConstantSpec` does not
-yet implement this condition: it accepts arbitrary `(constant, formula)` pairs and checks only
-membership. Until fixed, `ConstantSpec` is trusted input and the implementation must not be described
-as a complete trusted kernel.
+The premise warrant terms are checked normally and their obligations propagate. Only their
+normalized conclusions enter `Delta`; warrant terms, provenance, attacks, and statuses never enter a
+backend. Conversely, a backend returns only acceptance, dependencies, and diagnostics. A certificate
+therefore establishes that the conclusion is a backend consequence of the encoded premises and
+declared theory, not that any premise is true.
 
-LP is used only for genuinely strict subderivations. A statement such as `supports(E, C) -> C` is not
-a logical axiom; it must be a named defeasible warrant rule in `Pi`.
+An unwitnessed strict instance is accepted only when its policy entry explicitly says
+`assurance = trusted-policy`. This is an indefeasible trusted domain law, not a logical theorem.
+Reports distinguish it from `certified(beta, theory-digest)`.
 
-### 5.1 The strict-rule witness interface
+### 5.1 Required reference backend
 
-A strict rule `r : P1, ..., Pn ⇒ C` instantiated at `theta` may carry an LP derivation `d` as its
-witness. What the checker verifies is a *conditional deductive skeleton*:
+The v0.1 reference backend is intuitionistic natural deduction for implication and falsum:
 
 ```text
-Sigma_LP ; { x1 : P1 theta, ..., xn : Pn theta }  |-  d ⇒ t : C theta
+phi ::= a | false | phi -> phi
+e   ::= hyp i | lam phi e | app e e | abort phi e
 ```
 
-Each premise term `w_i` enters the witness as a hypothesis `x_i : P_i theta`; the derivation `d`
-builds a justification `t : C theta` for the conclusion. The witness may use logical-axiom constants
-(A0–A4, including factivity A1) freely, because it proves a *logical entailment among propositions*,
-which is legitimately factive. Factivity never reaches the warrant level: the interface consumes
-premise warrants only as hypotheses and emits `t : C theta`, which the strict rule reads as "`C
-theta` is warranted given its premises." No bare `F` escapes the LP fragment, and warrant-level
-defeat still propagates through sub-argument closure regardless of `d`. This is the only bridge
-between the sorts, and it runs one way: a checked strict witness lifts to a warrant; a warrant never
-becomes a free LP truth.
+with the standard hypothesis, implication-introduction, implication-elimination, and
+falsum-elimination rules. Certificates use de Bruijn indices. Its soundness is by induction on the
+typing derivation: hypotheses hold by context membership, implication introduction discharges its
+assumption, implication elimination preserves truth, and falsum elimination is vacuous. Free-index
+collection gives exact dependency accountability by structural induction.
 
-The witness is **optional**, and its presence is graded trust:
+It encodes a source proposition as `atom(canonicalSerialize(nf(p)))` using an injective structural
+serialization, so backend formula equality coincides with source `equiv`. This backend is
+intentionally small. Since source
+propositions are atomic, it certifies only the
+propositional consequences made visible by its encoding and declared theory. A non-logical domain law
+must remain a reported theory dependency or a trusted policy rule; the checker does not relabel it a
+tautology.
 
-- *strict, unwitnessed* — an indefeasible trusted policy schema (an ASPIC+-style strict rule or a
-  declared domain law), part of the policy TCB;
-- *strict, witnessed* — the LP derivation discharges the step to logical axioms, so it is
-  kernel-checked and leaves the policy TCB.
+### 5.2 Optional LP and domain adapters
 
-The fraction of load-bearing strict steps that carry a checked witness is the trust-reduction number
-the evaluation reports: LP earns its keep exactly to the extent witnesses are present, and an
-unwitnessed strict rule is honestly marked trusted rather than silently assumed sound.
+LP may be registered as an optional backend. Its `t:F`, application, sum, positive introspection,
+reflection, constant specification, and S4 realization remain internal to that adapter. The current
+Haskell `ConstantSpec` accepts arbitrary `(constant, formula)` pairs, so it is not yet a conforming
+adapter; eligibility requires fixed LP schema recognition and a soundness/conformance argument.
+
+Other adapters may certify classical propositional reasoning, arithmetic, temporal properties, or
+code behavior. Each adds only its selected checker and theory to the run's trusted base and must
+discharge the same backend obligations. A statement such as `supports(E, C) -> C` is not made logical
+by choosing a stronger backend; it remains a named defeasible warrant rule unless a declared backend
+theory genuinely entails it and reports that theory dependency.
+
+### 5.3 Backend-parametric results
+
+Two results justify the interface:
+
+1. **Strict-step soundness.** An accepted certified instance satisfies
+   `T ; [encode_beta(P_i theta)] |=_beta encode_beta(C theta)` directly by the backend soundness
+   obligation. This theorem excludes trusted-policy instances.
+2. **Backend replacement.** If two source-identical programs differ only in strict certificate
+   payloads and the two backends accept exactly the same instances, their checked warrant terms,
+   compiled argumentation frameworks are isomorphic after certificate erasure, and their grounded
+   labels and claim statuses correspond. The proof is structural induction on warrant checking,
+   followed by graph isomorphism of compilation and invariance of the grounded least fixed point
+   under that isomorphism.
+
+The second result proves that backend internals are not part of claim-status semantics when
+acceptance profiles match. Backend identity, theory, dependencies, certificate size, and replay data
+remain visible in audit reports. Whether a particular backend is useful cannot be proved from the
+calculus; it is measured by corpus coverage, checking cost, and the fraction of strict steps moved
+out of the policy TCB.
 
 ## 6. Warrant terms and dependencies
 
 Abstract warrant-term syntax (one category; mode comes from the rule's declaration in `Pi`):
 
 ```text
+assurance ::= none
+            | trusted
+            | cert(beta, theory-digest, kappa)
+
 w ::= leaf l
-    | r⟨theta ; w1, ..., wn ; {q ↦ w_q} ; {o*}⟩
+    | r⟨theta ; w1, ..., wn ; {q ↦ w_q} ; {o*} ; assurance⟩
 ```
 
 A rule instance carries its ground substitution `theta` (Section 4.1), its premise terms, a
 discharge map from critical questions to discharging warrant terms (checked against the questions'
-answer patterns under the same `theta`, Section 4.2), and its explicitly open obligations. For a
-strict-mode `r` the discharge map and hole set are empty, and the instance may carry an optional LP
-witness discharging the step to logical axioms (Section 5.1).
+answer patterns under the same `theta`, Section 4.2), and its explicitly open obligations. A
+defeasible instance has `assurance = none`. For a strict-mode `r`, the discharge map and hole set are
+empty and assurance is exactly `trusted` or `cert(beta, theory-digest, kappa)` (Section 5).
 
 The main source judgment records open obligations only:
 
 ```text
-Sigma; Pi; Gamma |- w : supports(p) ▷ O
+Sigma; Pi; Gamma; R |- w : supports(p) ▷ O
 ```
 
 The dependency set is not a judgment component: it is `leaves(w)`, the set of leaf constants
 occurring in `w`, each of which must be declared in `Gamma`. The former accountability theorem
 ("every leaf used by an accepted derivation is declared and reported") is thereby an inversion
-lemma on term structure: the reported dependency set is exactly `leaves(w)`.
+lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.
+
+Strict-certificate dependencies are derived separately as `certDeps(w)`, the union of every accepted
+backend certificate's `uses_beta(kappa)` after resolving premise slots to the corresponding subterms
+and theory slots to digest-addressed entries. The complete dependency report is
+`leaves(w) union certDeps(w)`. Backend obligation 4 guarantees that no free strict assumption is
+hidden.
 
 `O` is the set of unresolved mandatory obligations, collected across the term (an open hole in a
 subterm propagates). A complete graph node requires `O = empty`.
@@ -403,7 +464,7 @@ a Section 4.3 pre-evaluation policy decision and creates no attack.
 The attack judgment is:
 
 ```text
-Sigma; Pi; Gamma |- k : attacks(w, u@π)
+Sigma; Pi; Gamma; R |- k : attacks(w, u@π)
 ```
 
 Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and
@@ -426,6 +487,9 @@ compile(P) = AF = (Args, Attack)
 closed under subarguments in the ASPIC+ manner: an attack on `u@π` compiles to an edge onto every
 argument in `Args` that contains the attacked occurrence, so defeating a subterm defeats each
 complete term built on it. The grounded labelling maps each argument to `in`, `out`, or `undec`.
+Certificate payloads remain attached to nodes for replay but are not term positions or attack
+targets. `eraseCert` replaces them by a `certified` marker while preserving argument names, rule
+instances, conclusions, obligations, and positions.
 
 Two different monotonicity claims must not be conflated. For a fixed framework
 `AF = (Args, Attack)`, Dung's characteristic function
@@ -490,10 +554,11 @@ with negation living in the contrary relation rather than the proposition langua
 ## 9. Static and semantic results required before freeze
 
 1. Decidability of program and attack checking (including positional attack checking).
-2. Axiom safety for the strict fragment, including the mode boundary: no defeasible warrant term
-   occurs inside an LP term or under `t : F`.
-3. Leaf-dependency accountability, as a structural exactness lemma: the reported dependency set
-   of a checked term `w` equals `leaves(w)`, and every member is declared in `Gamma`.
+2. Strict-backend isolation: programs cannot extend `R`, backend theories are digest-addressed, and
+   no warrant term, attack, or backend proof term crosses the strict-certificate interface.
+3. Dependency accountability: the reported leaf set equals `leaves(w)` and every member is declared
+   in `Gamma`; backend-reported dependencies equal or conservatively contain every free premise and
+   theory entry used by each accepted certificate.
 4. Compilation soundness: no untyped node or attack appears in the target AF, and subargument
    closure introduces edges only onto arguments containing the attacked occurrence.
 5. Termination and determinism of grounded evaluation and claim aggregation.
@@ -501,20 +566,28 @@ with negation living in the contrary relation rather than the proposition langua
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`.
-8. Strict-witness soundness: a witnessed strict instance's conclusion is an LP consequence of its
-   premise hypotheses, and factivity (A1) is derivable only for strict constants.
-9. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
+8. Strict-certificate soundness: every certified instance's encoded conclusion is a consequence of
+   its encoded premise conclusions and declared backend theory. This result excludes
+   `trusted-policy` instances.
+9. Backend replacement: source-identical programs whose backend certificates accept the same strict
+   instances compile to AFs isomorphic under certificate erasure and produce equal claim statuses.
+10. Reference-backend soundness and dependency exactness for the natural-deduction adapter; each
+    additional shipped adapter must discharge the same obligations.
+11. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
    with `c.formal`.
-10. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
+12. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
 
-Main results 1-8 should be mechanized in a proof assistant. Tests of the Haskell checker are
-conformance evidence, not substitutes for these theorems.
+Core results 1-9 and the reference-adapter result 10 should be mechanized in a proof assistant.
+Additional adapter soundness may be imported from a separately verified checker only with an
+explicit theorem and encoding correspondence. Tests of executable checkers are conformance evidence,
+not substitutes for these theorems.
 
 ## 10. Presentation example
 
 ```lara
 artifact paper_17 at sha256:...
 policy empirical-v1
+use backends [nd@1]
 
 claim c1
   nl      = "Method M improves accuracy on distribution D"
@@ -542,14 +615,16 @@ add at least three complete real examples and matching JSON encodings.
 
 ## 11. ARA lowering boundary
 
-The untrusted elaborator performs five logged tasks:
+The untrusted elaborator performs six logged tasks:
 
 1. natural-language proposition formalization;
 2. evidence-leaf extraction and source binding;
 3. warrant-rule selection and instantiation;
 4. critical-question discharge or explicit hole creation; and
-5. typed attack extraction.
+5. strict-backend, theory, and certificate selection where a strict instance is certified; and
+6. typed attack extraction.
 
-Checker acceptance establishes structural validity only. Faithfulness of all five tasks is evaluated
-against human annotations. Artemov realization applies only when an already-formal strict S4 theorem
-is translated into the LP fragment; it is not a guarantee for this lowering process.
+Checker acceptance establishes structural validity only. Faithfulness of all six tasks is evaluated
+against human annotations. If the optional LP adapter is selected, Artemov realization applies only
+when an already-formal strict S4 theorem is translated into that adapter; it is not a guarantee for
+this lowering process.

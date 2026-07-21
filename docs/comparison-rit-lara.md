@@ -1,12 +1,12 @@
 # `rit` vs `lara` — what each verifies, and what it does not
 
-_Status: analysis note. First written 2026-07-20; revised against the POPL-track
-`docs/spec.md` (commit `7d9278d`), which restructured `lara` since the first draft — LP is now
-a strict sub-fragment, and the evidence→claim warrant lives in a versioned policy of defeasible
-schemes. Compares the two sibling projects under `ara/`: `rit` (a verification core built on the
-Lean kernel) and `lara` (this project, a warrant-checking language built on a Logic-of-Proofs
-strict core plus an argumentation layer). Goal: state precisely what each checks, where they
-agree, where they differ, and where the framing promises more than the mechanism delivers._
+_Status: analysis note. First written 2026-07-20; revised 2026-07-21 against the POPL-track
+`docs/spec.md` and `docs/strict-backend-decision.md`. LP is now an optional strict adapter, and the
+evidence→claim warrant lives in a versioned policy of defeasible schemes. Compares the two sibling
+projects under `ara/`: `rit` (a verification core built on the Lean kernel) and `lara` (this project,
+a warrant-checking language with a backend-parametric strict seam plus an argumentation layer). Goal:
+state precisely what each checks, where they agree, where they differ, and where the framing promises
+more than the mechanism delivers._
 
 ---
 
@@ -19,8 +19,8 @@ agree, where they differ, and where the framing promises more than the mechanism
 - **`lara`** — a small language of proof-carrying, **policy-relative** research warrants. A
   program declares propositions, evidence leaves, instances of strict or defeasible warrant
   rules, their obligations, typed attacks, and claim roots. The checker compiles this to a Dung
-  framework and reports, per claim, one of `justified / gap / defeated / contested`. Kernel = a
-  tiny **Logic-of-Proofs** checker for *strict* sub-steps, wrapped in an argumentation layer;
+  framework and reports, per claim, one of `justified / gap / defeated / contested`. Strict steps use
+  a small certificate interface with a natural-deduction reference adapter and optional LP adapter;
   the empirical evidence→claim step is a **defeasible scheme in a versioned policy `Pi`**, not a
   proof term.
 
@@ -69,7 +69,7 @@ declared rule is a correct account of what warrants a claim.** That judgment liv
 
 | Dimension | `rit` | `lara` (current spec) |
 |---|---|---|
-| Kernel logic | Lean 4 / CIC (dependent type theory) | LP (explicit S4) **for strict steps only** + a typed argumentation checker |
+| Kernel logic | Lean 4 / CIC (dependent type theory) | typed argumentation checker + registered strict-certificate adapters (natural deduction required; LP optional) |
 | The evidence→claim step | analytic relations proved; extraction pulled INTO the kernel (K-tier) | a **defeasible scheme** in a versioned policy `Pi`, with critical questions — *not* proved |
 | Empirical content | sha256 byte-capture + deterministic re-extraction; compressed *toward* the kernel | untrusted leaves (`observed/attested/assumed/certified`), kept *out* of the kernel |
 | Monotonic? | **Yes** — Lean is monotonic; proved is proved | **No** — typed attacks (rebut/undercut/undermine) + grounded semantics on top |
@@ -113,24 +113,22 @@ dependency is exposed (`#print axioms` / the leaf set `L`).
 `lara`'s current design draws the sharper conclusion: it does *not* try to express the
 evidence→claim step as a proof at all. That step is contingent (`supports(E,C) -> C` "is not a
 logical axiom", per `spec.md §5`), so it is modeled as a **defeasible rule**, checked by
-instantiation against a policy rather than by proving. Dependent types (or LP proof terms) are
-reserved for the genuinely strict sub-steps — which is exactly where they belong.
+instantiation against a policy rather than by proving. Proof systems are reserved for genuinely
+strict sub-steps and connected through one explicit backend interface.
 
 ---
 
 ## 6. Curry-Howard: what "compiles" actually certifies
 
 The tempting slogan is *"by Curry-Howard, if the program compiles the paper's claim is valid."*
-LP genuinely is a Curry-Howard system, so this is not forced — but the claim it licenses is
-narrower than it sounds, and the whole credibility turns on one word.
+The natural-deduction adapter and optional LP adapter genuinely have proof-term readings, but the
+claim they license is narrower than it sounds, and the whole credibility turns on one word.
 
-**Validity, not soundness.** The checker validates `t : F` (and, above it, that an argument
-correctly instantiates a rule) with the leaves taken as **hypotheses**, not theorems. So
-compilation certifies a *conditional*: *if the declared evidence holds, the warrant follows.* In
-the classical vocabulary this is **validity** (the conclusion follows from the premises), not
-**soundness** (valid *and the premises are true*). `lara`'s own guarantee is even weaker and more
-honest: acceptance means "structural validity relative to the selected policy," and completeness
-is *policy-relative* — complete with respect to the scheme's critical questions, not absolutely.
+**Validity, not soundness.** A strict adapter validates that its encoded conclusion follows from
+encoded premise conclusions and a declared theory; the warrant checker validates rule
+instantiation. Leaves remain **hypotheses**, not theorems. Compilation therefore certifies a
+conditional, not premise truth. LARA's end-to-end guarantee is structural validity relative to the
+selected policy, backend theories, and admitted leaves; completeness is policy-relative.
 
 **The right analogy — and it is still a strong pitch.** No type-checker proves a program
 correct; it proves it well-typed. `tsc` passing means no category errors *given your
@@ -152,23 +150,21 @@ critique lives:
 3. **Policy faithfulness.** That the defeasible rule (and its critical questions) is a correct
    account of what actually warrants the claim. `Pi` is a *trusted input*.
 
-**Curry-Howard now covers only the strict core.** With LP demoted to strict sub-steps, the clean
-CH story ("well-typed proof term ⇒ valid derivation") applies to `spec.md §5`, not to the whole
-pipeline. The defeasible layer is argumentation-framework defeat, which is **not** a CH
-phenomenon — a compiled, valid argument can still be *retracted* by a dead-end, and retraction
-has no proof-term counterpart. So the honest framing is: `lara` is a **typed argument checker
-with a Curry-Howard strict core**, not a Curry-Howard proof system end-to-end. Pitch it that way;
-at a PL venue, overselling CH invites exactly the objection the design already answers.
+**Curry-Howard covers adapters, not LARA as a whole.** The clean story ("well-typed proof term
+implies valid derivation") applies to proof-term adapters in `spec.md` Section 5. The defeasible layer
+is argumentation-framework defeat, which is not a Curry-Howard phenomenon: a valid argument can be
+retracted by a dead end. The honest framing is a **typed argument checker with pluggable strict
+certificate adapters**, not a Curry-Howard proof system end-to-end.
 
 ---
 
 ## 7. The necessity question: why a formal system at all?
 
 The earlier draft's sharpest critique was that a proof kernel is overkill for the shallow
-arithmetic that shows up between grounded facts and claims. The current `lara` design **answers
-the LP-specific version of this** by shrinking LP to strict sub-steps and moving the real work to
-the argumentation-scheme + policy + grounded-labelling layer. Good. But the necessity test simply
-re-points:
+arithmetic that shows up between grounded facts and claims. The current `lara` design answers this
+by putting strict checkers behind one backend seam and moving the real work to the
+argumentation-scheme + policy + grounded-labelling layer. The necessity test now applies per
+adapter:
 
 - **What the formal system now does** is enforce, across a whole artifact, that every argument
   correctly instantiates a declared scheme, every critical question is discharged or explicitly
@@ -176,10 +172,10 @@ re-points:
   "type system for arguments" value, and it *does* survive the necessity test better than "a
   prover for `2875 < 2900`", because the payoff is consistency-and-gap-location at scale, not
   single-step depth.
-- **The live question is whether the LP fragment earns its keep at all.** It is now a small,
-  arguably optional strict core. If real research warrants are almost entirely defeasible, LP is
-  vestigial and the contribution is the scheme/policy/Dung checker with LP as a minor component.
-  This is a concrete, answerable empirical question (see §8).
+- **The live question is which optional adapters earn their keep.** Natural deduction is the small
+  reference implementation. LP, arithmetic, temporal, or code adapters ship only when corpus steps
+  use their distinct capabilities. Backend replacement proves none is foundational; corpus evidence
+  decides utility.
 - **For `rit`,** the original critique still lands unchanged: Lean is a heavyweight trusted base
   (Mathlib; `native_decide` → compiler axiom; `grind` → classical axioms) doing the most trivial
   job (`a < b`), while the components that do real work — sha256 locks, extractors, re-execution,
@@ -191,7 +187,7 @@ re-points:
 > A formal system earns its place when it enforces consistency a human cannot audit at scale and
 > emits a portable, re-checkable certificate. `lara`'s scheme/defeat checker plausibly clears
 > this bar; a heavyweight proof kernel over shallow arithmetic (`rit`'s Lean use) does not, and
-> `lara`'s own LP fragment must show it is used by real warrants or be marked clearly optional.
+> each optional `lara` adapter must show it is used by real warrants.
 
 ---
 
@@ -205,8 +201,8 @@ window as before.
 
 `lara`'s current spec is, to its credit, **already honest about this** — it states that
 acceptance is "structural validity only," that completeness is policy-relative, that realization
-does *not* justify the lowering (`§11`), and that the current `ConstantSpec` is incomplete and
-"must not be described as a complete trusted kernel" (`§5`). The critique therefore now
+does *not* justify the lowering (`§11`), and that the current LP code is a non-conforming adapter
+seed rather than the trusted core (`§5`). The critique therefore now
 differentiates the two projects:
 
 - **`rit`** still over-frames: "verify claims" reads as epistemic verification the mechanism does
@@ -244,9 +240,9 @@ differentiates the two projects:
      as its policy" — have the answer ready (schemes curated from methodology literature,
      versioned, corpus-validated), and treat policy quality as an evaluated axis, not an
      assumption.
-  2. **Does the LP fragment earn its keep?** Measure, on the corpus, what fraction of warrants
-     actually use a strict LP subderivation versus being wholly defeasible. If small, mark LP
-     clearly optional and make the argumentation/policy/Dung checker the headline.
+  2. **Which strict adapters earn their keep?** Measure certified strict steps by backend and
+     distinguish generic propositional consequence from genuinely LP-, arithmetic-, temporal-, or
+     code-specific checks. Keep adapters optional unless they reduce trust on real warrants.
   3. **Is the concrete syntax the audit surface it needs to be?** Today a `claim` carries only its
      NL string; the formal proposition appears only inside the `supports(...)` argument. Put the
      claim's formal target next to its NL (as `rit`'s `@claim` does) so the highest-risk

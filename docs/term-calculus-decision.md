@@ -1,48 +1,51 @@
 # Term-calculus decision: one warrant-term language
 
-_Status: settled for language v0.1. Recorded 2026-07-20. Supersedes the two-layer reading of
-`spec.md` (argumentation calculus + LP sub-fragment as separate systems); `spec.md` §§3–7 now
-reflect this decision._
+_Status: settled for language v0.1. Recorded 2026-07-20; amended 2026-07-21 by
+`strict-backend-decision.md`. Supersedes the two-layer reading of `spec.md` (argumentation calculus
++ LP sub-fragment as separate source systems); `spec.md` Sections 3–7 now reflect one warrant
+calculus with a backend-parametric strict-certificate interface._
 
 ## Decision
 
 1. **One syntactic category.** Every argument is a **warrant term**
    `w ::= l | r⟨w₁,…,wₙ ; {q ↦ w_q} ; {o}⟩`. Strict and defeasible are a *mode* of the policy
-   rule `r`, not separate syntax. The strict LP fragment survives as the embedded degenerate
-   case (strict rule, empty critical-question map, no holes), not as a sibling system.
-2. **Justification logic supplies the term discipline, not the axioms.** The central judgment is
-   `Σ; Π; Γ ⊢ w : F ▷ O`, read "w warrants F with open obligations O." The dependency set is
-   `leaves(w)` — the frontier of the term — derived, not tracked. LP's axiom system (A0–A4,
-   realization) is confined to strict subderivations.
+   rule `r`, not separate syntax. A strict instance is the degenerate case (empty
+   critical-question map, no holes) and carries either an explicit trust marker or an opaque
+   certificate for a registered backend.
+2. **Proof-term traditions supply the term discipline, not LARA's axioms.** The central judgment is
+   `Σ; Π; Γ; R ⊢ w : F ▷ O`, read "w warrants F with open obligations O." The leaf dependency set
+   is `leaves(w)` — the frontier of the term — derived, not tracked. Backend-certificate
+   dependencies are reported separately. LP's A0–A4 and realization, when used, belong only to an
+   optional LP adapter; they are not axioms of the source calculus.
 3. **The warrant judgment is non-factive.** No warrant-level justification operator
-   (`justified(term, prop)` is removed from v0.1); LP's factivity axiom `t:F → F` may be
-   recognized only inside strict subderivations, and the grammar keeps LP proof polynomials and
-   warrant terms in separate syntactic categories so a defeasible warrant can never appear under
-   `t : F`.
+   (`justified(term, prop)` is removed from v0.1). A strict backend receives only encoded premise
+   conclusions and returns acceptance, dependencies, and diagnostics. Its formulas and proof terms
+   cannot enter source syntax, so even a factive backend cannot eliminate a warrant into truth.
 4. **Attacks are positional.** `rebut w u` targets the root conclusion; `undercut w u@π` targets
    the rule occurrence at position `π`; `undermine w u@π` targets the leaf occurrence at `π`.
    Rebut and undermine type-check against a policy-declared contrary relation, not full classical
    negation.
-5. **Dropped from the warrant level:** LP sum (`+`), hypothesis variables, and the internalized
-   justification operator. Multiple independent supports for a claim are multiple warrant terms
-   (separate AF nodes), never one summed term.
+5. **Absent from the warrant level:** backend-specific sum, proof variables, modalities, and
+   internalized justification operators. Multiple independent supports for a claim are multiple
+   warrant terms (separate AF nodes), never one backend-combined term.
 
 ## Why (evidence)
 
 1. **Factivity is wrong for warrants.** LP A1 (`t:F → F`) says justified implies true — correct
-   for mathematical proof, exactly what LARA's honesty story denies for empirical warrants. If an
-   axiom-schema recognizer admits A1 instances and a defeasible conclusion ever enters the
-   modality, the kernel derives claim truth from warrant existence. The non-factive justification
-   logics (J/J4, logics of justified *belief*) are the right family for the warrant judgment;
-   factivity is sound only where the premises are themselves strict.
-2. **Sum destroys defeat granularity.** `s + t` merges alternative supports into one term; the
+   for mathematical proof, exactly what LARA's honesty story denies for empirical warrants.
+   Non-factive J/J4 motivates the source judgment, but LARA is not axiomatized as either: it avoids
+   the warrant-level modality entirely. Adapter opacity is the stronger firewall because it also
+   covers classical provers, model checkers, and future backends.
+2. **Backend combination can destroy defeat granularity.** LP's `s + t` is the concrete example: it
+   merges alternative supports into one term; the
    defeat semantics needs them as separate AF nodes so an undercut can kill one while the other
    survives (already required by `spec.md` §4). Multiple `arg` declarations play sum's role with
    the correct granularity.
 3. **Accountability by construction.** The former judgment component `L` and the intended
-   accountability theorem ("every leaf used is declared and reported") collapse into a structural
-   fact: the dependency set of a checked term is exactly the set of leaf constants occurring in
-   it. A theorem about a bookkeeping side-channel becomes an inversion lemma on syntax.
+   leaf-accountability theorem ("every leaf used is declared and reported") collapse into a
+   structural fact: the leaf dependency set of a checked term is exactly the set of leaf constants
+   occurring in it. Backend theory dependencies remain explicit through each certificate's
+   `uses_beta`; they do not get misclassified as leaves.
 4. **The three ASPIC+ attack types are the three kinds of positions in a term** — root
    (conclusion → rebut), internal rule occurrence (→ undercut), frontier leaf (→ undermine).
    Attack well-formedness becomes subterm-occurrence checking plus the contrary relation:
@@ -73,19 +76,19 @@ four-state aggregation), never terms-as-arguments per se.
 
 ## What this dissolves
 
-The open question "does the LP fragment earn its keep?" (comparison note §9) no longer needs a
-corpus answer to justify the design: strict rules are a mode, and the Phase A question becomes
-"which rule-library entries are strict vs. defeasible, and which critical-question sets cover the
-sampled claim shapes" — which Phase A was measuring anyway. The pitch reframes from "a language
-backed by justification logic" to: *a warrant-term calculus in the justification-logic tradition —
-terms give syntactic accountability and positional defeat; argumentation gives the non-monotonic
-semantics; the checker gives policy-relative validity.*
+The question "does LP earn its keep?" no longer determines the core calculus. Backend replacement
+proves that warrant semantics is independent of certificate internals when acceptance profiles
+match. The corpus still decides whether the optional LP adapter ships: measure how many strict steps
+need LP-specific `t:F`, `!`, `+`, or realization rather than the reference natural-deduction or a
+domain checker. The pitch is now: *a warrant-term calculus with a small strict-certificate interface
+— terms give syntactic accountability and positional defeat; argumentation gives the non-monotonic
+semantics; registered backends reduce trust in strict steps without defining warrant semantics.*
 
 ## Flip criteria
 
 - **Reintroduce an internalized justification operator** if Phase A shows meta-level claims
   ("the paper argues that…", claims about other arguments) are a material fraction of the corpus.
-- **Promote the strict LP fragment** (dedicated surface syntax, realization results in the paper
+- **Promote the optional LP adapter** (dedicated payload codec and realization results in the paper
   body) if Phase A shows strict modal-deductive chaining is common rather than rare.
 - **Revisit belief-revision-style undermining** if the typed contrary relation proves too weak to
   express the undermining attacks annotators actually find.

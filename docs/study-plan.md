@@ -10,8 +10,8 @@ annotation first, then the trusted-core modules, then evaluation. Written 2026-0
 Each item has a **depth** and an **unblocks** target. Depth is either **deep** (read closely, work
 the key definitions by hand) or **skim** (grasp the idea and one load-bearing result). Do not read
 linearly — read each tier just before you start the work it unblocks. The minimum path is starred
-(★): three readings cover the two things built first (the M0 annotation vocabulary and the fixed LP
-kernel).
+(★): three readings cover the M0 annotation vocabulary and the strict-certificate
+producer/checker discipline.
 
 Track the deep readings by writing a one-paragraph note per paper into `docs/reading-notes/` (the
 delta LARA must defend, and any corpus pattern it predicts). Those notes seed the related-work
@@ -60,21 +60,23 @@ will, and this is the "what's the delta from Pandžić?" defense. #8: you will i
 
 ---
 
-## Tier 2 — before the trusted-core modules (`Lara.Axiom`, re-sealing `Lara.Kernel`)
+## Tier 2 — before `Lara.Strict` and the reference adapter
 
 | # | Reading | Depth | Unblocks | Link |
 | --- | --- | --- | --- | --- |
-| ★9 | **Artemov 2001**, Explicit Provability — **§§5, 8, 9 only** | deep | the A0–A4 fixed axiom-schema recognizer; the realization boundary | sartemov PDF (bib `url`) |
-| 10 | **Necula 1997**, Proof-Carrying Code | skim | the producer/checker TCB discipline (Track D) | doi:10.1145/263699.263712 |
-| 11 | **Miller 2015**, Foundational Proof Certificates | skim | precedent: certificate semantics against a small kernel | lix PDF (bib `url`) |
+| ★9 | **Miller 2015**, Foundational Proof Certificates | deep | certificate semantics against a small checker; the backend contract | lix PDF (bib `url`) |
+| 10 | **Pierce 2002**, Types and Programming Languages — STLC chapters | deep | de Bruijn natural-deduction certificates and the reference soundness induction | book (bib) |
+| 11 | **Necula 1997**, Proof-Carrying Code | skim | the producer/checker TCB discipline (Track D) | doi:10.1145/263699.263712 |
+| 12 | **Artemov 2001**, Explicit Provability — **Sections 5, 8, 9 only** | conditional deep | optional LP adapter: A0–A4, constant specifications, realization boundary | sartemov PDF (bib `url`) |
 
-**Why.** #9 is the LP axiom system you encode as the fixed schema recognizer (spec §5), plus the
-Realization Theorem — read §9 closely enough to internalize that realization is theorem→realization,
-**not** an ARA-lowering guarantee (the docs' most-repeated caution). #10 is one read to internalize
-"rejection costs nothing; the checker is the TCB." #11 is optional framing support.
+**Why.** #9 defines the general certificate-to-kernel relationship rather than privileging one
+logic. #10 supplies the small reference adapter and its structural proof method. #11 internalizes
+"rejection costs nothing; the checker is the TCB." Read #12 only if corpus evidence selects LP; its
+realization theorem is theorem-to-realization, **not** an ARA-lowering guarantee.
 
-**Checkpoint:** you can state each of A0–A4 as a schema and say what makes a `(constant, formula)`
-pair a valid instance — the exact predicate replacing today's membership-only `ConstantSpec`.
+**Checkpoint:** you can state the six backend obligations, prove natural-deduction soundness by
+induction, and prove backend replacement through AF isomorphism after certificate erasure. If LP
+ships, additionally state A0–A4 and the exact admissible constant-specification predicate.
 
 ---
 
@@ -82,14 +84,14 @@ pair a valid instance — the exact predicate replacing today's membership-only 
 
 | # | Reading | Depth | Unblocks | Link |
 | --- | --- | --- | --- | --- |
-| 12 | **Zhang et al. 2026**, Beyond Compilation | deep (at eval) | Axis (b): compile-success ≠ faithfulness (89.5% vs 60.5%) | arXiv:2606.31002 |
-| 13 | **Ren et al. 2026**, EG-VAR | skim now / deep at eval | sharpest trust-boundary comparison; narrows novelty | arXiv:2607.12650 |
-| 14 | **Jiang et al. 2023**, Draft-Sketch-Prove | skim | untrusted-producer/checked-output precedent (elaborator, Phase E) | arXiv:2210.12283 |
-| 15 | **Yang et al. 2023**, LeanDojo | skim | retrieval-augmented checked proof production | arXiv:2306.15626 |
-| 16 | **First et al. 2023**, Baldur | skim | whole-proof generation + repair | people.cs.umass.edu (bib `url`) |
+| 13 | **Zhang et al. 2026**, Beyond Compilation | deep (at eval) | Axis (b): compile-success ≠ faithfulness (89.5% vs 60.5%) | arXiv:2606.31002 |
+| 14 | **Ren et al. 2026**, EG-VAR | skim now / deep at eval | sharpest trust-boundary comparison; narrows novelty | arXiv:2607.12650 |
+| 15 | **Jiang et al. 2023**, Draft-Sketch-Prove | skim | untrusted-producer/checked-output precedent (elaborator, Phase E) | arXiv:2210.12283 |
+| 16 | **Yang et al. 2023**, LeanDojo | skim | retrieval-augmented checked proof production | arXiv:2306.15626 |
+| 17 | **First et al. 2023**, Baldur | skim | whole-proof generation + repair | people.cs.umass.edu (bib `url`) |
 
-These are preprints (#12, #13) or implementation precedents (#14–16), not foundations. Read #12/#13
-before finalizing evaluation and novelty claims; read #14–16 when building the elaborator, not before.
+These are preprints (#13, #14) or implementation precedents (#15–17), not foundations. Read #13/#14
+before finalizing evaluation and novelty claims; read #15–17 when building the elaborator, not before.
 
 ---
 
@@ -110,8 +112,8 @@ implementation path.
 | Week 1 (now) | Tier 0 (#1–3) | drafting the M0 annotation guide |
 | Weeks 2–4 | Tier 1 (#4–8) | M0 annotation (`corpus-map.md` §4) |
 | M0→M1 freeze | re-read #1, #9 | writing the frozen spec / static judgments |
-| Before `Lara.Axiom` | Tier 2 (#9–11) | the fixed axiom recognizer + `Lara.Kernel` re-seal |
-| ~M5 | Tier 3 (#12–16) | evaluation design and the untrusted elaborator |
+| Before `Lara.Strict` | Tier 2 (#9–11; #12 only if LP ships) | backend registry + natural-deduction adapter |
+| ~M5 | Tier 3 | evaluation design and the untrusted elaborator |
 
-**If you read only three:** #1 (ASPIC+), #2 (Yu–Zenker), #9 (Artemov §§5/8/9). They cover the
-annotation vocabulary and the fixed LP kernel — the first two things built.
+**If you read only three:** #1 (ASPIC+), #2 (Yu–Zenker), #9 (Miller). They cover the annotation
+vocabulary, policy-relative completeness, and the backend-neutral certificate discipline.

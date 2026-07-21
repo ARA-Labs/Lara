@@ -1,7 +1,8 @@
 # LARA: deep research review and POPL plan
 
-_Research snapshot: 2026-07-20. This is an adversarial design review, not a claim that the cited
-preprints have passed peer review._
+_Research snapshot: 2026-07-20; strict-fragment recommendation amended 2026-07-21 by
+`../docs/strict-backend-decision.md`. This is an adversarial design review, not a claim that the
+cited preprints have passed peer review._
 
 ## 1. Executive verdict
 
@@ -19,8 +20,9 @@ The strongest POPL version of LARA is:
 > structured argumentation framework and a replayable claim status. The guarantee is certificate
 > validity, dependency accountability, and policy-relative coverage, not empirical truth.
 
-LP remains useful as the strict proof-term fragment. It should not be the semantic center unless a
-corpus study shows that research warrants are predominantly modal-deductive structures.
+A backend-parametric strict-certificate interface replaces a built-in LP fragment. The required
+reference adapter is natural deduction; LP should ship only if corpus evidence shows that
+LP-specific modal-deductive structure occurs in real warrants.
 
 POPL 2027's submission deadline was 2026-07-09, so as of this review the realistic main-conference
 target is POPL 2028. The current POPL call asks for principled, enduring PL contributions and, since
@@ -38,8 +40,9 @@ contribution. Plan the project around a mechanized language result, not only a c
 
 2. **The current checker trusts arbitrary logical constants.** `ConstantSpec` is input data and
    `DConst` checks only membership. It does not recognize A0–A4 instances. A caller can register
-   `c : P` and obtain a checked `P`. Either implement fixed axiom-schema recognition or include the
-   constant-spec producer in the TCB. The proposal's current "baked into the kernel" claim is false.
+   `c : P` and obtain a checked `P`. It is therefore only an LP adapter seed. If that adapter ships,
+   implement fixed schema recognition; otherwise it is not part of LARA's trusted run. The earlier
+   "baked into the kernel" claim is false.
 
 3. **Empirical support is not deductive implication.** `supported(E,C)` does not entail `C` by LP.
    A bridge from evidence to claim is a non-logical, usually defeasible warrant rule. It must be
@@ -136,17 +139,18 @@ make the support defeated or contested according to the graph. The checker never
 The spec should define at least:
 
 ```text
-Σ; Π; Γ ⊢ a : supports(p) ▷ L, O
-Σ; Π; Γ ⊢ k : attacks(a, target)
+Σ; Π; Γ; R ⊢ a : supports(p) ▷ O
+Σ; Π; Γ; R ⊢ k : attacks(a, target)
 Σ; Π ⊢ W wf
 compile(W) = AF
 AF ⊢ a ⇓ in | out | undec
 W ⊢ p ⇓ justified | defeated | contested | gap
 ```
 
-`Σ` is the fixed logical signature, `Π` the versioned warrant policy, `Γ` admitted leaves, `L` the
-exact dependency set, and `O` unresolved obligations. Make dependency sets explicit in the judgment;
-they are central to the accountability theorem.
+`Σ` is the fixed proposition signature, `Π` the versioned warrant policy, `Γ` admitted leaves, `R`
+the fixed strict-backend registry, and `O` unresolved obligations. Leaf dependencies are
+`leaves(a)` by structural exactness; strict-certificate dependencies come from registered adapters'
+`uses` functions.
 
 ### 3.4 Status aggregation
 
@@ -170,11 +174,11 @@ The paper should target these results:
 
 1. **Decidable checking.** Well-formedness, rule instantiation, obligation discharge, and attack
    typing terminate and are decidable for a finite policy/program.
-2. **Axiom safety.** Every accepted strict constant is an instance of a fixed logical schema; no
-   artifact or producer can extend `Σ` silently.
-3. **Dependency accountability.** If an argument checks with dependency set `L`, every leaf used by
-   its derivation is in `L`, and each member of `L` has a declared artifact reference/provenance.
-   Strengthen to exactness if weakening is controlled.
+2. **Backend isolation and soundness.** No artifact extends `R`; every accepted certified strict
+   instance is a consequence of its encoded premises and digest-addressed theory under the selected
+   backend semantics.
+3. **Dependency accountability.** `leaves(a)` is exactly the declared leaf frontier, and every free
+   premise/theory dependency used by a strict certificate is reported by its adapter.
 4. **Compilation soundness.** Every node and attack in `compile(W)` comes from a checked source
    construct with matching target and source provenance.
 5. **Status determinism and termination.** Finite grounded evaluation yields one labelling and one
@@ -184,10 +188,12 @@ The paper should target these results:
    span and rule/target, not merely a global failure.
 8. **Codec adequacy.** Presentation syntax and JSON decode to alpha-equivalent ASTs; canonical print
    round-trips. This is engineering, but it matters for replayability.
-9. **Optional LP conservativity.** The strict fragment agrees with standard LP under an admissible
-   constant specification. Realization belongs here, not in the ARA-lowering theorem.
+9. **Backend replacement.** Source-identical programs whose adapters accept the same strict
+   instances compile to AFs isomorphic under certificate erasure and yield equal claim statuses.
+10. **Reference-adapter soundness.** The natural-deduction adapter is sound and has exact free-index
+    dependencies. Optional LP conservativity and realization are adapter-specific results.
 
-Mechanize items 1–6. A small Rocq, Lean, or Isabelle development is more persuasive than relying on
+Mechanize items 1–6 and 9–10. A small Rocq, Lean, or Isabelle development is more persuasive than relying on
 the Haskell implementation as its own model. The 2027 POPL call explicitly asks authors to expose
 mechanized proof scripts and non-standard axioms when proofs are a main contribution.
 
@@ -198,30 +204,34 @@ mechanized proof scripts and non-standard axioms when proofs are a main contribu
 - Sample 50–100 claims across the 30-paper corpus, stratified by descriptive, comparative, causal,
   generalization, negative-result, and implementation/behavioral claims.
 - For each, annotate propositions, evidence granularity, warrant scheme, premises, critical
-  questions, rebut/undercut/undermine candidates, and unresolved holes.
+  questions, rebut/undercut/undermine candidates, unresolved holes, and the smallest plausible
+  certifier/theory for each proposed strict step.
 - Double-annotate at least 20–30% and adjudicate disagreements.
 - Exit: a finite set of constructs covers at least 80% of sampled argument shapes without encoding
   whole reasoning steps as opaque leaves.
 
 ### Phase B: language v0.1 (4–6 weeks)
 
-- Freeze abstract and presentation syntax, name resolution, policy modules, leaf admission, strict
-  and defeasible rules, obligations, typed attacks, and claim aggregation.
+- Freeze abstract and presentation syntax, name resolution, policy modules, the strict-backend
+  interface, leaf admission, strict and defeasible rules, obligations, typed attacks, and claim
+  aggregation.
 - Write three complete examples and three intentionally rejected examples.
 - Specify the JSON codec separately from the language.
 - Exit: independent readers can derive the expected diagnostics and status from the spec.
 
 ### Phase C: mechanized metatheory (6–10 weeks, overlaps B)
 
-- Formalize syntax, checking, source semantics, AF compilation, and grounded labelling.
-- Prove the results in Section 4; record all axioms.
+- Formalize syntax, backend contract, reference natural-deduction adapter, checking, source
+  semantics, AF compilation, and grounded labelling.
+- Prove the results in Section 4; record all proof-assistant axioms and backend assumptions.
 - Keep the proof development as an anonymizable artifact from day one.
 - Exit: no `admit`/`sorry` in main theorems; a replay command checks the development.
 
 ### Phase D: compiler/checker (5–7 weeks)
 
-- Implement parser, resolver, fixed axiom-schema recognizer, policy checker, dependency extraction,
-  compiler, status engine, canonical printer, JSON codec, and structured diagnostics.
+- Implement parser, resolver, backend registry, natural-deduction adapter, policy checker, dependency
+  extraction, compiler, status engine, canonical printer, JSON codec, and structured diagnostics.
+  Implement fixed LP schema recognition only if the optional LP adapter ships.
 - Differential-test status against the mechanized executable semantics or a separately implemented
   reference.
 - Add mutation generators for wrong formulas, undeclared leaves, hidden policy extension, bad attack
@@ -230,10 +240,11 @@ mechanized proof scripts and non-standard axioms when proofs are a main contribu
 
 ### Phase E: untrusted ARA elaborator (4–6 weeks)
 
-- Split proposition formalization, leaf extraction, rule selection, obligation filling, and attack
-  extraction into logged stages.
+- Split proposition formalization, leaf extraction, rule selection, obligation filling,
+  strict-backend/theory selection, and attack extraction into logged stages.
 - Retain rejected candidates and checker feedback; cap repair loops and support explicit abstention.
-- Do not allow the model to define policy rules or logical schemas at runtime.
+- Do not allow the model to define policy rules, backend registrations, encodings, or theories at
+  runtime.
 - Exit: one full artifact compiles without hand-editing; every accepted construct has a source span.
 
 ### Phase F: evaluation (6–8 weeks)
@@ -276,7 +287,7 @@ accept/reject score is not ground truth for LARA's four states.
 
 ### Metrics
 
-- Proposition, leaf, rule, obligation, and attack precision/recall/F1.
+- Proposition, leaf, rule, obligation, strict-backend/theory, and attack precision/recall/F1.
 - Certificate acceptance and semantic-faithfulness rates, jointly and separately.
 - Correct abstention, false acceptance, and false gap rates.
 - Status macro-F1 and per-state confusion matrix on adjudicated gold.
