@@ -22,6 +22,8 @@ import Lara.Kernel
   )
 import Lara.Term (Con (..), Term (..), Var (..))
 
+import PropSpec (propSpecProps)
+
 -- ---------------------------------------------------------------------------
 -- Generators
 -- ---------------------------------------------------------------------------
@@ -158,7 +160,7 @@ prop_appMismatchRejected =
 main :: IO ()
 main = do
   results <-
-    sequence
+    sequence $
       [ run "valid derivations check" (quickCheckResult prop_validChecks)
       , run "sum monotonicity" (quickCheckResult prop_sumMonotone)
       , run "check introspection" (quickCheckResult prop_checkIntrospection)
@@ -166,6 +168,7 @@ main = do
       , run "apply non-implication rejected" (quickCheckResult prop_appNonImplicationRejected)
       , run "apply mismatch rejected" (quickCheckResult prop_appMismatchRejected)
       ]
+        ++ [run name act | (name, act) <- propSpecProps]
   unless (and results) exitFailure
   where
     run name act = do
