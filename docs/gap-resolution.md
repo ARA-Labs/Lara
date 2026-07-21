@@ -50,7 +50,8 @@ claim c
 ```
 
 - **`w supports c`  iff  `concl(w) ≡ c.formal`**, where `≡` is structural identity up to a fixed,
-  total normalization (canonical ordering / alpha-renaming of ground terms). No entailment, no
+  total normalization (the `nf`/`≡` normal form fixed in `spec.md` §3.2: literal canonicalization
+  plus structural recursion over ground atoms — no argument reordering, no binders). No entailment, no
   solver, nothing added to the TCB. This is AIF/Lean positional identity.
 - **`c.binding` is not a checker obligation.** The NL↔formal link is the single most load-bearing
   unchecked step (already `spec.md` §11); it is a first-class, versioned, human-signed audit field,
@@ -69,7 +70,7 @@ an entailment procedure in the TCB. Add it later as sugar: an explicit `entails`
 ### The Pandžić finding (it overturns an assumption)
 
 Pandžić's default justification logic is the closest term-based defeasible system, but it is **not
-non-factive**. He keeps factivity (axiom A3, `t:F → F`) globally — the whole logic is JT, the
+non-factive**. He keeps factivity (axiom A1, `t:F → F`) globally — the whole logic is JT, the
 explicit analogue of modal T — and confines *defeasibility* by two other devices: the inference
 license ("warrant") is kept *out of the evidence base* so it can be attacked without inconsistency,
 and retraction happens at the *extension* layer. His `t:F` is therefore
@@ -77,10 +78,10 @@ and retraction happens at the *extension* layer. His `t:F` is therefore
 non-factive warrant judgment, so it must depart from him on exactly this axis.
 
 The standard justification-logic knob he declined to use is the fix: the **JT-vs-J4 split**.
-Factivity is exactly one axiom (A3), present in JT/LP and absent in J/J4 (the belief logics, explicit
-counterparts of modal K/K4). Confine A3 to a *strict sort*; the *defeasible sort* omits it and is
+Factivity is exactly one axiom (A1), present in JT/LP and absent in J/J4 (the belief logics, explicit
+counterparts of modal K/K4). Confine A1 to a *strict sort*; the *defeasible sort* omits it and is
 non-factive by construction. Confinement is enforced through the **constant specification**: only
-strict constants may justify A3 instances.
+strict constants may justify A1 instances.
 
 ### How this maps onto LARA (the two categories already are the firewall)
 
@@ -91,8 +92,8 @@ recommended JT/J4 firewall, realized structurally rather than by a shared sort d
 - **Defeasible sort = the warrant-term calculus.** Already non-factive: a term concludes an atom,
   and `justified` status ≠ truth. There is no `t:F → F` construct at this level to remove.
 - **Strict sort = the embedded LP fragment.** Factive and sound (JT). Its `ConstantSpec` may contain
-  A3 instances; the fixed axiom-schema recognizer (the planned `ConstantSpec` fix) is the exact lever
-  that admits A3 for strict constants and nothing else.
+  A1 instances; the fixed axiom-schema recognizer (the planned `ConstantSpec` fix) is the exact lever
+  that admits A1 for strict constants and nothing else.
 - **One-directional coercion strict → defeasible.** A checked strict witness lifts to a warrant;
   a warrant never becomes a free LP truth. This is the only bridge, and it goes one way.
 
@@ -107,7 +108,7 @@ Sigma_LP ; { x₁ : P₁theta, …, xₙ : Pₙtheta }  ⊢  d ⇒ t : Ctheta
 
 — a **conditional deductive skeleton**: given justifications for the premises (LP hypotheses `xᵢ`,
 one per premise term `wᵢ`), `d` builds a justification for the conclusion. The witness may use
-logical-axiom constants (A0–A4, including A3) freely, because it proves a *logical entailment* among
+logical-axiom constants (A0–A4, including A1) freely, because it proves a *logical entailment* among
 propositions, which is legitimately factive. No bare `F` ever escapes: the interface consumes premise
 warrants as hypotheses and emits `t : Ctheta`, which the strict rule reads as "`Ctheta` is warranted
 given its premises." Warrant-layer defeat still propagates through sub-argument closure regardless of

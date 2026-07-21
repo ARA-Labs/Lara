@@ -321,7 +321,7 @@ Sigma_LP ; { x1 : P1 theta, ..., xn : Pn theta }  |-  d ⇒ t : C theta
 
 Each premise term `w_i` enters the witness as a hypothesis `x_i : P_i theta`; the derivation `d`
 builds a justification `t : C theta` for the conclusion. The witness may use logical-axiom constants
-(A0–A4, including factivity A3) freely, because it proves a *logical entailment among propositions*,
+(A0–A4, including factivity A1) freely, because it proves a *logical entailment among propositions*,
 which is legitimately factive. Factivity never reaches the warrant level: the interface consumes
 premise warrants only as hypotheses and emits `t : C theta`, which the strict rule reads as "`C
 theta` is warranted given its premises." No bare `F` escapes the LP fragment, and warrant-level
@@ -482,7 +482,7 @@ with negation living in the contrary relation rather than the proposition langua
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`.
 8. Strict-witness soundness: a witnessed strict instance's conclusion is an LP consequence of its
-   premise hypotheses, and factivity (A3) is derivable only for strict constants.
+   premise hypotheses, and factivity (A1) is derivable only for strict constants.
 9. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
    with `c.formal`.
 10. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
