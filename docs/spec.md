@@ -427,6 +427,26 @@ closed under subarguments in the ASPIC+ manner: an attack on `u@π` compiles to 
 argument in `Args` that contains the attacked occurrence, so defeating a subterm defeats each
 complete term built on it. The grounded labelling maps each argument to `in`, `out`, or `undec`.
 
+Two different monotonicity claims must not be conflated. For a fixed framework
+`AF = (Args, Attack)`, Dung's characteristic function
+
+```text
+D_AF(S) = { a in Args | every attacker of a is attacked by some member of S }
+```
+
+is monotone on the subset lattice: `S subseteq T` implies `D_AF(S) subseteq D_AF(T)`. Its least
+fixed point is therefore obtained by iteration from the empty set. Because `Args` is finite, the
+ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is
+deterministic and terminating; attack cycles produce `undec` labels rather than nontermination.
+
+LARA is **non-monotonic at the consequence level**, across extensions of the input framework. An
+argument may be `in` in one framework and cease to be `in` after a newly supplied, checked argument
+attacks it. Thus adding evidence or attacks can retract a claim's `justified` status even though the
+original warrant term remains well typed. This defeasibility is intentional for empirical reasoning,
+not a failure of the fixed-point construction. In abstract-interpretation terms, the internal
+transfer operator is monotone over a finite-height lattice; it is the external map from an extensible
+argument framework to accepted claims that is non-monotonic.
+
 For a claim `p`, let `support(P, p)` be its complete checked support arguments and `holes(P, p)` its
 unresolved root obligations. Claim status uses this priority:
 

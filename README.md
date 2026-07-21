@@ -1,6 +1,7 @@
 # lara
 
-A language to verify research claims with formal justification logic and neighborhood semantics.
+A language to verify research claims with formal justification logic and grounded argumentation
+semantics.
 
 `lara` lowers a research artifact into a checkable **warrant graph**: for each
 claim it computes whether the argument from declared evidence to the claim is

@@ -150,6 +150,14 @@ support, not a proof of underivability. Grounded is the least fixpoint of Dung's
 characteristic function — the same Knaster–Tarski machinery as abstract interpretation and the
 μ-calculus, hence polynomial and native to implement.
 
+There is no conflict between fixed-point evaluation and non-monotonic reasoning. For a fixed finite
+argumentation framework, Dung's characteristic function is monotone on the subset lattice of
+arguments, so iteration from the empty set terminates at the unique grounded least fixed point.
+"Non-monotonic" describes the consequence relation across framework extensions: adding a checked
+attacker can remove a previously accepted argument. The argument remains well typed; only its global
+acceptance status changes. This distinction is deliberate and load-bearing: empirical counterevidence
+must be able to retract a warrant without making the status engine non-deterministic or non-terminating.
+
 **Step 5 — The trust architecture confines what the model can mint.** The producer/checker
 split is Proof-Carrying Code, one generation earlier: an untrusted producer ships an object plus a
 checkable certificate, and a small trusted checker validates it before anything is accepted. Our
