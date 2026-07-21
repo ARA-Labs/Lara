@@ -192,10 +192,25 @@ tree:
                   first-order core AST as the differential anchor; backend is a structure carrying its
                   soundness obligation as a field; grounded lfp via bounded Finset iteration.
                 alternatives:
-                  - "Rocq/Coq"
+                  - "Rocq/Coq (renamed from Coq in 2024-2025)"
                   - "Isabelle"
                   - "Haskell implementation as its own model (rejected: property tests are not soundness)"
                 evidence: "Mathlib fixpoint machinery; Decidable typeclass makes results executable for the anchor. Grounds C07, C12."
+                children:
+
+                  - id: N20
+                    type: experiment
+                    support_level: explicit
+                    source_refs: ["lean/Lara/Prop.lean", "lean/lakefile.toml", "lean/README.md"]
+                    title: "Set up Lean 4 (v4.32.0) and mechanize the frozen nf/≡ carve-out (result 11) — the warm-up"
+                    result: >
+                      elan/Lean 4.32.0 installed; Lake project in lean/. Lara/Prop.lean ports the
+                      frozen nf/≡ (Atom/Term/Terms AST, canon as an abstract idempotent parameter) and
+                      machine-checks the equivalence laws, decidability, idempotence, and
+                      no-argument-reordering. No sorry/admit; every main theorem depends on at most
+                      propext. Lean-vs-Rocq (open question §8 #8) is thereby SETTLED to Lean 4. Result
+                      11 moves from implemented+tested to mechanized. Grounds C01.
+                    evidence: [C01]
 
               - id: N16
                 type: dead_end

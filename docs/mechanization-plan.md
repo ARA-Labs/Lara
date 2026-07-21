@@ -51,7 +51,7 @@ it; "test-only" = conformance evidence, no theorem.
 | 8 | Strict-certificate soundness (excludes `trusted-policy`) | **must** | A field/obligation of the `Backend` structure; proved once, per adapter. |
 | 9 | Backend replacement | **should** | Parametricity over the `Backend` structure + graph isomorphism under `eraseCert`. High reviewer value; the "backend internals are not part of claim-status semantics" result. |
 | 10 | Reference natural-deduction adapter soundness + exact dependencies | **must** | The one shipped adapter; induction on the typing derivation (`spec.md` §5.1). |
-| 11 | Support adequacy (`w supports c` = normalized identity) | **done** | `nf`/`≡` frozen (`spec.md` §3.2); already property-tested in Haskell. Port the definition + laws to the prover. |
+| 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** | `nf`/`≡` frozen (`spec.md` §3.2); property-tested in Haskell AND machine-checked in Lean 4 (`../lean/Lara/Prop.lean`: equivalence laws, decidability, idempotence, no-reorder; no `sorry`, axioms `propext` only). The completed warm-up. |
 | 12 | Codec round-trip to α-equivalent AST | **test-only** | QuickCheck in Haskell; mechanize only if cheap. Not a soundness result. |
 
 Optional LP-adapter conservativity/realization (`spec.md` §5.2) is adapter-specific and mechanized
@@ -211,7 +211,11 @@ obligation for **`contested` SCC provenance** (`popl-research-review.md` §6).
 - **Gate.** Mechanization starts at **M1 freeze**, runs parallel to the Haskell compiler (M3)
   (`engineering-plan.md` §6, `research-proposal.md` §8 #8 decides Lean/Rocq before M1). The two
   carve-outs (`nf`/`≡`, the ND adapter) can be *ported* to the prover early since they are already
-  frozen — a low-risk warm-up that also seeds result 10/11.
+  frozen — a low-risk warm-up that also seeds result 10/11. **Done for `nf`/`≡` (result 11):** the
+  Lean 4 development lives in `../lean/` (Lake project, toolchain pinned to v4.32.0);
+  `lean/Lara/Prop.lean` machine-checks the equivalence laws, decidability, idempotence, and
+  no-argument-reordering with no `sorry` and `propext` as the only axiom. **Lean 4 is the settled
+  prover choice** (open question §8 #8 resolved). The ND adapter (result 10) is the next warm-up target.
 - **Anonymizable from day one** (`popl-research-review.md` Phase C). No author-identifying paths,
   comments, or repo metadata in the proof development.
 - **No `sorry`/`admit` in main theorems** at M2 exit; a single replay command must check the whole

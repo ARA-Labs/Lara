@@ -22,13 +22,13 @@
 | 8 | Strict-certificate soundness | paper-proved | C03 | Theorem 1; excludes trusted-policy instances |
 | 9 | Backend replacement | paper-proved | C04 | Theorem 2 (AF isomorphism + grounded-lfp invariance) |
 | 10 | Reference ND adapter soundness + dependency exactness | paper-proved | C05 | Theorem 4 + Lemma 5, by induction |
-| 11 | Support adequacy (`w supports c` = normalized identity) | implemented+tested | C01 | `Lara.Prop` `nf`/`≡`; 8 QuickCheck properties pass |
+| 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** (+implemented+tested) | C01 | `lean/Lara/Prop.lean`: `nf`/`≡`, equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only. Also `Lara.Prop` Haskell + 8 QuickCheck properties. |
 | 12 | Codec round-trip to α-equivalent AST | spec-only | C12 | test-only (not a soundness result); codec not built |
 
-**Summary**: 1 implemented+tested (result 11); 4 paper-proved (2, 8, 9, 10); 6 spec-only (1, 3, 4, 5,
-7, 12); 1 open (6). Zero mechanized so far — mechanization starts at M1 freeze
-(docs/mechanization-plan.md §6). Core results 1–9 + reference-adapter 10 must be mechanized for the
-paper (spec §9 closing note).
+**Summary**: 1 **mechanized** (result 11, in Lean 4); 4 paper-proved (2, 8, 9, 10); 6 spec-only (1, 3,
+4, 5, 7, 12); 1 open (6). Result 11 is the mechanization warm-up (corpus-independent, frozen); the rest
+of the mechanization starts at M1 freeze (docs/mechanization-plan.md §6). Core results 1–9 +
+reference-adapter 10 must be mechanized for the paper (spec §9 closing note).
 
 ## Methodology grounding (C10, C11, C12 — from the deep-research pass, E02)
 

@@ -76,6 +76,7 @@ experimental, non-conforming adapter seed.
 | [artifacts.md](src/artifacts.md) | Pointer index to the repo codebase (Lara.Prop, the LP adapter seed, tests, spec, plans) | C01, C05 |
 | [execution/Prop.hs](src/execution/Prop.hs) | Transcribed: the implemented `nf`/`≡` normalizer (carve-out layer 1) | C01 |
 | [execution/Kernel.hs](src/execution/Kernel.hs) | Transcribed: the LP proof-term checker (non-conforming adapter seed) | C03 |
+| `../lean/Lara/Prop.lean` | Lean 4 mechanization of `nf`/`≡` (spec §9 result 11): equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only | C01 |
 
 ### Exploration Graph (`/trace`)
 | File | Description |
