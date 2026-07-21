@@ -323,6 +323,11 @@ Do not claim that LARA establishes scientific truth, exhaustive completeness, or
 8. **Yu and Zenker 2020, schemes and critical questions.** Supports policy-relative completeness:
    complete evaluation of a scheme instance requires addressing its relevant critical questions.
    <https://doi.org/10.1007/s10503-020-09512-4>
+9. **Pandžić 2022, defeasible argumentation in justification logic (two papers).** The closest
+   prior art: defeasible arguments as object-level justification terms, with rebutting,
+   undercutting, and undermining attacks. Validates the terms-as-arguments design and bounds the
+   novelty claim — see `../docs/term-calculus-decision.md` for the delta LARA must defend.
+   <https://doi.org/10.3233/AAC-200536>, <https://doi.org/10.1007/s10472-021-09765-z>
 
 ### Should cite
 

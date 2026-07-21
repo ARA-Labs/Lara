@@ -2,7 +2,9 @@
 
 _This is the living specification of the language and trusted checking boundary. The code in
 `src/Lara/` implements only the strict LP seed described in Section 5. The full language is not yet
-implemented or frozen._
+implemented or frozen. Sections 3–7 reflect the unified warrant-term calculus recorded in
+`term-calculus-decision.md`: every argument is a term, strict/defeasible is a rule mode, and
+attacks are positional._
 
 ## 1. Scope and guarantee
 
@@ -36,7 +38,7 @@ a tactic DSL, IDE, package manager, or standard library for the initial contribu
 p, q       proposition and claim identifiers
 l          leaf identifiers
 r          warrant-rule identifiers
-a, b       argument identifiers
+a, w, u    warrant-term (argument) identifiers
 o          obligation identifiers
 src        artifact source references
 policy     versioned warrant-policy identifiers
@@ -59,7 +61,7 @@ Phase 0 permits opaque, stable proposition identifiers whose display text is ret
 Domain-specific typed propositions may be added after the corpus study.
 
 ```text
-prop ::= atom(p) | false | prop -> prop | justified(term, prop)
+prop ::= atom(p) | false | prop -> prop
 
 leaf-kind ::= observed | attested | assumed | certified
 provenance ::= user | ai-executed | checker(name, version)
@@ -70,6 +72,11 @@ leaf l : prop
   refs       = [src*]
   metadata   = {...}
 ```
+
+There is no warrant-level justification operator in v0.1: `justified(term, prop)` is removed, and
+`t : F` formulas occur only inside strict LP subderivations (Section 5). The warrant judgment is
+non-factive by construction. Reintroduce an internalized operator only if the corpus study shows
+meta-level claims (claims about other arguments) matter.
 
 Confidence values and thresholds are metadata unless the selected policy gives them formal
 admission semantics. Provenance can admit, quarantine, or reject a leaf before argument evaluation;
@@ -86,10 +93,16 @@ rule r(params)
   premises   = [pattern*]
   conclusion = pattern
   requires   = [question*]
+
+contrary p q            -- policy-declared conflict between propositions
+exception r : pattern   -- policy-declared undercutting condition for rule r
 ```
 
 Policies are versioned trusted inputs. Artifact programs may instantiate but may not define or
-modify rules at runtime.
+modify rules at runtime. The contrary relation is the only source of propositional conflict:
+rebut and undermine typing (Section 7) check against it, and full classical negation is not
+assumed. Strict versus defeasible is a property of the rule looked up in `Pi`, not separate
+program syntax.
 
 ```text
 arg a : prop by r(a1, ..., an)
@@ -97,11 +110,22 @@ arg a : prop by r(a1, ..., an)
   open question as o
 ```
 
+An `arg` declaration names a warrant term (Section 6). Multiple independent supports for the same
+claim are separate `arg` declarations — never merged into one term — so that defeat can eliminate
+one while the other survives.
+
 An open mandatory obligation excludes that incomplete argument from the compiled argumentation
 framework and contributes a located `gap` explanation. Other complete support arguments for the same
 claim remain eligible.
 
 ## 5. Strict LP fragment
+
+The strict fragment is the embedded degenerate case of the warrant-term calculus: a strict-mode
+rule instance with an empty critical-question map and no holes may carry an explicit LP
+subderivation as its witness. LP proof polynomials and warrant terms are distinct syntactic
+categories; a defeasible warrant term can never appear inside an LP term or under `t : F`, so
+factivity (axiom A1, `t:F -> F`) is only ever applied to conclusions of strict reasoning. LP sum
+(`+`) and hypothesis variables exist only inside LP subderivations; the warrant level has neither.
 
 The existing prototype implements LP proof polynomials:
 
@@ -143,45 +167,63 @@ as a complete trusted kernel.
 LP is used only for genuinely strict subderivations. A statement such as `supports(E, C) -> C` is not
 a logical axiom; it must be a named defeasible warrant rule in `Pi`.
 
-## 6. Arguments and dependencies
+## 6. Warrant terms and dependencies
 
-Abstract argument syntax:
-
-```text
-a ::= from-leaf l
-    | strict r [a*]
-    | defeasible r [a*] discharges [q := a]* opens [o*]
-```
-
-The main source judgment records dependencies and obligations:
+Abstract warrant-term syntax (one category; mode comes from the rule's declaration in `Pi`):
 
 ```text
-Sigma; Pi; Gamma |- a : supports(p) ▷ L, O
+w ::= leaf l
+    | r⟨w1, ..., wn ; {q ↦ w_q} ; {o*}⟩
 ```
 
-`L` is the set of leaves on which `a` depends. `O` is the set of unresolved mandatory obligations.
-A complete graph node requires `O = empty`. The intended accountability theorem states that every
-leaf used by an accepted derivation is declared in and reported by `L`.
+A rule instance carries its premise terms, a discharge map from critical questions to discharging
+warrant terms, and its explicitly open obligations. For a strict-mode `r` the discharge map and
+hole set are empty, and the instance may carry an LP subderivation (Section 5) as its witness.
 
-## 7. Typed attacks
+The main source judgment records open obligations only:
 
 ```text
-k ::= rebut a b
-    | undercut a b.rule
-    | undermine a l
+Sigma; Pi; Gamma |- w : supports(p) ▷ O
 ```
 
-- `rebut a b` requires contrary conclusions.
-- `undercut a b.rule` requires `a` to conclude a policy-declared exception or failed applicability
-  condition for the exact rule instance used by `b`.
-- `undermine a l` requires `a` to challenge the proposition or admissibility of leaf `l` under a
-  policy-declared contrary relation.
+The dependency set is not a judgment component: it is `leaves(w)`, the set of leaf constants
+occurring in `w`, each of which must be declared in `Gamma`. The former accountability theorem
+("every leaf used by an accepted derivation is declared and reported") is thereby an inversion
+lemma on term structure: the reported dependency set is exactly `leaves(w)`.
+
+`O` is the set of unresolved mandatory obligations, collected across the term (an open hole in a
+subterm propagates). A complete graph node requires `O = empty`.
+
+## 7. Typed positional attacks
+
+Attacks address positions in warrant terms. A position `π` is a premise-index path
+(`π ::= ε | π.i`); `w@π` denotes the subterm occurrence at `π`.
+
+```text
+k ::= rebut w u          -- targets the root conclusion of u
+    | undercut w u@π     -- targets the rule occurrence at position π in u
+    | undermine w u@π    -- targets the leaf occurrence at position π in u
+```
+
+The three attack kinds are exactly the three kinds of positions in a term: the root (its
+conclusion), an internal rule occurrence, and a frontier leaf.
+
+- `rebut w u` requires `contrary(concl(w), concl(u))` to be declared in `Pi`.
+- `undercut w u@π` requires `u@π` to be a rule instance of some `r` and `w` to conclude a
+  policy-declared `exception r` (or failed applicability condition) for that exact instance.
+- `undermine w u@π` requires `u@π` to be a leaf `l` and `w` to conclude a `Pi`-declared contrary
+  of `l`'s proposition or admissibility.
 
 The attack judgment is:
 
 ```text
-Sigma; Pi; Gamma |- k : attacks(a, target)
+Sigma; Pi; Gamma |- k : attacks(w, u@π)
 ```
+
+Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and
+local, and the position doubles as the source location in diagnostics. The presentation syntax
+writes root positions with the previous sugar (`undercut d1 a1.rule` means `a1@ε`) and inner
+positions with paths (`undermine d2 a1/2.leaf`).
 
 An ARA dead end creates an attack only if it can construct one of these typed forms. A dead-end tag,
 confidence score, or provenance downgrade alone is insufficient.
@@ -194,8 +236,10 @@ A well-formed source program compiles to a finite Dung framework:
 compile(P) = AF = (Args, Attack)
 ```
 
-`Args` contains complete checked arguments. `Attack` contains exactly compiled typed attacks. The
-grounded labelling maps each argument to `in`, `out`, or `undec`.
+`Args` contains complete checked warrant terms. `Attack` contains exactly compiled typed attacks,
+closed under subarguments in the ASPIC+ manner: an attack on `u@π` compiles to an edge onto every
+argument in `Args` that contains the attacked occurrence, so defeating a subterm defeats each
+complete term built on it. The grounded labelling maps each argument to `in`, `out`, or `undec`.
 
 For a claim `p`, let `support(P, p)` be its complete checked support arguments and `holes(P, p)` its
 unresolved root obligations. Claim status uses this priority:
@@ -213,10 +257,13 @@ should not hide holes.
 
 ## 9. Static and semantic results required before freeze
 
-1. Decidability of program and attack checking.
-2. Axiom safety for the strict fragment.
-3. Leaf-dependency accountability.
-4. Compilation soundness: no untyped node or attack appears in the target AF.
+1. Decidability of program and attack checking (including positional attack checking).
+2. Axiom safety for the strict fragment, including the mode boundary: no defeasible warrant term
+   occurs inside an LP term or under `t : F`.
+3. Leaf-dependency accountability, as a structural exactness lemma: the reported dependency set
+   of a checked term `w` equals `leaves(w)`, and every member is declared in `Gamma`.
+4. Compilation soundness: no untyped node or attack appears in the target AF, and subargument
+   closure introduces edges only onto arguments containing the attacked occurrence.
 5. Termination and determinism of grounded evaluation and claim aggregation.
 6. Status preservation between a direct source semantics and compiled AF semantics.
 7. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
