@@ -1,0 +1,274 @@
+# `rit` vs `lara` — what each verifies, and what it does not
+
+_Status: analysis note. First written 2026-07-20; revised against the POPL-track
+`docs/spec.md` (commit `7d9278d`), which restructured `lara` since the first draft — LP is now
+a strict sub-fragment, and the evidence→claim warrant lives in a versioned policy of defeasible
+schemes. Compares the two sibling projects under `ara/`: `rit` (a verification core built on the
+Lean kernel) and `lara` (this project, a warrant-checking language built on a Logic-of-Proofs
+strict core plus an argumentation layer). Goal: state precisely what each checks, where they
+agree, where they differ, and where the framing promises more than the mechanism delivers._
+
+---
+
+## 1. One-line theses
+
+- **`rit`** — an *untrusted* agent runs experiments and proposes claims; a *trusted*
+  verification core turns each claim into a machine-recheckable proof-or-evidence.
+  "Trust comes from the verification layer, not the agent." Kernel = **Lean 4** +
+  deterministic extractors + sha256 integrity locks.
+- **`lara`** — a small language of proof-carrying, **policy-relative** research warrants. A
+  program declares propositions, evidence leaves, instances of strict or defeasible warrant
+  rules, their obligations, typed attacks, and claim roots. The checker compiles this to a Dung
+  framework and reports, per claim, one of `justified / gap / defeated / contested`. Kernel = a
+  tiny **Logic-of-Proofs** checker for *strict* sub-steps, wrapped in an argumentation layer;
+  the empirical evidence→claim step is a **defeasible scheme in a versioned policy `Pi`**, not a
+  proof term.
+
+Both are the *same architecture* — untrusted proposer, tiny trusted checker — applied to
+research artifacts. They differ in the kernel logic and, more importantly, in **where each
+draws the line between what the checker guarantees and what it merely assumes.**
+
+---
+
+## 2. What the pipeline actually does (jargon removed)
+
+Take a concrete claim: *"v3 hit the target in 2875 steps, beating the 2900 baseline."*
+
+- **`rit`:** split the claim into a **fact** ("2875 steps") and a **relation** ("2875 < 2900").
+  Lean proves the relation; the fact is *pinned* — hash the log, re-run an extractor to confirm
+  the number came from those bytes. Roll up AND/OR over a claim DAG; print an attestation.
+- **`lara`:** the fact enters as a **leaf** (`observed`, provenance `ai-executed`, bound to a
+  data ref). The step "this experiment supports the claim" is **not** proved — it is an instance
+  of a named **defeasible rule** in the policy (e.g. `controlled_experiment`), which carries
+  *critical questions* (randomization, power, external validity) that must each be discharged or
+  left as an explicit hole. A recorded dead-end can attack the argument. Grounded labelling over
+  the compiled graph yields the four-state status.
+
+The honest one-liner still holds for both: **the checker validates the argument structure —
+that steps instantiate declared rules, obligations are explicit, attacks are type-correct, and
+the status is the grounded result. It does not establish that the evidence is true, nor that the
+declared rule is a correct account of what warrants a claim.** That judgment lives in the leaves
+(both systems) and now, for `lara`, also in the policy.
+
+---
+
+## 3. What is the same
+
+| | Shared design |
+|---|---|
+| Trust model | Untrusted proposer, tiny trusted checker. Proof-Carrying Code / de Bruijn / LCF lineage. A bad proposal costs one failed check, never a false attestation. |
+| Sealed kernel | `rit` seals the Lean `Judgment`; `lara` seals `Judgment` via a hidden Haskell constructor. The only way to get one is a successful `check`. |
+| Input | Both consume an ARA and decompose it into a graph of claims (`rit`: *claim DAG*; `lara`: *warrant graph / compiled Dung framework*). |
+| Hume's fork | Both refuse to prove the empirical. Empirical content enters as leaves / groundings; only structural relations are checked. |
+| Dependency exposure | Both surface exactly which unverified inputs a conclusion rests on (`rit`: tiers T0–T4, `#print axioms`; `lara`: the leaf-dependency set `L` and open obligations `O` reported per argument). |
+| Two-axis honesty | Both keep deterministic structural correctness separate from noisy empirical reliability, and never average the two. |
+
+---
+
+## 4. Where they differ
+
+| Dimension | `rit` | `lara` (current spec) |
+|---|---|---|
+| Kernel logic | Lean 4 / CIC (dependent type theory) | LP (explicit S4) **for strict steps only** + a typed argumentation checker |
+| The evidence→claim step | analytic relations proved; extraction pulled INTO the kernel (K-tier) | a **defeasible scheme** in a versioned policy `Pi`, with critical questions — *not* proved |
+| Empirical content | sha256 byte-capture + deterministic re-extraction; compressed *toward* the kernel | untrusted leaves (`observed/attested/assumed/certified`), kept *out* of the kernel |
+| Monotonic? | **Yes** — Lean is monotonic; proved is proved | **No** — typed attacks (rebut/undercut/undermine) + grounded semantics on top |
+| Failure knowledge | not first-class; a claim simply fails to verify | first-class: a dead-end that constructs a typed attack can **defeat** a claim |
+| `gap` vs `defeated` | not distinguished | distinguished by design (`gap` = no complete argument / open obligation; `defeated` = complete but labelled `out`) |
+| Trust locus beyond leaves | the byte-capture event | the byte-capture event **and the policy `Pi`** (trusted input) |
+| Human surface | Lean source + `@claim` NL comment | a declarative presentation syntax (`claim`/`leaf`/`arg`/`undercut`/`status`) over a shared abstract syntax; JSON is the wire format |
+| Stack | Python front-end + Lean | Haskell core + Python front-end (Phase 3) |
+
+**The deepest difference is a dual strategy toward the same wall.** `rit` pushes as much of the
+empirical world *into* the kernel as it can: embed the evidence bytes as a Lean literal, ship the
+extractor as a Lean function, so the grounding itself becomes a theorem and the world enters at
+one byte-capture event. `lara` does the opposite: it keeps the empirical content *outside* as
+untrusted leaves, and spends its formal budget on the layer Lean cannot express — **typed,
+non-monotonic defeat**, where a recorded dead-end retracts a claim. That defeat capability is
+`lara`'s actual novelty and is invisible to a purely Lean approach.
+
+---
+
+## 5. The dependent-type question: can a kernel "express" a research claim?
+
+No — and neither project claims it can, once you read the fine print. A dependent-type kernel
+cannot express, let alone prove, the empirical content of a claim. "v3 reached the target in 2875
+steps" is not a theorem; it enters as an assumption:
+
+```lean
+opaque best_steps : Nat
+axiom best_steps_grounded : best_steps = 2875   -- NOT proved; asserted
+-- @claim: a real run reaches the target in under 3500 steps
+theorem reach_3500 : best_steps < 3500 := by rw [best_steps_grounded]; omega
+```
+
+The kernel proves only the **analytic** slice (`2875 < 3500`). The empirical `= 2875` is
+established *outside* — `rit` re-hashes and re-extracts; `lara` records it as a leaf — and the
+dependency is exposed (`#print axioms` / the leaf set `L`).
+
+- **What dependent types express well:** the relational / analytic skeleton — inequalities,
+  logical combinations, "premises ⇒ claim." Arguably more power than the task needs.
+- **What they cannot express:** the truth of a measurement. That always enters as an assumption.
+
+`lara`'s current design draws the sharper conclusion: it does *not* try to express the
+evidence→claim step as a proof at all. That step is contingent (`supports(E,C) -> C` "is not a
+logical axiom", per `spec.md §5`), so it is modeled as a **defeasible rule**, checked by
+instantiation against a policy rather than by proving. Dependent types (or LP proof terms) are
+reserved for the genuinely strict sub-steps — which is exactly where they belong.
+
+---
+
+## 6. Curry-Howard: what "compiles" actually certifies
+
+The tempting slogan is *"by Curry-Howard, if the program compiles the paper's claim is valid."*
+LP genuinely is a Curry-Howard system, so this is not forced — but the claim it licenses is
+narrower than it sounds, and the whole credibility turns on one word.
+
+**Validity, not soundness.** The checker validates `t : F` (and, above it, that an argument
+correctly instantiates a rule) with the leaves taken as **hypotheses**, not theorems. So
+compilation certifies a *conditional*: *if the declared evidence holds, the warrant follows.* In
+the classical vocabulary this is **validity** (the conclusion follows from the premises), not
+**soundness** (valid *and the premises are true*). `lara`'s own guarantee is even weaker and more
+honest: acceptance means "structural validity relative to the selected policy," and completeness
+is *policy-relative* — complete with respect to the scheme's critical questions, not absolutely.
+
+**The right analogy — and it is still a strong pitch.** No type-checker proves a program
+correct; it proves it well-typed. `tsc` passing means no category errors *given your
+annotations*, not that the code does what you want. `lara` is the exact analog:
+
+> compiles ≠ claim true — compiles = **the argument is well-typed and undefeated, given its
+> evidence and the chosen policy.**
+
+That is a real contribution (mechanized well-typedness for research arguments); "compiles ⇒ true"
+is not, and a reviewer will reject the latter on sight.
+
+**Three things `compiles` does *not* cover** — name them first, because they are where every
+critique lives:
+
+1. **Leaf truth (soundness).** The evidence atoms are assumed. Empirical, untrusted.
+2. **NL→proposition faithfulness (the translation gap).** That the formal `F` faithfully renders
+   the prose claim. No checker can verify this; `spec.md §11` lists it as an untrusted elaborator
+   task evaluated against human annotations. It is the single most load-bearing unchecked step.
+3. **Policy faithfulness.** That the defeasible rule (and its critical questions) is a correct
+   account of what actually warrants the claim. `Pi` is a *trusted input*.
+
+**Curry-Howard now covers only the strict core.** With LP demoted to strict sub-steps, the clean
+CH story ("well-typed proof term ⇒ valid derivation") applies to `spec.md §5`, not to the whole
+pipeline. The defeasible layer is argumentation-framework defeat, which is **not** a CH
+phenomenon — a compiled, valid argument can still be *retracted* by a dead-end, and retraction
+has no proof-term counterpart. So the honest framing is: `lara` is a **typed argument checker
+with a Curry-Howard strict core**, not a Curry-Howard proof system end-to-end. Pitch it that way;
+at a PL venue, overselling CH invites exactly the objection the design already answers.
+
+---
+
+## 7. The necessity question: why a formal system at all?
+
+The earlier draft's sharpest critique was that a proof kernel is overkill for the shallow
+arithmetic that shows up between grounded facts and claims. The current `lara` design **answers
+the LP-specific version of this** by shrinking LP to strict sub-steps and moving the real work to
+the argumentation-scheme + policy + grounded-labelling layer. Good. But the necessity test simply
+re-points:
+
+- **What the formal system now does** is enforce, across a whole artifact, that every argument
+  correctly instantiates a declared scheme, every critical question is discharged or explicitly
+  held, attacks are type-correct, and defeat propagates — then locate the gaps. That is the
+  "type system for arguments" value, and it *does* survive the necessity test better than "a
+  prover for `2875 < 2900`", because the payoff is consistency-and-gap-location at scale, not
+  single-step depth.
+- **The live question is whether the LP fragment earns its keep at all.** It is now a small,
+  arguably optional strict core. If real research warrants are almost entirely defeasible, LP is
+  vestigial and the contribution is the scheme/policy/Dung checker with LP as a minor component.
+  This is a concrete, answerable empirical question (see §8).
+- **For `rit`,** the original critique still lands unchanged: Lean is a heavyweight trusted base
+  (Mathlib; `native_decide` → compiler axiom; `grind` → classical axioms) doing the most trivial
+  job (`a < b`), while the components that do real work — sha256 locks, extractors, re-execution,
+  spec-checkers — are the *non-Lean* parts. The formal kernel is the least load-bearing piece
+  with the largest footprint.
+
+**The criterion to keep.**
+
+> A formal system earns its place when it enforces consistency a human cannot audit at scale and
+> emits a portable, re-checkable certificate. `lara`'s scheme/defeat checker plausibly clears
+> this bar; a heavyweight proof kernel over shallow arithmetic (`rit`'s Lean use) does not, and
+> `lara`'s own LP fragment must show it is used by real warrants or be marked clearly optional.
+
+---
+
+## 8. The honest read: what these systems are, and what they are not
+
+The grand framing on `rit`'s README is *"trust comes from the verification layer, not the
+agent."* But the research judgment — "does E support C?" — is a leaf, decided by an LLM or a
+human, never by the kernel. The kernel rigorously verifies what was never in doubt (`2875 <
+2900`) and not what decides whether the research is sound. That is the same lock-next-to-an-open-
+window as before.
+
+`lara`'s current spec is, to its credit, **already honest about this** — it states that
+acceptance is "structural validity only," that completeness is policy-relative, that realization
+does *not* justify the lowering (`§11`), and that the current `ConstantSpec` is incomplete and
+"must not be described as a complete trusted kernel" (`§5`). The critique therefore now
+differentiates the two projects:
+
+- **`rit`** still over-frames: "verify claims" reads as epistemic verification the mechanism does
+  not deliver. The defensible description is *tamper-evident bookkeeping + arithmetic checking +
+  dependency exposure*.
+- **`lara`** describes itself accurately. Its exposure is not dishonest framing but a **relocated
+  hard problem**: the epistemic content moved into the policy `Pi`, which is trusted, unchecked
+  input. The checker's guarantee is now three-way conditional — *given* true leaves, *and* a
+  faithful policy, *and* a faithful NL→proposition translation, the argument is valid and
+  undefeated.
+
+**The modest, defensible version of each:**
+
+- **`rit`** = tamper-evident bookkeeping + arithmetic checking. Guarantees the numbers came from
+  the stored logs and the composition math is error-free; tracks per claim what it rests on. Real
+  and useful. Not "verification of research."
+- **`lara`** = a typed, policy-relative argument checker with first-class defeat. Guarantees that
+  a paper's argument instantiates declared schemes, discharges or flags every critical question,
+  and survives recorded defeaters — and *locates* the gaps and defeaters. The one capability `rit`
+  lacks: a recorded dead-end can flip a claim to `defeated`.
+
+---
+
+## 9. The sharp questions each project should answer
+
+- **To `rit`:** the stated hook is that LLM-judges pass ~97% while only ~66% is real. What
+  fraction of that gap is *arithmetic / tampering / composition* error (which the kernel catches)
+  versus *bad judgment about whether evidence supports a claim* (which lives in the leaves and the
+  kernel never sees)? If mostly the latter, the kernel attacks the minority failure mode while
+  being sold as closing the whole gap.
+
+- **To `lara`, three:**
+  1. **Who writes `Pi`, and why is it right?** The policy is now the load-bearing epistemic
+     artifact and it is trusted input. The rebuttal-bait question is "your checker is only as good
+     as its policy" — have the answer ready (schemes curated from methodology literature,
+     versioned, corpus-validated), and treat policy quality as an evaluated axis, not an
+     assumption.
+  2. **Does the LP fragment earn its keep?** Measure, on the corpus, what fraction of warrants
+     actually use a strict LP subderivation versus being wholly defeasible. If small, mark LP
+     clearly optional and make the argumentation/policy/Dung checker the headline.
+  3. **Is the concrete syntax the audit surface it needs to be?** Today a `claim` carries only its
+     NL string; the formal proposition appears only inside the `supports(...)` argument. Put the
+     claim's formal target next to its NL (as `rit`'s `@claim` does) so the highest-risk
+     translation step is auditable at a glance.
+
+---
+
+## 10. Bottom line
+
+Neither system verifies research claims, and both now say so — `rit` in its fine print ("the
+world enters at one arrow"), `lara` in its spec ("structural validity only… policy-relative
+completeness… realization is not a guarantee for this lowering"). What they build is auditing
+infrastructure: tamper-evidence and arithmetic soundness (`rit`); typed, policy-relative argument
+checking with located gaps and first-class defeat (`lara`).
+
+The accurate way to read `rit`'s README: **cross out "verify claims" and write "make the
+bookkeeping around claims tamper-evident."** `lara`'s current spec already reads accurately; its
+job now is to defend the **policy** as a first-class, evaluated object rather than a trusted
+given, and to prove the **defeat layer** carries the contribution.
+
+For `lara` specifically, the one claim that survives every version of this critique is the
+**typed defeat layer**: dead-end-defeats-claim is a real capability a holistic reviewer cannot
+produce, it is what the ARA data model uniquely enables, and it does not depend on the checker
+laundering the model's leaf judgments. That — not Curry-Howard, not justification logic — is the
+contribution to lead with.
