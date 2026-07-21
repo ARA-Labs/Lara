@@ -190,16 +190,20 @@ But the analogy breaks in two load-bearing places, and those breaks _are_ the co
    LARA is therefore a **monotonic proof-term language embedded in a non-monotonic warrant system**;
    Lean is only the inner half.
 
-**What we are designing:** the object logic — grammar (`Lara.Term`, `Lara.Formula`) + the LP
-deduction rules + the checker — and the pipeline that consumes it (ARA in, warrant object out). The
-core language is the _internal representation_ that makes the verdict checkable and auditable.
+**What we are designing:** a small formal language for warrant certificates. This includes the core
+syntax (`Lara.Term`, `Lara.Formula`), a canonical human-readable presentation syntax, the LP
+deduction rules, the certificate checker, the leaf-atom interface, and the warrant-graph semantics
+that maps checked derivations plus attacks to the four statuses. JSON may remain the robust wire
+format between the untrusted producer and the trusted checker, but it is not the language
+specification. The paper needs a real calculus: syntax, judgments, checking rules, and semantics.
 
-**What we are deliberately not designing:** a human-facing surface language in the Lean-4 sense —
-concrete syntax, notation, a tactic DSL, an IDE, a standard library. The producer is an LLM emitting
-derivations (as JSON), not a human writing `.lara` files. A small surface syntax may appear later
-purely for debugging and hand-lowering (the Phase-0 hand-worked examples are that, done on paper),
-but it is a convenience, not the contribution. Building tactics and notation for human authors would
-be scope creep away from the thesis.
+**What we are deliberately not designing:** a Lean-style human authoring environment — notation
+engineering, tactics, an IDE, proof scripts, a package ecosystem, or a standard library. Those belong
+to proof-assistant design and would shift the contribution away from mechanized warrant checking.
+The producer is still an LLM/elaborator emitting derivations, and the required toolchain is the
+compiler/checker that validates those certificate programs. The readable syntax exists so humans and
+reviewers can inspect, debug, and audit LARA certificates; it is not the primary authoring interface
+or the contribution by itself.
 
 ### 3.2 Two tiers of axioms: the logic vs. the leaves
 
