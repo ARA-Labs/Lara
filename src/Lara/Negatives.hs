@@ -42,7 +42,7 @@ module Lara.Negatives
   ) where
 
 import Lara.AST
-import Lara.Prop (Prop (..), Term (..))
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 
 -- ---------------------------------------------------------------------------
 -- Taxonomy
@@ -97,10 +97,14 @@ data Negative = Negative
 -- ---------------------------------------------------------------------------
 
 con :: String -> Term
-con k = TCon k []
+con k = TCon (FunSym k) []
+
+-- | A constructor applied to arguments, e.g. @effect(m, accuracy, d, +2.1)@.
+funT :: String -> [Term] -> Term
+funT k = TCon (FunSym k)
 
 atom :: String -> [Term] -> Prop
-atom = Prop
+atom p = Prop (Pred p)
 
 leafD :: String -> Prop -> LeafKind -> Provenance -> Leaf
 leafD lid p k prov =
@@ -212,7 +216,7 @@ supportMismatch =
           , DeclLeaf
               ( leafD
                   "e1"
-                  (atom "reports" [con "exp_3", TCon "effect" [con "m", con "accuracy", con "d", TNum "+2.1"]])
+                  (atom "reports" [con "exp_3", funT "effect" [con "m", con "accuracy", con "d", TNum "+2.1"]])
                   Observed
                   AiExecuted
               )
@@ -249,7 +253,7 @@ premiseMismatch =
               ( leafD
                   "e1"
                   -- note: d_shift, not d
-                  (atom "reports" [con "exp_3", TCon "effect" [con "m", con "accuracy", con "d_shift", TNum "+2.1"]])
+                  (atom "reports" [con "exp_3", funT "effect" [con "m", con "accuracy", con "d_shift", TNum "+2.1"]])
                   Observed
                   AiExecuted
               )
@@ -279,8 +283,8 @@ premiseMismatch =
                 [ defeasibleRule
                     "controlled_experiment"
                     ["M", "Acc", "D", "Delta"]
-                    [AtomPat "reports" [PCon "exp_3" [], PCon "effect" [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
-                    (AtomPat "improves" [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
+                    [AtomPat (Pred "reports") [PCon (FunSym "exp_3") [], PCon (FunSym "effect") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
+                    (AtomPat (Pred "improves") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
                     []
                 ]
             , policyContraries = []
@@ -314,7 +318,7 @@ unaccountedQuestion =
           , DeclLeaf
               ( leafD
                   "e1"
-                  (atom "reports" [con "exp_3", TCon "effect" [con "m", con "accuracy", con "d", TNum "+2.1"]])
+                  (atom "reports" [con "exp_3", funT "effect" [con "m", con "accuracy", con "d", TNum "+2.1"]])
                   Observed
                   AiExecuted
               )
@@ -340,9 +344,9 @@ unaccountedQuestion =
                 [ defeasibleRule
                     "controlled_experiment"
                     ["M", "Acc", "D", "Delta"]
-                    [AtomPat "reports" [PCon "exp_3" [], PCon "effect" [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
-                    (AtomPat "improves" [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
-                    [Question (QuestionId "randomization") (AtomPat "randomized" [PVar (Param "M")]) Mandatory]
+                    [AtomPat (Pred "reports") [PCon (FunSym "exp_3") [], PCon (FunSym "effect") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
+                    (AtomPat (Pred "improves") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
+                    [Question (QuestionId "randomization") (AtomPat (Pred "randomized") [PVar (Param "M")]) Mandatory]
                 ]
             , policyContraries = []
             , policyExceptions = []
@@ -389,10 +393,10 @@ illTypedAttack =
           Policy
             { policyId = PolicyId "mixed-v1"
             , policyRules =
-                [ strictRule "deductive_step" [] [AtomPat "p" []] (AtomPat "q" []) True []
-                , defeasibleRule "presumption" [] [AtomPat "grounds_not_q" []] (AtomPat "not_q" []) []
+                [ strictRule "deductive_step" [] [AtomPat (Pred "p") []] (AtomPat (Pred "q") []) True []
+                , defeasibleRule "presumption" [] [AtomPat (Pred "grounds_not_q") []] (AtomPat (Pred "not_q") []) []
                 ]
-            , policyContraries = [Contrary (AtomPat "q" []) (AtomPat "not_q" [])]
+            , policyContraries = [Contrary (AtomPat (Pred "q") []) (AtomPat (Pred "not_q") [])]
             , policyExceptions = []
             , policyAdmission = []
             }
@@ -430,10 +434,10 @@ strictReachableContrary =
           Policy
             { policyId = PolicyId "illformed-policy-v1"
             , policyRules =
-                [ strictRule "deductive_step" ["X"] [AtomPat "basis" [PVar (Param "X")]] (AtomPat "derived" [PVar (Param "X")]) True []
+                [ strictRule "deductive_step" ["X"] [AtomPat (Pred "basis") [PVar (Param "X")]] (AtomPat (Pred "derived") [PVar (Param "X")]) True []
                 ]
             , -- derived(X) is strict-reachable, yet it appears here:
-              policyContraries = [Contrary (AtomPat "derived" [PVar (Param "X")]) (AtomPat "refuted" [PVar (Param "X")])]
+              policyContraries = [Contrary (AtomPat (Pred "derived") [PVar (Param "X")]) (AtomPat (Pred "refuted") [PVar (Param "X")])]
             , policyExceptions = []
             , policyAdmission = []
             }
@@ -504,8 +508,8 @@ strictAssuranceViolation =
                 [ strictRule
                     "deductive_step"
                     []
-                    [AtomPat "p" []]
-                    (AtomPat "q" [])
+                    [AtomPat (Pred "p") []]
+                    (AtomPat (Pred "q") [])
                     False -- allow-trusted = false
                     [CertRef (BackendId "nd") "1" (TheoryDigest "sha256:theory…")]
                 ]

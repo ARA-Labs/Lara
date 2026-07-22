@@ -42,6 +42,8 @@ module Lara.AST
   , Claim (..)
     -- * Policy: rules, patterns, obligations (spec §4)
   , Mode (..)
+  , Pred (..)
+  , FunSym (..)
   , Pat (..)
   , AtomPat (..)
   , Necessity (..)
@@ -73,7 +75,7 @@ module Lara.AST
   , Status (..)
   ) where
 
-import Lara.Prop (Prop, Term)
+import Lara.Prop (FunSym (..), Pred (..), Prop, Term)
 
 -- ---------------------------------------------------------------------------
 -- Names (spec §2)
@@ -188,11 +190,12 @@ data Mode = Strict | Defeasible
 data Pat
   = PVar Param
   | PLit Term -- ^ a ground literal used verbatim in the pattern
-  | PCon String [Pat] -- ^ constructor applied to sub-patterns
+  | PCon FunSym [Pat] -- ^ constructor applied to sub-patterns
   deriving (Eq, Show)
 
--- | An atom pattern (spec §4.1): @Apat ::= pred(P1, …, Pn)@.
-data AtomPat = AtomPat String [Pat]
+-- | An atom pattern (spec §4.1): @Apat ::= pred(P1, …, Pn)@. Reuses "Lara.Prop"'s
+-- 'Pred'\/'FunSym' so a pattern head cannot be confused with a term head.
+data AtomPat = AtomPat Pred [Pat]
   deriving (Eq, Show)
 
 -- | Whether an open critical question produces an obligation (spec §4.2). A

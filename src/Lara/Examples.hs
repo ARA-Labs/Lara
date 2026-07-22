@@ -34,7 +34,7 @@ module Lara.Examples
   ) where
 
 import Lara.AST
-import Lara.Prop (Prop (..), Term (..))
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 
 -- ---------------------------------------------------------------------------
 -- Small construction helpers (presentation-syntax sugar in Haskell)
@@ -42,11 +42,15 @@ import Lara.Prop (Prop (..), Term (..))
 
 -- | A nullary-constructor ground term (an identifier constant like @tailEMA@).
 con :: String -> Term
-con k = TCon k []
+con k = TCon (FunSym k) []
+
+-- | A constructor applied to arguments, e.g. @top_delta(tailEMA, +0.00251)@.
+funT :: String -> [Term] -> Term
+funT k = TCon (FunSym k)
 
 -- | An atomic proposition @pred(g1, …, gn)@.
 atom :: String -> [Term] -> Prop
-atom = Prop
+atom p = Prop (Pred p)
 
 -- | A leaf supporting itself as evidence, with kind and provenance.
 leaf :: String -> Prop -> LeafKind -> Provenance -> [String] -> Leaf
@@ -137,14 +141,14 @@ nanogptTailEma =
         , DeclLeaf $
             leaf
               "e_prune"
-              (atom "reports" [con "v1_pruning", TCon "top_delta" [con "tailEMA", TNum "+0.00251"]])
+              (atom "reports" [con "v1_pruning", funT "top_delta" [con "tailEMA", TNum "+0.00251"]])
               Observed
               AiExecuted
               ["record_configs/20260515_codex_v1_v12iso_3205/pruning_data.json#L111"]
         , DeclLeaf $
             leaf
               "e_next"
-              (atom "reports" [con "v1_pruning", TCon "next_delta" [con "noMuon2f", TNum "+0.00229"]])
+              (atom "reports" [con "v1_pruning", funT "next_delta" [con "noMuon2f", TNum "+0.00229"]])
               Observed
               AiExecuted
               ["record_configs/20260515_codex_v1_v12iso_3205/pruning_data.json#L103"]
@@ -233,7 +237,7 @@ nanogptV12Quarantine =
         , DeclLeaf $
             leaf
               "e_loss"
-              (atom "reports" [con "v12_stack", TCon "reached" [con "bin_2962"]])
+              (atom "reports" [con "v12_stack", funT "reached" [con "bin_2962"]])
               Observed
               AiExecuted
               ["v2/codex/scratchpad/THREAD.md#L120"]
@@ -242,7 +246,7 @@ nanogptV12Quarantine =
           DeclLeaf $
             leaf
               "e_audit"
-              (atom "reports" [con "compliance_audit", TCon "forward_path_rewrite" [con "rmsnorm"]])
+              (atom "reports" [con "compliance_audit", funT "forward_path_rewrite" [con "rmsnorm"]])
               Attested
               User
               ["v2/codex/scratchpad/THREAD.md#L126"]

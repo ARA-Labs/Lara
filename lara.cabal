@@ -23,6 +23,7 @@ library
     exposed-modules:  Lara.Prop
                       Lara.Strict
                       Lara.Strict.ND
+                      Lara.Strict.ND.Internal
                       Lara.AST
                       Lara.Examples
                       Lara.Negatives

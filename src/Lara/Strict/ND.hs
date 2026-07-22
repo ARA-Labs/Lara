@@ -46,7 +46,13 @@
 module Lara.Strict.ND
   ( -- * Backend formulas and certificates
     Formula (..)
+  , AtomId -- ^ opaque: constructor hidden; see "Lara.Strict.ND.Internal"
+  , atomIdString
   , Cert (..)
+    -- * Wire grammar
+  , Tag (..)
+  , tagToString
+  , parseTag
     -- * Encoding
   , encodeND
     -- * Type checking (the replay)
@@ -60,6 +66,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 
 import Lara.Prop (Prop, nf)
+import Lara.Strict.ND.Internal (AtomId (..))
 import Lara.Strict
   ( Backend (..)
   , BackendId (..)
@@ -76,10 +83,16 @@ import Lara.Strict
 -- source proposition (see 'encodeND'); the producer references a source
 -- proposition by that same string.
 data Formula
-  = FAtom String
+  = FAtom AtomId
   | FFalse
   | FImp Formula Formula
   deriving (Eq, Ord, Show)
+
+-- | Project the underlying serialization out of an 'AtomId'. This is the only
+-- public way to observe an atom's payload; there is no public way to construct
+-- one except through 'encodeND' or the closed wire decoder.
+atomIdString :: AtomId -> String
+atomIdString (AtomId s) = s
 
 -- | A natural-deduction certificate in de Bruijn form.
 data Cert
@@ -101,7 +114,7 @@ data Cert
 -- @'show' . 'nf'@, which is injective on the 'Prop' AST, discharging
 -- normalization fidelity.
 encodeND :: Prop -> Formula
-encodeND = FAtom . show . nf
+encodeND = FAtom . AtomId . show . nf
 
 -- ---------------------------------------------------------------------------
 -- Type checking (the replay)
@@ -169,20 +182,49 @@ inferType locals free = go locals
 -- > formula := (atom STRING) | false | (imp FORMULA FORMULA)
 -- > cert    := (hyp N) | (lam FORMULA CERT) | (app CERT CERT) | (abort FORMULA CERT)
 
+-- | The closed set of wire keywords. Every grammar keyword is a constructor,
+-- so the tag vocabulary is symbolic: the concrete on-the-wire strings live in
+-- exactly one place ('tagToString' \/ 'parseTag'), and any producer that needs
+-- to emit the same grammar (e.g. the conformance tests) shares this table
+-- rather than duplicating string literals. 'tagToString' and 'parseTag' are
+-- mutually inverse.
+data Tag = TAtom | TFalse | TImp | THyp | TLam | TApp | TAbort
+  deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | The on-the-wire spelling of a keyword. The single source of truth for the
+-- grammar's concrete syntax.
+tagToString :: Tag -> String
+tagToString TAtom = "atom"
+tagToString TFalse = "false"
+tagToString TImp = "imp"
+tagToString THyp = "hyp"
+tagToString TLam = "lam"
+tagToString TApp = "app"
+tagToString TAbort = "abort"
+
+-- | Parse a wire keyword, inverse to 'tagToString'. Derived from the same table
+-- by enumerating 'Tag', so it cannot drift out of sync.
+parseTag :: String -> Maybe Tag
+parseTag s = lookup s [(tagToString t, t) | t <- [minBound .. maxBound]]
+
 decodeFormula :: SExpr -> Either String Formula
-decodeFormula (SAtom "false") = Right FFalse
-decodeFormula (SList [SAtom "atom", SAtom s]) = Right (FAtom s)
-decodeFormula (SList [SAtom "imp", a, b]) = FImp <$> decodeFormula a <*> decodeFormula b
+decodeFormula (SAtom s) | parseTag s == Just TFalse = Right FFalse
+decodeFormula (SList [SAtom k, SAtom s]) | parseTag k == Just TAtom = Right (FAtom (AtomId s))
+decodeFormula (SList [SAtom k, a, b]) | parseTag k == Just TImp =
+  FImp <$> decodeFormula a <*> decodeFormula b
 decodeFormula e = Left ("malformed ND formula: " ++ show e)
 
 decodeCert :: SExpr -> Either String Cert
-decodeCert (SList [SAtom "hyp", SAtom n]) =
+decodeCert (SList [SAtom k, SAtom n]) | parseTag k == Just THyp =
   case reads n of
     [(i, "")] -> Right (Hyp i)
     _ -> Left ("malformed de Bruijn index: " ++ show n)
-decodeCert (SList [SAtom "lam", phi, e]) = Lam <$> decodeFormula phi <*> decodeCert e
-decodeCert (SList [SAtom "app", f, x]) = App <$> decodeCert f <*> decodeCert x
-decodeCert (SList [SAtom "abort", phi, e]) = Abort <$> decodeFormula phi <*> decodeCert e
+decodeCert (SList [SAtom k, phi, e]) | parseTag k == Just TLam =
+  Lam <$> decodeFormula phi <*> decodeCert e
+decodeCert (SList [SAtom k, f, x]) | parseTag k == Just TApp =
+  App <$> decodeCert f <*> decodeCert x
+decodeCert (SList [SAtom k, phi, e]) | parseTag k == Just TAbort =
+  Abort <$> decodeFormula phi <*> decodeCert e
 decodeCert e = Left ("malformed ND certificate: " ++ show e)
 
 -- ---------------------------------------------------------------------------

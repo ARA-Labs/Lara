@@ -30,8 +30,11 @@
 -- That is a normalization extension, not a change to the
 -- @p ≡ q  iff  nf p = nf q@ shape.
 module Lara.Prop
-  ( -- * Syntax
-    Term (..)
+  ( -- * Symbols
+    Pred (..)
+  , FunSym (..)
+    -- * Syntax
+  , Term (..)
   , Prop (..)
     -- * Normalization and identity
   , canonNum
@@ -43,6 +46,19 @@ module Lara.Prop
   , prettyProp
   , prettyTerm
   ) where
+
+-- | A predicate symbol (the head of a 'Prop'). Its own type so the eventual
+-- @Σ@-well-formedness checker cannot confuse it with a function symbol: in a
+-- first-order signature predicates and function symbols are separate namespaces
+-- with separate arity tables (spec §2). A free identifier with no invariant, so
+-- the constructor is exported (contrast 'Lara.Strict.ND.AtomId').
+newtype Pred = Pred String
+  deriving (Eq, Ord, Show)
+
+-- | A function\/constructor symbol (the head of a non-literal 'Term'). Distinct
+-- from 'Pred' for the same signature-namespace reason.
+newtype FunSym = FunSym String
+  deriving (Eq, Ord, Show)
 
 -- | A ground term: a literal or a constructor applied to argument terms.
 --
@@ -58,14 +74,14 @@ data Term
     TStr String
   | -- | constructor @k@ applied to zero or more arguments; @'TCon' k []@ is a
     -- nullary identifier constant such as @alice@
-    TCon String [Term]
+    TCon FunSym [Term]
   deriving (Eq, Ord, Show)
 
 -- | A proposition: a predicate applied to ground argument terms.
 --
 -- The nullary case @'Prop' p []@ is Phase 0's opaque, stable proposition
 -- identifier (spec §3).
-data Prop = Prop String [Term]
+data Prop = Prop Pred [Term]
   deriving (Eq, Ord, Show)
 
 -- ---------------------------------------------------------------------------
@@ -119,13 +135,13 @@ canonId = id
 nfTerm :: Term -> Term
 nfTerm (TNum s) = TNum (canonNum s)
 nfTerm (TStr s) = TStr s
-nfTerm (TCon k ts) = TCon (canonId k) (map nfTerm ts)
+nfTerm (TCon (FunSym k) ts) = TCon (FunSym (canonId k)) (map nfTerm ts)
 
 -- | The normal form of a proposition (spec §3.2):
 --
 -- > nf(pred(g1, ..., gn)) = pred(nf(g1), ..., nf(gn))
 nf :: Prop -> Prop
-nf (Prop p ts) = Prop (canonId p) (map nfTerm ts)
+nf (Prop (Pred p) ts) = Prop (Pred (canonId p)) (map nfTerm ts)
 
 -- | The trusted identity relation: @p ≡ q  iff  nf p = nf q@, where @=@ is
 -- syntactic equality on the AST. Decidable, total, and an equivalence.
@@ -144,15 +160,15 @@ equiv = (===)
 
 -- | Render a proposition, e.g. @improves(M, accuracy, D)@.
 prettyProp :: Prop -> String
-prettyProp (Prop p []) = p
-prettyProp (Prop p ts) = p ++ "(" ++ intercalateArgs ts ++ ")"
+prettyProp (Prop (Pred p) []) = p
+prettyProp (Prop (Pred p) ts) = p ++ "(" ++ intercalateArgs ts ++ ")"
 
 -- | Render a ground term.
 prettyTerm :: Term -> String
 prettyTerm (TNum s) = s
 prettyTerm (TStr s) = show s
-prettyTerm (TCon k []) = k
-prettyTerm (TCon k ts) = k ++ "(" ++ intercalateArgs ts ++ ")"
+prettyTerm (TCon (FunSym k) []) = k
+prettyTerm (TCon (FunSym k) ts) = k ++ "(" ++ intercalateArgs ts ++ ")"
 
 intercalateArgs :: [Term] -> String
 intercalateArgs = go

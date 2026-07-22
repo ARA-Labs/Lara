@@ -10,7 +10,9 @@ module PropSpec (propSpecProps) where
 import Test.QuickCheck
 
 import Lara.Prop
-  ( Prop (..)
+  ( FunSym (..)
+  , Prop (..)
+  , Pred (..)
   , Term (..)
   , canonNum
   , equiv
@@ -42,16 +44,16 @@ genTerm = sized go
           oneof
             [ TNum <$> genNoisyNum
             , TStr <$> listOf (elements ['a' .. 'c'])
-            , TCon <$> genIdent <*> pure []
+            , TCon <$> (FunSym <$> genIdent) <*> pure []
             ]
       | otherwise =
           frequency
             [ (3, go 0)
-            , (1, TCon <$> genIdent <*> resize (n `div` 2) (listOf (go (n `div` 2))))
+            , (1, TCon <$> (FunSym <$> genIdent) <*> resize (n `div` 2) (listOf (go (n `div` 2))))
             ]
 
 genProp :: Gen Prop
-genProp = Prop <$> genIdent <*> sized (\n -> resize n (listOf (resize n genTerm)))
+genProp = Prop <$> (Pred <$> genIdent) <*> sized (\n -> resize n (listOf (resize n genTerm)))
 
 newtype P = P Prop deriving (Show)
 
@@ -91,10 +93,10 @@ prop_noReorder :: Property
 prop_noReorder =
   forAll genTerm $ \a ->
     forAll genTerm $ \b ->
-      (nf (Prop "p" [a, b]) /= nf (Prop "p" [b, a])) == (nfArg a /= nfArg b)
+      (nf (Prop (Pred "p") [a, b]) /= nf (Prop (Pred "p") [b, a])) == (nfArg a /= nfArg b)
   where
     -- a term's normal form as it appears inside a Prop
-    nfArg t = let Prop _ [t'] = nf (Prop "p" [t]) in t'
+    nfArg t = let Prop _ [t'] = nf (Prop (Pred "p") [t]) in t'
 
 -- | 'canonNum' identifies surface variants of the same value.
 prop_canonNumVariants :: Bool

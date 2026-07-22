@@ -26,7 +26,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Test.QuickCheck
 
-import Lara.Prop (Prop (..), Term (..), nf)
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..), nf)
 import Lara.Strict
   ( BackendId (..)
   , Dependency (..)
@@ -41,11 +41,15 @@ import Lara.Strict
 import Lara.Strict.ND
   ( Cert (..)
   , Formula (..)
+  , Tag (..)
   , encodeND
   , inferType
   , mkNDBackend
   , ndBackendId
+  , parseTag
+  , tagToString
   )
+import Lara.Strict.ND.Internal (AtomId (..))
 
 -- ---------------------------------------------------------------------------
 -- ND formula generators
@@ -53,7 +57,7 @@ import Lara.Strict.ND
 
 -- | A small pool of atomic formulas keeps the valuation space enumerable.
 genAtomF :: Gen Formula
-genAtomF = FAtom . (: []) <$> elements ['P' .. 'T']
+genAtomF = FAtom . AtomId . (: []) <$> elements ['P' .. 'T']
 
 genFormula :: Gen Formula
 genFormula = sized go
@@ -144,12 +148,12 @@ instance Arbitrary WellTyped where
 
 interp :: Map.Map String Bool -> Formula -> Bool
 interp _ FFalse = False
-interp v (FAtom s) = Map.findWithDefault False s v
+interp v (FAtom (AtomId s)) = Map.findWithDefault False s v
 interp v (FImp a b) = not (interp v a) || interp v b
 
 atomsOf :: Formula -> [String]
 atomsOf FFalse = []
-atomsOf (FAtom s) = [s]
+atomsOf (FAtom (AtomId s)) = [s]
 atomsOf (FImp a b) = atomsOf a ++ atomsOf b
 
 -- | Every Boolean valuation over the relevant atoms. The atom pool is 5 symbols,
@@ -161,19 +165,25 @@ allValuations names =
     syms = nub names
 
 -- ---------------------------------------------------------------------------
--- Cert/Formula -> SExpr serialization (mirrors the adapter's private grammar)
+-- Cert/Formula -> SExpr serialization (mirrors the adapter's grammar)
 -- ---------------------------------------------------------------------------
 
+-- These share the adapter's 'Tag' table via 'tagToString', so the wire
+-- keywords are defined in exactly one place; a keyword change in the decoder
+-- flows here automatically instead of silently diverging.
+tag :: Tag -> SExpr
+tag = SAtom . tagToString
+
 formulaToSExpr :: Formula -> SExpr
-formulaToSExpr FFalse = SAtom "false"
-formulaToSExpr (FAtom s) = SList [SAtom "atom", SAtom s]
-formulaToSExpr (FImp a b) = SList [SAtom "imp", formulaToSExpr a, formulaToSExpr b]
+formulaToSExpr FFalse = tag TFalse
+formulaToSExpr (FAtom (AtomId s)) = SList [tag TAtom, SAtom s]
+formulaToSExpr (FImp a b) = SList [tag TImp, formulaToSExpr a, formulaToSExpr b]
 
 certToSExpr :: Cert -> SExpr
-certToSExpr (Hyp i) = SList [SAtom "hyp", SAtom (show i)]
-certToSExpr (Lam phi e) = SList [SAtom "lam", formulaToSExpr phi, certToSExpr e]
-certToSExpr (App f x) = SList [SAtom "app", certToSExpr f, certToSExpr x]
-certToSExpr (Abort phi e) = SList [SAtom "abort", formulaToSExpr phi, certToSExpr e]
+certToSExpr (Hyp i) = SList [tag THyp, SAtom (show i)]
+certToSExpr (Lam phi e) = SList [tag TLam, formulaToSExpr phi, certToSExpr e]
+certToSExpr (App f x) = SList [tag TApp, certToSExpr f, certToSExpr x]
+certToSExpr (Abort phi e) = SList [tag TAbort, formulaToSExpr phi, certToSExpr e]
 
 -- ---------------------------------------------------------------------------
 -- Properties
@@ -197,7 +207,7 @@ prop_ndSound (WellTyped free _ ty deps) =
 -- | An out-of-range free de Bruijn index is rejected, not silently accepted.
 prop_outOfRangeRejected :: Bool
 prop_outOfRangeRejected =
-  case inferType [] [FAtom "P"] (Hyp 5) of
+  case inferType [] [FAtom (AtomId "P")] (Hyp 5) of
     Left _ -> True
     Right _ -> False
 
@@ -205,8 +215,8 @@ prop_outOfRangeRejected =
 -- reports the empty free-dependency set even though its context is nonempty.
 prop_localNotDependency :: Bool
 prop_localNotDependency =
-  inferType [] [FAtom "Q"] (Lam (FAtom "P") (Hyp 0))
-    == Right (FImp (FAtom "P") (FAtom "P"), Set.empty)
+  inferType [] [FAtom (AtomId "Q")] (Lam (FAtom (AtomId "P")) (Hyp 0))
+    == Right (FImp (FAtom (AtomId "P")) (FAtom (AtomId "P")), Set.empty)
 
 -- | Normalization fidelity (obligation 2): @p ≡ q@ iff
 -- @encodeND p == encodeND q@.
@@ -214,12 +224,18 @@ prop_normalizationFidelity :: PropPair -> Bool
 prop_normalizationFidelity (PropPair p q) =
   (nf p == nf q) == (encodeND p == encodeND q)
 
+-- | The wire keyword table is coherent: 'parseTag' inverts 'tagToString' on
+-- every 'Tag'. Exhaustive over the closed set, so a keyword typo or a missing
+-- 'parseTag' case is caught here rather than by drift between the two.
+prop_tagRoundTrip :: Bool
+prop_tagRoundTrip = all (\t -> parseTag (tagToString t) == Just t) [minBound .. maxBound]
+
 -- | Closed registration (obligation 5): a backend absent from the registry is
 -- rejected with 'UnregisteredBackend' before any certificate work.
 prop_unregisteredRejected :: Bool
 prop_unregisteredRejected =
   let reg = mkRegistry [] -- empty registry
-      goal = Prop "p" []
+      goal = Prop (Pred "p") []
       cert = certToSExpr (Lam (encodeND goal) (Hyp 0))
    in case strictCheck reg ndBackendId (TheoryDigest "t0") [] goal cert of
         Left (UnregisteredBackend bid) -> bid == ndBackendId
@@ -236,7 +252,7 @@ prop_strictCheckSeals =
   let digest = TheoryDigest "empty"
       backend = mkNDBackend [(digest, [])]
       reg = mkRegistry [backend]
-      p = Prop "p" []
+      p = Prop (Pred "p") []
       cert = certToSExpr (Hyp 0)
    in case strictCheck reg ndBackendId digest [p] p cert of
         Right j ->
@@ -261,11 +277,11 @@ instance Arbitrary PropPair where
 genSimpleProp :: Gen Prop
 genSimpleProp = Prop <$> genPred <*> listOf genT
   where
-    genPred = (: []) <$> elements ['p' .. 'r']
+    genPred = Pred . (: []) <$> elements ['p' .. 'r']
     genT =
       oneof
         [ TNum <$> genNoisyNum
-        , TCon <$> ((: []) <$> elements ['a' .. 'c']) <*> pure []
+        , TCon <$> (FunSym . (: []) <$> elements ['a' .. 'c']) <*> pure []
         ]
     genNoisyNum = do
       sign <- elements ["", "+"]
@@ -291,6 +307,7 @@ strictSpecProps =
   , ("ND out-of-range index rejected", quickCheckResult prop_outOfRangeRejected)
   , ("ND local is not a dependency", quickCheckResult prop_localNotDependency)
   , ("encodeND normalization fidelity", quickCheckResult prop_normalizationFidelity)
+  , ("ND wire tag round-trip", quickCheckResult prop_tagRoundTrip)
   , ("strict unregistered backend rejected", quickCheckResult prop_unregisteredRejected)
   , ("strictCheck seals a judgment", quickCheckResult prop_strictCheckSeals)
   ]
