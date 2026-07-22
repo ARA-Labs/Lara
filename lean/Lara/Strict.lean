@@ -108,4 +108,62 @@ theorem nd_strict_step_sound (j : StrictJudgment ndBackend) :
     ndModels (j.premises.map ndBackend.enc) (ndBackend.enc j.goal) :=
   strict_step_sound j
 
+/-! ### Theorem 3 (source non-factivity — the factivity firewall)
+
+Discharges spec §9 **result 2** at the abstract level (C03). The paper proof
+(`ara/evidence/proofs/nonfactivity_and_defeat.md`, `strict-backend-decision.md`
+§5) is *syntactic confinement*: the source calculus has no truth judgment and no
+rule eliminating support into one, so by inversion backend acceptance produces
+only a *relative* support fact — never absolute truth. Even a fully factive
+backend cannot be used to eliminate source support into `⊢ p true`.
+
+In this abstract model the confinement is structural: a `StrictJudgment B`
+carries only `premises`, `goal`, and the acceptance fact, and its *only*
+soundness projection is `strict_step_sound`, which yields consequence **relative
+to the premises** (`B.models (premises.map enc) (enc goal)`). Non-factivity is
+the statement that this cannot be strengthened to premise-free truth
+(`B.models [] (enc goal)`). We prove the negative concretely: no such projection
+exists uniformly across backends, witnessed by the reference ND backend. -/
+
+/-- The witness proposition: the Phase-0 opaque atom `p` (nullary). -/
+def nonfactiveAtom : SourceProp := .atom "p" .nil
+
+/-- A concrete checked strict step against the reference ND backend: from the
+single premise `p`, the ND checker accepts the goal `p` (the identity/hypothesis
+step, `⊢ hyp 0 : p`). Its existence certifies backend acceptance — nothing more. -/
+def nonfactiveJudgment : StrictJudgment ndBackend where
+  premises := [nonfactiveAtom]
+  goal     := nonfactiveAtom
+  accepted := ⟨.hyp 0, .hyp rfl⟩
+
+/-- **The firewall bites.** The goal of an *accepted* strict step need not be
+semantically valid: the ND backend accepts `p ⊢ p`, yet `p` is false under the
+all-false valuation, so `⊨_ND p` fails. Acceptance confers relative support, not
+absolute truth. -/
+theorem nd_nonfactive_witness :
+    ¬ ndModels [] (ndBackend.enc nonfactiveJudgment.goal) := by
+  intro h
+  have hp : Lara.ND.satisfies (fun _ => false) (Lara.ND.Formula.atom "p") :=
+    h (fun _ => false) (fun ψ hψ => nomatch hψ)
+  simp only [Lara.ND.satisfies] at hp
+  exact absurd hp (by decide)
+
+/-- **Theorem 3 (non-factivity).** There is no uniform way to eliminate a checked
+strict step into a *premise-free* truth judgment about its goal — no map from
+`StrictJudgment B` to `B.models [] (B.enc goal)` for every backend `B`. This is
+the factivity firewall: backend acceptance never yields absolute truth. Proved by
+the reference ND witness, so it holds even against a factive backend. -/
+theorem no_truth_projection :
+    ¬ ∀ (B : Backend) (j : StrictJudgment B), B.models [] (B.enc j.goal) :=
+  fun h => nd_nonfactive_witness (h ndBackend nonfactiveJudgment)
+
+/-- The two halves side by side for the ND witness: the soundness projection gives
+consequence **relative to the premises** (`strict_step_sound`), and that is the
+*most* an accepted step yields — it cannot be strengthened to premise-free truth. -/
+theorem nd_relative_not_absolute :
+    ndModels (nonfactiveJudgment.premises.map ndBackend.enc)
+        (ndBackend.enc nonfactiveJudgment.goal)
+      ∧ ¬ ndModels [] (ndBackend.enc nonfactiveJudgment.goal) :=
+  ⟨strict_step_sound nonfactiveJudgment, nd_nonfactive_witness⟩
+
 end Lara.Strict

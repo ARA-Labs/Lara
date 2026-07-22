@@ -47,3 +47,8 @@ open Lara
 #print axioms Lara.Strict.strict_step_sound
 #print axioms Lara.Strict.ndBackend
 #print axioms Lara.Strict.nd_strict_step_sound
+
+-- Result 2 / C03: source non-factivity (Theorem 3, the factivity firewall).
+#print axioms Lara.Strict.nd_nonfactive_witness
+#print axioms Lara.Strict.no_truth_projection
+#print axioms Lara.Strict.nd_relative_not_absolute

@@ -10,7 +10,10 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | Spec §9 result | Content | Lean status |
 | --- | --- | --- |
 | **11** (support adequacy / `nf`/`≡`) | `Lara/Prop.lean` | ✅ **mechanized** — `nf`, `≡`, equivalence laws, decidability, idempotence, no-argument-reordering. No `sorry`; axioms: `propext` only. |
-| 1, 3, 4, 5, 7, 8, 9, 10 | — | not started (gated to M1 freeze; see mechanization-plan §6) |
+| **10** (ND adapter soundness + dependency exactness) | `Lara/ND.lean` | ✅ **mechanized** — `nd_sound`, `nd_relevance`, `fv_in_range`, `hyp_out_of_range_untypable`, plus the `infer` decision-procedure bridge. No `sorry`; `propext`/`Quot.sound` only. |
+| **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `propext` only. |
+| **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; `propext` only. |
+| 1, 3, 4, 5, 7, 9 | — | not started (gated to M1 freeze / compiled AF layer; see mechanization-plan §6) |
 | 6 (status preservation) | — | blocked — no direct source semantics yet (`../docs/mechanization-plan.md` §5) |
 
 This is the **low-risk warm-up** (`../docs/mechanization-plan.md` §6): the `nf`/`≡`

@@ -13,7 +13,7 @@
 | # | Result | Status | Grounds | Note |
 |---|--------|--------|---------|------|
 | 1 | Decidability of program + attack checking | spec-only | C02 | decidable functions defined; termination theorem pending mechanization |
-| 2 | Strict-backend isolation | paper-proved (+Haskell conformance) | C03 | Theorem 3 (non-factivity) by inversion; structural. `Lara.Strict` seals the factivity firewall in code (sealed `StrictJudgment`, opaque `SExpr` cert, no backend formula exported); Lean mechanization still pending M1. |
+| 2 | Strict-backend isolation | **mechanized** (+Haskell conformance) | C03 | Theorem 3 (non-factivity, the factivity firewall). `lean/Lara/Strict.lean`: `no_truth_projection` — no uniform map from a checked `StrictJudgment B` to premise-free truth `B.models [] (enc goal)` — proved via the reference ND witness `nd_nonfactive_witness` (the backend accepts `p ⊢ p` yet `⊨_ND p` fails under the all-false valuation), so it bites even against a factive backend; `nd_relative_not_absolute` pairs the relative-consequence projection (`strict_step_sound`) against the failure of absolute truth. No `sorry`, `propext` only. Also enforced structurally in both Haskell (sealed `StrictJudgment`, opaque `SExpr` cert, no backend formula exported) and Lean (`StrictJudgment` carries only source data). |
 | 3 | Dependency accountability (`leaves(w)`, `certDeps`) | spec-only | C08 | inversion lemma stated (spec §6); `Lara.SupportTerm` corpus-gated |
 | 4 | Compilation soundness + subargument closure | spec-only | C02 | the combinatorially fiddly one (positional attacks × closure) |
 | 5 | Grounded determinism + termination | spec-only | C07 | fixed-point argument in spec §8; `Lara.Grounded` not built |
@@ -25,16 +25,15 @@
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** (+implemented+tested) | C01 | `lean/Lara/Prop.lean`: `nf`/`≡`, equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only. Also `Lara.Prop` Haskell + 8 QuickCheck properties. |
 | 12 | Codec round-trip to α-equivalent AST | spec-only | C12 | test-only (not a soundness result); codec not built |
 
-**Summary**: 3 **mechanized** in Lean 4 (results 8, 10, 11 — the two frozen carve-outs); 2 paper-proved
-(2, 9); 6 spec-only (1, 3, 4, 5, 7, 12); 1 open (6). Results 8/10/11 also carry Haskell +
-property-test conformance. Per the mechanization discipline (CLAUDE.md), every frozen,
-corpus-independent result is mechanized as soon as its definitions land — result 11 was the warm-up,
-and carve-out 2 (results 8, 10) followed immediately. The remaining core results (1, 3, 4, 5, 9)
-depend on corpus-gated or compile-gated definitions and mechanize at/after M1 freeze
-(docs/mechanization-plan.md §6). Result 2 (Theorem 3, non-factivity) is paper-proved and enforced
-structurally in both the Haskell (sealed `StrictJudgment`) and Lean (`StrictJudgment` carries only
-source data) but is not yet stated as its own Lean theorem. Haskell conformance is not a substitute
-for the Lean proof.
+**Summary**: 4 **mechanized** in Lean 4 (results 2, 8, 10, 11 — the two frozen carve-outs plus the
+factivity firewall); 1 paper-proved (9); 6 spec-only (1, 3, 4, 5, 7, 12); 1 open (6). Results
+2/8/10/11 also carry Haskell + property-test conformance. Per the mechanization discipline
+(CLAUDE.md), every frozen, corpus-independent result is mechanized as soon as its definitions land —
+result 11 was the warm-up, carve-out 2 (results 8, 10) followed immediately, and result 2
+(non-factivity) landed once the abstract `Backend`/`StrictJudgment` model existed to state it against.
+The remaining core results (1, 3, 4, 5, 9) depend on corpus-gated or compile-gated definitions and
+mechanize at/after M1 freeze (docs/mechanization-plan.md §6). Result 9 (backend replacement) stays
+paper-proved pending the compiled AF layer.
 
 ## Methodology grounding (C10, C11, C12 — from the deep-research pass, E02)
 
@@ -57,6 +56,7 @@ the neural component (failed 1-2) — so LARA need not over-invest in baseline-b
 - Result 11 `implemented+tested` → C01's "trivial TCB addition" is empirically grounded, so `nf`/`≡`
   is frozen and the carve-out can be ported to Lean early.
 - Result 6 `open` → the highest-priority pre-M1 action: define the direct source semantics (N16).
-- Results 8/9/10 `paper-proved` but not mechanized → they stay on the M2 critical path; the paper's
-  soundness claim is not artifact-checkable until mechanized (C10).
+- Results 2/8/10 `mechanized` → the strict-backend soundness *and* isolation claims (Theorems 1, 3,
+  4) are now artifact-checkable, not just paper proofs (C10). Result 9 `paper-proved` stays on the M2
+  critical path until the compiled AF layer exists to state backend replacement against.
 - Results 3/4/5/7 `spec-only` and corpus-gated (or compile-order-gated) → wait on M0 / M3.

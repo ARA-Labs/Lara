@@ -1,7 +1,9 @@
 # Theorem 3 (source non-factivity) + Proposition 8 (monotonic consequence cannot represent defeat)
 
-- **Source**: docs/strict-backend-decision.md §5 Theorem 3, §6 Proposition 8. Theorem 3 is paper-proved
-  (targets spec §9 result 2); Proposition 8 is paper-proved (grounds the design behind result 5/§8).
+- **Source**: docs/strict-backend-decision.md §5 Theorem 3, §6 Proposition 8. Theorem 3 is
+  **mechanized** in Lean (`lean/Lara/Strict.lean`: `no_truth_projection` / `nd_nonfactive_witness` /
+  `nd_relative_not_absolute`; spec §9 result 2, `propext` only, `sorry`-free); Proposition 8 is
+  paper-proved (grounds the design behind result 5/§8).
 - **Grounds**: C03 (non-factivity), C06 (non-monotonic defeat).
 - **Assumptions used**: the source judgment forms (support / attack / status only, no truth judgment);
   grounded semantics; framework extension.
