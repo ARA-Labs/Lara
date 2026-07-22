@@ -1,0 +1,294 @@
+artifact: rebench-triton_cumsum
+group: rebench
+annotator: ai-executed (claude, 2026-07-21)
+deadend_cap: 'capped at 15 of 95 — selection rule: both official-stream dead ends on the development path
+  to C05''s 3-kernel pipeline (N04, N06), plus the 13 MALT dead ends most directly bearing on C09''s pure-PyTorch
+  performance-floor argument (micro-optimization, torch.compile / torch.jit, CUDA-graph launch-overhead,
+  and alternative-algorithm attempts). The remaining 80 dead ends bear only on unsampled claims — dtype
+  mismatch (C07), float32 precision (C08), grid=(1,) Triton kernels (C10), missing inter-block parity
+  carry (C11), and Triton 2.3.1 language restrictions (H13/H14) — and were left unclassified under the
+  cap.'
+claims:
+- claim_id: C05
+  claim_type: implementation-behavioral
+  proposition_shape:
+    sketch: achieves_score(triton_3kernel_pipeline, cfg(grid=128, block=16384, stages=8, warps=32, cudagraph_warmup=3),
+      rebench_scorer(n=1e8, h100), score=0.47)
+    arity: 4
+    phase0_nullary_sufficient: false
+    note: The claim binds a specific implementation-plus-launch-configuration to a specific score threshold
+      on a specific workload. A nullary atom would lose the config identity (the exact hardcoded autotune
+      winner) and the numeric score comparison that the falsification criterion (score > 0.47) checks.
+  inference_scheme:
+    scheme: benchmark_evaluation
+    strict_or_defeasible: defeasible
+    premises:
+    - tao_correct_solution.py (the kernel in the zip) is the same code that produced the README's reference
+      score of 0.47
+    - The scoring environment for the README number matches the task environment (H100, N=10^8 int32,
+      score = ln(time_ms))
+    - The README's reported reference score/time (0.47 / 1.6 ms) is accurate
+    - CUDA graph capture after 3 warmup runs excludes Triton JIT compilation from the timed region, so
+      the score reflects steady-state kernel time
+    - The pipeline is correct on all scored inputs (results_match and shape_dtype_match hold), otherwise
+      no valid score exists
+    supporting_experiments:
+    - E03
+  strict_certifier: domain-checker(kernel-config-inspector)
+  certifier_note: 'Only the code-inspection leg is strict: a checker that parses src/kernel/tao_correct_solution.py
+    can algorithmically certify that the single active autotune config is BLOCK_SIZE=16384, NUM_STAGES=8,
+    num_warps=32 (line 11; alternatives commented out), that grid_size=128, and that CUDA graph capture
+    follows 3 warmup runs with a PyTorch fallback for n < 1,000,000. The score achievement itself is empirical
+    and never strict.'
+  critical_questions:
+  - cq: Was the pipeline actually run against the official scorer by the artifact, rather than the score
+      being transcribed from the README?
+    mandatory: true
+    status: unmet-gap
+    basis: E03 Outcome cites evidence/tables/reference_scores.md, which sources metr-re-bench README;
+      no scorer invocation of tao_correct_solution.py is recorded anywhere in the artifact, and claims.md
+      marks C05 untested
+  - cq: Is correctness on all inputs (including the n < 1,000,000 PyTorch fallback path) established by
+      a recorded scorer pass?
+    mandatory: true
+    status: unmet-gap
+    basis: E03 Outcome asserts 'Correct on all inputs (per correctness check structure in score.py)' —
+      inferred from the check's structure, not from a logged results_match=True run
+  - cq: Does the artifact's execution environment match the one that produced the reference number (H100,
+      Triton 2.3.1, same scorer)?
+    mandatory: true
+    status: unmet-gap
+    basis: E03 Setup records kernel config but no hardware/software environment; reference_scores.md only
+      points at the README
+  - cq: Is JIT compilation overhead excluded from the timed region (warmup discipline)?
+    mandatory: false
+    status: met
+    basis: 'E03 Setup: ''CUDA graph capture after 3 warmup runs''; corroborated by tao_correct_solution.py
+      (C06 cites lines 130-143, 206-215)'
+  leaf_granularity: mixed
+  leaves:
+  - atom: The official reference solution scores 0.47 (1.6 ms) on N=10^8
+    provenance: attested
+    refs:
+    - evidence/tables/reference_scores.md
+    - metr-re-bench/ai_rd_triton_cumsum/README.md (transcribed)
+  - atom: 'tao_correct_solution.py hardcodes a single active autotune config: BLOCK_SIZE=16384, NUM_STAGES=8,
+      num_warps=32; other configs commented out'
+    provenance: observed
+    refs:
+    - src/kernel/tao_correct_solution.py lines 7-13
+    - trace N09
+  - atom: The solution captures a CUDA graph after 3 warmup runs and falls back to PyTorch for n < 1,000,000
+    provenance: observed
+    refs:
+    - src/kernel/tao_correct_solution.py
+    - E03 Setup
+    - trace N08
+  - atom: The zip kernel is the same code that produced the README reference score
+    provenance: assumed
+    refs:
+    - E03 Source note; claims.md C05 Provenance ('README states reference score; kernel is from zip')
+  attack_candidates:
+  - node: N04
+    decision: none
+    target: n/a
+    rationale: Rejected predecessor design (single-pass per-SM kernel with no inter-SM communication)
+      on the path that motivated the 3-kernel pipeline; it rules out an alternative, it does not conflict
+      with C05's conclusion, scheme, or leaves.
+  - node: N06
+    decision: none
+    target: n/a
+    rationale: Rejected design alternative (spin-wait tl.atomic_max barrier, 'very jank barrier') whose
+      failure is the stated reason for splitting into 3 kernels; motivating dead end, not an attack on
+      C05.
+  holes:
+  - No scorer invocation of tao_correct_solution.py exists in the artifact; the 0.47 score is transcribed
+    from the README and the claim's own falsification criterion (run the scorer) was never executed
+  - Identity of the zip kernel with the solution that produced the README number is assumed, not evidenced
+  - Hardware/software environment behind the reference number is unrecorded in the artifact
+  coverage_flags: []
+  uncertain: false
+  note: 'C05 is marked untested in claims.md, and the annotation reflects that: the benchmark_evaluation
+    scheme is instantiated only vicariously (the README''s run), so all three environment/execution CQs
+    are unmet-gaps — the claim is unestablished within the artifact rather than defeated. The code-inspection
+    leaves (config, warmup, fallback) were verified against the shipped source during annotation.'
+- claim_id: C09
+  claim_type: negative-result
+  proposition_shape:
+    sketch: perf_floor_above_ref(pytorch_two_cumsum_class, h100, n=1e8, floor_ms(1.5, 3.0), ref_score(0.47),
+      cause(hbm_bandwidth, traffic_gb=1.6))
+    arity: 6
+    phase0_nullary_sufficient: false
+    note: The claim quantifies over an implementation class (any pure-PyTorch two-cumsum variant), asserts
+      a numeric floor range, compares it to a reference score, and attributes the floor to memory bandwidth.
+      A nullary atom would lose the class quantification, the floor-vs- reference comparison, and the
+      causal bandwidth attribution — all of which the evidence separately bears on.
+  inference_scheme:
+    scheme: cross_run_observation
+    strict_or_defeasible: defeasible
+    premises:
+    - The 22 MALT runs' attempts exhaust the reasonable pure-PyTorch design space (eager variants, torch.compile
+      modes, torch.jit, CUDA graphs, alternative algorithms), so the observed clusters are a floor, not
+      a sampling artifact
+    - Scorer timings across runs are comparable measurements of the same workload (N=10^8 int32 on H100)
+    - The pipeline's HBM traffic is ~4 x 400 MB = 1.6 GB per invocation (two full-tensor cumsum passes
+      plus mask construction), making it bandwidth-bound rather than launch-bound
+    - No observed pure-PyTorch attempt achieved score <= 0.47 (the universal leg)
+    - The exploration-tree evidence set is complete enough that the absence of a sub-reference PyTorch
+      run in it reflects absence in the underlying runs
+    supporting_experiments:
+    - E05
+    - E06
+  strict_certifier: domain-checker(hbm-traffic-arithmetic)
+  certifier_note: 'Only the traffic arithmetic is strict: N=10^8 int32 = 400 MB per full pass; two cumsum
+    passes (read+write) plus mask construction gives the claimed ~4 x 400 MB = 1.6 GB, re-checkable by
+    a domain checker from the op structure in E05''s Setup. The step from 1.6 GB to a 1.5-3 ms floor is
+    empirical (H100 peak HBM bandwidth would allow ~0.5 ms), so the floor itself is never strict.'
+  critical_questions:
+  - cq: Do the aggregated runs include the strongest PyTorch variants (torch.compile default / max-autotune),
+      not just eager code?
+    mandatory: true
+    status: met
+    basis: E06 Setup covers modes {default, max-autotune, max-autotune-no-cudagraphs, reduce-overhead,
+      fullgraph=True} over 12+ runs; E05 covers four eager variant families over 22 runs
+  - cq: Is the universal leg ('floor sits above 0.47 in every observed MALT run') consistent with all
+      evidence recorded in the artifact?
+    mandatory: true
+    status: unmet-defeater
+    basis: 'The trace filter (exploration_tree.yaml header: ''attempts with score < 0.47 are excluded'')
+      makes the tree structurally unable to show a counterexample, and claims.md C12 explicitly attests
+      one: ''A small minority of torch.compile runs beat reference 0.47'', citing MALT 347447 attempt
+      3 (score 0.430) — a pure-PyTorch torch.compile run meeting C09''s own falsification criterion'
+  - cq: Is run-to-run variance accounted for when stating the 1.5-1.8 ms compiled plateau?
+    mandatory: true
+    status: met
+    basis: E06 Outcome documents the dispersion band explicitly (1.46 -> 2.5 ms on identical code, autotune
+      re-probing, 200 ms-3 s first-call compile cost)
+  - cq: Is the bandwidth-bound attribution grounded in an explicit analysis rather than assumed from op
+      counts?
+    mandatory: false
+    status: met
+    basis: E05 Setup fixes the two-cumsum op structure; explicit bandwidth analyses are attested in MALT
+      345741 attempt 20 and 347454 msg 139/151 (cited in claims.md C09 Proof), though not reproduced in
+      evidence/
+  leaf_granularity: mixed
+  leaves:
+  - atom: Eager two-cumsum variants cluster at 2.2-5.0 ms (score 0.8-1.6) across the 22 MALT runs
+    provenance: observed
+    refs:
+    - E05 Outcome
+    - evidence/tables/malt_attempts.md (120+ rows)
+    - trace N164/N167/N274/N424/N427/N521/N1029/N1072 among others
+  - atom: torch.compile default / max-autotune variants plateau at 1.5-1.8 ms; reduce-overhead and fullgraph
+      regress or fail
+    provenance: observed
+    refs:
+    - E06 Outcome
+    - evidence/tables/malt_attempts.md
+    - trace N773 (1.71 ms), N876 (1.62 ms)
+  - atom: The pipeline moves ~4 x 400 MB = 1.6 GB of HBM traffic per invocation, so it is bandwidth-bound
+    provenance: attested
+    refs:
+    - 'claims.md C09 Proof: bandwidth analysis in MALT 345741 attempt 20, 347454 msg 139/151'
+  - atom: No pure-PyTorch attempt in any observed MALT run scored <= 0.47
+    provenance: assumed
+    refs:
+    - trace/exploration_tree.yaml (whole malt_stream) — but the header filter excludes score < 0.47 attempts,
+      so this leaf is unauditable from the tree and is contradicted by claims.md C12 (347447 attempt 3,
+      score 0.430)
+  attack_candidates:
+  - node: N117
+    decision: none
+    target: n/a
+    rationale: torch.roll shift variant failing under @torch.compile is a rejected variant of the pipeline
+      C09 quantifies over; its failure narrows the design space and thereby supports, not attacks, the
+      floor.
+  - node: N165
+    decision: none
+    target: n/a
+    rationale: Micro-optimization (torch.where -> mask multiply) losing at 100M is a ruled-out alternative
+      that reinforces the claim that op-level tweaks cannot break the floor; no edge.
+  - node: N166
+    decision: none
+    target: n/a
+    rationale: Manual expression 'fusion' failing to cut memory traffic at large N directly corroborates
+      the bandwidth-bound premise; a supporting dead end, not an attack.
+  - node: N273
+    decision: none
+    target: n/a
+    rationale: torch.compile(reduce-overhead, fullgraph=True) crashing at warmup rules out one compile
+      mode; consistent with E06's reported regressions, no conflict with C09.
+  - node: N423
+    decision: none
+    target: n/a
+    rationale: CUDA-graph capture with wrong warmup shape is an execution error in a launch-overhead attack
+      that never produced a timing; rejected approach, no edge.
+  - node: N772
+    decision: none
+    target: n/a
+    rationale: CUDA-graph capture around a compiled forward aborting rules out another launch-overhead
+      route; consistent with the pipeline being bandwidth-bound rather than launch-bound.
+  - node: N875
+    decision: none
+    target: n/a
+    rationale: CUDA-graph wrapping failing on a generator-using op is the same ruled-out launch-overhead
+      route as N772 in a different run; no edge to C09.
+  - node: N925
+    decision: none
+    target: n/a
+    rationale: torch.nonzero segment algorithm timing out rules out an alternative pure-PyTorch algorithm,
+      supporting the premise that two-cumsum is the canonical PyTorch form; no attack.
+  - node: N969
+    decision: none
+    target: n/a
+    rationale: Chunked hybrid with .item() cross-chunk adds is a rejected alternative whose failure is
+      about parity-carry semantics (bears on C11); irrelevant to C09's floor beyond narrowing the design
+      space.
+  - node: N1013
+    decision: none
+    target: n/a
+    rationale: torch.jit.script slowing the chain 5x rules out the TorchScript route; supports the floor,
+      no edge.
+  - node: N1015
+    decision: none
+    target: n/a
+    rationale: The 4500x torch.compile 'slowdown' is a mistimed measurement (compile cost inside the timed
+      region, no warmup); its overgeneralized lesson ('no speedup achievable') conflicts with E06's observed
+      1.5 ms plateau, but the node's own measurement is invalid, so it neither rebuts the plateau leaf
+      nor undercuts the scheme.
+  - node: N1025
+    decision: none
+    target: n/a
+    rationale: gather-based shift producing wrong output is a correctness bug in a rejected shift primitive
+      (off-by-one family, bears on C02); no bearing on the performance floor.
+  - node: N1070
+    decision: none
+    target: n/a
+    rationale: JIT-scripted Python loop timing out rules out the last 'algorithmically different' pure-PyTorch
+      route in that run; supports the two-cumsum-floor premise, no edge.
+  holes:
+  - 'The universal leg (''floor sits above 0.47 in every observed MALT run'') is contradicted within the
+    artifact: C12''s proof cites MALT 347447 attempt 3 at score 0.430 and states a small minority of torch.compile
+    runs beat reference'
+  - The trace's inclusion filter (score < 0.47 excluded) makes the no-sub-reference-run leaf unauditable
+    from the exploration tree — the evidence set is selection-biased against exactly the counterexamples
+    that would falsify the claim
+  - 'The bandwidth attribution does not derive the floor: 1.6 GB at H100 peak HBM bandwidth implies ~0.5
+    ms, well below the observed 1.5 ms plateau, so the quantitative floor is empirical and the causal
+    premise is only qualitative'
+  - The design-space-exhaustion premise ('any pure-PyTorch implementation performs two full-tensor cumsum
+    passes') rests on observed failures of a finite set of alternatives (nonzero segments, Python loops,
+    chunked hybrids), not on an argument
+  coverage_flags:
+  - 'Stochastic outcome dispersion has no direct construct: identical submitted code yields 1.5x-2x different
+    scores across cold runs (E06: 1.46 -> 2.33-2.50 ms), so the leaf ''impl achieves time t'' is not functional
+    in the implementation — the vocabulary can state interval bounds but cannot express that the measurand
+    is a distribution whose tail crosses the reference threshold, which is exactly the fact separating
+    C09''s universal from C12''s minority-beats-reference'
+  uncertain: false
+  note: The core of C09 (bandwidth-bound plateau, gap to reference requires a fused Triton pass) is well
+    supported by E05/E06 across runs; the unmet-defeater applies specifically to the over-strong universal
+    'in every observed MALT run' leg, which the artifact's own C12 contradicts with a cited 0.430 torch.compile
+    score. No dead-end node carries that counterexample because the tree filter excludes sub-reference
+    attempts, so the defeater surfaces as an unmet CQ and a hole rather than as a typed attack edge. claim_type
+    adjudicated via double-annotation 2026-07-22.

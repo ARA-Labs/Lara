@@ -1,0 +1,221 @@
+artifact: sapg
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null   # only 2 dead_end nodes (N05, N13); all classified for every sampled claim
+claims:
+  - claim_id: C01
+    claim_type: negative-result
+    proposition_shape:
+      sketch: "perf_saturates(ppo, parallel_envs, threshold_25k, task)"
+      arity: 4
+      phase0_nullary_sufficient: true
+      note: >
+        Downstream use (C02/C04 depend on C01) consumes it as an opaque motivating
+        fact — neither the ~25k threshold nor the task argument is re-used in a
+        dependent inference, so a nullary atom loses no checkable structure at phase 0.
+    inference_scheme:
+      scheme: dose_response
+      strict_or_defeasible: defeasible
+      premises:
+        - "Batch sizes span a wide enough range (up to 100,000 envs) to distinguish a plateau from slow growth"
+        - "Each batch size is trained to a comparable asymptote (convergence or a budget that does not disadvantage large batches)"
+        - "Asymptotic performance is measured with the same metric across batch sizes and averaged over >=3 seeds"
+        - "No other hyperparameter co-varies with batch size in a way that caps large-batch performance"
+      supporting_experiments: [E01]
+    strict_certifier: domain-checker(gaussian-concentration-analysis)
+    certifier_note: >
+      Only the mechanism sub-step is plausibly strict: the claim's "due to redundant
+      IID samples from a shared Gaussian policy" rests on a mathematical analysis of
+      Gaussian sampling concentration (N03 evidence), which a domain checker could
+      certify as a derivation. The empirical plateau itself (E01) is never strict.
+    critical_questions:
+      - cq: "Does the batch-size sweep extend far enough beyond the claimed threshold to distinguish saturation from slow growth?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 1: sweep spans ~1500 to 100,000 environments, 4x beyond the ~25k threshold"
+      - cq: "Is asymptotic performance measured comparably at every batch size — trained to convergence or under a budget that does not penalize large batches?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 Procedure step 2 says 'to convergence (or a fixed compute budget)' — the disjunction is left unresolved; a fixed budget could artificially cap large-batch performance"
+      - cq: "Were optimizer hyperparameters (learning rate, minibatch size) re-tuned per batch size, ruling out the optimizer-bottleneck alternative?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 Setup/Procedure is silent on per-batch-size tuning; N03 explicitly lists 'learning rate too small' and 'trust region too conservative at large batch' as considered alternatives, rejected only by analysis"
+      - cq: "Is the plateau replicated across seeds and across more than one task?"
+        mandatory: false
+        status: met
+        basis: "E01 Procedure step 5 (>=3 seeds, report mean) and step 3 (both Shadow Hand and Allegro Kuka Throw)"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "PPO asymptotic performance at batch size b on task t (mean over >=3 seeds) — one point per (task, batch-size) cell of the E01 sweep"
+        provenance: attested
+        refs: ["logic/experiments.md#E01", "trace/exploration_tree.yaml#N02", "Figure 2"]
+      - atom: "SAPG reference performance level exceeds the PPO plateau on the same tasks (dashed-line comparison)"
+        provenance: attested
+        refs: ["logic/experiments.md#E01 Procedure step 4", "trace/exploration_tree.yaml#N02"]
+      - atom: "IID sampling from a shared Gaussian policy yields redundant samples at large scale (mechanism)"
+        provenance: assumed
+        refs: ["trace/exploration_tree.yaml#N03"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design alternative in the solution space (independent population training); its lesson is consistent with C01 and bears on neither its conclusion nor its support."
+      - node: N13
+        decision: none
+        target: "n/a"
+        rationale: "Rejected SAPG data-mixing design; concerns off-policy ratio inside SAPG, unrelated to PPO batch-size saturation."
+    holes:
+      - "The mechanistic attribution (IID Gaussian redundancy) is supported only by an analysis sketch cited in N03; the derivation itself is not in the artifact"
+      - "Convergence-vs-fixed-budget ambiguity in E01 leaves the fairness of the asymptote measurement open"
+      - "Per-batch-size hyperparameter re-tuning is unstated, so the optimizer-bottleneck alternative is excluded by argument, not by experiment"
+    coverage_flags:
+      - "The claim bundles an empirical regularity (plateau) with a mechanistic explanation ('due to redundant IID samples') in one atom; the vocabulary has no construct to mark the mechanism sub-claim as a separately attackable component"
+    uncertain: false
+    note: ""
+
+  - claim_id: C02
+    claim_type: comparative
+    proposition_shape:
+      sketch: "outperforms(sapg, baselines{ppo,dexpbt,pql}, allegro_kuka_hard_suite, steps_2e10, margin)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: >
+        The claim has distinct comparison legs with different content — 12-66% over
+        DexPBT vs. PPO/PQL failing entirely — and its falsification criteria and
+        potential attacks target specific legs; a nullary atom cannot distinguish
+        which baseline comparison fails.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "All methods run under identical environment conditions (N=24,576 envs, same horizon, same 2e10 step budget)"
+        - "Baselines are competently configured (DexPBT M=6 matching SAPG's population size; PQL/PPO at their standard settings)"
+        - "The metric (episode successes at 2e10 steps) is computed identically for all methods"
+        - "Reported gaps exceed seed variance (mean +/- standard error over 5 seeds)"
+      supporting_experiments: [E02, E03]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Are all methods compared under the same environment count, horizon, and step budget?"
+        mandatory: true
+        status: met
+        basis: "E02/E03 Setup: N=24,576 envs, 16-step horizon, 2e10 steps, 5 seeds for every method"
+      - cq: "Were the baselines given equivalent tuning effort or their authors' recommended hyperparameters?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 Procedure fixes SAPG's configuration in detail (step 3) but specifies only population structure for DexPBT (step 4) and nothing for PPO/PQL tuning"
+      - cq: "Is seed-level uncertainty reported so that 'significantly higher' is checkable against variance?"
+        mandatory: true
+        status: met
+        basis: "E02 Procedure step 6: mean +/- standard error across 5 seeds at 2e10 steps"
+      - cq: "Is there parameter/compute parity between SAPG (M=6 policies, LSTM 768) and single-policy baselines (PPO, PQL)?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E02 Setup gives SAPG's architecture but no parity discussion; the shared env-step budget gives sample parity only"
+      - cq: "Does the comparison cover both hard and easy regimes so the 'hard tasks' scoping is grounded?"
+        mandatory: false
+        status: met
+        basis: "E02 (AllegroKuka hard suite) plus E03 (ShadowHand/AllegroHand easy tasks) with the contrast stated in expected outcomes"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Episode successes of method m on AllegroKuka task t at 2e10 steps (mean +/- stderr, 5 seeds) — one cell per (method, task)"
+        provenance: attested
+        refs: ["logic/experiments.md#E02", "trace/exploration_tree.yaml#N12", "Table 1", "Figure 5"]
+      - atom: "Episode reward of method m on ShadowHand/AllegroHand at 2e10 steps — one cell per (method, task)"
+        provenance: attested
+        refs: ["logic/experiments.md#E03", "trace/exploration_tree.yaml#N12"]
+      - atom: "PPO and PQL achieve near-zero successes on the hard AllegroKuka tasks"
+        provenance: attested
+        refs: ["logic/claims.md#C02", "trace/exploration_tree.yaml#N12"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design alternative (DexPBT-style independent training); its failure mode explains the DexPBT gap and if anything supports C02 rather than attacking it."
+      - node: N13
+        decision: none
+        target: "n/a"
+        rationale: "Rejected SAPG hyperparameter design ruled out during development; standard SAPG (50/50 split) is what E02 compares, so no conflict with C02's conclusion or support."
+    holes:
+      - "Baseline tuning protocol for PPO/PQL/DexPBT is unstated, leaving the fairness premise of the comparison open"
+      - "The 12-66% margin appears only in claims.md and the trace; no result table with the underlying cells is in the corpus"
+      - "Model-capacity parity between the M=6 SAPG population and single-policy baselines is not addressed"
+    coverage_flags: []
+    uncertain: false
+    note: ""
+
+  - claim_id: C06
+    claim_type: causal
+    proposition_shape:
+      sketch: "selective_benefit(entropy_reg(sigma_0.005), follower_policies, hard_tasks{reorientation}, easy_tasks{allegrohand,regrasping,throw})"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >
+        The claim is a task-conditional contrast: a positive effect on Reorientation
+        (up to 16.5%) AND a null-to-negative effect on easier tasks. Its falsification
+        criteria test both directions, so an opaque nullary atom flattens two
+        opposite-signed sub-results that must be independently checkable.
+    inference_scheme:
+      scheme: dose_response
+      strict_or_defeasible: defeasible
+      premises:
+        - "Only the entropy coefficient sigma varies across {0, 0.003, 0.005}; all other SAPG settings are held fixed"
+        - "The sigma=0 arm serves as the no-treatment baseline on every task"
+        - "The Reorientation improvement (up to 16.5%) exceeds seed-level noise across 5 seeds"
+        - "The same sweep is run on easy tasks so the selective (task-conditional) part of the claim is grounded, not extrapolated"
+      supporting_experiments: [E04, E06]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is sigma the only varied factor between compared runs?"
+        mandatory: true
+        status: met
+        basis: "E06 Procedure step 1: for each task and each sigma, train SAPG identically to 2e10 steps; E04 varies entropy within otherwise-standard SAPG"
+      - cq: "Is a sigma=0 (no-entropy) baseline present on every task?"
+        mandatory: true
+        status: met
+        basis: "E06 Setup (sigma in {0, 0.003, 0.005} on all 6 tasks) and Baselines ('SAPG with sigma=0')"
+      - cq: "Is seed-level variance reported so the 16.5% Reorientation effect is distinguishable from noise?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E06 Setup specifies 5 seeds but Procedure step 2 says only 'report final performance and learning curves' — no stderr reporting is specified, unlike E02"
+      - cq: "Is the sigma grid fine enough to support the specific coefficient claimed (0.005)?"
+        mandatory: false
+        status: met
+        basis: "E06 Setup: three levels {0, 0.003, 0.005} suffice for the directional claim, though not for optimality of 0.005"
+      - cq: "Is the causal mechanism (entropy -> more exploration on harder tasks) tested beyond correlation with task difficulty?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E06 Expected outcome: 'entropy benefit should correlate with task requiring more exploration' — correlational framing only; no direct exploration measurement is tied to the sigma sweep"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Final SAPG performance at sigma s on task t at 2e10 steps — one cell per (sigma, task) of the E06 sweep"
+        provenance: attested
+        refs: ["logic/experiments.md#E06", "trace/exploration_tree.yaml#N11", "Figure 6"]
+      - atom: "sigma=0.005 improves Reorientation by up to 16.5% over sigma=0"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml#N11", "logic/claims.md#C06"]
+      - atom: "sigma=0 is optimal on AllegroHand, Regrasping, and Throw (entropy gives marginal or negative benefit)"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml#N11", "logic/experiments.md#E04 Expected outcome"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected population-training alternative; bears on the aggregation design lineage, not on the entropy-regularization effect or its evidence."
+      - node: N13
+        decision: none
+        target: "n/a"
+        rationale: "Rejected off-policy-ratio design; orthogonal axis to the entropy coefficient and does not conflict with C06's conclusion, inference, or premises."
+    holes:
+      - "No uncertainty reporting is specified for the E06 sweep, so the 16.5% effect-vs-noise premise is open"
+      - "The exploration-based mechanism is asserted via cross-task correlation, not measured (e.g. no E05-style diversity metric conditioned on sigma)"
+      - "The coefficient claim is grounded on a 3-point grid; 0.005 being best among {0, 0.003, 0.005} does not establish it as a per-task optimum"
+    coverage_flags:
+      - "Task-conditional selective effect (positive on hard tasks, null/negative on easy tasks) is one claim bundling opposite-signed sub-results; the schema expresses this only via the proposition sketch, with no construct for a conditional/scoped effect"
+    uncertain: false
+    note: >
+      Scheme choice: dose_response (3-level sigma sweep with per-task contrast) over
+      component_ablation, since E06 varies a continuous coefficient rather than
+      removing a component; E04's sigma variants are treated as points of the same sweep.

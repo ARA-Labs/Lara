@@ -1,0 +1,15 @@
+sessions:
+  - id: "2026-07-21_001"
+    date: "2026-07-21"
+    summary: "M0 kickoff: corpus submodule pin, extraction pipeline (231/279), six-way typing pass, seeded 60-claim stratified sample (PR #8)."
+    turn_count: 4
+    events_count: 7
+    claims_touched: []
+    open_threads: 5
+  - id: "2026-07-22_001"
+    date: "2026-07-22"
+    summary: "M0 annotation pass + affirmation: 60/60 claims annotated (kappa 0.73), findings crystallized as C13-C17, N29 authored-adversarial decision."
+    turn_count: 2
+    events_count: 11
+    claims_touched: [C13, C14, C15, C16, C17]
+    open_threads: 5

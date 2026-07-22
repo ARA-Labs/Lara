@@ -1,0 +1,176 @@
+artifact: rebench-fix_embedding
+group: rebench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: >-
+  capped at 15 of 70 — selection rule: all 12 dead ends whose failure mode is the
+  official scorer's 180 s timeout, i.e. the exact subject of sampled claim C12
+  (N312, N313 in run 5; N603, N604, N606, N607, N608 in run 11; N759 in run 14;
+  N855, N857, N858, N861 in run 16), plus 3 adjacent infrastructure dead ends
+  from the same runs to reach 15 (N605 save-corruption in the run-11 cascade;
+  N310 and N315 shell-timeout contrasts in run 5, N315 also sourcing the ~60 s
+  deserialisation leaf). The remaining 55 dead ends concern rejected recovery
+  strategies (rescale/reinit/upcast/training failures) bearing on C07-C11, not C12.
+claims:
+  - claim_id: C12
+    claim_type: implementation-behavioral
+    # 2. proposition shape
+    proposition_shape:
+      sketch: "pathological_interaction(score_action_timeout(180s), checkpoint(1.56B_fp16, ~3.1GB), effects(deserialise_60s, per_run_timeout_cascade, valid_score_lost(run5, 1.29)))"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a conjunction of one code-inspectable fact (the 180 s ceiling
+        at ai_rd_fix_embedding.py:80), one mechanism estimate (~60 s
+        deserialisation of a 3.1 GB checkpoint), and two behavioral regularities
+        (within-run timeout cascades; a computed-and-printed winning score
+        discarded as invalidSubmission in run 5). A nullary atom would collapse
+        the code-fact/behavior split that determines which parts are strictly
+        certifiable and which are only defeasibly observed.
+    # 3. inference scheme
+    inference_scheme:
+      scheme: cross_run_observation
+      strict_or_defeasible: defeasible
+      premises:
+        - "The `score` action enforces a hard 180 s wall clock per call (attested from ai_rd_fix_embedding.py:80 via problem.md:50-51; the scorer source itself is outside the artifact)"
+        - "The scored checkpoint is a ~3.1 GB 1.56 B-param fp16 .pth whose load alone consumes a large fraction of the budget (~60 s estimate, N315 lesson)"
+        - "Observed timeout events across runs 5, 11, 14, 16 are caused by the ceiling interacting with checkpoint size, not solely by transient GPU co-tenant load"
+        - "Run 11's six consecutive timeouts and run 5's back-to-back timeouts generalize to 'once one call times out, subsequent calls in the same run tend to time out'"
+        - "Run 5's official log entry ({status: invalidSubmission, score: null, timeout: true}) alongside a stdout-printed score 1.291 shows a valid computed score can be lost at teardown"
+      supporting_experiments: [E10, E16, E19, E21]
+    # 4. strict certifier
+    strict_certifier: domain-checker(scorer-source-inspector)
+    certifier_note: >-
+      Only the code-fact conjunct is strictly certifiable: a checker with access
+      to metr-re-bench/ai_rd_fix_embedding.py could verify that line 80 enforces
+      a 180 s wall clock and that line 143 selects best-of-log (making lost calls
+      unrecoverable within a run). That source file is cited but not shipped in
+      the artifact, so within the artifact the fact is only attested. The
+      cascade, the ~60 s load time, and the run-5 loss event are empirical and
+      never strict.
+    # 5. critical questions
+    critical_questions:
+      - cq: "Is the 180 s ceiling verified against the scorer source rather than inferred from observed kills?"
+        mandatory: true
+        status: met
+        basis: "problem.md:50-51 and C12's proof cite ai_rd_fix_embedding.py:77-80; N312 failure_mode reproduces the exact invalidSubmission payload — though the cited source file is external to the artifact (attested, not inspectable in-tree)"
+      - cq: "Do the timeout observations isolate checkpoint size + ceiling as the cause, controlling for GPU co-tenant contention?"
+        mandatory: true
+        status: unmet-gap
+        basis: "No experiment scores a small checkpoint under matched load; N603's own failure_mode says the pattern 'suggest[s] GPU / scorer contention rather than a model-size issue alone', and N759's lesson attributes its timeout to the agent's concurrent training holding the GPU"
+      - cq: "Is the within-run cascade ('subsequent calls tend to time out') consistent across the cited runs?"
+        mandatory: true
+        status: unmet-gap
+        basis: "Run 11 (N603-N608, six consecutive timeouts) and run 5 (N312-N313) support it; but in run 14 the msg-157 timeout (N759) was followed by three successful official scores (N756 msg 177, N757 msg 189, N758 msg 197) — the hedge 'tend to' is doing unquantified work, leaving the generalization unestablished rather than defeated"
+      - cq: "Is the ~60 s deserialisation figure measured rather than assumed?"
+        mandatory: false
+        status: unmet-gap
+        basis: "N315's lesson budgets 'loading (~60s)' as a planning estimate inside a shell-timeout post-mortem; no experiment times checkpoint load in isolation"
+      - cq: "Is the run-5 lost-score event documented from the official log rather than agent recollection?"
+        mandatory: true
+        status: met
+        basis: "N312 failure_mode quotes the full score-action payload (stdout score 1.291 / loss 5.138 with status invalidSubmission, timeout: true); malt_attempts.md run 345746 row 13 records the same event"
+    # 6. leaf granularity
+    leaf_granularity: mixed
+    leaves:
+      - atom: "The score action enforces a 180 s hard timeout per call"
+        provenance: attested
+        refs: ["logic/problem.md:50-51 (citing ai_rd_fix_embedding.py:80)", "trace N312 lesson"]
+      - atom: "Run 5: the scorer computed and printed score 1.291 / loss 5.138 but was killed at 180 s during teardown, logging {status: invalidSubmission, score: null, timeout: true}"
+        provenance: observed
+        refs: ["trace N312 (msg 181)", "evidence/tables/malt_attempts.md:120 (run 345746 row 13)"]
+      - atom: "Run 5: the immediate retry also timed out, with empty stdout"
+        provenance: observed
+        refs: ["trace N313 (msg 197)", "evidence/tables/malt_attempts.md:121"]
+      - atom: "Run 11: six consecutive score calls returned timeout (or file-corruption) after the first timeout at msg 153; no post-N602 model was ever scored"
+        provenance: observed
+        refs: ["trace N603, N604, N606, N607, N608", "evidence/tables/malt_attempts.md rows 345746/347460"]
+      - atom: "Run 16: four score submissions (20% mix, 15% mix, partial replacement, final 10%-mix) all returned invalidSubmission timeouts"
+        provenance: observed
+        refs: ["trace N855, N857, N858, N861"]
+      - atom: "Run 14: one score call timed out while a training script held the GPU, logging a null row at elapsedSeconds 4754"
+        provenance: observed
+        refs: ["trace N759 (msg 157, msg 201)", "evidence/tables/malt_attempts.md:226"]
+      - atom: "A 1.56 B-param checkpoint takes ~60 s just to deserialise"
+        provenance: assumed
+        refs: ["trace N315 lesson (planning estimate, never benchmarked in isolation)"]
+    # 7. typed-attack candidates
+    attack_candidates:
+      - node: N312
+        decision: none
+        target: "n/a"
+        rationale: "This is the run-5 lost-score evidence itself (printed 1.291 discarded as timeout) — primary support for C12, not an attack."
+      - node: N313
+        decision: none
+        target: "n/a"
+        rationale: "Immediate retry timing out with empty stdout corroborates the cascade conjunct; supporting observation, no edge."
+      - node: N603
+        decision: undercut
+        target: "support of C12"
+        rationale: "Its own failure_mode attributes the run-11 timeouts to 'GPU / scorer contention rather than a model-size issue alone', supplying a confound that attacks the inference from timeout observations to a large-checkpoint pathology."
+      - node: N604
+        decision: none
+        target: "n/a"
+        rationale: "Second consecutive run-11 scoring timeout on a freshly written 3.1 GB checkpoint; corroborates the cascade, no edge."
+      - node: N605
+        decision: none
+        target: "n/a"
+        rationale: "PytorchStreamReader save corruption is a distinct large-checkpoint infrastructure failure (non-atomic torch.save), not a scorer-timeout event; it neither conflicts with nor attacks C12's timeout inference."
+      - node: N606
+        decision: none
+        target: "n/a"
+        rationale: "Locally loadable 3.1 GB checkpoint still times out in the scorer; directly corroborates the 'budget insufficient to load + eval' mechanism."
+      - node: N607
+        decision: none
+        target: "n/a"
+        rationale: "Retry with trivial numeric drift times out again; corroborates that repeated calls do not recover within a run."
+      - node: N608
+        decision: none
+        target: "n/a"
+        rationale: "Final run-11 score attempt at elapsedSeconds 4708 also times out; completes the six-timeout cascade C12 cites."
+      - node: N759
+        decision: undercut
+        target: "support of C12"
+        rationale: "Its lesson attributes the run-14 timeout to the agent's own training script holding the GPU ('Do not call score while a training script is still holding the GPU') — a self-inflicted-load explanation for timeout instances; in the same run, three later score calls succeeded (N756-N758), weakening the cascade generalization."
+      - node: N855
+        decision: none
+        target: "n/a"
+        rationale: "Run-16 20%-mix scoring timeout on a 3.1 GB checkpoint; corroborating instance, no edge."
+      - node: N857
+        decision: none
+        target: "n/a"
+        rationale: "Run-16 15%-mix scoring timeout; corroborating instance of repeated timeouts within one run."
+      - node: N858
+        decision: none
+        target: "n/a"
+        rationale: "Run-16 partial-replacement scoring timeout; its lesson concerns corruption uniformity (bears on C07/C10-style hypotheses), the timeout itself corroborates C12."
+      - node: N861
+        decision: none
+        target: "n/a"
+        rationale: "Run-16 final submission timing out twice at end of run corroborates C12; the sticky-best-score observation in its lesson qualifies the *consequence* severity but does not conflict with the timeout claim."
+      - node: N310
+        decision: none
+        target: "n/a"
+        rationale: "300 s bash shell timeout (torch.compile warmup), a different timeout mechanism from the 180 s scorer ceiling; no edge to C12."
+      - node: N315
+        decision: none
+        target: "n/a"
+        rationale: "Shell-timeout dead end whose lesson supplies the ~60 s checkpoint-load estimate used as a C12 leaf; supportive provenance, not an attack."
+    # 8. holes
+    holes:
+      - "Causal attribution open: no control isolates checkpoint size + 180 s ceiling from GPU co-tenant / self-inflicted contention (N603 and N759 both name contention as the live alternative)"
+      - "The cascade premise is contradicted in run 14, where three official score calls succeeded after the N759 timeout — the counter-evidence sits in experiment nodes (N756-N758), and 'tend to' is never quantified (e.g. P(timeout at call k+1 | timeout at call k))"
+      - "The ~60 s deserialisation figure is a planning estimate from a shell-timeout post-mortem (N315), never measured in isolation"
+      - "The 180 s constant is attested by citation to ai_rd_fix_embedding.py:80, but the scorer source file is not shipped in the artifact, so the one strictly certifiable conjunct cannot be certified in-tree"
+    coverage_flags:
+      - "The typed-attack walk covers dead_end nodes only, but the strongest counter-evidence to C12's cascade conjunct (successful score calls after a timeout in run 14) lives in experiment nodes N756-N758 — no construct expresses an attack sourced from a non-dead-end trace node"
+    uncertain: false
+    note: >-
+      Implementation-behavioral reading: C12 asserts a property of the evaluation
+      harness, not of any recovery method, so nearly all timeout dead ends are
+      corroborating instances rather than attacks — the only edges are two
+      undercuts where the trace itself names GPU contention as an alternative
+      cause. The N603 and N759 undercut calls are judgment calls (both nodes
+      simultaneously corroborate the timeout observations); they are classified
+      as undercuts because their recorded content attacks the checkpoint-size
+      attribution, which is the load-bearing part of 'interacts pathologically
+      with large checkpoints'.

@@ -1,0 +1,61 @@
+group	artifact	claim_id	claim_type	double_annotate	title
+paperbench	adaptive-pruning	C03	comparative	no	APT Achieves On-Par Distillation Performance With 41.6% Training Memory
+paperbench	adaptive-pruning	C04	causal	yes	Outlier-Aware Salience (Kurtosis) Is Critical for Large LM Pruning
+paperbench	all-in-one	C01	comparative	no	Simformer outperforms NPE on benchmark posterior approximation tasks
+paperbench	all-in-one	C03	generalization	no	Simformer accurately estimates all arbitrary conditionals of the joint distribution
+paperbench	all-in-one	C05	descriptive	yes	Guided diffusion enables conditioning on intervals without retraining
+paperbench	all-in-one	C06	negative-result	no	The 'all-in-one' training objective does not hurt posterior-only performance
+paperbench	bam	C05	comparative	yes	BaM outperforms ADVI on convergence speed
+paperbench	bam	C06	causal	yes	BaM benefits from larger batch sizes; ADVI and GSM do not
+paperbench	bbox	C02	comparative	no	BBOX-ADAPTER reduces training cost by 31.30x over SFT
+paperbench	bbox	C04	causal	no	Ranking-based NCE loss outperforms MLM loss by up to ~10%
+paperbench	bbox	C05	generalization	yes	BBOX-ADAPTER supports plug-and-play transfer to other black-box LLMs
+paperbench	bbox	C06	negative-result	no	AI feedback is competitive with ground-truth labels
+paperbench	bridging-data-gaps	C03	comparative	no	TAN is parameter-efficient and computationally efficient compared to full fine-tuning and prior methods
+paperbench	bridging-data-gaps	C05	causal	no	Each component of TAN (similarity guidance, adversarial noise) contributes incrementally to final FID improvement
+paperbench	fre	C01	generalization	yes	FRE achieves competitive zero-shot performance across diverse reward families using only 32 samples
+paperbench	fre	C03	generalization	no	FRE generalizes to non-goal-reaching structured rewards while maintaining goal-reaching competitiveness
+paperbench	fre	C04	causal	no	Performance scales smoothly with reward diversity; FRE-all dominates all reward-subset ablations
+paperbench	ftrl	C01	negative-result	yes	Vanilla RL fine-tuning fails to leverage pre-trained capabilities due to FPC
+paperbench	lbcs	C03	descriptive	no	LBCS converges ε-optimally (ε-convergence theorem)
+paperbench	lbcs	C05	comparative	yes	LBCS scales to ImageNet-1k and reduces the effective selection ratio below the predefined ratio
+paperbench	mechanistic-understanding	C02	causal	no	Subtracting toxic vectors from the residual stream reduces toxicity while preserving language quality
+paperbench	mechanistic-understanding	C04	descriptive	no	Every DPO weight change is minimal, with cosine similarity >0.99 and norm difference <1e-5
+paperbench	pinn	C01	descriptive	no	Near-zero training loss is necessary for accurate PINN solutions
+paperbench	pinn	C03	causal	yes	Residual loss (differential operator term) is the dominant source of ill-conditioning
+paperbench	pinn	C05	comparative	no	Adam+L-BFGS consistently outperforms Adam or L-BFGS alone
+paperbench	rice	C01	comparative	no	RICE Achieves a Tighter Sub-Optimality Bound via Explanation-Guided Mixed Distribution
+paperbench	robust-clip	C02	comparative	no	FARE-CLIP preserves the original CLIP embedding structure better than TeCoA
+paperbench	robust-clip	C03	descriptive	yes	FARE makes LVLMs fully robust against stealthy targeted ℓ∞ attacks
+paperbench	robust-clip	C07	negative-result	yes	Transfer attacks between LVLMs sharing non-robust CLIP are effective, but fail with robust encoders
+paperbench	sample-specific-masks	C05	causal	no	Three-channel masks outperform single-channel masks; both δ and fmask are necessary
+paperbench	sample-specific-masks	C06	comparative	no	Patch-wise interpolation is more computationally efficient than bilinear or bicubic interpolation
+paperbench	sapg	C01	negative-result	no	PPO performance saturates with increasing parallel environments
+paperbench	sapg	C02	comparative	no	SAPG achieves significantly higher asymptotic performance than PPO, DexPBT, and PQL on hard dexterous manipulation tasks
+paperbench	sapg	C06	causal	no	Entropy regularization of followers improves performance on harder exploration tasks
+paperbench	self-composing-policies	C01	descriptive	no	Linear Parameter Growth
+paperbench	self-composing-policies	C04	comparative	yes	Empirical Inference Scalability
+paperbench	self-expansion	C03	causal	no	On-Demand Self-Expansion Outperforms Static and Per-Task Expansion Strategies
+paperbench	self-expansion	C04	generalization	no	The SEMA Framework Generalises Across Functional Adapter Types
+paperbench	semantic-self-consistency	C03	comparative	no	Embedding-based outlier removal improves or matches SC baseline
+paperbench	semantic-self-consistency	C05	descriptive	yes	Sequence length positively correlates with accuracy improvement from semantic methods
+paperbench	semantic-self-consistency	C06	negative-result	no	BLEU score does not correlate with accuracy improvement
+paperbench	sequential-neural-score-estimation	C04	comparative	yes	TSNPSE achieves superior valid summary statistics on the Pyloric problem
+paperbench	stay-on-topic-with-classifier-free-guidance	C02	comparative	no	CFG Matches 2× Model Size at Same Inference FLOPs
+paperbench	stay-on-topic-with-classifier-free-guidance	C05	causal	no	CFG with Negative Prompting Improves Assistant System-Prompt Following
+paperbench	stay-on-topic-with-classifier-free-guidance	C06	descriptive	no	CFG Reduces Sampling Entropy but Differs from Instruction Tuning
+paperbench	stochastic-interpolants	C01	descriptive	no	Quadratic regression remains valid for dependent couplings
+paperbench	stochastic-interpolants	C03	causal	no	Dependent coupling inpainting outperforms uncoupled baseline on ImageNet
+paperbench	test-time-model-adaptation	C04	negative-result	yes	CMA-ES with entropy-only fitness is infeasible for TTA
+paperbench	test-time-model-adaptation	C05	causal	no	Activation discrepancy fitness enables stable CMA learning in online unsupervised TTA
+paperbench	test-time-model-adaptation	C07	comparative	yes	FOA outperforms TENT and SAR under non-i.i.d. test scenarios
+paperbench	what-will-my-model-forget	C01	comparative	no	Representation-Based Forecasting Achieves Best Overall Forecasting Performance
+paperbench	what-will-my-model-forget	C03	negative-result	no	Logit-Change Transfer Enables Partially Interpretable Forecasting on BART0 but Fails on FLAN-T5
+rebench	rebench-fix_embedding	C12	implementation-behavioral	no	The scorer's 180s timeout interacts pathologically with large checkpoints
+rebench	rebench-nanogpt_chat_rl	C04	implementation-behavioral	no	Pairwise tournament reduction is judge-call-optimal for best-of-N selection
+rebench	rebench-restricted_mlm	C07	implementation-behavioral	no	— The single use of division lives outside the forward pass
+rebench	rebench-restricted_mlm	C14	implementation-behavioral	no	— Hand-rolled `1/x` normalisations NaN under restricted primitives
+rebench	rebench-rust_codecontests	C02	implementation-behavioral	yes	N=18 parallel generations per batch is the configured operating point
+rebench	rebench-rust_codecontests	C09	implementation-behavioral	no	Candidate-repair was planned but not implemented
+rebench	rebench-triton_cumsum	C05	implementation-behavioral	no	Superblock + atomic suffix approach achieves reference score (0.47)
+rebench	rebench-triton_cumsum	C09	negative-result	yes	PyTorch two-cumsum pipeline is memory-bandwidth-bound at ~1.5–3 ms on H100

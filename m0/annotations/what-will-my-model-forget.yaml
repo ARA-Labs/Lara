@@ -1,0 +1,176 @@
+artifact: what-will-my-model-forget
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C01
+    claim_type: comparative
+    proposition_shape:
+      sketch: "highest_f1(representation_with_prior, {threshold, fixed_logit, trainable_logit, representation_wo_prior}, config)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a per-configuration argmax over five methods, asserted for
+        7 of 8 enumerated (model, dataset, tuning) configurations of Table 1.
+        A nullary atom would lose both the comparison set and the enumerated
+        7-of-8 instantiation; the natural encoding is one comparison atom per
+        Table 1 column, conjoined.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "All five forecasting methods are trained on the same (D^Train_R, D̂PT, zij) ground-truth forgetting data per configuration"
+        - "All methods are evaluated on the identical D^Test_R × D̂PT pair set with binary F1 computed the same way"
+        - "The threshold baseline is tuned (γ on D^Train_R) rather than left at a default, so the comparison is against a competent baseline"
+        - "Table 1 cell values are read off correctly and representation-with-prior is the per-column maximum in 7 of the 8 columns"
+      supporting_experiments: [E01]
+    strict_certifier: domain-checker(table-argmax)
+    certifier_note: >-
+      The aggregation step 'representation-with-prior is the column maximum in
+      7 of 8 Table 1 configurations' is an arithmetic re-check over a finite
+      table: given the 5x8 F1 cells as leaves, a checker can certify the
+      per-column argmax and the 7-of-8 count. The F1 values themselves remain
+      empirical and defeasible.
+    critical_questions:
+      - cq: "Is a baseline forecasting method actually run in every configuration that the claim covers?"
+        mandatory: true
+        status: met
+        basis: "E01 Baselines: threshold-based forecasting with γ tuned on D^Train_R; E01 procedure steps 4-7 run every method per configuration"
+      - cq: "Are all methods evaluated under an identical protocol (same splits, same ground-truth labels, same metric)?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure steps 1-7: one shared pipeline produces z^test_ij once, then each forecasting model is scored against it with binary F1"
+      - cq: "Is the single exceptional configuration (the 1 of 8 where representation is not best) identified and consistent with the claim's scope?"
+        mandatory: true
+        status: met
+        basis: "E01 Expected outcome (fixed logit competitive when only LM heads are fine-tuned); trace N04 (fixed logit 68.37 on FLAN-T5/Head) vs N10 (representation 67.81 on FLAN-T5Large/Head)"
+      - cq: "Did each trainable method receive comparable hyperparameter tuning effort?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 Setup fixes fine-tuning steps (30 for LoRA/Full FT, 100 head-only) but documents no per-method tuning protocol for the forecasting models themselves"
+      - cq: "Are F1 scores reported with seeds or uncertainty so per-column argmax is stable?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 Setup/Procedure/Metrics mention no repeated runs, seeds, or intervals; several margins in trace N10 vs N04/N08 are small (e.g. 67.81 vs 68.37), so the count is unestablished at reported rigor, not defeated"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Representation-based forecasting F1 per configuration: 79.32 (BART0/Head), 67.19 (BART0/Full FT), 67.81 (FLAN-T5Large/Head), 48.66 (LoRA), 51.51 (Full FT), 65.93 (T53B/Head), 42.99 (T53B/LoRA)"
+        provenance: attested
+        refs: ["trace N10 (Table 1, §5.1)", "E01 Metrics"]
+      - atom: "Fixed logit-based forecasting reaches 68.37 on FLAN-T5/Head, exceeding representation's 67.81 — the single exception configuration"
+        provenance: attested
+        refs: ["trace N04 (Table 1, §5.1)", "trace N10"]
+      - atom: "Threshold baseline F1 on BART0/Full FT is 55.75 and on FLAN-T5Large LoRA/Full FT 43.93/48.43, below representation in those columns"
+        provenance: attested
+        refs: ["trace N07", "trace N08", "C03 statement (Table 1)"]
+      - atom: "Representation-with-prior exceeds representation-without-prior in all 8 configurations (e.g. 79.32 vs 77.92, 51.51 vs 50.38)"
+        provenance: attested
+        refs: ["trace N11 (Table 1, w/o Prior rows, §5.1)"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design: computing the exact full NTK for LoRA/Full FT is intractable; this motivates the trainable-kernel approximation and never bears on whether representation-based forecasting wins Table 1."
+      - node: N08
+        decision: none
+        target: "n/a"
+        rationale: "The trainable logit model failing on FLAN-T5 is a rejected-alternative finding that triggered the pivot (N09) to the representation approach; it does not conflict with C01's conclusion, its comparison scheme, or its leaves."
+    holes:
+      - "No seed count, repeated runs, or uncertainty for any Table 1 cell, so the 7-of-8 argmax count rests on single-run point estimates"
+      - "DR differs across model families (P3-Test for BART0, MMLU for FLAN-T5), so the cross-model 'best overall' aggregation mixes evaluation datasets without a bridging argument"
+      - "Hyperparameter tuning parity across the five forecasting methods is undocumented"
+    coverage_flags: []
+    uncertain: false
+    note: >-
+      Comparative reading: the claim decomposes cleanly into 8 per-column
+      argmax atoms plus one counted aggregation; 'nearly all' is grounded as
+      exactly 7 of 8 with the exception identified in the trace. Both dead
+      ends in the tree concern the logit-based line of work, not this claim.
+  - claim_id: C03
+    claim_type: negative-result
+    proposition_shape:
+      sketch: "f1_order(trainable_logit, threshold, config, direction)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        Conjunction of three directed per-cell comparisons: trainable logit >
+        threshold on BART0Large/Full FT (57.15 vs 55.75), but < threshold on
+        FLAN-T5Large/LoRA (36.54 vs 43.93) and FLAN-T5Large/Full FT (40.91 vs
+        48.43). A nullary atom would collapse the success/failure split that
+        makes this a negative result, and lose the per-configuration structure
+        the falsification criteria quantify over.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Trainable logit and threshold forecasting are trained and evaluated under the identical E01 protocol per configuration"
+        - "The three Table 1 cell pairs are read off correctly and ordered as stated (one win on BART0, two losses on FLAN-T5)"
+        - "The logit-change transfer phenomenon exists (E02 Figure 2a), grounding the 'partially interpretable' framing of the logit-based model as an NTK approximation"
+        - "The FLAN-T5 F1 deficit reflects the kernel approximation failing to capture FLAN-T5's logit dynamics rather than a training or tuning artifact"
+      supporting_experiments: [E01, E02]
+    strict_certifier: domain-checker(table-comparison)
+    certifier_note: >-
+      The three stated inequalities (57.15 > 55.75, 36.54 < 43.93, 40.91 <
+      48.43) are arithmetic comparisons over Table 1 leaves and can be
+      certified mechanically. The measured F1 values and the failure
+      attribution remain empirical.
+    critical_questions:
+      - cq: "Is the threshold baseline present and tuned in every configuration the claim compares against?"
+        mandatory: true
+        status: met
+        basis: "E01 Baselines: threshold with γ tuned on D^Train_R, run per (model, dataset, tuning) combination"
+      - cq: "Are the success and failure configurations evaluated under the same protocol so the split is attributable to the model family?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure applies one pipeline to BART0 and FLAN-T5 alike; only model/dataset/tuning vary by design"
+      - cq: "Is the FLAN-T5 failure diagnosed beyond the F1 gap (i.e. shown to stem from the simplified kernel rather than optimization or hyperparameters)?"
+        mandatory: true
+        status: unmet-gap
+        basis: "Trace N08 lesson asserts 'FLAN-T5's logit dynamics are too complex for the simplified kernel' but E01/E02 contain no diagnostic isolating kernel capacity from training artifacts; the negative result is established, its explanation is not"
+      - cq: "Does E02 establish logit-change transfer on more than an anecdotal scale?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E02 Setup uses a single pair of examples (one online, one upstream) with qualitative token-level inspection; no aggregate quantification"
+      - cq: "Are the three deciding cell values reported with seeds or uncertainty?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 reports single-run F1 per cell; the BART0 margin (57.15 vs 55.75) is 1.4 points with no variance estimate, so the positive half is unestablished at reported rigor rather than defeated"
+    leaf_granularity: mixed
+    leaves:
+      - atom: "BART0Large/Full FT: trainable logit F1 57.15 vs threshold 55.75"
+        provenance: attested
+        refs: ["trace N07 (Table 1, §5.1)", "C03 statement"]
+      - atom: "FLAN-T5Large/LoRA: trainable logit F1 36.54 vs threshold 43.93"
+        provenance: attested
+        refs: ["trace N08 (Table 1)", "C03 statement"]
+      - atom: "FLAN-T5Large/Full FT: trainable logit F1 40.91 vs threshold 48.43"
+        provenance: attested
+        refs: ["trace N08 (Table 1)", "C03 statement"]
+      - atom: "Logit changes on the online example partially transfer to an upstream example via the NTK, sufficient to flip its prediction (single example pair)"
+        provenance: attested
+        refs: ["trace N02 (Figure 2a, §3.2, §2.2)", "E02 Procedure/Expected outcome"]
+      - atom: "The exact full NTK is intractable for LoRA/Full FT (≈2.5M-dimensional backward passes), so the trainable kernel is a low-rank approximation of unverified fidelity"
+        provenance: attested
+        refs: ["trace N05 (failure_mode)", "trace N06 (choice/evidence)"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design (exact NTK computation) that explains why the trainable approximation exists; it is background for C03's method, not a conflicting result, scheme attack, or leaf attack."
+      - node: N08
+        decision: none
+        target: "n/a"
+        rationale: "This dead end IS the FLAN-T5 failure that C03's negative half reports — it is the supporting observation for the claim, not an attack on it; support is never an edge."
+    holes:
+      - "The mechanism attribution (simplified kernel cannot capture FLAN-T5 logit dynamics) is asserted from the F1 gap alone, with no ablation or diagnostic separating kernel capacity from training artifacts"
+      - "'Partially interpretable' has no defined interpretability measure; it rests on the NTK derivation (N03) plus one visualized example pair (E02)"
+      - "No variance or seed reporting for the 1.4-point BART0 win that carries the positive half of the claim"
+    coverage_flags:
+      - "'Partially interpretable' is a graded, undefined property of the method itself (not of any measured outcome); no construct in the vocabulary expresses degree-of-interpretability, so only the F1 orderings and the transfer observation are formalizable — the interpretability qualifier drops out"
+    uncertain: false
+    note: >-
+      Negative-result reading: the conclusion is the failure of trainable
+      logit-based forecasting to beat threshold on FLAN-T5, paired with a
+      bounded positive on BART0. Trace N08 records the same failure as a dead
+      end, so it functions as evidence for the claim rather than an attack.
+      The tree contains 2 dead ends total, well under the 15-node cap.

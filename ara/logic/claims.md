@@ -253,3 +253,100 @@ the result is stated but not yet proved or mechanized._
   The shared-core serialization is an M1 design requirement, not yet built.
 - **Dependencies**: C07, C10
 - **Tags**: differential-testing, conformance, mechanization, methodology
+
+## C13: A small fixed scheme vocabulary covers the corpus's argument shapes
+- **Statement**: The inference schemes that ARA corpus claims instantiate collapse into a small
+  closed family set dominated by controlled comparison and intervention/ablation, so the policy
+  layer can ship a fixed scheme vocabulary rather than an open-ended scheme language.
+- **Conditions**: Established on the 60-claim stratified M0 sample at corpus pin `62e9b54`
+  (single-AI annotation; only the typing field double-annotated). Family count is ~9 after
+  normalizing annotator-coined names; the unsampled reserve (171 claims) is unannotated.
+- **Sources**: ["9 families / all assignable ← m0/annotation-summary.md:44 «Top-3 families cover 46/60 (77%); all 60 are assignable to the 9 families» [result]", "two-thirds ← m0/annotation-summary.md:45–46 «comparison + ablation alone carry two-thirds of the corpus» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: A corpus or reserve claim whose supporting argument fits none of the
+  nine families without encoding the whole reasoning step as an opaque leaf, or reserve annotation
+  showing family count grows open-endedly rather than converging.
+- **Proof**: [E09]
+- **Dependencies**: []
+- **Tags**: corpus-study, schemes, policy-layer
+- **Last revised**: 2026-07-22 (2026-07-22_001#2)
+
+## C14: Corpus strict-step demand is arithmetic re-checking and code inspection — not LP
+- **Statement**: The strict steps corpus arguments actually need are certifiable by a
+  rational-arithmetic/table-recheck checker plus a static code-inspection checker; justification-
+  logic (LP) certificates answer no observed corpus demand, so the optional adapter portfolio
+  should lead with the arithmetic checker and LP stays a non-shipping option.
+- **Conditions**: 60-claim sample at pin `62e9b54`; "smallest plausible certifier" judgments by AI
+  annotators — the strict steps are identified, not discharged, inside the artifacts. The single
+  reference-nd call (tournament call-count arithmetic) is plausibly arithmetic too.
+- **Sources**: ["certifier counts ← m0/annotation-summary.md:48 «domain-checker 35, none 21, lp 3, reference-nd 1» [result]", "arithmetic character ← m0/annotation-summary.md:49–50 «overwhelmingly *arithmetic re-checks of reported tables* (deltas, ratios, aggregations, inequalities) plus a few code inspectors» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: Corpus/reserve strict steps at meaningful frequency that need nested
+  justification-term structure (LP) or genuine ND derivations rather than arithmetic or code
+  inspection; or an implemented arithmetic checker failing to certify the identified calls.
+- **Proof**: [E09]
+- **Dependencies**: []
+- **Tags**: corpus-study, strict-backend, adapter-portfolio
+- **Last revised**: 2026-07-22 (2026-07-22_001#2)
+
+## C15: Per-result-cell is the default evidence-leaf granularity
+- **Statement**: Corpus evidence decomposes naturally at the granularity of the individual reported
+  result cell (one number in a table or figure), not whole experiments or runs; the leaf layer
+  should default to per-result-cell atoms with coarser grains as explicit, minority exceptions.
+- **Conditions**: 60-claim sample at pin `62e9b54`; coarser or mixed grains cover the remaining
+  quarter of claims and must stay expressible.
+- **Sources**: ["grain distribution ← m0/annotation-summary.md:64–65 «per-result-cell 45, mixed 7, per-experiment-claim 6, per-run 2» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: Further annotation showing cell-level atoms are systematically the
+  wrong grain — e.g. distribution-valued or aggregate leaves dominating (cf. the stochastic-
+  dispersion wishlist item), or cell-level leaves proliferating beyond audit practicality.
+- **Proof**: [E09]
+- **Dependencies**: []
+- **Tags**: corpus-study, leaf-granularity, evidence-layer
+- **Last revised**: 2026-07-22 (2026-07-22_001#2)
+
+## C16: Defeat edges are rare and undercut-dominant; unmet critical questions must be gaps, not attacks
+- **Statement**: In real research artifacts genuine defeat edges are rare (a few percent of
+  dead-end classifications) and skew entirely to undercuts, while unmet mandatory critical
+  questions are pervasive; a sound defeat layer therefore routes unmet CQs to holes/gaps rather
+  than attack edges, and draws attack candidates from the whole exploration trace — experiment
+  nodes included — since counter-evidence can live outside dead ends and dead ends can even serve
+  as support.
+- **Conditions**: 60-claim sample at pin `62e9b54`. Rebut/undermine are unexercised in-corpus and
+  expectedly so: the corpus is polished, peer-reviewed top-venue work. By decision N29 (user,
+  2026-07-22), rebut/undermine are exercised via self-authored adversarial reports/mutations
+  against corpus claims at language-testing time, not by corpus mining.
+- **Sources**: ["attack profile ← m0/annotation-summary.md:55–56 «4 undercut, 0 rebut, 0 undermine, 190 none (98%)» [result]", "CQ profile ← m0/annotation-summary.md:67–68 «Mandatory: 105 met, **68 unmet-gap (39%)**, 3 unmet-defeater» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: Authored-adversarial or reserve annotation showing that gap-treatment
+  of unmet mandatory CQs suppresses defeats the artifact itself licenses (claims that should flip
+  status but do not), or that whole-trace attack walking still misses documented counter-evidence.
+- **Proof**: [E09]
+- **Dependencies**: [C02, C06]
+- **Tags**: corpus-study, defeat-layer, critical-questions
+- **Last revised**: 2026-07-22 (2026-07-22_001#2)
+
+## C17: The v0.1 construct set passes the M0 coverage gate at ~90% with a finite residual wishlist
+- **Statement**: The sampled argument shapes are expressible in the planned v0.1 construct set —
+  nine scheme families plus the nl/formal/binding scope discipline, multi-arg support, and
+  claim-splitting conventions — without opaque-leaf encoding of whole reasoning steps, clearing the
+  ≥80% exit gate; the inexpressible residue is a closed six-item construct wishlist plus three
+  evidence-model decisions, not an open-ended gap.
+- **Conditions**: Preliminary: single-AI annotation with only the typing field double-annotated;
+  coverage-flag adjudication user-affirmed (2026-07-22) but not independently reviewed; pooled
+  across benchmark populations (per-population split of O01 not yet applied); rebut/undermine
+  exercise deferred to authored adversarial tests (N29).
+- **Sources**: ["gate verdict ← m0/annotation-summary.md:99 «PASS — ~90% of sampled argument shapes are expressible» [result]", "flag partition ← m0/annotation-summary.md:75 «21/60 claims (35%) carry coverage flags» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: Full-schema double annotation or reserve annotation pushing
+  expressibility below 80%, or wishlist growth across further samples showing the residue is
+  open-ended rather than closed.
+- **Proof**: [E09]
+- **Dependencies**: [C13, C15, C16]
+- **Tags**: corpus-study, coverage-gate, v0.1-freeze
+- **Last revised**: 2026-07-22 (2026-07-22_001#2)

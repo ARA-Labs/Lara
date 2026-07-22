@@ -1,0 +1,131 @@
+session:
+  id: "2026-07-22_001"
+  date: "2026-07-22"
+  started: "2026-07-21T23:45"
+  last_turn: "2026-07-22T09:45"
+  turn_count: 2
+  summary: "M0 annotation pass complete + summary affirmed: C13-C17 crystallized, N29 authored-adversarial decision recorded. Earlier: M0 annotation pass complete: 60/60 claims annotated (27 parallel annotators), blind double-annotation kappa 0.73 with 4 adjudications, open questions #1/#2/#3/#5 answered, preliminary gate verdict PASS ~90%."
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N27"
+    routing: direct
+    provenance: ai-executed
+    summary: "Blind double-annotation (Opus second annotator): 14/18, kappa 0.73; 4 adjudications, codebook amended (precedence check first)."
+  - turn: 1
+    type: experiment
+    id: "N28"
+    routing: direct
+    provenance: ai-executed
+    summary: "8-field annotation of all 60 sampled claims; aggregates + coverage-flag adjudication in annotation-summary.md."
+  - turn: 1
+    type: observation
+    id: "O02"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Open-question answers: 9 scheme families (#2); arithmetic-recheck + code-inspection adapters, not LP (#1); per-result-cell leaves (#5)."
+  - turn: 1
+    type: observation
+    id: "O03"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Defeat layer (#3): attacks rare and all undercuts; walk whole trace, not just dead ends; dead-end-as-support exists; CQ gaps must be holes."
+  - turn: 1
+    type: observation
+    id: "O04"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Preliminary gate verdict PASS ~90% with 6-item construct wishlist; awaiting human review."
+
+ai_actions:
+  - turn: 1
+    action: "Launched 27 per-artifact annotation agents + blind typing agent (4 API-overload retries; blind pass completed on Opus); validated 27 YAMLs; adjudicated and propagated 4 type corrections; wrote annotation-summary.md; commit 6524e8c pushed to PR #8."
+    provenance: ai-executed
+    files_changed: ["m0/annotations/ (28 files)", "m0/double-annotation.tsv", "m0/annotation-summary.md", "m0/claim-types.tsv", "m0/sample.tsv", "m0/README.md"]
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: "User: 'can you do 1 and 2?' — authorized AI execution of both the double-annotation adjudication pass and the full 60-claim annotation."
+
+open_threads:
+  - "Human review of annotation-summary.md §3 (gate adjudication) and spot checks of attack decisions; full-schema double annotation still open."
+  - "Exercise rebut/undermine deliberately on the rebench reserve (e.g. fix_embedding C13) before defeat typing freezes."
+  - "Feed O02-O04 into the v0.1 calculus freeze once affirmed."
+  - "PR #8 (draft) now carries the entire M0 kickoff through annotation; ready for review/merge."
+  - "Parallel Lean candidate still open: grounded-labelling invariance under AF isomorphism (abstract half of result 9)."
+
+ai_suggestions_pending:
+  - "O01 (from 2026-07-21): coverage gate should be evaluated per benchmark population, not pooled."
+  - "O02-O04: open-question answers, defeat-layer constraints, gate verdict — all awaiting affirmation."
+
+# --- turn 2 (summary affirmation + crystallization) ---
+events_logged_turn2:
+  - turn: 2
+    type: decision
+    id: "N29"
+    routing: direct
+    provenance: user
+    summary: "Rebut/undermine exercised via self-authored adversarial reports at language-testing time; corpus mining rejected (top-venue published work has none)."
+  - turn: 2
+    type: crystallization
+    id: "C13"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O02: ~9 scheme families suffice (§8 #2)."
+  - turn: 2
+    type: crystallization
+    id: "C14"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O02: adapter portfolio = arithmetic-recheck + code-inspection, not LP (§8 #1)."
+  - turn: 2
+    type: crystallization
+    id: "C15"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O02: per-result-cell default leaf grain (§8 #5)."
+  - turn: 2
+    type: crystallization
+    id: "C16"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O03: defeat edges rare/undercut-dominant; CQ gaps are holes; whole-trace attack walk (+ constraints.md pipeline constraints)."
+  - turn: 2
+    type: crystallization
+    id: "C17"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O04: coverage gate PASS ~90%, finite wishlist."
+
+claims_touched_turn2:
+  - id: C13
+    action: crystallized
+    turn: 2
+  - id: C14
+    action: crystallized
+    turn: 2
+  - id: C15
+    action: crystallized
+    turn: 2
+  - id: C16
+    action: crystallized
+    turn: 2
+  - id: C17
+    action: crystallized
+    turn: 2
+
+key_context_turn2:
+  - turn: 2
+    excerpt: "User: 'm0/annotation-summary.md makes sense to me' — verbal affirmation of the M0 summary; and: rebut/undermine 'is not really possible to extract from the dataset ... we just need to write some reports on those ourselves' — decision N29."
+
+open_threads_turn2:
+  - "Spot checks of attack decisions; full-schema double annotation on a subset (only claim-type was double-annotated)."
+  - "Write kind-(a) annotation conventions and kind-(c) evidence-model decisions into spec §7/§8 for the v0.1 freeze, fed by C13-C16."
+  - "Author the adversarial attack-report suite (N29) when language testing starts."
+  - "O01 (per-population gate evaluation) still staged - not adopted by the affirmed summary."
+  - "PR #8 ready for review/merge."

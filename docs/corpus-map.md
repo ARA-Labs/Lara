@@ -109,11 +109,21 @@ The annotation directly answers the corpus-gated decision gates in `engineering-
 `Lara.Attack`), §8 #5 (leaf granularity → `Lara.SupportTerm`), and §8 #7
 (behavioral-vs-empirical routing → optional TL-1).
 
-## 5. Local inspection
+## 5. Local corpus checkout
 
-Both repos were cloned to `/tmp/ara-inspect/` for this analysis (not committed). Re-clone with:
+The corpus is vendored as a git submodule at `corpus/ara-paperbench`, pinned to commit
+`62e9b54b2d4efe45b97f25676a16784530dd552a` (upstream `main`, 2026-07-09). All M0 annotations
+reference artifacts at this pin; bumping the pin invalidates annotation provenance and requires
+re-checking sampled claims. Fetch it with:
 
 ```
-git clone --depth 1 https://github.com/AmberLJC/ara-paperbench
+git submodule update --init --depth 1 corpus/ara-paperbench
+```
+
+The format repo (`ARA-Labs/Agent-Native-Research-Artifact`, home of `resnet-ara-example` and the
+`rigor-reviewer` baseline skill) is *not* vendored — it is tooling/reference, not annotation input.
+Clone it ad hoc when needed:
+
+```
 git clone --depth 1 https://github.com/ARA-Labs/Agent-Native-Research-Artifact
 ```

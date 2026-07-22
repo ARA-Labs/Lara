@@ -62,3 +62,20 @@ The end-to-end guarantee is conditional on three unchecked things:
   logically rebut or undercut an argument).
 - Model-checker behavioral leaves (TL-1) — optional, strictly outside the kernel, gated by corpus
   open question §8 #7.
+
+## Corpus-derived pipeline constraints (M0, 2026-07-22 — grounds: C16, E09)
+
+- **Attack candidates come from the whole trace.** The elaborator's attack walk must cover
+  experiment nodes and score-filtered runs, not only `dead_end` nodes — two artifacts held their
+  strongest counter-evidence outside dead ends (fix_embedding C12, triton_cumsum C09).
+- **Unmet mandatory CQs are holes, not defeaters.** 39% of mandatory critical questions in the
+  corpus are unmet; treating them as attacks would spuriously defeat nearly every claim.
+- **Dead ends can support.** A `dead_end` node can be a claim's primary *evidence*
+  (restricted_mlm C14); the lowering map needs a support-from-dead-end path, not only attack typing.
+- **Result-cell conflicts need a decision.** Conflicting duplicate reports of one result cell
+  (figure vs text, bridging-data-gaps C05) are neither an attack nor a provenance grade; spec §7/§8
+  must say what the leaf layer does with them.
+- **Rebut/undermine test coverage is authored, not mined** (decision N29): the corpus is polished,
+  peer-reviewed top-venue work; adversarial reports/mutations against corpus claims are written by
+  us at language-testing time, extending the rejection-class negative-suite discipline to the
+  defeat layer.

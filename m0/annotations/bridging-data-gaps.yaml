@@ -1,0 +1,141 @@
+artifact: bridging-data-gaps
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C03
+    claim_type: comparative
+    proposition_shape:
+      sketch: "resource_dominates(ddpm_tan, full_finetune, ffhq_to_sunglasses_10shot, [param_rate, iterations, gpu_hours, gpu_memory])"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim is a conjunction of per-metric numeric dominances (1.3% vs 100%, 300 vs ~5000 iters, 3 vs 7.5 GPU h, 9 vs 20 GB) under a quality-parity side condition; a nullary atom would lose the arithmetically checkable inequality chain and the two-system comparison structure."
+    inference_scheme:
+      scheme: resource_benchmarking_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Both methods were trained to convergence on the same task (FFHQ → 10-shot Sunglasses)."
+        - "Wall-clock time, peak GPU memory, and parameter rate were recorded for both methods under the stated configurations (E03 steps 1-3)."
+        - "TAN's quality at convergence is equal or better than full fine-tuning's (E03 step 4), so the resource savings are not bought with quality loss."
+        - "The resource measurements are comparable across the two hardware/batch configurations."
+      supporting_experiments: [E03]
+    strict_certifier: domain-checker(resource-dominance-arithmetic)
+    certifier_note: "Certifies only the deductive tail: given the reported per-method numbers, re-check the inequality chain 1.3% < 100%, 300 < 5000, 3 < 7.5 GPU h, 9 < 20 GB (and the falsification thresholds ≥15 GB / ≥6 GPU h are not met). The parameter rate is additionally recomputable from the adaptor config (trainable/total params). The measurements themselves are empirical and stay defeasible."
+    critical_questions:
+      - cq: "Is quality at convergence matched or exceeded, so the efficiency comparison is not trading quality for resources?"
+        mandatory: true
+        status: met
+        basis: "E03 Procedure step 4 (compare FID at convergence); evidence/tables/table2_fid.md (TAN 20.06 vs DDPM-PA 34.75 on Sunglasses) and evidence/figures/figure4_ablation.md (direct fine-tuning 38.65 at 300 iters)."
+      - cq: "Are the two resource measurements comparable — baseline runs batch 5 on 1 GPU while TAN runs batch 40 on 8x A100; are GPU-hours and peak memory normalized across these configurations?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Setup states the asymmetric configurations explicitly but no normalization step appears in the Procedure; the reported 9 GB vs 20 GB and 3 vs 7.5 GPU h are taken as-is."
+      - cq: "Is the ~300-iteration convergence point supported by a sweep rather than a single stopping choice?"
+        mandatory: false
+        status: met
+        basis: "evidence/tables/table6_iteration_sensitivity.md (FID optimal at 300 iterations; note: measured on the LDM backbone, not DDPM)."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "DDPM-TAN fine-tunes 1.3% of parameters (adaptor c=4, d=8)."
+        provenance: attested
+        refs: ["logic/experiments.md E01/E03 Setup", "PAPER.md key_findings"]
+      - atom: "DDPM-TAN converges by ~300 iterations (FID optimum at 300 in the iteration sweep)."
+        provenance: observed
+        refs: ["evidence/tables/table6_iteration_sensitivity.md"]
+      - atom: "DDPM-TAN training cost: ~3 GPU hours, 9 GB peak memory (300 iters, batch 40, 8x A100)."
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N12", "PAPER.md overview"]
+      - atom: "Full fine-tuning baseline cost: ~5000 iterations, 7.5 GPU hours, 20 GB peak memory (batch 5, 1 GPU)."
+        provenance: attested
+        refs: ["logic/experiments.md E03 Setup", "trace/exploration_tree.yaml N11 alternatives"]
+      - atom: "TAN FID at convergence (20.06 on Sunglasses) is better than full fine-tuning family baselines."
+        provenance: observed
+        refs: ["evidence/tables/table2_fid.md"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: n/a
+        rationale: "Rules out a rejected prior approach (DDPM-PA blurry-image substitution); it motivates similarity guidance and neither contradicts C03's resource numbers nor its benchmarking inference."
+      - node: N08
+        decision: none
+        target: n/a
+        rationale: "Rules out an alternative design (train longer to transfer all images); it motivates adversarial noise selection and does not bear on the efficiency comparison's conclusion, scheme, or premises."
+    holes:
+      - "No raw measurement log or table for GPU hours / peak memory exists under evidence/ — the 3h/9GB vs 7.5h/20GB numbers are only attested in prose and trace (N12)."
+      - "Hardware/batch asymmetry between conditions (1 GPU batch 5 vs 8x A100 batch 40) is never normalized, leaving the memory comparison in particular under-established."
+      - "The 1.3% parameter-rate derivation (trainable/total count) is stated, not shown from the config."
+      - "Iteration sweep supporting ~300-iteration convergence (Table 6) was run on the LDM backbone, while C03's numbers are for DDPM-TAN."
+    coverage_flags: []
+    uncertain: false
+    note: "Multi-metric comparative: modeled as one predicate over a metric list; splitting into four per-metric atoms conjoined would also work and loses nothing."
+
+  - claim_id: C05
+    claim_type: causal
+    proposition_shape:
+      sketch: "incremental_fid_improvement(component_chain(adaptor_only, plus_similarity_guidance, plus_adversarial_noise), ffhq_to_sunglasses_10shot, 300_iterations)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: "The claim's content is a monotone FID chain over ablation variants (41.88 -> 26.41 -> 20.06); a nullary atom would lose the ordered per-variant cells that make the incremental-contribution reading checkable."
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Each variant differs from its neighbor in exactly one component (adaptor-only vs +similarity guidance vs +adversarial noise)."
+        - "All variants are trained under identical conditions: 300 iterations, same 10-shot Sunglasses data, same fixed noise inputs for generation (E05 Setup)."
+        - "FID is computed identically for every variant."
+        - "The observed FID drop at each chain step is attributable to the added component, not run-to-run variance."
+      supporting_experiments: [E05]
+    strict_certifier: domain-checker(fid-chain-arithmetic)
+    certifier_note: "Certifies only that the reported per-variant FIDs strictly decrease along the component chain (41.88 > 26.41 > 20.06), i.e. the claim's falsification criteria evaluate to 'not triggered' on the reported cells. The causal attribution of each drop to its component remains defeasible empirical inference."
+    critical_questions:
+      - cq: "Are all variants trained identically except for the ablated component (iterations, data, generation noise)?"
+        mandatory: true
+        status: met
+        basis: "E05 Setup/Procedure: all four variants trained 300 iterations on FFHQ → 10-shot Sunglasses; same fixed noise inputs used for generation."
+      - cq: "Is a non-ablated anchor baseline present?"
+        mandatory: true
+        status: met
+        basis: "E05 Baselines: variant 1 is direct full fine-tuning (FID 38.65), anchoring the adaptor-only regression and the chain."
+      - cq: "Is run-to-run FID variance addressed (repeats, seeds, error bars) so each single-run delta exceeds noise?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E05 Metrics reports single FID values per variant; no repeated runs or variance estimates anywhere in experiments.md or evidence/figures/figure4_ablation.md. The 15.5- and 6.4-point deltas are large, so absence leaves the claim under-established rather than defeated."
+      - cq: "Is adversarial noise's contribution measured without similarity guidance (factorial 2x2), given the claim says each component contributes 'independently'?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E05 Setup lists only the nested chain of variants; the adaptor+adversarial-noise-only cell is absent, so adversarial noise's effect is shown only on top of similarity guidance."
+      - cq: "Are the reported FID values internally consistent across the artifact?"
+        mandatory: false
+        status: met
+        basis: "evidence/figures/figure4_ablation.md documents a 20.06 (figure) vs 20.66 (§5.4 body text) discrepancy for the full-TAN cell and resolves it as a body-text typo, recording both values."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Baseline (direct full fine-tuning) FID = 38.65 on FFHQ → 10-shot Sunglasses at 300 iterations."
+        provenance: observed
+        refs: ["evidence/figures/figure4_ablation.md"]
+      - atom: "Adaptor-only FID = 41.88 (same setting)."
+        provenance: observed
+        refs: ["evidence/figures/figure4_ablation.md"]
+      - atom: "DPMs-TAN w/o adversarial noise (adaptor + similarity guidance) FID = 26.41 (same setting)."
+        provenance: observed
+        refs: ["evidence/figures/figure4_ablation.md"]
+      - atom: "DPMs-TAN full FID = 20.06 (figure value; body text says 20.66, recorded as typo)."
+        provenance: observed
+        refs: ["evidence/figures/figure4_ablation.md", "evidence/tables/table2_fid.md"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: n/a
+        rationale: "Rejected prior approach (DDPM-PA blurry-image substitution) that motivated similarity guidance; it does not contradict the ablation chain, its setup, or any FID leaf."
+      - node: N08
+        decision: none
+        target: n/a
+        rationale: "Rejected alternative design (more iterations instead of targeted noise) that motivated adversarial noise selection; it concerns a different training regime and does not attack the 300-iteration ablation's conclusion, inference, or premises."
+    holes:
+      - "No repeated runs or variance estimates for the per-variant FIDs, so each incremental delta rests on a single run (premise 4 left open)."
+      - "The ablation is a nested chain, not a 2x2 factorial: the adaptor+adversarial-noise-without-similarity cell is missing, so 'independent' contribution of adversarial noise is only established conditional on similarity guidance."
+      - "The 20.06 vs 20.66 body-text discrepancy for the full-TAN cell is resolved by the evidence file's judgment call (typo), not by the source artifact itself."
+    coverage_flags:
+      - "Conflicting duplicate reports of the same result cell (FID 20.06 in Figure 4 vs 20.66 in §5.4 text) fit no construct: not an attack edge (same source, same claim direction) and not a provenance grade (both are observed); recorded only via a free-text note on the leaf."
+    uncertain: false
+    note: "The baseline→adaptor step is a regression (38.65 → 41.88); the claim's incremental chain deliberately starts at adaptor-only, and E05's expected outcomes acknowledge the adaptor exception, so this is not a rebuttal of C05."

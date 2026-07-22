@@ -148,3 +148,16 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 - **Expected outcome**: exact dependency accountability; a genuine two-semantics preservation theorem once the compile step is instantiated over concrete support terms.
 - **Baselines**: none.
 - **Dependencies**: E07.
+
+## E09: M0 semantic corpus study — 60-claim stratified annotation (open questions §8 #1/#2/#3/#5)
+- **Design**: 231-claim sampling frame + 279 dead-end attack pool extracted from
+  `corpus/ara-paperbench` @ `62e9b54`; six-way claim typing over the full frame (blind
+  double-annotation of an 18-claim subset on a different model: 14/18, κ = 0.73, 4
+  adjudications); stratified 60-claim sample (seed 42, quotas with floor, paperbench-first)
+  annotated per the 8-field schema (`m0/annotations/SCHEMA.md`) by 27 independent AI
+  annotators (one per artifact, shared codebook, no cross-talk); aggregation and
+  coverage-flag adjudication in `m0/annotation-summary.md`.
+- **Status**: done (2026-07-22); human affirmation of the summary on 2026-07-22.
+- **Artifacts**: `m0/` (claims-index.tsv, claim-types.tsv, sample.tsv, annotations/,
+  double-annotation.tsv, annotation-summary.md), commits `75e2a65`…`6524e8c`.
+- **Grounds**: C13, C14, C15, C16, C17.

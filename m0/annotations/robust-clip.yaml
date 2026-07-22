@@ -1,0 +1,295 @@
+artifact: robust-clip
+group: paperbench
+annotator: ai-executed (claude, 2026-07-21)
+deadend_cap: null
+claims:
+- claim_id: C02
+  claim_type: comparative
+  proposition_shape:
+    sketch: lower_embedding_distortion(fare_enc, tecoa_enc, condition, training_radius)
+    arity: 4
+    phase0_nullary_sufficient: false
+    note: The claim is a conjunction of four cell-level inequalities (clean/adversarial loss x radius
+      in {2/255, 4/255}) at matched training radius. An opaque nullary atom would hide exactly the numeric
+      inequalities a checker can re-verify from Table 14, and would collapse the radius pairing that makes
+      the comparison fair.
+  inference_scheme:
+    scheme: controlled_comparison
+    strict_or_defeasible: defeasible
+    premises:
+    - All five encoders are evaluated on the same 500 ImageNet-validation images with the identical loss
+      definition L_clean(x) = ||phi_FT(x) - phi_Org(x)||^2_2.
+    - Adversarial loss uses the same attack budget (100-step APGD, eps = 4/255) for every encoder, and
+      the attack approximates the inner max equally well across encoder families.
+    - Comparison is at matched training radius (FARE2 vs TeCoA2, FARE4 vs TeCoA4), so radius is not a
+      confound.
+    supporting_experiments:
+    - E06
+  strict_certifier: domain-checker(table-inequality)
+  certifier_note: 'The final comparative step is a pure arithmetic re-check over Table 14 cells: mean
+    L_clean 32.7 < 236.9 (FARE2 vs TeCoA2) and 47.6 < 292.7 (FARE4 vs TeCoA4); mean L_adv 103.9 < 301.9
+    and 81.9 < 335.0. Only this inequality step is strict; the measurements that produce the cells stay
+    empirical.'
+  critical_questions:
+  - cq: Are all encoders evaluated on the same images with the same loss definition and the same attack
+      budget?
+    mandatory: true
+    status: met
+    basis: 'E06 Setup/Procedure: same 500 ImageNet-val images, same 100-step APGD at eps = 4/255, same
+      L_clean/L_adv formulas for all five encoders.'
+  - cq: Is the comparison made at matched training radius so radius is not a confound?
+    mandatory: true
+    status: met
+    basis: E06 Setup pairs radius-matched encoders (TeCoA2/FARE2, TeCoA4/FARE4); claims.md C02 states
+      'at matching training radius'.
+  - cq: Is the single 100-step APGD run strong enough that L_adv is not differentially underestimated
+      (e.g. via gradient masking) for one encoder family?
+    mandatory: true
+    status: unmet-gap
+    basis: E06 System specifies one 100-step APGD run; no restarts, alternative attacks, or attack-strength
+      sanity check is reported for the embedding-loss measurement.
+  - cq: Is a reference point present to anchor the scale of the distortion numbers?
+    mandatory: false
+    status: met
+    basis: 'E06 Baselines: original CLIP included (L_clean = 0 by definition; L_adv = 903.8 in Table 14).'
+  - cq: Does distortion measured only on ImageNet-val support the general 'preserves the embedding structure'
+      wording on other distributions?
+    mandatory: false
+    status: unmet-gap
+    basis: 'E06 Dataset: 500 ImageNet-validation images only; no other distribution is measured for embedding
+      loss.'
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: 'Mean clean embedding loss: FARE2 = 32.7 vs TeCoA2 = 236.9'
+    provenance: observed
+    refs:
+    - evidence/tables/table14_embedding_loss.md
+    - trace/exploration_tree.yaml N05
+  - atom: 'Mean clean embedding loss: FARE4 = 47.6 vs TeCoA4 = 292.7'
+    provenance: observed
+    refs:
+    - evidence/tables/table14_embedding_loss.md
+  - atom: 'Mean adversarial embedding loss (eps = 4/255): FARE2 = 103.9 vs TeCoA2 = 301.9'
+    provenance: observed
+    refs:
+    - evidence/tables/table14_embedding_loss.md
+  - atom: 'Mean adversarial embedding loss (eps = 4/255): FARE4 = 81.9 vs TeCoA4 = 335.0'
+    provenance: observed
+    refs:
+    - evidence/tables/table14_embedding_loss.md
+  - atom: 'Anchor: original CLIP has L_clean = 0.0 and L_adv = 903.8'
+    provenance: observed
+    refs:
+    - evidence/tables/table14_embedding_loss.md
+  attack_candidates:
+  - node: N05
+    decision: none
+    target: n/a
+    rationale: Diagnoses why the rejected TeCoA objective distorts embeddings (cosine loss ignores radial
+      direction); it is a rejected-design dead end that motivates FARE and is consistent with C02, not
+      an attack on it.
+  - node: N06
+    decision: none
+    target: n/a
+    rationale: Rules out ImageNet-only supervised fine-tuning as a design; it concerns zero-shot generalization
+      (C04's territory) and does not contest C02's conclusion, scheme, or leaves.
+  holes:
+  - No attack-strength verification for L_adv (single 100-step APGD, no restarts or second attack), so
+    the adversarial half of the comparison rests on an unchecked equal-attack-quality premise.
+  - '''Significantly lower'' is backed only by means over 500 images; no variance or statistical test
+    is reported.'
+  - The 'enabling drop-in replacement in LVLMs without retraining' consequence is not measured by E06
+    itself; it is carried by C01/E01 as a separate claim.
+  coverage_flags: []
+  uncertain: false
+  note: ''
+- claim_id: C03
+  claim_type: descriptive
+  proposition_shape:
+    sketch: targeted_attack_success_rate(llava_encoder, eps, mean_rate)
+    arity: 3
+    phase0_nullary_sufficient: false
+    note: The claim conjoins four measured cells (FARE4 at 2/255 and 4/255 both 0%; FARE2 0% at 2/255
+      and 2.0% at 4/255), each a mean over 6 targets x 25 images. A nullary atom would lose the per-cell
+      counts that make the rates re-computable.
+  inference_scheme:
+    scheme: adversarial_stress_test
+    strict_or_defeasible: defeasible
+    premises:
+    - APGD with 10,000 iterations under the exact-string success criterion is strong enough that zero
+      successes indicates robustness rather than weak optimization.
+    - The attack protocol is validated by succeeding against a known-vulnerable configuration (original
+      CLIP) under identical settings.
+    - The 150 trials per (encoder, eps) — 6 target captions x 25 images — are representative of the claimed
+      stealthy targeted-attack surface.
+    supporting_experiments:
+    - E02
+  strict_certifier: domain-checker(success-rate-arithmetic)
+  certifier_note: 'Recomputing the claimed rates from Table 3 counts is algorithmic: FARE4 = 0/150 at
+    both radii -> 0%; FARE2 = 0/150 at 2/255 -> 0% and (0+0+0+2+1+0)/150 = 3/150 -> 2.0% at 4/255. Only
+    this count-to-rate step is strict.'
+  critical_questions:
+  - cq: Does the attack succeed against a non-robust baseline under the same protocol (attack-validity
+      check)?
+    mandatory: true
+    status: met
+    basis: E02 Baselines include original CLIP; Table 3 shows 25/25 success on every target at both radii
+      (100%), also stated in trace node N02.
+  - cq: Is the attack budget documented and high enough to make zero successes meaningful?
+    mandatory: true
+    status: met
+    basis: 'E02 System: APGD with 10,000 iterations per (caption, image, encoder, eps) combination.'
+  - cq: Is the 'fully robust' wording supported without adaptive or non-APGD attacks tailored to the FARE
+      defense?
+    mandatory: true
+    status: unmet-gap
+    basis: E02 Procedure uses a single attack family (APGD on autoregressive cross-entropy); no adaptive
+      attack is reported, so full robustness beyond this protocol is left unestablished (a gap, not an
+      active defeater).
+  - cq: Is the success criterion precise and mechanically checkable?
+    mandatory: false
+    status: met
+    basis: 'E02 Procedure step 4: attack succeeds iff the target string is exactly contained in the model
+      output.'
+  - cq: Are evaluation images selected without bias toward hard-to-attack cases?
+    mandatory: false
+    status: met
+    basis: 'E02 Setup: captions 1-5 use 25 randomly sampled COCO images each; caption 6 uses 25 hand-selected
+      topical stock photos, and the selection rule is disclosed.'
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: 'FARE4: 0/25 successes on every target caption at eps = 2/255 and 4/255 (mean 0% at both radii)'
+    provenance: observed
+    refs:
+    - evidence/tables/table3_targeted_attacks.md
+  - atom: 'FARE2: 0/25 on all six targets at eps = 2/255 (mean 0%)'
+    provenance: observed
+    refs:
+    - evidence/tables/table3_targeted_attacks.md
+  - atom: 'FARE2 at eps = 4/255: 2/25 (stock-fraud target), 1/25 (phishing-URL target), 0/25 elsewhere
+      — mean 2.0%'
+    provenance: observed
+    refs:
+    - evidence/tables/table3_targeted_attacks.md
+  - atom: 'Attack-validity anchor: original CLIP at 25/25 on all targets at both radii (mean 100%)'
+    provenance: observed
+    refs:
+    - evidence/tables/table3_targeted_attacks.md
+    - trace/exploration_tree.yaml N02
+  attack_candidates:
+  - node: N05
+    decision: none
+    target: n/a
+    rationale: Concerns the rejected TeCoA training objective's embedding distortion; it says nothing
+      about targeted-attack success rates on FARE-equipped LLaVA.
+  - node: N06
+    decision: none
+    target: n/a
+    rationale: Concerns TeCoA's ImageNet-only generalization gap; irrelevant to C03's measured attack-success
+      counts.
+  holes:
+  - No adaptive attack tailored to the FARE defense; 'fully robust' is established only against 10k-iteration
+    APGD.
+  - 'Scope: only LLaVA-1.5 7B is attacked in E02, while the claim title says ''LVLMs''; OpenFlamingo is
+    not covered by this experiment.'
+  - Robustness is claimed only within l-inf eps <= 4/255; other norms and larger radii are untested here.
+  coverage_flags: []
+  uncertain: false
+  note: The claim body is faithful to Table 3; the 'fully robust' framing in the title is broader than
+    the measured cells, which the unmet CQ and holes record.
+- claim_id: C07
+  claim_type: negative-result
+  proposition_shape:
+    sketch: transfer_attack_outcome(src_lvlm, tgt_lvlm, tgt_encoder, effective_or_failed)
+    arity: 4
+    phase0_nullary_sufficient: false
+    note: The causal content lives in the contrast across the tgt_encoder argument (shared non-robust
+      CLIP -> effective; robust FARE -> failed) in both transfer directions; a nullary atom would erase
+      the 2x2(+robust columns) contrast structure that carries the difference-making inference.
+  inference_scheme:
+    scheme: controlled_comparison
+    strict_or_defeasible: defeasible
+    premises:
+    - Identical adversarial COCO images (eps = 4/255, generated against OF-CLIP or LLaVA-CLIP) are evaluated
+      on target models that differ only in vision encoder.
+    - Clean-performance references (LLaVA-CLIP COCO CIDEr 115.5, OF-CLIP 79.7) make 'effective' (large
+      CIDEr drop) and 'failed' (near-clean CIDEr) well-defined.
+    - 'The two LVLMs share no other component that could carry the transfer (different LLM backbones:
+      MPT-7B vs Vicuna-7B), so the shared CLIP encoder is the transfer channel.'
+    supporting_experiments:
+    - E01
+  strict_certifier: none
+  certifier_note: ''
+  critical_questions:
+  - cq: Is the same set of adversarial images evaluated across all target encoders, so encoder robustness
+      is the only varied factor?
+    mandatory: true
+    status: met
+    basis: 'E01 Procedure step 8: adversarial COCO images from OF-CLIP and LLaVA-CLIP are evaluated on
+      all five encoders for both OF and LLaVA.'
+  - cq: Are clean baselines reported for both target LVLMs so the CIDEr drop is attributable to the transferred
+      perturbation?
+    mandatory: true
+    status: met
+    basis: 'E01 Procedure step 2 / Table 1: COCO clean CIDEr 115.5 (LLaVA-CLIP) and 79.7 (OF-CLIP).'
+  - cq: Is transfer failure under robust encoders distinguishable from mere performance degradation of
+      those models?
+    mandatory: true
+    status: met
+    basis: 'Table 2: robust-encoder targets reach near- or above-clean CIDEr under transfer (e.g. LLaVA-FARE2
+      at 115.9/115.5 vs its 109.9 clean), so the models still function and the attack simply fails.'
+  - cq: Is the effect demonstrated in both transfer directions?
+    mandatory: false
+    status: met
+    basis: 'E01 step 8 / Table 2: OF-CLIP -> LLaVA (25.5) and LLaVA-CLIP -> OF (8.3).'
+  - cq: Is there a control separating 'shared' from merely 'non-robust' — e.g. a different non-shared
+      vulnerable encoder — to show that sharing, not just vulnerability, drives the transfer?
+    mandatory: true
+    status: unmet-gap
+    basis: 'E01 Setup: every non-robust condition uses the same original CLIP ViT-L/14; no distinct-but-vulnerable
+      encoder is tested, so the ''because they share the encoder'' attribution rests on an untested premise
+      (gap: the shown data never contradicts it).'
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: 'OF-CLIP adversarial COCO images on LLaVA-CLIP: CIDEr 25.5 vs clean 115.5'
+    provenance: observed
+    refs:
+    - evidence/tables/table2_transfer_attacks.md
+    - evidence/tables/table1_lvlm_robustness.md
+  - atom: 'LLaVA-CLIP adversarial COCO images on OF-CLIP: CIDEr 8.3 vs clean 79.7'
+    provenance: observed
+    refs:
+    - evidence/tables/table2_transfer_attacks.md
+    - evidence/tables/table1_lvlm_robustness.md
+  - atom: 'Transfer onto robust-encoder targets is near-clean: e.g. LLaVA-FARE2 115.9 (src OF-CLIP) and
+      115.5 (src LLaVA-CLIP); OF-FARE4 79.9 and 75.7'
+    provenance: observed
+    refs:
+    - evidence/tables/table2_transfer_attacks.md
+  - atom: 'Self-attack severity anchor: source model on its own images collapses (OF-CLIP 1.1, LLaVA-CLIP
+      3.1)'
+    provenance: observed
+    refs:
+    - evidence/tables/table2_transfer_attacks.md
+  attack_candidates:
+  - node: N05
+    decision: none
+    target: n/a
+    rationale: A rejected-objective dead end about TeCoA's loss design; it does not contest the transfer-attack
+      observations or their controlled-comparison scheme.
+  - node: N06
+    decision: none
+    target: n/a
+    rationale: A rejected-design dead end about TeCoA's ImageNet-only training; it bears on zero-shot
+      generalization, not on cross-model transfer of attacks.
+  holes:
+  - No control with a non-shared vulnerable encoder, so 'sharing causes transfer' (vs. 'any vulnerable
+    encoder is attackable by generic transferable perturbations') is an open premise.
+  - Transfer is tested only on COCO captioning at eps = 4/255; other tasks, datasets, and radii are untested.
+  - '''Near-clean performance'' for robust encoders is not given a formal threshold in the artifact; the
+    leaf relies on eyeballing Table 2 against Table 1.'
+  coverage_flags: []
+  uncertain: false
+  note: Causal attribution is expressed here as controlled_comparison plus the shared-channel premise;
+    the unmet mandatory CQ records that the artifact never isolates 'shared' from 'non-robust'. claim_type
+    adjudicated via double-annotation 2026-07-22.

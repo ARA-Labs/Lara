@@ -1,0 +1,277 @@
+artifact: fre
+group: paperbench
+annotator: ai-executed (claude, 2026-07-21)
+deadend_cap: null
+claims:
+- claim_id: C01
+  claim_type: generalization
+  proposition_shape:
+    sketch: zero_shot_competitive(fre_all, baseline_set, eval_suite, k_eval_samples)
+    arity: 4
+    phase0_nullary_sufficient: false
+    note: The comparison is parameterized by which baselines (FB/SF at K=5120, GC-IQL/GC-BC, privileged
+      OPAL), which eval suite (AntMaze/ExORL/Kitchen), and the K=32 sample budget; collapsing to a nullary
+      atom would hide the sample-budget asymmetry and the baseline set, both of which attacks would need
+      to target.
+  inference_scheme:
+    scheme: controlled_comparison
+    strict_or_defeasible: defeasible
+    premises:
+    - All methods are trained and evaluated on the same offline datasets and eval protocol (20 episodes/seed,
+      5 seeds, scores normalized to [0, 100]).
+    - Baselines are competently implemented/tuned representatives of their method families (FB, SF, GC-IQL,
+      GC-BC, OPAL).
+    - The sample-budget asymmetry (FRE K=32 vs FB/SF K=5120) is documented and, if anything, disadvantages
+      FRE.
+    - Aggregate rows (antmaze-all, exorl-all, all) are faithful means of the per-task cells.
+    supporting_experiments:
+    - E01
+    - E02
+  strict_certifier: domain-checker(table-aggregation)
+  certifier_note: Given the attested per-task cells of Table 1, recomputing the antmaze-all / exorl-all
+    / all aggregate rows and checking the claimed orderings (e.g. FRE all = 57 > SF all = 33) is pure
+    arithmetic and mechanically certifiable. The empirical content of each cell remains defeasible.
+  critical_questions:
+  - cq: Are all baselines evaluated under the same datasets, episode counts, and normalization as FRE?
+    mandatory: true
+    status: met
+    basis: E01 Procedure steps 1, 6-7 and Baselines list; Table 1 Conditions.
+  - cq: Is the evaluation-sample budget disparity (32 vs 5120) disclosed and handled so the comparison
+      is not confounded?
+    mandatory: true
+    status: met
+    basis: E01 Procedure steps 4 and 7; Table 1 caption states FB/SF use 5120 samples 'to be consistent
+      with prior work'; asymmetry favors the claim.
+  - cq: Is 'competitive with or better' backed by a statistical significance test across the 5 seeds,
+      as the falsification criterion presupposes?
+    mandatory: true
+    status: unmet-gap
+    basis: E01 Metrics report only mean ± std across 5 seeds; no test is described anywhere in experiments.md,
+      so the claim is under-established, not refuted.
+  - cq: Is OPAL's privileged online skill selection disclosed as a comparability caveat?
+    mandatory: false
+    status: met
+    basis: E01 Procedure step 7 and Table 1 footnote (best of 10 skills selected online); FRE beating
+      a privileged baseline strengthens the claim.
+  - cq: Is the setup reproducible (hardware, seeds, tuning protocol) as described?
+    mandatory: false
+    status: unmet-gap
+    basis: 'E01/E02 Setup: ''Hardware: Not specified in paper''; baseline tuning protocol not described.'
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: FRE overall 'all' score is 57 ± 9 (normalized, 5 seeds).
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 row 'all'
+  - atom: SF overall 'all' score is 33 ± 12; GC-IQL 24 ± 12; GC-BC 18 ± 5.
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 row 'all'
+  - atom: On kitchen, FRE scores 66 ± 3 vs FB 35 ± 9, SF 26 ± 16, OPAL 59 ± 4.
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 row 'kitchen'
+  - atom: FRE encodes each eval task from K=32 (state, reward) pairs while FB/SF use K=5120.
+    provenance: attested
+    refs:
+    - logic/experiments.md E01 Procedure steps 4, 7
+    - Table 1 caption
+  attack_candidates:
+  - node: N03
+    decision: none
+    target: n/a
+    rationale: N03 records the rejected linear SF/FB design; its failure mode is evidence FOR the comparison's
+      conclusion, not an attack on C01.
+  - node: N08
+    decision: none
+    target: n/a
+    rationale: White-noise reward priors are a rejected design alternative for the prior, ruling out an
+      alternative, not attacking C01's comparison.
+  holes:
+  - No statistical significance testing despite the falsification criterion being phrased in terms of
+    statistical significance.
+  - FB and OPAL have missing entries ('—') on most AntMaze rows, so the comparison is incomplete for parts
+    of the eval suite.
+  - Baseline hyperparameter tuning parity is not documented; hardware unspecified.
+  coverage_flags: []
+  uncertain: false
+  note: claim_type adjudicated via double-annotation 2026-07-22.
+- claim_id: C03
+  claim_type: generalization
+  proposition_shape:
+    sketch: generalizes_across_families(fre_all_agent, task_families, gc_baseline_set)
+    arity: 3
+    phase0_nullary_sufficient: false
+    note: The claim is a conjunction over task families {goal, directional, simplex, path} evaluated for
+      one fixed agent against {GC-IQL, GC-BC}; a nullary atom would lose the per-family structure that
+      the evidence (and its one tension, see holes) attaches to.
+  inference_scheme:
+    scheme: benchmark_evaluation
+    strict_or_defeasible: defeasible
+    premises:
+    - A single FRE-all checkpoint (no per-family retraining) is used for every task family.
+    - GC-IQL and GC-BC are evaluated on the same task suite under a task specification that is fair to
+      goal-conditioned methods.
+    - The task families jointly cover both goal-reaching and non-goal-reaching reward structure.
+    supporting_experiments:
+    - E01
+    - E02
+  strict_certifier: domain-checker(score-comparison)
+  certifier_note: 'Given attested Table 1 cells, the conjunctive check (FRE within noise of or above GC
+    baselines on goal rows AND FRE >> GC on directional/simplex rows) is arithmetic over fixed cells.
+    Only the cell values themselves are empirical. Note claims.md lists Proof: [E01] but experiments.md
+    marks E02 as also verifying C03; both are included.'
+  critical_questions:
+  - cq: Is the same FRE-all agent (frozen encoder, one policy) used across all task families, rather than
+      per-family specialists?
+    mandatory: true
+    status: met
+    basis: 'E01 Procedure steps 2-5: one encoder trained on the FRE-all prior, frozen, one z-conditioned
+      IQL policy evaluated on every task.'
+  - cq: How are goal-conditioned baselines (GC-IQL, GC-BC) conditioned on non-goal-reaching tasks (directional,
+      simplex, path), where no natural goal exists?
+    mandatory: true
+    status: unmet-gap
+    basis: E01 Setup/Procedure never states the conditioning protocol for GC methods on non-goal tasks;
+      their near-zero scores could be partly an artifact of the chosen task specification.
+  - cq: Is 'maintaining goal-reaching competitiveness' assessed with variance information across seeds?
+    mandatory: false
+    status: met
+    basis: 'E01/E02 Metrics: mean ± std over 5 seeds reported for every goal row (no formal test, but
+      dispersion is given).'
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: 'ant-directional: FRE 55.2 ± 8 vs GC-IQL 4.8 ± 14 and GC-BC 6.5 ± 16.'
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 row 'ant-directional'
+  - atom: 'ant-random-simplex: FRE 21.3 ± 4 vs GC-IQL 9.7 ± 2 and GC-BC 8.5 ± 10.'
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 row 'ant-random-simplex'
+  - atom: 'kitchen: FRE 66 ± 3 vs GC-IQL 3 ± 6 and GC-BC 1 ± 1.'
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 row 'kitchen'
+  - atom: 'Goal-reaching competitiveness: ant-goal-reaching FRE 48.8 ± 6 vs GC-IQL 0.0 ± 0; exorl-walker-goals
+      FRE 94 ± 2 vs GC-BC 100 ± 0.'
+    provenance: attested
+    refs:
+    - evidence/tables/table1_main_results.md
+    - Table 1 goal rows
+  attack_candidates:
+  - node: N03
+    decision: none
+    target: n/a
+    rationale: N03 rejects the linear SF/FB approach; it concerns SF/FB, not the GC baselines or FRE's
+      cross-family generalization, so it is a ruled-out alternative, not an attack.
+  - node: N08
+    decision: none
+    target: n/a
+    rationale: A rejected prior-design alternative (white-noise rewards); it does not contest C03's conclusion,
+      scheme, or premises.
+  holes:
+  - 'The claim''s ''GC-IQL and GC-BC score near zero on non-goal-reaching tasks'' does not hold for path
+    tasks: GC-IQL scores 46.6 ± 40 on ant-path-loop and 70.3 ± 37 on ant-path-center (above FRE''s 64.4
+    ± 38); the ''near zero'' scope is really directional/simplex plus kitchen.'
+  - Conditioning protocol for GC baselines on non-goal tasks is unspecified.
+  coverage_flags: []
+  uncertain: false
+  note: The path-task tension above is internal to the artifact's own evidence table, not a dead-end node,
+    so it surfaces as a hole rather than an attack edge.
+- claim_id: C04
+  claim_type: causal
+  proposition_shape:
+    sketch: diversity_dominance(fre_all, reward_subset_variants, antmaze_suite, total_score)
+    arity: 4
+    phase0_nullary_sufficient: false
+    note: The causal reading (joint encoding of disparate reward families causes no negative transfer)
+      rides entirely on the comparison of FRE-all's total score against the 6 strict-subset variants;
+      the variant set and the aggregate metric must stay visible for the ablation structure to be checkable.
+  inference_scheme:
+    scheme: component_ablation
+    strict_or_defeasible: defeasible
+    premises:
+    - All 7 variants differ only in the prior reward distribution; training budget and all other hyperparameters
+      are identical.
+    - The AntMaze eval suite (goal, directional, simplex, path) covers each reward family, so the total
+      score is a fair aggregate.
+    - FRE-all's total score is the maximum among all 7 variants by a margin the seed variance supports.
+    - The disclosed confound that FRE-all sees only 1/3 as many samples per family works against FRE-all,
+      not for it.
+    supporting_experiments:
+    - E03
+  strict_certifier: domain-checker(table-aggregation)
+  certifier_note: Given the attested Table 4 cells, recomputing each variant's total as the mean of its
+    four task-family scores and checking argmax(total) = FRE-all (47.3 vs next-best 46.9) is mechanical
+    arithmetic; whether that 0.4-point argmax supports 'dominates' is the defeasible part.
+  critical_questions:
+  - cq: Do the ablation variants hold everything except the prior reward distribution fixed (same budget,
+      same hyperparameters)?
+    mandatory: true
+    status: met
+    basis: E03 Setup ('same total training budget') and Procedure step 2 ('all other hyperparameters identical').
+  - cq: Is FRE-all's total-score dominance over every strict subset supported at the reported seed variance?
+    mandatory: true
+    status: unmet-defeater
+    basis: E03 Metrics give mean ± std only; Table 4 shows FRE-all 47.3 ± 7 vs FRE-goal-lin 46.9 ± 7 —
+      a 0.4-point margin inside overlapping ±7 intervals, so as shown the strict 'dominates all reward-subset
+      ablations' inference fails for that comparison (the weaker single-family falsification criterion
+      still passes).
+  - cq: Is the per-family sample-count confound (FRE-all sees 1/3 as many goal samples as FRE-goals) disclosed?
+    mandatory: false
+    status: met
+    basis: E03 Setup states it explicitly; the confound biases against FRE-all, strengthening the no-interference
+      reading.
+  - cq: Is 'scales smoothly with diversity' shown as a trend (1-, 2-, 3-family progression) rather than
+      only an argmax?
+    mandatory: false
+    status: unmet-gap
+    basis: E03 Expected outcome asserts 'scaling is smooth', but Table 4 / Figure 5 give a 7-variant bar
+      comparison, not a monotone diversity curve (e.g. pairwise FRE-goal-lin 46.9 already ≈ FRE-all 47.3).
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: 'Total scores: FRE-all 47.3 ± 7; FRE-goals 26.1 ± 8; FRE-lin 31.6 ± 5; FRE-mlp 25.3 ± 8; FRE-lin-mlp
+      32.3 ± 5; FRE-goal-mlp 33.8 ± 15; FRE-goal-lin 46.9 ± 7.'
+    provenance: attested
+    refs:
+    - evidence/tables/table4_reward_subset_ablation.md
+    - Table 4 row 'total'
+  - atom: Single-family specialists win their own family but collapse elsewhere (FRE-goals 66.0 goal /
+      8.3 path; FRE-lin 55.5 directional / 6.0 goal).
+    provenance: attested
+    refs:
+    - evidence/tables/table4_reward_subset_ablation.md
+    - evidence/figures/figure5_reward_diversity_scaling.md
+  - atom: All 7 variants share the same training budget; only the prior mixture differs.
+    provenance: attested
+    refs:
+    - logic/experiments.md E03 Setup and Procedure step 2
+  attack_candidates:
+  - node: N03
+    decision: none
+    target: n/a
+    rationale: Rejected alternative approach (linear SF/FB); unrelated to the reward-diversity ablation.
+  - node: N08
+    decision: none
+    target: n/a
+    rationale: White-noise priors failing is a rejected design that bounds the claim's scope (diversity
+      helps only among structured families); it rules out an alternative rather than contesting the ablation
+      inference over the three structured families.
+  holes:
+  - No significance test for the FRE-all vs FRE-goal-lin total-score ordering (0.4-point margin, overlapping
+    ± 7 std) — the 'dominates all subsets' wording outruns the evidence.
+  - '''Scales smoothly'' is asserted from a 7-variant bar comparison; no diversity curve or interpolation
+    is provided.'
+  - Ablation is AntMaze-only; the no-interference conclusion is not tested on ExORL or Kitchen.
+  coverage_flags: []
+  uncertain: true
+  note: 'Uncertainty is confined to the dominance CQ: unmet-defeater vs unmet-gap is a close call. Chosen
+    unmet-defeater because the artifact''s own Table 4 numbers (47.3 ± 7 vs 46.9 ± 7) actively contradict
+    strict dominance as stated, rather than merely leaving it untested.'

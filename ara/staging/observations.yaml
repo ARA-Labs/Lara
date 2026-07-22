@@ -1,0 +1,70 @@
+observations:
+  - id: O01
+    timestamp: "2026-07-21T23:15"
+    provenance: ai-suggested
+    content: >
+      Claim-type mix is benchmark-group-dependent: all 31/31 implementation-behavioral
+      claims live in rebench/speedrun (agent-run artifacts); paperbench+extra
+      (published-paper ARAs) is comparative/causal-heavy (72+54 of 231). Implication:
+      the frozen v0.1 construct set must be validated against BOTH populations — an
+      80% coverage gate passed on paperbench alone would not certify coverage of
+      implementation-behavioral argument shapes.
+    context: >
+      Six-way typing pass over the full 231-claim frame (m0/claim-types.tsv,
+      commit 1d57824); distribution counted from the completed table.
+    potential_type: claim
+    bound_to: [N25]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O02
+    timestamp: "2026-07-22T00:50"
+    provenance: ai-suggested
+    content: >
+      Corpus-gated open-question answers from the 60-claim annotation: (#2) a scheme
+      vocabulary of ~9 families suffices, comparison+ablation carry 2/3 of claims;
+      (#1) the smallest useful strict-adapter portfolio is a rational-arithmetic/
+      table-recheck checker plus a static code-inspection checker — LP is nearly absent
+      (3 speculative calls); (#5) per-result-cell is the default leaf grain (75%).
+    context: "m0/annotation-summary.md §2, aggregated from 27 annotation files."
+    potential_type: claim
+    bound_to: [N28]
+    promoted: true
+    promoted_to: "logic/claims.md:C13,C14,C15"
+    crystallized_via: verbal-affirmation
+    stale: false
+  - id: O03
+    timestamp: "2026-07-22T00:50"
+    provenance: ai-suggested
+    content: >
+      Defeat-layer findings (#3): real attacks are rare (4/194 decisions) and exclusively
+      undercuts in this sample; rebut/undermine unexercised. The attack-candidate walk must
+      cover the WHOLE trace, not only dead_end nodes (counter-evidence found in experiment
+      nodes: fix_embedding; score-filtered runs: triton_cumsum). Inverse phenomenon exists:
+      dead-end-as-support (restricted_mlm C14). Mandatory-CQ gaps are pervasive (39%) and
+      must surface as holes, not defeat edges, or nearly every claim is spuriously attacked.
+    context: "m0/annotation-summary.md §2-§3."
+    potential_type: constraint
+    bound_to: [N28]
+    promoted: true
+    promoted_to: "logic/claims.md:C16 + logic/solution/constraints.md (pipeline constraints)"
+    crystallized_via: verbal-affirmation
+    stale: false
+  - id: O04
+    timestamp: "2026-07-22T00:50"
+    provenance: ai-suggested
+    content: >
+      Preliminary construct-coverage gate verdict: PASS (~90% of sampled argument shapes
+      expressible) conditional on (a) writing the scope/binding and claim-splitting
+      conventions into the spec, (b) a 6-item construct wishlist (equivalence scheme,
+      monotone-relationship propositions, parametric growth-rate claims, stochastic
+      measurand leaves, negative existentials over code, graded predicates via binding),
+      (c) evidence-model decisions for dead-end-as-support and result-cell conflicts.
+    context: "m0/annotation-summary.md §3; awaiting human review of the adjudication."
+    potential_type: claim
+    bound_to: [N27, N28]
+    promoted: true
+    promoted_to: "logic/claims.md:C17"
+    crystallized_via: verbal-affirmation
+    stale: false

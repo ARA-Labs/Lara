@@ -1,0 +1,195 @@
+artifact: self-expansion
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C03
+    claim_type: causal
+    proposition_shape:
+      sketch: "outperforms(sema_full, ablation_variant, dataset, metric)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a universally quantified conjunction over five ablation
+        variants (no_exp, avg_w, rand_w, top1_sel, rand_sel), two datasets
+        (imagenet_a, vtab), and two metrics (A_N, A_bar). The falsification
+        criterion quantifies over exactly these instantiations ("any variant
+        ... on both ... simultaneously"), so a nullary atom would lose the
+        per-variant, per-dataset structure that the check operates on.
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Each ablation variant is trained with the same hyperparameters as full SEMA, differing only in the expansion or composition component being ablated (E03 Procedure step 2)"
+        - "All variants are evaluated with the same metrics (A_N, A_bar) on the same class-incremental splits of ImageNet-A and VTAB (E03 Procedure step 3)"
+        - "Full SEMA's cell values strictly exceed each variant's on both datasets (Table 2)"
+        - "Observed accuracy differences exceed run-to-run noise, so the gaps are attributable to the ablated component rather than training stochasticity"
+        - "The z-score trigger's contribution is robust to its own hyperparameters (threshold tau via E05, layer range via E06), so the full-SEMA reference point is not a cherry-picked configuration"
+      supporting_experiments: [E03, E05, E06]
+    strict_certifier: domain-checker(table-dominance)
+    certifier_note: >-
+      The dominance step is algorithmic: given Table 2 cells as leaves, a
+      checker can verify that for every variant v in {No Exp., Avg. W.,
+      Rand. W., Top-1 Sel., Rand. Sel.} and every dataset d in {ImageNet-A,
+      VTAB}, A_N(SEMA,d) > A_N(v,d) and A_bar(SEMA,d) > A_bar(v,d) — exactly
+      the negation of the falsification criterion. Only this arithmetic
+      re-check is strict; the inference from cells to the causal claim stays
+      defeasible.
+    critical_questions:
+      - cq: "Are all five ablation variants actually trained and evaluated on both ImageNet-A and VTAB under the stated procedure?"
+        mandatory: true
+        status: met
+        basis: "E03 Procedure steps 2-3 enumerate all variants on both datasets; Table 2 reports all cells"
+      - cq: "Do the variants differ from full SEMA only in the ablated component (same backbone, hyperparameters, task splits)?"
+        mandatory: true
+        status: met
+        basis: "E03 Setup (ViT-B/16-IN1K frozen, same system) and Procedure step 2 ('same hyperparameters')"
+      - cq: "Are results reported over multiple seeds with uncertainty, so that small margins (e.g. VTAB Avg. W. A_N 90.84 vs SEMA 91.26) exceed run noise?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Setup/Procedure specify no seed count or variance reporting; single point estimates leave the sub-1% VTAB margins unestablished rather than defeated"
+      - cq: "Is the z-score threshold tau=1.2 a robust operating point rather than a tuned-for-the-comparison choice?"
+        mandatory: false
+        status: met
+        basis: "E05 sweeps tau in [1.0,2.0] on ImageNet-A and [1.0,8.0] on VTAB and expects stable accuracy; trace N08 reports stability confirmed"
+      - cq: "Does the ablation isolate the z-score *trigger* itself, not just the presence of expansion and the routing scheme?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E03's variants ablate expansion presence and composition; the trigger-vs-alternative-trigger comparison (Expansion by Task) lives in E02 Procedure step 2 / Table 5, outside C03's listed proof [E03]"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Full SEMA: A_N 64.53 / A_bar 53.32 on ImageNet-A; A_N 91.26 / A_bar 89.64 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table2_ablation_expansion_composing.md", "trace N02/N12 evidence"]
+      - atom: "No Exp.: A_N 61.20 / A_bar 49.90 on ImageNet-A; A_N 86.21 / A_bar 83.66 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table2_ablation_expansion_composing.md", "trace N03 failure_mode"]
+      - atom: "Avg. W.: A_N 56.88 / A_bar 44.31 on ImageNet-A; A_N 90.84 / A_bar 89.14 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table2_ablation_expansion_composing.md", "trace N12 failure_mode"]
+      - atom: "Rand. W.: A_N 62.95 / A_bar 49.77 on ImageNet-A; A_N 88.87 / A_bar 85.17 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table2_ablation_expansion_composing.md", "trace N12 failure_mode"]
+      - atom: "Top-1 Sel.: A_N 62.00 / A_bar 50.56 on ImageNet-A; A_N 90.83 / A_bar 88.61 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table2_ablation_expansion_composing.md"]
+      - atom: "Rand. Sel.: A_N 61.70 / A_bar 50.36 on ImageNet-A; A_N 90.82 / A_bar 88.51 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table2_ablation_expansion_composing.md"]
+      - atom: "Accuracy stable across tau in [1.0, 2.0] on ImageNet-A (threshold robustness of the trigger)"
+        provenance: attested
+        refs: ["evidence/figures/fig6_expansion_threshold.md", "trace N08 result"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "The fixed-single-adapter dead end is the rejected alternative that becomes C03's own 'No Exp.' ablation row — it supports the claim rather than attacking its conclusion, scheme, or leaves."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "Hard RD-based routing is a rejected design alternative (Table 7, ~2% gap) motivating the learned soft router; it neither conflicts with C03's conclusion nor invalidates the ablation setup."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Average/random weighting is the rejected alternative realized as the Avg. W. / Rand. W. rows of Table 2 — evidence for C03, not an edge against it."
+    holes:
+      - "No seed count or uncertainty in E03; VTAB margins for Avg. W. (0.42 A_N, 0.50 A_bar) are within plausible single-run noise"
+      - "Claim title says 'Per-Task Expansion Strategies' but the statement and falsification criteria cover only variants (a)-(e); the per-task-expansion comparison rests on E02/Table 5, which is not in C03's proof set"
+      - "Attribution to the z-score trigger specifically (vs any expansion trigger) is not isolated by E03's variant set"
+    coverage_flags: []
+    uncertain: false
+    note: >-
+      Causal reading: the ablation removes/replaces one component at a time
+      and attributes the accuracy drop to that component. Table 2 dominance
+      holds in all 20 comparison cells, so the strict dominance step is fully
+      certified; the causal step remains defeasible mainly for lack of
+      variance reporting. All three tree dead ends are rejected-alternative
+      records that feed C03's evidence, so none is an attack.
+  - claim_id: C04
+    claim_type: generalization
+    proposition_shape:
+      sketch: "an_gap_within(adapter_variant, dataset, tolerance_pct=2.0)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim asserts |A_N(SEMA with variant) - A_N(SEMA with default
+        Adapter)| <= 2% for each variant in {lora, convpass} and each dataset
+        in {imagenet_a, vtab}. The falsification criterion quantifies per
+        variant per dataset, so the nullary collapse would lose the four
+        checkable instantiations and the numeric tolerance.
+    inference_scheme:
+      scheme: component_substitution
+      strict_or_defeasible: defeasible
+      premises:
+        - "LoRA and Convpass variants are trained inside the unchanged SEMA framework: RD, router, expansion strategy, and all other hyperparameters identical (E04 Procedure step 2)"
+        - "All three variants are evaluated with the same metrics (A_N, A_bar) on the same ImageNet-A and VTAB splits (E04 Procedure step 3)"
+        - "Each variant's A_N is within 2% of the default Adapter's on both datasets (Table 3)"
+        - "Two alternative adapter types are representative enough of 'functional adapter types' to license adapter-agnosticism"
+        - "The default-Adapter reference point is itself well-established (dependency on C01 via E01)"
+      supporting_experiments: [E04]
+    strict_certifier: domain-checker(tolerance-gap)
+    certifier_note: >-
+      The tolerance step is an arithmetic re-check: given Table 3 cells as
+      leaves, verify A_N(Adapter,d) - A_N(v,d) <= 2.0 for v in {LoRA,
+      Convpass}, d in {ImageNet-A, VTAB} (gaps: 1.03, 1.05, -0.59, 0.58).
+      Only this check is strict; the generalization to adapter-agnosticism
+      stays defeasible.
+    critical_questions:
+      - cq: "Are all SEMA components other than the functional adapter type held identical across variants?"
+        mandatory: true
+        status: met
+        basis: "E04 Procedure step 2: 'All other hyperparameters and SEMA components (RD, router, expansion strategy) remain identical'"
+      - cq: "Is the 2% tolerance evaluated for both alternative adapter types on both datasets?"
+        mandatory: true
+        status: met
+        basis: "E04 Procedure steps 1 and 3; Table 3 reports all four variant-dataset cells"
+      - cq: "Are results reported over multiple seeds with uncertainty, given that observed gaps (~1% A_N) are half the 2% tolerance?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 Setup/Procedure specify no seed count or variance; a single run near the tolerance boundary leaves the threshold claim unestablished at the stated rigor, not defeated"
+      - cq: "Do two alternative adapter types (LoRA, Convpass) license the scope 'generalises across functional adapter types'?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 tests exactly three types; nothing in experiments.md argues representativeness of the broader adapter-type class"
+      - cq: "Is the 2% tolerance a principled equivalence margin rather than chosen post hoc to fit Table 3?"
+        mandatory: false
+        status: unmet-gap
+        basis: "Neither E04 nor claims.md justifies the 2% figure; Expected outcome states 'comparable (within ~2%)' without derivation"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Adapter (default): A_N 64.53 on ImageNet-A; A_N 91.26 on VTAB"
+        provenance: attested
+        refs: ["evidence/tables/table3_adapter_variants.md"]
+      - atom: "LoRA: A_N 63.50 on ImageNet-A (gap 1.03); A_N 91.85 on VTAB (exceeds default by 0.59)"
+        provenance: attested
+        refs: ["evidence/tables/table3_adapter_variants.md"]
+      - atom: "Convpass: A_N 63.48 on ImageNet-A (gap 1.05); A_N 90.68 on VTAB (gap 0.58)"
+        provenance: attested
+        refs: ["evidence/tables/table3_adapter_variants.md"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "Concerns absence of expansion, not adapter type; it bears on C03's No Exp. row and has no edge to the adapter-agnosticism claim."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "Rejected hard RD-routing alternative; routing strategy is held fixed in E04, so it touches neither C04's conclusion nor its substitution scheme."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Rejected weighting alternatives concern adapter composition, which E04 keeps identical across variants; no attack on C04."
+    holes:
+      - "Scope premise open: adapter-agnosticism is asserted from two alternative types with no representativeness argument"
+      - "No seeds or uncertainty in E04, while observed gaps sit at roughly half the 2% tolerance"
+      - "'2% A_N' is not disambiguated between absolute percentage points and relative percent (all Table 3 gaps pass under either reading, but the atom's tolerance semantics are underspecified)"
+    coverage_flags:
+      - "Generalization over the open class 'functional adapter types' has no direct construct: atoms instantiate only per tested type (Adapter, LoRA, Convpass), and no vocabulary expresses the inductive step from three instances to the class"
+    uncertain: false
+    note: >-
+      Generalization reading: invariance-under-substitution evidence. The
+      numeric within-2% conjunction is fully certified against Table 3
+      (LoRA even beats the default on VTAB); what remains defeasible is the
+      jump from three tested types to adapter-agnosticism as a class-level
+      property. The tree's dead ends all concern expansion/routing design,
+      so none attacks C04.

@@ -1,0 +1,230 @@
+artifact: semantic-self-consistency
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # artifact has only 3 dead_end nodes (N06, N07, N12); all classified
+claims:
+  - claim_id: C03
+    claim_type: comparative
+    proposition_shape:
+      sketch: "majority_exceeds(outlier_methods{iforest,knn,ocsvm}, sc_baseline, best_accuracy, model_dataset_conditions)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is an aggregate over 45 method-model-dataset cells of Table 2 ("majority of
+        conditions exceed baseline") plus a persistence rider at reduced sample sizes. A nullary
+        opaque atom would lose the majority-count structure, which is exactly the part that is
+        re-checkable arithmetic from the table cells.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Treatment and baseline share the identical generation setup (same k=10 responses, temperature=0.8, same featurizer per dataset), so the only varying factor is pre-vote outlier removal."
+        - "Per-cell accuracy in Table 2 is correctly computed from the same answer-extraction procedure as the baseline (E01 step 2)."
+        - "Best-configuration accuracy exceeds the SC baseline in more than half of the method-model-dataset triples (arithmetic over Table 2)."
+        - "Gains remain consistent as sample size k decreases (E02 procedure step 7)."
+      supporting_experiments: [E02]
+    strict_certifier: domain-checker(table-aggregation)
+    certifier_note: >-
+      The majority-count step is deductive: given Table 2 as leaves, a checker can recompute, per
+      method-model-dataset triple, best_accuracy > sc_baseline and verify the count exceeds half of
+      the 45 triples. Only this aggregation is strict; the inference from cells to method quality
+      stays defeasible.
+    critical_questions:
+      - cq: "Is the SC baseline present and measured under the same sampling conditions as the outlier-removal variants?"
+        mandatory: true
+        status: met
+        basis: "E02 Setup/Baselines: SC baseline (majority vote k=10) reported per cell in Table 2; step 1 reuses E01 generation."
+      - cq: "Is the 'best configuration' selected without a held-out set, and is the resulting selection bias vs. an untuned baseline accounted for?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 procedure step 6 reports 'best and average accuracy across parameter configurations'; no held-out selection or correction is described. Average-accuracy columns partially mitigate (also reported), so the claim is weakly established rather than defeated — the claim scopes itself to best-configuration."
+      - cq: "Is the reduced-sample-size persistence rider backed by exhibited measurements?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 procedure step 7 asserts verification, but Table 2 (the falsification table) contains only k=10 results; no reduced-k table appears in evidence/tables/."
+      - cq: "Is run-to-run variance small relative to the reported deltas?"
+        mandatory: false
+        status: met
+        basis: "Table 4 (Appendix B) reports accuracy deviation across configurations, 0.33-2.13%, below most reported gains; no significance tests, though."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "best_accuracy(iforest, llama3, aqua_rat) = 72.25 and sc_baseline(llama3, aqua_rat) = 45.28"
+        provenance: observed
+        refs: ["evidence/tables/table2_outlier_detection.md"]
+      - atom: "best_accuracy(iforest, llama2, svamp) = 45.94 and sc_baseline(llama2, svamp) = 46.5 (a below-baseline cell; the majority count must survive such cells)"
+        provenance: observed
+        refs: ["evidence/tables/table2_outlier_detection.md"]
+      - atom: "best_accuracy(ocsvm, gpt4o_mini, strategyqa) = 81.02 and sc_baseline(gpt4o_mini, strategyqa) = 79.18"
+        provenance: observed
+        refs: ["evidence/tables/table2_outlier_detection.md", "trace node N10"]
+      - atom: "gains persist at reduced sample sizes"
+        provenance: assumed
+        refs: ["logic/experiments.md E02 step 7 (asserted, no exhibited table)"]
+    attack_candidates:
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "N-gram weighting is a rejected alternative design for the weighting strategy; its failure neither conflicts with C03's conclusion nor attacks E02's setup or leaves."
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "K-means was a rejected alternative for outlier identification (N09 alternatives); its instability motivated the chosen methods rather than contradicting their results."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Dimensionality reduction is a rejected preprocessing variant; raw embeddings were kept, so its failure does not bear on the raw-embedding results in Table 2."
+    holes:
+      - "No exhibited reduced-sample-size results despite the claim's 'consistent gains remaining at reduced sample sizes' clause."
+      - "Configuration search space behind 'best-configuration' is only partially specified (fixed hyperparameters listed in Setup, but the swept grid is not)."
+      - "No statistical significance testing on per-cell deltas."
+    coverage_flags: []
+    uncertain: false
+    note: ""
+
+  - claim_id: C05
+    claim_type: descriptive
+    proposition_shape:
+      sketch: "positively_correlated(avg_seq_length, avg_accuracy_increase, model_dataset_pairs)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The correlation is recomputable from the 15 (seq_length, accuracy_increase) pairs in
+        Table 3; a nullary atom would hide the sign-of-r structure that the falsification
+        criterion ('no positive correlation ... in Table 3') explicitly targets.
+    inference_scheme:
+      scheme: statistical_correlation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Avg. sequence length and avg. accuracy increase are measured per model-dataset pair from the same E01 runs (E04 steps 1-2, 4)."
+        - "Accuracy increase is computed against the SC baseline of E01 (dependency on C01's experimental frame)."
+        - "The correlation between the two columns over the 15 pairs is positive."
+        - "The 15 pairs are treated as (approximately) independent observations."
+      supporting_experiments: [E04]
+    strict_certifier: domain-checker(stats-recompute)
+    certifier_note: >-
+      Recomputing Pearson r over the 15 Table 3 rows is deductive arithmetic; a checker can certify
+      sign(r) > 0 (recompute here: r = 0.242). It cannot certify the defeasible reading 'longer
+      chains provide more discriminative semantic signal' — that mechanism claim stays outside the
+      strict step.
+    critical_questions:
+      - cq: "Is a correlation coefficient (and significance level) actually reported rather than a visual/asserted trend?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 step 5 says 'analyze correlations' and Table 3's note asserts 'positive correlation observed', but no coefficient or test appears anywhere in experiments.md or the evidence tables; recomputed r = 0.242 (t ~ 0.90, not significant at n = 15)."
+      - cq: "Are the 15 model-dataset points independent samples?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 Setup: points are 5 models x 3 datasets; same model contributes 3 correlated points (Table 3 note: GPT models are longer 'due to instruction fine-tuning'), which the analysis does not address."
+      - cq: "Is a third variable (model family / instruction tuning) driving both sequence length and accuracy gain?"
+        mandatory: false
+        status: unmet-gap
+        basis: "Table 3 notes attribute long sequences to instruction fine-tuning; no partial-correlation or per-family analysis in E04. Optional because the claim as sampled is descriptive ('tend to show'), not causal."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "avg_seq_length(gpt3.5, aqua_rat) = 102.40 and avg_accuracy_increase(gpt3.5, aqua_rat) = 7.30"
+        provenance: observed
+        refs: ["evidence/tables/table3_sequence_length_bleu.md"]
+      - atom: "avg_seq_length(gpt4o_mini, strategyqa) = 88.91 and avg_accuracy_increase(gpt4o_mini, strategyqa) = -2.44 (a long-sequence, negative-gain counter-cell the correlation must absorb)"
+        provenance: observed
+        refs: ["evidence/tables/table3_sequence_length_bleu.md"]
+      - atom: "positive correlation observed between avg sequence length and accuracy increase over all 15 pairs"
+        provenance: attested
+        refs: ["evidence/tables/table3_sequence_length_bleu.md (Key finding note)", "trace node N11"]
+    attack_candidates:
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "N-gram weighting failure concerns a rejected weighting design; it says nothing about the seq-length/accuracy-gain relation of the adopted methods."
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "K-means instability is a rejected clustering alternative; it does not conflict with, or attack the basis of, the Table 3 correlation."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Dimensionality-reduction failure concerns embedding preprocessing, not the sequence-length correlate; no bearing on C05."
+    holes:
+      - "No correlation coefficient, confidence interval, or significance test reported (recomputed r = 0.242 is positive in sign but weak and not significant at n = 15)."
+      - "Mechanism clause ('longer chains provide more discriminative semantic signal') has no direct supporting experiment."
+      - "Non-independence of the 15 points (5 models x 3 datasets) unaddressed."
+    coverage_flags: []
+    uncertain: true
+    note: >-
+      Borderline judgment: with recomputed r = 0.242 (n.s.), one could argue the missing
+      significance test is an unmet-defeater for any 'correlation exists' reading. Kept as
+      unmet-gap because the claim's own falsification criterion is sign-based ('no positive
+      correlation'), and the sign is positive; the claim is under-established, not defeated.
+
+  - claim_id: C06
+    claim_type: negative-result
+    proposition_shape:
+      sketch: "no_significant_positive_correlation(avg_bleu, avg_accuracy_increase, model_dataset_pairs)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        A negated statistical proposition over the same 15 Table 3 pairs; the negation and the
+        significance qualifier are load-bearing (falsification criterion: 'a statistically
+        significant positive correlation is found'), so an opaque nullary atom would lose the
+        checkable structure.
+    inference_scheme:
+      scheme: statistical_correlation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Avg. BLEU is computed per model-dataset pair against dataset reference answers on the same E01 responses (E04 step 3)."
+        - "Accuracy increase is computed against the SC baseline per pair (shared frame with C05, dependency on C05's Table 3 analysis)."
+        - "No statistically significant positive correlation holds between the BLEU and accuracy-increase columns."
+        - "The sample (n = 15) has enough power that absence of a detected correlation is informative."
+      supporting_experiments: [E04]
+    strict_certifier: domain-checker(stats-recompute)
+    certifier_note: >-
+      Given Table 3 as leaves and a fixed test policy (e.g. Pearson r, alpha = 0.05), 'no
+      significant positive correlation' is algorithmically checkable: recompute here gives
+      r = -0.234 (t ~ -0.87), so the null result is certified relative to that policy. The power
+      premise (absence is informative) remains defeasible and uncertified.
+    critical_questions:
+      - cq: "Is a statistical test with a stated threshold reported, so that 'no significant correlation' is more than an eyeballed table?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 step 5 and Table 3 notes assert 'no correlation observed'; no test statistic or alpha anywhere in experiments.md or evidence tables. Gap, not defeater: recomputation from Table 3 confirms the direction (r = -0.234)."
+      - cq: "Does the analysis have adequate power for the negative claim at n = 15 pairs?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 Setup fixes 15 model-dataset pairs; no power analysis. For a negative result the scheme is not policy-complete without it, but nothing shown actively defeats the inference."
+      - cq: "Is BLEU measured against an appropriate reference for reasoning paths?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E04 step 3 conflates 'BLEU score (ROUGE-N / n-gram overlap)' vs. dataset reference answers; metric identity is muddled, weakening the orthogonality interpretation."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "avg_bleu(gpt4o_mini, svamp) = 0.547 and avg_accuracy_increase(gpt4o_mini, svamp) = 1.19"
+        provenance: observed
+        refs: ["evidence/tables/table3_sequence_length_bleu.md", "evidence/tables/table3_sequence_length.md"]
+      - atom: "avg_bleu(llama2, strategyqa) = 0.075 and avg_accuracy_increase(llama2, strategyqa) = 9.82 (low BLEU, highest gain)"
+        provenance: observed
+        refs: ["evidence/tables/table3_sequence_length_bleu.md"]
+      - atom: "no correlation observed between BLEU score and accuracy increase across the 15 pairs"
+        provenance: attested
+        refs: ["evidence/tables/table3_sequence_length.md (Notes)", "trace node N11"]
+    attack_candidates:
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "The n-gram weighting failure (surface lexical overlap uninformative) is a rejected design whose lesson runs parallel to C06's conclusion; it is corroboration-adjacent, not a rebut/undercut/undermine of anything."
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "K-means instability concerns clustering of embeddings, unrelated to the BLEU/accuracy relation."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Dimensionality-reduction failure is a rejected preprocessing variant with no bearing on the BLEU correlation analysis."
+    holes:
+      - "No significance test or alpha reported for the null claim; 'statistically significant' in the falsification criterion is never operationalized."
+      - "No power analysis backing the negative result at n = 15."
+      - "BLEU vs. ROUGE-N metric identity is ambiguous in E04 step 3."
+    coverage_flags: []
+    uncertain: false
+    note: >-
+      Note for the attack-typing study: dead end N06 is a near-miss for a *support* edge to C06
+      (its lesson corroborates lexical/accuracy orthogonality); the attack vocabulary correctly
+      yields 'none', and no positive-edge construct is needed since corroboration is not defeat.

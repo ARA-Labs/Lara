@@ -1,0 +1,244 @@
+artifact: pinn
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # artifact has exactly 1 dead_end node (N09); no cap needed
+claims:
+  - claim_id: C01
+    claim_type: descriptive
+    proposition_shape:
+      sketch: "requires_low_loss(pde, l2re_target, loss_threshold)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: "The checkable content is per-PDE: a threshold family ('10^-5 or smaller,
+        depending on the PDE') plus an existential trivial-solution exception on
+        convection/reaction. A nullary atom loses the per-PDE instantiation that E01's
+        scatter data actually checks."
+    inference_scheme:
+      scheme: cross_run_observation
+      strict_or_defeasible: defeasible
+      premises:
+        - "The training sweep spans enough (PDE, optimizer, width, seed) combinations
+          that the loss-L2RE scatter reflects the loss landscape, not one regime"
+        - "Final L2RE is computed against ground truth on the full evaluation grid,
+          independent of the training objective"
+        - "Runs with loss ~ 0 but L2RE ~ 1 are identified and explained (trivial
+          constant solutions), not discarded as noise"
+      supporting_experiments: [E01, E06]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Does the run sweep span diverse optimizers, widths, and seeds so the
+          loss-L2RE scatter is not an artifact of one training regime?"
+        mandatory: true
+        status: met
+        basis: "E01 Setup/Procedure: all optimizer combinations x widths {50,100,200,400}
+          x seeds, 41000 iterations each"
+      - cq: "Is L2RE evaluated against ground truth on a grid independent of the
+          training loss being correlated?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 2 ('full evaluation grid'); E06 Baselines (analytical
+          solutions from Appendix A)"
+      - cq: "Are the loss ~ 0 / L2RE ~ 1 cases explained rather than treated as
+          scatter noise?"
+        mandatory: false
+        status: met
+        basis: "E01 Procedure step 4; E06 confirms these are near-constant trivial
+          solutions satisfying IC but failing BC"
+      - cq: "Does the monotone relationship hold beyond the three benchmark PDEs?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 Setup restricts to convection (beta=40), reaction (rho=5),
+          wave (beta=5); no other PDE tested"
+    leaf_granularity: per-run
+    leaves:
+      - atom: "Each swept run (PDE, optimizer, width, seed) contributes a (final loss,
+          final L2RE) point, and the pooled scatter shows a monotone loss-to-L2RE trend"
+        provenance: observed
+        refs: ["Figure 2", "E01 Procedure step 3", "trace N02"]
+      - atom: "Reaching L2RE ~ 1e-2 requires final loss ~ 1e-5 (order of magnitude,
+          per PDE)"
+        provenance: observed
+        refs: ["trace N02 result", "Figure 2", "section 4"]
+      - atom: "Convection and reaction runs exist with loss ~ 0 and L2RE ~ 1 whose
+          solutions are near-constant trivial functions (satisfy IC, fail BC)"
+        provenance: observed
+        refs: ["E06", "Figure 2", "trace N02"]
+    attack_candidates:
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "N09 is a rejected-approach dead end (L-BFGS-alone terminates early
+          on strong Wolfe failure); it says nothing about the loss-L2RE relationship."
+    holes:
+      - "Generality beyond the three benchmark PDEs is left open"
+      - "The per-PDE loss threshold is only pinned to an order of magnitude (~1e-5),
+        not a stated function of the PDE"
+    coverage_flags:
+      - "The claim's core is a monotone functional relationship between two continuous
+        quantities (loss vs L2RE); no LARA construct expresses graded functional
+        dependence directly, so the atom is a per-PDE threshold surrogate"
+    uncertain: false
+    note: "E06 is a secondary support (trivial-solution forensics) for the existential
+      clause of C01; claims.md lists only E01 as Proof."
+
+  - claim_id: C03
+    claim_type: causal
+    proposition_shape:
+      sketch: "dominant_ill_conditioning_source(loss_component=residual, among={residual, ic, bc}, pde)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: "The checkable structure is a comparison of max Hessian eigenvalues across
+        the three named loss components, per PDE; a nullary atom loses the comparison
+        set that the falsification criterion quantifies over."
+    inference_scheme:
+      scheme: component_spectral_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "All three component Hessian spectra are computed from the same trained
+          checkpoint with the same SLQ procedure"
+        - "SLQ spectral density estimates are accurate enough that the cross-component
+          max-eigenvalue ordering is reliable"
+        - "The residual component's larger outlier eigenvalues are attributable to the
+          differential operator D it contains (theoretical strand)"
+      supporting_experiments: [E02]
+    strict_certifier: domain-checker(operator-conditioning-theorem)
+    certifier_note: "Only the theoretical strand is strict: the derivation that an
+      ill-conditioned differential operator D induces large residual-Hessian eigenvalues
+      (Theorem 8.4-style argument, formally carried by C07/E05) is a checkable analytic
+      proof. The E02 spectral measurements themselves are empirical and never strict."
+    critical_questions:
+      - cq: "Are the residual, IC, and BC spectra computed from the same trained model
+          with the same estimator, so the comparison is like-for-like?"
+        mandatory: true
+        status: met
+        basis: "E02 Procedure steps 1, 3, 6: one best Adam+L-BFGS checkpoint per PDE,
+          SLQ repeated per component"
+      - cq: "Is the SLQ estimator's error quantified well enough to trust the
+          cross-component max-eigenvalue ordering?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 Setup names SLQ (PyHessian or equivalent) but Metrics report only
+          the visual spectra; no estimator error bars anywhere in experiments.md"
+      - cq: "Does residual dominance hold beyond the single best checkpoint per PDE
+          (other widths, seeds, training stages)?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E02 Setup: 'Best model from Adam+L-BFGS training sweep' only"
+      - cq: "Is the causal attribution to the differential operator independently
+          established rather than read off the correlation?"
+        mandatory: false
+        status: met
+        basis: "E05 verifies the theoretical prediction (condition number grows with
+          n_res per Theorem 8.4), supporting the mechanism behind C03"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "For each PDE in {convection, reaction, wave}, the residual-component
+          Hessian's maximum eigenvalue exceeds that of the IC and BC components"
+        provenance: observed
+        refs: ["Figure 3 bottom", "Figure 7", "section 5.2", "trace N05"]
+      - atom: "IC and BC component spectra are comparatively well-conditioned"
+        provenance: observed
+        refs: ["trace N05 result", "Figure 7"]
+      - atom: "Theory predicts the differential operator D is the source of the
+          dominant ill-conditioning"
+        provenance: attested
+        refs: ["claims.md C03 statement", "Theorem 8.4 via C07/E05"]
+    attack_candidates:
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "N09 concerns L-BFGS line-search termination mechanics, not which
+          loss component drives ill-conditioning; a rejected approach, not an attack."
+    holes:
+      - "SLQ estimator error is unquantified, so the component ordering rests on
+        visual spectra"
+      - "Dominance is shown only on one best checkpoint per PDE"
+      - "The theoretical strand is delegated to Theorem 8.4 (C07); E02 itself contains
+        no checkable derivation linking D to the residual spectrum"
+    coverage_flags:
+      - "C03 has two heterogeneous support strands (empirical spectral comparison and a
+        theoretical prediction) but the schema vocabulary admits exactly one
+        inference_scheme per claim; the theoretical strand had to be folded into a
+        premise plus the strict_certifier field"
+    uncertain: true
+    note: "Coin-flip on field 4: 'none' is defensible because C03's listed Proof (E02)
+      is purely empirical; domain-checker chosen because the claim statement itself
+      asserts 'theoretically predicted', which is a strict step in the artifact's
+      argument even though its formal home is C07."
+
+  - claim_id: C05
+    claim_type: comparative
+    proposition_shape:
+      sketch: "outperforms(optimizer=adam_lbfgs, baselines={adam, lbfgs}, pde, width, metric)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: "The claim universally quantifies over PDE x width {50,100,200,400} with one
+        carved-out exception (reaction) and two named effect sizes (14.2x, 6.07x); a
+        nullary atom loses the cell grid the falsification criterion ranges over."
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Both single-optimizer baselines (Adam alone, L-BFGS alone) run under the
+          same 41000-iteration budget, model family, and datasets"
+        - "Hyperparameters for each optimizer are tuned comparably before selecting the
+          best configuration"
+        - "Seed variability is reported (min/median/max over 5 seeds), not a single
+          lucky run"
+      supporting_experiments: [E03]
+    strict_certifier: domain-checker(arithmetic-recheck)
+    certifier_note: "The reported ratios (14.2x smaller L2RE than Adam on convection,
+      6.07x smaller than L-BFGS on wave) and the per-cell 'lowest min loss/L2RE'
+      orderings are arithmetic re-checks against Table 1 cell values; the underlying
+      training results remain empirical."
+    critical_questions:
+      - cq: "Are both baselines (Adam alone, L-BFGS alone) present under the same
+          iteration budget, model, and data?"
+        mandatory: true
+        status: met
+        basis: "E03 Setup (41000 total iterations, same MLP family and PDEs) and
+          Baselines ('Adam alone, L-BFGS alone')"
+      - cq: "Is the hyperparameter search budget comparable across optimizers?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Procedure steps 1-3: Adam searches 5 lrs, Adam+L-BFGS searches
+          5 lrs x 3 switch points = 15 configs, L-BFGS is untuned (lr=1.0); step 5
+          selects the best configuration per optimizer, which favors the larger grid"
+      - cq: "Is seed variability reported rather than best-run-only?"
+        mandatory: false
+        status: met
+        basis: "E03 Setup (5 seeds) and Procedure step 6 (min/median/max across seeds)"
+      - cq: "Is the reaction exception explicitly scoped rather than silently absorbed
+          into 'consistently'?"
+        mandatory: false
+        status: met
+        basis: "E03 Expected outcome ('Exception expected on reaction problem at certain
+          widths'); trace N08 (reaction width=100, Adam ~ Adam+L-BFGS)"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Adam+L-BFGS min L2RE is 14.2x smaller than Adam's on convection"
+        provenance: observed
+        refs: ["Table 1", "section 6.1", "trace N08"]
+      - atom: "Adam+L-BFGS min L2RE is 6.07x smaller than L-BFGS's on wave"
+        provenance: observed
+        refs: ["Table 1", "trace N08"]
+      - atom: "Per (PDE, width) cell, Adam+L-BFGS attains the lowest min loss and min
+          L2RE, except reaction at width=100 where Adam is comparable"
+        provenance: observed
+        refs: ["Table 1", "Figure 8", "trace N08 result"]
+    attack_candidates:
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "N09 (L-BFGS alone stalls on strong Wolfe failure) rules out a
+          rejected alternative and corroborates rather than conflicts with C05's
+          conclusion; per guidance this is no edge."
+    holes:
+      - "Tuning-budget asymmetry (untuned L-BFGS vs 15-config Adam+L-BFGS grid) is
+        not addressed"
+      - "'Consistently' carves out one acknowledged exception but states no rule for
+        how further exceptions would be counted against the claim"
+    coverage_flags: []
+    uncertain: false
+    note: ""

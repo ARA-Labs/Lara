@@ -1,0 +1,152 @@
+artifact: mechanistic-understanding
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C02
+    claim_type: causal
+    proposition_shape:
+      sketch: "reduces_toxicity_preserving_quality(model: gpt2_medium, intervention: subtract(v, last_layer), v: {wtoxic, mlp_v19, svd_utoxic0}, baseline: no_op)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >
+        The claim quantifies over three intervention vectors and three metrics
+        (toxicity down vs. baseline, F1 comparable, perplexity controlled relative
+        to DPO). A nullary atom would collapse the per-vector, per-metric structure
+        that Table 2 makes individually checkable.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "The No Op baseline is generated and scored under identical decoding settings and prompt sets."
+        - "Perspective API toxicity score is a valid measure of generation toxicity."
+        - "Perplexity (Wikitext-2) and F1 (Wikipedia continuations) jointly capture 'language quality'."
+        - "Calibrating intervention strength alpha to match DPO perplexity does not bias the toxicity comparison."
+      supporting_experiments: [E02]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is a no-intervention baseline measured under the same generation setup?"
+        mandatory: true
+        status: met
+        basis: "E02 Baselines: 'GPT2 No Op (no intervention)'; Table 2 row NO OP."
+      - cq: "Is the intervention strength alpha selected without optimizing for the toxicity outcome?"
+        mandatory: true
+        status: met
+        basis: "E02 Procedure step 3: alpha chosen so Wikitext-2 perplexity matches the post-DPO model — calibration is on perplexity, not on the reported toxicity metric."
+      - cq: "Is quality preservation checked on both fluency and content-overlap axes?"
+        mandatory: true
+        status: met
+        basis: "E02 Procedure steps 5-6: perplexity on Wikitext-2 and F1 on 2,000 Wikipedia sentences."
+      - cq: "Is run-to-run variance (sampling seeds, repeated generation) reported so the effect exceeds noise?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E02 Procedure has a single generation pass over 1,199 prompts; no seeds or variance in Metrics."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "toxicity(no_op) = 0.453"
+        provenance: observed
+        refs: ["evidence/tables/table2_interventions_results.md", "trace N07"]
+      - atom: "toxicity(subtract wtoxic) = 0.245; toxicity(subtract mlp_v19) = 0.305; toxicity(subtract svd_utoxic0) = 0.268 — all below baseline"
+        provenance: observed
+        refs: ["evidence/tables/table2_interventions_results.md", "trace N07"]
+      - atom: "ppl(subtract *) in [23.30, 23.56], comparable to ppl(dpo) = 23.34 and above ppl(no_op) = 21.7"
+        provenance: observed
+        refs: ["evidence/tables/table2_interventions_results.md"]
+      - atom: "f1(subtract *) in [0.192, 0.193], comparable to f1(no_op) = 0.193"
+        provenance: observed
+        refs: ["evidence/tables/table2_interventions_results.md"]
+      - atom: "top-1 predicted token shifts from toxic to non-toxic after intervention"
+        provenance: observed
+        refs: ["evidence/tables/table3_topk_continuations.md", "E02 Procedure step 7"]
+    attack_candidates:
+      - node: N08
+        decision: none
+        target: "n/a"
+        rationale: >
+          N08 rejects the stronger hypothesis that single-layer subtraction achieves
+          full DPO-level alignment; it does not conflict with C02's conclusion
+          (toxicity below No Op baseline at DPO-comparable perplexity), so it is a
+          rejected-approach dead end, not an attack edge.
+    holes:
+      - "No variance or multi-seed reporting for the stochastic generation pass, so effect-vs-noise is asserted, not shown."
+      - "Toxicity comparison holds only at the single alpha operating point calibrated to DPO perplexity; no dose-response across alpha."
+      - "Perspective API version and scoring configuration are unspecified, limiting re-measurement."
+    coverage_flags: []
+    uncertain: false
+    note: >
+      N08's failure_mode ('perplexity increases more for same toxicity reduction')
+      brushes against C02's falsification criterion, but Table 2 shows subtraction
+      perplexity (23.30-23.56) is comparable to DPO (23.34), which is what C02
+      actually asserts; the dead end only defeats the stronger 'as good as DPO' reading.
+
+  - claim_id: C04
+    claim_type: descriptive
+    proposition_shape:
+      sketch: "minimal_weight_change(param: theta, cos_sim(theta_gpt2, theta_dpo) > 0.99, norm_diff(theta) < bound(theta))"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >
+        The claim is a bounded universal over all matched parameter tensors with one
+        named exception (unembedding, bound 1e-3 instead of 1e-5). A nullary atom
+        would lose the per-tensor thresholds and the exception, which are exactly
+        what the falsification criterion quantifies over.
+    inference_scheme:
+      scheme: exhaustive_pairwise_measurement
+      strict_or_defeasible: strict
+      premises:
+        - "The compared checkpoints are the actual GPT2-medium and GPT2DPO weights used throughout the paper."
+        - "The enumeration covers every matched parameter tensor (token embeddings, all 24 MLP blocks, attention heads, unembedding)."
+        - "Cosine similarity and average norm difference are computed correctly per tensor."
+      supporting_experiments: [E03]
+    strict_certifier: domain-checker(tensor-distance-recheck)
+    certifier_note: >
+      Given the two fixed checkpoints, recomputing per-tensor cosine similarity and
+      average norm difference and comparing against the thresholds (0.99, 1e-5,
+      unembedding 1e-3) is a deterministic arithmetic re-check; a small checker over
+      the weight files could certify every leaf. The empirical part (that these
+      checkpoints are the models in question) stays outside the certifier.
+    critical_questions:
+      - cq: "Does the enumeration actually cover every parameter tensor the claim quantifies over?"
+        mandatory: true
+        status: met
+        basis: "E03 Procedure step 2: 'each matching parameter tensor (token embeddings, MLP blocks at all 24 layers, attention heads, unembedding)'."
+      - cq: "Is 'average norm difference' precisely defined (per-element vs. per-row vs. per-tensor)?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Metrics names 'per-tensor average norm difference' but never defines the averaging; the 1e-5/1e-3 thresholds are not re-checkable without it."
+      - cq: "Is the unembedding exception explicitly scoped rather than silently exempted?"
+        mandatory: false
+        status: met
+        basis: "E03 Expected outcome and C04 statement both name the unembedding layer as the sole exception with its own bound."
+      - cq: "Are the compared checkpoints identical to those used in the intervention and bypass experiments?"
+        mandatory: true
+        status: met
+        basis: "E03 Setup uses the same GPT2-medium and the GPT2DPO produced at trace N09; E04/E05 depend on E03."
+    leaf_granularity: per-experiment-claim
+    leaves:
+      - atom: "all matched non-unembedding tensors have cos_sim > 0.99 and average norm diff < 1e-5"
+        provenance: attested
+        refs: ["trace N11", "logic/experiments.md E03", "paper §5.1"]
+      - atom: "unembedding tensor has average norm diff < 1e-3"
+        provenance: attested
+        refs: ["trace N11", "logic/experiments.md E03", "paper §5.1"]
+      - atom: "MLP.kToxic and MLP.vToxic specifically fall inside the minimal-change bounds"
+        provenance: attested
+        refs: ["logic/experiments.md E03 step 4", "trace N11"]
+    attack_candidates:
+      - node: N08
+        decision: none
+        target: "n/a"
+        rationale: >
+          N08 concerns the adequacy of inference-time subtraction as an alignment
+          method; it has no bearing on the parameter-distance measurement between
+          GPT2 and GPT2DPO.
+    holes:
+      - "No per-tensor evidence table is shipped; the universal is attested as an aggregate sentence, so no leaf can currently be checked cell-by-cell."
+      - "The averaging convention behind 'norm difference < 1e-5' is undefined, blocking the otherwise-strict recheck."
+      - "The thresholds (0.99, 1e-5, 1e-3) are unmotivated; nothing rules out a meaningful change hiding below them (C03/C05 in fact locate one)."
+    coverage_flags:
+      - "Bounded universal quantification with a named exception ('every parameter ... except unembedding') has no direct construct; it must be encoded as an enumerated conjunction of per-tensor leaves plus a separate exception leaf."
+    uncertain: false
+    note: ""

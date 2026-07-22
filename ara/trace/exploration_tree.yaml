@@ -307,3 +307,156 @@ tree:
       Multiple independent supports are multiple `arg` declarations (separate AF nodes), never one
       backend-combined term. Sum may exist only inside an optional LP certificate, where it cannot
       merge source argument nodes. Grounds the design behind C06.
+
+  - id: N21
+    type: decision
+    provenance: user
+    timestamp: "2026-07-21T22:30"
+    support_level: explicit
+    source_refs: ["corpus/ara-paperbench (submodule)", "docs/corpus-map.md §5", "PR #8 (draft)"]
+    title: "M0 kickoff: vendor ara-paperbench as a git submodule pinned at 62e9b54"
+    choice: >
+      Corpus vendored as submodule corpus/ara-paperbench at upstream commit
+      62e9b54b2d4efe45b97f25676a16784530dd552a (main, 2026-07-09). All M0 annotation
+      provenance is valid only at this pin; bumping it invalidates sampled-claim references.
+    alternatives:
+      - "Vendor a copy — rejected: read-only input, ~6.6 MB, buys nothing over a pin"
+      - "Pinned-SHA clone script only — rejected: pin not enforced by git, drift-prone"
+    evidence: "docs/corpus-map.md §5; checkout matches inventory (4 groups, 23 paperbench artifacts)"
+    children:
+
+      - id: N22
+        type: experiment
+        provenance: ai-executed
+        timestamp: "2026-07-21T22:50"
+        support_level: explicit
+        source_refs: ["m0/extract_claims.py", "m0/claims-index.tsv", "m0/deadends-index.tsv"]
+        title: "Corpus extraction pipeline: 231-claim sampling frame + 279 dead-end attack pool"
+        result: >
+          claims-index.tsv: 231 rows (136 paperbench / 65 rebench / 20 extra / 10 speedrun),
+          exactly matching the corpus-map inventory. deadends-index.tsv: 279 rows, verified
+          per-artifact against raw counts. Schema drift is confined to rebench-restricted_mlm
+          (Evidence-for-Proof, no Status/Falsification); statuses: 213 supported, 1 partially,
+          2 untested, 1 hypothesis, 14 blank.
+        evidence: ["m0/claims-index.tsv", "m0/deadends-index.tsv", "commit d03168a"]
+        children:
+
+          - id: N23
+            type: dead_end
+            provenance: ai-executed
+            timestamp: "2026-07-21T22:45"
+            support_level: explicit
+            source_refs: ["m0/extract_claims.py parse_deadends", "corpus rebench-triton_cumsum trace"]
+            title: "Trace-YAML parser keyed on 'id:'-first node order silently corrupts alphabetized-key artifacts"
+            hypothesis: "Every trace node lists id: first, so flushing the current node on each id: line is a safe delimiter."
+            failure_mode: >
+              rebench-triton_cumsum alphabetizes keys inside each list item, so failure_mode/
+              hypothesis precede id and were attributed to the PREVIOUS node; one id-less node
+              was swallowed entirely (278 vs 279 raw count).
+            lesson: >
+              Hand-written corpus YAML has at least two key orders; delimit nodes on list-item
+              boundaries and treat only a known key vocabulary as keys. Count-reconciliation
+              against raw grep totals is what surfaced the bug — keep that check.
+
+      - id: N24
+        type: decision
+        provenance: ai-executed
+        timestamp: "2026-07-21T23:10"
+        support_level: explicit
+        source_refs: ["m0/README.md (rubric)", "m0/claim-types.tsv"]
+        title: "Six-way claim-typing rubric with explicit precedence"
+        choice: >
+          Type the headline assertion with precedence negative-result > causal > generalization >
+          comparative > implementation-behavioral > descriptive. Operational rules: generalization
+          only when breadth is the claimed content (multi-benchmark evaluation does not qualify);
+          single-component ablations/dose-response are causal while design-variant rankings are
+          comparative; analytic results (theorems/bounds) carry an 'analytic' note marking
+          strict-certifier candidates (corpus-map §4 field 4).
+        alternatives:
+          - "Type by evidence form instead of headline assertion — rejected: conflates scheme with claim type"
+          - "No precedence order — rejected: mixed claims (comparative+generalization) become annotator-dependent"
+        evidence: "m0/claim-types.tsv (231 rows, single-annotator ai-executed pass)"
+        children:
+
+          - id: N25
+            type: experiment
+            provenance: ai-executed
+            timestamp: "2026-07-21T23:15"
+            support_level: explicit
+            source_refs: ["m0/claim-types.tsv", "m0/README.md"]
+            title: "Typing pass over all 231 claims"
+            result: >
+              Distribution: comparative 72, causal 54, descriptive 36, implementation-behavioral 31,
+              negative-result 26, generalization 12. All 31 implementation-behavioral claims are in
+              rebench/speedrun; paperbench+extra is comparative/causal-heavy. Adjudication check =
+              the 18-claim double-annotation subset.
+            evidence: ["m0/claim-types.tsv", "commit 1d57824"]
+
+          - id: N26
+            type: decision
+            provenance: ai-executed
+            timestamp: "2026-07-21T23:18"
+            support_level: explicit
+            source_refs: ["m0/draw_sample.py", "m0/sample.tsv"]
+            title: "Stratified sample design: 60 claims, seeded, paperbench-first with per-artifact round-robin"
+            choice: >
+              seed=42, byte-identical reruns. Quotas by largest-remainder proportional allocation
+              with floor 5 per type (comparative 17, causal 14, descriptive 9, impl-behavioral 8,
+              negative-result 7, generalization 5); groups exhausted paperbench > extra > rebench >
+              speedrun within each stratum; round-robin across artifacts; 30% (18) double-annotate.
+              Result: 52 paperbench + 8 rebench.
+            alternatives:
+              - "Pure proportional quotas — rejected: generalization stratum drops to 3, too thin for construct coverage"
+              - "Uniform 10 per type — rejected: over-samples rare types, under-samples the comparative bulk"
+            evidence: ["m0/sample.tsv", "commit 1d57824"]
+
+  - id: N27
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-22T00:30"
+    support_level: explicit
+    source_refs: ["m0/double-annotation.tsv", "m0/README.md §rubric"]
+    title: "Blind double-annotation of claim typing (18 claims, second annotator = different model)"
+    result: >
+      Raw agreement 14/18 (77.8%), Cohen's kappa 0.73 (substantial). All 4 disagreements
+      adjudicated to the blind annotator: fre C01 -> generalization, lbcs C05 -> comparative,
+      robust-clip C07 -> negative-result, rebench-triton_cumsum C09 -> negative-result.
+      Systematic error in annotator A: typed the mechanism/subject where the precedence rule
+      demands the headline outcome (both negative-result misses). Codebook amended: run the
+      "does a negative-result reading fit?" check first.
+    evidence: ["m0/double-annotation.tsv", "commit 6524e8c"]
+
+  - id: N28
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-22T00:45"
+    support_level: explicit
+    source_refs: ["m0/annotations/ (27 files)", "m0/annotation-summary.md"]
+    title: "Full 8-field annotation of the 60-claim sample (one independent AI annotator per artifact)"
+    result: >
+      All 60 claims annotated against m0/annotations/SCHEMA.md. Aggregates: 22 raw scheme
+      names normalize to 9 families (top-3 = 77%); certifiers domain-checker 35 / none 21 /
+      lp 3 / reference-nd 1, with domain-checker calls overwhelmingly arithmetic re-checks of
+      reported tables; attacks 4 undercut / 0 rebut / 0 undermine / 190 none (98% non-attacks);
+      leaf granularity per-result-cell 45/60; CQs: 39% of mandatory critical questions are
+      unmet gaps. 21/60 claims carry coverage flags, adjudicated in annotation-summary.md §3
+      into absorbed-by-design (12), genuine construct candidates (6), evidence-model findings (3).
+      Preliminary exit-gate verdict: PASS at ~90% expressibility.
+    evidence: ["m0/annotation-summary.md", "commit 6524e8c"]
+
+  - id: N29
+    type: decision
+    provenance: user
+    timestamp: "2026-07-22T09:30"
+    support_level: explicit
+    source_refs: ["user directive 2026-07-22", "m0/annotation-summary.md §2"]
+    title: "Exercise rebut/undermine via self-authored adversarial reports, not corpus extraction"
+    choice: >
+      The corpus consists of published, peer-reviewed top-venue papers (NeurIPS/ICML/ICLR
+      class) whose polished traces contain essentially no genuine rebuts/undermines. Rather
+      than mining the reserve for them, we author adversarial reports / attack cases against
+      corpus claims ourselves when testing the language — extending the existing
+      rejection-class negative-test discipline to the defeat layer.
+    alternatives:
+      - "Mine the rebench reserve for naturally-occurring rebuts/undermines — rejected by user: not realistically extractable from top-quality published work"
+    evidence: "m0/annotation-summary.md §2 typed-attack profile (4 undercut / 0 rebut / 0 undermine / 190 none)"

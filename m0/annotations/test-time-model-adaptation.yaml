@@ -1,0 +1,222 @@
+artifact: test-time-model-adaptation
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 2 dead_end nodes (N03, N06); all classified
+claims:
+  - claim_id: C04
+    claim_type: negative-result
+    proposition_shape:
+      sketch: "infeasible(cma_es, entropy_only_fitness, param_space, online_tta)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim instantiates param_space twice (norm_layers -> 0.1%,
+        prompts -> 44.9%) with different failure levels, and the falsification
+        criterion targets one specific instance (cma + prompts + entropy vs
+        NoAdapt 55.5%); a nullary atom would hide which instance carries the
+        entropy-specific conclusion."
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "The failing configurations differ from working ones only in the swapped component (fitness function or parameter space), with all other hyperparameters held at FOA defaults"
+        - "NoAdapt is measured under the identical protocol (ImageNet-C severity 5, all 15 corruptions, batch size 64)"
+        - "The collapse is attributable to the entropy-only fitness, not to an untuned CMA setup or to the parameterization"
+        - "Accuracy is averaged over all 15 corruption types for every configuration"
+      supporting_experiments: [E05, E06]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is NoAdapt measured under the same dataset, severity, and batching protocol as the failing configurations?"
+        mandatory: true
+        status: met
+        basis: "E05 setup/procedure step 1 and E06 baselines run NoAdapt on the same ImageNet-C severity-5, 15-corruption protocol with default FOA hyperparameters"
+      - cq: "Is the collapse attributable to entropy fitness rather than to a mistuned CMA (population size K, prompt dimension)?"
+        mandatory: true
+        status: met
+        basis: "E06's factorial grid holds optimizer and parameter space fixed while swapping only the fitness: exp6 (prompts + CMA + entropy, 44.9%) vs FOA (prompts + CMA + Eq. 5) differ in fitness alone, so the same CMA setup succeeds with a different fitness"
+      - cq: "Does the norm-layer instance (0.1%) actually isolate entropy as the cause of failure?"
+        mandatory: true
+        status: unmet-defeater
+        basis: "E06 expected outcome: exp4 (norm + CMA + Eq. 5 fitness) collapses to ~0.1% just like exp5 (norm + CMA + entropy), so the norm-layer collapse occurs regardless of fitness; for that instance the evidence defeats the claim's 'confirming that entropy alone cannot provide stable CMA learning signals' attribution (the prompts instance is unaffected)"
+      - cq: "Are all configurations evaluated over the full 15-corruption average rather than a favorable subset?"
+        mandatory: false
+        status: met
+        basis: "E05 procedure step 8 and E06 procedure step 9 report average accuracy and ECE over all 15 corruption types for each configuration"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "CMA-ES on norm-layer parameters with entropy fitness collapses to ~0.1% average accuracy on ImageNet-C severity 5 (exp5)"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N02/N03", "logic/experiments.md E06", "Table 9"]
+      - atom: "CMA-ES on norm-layer parameters with Eq. 5 fitness also collapses to ~0.1% (exp4)"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N02/N03", "logic/experiments.md E06", "Table 9"]
+      - atom: "CMA-ES on prompt embeddings with entropy-only fitness reaches 44.9% average accuracy (exp6)"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N05/N06", "logic/experiments.md E06", "Table 9"]
+      - atom: "NoAdapt average accuracy on ImageNet-C severity 5 is 55.5%"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N05", "logic/experiments.md E05", "Table 5"]
+    attack_candidates:
+      - node: N03
+        decision: undercut
+        target: "support of C04"
+        rationale: "N03's failure mode (CMA-ES cannot handle high-dimensional targets; 0.1% with BOTH entropy and Eq. 5 fitness) supplies an alternative cause for the norm-layer cell, cutting the inference from that cell to the entropy-specific conclusion."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "N06 is the dead end that C04 itself reports (entropy-only fitness fails for CMA prompt optimization); it is the claim's own provenance, not an attack on it."
+    holes:
+      - "claims.md lists Proof: [E05] only, but the norm-layer numbers (0.1%) exist only in E06's design-choice grid (Table 9); the cited proof does not cover the norm-layer half of the statement"
+      - "The claim's wording attributes the norm-layer collapse to entropy, yet exp4 shows the same collapse with Eq. 5 fitness; the entropy-infeasibility conclusion rests on the prompts instance alone"
+      - "No hyperparameter sweep (e.g. CMA step size, K) is run for the failing configurations; the factorial contrast mitigates but does not fully rule out mistuning"
+    coverage_flags: []
+    uncertain: false
+    note: "Negative result expressed as an ablation cell falling below the NoAdapt
+      baseline; the defeater applies only to the norm-layer instance, so the claim
+      survives on the prompts instance but its scope should be narrowed."
+
+  - claim_id: C05
+    claim_type: causal
+    proposition_shape:
+      sketch: "fitness_effect(activation_discrepancy, cma_es, prompts, accuracy_delta_vs_noadapt)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim bundles two dose-like instances (discrepancy-only: 55.5 ->
+        63.4; full fitness + shifting: -> 66.3) plus a contrast against the
+        entropy-only failure (C04); a nullary atom would collapse the per-variant
+        cells that the falsification criterion (>= 5% gain; best-among-variants)
+        checks individually."
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Each ablation configuration differs only in the presence/absence of the fitness terms and activation shifting, with optimizer, prompts, and all other hyperparameters fixed"
+        - "NoAdapt and all variants are evaluated on the identical ImageNet-C severity-5, 15-corruption protocol"
+        - "The entropy-only failure (C04) establishes that the improvement is specific to the activation discrepancy term, not to CMA prompt adaptation per se"
+        - "The best-variant condition is checked against every ablation configuration, not a subset"
+      supporting_experiments: [E05, E06]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is activation discrepancy varied while holding activation shifting and entropy fixed (component isolation)?"
+        mandatory: true
+        status: met
+        basis: "E05 procedure enumerates the 7-way ablation: step 3 runs discrepancy fitness alone (no entropy, no shifting) -> 63.4%; steps 5-7 add components one at a time"
+      - cq: "Does the effect persist under a different optimizer, ruling out a CMA-specific artifact?"
+        mandatory: false
+        status: met
+        basis: "E06 exp2/exp3 run Eq. 5 fitness with SGD (exp3: prompts + SGD + Eq. 5 reaches 64.6% per N07 evidence), showing the fitness helps independently of CMA"
+      - cq: "Is 'stable/consistent learning signal' measured directly (variance, convergence traces, seeds) rather than inferred from endpoint accuracy?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E05/E06 metrics are average accuracy and ECE only; no seed counts, variance, or per-batch stability measurements appear anywhere in experiments.md"
+      - cq: "Is the full fitness + shifting configuration actually best among all FOA variants (falsification condition)?"
+        mandatory: true
+        status: met
+        basis: "E05 expected outcome: full FOA combination achieves highest accuracy and lowest ECE among all variants (66.3%, 3.2% ECE per N11)"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "NoAdapt average accuracy on ImageNet-C severity 5 is 55.5%"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N05", "logic/experiments.md E05", "Table 5"]
+      - atom: "CMA + prompts + activation discrepancy fitness alone reaches 63.4% accuracy, 9.4% ECE"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N08", "logic/experiments.md E05", "Table 5"]
+      - atom: "CMA + prompts + combined fitness (entropy + discrepancy), no shifting, reaches 63.8% accuracy, 9.9% ECE"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N09", "logic/experiments.md E05", "Table 5"]
+      - atom: "Full FOA (combined fitness + activation shifting) reaches 66.3% accuracy, 3.2% ECE — best among all variants"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N11", "logic/experiments.md E05", "Table 2/Table 5"]
+      - atom: "Eq. 5 fitness with SGD on prompts reaches 64.6% accuracy (optimizer-independence check)"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N07 evidence field", "logic/experiments.md E06 exp3"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "Rejected parameterization (norm layers as CMA target); every configuration C05 relies on uses prompt embeddings, so N03 touches no premise, scheme step, or conclusion of C05."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "The entropy-only failure is the motivating contrast C05 builds on (via dependency C04), i.e. it rules out the alternative fitness design — supporting context, not an attack."
+    holes:
+      - "'Consistent/stable learning signals' is asserted mechanistically but never measured; only endpoint accuracy and ECE are reported, with no seeds or variance"
+      - "The ablation evidence is confined to ImageNet-C severity 5, while the claim's scope is 'online unsupervised TTA' in general; E02's other benchmarks test full FOA, not the fitness ablation"
+      - "experiments.md E01 lists C05 in its Verifies field, but claims.md C05 cites only [E05, E06]; the cross-reference is inconsistent"
+    coverage_flags: []
+    uncertain: false
+    note: "Causal claim carried by an ablation ladder (NoAdapt -> discrepancy-only ->
+      + entropy -> + shifting); each rung is one leaf cell so the >= 5% falsification
+      threshold and the best-variant condition are separately checkable."
+
+  - claim_id: C07
+    claim_type: comparative
+    proposition_shape:
+      sketch: "outperforms(foa, baseline, scenario, metric)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim is a conjunction over baseline in {tent, sar} x scenario in
+        {label_shift, mixed_domain} x metric in {accuracy, ece} (8 cells), and the
+        falsification criterion is a per-cell disjunction ('lower than SAR or TENT
+        in either scenario'); a nullary atom cannot express which cell fails."
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "TENT, SAR, and FOA are run on the same non-i.i.d. test streams (identical class ordering in scenario 1; identical corruption interleaving in scenario 2)"
+        - "All methods use the same ViT-Base model and comparable hyperparameter budgets under the shifted protocol"
+        - "Baselines are configured per their recommended settings for non-i.i.d. operation (SAR was designed for such regimes)"
+        - "Scenario-1 numbers are averaged over all 15 corruption types; scenario-2 numbers cover the full mixed stream"
+      supporting_experiments: [E08]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is the same non-i.i.d. stream construction applied to every method?"
+        mandatory: true
+        status: met
+        basis: "E08 procedure steps 1-2 define one stream per scenario (class-ordered arrangement; randomly interleaved mixed stream) and run TENT, SAR, FOA on it"
+      - cq: "Are baseline hyperparameters appropriate/tuned for the non-i.i.d. setting rather than carried over blindly?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E08 setup says nothing about method configuration under shift; unlike E07 ('all methods use same hyperparameters as in main experiments'), E08 leaves baseline configuration unstated, so fairness is unestablished rather than contradicted"
+      - cq: "Is the randomly interleaved mixed stream repeated across seeds, or is the comparison a single draw?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E08 procedure step 2 specifies one random interleaving with no seed count or repetition; within-stream comparison stays fair only if all methods share the same draw"
+      - cq: "Is degradation contextualized against the i.i.d. baseline?"
+        mandatory: false
+        status: met
+        basis: "E08 procedure step 3 compares performance to the i.i.d. results from E01"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Online imbalanced label shift: FOA 62.1% / 6.6% ECE vs TENT 60.2% / 17.7% ECE"
+        provenance: attested
+        refs: ["logic/claims.md C07", "logic/experiments.md E08 scenario 1"]
+      - atom: "Online imbalanced label shift: FOA 62.1% / 6.6% ECE vs SAR 60.8% / 7.5% ECE"
+        provenance: attested
+        refs: ["logic/claims.md C07", "logic/experiments.md E08 scenario 1"]
+      - atom: "Mixed domain shift: FOA 62.0% / 4.9% ECE vs TENT 56.9% / 29.2% ECE"
+        provenance: attested
+        refs: ["logic/claims.md C07", "logic/experiments.md E08 scenario 2"]
+      - atom: "Mixed domain shift: FOA 62.0% / 4.9% ECE vs SAR 61.4% / 14.8% ECE"
+        provenance: attested
+        refs: ["logic/claims.md C07", "logic/experiments.md E08 scenario 2"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "Rejected internal design choice (CMA on norm layers) on the path to building FOA; it says nothing about any method's behavior under non-i.i.d. streams."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "Rejected fitness design predating the final FOA; C07 compares the finished method against baselines, and this dead end bears on no premise or cell of that comparison."
+    holes:
+      - "No exploration-tree node covers E08 (the trace ends at N12/quantized), so the non-i.i.d. numbers have no trace-level provenance and the leaves are attested from claims/experiments text only"
+      - "Baseline configuration under non-i.i.d. shift is unspecified in E08's setup"
+      - "The mixed-stream comparison rests on a single random interleaving with no stated seed or repetition"
+    coverage_flags: []
+    uncertain: false
+    note: "The falsification criterion's ECE clause is asymmetric (ECE only vs SAR,
+      'in both scenarios'), which the per-cell leaf granularity preserves; TENT's
+      ECE cells are supporting but not falsification-relevant."

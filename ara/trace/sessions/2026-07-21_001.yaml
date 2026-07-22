@@ -1,0 +1,85 @@
+session:
+  id: "2026-07-21_001"
+  date: "2026-07-21"
+  started: "2026-07-21T22:15"
+  last_turn: "2026-07-21T23:20"
+  turn_count: 4
+  summary: "M0 kickoff: corpus pinned as submodule (PR #8), 231-claim/279-dead-end extraction pipeline, six-way typing pass, seeded 60-claim stratified sample."
+
+events_logged:
+  - turn: 2
+    type: decision
+    id: "N21"
+    routing: direct
+    provenance: user
+    summary: "Vendor ara-paperbench as submodule pinned 62e9b54; annotation provenance valid only at pin."
+  - turn: 3
+    type: experiment
+    id: "N22"
+    routing: direct
+    provenance: ai-executed
+    summary: "Extraction pipeline: 231 claims / 279 dead ends, counts reconciled per artifact."
+  - turn: 3
+    type: dead_end
+    id: "N23"
+    routing: direct
+    provenance: ai-executed
+    summary: "id-first YAML node delimiter corrupted alphabetized-key artifacts; fixed via list-item boundaries."
+  - turn: 4
+    type: decision
+    id: "N24"
+    routing: direct
+    provenance: ai-executed
+    summary: "Six-way typing rubric: headline-assertion typing with explicit precedence; analytic notes mark strict-certifier candidates."
+  - turn: 4
+    type: experiment
+    id: "N25"
+    routing: direct
+    provenance: ai-executed
+    summary: "Typed all 231 claims: comp 72 / causal 54 / desc 36 / impl 31 / neg 26 / gen 12."
+  - turn: 4
+    type: observation
+    id: "O01"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Claim-type mix benchmark-group-dependent; construct coverage gate must span both populations."
+  - turn: 4
+    type: decision
+    id: "N26"
+    routing: direct
+    provenance: ai-executed
+    summary: "Sample design: 60 claims, seed 42, floor-5 quotas, paperbench-first round-robin, 18 double-annotate."
+
+ai_actions:
+  - turn: 2
+    action: "Added corpus/ara-paperbench submodule at 62e9b54; updated docs/corpus-map.md §5; opened draft PR #8 (commit 75e2a65)."
+    provenance: ai-executed
+    files_changed: [".gitmodules", "corpus/ara-paperbench", "docs/corpus-map.md"]
+  - turn: 3
+    action: "Wrote m0/extract_claims.py; generated claims-index.tsv (231) and deadends-index.tsv (279); fixed alphabetized-YAML parser bug; commit d03168a."
+    provenance: ai-executed
+    files_changed: ["m0/extract_claims.py", "m0/claims-index.tsv", "m0/deadends-index.tsv", "m0/README.md"]
+  - turn: 4
+    action: "Typed 231 claims (m0/claim-types.tsv); wrote m0/draw_sample.py; drew m0/sample.tsv (60 claims, 18 double); commit 1d57824."
+    provenance: ai-executed
+    files_changed: ["m0/claim-types.tsv", "m0/draw_sample.py", "m0/sample.tsv", "m0/README.md"]
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 2
+    excerpt: "User: 'let's do M0. First, should we add the dataset as a submodule' — user proposed the submodule pin; M0 formally started."
+  - turn: 4
+    excerpt: "User: 'do the typing pass and draw the sample' — authorized the AI single-annotator typing pass; adjudication deferred to the 18-claim double-annotation subset."
+
+open_threads:
+  - "Annotate the 60 sampled claims per the 8-field schema (corpus-map §4); walk each claim's dead ends via deadends-index.tsv."
+  - "Human second-annotator pass on the 18 double-annotate claims; adjudicate against m0/claim-types.tsv."
+  - "PR #8 (draft) awaiting review/merge: submodule + m0 pipeline + typing + sample."
+  - "Tier-0 readings (Modgil & Prakken 2014, Yu & Zenker 2020, Caminada & Amgoud 2007 ex. 5-6) before annotation proper; resnet C02/E01 hand-checkpoint."
+  - "Parallel Lean candidate: grounded-labelling invariance under AF isomorphism (abstract half of result 9)."
+
+ai_suggestions_pending:
+  - "O01: construct-coverage exit gate should be evaluated separately on paperbench-style and rebench-style populations, not pooled."
