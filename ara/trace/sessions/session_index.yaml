@@ -8,8 +8,8 @@ sessions:
     open_threads: 5
   - id: "2026-07-22_001"
     date: "2026-07-22"
-    summary: "M0 annotation pass + affirmation: 60/60 claims annotated (kappa 0.73), findings crystallized as C13-C17, N29 authored-adversarial decision."
-    turn_count: 2
-    events_count: 11
+    summary: "M0 annotation + affirmation (C13-C17, N29), then v0.1 freeze into spec (PR #9): N30-N33 decisions, C14/C17 revised, M0-frozen marker."
+    turn_count: 10
+    events_count: 20
     claims_touched: [C13, C14, C15, C16, C17]
-    open_threads: 5
+    open_threads: 6

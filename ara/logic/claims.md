@@ -279,7 +279,10 @@ the result is stated but not yet proved or mechanized._
   should lead with the arithmetic checker and LP stays a non-shipping option.
 - **Conditions**: 60-claim sample at pin `62e9b54`; "smallest plausible certifier" judgments by AI
   annotators — the strict steps are identified, not discharged, inside the artifacts. The single
-  reference-nd call (tournament call-count arithmetic) is plausibly arithmetic too.
+  reference-nd call (nanogpt_chat_rl C04) splits on review (2026-07-22): its counting instance
+  identities are arithmetic, but its ≥ N−1 optimality lower bound is a genuine quantified
+  derivation — the corpus's one ND-shaped demand, carried by the reference backend with the
+  combinatorial content as a declared theory dependency (spec §5.2, N33).
 - **Sources**: ["certifier counts ← m0/annotation-summary.md:48 «domain-checker 35, none 21, lp 3, reference-nd 1» [result]", "arithmetic character ← m0/annotation-summary.md:49–50 «overwhelmingly *arithmetic re-checks of reported tables* (deltas, ratios, aggregations, inequalities) plus a few code inspectors» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
@@ -289,7 +292,7 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [E09]
 - **Dependencies**: []
 - **Tags**: corpus-study, strict-backend, adapter-portfolio
-- **Last revised**: 2026-07-22 (2026-07-22_001#2)
+- **Last revised**: 2026-07-22 (2026-07-22_001#9)
 
 ## C15: Per-result-cell is the default evidence-leaf granularity
 - **Statement**: Corpus evidence decomposes naturally at the granularity of the individual reported
@@ -334,12 +337,15 @@ the result is stated but not yet proved or mechanized._
 - **Statement**: The sampled argument shapes are expressible in the planned v0.1 construct set —
   nine scheme families plus the nl/formal/binding scope discipline, multi-arg support, and
   claim-splitting conventions — without opaque-leaf encoding of whole reasoning steps, clearing the
-  ≥80% exit gate; the inexpressible residue is a closed six-item construct wishlist plus three
-  evidence-model decisions, not an open-ended gap.
+  ≥80% exit gate; the inexpressible residue is a closed six-item construct wishlist, not an
+  open-ended gap.
 - **Conditions**: Preliminary: single-AI annotation with only the typing field double-annotated;
   coverage-flag adjudication user-affirmed (2026-07-22) but not independently reviewed; pooled
   across benchmark populations (per-population split of O01 not yet applied); rebut/undermine
-  exercise deferred to authored adversarial tests (N29).
+  exercise deferred to authored adversarial tests (N29). The three evidence-model decisions
+  flagged at gate time (whole-trace attack walk, dead-end-as-support, result-cell conflict) were
+  resolved into spec §7/§4.3/§11 on 2026-07-22 (N30, N31, PR #9), leaving the six-item wishlist
+  as the whole residue.
 - **Sources**: ["gate verdict ← m0/annotation-summary.md:99 «PASS — ~90% of sampled argument shapes are expressible» [result]", "flag partition ← m0/annotation-summary.md:75 «21/60 claims (35%) carry coverage flags» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
@@ -349,4 +355,4 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [E09]
 - **Dependencies**: [C13, C15, C16]
 - **Tags**: corpus-study, coverage-gate, v0.1-freeze
-- **Last revised**: 2026-07-22 (2026-07-22_001#2)
+- **Last revised**: 2026-07-22 (2026-07-22_001#10)

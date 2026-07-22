@@ -460,3 +460,95 @@ tree:
     alternatives:
       - "Mine the rebench reserve for naturally-occurring rebuts/undermines — rejected by user: not realistically extractable from top-quality published work"
     evidence: "m0/annotation-summary.md §2 typed-attack profile (4 undercut / 0 rebut / 0 undermine / 190 none)"
+
+  - id: N30
+    type: decision
+    provenance: user
+    timestamp: "2026-07-22T10:37"
+    support_level: explicit
+    source_refs: ["docs/spec.md §7, §11 task 6", "commits d3902a4, bd78a37 (PR #9)"]
+    title: "dead_end nodes lower to support OR attack — elaborator per-node judgment, kernel-agnostic"
+    choice: >
+      A dead_end trace node may lower to a support leaf/argument instead of a typed attack
+      (restricted_mlm C14: a failed line of attempts IS a negative-result claim's primary
+      evidence). The choice is the untrusted elaborator's per-node judgment, audited on the
+      faithfulness axis. The kernel treats a dead-end-derived leaf as an ordinary
+      observed/attested leaf — kernel-invisible, but audit-distinguishable via its refs
+      binding to the source dead_end node (provenance never carries logical force, spec §3).
+      The refs-distinguishability refinement was affirmed after an explicit logic-theory
+      consistency check requested by the user.
+    alternatives:
+      - "Attack-only lowering; failed-attempt evidence re-encoded as ordinary experiment leaves, never from dead_end nodes — rejected: loses the direct evidential reading the corpus exhibits"
+    evidence: "m0/annotation-summary.md §3 kind-(c); spec §7 defeat-layer provenance note"
+
+  - id: N31
+    type: decision
+    provenance: user
+    timestamp: "2026-07-22T10:58"
+    support_level: explicit
+    source_refs: ["docs/spec.md §4.3, §11 task 2", "commit 8a82d9e (PR #9)"]
+    title: "Result-cell conflicts quarantine to gap — revised same-session from audit-only"
+    choice: >
+      Conflicting duplicate reports of one measurand cell: the elaborator declares
+      duplicate-report groups (untrusted, audited); admission enforces ≡ within each group;
+      a disagreeing group is quarantined whole, so dependent arguments fail type check at
+      that occurrence and the claim surfaces as gap — absence of reliable evidence, not a
+      counter-argument (same gap-not-defeat routing as unmet mandatory CQs, C16). Policy may
+      escalate quarantine → reject. Measurand identity never enters the trusted kernel.
+      Supersedes the audit-only diagnostic selected earlier the same session (commit
+      d3902a4): the user challenged that a claim could stay justified on conflicted data
+      ("data-integrity conflict is a huge bad ... should we fail type check?"); AI
+      counter-proposed localized quarantine over whole-program rejection (the corpus itself
+      contains such a conflict in a published paper — bridging-data-gaps C05); user adopted.
+    alternatives:
+      - "Audit-only diagnostic with contrary-declared atoms flowing to contested — initially selected, superseded: leaves claims justified on conflicted data; contested is the wrong status (a data conflict is not a counter-argument)"
+      - "Hard whole-program rejection — rejected: one corrupted cell renders the rest of the artifact uncheckable"
+      - "Built-in mutual undermine on same-measurand leaves — rejected: bakes measurand-identity detection into the trusted kernel"
+    evidence: "m0/annotation-summary.md §3 kind-(c) (bridging-data-gaps C05); spec §4.3"
+
+  - id: N32
+    type: decision
+    provenance: user
+    timestamp: "2026-07-22T11:11"
+    support_level: explicit
+    source_refs: ["docs/spec.md §4.5", "commits 7eec3fb, 3002ed9 (PR #9)"]
+    title: "v0.1 scheme spellings settled: descriptive snake_case + empirical-v1; short vocabulary reserved; frontend naming with ARA maintainer"
+    choice: >
+      The nine family identifiers are settled as descriptive snake_case
+      (controlled_comparison, intervention_ablation, ...) and the reference policy stays
+      empirical-v1. Deciding criterion supplied by the user: ARA/LARA's target readers are
+      Python-literate domain researchers, not PL experts — long-and-obvious beats
+      short-and-precise-to-insiders. M0 freezes the family partition; spellings are
+      surface-layer, revisitable until empirical-v1 ships (then rename = policy version
+      bump). The short single-word vocabulary (comparison, ablation, ...) is RESERVED — no
+      other construct may claim those spellings — keeping the aliasing path collision-free.
+      The canonical-vs-alias-vs-switch call is made in collaboration with the ARA maintainer
+      at frontend design time. §10 example fixed to controlled_comparison.
+    alternatives:
+      - "Short single-word vocabulary — deferred (reserved, not rejected): under-specifies for the domain-researcher reader (bare 'comparison' hides *controlled*, which licenses the scheme's CQs)"
+      - "Hierarchical family.variant dotted names — rejected: variant-resolution concept with no current payoff (no variant has distinct CQs yet)"
+      - "ml-empirical-v1 scope-honest policy name — rejected: under-claims content (schemes are field-general); validated scope lives in C13/C17 Conditions and policy metadata"
+    evidence: "spec §4.5 settlement note; memory: lara-audience-python-readability"
+
+  - id: N33
+    type: decision
+    provenance: user-revised
+    timestamp: "2026-07-22T11:47"
+    support_level: explicit
+    source_refs: ["docs/spec.md §5.2", "ara/logic/claims.md C14 Conditions", "m0/annotations/rebench-nanogpt_chat_rl.yaml:22 certifier_note", "commit 5e2383f (PR #9)"]
+    title: "Reference-nd call split on review: instance identities arithmetic; ≥N−1 lower bound is the corpus's one ND-shaped derivation"
+    choice: >
+      Reviewing the actual annotation (nanogpt_chat_rl C04 certifier_note) split the single
+      reference-nd call: the counting instance identities (single-elim on 8 plays 4+2+1 = 7
+      = N−1 matches; round-robin 28; depth ceil(log2 8) = 3) are arithmetic, but the
+      optimality lower bound — any reliable pairwise-selection rule needs ≥ N−1 judge calls
+      — quantifies over all selection procedures: a genuine deductive derivation no table
+      re-check expresses, carried by the §5.1 reference backend with the combinatorial
+      content as a declared theory dependency (source propositions are ground atoms). The
+      affirmed summary's "plausibly also arithmetic" folding was half-right (correct for
+      instances, oversimplified for the bound). Bonus bracketing observation recorded in
+      §5.2. Portfolio conclusion unchanged: arithmetic + code-inspection ship, LP does not.
+    alternatives:
+      - "Keep the 'plausibly arithmetic too' folding (matches affirmed summary verbatim) — rejected in favor of precision; the lower bound's premise even fails in-artifact (CQ2: judge nondeterministic)"
+      - "Drop the characterization entirely, report raw count only — rejected: least informative"
+    evidence: "m0/annotations/rebench-nanogpt_chat_rl.yaml certifier_note + CQ1/CQ2; spec §5.2"

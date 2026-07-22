@@ -68,3 +68,25 @@ observations:
     promoted_to: "logic/claims.md:C17"
     crystallized_via: verbal-affirmation
     stale: false
+  - id: O05
+    timestamp: "2026-07-22T11:47"
+    provenance: ai-suggested
+    content: >
+      The corpus brackets the ND reference backend from both sides: below it, strict-step
+      demand is arithmetic re-checks (35 domain-checker calls); above it, derivations beyond
+      its strength are correctly left attested rather than certified (stochastic-interpolants'
+      measure-theoretic Theorem 3.1 step, annotated "beyond reference-nd"). The one in-range
+      demand is the nanogpt_chat_rl ≥N−1 lower bound (N33). Paper-facing use: answers the
+      reviewer question "does anything in your corpus need the ND backend?" — the backend's
+      justification is the seam (result 10) plus exactly one corpus touchpoint, with clean
+      evidence the portfolio is neither under- nor over-powered.
+    context: >
+      Emerged during the user-requested review walkthrough of the §5.2 reference-nd
+      extrapolation (turn 9); written into spec §5.2 as part of the N33 split edit, but the
+      spec sentence IS the observation's source, not a downstream dependent.
+    potential_type: claim
+    bound_to: [N33]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false

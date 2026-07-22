@@ -20,3 +20,13 @@ entries:
       - "O02 split into three claims (three distinct open questions); promoted_to lists all targets."
       - "N29 recorded as user decision; propagated into C16/C17 Conditions, constraints.md, annotation-summary.md, m0/README.md — replacing my earlier 'mine the rebench reserve' recommendation."
       - "Did NOT promote O01 (per-population gate split): the affirmed summary uses pooled numbers; left staged."
+  - turn: "2026-07-22_001#3-10"
+    notes:
+      - "N30-N33 all routed direct as decisions (journey facts with user selections via AskUserQuestion); provenance user except N33 (user-revised: AI analyzed the annotation, user selected the recommended split)."
+      - "N31 recorded as ONE node carrying its same-session revision (audit-only -> quarantine-to-gap) in choice+alternatives — the initial selection was never separately epilogued, so no append-only violation."
+      - "Staged O05 (ND-backend bracketing) rather than crystallizing despite the sentence living in committed spec §5.2 — same precedent as O02-O04 turn 1: the spec sentence IS the observation's source, not a downstream dependent."
+      - "C14 Conditions revision recorded with before/after; Statement untouched (portfolio conclusion unchanged) so status stays supported — no weakening signal."
+      - "C17 Statement narrowed (dropped 'plus three evidence-model decisions') on artifact-commitment; ai-suggested provenance, user can revert."
+      - "Audience principle routed to constraints.md direct (user-dictated, first-person) — not staged; also mirrored in persistent memory."
+      - "Did NOT create a tree node for the M0-frozen marker (documentation act, not a research decision); logged as session event only."
+      - "O01 unpromoted and not stale (1 session-day); C17's pooled-gate Conditions still reference it."

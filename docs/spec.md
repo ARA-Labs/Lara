@@ -7,6 +7,15 @@ implemented or frozen. Sections 3–7 reflect the unified support-term calculus 
 `strict-backend-decision.md`: every argument is a term, strict/defeasible is a rule mode, strict
 certificates are opaque backend payloads, and attacks are positional._
 
+> **M0-frozen (2026-07-22, PR #9).** The following decisions are fixed by the semantic corpus
+> study (claims C13–C17, `m0/annotation-summary.md`) and are not to be re-litigated in M1 edits
+> without new corpus evidence triggering their recorded flip criteria: the §3 default leaf grain
+> (per-result-cell), the §4.3 duplicate-report-group quarantine-to-gap rule, the §4.5 nine-family
+> scheme vocabulary (partition frozen; spellings settled, revisitable with the ARA maintainer
+> until `empirical-v1` ships), the §5.2 adapter portfolio (arithmetic + code-inspection, LP
+> non-shipping), and the §7 defeat-layer conventions (whole-trace attack walk, dead-end → support
+> or attack, unmet mandatory CQs → holes). Everything else remains Phase 0 draft.
+
 ## 1. Scope and guarantee
 
 LARA is a small language of proof-carrying, policy-relative claim support. A program declares:
@@ -89,6 +98,15 @@ leaf l : prop
   refs       = [src*]
   metadata   = {...}
 ```
+
+**Default leaf granularity (M0, C15).** The default evidence-leaf grain is the individual
+reported **result cell** — one number in a table or figure — which the corpus study found to be the
+natural decomposition for three quarters of sampled claims (per-result-cell 45/60; mixed 7,
+per-experiment-claim 6, per-run 2). Coarser or mixed grains remain fully expressible as explicit,
+minority exceptions; the elaborator states the chosen grain per leaf and it is audited, not checked.
+A leaf whose value is a *distribution* rather than a single number (stochastic measurand dispersion,
+triton_cumsum C09) is a documented v0.1 residual-wishlist item (`constraints.md`), not yet a core
+construct.
 
 Support-level propositions are atomic. At this level, conflict comes from the declared `contrary`
 relation rather than negation-to-falsum, and an implication `E -> C` is reified as a named rule
@@ -265,6 +283,28 @@ reference. The outcomes:
 Admission is per-leaf, happens before argument evaluation, and never creates an attack
 (Section 3).
 
+**Conflicting duplicate reports of one result cell (M0, C16).** When the trace reports the same
+measurand cell more than once — a figure restating a table, text restating a figure
+(bridging-data-gaps C05) — the elaborator emits each report as a **distinct leaf** and declares them a
+**duplicate-report group** (Section 11, task 2). The group declaration is untrusted elaborator output,
+audited on the faithfulness axis; measurand identity never enters the trusted kernel. Admission then
+enforces agreement *within* each declared group by the existing `≡` relation (Section 3.2):
+
+- if the members' propositions are pairwise `≡`, they are admitted normally;
+- otherwise the checker **quarantines every member of the group** and raises a located
+  data-integrity diagnostic. Per the quarantine semantics above, any argument using a conflicted
+  cell fails type check at that occurrence, is excluded from the AF, and the dependent claim
+  surfaces as `gap`.
+
+A data conflict is thus *absence of reliable evidence*, not a counter-argument: it can never make a
+claim `justified` (the evidence is gone) and never makes it `contested` or `defeated` (no attack is
+created) — the same gap-not-defeat routing the corpus fixed for unmet mandatory critical questions
+(Section 7). It is neither a typed attack nor a provenance grade, and declaring the conflicting atoms
+`contrary` is not the intended encoding. The check is decidable and local (group membership plus
+`≡`). A policy may escalate the outcome from `quarantine` (the default) to `reject`, making any
+detected conflict a whole-program well-formedness error; the default keeps one corrupted cell from
+rendering the rest of the artifact uncheckable.
+
 ### 4.4 Instantiation in programs
 
 ```text
@@ -280,6 +320,56 @@ one while the other survives.
 An open mandatory obligation excludes that incomplete argument from the compiled argumentation
 framework and contributes a located `gap` explanation. Other complete support arguments for the same
 claim remain eligible.
+
+### 4.5 Reference policy scheme vocabulary (M0-frozen)
+
+Nothing in the calculus fixes *which* schemes a policy names — that is policy content. The corpus
+study (M0, C13, `m0/annotation-summary.md`) found that the argument shapes across the sampled ARA
+corpus collapse into a **small closed family set**, so the v0.1 reference policy (`empirical-v1`)
+ships a **fixed scheme vocabulary of nine families** rather than an open-ended scheme language:
+
+| Family | Merged raw schemes | Sample |
+| --- | --- | --- |
+| `controlled_comparison` | cost-accounting, resource, noninferiority, compute-matched, cross-model-transfer, spectral variants | 25 |
+| `intervention_ablation` | component_ablation, component_substitution, dose_response | 14 |
+| `observation_measurement` | cross_run_observation, exhaustive_pairwise, case_demonstration | 7 |
+| `analytic` | analytic_proof, analytic_bound_with_consequence_check | 4 |
+| `benchmark_stress_evaluation` | — | 3 |
+| `code_inspection` | plan_vs_shipped_diff | 3 |
+| `statistical_correlation` | — | 2 |
+| `inductive_generalization` | — | 1 |
+| `blind_paired_human_evaluation` | — | 1 |
+
+The identifier spellings above are **settled for v0.1** (decided 2026-07-22): descriptive
+snake_case, chosen for the target reader — a Python-literate domain researcher reading the
+formalization of their own artifact, not a PL expert — so long-and-obvious wins over
+short-and-precise-to-insiders. What M0 freezes is the family *partition* (nine families and the
+merge assignments); the spellings are surface-layer and may be revisited during frontend
+concrete-syntax design, but only until `empirical-v1` ships — after that, a rename is a policy
+version bump, since the spelling is baked into checked artifacts.
+
+The considered-and-deferred alternative is a short single-word vocabulary — `comparison`,
+`ablation`, `observation`, `analytic`, `stress_eval`, `inspection`, `correlation`,
+`generalization`, `human_eval` (in table order) — better program ergonomics, deferred for v0.1
+because it under-specifies for the domain-researcher reader (bare `comparison` hides *controlled*,
+which is what licenses the scheme's critical questions). These nine short identifiers are
+**reserved**: no other scheme, keyword, or construct may claim these spellings, so the aliasing
+path (short surface names decoding to the canonical identifiers via the single decode table)
+stays open without collision. The frontend concrete-syntax naming decision — canonical-only,
+alias, or switch — is made in collaboration with the ARA maintainer at frontend design time.
+
+All 60 sampled claims are assignable to these nine families with no whole-reasoning-step opaque-leaf
+encoding; `controlled_comparison` and `intervention_ablation` alone carry two-thirds of the corpus.
+Each family is a named defeasible scheme (Section 4) with its own premises and critical questions;
+authors instantiate but do not define schemes (a policy is a versioned trusted input). This closed
+vocabulary is a property of the *shipped policy*, not of the calculus, so extending it never touches
+the trusted core.
+
+**Flip criterion.** If reserve annotation (the 171 unsampled claims) or a new corpus shows the family
+count growing open-endedly rather than converging, extend the shipped policy's scheme set — the
+calculus and its metatheory are unaffected. A single corpus claim whose supporting argument fits none
+of the nine families without opaque-leaf encoding falsifies the "nine families suffice" claim (C13)
+and triggers this extension.
 
 ## 5. Strict-certificate backends
 
@@ -360,18 +450,42 @@ propositional consequences made visible by its encoding and declared theory. A n
 must remain a reported theory dependency or a trusted policy rule; the checker does not relabel it a
 tautology.
 
-### 5.2 Optional LP and domain adapters
+### 5.2 Optional domain adapters (M0-sized portfolio)
 
-LP may be registered as an optional backend. Its `t:F`, application, sum, positive introspection,
-reflection, constant specification, and S4 realization remain internal to that adapter. The current
-Haskell `ConstantSpec` accepts arbitrary `(constant, formula)` pairs, so it is not yet a conforming
-adapter; eligibility requires fixed LP schema recognition and a soundness/conformance argument.
+The corpus study (M0, C14, `m0/annotation-summary.md`) measured which strict steps corpus arguments
+actually demand: of 60 sampled claims, 35 identified a domain-checker call, 21 none, 3 LP, 1
+reference-nd. The 35 domain-checker calls are **overwhelmingly arithmetic re-checks of reported
+tables** — deltas, ratios, aggregations, inequalities — plus a few code inspectors. The v0.1 optional
+adapter portfolio is therefore sized to that demand and leads with two checkers:
 
-Other adapters may certify classical propositional reasoning, arithmetic, temporal properties, or
-code behavior. Each adds only its selected checker and theory to the run's trusted base and must
-discharge the same backend obligations. A statement such as `supports(E, C) -> C` is not made logical
-by choosing a stronger backend; it remains a named defeasible inference scheme unless a declared backend
-theory genuinely entails it and reports that theory dependency.
+1. a **rational-arithmetic / table-recheck checker** — certifies that a reported cell stands in a
+   declared arithmetic relation to other cells (delta, ratio, aggregation, inequality). This
+   answers the dominant observed demand, including the *instance identities* of the single
+   reference-nd call (nanogpt_chat_rl C04: single-elim on 8 plays 4+2+1 = 7 = N−1 matches;
+   round-robin 28; depth ⌈log₂ 8⌉ = 3). That call's *optimality lower bound* — any reliable
+   pairwise-selection rule needs ≥ N−1 judge calls — is the corpus's one ND-shaped derivation: a
+   quantified deductive step no table re-check expresses, carried by the Section 5.1 reference
+   backend with the combinatorial content ("every non-winner must lose at least once") as a
+   declared theory dependency, since source propositions are ground atoms. The corpus brackets the
+   reference backend from both sides: below it, arithmetic re-checks; above it, derivations beyond
+   its strength correctly left attested (stochastic-interpolants' measure-theoretic step).
+2. a **static code-inspection checker** — certifies structural facts about referenced source
+   (plan-vs-shipped diffs, negative existentials over code).
+
+**LP answers no observed corpus demand** (3 calls, all speculative) and is not part of the shipping
+portfolio. It may still be *registered* as an optional backend — its `t:F`, application, sum, positive
+introspection, reflection, constant specification, and S4 realization remain internal to that adapter
+— but v0.1 does not ship it. The current Haskell `ConstantSpec` accepts arbitrary `(constant,
+formula)` pairs, so it is not yet even a conforming adapter; eligibility would require fixed LP schema
+recognition and a soundness/conformance argument. **Flip criterion:** ship LP only if corpus or
+reserve strict steps at meaningful frequency need nested justification-term structure that arithmetic
+and code inspection cannot express (C14 falsification).
+
+Further adapters may certify classical propositional reasoning, temporal properties, or other domains.
+Each adds only its selected checker and theory to the run's trusted base and must discharge the same
+backend obligations. A statement such as `supports(E, C) -> C` is not made logical by choosing a
+stronger backend; it remains a named defeasible inference scheme unless a declared backend theory
+genuinely entails it and reports that theory dependency.
 
 ### 5.3 Backend-parametric results
 
@@ -476,6 +590,33 @@ positions with paths (`undermine d2 a1/2.leaf`).
 
 An ARA dead end creates an attack only if it can construct one of these typed forms. A dead-end tag,
 confidence score, or provenance downgrade alone is insufficient.
+
+**Defeat-layer provenance (M0, C16).** The corpus study fixes three conventions for how the elaborator
+draws attacks from a trace:
+
+- **Attack candidates come from the whole trace, not only `dead_end` nodes.** Counter-evidence
+  sometimes lives outside dead ends — in experiment nodes (fix_embedding C12) or score-filtered runs
+  (triton_cumsum C09) — so the attack-candidate walk covers the entire exploration trace.
+- **A `dead_end` node may lower to support instead of attack.** A failed line of attempts can be a
+  negative-result claim's *primary evidence* (restricted_mlm C14). Whether a node lowers to a support
+  leaf/argument or a typed attack is the elaborator's per-node judgment (Section 11), untrusted and
+  audited on the faithfulness axis; the kernel treats a dead-end-derived leaf as an ordinary
+  `observed`/`attested` leaf and introduces no new construct. Its `refs` binding records the source
+  `dead_end` node, so the lowering choice stays audit-distinguishable even though it is
+  kernel-invisible (provenance never carries logical force, Section 3).
+- **Unmet mandatory critical questions route to holes, never attacks.** In the corpus 39% of mandatory
+  CQs (seeds/variance, significance, baseline completeness) are simply unstated; typing them as attacks
+  would spuriously defeat nearly every claim, so they surface as gaps (Sections 4.2, 4.3), not defeat
+  edges.
+
+Empirically genuine defeat edges are rare and undercut-dominant (M0: 4 undercut / 0 rebut / 0
+undermine over 194 dead-end classifications — the systematically typed region; the whole-trace
+counter-evidence finds of the first bullet add candidates without changing the rarity profile), so
+most trace nodes lower to support or to nothing rather than to attacks, while missing justification
+surfaces as holes (previous bullet), not defeat edges. Rebut and undermine are unexercised in the polished top-venue corpus by construction; they are
+exercised through *self-authored adversarial reports/mutations* against corpus claims at
+language-testing time (decision N29), extending the rejection-class negative-suite discipline to the
+defeat layer, not through corpus mining.
 
 ## 8. Compilation and claim-support semantics
 
@@ -665,7 +806,7 @@ leaf e1 : reports(exp_3, effect(M, accuracy, D, +2.1))
   provenance = ai-executed
   refs       = [evidence/table_2.csv#row=mean]
 
-arg a1 : supports(c1) by controlled_experiment(e1)
+arg a1 : supports(c1) by controlled_comparison(e1)
   discharge randomization with e2
   discharge adequate_power with e3
   open external_validity as o1
@@ -684,11 +825,14 @@ add at least three complete real examples and matching JSON encodings.
 The untrusted elaborator performs six logged tasks:
 
 1. natural-language proposition formalization;
-2. evidence-leaf extraction and source binding;
+2. evidence-leaf extraction and source binding — including declaring duplicate-report groups when
+   one measurand cell is reported more than once (Section 4.3, M0 C16);
 3. inference-scheme selection and instantiation;
 4. critical-question discharge or explicit hole creation; and
 5. strict-backend, theory, and certificate selection where a strict instance is certified; and
-6. typed attack extraction.
+6. typed attack extraction — drawing candidates from the whole exploration trace (experiment and run
+   nodes, not only dead ends), and lowering each `dead_end` node to either a support leaf/argument or a
+   typed attack per its evidential role (Section 7, M0 C16).
 
 Checker acceptance establishes structural validity only. Faithfulness of all six tasks is evaluated
 against human annotations. If the optional LP adapter is selected, Artemov realization applies only
