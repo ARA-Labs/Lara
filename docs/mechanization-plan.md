@@ -182,29 +182,40 @@ right precedent:
   `contrary` touches it. Then direct = indirect consistency by construction. Do *not* mechanize Path A
   (transposition + involutive contradictories) unless the corpus forces the flip.
 
-## 5. Blocker for result 6: define the direct semantics first
+## 5. Result 6: abstract core mechanized; compile step still open (was the blocker) ◐
 
-Result 6 ("status preservation between a direct source semantics and the compiled-AF semantics") is
-currently **unprovable as stated** because `spec.md` §8 defines only the compiled route. There is no
-independent direct semantics, so the theorem has nothing to preserve.
+Result 6 ("status preservation between a direct source semantics and the compiled-AF semantics") was
+**unprovable as originally stated** because `spec.md` §8 defined only the compiled route — no
+independent direct semantics, so the theorem had nothing to preserve (exploration tree N16). The
+**abstract core is now mechanized** (2026-07-21, issue #4); the full headline is still M1 work.
 
-**Action before M1 freeze:** define a direct big-step claim-status judgment
+**Done — abstract AF layer.** `spec.md` §8.2 defines a direct big-step claim-status judgment
 
 ```
-Σ; Π; Γ; R ; W ⊢ p ⇓ justified | defeated | contested | gap
+W ⊢ a ⇓ in | out | undec        (aggregated to justified | defeated | contested | gap)
 ```
 
-directly on the well-formed program `W` (the judgment `popl-research-review.md` §3.3 already lists),
-*without* going through the Dung translation, then state result 6 as: for every well-formed `W` and
-claim `p`, the direct judgment and `grounded(compile(W))` assign the same status. Mechanize both.
+as the least fixed point of the defense operator (mutually-inductive `DirectIn`/`DirectOut`), and
+`lean/Lara/Grounded.lean` proves it equal to the executable bounded-iteration labelling over an
+**arbitrary** framework — `directIn_iff` (argument level), `labelC_inn/out/undec_iff` (label
+partition), `status_preservation` (claim status) — plus the grounded-termination/determinism core
+(`grounded_stable`, result 5). `sorry`-free, standard axiom trio. This discharges N16's "no
+independent semantics exists" objection: there is now a declarative grounded semantics distinct from
+the iteration, proved to agree with it.
 
-Alternative if a direct semantics proves awkward: reframe the compilation as *the* definition and
-drop result 6, keeping only results 4/5/7 as the compilation's correctness. This weakens the
-"semantics-preserving compilation" headline, so the direct-semantics route is preferred.
+**Not done — the compile step (the actual headline).** Every equivalence theorem quantifies over one
+already-given `F : AF`, and the direct and compiled sides read the *same* `F.attack`; `compile :
+Source → AF` and its subargument closure are only *defined and characterized* (`compile_attack_iff`),
+never *exercised*. The genuine result 6 — define a status on the *source* `W` and prove it equals
+`status(grounded(compile(W)))`, so the subargument-closure edges do work — is deferred to M1, gated on
+the concrete support-term layer. This is the honest boundary; do not cite the current development as
+the full "semantics-preserving compilation" theorem.
 
-Two other definitional holes must close before freeze (they make the status function total, needed
-for result 5): the **hole-vs-complete-alternative** case (`spec.md` §8, marked open) and the report
-obligation for **`contested` SCC provenance** (`popl-research-review.md` §6).
+The two definitional holes that made the status function partial (N17) are addressed in `spec.md` §8:
+the **hole-vs-complete-alternative** case (a complete `in` alternative dominates; `statusC_gap_iff`
+mechanizes "gap only on empty complete support"; the `incompleteAlternative` diagnostic is a defined
+convention) and **`contested` = grounded `undec`** (SCC provenance a separate defined report). The
+four-state status is total and deterministic by construction.
 
 ## 6. Sequencing and artifact hygiene
 

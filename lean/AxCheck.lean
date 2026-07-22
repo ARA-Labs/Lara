@@ -13,6 +13,7 @@ Lean trio (`propext`, `Classical.choice`, `Quot.sound`). See `lean/README.md`.
 import Lara.Prop
 import Lara.ND
 import Lara.Strict
+import Lara.Grounded
 
 open Lara
 
@@ -52,3 +53,20 @@ open Lara
 #print axioms Lara.Strict.nd_nonfactive_witness
 #print axioms Lara.Strict.no_truth_projection
 #print axioms Lara.Strict.nd_relative_not_absolute
+
+-- Result 5 / C07: grounded termination + determinism (finite stabilization).
+#print axioms Lara.Grounded.grounded_stable
+#print axioms Lara.Grounded.grounded_fixpoint
+
+-- Result 6 / C08 (abstract AF layer): declarative grounded ≡ executable grounded
+-- labelling over any AF (spec §9 result 6 abstract core; N16 partially resolved).
+-- The source-vs-compiled preservation exercising `compile`/subargument closure is
+-- M1 work; `compile_attack_iff` characterizes (not: exercises) the closure edges.
+-- `statusC_gap_iff` mechanizes the N17-(1) "gap only on empty complete support" half.
+#print axioms Lara.Grounded.directIn_iff
+#print axioms Lara.Grounded.labelC_inn_iff
+#print axioms Lara.Grounded.labelC_out_iff
+#print axioms Lara.Grounded.labelC_undec_iff
+#print axioms Lara.Grounded.status_preservation
+#print axioms Lara.Grounded.compile_attack_iff
+#print axioms Lara.Grounded.statusC_gap_iff

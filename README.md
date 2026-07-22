@@ -112,11 +112,17 @@ cd lean && lake build
 
 ## Status
 
-Phase 0/1. **Frozen and mechanized:** the `Lara.Prop` trusted identity relation
-(spec §9 result 11). **Data-only skeleton:** the full claim-support AST, worked
+Phase 0/1. **Mechanized in Lean 4** (`lean/`, `sorry`-free, standard axiom trio):
+the `Lara.Prop` trusted identity relation (result 11), the abstract strict-backend
+seam + ND reference adapter (results 8, 10) and its isolation/non-factivity firewall
+(result 2), and grounded termination/determinism (result 5 core) in
+`Lara/Grounded.lean`. **Partially mechanized:** result 6 — the abstract-AF-layer
+equivalence of the declarative and executable grounded semantics; the compile step
+(subargument closure) that would make it the full source-vs-compiled preservation is
+defined but not yet exercised (M1). **Data-only skeleton:** the full claim-support AST, worked
 ARA-Demo examples, and rejection-class negatives. **Optional seed:** the LP adapter
-that checks explicit LP derivations. **Still to come:** the strict-backend registry
-and natural-deduction reference adapter, the checker / Dung-framework compilation /
-grounded labelling (`Lara.Check`, `Lara.Compile`, `Lara.Grounded`), the leaf
-interface and ARA→core mapping, and the Python elaborator. See the roadmap in
+that checks explicit LP derivations. **Still to come (Haskell checker):** the
+checker / Dung-framework compilation / grounded labelling (`Lara.Check`,
+`Lara.Compile`, `Lara.Grounded`), the leaf interface and ARA→core mapping, and the
+Python elaborator. See the roadmap in
 [`docs/engineering-plan.md`](docs/engineering-plan.md).

@@ -13,8 +13,9 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **10** (ND adapter soundness + dependency exactness) | `Lara/ND.lean` | ✅ **mechanized** — `nd_sound`, `nd_relevance`, `fv_in_range`, `hyp_out_of_range_untypable`, plus the `infer` decision-procedure bridge. No `sorry`; `propext`/`Quot.sound` only. |
 | **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `propext` only. |
 | **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; `propext` only. |
-| 1, 3, 4, 5, 7, 9 | — | not started (gated to M1 freeze / compiled AF layer; see mechanization-plan §6) |
-| 6 (status preservation) | — | blocked — no direct source semantics yet (`../docs/mechanization-plan.md` §5) |
+| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean` | ◐ **partially mechanized (abstract AF layer)** — declarative grounded (`DirectIn`/`DirectOut`) ≡ executable grounded labelling *over any AF*: `directIn_iff`, `labelC_inn/out/undec_iff`, `status_preservation`. Genuine core (N16's "no independent semantics" gap closed), but `compile`/subargument closure are only defined + characterized (`compile_attack_iff`), **not exercised** — the source-vs-compiled preservation is M1 work. N17: `statusC_gap_iff` mechanizes "gap iff empty support"; the hole diagnostic is a defined convention. No `sorry`; trio axioms. |
+| **5** (grounded termination + determinism, core) | `Lara/Grounded.lean` | ✅ **mechanized (core)** — `grounded_stable`/`grounded_fixpoint`: bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|` steps. Full compiled-AF instance is M1-gated. |
+| 1, 3, 4, 9 | — | not started (gated to M1 freeze / compiled AF layer; see mechanization-plan §6) |
 
 This is the **low-risk warm-up** (`../docs/mechanization-plan.md` §6): the `nf`/`≡`
 carve-out is corpus-independent and already frozen, so it is safe to mechanize
@@ -53,8 +54,11 @@ contains `sorryAx` or anything outside the standard trio (`propext`,
 
 ## Next (post-M1)
 
-Add Mathlib as a dependency for result 5 (grounded least-fixpoint: needs
-`Finset` / complete-lattice / monotone-map machinery), then the backend
-interface + ND adapter (results 8, 10) and backend replacement (result 9). The
+The grounded least-fixpoint (result 5 core) is done **in core Lean 4** —
+`Lara/Grounded.lean` builds the finite fixpoint by hand (bounded iteration +
+a deficit-measure stabilization argument), so no Mathlib dependency was needed.
+Remaining work: the concrete compiled-AF construction over corpus support terms
+(results 4 / full 5) and backend replacement (result 9), which may still pull in
+Mathlib's `Finset` / order machinery once the support-term layer lands. The
 shared serialized first-order core AST is the Haskell↔Lean differential-testing
 anchor (mechanization-plan §3).

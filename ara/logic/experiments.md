@@ -119,8 +119,8 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 
 ## E07: Grounded evaluation determinism + termination (fixed-point construction)
 - **Verifies**: C07
-- **Evidence**: pending (`Lara.Grounded` spec-only)
-- **Run**: docs/spec.md §8; target Lean 4 mechanization via `Finset` bounded iteration (result 5; docs/mechanization-plan.md §4)
+- **Evidence**: **core mechanized** — `lean/Lara/Grounded.lean`: `grounded` = bounded characteristic-operator iteration from ∅; `grounded_stable` proves the ascending chain reaches the least fixed point within `|args|` steps (deficit measure + strict-filter-length, done by hand in core Lean 4 — no `Finset`/Mathlib needed); `grounded_fixpoint` gives the fixed point. Total, deterministic function. Full instance over concrete compiled support terms is M1-gated. (canonical status: `evidence/status/mechanization_status.md` result 5)
+- **Run**: docs/spec.md §8; Lean 4 mechanization by bounded iteration (result 5; docs/mechanization-plan.md §4)
 - **Setup**:
   - Model: n/a
   - System: Dung characteristic function `D_AF` on the finite argument set
@@ -133,17 +133,18 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 - **Baselines**: none.
 - **Dependencies**: none.
 
-## E08: Dependency accountability (leaves(w) = frontier) + status preservation (the open gap)
+## E08: Dependency accountability (leaves(w) = frontier) + status preservation (partially closed gap)
 - **Verifies**: C08
-- **Evidence**: pending (`Lara.SupportTerm`, `Lara.Compile` spec-only)
-- **Run**: docs/spec.md §6 (`leaves`/`certDeps`), §9 results 3 & 6; docs/mechanization-plan.md §5 (the result-6 gap)
+- **Evidence**: **result 6 abstract core mechanized; leaf accountability + compile step still pending.** `lean/Lara/Grounded.lean` defines the direct big-step judgment (`DirectIn`/`DirectOut`, no iteration) and proves it equals the executable grounded labelling over any AF (`directIn_iff`, `labelC_*_iff`, `status_preservation`) — an independent semantics now exists, closing N16's core objection. STILL OPEN: (a) leaf accountability (`Lara.SupportTerm` spec-only); (b) the source-vs-compiled *preservation itself* — the equivalence quantifies over one `F : AF`, so `compile`/subargument closure are only characterized (`compile_attack_iff`), not exercised (M1). (canonical status: `evidence/status/mechanization_status.md` result 6 = "partially mechanized (abstract AF layer)")
+- **Run**: docs/spec.md §6 (`leaves`/`certDeps`), §8.2 (direct semantics), §9 results 3 & 6; docs/mechanization-plan.md §5
 - **Setup**:
   - Model: n/a
-  - System: support-term checker + compilation + (to-be-defined) direct source semantics
+  - System: support-term checker + compilation + direct source semantics (abstract layer defined; concrete layer M1)
 - **Procedure**:
-  1. Prove the reported leaf set equals `leaves(w)` by inversion on term structure; strict deps via `uses`.
-  2. **Define a direct big-step claim-status semantics** independent of the Dung translation, then prove it agrees with compile-then-label (result 6 — currently UNPROVABLE as written; the flagged gap).
-- **Metrics**: proof status; whether result 6's direct semantics is defined before M1 freeze.
-- **Expected outcome**: exact dependency accountability; a genuine two-semantics preservation theorem once the direct semantics exists.
+  1. Prove the reported leaf set equals `leaves(w)` by inversion on term structure; strict deps via `uses`. *(pending)*
+  2. ✅ **Direct big-step claim-status semantics defined** (spec §8.2, `DirectIn`/`DirectOut`) and proved to agree with the executable grounded labelling over any AF (abstract core of result 6).
+  3. **Still to do (M1):** instantiate the agreement at `F = compile(W)` with a source-level status, so the subargument-closure edges are exercised — the genuine source-vs-compiled preservation.
+- **Metrics**: proof status per part; whether the compile step exercises `compile`/subargument closure.
+- **Expected outcome**: exact dependency accountability; a genuine two-semantics preservation theorem once the compile step is instantiated over concrete support terms.
 - **Baselines**: none.
 - **Dependencies**: E07.

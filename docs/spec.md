@@ -523,9 +523,25 @@ contested if none is in and some a in support(P,p) is labelled undec
 defeated  if support(P,p) is nonempty and every such a is labelled out
 ```
 
-The exact treatment of a hole when another independent complete argument exists is still open. The
-recommended outcome is a non-gap status plus a separate incomplete-alternative diagnostic; status
-should not hide holes.
+**Hole-vs-complete-alternative (resolved, N17 point 1).** A hole forces `gap` only when
+`support(P,p)` — the *complete* checked support arguments — is empty. When a complete argument
+exists, the priority above decides status from labels alone; an open hole on some *other* alternative
+never downgrades a claim with a complete `in` argument. Instead it surfaces through a separate
+`incompleteAlternative` diagnostic (status never hides holes, but a winning complete argument is not
+suppressed by them). This makes the status function total.
+
+**`contested` provenance (resolved, N17 point 2).** `contested` is defined as grounded `undec` (the
+broad reading above), which is wider than mutual defeat: even/odd cycles and `undec`-propagation all
+collapse to `contested`. The finer SCC / cycle structure is a *reporting* obligation
+(`contestedProvenance`), not part of the four-state status, so the status function stays total and
+deterministic. Determinism follows because status is a function of the deterministic grounded
+labelling (§9 result 5).
+
+In `lean/Lara/Grounded.lean`, `statusC` is the total aggregation and `statusC_gap_iff` mechanizes the
+"gap only on empty complete support" half of point 1; `incompleteAlternative` is a *defined*
+diagnostic (a modeling convention, not tied to `statusC` by a theorem), and the `contested`-provenance
+report of point 2 is likewise a definition. The status is total and deterministic by construction (a
+function of the deterministic `labelC`).
 
 ### 8.1 Consistency and the strict-rule well-formedness restriction
 
@@ -553,6 +569,48 @@ and close strict rules under transposition, which buys all four rationality post
 with negation living in the contrary relation rather than the proposition language. See
 `gap-resolution.md`.
 
+### 8.2 Direct claim-status semantics and status preservation
+
+The status of §8 is defined through the *compiled* route: `compile` the program to a Dung framework,
+compute the grounded labelling, then aggregate. That route cannot, on its own, discharge §9 **result
+6** ("status preservation between a direct source semantics and the compiled-AF semantics"): with
+only the compiled definition there is no independent semantics to preserve, so result 6 was
+previously unprovable (exploration tree **N16**). This section supplies the missing half.
+
+**Direct big-step judgment.** Define claim status *directly* on the well-formed program, without the
+Dung translation, as the least fixed point of the defense operator. Writing `att` for the
+subargument-closed attack relation induced by the program's typed attacks (an attack on occurrence
+`o` counts against every complete argument containing `o`, §8), the source judgment `W ⊢ a ⇓ label`
+is the least relation closed under
+
+```text
+W ⊢ a ⇓ in      iff  a is a complete argument and every attacker b of a has  W ⊢ b ⇓ out
+W ⊢ b ⇓ out     iff  some c with  W ⊢ c ⇓ in  attacks b
+W ⊢ a ⇓ undec   iff  neither  W ⊢ a ⇓ in  nor  W ⊢ a ⇓ out
+```
+
+and claim status aggregates these labels by the §8 priority (`justified`/`contested`/`defeated`/`gap`)
+exactly as `statusC` does over the compiled labelling. This is a declarative judgment: it never
+materializes the grounded iteration.
+
+**Result 6 (semantics-preserving compilation).** For every well-formed `W` and claim `p`, the direct
+status `W ⊢ p ⇓ status` equals `status(grounded(compile(W)), p)`. Equivalently, argument by argument,
+`W ⊢ a ⇓ in ⟺ a ∈ grounded(compile(W))`, and likewise for `out`/`undec`.
+
+**Mechanization status — abstract AF layer (honest boundary).** `lean/Lara/Grounded.lean` mechanizes
+the *abstract core* of result 6, and only that. Over an **arbitrary** finite framework `F`, it proves
+the two *definitions* of the grounded semantics equal: the declarative least fixed point
+`DirectIn`/`DirectOut` and the executable bounded-iteration labelling `labelC` — `directIn_iff`
+(argument level), `labelC_inn/out/undec_iff` (three-way label partition), `status_preservation`
+(four-state claim status). The executable side terminates within `|Args|` steps (`grounded_stable`),
+the determinism/termination core of result 5. What is **not** yet mechanized is the *compile step*
+itself: every one of these theorems quantifies over a single already-given `F`, with the direct and
+compiled sides reading the *same* `F.attack`, so `compile : Source → AF` and its subargument closure
+are only defined and characterized (`compile_attack_iff`), never exercised by a preservation theorem.
+Closing the full headline — instantiate at `F = compile(W)` and prove a source-level status equals it,
+so the subargument-closure edges do work — is M1 work, gated on the concrete support-term layer. The
+development is `sorry`-free within the standard axiom trio.
+
 ## 9. Static and semantic results required before freeze
 
 1. Decidability of program and attack checking (including positional attack checking).
@@ -563,8 +621,14 @@ with negation living in the contrary relation rather than the proposition langua
    theory entry used by each accepted certificate.
 4. Compilation soundness: no untyped node or attack appears in the target AF, and subargument
    closure introduces edges only onto arguments containing the attacked occurrence.
-5. Termination and determinism of grounded evaluation and claim aggregation.
-6. Status preservation between a direct source semantics and compiled AF semantics.
+5. Termination and determinism of grounded evaluation and claim aggregation. *(Core mechanized:
+   `lean/Lara/Grounded.lean` `grounded_stable`/`grounded_fixpoint` — bounded iteration reaches the
+   least fixed point within `|Args|` steps; aggregation is a total function of the labelling.)*
+6. Status preservation between a direct source semantics (§8.2) and compiled AF semantics.
+   *(Abstract AF layer mechanized: `lean/Lara/Grounded.lean` `directIn_iff`, `labelC_*_iff`,
+   `status_preservation` prove declarative grounded ≡ executable grounded over any AF. The compile
+   step — instantiating at `grounded(compile(W))` and exercising subargument closure — is M1 work;
+   see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`.

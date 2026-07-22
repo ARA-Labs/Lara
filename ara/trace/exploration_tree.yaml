@@ -227,6 +227,27 @@ tree:
                   WITHOUT the Dung translation, then prove agreement with grounded(compile(W)) and
                   mechanize both — else the 'semantics-preserving compilation' headline is empty.
                   Recommended over reframing compilation as definitional (which drops the headline).
+                resolution:
+                  status: partially_resolved
+                  date: 2026-07-21
+                  by: ["docs/spec.md §8.2", "lean/Lara/Grounded.lean", "PR feat/direct-status-semantics (issue #4)"]
+                  note: >
+                    ABSTRACT CORE DONE; COMPILE STEP STILL OPEN. Spec §8.2 defines the direct big-step
+                    judgment W ⊢ a ⇓ label as the mutually-inductive least fixed point DirectIn/DirectOut,
+                    and lean/Lara/Grounded.lean proves it equals the executable bounded-iteration
+                    labelling over an ARBITRARY framework F: directIn_iff (argument level),
+                    labelC_inn/out/undec_iff (label partition), status_preservation (four-state status),
+                    plus grounded_stable (result 5 core). sorry-free, standard trio. This discharges
+                    N16's core objection — an independent (declarative) grounded semantics now exists and
+                    provably agrees with the iteration.
+                  still_open: >
+                    The actual result-6 HEADLINE is NOT yet proven: every equivalence theorem quantifies
+                    over one already-given F : AF, with statusDirect/statusC reading the same F.attack, so
+                    compile : Source → AF and its subargument closure are only defined and characterized
+                    (compile_attack_iff), never exercised. Genuine result 6 = define a status on the source
+                    W and prove it equals status(grounded(compile(W))), exercising the closure edges. This
+                    is M1 work (gated on the concrete support-term layer). Flagged by code review on PR #7;
+                    provenance relabeled "result 6 — abstract AF layer" / "partially mechanized" to match.
 
               - id: N17
                 type: dead_end
@@ -242,6 +263,20 @@ tree:
                 lesson: >
                   Both must close before M1 freeze to make the status function total (needed for result
                   5 determinism, C07). Not a metatheory bug — a definitional/diagnostics obligation.
+                resolution:
+                  status: resolved
+                  date: 2026-07-21
+                  by: ["docs/spec.md §8 (hole/contested paragraphs)", "lean/Lara/Grounded.lean statusC / statusC_gap_iff"]
+                  note: >
+                    (1) A hole forces gap only when the COMPLETE support set is empty; a complete 'in'
+                    alternative dominates. The "gap only on empty complete support" half is MECHANIZED
+                    (statusC_gap_iff). The incompleteAlternative diagnostic ("holes surface separately")
+                    is a DEFINED modeling convention, not tied to statusC by a theorem. (2) contested is
+                    defined as grounded undec; the finer SCC/cycle structure is a separate defined
+                    contestedProvenance report, not part of the status. statusC is total and
+                    deterministic by construction (a function of the deterministic labelling), so the
+                    four-state status is total and deterministic (result 5, C07). Refined after code
+                    review on PR #7 to distinguish the mechanized half from the modeling conventions.
 
   - id: N18
     type: dead_end
