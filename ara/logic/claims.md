@@ -141,15 +141,20 @@ the result is stated but not yet proved or mechanized._
   `contested` = grounded `undec`, which is broader than mutual defeat (even/odd cycles,
   undec-propagation) and must be explained by the responsible SCC in the report.
 - **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:506 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
-- **Status**: hypothesis
+- **Status**: supported
+- **Provenance**: ai-suggested
 - **Falsification criteria**: A finite compiled framework on which grounded iteration fails to
   stabilize within |Args| steps or admits two distinct grounded labellings — refuting determinism or
   termination (spec §9 result 5).
 - **Proof**: [E07]
-- **Evidence basis**: spec §8 gives the fixed-point argument; `Lara.Grounded` and the four-state
-  aggregation are spec-only, so this is a stated-not-mechanized result (target: result 5).
+- **Evidence basis**: spec §8 gives the fixed-point argument; `lean/Lara/Grounded.lean` proves
+  bounded stabilization and fixed-point determinism, while `lean/Lara/Compile.lean`
+  `srcStatus_unique`/`srcStatus_iff` prove that source four-state status is functional and equals
+  compiled executable status under a faithful edge decider. `lean/AxCheck.lean` audits these
+  theorems without `sorryAx`.
 - **Dependencies**: C06
 - **Tags**: grounded-semantics, determinism, termination, four-state-status
+- **Last revised**: 2026-07-23 (2026-07-23_002)
 
 ## C08: The reported leaf-dependency set equals the term's leaf frontier — accountability is an inversion lemma, not a tracked judgment component
 - **Statement**: Making the leaf-dependency set *derived* (`leaves(w)` = the leaf constants occurring
@@ -159,15 +164,17 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds for checked support terms; every leaf in `leaves(w)` must be declared in the
   admitted context `Γ`, and backend dependencies (`certDeps`) are unioned in from accepted certificates.
 - **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:424 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
-- **Status**: hypothesis
+- **Status**: testing
 - **Falsification criteria**: A checked support term whose actual load-bearing leaf set differs from
   `leaves(w)`, or a strict certificate whose consulted theory/premise dependency is not returned by
   its adapter's `uses` — refuting dependency accountability (spec §9 result 3).
 - **Proof**: [E08]
-- **Evidence basis**: spec §6 defines `leaves(w)`/`certDeps(w)`; `Lara.SupportTerm` is corpus-gated
-  and spec-only, so this is a design claim awaiting mechanization (result 3).
+- **Evidence basis**: spec §6 defines `leaves(w)`/`certDeps(w)`;
+  `lean/Lara/Support.lean` proves `leaves_declared` for the source-leaf half, while backend
+  `certDeps` accountability still awaits a `uses` field on the executable backend interface.
 - **Dependencies**: C01
 - **Tags**: dependency-accountability, leaves, inversion-lemma
+- **Last revised**: 2026-07-22 (2026-07-22_002)
 
 ## C09: Restricting contrary relations off strict-reachable propositions buys consistency by construction
 - **Statement**: A compile-time well-formedness check that forbids any strict-rule consequent — and

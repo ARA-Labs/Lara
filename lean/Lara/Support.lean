@@ -1,0 +1,712 @@
+/-
+Mechanized support-term typing (`Lara.Support`) — the Lean port of the
+v0.1-frozen judgment `Sigma; Pi; Gamma; R |- w : supports(p) ▷ O` (spec §6.1,
+frozen 2026-07-22 in the M1 lock pass). Per the mechanization discipline
+(CLAUDE.md): the definition froze, so its metatheory lands now.
+
+What this file discharges, against the exact §6.1 figure:
+
+* **Result 3 (dependency accountability), leaf half** — `leaves_declared`:
+  every leaf constant of a typed term is declared in `Gamma`. The other half
+  ("the reported leaf set equals `leaves(w)`") is definitional: the report *is*
+  `leaves w` (spec §6). `certDeps` accountability needs a `uses` field on the
+  abstract `Backend` (obligation 4) and is a recorded follow-up.
+* **Result 1 (decidability), uniqueness half** — `hasSupport_unique`: a term
+  has at most one conclusion and obligation set. The executable checker (the
+  `infer`-style other half, as in `Lara/ND.lean` layer C) is the immediate
+  follow-up.
+* **Result 11 (support adequacy), relational layer** — `Supports` is `≡` on
+  the unique conclusion; `supports_resp_equiv` shows it is `≡`-functional.
+* The §6.1 accounting invariants as inversion lemmas: `strict_no_questions`
+  (a strict instance carries no discharge map and no holes),
+  `complete_mandatory_discharged` (`O = []` at an instance root forces every
+  mandatory question into the discharge map), and `dh_partition` (the
+  `D ⊎ H = questions(r)` cover/disjointness, extensionally).
+* `certOkOf_strict_step`: the §6.1 `cert` assurance side condition composed
+  with the abstract seam yields Theorem 1's consequence — §6 and §5 agree.
+
+Design notes (same conventions as the sibling files):
+
+* Domain identifiers and symbols are distinct newtypes (`RuleId`, `LeafId`,
+  `QuestionId`, `VarId`, `PredSym`, `ConSym`, `BackendId`, `Digest`,
+  `CertRef`) per the symbolic-core rule (CLAUDE.md): separate namespaces
+  cannot be swapped silently; raw strings live only inside the wrappers,
+  converted at the decode boundary. Instantiation unwraps `PredSym`/`ConSym`
+  only when producing the already-frozen ground `Lara.Prop` representation.
+* Contexts are functions (`Pi : RuleId → Option Rule`, `Gamma : LeafId →
+  Option Atom`): they are checker *inputs*, not wire data, so totality via
+  `Option` is the honest model. The wire substitution `theta` *is* data
+  (spec §4.1: JSON carries it explicitly), so it is an association list; the
+  §6.1 side condition `dom(theta) = {X1..Xm}` is carried exactly by the
+  `InstSide.θDom`/`θNodup` fields against the rule's declared `params`.
+* The `cert(beta, theory-digest, kappa)` assurance carries all three values:
+  backend id, digest, and an *opaque* certificate reference — the payload is
+  never inspected here (the factivity firewall, Theorem 3). Acceptance is the
+  indexed predicate `CertOk β h κ As C`, gated per-rule by the `certifiers`
+  allowlist (spec §4: an instance may use `cert(beta, h, ...)` only when
+  `(beta@version, h)` appears in `certifiers`); `certOkOf` instantiates it
+  from a digest-addressed registry of `Strict.Backend`s.
+* Rule-instance children are indexed by `l[i]?` lookups rather than nested
+  `Forall₂`-style premises, keeping every recursive occurrence directly under
+  `∀`/`→` (strictly positive, clean induction principles). List-shape helper
+  lemmas are proved by hand, self-contained (the `Lara/Grounded.lean` style).
+-/
+
+import Lara.Prop
+import Lara.Strict
+
+namespace Lara.Support
+
+/-! ### Domain identifiers (symbolic core: one newtype per namespace) -/
+
+/-- Inference-scheme (rule) identifier. -/
+structure RuleId where
+  name : String
+deriving DecidableEq
+
+/-- Evidence-leaf identifier. -/
+structure LeafId where
+  name : String
+deriving DecidableEq
+
+/-- Critical-question identifier. -/
+structure QuestionId where
+  name : String
+deriving DecidableEq
+
+/-- Rule-parameter (variable) identifier. -/
+structure VarId where
+  name : String
+deriving DecidableEq
+
+/-- Predicate symbol. Kept distinct from constructor symbols in the core AST. -/
+structure PredSym where
+  name : String
+deriving DecidableEq
+
+/-- Term-constructor symbol. Kept distinct from predicate symbols. -/
+structure ConSym where
+  name : String
+deriving DecidableEq
+
+/-- Strict-backend identifier (`beta`). -/
+structure BackendId where
+  name : String
+deriving DecidableEq
+
+/-- Theory digest (`h`), digest-addressed. -/
+structure Digest where
+  hash : String
+deriving DecidableEq
+
+/-! ### Patterns and substitutions (spec §4.1) -/
+
+/- Rule-body patterns `P ::= X | k | k(P1, ..., Pn)`; mutual argument list as
+in `Lara.Term`/`Terms`. -/
+mutual
+  inductive Pat where
+    | var : VarId → Pat
+    | num : String → Pat
+    | str : String → Pat
+    | con : ConSym → Pats → Pat
+  inductive Pats where
+    | nil  : Pats
+    | cons : Pat → Pats → Pats
+end
+
+/-- An atom pattern `Apat ::= pred(P1, ..., Pn)`. -/
+structure APat where
+  pred : PredSym
+  args : Pats
+
+/-- The wire substitution: explicit, ground by construction (`Term` is ground). -/
+abbrev Subst := List (VarId × Term)
+
+def lookupSubst : Subst → VarId → Option Term
+  | [], _ => none
+  | (y, t) :: rest, x => if y = x then some t else lookupSubst rest x
+
+/- Instantiation `P theta` — `none` iff a variable is unbound. The §6.1 side
+condition `dom(theta) = {X1..Xm}` is NOT this success condition (which only
+sees variables actually occurring in the instantiated pattern); it is the
+`InstSide.θDom`/`θNodup` fields against the rule's declared `params`. -/
+mutual
+  def instPat (θ : Subst) : Pat → Option Term
+    | .var x => lookupSubst θ x
+    | .num s => some (.num s)
+    | .str s => some (.str s)
+    | .con k ps => (instPats θ ps).map (.con k.name)
+  def instPats (θ : Subst) : Pats → Option Terms
+    | .nil => some .nil
+    | .cons p ps =>
+      match instPat θ p, instPats θ ps with
+      | some t, some ts => some (.cons t ts)
+      | _, _ => none
+end
+
+/-- `Apat theta` as a ground atom. -/
+def instAPat (θ : Subst) (ap : APat) : Option Atom :=
+  (instPats θ ap.args).map (.atom ap.pred.name)
+
+def instAPats (θ : Subst) : List APat → Option (List Atom)
+  | [] => some []
+  | ap :: aps =>
+    match instAPat θ ap, instAPats θ aps with
+    | some a, some rest => some (a :: rest)
+    | _, _ => none
+
+/-! ### Policy rules (spec §4) -/
+
+inductive Mode where
+  | strict
+  | defeasible
+deriving DecidableEq
+
+/-- A critical question: name, answer pattern over the rule's parameters, and
+the mandatory/optional flag (spec §4.2). -/
+structure Question where
+  name      : QuestionId
+  answer    : APat
+  mandatory : Bool
+
+/-- A policy rule. `params` are the declared parameters `X1..Xm` (spec §4:
+rule well-formedness requires every variable in premises/conclusion/answers
+among them); `certifiers` is the per-rule strict-certificate allowlist
+(`(beta@version, theory-digest)` pairs); `allowTrusted` gates the `trusted`
+assurance. -/
+structure Rule where
+  mode         : Mode
+  params       : List VarId
+  premises     : List APat
+  concl        : APat
+  questions    : List Question
+  allowTrusted : Bool
+  certifiers   : List (BackendId × Digest)
+
+def questionNames (r : Rule) : List QuestionId := r.questions.map (·.name)
+
+def mandatoryNames (r : Rule) : List QuestionId :=
+  (r.questions.filter (·.mandatory)).map (·.name)
+
+/-! ### Support terms (spec §6) -/
+
+/-- Assurance on an instance. `cert` carries the frozen triple
+`(beta, theory-digest, kappa)` — the certificate reference is opaque data;
+its acceptance is the `CertOk` premise of the typing relation. -/
+inductive Assurance where
+  | none
+  | trusted
+  | cert : BackendId → Digest → CertRef → Assurance
+deriving DecidableEq
+
+/-- `w ::= leaf l | r⟨theta ; w* ; {q ↦ w_q} ; {o*} ; assurance⟩`.
+The discharge map is an association list `question ↦ discharging term`;
+the hole set is the list of open question names. -/
+inductive SupportTerm where
+  | leaf : LeafId → SupportTerm
+  | inst : RuleId → Subst → List SupportTerm →
+           List (QuestionId × SupportTerm) → List QuestionId → Assurance →
+           SupportTerm
+
+/- `leaves(w)`: the leaf constants occurring in `w`, discharge subterms
+included (spec §6 — the dependency report *is* this set). -/
+mutual
+  def leaves : SupportTerm → List LeafId
+    | .leaf l => [l]
+    | .inst _ _ ws D _ _ => leavesList ws ++ leavesDis D
+  def leavesList : List SupportTerm → List LeafId
+    | [] => []
+    | w :: ws => leaves w ++ leavesList ws
+  def leavesDis : List (QuestionId × SupportTerm) → List LeafId
+    | [] => []
+    | (_, w) :: rest => leaves w ++ leavesDis rest
+end
+
+/-! ### List helpers (self-contained, `Grounded.lean` style) -/
+
+def memB {α : Type _} [DecidableEq α] (x : α) : List α → Bool
+  | [] => false
+  | y :: ys => if x = y then true else memB x ys
+
+theorem memB_iff {α : Type _} [DecidableEq α] {x : α} :
+    ∀ {l : List α}, memB x l = true ↔ x ∈ l := by
+  intro l
+  induction l with
+  | nil => simp [memB]
+  | cons y ys ih =>
+    by_cases h : x = y
+    · simp [memB, h]
+    · simp [memB, h, ih]
+
+/-- Deterministically remove repeated question identifiers. -/
+def dedupQuestions : List QuestionId → List QuestionId
+  | [] => []
+  | q :: qs =>
+      let rest := dedupQuestions qs
+      if memB q rest then rest else q :: rest
+
+theorem mem_dedupQuestions {q : QuestionId} :
+    ∀ qs, q ∈ dedupQuestions qs ↔ q ∈ qs := by
+  intro qs
+  induction qs with
+  | nil => simp [dedupQuestions]
+  | cons q' qs ih =>
+      by_cases h : q' ∈ dedupQuestions qs
+      · have hb : memB q' (dedupQuestions qs) = true := memB_iff.mpr h
+        simp only [dedupQuestions, hb, if_true, List.mem_cons]
+        constructor
+        · intro hq
+          exact Or.inr (ih.mp hq)
+        · intro hq
+          rcases hq with heq | hq
+          · subst q'
+            exact h
+          · exact ih.mpr hq
+      · simp [dedupQuestions, memB_iff, h, ih]
+
+theorem dedupQuestions_nodup :
+    ∀ qs, (dedupQuestions qs).Nodup := by
+  intro qs
+  induction qs with
+  | nil => simp [dedupQuestions]
+  | cons q qs ih =>
+      simp only [dedupQuestions]
+      split
+      · exact ih
+      · apply List.nodup_cons.mpr
+        rename_i hnot
+        exact ⟨fun hmem => hnot (memB_iff.mpr hmem), ih⟩
+
+/-- Collect obligation sets using proved duplicate-eliminating list union. The
+traversal order is deterministic, while membership and multiplicity match the
+set union in §6.1. -/
+def unionAll : List (List QuestionId) → List QuestionId
+  | Os => dedupQuestions Os.flatten
+
+theorem unionAll_nodup (Os : List (List QuestionId)) :
+    (unionAll Os).Nodup :=
+  dedupQuestions_nodup Os.flatten
+
+/-- `H ∩ mandatory(r)`: the obligations an instance's hole set contributes
+(§6.1 — optional members of `H` are diagnostics, not obligations). -/
+def openMandatory (r : Rule) (H : List QuestionId) : List QuestionId :=
+  H.filter (fun n => memB n (mandatoryNames r))
+
+/-- The exact obligation set reported by an instance: child-premise,
+child-discharge, and open-mandatory obligations are unioned as sets. -/
+def collectObligations (Os DOs : List (List QuestionId)) (r : Rule)
+    (H : List QuestionId) : List QuestionId :=
+  unionAll (Os ++ DOs ++ [openMandatory r H])
+
+theorem collectObligations_nodup (Os DOs : List (List QuestionId)) (r : Rule)
+    (H : List QuestionId) :
+    (collectObligations Os DOs r H).Nodup :=
+  unionAll_nodup _
+
+theorem append_eq_nil' {α : Type _} {l₁ l₂ : List α} (h : l₁ ++ l₂ = []) :
+    l₁ = [] ∧ l₂ = [] := by
+  cases l₁ with
+  | nil => exact ⟨rfl, h⟩
+  | cons x xs => simp at h
+
+theorem getElem?_some_of_lt {α : Type _} :
+    ∀ (l : List α) (i : Nat), i < l.length → ∃ a, l[i]? = some a := by
+  intro l
+  induction l with
+  | nil => intro i h; exact absurd h (Nat.not_lt_zero i)
+  | cons x xs ih =>
+    intro i h
+    cases i with
+    | zero => exact ⟨x, by simp⟩
+    | succ j =>
+      obtain ⟨a, ha⟩ := ih j (Nat.lt_of_succ_lt_succ h)
+      exact ⟨a, by simpa using ha⟩
+
+theorem lt_of_getElem?_some {α : Type _} :
+    ∀ {l : List α} {i : Nat} {a : α}, l[i]? = some a → i < l.length := by
+  intro l
+  induction l with
+  | nil => intro i a h; simp at h
+  | cons x xs ih =>
+    intro i a h
+    cases i with
+    | zero => exact Nat.succ_pos _
+    | succ j =>
+      simp only [List.getElem?_cons_succ] at h
+      exact Nat.succ_lt_succ (ih h)
+
+theorem getElem?_none_of_ge {α : Type _} :
+    ∀ (l : List α) (i : Nat), l.length ≤ i → l[i]? = none := by
+  intro l
+  induction l with
+  | nil => intro i _; simp
+  | cons x xs ih =>
+    intro i h
+    cases i with
+    | zero => exact absurd h (by simp)
+    | succ j => simpa using ih j (Nat.le_of_succ_le_succ h)
+
+theorem ext_getElem? {α : Type _} :
+    ∀ (l₁ l₂ : List α), (∀ i : Nat, l₁[i]? = l₂[i]?) → l₁ = l₂ := by
+  intro l₁
+  induction l₁ with
+  | nil =>
+    intro l₂ h
+    cases l₂ with
+    | nil => rfl
+    | cons y ys => have := h 0; simp at this
+  | cons x xs ih =>
+    intro l₂ h
+    cases l₂ with
+    | nil => have := h 0; simp at this
+    | cons y ys =>
+      have h0 := h 0
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at h0
+      have ht : xs = ys := ih ys (fun i => by simpa using h (i + 1))
+      rw [h0, ht]
+
+theorem mem_leavesList : ∀ {ws : List SupportTerm} {l : LeafId},
+    l ∈ leavesList ws →
+      ∃ (i : Nat) (w : SupportTerm), ws[i]? = some w ∧ l ∈ leaves w := by
+  intro ws
+  induction ws with
+  | nil => intro l h; simp [leavesList] at h
+  | cons w ws ih =>
+    intro l h
+    simp only [leavesList] at h
+    rcases List.mem_append.mp h with h1 | h2
+    · exact ⟨0, w, by simp, h1⟩
+    · obtain ⟨i, w', hw', hl⟩ := ih h2
+      exact ⟨i + 1, w', by simpa using hw', hl⟩
+
+theorem mem_leavesDis : ∀ {D : List (QuestionId × SupportTerm)} {l : LeafId},
+    l ∈ leavesDis D →
+      ∃ (j : Nat) (q : QuestionId) (w : SupportTerm),
+        D[j]? = some (q, w) ∧ l ∈ leaves w := by
+  intro D
+  induction D with
+  | nil => intro l h; simp [leavesDis] at h
+  | cons qw rest ih =>
+    intro l h
+    obtain ⟨q, w⟩ := qw
+    simp only [leavesDis] at h
+    rcases List.mem_append.mp h with h1 | h2
+    · exact ⟨0, q, w, by simp, h1⟩
+    · obtain ⟨j, q', w', hw', hl⟩ := ih h2
+      exact ⟨j + 1, q', w', by simpa using hw', hl⟩
+
+theorem mem_mandatoryNames {r : Rule} {qd : Question}
+    (hq : qd ∈ r.questions) (hm : qd.mandatory = true) :
+    qd.name ∈ mandatoryNames r :=
+  List.mem_map.mpr ⟨qd, List.mem_filter.mpr ⟨hq, hm⟩, rfl⟩
+
+theorem mem_questionNames {r : Rule} {qd : Question} (hq : qd ∈ r.questions) :
+    qd.name ∈ questionNames r :=
+  List.mem_map.mpr ⟨qd, hq, rfl⟩
+
+/-! ### The typing judgment (spec §6.1, v0.1-frozen) -/
+
+/-- Backend acceptance, indexed by the frozen `cert` triple: `CertOk β h κ As C`
+abstracts "registered backend `β` with allowlisted theory digest `h` accepts
+certificate `κ` for the encoded step" — it consumes the *instantiated premise
+patterns* `As` (spec §5: `Delta = [encode_beta(P_i theta)]`), not the premise
+terms' conclusions. `certOkOf` below instantiates it from a registry. -/
+inductive AssuranceOk (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop)
+    (r : Rule) (As : List Atom) (C : Atom) : Assurance → Prop where
+  | defeasible (h : r.mode = .defeasible) : AssuranceOk CertOk r As C .none
+  | trusted (h : r.mode = .strict) (ht : r.allowTrusted = true) :
+      AssuranceOk CertOk r As C .trusted
+  | cert {β : BackendId} {hd : Digest} {κ : CertRef}
+      (h : r.mode = .strict)
+      (hallow : (β, hd) ∈ r.certifiers)
+      (hacc : CertOk β hd κ As C) :
+      AssuranceOk CertOk r As C (.cert β hd κ)
+
+/-- The non-recursive premises of the §6.1 instance rule, bundled. `As` are
+the instantiated premise patterns, `Cs`/`Os` the premise terms' conclusions
+and obligations, `DCs`/`DOs` the same for discharge terms. -/
+structure InstSide (canon : String → String) (Pi : RuleId → Option Rule)
+    (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop)
+    (rn : RuleId) (θ : Subst) (r : Rule)
+    (ws : List SupportTerm) (D : List (QuestionId × SupportTerm))
+    (H : List QuestionId) (α : Assurance) (As Cs : List Atom)
+    (Os : List (List QuestionId))
+    (DCs : List Atom) (DOs : List (List QuestionId)) (C : Atom) : Prop where
+  /-- the rule is policy content, looked up — never program-defined (§4) -/
+  rule   : Pi rn = some r
+  /-- `theta` is duplicate-free … -/
+  θNodup : (θ.map Prod.fst).Nodup
+  /-- … and `dom(theta) = {X1..Xm}` exactly — the §6.1 side condition (no
+  extra bindings, no omitted declared parameters, questions/exceptions
+  included since their variables are among `params` by rule wf, §4.1) -/
+  θDom   : ∀ x : VarId, x ∈ θ.map Prod.fst ↔ x ∈ r.params
+  /-- premise patterns instantiate … -/
+  prems  : instAPats θ r.premises = some As
+  /-- … and so does the conclusion pattern: `concl(w) = Ap_c theta` -/
+  concl  : instAPat θ r.concl = some C
+  lenAs  : ws.length = As.length
+  lenCs  : Cs.length = ws.length
+  lenOs  : Os.length = ws.length
+  /-- premise identity is `≡` (folded into `supports(...)`, §6.1) -/
+  premEq : ∀ (i : Nat) (A B : Atom),
+             Cs[i]? = some A → As[i]? = some B → equiv canon A B
+  lenDCs : DCs.length = D.length
+  lenDOs : DOs.length = D.length
+  /-- each discharge answers its question's pattern under the same `theta` (§4.2) -/
+  ans    : ∀ (j : Nat) (q : QuestionId) (w : SupportTerm) (A : Atom),
+             D[j]? = some (q, w) → DCs[j]? = some A →
+             ∃ qd, qd ∈ r.questions ∧ qd.name = q ∧
+               ∃ Aq, instAPat θ qd.answer = some Aq ∧ equiv canon A Aq
+  /-- the policy's question names are duplicate-free (rule wf) … -/
+  qNodup : (questionNames r).Nodup
+  /-- … as are the discharge keys … -/
+  dNodup : (D.map Prod.fst).Nodup
+  /-- … and the hole set — so `D ⊎ H = questions(r)` is a genuine partition -/
+  hNodup : H.Nodup
+  /-- `D ⊎ H = questions(r)`: cover … -/
+  cover  : ∀ qd, qd ∈ r.questions → qd.name ∈ D.map Prod.fst ∨ qd.name ∈ H
+  /-- … disjointness … -/
+  disj   : ∀ n, n ∈ D.map Prod.fst → n ∉ H
+  /-- … and no junk on either side (a question absent from both is ill-formed) -/
+  keysD  : ∀ n, n ∈ D.map Prod.fst → n ∈ questionNames r
+  keysH  : ∀ n, n ∈ H → n ∈ questionNames r
+  /-- strict rules declare no questions (§5), so `D` and `H` are empty -/
+  strictNoQ : r.mode = .strict → D = [] ∧ H = []
+  /-- the `assurance(m, alpha)` side condition -/
+  assur  : AssuranceOk CertOk r As C α
+
+/-- `Sigma; Pi; Gamma; R |- w : supports(p) ▷ O`, §6.1's two rules. The
+conclusion index is the *exact* `concl(w)`; `≡`-closure is applied where the
+spec applies it (premises, discharges, and the claim-level `Supports`).
+Recursive premises are `l[i]?`-indexed so each occurrence sits directly under
+`∀`/`→`. -/
+inductive HasSupport (canon : String → String) (Pi : RuleId → Option Rule)
+    (Gamma : LeafId → Option Atom)
+    (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop) :
+    SupportTerm → Atom → List QuestionId → Prop where
+  | leaf {l : LeafId} {p : Atom} (hΓ : Gamma l = some p) :
+      HasSupport canon Pi Gamma CertOk (.leaf l) p []
+  | inst {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+      {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
+      {α : Assurance} {r : Rule} {As Cs : List Atom}
+      {Os : List (List QuestionId)}
+      {DCs : List Atom} {DOs : List (List QuestionId)} {C : Atom}
+      (hside : InstSide canon Pi CertOk rn θ r ws D H α As Cs Os DCs DOs C)
+      (hprems : ∀ (i : Nat) (w : SupportTerm) (A : Atom) (O : List QuestionId),
+        ws[i]? = some w → Cs[i]? = some A → Os[i]? = some O →
+        HasSupport canon Pi Gamma CertOk w A O)
+      (hdis : ∀ (j : Nat) (q : QuestionId) (w : SupportTerm) (A : Atom)
+        (O : List QuestionId), D[j]? = some (q, w) → DCs[j]? = some A →
+        DOs[j]? = some O → HasSupport canon Pi Gamma CertOk w A O) :
+      HasSupport canon Pi Gamma CertOk (.inst rn θ ws D H α) C
+        (collectObligations Os DOs r H)
+
+/-- `w supports p` at claim level (spec §3.1/§6.1): the unique conclusion is
+`≡`-identical to `p`. Result 11's decidability lands with the executable
+checker; this is the relational layer. -/
+def Supports (canon : String → String) (Pi : RuleId → Option Rule)
+    (Gamma : LeafId → Option Atom)
+    (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop)
+    (w : SupportTerm) (p : Atom) : Prop :=
+  ∃ C O, HasSupport canon Pi Gamma CertOk w C O ∧ equiv canon C p
+
+/-! ### Result 3 (leaf half): dependency accountability -/
+
+/-- **Every leaf used by a typed term is declared.** The reported dependency
+set is `leaves w` by definition (§6), so with this lemma the report is exactly
+the declared leaves the term touches — the accountability inversion. -/
+theorem leaves_declared {canon Pi Gamma CertOk} {w : SupportTerm} {C : Atom}
+    {O : List QuestionId} (h : HasSupport canon Pi Gamma CertOk w C O) :
+    ∀ l, l ∈ leaves w → ∃ p, Gamma l = some p := by
+  induction h with
+  | leaf hΓ =>
+    intro l hl
+    simp only [leaves, List.mem_singleton] at hl
+    subst hl
+    exact ⟨_, hΓ⟩
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    intro l hl
+    simp only [leaves] at hl
+    rcases List.mem_append.mp hl with hws | hD
+    · obtain ⟨i, w', hw', hl'⟩ := mem_leavesList hws
+      have hi := lt_of_getElem?_some hw'
+      obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i
+        (by have := hside.lenCs; omega)
+      obtain ⟨O', hO⟩ := getElem?_some_of_lt Os i
+        (by have := hside.lenOs; omega)
+      exact ihprems i w' A O' hw' hA hO l hl'
+    · obtain ⟨j, q, w', hw', hl'⟩ := mem_leavesDis hD
+      have hj := lt_of_getElem?_some hw'
+      obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j
+        (by have := hside.lenDCs; omega)
+      obtain ⟨O', hO⟩ := getElem?_some_of_lt DOs j
+        (by have := hside.lenDOs; omega)
+      exact ihdis j q w' A O' hw' hA hO l hl'
+
+/-! ### Result 1 (uniqueness half): support checking is deterministic -/
+
+/-- **Uniqueness.** A term has one conclusion and one obligation set: checking
+is a partial function of the term (the checker's other half is the executable
+`infer` port, to follow). -/
+theorem hasSupport_unique {canon Pi Gamma CertOk} {w : SupportTerm}
+    {C₁ : Atom} {O₁ : List QuestionId}
+    (h₁ : HasSupport canon Pi Gamma CertOk w C₁ O₁) :
+    ∀ {C₂ O₂}, HasSupport canon Pi Gamma CertOk w C₂ O₂ → C₁ = C₂ ∧ O₁ = O₂ := by
+  induction h₁ with
+  | leaf hΓ =>
+    intro C₂ O₂ h₂
+    cases h₂ with
+    | leaf hΓ' => exact ⟨Option.some.inj (hΓ.symm.trans hΓ'), rfl⟩
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    intro C₂ O₂ h₂
+    cases h₂ with
+    | @inst _ _ _ _ _ _ r' As' Cs' Os' DCs' DOs' _ hside' hprems' hdis' =>
+      have hr : r' = r := Option.some.inj (hside'.rule.symm.trans hside.rule)
+      subst hr
+      have hAs : As' = As := Option.some.inj (hside'.prems.symm.trans hside.prems)
+      subst hAs
+      have hC : C = C₂ := Option.some.inj (hside.concl.symm.trans hside'.concl)
+      have hOs : Os = Os' := by
+        apply ext_getElem?
+        intro i
+        by_cases hi : i < ws.length
+        · obtain ⟨w', hw⟩ := getElem?_some_of_lt ws i hi
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i
+            (by have := hside.lenCs; omega)
+          obtain ⟨O', hO⟩ := getElem?_some_of_lt Os i
+            (by have := hside.lenOs; omega)
+          obtain ⟨A', hA'⟩ := getElem?_some_of_lt Cs' i
+            (by have := hside'.lenCs; omega)
+          obtain ⟨O'', hO'⟩ := getElem?_some_of_lt Os' i
+            (by have := hside'.lenOs; omega)
+          have huniq := ihprems i w' A O' hw hA hO (hprems' i w' A' O'' hw hA' hO')
+          rw [hO, hO', huniq.2]
+        · rw [getElem?_none_of_ge Os i (by have := hside.lenOs; omega),
+              getElem?_none_of_ge Os' i (by have := hside'.lenOs; omega)]
+      have hDOs : DOs = DOs' := by
+        apply ext_getElem?
+        intro j
+        by_cases hj : j < D.length
+        · obtain ⟨qw, hqw⟩ := getElem?_some_of_lt D j hj
+          obtain ⟨q, w'⟩ := qw
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j
+            (by have := hside.lenDCs; omega)
+          obtain ⟨O', hO⟩ := getElem?_some_of_lt DOs j
+            (by have := hside.lenDOs; omega)
+          obtain ⟨A', hA'⟩ := getElem?_some_of_lt DCs' j
+            (by have := hside'.lenDCs; omega)
+          obtain ⟨O'', hO'⟩ := getElem?_some_of_lt DOs' j
+            (by have := hside'.lenDOs; omega)
+          have huniq := ihdis j q w' A O' hqw hA hO (hdis' j q w' A' O'' hqw hA' hO')
+          rw [hO, hO', huniq.2]
+        · rw [getElem?_none_of_ge DOs j (by have := hside.lenDOs; omega),
+              getElem?_none_of_ge DOs' j (by have := hside'.lenDOs; omega)]
+      exact ⟨hC, by simp only [collectObligations]; rw [hOs, hDOs]⟩
+
+/-- `Supports` respects `≡`: one term cannot support two `≢` claims. With
+uniqueness this is result 11's functionality at claim level. -/
+theorem supports_resp_equiv {canon Pi Gamma CertOk} {w : SupportTerm}
+    {p p' : Atom} (h₁ : Supports canon Pi Gamma CertOk w p)
+    (h₂ : Supports canon Pi Gamma CertOk w p') :
+    equiv canon p p' := by
+  obtain ⟨C, O, hC, he⟩ := h₁
+  obtain ⟨C', O', hC', he'⟩ := h₂
+  have hcc : C = C' := (hasSupport_unique hC hC').1
+  exact equiv_trans canon (equiv_symm canon he) (hcc ▸ he')
+
+/-! ### The §6.1 accounting invariants as inversion lemmas -/
+
+/-- A strict instance has an empty discharge map and hole set (spec §5/§6.1's
+`m = strict ⟹ D = {} ∧ H = {}`). -/
+theorem strict_no_questions {canon Pi Gamma CertOk}
+    {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+    {D : List (QuestionId × SupportTerm)} {H : List QuestionId} {α : Assurance}
+    {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk (.inst rn θ ws D H α) C O)
+    {r : Rule} (hr : Pi rn = some r) (hm : r.mode = .strict) :
+    D = [] ∧ H = [] := by
+  cases h with
+  | @inst _ _ _ _ _ _ r' As Cs Os DCs DOs C hside _ _ =>
+    have : r' = r := Option.some.inj (hside.rule.symm.trans hr)
+    subst this
+    exact hside.strictNoQ hm
+
+/-- **Complete instances discharge every mandatory question.** `O = []` at an
+instance root forces `H ∩ mandatory(r) = []`, and the `D (+) H` cover then
+puts each mandatory question's name in the discharge map — the §6.1
+accounting invariant doing its job. -/
+theorem complete_mandatory_discharged {canon Pi Gamma CertOk}
+    {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+    {D : List (QuestionId × SupportTerm)} {H : List QuestionId} {α : Assurance}
+    {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk (.inst rn θ ws D H α) C O)
+    (hO : O = []) {r : Rule} (hr : Pi rn = some r) :
+    ∀ qd ∈ r.questions, qd.mandatory = true → qd.name ∈ D.map Prod.fst := by
+  cases h with
+  | @inst _ _ _ _ _ _ r' As Cs Os DCs DOs C' hside _ _ =>
+    intro qd hq hm
+    have hrr : r' = r := Option.some.inj (hside.rule.symm.trans hr)
+    rw [hrr] at hside hO
+    have hOM : openMandatory r H = [] := by
+      cases hom : openMandatory r H with
+      | nil => rfl
+      | cons q qs =>
+          have hmem : q ∈ collectObligations Os DOs r H := by
+            rw [collectObligations, unionAll]
+            apply (mem_dedupQuestions _).mpr
+            simp [hom]
+          rw [hO] at hmem
+          simp at hmem
+    rcases hside.cover qd hq with hk | hh
+    · exact hk
+    · have hmem : qd.name ∈ openMandatory r H :=
+        List.mem_filter.mpr ⟨hh, memB_iff.mpr (mem_mandatoryNames hq hm)⟩
+      rw [hOM] at hmem
+      cases hmem
+
+/-- **The `D ⊎ H` partition, extensionally.** With the `Nodup` invariants of
+`InstSide`, cover + disjointness + no-junk make discharge keys and holes a
+genuine partition of the rule's question names: membership on either side is
+equivalent to being a declared question, and the two sides never overlap. -/
+theorem dh_partition {canon Pi CertOk}
+    {rn : RuleId} {θ : Subst} {r : Rule} {ws : List SupportTerm}
+    {D : List (QuestionId × SupportTerm)} {H : List QuestionId} {α : Assurance}
+    {As Cs : List Atom} {Os : List (List QuestionId)}
+    {DCs : List Atom} {DOs : List (List QuestionId)} {C : Atom}
+    (hside : InstSide canon Pi CertOk rn θ r ws D H α As Cs Os DCs DOs C) :
+    (∀ n, n ∈ questionNames r ↔ (n ∈ D.map Prod.fst ∨ n ∈ H)) ∧
+      ∀ n, n ∈ D.map Prod.fst → n ∉ H := by
+  refine ⟨fun n => ⟨fun hn => ?_, fun hn => ?_⟩, hside.disj⟩
+  · obtain ⟨qd, hqd, hname⟩ := List.mem_map.mp hn
+    exact hname ▸ hside.cover qd hqd
+  · rcases hn with h | h
+    · exact hside.keysD n h
+    · exact hside.keysH n h
+
+/-! ### The seam: §6.1's `cert` assurance meets Theorem 1 -/
+
+/-- `CertOk` from a digest-addressed backend registry: `β@h` resolves to a
+registered abstract backend that accepts the exact submitted certificate for
+the encoded step (spec §5's
+`check_beta(T, [encode(P_i theta)], encode(C theta), kappa) = accept`, with
+the theory folded into the backend as in `Lara.Strict`). The certificate
+reference is passed unchanged through the registry seam into the abstract
+`Strict.Backend.check`; a different or swapped `κ` therefore cannot inherit
+acceptance from another certificate. -/
+def certOkOf (reg : BackendId → Digest → Option Strict.Backend) :
+    BackendId → Digest → CertRef → List Atom → Atom → Prop :=
+  fun β h κ As C =>
+    ∃ B, reg β h = some B ∧ B.check κ (As.map B.enc) (B.enc C)
+
+/-- The §6.1 `cert` side condition composed with the abstract seam is exactly
+Theorem 1: an accepted strict instance's conclusion is a backend consequence
+of its instantiated premises, for the registered backend the assurance names.
+§6 typing and §5 soundness agree. -/
+theorem certOkOf_strict_step {reg : BackendId → Digest → Option Strict.Backend}
+    {β : BackendId} {h : Digest} {κ : CertRef} {As : List Atom} {C : Atom}
+    (hacc : certOkOf reg β h κ As C) :
+    ∃ B, reg β h = some B ∧ B.models (As.map B.enc) (B.enc C) := by
+  obtain ⟨B, hreg, hchk⟩ := hacc
+  exact ⟨B, hreg, B.sound _ _ _ hchk⟩
+
+end Lara.Support

@@ -90,3 +90,18 @@ observations:
     promoted_to: null
     crystallized_via: null
     stale: false
+  - id: O06
+    timestamp: "2026-07-22T22:08"
+    provenance: ai-suggested
+    content: >
+      The remaining support/attack decision-procedure gap is an interface gap, not a
+      corpus dependency: `Strict.Backend.check` is modeled as an arbitrary proposition.
+      A constructive checker needs the backend seam to expose decidable replay acceptance;
+      the checker-built `Faithful` edge oracle then composes from that result.
+    context: "Technical evaluation of PR #10 review feedback during the lock-pass hardening."
+    potential_type: constraint
+    bound_to: [N34]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false

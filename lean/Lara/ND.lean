@@ -58,7 +58,7 @@ inductive Formula where
   | atom : String → Formula
   | fls  : Formula
   | imp  : Formula → Formula → Formula
-deriving DecidableEq
+deriving DecidableEq, Repr
 
 /-- A natural-deduction certificate in de Bruijn form. Mirrors
 `Lara.Strict.ND.Cert`. -/
@@ -67,7 +67,7 @@ inductive Cert where
   | lam   : Formula → Cert → Cert
   | app   : Cert → Cert → Cert
   | abort : Formula → Cert → Cert
-deriving DecidableEq
+deriving DecidableEq, Repr
 
 /-- Positional context lookup (de Bruijn): index `0` is the innermost binding. -/
 def lookup : List Formula → Nat → Option Formula

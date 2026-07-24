@@ -24,6 +24,7 @@ Faithful to `src/Lara/Strict.hs`:
 
 import Lara.Prop
 import Lara.ND
+import Lara.Certificate
 
 namespace Lara.Strict
 
@@ -42,10 +43,10 @@ structure Backend where
   enc    : SourceProp → Form
   /-- mathematical consequence `T ; Δ ⊨_β φ` (need not be executable) -/
   models : List Form → Form → Prop
-  /-- the replay `check_β`: does this step check? -/
-  check  : List Form → Form → Prop
+  /-- the replay `check_β`: does this exact submitted certificate check? -/
+  check  : Lara.Support.CertRef → List Form → Form → Prop
   /-- **obligation 3, certificate soundness:** acceptance implies consequence -/
-  sound  : ∀ Δ φ, check Δ φ → models Δ φ
+  sound  : ∀ κ Δ φ, check κ Δ φ → models Δ φ
 
 /-- A checked strict step against backend `B`. Its existence certifies that `B`
 accepted the encoded goal from the encoded premises. It carries only
@@ -53,8 +54,9 @@ source-visible data plus the acceptance fact — never a backend proof term. -/
 structure StrictJudgment (B : Backend) where
   premises : List SourceProp
   goal     : SourceProp
+  certificate : Lara.Support.CertRef
   /-- the backend accepted the encoded step -/
-  accepted : B.check (premises.map B.enc) (B.enc goal)
+  accepted : B.check certificate (premises.map B.enc) (B.enc goal)
 
 /-- **Theorem 1 (certified strict-step soundness).** A checked strict step is a
 semantic consequence under the backend's model: the encoded goal follows from the
@@ -62,25 +64,28 @@ encoded premises. Nothing is claimed about the *truth* of any premise
 (non-factivity). This is the projection of obligation 3 through the judgment. -/
 theorem strict_step_sound {B : Backend} (j : StrictJudgment B) :
     B.models (j.premises.map B.enc) (B.enc j.goal) :=
-  B.sound _ _ j.accepted
+  B.sound _ _ _ j.accepted
 
 /-! ### The reference ND backend satisfies the abstract contract
 
 We instantiate `Backend` with the mechanized natural-deduction adapter of
-`Lara/ND.lean`. Its `check Δ φ` is "there exists a certificate `e` with
-`Δ ⊢ e : φ`", its `models` is the Boolean semantics of the decision doc, and
-`sound` is discharged by `Lara.ND.nd_sound`. This shows result 10's soundness
-lemma is exactly the obligation-3 field the abstract Theorem 1 consumes. -/
+`Lara/ND.lean`. Its `check κ Δ φ` decodes the exact submitted reference `κ`
+as a certificate `e` and requires `Δ ⊢ e : φ`; its `models` is the Boolean
+semantics of the decision doc, and `sound` is discharged by
+`Lara.ND.nd_sound`. This shows result 10's soundness lemma is exactly the
+obligation-3 field the abstract Theorem 1 consumes. -/
 
 /-- The ND backend's mathematical consequence: every valuation satisfying all of
 `Δ` satisfies `φ` (decision doc §4.1: `T ; Δ ⊨_ND φ`). -/
 def ndModels (Δ : List Lara.ND.Formula) (φ : Lara.ND.Formula) : Prop :=
   ∀ v : String → Bool, (∀ ψ, ψ ∈ Δ → Lara.ND.satisfies v ψ) → Lara.ND.satisfies v φ
 
-/-- The ND backend's checker: some certificate types the step. Matches the
-Haskell adapter's "decode + `inferType` accepts". -/
-def ndCheck (Δ : List Lara.ND.Formula) (φ : Lara.ND.Formula) : Prop :=
-  ∃ e : Lara.ND.Cert, Lara.ND.HasType Δ e φ
+/-- The ND backend's checker: the exact referenced certificate types the step.
+Matches the Haskell adapter's "decode + `inferType` accepts". -/
+def ndCheck (κ : Lara.Support.CertRef) (Δ : List Lara.ND.Formula)
+    (φ : Lara.ND.Formula) : Prop :=
+  ∃ e : Lara.ND.Cert,
+    κ.payload = toString (repr e) ∧ Lara.ND.HasType Δ e φ
 
 /-- A fixed injective source encoding for the instantiation. Any injective map
 into `Formula.atom` discharges normalization fidelity; the metatheory of
@@ -97,8 +102,8 @@ def ndBackend : Backend where
   models := ndModels
   check  := ndCheck
   sound  := by
-    intro Δ φ hchk
-    obtain ⟨e, hty⟩ := hchk
+    intro κ Δ φ hchk
+    obtain ⟨e, _, hty⟩ := hchk
     intro v hΔ
     exact Lara.ND.nd_sound hty v hΔ
 
@@ -134,7 +139,8 @@ step, `⊢ hyp 0 : p`). Its existence certifies backend acceptance — nothing m
 def nonfactiveJudgment : StrictJudgment ndBackend where
   premises := [nonfactiveAtom]
   goal     := nonfactiveAtom
-  accepted := ⟨.hyp 0, .hyp rfl⟩
+  certificate := ⟨toString (repr (Lara.ND.Cert.hyp 0))⟩
+  accepted := ⟨.hyp 0, rfl, .hyp rfl⟩
 
 /-- **The firewall bites.** The goal of an *accepted* strict step need not be
 semantically valid: the ND backend accepts `p ⊢ p`, yet `p` is false under the

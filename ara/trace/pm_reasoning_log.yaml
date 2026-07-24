@@ -30,3 +30,8 @@ entries:
       - "Audience principle routed to constraints.md direct (user-dictated, first-person) — not staged; also mirrored in persistent memory."
       - "Did NOT create a tree node for the M0-frozen marker (documentation act, not a research decision); logged as session event only."
       - "O01 unpromoted and not stale (1 session-day); C17's pooled-gate Conditions still reference it."
+  - turn: "2026-07-23_001#1"
+    notes:
+      - "Routed the failed HTTPS-only CI repair as dead_end N35 because the logs directly refuted the assumed transport-only cause."
+      - "Routed the verified direct-index workaround as experiment N36; the successful GitHub Actions run is direct evidence."
+      - "Did NOT touch claims or stage an observation: this was infrastructure recovery, not a new interpretation of the research."

@@ -512,6 +512,8 @@ These are the decisions that shape the calculus; each is tracked in `../ARA-veri
    Choose Lean 4 or Rocq before freezing M1. Lean 4 is the default absent stronger Rocq expertise.
    Record precisely which definitions are executable, which theorems are mechanized, and how the
    Haskell functions correspond to them; do not call testing a proof of conformance.
+   **Resolved (2026-07-22, M1 pre-freeze):** TCB enumerated and elaborator placed outside it in
+   spec §1.1; mechanization host = Lean 4. See `docs/m1-freeze-checklist.md`.
 
 ---
 

@@ -43,6 +43,48 @@ JSON is the producer/checker wire encoding. The syntax below is the canonical pr
 for the paper, examples, debugging, and reports. Both map to one abstract syntax. LARA does not need
 a tactic DSL, IDE, package manager, or standard library for the initial contribution.
 
+### 1.1 Trusted computing base and mechanization host
+
+The guarantee above holds only relative to a **trusted computing base (TCB)** — the code whose
+correctness the acceptance verdict depends on. A defect inside the TCB can make the checker accept an
+invalid certificate; a defect outside it cannot, because every untrusted output is re-checked by
+trusted code before it is believed. The M1 freeze fixes this boundary (open question §8 #8).
+
+**Inside the TCB (trusted code).**
+
+| # | Component | Module (M3 target) | Discharges |
+| --- | --- | --- | --- |
+| 1 | Decode boundary: presentation parser + JSON decoder into the abstract syntax | `Lara.Syntax`, `Lara.Json` | §9 result 12 (codec round-trip) |
+| 2 | Proposition normalizer `nf` and identity `≡` | `Lara.Prop` | §9 result 11 (frozen carve-out 1) |
+| 3 | Static checker: leaf admission, policy instantiation, critical-question discharge, support-term typing | `Lara.Policy`, `Lara.SupportTerm` | §9 results 1, 3 |
+| 4 | §8.1 policy well-formedness validator (strict-reachable `contrary` check) | `Lara.Policy` | §8.1 restriction; §9 result 7 |
+| 5 | Typed-attack checker (positional rebut / undercut / undermine) | `Lara.Attack` | §9 results 1, 4 |
+| 6 | Strict-backend registry `R` and each shipped adapter | `Lara.Strict`, `Lara.Strict.ND`, arithmetic-recheck, code-inspection | §9 results 2, 8, 10 (frozen carve-out 2 for the seam + ND) |
+| 7 | Compiler `compile(P) = AF` with subargument closure | `Lara.Compile` | §9 result 4 |
+| 8 | Status engine: grounded labelling + four-state aggregation | `Lara.Grounded` | §9 results 5, 6, 7 |
+| 9 | Diagnostics / located rejection | `Lara.Diagnostics` | §1; §10 |
+
+Trusted **inputs** (versioned data, not executable TCB, but part of the trust base and replay
+identity): the proposition signature `Sigma`, the claim-support policy `Pi`, the backend registry
+`R`, and the policy-allowlisted theory digests. Programs may instantiate these but may never define
+them at runtime (§4, §5).
+
+**Outside the TCB (untrusted).** The Python/LLM elaborator and its six §11 lowering tasks; strict
+certificates `kappa` and backend proof terms (untrusted payloads that a trusted adapter checks); and
+any producer of the wire program. Checker acceptance establishes structural validity only; lowering
+faithfulness is an evaluation axis (§11), never a checker guarantee.
+
+**Mechanization host: Lean 4** (open question §8 #8, resolved 2026-07-22). Lean 4 is the default
+absent stronger Rocq expertise and is already the working choice — the carve-outs are mechanized
+under `lean/`. The mechanized development is a separate Lean model sharing one serialized first-order
+core AST with the Haskell checker; that shared serialized core is the differential-testing anchor.
+Discipline: (a) core results §9 1–9 and reference-adapter result 10 are mechanized in Lean 4; (b) each
+definition is ported to Lean the moment it is frozen and corpus-independent, not deferred to a later
+milestone; (c) the spec records, per definition, whether it is executable in Lean, which theorem
+covers it, and how the Haskell function corresponds; (d) property, golden, mutation, and differential
+tests are conformance evidence for the Haskell checker, never a substitute for the Lean theorems
+(§9 closing note).
+
 ## 2. Names and program environment
 
 ```text
@@ -546,6 +588,84 @@ hidden.
 `O` is the set of unresolved mandatory obligations, collected across the term (an open hole in a
 subterm propagates). A complete graph node requires `O = empty`.
 
+### 6.1 Support-term typing rules (v0.1-frozen)
+
+The judgment above is defined by two syntax-directed rules, so it is decidable (§9 result 1).
+`concl(w)` is the proposition a well-typed term supports; `w : supports(p)` holds iff
+`concl(w) ≡ p` (Section 3.2), and the top-level claim check (Section 3.1) applies `≡` once more
+between `concl(w)` and `c.formal`.
+
+**Leaf.** A leaf term supports its admitted proposition with no obligation:
+
+```text
+             (l : p_l) in Gamma
+------------------------------------------------
+Sigma; Pi; Gamma; R |- leaf l : supports(p_l) ▷ {}
+```
+
+Only admitted leaves occur in `Gamma` (Section 4.3); a quarantined or rejected leaf has no entry, so
+`leaf l` fails to type at that occurrence with a located diagnostic.
+
+**Instance.** Let `Pi` declare `rule r(X1..Xm)` with premise patterns `Ap_1..Ap_n`, conclusion
+pattern `Ap_c`, questions `q : A_q`, and mode `m`. For
+`w = r<theta ; w_1..w_n ; {q |-> w_q}_{q in D} ; {o_j}_{j in H} ; alpha>`:
+
+```text
+theta ground,  dom(theta) = {X1..Xm}
+for each i in 1..n:   Sigma; Pi; Gamma; R |- w_i : supports(Ap_i theta) ▷ O_i
+for each q in D:      Sigma; Pi; Gamma; R |- w_q : supports(A_q theta)  ▷ O_q
+D (+) H = questions(r)                    -- disjoint; every declared q discharged or an
+                                          -- explicit named hole (Section 4.2)
+assurance(m, alpha)                       -- side condition below
+--------------------------------------------------------------------------------
+Sigma; Pi; Gamma; R |- w
+  : supports(Ap_c theta) ▷ ( U_i O_i  U  U_{q in D} O_q  U  (H ∩ mandatory(r)) )
+```
+
+so `concl(w) = Ap_c theta`. The premise and discharge checks carry the identity
+`concl(w_i) ≡ Ap_i theta` (resp. `concl(w_q) ≡ A_q theta`) inside their `supports(...)` premises
+(Sections 4.1, 4.2). `H` is the term's **syntactic** hole set (`{o*}`) read as the questions it
+names: the accounting invariant `D (+) H = questions(r)` makes a question absent from both maps a
+well-formedness error, for optional questions too. Only the **mandatory** members of `H` contribute
+obligations — an open optional question is a located diagnostic, not an obligation (Section 4.2). The
+obligation set unions every subterm's open obligations with this instance's own
+`H ∩ mandatory(r)`; a complete node requires `O = {}` (Section 6).
+
+**Assurance side condition** `assurance(m, alpha)`:
+
+- `m = defeasible`: `alpha = none`.
+- `m = strict`: `D = {}` and `H = {}` (strict rules declare no questions, Section 5), and either
+  - `alpha = trusted` with `allow-trusted = true` for `r` (Section 4); or
+  - `alpha = cert(beta, h, kappa)` with `(beta@version, h) in certifiers(r)`, `beta@version in R`,
+    `theoryDigest(T) = h`, and
+    `check_beta(T, [encode_beta(Ap_1 theta) .. encode_beta(Ap_n theta)], encode_beta(Ap_c theta), kappa) = accept`
+    (Section 5). Its strict dependencies are `uses_beta(kappa)`, folded into `certDeps(w)` (Section 6).
+
+This figure is the executable core the Haskell checker and the Lean model share (Section 1.1). It is
+**frozen for v0.1**: the freeze proves nothing by itself but triggers the Section 9 obligations to be
+mechanized against this exact definition — result 1 (decidability), result 3 (dependency
+accountability via the `leaves`/`certDeps` inversion), and result 11 (support adequacy).
+*(Mechanized against this figure, `lean/Lara/Support.lean`: `leaves_declared` — every leaf of a
+typed term is declared in `Gamma`, the result-3 leaf half, with "report = `leaves(w)`" definitional;
+`hasSupport_unique` — one conclusion and obligation set per term, the result-1 uniqueness half;
+`supports_resp_equiv` — result 11 at the relational layer; `strict_no_questions`,
+`complete_mandatory_discharged`, and `dh_partition` — the `D ⊎ H` accounting invariants, with
+`Nodup` conditions making the partition genuine; duplicate-eliminating `collectObligations` —
+the list representation of §6.1's obligation-set union; `certOkOf_strict_step` — the `cert` side
+condition, gated by the rule's `certifiers` allowlist and a digest-addressed registry, composed
+with §5 Theorem 1. The registry passes the exact submitted `kappa` into backend replay, so an
+arbitrary or swapped certificate reference cannot borrow acceptance from another proof. The model
+carries the frozen `(beta, theory-digest, kappa)` triple and `dom(theta) = {X1..Xm}` exactly.
+Concrete obligation-accounting cases (mixed mandatory/optional holes, nested propagation,
+duplicate elimination, missing- and overlapping-accounting rejection) are pinned in
+`lean/Lara/Examples.lean`.
+Pending: the executable checker (result-1 decision procedure) and `certDeps` accountability,
+which needs a `uses` field on the abstract backend. The checker has one genuine
+interface dependency: `Strict.Backend.check` and hence registry replay acceptance
+are currently arbitrary propositions, not decidable operations. A constructive
+support checker requires the strict-backend seam to expose a decision procedure
+for acceptance; attack checking then composes with that support checker.)*
+
 ## 7. Typed positional attacks
 
 Attacks address positions in support terms. A position `π` is a path of premise indices and
@@ -587,6 +707,69 @@ Attack checking is subterm-occurrence checking plus a contrary-relation lookup: 
 local, and the position doubles as the source location in diagnostics. The presentation syntax
 writes root positions with the previous sugar (`undercut d1 a1.rule` means `a1@ε`) and inner
 positions with paths (`undermine d2 a1/2.leaf`).
+
+### 7.1 Attack typing rules (v0.1-frozen)
+
+The three prose requirements above, as rules. Position lookup `u@π` is the partial function
+(every attack premise `u@π = t` requires definedness):
+
+```text
+u@ε      = u
+u@(π.i)  = w_i        if u@π = r⟨theta; w_1..w_n; sigma; {o*}; assurance⟩, 1 ≤ i ≤ n
+u@(π.q)  = sigma(q)   if u@π = r⟨theta; ...; sigma; {o*}; assurance⟩, q ∈ dom(sigma)
+u@π      undefined otherwise
+```
+
+The contrary-instance relation, from Section 4.1 with identity per Section 3.2:
+
+```text
+contrary_Pi(p, q)   iff   some declared `contrary A B` and ground rho
+                          have  A rho ≡ p  and  B rho ≡ q
+```
+
+```text
+Sigma; Pi; Gamma; R |- w : supports(p_w) ▷ O_w
+u = r⟨theta; ...⟩    mode(Pi, r) = defeasible    Ap_c(r) theta = p_u
+contrary_Pi(p_w, p_u)
+-------------------------------------------------------------- [A-Rebut]
+Sigma; Pi; Gamma; R |- rebut w u : attacks(w, u@ε)
+
+Sigma; Pi; Gamma; R |- w : supports(p_w) ▷ O_w
+u@π = r⟨theta; ...⟩    mode(Pi, r) = defeasible
+exception r : E in Pi    p_w ≡ E theta
+-------------------------------------------------------------- [A-Undercut]
+Sigma; Pi; Gamma; R |- undercut w u@π : attacks(w, u@π)
+
+Sigma; Pi; Gamma; R |- w : supports(p_w) ▷ O_w
+u@π = leaf l    (l : p_l) in Gamma
+contrary_Pi(p_w, p_l)
+-------------------------------------------------------------- [A-Undermine]
+Sigma; Pi; Gamma; R |- undermine w u@π : attacks(w, u@π)
+```
+
+Three deliberate design points:
+
+- **Checked, not complete.** The source premise requires `w` to type-check but not `O_w = ∅`:
+  completeness gates AF entry (Section 8), so an attacker with open obligations types but never
+  produces an edge. This keeps §1's "every attack has a checked source" while letting the compile
+  step, not attack typing, decide eligibility.
+- **Local.** The target's own typing is not a premise. [A-Rebut] reads the target conclusion off the
+  root instance (`Ap_c(r) theta`), which coincides with the typed conclusion by uniqueness (a
+  mechanized coherence lemma); [A-Undercut]/[A-Undermine] touch only the occurrence, `Pi`, and
+  `Gamma`. This is the "decidable and local" claim above, made precise.
+- **Strict-unattackability is a theorem.** No rule types a rebut or undercut on a strict occurrence
+  (the `defeasible` mode premises), and root-conclusion / rule-occurrence / leaf-occurrence
+  partition the attackable positions — the "three kinds of attacks are the three kinds of
+  positions" statement holds by construction.
+
+These rules are **frozen for v0.1** and trigger the Section 9 obligations against this exact
+definition — result 1 (attack-checking decidability) and result 4 (only typed attacks enter the
+compiled AF). *(Mechanized against this figure, `lean/Lara/Attack.lean`: `attack_source_checked`;
+`rebut_top_defeasible` and `undercut_pos_defeasible` — strict occurrences are unattackable;
+`undercut_target_rule` / `undermine_target_leaf` — the position-kind partition;
+`rebut_concl_coherent` — the local conclusion read-off agrees with the target's typed conclusion.
+Pending: the executable attack checker and the compile-facing edge soundness, which lands with the
+`compile` relation. Presentation premise indices are 1-based; the mechanized model is 0-based.)*
 
 An ARA dead end creates an attack only if it can construct one of these typed forms. A dead-end tag,
 confidence score, or provenance downgrade alone is insufficient.
@@ -633,6 +816,41 @@ complete term built on it. The grounded labelling maps each argument to `in`, `o
 Certificate payloads remain attached to nodes for replay but are not term positions or attack
 targets. `eraseCert` replaces them by a `certified` marker while preserving argument names, rule
 instances, conclusions, obligations, and positions.
+
+**Compilation rules (v0.1-frozen).** With the position lookup `u@π` and the attack judgment of
+Section 7.1:
+
+```text
+Args(P)   = { a | arg a declared in P,  Sigma; Pi; Gamma; R |- a : supports(p_a) ▷ ∅ }
+
+occ(k)    = u      if k = rebut w u
+          = u@π    if k = undercut w u@π  or  k = undermine w u@π
+
+Attack(P) = { (w, v) | attack k declared in P
+                       Sigma; Pi; Gamma; R |- k : attacks(w, u@π)
+                       w ∈ Args(P),  v ∈ Args(P),  ∃π'. v@π' = occ(k) }
+```
+
+- `Args` admits only complete declared arguments (`O = ∅`); an incomplete argument neither enters
+  the AF nor emits an edge — this is where Section 7.1's checked-not-complete source rule lands.
+- Occurrence containment `∃π'. v@π' = occ(k)` is structural: any complete argument sharing the
+  attacked subterm is defeated with it. The direct edge `(w, u)` is itself a closure edge, since
+  `occ(k)` occurs in `u` at `π`.
+- No untyped node or edge exists by construction (§9 result 4): `Args` requires the §6.1 judgment
+  with an empty obligation set, `Attack` requires the §7.1 judgment.
+
+*(Mechanized against this figure, `lean/Lara/Compile.lean`: `compile_nodes_checked` and `edge_iff`
+— the two halves of result 4's "no untyped node or attack appears in the target AF";
+`closure_includes_direct` / `target_contains_occ` — the direct edge is a closure edge;
+`attackOcc_unique`; `srcIn_iff_directIn`/`srcIn_iff_grounded` — the source-level declarative
+judgment over closure edges agrees with the abstract grounded semantics of
+`lean/Lara/Grounded.lean` over the compiled AF at the argument level; and `srcStatus_iff` —
+the exact iff/equality characterization at four-state claim status (`SrcStatus`, read from the
+source judgment alone). Both levels are parametric in an edge oracle (`Faithful`) that the pending executable
+checker will supply constructively; that oracle is the remaining gap in §9 result 6's
+source-vs-compiled half. The closure's strict-superset behavior — one attack edging both the
+declared target and a distinct wrapper argument containing the occurrence, with the grounded
+verdict under a concrete decider — is pinned in `lean/Lara/Examples.lean`.)*
 
 Two different monotonicity claims must not be conflated. For a fixed framework
 `AF = (Args, Attack)`, Dung's characteristic function
@@ -738,19 +956,23 @@ materializes the grounded iteration.
 status `W ⊢ p ⇓ status` equals `status(grounded(compile(W)), p)`. Equivalently, argument by argument,
 `W ⊢ a ⇓ in ⟺ a ∈ grounded(compile(W))`, and likewise for `out`/`undec`.
 
-**Mechanization status — abstract AF layer (honest boundary).** `lean/Lara/Grounded.lean` mechanizes
-the *abstract core* of result 6, and only that. Over an **arbitrary** finite framework `F`, it proves
-the two *definitions* of the grounded semantics equal: the declarative least fixed point
-`DirectIn`/`DirectOut` and the executable bounded-iteration labelling `labelC` — `directIn_iff`
-(argument level), `labelC_inn/out/undec_iff` (three-way label partition), `status_preservation`
-(four-state claim status). The executable side terminates within `|Args|` steps (`grounded_stable`),
-the determinism/termination core of result 5. What is **not** yet mechanized is the *compile step*
-itself: every one of these theorems quantifies over a single already-given `F`, with the direct and
-compiled sides reading the *same* `F.attack`, so `compile : Source → AF` and its subargument closure
-are only defined and characterized (`compile_attack_iff`), never exercised by a preservation theorem.
-Closing the full headline — instantiate at `F = compile(W)` and prove a source-level status equals it,
-so the subargument-closure edges do work — is M1 work, gated on the concrete support-term layer. The
-development is `sorry`-free within the standard axiom trio.
+**Mechanization status — source-to-compiled bridge, oracle-parametric (honest boundary).**
+`lean/Lara/Grounded.lean` proves declarative grounded semantics equal to executable bounded
+iteration over an arbitrary finite framework (`directIn_iff`, `labelC_inn/out/undec_iff`,
+`status_preservation`), including termination within `|Args|` steps (`grounded_stable`).
+`lean/Lara/Compile.lean` now instantiates that layer at checked source programs: `SrcIn`/`SrcOut`
+read the Prop-level subargument-closed source relation directly, while `srcIn_iff_grounded` and
+`srcStatus_iff` prove argument membership and four-state source status equal the executable
+verdict over `toAF`. The theorem is parametric in `Faithful`, the obligation that a Boolean edge
+oracle decides the frozen source `Edge` relation exactly. `lean/Lara/Examples.lean` supplies a
+concrete faithful oracle whose closure relation strictly extends the direct attack and computes the
+expected defeated verdict. What remains is the **general checker-built edge decider** and its
+`Faithful` proof. It shares the support/attack checker's concrete dependency on a decidable backend
+replay interface: the current `Strict.Backend.check : ... → Prop` cannot be executed to construct
+the proof-bearing `CheckedProgram` from raw declarations. Once that interface is strengthened, the
+checker can construct the program and its edge oracle together, removing the parameter and closing
+result 6 constructively.
+The development is `sorry`-free within the standard axiom trio.
 
 ## 9. Static and semantic results required before freeze
 
@@ -766,10 +988,11 @@ development is `sorry`-free within the standard axiom trio.
    `lean/Lara/Grounded.lean` `grounded_stable`/`grounded_fixpoint` — bounded iteration reaches the
    least fixed point within `|Args|` steps; aggregation is a total function of the labelling.)*
 6. Status preservation between a direct source semantics (§8.2) and compiled AF semantics.
-   *(Abstract AF layer mechanized: `lean/Lara/Grounded.lean` `directIn_iff`, `labelC_*_iff`,
-   `status_preservation` prove declarative grounded ≡ executable grounded over any AF. The compile
-   step — instantiating at `grounded(compile(W))` and exercising subargument closure — is M1 work;
-   see §8.2.)*
+   *(Source-to-compiled bridge mechanized modulo the executable edge decider:
+   `lean/Lara/Compile.lean` `srcIn_iff_grounded` and `srcStatus_iff` connect source judgments
+   over subargument-closed `Edge` to executable grounded status whenever `Faithful` holds;
+   `lean/Lara/Examples.lean` proves a concrete faithful closure instance. The general checker-built
+   `Faithful` witness remains M2 work; see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`.

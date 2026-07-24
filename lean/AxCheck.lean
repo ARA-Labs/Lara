@@ -14,6 +14,10 @@ import Lara.Prop
 import Lara.ND
 import Lara.Strict
 import Lara.Grounded
+import Lara.Support
+import Lara.Attack
+import Lara.Compile
+import Lara.Examples
 
 open Lara
 
@@ -53,6 +57,97 @@ open Lara
 #print axioms Lara.Strict.nd_nonfactive_witness
 #print axioms Lara.Strict.no_truth_projection
 #print axioms Lara.Strict.nd_relative_not_absolute
+
+-- Result 3 (leaf half) + result 1 (uniqueness half) / spec §6.1 freeze:
+-- support-term typing — dependency accountability, determinism, the D⊎H
+-- accounting invariants (incl. the extensional partition), and the
+-- cert-assurance ∘ Theorem-1 composition. Every theorem in the file is
+-- audited, helper lemmas included (CLAUDE.md: AxCheck covers every new
+-- theorem).
+#print axioms Lara.Support.memB_iff
+#print axioms Lara.Support.mem_dedupQuestions
+#print axioms Lara.Support.dedupQuestions_nodup
+#print axioms Lara.Support.unionAll
+#print axioms Lara.Support.unionAll_nodup
+#print axioms Lara.Support.collectObligations
+#print axioms Lara.Support.collectObligations_nodup
+#print axioms Lara.Support.append_eq_nil'
+#print axioms Lara.Support.getElem?_some_of_lt
+#print axioms Lara.Support.lt_of_getElem?_some
+#print axioms Lara.Support.getElem?_none_of_ge
+#print axioms Lara.Support.ext_getElem?
+#print axioms Lara.Support.mem_leavesList
+#print axioms Lara.Support.mem_leavesDis
+#print axioms Lara.Support.mem_mandatoryNames
+#print axioms Lara.Support.mem_questionNames
+#print axioms Lara.Support.leaves_declared
+#print axioms Lara.Support.hasSupport_unique
+#print axioms Lara.Support.supports_resp_equiv
+#print axioms Lara.Support.strict_no_questions
+#print axioms Lara.Support.complete_mandatory_discharged
+#print axioms Lara.Support.dh_partition
+#print axioms Lara.Support.certOkOf_strict_step
+
+-- Spec §7.1 freeze: typed positional attacks — checked source (§1 guarantee 4),
+-- strict-unattackability, position-kind partition, and the coherence of local
+-- attack checking with global support typing.
+#print axioms Lara.Attack.attack_source_checked
+#print axioms Lara.Attack.rebut_top_defeasible
+#print axioms Lara.Attack.undercut_pos_defeasible
+#print axioms Lara.Attack.undercut_target_rule
+#print axioms Lara.Attack.undermine_target_leaf
+#print axioms Lara.Attack.rebut_concl_coherent
+
+-- Spec §8 compile freeze: result 4 both halves (no untyped node or attack),
+-- subargument closure extends the direct attack, and the N16 bridge at both
+-- levels — argument (srcIn_iff_grounded) and exact four-state claim status
+-- (srcStatus_iff) — oracle-parametric via Compile.Faithful.
+#print axioms Lara.Compile.contains_refl
+#print axioms Lara.Compile.attackOcc_unique
+#print axioms Lara.Compile.target_contains_occ
+#print axioms Lara.Compile.compile_nodes_checked
+#print axioms Lara.Compile.edge_iff
+#print axioms Lara.Compile.closure_includes_direct
+#print axioms Lara.Compile.srcIn_direct
+#print axioms Lara.Compile.srcOut_direct
+#print axioms Lara.Compile.direct_srcIn
+#print axioms Lara.Compile.direct_srcOut
+#print axioms Lara.Compile.srcIn_iff_directIn
+#print axioms Lara.Compile.srcOut_iff_directOut
+#print axioms Lara.Compile.srcIn_iff_grounded
+#print axioms Lara.Compile.srcStatus_correct
+#print axioms Lara.Compile.srcStatus_unique
+#print axioms Lara.Compile.srcStatus_iff
+
+-- Concrete conformance examples: obligation accounting (mixed/nested/missing),
+-- subterm traversal boundaries, and subargument-closure superset behavior with
+-- a concrete edge decider and grounded verdict.
+#print axioms Lara.Examples.no_prems
+#print axioms Lara.Examples.no_dis
+#print axioms Lara.Examples.subterm_boundaries
+#print axioms Lara.Examples.sideMix
+#print axioms Lara.Examples.mixed_holes_obligations
+#print axioms Lara.Examples.sideUse
+#print axioms Lara.Examples.nested_obligation_propagates
+#print axioms Lara.Examples.sideDisUse
+#print axioms Lara.Examples.discharge_obligation_propagates
+#print axioms Lara.Examples.sidePair
+#print axioms Lara.Examples.repeated_obligation_deduplicated
+#print axioms Lara.Examples.missing_question_rejected
+#print axioms Lara.Examples.overlapping_question_rejected
+#print axioms Lara.Examples.defeasible_rebut_typed
+#print axioms Lara.Examples.strict_root_rebut_rejected
+#print axioms Lara.Examples.nested_undercut_typed
+#print axioms Lara.Examples.mixed_path_undermine_typed
+#print axioms Lara.Examples.sideWrap
+#print axioms Lara.Examples.vWrap_typed
+#print axioms Lara.Examples.kAtk_typed
+#print axioms Lara.Examples.closure_edge_direct
+#print axioms Lara.Examples.closure_edge_wrapper
+#print axioms Lara.Examples.closure_no_edge_unrelated
+#print axioms Lara.Examples.edge_fixture_iff
+#print axioms Lara.Examples.edgeBEx_faithful
+#print axioms Lara.Examples.closure_grounded_verdict
 
 -- Result 5 / C07: grounded termination + determinism (finite stabilization).
 #print axioms Lara.Grounded.grounded_stable

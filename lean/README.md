@@ -13,14 +13,18 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **10** (ND adapter soundness + dependency exactness) | `Lara/ND.lean` | ✅ **mechanized** — `nd_sound`, `nd_relevance`, `fv_in_range`, `hyp_out_of_range_untypable`, plus the `infer` decision-procedure bridge. No `sorry`; `propext`/`Quot.sound` only. |
 | **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `propext` only. |
 | **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; `propext` only. |
-| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean` | ◐ **partially mechanized (abstract AF layer)** — declarative grounded (`DirectIn`/`DirectOut`) ≡ executable grounded labelling *over any AF*: `directIn_iff`, `labelC_inn/out/undec_iff`, `status_preservation`. Genuine core (N16's "no independent semantics" gap closed), but `compile`/subargument closure are only defined + characterized (`compile_attack_iff`), **not exercised** — the source-vs-compiled preservation is M1 work. N17: `statusC_gap_iff` mechanizes "gap iff empty support"; the hole diagnostic is a defined convention. No `sorry`; trio axioms. |
-| **5** (grounded termination + determinism, core) | `Lara/Grounded.lean` | ✅ **mechanized (core)** — `grounded_stable`/`grounded_fixpoint`: bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|` steps. Full compiled-AF instance is M1-gated. |
-| 1, 3, 4, 9 | — | not started (gated to M1 freeze / compiled AF layer; see mechanization-plan §6) |
+| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **mechanized modulo the executable edge decider** — source `SrcIn`/`SrcOut` and four-state `SrcStatus` agree exactly with executable grounded evaluation over `toAF` (`srcIn_iff_grounded`, `srcStatus_iff`) whenever `Faithful` decides the frozen closure relation. `Lara/Examples.lean` supplies a concrete faithful decider that exercises a strict closure edge. The general checker-produced decider remains M2 work. |
+| **5** (grounded termination + determinism) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ✅ **mechanized** — bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|` steps; `toAF` instantiates the result for checked programs. |
+| **4** (compilation soundness) | `Lara/Compile.lean`, `Lara/Examples.lean` | ✅ **mechanized (relational compile layer)** — only complete checked terms become nodes; only typed declared attacks produce edges; direct and strict-superset closure behavior are proved concretely. |
+| **3** (dependency accountability) | `Lara/Support.lean` | ◐ **partially mechanized** — `leaves_declared` proves the source-leaf half; backend `certDeps` accountability awaits the executable backend interface. |
+| **1** (checking decidability) | `Lara/Support.lean`, `Lara/Attack.lean` | ◐ **relational metatheory mechanized** — typing uniqueness and inversion properties are proved. Executable support/attack decision procedures require the abstract strict-backend seam to expose decidable replay acceptance (`Backend.check` is currently an arbitrary `Prop`). |
+| **9** (backend replacement) | — | not started |
 
-This is the **low-risk warm-up** (`../docs/mechanization-plan.md` §6): the `nf`/`≡`
-carve-out is corpus-independent and already frozen, so it is safe to mechanize
-before M1. It mirrors the Haskell `Lara.Prop` (`../src/Lara/Prop.hs`) and the
-QuickCheck properties in `../test/PropSpec.hs`.
+The development now covers the frozen M1 relational support, attack, and
+compile layers in addition to the earlier `nf`/`≡`, ND, strict-backend, and
+grounded-semantics cores. `Lara/Examples.lean` provides closed conformance
+fixtures for duplicate-free obligation accounting, all three attack forms,
+position traversal, and closure behavior.
 
 ## Build
 
@@ -52,13 +56,14 @@ contains `sorryAx` or anything outside the standard trio (`propext`,
   surgery: idempotence is the only property the structural metatheory needs
   (spec §3.2), so modeling it abstractly keeps the development axiom-free.
 
-## Next (post-M1)
+## Next
 
 The grounded least-fixpoint (result 5 core) is done **in core Lean 4** —
 `Lara/Grounded.lean` builds the finite fixpoint by hand (bounded iteration +
 a deficit-measure stabilization argument), so no Mathlib dependency was needed.
-Remaining work: the concrete compiled-AF construction over corpus support terms
-(results 4 / full 5) and backend replacement (result 9), which may still pull in
-Mathlib's `Finset` / order machinery once the support-term layer lands. The
-shared serialized first-order core AST is the Haskell↔Lean differential-testing
-anchor (mechanization-plan §3).
+Remaining work: strengthen the strict-backend interface with decidable replay
+acceptance, then construct executable support/attack checking and its general
+`Faithful` edge decider (closing results 1 and 6 constructively); backend dependency
+accountability (the remaining half of result 3), the result-7 validator, and
+backend replacement (result 9). The shared serialized first-order core AST is
+the Haskell↔Lean differential-testing anchor (mechanization-plan §3).

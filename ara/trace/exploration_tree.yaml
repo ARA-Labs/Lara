@@ -552,3 +552,74 @@ tree:
       - "Keep the 'plausibly arithmetic too' folding (matches affirmed summary verbatim) — rejected in favor of precision; the lower bound's premise even fails in-artifact (CQ2: judge nondeterministic)"
       - "Drop the characterization entirely, report raw count only — rejected: least informative"
     evidence: "m0/annotations/rebench-nanogpt_chat_rl.yaml certifier_note + CQ1/CQ2; spec §5.2"
+
+  - id: N34
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-22T22:08"
+    support_level: explicit
+    source_refs: ["PR #10 review threads", "lean/Lara/Support.lean", "lean/Lara/Attack.lean", "lean/Lara/Compile.lean", "lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+    title: "PR #10 formal-model hardening and adversarial conformance pass"
+    result: >
+      Eleven review findings were checked against the frozen model. The Lean layer now
+      preserves the full certificate triple and authorization indices, exact duplicate-free
+      substitution domains and question partitions, namespace-distinct identifiers/symbols,
+      duplicate-free argument nodes, and four-state source-to-compiled status lifting.
+      Closed fixtures pin mixed/nested obligations, missing/overlapping accounting rejection,
+      position failures and successful nested attacks, strict-superset closure, and a concrete
+      grounded verdict. `lake build`, the every-theorem axiom audit, and the full Haskell test
+      suite pass. The general executable checker remains blocked on the current abstract
+      `Strict.Backend.check : ... → Prop` lacking a decidable replay operation.
+    evidence: ["lean/AxCheck.lean", "cabal test all (22 properties, pass)", "N16"]
+
+  - id: N35
+    type: dead_end
+    provenance: ai-executed
+    timestamp: "2026-07-23T00:16"
+    support_level: explicit
+    source_refs: ["GitHub Actions run 29987250811", "commit ea40ee1"]
+    title: "HTTPS-only Hackage configuration still follows the retired Dream.io mirror"
+    description: >
+      Disabling setup's automatic update, regenerating the cabal config, switching the
+      Hackage repository URL from HTTP to HTTPS, and retrying three times did not recover CI.
+      Cabal's secure repository metadata continued selecting
+      objects-us-east-1.dream.io/hackage-mirror and received HTTP 404 on root.json.
+    evidence: "GitHub Actions run 29987250811, Haskell / Update package index"
+
+  - id: N36
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-23T00:16"
+    support_level: explicit
+    source_refs: ["GitHub Actions run 29987574829", ".github/workflows/ci.yml", "commit cf2bb38"]
+    title: "Direct HTTPS Hackage index workaround restores the full CI pipeline"
+    result: >
+      The workflow now disables setup's implicit package-index update, regenerates the Cabal
+      user config, uses the direct HTTPS Hackage URL with secure mirror discovery disabled,
+      and retries the explicit update up to three times. GitHub Actions run 29987574829
+      completed successfully: package-index update, configure, freeze, cache, Haskell build
+      and tests, Lean build, and the axiom audit all passed.
+    evidence: ["GitHub Actions run 29987574829", "commits ea40ee1, cf2bb38, b1c4808"]
+    superseded_by: N37
+    caveat: >
+      Re-review found that disabling secure repository mode removed Hackage Security's
+      signed-index and rollback guarantees. The operational recovery passed CI but was not
+      an acceptable supply-chain fix.
+
+  - id: N37
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-23T10:12"
+    support_level: explicit
+    source_refs: ["PR #10 review 4761730561", "lean/Lara/Strict.lean", "lean/Lara/Support.lean", "lean/Lara/Compile.lean", "lean/Lara/Examples.lean", ".github/workflows/ci.yml"]
+    title: "PR #10 re-review closes five semantic and security gaps"
+    result: >
+      All five requested changes were verified against the model and addressed. Backend
+      replay is indexed by the exact submitted certificate reference; source four-state
+      status now has uniqueness and an iff/equality theorem; obligation collection is a
+      proved duplicate-free union with a repeated-child fixture; successful rebut and
+      strict-root rejection are concrete audited fixtures; and CI keeps Hackage Security
+      enabled. A fresh secure `cabal update` succeeded, `lake build` and the expanded
+      every-theorem axiom audit passed without `sorryAx` and within the standard axiom
+      trio, and all 22 Haskell property groups passed 100 cases each.
+    evidence: ["lean/AxCheck.lean", "cabal test all (22 properties, pass)", "PR #10 review 4761730561"]

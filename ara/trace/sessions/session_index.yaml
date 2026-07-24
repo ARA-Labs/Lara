@@ -13,3 +13,24 @@ sessions:
     events_count: 20
     claims_touched: [C13, C14, C15, C16, C17]
     open_threads: 6
+  - id: "2026-07-22_002"
+    date: "2026-07-22"
+    summary: "PR #10 review hardening: formal-model boundaries strengthened, adversarial Lean fixtures added, CI-equivalent checks pass."
+    turn_count: 1
+    events_count: 2
+    claims_touched: [C08]
+    open_threads: 2
+  - id: "2026-07-23_001"
+    date: "2026-07-23"
+    summary: "PR #10 CI recovery: bypassed a retired Hackage mirror and verified the complete Haskell/Lean workflow."
+    turn_count: 1
+    events_count: 2
+    claims_touched: []
+    open_threads: 1
+  - id: "2026-07-23_002"
+    date: "2026-07-23"
+    summary: "PR #10 re-review: five semantic/security gaps closed with exact replay, exact status, set obligations, rebut fixtures, and secure Hackage metadata."
+    turn_count: 1
+    events_count: 2
+    claims_touched: [C07]
+    open_threads: 2

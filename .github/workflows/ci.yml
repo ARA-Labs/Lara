@@ -18,6 +18,24 @@ jobs:
         with:
           ghc-version: '9.6'
           cabal-version: 'latest'
+          cabal-update: false
+
+      - name: Update package index
+        run: |
+          cabal user-config update
+          cabal_config="$(cabal path --output-format=json | jq -r '."config-file"')"
+          sed -i 's|url: http://hackage.haskell.org/|url: https://hackage.haskell.org/|' "$cabal_config"
+          # Keep Hackage Security enabled: signed metadata provides index
+          # authenticity and rollback protection independently of HTTPS.
+          for attempt in 1 2 3; do
+            if cabal update; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
 
       - name: Configure
         run: cabal configure --enable-tests
