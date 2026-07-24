@@ -1,0 +1,41 @@
+session:
+  id: "2026-07-24_003"
+  timestamp: "2026-07-24T21:09"
+  ended: "2026-07-24T21:20"
+  summary: "README synced with the frozen v0.1 state, then restructured in the Lean/Agda/Rocq proof-assistant style (badges, feature bullets, syntax taste, docs table, TCB section)."
+
+events_logged:
+  - type: observation
+    id: null
+    provenance: ai-executed
+    summary: "Turn 1: documentation act only — README drift closed against docs/spec.md; no new research decision, so no tree node allocated."
+  - type: decision
+    id: null
+    provenance: user
+    summary: "Turn 2: user directed the README to follow the proof-assistant-community README shape (Lean, Agda, Rocq); restructure executed, content unchanged in substance."
+  - type: observation
+    id: null
+    provenance: user
+    summary: "Turn 3: user flagged that the README stated neither the project's purpose nor its formal-theory lineage; purpose paragraph and Theoretical foundations section added from the novelty doc's own framing."
+
+ai_actions:
+  - action: "Rewrote the README intro to state the implemented Lara.Strict seam + Lara.Strict.ND reference adapter and the M0-sized adapter portfolio (arithmetic table-recheck + code-inspection, LP non-shipping per spec §5.2), replacing the stale 'ND adapter planned / LP optional' wording."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Completed the Layout listing (Strict.hs, Strict/ND.hs, ND/Internal.hs, test/StrictSpec.hs, m0/, corpus/), expanded the trusted-base bullet to cover both implemented carve-outs, and relabeled the LP seed 'optional' → 'non-shipping' in Layout, trusted-vs-skeleton, and Status."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Restructured the README into the Lean/Agda/Rocq shape: CI/license/spec badges, feature-bullet overview, 'A taste of LARA' section using the spec §10 presentation example, 'Building from source' split (Haskell/Lean, verified CI runs both plus the AxCheck audit), a documentation link table, condensed 'Trusted computing base' section, and a License section. All prior content preserved in substance."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Committed and opened PR #19 (docs/readme-proof-assistant-style), then added a purpose paragraph (target domain: research artifacts; checker validates certificates, not empirical truth — spec §1) and a 'Theoretical foundations' section naming the four lineages from novelty-and-related-work.md (Dung 1995 grounded semantics; ASPIC+ structured argumentation; argumentation schemes with critical questions; PCC/LCF trust discipline; LP as non-shipping seed), plus the novelty doc row in the documentation table."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+
+claims_touched: []
+
+open_threads:
+  - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
+  - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
+
+ai_suggestions_pending: []

@@ -48,3 +48,18 @@ entries:
       - "Advanced C09 hypothesis→testing because the validator half is now machine-checked; kept it below supported because attack completeness and the grounded consistency theorem remain."
       - "Advanced C02 only as historical reconciliation from 2026-07-22; no stronger status was inferred from this session."
       - "Maturity tracker marked O01/O05/O06 stale after three or more later sessions; no topic had three unpromoted observations requiring promotion."
+  - turn: "2026-07-24_003#1"
+    notes:
+      - "Routed the README sync as a documentation act (session event only, no tree node) — same precedent as the M0-frozen marker; it applies already-frozen decisions rather than making one."
+      - "Considered staging an observation for the LP 'optional → non-shipping' relabel but rejected it: C14 already crystallizes that decision; the README merely catches up."
+      - "No Stage 3/4 activity: no closure signals fired, no logic entries touched."
+  - turn: "2026-07-24_003#2"
+    notes:
+      - "Routed the proof-assistant-style README restructure as a user-directed documentation act (session event, no tree node) — presentation form, not a research decision."
+      - "Verified the CI-badge claim against .github/workflows/ci.yml before writing it (lake build + AxCheck audit both present) rather than asserting from memory."
+      - "No staging, no crystallization, no logic edits; open threads carried unchanged."
+  - turn: "2026-07-24_003#3"
+    notes:
+      - "User question 'did we state purpose and formal framework?' treated as a gap report → purpose paragraph + Theoretical foundations section added; sourced from novelty-and-related-work.md §1-§2 wording, not from memory."
+      - "Kept 'argumentation schemes with critical questions' unattributed (no Walton citation in the repo's own docs); named only lineages the delta table itself names."
+      - "Still no tree node: README content, even theory framing, restates positions already crystallized in the novelty doc and C13-C17."

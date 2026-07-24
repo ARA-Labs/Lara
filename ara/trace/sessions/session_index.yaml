@@ -48,3 +48,10 @@ sessions:
     events_count: 3
     claims_touched: [C09]
     open_threads: 2
+  - id: "2026-07-24_003"
+    date: "2026-07-24"
+    summary: "README synced with frozen v0.1, restructured in the Lean/Agda/Rocq style, and given explicit purpose + theoretical-foundations sections; PR #19."
+    turn_count: 3
+    events_count: 3
+    claims_touched: []
+    open_threads: 2
