@@ -87,11 +87,12 @@ the located diagnostic acceptance must produce.
 ## Mechanization
 
 `lean/` is the machine-checked companion to the Haskell checker (Lean 4, toolchain
-pinned in `lean/lean-toolchain`). `Lara/Prop.lean` mechanizes spec §9 **result 11**
-(the `nf`/`≡` support-adequacy carve-out): the equivalence laws, decidability,
-idempotence, and no-argument-reordering, with no `sorry` and `propext` as the only
-axiom. It mirrors `src/Lara/Prop.hs` and `test/PropSpec.hs`. Remaining results are
-gated to the M1 freeze — see [`docs/mechanization-plan.md`](docs/mechanization-plan.md).
+pinned in `lean/lean-toolchain`). The `sorry`-free development covers proposition
+identity, the strict-backend seam and ND adapter, support/attack typing, relational
+compilation and grounded status, and the executable §8.1 Path-B policy validator.
+`AxCheck.lean` audits every theorem against the standard axiom trio. See
+[`lean/README.md`](lean/README.md) and
+[`docs/mechanization-plan.md`](docs/mechanization-plan.md).
 
 ## Build & test
 
@@ -112,17 +113,16 @@ cd lean && lake build
 
 ## Status
 
-Phase 0/1. **Mechanized in Lean 4** (`lean/`, `sorry`-free, standard axiom trio):
-the `Lara.Prop` trusted identity relation (result 11), the abstract strict-backend
-seam + ND reference adapter (results 8, 10) and its isolation/non-factivity firewall
-(result 2), and grounded termination/determinism (result 5 core) in
-`Lara/Grounded.lean`. **Partially mechanized:** result 6 — the abstract-AF-layer
-equivalence of the declarative and executable grounded semantics; the compile step
-(subargument closure) that would make it the full source-vs-compiled preservation is
-defined but not yet exercised (M1). **Data-only skeleton:** the full claim-support AST, worked
-ARA-Demo examples, and rejection-class negatives. **Optional seed:** the LP adapter
-that checks explicit LP derivations. **Still to come (Haskell checker):** the
-checker / Dung-framework compilation / grounded labelling (`Lara.Check`,
-`Lara.Compile`, `Lara.Grounded`), the leaf interface and ARA→core mapping, and the
-Python elaborator. See the roadmap in
+M1 complete: the `lara-core@0.1` language is frozen in
+[`docs/spec.md`](docs/spec.md). **Mechanized in Lean 4** (`lean/`, `sorry`-free,
+standard axiom trio): results 2, 4, 5, 8, 10, and 11; the leaf half of result 3;
+the relational/uniqueness half of result 1; the source-to-compiled bridge for
+result 6 modulo the general executable edge decider; and the §8.1
+strict-reachable/`wf(Pi)` validator underlying result 7. **Data-only skeleton:**
+the full claim-support AST, worked ARA-Demo examples, and rejection-class
+negatives. **Optional seed:** the LP adapter that checks explicit LP derivations.
+**Still to come (Haskell checker):** executable support/attack checking,
+Dung-framework compilation and grounded labelling (`Lara.Check`, `Lara.Compile`,
+`Lara.Grounded`), the leaf interface and ARA→core mapping, and the Python
+elaborator. See the roadmap in
 [`docs/engineering-plan.md`](docs/engineering-plan.md).

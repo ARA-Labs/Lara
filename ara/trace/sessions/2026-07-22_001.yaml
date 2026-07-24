@@ -2,9 +2,9 @@ session:
   id: "2026-07-22_001"
   date: "2026-07-22"
   started: "2026-07-21T23:45"
-  last_turn: "2026-07-22T11:55"
-  turn_count: 10
-  summary: "M0 -> v0.1 freeze complete (PR #9): C13-C16 written into spec; decisions N30 (dead-end->support), N31 (result-cell quarantine-to-gap, revised from audit-only), N32 (snake_case spellings + audience principle), N33 (reference-nd split); C14/C17 revised; M0-frozen marker added. Earlier: annotation pass + affirmation: C13-C17 crystallized, N29 recorded. Earlier: M0 annotation pass complete: 60/60 claims annotated (27 parallel annotators), blind double-annotation kappa 0.73 with 4 adjudications, open questions #1/#2/#3/#5 answered, preliminary gate verdict PASS ~90%."
+  last_turn: "2026-07-22T14:07"
+  turn_count: 18
+  summary: "M1 complete: v0.1 language spec frozen — TCB and Lean-4 host fixed (N38), port-as-we-lock adopted after the §6.1 D⊎H defect (N39), the §6.1/§7.1/§8 derivation chain frozen and mechanized (N40-N42), and the final versioning/rejection/backlog pass completed (N43). Earlier turns retain the M0 annotation and v0.1 scheme/adapter/leaf/defeat freeze history."
 
 events_logged:
   - turn: 1
@@ -257,3 +257,141 @@ open_threads_turns3_10:
 ai_suggestions_pending_turns3_10:
   - "O01 (2026-07-21): coverage gate per benchmark population, not pooled."
   - "O05 (2026-07-22): ND-backend bracketing observation — in spec §5.2 text but unaffirmed as a standalone claim."
+
+# --- turns 11-18 (M1 lock pass + final v0.1 freeze) ---
+events_logged_turns11_18:
+  - turn: 11
+    type: decision
+    id: "N38"
+    routing: direct
+    provenance: user-revised
+    summary: "M1 entered; §8 #8 resolved: TCB enumerated in spec §1.1, Lean 4 fixed as host, and the row-by-row freeze checklist created."
+  - turn: 14
+    type: decision
+    id: "N39"
+    routing: direct
+    provenance: user-revised
+    summary: "Port-as-we-lock adopted after review found the §6.1 D⊎H defect: H had been mandatory-only despite §4.2 requiring optional holes."
+  - turn: 15
+    type: experiment
+    id: "N40"
+    routing: direct
+    provenance: ai-executed
+    summary: "§6.1 frozen with the D⊎H fix and ported to Lara.Support; six sorry-free theorems covered leaf accountability, typing uniqueness, question accounting, and strict assurance."
+  - turn: 16
+    type: experiment
+    id: "N41"
+    routing: direct
+    provenance: ai-executed
+    summary: "§7.1 frozen and ported to Lara.Attack; six sorry-free theorems covered checked sources, strict-unattackability, position kinds, and conclusion coherence."
+  - turn: 17
+    type: experiment
+    id: "N42"
+    routing: direct
+    provenance: ai-executed
+    summary: "§8 compilation frozen and ported to Lara.Compile; theorems covered result 4 and the oracle-parametric source-to-grounded bridge."
+  - turn: 18
+    type: decision
+    id: "N43"
+    routing: direct
+    provenance: user-revised
+    summary: "The v0.1 freeze completed: versioning/replay identity, R1-R14, remaining freeze rows, M2 backlog, and two-PR packaging."
+  - turn: 14
+    type: observation
+    id: "O07"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Port-as-we-lock may act as a defect-detection mechanism; staged because the evidence was a single defect caught by review before the port."
+  - turn: 17
+    type: observation
+    id: "O08"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Result 6 factors into a mechanized oracle-parametric equivalence and a residual executable edge-decider obligation."
+
+ai_actions_turns11_18:
+  - turn: 12
+    action: "Enumerated the TCB, fixed Lean 4 as host, resolved §8 #8, and drafted the M1 freeze checklist."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "plans/research-proposal.md", "docs/m1-freeze-checklist.md"]
+  - turn: 15
+    action: "Corrected §6.1 D⊎H accounting and added the initial Lara.Support mechanization plus AxCheck coverage."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "lean/Lara/Support.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 16
+    action: "Added the frozen §7.1 judgment and initial Lara.Attack mechanization plus AxCheck coverage."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "lean/Lara/Attack.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 17
+    action: "Added the frozen §8 compile rules and initial Lara.Compile bridge; updated the Grounded scope note and axiom audit."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "lean/Lara/Compile.lean", "lean/Lara/Attack.lean", "lean/Lara/Grounded.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 18
+    action: "Completed the final spec-freeze pass: versions, admission markers, §8.1, R1-R14, mechanization pointers, checklist exit, and M2 backlog."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "docs/m1-freeze-checklist.md", "docs/engineering-plan.md"]
+
+claims_touched_turns11_18:
+  - id: C02
+    action: advanced
+    turn: 16
+    provenance: ai-suggested
+  - id: C07
+    action: advanced
+    turn: 17
+    provenance: ai-suggested
+  - id: C08
+    action: advanced
+    turn: 15
+    provenance: ai-suggested
+
+logic_revisions_turns11_18:
+  - turn: 16
+    entry: C02
+    field: Status
+    before: hypothesis
+    after: testing
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Attack typing, strict-unattackability, and position coherence compiled sorry-free; executable checking and adversarial coverage remained."
+  - turn: 17
+    entry: C07
+    field: Status
+    before: hypothesis
+    after: testing
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Grounded stabilization was already mechanized and the compile bridge now composed source-level status with it."
+  - turn: 15
+    entry: C08
+    field: Status
+    before: hypothesis
+    after: testing
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "The leaf half was mechanized by leaves_declared; the certDeps half still required Backend.uses."
+  - turn: 12
+    entry: "solution/mechanization.md §2"
+    field: prover-choice paragraph
+    before: "Lean 4 was the default pending §8 #8, with proof work nominally gated on the whole M1 freeze."
+    after: "Lean 4 was resolved as host and the gate refined to port-as-we-lock for each individually frozen definition."
+    signal: dependency-change
+    provenance: ai-suggested
+
+key_context_turns11_18:
+  - turn: 14
+    excerpt: "Review found the D⊎H inconsistency; the port-as-we-lock recommendation was accepted with 'sure'."
+  - turn: 18
+    excerpt: "The user directed one docs pass over the remaining spec-only rows and asked whether to package it in this PR or the next; two-PR packaging was recommended."
+
+open_threads_turns11_18:
+  - "Open the lock-pass and freeze PRs, then tag spec-v0.1 on the freeze merge commit."
+  - "Build executable support/attack checkers and the general Compile.Faithful edge decider."
+  - "Complete certDeps accountability, result 7 consistency, result 9 backend replacement, shipped-adapter obligations, and codec round-trip."
+  - "Carry N29 authored adversarial attack reports into the M3/M5 golden-test assets."
+  - "Continue annotation spot checks and the full-schema double-annotation subset."
+
+ai_suggestions_pending_turns11_18:
+  - "Two-PR packaging and spec-v0.1 tag placement remained an AI recommendation pending execution."
+  - "O07 (port-as-we-lock as defect detection) remained staged with single-instance evidence."
+  - "O08 (result-6 oracle-parametric factoring) remained staged pending a constructive general Faithful decider or user affirmation."

@@ -8,11 +8,11 @@ sessions:
     open_threads: 5
   - id: "2026-07-22_001"
     date: "2026-07-22"
-    summary: "M0 annotation + affirmation (C13-C17, N29), then v0.1 freeze into spec (PR #9): N30-N33 decisions, C14/C17 revised, M0-frozen marker."
-    turn_count: 10
-    events_count: 20
-    claims_touched: [C13, C14, C15, C16, C17]
-    open_threads: 6
+    summary: "M0 annotation and scheme freeze (N29-N33), then M1 complete: TCB/host, port-as-we-lock, frozen support/attack/compile chain, and lara-core@0.1 (N38-N43)."
+    turn_count: 18
+    events_count: 28
+    claims_touched: [C02, C07, C08, C13, C14, C15, C16, C17]
+    open_threads: 5
   - id: "2026-07-22_002"
     date: "2026-07-22"
     summary: "PR #10 review hardening: formal-model boundaries strengthened, adversarial Lean fixtures added, CI-equivalent checks pass."
@@ -33,4 +33,18 @@ sessions:
     turn_count: 1
     events_count: 2
     claims_touched: [C07]
+    open_threads: 2
+  - id: "2026-07-24_001"
+    date: "2026-07-24"
+    summary: "PR #14 review remediation: branch rebased onto #10, §8.1 validator mechanized, docs and append-only ARA history reconciled, full Lean/Haskell checks pass."
+    turn_count: 1
+    events_count: 3
+    claims_touched: [C02, C09]
+    open_threads: 3
+  - id: "2026-07-24_002"
+    date: "2026-07-24"
+    summary: "Additional PR #14 review closed the syntactic-vs-instance wf(Pi) gap with conservative overlap proofs and an exact regression."
+    turn_count: 1
+    events_count: 3
+    claims_touched: [C09]
     open_threads: 2

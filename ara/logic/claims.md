@@ -37,15 +37,20 @@ the result is stated but not yet proved or mechanized._
   ASPIC+ restriction that strict rules are unattackable; positions are paths of premise indices and
   question names.
 - **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:447 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:472 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
-- **Status**: hypothesis
+- **Status**: testing
 - **Falsification criteria**: A defeat pattern the corpus annotators find that cannot be typed as an
   attack on a root / internal-rule / leaf position (e.g. a genuine attack on something other than
   those three positions), forcing a fourth attack primitive.
-- **Proof**: [E05]
-- **Evidence basis**: spec §7 defines the positional attack judgment; `Lara.Attack` is spec-only
-  pending the M0 defeat-typing decision, so this is a design claim not yet mechanized.
+- **Proof**: [E05, "lean/Lara/Attack.lean: undercut_target_rule / undermine_target_leaf,
+  rebut_top_defeasible / undercut_pos_defeasible, rebut_concl_coherent; audited by AxCheck"]
+- **Evidence basis**: spec §7.1 fixes the positional judgment and
+  `lean/Lara/Attack.lean` mechanizes the position-kind partition,
+  strict-unattackability, and local/global conclusion coherence sorry-free.
+  The executable attack checker and N29 adversarial coverage remain before
+  this claim can advance to supported.
 - **Dependencies**: C01
 - **Tags**: attacks, positions, ASPIC+, decidability
+- **Last revised**: 2026-07-24 (2026-07-24_001; historical evidence from 2026-07-22_001#16)
 
 ## C03: An accepted strict certificate establishes a conditional deductive consequence, never premise truth
 - **Statement**: Routing strict steps through a backend that returns only accept/reject + dependencies
@@ -176,26 +181,37 @@ the result is stated but not yet proved or mechanized._
 - **Tags**: dependency-accountability, leaves, inversion-lemma
 - **Last revised**: 2026-07-22 (2026-07-22_002)
 
-## C09: Restricting contrary relations off strict-reachable propositions buys consistency by construction
+## C09: Restricting contrary-instance overlap off strict-reachable patterns buys consistency by construction
 - **Statement**: A compile-time well-formedness check that forbids any strict-rule consequent — and
-  any proposition on a strict chain — from participating in a declared `contrary` pair (Path B) makes
-  every conflict rebuttable at a defeasible step, so direct = indirect consistency hold under grounded
-  semantics and two contrary claims are never jointly `justified`. The cost is an expressiveness limit:
-  strict chains may only target uncontested claims.
+  any pattern on a strict chain — from having a canonically equivalent ground instance with either
+  side of a declared `contrary` pair (Path B) makes every conflict rebuttable at a defeasible step,
+  so direct = indirect consistency hold under grounded semantics and two contrary claims are never
+  jointly `justified`. The cost is an expressiveness limit: strict chains may only target
+  uncontested claims.
 - **Conditions**: v0.1 chooses Path B; if the corpus shows strict rules genuinely feeding contested
   claims, the flip is Path A (total involutive contradictory map + transposition closure), which buys
-  all four rationality postulates at the cost of structuring the contrary relation.
+  all four rationality postulates at the cost of structuring the contrary relation. The v0.1
+  executable `mayOverlap` check is conservative for non-linear patterns: it may reject a safe policy
+  but cannot accept two patterns with canonically equivalent ground instances.
 - **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:546 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
-- **Status**: hypothesis
+- **Status**: testing
 - **Falsification criteria**: A Path-B-well-formed policy under which two contrary claims are both
   labelled `justified` by grounded semantics — refuting consistency (spec §9 result 7); or corpus
   evidence that Path B's expressiveness limit rejects a large fraction of real strict chains.
-- **Proof**: [E05]
-- **Evidence basis**: spec §8.1 states the strict-reachable validator and the consistency argument
-  (from Caminada–Amgoud Examples 5–6); the validator (`Lara.Policy`) is an early M3 target but
-  spec-only now.
+- **Proof**: [E05, "lean/Lara/Policy.lean: strictReachable_iff_mem /
+  aPatMayOverlap_of_instances / wfB_iff / wellFormed_no_strict_contrary_left/right;
+  exact counterexample under Lara.Policy.Regression; audited by AxCheck"]
+- **Evidence basis**: spec §8.1 states the Path-B restriction and
+  `lean/Lara/Policy.lean` now mechanizes the finite strict-reachable set and
+  exact executable `wf(Pi)` judgment over a conservative instance-overlap
+  relation. Its ground-instance soundness lemma and two `ContraryMatch` boundary
+  theorems close the syntactic-vs-instance gap identified in review. The headline
+  consistency theorem still needs an attack-completeness postcondition:
+  `CheckedProgram.typed` proves declared attacks sound, but not that every
+  rebuttable conflict yields an edge.
 - **Dependencies**: C02
 - **Tags**: rationality-postulates, consistency, strict-rules, path-B
+- **Last revised**: 2026-07-24 (2026-07-24_002)
 
 ## C10: For a calculus-contribution paper, mechanized metatheory + worked examples + rejection conformance is the evaluation — not benchmarks or user studies
 - **Statement**: When a paper's contribution is a calculus rather than a system, the credible

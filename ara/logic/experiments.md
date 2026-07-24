@@ -84,7 +84,8 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 
 ## E05: Positional attack typing + strict-reachable consistency validator (corpus-gated)
 - **Verifies**: C02, C09
-- **Evidence**: pending (corpus-gated: `Lara.Attack`, `Lara.Policy` are spec-only)
+- **Evidence**: partial — positional attack typing and the instance-overlap validator are mechanized;
+  corpus defeat coverage and the result-7 status theorem remain pending
 - **Run**: docs/spec.md §7 (attack judgment), §8.1 (Path-B validator); M0 corpus study fixes defeat typing (open question §8 #3)
 - **Setup**:
   - Model: n/a
@@ -93,7 +94,8 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 - **Procedure**:
   1. For each corpus dead end, decide rebut / undercut / undermine / no-edge with target position and contrary pair.
   2. Confirm every attack types as an attack on a root / internal-rule / leaf position.
-  3. Compute the strict-reachable proposition set; reject policies whose `contrary` touches it.
+  3. Compute the strict-reachable pattern set; reject policies whose `contrary` sides may overlap it
+     at the ground-instance level.
 - **Metrics**: fraction of annotated defeats typable within the three position kinds; policy-validator rejection correctness.
 - **Expected outcome**:
   - Every real defeat fits one of the three position kinds (else a fourth primitive is needed → falsifies C02).

@@ -171,7 +171,10 @@ right precedent:
   acceptance profiles produce, after `eraseCert`, isomorphic AFs; the grounded lfp is invariant under
   that isomorphism. Structural induction on support checking + graph iso + lfp-invariance
   (`spec.md` §5.3). This is the proof that backend internals are outside claim-status semantics —
-  high reviewer value, hence "should" not "must," but do it if the schedule allows.
+  high reviewer value. **Current representation blocker (2026-07-24):**
+  `Compile.CheckedProgram` stores certificate-bearing `SupportTerm` nodes but no stable argument id
+  or certificate-erased skeleton. Add that compile-boundary identity/bijection before stating the
+  payload-varying graph isomorphism; queue order is not the blocker.
 - **Result 4 (compilation soundness + subargument closure).** The fiddly one. Positions `π` are
   paths; an attack on `w@π` compiles to edges onto *every* argument containing that occurrence
   (`spec.md` §8). Mechanize `w@π` as a partial subterm lookup and prove (a) every compiled edge has a
@@ -179,15 +182,21 @@ right precedent:
   occurrence. Get the `w@π` datatype right before proving anything.
 - **Result 7 (consistency, Path B).** Mechanize the **compile-time strict-reachable validator**
   (`spec.md` §8.1): least set closed under strict rules' premises→conclusion; reject policies whose
-  `contrary` touches it. Then direct = indirect consistency by construction. Do *not* mechanize Path A
-  (transposition + involutive contradictories) unless the corpus forces the flip.
+  `contrary` sides may overlap it at the ground-instance level. Then direct = indirect consistency
+  by construction. Do *not* mechanize Path A (transposition + involutive contradictories) unless the
+  corpus forces the flip. **Validator done (2026-07-24):**
+  `Lara.Policy.strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, and `wfB_iff`, plus the
+  instantiated-contrary boundary theorems and located R12 payload. The status theorem still needs
+  attack completeness; `CheckedProgram.typed` currently proves only that declared attacks are sound,
+  not that every rebuttable conflict is declared.
 
-## 5. Result 6: abstract core mechanized; compile step still open (was the blocker) ◐
+## 5. Result 6: source-to-compiled bridge mechanized modulo the edge decider ◐
 
 Result 6 ("status preservation between a direct source semantics and the compiled-AF semantics") was
 **unprovable as originally stated** because `spec.md` §8 defined only the compiled route — no
 independent direct semantics, so the theorem had nothing to preserve (exploration tree N16). The
-**abstract core is now mechanized** (2026-07-21, issue #4); the full headline is still M1 work.
+**abstract core is mechanized** (2026-07-21, issue #4), and the M1 lock pass now composes it with
+the frozen source compile relation.
 
 **Done — abstract AF layer.** `spec.md` §8.2 defines a direct big-step claim-status judgment
 
@@ -203,13 +212,14 @@ partition), `status_preservation` (claim status) — plus the grounded-terminati
 independent semantics exists" objection: there is now a declarative grounded semantics distinct from
 the iteration, proved to agree with it.
 
-**Not done — the compile step (the actual headline).** Every equivalence theorem quantifies over one
-already-given `F : AF`, and the direct and compiled sides read the *same* `F.attack`; `compile :
-Source → AF` and its subargument closure are only *defined and characterized* (`compile_attack_iff`),
-never *exercised*. The genuine result 6 — define a status on the *source* `W` and prove it equals
-`status(grounded(compile(W)))`, so the subargument-closure edges do work — is deferred to M1, gated on
-the concrete support-term layer. This is the honest boundary; do not cite the current development as
-the full "semantics-preserving compilation" theorem.
+**Done modulo one executable obligation — source composition.** `Lara.Compile.SrcIn`/`SrcOut` and
+`SrcStatus` read the Prop-level frozen closure relation directly;
+`srcIn_iff_grounded`/`srcStatus_iff` prove equality with executable grounded status over `toAF`
+whenever `Compile.Faithful` ties its Boolean edge oracle to that relation.
+`Lara.Examples.edgeBEx_faithful` exercises a concrete strict-superset closure. The honest remaining
+boundary is the general checker-built edge decider: the relational compile theorem is exercised,
+but the raw-source checker cannot yet construct `Faithful` while `Backend.check` is an arbitrary
+`Prop`.
 
 The two definitional holes that made the status function partial (N17) are addressed in `spec.md` §8:
 the **hole-vs-complete-alternative** case (a complete `in` alternative dominates; `statusC_gap_iff`

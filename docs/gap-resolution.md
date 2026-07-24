@@ -155,10 +155,11 @@ adapter is useful on the corpus.
     relation*, not the proposition language, so "no classical negation in props" survives.
   - **Path B (recommended for v0.1)** — forbid strict rules from producing contested conclusions: a
     compile-time well-formedness check that **no strict-rule consequent (nor any proposition on a
-    strict chain) participates in a declared contrary pair.** Then every conflict is rebuttable at a
-    defeasible step, strict closure introduces no new conflict, and direct = indirect consistency
-    hold by construction. This keeps the contrary relation arbitrary and adds no negation; the cost
-    is a real expressiveness limit (strict chains may only target uncontested claims).
+    strict chain) can overlap either side of a declared contrary pair at the ground-instance
+    level.** Then every conflict is rebuttable at a defeasible step, strict closure introduces no
+    new conflict, and direct = indirect consistency hold by construction. This keeps the contrary
+    relation arbitrary and adds no negation; the cost is a real expressiveness limit (strict chains
+    may only target uncontested claims).
 
   **Decision: Path B for v0.1** (settled — a compile-time well-formedness check), with Path A
   recorded as the flip criterion if the corpus shows strict rules genuinely feeding contested claims.

@@ -18,7 +18,8 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **4** (compilation soundness) | `Lara/Compile.lean`, `Lara/Examples.lean` | ✅ **mechanized (relational compile layer)** — only complete checked terms become nodes; only typed declared attacks produce edges; direct and strict-superset closure behavior are proved concretely. |
 | **3** (dependency accountability) | `Lara/Support.lean` | ◐ **partially mechanized** — `leaves_declared` proves the source-leaf half; backend `certDeps` accountability awaits the executable backend interface. |
 | **1** (checking decidability) | `Lara/Support.lean`, `Lara/Attack.lean` | ◐ **relational metatheory mechanized** — typing uniqueness and inversion properties are proved. Executable support/attack decision procedures require the abstract strict-backend seam to expose decidable replay acceptance (`Backend.check` is currently an arbitrary `Prop`). |
-| **9** (backend replacement) | — | not started |
+| **7** (Path-B consistency) | `Lara/Policy.lean` | ◐ **validator mechanized** — `StrictReachable`, conservative instance-overlap checking, `aPatMayOverlap_of_instances`, and `wfB_iff` prove the finite `wf(Pi)` check catches canonically equivalent ground instances; `wellFormed_no_strict_contrary_left/right` connect it to `ContraryMatch`, and `firstViolation?` carries the located R12 rule/pair. The status-consistency theorem still needs attack completeness, which `CheckedProgram.typed` does not provide. |
+| **9** (backend replacement) | — | **statement-model blocker recorded** — `CheckedProgram` currently identifies nodes only by certificate-bearing `SupportTerm`; it lacks stable argument ids and a certificate-erased skeleton/bijection. Add that representation before stating payload-varying AF isomorphism faithfully. |
 
 The development now covers the frozen M1 relational support, attack, and
 compile layers in addition to the earlier `nf`/`≡`, ND, strict-backend, and
@@ -40,10 +41,10 @@ lake build
 lake env lean AxCheck.lean   # runs `#print axioms` on every main theorem
 ```
 
-Every main theorem depends on at most `propext` (standard) and no `sorry`/`admit`.
-CI enforces this: the `lean` job fails if any theorem's transitive axiom set
-contains `sorryAx` or anything outside the standard trio (`propext`,
-`Classical.choice`, `Quot.sound`).
+Every main theorem stays within the standard trio (`propext`,
+`Classical.choice`, `Quot.sound`) and uses no `sorry`/`admit`. CI enforces this:
+the `lean` job fails if any theorem's transitive axiom set contains `sorryAx` or
+anything outside that trio.
 
 ## Modeling notes
 
@@ -64,6 +65,7 @@ a deficit-measure stabilization argument), so no Mathlib dependency was needed.
 Remaining work: strengthen the strict-backend interface with decidable replay
 acceptance, then construct executable support/attack checking and its general
 `Faithful` edge decider (closing results 1 and 6 constructively); backend dependency
-accountability (the remaining half of result 3), the result-7 validator, and
-backend replacement (result 9). The shared serialized first-order core AST is
-the Haskell↔Lean differential-testing anchor (mechanization-plan §3).
+accountability (the remaining half of result 3); the result-7 consistency theorem
+after adding attack completeness; and the certificate-erased argument identity
+needed to state backend replacement (result 9). The shared serialized first-order
+core AST is the Haskell↔Lean differential-testing anchor (mechanization-plan §3).

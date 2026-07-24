@@ -623,3 +623,136 @@ tree:
       every-theorem axiom audit passed without `sorryAx` and within the standard axiom
       trio, and all 22 Haskell property groups passed 100 cases each.
     evidence: ["lean/AxCheck.lean", "cabal test all (22 properties, pass)", "PR #10 review 4761730561"]
+
+  - id: N38
+    type: decision
+    provenance: user-revised
+    timestamp: "2026-07-22T13:06"
+    support_level: explicit
+    source_refs: ["docs/spec.md §1.1", "docs/m1-freeze-checklist.md"]
+    title: "M1 entered with the TCB enumerated and Lean 4 fixed as mechanization host"
+    choice: >
+      M1 was treated as the whole-language spec freeze, not as the already-complete
+      corpus-input freeze. The spec enumerated the executable TCB and trusted inputs,
+      fixed Lean 4 as host, and opened a row-by-row freeze checklist.
+    alternatives:
+      - "Treat PR #9 as M1 complete — rejected because it froze corpus-derived inputs, not the language surface"
+      - "Switch to Rocq — rejected because Lean was the recorded default and already carried the mechanization"
+    evidence: "docs/spec.md §1.1; docs/m1-freeze-checklist.md"
+
+  - id: N39
+    type: decision
+    provenance: user-revised
+    timestamp: "2026-07-22T13:15"
+    support_level: explicit
+    source_refs: ["docs/spec.md §6.1", "lean/Lara/Support.lean"]
+    title: "Port-as-we-lock adopted after the §6.1 D⊎H defect"
+    choice: >
+      Each frozen corpus-independent definition ports to Lean before the next
+      lock item. The immediate trigger was a mismatch between the mandatory-only
+      H definition and §4.2's optional-hole accounting; H became the full
+      syntactic hole set and only H intersect mandatory contributes obligations.
+    alternatives:
+      - "Batch Lean ports at the final tag — rejected because frozen definitions would accumulate without structural checking"
+    evidence: "docs/spec.md §6.1; Lara.Support.dh_partition"
+
+  - id: N40
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-22T13:42"
+    support_level: explicit
+    source_refs: ["docs/spec.md §6.1", "lean/Lara/Support.lean", "lean/AxCheck.lean"]
+    title: "§6.1 support typing frozen and mechanized"
+    result: >
+      The frozen support judgment was ported sorry-free. Main now carries
+      leaf accountability, typing uniqueness, normalized support coherence,
+      strict-question inversion, complete mandatory discharge, the D⊎H
+      partition, duplicate-free obligation collection, and
+      certOkOf_strict_step.
+    evidence: ["lean/AxCheck.lean", "lake build"]
+
+  - id: N41
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-22T13:49"
+    support_level: explicit
+    source_refs: ["docs/spec.md §7.1", "lean/Lara/Attack.lean", "lean/AxCheck.lean"]
+    title: "§7.1 positional attack typing frozen and mechanized"
+    result: >
+      Six sorry-free theorems established checked attack sources,
+      strict-unattackability, the undercut/undermine position-kind partition,
+      and local/global rebut conclusion coherence.
+    evidence: ["lean/AxCheck.lean", "lake build"]
+
+  - id: N42
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-22T13:59"
+    support_level: explicit
+    source_refs: ["docs/spec.md §8", "lean/Lara/Compile.lean", "lean/Lara/Examples.lean"]
+    also_depends_on: [N16]
+    title: "§8 compilation frozen and source status bridged to grounded evaluation"
+    result: >
+      The relational compiler proves node/edge soundness and subargument
+      closure. SrcIn/SrcOut/SrcStatus compose the source relation with
+      executable grounded evaluation under Compile.Faithful; a closed example
+      supplies and exercises one concrete faithful edge oracle.
+    evidence: ["lean/AxCheck.lean", "Lara.Examples.edgeBEx_faithful"]
+
+  - id: N43
+    type: decision
+    provenance: user-revised
+    timestamp: "2026-07-22T14:07"
+    support_level: explicit
+    source_refs: ["docs/spec.md", "docs/m1-freeze-checklist.md"]
+    title: "M1 completed with lara-core@0.1 frozen"
+    choice: >
+      The final spec pass fixed replay identity, admission markers, the §8.1
+      Path-B restriction, rejection classes R1-R14, and the remaining
+      mechanization pointers. The M2 backlog was opened and spec-v0.1 was
+      assigned to the freeze PR merge.
+    alternatives:
+      - "Keep the surface marked WIP — rejected because every checklist row had a frozen or explicitly deferred disposition"
+    evidence: "docs/spec.md header and §2.1/§10.1; docs/m1-freeze-checklist.md"
+
+  - id: N44
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T08:14"
+    support_level: explicit
+    source_refs: ["PR #14 review 4771132852", "lean/Lara/Policy.lean", "lean/AxCheck.lean"]
+    also_depends_on: [N43]
+    title: "PR #14 review remediation rebases the freeze and mechanizes §8.1 wf(Pi)"
+    result: >
+      The freeze branch was rebased onto PR #10's squash, dropping stale
+      pre-newtype Lean duplicates. Spec theorem pointers and public status
+      text were reconciled; the ARA session recovered its append-only turn-1
+      blocks. Lara.Policy now gives the finite strict-reachable relation,
+      executable wfB with exactness theorem, and a located R12 payload.
+      lake build and the standard-trio AxCheck audit pass; all 22 Haskell
+      property groups pass 100 tests.
+    evidence: ["lean/AxCheck.lean", "cabal test all", "git diff --check"]
+
+  - id: N45
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T08:48"
+    support_level: explicit
+    source_refs: ["PR #14 additional review finding", "docs/spec.md §8.1", "lean/Lara/Policy.lean", "lean/AxCheck.lean"]
+    also_depends_on: [N43, N44]
+    title: "Instance-level contrary counterexample falsifies syntactic wf(Pi) and is closed before the v0.1 tag"
+    result: >
+      The review counterexample was reproduced: the strict conclusion
+      CanFly(X) differs syntactically from contrary-side CanFly(tweety), yet
+      instAPat and ContraryMatch meet on the ground atom. wf(Pi) was changed
+      from pattern equality to conservative structural instance overlap,
+      parameterized by canon. Lean proves every pair of canonically equivalent
+      ground instances is caught, proves well-formed policies exclude
+      ContraryMatch on either side of a strict conclusion, and pins the exact
+      Bird(X) / CanFly(tweety) regression. lake build, the standard-trio axiom
+      audit, all 22 Haskell property groups, and diff integrity checks pass.
+    evidence:
+      - "Lara.Policy.aPatMayOverlap_of_instances"
+      - "Lara.Policy.wellFormed_no_strict_contrary_left/right"
+      - "Lara.Policy.Regression.declared_instance_is_contrary"
+      - "Lara.Policy.Regression.instantiated_strict_contrary_rejected"

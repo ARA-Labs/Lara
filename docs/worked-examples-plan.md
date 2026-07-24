@@ -111,9 +111,10 @@ position; **not** a `gap` (a `gap` is an open obligation, not an undeclared refe
 
 ### R2 — `strict-contrary-violation` (rejected at compile time)
 
-A policy declares a `contrary` pair touching a **strict-reachable** proposition (a strict rule's
-consequent or something on a strict chain). Expected: the §8.1 Path-B well-formedness check rejects
-the *program* at compile time with a diagnostic naming the offending rule and contrary pair
+A policy declares a `contrary` pair whose side may overlap a **strict-reachable** pattern at the
+ground-instance level (a strict rule's consequent or something on a strict chain). Expected: the §8.1
+Path-B well-formedness check rejects the *program* at compile time with a diagnostic naming the
+offending rule and contrary pair
 (`spec.md` §8.1). This example is the human-readable witness that the consistency guarantee is
 enforced, not just proved.
 

@@ -17,6 +17,7 @@ import Lara.Grounded
 import Lara.Support
 import Lara.Attack
 import Lara.Compile
+import Lara.Policy
 import Lara.Examples
 
 open Lara
@@ -119,6 +120,19 @@ open Lara
 #print axioms Lara.Compile.srcStatus_unique
 #print axioms Lara.Compile.srcStatus_iff
 
+-- Spec §8.1 Path-B policy validator: the finite strict-reachable set denotes
+-- the relational least set, and executable wf(Pi) is exact.
+#print axioms Lara.Policy.strictReachable_closed
+#print axioms Lara.Policy.strictReachable_iff_mem
+#print axioms Lara.Policy.aPatMayOverlap_of_instances
+#print axioms Lara.Policy.wfB_iff
+#print axioms Lara.Policy.wellFormed_no_strict_contrary_left
+#print axioms Lara.Policy.wellFormed_no_strict_contrary_right
+#print axioms Lara.Policy.Regression.overlap_is_not_pattern_equality
+#print axioms Lara.Policy.Regression.strict_conclusion_instance
+#print axioms Lara.Policy.Regression.declared_instance_is_contrary
+#print axioms Lara.Policy.Regression.instantiated_strict_contrary_rejected
+
 -- Concrete conformance examples: obligation accounting (mixed/nested/missing),
 -- subterm traversal boundaries, and subargument-closure superset behavior with
 -- a concrete edge decider and grounded verdict.
@@ -154,9 +168,9 @@ open Lara
 #print axioms Lara.Grounded.grounded_fixpoint
 
 -- Result 6 / C08 (abstract AF layer): declarative grounded ≡ executable grounded
--- labelling over any AF (spec §9 result 6 abstract core; N16 partially resolved).
--- The source-vs-compiled preservation exercising `compile`/subargument closure is
--- M1 work; `compile_attack_iff` characterizes (not: exercises) the closure edges.
+-- labelling over any AF. Lara.Compile above now exercises the source compile
+-- relation oracle-parametrically; `compile_attack_iff` remains the older abstract
+-- characterization at this layer.
 -- `statusC_gap_iff` mechanizes the N17-(1) "gap only on empty complete support" half.
 #print axioms Lara.Grounded.directIn_iff
 #print axioms Lara.Grounded.labelC_inn_iff

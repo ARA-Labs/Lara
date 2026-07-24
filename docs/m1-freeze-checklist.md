@@ -39,18 +39,18 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | --- | --- | --- | --- | --- | --- |
 | 1 | `nf` / `≡` proposition normalization | §3.2 | **Frozen** | none (carve-out 1) | §9 r11 — **done** (`lean/Lara/Prop.lean`) |
 | 2 | Proposition / leaf shape (`nl`/`formal`/`binding`, per-cell grain) | §3, §3.1 | **Frozen** | none (C15); distribution-valued leaf → Defer (C17) | serializes into core AST |
-| 3 | Policy language: patterns, substitution, CQ discharge, admission table | §4.1–§4.4 | **Lock** | freeze the static admission judgment as v0.1 rules | §9 r1, r3 |
+| 3 | Policy language: patterns, substitution, CQ discharge, admission table | §4.1–§4.4 | **Frozen** | ✅ §4.1 instantiation + §4.2 accounting markers; §4.3 `Gamma(P)` construction figure; Lean: `instPat`/`instAPat`, `InstSide`, `DefeatPolicy` | §9 r1, r3 (see rows 8/9) |
 | 4 | Reference scheme vocabulary (9 families) | §4.5 | **Frozen** | none (C13); spellings revisitable until `empirical-v1` ships | schema instances, no new theorem |
-| 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Lock** | state as part of the frozen definition, not an aside | §9 r7 |
+| 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12 | §9 r7 — validator ✅ (`lean/Lara/Policy.lean`); consistency theorem needs attack completeness |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
 | 7 | Shipped adapter portfolio (arithmetic-recheck, code-inspection; LP non-shipping) | §5.2 | **Frozen** | none (C14); per-adapter soundness is M2/M3 | §9 r10 per shipped adapter — **pending** |
 | 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules written (§6.1); ✅ Lean port landed (`lean/Lara/Support.lean`) — pending: executable checker, `certDeps` | §9 r3 leaf half ✅, r1 uniqueness half ✅, r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules written (§7.1); ✅ Lean port landed (`lean/Lara/Attack.lean`) — pending: executable checker, compile-facing edge soundness | §9 r1 (strict-unattackability, partition, coherence ✅; decision procedure pending), r4 (with item 11) |
-| 10 | Holes (open obligations) | §4.2, §10 | **Lock** | confirm hole surface + located reporting are v0.1-fixed | §9 r1 |
+| 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
 | 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ compile rules written (§8, v0.1-frozen); ✅ Lean port landed (`lean/Lara/Compile.lean`) — pending: executable edge oracle (`Faithful`), r9 | §9 r4 both halves ✅; r6 source-vs-compiled bridged oracle-parametrically ✅; r9 pending |
-| 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5, r6, r7 — **done abstract** (`Grounded.lean`); compile-composed step pending |
-| 13 | Abstract syntax + JSON wire schema, **versioning** | §1, §2 | **Lock** | assign v0.1 version ids (`Sigma`, `Pi`, backends, JSON schema); codec round-trip contract | §9 r12 |
-| 14 | Specified rejection behavior (located, per rejection class) | §1, §10 | **Lock** | enumerate the rejection classes (mutation-suite spine) as v0.1 | §9 r1 (decidability) |
+| 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 compile-composed oracle-parametrically ✅; r7 consistency pending attack completeness |
+| 13 | Abstract syntax + JSON wire schema, **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 (with M3 codec) |
+| 14 | Specified rejection behavior (located, per rejection class) | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
 
 ## M0 conditions the freeze must absorb
 
@@ -69,14 +69,41 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    defeat-layer evaluation uses self-authored adversarial reports. Not a freeze blocker — flags a
    test-asset task for M3/M5.
 
-## Exit action
+## Exit action — all complete (2026-07-22)
 
-1. Complete the **Lock** rows above in one spec pass (items 3, 5, 8–11, 13, 14).
-2. Absorb the four M0 conditions.
-3. Tag the spec **v0.1** and lift the "Phase 0 / WIP" header.
-4. Open the **M2 mechanization backlog** for every newly frozen corpus-independent definition —
-   per CLAUDE.md discipline, port as each freezes, do not batch to a later milestone. The pending
-   obligations are: compile relation (§9 r4, r6-composed, r9) and each shipped adapter (§9 r10).
+1. ✅ All Lock rows closed (items 3, 5, 8–11, 13, 14) — derivation chain (8/9/11) frozen *and*
+   ported to Lean; surface rows (3/5/10/13/14) frozen in the final spec pass.
+2. ✅ M0 conditions absorbed (kind-(a) conventions in §3/§4/§11; C17 wishlist recorded as
+   deferred in `ara/logic/solution/constraints.md`; kind-(c) calls in §4.3/§7/§11; N29 flagged
+   for M3/M5 test assets).
+3. ✅ Spec header lifted to **v0.1 — frozen at M1**; M1-frozen blockquote added. Apply the git tag
+   `spec-v0.1` on the merge commit of the freeze PR.
+4. ✅ M2 backlog opened (below).
+
+## M2 backlog (opened at freeze; ordered by dependency, all corpus-independent)
+
+1. **§8.1 validator — validator done**: `lean/Lara/Policy.lean` defines the finite
+   strict-reachable set, proves `strictReachable_iff_mem`, conservatively checks instance overlap,
+   proves canonically equivalent ground instances are caught
+   (`aPatMayOverlap_of_instances`), decides `wf(Pi)` via `wfB_iff`, connects the judgment to
+   `ContraryMatch`, and returns a located R12 rule/pair. The remaining §9 r7 status-consistency
+   theorem is not yet provable from `CheckedProgram`: `typed` is attack soundness (every declared
+   attack is typed), but the theorem also needs attack completeness (every rebuttable contrary
+   conflict produces a declared/compiled edge). Add that checker postcondition with the executable
+   attack checker.
+2. **Executable checkers**: decision procedures for §6.1 support typing and §7.1 attack typing
+   (`infer`-style, as `Lara/ND.lean` layer C), proving §9 r1 and constructively supplying
+   `Compile.Faithful` — closes r6's source-vs-compiled half.
+3. **`certDeps` accountability**: extend the abstract `Backend` with `uses`, prove r3's
+   certificate half (obligation 4).
+4. **r9 backend replacement — representation blocker**: the relational §6.1/§8 layers are frozen,
+   but `CheckedProgram` stores certificate-bearing `SupportTerm` nodes and has no stable argument
+   ids or certificate-erased skeleton. Payload-different programs therefore lack the node bijection
+   needed to state the promised AF isomorphism faithfully. Add argument identity plus `eraseCert`
+   at the compile boundary, then prove checking transport, graph isomorphism, and status equality.
+5. **Shipped-adapter obligations (r10)**: arithmetic-recheck and code-inspection adapters
+   discharge the same soundness/dependency obligations as ND (with their M3 implementations).
+6. **r12 codec round-trip**: once `Lara.Json`/`Lara.Syntax` exist (M3 boundary layer).
 
 _Done so far (2026-07-22): §8 #8 resolved — TCB written into spec §1.1, host fixed to Lean 4.
 Lock pass item 8 — support-term typing rules made explicit and v0.1-frozen in spec §6.1 (defect
@@ -94,4 +121,15 @@ declared arguments, `occ(k)`, closure edges by structural occurrence containment
 (`compile_nodes_checked`, `edge_iff`), closure ⊇ direct, and the N16 bridge
 (`srcIn_iff_directIn`/`srcIn_iff_grounded`) connecting source-level declarative status to the
 abstract grounded layer, oracle-parametric (`Compile.Faithful`) until the executable checkers
-land._
+land.
+Final spec pass (rows 3/5/10/13/14) — §4.1/§4.2 freeze markers, §4.3 `Gamma(P)` construction,
+§8.1 frozen as definition (violation = R12), §2.1 versioning + replay identity
+(`lara-core@0.1`), §10.1 rejection classes R1–R14, §9 per-result mechanization pointers, and the
+header lifted to **v0.1 — frozen at M1**. **M1 is complete**; tag `spec-v0.1` at the freeze-PR
+merge commit.
+Review follow-up (2026-07-24) — §8.1's finite validator is now mechanized in
+`lean/Lara/Policy.lean` and audited in `AxCheck.lean`. A second review exposed that syntactic
+pattern equality did not align with instance-level `ContraryMatch`; `wf(Pi)` now uses a
+conservative pattern-overlap check with a proved ground-instance soundness bridge. The exact model
+blockers for the remaining r7 theorem and r9 are recorded above rather than deferred on queue order
+alone._

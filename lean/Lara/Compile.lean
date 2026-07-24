@@ -167,8 +167,8 @@ theorem closure_includes_direct (P : CheckedProgram canon Pi Gamma CertOk dp)
 /-! ### The bridge to the abstract grounded layer (N16)
 
 `Lara/Grounded.lean` proved declarative ≡ executable grounded semantics over
-an arbitrary abstract AF, with `compile` characterized but never exercised.
-Here we exercise it: index the checked program's arguments by list position,
+an arbitrary abstract AF, where the earlier layer characterized `compile`
+without exercising it. Here we exercise it: index the checked program's arguments by list position,
 compile to a `Grounded.AF`, and show a source-level declarative judgment
 defined over the Prop-level closure edges agrees with the abstract one —
 first per argument, then lifted to four-state claim status. The Bool edge

@@ -17,7 +17,7 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
-    stale: false
+    stale: true
   - id: O02
     timestamp: "2026-07-22T00:50"
     provenance: ai-suggested
@@ -89,7 +89,7 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
-    stale: false
+    stale: true
   - id: O06
     timestamp: "2026-07-22T22:08"
     provenance: ai-suggested
@@ -104,4 +104,79 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
+    stale: true
+  - id: O07
+    timestamp: "2026-07-22T13:42"
+    provenance: ai-suggested
+    content: >
+      Same-session mechanization can expose structural defects in a newly
+      frozen definition. The §6.1 D⊎H mismatch motivated port-as-we-lock,
+      although that specific defect was found by review before the port.
+    context: "M1 lock pass; reconciled after the PR #14 rebase."
+    potential_type: heuristic
+    bound_to: [N39, N40]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O08
+    timestamp: "2026-07-22T13:59"
+    provenance: ai-suggested
+    content: >
+      Result 6 factors into an oracle-parametric semantic equivalence and one
+      constructive residual: the checker-built Compile.Faithful edge decider.
+      This localizes future preservation failures to executable decision
+      procedures rather than the grounded semantics.
+    context: "M1 compile lock item; reconciled after the PR #14 rebase."
+    potential_type: claim
+    bound_to: [N42, N16]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O09
+    timestamp: "2026-07-24T08:14"
+    provenance: ai-suggested
+    content: >
+      Result 9 is blocked at the statement-model boundary, not by proof
+      scheduling: CheckedProgram nodes are certificate-bearing SupportTerms
+      with no stable argument id or certificate-erased skeleton, so
+      payload-varying programs lack the required explicit node bijection.
+    context: "Technical evaluation of PR #14 review feedback."
+    potential_type: constraint
+    bound_to: [N44]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O10
+    timestamp: "2026-07-24T08:14"
+    provenance: ai-suggested
+    content: >
+      The remaining result-7 status theorem needs attack completeness in
+      addition to the mechanized Path-B validator. CheckedProgram.typed proves
+      every declared attack is valid, but does not prove every rebuttable
+      contrary conflict generates a declared and compiled edge.
+    context: "Technical evaluation and implementation of the §8.1 validator."
+    potential_type: constraint
+    bound_to: [N44]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O11
+    timestamp: "2026-07-24T08:48"
+    provenance: user
+    content: >
+      The original §8.1 validator compared APat syntax while ContraryMatch
+      registers conflicts after instAPat plus canonical equivalence. Therefore
+      a strict CanFly(X) conclusion passed wf(Pi) against a ground
+      CanFly(tweety) contrary side even though their instances participate in
+      the same conflict.
+    context: "Additional PR #14 review finding; verified and repaired before the spec-v0.1 tag."
+    potential_type: claim
+    bound_to: [N44, N45, C09]
+    promoted: true
+    promoted_to: [N45, C09]
+    crystallized_via: "Lean counterexample and ground-instance overlap soundness proof"
     stale: false

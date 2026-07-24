@@ -21,11 +21,15 @@ carry soundness; the tests cross-check the implementation against them.
 
 ## 2. Prover choice and gating
 
-**Default Lean 4** (decide vs Rocq before M1 by collaborator expertise; open question §8 #8). Rationale:
-Mathlib's order-theory/fixpoint and `Finset` machinery for result 5; Lean's `Decidable` typeclass makes
-results 1/5/11 executable *and* proved-decidable in one artifact (the differential-testing anchor needs
-this); reviewer familiarity. Do NOT start proving until M1 freezes the definitions — re-proving after
-definition churn is the main way a mechanization track blows its schedule.
+**Lean 4 — resolved** (open question §8 #8 closed 2026-07-22 at the M1 pre-freeze, N38: host fixed
+in spec §1.1 alongside the TCB enumeration). Rationale: Mathlib's order-theory/fixpoint and `Finset`
+machinery for result 5; Lean's `Decidable` typeclass makes results 1/5/11 executable *and*
+proved-decidable in one artifact (the differential-testing anchor needs this); reviewer familiarity;
+and by resolution time three results were already mechanized in Lean. The "don't prove before M1
+freezes" gate was refined at M1 into **port-as-we-lock** (N39): each definition ports the moment it
+individually freezes — the §6.1 D⊎H defect is the evidence for why frozen-but-unmechanized
+definitions shouldn't accumulate. (No Mathlib needed so far: the fixpoint core was done by hand in
+core Lean 4.)
 
 ## 3. One shared core, two implementations, a differential anchor
 
@@ -50,23 +54,28 @@ has precedent (Marmsoler–Brucker code-generate a Haskell oracle from an Isabel
   obligation as a field*; result 8 is one line per accepted instance; the ND adapter is an `instance`
   whose obligation is discharged by induction on the typing derivation.
 - **Result 9 (backend replacement)** — parametricity over the `Backend` structure + graph isomorphism
-  under `eraseCert` + lfp invariance.
+  under `eraseCert` + lfp invariance. Before the proof, extend `CheckedProgram` with stable argument
+  identity and a certificate-erased skeleton/bijection; certificate-bearing `SupportTerm` equality
+  cannot state the payload-varying node correspondence (O09).
 - **Result 4 (compilation soundness + subargument closure)** — mechanize `w@π` as a partial subterm
   lookup; prove every compiled edge has a typed source and closure adds edges only onto arguments
   containing the attacked occurrence.
-- **Result 7 (consistency, Path B)** — mechanize the compile-time strict-reachable validator; direct =
-  indirect consistency by construction. Do NOT mechanize Path A unless the corpus forces the flip.
+- **Result 7 (consistency, Path B)** — the compile-time strict-reachable validator is mechanized in
+  `Lara.Policy` (`strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, `wfB_iff`,
+  `wellFormed_no_strict_contrary_left/right`). The executable judgment uses a conservative
+  structural overlap relation rather than syntactic pattern equality, aligning it with
+  instance-level `ContraryMatch` (N45). The direct/indirect consistency theorem next needs attack
+  completeness from the executable checker; `CheckedProgram.typed` supplies only attack soundness
+  (O10). Do NOT mechanize Path A unless the corpus forces the flip.
 
-## 5. The result-6 gap (found this session; must close before M1 freeze)
+## 5. Result 6: source-to-compiled bridge mechanized modulo the edge decider
 
 Result 6 ("status preservation between a *direct source semantics* and the compiled-AF semantics") is
-**currently unprovable as written**: spec §8 defines only the compiled route, so there is no
-independent direct semantics to preserve. Action: define a direct big-step claim-status judgment
-`Σ; Π; Γ; R ; W ⊢ p ⇓ status` *without* the Dung translation, then state result 6 as agreement with
-`grounded(compile(W))`, and mechanize both. Alternative (weaker): reframe the compilation as *the*
-definition and drop result 6 — this loses the "semantics-preserving compilation" headline, so the
-direct-semantics route is preferred. Two other definitional holes must close for result 5's totality:
-the hole-vs-complete-alternative case and `contested`-SCC provenance.
+no longer blocked on a missing direct semantics. `Lara.Compile.SrcIn`/`SrcOut`/`SrcStatus` read the
+Prop-level source closure relation, and `srcIn_iff_grounded`/`srcStatus_iff` prove equality with
+executable grounded evaluation under `Compile.Faithful`; `Lara.Examples.edgeBEx_faithful` exercises
+a concrete strict-superset closure. The residual is constructive: the raw-source checker must build
+the general Boolean edge decider and its `Faithful` proof once backend replay is decidable (O06/O08).
 
 ## 6. Sequencing and artifact hygiene
 

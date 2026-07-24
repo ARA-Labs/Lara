@@ -35,3 +35,16 @@ entries:
       - "Routed the failed HTTPS-only CI repair as dead_end N35 because the logs directly refuted the assumed transport-only cause."
       - "Routed the verified direct-index workaround as experiment N36; the successful GitHub Actions run is direct evidence."
       - "Did NOT touch claims or stage an observation: this was infrastructure recovery, not a new interpretation of the research."
+  - turn: "2026-07-22_001#11-18"
+    notes:
+      - "Reconciled after PR #14 rebase under fresh IDs N38-N43/O07-O08 because main already used N34-N37/O06 for later PR #10 sessions."
+      - "Restored the original turn-1 blocks byte-for-structure and appended the M1 material under *_turns11_18 keys; the deleted rebut/undermine open thread is present again."
+      - "C02 advanced hypothesis→testing from the sorry-free Attack theorems; C07/C08 advances remain recorded historically, while main's later stronger states stay authoritative."
+      - "N39 is user-revised because the user accepted the port-as-we-lock recommendation; O07 remains staged because its generalized defect-detection claim has single-instance evidence."
+  - turn: "2026-07-24_001#1"
+    notes:
+      - "Routed the completed review pass as experiment N44: it produced a rebased branch, a new mechanized validator, and reproducible Lean/Haskell results."
+      - "Staged O09/O10 as constraints, not claims: they identify missing model/checker preconditions for results 9 and 7 rather than asserting the results themselves."
+      - "Advanced C09 hypothesis→testing because the validator half is now machine-checked; kept it below supported because attack completeness and the grounded consistency theorem remain."
+      - "Advanced C02 only as historical reconciliation from 2026-07-22; no stronger status was inferred from this session."
+      - "Maturity tracker marked O01/O05/O06 stale after three or more later sessions; no topic had three unpromoted observations requiring promotion."

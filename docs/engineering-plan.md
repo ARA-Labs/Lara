@@ -6,7 +6,14 @@ milestone spine (`../plans/research-proposal.md` §7, M0–M7) and the phased wo
 describes the *module dependency graph* and the *build discipline*. The spec (`spec.md`) is the
 contract every module implements._
 
-## 0. Current state (2026-07-21)
+## 0. Current state (2026-07-21; M1 update 2026-07-22)
+
+**M1 update (2026-07-22):** M0 exited (PR #8/#9) and the v0.1 language froze — `spec.md` is now
+"v0.1 — frozen at M1" with the row-by-row record in `m1-freeze-checklist.md`. The Lean
+development additionally mechanizes the frozen §6.1 support-term typing, §7.1 attack typing, and
+§8 compilation layers (`lean/Lara/{Support,Attack,Compile}.lean`) plus the executable §8.1
+Path-B validator (`lean/Lara/Policy.lean`); the M2 backlog and remaining proof preconditions are
+tracked in the checklist. The Haskell state below is unchanged — M3 builds against the frozen spec.
 
 The only code that exists is an experimental LP adapter seed — ~483 lines of Haskell:
 
@@ -92,8 +99,8 @@ whose shape M0 can change.
 | 8 | `Lara.Diagnostics` — located rejection for every ill-formed construct | §1, §10 | all above | no |
 
 **The §8.1 policy validator is an early M3 target** (`research-proposal.md:447`): compute the
-strict-reachable proposition set and reject any policy whose `contrary` declarations touch it. It
-lands with `Lara.Policy` (layer 3), not later.
+strict-reachable pattern set and reject any policy whose `contrary` sides may overlap it at the
+ground-instance level. It lands with `Lara.Policy` (layer 3), not later.
 
 ### Boundary layers (after the core AST stabilizes)
 

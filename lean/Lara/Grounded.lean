@@ -17,7 +17,8 @@ exercised** by the equivalence theorems below — every one of them quantifies o
 single already-given `F : AF`, and `statusDirect`/`statusC` read the *same*
 `F.attack`. Instantiating the equivalence at `F := compile W` and proving a
 source-level status matches it (thereby exercising the subargument-closure edges)
-is M1 work. Provenance docs label this "result 6 — abstract AF layer" accordingly.
+is supplied oracle-parametrically by `Lara.Compile`; constructing the general
+edge decider from raw source is M2 work.
 (M1 update: `Lara/Compile.lean` now defines the concrete closure-edge relation
 over the frozen §6.1/§7.1 layers and bridges a source-level declarative judgment
 to this abstract layer — `srcIn_iff_directIn`/`srcIn_iff_grounded` — parametric

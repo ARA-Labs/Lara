@@ -113,11 +113,13 @@ mutual
     | nil  : Pats
     | cons : Pat → Pats → Pats
 end
+deriving instance DecidableEq for Pat, Pats
 
 /-- An atom pattern `Apat ::= pred(P1, ..., Pn)`. -/
 structure APat where
   pred : PredSym
   args : Pats
+deriving DecidableEq
 
 /-- The wire substitution: explicit, ground by construction (`Term` is ground). -/
 abbrev Subst := List (VarId × Term)

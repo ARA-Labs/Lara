@@ -15,10 +15,14 @@
 --     both halves, closure ⊇ direct, and the N16 bridge from source-level
 --     declarative status to the abstract grounded layer (oracle-parametric)
 --     — Lara.Compile
+--   * the §8.1 Path-B policy validator: strict-reachable patterns, executable
+--     wf(Pi), and located R12 violations — Lara.Policy
 -- To come: the executable support/attack/edge checkers (result 1 other half;
 -- they also constructively supply Compile.Faithful, closing result 6's
 -- source-vs-compiled half), certDeps accountability (needs Backend.uses),
--- backend replacement (result 9). See docs/mechanization-plan.md.
+-- the result-7 consistency theorem (needs attack completeness), and backend
+-- replacement (needs certificate-erased argument identity). See
+-- docs/mechanization-plan.md.
 import Lara.Prop
 import Lara.ND
 import Lara.Certificate
@@ -27,4 +31,5 @@ import Lara.Grounded
 import Lara.Support
 import Lara.Attack
 import Lara.Compile
+import Lara.Policy
 import Lara.Examples
