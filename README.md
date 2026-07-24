@@ -23,6 +23,13 @@ establish empirical truth — it establishes that the argument is well formed,
 complete relative to the declared policy, and yields the reported status
 ([spec §1](docs/spec.md)).
 
+> "The format of research knowledge matters a lot more than you think —
+> that is how knowledge compounds."
+
+LARA is the checker side of that thesis: when claims, implementations, results,
+and dead ends are explicit, the *support* of each claim becomes an object a
+small trusted kernel can type, compile, and audit.
+
 Features:
 
 - **One calculus.** Every argument is a single syntactic category — the

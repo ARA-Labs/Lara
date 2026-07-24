@@ -63,3 +63,21 @@ entries:
       - "User question 'did we state purpose and formal framework?' treated as a gap report → purpose paragraph + Theoretical foundations section added; sourced from novelty-and-related-work.md §1-§2 wording, not from memory."
       - "Kept 'argumentation schemes with critical questions' unattributed (no Walton citation in the repo's own docs); named only lineages the delta table itself names."
       - "Still no tree node: README content, even theory framing, restates positions already crystallized in the novelty doc and C13-C17."
+  - turn: "2026-07-24_003#4"
+    notes:
+      - "Transcript retrieval logged as a reference, not an event or observation — external context about the ARA ecosystem's motivation, no bearing yet on LARA claims."
+      - "Noted for future turns: the interview articulates the ARA thesis LARA consumes (artifacts carry dead ends + trajectories); if the user draws design conclusions from it, stage them then."
+  - turn: "2026-07-24_003#5"
+    notes:
+      - "User directive to 'record that in a doc' routed as a documentation decision (provenance user) + ai-executed reference note; followed the docs/references/ house style incl. a provenance flag since the source is auto-captions."
+      - "Considered staging the interview's ecosystem premises (infinite-bandwidth consumers, format-as-compounding-mechanism) as observations; rejected — they are ARA-side assumptions, and the note itself marks them motivational, not evidence for LARA claims."
+      - "No tree node: the doc restates external positions; LARA design decisions it echoes (C13-C17) are already crystallized."
+  - turn: "2026-07-24_003#6"
+    notes:
+      - "Chose the [09:01] ARA-primitive quote for the README epigraph over [04:00] (knowledge-compounding, too philosophical for a checker's README) and [10:00] (dead-ends, narrower); it names the exact objects LARA types."
+      - "Quote is condensed with visible ellipses and links to the reference note rather than restating the auto-caption caveat inline."
+      - "Documentation act; no tree node, no staging, no logic edits."
+  - turn: "2026-07-24_003#7"
+    notes:
+      - "User overrode the epigraph choice: [04:00] knowledge-compounding quote, unattributed — earlier 'too philosophical' judgment reversed by the user ('we are doing logic theory already'); provenance user-revised for the epigraph."
+      - "Attribution line dropped per user; the reference note still documents the source, so provenance is preserved one hop away."
