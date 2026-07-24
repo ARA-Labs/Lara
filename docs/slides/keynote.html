@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LARA — POPL talk</title>
+<style>
+  :root{
+    --bg:#0f1216; --panel:#161b22; --panel2:#0c0f13;
+    --ink:#eceff4; --dim:#aab4c0; --faint:#6b7684; --line:#2a323d;
+    --accent:#7aa2f7; --accent2:#e0a458;
+    --good:#7bcf9a; --bad:#e88b8e; --undec:#d9be6a;
+    --thm:#7aa2f7; --def:#9d8cf0; --cor:#7bcf9a;
+    --mono:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased}
+  #deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:8vh 8vw 9vh;opacity:0;transition:opacity .3s ease}
+  .slide.active{display:flex;opacity:1}
+  .slide.center{justify-content:center}
+  .slide.active .rise{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+  .slide.active .rise:nth-child(2){animation-delay:.04s}
+  .slide.active .rise:nth-child(3){animation-delay:.08s}
+  .slide.active .rise:nth-child(4){animation-delay:.12s}
+  .slide.active .rise:nth-child(5){animation-delay:.16s}
+  .slide.active .rise:nth-child(6){animation-delay:.2s}
+  @keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+  /* running head: section marker */
+  .sec{font-family:var(--sans);font-size:clamp(11px,1.1vw,15px);letter-spacing:.04em;color:var(--faint);margin-bottom:1.4rem;display:flex;gap:.6em;align-items:baseline}
+  .sec b{color:var(--accent);font-weight:600}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,5.6vw,74px);line-height:1.04;letter-spacing:-.01em}
+  h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.4vw,46px);line-height:1.12;letter-spacing:-.005em;margin-bottom:1.5rem}
+  h2 .em{color:var(--accent)}
+  p,li{font-size:clamp(14px,1.5vw,21px);line-height:1.5;color:var(--dim)}
+  p strong,li strong{color:var(--ink);font-weight:600}
+  .subtitle{font-family:var(--serif);font-size:clamp(18px,2.3vw,32px);color:var(--dim);line-height:1.3;margin-top:1.5rem;max-width:30ch}
+  .byline{margin-top:2.6rem;font-size:clamp(13px,1.3vw,18px);color:var(--faint);line-height:1.7}
+  .byline b{color:var(--ink);font-weight:600}
+  .venue{font-family:var(--mono);font-size:clamp(11px,1.15vw,15px);letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-top:.4rem}
+  code,.mono{font-family:var(--mono)}
+  .cite{color:var(--faint);font-style:italic}
+
+  .codebox{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;
+    padding:clamp(.8rem,1.7vw,1.4rem) clamp(1rem,2vw,1.7rem);font-family:var(--mono);
+    font-size:clamp(12px,1.4vw,20px);color:var(--ink);line-height:1.55;margin:.4rem 0;white-space:pre;overflow-x:auto}
+  .codebox.sm{font-size:clamp(11px,1.2vw,16px);line-height:1.5}
+  .c{color:var(--faint)} .k{color:var(--accent)} .o{color:var(--accent2)} .v{color:var(--def)}
+  .g{color:var(--good)} .r{color:var(--bad)} .u{color:var(--undec)}
+
+  /* theorem / definition environments */
+  .box{border:1px solid var(--line);border-radius:8px;padding:clamp(.9rem,1.9vw,1.4rem) clamp(1.1rem,2.1vw,1.7rem);margin:.5rem 0;background:var(--panel)}
+  .box .lab{font-family:var(--sans);font-weight:700;font-size:clamp(13px,1.35vw,19px);margin-bottom:.5rem;display:block}
+  .box .lab .id{color:var(--faint);font-weight:400;font-style:italic}
+  .box p{font-size:clamp(13px,1.4vw,19px)}
+  .box.thm{border-left:3px solid var(--thm)} .box.thm .lab{color:var(--thm)}
+  .box.def{border-left:3px solid var(--def)} .box.def .lab{color:var(--def)}
+  .box.cor{border-left:3px solid var(--cor)} .box.cor .lab{color:var(--cor)}
+  .box .stmt{font-family:var(--serif);font-style:italic;color:var(--ink);font-size:clamp(14px,1.5vw,21px);line-height:1.4}
+  .box .pf{font-size:clamp(12px,1.25vw,16px);color:var(--faint);margin-top:.6rem}
+  .box .pf b{color:var(--dim);font-style:normal}
+
+  /* inference rule */
+  .rule{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:clamp(12px,1.35vw,19px);margin:.4rem 1.2rem .4rem 0;color:var(--ink)}
+  .rule .prem{padding:0 .8em .25em}
+  .rule .bar{border-top:1.5px solid var(--accent);width:100%;position:relative}
+  .rule .bar .rn{position:absolute;right:-.2em;top:-.7em;transform:translateX(100%);color:var(--accent);font-size:.72em}
+  .rule .concl{padding:.25em .8em 0}
+  .rules{display:flex;flex-wrap:wrap;align-items:flex-start;margin-top:.6rem}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.6vw,2.4rem);align-items:start}
+  .two.tight{gap:clamp(.8rem,1.8vw,1.5rem)}
+  ul{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-top:.3rem}
+  li{position:relative;padding-left:1.5em}
+  li::before{content:"▸";position:absolute;left:0;top:0;color:var(--accent);font-size:.85em}
+  ol.out{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:.85rem}
+  ol.out li{counter-increment:s;padding-left:2.4em;font-size:clamp(15px,1.7vw,26px);color:var(--faint);transition:color .2s}
+  ol.out li.on{color:var(--ink)}
+  ol.out li::before{content:"§" counter(s);position:absolute;left:0;top:0;font-family:var(--mono);font-size:.8em;color:var(--accent);opacity:.7}
+  ol.out li.on::before{opacity:1}
+
+  table.dt{border-collapse:collapse;width:100%;margin-top:.5rem;font-size:clamp(11px,1.25vw,17px)}
+  table.dt td,table.dt th{border:1px solid var(--line);padding:.45em .65em;text-align:left;vertical-align:top}
+  table.dt th{font-family:var(--sans);font-weight:700;color:var(--accent2);font-size:.92em}
+  table.dt td.sys{font-weight:600;color:var(--ink);white-space:nowrap}
+  table.dt td.lacks{color:var(--dim)}
+  table.dt .done{color:var(--good)} table.dt .part{color:var(--undec)} table.dt .todo{color:var(--faint)}
+  table.dt .thm{font-family:var(--mono);color:var(--dim);font-size:.92em}
+
+  .states{display:flex;gap:clamp(.5rem,1.3vw,1rem);flex-wrap:wrap;margin-top:.6rem}
+  .st{flex:1;min-width:120px;border:1px solid var(--line);border-radius:9px;padding:clamp(.7rem,1.6vw,1.1rem);background:var(--panel)}
+  .st .n{font-family:var(--mono);font-weight:600;font-size:clamp(13px,1.5vw,20px);margin-bottom:.25rem}
+  .st p{font-size:clamp(11px,1.2vw,15px);color:var(--dim)}
+  .st.j{border-color:#2f5a41} .st.j .n{color:var(--good)}
+  .st.g{border-color:#4a4530} .st.g .n{color:var(--undec)}
+  .st.d{border-color:#5a3132} .st.d .n{color:var(--bad)}
+  .st.c{border-color:#33475e} .st.c .n{color:var(--accent)}
+
+  .note{font-family:var(--sans);font-size:clamp(11px,1.15vw,15px);color:var(--faint);margin-top:1.2rem}
+  .lead{font-family:var(--serif);font-size:clamp(19px,2.6vw,38px);line-height:1.3;color:var(--ink);max-width:26ch;font-style:italic}
+  .lead .em{color:var(--accent);font-style:normal}
+  .hook{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5vw,66px);line-height:1.05;letter-spacing:-.01em;color:var(--ink)}
+  .hook .em{color:var(--accent)}
+  .hook .strike{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:.06em}
+  .theme-tag{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-style:italic;font-size:clamp(11px,1.15vw,15px);color:var(--faint);z-index:19;opacity:.5;white-space:nowrap;pointer-events:none}
+  @media (max-width:760px){.theme-tag{display:none}}
+
+  #bar{position:fixed;left:0;bottom:0;height:2px;background:var(--accent);width:0;transition:width .3s ease;z-index:20}
+  #hud{position:fixed;right:20px;bottom:12px;font-family:var(--mono);font-size:11px;color:var(--faint);z-index:20;letter-spacing:.08em}
+  #hud b{color:var(--dim)}
+  #dots{position:fixed;left:20px;bottom:11px;display:flex;gap:5px;z-index:20;max-width:62vw;flex-wrap:wrap}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--line);cursor:pointer;transition:all .2s;border:0;padding:0}
+  .dot.on{background:var(--accent);transform:scale(1.35)}
+  #hint{position:fixed;top:13px;right:20px;font-family:var(--mono);font-size:10px;color:var(--faint);z-index:20;letter-spacing:.05em;opacity:.65}
+  .brand{position:fixed;top:13px;left:20px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--faint);z-index:20}
+  .brand b{color:var(--accent)}
+  @media (max-width:760px){.two{grid-template-columns:1fr}#dots{display:none}}
+</style>
+</head>
+<body>
+<div class="brand"><b>LARA</b> · POPL</div>
+<div id="hint">← → space · f</div>
+<div id="deck"></div>
+<div id="bar"></div>
+<div id="hud"><b id="cur">1</b> / <span id="tot">1</span></div>
+<div class="theme-tag">research can be well-typed</div>
+<div id="dots"></div>
+
+<script>
+const slides = [
+
+/* ══════════════ 0 · TITLE (centered) ══════════════ */
+`<div class="rise venue">POPL · Principles of Programming Languages</div>
+ <h1 class="rise" style="margin-top:1.2rem">LARA</h1>
+ <p class="rise hook" style="margin-top:1.4rem">Research can be <span class="em">well-typed.</span></p>
+ <p class="rise subtitle" style="margin-top:1rem">A proof-carrying language of typed, defeasible claim-support certificates with a backend-parametric strict seam.</p>
+ <div class="rise byline">
+   <b>Checking the step every research artifact declares but no one checks:</b><br>
+   <span style="color:var(--dim)">“this evidence supports this claim.”</span>
+ </div>
+ <div class="rise note" style="margin-top:2rem">Haskell checker · Lean 4 mechanized metatheory · <span class="cite">sorry</span>-free within {propext, Classical.choice, Quot.sound}</div>`,
+
+/* ══════════════ 1 · ROADMAP ══════════════ */
+`<div class="rise sec"><b>Roadmap</b> — where we're going, in plain terms</div>
+ <ol class="out">
+   <li class="rise">The problem — a claim, an arrow, and nobody checking it</li>
+   <li class="rise">Proof-carrying code — untrusted producer, tiny trusted checker</li>
+   <li class="rise">The gap in prior work, and our contribution</li>
+   <li class="rise">A little argumentation theory (Dung, grounded, defeasible)</li>
+   <li class="rise">The lens — a claim-support argument <em>is</em> a typing derivation</li>
+   <li class="rise">The calculus — one term, one judgment, support as identity</li>
+   <li class="rise">The strict seam and the factivity firewall</li>
+   <li class="rise">Attacks, compilation, and the four-state status</li>
+   <li class="rise">Metatheory, evaluation, related work</li>
+ </ol>
+ <p class="rise note">We'll define every term the first time we use it. No prior exposure to proof-carrying code or argumentation theory is assumed.</p>`,
+
+/* ══════════════ 2 · DIVIDER §1 (centered) ══════════════ */
+`<div class="rise sec"><b>§1</b> · The problem</div>
+ <h1 class="rise">The arrow nobody checks.</h1>
+ <p class="rise subtitle" style="max-width:34ch">Every research artifact declares that some evidence supports some claim. That declaration is trusted on faith.</p>`,
+
+/* ══════════════ 3 · the unchecked arrow ══════════════ */
+`<div class="rise sec"><b>§1</b> Why we care</div>
+ <h2 class="rise">Every paper is full of the same tiny, invisible step.</h2>
+ <p class="rise" style="max-width:64ch">A results table, a figure, a benchmark number — then a sentence: <em>“therefore method M is better.”</em> That “therefore” is an <strong>arrow</strong> from evidence to a claim.</p>
+ <p class="rise lead" style="margin-top:1.2rem;max-width:50ch">We publish the evidence. We publish the claim. We <span class="em">assert</span> the arrow — and no tool ever checks it.</p>
+ <p class="rise note" style="margin-top:1.2rem">Peer review reads the prose and gives a holistic yes/no. It cannot point at <em>which</em> step is weak, and it cannot be replayed. When a later result overturns a finding, nothing in the original artifact records that the arrow was ever contingent.</p>`,
+
+/* ══════════════ 4 · concrete claim ══════════════ */
+`<div class="rise sec"><b>§1</b> A concrete claim</div>
+ <h2 class="rise">Here is one such arrow, written out.</h2>
+ <div class="codebox rise sm"><span class="k">claim</span> c₁   nl = "Method M improves accuracy on distribution D"
+        formal = improves(M, accuracy, D)
+
+<span class="k">leaf</span> e₁ : reports(exp₃, effect(M, accuracy, D, +2.1))     <span class="c">— one cell of one table</span>
+
+<span class="k">arg</span>  a₁ : supports(c₁) <span class="o">by</span> controlled_comparison(e₁)
+       discharge randomization, adequate_power ;  <span class="u">open external_validity</span></div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch">Read it top to bottom. A <strong>claim</strong> has an English sentence <code>nl</code> and a formal target <code>formal</code>. A <strong>leaf</strong> is one raw piece of evidence — literally one number in a table. An <strong>argument</strong> <code>a₁</code> says: this leaf supports the claim, <em>via</em> a named reasoning pattern, having answered some questions and left one open.</p>`,
+
+/* ══════════════ 5 · three hidden moves ══════════════ */
+`<div class="rise sec"><b>§1</b> Three hidden moves</div>
+ <h2 class="rise">That one line hides <span class="em">three</span> separate acts of trust.</h2>
+ <div class="two tight">
+   <div class="rise">
+     <ul>
+       <li><strong>(i) Does e₁ actually support c₁?</strong> Is the number even about the thing the claim is about?</li>
+       <li><strong>(ii) Is the inference sound, or merely plausible?</strong> A controlled comparison is presumptive, not a proof.</li>
+       <li><strong>(iii) What happens later?</strong> If a follow-up result undercuts the method, does the claim quietly retract?</li>
+     </ul>
+   </div>
+   <div class="rise">
+     <p>Today, all three are <em>declared in prose</em> and <strong>checked by no one</strong>.</p>
+     <p style="margin-top:.9rem">Our goal: make this object <em>checkable</em> — so a machine confirms (i), records the presumptive nature of (ii), and re-computes status when (iii) happens.</p>
+   </div>
+ </div>
+ <p class="rise note">Notice the tension already: we want to <em>check</em> the arrow like a type-checker, yet a later result must be able to <em>defeat</em> it. Hold onto that tension — it drives the whole design.</p>`,
+
+/* ══════════════ 6 · why not a normal type system ══════════════ */
+`<div class="rise sec"><b>§1</b> The core difficulty</div>
+ <h2 class="rise">Why can't a normal type system just do this?</h2>
+ <p class="rise" style="max-width:64ch">A type system is <strong>monotone</strong>: once <code>Γ ⊢ e : A</code> holds, adding more to the context <code>Γ</code> never takes it away. That is exactly the property we <em>don't</em> want for empirical claims.</p>
+ <div class="two tight" style="margin-top:1.2rem">
+   <div class="box def rise"><span class="lab">Empirical support is <span class="id">defeasible</span></span><p><strong>Defeasible</strong> = a conclusion that is warranted <em>now</em> but can be withdrawn when new information arrives, without anyone having made a mistake. New evidence can retract an old, perfectly-reasoned claim.</p></div>
+   <div class="rise"><p>So we need a system where a term is <strong>well-typed</strong> — it passes the check — and yet its conclusion can later be <strong>defeated</strong>. The term never becomes ill-typed; only its <em>status</em> moves.</p>
+     <p style="margin-top:.8rem">No ordinary type system does this. That is the design problem LARA solves.</p></div>
+ </div>`,
+
+/* ══════════════ 7 · DIVIDER §2 PCC (centered) ══════════════ */
+`<div class="rise sec"><b>§2</b> · The architecture</div>
+ <h1 class="rise">Proof-carrying code.</h1>
+ <p class="rise subtitle" style="max-width:36ch">Don't trust the producer. Ship a certificate. Trust only a tiny checker.</p>`,
+
+/* ══════════════ 8 · what is PCC ══════════════ */
+`<div class="rise sec"><b>§2</b> Background: proof-carrying code</div>
+ <h2 class="rise">The one idea we borrow.</h2>
+ <p class="rise" style="max-width:64ch"><strong>Proof-carrying code</strong> (Necula '97; foundational PCC, Appel; Foundational Proof Certificates, Miller) was invented so a host could run untrusted machine code safely.</p>
+ <div class="two tight" style="margin-top:1.1rem">
+   <div class="box def rise"><span class="lab">The recipe</span><p>The code arrives <strong>bundled with a certificate</strong> — a proof that it obeys a safety policy. A small <em>checker</em> validates the certificate against the code before running it.</p></div>
+   <div class="rise">
+     <p>Two roles, deliberately unequal:</p>
+     <ul>
+       <li><strong>Producer</strong> — arbitrarily clever, arbitrarily <em>untrusted</em>. May be buggy, adversarial, or an LLM.</li>
+       <li><strong>Checker</strong> — small, fixed, and the <em>sole arbiter</em>. This is the trusted computing base (TCB).</li>
+     </ul>
+   </div>
+ </div>`,
+
+/* ══════════════ 9 · why the architecture matters ══════════════ */
+`<div class="rise sec"><b>§2</b> Why the asymmetry matters</div>
+ <h2 class="rise">A wrong proposal costs <span class="em">one failed check</span> — never a false acceptance.</h2>
+ <p class="rise" style="max-width:64ch">Because trust lives entirely in the small checker, the producer can be anyone — a human, a script, a large language model. Cleverness is free; it cannot buy a wrong answer past the checker.</p>
+ <div class="box thm rise" style="margin-top:1.1rem"><span class="lab">The guarantee we inherit</span>
+   <p class="stmt">If the checker accepts, the property holds — regardless of how the certificate was produced. Soundness is a property of the checker alone.</p>
+ </div>
+ <p class="rise lead" style="margin-top:1.2rem;max-width:52ch">LARA makes the producer's claim-support argument the <span class="em">certificate</span>, and a small checker its <span class="em">sole arbiter.</span></p>
+ <p class="rise note">Classical PCC certifies <em>machine proofs</em> — monotone and factive. Our new twist: the certified object is <em>defeasible</em>. That is what §7 onward is about.</p>`,
+
+/* ══════════════ 10 · DIVIDER §3 the gap (centered) ══════════════ */
+`<div class="rise sec"><b>§3</b> · Prior work</div>
+ <h1 class="rise">Represent, or attest — <br>but never <span class="em">check</span> a defeasible claim.</h1>
+ <p class="rise subtitle" style="max-width:38ch">The design space is populated. The object we need is missing from it.</p>`,
+
+/* ══════════════ 11 · represent vs attest ══════════════ */
+`<div class="rise sec"><b>§3</b> The gap — first axis</div>
+ <h2 class="rise">Existing systems either <span class="em">represent</span> the arrow, or <span class="em">attest</span> it.</h2>
+ <div class="two tight">
+   <div class="box def rise"><span class="lab">Represent</span><p><strong>Micropublications, AIF, nanopublications.</strong> They give you a data model — nodes for claims and evidence, edges for “supports.” But the support edge is simply <em>asserted</em>. There is no status, no located defeat, and no soundness theorem. It records the arrow; it never checks it.</p></div>
+   <div class="box def rise"><span class="lab">Attest</span><p><strong>EG-VAR</strong> (2026, workshop). It kernel-checks tool attestations of empirical claims — genuinely verified. But it is <em>monotonic</em> and <em>factive</em>: a conclusion, once attested, can never be retracted by a later dead end. Trust is relocated to the lift into the kernel.</p></div>
+ </div>
+ <p class="rise note">Neither one lets a checked claim be <em>defeated later</em> — the very thing empirical reasoning demands.</p>`,
+
+/* ══════════════ 12 · two adjacent logics ══════════════ */
+`<div class="rise sec"><b>§3</b> The gap — second axis</div>
+ <h2 class="rise">Two logics sit next door, and each is missing a side.</h2>
+ <div class="two tight">
+   <div class="box def rise"><span class="lab">Pandžić</span><p>Defeasible justification-logic <em>terms</em> — close in spirit. But it is pure logic: <strong>factive</strong>, and with no artifact layer, no policy of inference schemes, no critical-question layer, and no compilation theorem tying it to a computed status.</p></div>
+   <div class="box def rise"><span class="lab">ASPIC⁺ / Dung</span><p>A structured argumentation <em>framework</em> and an abstract <em>semantics</em> (we'll define both in §4). Powerful — but not a <strong>checkable language</strong>. There is no small trusted checker and no theorem relating a source program to its evaluated status.</p></div>
+ </div>
+ <p class="rise note">We are not the first to <em>formalize a claim</em> — asserting that would be false, and a desk reject. The point is what nobody has built.</p>`,
+
+/* ══════════════ 13 · what's missing ══════════════ */
+`<div class="rise sec"><b>§3</b> The missing object</div>
+ <h2 class="rise">What no one has: a <span class="em">checkable, defeasible</span> claim-support object.</h2>
+ <p class="rise lead" style="max-width:44ch">We want an object that is at once <span class="em">checked</span> by a small kernel, <span class="em">defeasible</span> so later evidence can move it, carries a <span class="em">located</span> status, and comes with a <span class="em">soundness theorem.</span></p>
+ <ul class="rise" style="margin-top:1.2rem">
+   <li>Represent-systems give the shape but no check and no theorem.</li>
+   <li>Attest-systems give the check but stay monotone and factive.</li>
+   <li>The logics give defeasibility but no artifact, no checker, no compilation theorem.</li>
+ </ul>
+ <p class="rise note">The contribution is the combination made rigorous — an object that is all four at once.</p>`,
+
+/* ══════════════ 14 · contribution ══════════════ */
+`<div class="rise sec"><b>§3</b> Contribution</div>
+ <h2 class="rise">The object, and its guarantee.</h2>
+ <p class="rise lead" style="max-width:42ch">LARA is a proof-carrying language whose programs <em>are</em> typed claim-support certificates, which a small checker compiles into an argumentation framework and a replayable four-state status.</p>
+ <div class="rise" style="margin-top:1.4rem">
+   <p style="max-width:64ch">The architecture is proof-carrying: an <strong>untrusted producer</strong> — human or LLM — proposes the certificate; a <strong>small trusted checker</strong> is the sole arbiter of structural validity. A wrong proposal costs one failed check, never a false acceptance.</p>
+ </div>`,
+
+/* ══════════════ 15 · three parts ══════════════ */
+`<div class="rise sec"><b>§3</b> Three parts none prior combines</div>
+ <h2 class="rise">What we actually deliver.</h2>
+ <div class="box def rise"><span class="lab">1 · A calculus</span><p>A typed claim-support calculus with policy-generated <strong>obligations</strong> and typed <strong>attacks</strong> — one term category, strict-vs-defeasible as a rule mode.</p></div>
+ <div class="box def rise"><span class="lab">2 · A compilation</span><p>A <strong>semantics-preserving compilation</strong> to a Dung argumentation framework with a grounded, four-state status.</p></div>
+ <div class="box def rise"><span class="lab">3 · Mechanized metatheory</span><p><strong>Machine-checked</strong> accountability, backend-replacement, non-factivity, and status-preservation theorems — in Lean 4.</p></div>
+ <p class="rise note">The novelty is the checked, defeasible, replayable object with <em>located</em> failure — plus the theorem that ties source to status.</p>`,
+
+/* ══════════════ 16 · DIVIDER §4 argumentation (centered) ══════════════ */
+`<div class="rise sec"><b>§4</b> · Background</div>
+ <h1 class="rise">A little argumentation theory.</h1>
+ <p class="rise subtitle" style="max-width:36ch">Three ideas — defeasible rules, a Dung framework, the grounded extension — before we build on them.</p>`,
+
+/* ══════════════ 17 · defeasible reasoning plain ══════════════ */
+`<div class="rise sec"><b>§4</b> Defeasible reasoning</div>
+ <h2 class="rise">Two kinds of rules: some are <span class="em">safe</span>, some are <span class="em">presumptive</span>.</h2>
+ <div class="two tight">
+   <div class="box def rise"><span class="lab">Strict rule</span><p>Deductively valid — if the premises hold, the conclusion holds, period. Arithmetic, logical deduction. You <em>cannot</em> argue “the rule doesn't apply here.” Strict rules are <strong>unattackable</strong>.</p></div>
+   <div class="box def rise"><span class="lab">Defeasible rule</span><p>Presumptive — the premises give you <em>good reason</em> to accept the conclusion, but exceptions exist. “Birds fly” is defeasible: penguins are birds. It comes with <strong>critical questions</strong> that must be answered or flagged.</p></div>
+ </div>
+ <p class="rise note" style="margin-top:1.1rem">A <strong>critical question (CQ)</strong> is a standard challenge attached to a scheme — “was the comparison randomized?”, “was the sample powered?”. Answer it, or record it as an open <em>hole</em>. Empirical support is almost entirely defeasible reasoning.</p>`,
+
+/* ══════════════ 18 · Dung AF ══════════════ */
+`<div class="rise sec"><b>§4</b> A Dung argumentation framework</div>
+ <h2 class="rise">Forget the <em>contents</em>. Keep only <span class="em">who attacks whom</span>.</h2>
+ <div class="box def rise"><span class="lab">Abstract argumentation framework (Dung 1995)</span>
+   <p class="stmt">A framework is a pair <code>AF = (Args, Attack)</code>: a set of arguments, and a binary <em>attack</em> relation on them. Nothing else — arguments are opaque nodes; attacks are directed edges.</p>
+ </div>
+ <div class="codebox rise sm" style="margin-top:.8rem">   a  ──attacks──▶  b  ──attacks──▶  c
+
+<span class="c">Is c acceptable? Only if its attacker b is itself defeated by some accepted argument.</span></div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch">The genius of Dung's abstraction: acceptability is decided <em>purely</em> from the attack graph. We just have to say which sets of arguments “defend themselves.” That is what a <strong>semantics</strong> does.</p>`,
+
+/* ══════════════ 19 · grounded extension iteration ══════════════ */
+`<div class="rise sec"><b>§4</b> The grounded extension</div>
+ <h2 class="rise">The most <span class="em">skeptical</span> semantics — build it from the empty set up.</h2>
+ <div class="codebox rise sm">D_AF(S) = { a ∈ Args | every attacker of a is attacked by some b ∈ S }
+
+∅  ⊆  D_AF(∅)  ⊆  D_AF(D_AF(∅))  ⊆  …   →   grounded = ⋃ₙ D_AFⁿ(∅)</div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch"><code>D_AF(S)</code> is the <strong>defense operator</strong>: the arguments that <code>S</code> can defend. Start from nothing. Round 1 accepts every <em>unattacked</em> argument. Round 2 adds anything whose attackers are all now defeated. Repeat until nothing changes.</p>
+ <div class="box def rise" style="margin-top:.6rem"><span class="lab">Three labels</span><p>Each argument ends up <strong class="mono" style="color:var(--good)">in</strong> (accepted), <strong class="mono" style="color:var(--bad)">out</strong> (defeated by something in), or <strong class="mono" style="color:var(--undec)">undec</strong> (undecided — typically in an attack cycle). The grounded labelling is <em>unique</em>.</p></div>`,
+
+/* ══════════════ 20 · four states preview ══════════════ */
+`<div class="rise sec"><b>§4</b> From labels to a claim's status</div>
+ <h2 class="rise">A claim can have several arguments. Aggregate their labels.</h2>
+ <p class="rise" style="max-width:64ch">One claim may be supported by several independent arguments. LARA collapses their <code>in/out/undec</code> labels into <strong>one of four states</strong> per claim — a preview, we return to it in §8:</p>
+ <div class="states rise" style="margin-top:.8rem">
+   <div class="st j"><div class="n">justified</div><p>some argument survives (in)</p></div>
+   <div class="st c"><div class="n">contested</div><p>undecided (cycle / undec)</p></div>
+   <div class="st d"><div class="n">defeated</div><p>every argument refuted (out)</p></div>
+   <div class="st g"><div class="n">gap</div><p>no complete argument at all</p></div>
+ </div>
+ <p class="rise note" style="margin-top:1rem">That's all the background we need. Now: how do we <em>build</em> the arguments and attacks so a small checker can validate them?</p>`,
+
+/* ══════════════ 21 · DIVIDER §5 the lens (centered) ══════════════ */
+`<div class="rise sec"><b>§5</b> · The lens</div>
+ <h1 class="rise">A claim-support argument <span class="em">is</span> a typing derivation.</h1>
+ <p class="rise subtitle" style="max-width:36ch">The organizing idea of the whole paper — read the whole thing through the eyes of a type-checker.</p>`,
+
+/* ══════════════ 22 · lens table ══════════════ */
+`<div class="rise sec"><b>§5</b> The correspondence</div>
+ <h2 class="rise">Line up type theory against LARA, term for term.</h2>
+ <table class="dt rise" style="font-size:clamp(12px,1.4vw,20px)">
+   <tr><th>Type theory</th><th>LARA</th></tr>
+   <tr><td class="sys">a term <code>e</code></td><td class="lacks">a support term <code>w</code> — the argument</td></tr>
+   <tr><td class="sys">a type <code>A</code></td><td class="lacks">a claim <code>supports(p)</code></td></tr>
+   <tr><td class="sys">typing rules</td><td class="lacks">policy inference schemes (Π)</td></tr>
+   <tr><td class="sys">the context <code>Γ</code></td><td class="lacks">admitted evidence leaves</td></tr>
+   <tr><td class="sys"><code>Γ ⊢ e : A</code></td><td class="lacks"><code>Σ;Π;Γ;R ⊢ w : supports(p) ▷ O</code></td></tr>
+   <tr><td class="sys">type-checking</td><td class="lacks">claim-support checking — the sole arbiter</td></tr>
+ </table>
+ <p class="rise note" style="margin-top:1rem">We'll walk this table one row at a time — it is worth the patience.</p>`,
+
+/* ══════════════ 23 · rows walk 1 ══════════════ */
+`<div class="rise sec"><b>§5</b> Reading the rows — the object and its type</div>
+ <h2 class="rise">The argument is the <span class="em">term</span>; the claim is its <span class="em">type</span>.</h2>
+ <ul class="rise">
+   <li><strong>Term <code>e</code> ↔ support term <code>w</code>.</strong> Just as a program term is the <em>evidence</em> that a type is inhabited, the support term <em>is</em> the argument. It is a tree: leaves at the bottom, inference-scheme applications above.</li>
+   <li><strong>Type <code>A</code> ↔ claim <code>supports(p)</code>.</strong> The “type” a support term inhabits is precisely the claim it argues for. If the term checks, the claim's formal target is inhabited by this argument.</li>
+   <li><strong>Typing rules ↔ inference schemes Π.</strong> In a type system the rules are fixed. Here they live in a versioned <em>policy</em> Π — <code>controlled_comparison</code>, <code>intervention_ablation</code>, and so on — a trusted input, not something the artifact author may edit.</li>
+ </ul>`,
+
+/* ══════════════ 24 · rows walk 2 ══════════════ */
+`<div class="rise sec"><b>§5</b> Reading the rows — context, judgment, checker</div>
+ <h2 class="rise">The context is the <span class="em">evidence</span>; checking is the <span class="em">arbiter</span>.</h2>
+ <ul class="rise">
+   <li><strong>Context <code>Γ</code> ↔ admitted leaves.</strong> A term type-checks relative to a context of hypotheses. Here the context is the set of evidence leaves that passed <em>admission</em> policy (§4.3) — the raw facts you're allowed to build on.</li>
+   <li><strong>Judgment <code>Γ ⊢ e : A</code> ↔ <code>Σ;Π;Γ;R ⊢ w : supports(p) ▷ O</code>.</strong> Same shape, with two extras: <code>Σ</code> is the fixed proposition vocabulary, <code>R</code> the strict-backend registry, and the <code>▷ O</code> on the right tracks <em>open obligations</em> — the one genuinely new piece.</li>
+   <li><strong>Type-checking ↔ claim-support checking.</strong> The checker is the sole arbiter. If it accepts, the evidence supports the claim <em>relative to the policy</em>.</li>
+ </ul>`,
+
+/* ══════════════ 25 · well-typed but defeasible ══════════════ */
+`<div class="rise sec"><b>§5</b> The one thing this type system must do</div>
+ <h2 class="rise">An empirical argument is not a proof.</h2>
+ <p class="rise" style="max-width:64ch">If this were an ordinary type system, we'd be done. But an empirical argument is <em>presumptive</em> — and a later result must be able to overturn it. So this type system must do one thing no ordinary one does…</p>
+ <p class="rise lead" style="margin-top:1.4rem;max-width:52ch"><span class="em">…it must let a well-typed term be defeated</span> — without ever becoming ill-typed.</p>
+ <p class="rise note" style="margin-top:1.2rem">The term stays typed forever. What moves is the argumentation <em>status</em> computed on top of it. Keeping those two layers separate is the heart of the design.</p>`,
+
+/* ══════════════ 26 · DIVIDER §6 calculus (centered) ══════════════ */
+`<div class="rise sec"><b>§6</b> · The calculus</div>
+ <h1 class="rise">One term. One judgment. <span class="em">No solver.</span></h1>
+ <p class="rise subtitle" style="max-width:36ch">Every argument is a single syntactic category, and support is decided by identity — not by search.</p>`,
+
+/* ══════════════ 27 · one term one judgment ══════════════ */
+`<div class="rise sec"><b>§6</b> One syntactic category</div>
+ <h2 class="rise">Every argument is <span class="em">one</span> kind of term.</h2>
+ <div class="codebox rise sm">w ::= <span class="k">leaf</span> l  |  r⟨θ ; w₁…wₙ ; {q ↦ w_q} ; {o*} ; assurance⟩
+       <span class="c">strict vs defeasible is the scheme's MODE in policy Π — not new syntax</span></div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch">A term is either a <strong>leaf</strong> (a raw evidence fact) or a <strong>rule instance</strong>: a scheme <code>r</code> applied with a ground substitution <code>θ</code>, over premise terms <code>w₁…wₙ</code>, a map <code>{q ↦ w_q}</code> discharging critical questions, a set <code>{o*}</code> of open holes, and an <code>assurance</code> tag.</p>
+ <p class="rise note">Crucially: <strong>strict and defeasible are not different syntax.</strong> Whether a rule is strict is looked up in the policy Π. This is why the whole calculus has just one term category — and one metatheory to prove things about.</p>`,
+
+/* ══════════════ 28 · obligations O ══════════════ */
+`<div class="rise sec"><b>§6</b> The judgment and its obligations</div>
+ <h2 class="rise">The judgment tracks <span class="em">open obligations</span>.</h2>
+ <div class="codebox rise">Σ ; Π ; Γ ; R  ⊢  w : supports(p)  ▷  O          <span class="c">O = open mandatory holes</span></div>
+ <div class="two tight" style="margin-top:1rem">
+   <p class="rise"><strong>What is O?</strong> A defeasible scheme carries mandatory critical questions. Each must be either <em>discharged</em> by a subterm or left as an explicit <em>hole</em>. <code>O</code> collects the unmet mandatory holes across the whole term. A <strong>complete</strong> argument has <code>O = ∅</code>.</p>
+   <p class="rise"><strong>Why it matters.</strong> Only complete arguments enter the argumentation framework. An open mandatory obligation doesn't <em>defeat</em> the claim — it produces a <em>gap</em>: “not shown,” distinct from “refuted.” Missing justification and active counter-argument are different failures.</p>
+ </div>
+ <p class="rise note">Dependencies aren't a judgment field either: <code>deps(w) = leaves(w) ∪ certDeps(w)</code>, read off the term. Accountability is an <em>inversion lemma</em> on structure, not bookkeeping.</p>`,
+
+/* ══════════════ 29 · support = identity ══════════════ */
+`<div class="rise sec"><b>§6</b> Support = normalized positional identity</div>
+ <h2 class="rise">There is <span class="em">no</span> entailment engine in the trusted base.</h2>
+ <div class="codebox rise">nf(pred(g₁…gₙ)) = pred(nf g₁ … nf gₙ)      nf(k) = canon(k)
+w <span class="o">supports</span> c   ⟺   concl(w) ≡ c.formal   ⟺   nf(concl w) = nf(c.formal)</div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch">Here is the key move. “<code>w</code> supports <code>c</code>” does <strong>not</strong> mean “a solver proved <code>concl(w)</code> entails <code>c</code>.” It means the normalized conclusion of <code>w</code> is <em>literally identical</em> to the claim's formal target. <code>canon</code> canonicalizes literals (<code>+2.1</code>, <code>2.10</code> → <code>2.1</code>) but <em>never reorders arguments</em>.</p>
+ <p class="rise note">Why refuse a solver? A solver in the TCB is a huge, hard-to-trust component. Positional identity is trivially decidable — the same discipline as “the theorem <em>is</em> the object” in a proof assistant, and as AIF inference nodes. Real entailment, when wanted, enters as an explicit support step whose conclusion is discharged by identity — so the trusted core never grows.</p>`,
+
+/* ══════════════ 30 · support adequacy ══════════════ */
+`<div class="rise sec"><b>§6</b> Support adequacy</div>
+ <h2 class="rise">The identity relation is exactly as well-behaved as we need.</h2>
+ <div class="box thm rise"><span class="lab">Support adequacy <span class="id">(spec §9, result 11 · mechanized)</span></span>
+   <p class="stmt">≡ is decidable, total, reflexive, symmetric, transitive, and linear in term size.</p>
+   <p class="pf"><b>Lean:</b> <code>equiv_iff_nf_eq</code>, <code>equiv_refl / equiv_symm / equiv_trans</code>, <code>nfTerm_idem</code>. Because <code>canon</code> normalizes literals but never reorders arguments — no predicate is associative-commutative in v0.1 — we deliberately have <code>pred(a,b) ≢ pred(b,a)</code>.</p>
+ </div>
+ <p class="rise" style="margin-top:1rem;max-width:62ch">This is the smallest possible addition to the trusted computing base — a structural equality with idempotent normalization. It is the <em>only</em> piece of the kernel that decides whether evidence meets a claim, and it is fully mechanized.</p>
+ <p class="rise note"><strong>Flip criterion:</strong> if the corpus ever needs symmetric / AC predicates or binders, extend <code>nf</code> with argument-sorting and de Bruijn indexing and re-prove the same laws — a normalization extension, not a change of shape.</p>`,
+
+/* ══════════════ 31 · NL binding firewall ══════════════ */
+`<div class="rise sec"><b>§6</b> The honest boundary</div>
+ <h2 class="rise">The most load-bearing step is <span class="em">never</span> a theorem.</h2>
+ <p class="rise" style="max-width:64ch">A claim is a triple: an English sentence <code>nl</code>, a formal target <code>formal</code>, and a <strong>binding</strong> between them. The checker validates everything <em>above</em> the formal target. The binding of English to formal is a different matter entirely.</p>
+ <div class="box def rise" style="margin-top:.9rem"><span class="lab">c.binding — first-class, human-signed, audited</span>
+   <p>Whether <code>"Method M improves accuracy on D"</code> really means <code>improves(M, accuracy, D)</code> is <strong>never a checker obligation</strong>. It is a versioned, human-signed field, evaluated on a semantic-faithfulness axis — <em>audited, never proven.</em></p>
+ </div>
+ <p class="rise lead" style="margin-top:1.1rem;max-width:52ch">We <span class="em">refuse</span> to launder the untrusted lowering into a theorem.</p>
+ <p class="rise note">Being loud about what is <em>not</em> proven is a feature. A soundness claim that quietly assumed a correct NL→formal translation would be dishonest — and worthless.</p>`,
+
+/* ══════════════ 32 · DIVIDER §7 seam (centered) ══════════════ */
+`<div class="rise sec"><b>§7</b> · The strict seam</div>
+ <h1 class="rise">Every strict logic hides behind <span class="em">four functions.</span></h1>
+ <p class="rise subtitle" style="max-width:37ch">And acceptance is conditional consequence — never truth. Hume's fork, enforced by construction.</p>`,
+
+/* ══════════════ 33 · why a seam ══════════════ */
+`<div class="rise sec"><b>§7</b> Why a seam at all</div>
+ <h2 class="rise">Some steps really are deductive. Where do they live?</h2>
+ <p class="rise" style="max-width:64ch">Support is identity, and the core has no solver — good. But some steps in a real argument <em>are</em> genuine deductions: an arithmetic re-check of a table, a logical entailment. We must let those in <strong>without</strong> putting a theorem prover in the trusted base.</p>
+ <div class="box def rise" style="margin-top:1rem"><span class="lab">The seam</span><p>A strict step carries an <strong>opaque certificate</strong> for a fixed, versioned <em>backend</em>. The source calculus knows nothing about the backend's formulas, proof terms, axioms, or model theory. It talks to every backend through the same narrow interface.</p></div>
+ <p class="rise note">The corpus study found the demand is overwhelmingly arithmetic table re-checks (35 of 60 sampled claims) — plus a few code inspectors. The v0.1 portfolio leads with exactly those; a logic-of-proofs (LP) adapter is registerable but ships with nothing to check, because nothing demanded it.</p>`,
+
+/* ══════════════ 34 · four functions ══════════════ */
+`<div class="rise sec"><b>§7</b> The four functions</div>
+ <h2 class="rise">The entire interface a backend must provide.</h2>
+ <div class="codebox rise sm">encode_β : prop → Form_β
+check_β  : Theory_β → List Form_β → Form_β → Cert_β → accept | reject
+uses_β   : Cert_β → Set Dep
+models_β : Theory_β → List Form_β → Form_β → Prop</div>
+ <ul class="rise" style="margin-top:1rem">
+   <li><strong>encode_β</strong> — lower a source proposition into the backend's private formula language.</li>
+   <li><strong>check_β</strong> — replay a submitted certificate: given theory, premise formulas, goal, and certificate, return accept or reject. <em>It checks; it does not search.</em></li>
+   <li><strong>uses_β</strong> — report exactly which dependencies a certificate consumed (no hidden premises).</li>
+   <li><strong>models_β</strong> — the backend's own consequence relation, used only to <em>state</em> soundness.</li>
+ </ul>`,
+
+/* ══════════════ 35 · six obligations ══════════════ */
+`<div class="rise sec"><b>§7</b> The six obligations</div>
+ <h2 class="rise">What a backend must <span class="em">prove</span> to be admitted.</h2>
+ <div class="two tight">
+   <div class="rise"><ul>
+     <li><strong>Decidable, terminating replay</strong> — <code>check_β</code> always halts.</li>
+     <li><strong>Normalization fidelity</strong> — <code>p ≡ q ⟺ encode_β p = encode_β q</code>; the seam respects source identity.</li>
+     <li><strong>Certificate soundness</strong> — <code>accept ⟹ T; Δ ⊨_β φ</code>.</li>
+   </ul></div>
+   <div class="rise"><ul>
+     <li><strong>Dependency accountability</strong> — <code>uses_β</code> covers every free premise / theory entry.</li>
+     <li><strong>Closed registration</strong> — no runtime checker, encoding, or axiom upload; backends are fixed by id + version.</li>
+     <li><strong>Consequence laws</strong> — reflexivity, cut, weakening. Non-monotonicity belongs in the attack layer, never here.</li>
+   </ul></div>
+ </div>
+ <p class="rise note" style="margin-top:1rem">Discharge all six and your backend is sound-by-construction to plug in. The core proves things about the interface once, for all backends.</p>`,
+
+/* ══════════════ 36 · reference ND backend ══════════════ */
+`<div class="rise sec"><b>§7</b> The reference backend</div>
+ <h2 class="rise">A deliberately tiny one: intuitionistic natural deduction.</h2>
+ <div class="codebox rise sm">φ ::= a | ⊥ | φ → φ
+e ::= hyp i | lam φ e | app e e | abort φ e        <span class="c">de Bruijn certificates</span></div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch">Implication and falsum, with the standard hyp / →-intro / →-elim / ⊥-elim rules. Soundness is a routine induction on the typing derivation; free-index collection gives <em>exact</em> dependency accountability.</p>
+ <div class="box thm rise" style="margin-top:.6rem"><span class="lab">Reference-backend results <span class="id">(result 10 · mechanized)</span></span>
+   <p class="stmt">The ND adapter is sound and its reported dependencies are exactly the certificate's free hypotheses.</p>
+   <p class="pf"><b>Lean:</b> <code>nd_sound</code>, <code>nd_strict_step_sound</code>, <code>infer_deps_eq_fv</code>. It is <strong>sound but deliberately incomplete</strong> — LARA checks a submitted certificate, it never searches for one.</p>
+ </div>`,
+
+/* ══════════════ 37 · factivity + Hume ══════════════ */
+`<div class="rise sec"><b>§7</b> Factivity — the word to define</div>
+ <h2 class="rise">What would go wrong if acceptance meant <span class="em">truth?</span></h2>
+ <div class="box def rise"><span class="lab">Factive vs. non-factive</span>
+   <p>A judgment is <strong>factive</strong> if “accepted” implies “true in the world.” It is <strong>non-factive</strong> if “accepted” only means “follows from the stated assumptions.” LARA is deliberately non-factive.</p>
+ </div>
+ <p class="rise" style="margin-top:1.1rem;max-width:64ch"><strong>Hume's fork:</strong> you cannot derive an <em>is</em> (an empirical truth about the world) from pure relations of ideas. A logical certificate can tell you the conclusion <em>follows from</em> the premises; it can never tell you the premises are <em>true</em>.</p>
+ <p class="rise lead" style="margin-top:1rem;max-width:52ch">So acceptance must be <span class="em">conditional consequence</span> — the leaves stay untrusted hypotheses.</p>`,
+
+/* ══════════════ 38 · non-factivity thm ══════════════ */
+`<div class="rise sec"><b>§7</b> The factivity firewall</div>
+ <h2 class="rise">Enforced by construction, and proven.</h2>
+ <div class="rules rise">
+   <div class="rule">
+     <div class="prem">check_β(T, Δ, φ, κ) = accept</div>
+     <div class="bar"><span class="rn">Thm 3</span></div>
+     <div class="concl">T ; Δ &nbsp;⊨_β&nbsp; φ &nbsp;&nbsp;<span class="c">— and NOT&nbsp; ⊢ p true</span></div>
+   </div>
+ </div>
+ <div class="box thm rise" style="margin-top:1rem"><span class="lab">Source non-factivity <span class="id">(result 2 · mechanized, by inversion)</span></span>
+   <p class="stmt">No accepted certificate can be eliminated into a source truth judgment. An accepted step proves the conclusion follows from the encoded <em>premise conclusions</em> and declared theory — nothing about whether any premise is true.</p>
+   <p class="pf"><b>Lean:</b> <code>no_truth_projection</code>, <code>nd_nonfactive_witness</code>, <code>nd_relative_not_absolute</code>. The backend receives only normalized encodings and returns only accept/reject + deps. The firewall isn't a runtime guard — it's the <em>shape</em> of the interface.</p>
+ </div>`,
+
+/* ══════════════ 39 · DIVIDER §8 attacks (centered) ══════════════ */
+`<div class="rise sec"><b>§8</b> · Defeat and status</div>
+ <h1 class="rise">Three attacks. Three <span class="em">positions.</span></h1>
+ <p class="rise subtitle" style="max-width:37ch">Then compile to a Dung framework, take the grounded fixed point, and read off one of four states.</p>`,
+
+/* ══════════════ 40 · three attacks = positions ══════════════ */
+`<div class="rise sec"><b>§8</b> Typed positional attacks</div>
+ <h2 class="rise">The three attacks <span class="em">are</span> the three positions of a term.</h2>
+ <div class="codebox rise sm">π ::= ε | π.i | π.q        <span class="c">a path: root · premise i · question q</span>
+
+<span class="r">rebut</span>     w u     — u's top rule defeasible ∧ (concl w, concl u) a declared contrary
+<span class="r">undercut</span>  w u@π   — u@π an instance of defeasible r ∧ w ⊢ E θ  for  exception r:E
+<span class="r">undermine</span> w u@π   — u@π a leaf l ∧ w concludes a declared contrary of l's prop</div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch">A support term is a tree, so it has exactly three kinds of <em>position</em>: its <strong>root</strong> conclusion, an <strong>internal rule</strong> occurrence, and a <strong>frontier leaf</strong>. Each is attacked by exactly one attack kind. The correspondence is not a coincidence — it is the definition.</p>`,
+
+/* ══════════════ 41 · attacks w/ example ══════════════ */
+`<div class="rise sec"><b>§8</b> The three attacks, concretely</div>
+ <h2 class="rise">What each one says, in words.</h2>
+ <ul class="rise">
+   <li><strong class="mono r">rebut</strong> — attack the <em>conclusion</em>. “Your headline is false: I have an equally-typed argument for the contrary.” Two papers with opposite findings rebut each other.</li>
+   <li><strong class="mono r">undercut</strong> — attack a <em>rule step</em>. “Your inference doesn't apply <em>here</em>.” The comparison assumed no distribution shift; I show the shift — so the <code>controlled_comparison</code> step is undercut at that exact occurrence.</li>
+   <li><strong class="mono r">undermine</strong> — attack a <em>leaf</em>. “Your raw datum is wrong.” I conclude a declared contrary of the evidence cell itself.</li>
+ </ul>
+ <p class="rise note" style="margin-top:1rem">Conflict is never full classical negation — it is a policy-declared <code>contrary</code> relation. Rebut and undermine consult it; undercut consults a declared <code>exception</code>. All are ground lookups.</p>`,
+
+/* ══════════════ 42 · strict unattackable + localization ══════════════ */
+`<div class="rise sec"><b>§8</b> Two consequences of typing attacks by position</div>
+ <h2 class="rise">Strict steps are safe; failure has an <span class="em">address.</span></h2>
+ <div class="two tight">
+   <div class="box cor rise"><span class="lab">Strict rules are unattackable</span><p>Only defeasible rules carry <code>exception</code>s and are rebuttable. A strict inference is deductively valid — “the rule doesn't apply here” is incoherent (ASPIC⁺: strict inferences are unattackable). A well-formedness check (§8.1) keeps contested conflicts from hiding behind strict chains.</p></div>
+   <div class="box cor rise"><span class="lab">Defeat is located</span><p>Attack well-formedness reduces to <strong>subterm-occurrence lookup + one contrary/exception lookup</strong> — decidable and local. The attacked position <em>is</em> the source location in the diagnostic — the localization a holistic reviewer score can never give.</p></div>
+ </div>
+ <p class="rise note" style="margin-top:1rem">Empirically defeat is rare and undercut-dominant (corpus: 4 undercut / 0 rebut / 0 undermine over 194 dead-end classifications). Rebut and undermine are exercised through self-authored adversarial mutations, not corpus mining.</p>`,
+
+/* ══════════════ 43 · DIVIDER §9 compile+status (centered) ══════════════ */
+`<div class="rise sec"><b>§9</b> · Compilation</div>
+ <h1 class="rise">From program to <span class="em">status.</span></h1>
+ <p class="rise subtitle" style="max-width:36ch">Compile the checked terms and attacks to a finite Dung framework; take the grounded least fixed point; aggregate.</p>`,
+
+/* ══════════════ 44 · compile to Dung ══════════════ */
+`<div class="rise sec"><b>§9</b> Compilation</div>
+ <h2 class="rise">Complete terms become nodes; typed attacks become edges.</h2>
+ <div class="codebox rise sm">compile(P) = (Args, Attack)
+   <span class="c">Args   = complete checked support terms (O = ∅)</span>
+   <span class="c">Attack = compiled typed attacks, closed under subarguments</span></div>
+ <p class="rise" style="margin-top:1rem;max-width:64ch"><strong>Subargument closure</strong> is the subtle part: an attack on an occurrence <code>u@π</code> compiles to an edge onto <em>every</em> complete argument that contains that occurrence. Defeating a subterm defeats every argument built on it (the ASPIC⁺ discipline). Certificate payloads ride along on nodes for replay but are never attack targets.</p>
+ <p class="rise note"><code>eraseCert</code> replaces a certificate by a <code>certified</code> marker while preserving names, rule instances, conclusions, obligations, and positions — this is what backend replacement (§9, later) quantifies over.</p>`,
+
+/* ══════════════ 45 · grounded lfp walked ══════════════ */
+`<div class="rise sec"><b>§9</b> Grounded evaluation</div>
+ <h2 class="rise">Iterate the defense operator from ∅ — and it always stops.</h2>
+ <div class="codebox rise sm">D_AF(S) = { a ∈ Args | every attacker of a is attacked by some b ∈ S }
+grounded = ⋃ₙ D_AFⁿ(∅)</div>
+ <div class="box thm rise" style="margin-top:.8rem"><span class="lab">Determinism &amp; termination <span class="id">(result 5 core · mechanized)</span></span>
+   <p class="stmt">D_AF is monotone on the finite subset lattice; the ascending chain from ∅ stabilizes in ≤ |Args| steps. The grounded labelling is unique; attack cycles yield undec, never divergence.</p>
+   <p class="pf"><b>Lean:</b> <code>grounded_stable</code>, <code>grounded_fixpoint</code>. And <code>directIn_iff</code> / <code>status_preservation</code> prove the declarative least fixed point equals the executable iteration over any finite AF (result 6, abstract layer).</p>
+ </div>
+ <p class="rise note">This is a <em>terminating, deterministic</em> evaluation — the reason a claim's status is replayable, not a matter of opinion.</p>`,
+
+/* ══════════════ 46 · four-state status fn ══════════════ */
+`<div class="rise sec"><b>§9</b> The four-state status</div>
+ <h2 class="rise">One total function of the labelling.</h2>
+ <div class="codebox rise sm"><span class="u">gap</span>       support(P,p) empty, or a hole no complete alternative closes
+<span class="g">justified</span> some a ∈ support(P,p) labelled <span class="g">in</span>
+<span class="k">contested</span> none in, some labelled <span class="k">undec</span>          <span class="c">(= grounded undec, incl. cycles)</span>
+<span class="r">defeated</span>  support nonempty ∧ every a labelled <span class="r">out</span></div>
+ <div class="states rise" style="margin-top:.8rem">
+   <div class="st j"><div class="n">justified</div><p>survives</p></div>
+   <div class="st c"><div class="n">contested</div><p>undecided</p></div>
+   <div class="st d"><div class="n">defeated</div><p>refuted</p></div>
+   <div class="st g"><div class="n">gap</div><p>not shown</p></div>
+ </div>
+ <p class="rise note" style="margin-top:1rem">Read the priority top-down. Note <strong>gap ≠ defeated</strong>: “no argument was given” is a different verdict from “an argument was given and refuted.” Total &amp; deterministic by construction — <code>statusC</code>, <code>statusC_gap_iff</code> mechanized; finer cycle structure is a reporting obligation.</p>`,
+
+/* ══════════════ 47 · worked example status ══════════════ */
+`<div class="rise sec"><b>§9</b> Walking the motivating example</div>
+ <h2 class="rise">Watch the status <span class="em">move</span> as evidence arrives.</h2>
+ <div class="codebox rise sm"><span class="c">— start: only a₁ supports c₁, but external_validity is an open hole</span>
+c₁ : <span class="u">gap</span>          <span class="c">O ≠ ∅, no complete argument yet</span>
+
+<span class="c">— discharge external_validity with e₅: a₁ is now complete, unattacked</span>
+c₁ : <span class="g">justified</span>    <span class="c">a₁ labelled in</span>
+
+<span class="k">arg</span> d₁ : challenges(external_validity(a₁)) by distribution_shift(e₄)
+<span class="r">undercut</span> d₁ a₁.rule   <span class="c">— a checked attacker on the rule occurrence</span>
+c₁ : <span class="r">defeated</span>     <span class="c">a₁ labelled out; d₁ in — the term a₁ is STILL well-typed</span></div>
+ <p class="rise lead" style="margin-top:1rem;max-width:54ch">Same term <code>a₁</code>, three statuses. The <span class="em">type</span> never changed. Defeat moved the <span class="em">status.</span></p>`,
+
+/* ══════════════ 48 · two monotonicities ══════════════ */
+`<div class="rise sec"><b>§9</b> Why a proof system cannot do this</div>
+ <h2 class="rise">Two monotonicities — and you must keep them apart.</h2>
+ <div class="two tight">
+   <div class="box cor rise"><span class="lab">Inside a fixed AF — monotone</span><p><code>D_AF</code> is monotone over a finite-height lattice, so the least fixed point exists, is unique, and terminates. This is <em>why</em> evaluation is deterministic. Standard, well-behaved.</p></div>
+   <div class="box thm rise" style="border-left-color:var(--bad)"><span class="lab" style="color:var(--bad)">Across AF extensions — non-monotone <span class="id">(Prop. 8)</span></span><p class="stmt">Claim acceptance is non-monotonic: a newly supplied, checked attacker moves a claim out of justified while its original support term stays well-typed. No monotonic consequence relation — S4, LP, J, J4 — represents this.</p></div>
+ </div>
+ <p class="rise" style="margin-top:1.1rem;max-width:64ch">The <em>internal</em> transfer operator is monotone; the <em>external</em> map from an extensible framework to accepted claims is not. Conflating the two is the classic error. This defeasibility is intentional for empirical reasoning — precisely what a purely proof-theoretic account cannot express, and why the core is an argumentation framework, not a logic.</p>`,
+
+/* ══════════════ 49 · backend replacement ══════════════ */
+`<div class="rise sec"><b>§9</b> The payoff of the opaque seam</div>
+ <h2 class="rise">Claim status is <span class="em">independent</span> of certificate internals.</h2>
+ <div class="box thm rise"><span class="lab">Backend replacement <span class="id">(result 9 · paper proof, M1 target)</span></span>
+   <p class="stmt">If two backends accept exactly the same strict instances, then source-identical programs compile — after certificate erasure — to isomorphic argumentation frameworks, and every claim receives the same four-state status.</p>
+   <p class="pf"><b>Proof:</b> structural induction on support checking → graph isomorphism of <code>compile</code> under <code>eraseCert</code> → invariance of the grounded least fixed point under that isomorphism.</p>
+ </div>
+ <p class="rise" style="margin-top:1.1rem;max-width:64ch">So <em>which</em> logic sits behind the seam — ND, LP, an arithmetic re-checker — is <strong>provably not part of claim-status semantics</strong>. Backend identity, theory, and dependencies stay visible in audit; only <em>status</em> is invariant. This is the formal reason we privilege no single logic.</p>`,
+
+/* ══════════════ 50 · DIVIDER §10 metatheory & eval (centered) ══════════════ */
+`<div class="rise sec"><b>§10</b> · Evidence</div>
+ <h1 class="rise">What is <span class="em">proven</span>, what is not, and how we evaluate.</h1>
+ <p class="rise subtitle" style="max-width:38ch">The honest ledger — and why, for a calculus, the proof <em>is</em> the experiment.</p>`,
+
+/* ══════════════ 51 · metatheory ledger ══════════════ */
+`<div class="rise sec"><b>§10</b> Metatheory — mechanization status</div>
+ <h2 class="rise">The proofs carry soundness; tests are only conformance evidence.</h2>
+ <table class="dt rise">
+   <tr><th>Result</th><th>Lean witness</th><th></th></tr>
+   <tr><td class="sys">11 · support adequacy</td><td class="thm">equiv_iff_nf_eq · nfTerm_idem</td><td class="done">✓</td></tr>
+   <tr><td class="sys">8 · strict-step soundness</td><td class="thm">strict_step_sound</td><td class="done">✓</td></tr>
+   <tr><td class="sys">10 · ND soundness + dep-exactness</td><td class="thm">nd_sound · infer_deps_eq_fv</td><td class="done">✓</td></tr>
+   <tr><td class="sys">2 · non-factivity firewall</td><td class="thm">no_truth_projection</td><td class="done">✓</td></tr>
+   <tr><td class="sys">5 · grounded determinism/termination</td><td class="thm">grounded_stable · statusC</td><td class="done">✓ core</td></tr>
+   <tr><td class="sys">6 · direct ≡ compiled semantics</td><td class="thm">directIn_iff · status_preservation</td><td class="part">◑ abstract AF layer</td></tr>
+   <tr><td class="sys">9 · backend replacement (full)</td><td class="thm">compile-step exercise</td><td class="todo">○ M1</td></tr>
+ </table>
+ <p class="rise note"><span class="cite">sorry</span>-free within the standard axiom trio {propext, Classical.choice, Quot.sound}. The compile step (subargument closure) is defined and characterized (<code>compile_attack_iff</code>) but not yet exercised end-to-end — the honest boundary of result 6. We say so out loud.</p>`,
+
+/* ══════════════ 52 · evaluation ══════════════ */
+`<div class="rise sec"><b>§10</b> Evaluation — for a calculus, proof is the experiment</div>
+ <h2 class="rise">No benchmark. What, then, <span class="em">is</span> the evaluation?</h2>
+ <ul class="rise" style="font-size:clamp(15px,1.7vw,24px);gap:.9rem">
+   <li>Machine-checked <strong>metatheory</strong> — soundness, non-factivity, replacement, determinism</li>
+   <li>Worked examples spanning <strong>every status and every attack kind</strong></li>
+   <li>Adversarial <strong>rejection-class conformance</strong> — zero false positives on seeded-incorrect certificates</li>
+ </ul>
+ <p class="rise" style="margin-top:1.4rem;max-width:64ch">Precedent: WebAssembly 1.0's mechanization <em>was</em> the evaluation <span class="cite">(FM 2021)</span>. And POPL artifact evaluation <strong>excludes non-mechanized proofs from review</strong> — so an un-mechanized soundness argument earns no artifact credit. Mechanization is not documentation of the result. It <em>is</em> the result.</p>`,
+
+/* ══════════════ 53 · related work delta ══════════════ */
+`<div class="rise sec"><b>§10</b> Related work — the delta, on the record</div>
+ <table class="dt rise">
+   <tr><th>System</th><th>What it does</th><th>What LARA adds</th></tr>
+   <tr><td class="sys">Micropublications<br>AIF</td><td>RDF / interchange model of claims + support</td><td class="lacks">representation, not checking — support is asserted; no status, no located defeat, no theorem</td></tr>
+   <tr><td class="sys">EG-VAR<br><span class="cite">(2026, workshop)</span></td><td>Lean-kernel-attested empirical claims</td><td class="lacks">monotonic + factive; trust relocated to the lift. No defeat, no CQ completeness, no four-state status</td></tr>
+   <tr><td class="sys">Pandžić</td><td>defeasible justification-logic terms</td><td class="lacks">pure logic, factive; no artifact / policy / CQ layer; no compilation theorem</td></tr>
+   <tr><td class="sys">ASPIC⁺ · Dung</td><td>structured framework · abstract semantics</td><td class="lacks">not a checkable language; LARA is a typed calculus that compiles to it, with mechanized metatheory</td></tr>
+   <tr><td class="sys">PCC / FPC</td><td>untrusted producer / checked certificate</td><td class="lacks">the architecture ancestor — for machine proofs; LARA adds the non-monotonic defeasible layer</td></tr>
+ </table>
+ <p class="rise note">Composition is the <em>method</em>; the semantics-preserving compilation theorem + located failure is the <strong>contribution</strong>. Composition alone would be weak novelty — the theorem specific to the combination is not.</p>`,
+
+/* ══════════════ 54 · CONCLUSION (centered) ══════════════ */
+`<div class="rise sec"><b>Conclusion</b></div>
+ <p class="rise hook">Research can be <span class="em">well-typed.</span></p>
+ <p class="rise lead" style="max-width:46ch;margin-top:1.2rem">Support is <span class="em">identity</span> — the core has no solver. The three attacks are the three <span class="em">positions</span> — defeat is located. Strict logic hides behind a seam — status is <span class="em">non-factive</span> and <span class="em">logic-agnostic</span>. Compilation to a Dung framework gives a deterministic, genuinely <span class="em">non-monotonic</span> four-state status — a type system in which a well-typed argument can still be defeated.</p>
+ <div class="rise" style="margin-top:1.8rem;font-family:var(--mono);font-size:clamp(12px,1.35vw,18px);color:var(--faint);letter-spacing:.02em">program ⟶ check ▷ O ⟶ compile ⟶ grounded lfp ⟶ { justified · gap · defeated · contested }</div>
+ <div class="rise note" style="margin-top:1.6rem">Mechanized reference semantics in Lean 4 · Haskell trusted checker · untrusted LLM producer. &nbsp;<b style="color:var(--dim)">Thank you.</b></div>`,
+
+];
+
+const deck=document.getElementById('deck'),dots=document.getElementById('dots');
+const centered=new Set([0, 2, 7, 10, 16, 21, 26, 32, 39, 43, 50, slides.length-1]);   // title + section dividers + conclusion vertically centered
+slides.forEach((html,i)=>{
+  const s=document.createElement('section');
+  s.className='slide'+(centered.has(i)?' center':'');
+  s.innerHTML=html;
+  deck.appendChild(s);
+  const d=document.createElement('button');d.className='dot';d.setAttribute('aria-label','Slide '+(i+1));d.onclick=()=>go(i);dots.appendChild(d);
+});
+const nodes=[...document.querySelectorAll('.slide')],dotNodes=[...document.querySelectorAll('.dot')];
+document.getElementById('tot').textContent=slides.length;
+let idx=0;
+function go(n){
+  idx=Math.max(0,Math.min(slides.length-1,n));
+  nodes.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  dotNodes.forEach((d,i)=>d.classList.toggle('on',i===idx));
+  document.getElementById('cur').textContent=idx+1;
+  document.getElementById('bar').style.width=(idx/(slides.length-1)*100)+'%';
+  document.querySelector('.theme-tag').style.display=centered.has(idx)?'none':'block';
+  location.hash=idx+1;
+}
+function next(){go(idx+1)} function prev(){go(idx-1)}
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();next();}
+  else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev();}
+  else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(slides.length-1);}
+  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+});
+let sx=null;
+addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50){dx<0?next():prev();}sx=null;},{passive:true});
+deck.addEventListener('click',e=>{if(e.target.closest('.dot'))return;const r=innerWidth*0.28;e.clientX<r?prev():next();});
+go(parseInt(location.hash.slice(1))-1||0);
+</script>
+</body>
+</html>
