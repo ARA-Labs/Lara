@@ -28,10 +28,10 @@ What this file discharges, against the exact spec figure:
   `Grounded.statusC` over the compiled AF. Together the two levels give
   source-to-compiled
   status preservation with exactly **one** residual obligation: the Bool edge
-  relation is an oracle (`Faithful`) standing in for the pending executable
-  support/attack checkers. Supplying that oracle constructively (the M2
-  decider slice) closes §9 result 6's source-vs-compiled half; nothing else
-  is missing at this layer.
+  relation is an oracle (`Faithful`). Executable support, positional-attack,
+  and whole-program checking now construct `CheckedProgram`; supplying the
+  general closure-edge decider and its `Faithful` proof (issue #17) closes §9
+  result 6's source-vs-compiled half. Nothing else is missing at this layer.
 
 Design notes:
 
@@ -121,6 +121,10 @@ structure CheckedProgram (canon : String → String) (Pi : RuleId → Option Rul
   atts : List Attack.Attack
   /-- every declared attack types (§7.1) -/
   typed : ∀ k ∈ atts, Attack.HasAttack canon Pi Gamma CertOk dp k
+  /-- every declared attack source is a declared argument (R1 boundary) -/
+  source_declared : ∀ k ∈ atts, k.source ∈ args
+  /-- every declared attack target is a declared argument (R1 boundary) -/
+  target_declared : ∀ k ∈ atts, k.target ∈ args
 
 /-- **The compiled attack relation (spec §8 `Attack(P)`, v0.1-frozen).**
 `Edge P a b`: both endpoints are declared complete arguments, and some
@@ -159,10 +163,10 @@ theorem edge_iff (P : CheckedProgram canon Pi Gamma CertOk dp)
 target are both declared arguments yields the direct edge source → target. -/
 theorem closure_includes_direct (P : CheckedProgram canon Pi Gamma CertOk dp)
     {k : Attack.Attack} (hk : k ∈ P.atts) {t : SupportTerm}
-    (hocc : AttackOcc k t)
-    (hsrc : k.source ∈ P.args) (htgt : k.target ∈ P.args) :
+    (hocc : AttackOcc k t) :
     Edge P k.source k.target :=
-  ⟨hsrc, htgt, k, hk, rfl, t, hocc, target_contains_occ hocc⟩
+  ⟨P.source_declared k hk, P.target_declared k hk,
+    k, hk, rfl, t, hocc, target_contains_occ hocc⟩
 
 /-! ### The bridge to the abstract grounded layer (N16)
 
@@ -172,8 +176,8 @@ without exercising it. Here we exercise it: index the checked program's argument
 compile to a `Grounded.AF`, and show a source-level declarative judgment
 defined over the Prop-level closure edges agrees with the abstract one —
 first per argument, then lifted to four-state claim status. The Bool edge
-relation is oracle-parametric (`Faithful`) until the executable checkers
-land. -/
+relation remains oracle-parametric (`Faithful`) until the general checker-built
+edge decider lands (issue #17). -/
 
 /-- The compiled abstract AF: arguments are indices into `P.args`; the edge
 relation is the supplied oracle. -/

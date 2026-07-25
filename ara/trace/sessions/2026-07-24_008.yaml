@@ -1,0 +1,72 @@
+session:
+  id: "2026-07-24_008"
+  timestamp: "2026-07-24T17:47"
+  ended: "2026-07-24T17:47"
+  summary: "Closed issue #16 with reviewed executable support, attack, and raw-program checkers, exact adequacy proofs, and complete Lean/Haskell verification."
+
+events_logged:
+  - type: decision
+    id: N54
+    provenance: user
+    summary: "Approved the complete backend-first, canon-indexed, typed-diagnostic checker architecture and rejected an Option-only staging core."
+  - type: dead_end
+    id: N55
+    provenance: ai-executed
+    summary: "Dependent proof-carrying support recursion elaborated but failed Lean C-code generation."
+  - type: pivot
+    id: N56
+    provenance: ai-executed
+    summary: "Separated the first-order executable support checker from its proof-only exact adequacy module."
+  - type: experiment
+    id: N57
+    provenance: ai-executed
+    summary: "Verified the complete result-1 checker surface with 304 audited Lean declarations and 28 passing Haskell property groups."
+  - type: heuristic
+    id: H05
+    provenance: ai-suggested
+    summary: "Keep executable recursion first-order and move dependent adequacy proofs beside it."
+  - type: claim
+    id: C02
+    provenance: ai-suggested
+    summary: "Advanced the positional three-attack correspondence to supported using exact attack and program checker adequacy."
+
+ai_actions:
+  - action: "Ran an interactive engineering review and incorporated every accepted architecture, error-taxonomy, performance, and coverage decision into the committed plan."
+    provenance: ai-executed
+    files_changed: ["docs/superpowers/plans/2026-07-24-issue-16-executable-checkers.md"]
+  - action: "Implemented and independently reviewed the executable strict seam, ND replay adapter, support checker, attack checker, and proof-bearing raw-program checker."
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Certificate.lean"
+      - "lean/Lara/Strict.lean"
+      - "lean/Lara/Check/Error.lean"
+      - "lean/Lara/Check/Support.lean"
+      - "lean/Lara/Check/SupportProof.lean"
+      - "lean/Lara/Check/Attack.lean"
+      - "lean/Lara/Check/Program.lean"
+  - action: "Ported and tested the exact UTF-8 framed Atom key in Haskell and Lean."
+    provenance: ai-executed
+    files_changed: ["src/Lara/Strict/ND.hs", "test/StrictSpec.hs"]
+  - action: "Reconciled result status without claiming the #17 edge decider, #18 attack completeness, result-3 dependency accountability, or result-9 erased identity."
+    provenance: ai-executed
+    files_changed:
+      - "docs/spec.md"
+      - "docs/mechanization-plan.md"
+      - "ara/evidence/status/mechanization_status.md"
+      - "ara/logic/claims.md"
+  - action: "Ran clean Lean build and standard-trio AxCheck gates plus Cabal build and all 28 Haskell property groups."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C02
+    action: advanced
+    provenance: ai-suggested
+
+open_threads:
+  - "Issue #17 must construct the general executable Compile.Faithful edge decider."
+  - "Issue #18 must add attack completeness before closing result-7 status consistency."
+  - "Certificate dependency accountability (Backend.uses/certDeps) remains the result-3 certificate half."
+  - "Certificate-erased argument identity and backend replacement remain result 9."
+
+ai_suggestions_pending: []

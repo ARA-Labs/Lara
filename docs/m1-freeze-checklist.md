@@ -44,10 +44,10 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12 | §9 r7 — validator ✅ (`lean/Lara/Policy.lean`); consistency theorem needs attack completeness |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
 | 7 | Shipped adapter portfolio (arithmetic-recheck, code-inspection; LP non-shipping) | §5.2 | **Frozen** | none (C14); per-adapter soundness is M2/M3 | §9 r10 per shipped adapter — **pending** |
-| 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules written (§6.1); ✅ Lean port landed (`lean/Lara/Support.lean`) — pending: executable checker, `certDeps` | §9 r3 leaf half ✅, r1 uniqueness half ✅, r11 relational ✅ |
-| 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules written (§7.1); ✅ Lean port landed (`lean/Lara/Attack.lean`) — pending: executable checker, compile-facing edge soundness | §9 r1 (strict-unattackability, partition, coherence ✅; decision procedure pending), r4 (with item 11) |
+| 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules and exact executable Lean checker (`Lara.Check.inferSupport`) landed — pending: `certDeps` | §9 r1 support/program checker ✅; r3 leaf half ✅; r11 relational ✅ |
+| 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
-| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ compile rules written (§8, v0.1-frozen); ✅ Lean port landed (`lean/Lara/Compile.lean`) — pending: executable edge oracle (`Faithful`), r9 | §9 r4 both halves ✅; r6 source-vs-compiled bridged oracle-parametrically ✅; r9 pending |
+| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ compile rules and proof-bearing raw `checkProgram` landed — pending: general executable edge oracle (#17), r9 | §9 r4 both halves ✅; r6 source-vs-compiled bridged oracle-parametrically ✅; r9 pending |
 | 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 compile-composed oracle-parametrically ✅; r7 consistency pending attack completeness |
 | 13 | Abstract syntax + JSON wire schema, **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 (with M3 codec) |
 | 14 | Specified rejection behavior (located, per rejection class) | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
@@ -89,11 +89,11 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    `ContraryMatch`, and returns a located R12 rule/pair. The remaining §9 r7 status-consistency
    theorem is not yet provable from `CheckedProgram`: `typed` is attack soundness (every declared
    attack is typed), but the theorem also needs attack completeness (every rebuttable contrary
-   conflict produces a declared/compiled edge). Add that checker postcondition with the executable
-   attack checker.
-2. **Executable checkers**: decision procedures for §6.1 support typing and §7.1 attack typing
-   (`infer`-style, as `Lara/ND.lean` layer C), proving §9 r1 and constructively supplying
-   `Compile.Faithful` — closes r6's source-vs-compiled half.
+   conflict produces a declared/compiled edge). Add that checker postcondition under issue #18.
+2. **Executable checkers — result-1 portion done**: `Lara.Check.inferSupport`,
+   `checkAttack`, and `checkProgram` exactly decide the frozen support,
+   positional-attack, and raw-program judgments. The separate general
+   `Compile.Faithful` edge decider remains issue #17 and closes r6.
 3. **`certDeps` accountability**: extend the abstract `Backend` with `uses`, prove r3's
    certificate half (obligation 4).
 4. **r9 backend replacement — representation blocker**: the relational §6.1/§8 layers are frozen,

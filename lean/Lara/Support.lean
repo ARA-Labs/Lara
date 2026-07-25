@@ -12,9 +12,9 @@ What this file discharges, against the exact §6.1 figure:
   `leaves w` (spec §6). `certDeps` accountability needs a `uses` field on the
   abstract `Backend` (obligation 4) and is a recorded follow-up.
 * **Result 1 (decidability), uniqueness half** — `hasSupport_unique`: a term
-  has at most one conclusion and obligation set. The executable checker (the
-  `infer`-style other half, as in `Lara/ND.lean` layer C) is the immediate
-  follow-up.
+  has at most one conclusion and obligation set. `Lara.Check.Support` supplies
+  the executable checker; `Lara.Check.SupportProof` proves soundness and exact
+  completeness against this relation.
 * **Result 11 (support adequacy), relational layer** — `Supports` is `≡` on
   the unique conclusion; `supports_resp_equiv` shows it is `≡`-functional.
 * The §6.1 accounting invariants as inversion lemmas: `strict_no_questions`
@@ -45,7 +45,7 @@ Design notes (same conventions as the sibling files):
   indexed predicate `CertOk β h κ As C`, gated per-rule by the `certifiers`
   allowlist (spec §4: an instance may use `cert(beta, h, ...)` only when
   `(beta@version, h)` appears in `certifiers`); `certOkOf` instantiates it
-  from a digest-addressed registry of `Strict.Backend`s.
+  from a backend-first registry whose inner resolver selects a fixed theory.
 * Rule-instance children are indexed by `l[i]?` lookups rather than nested
   `Forall₂`-style premises, keeping every recursive occurrence directly under
   `∀`/`→` (strictly positive, clean induction principles). List-shape helper
@@ -91,7 +91,8 @@ deriving DecidableEq
 
 /-- Strict-backend identifier (`beta`). -/
 structure BackendId where
-  name : String
+  name    : String
+  version : Nat
 deriving DecidableEq
 
 /-- Theory digest (`h`), digest-addressed. -/
@@ -209,6 +210,117 @@ inductive SupportTerm where
   | inst : RuleId → Subst → List SupportTerm →
            List (QuestionId × SupportTerm) → List QuestionId → Assurance →
            SupportTerm
+
+/- Lean 4.32 cannot synthesize equality through the nested recursive
+`List SupportTerm` and `List (QuestionId × SupportTerm)` fields.  Decide all
+three mutually recursive shapes directly.  This is structural source equality:
+in particular the assurance (including an opaque certificate payload) remains
+part of the identity. -/
+mutual
+  def SupportTerm.decEq :
+      (a b : SupportTerm) → Decidable (a = b)
+    | .leaf x, .leaf y =>
+        match _root_.decEq x y with
+        | isTrue h => isTrue (by cases h; rfl)
+        | isFalse h =>
+            isFalse (by intro hab; injection hab with hxy; exact h hxy)
+    | .leaf _, .inst _ _ _ _ _ _ => isFalse (by intro h; cases h)
+    | .inst _ _ _ _ _ _, .leaf _ => isFalse (by intro h; cases h)
+    | .inst rn θ ws D H α, .inst rn' θ' ws' D' H' α' =>
+        match _root_.decEq rn rn' with
+        | isFalse h =>
+            isFalse (by intro hab; injection hab with hrn; exact h hrn)
+        | isTrue hrn =>
+          match _root_.decEq θ θ' with
+          | isFalse h =>
+              isFalse (by intro hab; injection hab with _ hθ; exact h hθ)
+          | isTrue hθ =>
+            match SupportTerm.decEqList ws ws' with
+            | isFalse h =>
+                isFalse (by intro hab; injection hab with _ _ hws; exact h hws)
+            | isTrue hws =>
+              match SupportTerm.decEqDischarges D D' with
+              | isFalse h =>
+                  isFalse (by
+                    intro hab
+                    injection hab with _ _ _ hD
+                    exact h hD)
+              | isTrue hD =>
+                match _root_.decEq H H' with
+                | isFalse h =>
+                    isFalse (by
+                      intro hab
+                      injection hab with _ _ _ _ hH
+                      exact h hH)
+                | isTrue hH =>
+                  match _root_.decEq α α' with
+                  | isFalse h =>
+                      isFalse (by
+                        intro hab
+                        injection hab with _ _ _ _ _ hα
+                        exact h hα)
+                  | isTrue hα =>
+                      isTrue (by
+                        cases hrn
+                        cases hθ
+                        cases hws
+                        cases hD
+                        cases hH
+                        cases hα
+                        rfl)
+
+  def SupportTerm.decEqList :
+      (xs ys : List SupportTerm) → Decidable (xs = ys)
+    | [], [] => isTrue rfl
+    | [], _ :: _ => isFalse (by intro h; cases h)
+    | _ :: _, [] => isFalse (by intro h; cases h)
+    | x :: xs, y :: ys =>
+        match SupportTerm.decEq x y with
+        | isFalse h =>
+            isFalse (by
+              intro hxy
+              injection hxy with hhead
+              exact h hhead)
+        | isTrue h =>
+          match SupportTerm.decEqList xs ys with
+          | isTrue hs => isTrue (by cases h; cases hs; rfl)
+          | isFalse hs =>
+              isFalse (by
+                intro hxy
+                injection hxy with _ htail
+                exact hs htail)
+
+  def SupportTerm.decEqDischarges :
+      (xs ys : List (QuestionId × SupportTerm)) → Decidable (xs = ys)
+    | [], [] => isTrue rfl
+    | [], _ :: _ => isFalse (by intro h; cases h)
+    | _ :: _, [] => isFalse (by intro h; cases h)
+    | (q, x) :: xs, (q', y) :: ys =>
+        match _root_.decEq q q' with
+        | isFalse h =>
+            isFalse (by
+              intro hxy
+              injection hxy with hhead
+              exact h (congrArg Prod.fst hhead))
+        | isTrue hq =>
+          match SupportTerm.decEq x y with
+          | isFalse h =>
+              isFalse (by
+                intro hxy
+                injection hxy with hhead
+                exact h (congrArg Prod.snd hhead))
+          | isTrue hx =>
+            match SupportTerm.decEqDischarges xs ys with
+            | isTrue hs =>
+                isTrue (by cases hq; cases hx; cases hs; rfl)
+            | isFalse hs =>
+                isFalse (by
+                  intro hxy
+                  injection hxy with _ htail
+                  exact hs htail)
+end
+
+instance : DecidableEq SupportTerm := SupportTerm.decEq
 
 /- `leaves(w)`: the leaf constants occurring in `w`, discharge subterms
 included (spec §6 — the dependency report *is* this set). -/
@@ -548,8 +660,8 @@ theorem leaves_declared {canon Pi Gamma CertOk} {w : SupportTerm} {C : Atom}
 /-! ### Result 1 (uniqueness half): support checking is deterministic -/
 
 /-- **Uniqueness.** A term has one conclusion and one obligation set: checking
-is a partial function of the term (the checker's other half is the executable
-`infer` port, to follow). -/
+is a partial function of the term. `Lara.Check.Support` provides the executable
+inference function and `Lara.Check.SupportProof` proves its exact adequacy. -/
 theorem hasSupport_unique {canon Pi Gamma CertOk} {w : SupportTerm}
     {C₁ : Atom} {O₁ : List QuestionId}
     (h₁ : HasSupport canon Pi Gamma CertOk w C₁ O₁) :
@@ -687,28 +799,74 @@ theorem dh_partition {canon Pi CertOk}
 
 /-! ### The seam: §6.1's `cert` assurance meets Theorem 1 -/
 
-/-- `CertOk` from a digest-addressed backend registry: `β@h` resolves to a
-registered abstract backend that accepts the exact submitted certificate for
-the encoded step (spec §5's
-`check_beta(T, [encode(P_i theta)], encode(C theta), kappa) = accept`, with
-the theory folded into the backend as in `Lara.Strict`). The certificate
-reference is passed unchanged through the registry seam into the abstract
-`Strict.Backend.check`; a different or swapped `κ` therefore cannot inherit
-acceptance from another certificate. -/
-def certOkOf (reg : BackendId → Digest → Option Strict.Backend) :
+/-- One registered outer backend identity, with an inner fixed-theory resolver. -/
+structure RegisteredBackend (canon : String → String) where
+  /-- Resolve a selected digest to a backend specialized to that fixed theory. -/
+  resolve : Digest → Option (Strict.Backend canon)
+
+/-- Backend-first closed registry.  The complete `(name, version)` is the outer
+identity; digest selection occurs only after that exact lookup succeeds. -/
+abbrev BackendRegistry (canon : String → String) :=
+  BackendId → Option (RegisteredBackend canon)
+
+/-- `CertOk` from a backend-first registry: exact identity `β` is resolved
+before digest `h`, and the resulting theory-specialized backend receives the
+unchanged symbolic certificate and encoded source premises. -/
+def certOkOf {canon : String → String} (reg : BackendRegistry canon) :
     BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun β h κ As C =>
-    ∃ B, reg β h = some B ∧ B.check κ (As.map B.enc) (B.enc C)
+    match reg β with
+    | none => False
+    | some registered =>
+        match registered.resolve h with
+        | none => False
+        | some B => B.accepts κ (As.map B.enc) (B.enc C)
+
+/-- Executable certificate check over the same backend-first resolution path. -/
+def certOkBOf {canon : String → String} (reg : BackendRegistry canon)
+    (β : BackendId) (h : Digest) (κ : CertRef) (As : List Atom)
+    (C : Atom) : Bool :=
+  -- β -> closed registry -> h -> fixed-theory backend -> exact replay
+  match reg β with
+  | none => false
+  | some registered =>
+      match registered.resolve h with
+      | none => false
+      | some B => B.replay κ (As.map B.enc) (B.enc C)
+
+/-- Executable replay is adequate for proposition-level certificate
+acceptance, including both lookup layers. -/
+theorem certOkBOf_iff {canon : String → String} (reg : BackendRegistry canon)
+    (β : BackendId) (h : Digest) (κ : CertRef) (As : List Atom)
+    (C : Atom) :
+    certOkBOf reg β h κ As C = true ↔ certOkOf reg β h κ As C := by
+  cases hreg : reg β with
+  | none => simp [certOkBOf, certOkOf, hreg]
+  | some registered =>
+      cases hresolve : registered.resolve h with
+      | none => simp [certOkBOf, certOkOf, hreg, hresolve]
+      | some B =>
+          simpa [certOkBOf, certOkOf, hreg, hresolve] using
+            (B.replay_iff κ (As.map B.enc) (B.enc C))
 
 /-- The §6.1 `cert` side condition composed with the abstract seam is exactly
 Theorem 1: an accepted strict instance's conclusion is a backend consequence
 of its instantiated premises, for the registered backend the assurance names.
 §6 typing and §5 soundness agree. -/
-theorem certOkOf_strict_step {reg : BackendId → Digest → Option Strict.Backend}
+theorem certOkOf_strict_step {canon : String → String}
+    {reg : BackendRegistry canon}
     {β : BackendId} {h : Digest} {κ : CertRef} {As : List Atom} {C : Atom}
     (hacc : certOkOf reg β h κ As C) :
-    ∃ B, reg β h = some B ∧ B.models (As.map B.enc) (B.enc C) := by
-  obtain ⟨B, hreg, hchk⟩ := hacc
-  exact ⟨B, hreg, B.sound _ _ _ hchk⟩
+    ∃ registered B, reg β = some registered ∧
+      registered.resolve h = some B ∧
+      B.models (As.map B.enc) (B.enc C) := by
+  simp only [certOkOf] at hacc
+  split at hacc
+  · contradiction
+  · rename_i registered hregistered
+    split at hacc
+    · contradiction
+    · rename_i B hB
+      exact ⟨registered, B, hregistered, hB, B.sound _ _ _ hacc⟩
 
 end Lara.Support

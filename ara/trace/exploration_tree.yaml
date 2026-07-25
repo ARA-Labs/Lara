@@ -571,6 +571,30 @@ tree:
       suite pass. The general executable checker remains blocked on the current abstract
       `Strict.Backend.check : ... → Prop` lacking a decidable replay operation.
     evidence: ["lean/AxCheck.lean", "cabal test all (22 properties, pass)", "N16"]
+    children:
+
+      - id: N48
+        type: experiment
+        provenance: ai-executed
+        timestamp: "2026-07-24T14:55"
+        support_level: explicit
+        source_refs: ["lean/Lara/Certificate.lean", "lean/Lara/Strict.lean", "lean/Lara/Support.lean", "lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+        also_depends_on: [N43]
+        title: "Executable certificate replay closes the abstract strict-backend seam"
+        result: >
+          The Lean seam now mirrors symbolic S-expression certificate payloads with
+          a manual nested-list equality decision, identifies backends by exact
+          name+version, indexes encodings and registries by the canonicalizer, and
+          separates proposition-level acceptance from executable Boolean replay via
+          an adequacy theorem. Backend-first resolution distinguishes absent backend,
+          version mismatch, and unknown digest. An nd@1 fixture with two fixed theory
+          digests proves premise-before-theory ordering. `lake build` and the expanded
+          AxCheck audit pass sorry-free within the standard axiom trio.
+        evidence:
+          - "Lara.Strict.StrictJudgment.ofReplay"
+          - "Lara.Support.certOkBOf_iff"
+          - "Lara.Examples.registry_fixed_theory_order"
+          - "lean/AxCheck.lean"
 
   - id: N35
     type: dead_end
@@ -802,3 +826,231 @@ tree:
       #print axioms. Committed as docs/comparison-rit-lara.md §11.5 (ba6c45e), pushed to PR #22.
     evidence: ["docs/comparison-rit-lara.md §11.5", "../rit/src/rit/admit/__init__.py:43-51 (per-file loop)", "../rit/src/rit/formal/uses.py:86-90 (used_constants stub)", "../rit/src/rit/grounding/__init__.py:52-55 (L1/L2 only)"]
     status: resolved
+
+  - id: N49
+    type: dead_end
+    provenance: ai-executed
+    timestamp: "2026-07-24T15:03"
+    support_level: explicit
+    source_refs: ["Lean AxCheck output during 2026-07-24_004"]
+    also_depends_on: [N48]
+    title: "Native-decide proofs violate the standard-trio axiom audit"
+    hypothesis: >
+      Executable golden-vector and registry fixtures could be closed with
+      native_decide while retaining the project's ordinary AxCheck guarantee.
+    failure_mode: >
+      The generated native_decide axioms appeared transitively in nonfactivity
+      and registry theorems, outside propext, Classical.choice, and Quot.sound.
+    lesson: >
+      Keep runtime matrices as executable Bool values, and prove soundness-facing
+      fixtures through replay_iff plus declarative typing witnesses.
+
+  - id: N50
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T15:23"
+    support_level: explicit
+    source_refs: ["lean/Lara/ND.lean", "lean/Lara/Strict.lean", "lean/Lara/Examples.lean", "src/Lara/Strict/ND.hs", "test/StrictSpec.hs", "lean/AxCheck.lean"]
+    also_depends_on: [N48, N49]
+    title: "Concrete executable ND replay and exact cross-language atom codec"
+    result: >
+      Lean and Haskell now share an exact A/N/S/C/L token stream whose fields
+      use canonical decimal UTF-8 byte-length frames. Lean proves the frame and
+      Atom decoder left inverses, encoder injectivity, ndEnc_iff, exact
+      decode/infer replay adequacy, and theory-closed backend soundness. Haskell
+      removed show . nf, added the identical encoder/decoder, and expanded the
+      closed decoder/infer matrix. lake build, standard-trio AxCheck, cabal
+      build, all 25 property groups, and git diff --check pass.
+    evidence:
+      - "Lara.Strict.decodeAtomKey_encodeAtomKey"
+      - "Lara.Strict.ndReplay_iff"
+      - "Lara.Strict.ndBackendWithTheory"
+      - "ara/evidence/results/executable_nd_adapter.md"
+
+  - id: N51
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T16:05"
+    support_level: explicit
+    source_refs: ["Task 2 spec review", "lean/Lara/ND.lean", "lean/Lara/Examples.lean", "test/StrictSpec.hs"]
+    also_depends_on: [N50]
+    title: "ND malformed-wire and replay boundary matrix completed after spec review"
+    result: >
+      Universal unknown-tag rejection, generated non-canonical index rejection,
+      one-shorter/one-longer fixtures for every Formula and Cert constructor,
+      both application-child inference failures, abort success/failure, and
+      explicit argument-sensitive ndEnc separation/canonicalization regressions
+      were added. The
+      obsolete temporary slot replay helper was removed. lake build, the
+      standard-trio AxCheck audit, cabal build, and all 27 Haskell property
+      groups at 100 cases each pass.
+    evidence:
+      - "Lara.ND.decodeFormula_unknown_list"
+      - "Lara.ND.decodeCert_unknown_list"
+      - "Lara.Examples.nd_formula_bad_arity_matrix"
+      - "Lara.Examples.nd_cert_bad_arity_matrix"
+      - "ara/evidence/results/executable_nd_adapter.md"
+
+  - id: N52
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T16:53"
+    support_level: explicit
+    source_refs: ["lean/Lara/Attack.lean", "lean/Lara/Check/Attack.lean", "lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+    also_depends_on: [N41, N48]
+    title: "Exact executable contrary matching and positional attack checking"
+    result: >
+      A finite first-order matcher now threads one raw ground substitution
+      across both sides of every contrary declaration and proves exact
+      equivalence with ContraryMatch for arbitrary canonicalizers, including
+      non-idempotent ones. The attack checker infers each source once and
+      exactly decides rebut, undercut, and undermine against local target
+      occurrences, with closed R10/R11 diagnostics. Soundness and completeness
+      against HasAttack are machine checked. The full fixture matrix, lake
+      build, standard-trio AxCheck audit, and diff integrity gate pass.
+    evidence:
+      - "Lara.Attack.contraryMatchB_iff"
+      - "Lara.Check.exceptionMatchB_iff"
+      - "Lara.Check.checkAttack_sound"
+      - "Lara.Check.checkAttack_complete"
+      - "Lara.Examples.contrary_nonidempotent_repeated_rejects"
+
+  - id: N53
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T17:20"
+    support_level: explicit
+    source_refs: ["lean/Lara/Check/Program.lean", "lean/Lara/Compile.lean", "lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+    also_depends_on: [N40, N41, N42, N52]
+    title: "Raw declarations now construct proof-bearing checked programs"
+    result: >
+      A deterministic whole-program checker now rejects structural duplicate
+      arguments, distinguishes valid open obligations from frozen R-class
+      failures, checks every argument once into an aligned cache, resolves
+      attack sources from that cache, and constructs the strengthened
+      CheckedProgram boundary with typed and declared endpoints. Lean proves
+      exact relational soundness/completeness, cache alignment and unique keys,
+      and complete-node/declared-endpoint postconditions. The raw fixture
+      matrix includes certificate-payload-sensitive identity, deterministic
+      failure order, undeclared endpoints, all three attack failures, and
+      repeated attacks from one cached source. lake build, the standard-trio
+      AxCheck audit, no-hole scan, and diff integrity checks pass.
+    evidence:
+      - "Lara.Check.checkProgram_sound"
+      - "Lara.Check.checkProgram_complete"
+      - "Lara.Check.CheckedArguments.cache_nodup"
+      - "Lara.Examples.check_program_certificate_payload_distinct"
+      - "Lara.Examples.check_program_many_attacks_one_source"
+
+  - id: N54
+    type: decision
+    provenance: user
+    timestamp: "2026-07-24T14:40"
+    support_level: explicit
+    source_refs: ["docs/superpowers/plans/2026-07-24-issue-16-executable-checkers.md", "plan-eng-review decisions D18-D26"]
+    also_depends_on: [N43]
+    title: "Engineering review fixes the complete executable-checker architecture"
+    choice: >
+      Keep the complete six-task issue in one branch and implement one
+      Except-first checker path with closed diagnostics. Make backend lookup
+      backend-first and digest-resolved, version identities, index backends and
+      registries by the source canonicalizer, share one proved Lean/Haskell
+      Atom-key format, retain raw contrary substitutions, and cache
+      non-indexed checked support values that own their terms.
+    alternatives:
+      - "Pair-indexed registry lookup that cannot distinguish an absent backend from an unknown digest"
+      - "Name-only backend identity and undocumented theory participation"
+      - "Display-derived serialization without a proved decoder left inverse"
+      - "Normalized substitution storage that assumes canonicalizer idempotence"
+      - "Indexed checked-support lists requiring pervasive dependent pairs"
+      - "A separate Option-only checker core followed by duplicate diagnostic logic"
+    evidence: "Explicit user choices during plan-eng-review; reviewed plan commit 2d60e33"
+
+  - id: N55
+    type: dead_end
+    provenance: ai-executed
+    timestamp: "2026-07-24T16:25"
+    support_level: explicit
+    source_refs: ["lean/Lara/Check/Support.lean", "Lean 4.32 Lake C-codegen output"]
+    also_depends_on: [N54]
+    title: "Dependent proof-carrying support recursion fails native code generation"
+    hypothesis: >
+      Returning proof-bearing checked values directly from the nested recursive
+      support checker would make soundness construction-time while still
+      compiling as an executable Lake module.
+    failure_mode: >
+      Lean accepted the definitions and exact adequacy proofs during direct
+      elaboration, but the Lake `-c` path revisited dependent proof terms,
+      exhausted elaboration/code-generation resources, and could not emit the
+      checker module.
+    lesson: >
+      Kernel acceptance alone is not the executable gate. Keep runtime
+      recursion first-order and prove the erased result externally in a
+      proof-only companion module.
+    children:
+      - id: N56
+        type: pivot
+        provenance: ai-executed
+        timestamp: "2026-07-24T16:37"
+        support_level: explicit
+        source_refs: ["lean/Lara/Check/Support.lean", "lean/Lara/Check/SupportProof.lean"]
+        from: "Dependent proof-carrying recursive checker"
+        to: "First-order Except checker plus proof-only exact adequacy module"
+        trigger: "The executable core code-generated successfully while dependent proof recursion failed the Lake C-codegen path."
+
+  - id: N57
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T17:47"
+    support_level: explicit
+    source_refs:
+      - "lean/AxCheck.lean"
+      - "test/StrictSpec.hs"
+      - "ara/evidence/status/test_status.md"
+      - "ara/evidence/status/mechanization_status.md"
+    also_depends_on: [N50, N51, N52, N53, N56]
+    title: "Issue #16 executable checker surface passes complete verification"
+    result: >
+      The final Lean build is warning-free. The standalone AxCheck audit covers
+      304 declarations, including all 177 public theorem additions from the
+      issue, with no sorryAx and exactly propext, Classical.choice, and
+      Quot.sound. Cabal builds cleanly and all 28 named Haskell property groups
+      pass, including 100 generated nested/Unicode Atom-key round trips. Exact
+      support, positional-attack, and raw-program checker adequacy closes the
+      result-1 Lean checker portion while #17, #18, result 3, and result 9 remain
+      explicitly open.
+    evidence:
+      - "/tmp/lara-issue-16-axcheck.txt"
+      - "cabal test all --test-show-details=direct (28 groups, pass)"
+      - "Lara.Check.inferSupport_sound / inferSupport_complete"
+      - "Lara.Check.checkAttack_sound / checkAttack_complete"
+      - "Lara.Check.checkProgram_sound / checkProgram_complete"
+
+  - id: N58
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-24T21:02"
+    support_level: explicit
+    source_refs:
+      - "PR #21 requested-changes review"
+      - "lean/Lara/Examples.lean"
+      - "lean/Lara/Strict.lean"
+      - "src/Lara/Strict/ND.hs"
+      - "test/StrictSpec.hs"
+      - "lean/AxCheck.lean"
+    also_depends_on: [N50, N51, N57]
+    title: "PR #21 review makes executable conformance gates and frame tags structural"
+    result: >
+      Six previously inert Lean Bool matrices are now #guard build gates. The
+      A/N/S/C/L codec vocabulary is a closed FrameTag sum in both languages;
+      encoding and decoding share the render/parse table, Lean proves its
+      parse/render inverse, and the Haskell golden-vector group checks the same
+      exhaustive round trip. Stale show . nf TCB documentation was corrected.
+      lake build, the 299-entry standard-trio AxCheck audit, cabal build, all
+      30 Haskell property groups at 100 cases each, and git diff --check pass
+      without changing the frozen atom-key bytes.
+    evidence:
+      - "Lara.Strict.FrameTag.parse_toString"
+      - "Lara.Examples #guard conformance matrices"
+      - "test/StrictSpec.hs prop_frameTagRoundTrip"
+      - "ara/evidence/results/executable_nd_adapter.md"

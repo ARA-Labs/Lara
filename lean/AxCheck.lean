@@ -18,9 +18,14 @@ import Lara.Support
 import Lara.Attack
 import Lara.Compile
 import Lara.Policy
+import Lara.Check
 import Lara.Examples
 
 open Lara
+
+-- Symbolic certificate wire equality (nested `List SExpr`, decided manually).
+#print axioms Lara.Support.SExpr.decEq
+#print axioms Lara.Support.SExpr.decEqList
 
 -- Result 11 / C01: nf/≡ carve-out.
 #print axioms equiv_iff_nf_eq
@@ -48,10 +53,41 @@ open Lara
 #print axioms Lara.ND.infer_deps_eq_fv
 #print axioms Lara.ND.infer_iff
 #print axioms Lara.ND.hasType_unique
+#print axioms Lara.ND.Tag.parse_toString
+#print axioms Lara.ND.decodeNat_repr
+#print axioms Lara.ND.decodeNat_leading_zero_01
+#print axioms Lara.ND.decodeNat_some_canonical
+#print axioms Lara.ND.decodeFormula_list_bad_arity
+#print axioms Lara.ND.decodeCert_list_bad_arity
+#print axioms Lara.ND.decodeFormula_unknown_atom
+#print axioms Lara.ND.decodeFormula_unknown_list
+#print axioms Lara.ND.decodeCert_unknown_list
 
 -- Result 8 / C03: abstract strict-step soundness (Theorem 1) + ND instantiation.
+#print axioms Lara.Strict.StrictJudgment.ofReplay
 #print axioms Lara.Strict.strict_step_sound
+#print axioms Lara.Strict.ndReplay_iff
 #print axioms Lara.Strict.ndBackend
+#print axioms Lara.Strict.FrameTag.parse_toString
+#print axioms Lara.Strict.charByteSize_toList
+#print axioms Lara.Strict.splitColon_append
+#print axioms Lara.Strict.takeUtf8_append
+#print axioms Lara.Strict.parseFrame_frame
+#print axioms Lara.Strict.decodeFramesAux_render
+#print axioms Lara.Strict.decodeFrames_render
+#print axioms Lara.Strict.frame_length_pos
+#print axioms Lara.Strict.sourceTermsOfList_toList
+#print axioms Lara.Strict.encodeTermKeys_eq_map
+#print axioms Lara.Strict.decodeTermKeyAux_encode
+#print axioms Lara.Strict.decodeTermKeys_encode
+#print axioms Lara.Strict.payloadChars_le_renderFrames
+#print axioms Lara.Strict.payloadChars_append
+#print axioms Lara.Strict.atomTermDepth_le_key_length
+#print axioms Lara.Strict.atomTermsDepth_le_keys_length
+#print axioms Lara.Strict.decodeAtomKey_encodeAtomKey
+#print axioms Lara.Strict.encodeAtomKey_injective
+#print axioms Lara.Strict.ndEnc_iff
+#print axioms Lara.Strict.ndBackendWithTheory
 #print axioms Lara.Strict.nd_strict_step_sound
 
 -- Result 2 / C03: source non-factivity (Theorem 3, the factivity firewall).
@@ -87,7 +123,29 @@ open Lara
 #print axioms Lara.Support.strict_no_questions
 #print axioms Lara.Support.complete_mandatory_discharged
 #print axioms Lara.Support.dh_partition
+#print axioms Lara.Support.certOkBOf_iff
 #print axioms Lara.Support.certOkOf_strict_step
+#print axioms Lara.Support.SupportTerm.decEq
+#print axioms Lara.Support.SupportTerm.decEqList
+#print axioms Lara.Support.SupportTerm.decEqDischarges
+
+-- Result 1 executable half: Boolean side conditions and the support checker's
+-- exact soundness/completeness bridge to `HasSupport`.
+#print axioms Lara.Check.substDomainB_iff
+#print axioms Lara.Check.atomsEquivB_iff
+#print axioms Lara.Check.AtomsEquiv.length
+#print axioms Lara.Check.AtomsEquiv.get
+#print axioms Lara.Check.AtomsEquiv.of_get
+#print axioms Lara.Check.strictNoQuestionB_iff
+#print axioms Lara.Check.assuranceOkB_iff
+#print axioms Lara.Check.answerOkB_iff
+#print axioms Lara.Check.answersOkB_iff
+#print axioms Lara.Check.knownAnswersOkB_eq_answersOkB
+#print axioms Lara.Check.AnswersOk.length
+#print axioms Lara.Check.AnswersOk.get
+#print axioms Lara.Check.AnswersOk.of_get
+#print axioms Lara.Check.inferSupport_sound
+#print axioms Lara.Check.inferSupport_complete
 
 -- Spec §7.1 freeze: typed positional attacks — checked source (§1 guarantee 4),
 -- strict-unattackability, position-kind partition, and the coherence of local
@@ -98,6 +156,43 @@ open Lara
 #print axioms Lara.Attack.undercut_target_rule
 #print axioms Lara.Attack.undermine_target_leaf
 #print axioms Lara.Attack.rebut_concl_coherent
+#print axioms Lara.Attack.SubstExtends.refl
+#print axioms Lara.Attack.SubstExtends.trans
+#print axioms Lara.Attack.instPat_of_extends
+#print axioms Lara.Attack.instPats_of_extends
+#print axioms Lara.Attack.instAPat_of_extends
+#print axioms Lara.Attack.matchPat_sound
+#print axioms Lara.Attack.matchPats_sound
+#print axioms Lara.Attack.matchAPat_sound
+#print axioms Lara.Attack.matchPat_complete
+#print axioms Lara.Attack.matchPats_complete
+#print axioms Lara.Attack.matchAPat_complete
+#print axioms Lara.Attack.emptySubstCanonAgrees
+#print axioms Lara.Attack.contraryMatchDecl_iff
+#print axioms Lara.Attack.contraryMatchB_iff
+
+-- Exact executable positional attack checking, including finite exception
+-- selection and cached-source/public adequacy.
+#print axioms Lara.Check.exceptionMatchB_iff
+#print axioms Lara.Check.checkAttackTarget_iff
+#print axioms Lara.Check.checkAttackWithSource_sound
+#print axioms Lara.Check.checkAttackWithSource_complete
+#print axioms Lara.Check.checkAttack_sound
+#print axioms Lara.Check.checkAttack_complete
+
+-- Proof-bearing whole-program construction: deterministic duplicate boundary,
+-- aligned checked-source cache, strengthened R1 endpoint boundary, and exact
+-- relational soundness/completeness.
+#print axioms Lara.Check.incompleteArgument_no_rejectClass
+#print axioms Lara.Check.firstDuplicate_none_iff
+#print axioms Lara.Check.CheckedArguments.cache_nodup
+#print axioms Lara.Check.lookupChecked_term
+#print axioms Lara.Check.lookupChecked_complete
+#print axioms Lara.Check.checkProgram_sound
+#print axioms Lara.Check.checkProgram_complete
+#print axioms Lara.Check.checkProgram_accepted_source_declared
+#print axioms Lara.Check.checkProgram_accepted_target_declared
+#print axioms Lara.Check.checkProgram_nodes_complete
 
 -- Spec §8 compile freeze: result 4 both halves (no untyped node or attack),
 -- subargument closure extends the direct attack, and the N16 bridge at both
@@ -136,6 +231,20 @@ open Lara
 -- Concrete conformance examples: obligation accounting (mixed/nested/missing),
 -- subterm traversal boundaries, and subargument-closure superset behavior with
 -- a concrete edge decider and grounded verdict.
+#print axioms Lara.Examples.slotBackend
+#print axioms Lara.Examples.registry_exact_digest_accepts
+#print axioms Lara.Examples.registry_exact_digest_rejects
+#print axioms Lara.Examples.registry_backend_absent
+#print axioms Lara.Examples.registry_version_mismatch
+#print axioms Lara.Examples.registry_digest_unknown
+#print axioms Lara.Examples.registry_success_bridge
+#print axioms Lara.Examples.registry_missing_bridge
+#print axioms Lara.Examples.registry_premises_before_theory
+#print axioms Lara.Examples.registry_fixed_theory_order
+-- The six executable ND conformance matrices are enforced with `#guard` in
+-- `Lara.Examples`; unlike theorems, commands do not have an axiom set to print.
+#print axioms Lara.Examples.ndEnc_distinct_atoms
+#print axioms Lara.Examples.ndEnc_numeric_canonical_equal
 #print axioms Lara.Examples.no_prems
 #print axioms Lara.Examples.no_dis
 #print axioms Lara.Examples.subterm_boundaries
@@ -149,13 +258,103 @@ open Lara
 #print axioms Lara.Examples.repeated_obligation_deduplicated
 #print axioms Lara.Examples.missing_question_rejected
 #print axioms Lara.Examples.overlapping_question_rejected
+#print axioms Lara.Examples.check_declared_leaf
+#print axioms Lara.Examples.check_mixed_holes
+#print axioms Lara.Examples.check_nested_obligations
+#print axioms Lara.Examples.check_discharge_propagation
+#print axioms Lara.Examples.check_obligation_deduplication
+#print axioms Lara.Examples.check_missing_question
+#print axioms Lara.Examples.check_question_overlap
+#print axioms Lara.Examples.check_premise_mismatch
+#print axioms Lara.Examples.check_discharge_mismatch
+#print axioms Lara.Examples.check_discharge_precedes_question_accounting
+#print axioms Lara.Examples.check_missing_leaf
+#print axioms Lara.Examples.check_missing_rule_precedence
+#print axioms Lara.Examples.check_duplicate_substitution_precedence
+#print axioms Lara.Examples.check_substitution_domain
+#print axioms Lara.Examples.check_substitution_extra_binding
+#print axioms Lara.Examples.check_premise_instantiation
+#print axioms Lara.Examples.check_conclusion_instantiation
+#print axioms Lara.Examples.check_too_few_premises
+#print axioms Lara.Examples.check_too_many_premises
+#print axioms Lara.Examples.check_child_error_precedes_parent_shape
+#print axioms Lara.Examples.check_duplicate_declarations
+#print axioms Lara.Examples.check_duplicate_discharges
+#print axioms Lara.Examples.check_duplicate_holes
+#print axioms Lara.Examples.check_undeclared_discharge
+#print axioms Lara.Examples.check_undeclared_hole
+#print axioms Lara.Examples.check_answer_instantiation
+#print axioms Lara.Examples.check_strict_questions
+#print axioms Lara.Examples.check_strict_trusted_success
+#print axioms Lara.Examples.check_strict_cert_success
+#print axioms Lara.Examples.check_assurance_wrong_mode
+#print axioms Lara.Examples.check_assurance_trusted_disallowed
+#print axioms Lara.Examples.check_assurance_unallowlisted
+#print axioms Lara.Examples.check_assurance_backend_missing
+#print axioms Lara.Examples.check_assurance_digest_missing
+#print axioms Lara.Examples.check_assurance_replay_rejected
 #print axioms Lara.Examples.defeasible_rebut_typed
 #print axioms Lara.Examples.strict_root_rebut_rejected
 #print axioms Lara.Examples.nested_undercut_typed
 #print axioms Lara.Examples.mixed_path_undermine_typed
+#print axioms Lara.Examples.contrary_shared_substitution
+#print axioms Lara.Examples.contrary_shared_substitution_rejects
+#print axioms Lara.Examples.contrary_repeated_variable
+#print axioms Lara.Examples.contrary_repeated_variable_rejects
+#print axioms Lara.Examples.contrary_canonical_numeric
+#print axioms Lara.Examples.contrary_nonidempotent_repeated_rejects
+#print axioms Lara.Examples.contrary_constructor_arity_rejects
+#print axioms Lara.Examples.check_rebut_success
+#print axioms Lara.Examples.check_nested_undercut_success
+#print axioms Lara.Examples.check_mixed_undermine_success
+#print axioms Lara.Examples.check_rebut_strict_root
+#print axioms Lara.Examples.check_undercut_strict_occurrence
+#print axioms Lara.Examples.check_undercut_undefined_position
+#print axioms Lara.Examples.check_undermine_undefined_position
+#print axioms Lara.Examples.check_undercut_wrong_occurrence
+#print axioms Lara.Examples.check_undermine_wrong_occurrence
+#print axioms Lara.Examples.check_rebut_wrong_occurrence
+#print axioms Lara.Examples.check_rebut_missing_contrary
+#print axioms Lara.Examples.check_undermine_missing_contrary
+#print axioms Lara.Examples.check_rebut_missing_target_rule
+#print axioms Lara.Examples.check_undercut_missing_target_rule
+#print axioms Lara.Examples.check_rebut_target_conclusion_instantiation
+#print axioms Lara.Examples.check_undercut_exception_instantiation
+#print axioms Lara.Examples.check_undercut_missing_exception
+#print axioms Lara.Examples.check_undercut_exception_mismatch
+#print axioms Lara.Examples.check_undermine_undeclared_leaf
+#print axioms Lara.Examples.check_attack_source_failure_rebut
+#print axioms Lara.Examples.check_attack_source_failure_undercut
+#print axioms Lara.Examples.check_attack_source_failure_undermine
 #print axioms Lara.Examples.sideWrap
 #print axioms Lara.Examples.vWrap_typed
 #print axioms Lara.Examples.kAtk_typed
+#print axioms Lara.Examples.PExCheck_success
+#print axioms Lara.Examples.PExCheck_ok
+#print axioms Lara.Examples.PEx_args
+#print axioms Lara.Examples.PEx_atts
+#print axioms Lara.Examples.supportTerm_nested_structural_equality
+#print axioms Lara.Examples.supportTerm_certificate_payload_distinct
+#print axioms Lara.Examples.registry_wrapped_certificate_accepts
+#print axioms Lara.Examples.check_wrapped_certificate_success
+#print axioms Lara.Examples.check_program_empty
+#print axioms Lara.Examples.check_program_one_complete
+#print axioms Lara.Examples.check_program_full_PEx
+#print axioms Lara.Examples.check_program_certificate_payload_distinct
+#print axioms Lara.Examples.check_program_duplicate_first_pair
+#print axioms Lara.Examples.check_program_duplicate_crossing_first_pair
+#print axioms Lara.Examples.check_program_incomplete_exact
+#print axioms Lara.Examples.check_program_incomplete_not_rejection_class
+#print axioms Lara.Examples.check_program_support_error_wrapped
+#print axioms Lara.Examples.check_program_first_argument_failure
+#print axioms Lara.Examples.check_program_undeclared_source
+#print axioms Lara.Examples.check_program_undeclared_target
+#print axioms Lara.Examples.check_program_endpoint_reject_classes
+#print axioms Lara.Examples.check_program_rebut_error_wrapped
+#print axioms Lara.Examples.check_program_undercut_error_wrapped
+#print axioms Lara.Examples.check_program_undermine_error_wrapped
+#print axioms Lara.Examples.check_program_first_attack_failure
+#print axioms Lara.Examples.check_program_many_attacks_one_source
 #print axioms Lara.Examples.closure_edge_direct
 #print axioms Lara.Examples.closure_edge_wrapper
 #print axioms Lara.Examples.closure_no_edge_unrelated

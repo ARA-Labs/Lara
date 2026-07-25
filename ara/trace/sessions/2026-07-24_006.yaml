@@ -1,0 +1,37 @@
+session:
+  id: "2026-07-24_006"
+  timestamp: "2026-07-24T16:53"
+  ended: "2026-07-24T16:53"
+  summary: "Implemented and mechanized exact contrary matching and executable positional attack checking."
+
+events_logged:
+  - type: experiment
+    id: N52
+    provenance: ai-executed
+    summary: "Proved exact arbitrary-canon contrary matching and exact soundness/completeness of all three positional attack constructors."
+  - type: heuristic
+    id: H03
+    provenance: ai-suggested
+    summary: "Retain raw matcher substitutions and normalize exactly once at equality boundaries."
+
+ai_actions:
+  - action: "Implemented shared-substitution first-order matching and its mutual soundness/completeness proof."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Attack.lean"]
+  - action: "Implemented exception selection, cached-source attack checking, exact R10/R11 diagnostics, and HasAttack adequacy."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Check/Attack.lean", "lean/Lara/Check.lean"]
+  - action: "Added matcher regressions and the complete positive/negative attack fixture matrix."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+  - action: "Ran lake build, AxCheck standard-trio audit, hole scan, and git diff integrity checks."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+open_threads:
+  - "The compile-facing outer declaration location and program-level diagnostic wrapper remain in the next implementation step."
+  - "The checker-built Compile.Faithful edge decider still needs composition at the program layer."
+
+ai_suggestions_pending: []

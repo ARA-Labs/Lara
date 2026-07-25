@@ -38,16 +38,149 @@ judgment is relational.
 -/
 
 import Lara.Compile
+import Lara.Check
 
 namespace Lara.Examples
 
-open Lara.Support Lara.Compile
+open Lara.Support Lara.Compile Lara.Check
 
 /-! ### Fixture -/
 
 def pA : Atom := .atom "p" .nil
 def pB : Atom := .atom "q" .nil
 def pC : Atom := .atom "s" .nil
+
+def atomKeyGoldenInputs : List (Atom × String) :=
+  [ (.atom "" .nil, "1:A0:1:L1:0")
+  , (.atom ":" (.cons (.str "a:b") .nil), "1:A1::1:L1:18:1:S3:a:b")
+  , (.atom "π" (.cons (.str "雪") .nil), "1:A2:π1:L1:18:1:S3:雪")
+  , (.atom "p" (.cons (.con "z" .nil) .nil), "1:A1:p1:L1:112:1:C1:z1:L1:0")
+  , (.atom "p" (.cons (.con "f" (.cons (.num "2")
+      (.cons (.con "g" (.cons (.str "x") .nil)) .nil))) .nil),
+      "1:A1:p1:L1:143:1:C1:f1:L1:26:1:N1:220:1:C1:g1:L1:16:1:S1:x")
+  , (.atom "p" (.cons (.num "1") (.cons (.num "2") .nil)),
+      "1:A1:p1:L1:26:1:N1:16:1:N1:2")
+  , (.atom "p" (.cons (.num "2") (.cons (.num "1") .nil)),
+      "1:A1:p1:L1:26:1:N1:26:1:N1:1") ]
+
+def atom_key_golden_vectors : Bool :=
+  atomKeyGoldenInputs.all (fun x =>
+    Lara.Strict.encodeAtomKey x.1 == x.2 &&
+    Lara.Strict.decodeAtomKey x.2 == some x.1)
+
+def atom_key_malformed_rejected : Bool :=
+  ["01:A0:1:L1:0", "1:A0:1:L1:0x", "1:X0:1:L1:0",
+    "1:A0:1:L1:1", "1:A3:π1:L1:0"].all
+      (fun s => Lara.Strict.decodeAtomKey s == none)
+
+def ndP : Lara.ND.Formula := Lara.Strict.ndEnc id pA
+def ndQ : Lara.ND.Formula := Lara.Strict.ndEnc id pB
+def ndPWire : SExpr := .list [.atom "atom",
+  .atom (Lara.Strict.encodeAtomKey pA)]
+def ndQWire : SExpr := .list [.atom "atom",
+  .atom (Lara.Strict.encodeAtomKey pB)]
+def ndIdentity : CertRef := ⟨.list [.atom "lam", ndPWire,
+  .list [.atom "hyp", .atom "0"]]⟩
+def ndNested : CertRef := ⟨.list [.atom "lam", ndPWire,
+  .list [.atom "app",
+    .list [.atom "lam", ndPWire, .list [.atom "hyp", .atom "0"]],
+    .list [.atom "hyp", .atom "0"]]]⟩
+def ndMalformed : CertRef := ⟨.list [.atom "hyp", .atom "01"]⟩
+def ndOutOfRange : CertRef := ⟨.list [.atom "hyp", .atom "2"]⟩
+def ndAppFunctionFailure : CertRef := ⟨.list [.atom "app",
+  .list [.atom "hyp", .atom "2"], .list [.atom "hyp", .atom "0"]]⟩
+def ndAppArgumentFailure : CertRef := ⟨.list [.atom "app",
+  .list [.atom "hyp", .atom "0"], .list [.atom "hyp", .atom "2"]]⟩
+def ndAbortQ : CertRef := ⟨.list [.atom "abort", ndQWire,
+  .list [.atom "hyp", .atom "0"]]⟩
+
+def nd_replay_matrix : Bool :=
+  Lara.Strict.ndReplay ndIdentity [] (.imp ndP ndP) &&
+  Lara.Strict.ndReplay ndNested [] (.imp ndP ndP) &&
+  !Lara.Strict.ndReplay ndMalformed [] ndP &&
+  !Lara.Strict.ndReplay ndOutOfRange [ndP] ndP &&
+  !Lara.Strict.ndReplay ⟨.list [.atom "hyp", .atom "0"]⟩ [ndP] ndQ &&
+  !Lara.Strict.ndReplay ndAppFunctionFailure [.imp ndP ndQ, ndP] ndQ &&
+  !Lara.Strict.ndReplay ndAppArgumentFailure [.imp ndP ndQ, ndP] ndQ &&
+  Lara.Strict.ndReplay ndAbortQ [.fls] ndQ &&
+  !Lara.Strict.ndReplay ndAbortQ [ndP] ndQ
+
+def nd_decoder_matrix : Bool := decide (
+    Lara.ND.decodeFormula (.atom "false") = some .fls ∧
+    Lara.ND.decodeFormula ndPWire = some ndP ∧
+    Lara.ND.decodeFormula (.list [.atom "imp", ndPWire, ndQWire]) =
+      some (.imp ndP ndQ) ∧
+    Lara.ND.decodeCert (.list [.atom "hyp", .atom "0"]) = some (.hyp 0) ∧
+    Lara.ND.decodeCert ndIdentity.payload =
+      some (.lam ndP (.hyp 0)) ∧
+    Lara.ND.decodeCert (.list [.atom "app",
+      .list [.atom "hyp", .atom "0"], .list [.atom "hyp", .atom "1"]]) =
+      some (.app (.hyp 0) (.hyp 1)) ∧
+    Lara.ND.decodeCert (.list [.atom "abort", ndPWire,
+      .list [.atom "hyp", .atom "0"]]) =
+      some (.abort ndP (.hyp 0)))
+
+/-- Every list-form Formula constructor is rejected at one field shorter and
+one field longer than its exact arity. `false` is a bare atom, so both of its
+malformed list encodings are included explicitly. -/
+def nd_formula_bad_arity_matrix : Bool :=
+  [ .list [.atom "atom"]
+  , .list [.atom "atom", .atom "P", .atom "extra"]
+  , .list [.atom "false"]
+  , .list [.atom "false", .atom "extra"]
+  , .list [.atom "imp", ndPWire]
+  , .list [.atom "imp", ndPWire, ndQWire, .atom "extra"]
+  ].all (fun e => Lara.ND.decodeFormula e == none)
+
+/-- Every certificate constructor is rejected at one field shorter and one
+field longer than its exact arity. -/
+def nd_cert_bad_arity_matrix : Bool :=
+  [ .list [.atom "hyp"]
+  , .list [.atom "hyp", .atom "0", .atom "extra"]
+  , .list [.atom "lam", ndPWire]
+  , .list [.atom "lam", ndPWire, .list [.atom "hyp", .atom "0"],
+      .atom "extra"]
+  , .list [.atom "app", .list [.atom "hyp", .atom "0"]]
+  , .list [.atom "app", .list [.atom "hyp", .atom "0"],
+      .list [.atom "hyp", .atom "1"], .atom "extra"]
+  , .list [.atom "abort", ndPWire]
+  , .list [.atom "abort", ndPWire, .list [.atom "hyp", .atom "0"],
+      .atom "extra"]
+  ].all (fun e => Lara.ND.decodeCert e == none)
+
+-- These executable conformance matrices are build gates, not inert fixtures.
+#guard atom_key_golden_vectors
+#guard atom_key_malformed_rejected
+#guard nd_replay_matrix
+#guard nd_decoder_matrix
+#guard nd_formula_bad_arity_matrix
+#guard nd_cert_bad_arity_matrix
+
+def numericCanon : String → String
+  | "+01" => "1"
+  | s => s
+
+def numericNoisy : Atom := .atom "n" (.cons (.num "+01") .nil)
+def numericCanonical : Atom := .atom "n" (.cons (.num "1") .nil)
+def pArgA : Atom := .atom "p" (.cons (.con "a" .nil) .nil)
+def pArgB : Atom := .atom "p" (.cons (.con "b" .nil) .nil)
+
+/-- With predicate and arity held fixed, distinct normalized argument terms
+remain distinct after ND encoding. This specifically rejects a predicate-only
+encoder. -/
+theorem ndEnc_distinct_atoms :
+    Lara.Strict.ndEnc id pArgA ≠ Lara.Strict.ndEnc id pArgB := by
+  intro h
+  have he := (Lara.Strict.ndEnc_iff id pArgA pArgB).mp h
+  simp [Lara.equiv, Lara.nf, Lara.nfTerms, Lara.nfTerm, pArgA, pArgB] at he
+
+/-- Numeric spellings identified by the canonicalizer receive the same ND
+encoding. -/
+theorem ndEnc_numeric_canonical_equal :
+    Lara.Strict.ndEnc numericCanon numericNoisy =
+      Lara.Strict.ndEnc numericCanon numericCanonical := by
+  apply (Lara.Strict.ndEnc_iff numericCanon numericNoisy numericCanonical).mpr
+  rfl
 
 def l1 : LeafId := ⟨"l1"⟩
 def l2 : LeafId := ⟨"l2"⟩
@@ -95,6 +228,146 @@ def PiEx : RuleId → Option Rule := fun r =>
 
 def certOkNone : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun _ _ _ _ _ => False
+
+/-! ### Executable strict registry matrix
+
+These fixtures use the real ND decoder and executable replay. Each resolved
+backend closes over exactly one fixed theory list.
+-/
+
+/-- Exact Haskell-conformant ND identity. -/
+def ndId : BackendId := ⟨"nd", 1⟩
+
+/-- Same name, different version: a distinct (unregistered) backend identity. -/
+def ndIdV2 : BackendId := ⟨"nd", 2⟩
+
+def digestA : Digest := ⟨"sha256:theory-a"⟩
+def digestB : Digest := ⟨"sha256:theory-b"⟩
+def digestUnknown : Digest := ⟨"sha256:unknown"⟩
+
+def slot0Cert : CertRef := ⟨.list [.atom "hyp", .atom "0"]⟩
+def slot1Cert : CertRef := ⟨.list [.atom "hyp", .atom "1"]⟩
+def rejectCert : CertRef := ⟨.list [.atom "hyp", .atom "01"]⟩
+
+/-- The real ND backend closed over a selected fixed theory. -/
+def slotBackend (canon : String → String) (theoryForms : List Atom) :
+    Lara.Strict.Backend canon :=
+  Lara.Strict.ndBackendWithTheory canon theoryForms
+
+/-- `digestA` and `digestB` select distinct fixed theory lists. -/
+def ndRegistered : RegisteredBackend id where
+  resolve := fun h =>
+    if h = digestA then some (slotBackend id [pB])
+    else if h = digestB then some (slotBackend id [pC])
+    else none
+
+/-- Backend-first registry: only exact identity `nd@1` has an outer entry. -/
+def registryEx : BackendRegistry id := fun β =>
+  if β = ndId then some ndRegistered else none
+
+/-- Registered backend plus exact digest accepts.  Slot 1 is the first fixed
+theory entry because the source premise occupies slot 0. -/
+theorem registry_exact_digest_accepts :
+    certOkBOf registryEx ndId digestA slot1Cert [pA] pB = true := by
+  apply (certOkBOf_iff registryEx ndId digestA slot1Cert [pA] pB).mpr
+  change Lara.Strict.ndAccepts slot1Cert
+    ([Lara.Strict.ndEnc id pA] ++ [Lara.Strict.ndEnc id pB])
+    (Lara.Strict.ndEnc id pB)
+  refine ⟨.hyp 1, ?_, .hyp rfl⟩
+  have h1 : Lara.ND.decodeNat "1" = some 1 := by
+    change Lara.ND.decodeNat (Nat.repr 1) = some 1
+    exact Lara.ND.decodeNat_repr 1
+  simp [slot1Cert, Lara.ND.decodeCert, Lara.ND.Tag.parse, h1]
+
+/-- Registered backend plus exact digest can still reject replay. -/
+theorem registry_exact_digest_rejects :
+    certOkBOf registryEx ndId digestA rejectCert [pA] pB = false := by
+  apply Bool.eq_false_iff.mpr
+  intro h
+  have hacc :=
+    (certOkBOf_iff registryEx ndId digestA rejectCert [pA] pB).mp h
+  change Lara.Strict.ndAccepts rejectCert
+    ([Lara.Strict.ndEnc id pA] ++ [Lara.Strict.ndEnc id pB])
+    (Lara.Strict.ndEnc id pB) at hacc
+  rcases hacc with ⟨e, hd, _⟩
+  have hnone : Lara.ND.decodeCert rejectCert.payload = none := by
+    simp [rejectCert, Lara.ND.decodeCert, Lara.ND.Tag.parse,
+      Lara.ND.decodeNat_leading_zero_01]
+  rw [hnone] at hd
+  contradiction
+
+/-- Missing outer backend entry. -/
+theorem registry_backend_absent :
+    certOkBOf registryEx ⟨"other", 1⟩ digestA slot1Cert [pA] pB = false := by
+  decide
+
+/-- Backend name alone is not identity: `nd@2` cannot use `nd@1`. -/
+theorem registry_version_mismatch :
+    certOkBOf registryEx ndIdV2 digestA slot1Cert [pA] pB = false := by
+  decide
+
+/-- Present backend, unknown inner digest. -/
+theorem registry_digest_unknown :
+    certOkBOf registryEx ndId digestUnknown slot1Cert [pA] pB = false := by
+  decide
+
+/-- The successful Boolean result produces mathematical acceptance. -/
+theorem registry_success_bridge :
+    certOkOf registryEx ndId digestA slot1Cert [pA] pB :=
+  (certOkBOf_iff registryEx ndId digestA slot1Cert [pA] pB).mp
+    registry_exact_digest_accepts
+
+/-- Adequacy also rules out proposition-level acceptance on a missing outer
+lookup. -/
+theorem registry_missing_bridge :
+    ¬ certOkOf registryEx ndIdV2 digestA slot1Cert [pA] pB := by
+  intro hacc
+  have hb :=
+    (certOkBOf_iff registryEx ndIdV2 digestA slot1Cert [pA] pB).mpr hacc
+  rw [registry_version_mismatch] at hb
+  exact Bool.noConfusion hb
+
+/-- Replay sees source premises before fixed theory entries. -/
+theorem registry_premises_before_theory :
+    certOkBOf registryEx ndId digestA slot0Cert [pA] pA = true := by
+  apply (certOkBOf_iff registryEx ndId digestA slot0Cert [pA] pA).mpr
+  change Lara.Strict.ndAccepts slot0Cert
+    ([Lara.Strict.ndEnc id pA] ++ [Lara.Strict.ndEnc id pB])
+    (Lara.Strict.ndEnc id pA)
+  refine ⟨.hyp 0, ?_, .hyp rfl⟩
+  have h0 : Lara.ND.decodeNat "0" = some 0 := by
+    change Lara.ND.decodeNat (Nat.repr 0) = some 0
+    exact Lara.ND.decodeNat_repr 0
+  simp [slot0Cert, Lara.ND.decodeCert, Lara.ND.Tag.parse, h0]
+
+/-- Distinct digest fixtures really close over distinct fixed theories, and the
+same slot-1 certificate observes that selection after the premise prefix. -/
+theorem registry_fixed_theory_order :
+    certOkBOf registryEx ndId digestA slot1Cert [pA] pB = true ∧
+    certOkBOf registryEx ndId digestB slot1Cert [pA] pB = false := by
+  refine ⟨registry_exact_digest_accepts, ?_⟩
+  apply Bool.eq_false_iff.mpr
+  intro h
+  have hacc :=
+    (certOkBOf_iff registryEx ndId digestB slot1Cert [pA] pB).mp h
+  change Lara.Strict.ndAccepts slot1Cert
+    ([Lara.Strict.ndEnc id pA] ++ [Lara.Strict.ndEnc id pC])
+    (Lara.Strict.ndEnc id pB) at hacc
+  rcases hacc with ⟨e, hd, ht⟩
+  have h1 : Lara.ND.decodeNat "1" = some 1 := by
+    change Lara.ND.decodeNat (Nat.repr 1) = some 1
+    exact Lara.ND.decodeNat_repr 1
+  have hd1 : Lara.ND.decodeCert slot1Cert.payload = some (.hyp 1) := by
+    simp [slot1Cert, Lara.ND.decodeCert, Lara.ND.Tag.parse, h1]
+  rw [hd1] at hd
+  injection hd with he
+  subst e
+  cases ht with
+  | hyp hlookup =>
+    have heq : Lara.Strict.ndEnc id pC = Lara.Strict.ndEnc id pB := by
+      simpa [Lara.ND.lookup] using Option.some.inj hlookup
+    have hequiv := (Lara.Strict.ndEnc_iff id pC pB).mp heq
+    simp [pC, pB, Lara.equiv, Lara.nf] at hequiv
 
 /-! ### §7.1 position-lookup boundaries -/
 
@@ -399,6 +672,299 @@ theorem overlapping_question_rejected :
   | @inst _ _ _ _ _ _ _ _ _ _ _ _ _ hside _ _ =>
     exact hside.disj q1 (by simp) (by simp)
 
+/-! ### Executable support-checker conformance -/
+
+def xCheck : VarId := ⟨"x-check"⟩
+def yCheck : VarId := ⟨"y-check"⟩
+def tZero : Term := .num "0"
+def apX : APat := ⟨⟨"p"⟩, .cons (.var xCheck) .nil⟩
+def apY : APat := ⟨⟨"p"⟩, .cons (.var yCheck) .nil⟩
+
+def rParamPremId : RuleId := ⟨"r-param-prem"⟩
+def rParamConclId : RuleId := ⟨"r-param-concl"⟩
+def rStrictTrustedId : RuleId := ⟨"r-strict-trusted"⟩
+def rStrictNoTrustId : RuleId := ⟨"r-strict-no-trust"⟩
+def rStrictQuestionId : RuleId := ⟨"r-strict-question"⟩
+def rCertId : RuleId := ⟨"r-cert"⟩
+def rCertNoneId : RuleId := ⟨"r-cert-none"⟩
+def rCertOtherId : RuleId := ⟨"r-cert-other"⟩
+def rCertDigestId : RuleId := ⟨"r-cert-digest"⟩
+def rBadAnswerId : RuleId := ⟨"r-bad-answer"⟩
+def rDupQuestionId : RuleId := ⟨"r-dup-question"⟩
+def otherBackend : BackendId := ⟨"other", 1⟩
+
+def ruleParamPrem : Rule :=
+  { mode := .defeasible, params := [xCheck], premises := [apY], concl := apA
+  , questions := [], allowTrusted := false, certifiers := [] }
+
+def ruleParamConcl : Rule :=
+  { mode := .defeasible, params := [xCheck], premises := [], concl := apY
+  , questions := [], allowTrusted := false, certifiers := [] }
+
+def ruleStrictTrusted : Rule :=
+  { mode := .strict, params := [], premises := [], concl := apA
+  , questions := [], allowTrusted := true, certifiers := [] }
+
+def ruleStrictNoTrust : Rule :=
+  { ruleStrictTrusted with allowTrusted := false }
+
+def ruleStrictQuestion : Rule :=
+  { ruleStrictTrusted with questions := [⟨q1, apB, true⟩] }
+
+def ruleCert : Rule :=
+  { mode := .strict, params := [], premises := [apA], concl := apB
+  , questions := [], allowTrusted := false
+  , certifiers := [(ndId, digestA)] }
+
+def ruleCertNone : Rule := { ruleCert with certifiers := [] }
+def ruleCertOther : Rule :=
+  { ruleCert with certifiers := [(otherBackend, digestA)] }
+def ruleCertDigest : Rule :=
+  { ruleCert with certifiers := [(ndId, digestUnknown)] }
+
+def ruleBadAnswer : Rule :=
+  { mode := .defeasible, params := [xCheck], premises := [], concl := apA
+  , questions := [⟨q1, apY, true⟩], allowTrusted := false, certifiers := [] }
+
+def ruleDupQuestion : Rule :=
+  { ruleMix with questions := [⟨q1, apB, true⟩, ⟨q1, apB, false⟩] }
+
+def PiCheck : RuleId → Option Rule := fun rn =>
+  if rn = rParamPremId then some ruleParamPrem
+  else if rn = rParamConclId then some ruleParamConcl
+  else if rn = rStrictTrustedId then some ruleStrictTrusted
+  else if rn = rStrictNoTrustId then some ruleStrictNoTrust
+  else if rn = rStrictQuestionId then some ruleStrictQuestion
+  else if rn = rCertId then some ruleCert
+  else if rn = rCertNoneId then some ruleCertNone
+  else if rn = rCertOtherId then some ruleCertOther
+  else if rn = rCertDigestId then some ruleCertDigest
+  else if rn = rBadAnswerId then some ruleBadAnswer
+  else if rn = rDupQuestionId then some ruleDupQuestion
+  else PiEx rn
+
+def PiCert : RuleId → Option Rule := fun rn =>
+  if rn = rCertId then some ruleCert else none
+
+theorem check_declared_leaf :
+    inferSupport PiCheck ΓEx registryEx .root (.leaf l1) =
+      .ok ⟨pA, []⟩ := by rfl
+
+theorem check_mixed_holes :
+    inferSupport PiCheck ΓEx registryEx .root tMix =
+      .ok ⟨pA, [q1]⟩ := by rfl
+
+theorem check_nested_obligations :
+    inferSupport PiCheck ΓEx registryEx .root tUse =
+      .ok ⟨pB, [q1]⟩ := by rfl
+
+theorem check_discharge_propagation :
+    inferSupport PiCheck ΓEx registryEx .root tDisUse =
+      .ok ⟨pA, [q1]⟩ := by rfl
+
+theorem check_obligation_deduplication :
+    inferSupport PiCheck ΓEx registryEx .root tPair =
+      .ok ⟨pB, [q1]⟩ := by rfl
+
+theorem check_missing_question :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [] [q1] .none) =
+      .error (.R5 .root
+        (.uncovered [q1, q2] [] [q1])) := by rfl
+
+theorem check_question_overlap :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [(q1, .leaf l2)] [q1, q2] .none) =
+      .error (.R5 .root
+        (.overlap [q1] [q1, q2])) := by rfl
+
+theorem check_premise_mismatch :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rWrapId [] [.leaf l2] [] [] .none) =
+      .error (.R4 (.premise .root 0) (.mismatch pA pB)) := by rfl
+
+theorem check_discharge_mismatch :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [(q1, .leaf l1)] [q2] .none) =
+      .error (.R6 (.question .root q1)
+        (.conclusionMismatch q1 pB pA)) := by rfl
+
+theorem check_discharge_precedes_question_accounting :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [(q1, .leaf l1)] [] .none) =
+      .error (.R6 (.question .root q1)
+        (.conclusionMismatch q1 pB pA)) := by rfl
+
+theorem check_missing_leaf :
+    inferSupport PiCheck ΓEx registryEx .root (.leaf ⟨"missing"⟩) =
+      .error (.R1 .root (.missingLeaf ⟨"missing"⟩)) := by rfl
+
+theorem check_missing_rule_precedence :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst ⟨"missing"⟩ [(xCheck, tZero), (xCheck, tZero)]
+        [.leaf ⟨"missing"⟩] [] [] .none) =
+      .error (.R1 .root (.missingRule ⟨"missing"⟩)) := by rfl
+
+theorem check_duplicate_substitution_precedence :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rParamPremId [(xCheck, tZero), (xCheck, tZero)]
+        [.leaf ⟨"missing"⟩] [] [] .none) =
+      .error (.R3 .root
+        (.duplicateKeys [xCheck, xCheck])) := by rfl
+
+theorem check_substitution_domain :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rParamPremId [] [] [] [] .none) =
+      .error (.R3 .root (.domainMismatch [] [xCheck])) := by rfl
+
+theorem check_substitution_extra_binding :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rWrapId [(xCheck, tZero)] [] [] [] .none) =
+      .error (.R3 .root (.domainMismatch [xCheck] [])) := by rfl
+
+theorem check_premise_instantiation :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rParamPremId [(xCheck, tZero)] [] [] [] .none) =
+      .error (.R3 .root
+        (.premiseInstantiation [apY])) := by rfl
+
+theorem check_conclusion_instantiation :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rParamConclId [(xCheck, tZero)] [] [] [] .none) =
+      .error (.R3 .root
+        (.conclusionInstantiation apY)) := by rfl
+
+theorem check_too_few_premises :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rWrapId [] [] [] [] .none) =
+      .error (.R4 .root (.count 1 0)) := by rfl
+
+theorem check_too_many_premises :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rWrapId [] [.leaf l1, .leaf l1] [] [] .none) =
+      .error (.R4 .root (.count 1 2)) := by rfl
+
+theorem check_child_error_precedes_parent_shape :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rWrapId [] [.leaf ⟨"missing"⟩, .leaf l1] [] [] .none) =
+      .error (.R1 (.premise .root 0)
+        (.missingLeaf ⟨"missing"⟩)) := by rfl
+
+theorem check_duplicate_declarations :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rDupQuestionId [] [] [] [q1] .none) =
+      .error (.R5 .root
+        (.duplicateDeclarations [q1, q1])) := by rfl
+
+theorem check_duplicate_discharges :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [(q1, .leaf l2), (q1, .leaf l2)] [q2] .none) =
+      .error (.R5 .root
+        (.duplicateDischarges [q1, q1])) := by rfl
+
+theorem check_duplicate_holes :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [] [q1, q1, q2] .none) =
+      .error (.R5 .root
+        (.duplicateHoles [q1, q1, q2])) := by rfl
+
+theorem check_undeclared_discharge :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [(q1, .leaf l2), (⟨"junk"⟩, .leaf l2)]
+        [q2] .none) =
+      .error (.R5 .root
+        (.undeclaredDischarge [q1, ⟨"junk"⟩] [q1, q2])) := by rfl
+
+theorem check_undeclared_hole :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rMixId [] [] [] [q1, q2, ⟨"junk"⟩] .none) =
+      .error (.R5 .root
+        (.undeclaredHole [q1, q2, ⟨"junk"⟩] [q1, q2])) := by rfl
+
+theorem check_answer_instantiation :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rBadAnswerId [(xCheck, tZero)] []
+        [(q1, .leaf l2)] [] .none) =
+      .error (.R6 (.question .root q1)
+        (.answerInstantiation q1 apY)) := by rfl
+
+theorem check_strict_questions :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rStrictQuestionId [] [] [] [q1] .trusted) =
+      .error (.R7 .root (.questionsPresent [] [q1])) := by rfl
+
+theorem check_strict_trusted_success :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rStrictTrustedId [] [] [] [] .trusted) =
+      .ok ⟨pA, []⟩ := by rfl
+
+theorem check_strict_cert_success :
+    inferSupport PiCert ΓEx registryEx .root
+      (.inst rCertId [] [.leaf l1] [] [] (.cert ndId digestA slot1Cert)) =
+      .ok ⟨pB, []⟩ := by
+  have hcert : certOkBOf registryEx ndId digestA slot1Cert
+      [Atom.atom "p" .nil] (Atom.atom "q" .nil) = true := by
+    simpa [pA, pB] using registry_exact_digest_accepts
+  have hequiv : equiv id pA (Atom.atom "p" .nil) := by
+    rfl
+  simp [inferSupport, inferSupportRaw, inferPremisesRaw, inferDischargesRaw,
+    PiCert, ruleCert, ΓEx, requireB, instAPats, instAPat, instPats,
+    Bind.bind, Except.bind, Pure.pure, Except.pure,
+    apA, apB, pB, l1, substDomainB, atomsEquivB, questionNames, hequiv,
+    collectObligations, unionAll, dedupQuestions, openMandatory,
+    mandatoryNames, memB,
+    knownAnswersOkB, strictNoQuestionB, assuranceOkB,
+    hcert]
+
+theorem check_assurance_wrong_mode :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rStrictTrustedId [] [] [] [] .none) =
+      .error (.R7 .root
+        (.wrongMode .strict .none)) := by rfl
+
+theorem check_assurance_trusted_disallowed :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rStrictNoTrustId [] [] [] [] .trusted) =
+      .error (.R7 .root .trustedDisallowed) := by rfl
+
+theorem check_assurance_unallowlisted :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rCertNoneId [] [.leaf l1] [] []
+        (.cert ndId digestA slot1Cert)) =
+      .error (.R7 .root
+        (.certifierUnallowlisted ndId digestA)) := by rfl
+
+theorem check_assurance_backend_missing :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rCertOtherId [] [.leaf l1] [] []
+        (.cert otherBackend digestA slot1Cert)) =
+      .error (.R13 .root
+        (.backendMissing otherBackend)) := by rfl
+
+theorem check_assurance_digest_missing :
+    inferSupport PiCheck ΓEx registryEx .root
+      (.inst rCertDigestId [] [.leaf l1] [] []
+        (.cert ndId digestUnknown slot1Cert)) =
+      .error (.R13 .root
+        (.digestMissing ndId digestUnknown)) := by rfl
+
+theorem check_assurance_replay_rejected :
+    inferSupport PiCert ΓEx registryEx .root
+      (.inst rCertId [] [.leaf l1] [] [] (.cert ndId digestA rejectCert)) =
+      .error (.R13 .root
+        (.replayRejected ndId digestA rejectCert)) := by
+  have hcert : certOkBOf registryEx ndId digestA rejectCert
+      [Atom.atom "p" .nil] (Atom.atom "q" .nil) = false := by
+    simpa [pA, pB] using registry_exact_digest_rejects
+  have hequiv : equiv id pA (Atom.atom "p" .nil) := by
+    rfl
+  simp [inferSupport, inferSupportRaw, inferPremisesRaw, inferDischargesRaw,
+    PiCert, ruleCert, ΓEx, requireB, instAPats, instAPat, instPats,
+    Bind.bind, Except.bind, Pure.pure, Except.pure,
+    apA, apB, l1, substDomainB, atomsEquivB, questionNames, hequiv,
+    memB, knownAnswersOkB, strictNoQuestionB, assuranceOkB,
+    hcert, assuranceError, registryEx, ndRegistered]
+
 /-! ### §7.1 successful attacks at nested positions -/
 
 /-- Policy fixture with an undercut exception for `rWrap` and a contrary from
@@ -482,6 +1048,196 @@ theorem mixed_path_undermine_typed :
       ⟨(apA, apB), by simp [dpPos], [], pA, pB, by decide, by decide,
         equiv_refl id pA, equiv_refl id pB⟩
 
+/-! ### Executable contrary and positional-attack matrix -/
+
+def vx : VarId := ⟨"X"⟩
+def apPX : APat := ⟨⟨"p"⟩, .cons (.var vx) .nil⟩
+def apQX : APat := ⟨⟨"q"⟩, .cons (.var vx) .nil⟩
+def apPXX : APat :=
+  ⟨⟨"p"⟩, .cons (.var vx) (.cons (.var vx) .nil)⟩
+def ta : Term := .con "a" .nil
+def tb : Term := .con "b" .nil
+def pTa : Atom := .atom "p" (.cons ta .nil)
+def qTa : Atom := .atom "q" (.cons ta .nil)
+def qTb : Atom := .atom "q" (.cons tb .nil)
+def pTaTa : Atom := .atom "p" (.cons ta (.cons ta .nil))
+def pTaTb : Atom := .atom "p" (.cons ta (.cons tb .nil))
+
+def dpShared : Attack.DefeatPolicy := ⟨[(apPX, apQX)], []⟩
+def dpRepeated : Attack.DefeatPolicy := ⟨[(apPXX, apB)], []⟩
+
+theorem contrary_shared_substitution :
+    Attack.contraryMatchB id dpShared pTa qTa = true := by decide
+
+theorem contrary_shared_substitution_rejects :
+    Attack.contraryMatchB id dpShared pTa qTb = false := by decide
+
+theorem contrary_repeated_variable :
+    Attack.contraryMatchB id dpRepeated pTaTa pB = true := by decide
+
+theorem contrary_repeated_variable_rejects :
+    Attack.contraryMatchB id dpRepeated pTaTb pB = false := by decide
+
+def apNumX : APat :=
+  ⟨⟨"n"⟩, .cons (.num "+01") .nil⟩
+def dpNumeric : Attack.DefeatPolicy := ⟨[(apNumX, apB)], []⟩
+
+theorem contrary_canonical_numeric :
+    Attack.contraryMatchB numericCanon dpNumeric numericCanonical pB = true :=
+  by decide
+
+def stepCanon : String → String
+  | "a" => "b"
+  | "b" => "c"
+  | s => s
+
+def pNumAB : Atom :=
+  .atom "p" (.cons (.num "a") (.cons (.num "b") .nil))
+
+/-- A matcher that normalized its stored binding again would incorrectly
+accept this pair (`canon (canon "a") = "c"`). -/
+theorem contrary_nonidempotent_repeated_rejects :
+    Attack.contraryMatchB stepCanon dpRepeated pNumAB pB = false := by decide
+
+theorem contrary_constructor_arity_rejects :
+    Attack.contraryMatchB id dpShared
+      (.atom "p" (.cons (.con "a" (.cons ta .nil)) .nil)) qTa = false := by
+  decide
+
+theorem check_rebut_success :
+    checkAttack PiEx ΓEx registryEx dpRebut kRebut = .ok () := by rfl
+
+theorem check_nested_undercut_success :
+    checkAttack PiEx ΓEx registryEx dpPos kNestedUndercut = .ok () := by rfl
+
+theorem check_mixed_undermine_success :
+    checkAttack PiEx ΓEx registryEx dpPos kMixedUndermine = .ok () := by rfl
+
+theorem check_rebut_strict_root :
+    checkAttack PiStrict ΓEx registryEx dpRebut
+      (.rebut (.leaf l2) strictTarget) =
+      .error (.R11 .root [] .rebut (.strictTarget rStrictId)) := by rfl
+
+theorem check_undercut_strict_occurrence :
+    checkAttack PiStrict ΓEx registryEx dpPos
+      (.undercut (.leaf l2) strictTarget []) =
+      .error (.R11 .root [] .undercut (.strictTarget rStrictId)) := by rfl
+
+theorem check_undercut_undefined_position :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undercut (.leaf l2) tNest [.prem 9]) =
+      .error (.R10 .root [.prem 9] .undercut .undefinedPosition) := by rfl
+
+theorem check_undermine_undefined_position :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undermine (.leaf l1) tNest [.ques q2]) =
+      .error (.R10 .root [.ques q2] .undermine .undefinedPosition) := by rfl
+
+theorem check_undercut_wrong_occurrence :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undercut (.leaf l2) tNest [.prem 0, .ques q1]) =
+      .error (.R10 .root [.prem 0, .ques q1] .undercut
+        (.wrongOccurrenceKind .rule .leaf)) := by rfl
+
+theorem check_undermine_wrong_occurrence :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undermine (.leaf l1) tNest [.prem 0]) =
+      .error (.R10 .root [.prem 0] .undermine
+        (.wrongOccurrenceKind .leaf .rule)) := by rfl
+
+theorem check_rebut_wrong_occurrence :
+    checkAttack PiEx ΓEx registryEx dpRebut
+      (.rebut (.leaf l2) (.leaf l1)) =
+      .error (.R10 .root [] .rebut
+        (.wrongOccurrenceKind .rule .leaf)) := by rfl
+
+theorem check_rebut_missing_contrary :
+    checkAttack PiEx ΓEx registryEx dpPos kRebut =
+      .error (.R11 .root [] .rebut (.missingContrary pB pA)) := by rfl
+
+theorem check_undermine_missing_contrary :
+    checkAttack PiEx ΓEx registryEx dpRebut
+      (.undermine (.leaf l1) (.leaf l2) []) =
+      .error (.R11 .root [] .undermine
+        (.missingContrary pA pB)) := by rfl
+
+def rAbsent : RuleId := ⟨"absent-target"⟩
+def absentTarget : SupportTerm := .inst rAbsent [] [] [] [] .none
+
+theorem check_rebut_missing_target_rule :
+    checkAttack PiEx ΓEx registryEx dpRebut
+      (.rebut (.leaf l2) absentTarget) =
+      .error (.R11 .root [] .rebut (.missingTargetRule rAbsent)) := by rfl
+
+theorem check_undercut_missing_target_rule :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undercut (.leaf l2) absentTarget []) =
+      .error (.R11 .root [] .undercut (.missingTargetRule rAbsent)) := by rfl
+
+def rBadConclId : RuleId := ⟨"bad-concl-target"⟩
+def ruleBadConcl : Rule :=
+  { ruleWrap with params := [vx], concl := apPX }
+def PiAttackBad : RuleId → Option Rule := fun rn =>
+  if rn = rBadConclId then some ruleBadConcl else PiEx rn
+def badConclTarget : SupportTerm :=
+  .inst rBadConclId [] [] [] [] .none
+
+theorem check_rebut_target_conclusion_instantiation :
+    checkAttack PiAttackBad ΓEx registryEx dpRebut
+      (.rebut (.leaf l2) badConclTarget) =
+      .error (.R11 .root [] .rebut
+        (.targetConclusionInstantiation rBadConclId apPX)) := by rfl
+
+def apQVar : APat := ⟨⟨"q"⟩, .cons (.var vx) .nil⟩
+def dpBadException : Attack.DefeatPolicy :=
+  ⟨[], [(rWrapId, apQVar)]⟩
+
+theorem check_undercut_exception_instantiation :
+    checkAttack PiEx ΓEx registryEx dpBadException
+      (.undercut (.leaf l2)
+        (.inst rWrapId [] [.leaf l1] [] [] .none) []) =
+      .error (.R11 .root [] .undercut
+        (.exceptionInstantiation rWrapId apQVar)) := by rfl
+
+theorem check_undercut_missing_exception :
+    checkAttack PiEx ΓEx registryEx dpRebut
+      (.undercut (.leaf l2)
+        (.inst rWrapId [] [.leaf l1] [] [] .none) []) =
+      .error (.R11 .root [] .undercut
+        (.missingException rWrapId)) := by rfl
+
+theorem check_undercut_exception_mismatch :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undercut (.leaf l1)
+        (.inst rWrapId [] [.leaf l1] [] [] .none) []) =
+      .error (.R11 .root [] .undercut
+        (.exceptionMismatch rWrapId pA pB)) := by rfl
+
+def lAbsent : LeafId := ⟨"absent-target-leaf"⟩
+
+theorem check_undermine_undeclared_leaf :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undermine (.leaf l1) (.leaf lAbsent) []) =
+      .error (.R11 .root [] .undermine (.missingTargetLeaf lAbsent)) := by
+  rfl
+
+def badSource : SupportTerm := .leaf ⟨"missing-source"⟩
+
+theorem check_attack_source_failure_rebut :
+    checkAttack PiEx ΓEx registryEx dpRebut
+      (.rebut badSource absentTarget) =
+      .error (.R1 .root (.missingLeaf ⟨"missing-source"⟩)) := by rfl
+
+theorem check_attack_source_failure_undercut :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undercut badSource (.leaf l1) [.prem 99]) =
+      .error (.R1 .root (.missingLeaf ⟨"missing-source"⟩)) := by rfl
+
+theorem check_attack_source_failure_undermine :
+    checkAttack PiEx ΓEx registryEx dpPos
+      (.undermine badSource (.leaf lAbsent) []) =
+      .error (.R1 .root (.missingLeaf ⟨"missing-source"⟩)) := by rfl
+
 /-! ### §8 subargument closure, concretely -/
 
 /-- The wrapper argument: a complete instance built on the leaf `l1`. -/
@@ -546,40 +1302,233 @@ theorem kAtk_typed :
 
 /-- The program: attacker, attacked leaf argument, and a distinct wrapper
 argument containing the attacked occurrence. -/
-def PEx : CheckedProgram id PiEx ΓEx certOkNone dpEx where
-  args := [.leaf l2, .leaf l1, vWrap]
-  nodup := by simp [vWrap, l1, l2]
-  complete := by
-    intro w hw
-    simp only [List.mem_cons, List.not_mem_nil, or_false] at hw
-    rcases hw with rfl | rfl | rfl
-    · exact ⟨pB, .leaf (by decide)⟩
-    · exact ⟨pA, .leaf (by decide)⟩
-    · exact ⟨pB, vWrap_typed⟩
-  atts := [kAtk]
-  typed := by
-    intro k hk
-    simp only [List.mem_cons, List.not_mem_nil, or_false] at hk
-    subst hk
-    exact kAtk_typed
+def PExCheck :=
+  checkProgram PiEx ΓEx registryEx dpEx
+    [.leaf l2, .leaf l1, vWrap] [kAtk]
+
+theorem PExCheck_success : PExCheck.isOk = true := by decide
+
+def PEx : CheckedProgram id PiEx ΓEx (certOkOf registryEx) dpEx :=
+  PExCheck.toOption.get (by decide)
+
+theorem PExCheck_ok : PExCheck = .ok PEx := by
+  cases h : PExCheck with
+  | error e =>
+      have hs := PExCheck_success
+      rw [h] at hs
+      contradiction
+  | ok program =>
+      have hopt : PExCheck.toOption = some program :=
+        congrArg Except.toOption h
+      have hp : PEx = program := by
+        unfold PEx
+        apply Option.get_of_eq_some
+        exact hopt
+      rw [hp]
+
+@[simp] theorem PEx_args :
+    PEx.args = [.leaf l2, .leaf l1, vWrap] :=
+  (checkProgram_sound PExCheck_ok).1
+
+@[simp] theorem PEx_atts : PEx.atts = [kAtk] :=
+  (checkProgram_sound PExCheck_ok).2.1
+
+/-! ### Proof-bearing program checker matrix -/
+
+/-- Equality descends through nested premise and discharge lists. -/
+theorem supportTerm_nested_structural_equality :
+    decide (tNest = tNest ∧ tI = tI) = true := by decide
+
+def certNestedA : SupportTerm :=
+  .inst rWrapId [] [tNest] [(q1, tI)] []
+    (.cert ndId digestA slot0Cert)
+
+def certNestedB : SupportTerm :=
+  .inst rWrapId [] [tNest] [(q1, tI)] []
+    (.cert ndId digestA slot1Cert)
+
+/-- Structural identity is certificate-sensitive even beneath recursive lists. -/
+theorem supportTerm_certificate_payload_distinct :
+    certNestedA ≠ certNestedB := by decide
+
+/-- A second ND proof of `pB` from `[pA]`: introduce a fresh `pA`, select the
+fixed-theory `pB` at slot 2, then apply the resulting implication to slot 0. -/
+def slot1WrappedCert : CertRef := ⟨.list
+  [.atom "app",
+    .list [.atom "lam", ndPWire,
+      .list [.atom "hyp", .atom "2"]],
+    .list [.atom "hyp", .atom "0"]]⟩
+
+def certArgument (κ : CertRef) : SupportTerm :=
+  .inst rCertId [] [.leaf l1] [] [] (.cert ndId digestA κ)
+
+theorem registry_wrapped_certificate_accepts :
+    certOkBOf registryEx ndId digestA slot1WrappedCert [pA] pB = true := by
+  apply (certOkBOf_iff registryEx ndId digestA slot1WrappedCert [pA] pB).mpr
+  change Lara.Strict.ndAccepts slot1WrappedCert
+    ([Lara.Strict.ndEnc id pA] ++ [Lara.Strict.ndEnc id pB])
+    (Lara.Strict.ndEnc id pB)
+  refine ⟨.app (.lam ndP (.hyp 2)) (.hyp 0), ?_, ?_⟩
+  · have h0 : Lara.ND.decodeNat "0" = some 0 := by
+      change Lara.ND.decodeNat (Nat.repr 0) = some 0
+      exact Lara.ND.decodeNat_repr 0
+    have h2 : Lara.ND.decodeNat "2" = some 2 := by
+      change Lara.ND.decodeNat (Nat.repr 2) = some 2
+      exact Lara.ND.decodeNat_repr 2
+    simp [slot1WrappedCert, ndPWire, ndP, Lara.Strict.ndEnc, pA,
+      Lara.nf, Lara.nfTerms, Lara.ND.decodeCert,
+      Lara.ND.decodeFormula, Lara.ND.Tag.parse, h0, h2]
+  · apply Lara.ND.HasType.app
+    · apply Lara.ND.HasType.lam
+      exact Lara.ND.HasType.hyp rfl
+    · exact Lara.ND.HasType.hyp rfl
+
+theorem check_wrapped_certificate_success :
+    inferSupport PiCert ΓEx registryEx .root
+      (certArgument slot1WrappedCert) = .ok ⟨pB, []⟩ := by
+  have hcert : certOkBOf registryEx ndId digestA slot1WrappedCert
+      [Atom.atom "p" .nil] (Atom.atom "q" .nil) = true := by
+    simpa [pA, pB] using registry_wrapped_certificate_accepts
+  have hequiv : equiv id pA (Atom.atom "p" .nil) := by rfl
+  simp [certArgument, inferSupport, inferSupportRaw, inferPremisesRaw,
+    inferDischargesRaw, PiCert, ruleCert, ΓEx, requireB, instAPats,
+    instAPat, instPats, Bind.bind, Except.bind, Pure.pure, Except.pure,
+    apA, apB, pB, l1, substDomainB, atomsEquivB, questionNames, hequiv,
+    collectObligations, unionAll, dedupQuestions, openMandatory,
+    mandatoryNames, memB, knownAnswersOkB, strictNoQuestionB, assuranceOkB,
+    hcert]
+
+theorem check_program_empty :
+    (checkProgram PiEx ΓEx registryEx dpEx [] []).isOk = true := by decide
+
+theorem check_program_one_complete :
+    (checkProgram PiEx ΓEx registryEx dpEx [.leaf l1] []).isOk = true := by
+  decide
+
+theorem check_program_full_PEx : PExCheck.isOk = true :=
+  PExCheck_success
+
+/-- Terms differing only in the opaque certificate payload remain two
+declarations and are both accepted when both certificates replay. -/
+theorem check_program_certificate_payload_distinct :
+    (checkProgram PiCert ΓEx registryEx ⟨[], []⟩
+      [certArgument slot1Cert, certArgument slot1WrappedCert] []).isOk =
+        true := by
+  obtain ⟨program, hprogram⟩ := checkProgram_complete
+    (args := [certArgument slot1Cert, certArgument slot1WrappedCert])
+    (atts := []) (dp := ⟨[], []⟩) (by decide)
+    (by
+      intro w hw
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hw
+      rcases hw with rfl | rfl
+      · exact ⟨pB, inferSupport_sound check_strict_cert_success⟩
+      · exact ⟨pB, inferSupport_sound check_wrapped_certificate_success⟩)
+    (by simp) (by simp) (by simp)
+  rw [hprogram]
+  rfl
+
+theorem check_program_duplicate_first_pair :
+    checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l1, .leaf l2, .leaf l1, .leaf l2] [] =
+      .error (.duplicateArgument 0 2) := by rfl
+
+/-- Duplicate diagnostics are lexicographic by the first declaration index,
+even when a later duplicate pair crosses an earlier adjacent pair. -/
+theorem check_program_duplicate_crossing_first_pair :
+    checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l1, .leaf l2, .leaf l2, .leaf l1] [] =
+      .error (.duplicateArgument 0 3) := by rfl
+
+theorem check_program_incomplete_exact :
+    checkProgram PiEx ΓEx registryEx dpEx [tMix] [] =
+      .error (.incompleteArgument 0 [q1]) := by rfl
+
+theorem check_program_incomplete_not_rejection_class :
+    (ProgramError.incompleteArgument 0 [q1]).rejectClass = none := by rfl
+
+theorem check_program_support_error_wrapped :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l1, badSource] [] =
+      .error (.rejection (.argument 1)
+        (.R1 .root (.missingLeaf ⟨"missing-source"⟩))) := by rfl
+
+theorem check_program_first_argument_failure :
+    checkProgram PiEx ΓEx registryEx dpEx
+      [badSource, .leaf ⟨"another-missing"⟩] [] =
+      .error (.rejection (.argument 0)
+        (.R1 .root (.missingLeaf ⟨"missing-source"⟩))) := by rfl
+
+theorem check_program_undeclared_source :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l1]
+      [.undermine (.leaf l2) (.leaf l1) []] =
+      .error (.rejection (.attack 0)
+        (.R1 .root (.undeclaredAttackSource (.leaf l2)))) := by rfl
+
+theorem check_program_undeclared_target :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l2] [kAtk] =
+      .error (.rejection (.attack 0)
+        (.R1 .root (.undeclaredAttackTarget (.leaf l1)))) := by rfl
+
+theorem check_program_endpoint_reject_classes :
+    (ProgramError.rejection (.attack 0)
+      (.R1 .root (.undeclaredAttackSource (.leaf l2)))).rejectClass =
+        some .R1 ∧
+    (ProgramError.rejection (.attack 0)
+      (.R1 .root (.undeclaredAttackTarget (.leaf l1)))).rejectClass =
+        some .R1 := by decide
+
+theorem check_program_rebut_error_wrapped :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l2, .leaf l1]
+      [.rebut (.leaf l2) (.leaf l1)] =
+      .error (.rejection (.attack 0)
+        (.R10 .root [] .rebut
+          (.wrongOccurrenceKind .rule .leaf))) := by rfl
+
+theorem check_program_undercut_error_wrapped :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l2, .leaf l1]
+      [.undercut (.leaf l2) (.leaf l1) []] =
+      .error (.rejection (.attack 0)
+        (.R10 .root [] .undercut
+          (.wrongOccurrenceKind .rule .leaf))) := by rfl
+
+theorem check_program_undermine_error_wrapped :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l2, vWrap]
+      [.undermine (.leaf l2) vWrap []] =
+      .error (.rejection (.attack 0)
+        (.R10 .root [] .undermine
+          (.wrongOccurrenceKind .leaf .rule))) := by rfl
+
+theorem check_program_first_attack_failure :
+    checkProgram PiEx ΓEx registryEx dpEx [.leaf l2, .leaf l1]
+      [.rebut (.leaf l2) (.leaf l1),
+        .undermine (.leaf l1) (.leaf l2) []] =
+      .error (.rejection (.attack 0)
+        (.R10 .root [] .rebut
+          (.wrongOccurrenceKind .rule .leaf))) := by rfl
+
+/-- Repeated attacks from one source traverse the retained source cache. -/
+theorem check_program_many_attacks_one_source :
+    (checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l2, .leaf l1, vWrap] [kAtk, kAtk, kAtk]).isOk = true := by
+  decide
 
 /-- **Direct edge:** the attack's own declared target receives the edge. -/
 theorem closure_edge_direct : Edge PEx (.leaf l2) (.leaf l1) :=
-  ⟨by simp [PEx], by simp [PEx], kAtk, by simp [PEx], rfl,
+  ⟨by simp, by simp, kAtk, by simp, rfl,
     .leaf l1, rfl, contains_refl _⟩
 
 /-- **Closure edge:** the wrapper argument — a *different* declared term
 containing the attacked occurrence at `[.prem 0]` — also receives the edge.
 This is the strict-superset behavior of subargument closure. -/
 theorem closure_edge_wrapper : Edge PEx (.leaf l2) vWrap :=
-  ⟨by simp [PEx], by simp [PEx], kAtk, by simp [PEx], rfl,
+  ⟨by simp, by simp, kAtk, by simp, rfl,
     .leaf l1, rfl, ⟨[.prem 0], by simp [vWrap, Attack.subterm]⟩⟩
 
 /-- **No spurious edge:** a term not containing the attacked occurrence gets
 no edge. -/
 theorem closure_no_edge_unrelated : ¬ Edge PEx (.leaf l2) (.leaf l2) := by
   rintro ⟨_, _, k, hk, hsrc, t, hocc, hcont⟩
-  simp only [PEx, List.mem_cons, List.not_mem_nil, or_false] at hk
+  rw [PEx_atts] at hk
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hk
   subst hk
   have ht : SupportTerm.leaf l1 = t := by
     simpa [kAtk, AttackOcc, Attack.subterm] using hocc
@@ -598,11 +1547,13 @@ theorem edge_fixture_iff (a b : SupportTerm) :
   · intro hE
     have hE' := hE
     obtain ⟨ha, hb, k, hk, hsrc, _, _, _⟩ := hE
-    simp only [PEx, List.mem_cons, List.not_mem_nil, or_false] at hk
+    rw [PEx_atts] at hk
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hk
     subst hk
     have ha' : a = .leaf l2 := by
       simpa [kAtk, Attack.Attack.source] using hsrc.symm
-    simp only [PEx, List.mem_cons, List.not_mem_nil, or_false] at hb
+    rw [PEx_args] at hb
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hb
     rcases hb with hb | hb | hb
     · subst ha'; subst hb
       exact (closure_no_edge_unrelated hE').elim
@@ -626,11 +1577,12 @@ theorem edgeBEx_faithful : Faithful PEx edgeBEx where
     rcases hij with ⟨rfl, rfl | rfl⟩ <;> decide
   agrees := by
     intro i j a b ha hb
-    have hi : i < 3 := by simpa [PEx] using lt_of_getElem?_some ha
-    have hj : j < 3 := by simpa [PEx] using lt_of_getElem?_some hb
+    have hi : i < 3 := by simpa using lt_of_getElem?_some ha
+    have hj : j < 3 := by simpa using lt_of_getElem?_some hb
     obtain (rfl | rfl | rfl) : i = 0 ∨ i = 1 ∨ i = 2 := by omega
     all_goals obtain (rfl | rfl | rfl) : j = 0 ∨ j = 1 ∨ j = 2 := by omega
-    all_goals simp only [PEx, List.getElem?_cons_zero,
+    all_goals rw [PEx_args] at ha hb
+    all_goals simp only [List.getElem?_cons_zero,
       List.getElem?_cons_succ, Option.some.injEq] at ha hb
     all_goals subst a
     all_goals subst b

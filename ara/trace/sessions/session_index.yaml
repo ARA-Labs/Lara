@@ -55,6 +55,48 @@ sessions:
     events_count: 5
     claims_touched: []
     open_threads: 2
+  - id: "2026-07-24_004"
+    date: "2026-07-24"
+    summary: "Concrete ND replay: proved UTF-8 Atom codec inverse, exact submitted-cert adequacy, fixed-theory closure, and shared Lean/Haskell conformance."
+    turn_count: 1
+    events_count: 4
+    claims_touched: [C03, C05]
+    open_threads: 2
+  - id: "2026-07-24_005"
+    date: "2026-07-24"
+    summary: "ND spec-review hardening: universal malformed-wire properties, complete constructor arity/replay matrices, and 27 passing Haskell property groups."
+    turn_count: 1
+    events_count: 1
+    claims_touched: [C03, C05]
+    open_threads: 2
+  - id: "2026-07-24_006"
+    date: "2026-07-24"
+    summary: "Exact contrary matcher and executable positional attack checker, with arbitrary-canon adequacy, closed diagnostics, and full fixture matrix."
+    turn_count: 1
+    events_count: 2
+    claims_touched: []
+    open_threads: 2
+  - id: "2026-07-24_007"
+    date: "2026-07-24"
+    summary: "Proof-bearing whole-program checker with structural identity, cached attack sources, strengthened endpoint boundary, and exact adequacy."
+    turn_count: 1
+    events_count: 2
+    claims_touched: []
+    open_threads: 1
+  - id: "2026-07-24_008"
+    date: "2026-07-24"
+    summary: "Issue #16 closure: reviewed executable checker architecture, codegen-safe support adequacy, full Lean/Haskell gates, and result-1 evidence reconciliation."
+    turn_count: 30
+    events_count: 6
+    claims_touched: [C02]
+    open_threads: 4
+  - id: "2026-07-24_009"
+    date: "2026-07-24"
+    summary: "Executable strict-certificate seam: symbolic wire payloads, canon-indexed replay adequacy, backend-first theory resolution, and registry conformance fixtures."
+    turn_count: 1
+    events_count: 1
+    claims_touched: []
+    open_threads: 2
   - id: "2026-07-25_001"
     date: "2026-07-25"
     summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound), §11 addendum + novelty row (d192047), PR #22 merged. Commit-path audit found five write-up-vs-code discrepancies → C19 + §11.5, rebased onto PR #23. Then C20 + §11.6: rit's formal verification is node-level only; the weakest-link roll-up is a conditional guarantee over an untrusted (proposer-declared) edge set — missing-edge laundering."
@@ -62,3 +104,17 @@ sessions:
     events_count: 12
     claims_touched: [C18, C19, C20]
     open_threads: 5
+  - id: "2026-07-25_002"
+    date: "2026-07-25"
+    summary: "PR #21 review remediation: enforced Lean matrices, symbolic frame tags, corrected TCB docs, and full Lean/Haskell gates."
+    turn_count: 1
+    events_count: 2
+    claims_touched: [C03, C05]
+    open_threads: 1
+  - id: "2026-07-25_003"
+    date: "2026-07-25"
+    summary: "PR #21 conflict resolution: preserved upstream rit-comparison ARA history, reassigned branch-local trace IDs, and revalidated all project gates."
+    turn_count: 1
+    events_count: 0
+    claims_touched: []
+    open_threads: 0

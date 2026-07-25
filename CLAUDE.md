@@ -21,10 +21,11 @@ depends on surface syntax. Concretely:
 - A domain-meaningful identifier is its own `newtype`, never bare `String`
   (`Pred`, `FunSym`, `AtomId`, and the `*Id` classes in `Lara.AST`). Separate
   namespaces get separate types so they cannot be swapped silently.
-- When a value carries an invariant the frontend must not forge (e.g. an atom is
-  `show . nf` of a normalized `Prop`), hide the constructor and expose it only
-  through the sanctioned smart constructor / decoder, with an `.Internal` module
-  as the test escape hatch (see `AtomId` / `Lara.Strict.ND.Internal`).
+- When a value carries an invariant the frontend must not forge (e.g. an ND
+  atom is the shared UTF-8 framed `encodeAtomKey` of a normalized `Prop`), hide
+  the constructor and expose it only through the sanctioned smart constructor /
+  decoder, with an `.Internal` module as the test escape hatch (see `AtomId` /
+  `Lara.Strict.ND.Internal`).
 - The pre-parse wire token (`SExpr.SAtom`) is the one place a plain `String` is
   correct — it is untyped by design, like a JSON lexer's string node. Parse it
   into the symbolic core at the boundary; don't push surface concerns inward.

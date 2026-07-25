@@ -41,13 +41,13 @@ it; "test-only" = conformance evidence, no theorem.
 
 | # | Result | Status | Note |
 | --- | --- | --- | --- |
-| 1 | Decidability of program + attack checking | **must** | Definitions are decidable functions; the theorem is that they terminate and agree with the relations. |
+| 1 | Decidability of program + attack checking | **mechanized (checker portion)** | `inferSupport`, `checkAttack`, and proof-bearing `checkProgram` terminate and agree exactly with the frozen relations. |
 | 2 | Strict-backend isolation | **must** | Structural: no term/attack/proof crosses the interface. Falls out of the `Backend` structure's typing. |
 | 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **must** | Inversion lemma on term structure (`spec.md` §6). |
 | 4 | Compilation soundness (no untyped node/attack; subargument closure) | **must** | The combinatorially fiddly one — positional attacks × closure. |
 | 5 | Termination + determinism of grounded evaluation | **must** | Monotone operator on a finite-height lattice; bounded iteration ≤ `|Args|`. |
-| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **must** | ⚠️ **requires a direct semantics that does not yet exist** — see §5. Headline compilation theorem. |
-| 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **must** | Mechanize Path B (the compile-time strict-reachable validator), not Path A. |
+| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **mechanized modulo #17** | Direct semantics and the oracle-parametric bridge are proved; the general checker-built `Faithful` edge decider remains. |
+| 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **validator mechanized; theorem waits #18** | Path-B validation is executable and exact; status consistency still needs attack completeness. |
 | 8 | Strict-certificate soundness (excludes `trusted-policy`) | **must** | A field/obligation of the `Backend` structure; proved once, per adapter. |
 | 9 | Backend replacement | **should** | Parametricity over the `Backend` structure + graph isomorphism under `eraseCert`. High reviewer value; the "backend internals are not part of claim-status semantics" result. |
 | 10 | Reference natural-deduction adapter soundness + exact dependencies | **must** | The one shipped adapter; induction on the typing derivation (`spec.md` §5.1). |
@@ -187,8 +187,15 @@ right precedent:
   corpus forces the flip. **Validator done (2026-07-24):**
   `Lara.Policy.strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, and `wfB_iff`, plus the
   instantiated-contrary boundary theorems and located R12 payload. The status theorem still needs
-  attack completeness; `CheckedProgram.typed` currently proves only that declared attacks are sound,
-  not that every rebuttable conflict is declared.
+  attack completeness (issue #18); accepted programs currently prove only that
+  declared attacks are sound, not that every rebuttable conflict is declared.
+
+- **Result 1 (checking decidability).** `Lara.Check.inferSupport` and
+  `checkAttack` exactly decide the frozen §6.1/§7.1 judgments, and
+  `checkProgram` constructs a `CheckedProgram` from raw argument/attack
+  declarations. Its soundness/completeness theorems close the result-1 checker
+  portion. This is Lean mechanization, not a claim that the production Haskell
+  M3 checker exists.
 
 ## 5. Result 6: source-to-compiled bridge mechanized modulo the edge decider ◐
 
@@ -216,10 +223,10 @@ the iteration, proved to agree with it.
 `SrcStatus` read the Prop-level frozen closure relation directly;
 `srcIn_iff_grounded`/`srcStatus_iff` prove equality with executable grounded status over `toAF`
 whenever `Compile.Faithful` ties its Boolean edge oracle to that relation.
-`Lara.Examples.edgeBEx_faithful` exercises a concrete strict-superset closure. The honest remaining
-boundary is the general checker-built edge decider: the relational compile theorem is exercised,
-but the raw-source checker cannot yet construct `Faithful` while `Backend.check` is an arbitrary
-`Prop`.
+`Lara.Examples.edgeBEx_faithful` exercises a concrete strict-superset closure.
+Executable replay and proof-bearing raw-source `checkProgram` are now in
+place. The honest remaining boundary is the general checker-built edge
+decider and its `Faithful` proof (issue #17).
 
 The two definitional holes that made the status function partial (N17) are addressed in `spec.md` §8:
 the **hole-vs-complete-alternative** case (a complete `in` alternative dominates; `statusC_gap_iff`
@@ -236,7 +243,9 @@ four-state status is total and deterministic by construction.
   Lean 4 development lives in `../lean/` (Lake project, toolchain pinned to v4.32.0);
   `lean/Lara/Prop.lean` machine-checks the equivalence laws, decidability, idempotence, and
   no-argument-reordering with no `sorry` and `propext` as the only axiom. **Lean 4 is the settled
-  prover choice** (open question §8 #8 resolved). The ND adapter (result 10) is the next warm-up target.
+  prover choice** (open question §8 #8 resolved). The ND adapter (result 10),
+  executable support/attack/program checkers (result 1), and the
+  oracle-parametric source bridge are now mechanized.
 - **Anonymizable from day one** (`popl-research-review.md` Phase C). No author-identifying paths,
   comments, or repo metadata in the proof development.
 - **No `sorry`/`admit` in main theorems** at M2 exit; a single replay command must check the whole
@@ -248,11 +257,8 @@ four-state status is total and deterministic by construction.
 
 ## 7. Open decisions
 
-1. **Lean 4 vs Rocq** — default Lean 4; decide before M1 by collaborator expertise
-   (`research-proposal.md` §8 #8).
-2. **Direct semantics for result 6** — define it (preferred) or reframe the compilation as
-   definitional (§5).
-3. **Result 9 in scope for the paper?** — high value, "should"; include if the M2 schedule holds.
-4. **Executable-Lean vs separate reference interpreter** — prefer executable Lean definitions so one
-   development both proves and runs the differential anchor (§3); fall back to a separate reference
-   interpreter only if key definitions resist decidability.
+1. **Result 9 in scope for the paper?** — high value, "should"; include if the M2 schedule holds.
+2. **General executable edge decider (#17)** — construct `Compile.Faithful`
+   from accepted programs to close result 6.
+3. **Attack completeness (#18)** — strengthen the accepted-program invariant
+   enough to state and prove result-7 status consistency.

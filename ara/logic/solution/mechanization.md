@@ -60,13 +60,18 @@ has precedent (Marmsoler–Brucker code-generate a Haskell oracle from an Isabel
 - **Result 4 (compilation soundness + subargument closure)** — mechanize `w@π` as a partial subterm
   lookup; prove every compiled edge has a typed source and closure adds edges only onto arguments
   containing the attacked occurrence.
+- **Result 1 (checking decidability)** — done for the frozen checker surface:
+  `Lara.Check.inferSupport`, `checkAttack`, and `checkProgram` execute and
+  have exact relational soundness/completeness theorems. `checkProgram`
+  constructs the proof-bearing compile boundary from raw declarations. This
+  does not claim a production Haskell M3 checker.
 - **Result 7 (consistency, Path B)** — the compile-time strict-reachable validator is mechanized in
   `Lara.Policy` (`strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, `wfB_iff`,
   `wellFormed_no_strict_contrary_left/right`). The executable judgment uses a conservative
   structural overlap relation rather than syntactic pattern equality, aligning it with
   instance-level `ContraryMatch` (N45). The direct/indirect consistency theorem next needs attack
-  completeness from the executable checker; `CheckedProgram.typed` supplies only attack soundness
-  (O10). Do NOT mechanize Path A unless the corpus forces the flip.
+  completeness (issue #18); accepted programs currently supply only attack
+  soundness. Do NOT mechanize Path A unless the corpus forces the flip.
 
 ## 5. Result 6: source-to-compiled bridge mechanized modulo the edge decider
 
@@ -74,8 +79,9 @@ Result 6 ("status preservation between a *direct source semantics* and the compi
 no longer blocked on a missing direct semantics. `Lara.Compile.SrcIn`/`SrcOut`/`SrcStatus` read the
 Prop-level source closure relation, and `srcIn_iff_grounded`/`srcStatus_iff` prove equality with
 executable grounded evaluation under `Compile.Faithful`; `Lara.Examples.edgeBEx_faithful` exercises
-a concrete strict-superset closure. The residual is constructive: the raw-source checker must build
-the general Boolean edge decider and its `Faithful` proof once backend replay is decidable (O06/O08).
+a concrete strict-superset closure. Executable backend replay and proof-bearing
+raw-program construction are complete; the constructive residual is the
+general Boolean edge decider and its `Faithful` proof (issue #17).
 
 ## 6. Sequencing and artifact hygiene
 

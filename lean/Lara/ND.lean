@@ -50,6 +50,9 @@ Design notes (faithful to the Haskell `inferType [] free`):
   reasons purely about the backend logic, exactly as the Haskell adapter does.
 -/
 
+import Std.Data.String.ToNat
+import Lara.Certificate
+
 namespace Lara.ND
 
 /-- Backend formulas: an atom (the serialized normalized source proposition),
@@ -68,6 +71,173 @@ inductive Cert where
   | app   : Cert → Cert → Cert
   | abort : Formula → Cert → Cert
 deriving DecidableEq, Repr
+
+/-! ### Closed symbolic wire decoder
+
+The concrete spellings are centralized in `Tag`; parsing never treats an
+unrecognized string as a keyword.  Natural-number indices use Lean's canonical
+decimal representation, so signs, separators, and leading zeroes are rejected.
+-/
+
+inductive Tag where
+  | atom | fls | imp | hyp | lam | app | abort
+deriving DecidableEq, Repr
+
+def Tag.toString : Tag → String
+  | .atom => "atom"
+  | .fls => "false"
+  | .imp => "imp"
+  | .hyp => "hyp"
+  | .lam => "lam"
+  | .app => "app"
+  | .abort => "abort"
+
+def Tag.parse : String → Option Tag
+  | "atom" => some .atom
+  | "false" => some .fls
+  | "imp" => some .imp
+  | "hyp" => some .hyp
+  | "lam" => some .lam
+  | "app" => some .app
+  | "abort" => some .abort
+  | _ => none
+
+@[simp] theorem Tag.parse_toString (t : Tag) : Tag.parse t.toString = some t := by
+  cases t <;> rfl
+
+def decodeNat (s : String) : Option Nat := do
+  let n ← s.toNat?
+  if s = Nat.repr n then some n else none
+
+@[simp] theorem decodeNat_repr (n : Nat) : decodeNat (Nat.repr n) = some n := by
+  simp [decodeNat]
+
+theorem decodeNat_leading_zero_01 : decodeNat "01" = none := by
+  have hn : "01".toNat? = some 1 := by
+    rw [String.toNat?_eq_some_ofDigitChars (by
+      apply String.isNat_of_isDigit
+      · simp
+      · intro c hc
+        simp at hc
+        rcases hc with rfl | rfl <;> rfl)]
+    rfl
+  unfold decodeNat
+  rw [hn]
+  change (if "01" = Nat.repr 1 then some 1 else none) = none
+  rw [if_neg]
+  intro h
+  have hh := congrArg String.toList h
+  change ['0', '1'] = ['1'] at hh
+  contradiction
+
+theorem decodeNat_some_canonical {s : String} {n : Nat}
+    (h : decodeNat s = some n) : s = Nat.repr n := by
+  unfold decodeNat at h
+  cases hs : s.toNat? with
+  | none => simp [hs] at h
+  | some m =>
+    rw [hs] at h
+    change (if s = Nat.repr m then some m else none) = some n at h
+    split at h
+    · rename_i hc
+      have hm : m = n := Option.some.inj h
+      exact hm ▸ hc
+    · simp at h
+
+open Lara.Support
+
+mutual
+  def decodeFormula : SExpr → Option Formula
+    | .atom k =>
+        if Tag.parse k = some .fls then some .fls else none
+    | .list [.atom k, .atom a] =>
+        if Tag.parse k = some .atom then some (.atom a) else none
+    | .list [.atom k, a, b] =>
+        if Tag.parse k = some .imp then
+          return .imp (← decodeFormula a) (← decodeFormula b)
+        else none
+    | _ => none
+
+  def decodeCert : SExpr → Option Cert
+    | .list [.atom k, .atom n] =>
+        if Tag.parse k = some .hyp then return .hyp (← decodeNat n) else none
+    | .list [.atom k, φ, e] =>
+        match Tag.parse k with
+        | some .lam => return .lam (← decodeFormula φ) (← decodeCert e)
+        | some .app => return .app (← decodeCert φ) (← decodeCert e)
+        | some .abort => return .abort (← decodeFormula φ) (← decodeCert e)
+        | _ => none
+    | _ => none
+end
+
+theorem decodeFormula_list_bad_arity (t : Tag) (xs : List SExpr)
+    (h : (t = .atom → xs.length ≠ 1) ∧
+      (t = .imp → xs.length ≠ 2)) :
+    decodeFormula (.list (.atom t.toString :: xs)) = none := by
+  cases t <;>
+    cases xs with
+    | nil => simp_all [decodeFormula]
+    | cons x xs =>
+      cases xs with
+      | nil => cases x <;> simp_all [decodeFormula, Tag.toString, Tag.parse]
+      | cons y xs =>
+        cases xs with
+        | nil =>
+          cases x <;> cases y <;>
+            simp_all [decodeFormula, Tag.toString, Tag.parse]
+        | cons z xs => simp_all [decodeFormula, Tag.toString]
+
+theorem decodeCert_list_bad_arity (t : Tag) (xs : List SExpr)
+    (h : (t = .hyp → xs.length ≠ 1) ∧
+      (t = .lam ∨ t = .app ∨ t = .abort → xs.length ≠ 2)) :
+    decodeCert (.list (.atom t.toString :: xs)) = none := by
+  cases t <;>
+    cases xs with
+    | nil => simp_all [decodeCert]
+    | cons x xs =>
+      cases xs with
+      | nil =>
+        cases x <;> simp_all [decodeCert, Tag.toString, Tag.parse]
+      | cons y xs =>
+        cases xs with
+        | nil =>
+          cases x <;> cases y <;>
+            simp_all [decodeCert, Tag.toString, Tag.parse]
+        | cons z xs => simp_all [decodeCert, Tag.toString]
+
+/-- A bare atom outside the closed keyword vocabulary cannot be decoded as a
+formula (in particular, it cannot alias the distinguished `false` atom). -/
+theorem decodeFormula_unknown_atom {k : String} (h : Tag.parse k = none) :
+    decodeFormula (.atom k) = none := by
+  simp [decodeFormula, h]
+
+/-- An unknown head tag is rejected at every formula-list arity. -/
+theorem decodeFormula_unknown_list {k : String} (xs : List SExpr)
+    (h : Tag.parse k = none) :
+    decodeFormula (.list (.atom k :: xs)) = none := by
+  cases xs with
+  | nil => simp [decodeFormula]
+  | cons x xs =>
+    cases xs with
+    | nil => cases x <;> simp [decodeFormula, h]
+    | cons y xs =>
+      cases xs with
+      | nil => cases x <;> cases y <;> simp [decodeFormula, h]
+      | cons z xs => simp [decodeFormula]
+
+/-- An unknown head tag is rejected at every certificate-list arity. -/
+theorem decodeCert_unknown_list {k : String} (xs : List SExpr)
+    (h : Tag.parse k = none) :
+    decodeCert (.list (.atom k :: xs)) = none := by
+  cases xs with
+  | nil => simp [decodeCert]
+  | cons x xs =>
+    cases xs with
+    | nil => cases x <;> simp [decodeCert, h]
+    | cons y xs =>
+      cases xs with
+      | nil => cases x <;> cases y <;> simp [decodeCert, h]
+      | cons z xs => simp [decodeCert]
 
 /-- Positional context lookup (de Bruijn): index `0` is the innermost binding. -/
 def lookup : List Formula → Nat → Option Formula

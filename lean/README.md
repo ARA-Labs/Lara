@@ -11,14 +11,14 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | --- | --- | --- |
 | **11** (support adequacy / `nf`/`≡`) | `Lara/Prop.lean` | ✅ **mechanized** — `nf`, `≡`, equivalence laws, decidability, idempotence, no-argument-reordering. No `sorry`; axioms: `propext` only. |
 | **10** (ND adapter soundness + dependency exactness) | `Lara/ND.lean` | ✅ **mechanized** — `nd_sound`, `nd_relevance`, `fv_in_range`, `hyp_out_of_range_untypable`, plus the `infer` decision-procedure bridge. No `sorry`; `propext`/`Quot.sound` only. |
-| **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `propext` only. |
-| **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; `propext` only. |
-| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **mechanized modulo the executable edge decider** — source `SrcIn`/`SrcOut` and four-state `SrcStatus` agree exactly with executable grounded evaluation over `toAF` (`srcIn_iff_grounded`, `srcStatus_iff`) whenever `Faithful` decides the frozen closure relation. `Lara/Examples.lean` supplies a concrete faithful decider that exercises a strict closure edge. The general checker-produced decider remains M2 work. |
+| **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `strict_step_sound` needs no axioms, while `nd_strict_step_sound` uses the standard trio (`propext`, `Classical.choice`, `Quot.sound`). |
+| **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; AxCheck reports the standard trio (`propext`, `Classical.choice`, `Quot.sound`) for all three results. |
+| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **mechanized modulo the executable edge decider** — source `SrcIn`/`SrcOut` and four-state `SrcStatus` agree exactly with executable grounded evaluation over `toAF` (`srcIn_iff_grounded`, `srcStatus_iff`) whenever `Faithful` decides the frozen closure relation. `Lara/Examples.lean` supplies a concrete faithful decider that exercises a strict closure edge. The general checker-built decider remains issue #17. |
 | **5** (grounded termination + determinism) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ✅ **mechanized** — bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|` steps; `toAF` instantiates the result for checked programs. |
 | **4** (compilation soundness) | `Lara/Compile.lean`, `Lara/Examples.lean` | ✅ **mechanized (relational compile layer)** — only complete checked terms become nodes; only typed declared attacks produce edges; direct and strict-superset closure behavior are proved concretely. |
-| **3** (dependency accountability) | `Lara/Support.lean` | ◐ **partially mechanized** — `leaves_declared` proves the source-leaf half; backend `certDeps` accountability awaits the executable backend interface. |
-| **1** (checking decidability) | `Lara/Support.lean`, `Lara/Attack.lean` | ◐ **relational metatheory mechanized** — typing uniqueness and inversion properties are proved. Executable support/attack decision procedures require the abstract strict-backend seam to expose decidable replay acceptance (`Backend.check` is currently an arbitrary `Prop`). |
-| **7** (Path-B consistency) | `Lara/Policy.lean` | ◐ **validator mechanized** — `StrictReachable`, conservative instance-overlap checking, `aPatMayOverlap_of_instances`, and `wfB_iff` prove the finite `wf(Pi)` check catches canonically equivalent ground instances; `wellFormed_no_strict_contrary_left/right` connect it to `ContraryMatch`, and `firstViolation?` carries the located R12 rule/pair. The status-consistency theorem still needs attack completeness, which `CheckedProgram.typed` does not provide. |
+| **3** (dependency accountability) | `Lara/Support.lean` | ◐ **partially mechanized** — `leaves_declared` proves the source-leaf half; backend `certDeps` accountability separately awaits a `Backend.uses` field. |
+| **1** (checking decidability) | `Lara/Check/` | ✅ **checker portion mechanized** — `inferSupport`, `checkAttack`, and proof-bearing `checkProgram` execute over the finite backend registry and have exact soundness/completeness theorems for the frozen support, positional-attack, and raw-program judgments. Deterministic duplicate and located rejection behavior are pinned by closed fixtures. |
+| **7** (Path-B consistency) | `Lara/Policy.lean` | ◐ **validator mechanized** — `StrictReachable`, conservative instance-overlap checking, `aPatMayOverlap_of_instances`, and `wfB_iff` prove the finite `wf(Pi)` check catches canonically equivalent ground instances; `wellFormed_no_strict_contrary_left/right` connect it to `ContraryMatch`, and `firstViolation?` carries the located R12 rule/pair. The status-consistency theorem still needs attack completeness (issue #18), which `CheckedProgram.typed` does not provide. |
 | **9** (backend replacement) | — | **statement-model blocker recorded** — `CheckedProgram` currently identifies nodes only by certificate-bearing `SupportTerm`; it lacks stable argument ids and a certificate-erased skeleton/bijection. Add that representation before stating payload-varying AF isomorphism faithfully. |
 
 The development now covers the frozen M1 relational support, attack, and
@@ -62,10 +62,9 @@ anything outside that trio.
 The grounded least-fixpoint (result 5 core) is done **in core Lean 4** —
 `Lara/Grounded.lean` builds the finite fixpoint by hand (bounded iteration +
 a deficit-measure stabilization argument), so no Mathlib dependency was needed.
-Remaining work: strengthen the strict-backend interface with decidable replay
-acceptance, then construct executable support/attack checking and its general
-`Faithful` edge decider (closing results 1 and 6 constructively); backend dependency
-accountability (the remaining half of result 3); the result-7 consistency theorem
-after adding attack completeness; and the certificate-erased argument identity
-needed to state backend replacement (result 9). The shared serialized first-order
-core AST is the Haskell↔Lean differential-testing anchor (mechanization-plan §3).
+Remaining work: construct the general `Faithful` edge decider (issue #17,
+closing result 6); backend dependency accountability (the remaining half of
+result 3); the result-7 consistency theorem after adding attack completeness
+(issue #18); and the certificate-erased argument identity needed to state
+backend replacement (result 9). The shared serialized first-order core AST is
+the Haskell↔Lean differential-testing anchor (mechanization-plan §3).

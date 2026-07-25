@@ -23,8 +23,8 @@
 --
 -- > encode_ND(p) = atom(canonicalSerialize(nf p))
 --
--- Here the canonical serialization is @'show' . 'nf'@ on the source
--- proposition. Derived 'Show' is injective on the 'Prop' AST, so
+-- Here the canonical serialization is the shared tagged, UTF-8 byte-length
+-- framed atom key. Its closed decoder is a left inverse, so
 --
 -- > p ≡ q   iff   nf p == nf q   iff   encodeND p == encodeND q,
 --
@@ -53,8 +53,15 @@ module Lara.Strict.ND
   , Tag (..)
   , tagToString
   , parseTag
+  , decodeFormula
+  , decodeCert
     -- * Encoding
+  , FrameTag (..)
+  , frameTagToString
+  , parseFrameTag
   , encodeND
+  , encodeAtomKey
+  , decodeAtomKey
     -- * Type checking (the replay)
   , inferType
     -- * The registered adapter
@@ -62,10 +69,11 @@ module Lara.Strict.ND
   , mkNDBackend
   ) where
 
+import Data.Char (ord)
 import Data.Set (Set)
 import qualified Data.Set as Set
 
-import Lara.Prop (Prop, nf)
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..), nf)
 import Lara.Strict.ND.Internal (AtomId (..))
 import Lara.Strict
   ( Backend (..)
@@ -97,7 +105,7 @@ atomIdString (AtomId s) = s
 -- | A natural-deduction certificate in de Bruijn form.
 data Cert
   = -- | @hyp i@: the assumption at de Bruijn index @i@
-    Hyp Int
+    Hyp Integer
   | -- | @lam phi e@: implication introduction; @phi@ is the (annotated) antecedent
     Lam Formula Cert
   | -- | @app f x@: implication elimination
@@ -110,11 +118,132 @@ data Cert
 -- Encoding
 -- ---------------------------------------------------------------------------
 
--- | @encode_ND(p) = atom(canonicalSerialize(nf p))@. The serialization is
--- @'show' . 'nf'@, which is injective on the 'Prop' AST, discharging
--- normalization fidelity.
+-- | The closed vocabulary of the framed source-atom key.
+data FrameTag = FTAtom | FTNum | FTStr | FTCon | FTLen
+  deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | The single source of truth for frame-tag wire spellings.
+frameTagToString :: FrameTag -> String
+frameTagToString FTAtom = "A"
+frameTagToString FTNum = "N"
+frameTagToString FTStr = "S"
+frameTagToString FTCon = "C"
+frameTagToString FTLen = "L"
+
+-- | Parse a frame tag, inverse to 'frameTagToString'.
+parseFrameTag :: String -> Maybe FrameTag
+parseFrameTag s =
+  lookup s [(frameTagToString t, t) | t <- [minBound .. maxBound]]
+
+utf8Length :: String -> Int
+utf8Length = sum . map width
+  where
+    width c
+      | ord c <= 0x7f = 1
+      | ord c <= 0x7ff = 2
+      | ord c <= 0xffff = 3
+      | otherwise = 4
+
+frame :: String -> String
+frame s = show (utf8Length s) ++ ":" ++ s
+
+renderFrames :: [String] -> String
+renderFrames = concatMap frame
+
+encodeTermKey :: Term -> String
+encodeTermKey (TNum n) = renderFrames [frameTagToString FTNum, n]
+encodeTermKey (TStr s) = renderFrames [frameTagToString FTStr, s]
+encodeTermKey (TCon (FunSym k) ts) =
+  renderFrames
+    ( [frameTagToString FTCon, k, frameTagToString FTLen, show (length ts)]
+        ++ map encodeTermKey ts
+    )
+
+-- | Exact, prefix-free source-atom wire key shared with the Lean adapter.
+encodeAtomKey :: Prop -> String
+encodeAtomKey (Prop (Pred p) ts) =
+  renderFrames
+    ( [frameTagToString FTAtom, p, frameTagToString FTLen, show (length ts)]
+        ++ map encodeTermKey ts
+    )
+
+takeUtf8 :: Int -> String -> Maybe (String, String)
+takeUtf8 n
+  | n < 0 = const Nothing
+  | otherwise = go n []
+  where
+    go 0 acc rest = Just (reverse acc, rest)
+    go _ _ [] = Nothing
+    go left acc (c : cs)
+      | width c <= left = go (left - width c) (c : acc) cs
+      | otherwise = Nothing
+    width c
+      | ord c <= 0x7f = 1
+      | ord c <= 0x7ff = 2
+      | ord c <= 0xffff = 3
+      | otherwise = 4
+
+parseCanonicalNat :: String -> Maybe Integer
+parseCanonicalNat s =
+  case reads s :: [(Integer, String)] of
+    [(n, "")]
+      | n >= 0
+      , show n == s -> Just n
+    _ -> Nothing
+
+parseFrame :: String -> Maybe (String, String)
+parseFrame input = do
+  let (digits, colonRest) = break (== ':') input
+  rest <- case colonRest of
+    ':' : xs -> Just xs
+    _ -> Nothing
+  n <- parseCanonicalNat digits
+  if n <= toInteger (maxBound :: Int)
+    then takeUtf8 (fromInteger n) rest
+    else Nothing
+
+decodeFrames :: String -> Maybe [String]
+decodeFrames "" = Just []
+decodeFrames input = do
+  (field, rest) <- parseFrame input
+  (field :) <$> decodeFrames rest
+
+decodeTermKey :: String -> Maybe Term
+decodeTermKey key = do
+  fields <- decodeFrames key
+  case fields of
+    [tag, payload] ->
+      case parseFrameTag tag of
+        Just FTNum -> Just (TNum payload)
+        Just FTStr -> Just (TStr payload)
+        _ -> Nothing
+    conTag : k : lenTag : count : children
+      | parseFrameTag conTag == Just FTCon
+      , parseFrameTag lenTag == Just FTLen -> do
+          n <- parseCanonicalNat count
+          if toInteger (length children) == n
+            then TCon (FunSym k) <$> mapM decodeTermKey children
+            else Nothing
+    _ -> Nothing
+
+-- | Inverse of 'encodeAtomKey'; rejects non-canonical lengths/counts, unknown
+-- tags, truncation, trailing bytes, and child-count mismatches.
+decodeAtomKey :: String -> Maybe Prop
+decodeAtomKey key = do
+  fields <- decodeFrames key
+  case fields of
+    atomTag : p : lenTag : count : children
+      | parseFrameTag atomTag == Just FTAtom
+      , parseFrameTag lenTag == Just FTLen -> do
+          n <- parseCanonicalNat count
+          if toInteger (length children) == n
+            then Prop (Pred p) <$> mapM decodeTermKey children
+            else Nothing
+    _ -> Nothing
+
+-- | @encode_ND(p) = atom(encodeAtomKey(nf p))@.
 encodeND :: Prop -> Formula
-encodeND = FAtom . AtomId . show . nf
+encodeND = FAtom . AtomId . encodeAtomKey . nf
 
 -- ---------------------------------------------------------------------------
 -- Type checking (the replay)
@@ -135,15 +264,20 @@ inferType :: [Formula] -> [Formula] -> Cert -> Either String (Formula, Set Int)
 inferType locals free = go locals
   where
     nFree = length free
+    nFreeInteger = toInteger nFree
 
     go :: [Formula] -> Cert -> Either String (Formula, Set Int)
     go ls (Hyp i)
       | i < 0 = Left ("negative de Bruijn index " ++ show i)
-      | i < length ls = Right (ls !! i, Set.empty) -- locally bound: not a dependency
+      | i < nLoc =
+          let localIndex = fromInteger i
+           in Right (ls !! localIndex, Set.empty) -- locally bound: not a dependency
       | otherwise =
-          let j = i - length ls -- into the free context
-           in if j < nFree
-                then Right (free !! j, Set.singleton j)
+          let j = i - nLoc -- into the free context
+           in if j < nFreeInteger
+                then
+                  let freeIndex = fromInteger j
+                   in Right (free !! freeIndex, Set.singleton freeIndex)
                 else
                   Left
                     ( "free de Bruijn index out of range: hyp "
@@ -154,6 +288,8 @@ inferType locals free = go locals
                         ++ show nFree
                         ++ " free slot(s)"
                     )
+      where
+        nLoc = toInteger (length ls)
     go ls (Lam phi e) = do
       (psi, deps) <- go (phi : ls) e
       Right (FImp phi psi, deps)
@@ -216,8 +352,8 @@ decodeFormula e = Left ("malformed ND formula: " ++ show e)
 
 decodeCert :: SExpr -> Either String Cert
 decodeCert (SList [SAtom k, SAtom n]) | parseTag k == Just THyp =
-  case reads n of
-    [(i, "")] -> Right (Hyp i)
+  case parseCanonicalNat n of
+    Just i -> Right (Hyp i)
     _ -> Left ("malformed de Bruijn index: " ++ show n)
 decodeCert (SList [SAtom k, phi, e]) | parseTag k == Just TLam =
   Lam <$> decodeFormula phi <*> decodeCert e

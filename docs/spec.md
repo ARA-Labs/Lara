@@ -723,12 +723,11 @@ carries the frozen `(beta, theory-digest, kappa)` triple and `dom(theta) = {X1..
 Concrete obligation-accounting cases (mixed mandatory/optional holes, nested propagation,
 duplicate elimination, missing- and overlapping-accounting rejection) are pinned in
 `lean/Lara/Examples.lean`.
-Pending: the executable checker (result-1 decision procedure) and `certDeps` accountability,
-which needs a `uses` field on the abstract backend. The checker has one genuine
-interface dependency: `Strict.Backend.check` and hence registry replay acceptance
-are currently arbitrary propositions, not decidable operations. A constructive
-support checker requires the strict-backend seam to expose a decision procedure
-for acceptance; attack checking then composes with that support checker.)*
+`lean/Lara/Check/Support.lean` and `SupportProof.lean` now provide the
+executable support checker and exact soundness/completeness bridge; the finite
+backend registry exposes Boolean replay with proved adequacy. The remaining
+result-3 `certDeps` certificate half is separate and needs a `uses` field on
+the abstract backend.)*
 
 ## 7. Typed positional attacks
 
@@ -832,8 +831,10 @@ compiled AF). *(Mechanized against this figure, `lean/Lara/Attack.lean`: `attack
 `rebut_top_defeasible` and `undercut_pos_defeasible` — strict occurrences are unattackable;
 `undercut_target_rule` / `undermine_target_leaf` — the position-kind partition;
 `rebut_concl_coherent` — the local conclusion read-off agrees with the target's typed conclusion.
-Pending: the executable attack checker and the compile-facing edge soundness, which lands with the
-`compile` relation. Presentation premise indices are 1-based; the mechanized model is 0-based.)*
+`lean/Lara/Check/Attack.lean` now supplies exact executable positional-attack
+checking (`checkAttack_sound`/`complete`), and `lean/Lara/Compile.lean`
+discharges relational compile-facing edge soundness. Presentation premise
+indices are 1-based; the mechanized model is 0-based.)*
 
 An ARA dead end creates an attack only if it can construct one of these typed forms. A dead-end tag,
 confidence score, or provenance downgrade alone is insufficient.
@@ -910,8 +911,10 @@ Attack(P) = { (w, v) | attack k declared in P
 judgment over closure edges agrees with the abstract grounded semantics of
 `lean/Lara/Grounded.lean` over the compiled AF at the argument level; and `srcStatus_iff` —
 the exact iff/equality characterization at four-state claim status (`SrcStatus`, read from the
-source judgment alone). Both levels are parametric in an edge oracle (`Faithful`) that the pending executable
-checker will supply constructively; that oracle is the remaining gap in §9 result 6's
+source judgment alone). Both levels are parametric in an edge oracle (`Faithful`).
+Executable support, positional-attack, and proof-bearing raw-program checking
+are complete; the separate general checker-built edge decider and its
+`Faithful` proof (issue #17) are the remaining gap in §9 result 6's
 source-vs-compiled half. The closure's strict-superset behavior — one attack edging both the
 declared target and a distinct wrapper argument containing the occurrence, with the grounded
 verdict under a concrete decider — is pinned in `lean/Lara/Examples.lean`.)*
@@ -1003,9 +1006,10 @@ rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-rea
 the conservative overlap check and its ground-instance soundness lemma
 `aPatMayOverlap_of_instances`, executable `wfB`, its exactness theorem `wfB_iff`, the bridge
 `wellFormed_no_strict_contrary_left/right`, and the located `firstViolation?` R12 payload. The
-remaining §9 result 7 consistency theorem needs the executable checker to establish attack
-completeness: the current compile boundary proves every declared attack is typed, but not yet that
-every rebuttable contrary conflict yields a compiled edge._
+remaining §9 result 7 consistency theorem needs an accepted-program
+attack-completeness invariant: the current proof-bearing checker proves every accepted declared
+attack is typed, but not yet that every rebuttable contrary conflict yields a
+declared/compiled edge (issue #18)._
 
 **Flip criterion.** If the corpus shows strict rules genuinely feeding contested claims, switch to
 Path A — require the contrary relation to be a total, involutive contradictory map (`−φ`, `−−φ = φ`)
@@ -1052,18 +1056,19 @@ verdict over `toAF`. The theorem is parametric in `Faithful`, the obligation tha
 oracle decides the frozen source `Edge` relation exactly. `lean/Lara/Examples.lean` supplies a
 concrete faithful oracle whose closure relation strictly extends the direct attack and computes the
 expected defeated verdict. What remains is the **general checker-built edge decider** and its
-`Faithful` proof. It shares the support/attack checker's concrete dependency on a decidable backend
-replay interface: the current `Strict.Backend.check : ... → Prop` cannot be executed to construct
-the proof-bearing `CheckedProgram` from raw declarations. Once that interface is strengthened, the
-checker can construct the program and its edge oracle together, removing the parameter and closing
-result 6 constructively.
+`Faithful` proof (issue #17). The executable backend replay interface and
+proof-bearing `checkProgram` construction from raw declarations are now in
+place; constructing the finite closure-edge decision function from the
+accepted program is the remaining result-6 obligation.
 The development is `sorry`-free within the standard axiom trio.
 
 ## 9. Static and semantic results required before freeze
 
 1. Decidability of program and attack checking (including positional attack checking).
-   *(Uniqueness halves mechanized: `lean/Lara/Support.lean` `hasSupport_unique`; the decision
-   procedures are the M2 executable-checker slice.)*
+   *(Checker portion mechanized: `Lara.Check.inferSupport`,
+   `checkAttack`, and `checkProgram` execute and have exact relational
+   soundness/completeness theorems. `checkProgram` also constructs the
+   proof-bearing compile boundary from accepted raw declarations.)*
 2. Strict-backend isolation: programs cannot extend `R`, backend theories are digest-addressed, and
    no support term, attack, or backend proof term crosses the strict-certificate interface.
 3. Dependency accountability: the reported leaf set equals `leaves(w)` and every member is declared
@@ -1082,14 +1087,14 @@ The development is `sorry`-free within the standard axiom trio.
    `lean/Lara/Compile.lean` `srcIn_iff_grounded` and `srcStatus_iff` connect source judgments
    over subargument-closed `Edge` to executable grounded status whenever `Faithful` holds;
    `lean/Lara/Examples.lean` proves a concrete faithful closure instance. The general checker-built
-   `Faithful` witness remains M2 work; see §8.2.)*
+   `Faithful` witness remains issue #17; see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`. *(The §8.1 validator is
    mechanized in `lean/Lara/Policy.lean`: `strictReachable_iff_mem`,
    `aPatMayOverlap_of_instances`, `wfB_iff`, and
    `wellFormed_no_strict_contrary_left/right`. The status theorem additionally needs attack
-   completeness from the executable checker; `CheckedProgram.typed` currently supplies only the
+   completeness (issue #18); the accepted program currently supplies only the
    soundness direction.)*
 8. Strict-certificate soundness: every certified instance's encoded conclusion is a consequence of
    its encoded premise conclusions and declared backend theory. This result excludes
@@ -1105,8 +1110,8 @@ The development is `sorry`-free within the standard axiom trio.
     additional shipped adapter must discharge the same obligations.
 11. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
    with `c.formal`. *(Identity level mechanized in `lean/Lara/Prop.lean`; relational layer in
-   `lean/Lara/Support.lean` `Supports`/`supports_resp_equiv`; decidability lands with the
-   executable checker.)*
+   `lean/Lara/Support.lean` `Supports`/`supports_resp_equiv`; executable
+   support inference and adequacy are in `lean/Lara/Check/`.)*
 12. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
 
 Core results 1-9 and the reference-adapter result 10 should be mechanized in a proof assistant.

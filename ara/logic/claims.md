@@ -37,20 +37,30 @@ the result is stated but not yet proved or mechanized._
   ASPIC+ restriction that strict rules are unattackable; positions are paths of premise indices and
   question names.
 - **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:447 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:472 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
-- **Status**: testing
+- **Status**: supported
 - **Falsification criteria**: A defeat pattern the corpus annotators find that cannot be typed as an
   attack on a root / internal-rule / leaf position (e.g. a genuine attack on something other than
   those three positions), forcing a fourth attack primitive.
 - **Proof**: [E05, "lean/Lara/Attack.lean: undercut_target_rule / undermine_target_leaf,
-  rebut_top_defeasible / undercut_pos_defeasible, rebut_concl_coherent; audited by AxCheck"]
+  rebut_top_defeasible / undercut_pos_defeasible, rebut_concl_coherent;
+  lean/Lara/Check/Attack.lean: checkAttack_sound / checkAttack_complete;
+  lean/Lara/Check/Program.lean: checkProgram_sound / checkProgram_complete;
+  lean/Lara/Examples.lean: check_rebut_success /
+  check_nested_undercut_success / check_mixed_undermine_success /
+  check_program_endpoint_reject_classes;
+  all listed explicitly in lean/AxCheck.lean"]
 - **Evidence basis**: spec §7.1 fixes the positional judgment and
   `lean/Lara/Attack.lean` mechanizes the position-kind partition,
-  strict-unattackability, and local/global conclusion coherence sorry-free.
-  The executable attack checker and N29 adversarial coverage remain before
-  this claim can advance to supported.
+  strict-unattackability, and local/global conclusion coherence sorry-free;
+  `Lara.Check` now adds exact executable positional-attack and raw-program
+  checking with soundness/completeness. AxCheck audits the adequacy theorems
+  and concrete positive/rejection fixtures within the standard axiom trio.
+  N29 adversarial corpus coverage remains evaluation work, not a gap in the
+  formal checker claim.
 - **Dependencies**: C01
 - **Tags**: attacks, positions, ASPIC+, decidability
-- **Last revised**: 2026-07-24 (2026-07-24_001; historical evidence from 2026-07-22_001#16)
+- **Last revised**: 2026-07-24 (result-1 checker closure; N52, N53, N57,
+  session 2026-07-24_008)
 
 ## C03: An accepted strict certificate establishes a conditional deductive consequence, never premise truth
 - **Statement**: Routing strict steps through a backend that returns only accept/reject + dependencies
@@ -67,11 +77,13 @@ the result is stated but not yet proved or mechanized._
   judgment `⊢ p true` for a supported proposition — i.e. a rule that eliminates support into truth —
   would refute the non-factivity theorem.
 - **Proof**: [E03]
-- **Evidence basis**: Theorem 3 (strict-backend-decision §5) proves source non-factivity syntactically
-  by inversion; the current Haskell `Kernel` is an LP adapter *seed*, so the interface itself is
-  spec-only and this is a paper-proved (not mechanized) result.
+- **Evidence basis**: `lean/Lara/Strict.lean` mechanizes the factivity firewall through the concrete
+  executable ND backend: `nonfactiveJudgment` is built from exact symbolic replay of `hyp 0`,
+  `nd_nonfactive_witness` refutes premise-free validity, and `no_truth_projection` lifts the witness
+  to all backends. `Lara.Strict.ND` supplies the matching Haskell adapter.
 - **Dependencies**: C04
 - **Tags**: strict-backend, non-factivity, soundness, trust-boundary
+- **Last revised**: 2026-07-24 (2026-07-24_004)
 
 ## C04: Confining strict logic behind an opaque interface makes claim-support status independent of certificate internals
 - **Statement**: If two backends accept exactly the same strict instances, then after erasing
@@ -109,11 +121,14 @@ the result is stated but not yet proved or mechanized._
   Boolean consequence of its context (refuting Theorem 4), or a well-typed certificate whose true
   premise/theory dependencies are not exactly its free de Bruijn indices (refuting Lemma 5).
 - **Proof**: [E03]
-- **Evidence basis**: Theorem 4 and Lemma 5 (strict-backend-decision §5) give the reference adapter's
-  soundness and dependency exactness by structural induction; both are paper-proved, targeted for
-  mechanization (result 10), not yet machine-checked, and no conforming adapter is yet implemented.
+- **Evidence basis**: `lean/Lara/ND.lean` proves `infer` sound and complete for `HasType` and proves
+  exact free-variable dependencies. `lean/Lara/Strict.lean` now adds the closed symbolic decoder,
+  exact submitted-certificate replay, replay/acceptance adequacy, and a source atom-key decoder
+  left-inverse establishing normalization fidelity without relying on generated display text.
+  `src/Lara/Strict/ND.hs` implements the identical framed encoding and executable adapter.
 - **Dependencies**: C03
 - **Tags**: natural-deduction, soundness, dependency-accountability, modularity
+- **Last revised**: 2026-07-24 (2026-07-24_004)
 
 ## C06: Claim acceptance is non-monotonic and cannot be captured by any monotonic consequence relation
 - **Statement**: Because a newly supplied, checked attacker can move a claim from `justified` to not

@@ -20,7 +20,7 @@
 --     dependencies.
 module StrictSpec (strictSpecProps) where
 
-import Data.List (nub)
+import Data.List (isPrefixOf, nub)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -43,10 +43,16 @@ import Lara.Strict.ND
   , Formula (..)
   , Tag (..)
   , encodeND
+  , encodeAtomKey
+  , decodeAtomKey
+  , decodeFormula
+  , decodeCert
   , inferType
   , mkNDBackend
   , ndBackendId
+  , parseFrameTag
   , parseTag
+  , frameTagToString
   , tagToString
   )
 import Lara.Strict.ND.Internal (AtomId (..))
@@ -119,7 +125,7 @@ genModusPonensFamily = do
   withPadding core $ \free shift ->
     WellTyped
       { wtFree = free
-      , wtCert = App (Hyp (shift + 1)) (Hyp shift)
+      , wtCert = App (Hyp (toInteger (shift + 1))) (Hyp (toInteger shift))
       , wtType = b
       , wtDeps = Set.fromList [shift, shift + 1]
       }
@@ -131,7 +137,7 @@ genAbortFamily = do
   withPadding [FFalse] $ \free shift ->
     WellTyped
       { wtFree = free
-      , wtCert = Abort t (Hyp shift)
+      , wtCert = Abort t (Hyp (toInteger shift))
       , wtType = t
       , wtDeps = Set.singleton shift
       }
@@ -224,11 +230,220 @@ prop_normalizationFidelity :: PropPair -> Bool
 prop_normalizationFidelity (PropPair p q) =
   (nf p == nf q) == (encodeND p == encodeND q)
 
+-- | Exact shared Lean/Haskell golden vectors for the UTF-8 framed atom key.
+prop_atomKeyGoldenVectors :: Bool
+prop_atomKeyGoldenVectors =
+  prop_frameTagRoundTrip
+    && all
+      (\(p, bytes) ->
+        encodeAtomKey p == bytes
+          && decodeAtomKey bytes == Just p)
+      [ (Prop (Pred "") [], "1:A0:1:L1:0")
+      , (Prop (Pred ":") [TStr "a:b"], "1:A1::1:L1:18:1:S3:a:b")
+      , (Prop (Pred "π") [TStr "雪"], "1:A2:π1:L1:18:1:S3:雪")
+      , (Prop (Pred "p") [TCon (FunSym "z") []], "1:A1:p1:L1:112:1:C1:z1:L1:0")
+      , ( Prop (Pred "p") [TCon (FunSym "f") [TNum "2", TCon (FunSym "g") [TStr "x"]]]
+        , "1:A1:p1:L1:143:1:C1:f1:L1:26:1:N1:220:1:C1:g1:L1:16:1:S1:x"
+        )
+      , (Prop (Pred "p") [TNum "1", TNum "2"], "1:A1:p1:L1:26:1:N1:16:1:N1:2")
+      , (Prop (Pred "p") [TNum "2", TNum "1"], "1:A1:p1:L1:26:1:N1:26:1:N1:1")
+      ]
+
+prop_atomKeyMalformedRejected :: Bool
+prop_atomKeyMalformedRejected =
+  all
+    ((== Nothing) . decodeAtomKey)
+    [ "01:A0:1:L1:0" -- non-canonical length
+    , "1:A0:1:L1:0x" -- trailing bytes
+    , "1:X0:1:L1:0" -- unknown root tag
+    , "1:A0:1:L1:1" -- child-count mismatch
+    , "1:A3:π1:L1:0" -- length crosses a UTF-8 boundary
+    ]
+
+-- | Generated left-inverse coverage for nested source atoms, including
+-- multibyte identifiers and payloads. This complements the exact shared
+-- Lean/Haskell vectors with structural recursion coverage.
+prop_atomKeyRoundTrip :: Property
+prop_atomKeyRoundTrip =
+  forAll genAtomKeyProp $ \p ->
+    counterexample ("atom key failed to round-trip: " ++ show p) $
+      decodeAtomKey (encodeAtomKey p) == Just p
+  where
+    genAtomKeyProp = sized $ \n ->
+      let depth = min 4 n
+       in Prop <$> (Pred <$> genText)
+            <*> resize depth (listOf (genTerm depth))
+    genTerm n
+      | n <= 0 =
+          oneof
+            [ TNum <$> elements ["0", "+02.10", "-0.0", "雪"]
+            , TStr <$> genText
+            , TCon <$> (FunSym <$> genText) <*> pure []
+            ]
+      | otherwise =
+          frequency
+            [ (3, genTerm 0)
+            , (2, TCon <$> (FunSym <$> genText)
+                <*> resize (min 3 (n `div` 2))
+                  (listOf (genTerm (n `div` 2))))
+            ]
+    genText = listOf (elements ['a', ':', 'π', '雪', '🙂'])
+
+-- | The framed atom-key tag table is coherent and exhaustive.
+prop_frameTagRoundTrip :: Bool
+prop_frameTagRoundTrip =
+  all
+    (\t -> parseFrameTag (frameTagToString t) == Just t)
+    [minBound .. maxBound]
+
 -- | The wire keyword table is coherent: 'parseTag' inverts 'tagToString' on
 -- every 'Tag'. Exhaustive over the closed set, so a keyword typo or a missing
 -- 'parseTag' case is caught here rather than by drift between the two.
 prop_tagRoundTrip :: Bool
 prop_tagRoundTrip = all (\t -> parseTag (tagToString t) == Just t) [minBound .. maxBound]
+
+-- | Literal wire vectors pin the public Formula/Cert grammar independently of
+-- 'tagToString'. If producer and decoder spelling drift together, these
+-- production-independent fixtures still fail.
+prop_wireKeywordGoldenVectors :: Bool
+prop_wireKeywordGoldenVectors =
+  and
+    [ decodeFormula (SAtom "false") == Right FFalse
+    , decodeFormula (SList [SAtom "atom", SAtom "P"]) == Right p
+    , decodeFormula
+        (SList [SAtom "imp", SList [SAtom "atom", SAtom "P"], SAtom "false"])
+        == Right (FImp p FFalse)
+    , decodeCert (SList [SAtom "hyp", SAtom "0"]) == Right (Hyp 0)
+    , decodeCert
+        (SList [SAtom "lam", SList [SAtom "atom", SAtom "P"], SList [SAtom "hyp", SAtom "0"]])
+        == Right (Lam p (Hyp 0))
+    , decodeCert
+        (SList [SAtom "app", SList [SAtom "hyp", SAtom "0"], SList [SAtom "hyp", SAtom "1"]])
+        == Right (App (Hyp 0) (Hyp 1))
+    , decodeCert
+        (SList [SAtom "abort", SList [SAtom "atom", SAtom "P"], SList [SAtom "hyp", SAtom "0"]])
+        == Right (Abort p (Hyp 0))
+    ]
+  where
+    p = FAtom (AtomId "P")
+
+-- | Every string outside the closed tag table is rejected in each syntactic
+-- position where a Formula or Cert keyword could otherwise occur.
+prop_unknownTagRejected :: Property
+prop_unknownTagRejected =
+  forAll genUnknownTag $ \k ->
+    counterexample ("unexpectedly decoded unknown tag " ++ show k) $
+      all isLeft
+        [ decodeFormula (SAtom k)
+        , decodeFormula (SList [SAtom k, SAtom "P"])
+        , decodeFormula (SList [SAtom k, formulaToSExpr p, formulaToSExpr q])
+        ]
+        && all isLeft
+          [ decodeCert (SList [SAtom k, SAtom "0"])
+          , decodeCert (SList [SAtom k, formulaToSExpr p, certToSExpr (Hyp 0)])
+          ]
+  where
+    p = FAtom (AtomId "P")
+    q = FAtom (AtomId "Q")
+    isLeft (Left _) = True
+    isLeft _ = False
+    genUnknownTag =
+      suchThat (resize 16 arbitrary) ((== Nothing) . parseTag)
+
+isCanonicalNatString :: String -> Bool
+isCanonicalNatString s =
+  case reads s :: [(Integer, String)] of
+    [(n, "")]
+      | n >= 0
+      , show n == s -> True
+    _ -> False
+
+genMalformedIndex :: Gen String
+genMalformedIndex =
+  suchThat candidate (not . isCanonicalNatString)
+  where
+    digits = listOf1 (elements ['0' .. '9'])
+    candidate =
+      frequency
+        [ (4, elements ["", "-1", "01", "x"])
+        , (3, do ds <- digits; elements ["-" ++ ds, "+" ++ ds, "0" ++ ds])
+        , (2, resize 16 (listOf (elements (['0' .. '9'] ++ "+-_x"))))
+        ]
+
+-- | Bounded generative coverage of strings outside the canonical non-negative
+-- unbounded natural-number grammar accepted by a de Bruijn index.
+prop_malformedIndexRejected :: Property
+prop_malformedIndexRejected =
+  forAll genMalformedIndex $ \s ->
+    counterexample ("unexpectedly decoded malformed index " ++ show s) $
+      isLeft (decodeCert (SList [tag THyp, SAtom s]))
+  where
+    isLeft (Left _) = True
+    isLeft _ = False
+
+-- | The Lean wire grammar uses unbounded 'Nat' indices. A canonical value
+-- beyond the host 'Int' range must therefore decode successfully, then be
+-- rejected by replay as out of range without ever being converted to 'Int'.
+prop_unboundedIndexDecodedThenRejected :: Bool
+prop_unboundedIndexDecodedThenRejected =
+  decodeCert wire == Right (Hyp huge)
+    && case decodeCert wire >>= inferType [] [] of
+      Left err -> "free de Bruijn index out of range" `isPrefixOf` err
+      Right _ -> False
+  where
+    huge = 9223372036854775808
+    wire = SList [SAtom "hyp", SAtom "9223372036854775808"]
+
+prop_closedDecoderMatrix :: Bool
+prop_closedDecoderMatrix =
+  and
+    [ decodeFormula (tag TFalse) == Right FFalse
+    , decodeFormula (formulaToSExpr p) == Right p
+    , decodeFormula (formulaToSExpr (FImp p q)) == Right (FImp p q)
+    , decodeCert (certToSExpr (Hyp 0)) == Right (Hyp 0)
+    , decodeCert (certToSExpr (Lam p (Hyp 0))) == Right (Lam p (Hyp 0))
+    , decodeCert (certToSExpr (App (Hyp 0) (Hyp 1))) == Right (App (Hyp 0) (Hyp 1))
+    , decodeCert (certToSExpr (Abort q (Hyp 0))) == Right (Abort q (Hyp 0))
+    , all isLeft
+        [ decodeFormula (SList [tag TAtom])
+        , decodeFormula (SList [tag TAtom, SAtom "P", SAtom "extra"])
+        , decodeFormula (SList [])
+        , decodeFormula (SList [tag TFalse])
+        , decodeFormula (SList [tag TFalse, SAtom "extra"])
+        , decodeFormula (SList [tag TImp, formulaToSExpr p])
+        , decodeFormula
+            (SList [tag TImp, formulaToSExpr p, formulaToSExpr q, SAtom "extra"])
+        ]
+    , all isLeft
+        [ decodeCert (SList [tag THyp, SAtom ""])
+        , decodeCert (SList [tag THyp, SAtom "-1"])
+        , decodeCert (SList [tag THyp, SAtom "01"])
+        , decodeCert (SList [tag THyp, SAtom "x"])
+        , decodeCert (SList [tag THyp])
+        , decodeCert (SList [tag THyp, SAtom "0", SAtom "extra"])
+        , decodeCert (SList [tag TLam, formulaToSExpr p])
+        , decodeCert
+            (SList [tag TLam, formulaToSExpr p, certToSExpr (Hyp 0), SAtom "extra"])
+        , decodeCert (SList [tag TApp, certToSExpr (Hyp 0)])
+        , decodeCert
+            (SList [tag TApp, certToSExpr (Hyp 0), certToSExpr (Hyp 1), SAtom "extra"])
+        , decodeCert (SList [tag TAbort, formulaToSExpr q])
+        , decodeCert
+            (SList [tag TAbort, formulaToSExpr q, certToSExpr (Hyp 0), SAtom "extra"])
+        , decodeCert (SList [SAtom "unknown", SAtom "0"])
+        ]
+    , isLeft (inferType [] [p] (App (Hyp 1) (Hyp 0)))
+    , isLeft (inferType [] [FImp p q, p] (App (Hyp 0) (Hyp 2)))
+    , isLeft (inferType [] [p] (App (Hyp 0) (Hyp 0)))
+    , isLeft (inferType [] [FImp p q, q] (App (Hyp 0) (Hyp 1)))
+    , inferType [] [FFalse] (Abort q (Hyp 0)) == Right (q, Set.singleton 0)
+    , isLeft (inferType [] [p] (Abort q (Hyp 0)))
+    ]
+  where
+    p = FAtom (AtomId "P")
+    q = FAtom (AtomId "Q")
+    isLeft (Left _) = True
+    isLeft _ = False
 
 -- | Closed registration (obligation 5): a backend absent from the registry is
 -- rejected with 'UnregisteredBackend' before any certificate work.
@@ -307,7 +522,15 @@ strictSpecProps =
   , ("ND out-of-range index rejected", quickCheckResult prop_outOfRangeRejected)
   , ("ND local is not a dependency", quickCheckResult prop_localNotDependency)
   , ("encodeND normalization fidelity", quickCheckResult prop_normalizationFidelity)
+  , ("atom-key exact golden vectors", quickCheckResult prop_atomKeyGoldenVectors)
+  , ("atom-key malformed inputs rejected", quickCheckResult prop_atomKeyMalformedRejected)
+  , ("atom-key generated round-trip", quickCheckResult prop_atomKeyRoundTrip)
   , ("ND wire tag round-trip", quickCheckResult prop_tagRoundTrip)
+  , ("ND literal wire keyword vectors", quickCheckResult prop_wireKeywordGoldenVectors)
+  , ("ND unknown tags universally rejected", quickCheckResult prop_unknownTagRejected)
+  , ("ND malformed indices universally rejected", quickCheckResult prop_malformedIndexRejected)
+  , ("ND unbounded canonical index reaches replay", quickCheckResult prop_unboundedIndexDecodedThenRejected)
+  , ("ND closed decoder/infer matrix", quickCheckResult prop_closedDecoderMatrix)
   , ("strict unregistered backend rejected", quickCheckResult prop_unregisteredRejected)
   , ("strictCheck seals a judgment", quickCheckResult prop_strictCheckSeals)
   ]

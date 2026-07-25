@@ -212,8 +212,8 @@ enumerated ([spec §1.1](docs/spec.md)). Two pieces are implemented and frozen:
   have a registered backend accept), and no backend formula or proof term ever
   re-enters the source language — the *factivity firewall*. The ND adapter
   checks intuitionistic natural deduction over `→`/`⊥` with de Bruijn
-  certificates, encoding each source proposition as an opaque atom via
-  `show . nf` (spec §5.1).
+  certificates, encoding each source proposition as an opaque atom via the
+  shared UTF-8 framed atom key of `nf p` (`encodeAtomKey . nf`, spec §5.1).
 
 The rest of the Haskell is deliberately not trusted yet: **`Lara.AST`** is the
 datatype skeleton for the whole language (spec §2–§8) with **no checking** —
@@ -232,15 +232,18 @@ checker, never a substitute for the theorems (spec §9).
 M1 complete: the `lara-core@0.1` language is frozen in
 [`docs/spec.md`](docs/spec.md). **Mechanized in Lean 4** (`lean/`, `sorry`-free,
 standard axiom trio): results 2, 4, 5, 8, 10, and 11; the leaf half of result 3;
-the relational/uniqueness half of result 1; the source-to-compiled bridge for
-result 6 modulo the general executable edge decider; and the §8.1
+the exact executable support/positional-attack/program-checker portion of
+result 1; the source-to-compiled bridge for result 6 modulo the general
+executable edge decider (#17); and the §8.1
 strict-reachable/`wf(Pi)` validator underlying result 7. **Data-only skeleton:**
 the full claim-support AST, worked ARA-Demo examples, and rejection-class
 negatives. **Non-shipping seed:** the LP adapter that checks explicit LP
-derivations (M0 measured no corpus demand; spec §5.2). **Still to come (Haskell
-checker):** executable support/attack checking, Dung-framework compilation and
-grounded labelling (`Lara.Check`, `Lara.Compile`, `Lara.Grounded`), the leaf
-interface and ARA→core mapping, and the Python elaborator. See the roadmap in
+derivations (M0 measured no corpus demand; spec §5.2). **Still to come
+(production Haskell M3 checker):** executable support/attack checking,
+Dung-framework compilation and grounded labelling (`Lara.Check`, `Lara.Compile`,
+`Lara.Grounded`), the leaf interface and ARA→core mapping, and the Python
+elaborator. The Haskell changes here are the strict-adapter serializer and
+conformance suite, not an M3 checker implementation. See the roadmap in
 [`docs/engineering-plan.md`](docs/engineering-plan.md).
 
 ## License

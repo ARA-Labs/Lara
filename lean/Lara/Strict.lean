@@ -1,175 +1,616 @@
 /-
-Mechanized abstract strict-certificate backend (`Lara.Strict`). Discharges spec
-§9 **result 8** (strict-certificate soundness, Theorem 1) at the abstract level,
-and instantiates it with the mechanized ND adapter (`Lara/ND.lean`) to show the
-reference backend satisfies the abstract contract.
-
-This follows the mechanization architecture decided in the exploration tree
-(N15): the backend is a *structure* that carries its soundness obligation
-(decision doc §2 obligation 3) as a field. Theorem 1 is then the projection of
-that field — exactly the paper proof ("apply backend obligation 3"). The content
-is in *discharging* the obligation for a concrete backend, which `ndBackend`
-does using `Lara.ND.nd_sound`.
-
-Faithful to `src/Lara/Strict.hs`:
-
-* A `Backend` bundles an encoding `enc : SourceProp → Form`, a checker `check`, a
-  mathematical consequence relation `models`, and the proof that acceptance
-  implies consequence (`sound`).
-* A `StrictJudgment` is a structure whose very existence is the certificate — the
-  Lean analogue of the sealed Haskell `StrictJudgment` constructor. It carries
-  only source data plus the acceptance fact, never a backend proof term (the
-  factivity firewall, Theorem 3).
+Mechanized abstract strict-certificate backend (`Lara.Strict`).  Mathematical
+acceptance remains proposition-valued, while every backend also supplies a
+Boolean replay and proves it adequate.  Backends are indexed by the source
+canonicalizer, preventing a registry constructed for one normalization policy
+from being used by another.
 -/
 
 import Lara.Prop
 import Lara.ND
 import Lara.Certificate
+import Std.Data.String.ToNat
+import Init.Data.String.Lemmas.Basic
 
 namespace Lara.Strict
 
-/-- Source propositions at this layer are the mechanized `Lara.Atom`. The seam's
-metatheory only needs that a backend can encode them. -/
+/-- Source propositions at the strict seam. -/
 abbrev SourceProp := Lara.Atom
 
-/-- A registered backend, reduced to what the soundness metatheory needs
-(decision doc §2). `Form` is the backend's private formula type; `models Δ φ` is
-`T ; Δ ⊨_β φ` with the theory `T` folded into the relation. The `sound` field is
-obligation 3: acceptance implies consequence. -/
-structure Backend where
-  /-- backend formula type -/
-  Form   : Type
-  /-- source encoding `encode_β` -/
-  enc    : SourceProp → Form
-  /-- mathematical consequence `T ; Δ ⊨_β φ` (need not be executable) -/
+/-- A registered strict backend for one fixed source canonicalizer.  A resolved
+backend may close both `models` and `accepts`/`replay` over a fixed theory; the
+only list supplied by a caller is the encoded source-premise list. -/
+structure Backend (canon : String → String) where
+  /-- Backend-private formula type. -/
+  Form : Type
+  /-- Source encoding. -/
+  enc : SourceProp → Form
+  /-- Encoding identifies exactly canonical source identity. -/
+  enc_iff : ∀ p q, enc p = enc q ↔ Lara.equiv canon p q
+  /-- Mathematical consequence, with any selected theory closed over. -/
   models : List Form → Form → Prop
-  /-- the replay `check_β`: does this exact submitted certificate check? -/
-  check  : Lara.Support.CertRef → List Form → Form → Prop
-  /-- **obligation 3, certificate soundness:** acceptance implies consequence -/
-  sound  : ∀ κ Δ φ, check κ Δ φ → models Δ φ
+  /-- Proposition-level acceptance of the exact submitted certificate. -/
+  accepts : Lara.Support.CertRef → List Form → Form → Prop
+  /-- Executable replay of the exact submitted certificate. -/
+  replay : Lara.Support.CertRef → List Form → Form → Bool
+  /-- Replay is adequate for mathematical acceptance. -/
+  replay_iff : ∀ κ Δ φ, replay κ Δ φ = true ↔ accepts κ Δ φ
+  /-- Certificate soundness. -/
+  sound : ∀ κ Δ φ, accepts κ Δ φ → models Δ φ
 
-/-- A checked strict step against backend `B`. Its existence certifies that `B`
-accepted the encoded goal from the encoded premises. It carries only
-source-visible data plus the acceptance fact — never a backend proof term. -/
-structure StrictJudgment (B : Backend) where
+/-- A checked strict step.  Its acceptance field stays proposition-level, so
+the theorem surface speaks about mathematical acceptance rather than Boolean
+implementation details. -/
+structure StrictJudgment {canon : String → String} (B : Backend canon) where
   premises : List SourceProp
-  goal     : SourceProp
+  goal : SourceProp
   certificate : Lara.Support.CertRef
-  /-- the backend accepted the encoded step -/
-  accepted : B.check certificate (premises.map B.enc) (B.enc goal)
+  accepted : B.accepts certificate (premises.map B.enc) (B.enc goal)
 
-/-- **Theorem 1 (certified strict-step soundness).** A checked strict step is a
-semantic consequence under the backend's model: the encoded goal follows from the
-encoded premises. Nothing is claimed about the *truth* of any premise
-(non-factivity). This is the projection of obligation 3 through the judgment. -/
-theorem strict_step_sound {B : Backend} (j : StrictJudgment B) :
+namespace StrictJudgment
+
+/-- Construct a proposition-level judgment from raw data accepted by executable
+replay.  This is the intended boundary constructor for checker output. -/
+def ofReplay {canon : String → String} {B : Backend canon}
+    (premises : List SourceProp) (goal : SourceProp)
+    (certificate : Lara.Support.CertRef)
+    (h : B.replay certificate (premises.map B.enc) (B.enc goal) = true) :
+    StrictJudgment B where
+  premises := premises
+  goal := goal
+  certificate := certificate
+  accepted := (B.replay_iff _ _ _).mp h
+
+end StrictJudgment
+
+/-- **Theorem 1 (certified strict-step soundness).** -/
+theorem strict_step_sound {canon : String → String} {B : Backend canon}
+    (j : StrictJudgment B) :
     B.models (j.premises.map B.enc) (B.enc j.goal) :=
   B.sound _ _ _ j.accepted
 
-/-! ### The reference ND backend satisfies the abstract contract
+/-! ### Exact source-atom wire encoding
 
-We instantiate `Backend` with the mechanized natural-deduction adapter of
-`Lara/ND.lean`. Its `check κ Δ φ` decodes the exact submitted reference `κ`
-as a certificate `e` and requires `Δ ⊢ e : φ`; its `models` is the Boolean
-semantics of the decision doc, and `sound` is discharged by
-`Lara.ND.nd_sound`. This shows result 10's soundness lemma is exactly the
-obligation-3 field the abstract Theorem 1 consumes. -/
+Every field is a canonical UTF-8 byte-length frame, `LEN:PAYLOAD`.  The framed
+token stream uses distinct `A`/`N`/`S`/`C`/`L` tags; `L` is followed by a
+canonical child count and then the recursively encoded children.
+-/
 
-/-- The ND backend's mathematical consequence: every valuation satisfying all of
-`Δ` satisfies `φ` (decision doc §4.1: `T ; Δ ⊨_ND φ`). -/
+/-- Closed vocabulary for the framed source-atom key. -/
+inductive FrameTag where
+  | atom | num | str | con | len
+deriving DecidableEq, Repr
+
+/-- The single source of truth for frame-tag wire spellings. -/
+def FrameTag.toString : FrameTag → String
+  | .atom => "A"
+  | .num => "N"
+  | .str => "S"
+  | .con => "C"
+  | .len => "L"
+
+def FrameTag.all : List FrameTag := [.atom, .num, .str, .con, .len]
+
+/-- Parse a frame tag from the closed vocabulary. -/
+def FrameTag.parse (s : String) : Option FrameTag :=
+  FrameTag.all.find? (fun tag => tag.toString = s)
+
+@[simp] theorem FrameTag.parse_toString (tag : FrameTag) :
+    FrameTag.parse tag.toString = some tag := by
+  cases tag <;> rfl
+
+def charByteSize : List Char → Nat
+  | [] => 0
+  | c :: cs => c.utf8Size + charByteSize cs
+
+theorem charByteSize_toList (s : String) :
+    charByteSize s.toList = s.utf8ByteSize := by
+  obtain ⟨cs, rfl⟩ := String.exists_eq_ofList s
+  induction cs with
+  | nil => simp [charByteSize]
+  | cons c cs ih =>
+    simp only [String.toList_ofList] at ih
+    simp [charByteSize, String.ofList_cons, String.utf8ByteSize_append, ih]
+
+def splitColon : List Char → Option (List Char × List Char)
+  | [] => none
+  | c :: rest =>
+      if c = ':' then some ([], rest)
+      else do
+        let (head, tail) ← splitColon rest
+        some (c :: head, tail)
+
+theorem splitColon_append {head tail : List Char} (h : ':' ∉ head) :
+    splitColon (head ++ ':' :: tail) = some (head, tail) := by
+  induction head with
+  | nil => simp [splitColon]
+  | cons c cs ih =>
+    simp only [List.mem_cons, not_or] at h
+    have hc : c ≠ ':' := fun hc => h.1 hc.symm
+    simp [splitColon, hc, ih h.2]
+
+def takeUtf8 : Nat → List Char → Option (List Char × List Char)
+  | 0, cs => some ([], cs)
+  | _ + 1, [] => none
+  | n + 1, c :: cs =>
+      if c.utf8Size ≤ n + 1 then do
+        let (head, tail) ← takeUtf8 (n + 1 - c.utf8Size) cs
+        some (c :: head, tail)
+      else none
+
+theorem takeUtf8_append (head tail : List Char) :
+    takeUtf8 (charByteSize head) (head ++ tail) = some (head, tail) := by
+  induction head with
+  | nil => simp [charByteSize, takeUtf8]
+  | cons c cs ih =>
+    have hc : 0 < c.utf8Size := c.utf8Size_pos
+    have hle : c.utf8Size ≤ c.utf8Size + charByteSize cs := Nat.le_add_right _ _
+    change takeUtf8 (c.utf8Size + charByteSize cs) (c :: (cs ++ tail)) =
+      some (c :: cs, tail)
+    rw [show c.utf8Size + charByteSize cs =
+      (c.utf8Size + charByteSize cs - 1) + 1 by omega]
+    simp only [takeUtf8]
+    rw [if_pos (by omega)]
+    rw [show c.utf8Size + charByteSize cs - 1 + 1 - c.utf8Size =
+      charByteSize cs by omega, ih]
+    rfl
+
+def frame (s : String) : String :=
+  Nat.repr s.utf8ByteSize ++ ":" ++ s
+
+def parseFrame (cs : List Char) : Option (String × List Char) := do
+  let (digits, rest) ← splitColon cs
+  let ds := String.ofList digits
+  let n ← ds.toNat?
+  if ds = Nat.repr n then
+    let (payload, tail) ← takeUtf8 n rest
+    some (String.ofList payload, tail)
+  else none
+
+theorem parseFrame_frame (s : String) (tail : List Char) :
+    parseFrame ((frame s).toList ++ tail) = some (s, tail) := by
+  rw [show (frame s).toList ++ tail =
+    (Nat.repr s.utf8ByteSize).toList ++ ':' :: (s.toList ++ tail) by
+      simp [frame, String.toList_append]]
+  simp only [parseFrame]
+  rw [splitColon_append (by
+    rw [Nat.toList_repr]
+    intro h
+    have hd := Nat.isDigit_of_mem_toDigits (b := 10) (n := s.utf8ByteSize)
+      (by decide) (by decide) h
+    simp at hd)]
+  simp only [String.ofList_toList, Nat.toNat?_repr, Option.bind_eq_bind,
+    Option.bind_some]
+  simp only [if_true]
+  rw [← charByteSize_toList, takeUtf8_append]
+  simp
+
+def renderFrames : List String → String
+  | [] => ""
+  | s :: ss => frame s ++ renderFrames ss
+
+def decodeFramesAux : Nat → List Char → Option (List String)
+  | 0, [] => some []
+  | 0, _ :: _ => none
+  | _ + 1, [] => some []
+  | fuel + 1, cs@(_ :: _) => do
+      let (s, rest) ← parseFrame cs
+      some (s :: (← decodeFramesAux fuel rest))
+
+def decodeFrames (s : String) : Option (List String) :=
+  decodeFramesAux (s.toList.length + 1) s.toList
+
+theorem decodeFramesAux_render (xs : List String) (fuel : Nat)
+    (h : xs.length < fuel) :
+    decodeFramesAux fuel (renderFrames xs).toList = some xs := by
+  induction xs generalizing fuel with
+  | nil =>
+    cases fuel <;> simp_all [decodeFramesAux, renderFrames]
+  | cons s ss ih =>
+    cases fuel with
+    | zero => simp at h
+    | succ fuel =>
+      have hf : ss.length < fuel := by simpa using Nat.lt_of_succ_lt_succ h
+      simp only [renderFrames, String.toList_append]
+      have hne : (frame s).toList ++ (renderFrames ss).toList ≠ [] := by
+        simp [frame, String.toList_append]
+      obtain ⟨c, rest, heq⟩ := List.exists_cons_of_ne_nil hne
+      have hp := parseFrame_frame s (renderFrames ss).toList
+      rw [heq] at hp ⊢
+      simp [decodeFramesAux, hp, ih fuel hf]
+
+theorem decodeFrames_render (xs : List String) :
+    decodeFrames (renderFrames xs) = some xs := by
+  apply decodeFramesAux_render
+  induction xs with
+  | nil => simp
+  | cons s ss ih =>
+    simp only [renderFrames, String.toList_append, List.length_append]
+    have hcolon : 0 < (frame s).toList.length := by
+      simp [frame, String.toList_append]
+      have hs : 0 < s.toList.length + 1 := Nat.zero_lt_succ _
+      omega
+    simp only [List.length_cons]
+    omega
+
+theorem frame_length_pos (s : String) : 0 < (frame s).toList.length := by
+  simp [frame, String.toList_append]
+  have h : 0 < s.toList.length + 1 := Nat.zero_lt_succ _
+  omega
+
+mutual
+  def sourceTermsToList : Lara.Terms → List Lara.Term
+    | .nil => []
+    | .cons t ts => t :: sourceTermsToList ts
+
+  def sourceTermsOfList : List Lara.Term → Lara.Terms
+    | [] => .nil
+    | t :: ts => .cons t (sourceTermsOfList ts)
+end
+
+@[simp] theorem sourceTermsOfList_toList (ts : Lara.Terms) :
+    sourceTermsOfList (sourceTermsToList ts) = ts := by
+  match ts with
+  | .nil => rfl
+  | .cons t ts =>
+      simp [sourceTermsToList, sourceTermsOfList, sourceTermsOfList_toList ts]
+
+mutual
+  def atomTermDepth : Lara.Term → Nat
+    | .num _ | .str _ => 1
+    | .con _ ts => atomTermsDepth ts + 1
+
+  def atomTermsDepth : Lara.Terms → Nat
+    | .nil => 0
+    | .cons t ts => max (atomTermDepth t) (atomTermsDepth ts)
+end
+
+mutual
+  def encodeTermKey : Lara.Term → String
+    | .num n => renderFrames [FrameTag.num.toString, n]
+    | .str s => renderFrames [FrameTag.str.toString, s]
+    | .con k ts =>
+        renderFrames
+          ([FrameTag.con.toString, k, FrameTag.len.toString,
+              Nat.repr (sourceTermsToList ts).length] ++
+            encodeTermKeys ts)
+
+  def encodeTermKeys : Lara.Terms → List String
+    | .nil => []
+    | .cons t ts => encodeTermKey t :: encodeTermKeys ts
+end
+
+@[simp] theorem encodeTermKeys_eq_map (ts : Lara.Terms) :
+    encodeTermKeys ts = (sourceTermsToList ts).map encodeTermKey := by
+  match ts with
+  | .nil => rfl
+  | .cons t ts =>
+      simp [encodeTermKeys, sourceTermsToList, encodeTermKeys_eq_map ts]
+
+def encodeAtomKey : Lara.Atom → String
+  | .atom p ts =>
+      renderFrames
+        ([FrameTag.atom.toString, p, FrameTag.len.toString,
+            Nat.repr (sourceTermsToList ts).length] ++
+          encodeTermKeys ts)
+
+def decodeTermKeyAux : Nat → String → Option Lara.Term
+  | 0, _ => none
+  | fuel + 1, key => do
+      let fields ← decodeFrames key
+      match fields with
+      | [tag, payload] =>
+          match FrameTag.parse tag with
+          | some .num => some (.num payload)
+          | some .str => some (.str payload)
+          | _ => none
+      | conTag :: k :: lenTag :: count :: children =>
+          match FrameTag.parse conTag, FrameTag.parse lenTag with
+          | some .con, some .len =>
+              let n ← count.toNat?
+              if count = Nat.repr n then pure () else none
+              if children.length = n then
+                return .con k
+                  (sourceTermsOfList (← children.mapM (decodeTermKeyAux fuel)))
+              else none
+          | _, _ => none
+      | _ => none
+
+def decodeAtomKey (key : String) : Option Lara.Atom := do
+  let fields ← decodeFrames key
+  match fields with
+  | atomTag :: p :: lenTag :: count :: children =>
+      match FrameTag.parse atomTag, FrameTag.parse lenTag with
+      | some .atom, some .len =>
+          let n ← count.toNat?
+          if count = Nat.repr n then pure () else none
+          if children.length = n then
+            return .atom p
+              (sourceTermsOfList (← children.mapM
+                (decodeTermKeyAux (key.toList.length + 1))))
+          else none
+      | _, _ => none
+  | _ => none
+
+mutual
+  theorem decodeTermKeyAux_encode (t : Lara.Term) (fuel : Nat)
+      (h : atomTermDepth t < fuel) :
+      decodeTermKeyAux fuel (encodeTermKey t) = some t := by
+    cases t with
+    | num n =>
+      cases fuel with
+      | zero => simp [atomTermDepth] at h
+      | succ fuel =>
+        simp [decodeTermKeyAux, encodeTermKey, decodeFrames_render]
+    | str s =>
+      cases fuel with
+      | zero => simp [atomTermDepth] at h
+      | succ fuel =>
+        simp [decodeTermKeyAux, encodeTermKey, decodeFrames_render]
+    | con k ts =>
+      cases fuel with
+      | zero => simp [atomTermDepth] at h
+      | succ fuel =>
+        have ht : atomTermsDepth ts < fuel := by
+          simpa [atomTermDepth] using Nat.lt_of_succ_lt_succ h
+        simp [decodeTermKeyAux, encodeTermKey, decodeFrames_render,
+          Nat.toNat?_repr]
+        rw [show (decodeTermKeyAux fuel ∘ encodeTermKey) =
+          (fun t => decodeTermKeyAux fuel (encodeTermKey t)) by rfl,
+          decodeTermKeys_encode ts fuel ht]
+        simp
+
+  theorem decodeTermKeys_encode (ts : Lara.Terms) (fuel : Nat)
+      (h : atomTermsDepth ts < fuel) :
+      (sourceTermsToList ts).mapM
+          (fun t => decodeTermKeyAux fuel (encodeTermKey t)) =
+        some (sourceTermsToList ts) := by
+    cases ts with
+    | nil => rfl
+    | cons t ts =>
+      have ht : atomTermDepth t < fuel :=
+        Nat.lt_of_le_of_lt (Nat.le_max_left ..) h
+      have hts : atomTermsDepth ts < fuel :=
+        Nat.lt_of_le_of_lt (Nat.le_max_right ..) h
+      simp [sourceTermsToList, decodeTermKeyAux_encode t fuel ht,
+        decodeTermKeys_encode ts fuel hts]
+end
+
+def payloadChars : List String → Nat
+  | [] => 0
+  | s :: ss => s.toList.length + payloadChars ss
+
+theorem payloadChars_le_renderFrames (xs : List String) :
+    payloadChars xs ≤ (renderFrames xs).toList.length := by
+  induction xs with
+  | nil => simp [payloadChars, renderFrames]
+  | cons s ss ih =>
+    simp only [payloadChars, renderFrames, String.toList_append, List.length_append]
+    have hf : s.toList.length ≤ (frame s).toList.length := by
+      simp [frame, String.toList_append]
+      omega
+    omega
+
+@[simp] theorem payloadChars_append (xs ys : List String) :
+    payloadChars (xs ++ ys) = payloadChars xs + payloadChars ys := by
+  induction xs with
+  | nil => simp [payloadChars]
+  | cons x xs ih => simp [payloadChars, ih, Nat.add_assoc]
+
+mutual
+  theorem atomTermDepth_le_key_length (t : Lara.Term) :
+      atomTermDepth t ≤ (encodeTermKey t).toList.length := by
+    match t with
+    | .num n =>
+        have hp := frame_length_pos FrameTag.num.toString
+        simp [atomTermDepth, encodeTermKey, renderFrames, String.toList_append]
+        omega
+    | .str s =>
+        have hp := frame_length_pos FrameTag.str.toString
+        simp [atomTermDepth, encodeTermKey, renderFrames, String.toList_append]
+        omega
+    | .con k ts =>
+        have hts := atomTermsDepth_le_keys_length ts
+        have hrender := payloadChars_le_renderFrames
+          ([FrameTag.con.toString, k, FrameTag.len.toString,
+              Nat.repr (sourceTermsToList ts).length] ++ encodeTermKeys ts)
+        have hprefix : 0 <
+            payloadChars [FrameTag.con.toString, k, FrameTag.len.toString,
+              Nat.repr (sourceTermsToList ts).length] := by
+          simp [payloadChars, FrameTag.toString]
+          omega
+        simp only [atomTermDepth, encodeTermKey]
+        have happ := payloadChars_append
+          [FrameTag.con.toString, k, FrameTag.len.toString,
+            Nat.repr (sourceTermsToList ts).length] (encodeTermKeys ts)
+        omega
+
+  theorem atomTermsDepth_le_keys_length (ts : Lara.Terms) :
+      atomTermsDepth ts ≤ payloadChars (encodeTermKeys ts) := by
+    match ts with
+    | .nil => exact Nat.le_refl 0
+    | .cons t ts =>
+        have ht := atomTermDepth_le_key_length t
+        have hts := atomTermsDepth_le_keys_length ts
+        simp only [atomTermsDepth, encodeTermKeys, payloadChars]
+        exact Nat.max_le.mpr
+          ⟨Nat.le_add_right_of_le ht, Nat.le_add_left_of_le hts⟩
+end
+
+theorem decodeAtomKey_encodeAtomKey (a : Lara.Atom) :
+    decodeAtomKey (encodeAtomKey a) = some a := by
+  cases a with
+  | atom p ts =>
+    have hdepth : atomTermsDepth ts <
+        (encodeAtomKey (.atom p ts)).toList.length + 1 := by
+      have hle := atomTermsDepth_le_keys_length ts
+      have hr := payloadChars_le_renderFrames
+        ([FrameTag.atom.toString, p, FrameTag.len.toString,
+            Nat.repr (sourceTermsToList ts).length] ++ encodeTermKeys ts)
+      have happ := payloadChars_append
+        [FrameTag.atom.toString, p, FrameTag.len.toString,
+          Nat.repr (sourceTermsToList ts).length] (encodeTermKeys ts)
+      simp only [encodeAtomKey]
+      omega
+    simp [decodeAtomKey, encodeAtomKey, decodeFrames_render,
+      Nat.toNat?_repr]
+    have hdepth' : atomTermsDepth ts <
+        (renderFrames
+          ([FrameTag.atom.toString, p, FrameTag.len.toString,
+              Nat.repr (sourceTermsToList ts).length] ++
+            (sourceTermsToList ts).map encodeTermKey)).toList.length + 1 := by
+      simpa [encodeAtomKey, encodeTermKeys_eq_map] using hdepth
+    have hmap := decodeTermKeys_encode ts
+      ((renderFrames
+        ([FrameTag.atom.toString, p, FrameTag.len.toString,
+            Nat.repr (sourceTermsToList ts).length] ++
+          (sourceTermsToList ts).map encodeTermKey)).toList.length + 1) hdepth'
+    change ((List.mapM
+      (fun t => decodeTermKeyAux
+        ((renderFrames
+          ([FrameTag.atom.toString, p, FrameTag.len.toString,
+              Nat.repr (sourceTermsToList ts).length] ++
+            (sourceTermsToList ts).map encodeTermKey)).toList.length + 1)
+        (encodeTermKey t))
+      (sourceTermsToList ts)).bind
+        (fun xs => some (Lara.Atom.atom p (sourceTermsOfList xs)))) =
+      some (Lara.Atom.atom p ts)
+    rw [hmap]
+    simp
+
+theorem encodeAtomKey_injective : Function.Injective encodeAtomKey := by
+  intro a b h
+  have ha := decodeAtomKey_encodeAtomKey a
+  have hb := decodeAtomKey_encodeAtomKey b
+  rw [h] at ha
+  rw [ha] at hb
+  exact Option.some.inj hb
+
+def ndEnc (canon : String → String) (p : SourceProp) : Lara.ND.Formula :=
+  .atom (encodeAtomKey (Lara.nf canon p))
+
+theorem ndEnc_iff (canon : String → String) (p q : SourceProp) :
+    ndEnc canon p = ndEnc canon q ↔ Lara.equiv canon p q := by
+  simp only [ndEnc, Lara.equiv, Lara.ND.Formula.atom.injEq]
+  exact ⟨fun h => encodeAtomKey_injective h, congrArg encodeAtomKey⟩
+
+/-! ### Executable ND replay adapter -/
+
 def ndModels (Δ : List Lara.ND.Formula) (φ : Lara.ND.Formula) : Prop :=
-  ∀ v : String → Bool, (∀ ψ, ψ ∈ Δ → Lara.ND.satisfies v ψ) → Lara.ND.satisfies v φ
+  ∀ v : String → Bool,
+    (∀ ψ, ψ ∈ Δ → Lara.ND.satisfies v ψ) → Lara.ND.satisfies v φ
 
-/-- The ND backend's checker: the exact referenced certificate types the step.
-Matches the Haskell adapter's "decode + `inferType` accepts". -/
-def ndCheck (κ : Lara.Support.CertRef) (Δ : List Lara.ND.Formula)
+/-- Symbolic wire payload for the ND certificate `hyp 0`. -/
+def ndHypZero : Lara.Support.SExpr :=
+  .list [.atom "hyp", .atom "0"]
+
+/-- Acceptance means that the exact submitted symbolic certificate decodes and
+has the requested type in the submitted free context. -/
+def ndAccepts (κ : Lara.Support.CertRef) (Δ : List Lara.ND.Formula)
     (φ : Lara.ND.Formula) : Prop :=
-  ∃ e : Lara.ND.Cert,
-    κ.payload = toString (repr e) ∧ Lara.ND.HasType Δ e φ
+  ∃ e, Lara.ND.decodeCert κ.payload = some e ∧ Lara.ND.HasType Δ e φ
 
-/-- A fixed injective source encoding for the instantiation. Any injective map
-into `Formula.atom` discharges normalization fidelity; the metatheory of
-Theorem 1 does not depend on its details, so we pin the trivial predicate encoder
-(the real adapter uses `atom ∘ canonicalSerialize ∘ nf`). -/
-def ndEnc : SourceProp → Lara.ND.Formula
-  | .atom p _ => .atom p
+/-- Decode and infer the exact submitted certificate; no proof search occurs. -/
+def ndReplay (κ : Lara.Support.CertRef) (Δ : List Lara.ND.Formula)
+    (φ : Lara.ND.Formula) : Bool :=
+  match Lara.ND.decodeCert κ.payload with
+  | none => false
+  | some e =>
+      match Lara.ND.infer Δ [] e with
+      | some (conclusion, _) => conclusion == φ
+      | none => false
 
-/-- The reference ND backend as an abstract `Backend`. Its `sound` field is
-`Lara.ND.nd_sound` — result 10 feeding result 8. -/
-def ndBackend : Backend where
-  Form   := Lara.ND.Formula
-  enc    := ndEnc
+theorem ndReplay_iff (κ : Lara.Support.CertRef) (Δ : List Lara.ND.Formula)
+    (φ : Lara.ND.Formula) :
+    ndReplay κ Δ φ = true ↔ ndAccepts κ Δ φ := by
+  constructor
+  · intro h
+    simp only [ndReplay] at h
+    cases hd : Lara.ND.decodeCert κ.payload with
+    | none => simp [hd] at h
+    | some e =>
+      cases hi : Lara.ND.infer Δ [] e with
+      | none => simp [hd, hi] at h
+      | some result =>
+        obtain ⟨conclusion, deps⟩ := result
+        have hc : conclusion = φ := by simpa [hd, hi] using h
+        exact ⟨e, hd, hc ▸ (by simpa using Lara.ND.infer_sound [] e conclusion deps hi)⟩
+  · rintro ⟨e, hd, ht⟩
+    obtain ⟨deps, hi⟩ := Lara.ND.infer_complete (free := Δ) [] e φ (by simpa using ht)
+    simp [ndReplay, hd, hi]
+
+def ndBackend (canon : String → String) : Backend canon where
+  Form := Lara.ND.Formula
+  enc := ndEnc canon
+  enc_iff := ndEnc_iff canon
   models := ndModels
-  check  := ndCheck
-  sound  := by
-    intro κ Δ φ hchk
-    obtain ⟨e, _, hty⟩ := hchk
-    intro v hΔ
-    exact Lara.ND.nd_sound hty v hΔ
+  accepts := ndAccepts
+  replay := ndReplay
+  replay_iff := ndReplay_iff
+  sound := by
+    rintro κ Δ φ ⟨e, _, ht⟩
+    exact Lara.ND.nd_sound ht
 
-/-- Sanity: Theorem 1 specialized to the ND backend gives the Boolean-consequence
-guarantee for any checked ND step, with no extra hypotheses. -/
-theorem nd_strict_step_sound (j : StrictJudgment ndBackend) :
-    ndModels (j.premises.map ndBackend.enc) (ndBackend.enc j.goal) :=
+/-- Resolve a registered digest by closing replay and consequence over that
+digest's fixed theory entries, after the caller-supplied premise encodings. -/
+def ndBackendWithTheory (canon : String → String) (theory : List SourceProp) :
+    Backend canon where
+  Form := Lara.ND.Formula
+  enc := ndEnc canon
+  enc_iff := ndEnc_iff canon
+  models := fun Δ φ => ndModels (Δ ++ theory.map (ndEnc canon)) φ
+  accepts := fun κ Δ φ => ndAccepts κ (Δ ++ theory.map (ndEnc canon)) φ
+  replay := fun κ Δ φ => ndReplay κ (Δ ++ theory.map (ndEnc canon)) φ
+  replay_iff := by
+    intro κ Δ φ
+    exact ndReplay_iff κ (Δ ++ theory.map (ndEnc canon)) φ
+  sound := by
+    rintro κ Δ φ ⟨e, _, ht⟩
+    exact Lara.ND.nd_sound ht
+
+/-- Theorem 1 specialized to the executable ND backend. -/
+theorem nd_strict_step_sound (j : StrictJudgment (ndBackend id)) :
+    ndModels (j.premises.map (ndBackend id).enc)
+      ((ndBackend id).enc j.goal) :=
   strict_step_sound j
 
-/-! ### Theorem 3 (source non-factivity — the factivity firewall)
+/-! ### Theorem 3 (source non-factivity — the factivity firewall) -/
 
-Discharges spec §9 **result 2** at the abstract level (C03). The paper proof
-(`ara/evidence/proofs/nonfactivity_and_defeat.md`, `strict-backend-decision.md`
-§5) is *syntactic confinement*: the source calculus has no truth judgment and no
-rule eliminating support into one, so by inversion backend acceptance produces
-only a *relative* support fact — never absolute truth. Even a fully factive
-backend cannot be used to eliminate source support into `⊢ p true`.
-
-In this abstract model the confinement is structural: a `StrictJudgment B`
-carries only `premises`, `goal`, and the acceptance fact, and its *only*
-soundness projection is `strict_step_sound`, which yields consequence **relative
-to the premises** (`B.models (premises.map enc) (enc goal)`). Non-factivity is
-the statement that this cannot be strengthened to premise-free truth
-(`B.models [] (enc goal)`). We prove the negative concretely: no such projection
-exists uniformly across backends, witnessed by the reference ND backend. -/
-
-/-- The witness proposition: the Phase-0 opaque atom `p` (nullary). -/
 def nonfactiveAtom : SourceProp := .atom "p" .nil
 
-/-- A concrete checked strict step against the reference ND backend: from the
-single premise `p`, the ND checker accepts the goal `p` (the identity/hypothesis
-step, `⊢ hyp 0 : p`). Its existence certifies backend acceptance — nothing more. -/
-def nonfactiveJudgment : StrictJudgment ndBackend where
-  premises := [nonfactiveAtom]
-  goal     := nonfactiveAtom
-  certificate := ⟨toString (repr (Lara.ND.Cert.hyp 0))⟩
-  accepted := ⟨.hyp 0, rfl, .hyp rfl⟩
+/-- The accepted symbolic ND identity step `p ⊢ p`, constructed through the
+Boolean-to-proposition replay bridge. -/
+def nonfactiveJudgment : StrictJudgment (ndBackend id) :=
+  StrictJudgment.ofReplay [nonfactiveAtom] nonfactiveAtom ⟨ndHypZero⟩ (by
+    apply (ndReplay_iff _ _ _).mpr
+    exact ⟨.hyp 0, by
+      have hz : Lara.ND.decodeNat "0" = some 0 := by
+        change Lara.ND.decodeNat (Nat.repr 0) = some 0
+        exact Lara.ND.decodeNat_repr 0
+      simp [ndHypZero, Lara.ND.decodeCert, Lara.ND.Tag.parse, hz],
+      .hyp rfl⟩)
 
-/-- **The firewall bites.** The goal of an *accepted* strict step need not be
-semantically valid: the ND backend accepts `p ⊢ p`, yet `p` is false under the
-all-false valuation, so `⊨_ND p` fails. Acceptance confers relative support, not
-absolute truth. -/
+/-- The accepted goal need not be valid without its premise. -/
 theorem nd_nonfactive_witness :
-    ¬ ndModels [] (ndBackend.enc nonfactiveJudgment.goal) := by
+    ¬ ndModels [] ((ndBackend id).enc nonfactiveJudgment.goal) := by
   intro h
-  have hp : Lara.ND.satisfies (fun _ => false) (Lara.ND.Formula.atom "p") :=
+  have hp : Lara.ND.satisfies (fun _ : String => false)
+      ((ndBackend id).enc nonfactiveJudgment.goal) :=
     h (fun _ => false) (fun ψ hψ => nomatch hψ)
-  simp only [Lara.ND.satisfies] at hp
-  exact absurd hp (by decide)
+  exact Bool.noConfusion hp
 
-/-- **Theorem 3 (non-factivity).** There is no uniform way to eliminate a checked
-strict step into a *premise-free* truth judgment about its goal — no map from
-`StrictJudgment B` to `B.models [] (B.enc goal)` for every backend `B`. This is
-the factivity firewall: backend acceptance never yields absolute truth. Proved by
-the reference ND witness, so it holds even against a factive backend. -/
+/-- There is no uniform premise-free truth projection from checked strict
+steps, even when quantified over canonicalizers and backends. -/
 theorem no_truth_projection :
-    ¬ ∀ (B : Backend) (j : StrictJudgment B), B.models [] (B.enc j.goal) :=
-  fun h => nd_nonfactive_witness (h ndBackend nonfactiveJudgment)
+    ¬ ∀ (canon : String → String) (B : Backend canon)
+      (j : StrictJudgment B), B.models [] (B.enc j.goal) :=
+  fun h => nd_nonfactive_witness (h id (ndBackend id) nonfactiveJudgment)
 
-/-- The two halves side by side for the ND witness: the soundness projection gives
-consequence **relative to the premises** (`strict_step_sound`), and that is the
-*most* an accepted step yields — it cannot be strengthened to premise-free truth. -/
+/-- Relative soundness and non-factivity side by side. -/
 theorem nd_relative_not_absolute :
-    ndModels (nonfactiveJudgment.premises.map ndBackend.enc)
-        (ndBackend.enc nonfactiveJudgment.goal)
-      ∧ ¬ ndModels [] (ndBackend.enc nonfactiveJudgment.goal) :=
+    ndModels (nonfactiveJudgment.premises.map (ndBackend id).enc)
+        ((ndBackend id).enc nonfactiveJudgment.goal)
+      ∧ ¬ ndModels [] ((ndBackend id).enc nonfactiveJudgment.goal) :=
   ⟨strict_step_sound nonfactiveJudgment, nd_nonfactive_witness⟩
 
 end Lara.Strict

@@ -25,6 +25,7 @@ Instead, per the project's own decision, the empirical signal that grounds each 
 | File | Source | Claims | Description |
 |------|--------|--------|-------------|
 | [results/prop_layer.md](results/prop_layer.md) | `cabal build`/`cabal test` on `Lara.Prop` | C01 | Build + property-suite run record for carve-out layer 1 |
+| [results/executable_nd_adapter.md](results/executable_nd_adapter.md) | Lean/Haskell ND adapter gates | C03, C05 | Exact replay adequacy, proved Atom codec inverse, shared golden vectors, and full gate results |
 
 ## Proofs
 | File | Source | Claims | Description |

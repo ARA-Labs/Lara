@@ -101,9 +101,9 @@ observations:
     context: "Technical evaluation of PR #10 review feedback during the lock-pass hardening."
     potential_type: constraint
     bound_to: [N34]
-    promoted: false
-    promoted_to: null
-    crystallized_via: null
+    promoted: true
+    promoted_to: [N48]
+    crystallized_via: "Canon-indexed Backend.replay/replay_iff and certOkBOf_iff"
     stale: true
   - id: O07
     timestamp: "2026-07-22T13:42"
@@ -118,7 +118,7 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
-    stale: false
+    stale: true
   - id: O08
     timestamp: "2026-07-22T13:59"
     provenance: ai-suggested
@@ -133,7 +133,7 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
-    stale: false
+    stale: true
   - id: O09
     timestamp: "2026-07-24T08:14"
     provenance: ai-suggested
@@ -148,7 +148,7 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
-    stale: false
+    stale: true
   - id: O10
     timestamp: "2026-07-24T08:14"
     provenance: ai-suggested
@@ -163,7 +163,7 @@ observations:
     promoted: false
     promoted_to: null
     crystallized_via: null
-    stale: false
+    stale: true
   - id: O11
     timestamp: "2026-07-24T08:48"
     provenance: user
