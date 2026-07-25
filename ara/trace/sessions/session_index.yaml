@@ -57,8 +57,8 @@ sessions:
     open_threads: 2
   - id: "2026-07-25_001"
     date: "2026-07-25"
-    summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound) crystallized, §11 addendum + novelty row (d192047), PR #22 merged. Follow-up commit-path audit found five write-up-vs-code discrepancies → C19 crystallized, §11.5; PR #22's squash stranded that work, rebased + nitpicked onto PR #23."
-    turn_count: 5
-    events_count: 9
-    claims_touched: [C18, C19]
+    summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound), §11 addendum + novelty row (d192047), PR #22 merged. Commit-path audit found five write-up-vs-code discrepancies → C19 + §11.5, rebased onto PR #23. Then C20 + §11.6: rit's formal verification is node-level only; the weakest-link roll-up is a conditional guarantee over an untrusted (proposer-declared) edge set — missing-edge laundering."
+    turn_count: 7
+    events_count: 12
+    claims_touched: [C18, C19, C20]
     open_threads: 5

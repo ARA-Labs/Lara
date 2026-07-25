@@ -230,3 +230,26 @@ observations:
     promoted_to: "logic/claims.md:C19"
     crystallized_via: "empirical-resolution + artifact-commitment"
     stale: false
+  - id: O14
+    timestamp: "2026-07-25T13:40"
+    provenance: user-revised
+    content: >
+      Sharpening of the §11.5 audit into what rit's "formal verification" means: it verifies
+      NODES, not the GRAPH. The weakest-link/status roll-up is arithmetically sound but is a
+      CONDITIONAL guarantee over an untrusted edge set (edges are proposer-declared, not read
+      from proof terms). Failure mode is asymmetric: a spurious edge only over-penalizes, but an
+      OMITTED real edge launders a claim resting on a weak/refuted fact into a falsely high grade,
+      undetectable because the true dependency is never derived. Node-level verification does not
+      transfer to the composed artifact. Division of labor with lara: nobody verifies NL->structure
+      or the edges (irreducible, Hume's fork), but the propagation OVER a declared structure is the
+      tractable target — rit leaves it ad hoc, lara proves it (grounded-labelling soundness).
+    context: >
+      User asked "what is the meaning of their formal verification if the roll-up runs over a DAG
+      whose edges it never verifies", affirmed the answer ("this summary is very good, did you
+      write it down?"), prompting persistence into docs/comparison-rit-lara.md §11.6 + claim C20.
+    potential_type: claim
+    bound_to: [N47]
+    promoted: true
+    promoted_to: "logic/claims.md:C20"
+    crystallized_via: "verbal-affirmation + artifact-commitment"
+    stale: false

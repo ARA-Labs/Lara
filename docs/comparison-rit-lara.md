@@ -403,3 +403,40 @@ kernel-checked single-arithmetic-fact proofs with re-extracted numeric leaves, p
 the gate. This *strengthens* §11.3: the weakest-link roll-up runs over a DAG whose edges `rit`
 never verifies, and the K-tier that would shrink its TCB is not wired in. The shadow-argumentation
 reading is not just "unproven semantics" — much of the machinery is off the commit path entirely.
+
+### 11.6 What, then, does `rit`'s "formal verification" mean?
+
+Given §11.5, the phrase means something precise and much smaller than it sounds: **`rit` formally
+verifies *nodes*, never the *graph* that composes them.** The formal guarantee is real but local —
+a set of independently kernel-checked, hash-pinned atomic facts, plus the arithmetic immediately
+over each one. It is not "this research artifact has been verified."
+
+- **What one certificate says.** "This number was extracted from these exact bytes (sha256 + regex
+  re-derivation), and this arithmetic relation over it holds (kernel-checked)." Genuine
+  tamper-evidence on one quantity plus a genuine arithmetic fact — nothing fake survives at this
+  level.
+- **What the roll-up is.** The weakest-link grade and AND/OR status propagation are
+  *arithmetically faithful* — the code does what it says over whatever graph it is handed. But that
+  graph's edges are the agent's **declared** `claim_deps`, not read from the proof terms
+  (`used_constants` is a stub, §11.5#2). So the roll-up is a **conditional guarantee with an
+  unchecked antecedent**: "*if* these are the real dependencies, *then* the weakest link in the cone
+  is grade L1." The antecedent is never verified.
+- **The failure mode: missing-edge laundering.** A *spurious* extra edge is harmless
+  (over-conservative). An *omitted* real edge is not: a claim that actually rests on a weak or
+  refuted fact, but whose declared deps omit that edge, receives a falsely high grade, and `rit`
+  cannot catch it — it never derives the true dependency from the proof. The roll-up's one job is to
+  be conservative, and the single case it cannot see is the one that defeats conservatism.
+- **Where the overclaim lives.** Not in `grade.py` (honestly labelled a conservative heuristic, no
+  theorem asserted) — in the README's "claim ↔ claim links = theorem dependencies," which presents
+  agent-declared edges as kernel-derived facts. The verified bricks are shown inside a blueprint the
+  untrusted party drew.
+
+**Division of labor with `lara` (stated precisely).** *Nobody* can verify the NL→structure
+faithfulness — that "faster" means `2875 < 3225`, or that these are the right edges (Hume's fork;
+C18, C08). That trust is irreducible for both projects. The tractable question is narrower: *given*
+a declared structure, is the **propagation over it** proven sound? `rit`'s is not — the roll-up is
+ad hoc code over an untrusted edge set. `lara`'s is — compilation to a Dung framework with a
+grounded-labelling soundness theorem (result 6/7). `lara` does not verify the edges either; it
+verifies the layer `rit` currently leaves as untrusted code (how status flows across the graph),
+while both still rest on the same unverifiable leaf/edge trust at the bottom. That is the exact
+seam, and why the two are complementary rather than redundant.

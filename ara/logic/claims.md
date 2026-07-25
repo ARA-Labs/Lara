@@ -431,3 +431,31 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [docs/comparison-rit-lara.md §11.5 (commit-path audit, commit ba6c45e); trace N47]
 - **Dependencies**: [C18]
 - **Tags**: related-work, rit, verification-method, spec-vs-code, trust-architecture
+
+## C20: Verified-node / declared-edge attestation graphs launder weak claims through missing dependency edges
+- **Statement**: When an attestation system kernel-checks individual claim nodes but takes the
+  dependency edges between them from the untrusted proposer's declaration (rather than deriving
+  them from the proof terms), its weakest-link / status roll-up becomes a conditional guarantee
+  whose antecedent — that the declared edge set is the true dependency set — is never verified.
+  The roll-up stays arithmetically sound over the given graph, so a *spurious* edge only over-
+  penalizes; but an *omitted* real edge silently upgrades a claim that rests on a weak or refuted
+  fact to a falsely high grade, and the system cannot detect it because it never reads the true
+  dependency. Node-level formal verification therefore does not transfer to the composed artifact:
+  the aggregate verdict is an unverified composition of verified parts.
+- **Conditions**: Holds for kernel-attestation verifiers whose inter-claim edges are proposer-
+  declared and whose leaf/relation facts are individually checked — verified against rit's shipping
+  code 2026-07-25 (`declared_claim_deps` in `push.py`; `used_constants` a `return []` stub;
+  `derive.grade`/`gate.grade` roll-up over that declared cone). Does not apply to systems that read
+  dependencies from the proof term (Lean `getUsedConstants`, or a single-environment check where a
+  proof must actually consume another's theorem) — there the edge set is kernel-derived, and this
+  laundering channel closes.
+- **Sources**: ["declared edges ← ../rit/src/rit/action/push.py «u = USES.uses(repo.proofs / f\"{thm}.lean\", declared_claim_deps=deps)» (edges = the deps argument, not read from the term) [result]", "used_constants stub ← ../rit/src/rit/formal/uses.py «def used_constants(lean_path): … return []» [result]", "roll-up over declared cone ← ../rit/src/rit/derive/__init__.py «grade(): … tiers = [by_label[l]... for l in claim.get(\"grounding_deps\", [])] … floor = min(...)» + gate/grade.py grade_block walks b.references [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: Exhibiting, in rit's shipping code, a path by which an omitted
+  claim→claim dependency edge is detected at the commit gate — e.g. `admit.gate` deriving the
+  true dependency cone from the proof terms and rejecting a grade computed over an incomplete
+  declared cone. If the gate reads real edges, the laundering channel this claim names does not exist.
+- **Proof**: [docs/comparison-rit-lara.md §11.6 (conditional-roll-up + missing-edge analysis); trace N47]
+- **Dependencies**: [C19]
+- **Tags**: rit, verification-method, trust-architecture, composition, roll-up

@@ -105,3 +105,15 @@ entries:
       - "Discovered PR #22's squash (29c7570) captured only d192047+5307671; ba6c45e (§11.5) + 3692817 (C19 capture) were stranded on the old branch. Recovered by cherry-picking both onto a fresh main-based branch — clean apply because main already holds the squashed base content."
       - "Nitpick was a doc-internal-consistency fix: §4 asserted rit's K-tier as fact, which §11.5 #3 refutes. Chose forward-pointers over deleting the K-tier framing (K-tier is real as rit's design, just unwired) — keeps the dual-strategy narrative while flagging the shipping reality."
       - "Did NOT touch C19 or any logic/ entry — its content already reflects the finding; this turn only moved it to a landable PR."
+  - turn: "2026-07-25_001#6"
+    notes:
+      - "Staged O14 and crystallized same-turn to C20 via verbal-affirmation ('this summary is very good, did you write it down?') + artifact-commitment (§11.6 + C20 written). Both signals present, matching the C18/C19 precedent."
+      - "C20 kept distinct from C19 (depends on it): C19 = 'guarantee is the gate's fixed point' (general); C20 = the specific mechanism/failure mode by which node-level verification fails to compose (missing-edge laundering). C20 is the falsifiable sharpening C19's Falsification did not cover."
+      - "Provenance user-revised: the framing was mine but the user's affirmation + 'did you write it down?' is a first-person adoption; empirical-resolution/artifact-commitment alone would not upgrade, the affirmation does."
+      - "C20 Falsification is asymmetric-edge-specific (a gate path that derives true edges from proof terms), not a re-run of the C19 gate — kept it a real-world/system-behavior disproof per the schema."
+      - "Did NOT promote O12: this turn sharpened the lara-side division of labor (proven propagation) but still no code/milestone depends on the rit<->lara integration; O12 stays staged."
+  - turn: "2026-07-25_001#7"
+    notes:
+      - "Packaging/recovery turn — no new claim/experiment. Same partial-squash pattern recurred: PR #23 squash (a5328b5) stranded its final commit 0427cf7 (§11.6 + C20). Recovered by cherry-pick onto a fresh main-based branch; opened PR #24."
+      - "Flagged the recurrence explicitly in open_threads (twice now: #22 and #23) — root cause is squash-merging before the branch's last push lands. Added a merge-completeness note to the PR body."
+      - "No logic/ edit: §11.6 + C20 content already correct from turn 6; this turn only relocates it to a landable PR."
