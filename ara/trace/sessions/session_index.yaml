@@ -50,8 +50,15 @@ sessions:
     open_threads: 2
   - id: "2026-07-24_003"
     date: "2026-07-24"
-    summary: "README synced/restructured with purpose + theory sections (PR #19); ARA-founder interview transcript captured and its artifact-format discussion recorded as a reference doc."
-    turn_count: 7
-    events_count: 4
+    summary: "README synced/restructured with purpose + theory sections (PR #19); ARA-founder interview transcript captured and its artifact-format discussion recorded as a reference doc; late rit-vs-lara comparison discussion opened."
+    turn_count: 8
+    events_count: 5
     claims_touched: []
     open_threads: 2
+  - id: "2026-07-25_001"
+    date: "2026-07-25"
+    summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound) crystallized; comparison-doc §11 addendum + novelty delta row committed (d192047); composition thesis staged as O12."
+    turn_count: 3
+    events_count: 4
+    claims_touched: [C18]
+    open_threads: 4

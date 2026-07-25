@@ -1,8 +1,8 @@
 session:
   id: "2026-07-24_003"
   timestamp: "2026-07-24T21:09"
-  ended: "2026-07-24T21:20"
-  summary: "README synced with frozen v0.1, restructured proof-assistant style, purpose/theory sections added (PR #19); ARA-ecosystem interview transcript retrieved for context."
+  ended: "2026-07-24T23:55"
+  summary: "README synced with frozen v0.1, restructured proof-assistant style, purpose/theory sections added (PR #19); ARA-ecosystem interview transcript retrieved for context; late-evening rit-vs-lara comparison discussion opened (new conversation, continues into 2026-07-25_001)."
 
 events_logged:
   - type: observation
@@ -21,8 +21,10 @@ events_logged:
     id: null
     provenance: user
     summary: "Turn 5: user directed that the interview's research-artifact-format discussion be recorded as a reference doc; docs/references/liu-2026-ara-format-interview.md created in the existing reference-note style with a caption-provenance flag and LARA-relevance framing (leaf grain, whole-trace attack walk, dead-end-as-content)."
-
-ai_actions:
+  - type: observation
+    id: null
+    provenance: user
+    summary: "Turn 8 (new conversation, ~23:40): user opened a rit-vs-lara comparison — framing the siblings as complementary formalizations of agent-native research artifacts, and questioning whether argumentation is expressible in dependent types; analysis (Lean-as-object-logic vs Lean-as-metatheory, Hume's-fork missing middle, shadow-AF reading of rit's collision/tier machinery) delivered from rit README + DESIGN.md; interpretive content captured next day once source-verified (see 2026-07-25_001, N46, C18, O12)."
   - action: "Rewrote the README intro to state the implemented Lara.Strict seam + Lara.Strict.ND reference adapter and the M0-sized adapter portfolio (arithmetic table-recheck + code-inspection, LP non-shipping per spec §5.2), replacing the stale 'ND adapter planned / LP optional' wording."
     provenance: ai-executed
     files_changed: ["README.md"]

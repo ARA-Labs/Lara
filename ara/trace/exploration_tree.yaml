@@ -756,3 +756,24 @@ tree:
       - "Lara.Policy.wellFormed_no_strict_contrary_left/right"
       - "Lara.Policy.Regression.declared_instance_is_contrary"
       - "Lara.Policy.Regression.instantiated_strict_contrary_rejected"
+
+  - id: N46
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-25T00:05"
+    support_level: explicit
+    source_refs: ["../rit/src/rit/formal/primitives.py", "../rit/src/rit/formal/grammar.py", "../rit/notes/DESIGN.md", "docs/comparison-rit-lara.md §11", "commit d192047"]
+    title: "rit source verification pins its expressible fragment to arithmetic over extracted scalars"
+    result: >
+      rit has restructured since its README (formal/core/action/algorithms layout
+      gone; package now src/rit/{formal,gate,action,admit,derive,grounding,store}
+      plus benchmark adapters/). Its world-facing formal vocabulary is five object
+      kinds (GOAL, EVIDENCE, FACT, RECORD, BASELINE) and six relations (GROUNDS,
+      ORDER, BEAT, BOUND, ENTAIL, CONTRADICT), all predicates over log-extracted
+      naturals; grammar.py renders conclusions as decidable arithmetic proved
+      `by decide`, with preconditions as documented (not proved) hypotheses checked
+      by sha256 outside Lean. rit's own source concedes "'why' as VALUE
+      (important/novel) is NOT formalizable". Finding written into
+      docs/comparison-rit-lara.md §11 and the novelty delta table, committed on
+      chore/update-comparison (d192047).
+    evidence: ["docs/comparison-rit-lara.md §11.1", "docs/novelty-and-related-work.md §2 rit row"]

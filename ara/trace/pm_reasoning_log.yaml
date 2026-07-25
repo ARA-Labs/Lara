@@ -81,3 +81,12 @@ entries:
     notes:
       - "User overrode the epigraph choice: [04:00] knowledge-compounding quote, unattributed — earlier 'too philosophical' judgment reversed by the user ('we are doing logic theory already'); provenance user-revised for the epigraph."
       - "Attribution line dropped per user; the reference note still documents the source, so provenance is preserved one hop away."
+  - turn: "2026-07-25_001#1-3"
+    notes:
+      - "Backfilled the 2026-07-24 late-evening comparison-discussion turn as event turn-8 in 2026-07-24_003 (calendar-day rule; different conversation, same day) — no tree node there since its interpretive content only became recordable once source-verified today."
+      - "Crystallized C18 same-turn (allowed: empirical resolution — rit source read — AND artifact commitment — §11 addendum + delta row committed d192047 — fired together); provenance user-revised: hypothesis is the user's ('only numerical comparison'), the grounding-interface generalization is AI sharpening."
+      - "Number grounding for C18 done from verbatim rit source quotes (primitives.py RELATIONS/OBJECTS dicts, grammar.py `by decide` docstring, the 'why is NOT formalizable' admission)."
+      - "Staged O12 (composition architecture) rather than crystallizing: written into §11.4 but nothing depends on it — a doc recording an idea is not artifact commitment."
+      - "Did NOT stage the boss-comment positioning separately: it restates C06/C18 and the comparison doc; no independent content."
+      - "Stage 4: revised the related_work.md rit line (empirical-resolution signal); considered but rejected promoting rit to a full RW11 entry — the additional-citations tier still fits a sibling project without a publication."
+      - "Near-miss: O05/O06 remain stale-staged, untouched by this turn's topic; no abandonment action beyond the existing stale flags."

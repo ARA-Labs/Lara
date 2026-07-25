@@ -379,3 +379,28 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: [C13, C15, C16]
 - **Tags**: corpus-study, coverage-gate, v0.1-freeze
 - **Last revised**: 2026-07-22 (2026-07-22_001#10)
+
+## C18: Kernel-attestation verifiers are bounded by their grounding interface, not their kernel logic
+- **Statement**: In a kernel-attestation verifier of research artifacts (rit-style: sha256-locked
+  evidence + proof-kernel discharge), the world-facing expressible fragment is capped by the
+  grounding interface — only predicates over deterministically extractable quantities can be claim
+  content — so every paper-level claim enters the kernel through an unchecked, defeasible narrowing
+  from prose to a numeric shadow. The kernel's own expressiveness (full CIC) is not the binding
+  constraint; the extraction interface and the auto-discharge tactic portfolio are.
+- **Conditions**: Verified against rit's source tree as of 2026-07-25 (post-restructure:
+  `src/rit/{formal,gate,...}`); rit's implemented vocabulary is five object kinds and six relations
+  over log-extracted naturals, discharged `by decide` (solver portfolio decide → omega → simp).
+  Generalization to other kernel-attestation systems (e.g. EG-VAR) is argued, not yet verified
+  against their sources. Says nothing against the kernel's value on the numeric fragment itself —
+  that fragment is exactly what LARA delegates to a strict backend.
+- **Sources**: ["six relations ← ../rit/src/rit/formal/primitives.py «RELATIONS = {\"GROUNDS\" … \"ORDER\" … \"BEAT\" … \"BOUND\" … \"ENTAIL\" … \"CONTRADICT\" …}» (dict has exactly six keys) [result]", "five objects ← ../rit/src/rit/formal/primitives.py «OBJECTS = {\"GOAL\" … \"EVIDENCE\" … \"FACT\" … \"RECORD\" … \"BASELINE\" …}» [result]", "by decide default ← ../rit/src/rit/formal/grammar.py «proof: the proof script. Defaults to `by decide` (decidable arithmetic)» [result]", "non-formalizability admission ← ../rit/src/rit/formal/primitives.py «(\"why\" as VALUE (important/novel) is NOT formalizable and is kept as context, never proven.)» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: A kernel-attestation system mechanically checking a non-numeric
+  world-facing claim (causal, methodological, generalization) without a trusted human/LLM
+  narrowing step — e.g., a checked scheme-instantiation or a verified prose-to-formal lowering
+  admitted through its kernel gate.
+- **Proof**: [docs/comparison-rit-lara.md §11.1–§11.2 (source-verified addendum, commit d192047)]
+- **Dependencies**: [C06]
+- **Tags**: related-work, novelty-defense, rit, expressiveness
+- **Last revised**: 2026-07-25 (2026-07-25_001#3)

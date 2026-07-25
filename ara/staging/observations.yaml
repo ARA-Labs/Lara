@@ -180,3 +180,26 @@ observations:
     promoted_to: [N45, C09]
     crystallized_via: "Lean counterexample and ground-instance overlap soundness proof"
     stale: false
+  - id: O12
+    timestamp: "2026-07-25T00:10"
+    provenance: ai-suggested
+    content: >
+      rit and lara compose as engineering, not competition: rit's portable Lean
+      kernel certificates and K-tier groundings match the opaque-certificate shape
+      Lara.Strict accepts (its T0-K tiers map onto leaf provenance), which would
+      upgrade lara leaves from declared to machine-rechecked without widening the
+      TCB; conversely lara's Dung compilation + grounded labelling is a proven
+      aggregation semantics for rit's open honest-roll-up problem (rit
+      DESIGN.md §7b#3), whose current AND/OR + collision + tier machinery is an
+      unproven shadow argumentation framework.
+    context: >
+      rit-vs-lara comparison session (user framing: complementary siblings, both
+      formalizing agent-native research artifacts); recorded in
+      docs/comparison-rit-lara.md §11.3-§11.4 but no code or milestone depends
+      on the integration yet.
+    potential_type: architecture
+    bound_to: [N46]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false

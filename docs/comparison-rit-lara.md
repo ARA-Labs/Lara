@@ -1,7 +1,8 @@
 # `rit` vs `lara` — what each verifies, and what it does not
 
 _Status: analysis note. First written 2026-07-20; revised 2026-07-21 against the POPL-track
-`docs/spec.md` and `docs/strict-backend-decision.md`. LP is now an optional strict adapter, and the
+`docs/spec.md` and `docs/strict-backend-decision.md`; §11 addendum 2026-07-25 verified against
+`rit`'s current source tree. LP is now an optional strict adapter, and the
 evidence→claim support lives in a versioned policy of defeasible schemes. Compares the two sibling
 projects under `ara/`: `rit` (a verification core built on the Lean kernel) and `lara` (this project,
 a claim-support language with a backend-parametric strict seam plus an argumentation layer). Goal:
@@ -268,3 +269,85 @@ For `lara` specifically, the one claim that survives every version of this criti
 produce, it is what the ARA data model uniquely enables, and it does not depend on the checker
 laundering the model's leaf judgments. That — not Curry-Howard, not justification logic — is the
 contribution to lead with.
+
+---
+
+## 11. Addendum (2026-07-25): the expressible fragment, verified against `rit`'s code
+
+_`rit` has restructured since its README was written (the `formal/core/action/algorithms` layout is
+gone; the package now lives in `src/rit/{formal,gate,action,admit,derive,grounding,store}` plus
+benchmark `adapters/` and `eval/`). The claims below were checked against the current tree, not the
+README._
+
+### 11.1 What `rit`'s formal layer can literally say
+
+The entire world-facing vocabulary (`src/rit/formal/primitives.py`) is five object kinds — GOAL,
+EVIDENCE, FACT, RECORD, BASELINE — and six relations:
+
+| Relation | Meaning |
+|---|---|
+| GROUNDS | evidence ⊢ fact (deterministic extraction, sha256) |
+| ORDER | record ≤ record |
+| BEAT | record vs. an external baseline constant |
+| BOUND | ∀ run in cohort, lo ≤ value ≤ hi |
+| ENTAIL | do the grounded records reach the goal (overclaim check) |
+| CONTRADICT | two claims whose conjunction proves ⊥ |
+
+A FACT is a natural number extracted from a log. The grammar (`src/rit/formal/grammar.py`) renders
+each conclusion as a "decidable arithmetic fact" proved `by decide`, with preconditions (code hash,
+GPU count) as *documented* hypotheses whose truth is checked by sha256 outside Lean. Even ENTAIL and
+CONTRADICT are arithmetic over these scalars. **So the observation "rit can only express numerical
+comparison" is correct for the implemented system** — comparisons and interval bounds over
+extracted numbers.
+
+The ceiling is not Lean (which can state arbitrary mathematics) but structural, and two-fold:
+
+1. **The grounding interface.** The only place the world enters is deterministic extraction of
+   values from bytes. Any empirical claim must therefore be *reducible to a predicate over
+   extractable quantities*. "top-1 = 78.4%" fits; "the gain comes from the attention mechanism,"
+   "this generalizes beyond the benchmark," "the comparison was fair" have no extractor.
+2. **The auto-discharge portfolio.** The solver tries `decide` → `omega` → `simp`, capping the
+   analytic side at decidable / linear-arithmetic goals in practice.
+
+`rit` concedes this in its own source: `primitives.py` states that "'why' as VALUE
+(important/novel) is NOT formalizable and is kept as context, never proven," and the `@claim`
+convention already conceded the NL sentence is unchecked.
+
+### 11.2 The silent narrowing — the sharpest form of the delta
+
+Every claim a paper makes reaches `rit`'s kernel only through a **narrowing step**: from "method M
+is faster" to "this extracted number beats that constant." That step is itself an inference, and a
+defeasible one — it presumes the runs are comparable, the metric is the right operationalization,
+the cohort is representative. `rit` performs it silently and unverifiably, in the gap between the
+NL sentence and the theorem; the claim either shrinks to its numeric shadow (`improves(M,D)` becomes
+`2875 < 3225`) or survives only as an unverified comment. `lara` types exactly this step: the leaf
+supports the claim *via a named scheme* whose critical questions must be discharged or stand as
+located holes, and which can be undercut. Our predicates need not be machine-decidable because
+their role is argumentative, not deductive; the decidable numeric fragment is what we delegate to
+a strict backend — which is the slot `rit` fits into.
+
+### 11.3 `rit`'s non-kernel defeat machinery is a shadow argumentation framework
+
+To handle disagreement `rit` had to build substantial machinery *outside* the kernel: a verdict
+lattice, collision detection ("same premises, different conclusion"), evidence-tier winner-picking,
+dispute branches, weakest-link trust roll-up. Structurally, collisions are rebuttals, "missing
+premises" are undischarged critical questions, and tier-based resolution is a preference-based
+defeat relation — an ad hoc, unproven argumentation layer. Their design doc lists honest
+aggregation as an open problem that "getting this wrong makes the whole ledger dishonest"
+(`rit/notes/DESIGN.md` §7b#3). That layer is `lara`'s object of study, with the grounded-labelling
+metatheory mechanized.
+
+### 11.4 The composition, stated as engineering
+
+- **`rit` as a `lara` strict backend / leaf oracle.** `rit`'s portable kernel certificates and
+  K-tier groundings are exactly the shape of opaque certificate the `Lara.Strict` seam accepts;
+  its T0–K tiers map onto our leaf provenance vocabulary. This upgrades our leaves from
+  "declared" to "machine-rechecked" without widening our TCB.
+- **`lara` as `rit`'s aggregation semantics.** Replacing their AND/OR + collision heuristics with
+  compilation to a Dung framework and grounded labelling would give their roll-up a proven
+  propagation story — a principled answer to their open problem §7b#3.
+
+Neither subsumes the other: a fully `rit`-verified artifact can still be *defeated* (valid
+measurement, undermined setup), and a fully `lara`-justified argument can still rest on fabricated
+leaves `rit` would catch. They compress the world into bytes; we adjudicate what the bytes are
+allowed to mean.

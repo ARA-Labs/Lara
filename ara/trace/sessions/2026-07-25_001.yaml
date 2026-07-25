@@ -1,0 +1,72 @@
+session:
+  id: "2026-07-25_001"
+  timestamp: "2026-07-25T00:00"
+  ended: "2026-07-25T00:15"
+  summary: "rit comparison hardened from analysis to source-verified evidence: expressible-fragment claim C18 crystallized, comparison doc §11 addendum + novelty delta-table row committed (chore/update-comparison, d192047)."
+
+events_logged:
+  - turn: 1
+    type: observation
+    id: null
+    routing: none
+    provenance: ai-executed
+    summary: "Boss-comment drafted articulating the rit/lara positioning (judges-claims vs judges-arguments, silent narrowing, composition points); positioning content, later grounded in docs — no separate record."
+  - turn: 2
+    type: experiment
+    id: N46
+    routing: direct
+    provenance: ai-executed
+    summary: "User hypothesis 'rit can only express numerical comparison' verified against rit's current source: five objects / six relations over log-extracted naturals, `by decide` grammar, own non-formalizability admission; confirmed with the ceiling relocated from Lean to the grounding interface + tactic portfolio."
+  - turn: 3
+    type: observation
+    id: O12
+    routing: staged
+    provenance: ai-suggested
+    summary: "Composition thesis staged: rit certificates fit the Lara.Strict opaque-certificate shape (leaf upgrade); lara grounded semantics answers rit's open honest-aggregation problem. No code depends on it yet."
+  - turn: 3
+    type: claim
+    id: C18
+    routing: crystallized
+    provenance: user-revised
+    summary: "C18 crystallized (empirical resolution + artifact commitment in the same turn): kernel-attestation verifiers are bounded by their grounding interface, not their kernel logic; paper claims enter through an unchecked defeasible narrowing."
+
+ai_actions:
+  - turn: 2
+    action: "Read ../rit/src/rit/formal/{primitives,grammar}.py and notes/DESIGN.md; established rit's post-restructure layout and its implemented formal vocabulary; quoted source lines verbatim for number grounding."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: "Wrote docs/comparison-rit-lara.md §11 addendum (expressible fragment §11.1, silent narrowing §11.2, shadow-AF §11.3, composition §11.4) and sharpened the rit row in docs/novelty-and-related-work.md §2; committed d192047 on user-created branch chore/update-comparison."
+    provenance: ai-executed
+    files_changed: ["docs/comparison-rit-lara.md", "docs/novelty-and-related-work.md"]
+
+claims_touched:
+  - id: C18
+    action: created
+    turn: 3
+
+logic_revisions:
+  - turn: 3
+    entry: related_work.md (rit additional-citation line)
+    field: content
+    before: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction (see `docs/comparison-rit-lara.md`)."
+    after: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction. Source-verified 2026-07-25 (C18): its world-facing fragment is five object kinds / six relations over log-extracted naturals discharged `by decide`, so paper claims enter through a silent defeasible narrowing LARA types; its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose open aggregation problem grounded semantics answers (see `docs/comparison-rit-lara.md` §11)."
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "rit entry updated from README-derived to source-verified; cross-ref to C18 and comparison doc §11."
+
+key_context:
+  - turn: 1
+    excerpt: "User: 'R&D is also a team sport, so we're not competing. We're supporting each other from different aspects... We're basically formalizing the agent-native research artifacts.' — frames every rit delta as complementarity, not rivalry; carried into the comparison doc's §11.4 composition framing."
+  - turn: 2
+    excerpt: "User: 'I feel like their approach can only express numerical comparison, right?' — the hypothesis C18 sharpens; confirmed for the implemented system, with the ceiling attributed to the grounding interface + auto-discharge portfolio rather than the kernel."
+
+open_threads:
+  - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
+  - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
+  - "chore/update-comparison committed locally (d192047) but not pushed / no PR yet."
+  - "O12 (rit-lara composition: rit as strict backend, lara as rit's aggregation semantics) awaits a design commitment before crystallizing."
+
+ai_suggestions_pending:
+  - "O12: the rit↔lara integration architecture (staged this session)."
+  - "C18's generalization beyond rit (EG-VAR and other kernel-attestation systems) is argued, not source-verified."
