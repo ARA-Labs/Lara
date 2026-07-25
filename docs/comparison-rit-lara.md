@@ -71,8 +71,8 @@ declared scheme is a correct account of what supports a claim.** That judgment l
 | Dimension | `rit` | `lara` (current spec) |
 |---|---|---|
 | Kernel logic | Lean 4 / CIC (dependent type theory) | typed argumentation checker + registered strict-certificate adapters (natural deduction required; LP optional) |
-| The evidence→claim step | analytic relations proved; extraction pulled INTO the kernel (K-tier) | a **defeasible scheme** in a versioned policy `Pi`, with critical questions — *not* proved |
-| Empirical content | sha256 byte-capture + deterministic re-extraction; compressed *toward* the kernel | untrusted leaves (`observed/attested/assumed/certified`), kept *out* of the kernel |
+| The evidence→claim step | analytic relations proved; extraction pulled INTO the kernel (K-tier — *designed only*; §11.5 finds it unwired, so shipping `rit` extracts in Python) | a **defeasible scheme** in a versioned policy `Pi`, with critical questions — *not* proved |
+| Empirical content | sha256 byte-capture + deterministic re-extraction; compressed *toward* the kernel (in design; today the Python extractor stays in the TCB — §11.5) | untrusted leaves (`observed/attested/assumed/certified`), kept *out* of the kernel |
 | Monotonic? | **Yes** — Lean is monotonic; proved is proved | **No** — typed attacks (rebut/undercut/undermine) + grounded semantics on top |
 | Failure knowledge | not first-class; a claim simply fails to verify | first-class: a dead-end that constructs a typed attack can **defeat** a claim |
 | `gap` vs `defeated` | not distinguished | distinguished by design (`gap` = no complete argument / open obligation; `defeated` = complete but labelled `out`) |
@@ -80,10 +80,12 @@ declared scheme is a correct account of what supports a claim.** That judgment l
 | Human surface | Lean source + `@claim` NL comment | a declarative presentation syntax (`claim`/`leaf`/`arg`/`undercut`/`status`) over a shared abstract syntax; JSON is the wire format |
 | Stack | Python front-end + Lean | Haskell core + Python front-end (Phase 3) |
 
-**The deepest difference is a dual strategy toward the same wall.** `rit` pushes as much of the
-empirical world *into* the kernel as it can: embed the evidence bytes as a Lean literal, ship the
-extractor as a Lean function, so the grounding itself becomes a theorem and the world enters at
-one byte-capture event. `lara` does the opposite: it keeps the empirical content *outside* as
+**The deepest difference is a dual strategy toward the same wall.** `rit`'s *design* pushes as much
+of the empirical world *into* the kernel as it can: embed the evidence bytes as a Lean literal, ship
+the extractor as a Lean function, so the grounding itself becomes a theorem and the world enters at
+one byte-capture event. (That is the K-tier aspiration; §11.5 finds it unwired in the shipping code,
+where every committed fact still passes through a Python extractor at tier L1/L2.) `lara` does the
+opposite: it keeps the empirical content *outside* as
 untrusted leaves, and spends its formal budget on the layer Lean cannot express — **typed,
 non-monotonic defeat**, where a recorded dead-end retracts a claim. That defeat capability is
 `lara`'s actual novelty and is invisible to a purely Lean approach.
@@ -277,7 +279,10 @@ contribution to lead with.
 _`rit` has restructured since its README was written (the `formal/core/action/algorithms` layout is
 gone; the package now lives in `src/rit/{formal,gate,action,admit,derive,grounding,store}` plus
 benchmark `adapters/` and `eval/`). The claims below were checked against the current tree, not the
-README._
+README. §11.1–11.4 read the formal **vocabulary**; §11.5 (added on a follow-up pass) reads the
+shipping **commit path** and records where the write-up's pipeline claims — one Lean environment, a
+kernel-read claim DAG, K-tier grounding, a falsifiability gate — are not what `admit.gate` actually
+enforces._
 
 ### 11.1 What `rit`'s formal layer can literally say
 
@@ -340,9 +345,10 @@ metatheory mechanized.
 ### 11.4 The composition, stated as engineering
 
 - **`rit` as a `lara` strict backend / leaf oracle.** `rit`'s portable kernel certificates and
-  K-tier groundings are exactly the shape of opaque certificate the `Lara.Strict` seam accepts;
-  its T0–K tiers map onto our leaf provenance vocabulary. This upgrades our leaves from
-  "declared" to "machine-rechecked" without widening our TCB.
+  (designed-but-not-yet-wired, see §11.5) K-tier groundings are the shape of opaque certificate the
+  `Lara.Strict` seam accepts; its T0–K tiers map onto our leaf provenance vocabulary. This upgrades
+  our leaves from "declared" to "machine-rechecked" without widening our TCB — at the tier `rit`
+  actually reaches today (L1/L2, Python extractor in the TCB), not the K-tier its write-up advertises.
 - **`lara` as `rit`'s aggregation semantics.** Replacing their AND/OR + collision heuristics with
   compilation to a Dung framework and grounded labelling would give their roll-up a proven
   propagation story — a principled answer to their open problem §7b#3.
@@ -351,3 +357,49 @@ Neither subsumes the other: a fully `rit`-verified artifact can still be *defeat
 measurement, undermined setup), and a fully `lara`-justified argument can still rest on fabricated
 leaves `rit` would catch. They compress the world into bytes; we adjudicate what the bytes are
 allowed to mean.
+
+### 11.5 Write-up vs. code: what the shipping commit path actually enforces
+
+§11.1's vocabulary finding read `rit`'s formal *layer* against source. This section reads its
+commit *path* — `rit.py` CLI → `action/push.py` → `admit.gate` → `grounding` + `formal/kernel` —
+against the README/DESIGN prose (verified 2026-07-25). Five claims the write-up makes do not
+survive contact with the shipping code. The rule this enforces: **describe `rit` by what
+`admit.gate` runs, not by what its prose asserts.**
+
+1. **Not "one Lean environment."** README and `admit/__init__.py` both say the repo "is checked as
+   one Lean environment." `admit.check_proofs` in fact loops and runs `kernel._run_lean(f)` on each
+   `.lean` file *separately* — N independent single-file compilations, each re-declaring its own
+   `opaque`/`axiom` shadows locally.
+2. **The claim→claim DAG is self-reported, not kernel-read.** README: "claim ↔ claim links =
+   theorem dependencies." But `formal/uses.used_constants` (the `getUsedConstants` read of real
+   inter-theorem edges) is a `return []` TODO stub; the edges actually come from
+   `declared_claim_deps` — the agent's hand-declared list (`push.py:158`). Only the empirical
+   `_grounded` axiom deps are genuinely kernel-read. This is a consequence of (1): isolated
+   single-file checks mean no proof consumes another's theorem, so there are no kernel claim→claim
+   edges to read.
+3. **K-tier grounding is unreachable in the write path.** DESIGN.md sells K-tier — extraction as a
+   `native_decide` theorem so "the Python interpreter then leaves the trust base entirely." But
+   `grounding.bind()` only ever assigns tier `"L1"` or `"L2"`; `lean_grounding_src`/`native_decide`
+   is never called by `push`. For **every fact `rit` actually commits, the Python regex extractor
+   is in the TCB** — the opposite of the K-tier claim. K-tier is an unused helper plus a demo.
+4. **The falsifiability gate is not enforced at commit.** `formal/__init__.py` lists "the
+   falsifiability gate rejects restatements" as a soundness component and `gate/solve.tautological`
+   implements it, but `admit.gate` checks only two things — proofs kernel-check, groundings
+   re-extract — and never calls `tautological`. A pure restatement/tautology passes the real gate.
+5. **Much of the verification machinery is a parallel dead world.**
+   `gate/{collision,dedup,simplify,mergecheck,grade}.py` operate over a `cfg` block-CFG the live
+   `push` path never builds; the commit path uses `grounding.collision` (manifest) and
+   `derive.grade` instead. Only `gate/entail.py` is on the live path (via `derive.settle`).
+
+**What does hold up.** The per-fact core is real: `push` writes `axiom <label>_grounded : <label>
+= <value>` with the value taken from the binding, and `admit.gate` re-extracts every binding
+(sha256 + regex re-derive), so the anti-gaming property genuinely holds via re-extraction; the
+kernel really rejects `sorry`/rogue axioms via `#print axioms`. Single-fact, single-proof
+attestation is sound at L1/L2.
+
+**Consequence for the comparison.** Shipping `rit` is narrower than its write-up: independently
+kernel-checked single-arithmetic-fact proofs with re-extracted numeric leaves, plus a
+**self-reported, unverified dependency graph** and aggregation modules that mostly do not run at
+the gate. This *strengthens* §11.3: the weakest-link roll-up runs over a DAG whose edges `rit`
+never verifies, and the K-tier that would shrink its TCB is not wired in. The shadow-argumentation
+reading is not just "unproven semantics" — much of the machinery is off the commit path entirely.

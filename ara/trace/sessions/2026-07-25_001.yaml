@@ -1,8 +1,8 @@
 session:
   id: "2026-07-25_001"
   timestamp: "2026-07-25T00:00"
-  ended: "2026-07-25T00:15"
-  summary: "rit comparison hardened from analysis to source-verified evidence: expressible-fragment claim C18 crystallized, comparison doc §11 addendum + novelty delta-table row committed (chore/update-comparison, d192047)."
+  ended: "2026-07-25T13:10"
+  summary: "rit comparison hardened from analysis to source-verified evidence: C18 crystallized, §11 addendum + novelty row (d192047), PR #22 merged. Follow-up commit-path audit found five write-up-vs-code discrepancies (C19 crystallized, §11.5); PR #22's squash stranded that work, so it was rebased + nitpicked onto PR #23."
 
 events_logged:
   - turn: 1
@@ -29,6 +29,24 @@ events_logged:
     routing: crystallized
     provenance: user-revised
     summary: "C18 crystallized (empirical resolution + artifact commitment in the same turn): kernel-attestation verifiers are bounded by their grounding interface, not their kernel logic; paper claims enter through an unchecked defeasible narrowing."
+  - turn: 4
+    type: experiment
+    id: N47
+    routing: direct
+    provenance: ai-executed
+    summary: "User-directed code-vs-write-up audit of rit's shipping commit path: five advertised claims fail against code (not one Lean env; claim->claim DAG declared not kernel-read; K-tier unreachable; falsifiability gate uncalled; gate/* modules run over a cfg the push path never builds). Per-fact re-extraction + kernel sorry/rogue-axiom rejection do hold."
+  - turn: 4
+    type: observation
+    id: O13
+    routing: staged
+    provenance: user-revised
+    summary: "Staged the audit's interpretive finding (a verifier's guarantee is its gate's fixed point, weaker than its write-up here) and crystallized it same-turn to C19."
+  - turn: 4
+    type: claim
+    id: C19
+    routing: crystallized
+    provenance: user-revised
+    summary: "C19 crystallized (empirical resolution + artifact commitment): a kernel-attestation verifier's real guarantee is what its commit gate enforces, not its write-up; rit's aggregate guarantees are designed-but-unwired while its per-fact core holds."
 
 ai_actions:
   - turn: 2
@@ -39,11 +57,26 @@ ai_actions:
     action: "Wrote docs/comparison-rit-lara.md §11 addendum (expressible fragment §11.1, silent narrowing §11.2, shadow-AF §11.3, composition §11.4) and sharpened the rit row in docs/novelty-and-related-work.md §2; committed d192047 on user-created branch chore/update-comparison."
     provenance: ai-executed
     files_changed: ["docs/comparison-rit-lara.md", "docs/novelty-and-related-work.md"]
+  - turn: 4
+    action: "Pushed chore/update-comparison to origin and opened PR #22 (d192047 + 5307671)."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
+    action: "Read rit's live commit path (rit.py, action/push.py, admit/__init__.py, formal/{kernel,checker,uses,semantics,grammar,system}.py, gate/{solve,collision,grade}.py, grounding/{__init__,provenance}.py) + grep confirmations; wrote docs/comparison-rit-lara.md §11.5 (commit-path audit) plus a K-tier caveat in §11.4 and the header note; committed ba6c45e and pushed to PR #22."
+    provenance: ai-executed
+    files_changed: ["docs/comparison-rit-lara.md"]
+  - turn: 5
+    action: "PR #22 merged into main (squash 29c7570) but captured only d192047+5307671; §11.5 (ba6c45e) + C19 capture (3692817) were stranded. Synced main, branched chore/comparison-nitpick, cherry-picked ba6c45e+3692817, added a doc-consistency nitpick (§4 K-tier row + 'deepest difference' prose forward-pointed to §11.5, since they asserted K-tier as fact), committed 2321a87, pushed, opened PR #23."
+    provenance: ai-executed
+    files_changed: ["docs/comparison-rit-lara.md"]
 
 claims_touched:
   - id: C18
     action: created
     turn: 3
+  - id: C19
+    action: created
+    turn: 4
 
 logic_revisions:
   - turn: 3
@@ -60,13 +93,17 @@ key_context:
     excerpt: "User: 'R&D is also a team sport, so we're not competing. We're supporting each other from different aspects... We're basically formalizing the agent-native research artifacts.' — frames every rit delta as complementarity, not rivalry; carried into the comparison doc's §11.4 composition framing."
   - turn: 2
     excerpt: "User: 'I feel like their approach can only express numerical comparison, right?' — the hypothesis C18 sharpens; confirmed for the implemented system, with the ceiling attributed to the grounding interface + auto-discharge portfolio rather than the kernel."
+  - turn: 4
+    excerpt: "User: 'when evaluating rit, you should not just say what it claims in their write up. I looking at the code think there is a little discrepancy.' — a first-person methodological directive (describe rit by what its gate enforces, not its prose) that became the core of C19; my audit found five discrepancies, not one."
 
 open_threads:
   - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
   - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
-  - "chore/update-comparison committed locally (d192047) but not pushed / no PR yet."
-  - "O12 (rit-lara composition: rit as strict backend, lara as rit's aggregation semantics) awaits a design commitment before crystallizing."
+  - "PR #22 merged (squash 29c7570) but only captured d192047+5307671; §11.5+C19 rebased onto PR #23 (chore/comparison-nitpick) — awaiting review/merge."
+  - "O12 (rit-lara composition) awaits a design commitment before crystallizing; its K-tier premise is now qualified by C19/N47 (K-tier designed but unwired in rit today)."
+  - "C19's generalization beyond rit (whether other kernel-attestation verifiers' gates under-enforce their write-ups) is argued from mechanism, not source-verified elsewhere."
 
 ai_suggestions_pending:
-  - "O12: the rit↔lara integration architecture (staged this session)."
+  - "O12: the rit↔lara integration architecture (staged; K-tier premise now qualified by C19)."
   - "C18's generalization beyond rit (EG-VAR and other kernel-attestation systems) is argued, not source-verified."
+  - "C19's generalization beyond rit is argued from mechanism, not source-verified elsewhere."

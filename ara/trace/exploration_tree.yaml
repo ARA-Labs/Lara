@@ -777,3 +777,28 @@ tree:
       docs/comparison-rit-lara.md §11 and the novelty delta table, committed on
       chore/update-comparison (d192047).
     evidence: ["docs/comparison-rit-lara.md §11.1", "docs/novelty-and-related-work.md §2 rit row"]
+  - id: N47
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-25T12:30"
+    support_level: explicit
+    also_depends_on: [N46]
+    source_refs: ["../rit/src/rit.py", "../rit/src/rit/action/push.py", "../rit/src/rit/admit/__init__.py", "../rit/src/rit/formal/{kernel,checker,uses,semantics,grammar,system}.py", "../rit/src/rit/gate/{solve,collision,grade}.py", "../rit/src/rit/grounding/{__init__,provenance}.py", "../rit/README.md", "../rit/notes/DESIGN.md", "docs/comparison-rit-lara.md §11.5", "commit ba6c45e"]
+    title: "rit's shipping commit path enforces strictly less than its write-up claims"
+    result: >
+      Audited rit's live path (rit.py CLI -> action/push -> admit.gate -> grounding +
+      formal/kernel) against README/DESIGN prose. Five write-up claims fail against code:
+      (1) NOT one Lean environment — admit.check_proofs loops kernel._run_lean(f) per file,
+      N independent single-file compilations; (2) claim->claim DAG is self-reported —
+      formal/uses.used_constants is a return-[] TODO stub, edges come from declared_claim_deps
+      (push.py:158), only empirical _grounded axioms are kernel-read; (3) K-tier grounding
+      unreachable — grounding.bind() only assigns L1/L2, lean_grounding_src/native_decide never
+      called by push, so the Python regex extractor is in the TCB for every committed fact;
+      (4) the falsifiability gate is not enforced — admit.gate never calls gate/solve.tautological;
+      (5) gate/{collision,dedup,simplify,mergecheck,grade}.py run over a cfg block-CFG the push
+      path never builds (only gate/entail is live, via derive.settle). What HOLDS: per-fact
+      re-extraction (push writes axiom label_grounded = value from the binding; admit.gate
+      re-extracts every binding via sha256 + regex), and kernel sorry/rogue-axiom rejection via
+      #print axioms. Committed as docs/comparison-rit-lara.md §11.5 (ba6c45e), pushed to PR #22.
+    evidence: ["docs/comparison-rit-lara.md §11.5", "../rit/src/rit/admit/__init__.py:43-51 (per-file loop)", "../rit/src/rit/formal/uses.py:86-90 (used_constants stub)", "../rit/src/rit/grounding/__init__.py:52-55 (L1/L2 only)"]
+    status: resolved

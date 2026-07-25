@@ -203,3 +203,30 @@ observations:
     promoted_to: null
     crystallized_via: null
     stale: false
+    # NOTE: premise "rit's K-tier groundings match the opaque-certificate shape" is qualified by
+    # O13/N47 — K-tier is designed but not wired in rit's write path today. Not a hard contradiction
+    # (O12 speaks of rit's designed capability); doc §11.4 reconciled with a "designed-but-not-yet-
+    # wired" caveat. Left staged, unrewritten (append-only).
+  - id: O13
+    timestamp: "2026-07-25T12:30"
+    provenance: user-revised
+    content: >
+      A kernel-attestation verifier's real trust guarantee is the fixed point of its commit
+      gate, which can be strictly weaker than the architecture its write-up describes. Auditing
+      rit's shipping path (admit.gate) found four advertised aggregate guarantees unwired,
+      stubbed, or unreachable — one Lean environment (actually per-file compilation),
+      kernel-read claim->claim DAG (used_constants is a return-[] stub; edges are declared),
+      TCB-shrinking K-tier grounding (bind() only emits L1/L2), and a falsifiability gate
+      (never called at commit) — while the per-fact re-extraction core does hold. The
+      methodological rule: describe such a system by what its gate enforces, not its prose.
+    context: >
+      User directed (turn: "you should not just say what it claims in their write up ... I think
+      there is a little discrepancy") a code-vs-write-up audit of rit; I read the live commit path
+      and confirmed five discrepancies, committed as docs/comparison-rit-lara.md §11.5 (ba6c45e),
+      pushed to PR #22.
+    potential_type: claim
+    bound_to: [N47]
+    promoted: true
+    promoted_to: "logic/claims.md:C19"
+    crystallized_via: "empirical-resolution + artifact-commitment"
+    stale: false

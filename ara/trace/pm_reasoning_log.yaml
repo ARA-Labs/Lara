@@ -90,3 +90,18 @@ entries:
       - "Did NOT stage the boss-comment positioning separately: it restates C06/C18 and the comparison doc; no independent content."
       - "Stage 4: revised the related_work.md rit line (empirical-resolution signal); considered but rejected promoting rit to a full RW11 entry — the additional-citations tier still fits a sibling project without a publication."
       - "Near-miss: O05/O06 remain stale-staged, untouched by this turn's topic; no abandonment action beyond the existing stale flags."
+  - turn: "2026-07-25_001#4"
+    notes:
+      - "N47 routed direct as experiment (source audit with a definite result — five confirmed discrepancies); the numbers/file:line are journey facts, not interpretation."
+      - "Crystallized O13 -> C19 same-turn via empirical-resolution + artifact-commitment, mirroring the C18 precedent (user hypothesis, source-verified, committed to doc/PR). Signal is the source audit result + the §11.5 commit (ba6c45e) on PR #22."
+      - "C19 provenance user-revised, not ai-suggested: the core methodological principle ('describe rit by what its gate enforces, not its write-up') was a first-person user directive this turn, without exact claim wording — the user-revised case. Empirical-resolution/artifact-commitment do not themselves upgrade provenance, but the user directive does."
+      - "C19 depends on C18 (both about rit; C19 is the implementation-vs-spec layer, C18 the expressiveness layer) — sibling claims, C18 is the nearer premise (grounding interface is where finding #3, the Python extractor in the TCB, bites)."
+      - "Did NOT rewrite O12 (append-only): finding #3 qualifies but does not hard-contradict its K-tier premise (O12 speaks of rit's designed capability; K-tier is designed, just unwired). Added a NOTE comment on O12 + a designed-but-not-yet-wired caveat in doc §11.4 instead of an unresolved decision node — the gap is reconciled, not adversarial."
+      - "Did NOT revise C18: no signal touched it this turn; the new finding is a distinct claim, not evidence for/against C18's expressiveness statement."
+      - "Number grounding for C19: each of the five Sources entries opened the live rit source and copied the matched construct verbatim ([result] — code the audit found), not from memory."
+  - turn: "2026-07-25_001#5"
+    notes:
+      - "Packaging/consistency turn — no new claim or experiment crystallized. Logged as ai_actions + an open-thread update only; the nitpick edited docs/, not ara/logic/, so no logic_revisions entry."
+      - "Discovered PR #22's squash (29c7570) captured only d192047+5307671; ba6c45e (§11.5) + 3692817 (C19 capture) were stranded on the old branch. Recovered by cherry-picking both onto a fresh main-based branch — clean apply because main already holds the squashed base content."
+      - "Nitpick was a doc-internal-consistency fix: §4 asserted rit's K-tier as fact, which §11.5 #3 refutes. Chose forward-pointers over deleting the K-tier framing (K-tier is real as rit's design, just unwired) — keeps the dual-strategy narrative while flagging the shipping reality."
+      - "Did NOT touch C19 or any logic/ entry — its content already reflects the finding; this turn only moved it to a landable PR."

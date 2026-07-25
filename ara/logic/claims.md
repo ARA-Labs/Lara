@@ -404,3 +404,30 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: [C06]
 - **Tags**: related-work, novelty-defense, rit, expressiveness
 - **Last revised**: 2026-07-25 (2026-07-25_001#3)
+
+## C19: A verification system's real guarantee is what its commit gate enforces, not what its write-up claims
+- **Statement**: For a kernel-attestation research verifier, the trust guarantee actually delivered
+  is the fixed point of its admission gate — the set of checks that run before a commit is accepted —
+  and this can be strictly weaker than the trust architecture the system's own documentation
+  describes. Aggregate/whole-artifact guarantees (single proof environment, machine-read cross-claim
+  dependency graph, extraction moved into the kernel, a falsifiability filter) are especially prone
+  to being designed-but-unwired: present as helpers, prose, or stubs yet never invoked on the write
+  path. Auditing such a system therefore requires reading the gate path, not the write-up; the
+  per-artifact leaf guarantee can be sound while the aggregate one is not enforced.
+- **Conditions**: Verified against rit's shipping tree 2026-07-25 (commit path `rit.py` →
+  `action/push` → `admit.gate` → `grounding` + `formal/kernel`). Four advertised aggregate
+  guarantees found not enforced (per-file compilation not one Lean env; `used_constants` a
+  `return []` stub so claim→claim edges are declared; `bind()` emits only L1/L2 so K-tier never
+  fires; `tautological` never called at commit); the per-fact re-extraction + kernel sorry/rogue-axiom
+  rejection core does hold. Generalization to other kernel-attestation systems is argued from the
+  mechanism, not yet source-verified elsewhere.
+- **Sources**: ["per-file compilation ← ../rit/src/rit/admit/__init__.py «for f in files: ok, why = _check_one(f)» (loop; _check_one runs kernel._run_lean on one file) [result]", "used_constants stub ← ../rit/src/rit/formal/uses.py «def used_constants(lean_path): … Returns []. return []» [result]", "L1/L2 only ← ../rit/src/rit/grounding/__init__.py «tier, exid, spec = \"L2\", extractor_id(extractor), extractor … tier, exid, spec = \"L1\", \"\", None» (bind() branches; no K) [result]", "falsifiability gate not called ← ../rit/src/rit/admit/__init__.py «gate(): p = check_proofs(repo); g = grounding.reextract_all(repo); admitted = p[\"ok\"] and g[\"ok\"]» (no tautological) [result]", "per-fact core holds ← ../rit/src/rit/action/push.py «axiom {b['label']}_grounded : {b['label']} = {int(b['value'])}» + admit.gate re-extracts every binding [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification criteria**: Reading rit's `admit.gate` and finding it does invoke, on the commit
+  path, the whole-repo single-environment check, a kernel `getUsedConstants` read of claim→claim
+  edges, a K-tier (`native_decide`-over-evidence) grounding, and the `tautological` falsifiability
+  filter — i.e. the write-up's aggregate guarantees are in fact enforced, not merely documented.
+- **Proof**: [docs/comparison-rit-lara.md §11.5 (commit-path audit, commit ba6c45e); trace N47]
+- **Dependencies**: [C18]
+- **Tags**: related-work, rit, verification-method, spec-vs-code, trust-architecture

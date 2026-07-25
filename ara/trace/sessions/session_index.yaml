@@ -57,8 +57,8 @@ sessions:
     open_threads: 2
   - id: "2026-07-25_001"
     date: "2026-07-25"
-    summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound) crystallized; comparison-doc §11 addendum + novelty delta row committed (d192047); composition thesis staged as O12."
-    turn_count: 3
-    events_count: 4
-    claims_touched: [C18]
-    open_threads: 4
+    summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound) crystallized, §11 addendum + novelty row (d192047), PR #22 merged. Follow-up commit-path audit found five write-up-vs-code discrepancies → C19 crystallized, §11.5; PR #22's squash stranded that work, rebased + nitpicked onto PR #23."
+    turn_count: 5
+    events_count: 9
+    claims_touched: [C18, C19]
+    open_threads: 5
