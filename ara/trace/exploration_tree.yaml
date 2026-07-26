@@ -1054,3 +1054,38 @@ tree:
       - "Lara.Examples #guard conformance matrices"
       - "test/StrictSpec.hs prop_frameTagRoundTrip"
       - "ara/evidence/results/executable_nd_adapter.md"
+
+  - id: N59
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-25T00:00"
+    support_level: explicit
+    source_refs:
+      - "lean/Lara/Compile.lean"
+      - "lean/Lara/Examples.lean"
+      - "lean/AxCheck.lean"
+      - "docs/spec.md §8.2"
+    also_depends_on: [N42, N16]
+    title: "Issue #17 closed: checker-built edge decider discharges Faithful (result 6 source-vs-compiled half, oracle-free)"
+    result: >
+      The Faithful edge oracle that N42's source-vs-compiled bridge assumed is
+      now supplied constructively. containsB (subterm occurrence) and
+      attackClosureB (attack on any contained occurrence) build the checker's
+      closure decider edgeB, and edgeB_faithful proves it decides the frozen
+      closure Edge relation exactly (via containsB_iff/attackClosureB_iff/edgeB_iff,
+      the DisNodup side condition discharged by the checker's hasSupport_disNodup).
+      The specialized wrappers checkedAF, srcIn_iff_checkedGrounded,
+      srcStatus_checked, and srcStatus_iff_checked therefore state result 6's
+      source-vs-compiled half over an accepted program with NO oracle hypothesis.
+      This is oracle elimination only: SrcIn/SrcOut/SrcStatus remain the Prop-level
+      shadow of the SAME compiled Edge closure that edgeB executes — not an
+      independent source calculus — and grounded consistency / attack completeness
+      (result 7) stay open as issue #18. lake build succeeds; the AxCheck audit
+      prints no sorryAx and exactly propext, Classical.choice, Quot.sound; all 30
+      Haskell property groups still pass (Lean-only change).
+    evidence:
+      - "Lara.Compile.edgeB_faithful"
+      - "Lara.Compile.srcIn_iff_checkedGrounded / srcStatus_iff_checked"
+      - "Lara.Examples.checked_edge_fixture_faithful / checked_closure_status"
+      - "lake env lean AxCheck.lean (no sorryAx, standard trio)"
+      - "cabal test all --test-show-details=direct (30 groups, pass)"

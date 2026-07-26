@@ -46,7 +46,7 @@ it; "test-only" = conformance evidence, no theorem.
 | 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **must** | Inversion lemma on term structure (`spec.md` §6). |
 | 4 | Compilation soundness (no untyped node/attack; subargument closure) | **must** | The combinatorially fiddly one — positional attacks × closure. |
 | 5 | Termination + determinism of grounded evaluation | **must** | Monotone operator on a finite-height lattice; bounded iteration ≤ `|Args|`. |
-| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **mechanized modulo #17** | Direct semantics and the oracle-parametric bridge are proved; the general checker-built `Faithful` edge decider remains. |
+| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done (#17 closed)** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` now discharges `Faithful` constructively (no oracle hypothesis). Attack completeness (result 7) is the remaining neighbor, issue #18. |
 | 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **validator mechanized; theorem waits #18** | Path-B validation is executable and exact; status consistency still needs attack completeness. |
 | 8 | Strict-certificate soundness (excludes `trusted-policy`) | **must** | A field/obligation of the `Backend` structure; proved once, per adapter. |
 | 9 | Backend replacement | **should** | Parametricity over the `Backend` structure + graph isomorphism under `eraseCert`. High reviewer value; the "backend internals are not part of claim-status semantics" result. |
@@ -197,7 +197,7 @@ right precedent:
   portion. This is Lean mechanization, not a claim that the production Haskell
   M3 checker exists.
 
-## 5. Result 6: source-to-compiled bridge mechanized modulo the edge decider ◐
+## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed) ◐
 
 Result 6 ("status preservation between a direct source semantics and the compiled-AF semantics") was
 **unprovable as originally stated** because `spec.md` §8 defined only the compiled route — no
@@ -219,14 +219,19 @@ partition), `status_preservation` (claim status) — plus the grounded-terminati
 independent semantics exists" objection: there is now a declarative grounded semantics distinct from
 the iteration, proved to agree with it.
 
-**Done modulo one executable obligation — source composition.** `Lara.Compile.SrcIn`/`SrcOut` and
-`SrcStatus` read the Prop-level frozen closure relation directly;
-`srcIn_iff_grounded`/`srcStatus_iff` prove equality with executable grounded status over `toAF`
-whenever `Compile.Faithful` ties its Boolean edge oracle to that relation.
-`Lara.Examples.edgeBEx_faithful` exercises a concrete strict-superset closure.
-Executable replay and proof-bearing raw-source `checkProgram` are now in
-place. The honest remaining boundary is the general checker-built edge
-decider and its `Faithful` proof (issue #17).
+**Done — source composition, oracle eliminated.** `Lara.Compile.SrcIn`/`SrcOut` and
+`SrcStatus` read the Prop-level frozen closure relation directly — the shadow of the *same*
+compiled `Edge`, not an independent calculus; `srcIn_iff_grounded`/`srcStatus_iff` prove equality
+with executable grounded status over `toAF` given `Compile.Faithful`. That `Faithful` obligation is
+no longer parametric: the checker-built closure decider `edgeB` (from `containsB` and
+`attackClosureB`) decides the frozen closure `Edge` exactly (`containsB_iff`, `attackClosureB_iff`,
+`edgeB_iff`, `edgeB_faithful`, with the `DisNodup` side condition from `hasSupport_disNodup`), so
+the specialized wrappers `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and
+`srcStatus_iff_checked` state source-vs-compiled agreement over an accepted program with **no oracle
+hypothesis**. `Lara.Examples` pins the decider (`checked_edge_fixture_faithful`,
+`checked_closure_status`) on concrete fixtures. Executable replay and proof-bearing raw-source
+`checkProgram` are in place. This closes issue #17; attack completeness (result 7) remains issue
+#18.
 
 The two definitional holes that made the status function partial (N17) are addressed in `spec.md` §8:
 the **hole-vs-complete-alternative** case (a complete `in` alternative dominates; `statusC_gap_iff`
@@ -244,8 +249,8 @@ four-state status is total and deterministic by construction.
   `lean/Lara/Prop.lean` machine-checks the equivalence laws, decidability, idempotence, and
   no-argument-reordering with no `sorry` and `propext` as the only axiom. **Lean 4 is the settled
   prover choice** (open question §8 #8 resolved). The ND adapter (result 10),
-  executable support/attack/program checkers (result 1), and the
-  oracle-parametric source bridge are now mechanized.
+  executable support/attack/program checkers (result 1), and the source-vs-compiled
+  bridge (result 6, `Faithful` now discharged by the checker-built `edgeB`) are now mechanized.
 - **Anonymizable from day one** (`popl-research-review.md` Phase C). No author-identifying paths,
   comments, or repo metadata in the proof development.
 - **No `sorry`/`admit` in main theorems** at M2 exit; a single replay command must check the whole
@@ -258,7 +263,7 @@ four-state status is total and deterministic by construction.
 ## 7. Open decisions
 
 1. **Result 9 in scope for the paper?** — high value, "should"; include if the M2 schedule holds.
-2. **General executable edge decider (#17)** — construct `Compile.Faithful`
-   from accepted programs to close result 6.
-3. **Attack completeness (#18)** — strengthen the accepted-program invariant
-   enough to state and prove result-7 status consistency.
+2. **General executable edge decider (#17)** — **done:** `Compile.edgeB`/`edgeB_faithful`
+   construct `Compile.Faithful` from accepted programs, closing result 6's source-vs-compiled half.
+3. **Attack completeness (#18)** — the next M2 tracker child: strengthen the accepted-program
+   invariant enough to state and prove result-7 status consistency.

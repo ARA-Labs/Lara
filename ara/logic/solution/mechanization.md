@@ -73,15 +73,20 @@ has precedent (Marmsoler–Brucker code-generate a Haskell oracle from an Isabel
   completeness (issue #18); accepted programs currently supply only attack
   soundness. Do NOT mechanize Path A unless the corpus forces the flip.
 
-## 5. Result 6: source-to-compiled bridge mechanized modulo the edge decider
+## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed)
 
 Result 6 ("status preservation between a *direct source semantics* and the compiled-AF semantics") is
 no longer blocked on a missing direct semantics. `Lara.Compile.SrcIn`/`SrcOut`/`SrcStatus` read the
-Prop-level source closure relation, and `srcIn_iff_grounded`/`srcStatus_iff` prove equality with
-executable grounded evaluation under `Compile.Faithful`; `Lara.Examples.edgeBEx_faithful` exercises
-a concrete strict-superset closure. Executable backend replay and proof-bearing
-raw-program construction are complete; the constructive residual is the
-general Boolean edge decider and its `Faithful` proof (issue #17).
+Prop-level source closure relation — the shadow of the *same* compiled `Edge`, not an independent
+calculus — and `srcIn_iff_grounded`/`srcStatus_iff` prove equality with executable grounded
+evaluation under `Compile.Faithful`. That `Faithful` obligation is no longer parametric: the
+checker-built closure decider `edgeB` (from `containsB`/`attackClosureB`) decides the frozen closure
+`Edge` relation exactly (`edgeB_faithful`, with the `DisNodup` side condition discharged by the
+checker's `hasSupport_disNodup`), so the specialized wrappers `checkedAF`,
+`srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` give source-vs-compiled
+agreement over an accepted program with **no oracle hypothesis**; `Lara.Examples` pins the decider on
+concrete fixtures. Executable backend replay and proof-bearing raw-program construction are complete.
+This closes issue #17; attack completeness (result 7) remains issue #18.
 
 ## 6. Sequencing and artifact hygiene
 

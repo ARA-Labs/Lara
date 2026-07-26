@@ -911,11 +911,13 @@ Attack(P) = { (w, v) | attack k declared in P
 judgment over closure edges agrees with the abstract grounded semantics of
 `lean/Lara/Grounded.lean` over the compiled AF at the argument level; and `srcStatus_iff` —
 the exact iff/equality characterization at four-state claim status (`SrcStatus`, read from the
-source judgment alone). Both levels are parametric in an edge oracle (`Faithful`).
+source judgment alone). The edge oracle these levels take (`Faithful`) is no longer a
+gap: the checker-built closure decider `edgeB` (built from `containsB` and
+`attackClosureB`) constructively supplies it via `Compile.edgeB_faithful`, so §9 result
+6's source-vs-compiled half now holds with no oracle hypothesis (specialized as
+`checkedAF` / `srcIn_iff_checkedGrounded` / `srcStatus_iff_checked`; issue #17 closed).
 Executable support, positional-attack, and proof-bearing raw-program checking
-are complete; the separate general checker-built edge decider and its
-`Faithful` proof (issue #17) are the remaining gap in §9 result 6's
-source-vs-compiled half. The closure's strict-superset behavior — one attack edging both the
+are complete. The closure's strict-superset behavior — one attack edging both the
 declared target and a distinct wrapper argument containing the occurrence, with the grounded
 verdict under a concrete decider — is pinned in `lean/Lara/Examples.lean`.)*
 
@@ -1045,21 +1047,27 @@ materializes the grounded iteration.
 status `W ⊢ p ⇓ status` equals `status(grounded(compile(W)), p)`. Equivalently, argument by argument,
 `W ⊢ a ⇓ in ⟺ a ∈ grounded(compile(W))`, and likewise for `out`/`undec`.
 
-**Mechanization status — source-to-compiled bridge, oracle-parametric (honest boundary).**
-`lean/Lara/Grounded.lean` proves declarative grounded semantics equal to executable bounded
-iteration over an arbitrary finite framework (`directIn_iff`, `labelC_inn/out/undec_iff`,
+**Mechanization status — source-to-compiled bridge, oracle eliminated (source-vs-compiled half
+complete).** `lean/Lara/Grounded.lean` proves declarative grounded semantics equal to executable
+bounded iteration over an arbitrary finite framework (`directIn_iff`, `labelC_inn/out/undec_iff`,
 `status_preservation`), including termination within `|Args|` steps (`grounded_stable`).
 `lean/Lara/Compile.lean` now instantiates that layer at checked source programs: `SrcIn`/`SrcOut`
-read the Prop-level subargument-closed source relation directly, while `srcIn_iff_grounded` and
+read the Prop-level subargument-closed source relation directly — the shadow of the *same* compiled
+closure `Edge`, not an independent declarative calculus — while `srcIn_iff_grounded` and
 `srcStatus_iff` prove argument membership and four-state source status equal the executable
-verdict over `toAF`. The theorem is parametric in `Faithful`, the obligation that a Boolean edge
-oracle decides the frozen source `Edge` relation exactly. `lean/Lara/Examples.lean` supplies a
-concrete faithful oracle whose closure relation strictly extends the direct attack and computes the
-expected defeated verdict. What remains is the **general checker-built edge decider** and its
-`Faithful` proof (issue #17). The executable backend replay interface and
-proof-bearing `checkProgram` construction from raw declarations are now in
-place; constructing the finite closure-edge decision function from the
-accepted program is the remaining result-6 obligation.
+verdict over `toAF`. The `Faithful` obligation those carried — that a Boolean edge decider agrees
+with the frozen closure `Edge` relation exactly — is no longer an assumption: `containsB`
+(subterm-occurrence) and `attackClosureB` (attack-on-any-contained-occurrence) build the checker's
+closure decider `edgeB`, and `edgeB_faithful` proves it decides `Edge` exactly, discharging
+`Faithful` constructively (`containsB_iff`/`attackClosureB_iff`/`edgeB_iff`, with the `DisNodup`
+side condition supplied by the checker's `hasSupport_disNodup`). The specialized wrappers
+`checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` therefore
+state result 6's source-vs-compiled half over an accepted program with **no oracle hypothesis**;
+`lean/Lara/Examples.lean` pins the checker-built decider and its grounded verdict on concrete
+fixtures. This closes issue #17. It does **not** relate an independent source calculus to the AF —
+`SrcIn`/`SrcOut` are the Prop-level shadow of the compiled edge closure that `edgeB` executes — and
+it does not establish grounded consistency or attack completeness; the residual half of result 6's
+neighborhood (attack completeness, needed for result 7) remains issue #18.
 The development is `sorry`-free within the standard axiom trio.
 
 ## 9. Static and semantic results required before freeze
@@ -1083,11 +1091,12 @@ The development is `sorry`-free within the standard axiom trio.
    `lean/Lara/Grounded.lean` `grounded_stable`/`grounded_fixpoint` — bounded iteration reaches the
    least fixed point within `|Args|` steps; aggregation is a total function of the labelling.)*
 6. Status preservation between a direct source semantics (§8.2) and compiled AF semantics.
-   *(Source-to-compiled bridge mechanized modulo the executable edge decider:
-   `lean/Lara/Compile.lean` `srcIn_iff_grounded` and `srcStatus_iff` connect source judgments
-   over subargument-closed `Edge` to executable grounded status whenever `Faithful` holds;
-   `lean/Lara/Examples.lean` proves a concrete faithful closure instance. The general checker-built
-   `Faithful` witness remains issue #17; see §8.2.)*
+   *(Source-vs-compiled half complete — oracle eliminated: `lean/Lara/Compile.lean`
+   `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` connect source
+   judgments over the subargument-closed `Edge` closure to executable grounded status over an
+   accepted program with **no `Faithful` hypothesis** — the checker-built `edgeB`/`edgeB_faithful`
+   discharge it constructively; `lean/Lara/Examples.lean` pins the decider on fixtures. Issue #17
+   closed. Attack completeness (result 7) remains issue #18; see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`. *(The §8.1 validator is

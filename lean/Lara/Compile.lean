@@ -27,10 +27,11 @@ What this file discharges, against the exact spec figure:
   `srcStatus_iff` proves it holds iff the status equals executable
   `Grounded.statusC` over the compiled AF. Together the two levels give
   source-to-compiled
-  status preservation with exactly **one** residual obligation: the Bool edge
-  relation is an oracle (`Faithful`). Executable support, positional-attack,
-  and whole-program checking now construct `CheckedProgram`; supplying the
-  general closure-edge decider and its `Faithful` proof (issue #17) closes §9
+  status preservation. The residual Bool-edge obligation is now discharged:
+  executable support, positional-attack, and whole-program checking construct
+  `CheckedProgram`, and the general closure-edge decider `edgeB` with its
+  `edgeB_faithful` proof (issue #17) supplies `Faithful` constructively —
+  exposed oracle-free through `checkedAF`/`srcStatus_iff_checked` — closing §9
   result 6's source-vs-compiled half. Nothing else is missing at this layer.
 
 Design notes:
@@ -95,12 +96,292 @@ theorem target_contains_occ {k : Attack.Attack} {t : SupportTerm}
   | undercut w u π => exact ⟨π, h⟩
   | undermine w u π => exact ⟨π, h⟩
 
+/-! ### Decidable structural closure (spec §8, executable)
+
+`Contains` quantifies over the infinite position type, so it is not directly
+decidable. `containsB` is its total Boolean twin: a structural scan over every
+occurrence (premise and discharge subterms, self included). It agrees with
+`Contains` on the well-formed domain (`DisNodup`), and the guard is
+load-bearing — a duplicate discharge key makes the scan see a branch the
+positional `lookupDis` (first-match) can never reach. -/
+
+mutual
+  /-- `containsB v t`: does `t` occur structurally in `v`? A total Boolean scan
+  over `v` and its premise/discharge subterms. Uses explicit list recursion
+  (Lean 4.32 cannot recurse through `SupportTerm`'s nested list fields via a
+  `List.any` lambda), mirroring `leaves`/`leavesList`/`leavesDis`. -/
+  def containsB : SupportTerm → SupportTerm → Bool
+    | .leaf l, t => decide (.leaf l = t)
+    | .inst r θ ws ds hs a, t =>
+        decide (.inst r θ ws ds hs a = t) || containsBList ws t || containsBDis ds t
+  def containsBList : List SupportTerm → SupportTerm → Bool
+    | [], _ => false
+    | w :: ws, t => containsB w t || containsBList ws t
+  def containsBDis : List (QuestionId × SupportTerm) → SupportTerm → Bool
+    | [], _ => false
+    | (_, w) :: rest, t => containsB w t || containsBDis rest t
+end
+
+/-- `attackClosureB k target`: does the attacked occurrence of `k` occur in
+`target`? For a rebut the occurrence is the whole target term; for an
+undercut/undermine it is the subterm at the attack's position (`none` off
+range gives `false`). This is the executable closure test behind `Edge`. -/
+def attackClosureB (k : Attack.Attack) (target : SupportTerm) : Bool :=
+  match k with
+  | .rebut _ u => containsB target u
+  | .undercut _ u π | .undermine _ u π =>
+      match Attack.subterm u π with
+      | some t => containsB target t
+      | none => false
+
+mutual
+  /-- Recursive discharge-key distinctness: at every `inst` node the discharge
+  keys are `Nodup`. This is the well-formedness the frontend cannot forge
+  (guaranteed by the checker, `hasSupport_disNodup`) and exactly the domain on
+  which `containsB` agrees with the positional `Contains`. -/
+  def DisNodup : SupportTerm → Prop
+    | .leaf _ => True
+    | .inst _ _ ws D _ _ => (D.map Prod.fst).Nodup ∧ DisNodupList ws ∧ DisNodupDis D
+  def DisNodupList : List SupportTerm → Prop
+    | [] => True
+    | w :: ws => DisNodup w ∧ DisNodupList ws
+  def DisNodupDis : List (QuestionId × SupportTerm) → Prop
+    | [] => True
+    | (_, w) :: rest => DisNodup w ∧ DisNodupDis rest
+end
+
 /-! ### Checked programs and the compiled edge relation (spec §8, frozen) -/
 
 variable {canon : String → String} {Pi : RuleId → Option Rule}
   {Gamma : LeafId → Option Atom}
   {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
   {dp : Attack.DefeatPolicy}
+
+/-- **Every checked support term satisfies `DisNodup`.** By induction on
+`HasSupport`: the top-level discharge keys are `Nodup` by `InstSide.dNodup`,
+and the premise/discharge subterms satisfy `DisNodup` by the induction
+hypotheses. The recursive `DisNodupList`/`DisNodupDis` facts are rebuilt by an
+auxiliary induction on the list with index bookkeeping (mirroring
+`leaves_declared`). -/
+theorem hasSupport_disNodup {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk w C O) : DisNodup w := by
+  induction h with
+  | leaf _ => exact True.intro
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    refine ⟨hside.dNodup, ?_, ?_⟩
+    · -- `DisNodupList ws` from the per-index premise IH.
+      clear hprems hdis ihdis
+      have hlen : Cs.length = ws.length := hside.lenCs
+      have hlenO : Os.length = ws.length := hside.lenOs
+      -- generalize over an index offset so `ws[i]?` lines up with the tail.
+      suffices H : ∀ (ws' : List SupportTerm),
+          (∀ (i : Nat) (w' : SupportTerm), ws'[i]? = some w' → DisNodup w') →
+          DisNodupList ws' by
+        exact H ws (fun i w' hw' => by
+          have hi := lt_of_getElem?_some hw'
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i (by omega)
+          obtain ⟨O', hO⟩ := getElem?_some_of_lt Os i (by omega)
+          exact ihprems i w' A O' hw' hA hO)
+      intro ws' hall
+      induction ws' with
+      | nil => exact True.intro
+      | cons x xs ih =>
+        refine ⟨hall 0 x rfl, ih (fun i w' hw' => hall (i + 1) w' (by simpa using hw'))⟩
+    · -- `DisNodupDis D` from the per-index discharge IH.
+      clear hprems hdis ihprems
+      have hlen : DCs.length = D.length := hside.lenDCs
+      have hlenO : DOs.length = D.length := hside.lenDOs
+      suffices H : ∀ (D' : List (QuestionId × SupportTerm)),
+          (∀ (j : Nat) (q : QuestionId) (w' : SupportTerm),
+            D'[j]? = some (q, w') → DisNodup w') →
+          DisNodupDis D' by
+        exact H D (fun j q w' hw' => by
+          have hj := lt_of_getElem?_some hw'
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j (by omega)
+          obtain ⟨O', hO⟩ := getElem?_some_of_lt DOs j (by omega)
+          exact ihdis j q w' A O' hw' hA hO)
+      intro D' hall
+      induction D' with
+      | nil => exact True.intro
+      | cons x xs ih =>
+        obtain ⟨q, w'⟩ := x
+        refine ⟨hall 0 q w' rfl, ih (fun j q'' w'' hw'' =>
+          hall (j + 1) q'' w'' (by simpa using hw''))⟩
+
+/-- A successful `lookupDis` names a key that is present. Used to discharge the
+`containsBDis` cons lifting: a hit deeper in the list has a key distinct from
+the head (by `Nodup`), so the head branch does not shadow it. -/
+theorem lookupDis_some_mem {D : List (QuestionId × SupportTerm)}
+    {q : QuestionId} {w : SupportTerm} (h : Attack.lookupDis D q = some w) :
+    q ∈ D.map Prod.fst := by
+  induction D with
+  | nil => simp [Attack.lookupDis] at h
+  | cons hd tl ih =>
+    obtain ⟨q', w'⟩ := hd
+    simp only [Attack.lookupDis] at h
+    by_cases hq : q' = q
+    · subst hq; simp
+    · simp only [if_neg hq] at h
+      exact List.mem_cons.mpr (Or.inr (ih h))
+
+/-- **`containsB` decides `Contains` on the `DisNodup` domain.** The mutual
+statement over the three scanners is proved together (via the four-motive
+`SupportTerm.rec`), generalized over the query. Forward: a hit in
+`containsBList`/`containsBDis` yields a positional witness — for discharges the
+`Nodup` key set makes `lookupDis` return exactly the branch that hit (the
+load-bearing use of the guard). Reverse: a position witness reduces the
+matching branch. -/
+theorem containsB_iff {v : SupportTerm} (hwf : DisNodup v) (t : SupportTerm) :
+    containsB v t = true ↔ Contains v t := by
+  revert t hwf
+  refine SupportTerm.rec
+    (motive_1 := fun v => DisNodup v → ∀ t,
+      containsB v t = true ↔ Contains v t)
+    (motive_2 := fun ws => DisNodupList ws → ∀ t,
+      containsBList ws t = true ↔ ∃ (i : Nat) (w : SupportTerm), ws[i]? = some w ∧ Contains w t)
+    (motive_3 := fun D => (D.map Prod.fst).Nodup → DisNodupDis D → ∀ t,
+      containsBDis D t = true ↔ ∃ q w, Attack.lookupDis D q = some w ∧ Contains w t)
+    (motive_4 := fun p => DisNodup p.2 → ∀ t,
+      containsB p.2 t = true ↔ Contains p.2 t)
+    ?leaf ?inst ?nilL ?consL ?nilD ?consD ?pair v
+  case leaf =>
+    intro l _ t
+    simp only [containsB]
+    constructor
+    · intro h
+      refine ⟨[], ?_⟩
+      simp only [Attack.subterm]
+      exact congrArg some (of_decide_eq_true h)
+    · rintro ⟨π, hπ⟩
+      cases π with
+      | nil => exact decide_eq_true (by simpa only [Attack.subterm, Option.some.injEq] using hπ)
+      | cons e rest => simp [Attack.subterm] at hπ
+  case inst =>
+    intro r θ ws ds hs a ihL ihD hwf t
+    obtain ⟨hnodup, hwfL, hwfD⟩ := hwf
+    simp only [containsB, Bool.or_eq_true]
+    rw [ihL hwfL t, ihD hnodup hwfD t]
+    constructor
+    · rintro ((h | ⟨i, w, hw, hc⟩) | ⟨q, w, hq, hc⟩)
+      · exact ⟨[], congrArg some (of_decide_eq_true h)⟩
+      · obtain ⟨π, hπ⟩ := hc
+        exact ⟨.prem i :: π, by simp only [Attack.subterm, hw]; exact hπ⟩
+      · obtain ⟨π, hπ⟩ := hc
+        exact ⟨.ques q :: π, by simp only [Attack.subterm, hq]; exact hπ⟩
+    · rintro ⟨π, hπ⟩
+      cases π with
+      | nil =>
+        simp only [Attack.subterm, Option.some.injEq] at hπ
+        exact Or.inl (Or.inl (decide_eq_true hπ))
+      | cons e rest =>
+        cases e with
+        | prem i =>
+          simp only [Attack.subterm] at hπ
+          revert hπ
+          cases hw : ws[i]? with
+          | none => intro h; simp at h
+          | some w => intro hπ; exact Or.inl (Or.inr ⟨i, w, hw, rest, hπ⟩)
+        | ques q =>
+          simp only [Attack.subterm] at hπ
+          revert hπ
+          cases hq : Attack.lookupDis ds q with
+          | none => intro h; simp at h
+          | some w => intro hπ; exact Or.inr ⟨q, w, hq, rest, hπ⟩
+  case nilL =>
+    intro _ t
+    simp only [containsBList]
+    constructor
+    · intro h; simp at h
+    · rintro ⟨i, w, hw, _⟩; simp at hw
+  case consL =>
+    intro x xs ihx ihxs hwf t
+    obtain ⟨hwfx, hwfxs⟩ := hwf
+    simp only [containsBList, Bool.or_eq_true]
+    rw [ihx hwfx t, ihxs hwfxs t]
+    constructor
+    · rintro (h | ⟨i, w, hw, hc⟩)
+      · exact ⟨0, x, rfl, h⟩
+      · exact ⟨i + 1, w, by simpa using hw, hc⟩
+    · rintro ⟨i, w, hw, hc⟩
+      cases i with
+      | zero =>
+        simp only [List.getElem?_cons_zero, Option.some.injEq] at hw
+        exact Or.inl (by rw [hw]; exact hc)
+      | succ j => exact Or.inr ⟨j, w, by simpa using hw, hc⟩
+  case nilD =>
+    intro _ _ t
+    simp only [containsBDis]
+    constructor
+    · intro h; simp at h
+    · rintro ⟨q, w, hq, _⟩; simp [Attack.lookupDis] at hq
+  case consD =>
+    intro hd tl ih4 ihtl hnodup hwf t
+    obtain ⟨q0, w0⟩ := hd
+    rw [List.map_cons] at hnodup
+    obtain ⟨hkey, hkeys⟩ := List.nodup_cons.mp hnodup
+    obtain ⟨hwf0, hwftl⟩ := hwf
+    simp only [containsBDis, Bool.or_eq_true]
+    rw [ih4 hwf0 t, ihtl hkeys hwftl t]
+    constructor
+    · rintro (hc | ⟨q, w, hq, hc⟩)
+      · exact ⟨q0, w0, by simp [Attack.lookupDis], hc⟩
+      · refine ⟨q, w, ?_, hc⟩
+        have hqne : q0 ≠ q := fun h => hkey (by rw [h]; exact lookupDis_some_mem hq)
+        simp [Attack.lookupDis, hqne, hq]
+    · rintro ⟨q, w, hq, hc⟩
+      simp only [Attack.lookupDis] at hq
+      by_cases hqq : q0 = q
+      · rw [if_pos hqq, Option.some.injEq] at hq
+        exact Or.inl (by rw [hq]; exact hc)
+      · rw [if_neg hqq] at hq
+        exact Or.inr ⟨q, w, hq, hc⟩
+  case pair =>
+    intro _ w ih
+    exact ih
+
+/-- **`attackClosureB` decides the closure test.** `attackClosureB k target`
+holds iff some attacked occurrence of `k` is contained in `target`. Each attack
+form threads `hwf` into `containsB_iff`. -/
+theorem attackClosureB_iff {target : SupportTerm} (hwf : DisNodup target)
+    (k : Attack.Attack) :
+    attackClosureB k target = true ↔ ∃ t, AttackOcc k t ∧ Contains target t := by
+  cases k with
+  | rebut w u =>
+    constructor
+    · intro h
+      simp only [attackClosureB] at h
+      exact ⟨u, rfl, (containsB_iff hwf u).mp h⟩
+    · rintro ⟨t, ht, hc⟩
+      simp only [AttackOcc] at ht
+      subst ht
+      simp only [attackClosureB]
+      exact (containsB_iff hwf t).mpr hc
+  | undercut w u π =>
+    constructor
+    · intro h
+      simp only [attackClosureB] at h
+      revert h
+      cases hs : Attack.subterm u π with
+      | none => intro h; simp at h
+      | some s => intro h; exact ⟨s, hs, (containsB_iff hwf s).mp h⟩
+    · rintro ⟨t, ht, hc⟩
+      simp only [AttackOcc] at ht
+      simp only [attackClosureB]
+      rw [ht]
+      exact (containsB_iff hwf t).mpr hc
+  | undermine w u π =>
+    constructor
+    · intro h
+      simp only [attackClosureB] at h
+      revert h
+      cases hs : Attack.subterm u π with
+      | none => intro h; simp at h
+      | some s => intro h; exact ⟨s, hs, (containsB_iff hwf s).mp h⟩
+    · rintro ⟨t, ht, hc⟩
+      simp only [AttackOcc] at ht
+      simp only [attackClosureB]
+      rw [ht]
+      exact (containsB_iff hwf t).mpr hc
 
 /-- A well-formed source program at the compile boundary: declared arguments
 with evidence they are complete checked support terms (`O = ∅`, spec §8
@@ -175,9 +456,10 @@ an arbitrary abstract AF, where the earlier layer characterized `compile`
 without exercising it. Here we exercise it: index the checked program's arguments by list position,
 compile to a `Grounded.AF`, and show a source-level declarative judgment
 defined over the Prop-level closure edges agrees with the abstract one —
-first per argument, then lifted to four-state claim status. The Bool edge
-relation remains oracle-parametric (`Faithful`) until the general checker-built
-edge decider lands (issue #17). -/
+first per argument, then lifted to four-state claim status. The bridge below
+stays oracle-parametric (`Faithful`) by design; the checker-built
+`edgeB`/`edgeB_faithful` (issue #17) instantiate it in the "Oracle-free
+result-6 wrappers" section. -/
 
 /-- The compiled abstract AF: arguments are indices into `P.args`; the edge
 relation is the supplied oracle. -/
@@ -195,6 +477,66 @@ structure Faithful (P : CheckedProgram canon Pi Gamma CertOk dp)
   agrees : ∀ (i j : Nat) (a b : SupportTerm),
     P.args[i]? = some a → P.args[j]? = some b →
     (edgeB i j = true ↔ Edge P a b)
+
+/-- **The checked-program edge decider (issue #17).** Indexing the checked
+program's arguments by list position, `edgeB P i j` decides `Edge P a b` for the
+terms `a`/`b` at those positions: out-of-range on either side is no edge, and in
+range it scans the declared attacks for one sourced at `a` whose attacked
+occurrence is structurally contained in `b` (`attackClosureB`). -/
+def edgeB (P : CheckedProgram canon Pi Gamma CertOk dp)
+    (i j : Nat) : Bool :=
+  match P.args[i]?, P.args[j]? with
+  | some source, some target =>
+      P.atts.any (fun k =>
+        decide (k.source = source) && attackClosureB k target)
+  | _, _ => false
+
+/-- **`edgeB` decides `Edge` on declared endpoints.** With the source/target
+terms pinned by their positions, the scan agrees with the `Edge` relation; the
+`DisNodup` side-condition of `attackClosureB_iff` is discharged from the
+checker's completeness invariant (`hasSupport_disNodup`). -/
+theorem edgeB_iff {P : CheckedProgram canon Pi Gamma CertOk dp}
+    {i j : Nat} {source target : SupportTerm}
+    (hsource : P.args[i]? = some source)
+    (htarget : P.args[j]? = some target) :
+    edgeB P i j = true ↔ Edge P source target := by
+  have hmem : target ∈ P.args := List.mem_of_getElem? htarget
+  obtain ⟨C, hC⟩ := P.complete target hmem
+  have hdn : DisNodup target := hasSupport_disNodup hC
+  constructor
+  · intro h
+    unfold edgeB at h
+    rw [hsource, htarget] at h
+    obtain ⟨k, hk, hpk⟩ := List.any_eq_true.mp h
+    rw [Bool.and_eq_true] at hpk
+    obtain ⟨hsrc, hcl⟩ := hpk
+    have hsrceq : k.source = source := of_decide_eq_true hsrc
+    obtain ⟨t, hocc, hcont⟩ := (attackClosureB_iff hdn k).mp hcl
+    exact ⟨List.mem_of_getElem? hsource, hmem, k, hk, hsrceq, t, hocc, hcont⟩
+  · rintro ⟨_, _, k, hk, hsrceq, t, hocc, hcont⟩
+    unfold edgeB
+    rw [hsource, htarget]
+    rw [List.any_eq_true]
+    refine ⟨k, hk, ?_⟩
+    rw [Bool.and_eq_true]
+    exact ⟨decide_eq_true hsrceq, (attackClosureB_iff hdn k).mpr ⟨t, hocc, hcont⟩⟩
+
+/-- **`edgeB` is a faithful decider.** `ranged`: an edge forces the `some,some`
+branch, so both positions are in range; `agrees` is `edgeB_iff` under the
+position hypotheses. This constructively discharges the `Faithful` oracle. -/
+theorem edgeB_faithful (P : CheckedProgram canon Pi Gamma CertOk dp) :
+    Faithful P (edgeB P) := by
+  refine ⟨?_, ?_⟩
+  · intro i j h
+    unfold edgeB at h
+    cases hi : P.args[i]? with
+    | none => rw [hi] at h; simp at h
+    | some source =>
+      cases hj : P.args[j]? with
+      | none => rw [hi, hj] at h; simp at h
+      | some target => exact ⟨lt_of_getElem?_some hi, lt_of_getElem?_some hj⟩
+  · intro i j a b hi hj
+    exact edgeB_iff hi hj
 
 /- Source-level declarative grounded judgment, over the *Prop-level* closure
 edges — never materializing the iteration or the Bool oracle. `SrcIn P i`:
@@ -299,9 +641,9 @@ inductive SrcStatus (P : CheckedProgram canon Pi Gamma CertOk dp)
 /-- **The N16 bridge, claim-status level.** The source-level status relation
 holds exactly at the executable compiled status: `SrcStatus P c
 (Grounded.statusC (toAF P edgeB) c)`. With `srcIn_iff_grounded` this is
-source-to-compiled status preservation, oracle-parametric — the constructive
-`Faithful` from the M2 decider slice is the only remaining gap in §9 result
-6's source-vs-compiled half. -/
+source-to-compiled status preservation, oracle-parametric — instantiated
+oracle-free by the constructive `Faithful` from `edgeB_faithful` (issue #17)
+in `srcStatus_checked`. -/
 theorem srcStatus_correct {P : CheckedProgram canon Pi Gamma CertOk dp}
     {edgeB : Nat → Nat → Bool} (hf : Faithful P edgeB) (c : Grounded.Claim) :
     SrcStatus P c (Grounded.statusC (toAF P edgeB) c) := by
@@ -403,5 +745,40 @@ theorem srcStatus_iff {P : CheckedProgram canon Pi Gamma CertOk dp}
   · intro hs
     subst s
     exact srcStatus_correct hf c
+
+/-! ### Oracle-free result-6 wrappers
+
+The generic bridge above is parametric in an arbitrary `Faithful` decider. The
+following instantiate it at the checker-built `edgeB P` / `edgeB_faithful P`, so
+the `Faithful` oracle is supplied *constructively*: no caller manufactures it.
+This discharges §9 result 6's source-vs-compiled half. -/
+
+/-- The compiled AF built from the checker's own edge decider — the oracle-free
+counterpart of `toAF P edgeB`. -/
+def checkedAF (P : CheckedProgram canon Pi Gamma CertOk dp) : Grounded.AF :=
+  toAF P (edgeB P)
+
+/-- Oracle-free source-in preservation: source-level in agrees with the
+executable grounded extension over `checkedAF P`. -/
+theorem srcIn_iff_checkedGrounded
+    (P : CheckedProgram canon Pi Gamma CertOk dp) (i : Nat) :
+    SrcIn P i ↔ i ∈ Grounded.grounded (checkedAF P) :=
+  srcIn_iff_grounded (edgeB_faithful P) i
+
+/-- Oracle-free source-to-compiled status preservation: the source status
+relation holds at the executable compiled status over `checkedAF P`. -/
+theorem srcStatus_checked
+    (P : CheckedProgram canon Pi Gamma CertOk dp) (c : Grounded.Claim) :
+    SrcStatus P c (Grounded.statusC (checkedAF P) c) :=
+  srcStatus_correct (edgeB_faithful P) c
+
+/-- Oracle-free exact status preservation: a source status derivation exists
+exactly for the single status returned by compiled grounded evaluation over
+`checkedAF P`. -/
+theorem srcStatus_iff_checked
+    (P : CheckedProgram canon Pi Gamma CertOk dp) (c : Grounded.Claim)
+    (s : Grounded.Status) :
+    SrcStatus P c s ↔ s = Grounded.statusC (checkedAF P) c :=
+  srcStatus_iff (edgeB_faithful P) c s
 
 end Lara.Compile

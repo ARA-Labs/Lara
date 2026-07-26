@@ -233,8 +233,8 @@ M1 complete: the `lara-core@0.1` language is frozen in
 [`docs/spec.md`](docs/spec.md). **Mechanized in Lean 4** (`lean/`, `sorry`-free,
 standard axiom trio): results 2, 4, 5, 8, 10, and 11; the leaf half of result 3;
 the exact executable support/positional-attack/program-checker portion of
-result 1; the source-to-compiled bridge for result 6 modulo the general
-executable edge decider (#17); and the §8.1
+result 1; the source-vs-compiled half of result 6 via the checker-built edge
+decider (#17 closed; attack completeness for result 7 remains, #18); and the §8.1
 strict-reachable/`wf(Pi)` validator underlying result 7. **Data-only skeleton:**
 the full claim-support AST, worked ARA-Demo examples, and rejection-class
 negatives. **Non-shipping seed:** the LP adapter that checks explicit LP

@@ -1292,6 +1292,32 @@ theorem vWrap_typed : HasSupport id PiEx ΓEx certOkNone vWrap pB [] :=
 `leaf l1` at its root — `pB` is a declared contrary of `pA`. -/
 def kAtk : Attack.Attack := .undermine (.leaf l2) (.leaf l1) []
 
+/-! ### Supporting terms for the decidable-closure fixtures (Task 1)
+
+Small closed terms exercising every branch of `containsB`/`attackClosureB`,
+including the off-`DisNodup`-domain divergence between `containsB` and
+`Contains` (a duplicate discharge key). -/
+
+/-- A discharge-only instance: `l1` discharges question `q1`. Exercises the
+`containsBDis` recursion (`containsB_discharge_hit`). -/
+def vDis : SupportTerm := .inst rWrapId [] [] [(q1, .leaf l1)] [] .none
+
+/-- A **duplicate discharge key** instance — `q1` maps to both `l1` and `l2`.
+This is *not* `DisNodup`, so `containsB` (which scans every discharge branch)
+and `Contains` (positional, where `lookupDis` returns the FIRST match only)
+diverge on the query `.leaf l2`. -/
+def vDup : SupportTerm :=
+  .inst rWrapId [] [] [(q1, .leaf l1), (q1, .leaf l2)] [] .none
+
+/-- A rebut whose attacked occurrence is the whole target term. -/
+def kReb : Attack.Attack := .rebut (.leaf l2) vWrap
+
+/-- An undermine descending to `vWrap`'s premise `.leaf l1` at `[.prem 0]`. -/
+def kPos : Attack.Attack := .undermine (.leaf l2) vWrap [.prem 0]
+
+/-- An undermine with an out-of-range premise index — `subterm` is `none`. -/
+def kBadPos : Attack.Attack := .undermine (.leaf l2) vWrap [.prem 9]
+
 def dpEx : Attack.DefeatPolicy := ⟨[(apB, apA)], []⟩
 
 theorem kAtk_typed :
@@ -1523,6 +1549,79 @@ theorem closure_edge_wrapper : Edge PEx (.leaf l2) vWrap :=
   ⟨by simp, by simp, kAtk, by simp, rfl,
     .leaf l1, rfl, ⟨[.prem 0], by simp [vWrap, Attack.subterm]⟩⟩
 
+/-! ### Decidable structural closure (`containsB`/`attackClosureB`, Task 1)
+
+Branch-coverage fixtures for the total Boolean occurrence and closure
+predicates, including the guarded-domain divergence from `Contains`. -/
+
+theorem containsB_wrapper_leaf :
+    Compile.containsB vWrap (.leaf l1) = true := by decide
+
+theorem containsB_leaf_unrelated :
+    Compile.containsB (.leaf l2) (.leaf l1) = false := by decide
+
+theorem attackClosureB_direct :
+    Compile.attackClosureB kAtk (.leaf l1) = true := by decide
+
+theorem attackClosureB_wrapper :
+    Compile.attackClosureB kAtk vWrap = true := by decide
+
+/-- `containsB`: the `inst` self-equal true branch. -/
+theorem containsB_inst_self : Compile.containsB vWrap vWrap = true := by decide
+
+/-- `containsB`: positive discharge containment (exercises `containsBDis`). -/
+theorem containsB_discharge_hit :
+    Compile.containsB vDis (.leaf l1) = true := by decide
+
+/-- `containsB` vs `Contains` DIVERGE off the well-formed (`DisNodup`) domain:
+`vDup` scans both discharge branches, so `containsB` finds `.leaf l2`, but the
+positional `Contains` cannot — `lookupDis` returns only the FIRST `q1` match
+(`.leaf l1`). This is the shadowing counterexample the `DisNodup` guard on
+`containsB_iff` rules out. -/
+theorem containsB_dupkey_true :
+    Compile.containsB vDup (.leaf l2) = true := by decide
+
+theorem containsB_dupkey_not_contains :
+    ¬ Compile.Contains vDup (.leaf l2) := by
+  rintro ⟨π, hπ⟩
+  cases π with
+  | nil => simp [Attack.subterm, vDup, l1, l2] at hπ
+  | cons e rest =>
+    cases e with
+    | prem i =>
+      -- `vDup` has empty premise list, so `ws[i]? = none`.
+      simp [Attack.subterm, vDup] at hπ
+    | ques q =>
+      -- `lookupDis` returns the FIRST `q1` match (`.leaf l1`); `q ≠ q1` is none.
+      simp only [Attack.subterm, vDup] at hπ
+      by_cases hq : q1 = q
+      · subst hq
+        simp only [Attack.lookupDis, if_pos] at hπ
+        -- descended into `.leaf l1`, which can never reach `.leaf l2`.
+        cases rest with
+        | nil => simp [Attack.subterm, l1, l2] at hπ
+        | cons e' rest' => simp [Attack.subterm] at hπ
+      · simp [Attack.lookupDis, hq] at hπ
+
+/-- `vDup` genuinely lies OFF the `DisNodup` domain: its discharge keys are
+`[q1, q1]`, not `Nodup`. This pins as a theorem the "off-domain" premise that
+`containsB_dupkey_true`/`containsB_dupkey_not_contains` rest on — the divergence
+is a guarded-out case, not a `containsB`/`Contains` agreement bug. -/
+theorem vDup_not_disNodup : ¬ Compile.DisNodup vDup := by
+  simp [Compile.DisNodup, vDup]
+
+/-- `attackClosureB`: the `.rebut` branch (occurrence IS the whole target). -/
+theorem attackClosureB_rebut :
+    Compile.attackClosureB kReb vWrap = true := by decide
+
+/-- `attackClosureB`: positional `π ≠ []` some-case (descends into `vWrap`). -/
+theorem attackClosureB_positional :
+    Compile.attackClosureB kPos (.leaf l1) = true := by decide
+
+/-- `attackClosureB`: out-of-position none→false case. -/
+theorem attackClosureB_badpos :
+    Compile.attackClosureB kBadPos (.leaf l1) = false := by decide
+
 /-- **No spurious edge:** a term not containing the attacked occurrence gets
 no edge. -/
 theorem closure_no_edge_unrelated : ¬ Edge PEx (.leaf l2) (.leaf l2) := by
@@ -1588,15 +1687,66 @@ theorem edgeBEx_faithful : Faithful PEx edgeBEx where
     all_goals subst b
     all_goals simp [edgeBEx, edge_fixture_iff, vWrap, l1, l2]
 
+/-- **The checked-program edge decider on `PEx`.** `edgeB` reads the edges
+directly off the checked program: index 0 (`.leaf l2`) attacks the direct target
+1 (`.leaf l1`) and the wrapper 2 (`vWrap`); non-source rows and out-of-range
+indices give no edge. -/
+theorem checked_edge_fixture :
+    Compile.edgeB PEx 0 1 = true ∧
+    Compile.edgeB PEx 0 2 = true ∧
+    Compile.edgeB PEx 1 1 = false ∧
+    Compile.edgeB PEx 3 1 = false ∧
+    Compile.edgeB PEx 0 3 = false := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+    simp only [Compile.edgeB, PEx_args, PEx_atts, kAtk, List.any_cons,
+      List.any_nil, Compile.attackClosureB, Attack.subterm, Compile.containsB,
+      vWrap, l1, l2, List.getElem?_cons_zero, List.getElem?_cons_succ,
+      List.getElem?_nil] <;> decide
+
+/-- The checked decider is faithful — a corollary of the general
+`edgeB_faithful`, exercised on the running example. -/
+theorem checked_edge_fixture_faithful :
+    Compile.Faithful PEx (Compile.edgeB PEx) :=
+  Compile.edgeB_faithful PEx
+
+/-- **`edgeB PEx` and the hand-written `edgeBEx` decide the same edges.** The
+checker-built decider extensionally matches the concrete oracle used above, so
+the regression carries over. -/
+theorem edgeB_PEx_eq_edgeBEx : Compile.edgeB PEx = edgeBEx := by
+  funext i j
+  rcases i with _ | _ | _ | i <;> rcases j with _ | _ | _ | j <;>
+    simp only [Compile.edgeB, edgeBEx, PEx_args, PEx_atts, kAtk, List.any_cons,
+      List.any_nil, Compile.attackClosureB, Attack.subterm, Compile.containsB,
+      vWrap, l1, l2, List.getElem?_cons_zero, List.getElem?_cons_succ,
+      List.getElem?_nil, Nat.reduceBEq] <;> rfl
+
 /-- **Grounded verdict through the closure edges:** the attacker is `in`, the
 attacked argument *and* the wrapper are `out`, and the wrapper's claim is
 `defeated` purely via the closure edge — computed by the executable grounded
-semantics over the compiled AF under the concrete decider. -/
+semantics over the compiled AF under the *checker-built* decider `edgeB PEx`. -/
 theorem closure_grounded_verdict :
-    Grounded.labelC (toAF PEx edgeBEx) 0 = Grounded.Label.inn ∧
-    Grounded.labelC (toAF PEx edgeBEx) 1 = Grounded.Label.out ∧
-    Grounded.labelC (toAF PEx edgeBEx) 2 = Grounded.Label.out ∧
-    Grounded.statusC (toAF PEx edgeBEx) ⟨[2], []⟩ = Grounded.Status.defeated := by
-  decide
+    Grounded.labelC (toAF PEx (Compile.edgeB PEx)) 0 = Grounded.Label.inn ∧
+    Grounded.labelC (toAF PEx (Compile.edgeB PEx)) 1 = Grounded.Label.out ∧
+    Grounded.labelC (toAF PEx (Compile.edgeB PEx)) 2 = Grounded.Label.out ∧
+    Grounded.statusC (toAF PEx (Compile.edgeB PEx)) ⟨[2], []⟩
+      = Grounded.Status.defeated := by
+  rw [show Compile.edgeB PEx = edgeBEx from edgeB_PEx_eq_edgeBEx]; decide
+
+/-- **Oracle-free compiled-AF status through `checkedAF`.** The wrapper AF is
+`toAF PEx (edgeB PEx)`; the wrapper's claim is `defeated` computed by the
+executable grounded semantics over it. -/
+theorem checked_closure_status :
+    Grounded.statusC (Compile.checkedAF PEx) ⟨[2], []⟩ =
+      Grounded.Status.defeated := by
+  rw [Compile.checkedAF,
+    show Compile.edgeB PEx = edgeBEx from edgeB_PEx_eq_edgeBEx]; decide
+
+/-- **Oracle-free source status witness.** `srcStatus_checked` supplies the
+`Faithful` oracle constructively, so a source-level derivation exists for the
+compiled `defeated` verdict with no oracle argument. -/
+theorem checked_src_status_exists :
+    ∃ s, Compile.SrcStatus PEx ⟨[2], []⟩ s :=
+  ⟨Grounded.Status.defeated,
+    Compile.srcStatus_checked PEx ⟨[2], []⟩⟩
 
 end Lara.Examples

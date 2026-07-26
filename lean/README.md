@@ -13,7 +13,7 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **10** (ND adapter soundness + dependency exactness) | `Lara/ND.lean` | ✅ **mechanized** — `nd_sound`, `nd_relevance`, `fv_in_range`, `hyp_out_of_range_untypable`, plus the `infer` decision-procedure bridge. No `sorry`; `propext`/`Quot.sound` only. |
 | **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `strict_step_sound` needs no axioms, while `nd_strict_step_sound` uses the standard trio (`propext`, `Classical.choice`, `Quot.sound`). |
 | **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; AxCheck reports the standard trio (`propext`, `Classical.choice`, `Quot.sound`) for all three results. |
-| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **mechanized modulo the executable edge decider** — source `SrcIn`/`SrcOut` and four-state `SrcStatus` agree exactly with executable grounded evaluation over `toAF` (`srcIn_iff_grounded`, `srcStatus_iff`) whenever `Faithful` decides the frozen closure relation. `Lara/Examples.lean` supplies a concrete faithful decider that exercises a strict closure edge. The general checker-built decider remains issue #17. |
+| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **source-vs-compiled half complete: the `Faithful` oracle is now constructively supplied by `Compile.edgeB_faithful`** — the checker-built closure decider `edgeB` (from `containsB`/`attackClosureB`) decides the frozen closure `Edge` exactly (`edgeB_faithful`), so the specialized wrappers `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` state source-vs-compiled status agreement over an accepted program with **no oracle hypothesis** (`SrcIn`/`SrcOut`/`SrcStatus` being the Prop-level shadow of that same compiled closure, not an independent calculus). `Lara/Examples.lean` pins the decider on concrete fixtures. Issue #17 closed. Residual half — attack completeness for grounded consistency (result 7) — is issue #18. |
 | **5** (grounded termination + determinism) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ✅ **mechanized** — bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|` steps; `toAF` instantiates the result for checked programs. |
 | **4** (compilation soundness) | `Lara/Compile.lean`, `Lara/Examples.lean` | ✅ **mechanized (relational compile layer)** — only complete checked terms become nodes; only typed declared attacks produce edges; direct and strict-superset closure behavior are proved concretely. |
 | **3** (dependency accountability) | `Lara/Support.lean` | ◐ **partially mechanized** — `leaves_declared` proves the source-leaf half; backend `certDeps` accountability separately awaits a `Backend.uses` field. |
@@ -62,9 +62,10 @@ anything outside that trio.
 The grounded least-fixpoint (result 5 core) is done **in core Lean 4** —
 `Lara/Grounded.lean` builds the finite fixpoint by hand (bounded iteration +
 a deficit-measure stabilization argument), so no Mathlib dependency was needed.
-Remaining work: construct the general `Faithful` edge decider (issue #17,
-closing result 6); backend dependency accountability (the remaining half of
-result 3); the result-7 consistency theorem after adding attack completeness
-(issue #18); and the certificate-erased argument identity needed to state
-backend replacement (result 9). The shared serialized first-order core AST is
+The checker-built `Faithful` edge decider (issue #17, closing result 6's
+source-vs-compiled half) is now done — `Compile.edgeB`/`edgeB_faithful` discharge
+the oracle constructively. Remaining work: backend dependency accountability (the
+remaining half of result 3); the result-7 consistency theorem after adding attack
+completeness (issue #18); and the certificate-erased argument identity needed to
+state backend replacement (result 9). The shared serialized first-order core AST is
 the Haskell↔Lean differential-testing anchor (mechanization-plan §3).

@@ -170,11 +170,16 @@ the result is stated but not yet proved or mechanized._
 - **Evidence basis**: spec §8 gives the fixed-point argument; `lean/Lara/Grounded.lean` proves
   bounded stabilization and fixed-point determinism, while `lean/Lara/Compile.lean`
   `srcStatus_unique`/`srcStatus_iff` prove that source four-state status is functional and equals
-  compiled executable status under a faithful edge decider. `lean/AxCheck.lean` audits these
-  theorems without `sorryAx`.
+  compiled executable status under a faithful edge decider. That `Faithful` edge decider is no longer
+  an assumption: the checker-built `edgeB` (from `containsB`/`attackClosureB`) decides the frozen
+  closure `Edge` exactly (`edgeB_faithful`), so `srcIn_iff_checkedGrounded`/`srcStatus_iff_checked`
+  carry source-vs-compiled status agreement over an accepted program with **no oracle hypothesis**
+  (the source status is the Prop shadow of that same compiled closure `Edge`, not an independent
+  calculus — grounded consistency and attack completeness, needed for result 7, remain issue #18).
+  `lean/AxCheck.lean` audits these theorems without `sorryAx`.
 - **Dependencies**: C06
 - **Tags**: grounded-semantics, determinism, termination, four-state-status
-- **Last revised**: 2026-07-23 (2026-07-23_002)
+- **Last revised**: 2026-07-25 (issue #17 close: `Faithful` oracle discharged by `edgeB_faithful`)
 
 ## C08: The reported leaf-dependency set equals the term's leaf frontier — accountability is an inversion lemma, not a tracked judgment component
 - **Statement**: Making the leaf-dependency set *derived* (`leaves(w)` = the leaf constants occurring

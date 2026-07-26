@@ -197,7 +197,11 @@ open Lara
 -- Spec §8 compile freeze: result 4 both halves (no untyped node or attack),
 -- subargument closure extends the direct attack, and the N16 bridge at both
 -- levels — argument (srcIn_iff_grounded) and exact four-state claim status
--- (srcStatus_iff) — oracle-parametric via Compile.Faithful.
+-- (srcStatus_iff). Result 6's source-vs-compiled half is no longer merely
+-- oracle-parametric: the constructive checker-built edge decider
+-- (`containsB`/`attackClosureB`/`edgeB`) discharges `Compile.Faithful` via
+-- `edgeB_faithful`, so the specialized wrappers (`srcIn_iff_checkedGrounded`,
+-- `srcStatus_checked`, `srcStatus_iff_checked`) hold with no oracle hypothesis.
 #print axioms Lara.Compile.contains_refl
 #print axioms Lara.Compile.attackOcc_unique
 #print axioms Lara.Compile.target_contains_occ
@@ -214,6 +218,15 @@ open Lara
 #print axioms Lara.Compile.srcStatus_correct
 #print axioms Lara.Compile.srcStatus_unique
 #print axioms Lara.Compile.srcStatus_iff
+#print axioms Lara.Compile.hasSupport_disNodup
+#print axioms Lara.Compile.lookupDis_some_mem
+#print axioms Lara.Compile.containsB_iff
+#print axioms Lara.Compile.attackClosureB_iff
+#print axioms Lara.Compile.edgeB_iff
+#print axioms Lara.Compile.edgeB_faithful
+#print axioms Lara.Compile.srcIn_iff_checkedGrounded
+#print axioms Lara.Compile.srcStatus_checked
+#print axioms Lara.Compile.srcStatus_iff_checked
 
 -- Spec §8.1 Path-B policy validator: the finite strict-reachable set denotes
 -- the relational least set, and executable wf(Pi) is exact.
@@ -361,6 +374,23 @@ open Lara
 #print axioms Lara.Examples.edge_fixture_iff
 #print axioms Lara.Examples.edgeBEx_faithful
 #print axioms Lara.Examples.closure_grounded_verdict
+#print axioms Lara.Examples.checked_edge_fixture
+#print axioms Lara.Examples.checked_edge_fixture_faithful
+#print axioms Lara.Examples.edgeB_PEx_eq_edgeBEx
+#print axioms Lara.Examples.checked_closure_status
+#print axioms Lara.Examples.checked_src_status_exists
+#print axioms Lara.Examples.containsB_wrapper_leaf
+#print axioms Lara.Examples.containsB_leaf_unrelated
+#print axioms Lara.Examples.attackClosureB_direct
+#print axioms Lara.Examples.attackClosureB_wrapper
+#print axioms Lara.Examples.containsB_inst_self
+#print axioms Lara.Examples.containsB_discharge_hit
+#print axioms Lara.Examples.containsB_dupkey_true
+#print axioms Lara.Examples.containsB_dupkey_not_contains
+#print axioms Lara.Examples.vDup_not_disNodup
+#print axioms Lara.Examples.attackClosureB_rebut
+#print axioms Lara.Examples.attackClosureB_positional
+#print axioms Lara.Examples.attackClosureB_badpos
 
 -- Result 5 / C07: grounded termination + determinism (finite stabilization).
 #print axioms Lara.Grounded.grounded_stable
