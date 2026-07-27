@@ -1,5 +1,8 @@
 # TODOS
 
+> Tracked in GitHub issue #27 (M3 tracker: production Haskell checker and
+> status engine). Plan: `plans/2026-07-26-m3-production-checker.md`.
+
 ## Runtime
 
 ### Cache grounded adjacency for the M3 production evaluator
