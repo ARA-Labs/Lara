@@ -65,13 +65,16 @@ has precedent (Marmsoler–Brucker code-generate a Haskell oracle from an Isabel
   have exact relational soundness/completeness theorems. `checkProgram`
   constructs the proof-bearing compile boundary from raw declarations. This
   does not claim a production Haskell M3 checker.
-- **Result 7 (consistency, Path B)** — the compile-time strict-reachable validator is mechanized in
-  `Lara.Policy` (`strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, `wfB_iff`,
-  `wellFormed_no_strict_contrary_left/right`). The executable judgment uses a conservative
-  structural overlap relation rather than syntactic pattern equality, aligning it with
-  instance-level `ContraryMatch` (N45). The direct/indirect consistency theorem next needs attack
-  completeness (issue #18); accepted programs currently supply only attack
-  soundness. Do NOT mechanize Path A unless the corpus forces the flip.
+- **Result 7 (consistency, Path B)** — complete for the Lean reference PL. The canonical
+  `checkUnit` boundary runs duplicate-rule and exact Path-B/R12 checks before detailed program
+  acceptance, reuses one retained checked-node cache, and rejects the first uncovered ordered
+  attackable contrary pair. `coveredB_iff` ties the executable scan to the frozen unlabelled
+  compiled `Edge`, so a closure edge or a differently labelled typed attack with the same endpoints
+  supplies coverage; self-pairs are included. `Unit.CheckedUnit` carries these invariants while
+  generic `CheckedProgram` remains attack-soundness-only. `grounded_conflictFree`,
+  `claimSupportFor`, and `contrary_claims_not_both_justified` close computed complete-claim
+  consistency. Do NOT mechanize Path A unless the corpus forces the flip. Full hole computation,
+  a production Haskell checker/evaluator, and NL-to-structure validation remain outside this result.
 
 ## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed)
 
@@ -86,9 +89,29 @@ checker's `hasSupport_disNodup`), so the specialized wrappers `checkedAF`,
 `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` give source-vs-compiled
 agreement over an accepted program with **no oracle hypothesis**; `Lara.Examples` pins the decider on
 concrete fixtures. Executable backend replay and proof-bearing raw-program construction are complete.
-This closes issue #17; attack completeness (result 7) remains issue #18.
+This closes issue #17. Issue #18 subsequently closes attack completeness and result 7 at the
+proof-bearing `CheckedUnit` boundary; the generic `CheckedProgram` boundary remains unchanged.
 
-## 6. Sequencing and artifact hygiene
+## 6. Result 7: checked-unit consistency complete (#18)
+
+The public accepted-program path is `checkUnit → Unit.CheckedUnit`. Its fixed rejection order is:
+duplicate rule identifiers, R12/Path-B violations, duplicate arguments, support failures, typed
+attack failures, then missing conflict coverage. Policy validation precedes program checking, so
+strict-root conflicts are owned by R12 rather than misreported as missing attacks.
+
+Detailed program acceptance retains the support checker's indexed nodes and per-source typed-attack
+buckets. The completeness scan reuses those values and `coveredB`; it does not re-infer support or
+materialize an edge matrix. Coverage is intentionally unlabelled compiled-edge coverage, including
+subargument closure, alternate typed reasons with identical endpoints, and ordered self-pairs.
+
+Downstream, `Lara.Consistency` converts retained nodes to exact stable support indices through
+`claimSupportFor`. `completeClaimFor` denotes the complete-support projection and therefore has no
+holes; it is not the full spec-level `holes(P,p)` algorithm. The headline theorem combines the
+Path-B attackability bridge, checked-unit completeness, and generic grounded conflict-freedom to
+exclude simultaneous justification of computed contrary claims. `Lara.Grounded` remains the
+proof-oriented executable reference semantics, not an optimized production evaluator.
+
+## 7. Sequencing and artifact hygiene
 
 Mechanization starts at M1 freeze, parallel to the Haskell compiler (M3). The two carve-outs (`nf`/`≡`,
 the ND adapter) may be *ported* to the prover early as a low-risk warm-up seeding results 10/11. The

@@ -175,7 +175,7 @@ the result is stated but not yet proved or mechanized._
   closure `Edge` exactly (`edgeB_faithful`), so `srcIn_iff_checkedGrounded`/`srcStatus_iff_checked`
   carry source-vs-compiled status agreement over an accepted program with **no oracle hypothesis**
   (the source status is the Prop shadow of that same compiled closure `Edge`, not an independent
-  calculus — grounded consistency and attack completeness, needed for result 7, remain issue #18).
+  calculus). Issue #18 subsequently supplies checked-unit attack completeness and result 7.
   `lean/AxCheck.lean` audits these theorems without `sorryAx`.
 - **Dependencies**: C06
 - **Tags**: grounded-semantics, determinism, termination, four-state-status
@@ -202,6 +202,7 @@ the result is stated but not yet proved or mechanized._
 - **Last revised**: 2026-07-22 (2026-07-22_002)
 
 ## C09: Restricting contrary-instance overlap off strict-reachable patterns buys consistency by construction
+- **Provenance**: ai-suggested
 - **Statement**: A compile-time well-formedness check that forbids any strict-rule consequent — and
   any pattern on a strict chain — from having a canonically equivalent ground instance with either
   side of a declared `contrary` pair (Path B) makes every conflict rebuttable at a defeasible step,
@@ -214,24 +215,34 @@ the result is stated but not yet proved or mechanized._
   executable `mayOverlap` check is conservative for non-linear patterns: it may reject a safe policy
   but cannot accept two patterns with canonically equivalent ground instances.
 - **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:546 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
-- **Status**: testing
+- **Status**: supported
 - **Falsification criteria**: A Path-B-well-formed policy under which two contrary claims are both
   labelled `justified` by grounded semantics — refuting consistency (spec §9 result 7); or corpus
   evidence that Path B's expressiveness limit rejects a large fraction of real strict chains.
 - **Proof**: [E05, "lean/Lara/Policy.lean: strictReachable_iff_mem /
   aPatMayOverlap_of_instances / wfB_iff / wellFormed_no_strict_contrary_left/right;
-  exact counterexample under Lara.Policy.Regression; audited by AxCheck"]
+  lean/Lara/Compile.lean: coveredB_iff / complete_conflict_edge;
+  lean/Lara/Check/Unit.lean: checkUnit_sound;
+  lean/Lara/Grounded.lean: grounded_conflictFree / statusC_justified_iff;
+  lean/Lara/Consistency.lean: wellFormed_contrary_target_attackable /
+  contrary_args_not_both_grounded / contrary_claims_not_both_justified;
+  exact self-conflict and rejection fixtures; audited by AxCheck"]
 - **Evidence basis**: spec §8.1 states the Path-B restriction and
-  `lean/Lara/Policy.lean` now mechanizes the finite strict-reachable set and
-  exact executable `wf(Pi)` judgment over a conservative instance-overlap
-  relation. Its ground-instance soundness lemma and two `ContraryMatch` boundary
-  theorems close the syntactic-vs-instance gap identified in review. The headline
-  consistency theorem still needs an attack-completeness postcondition:
-  `CheckedProgram.typed` proves declared attacks sound, but not that every
-  rebuttable conflict yields an edge.
+  `lean/Lara/Policy.lean` mechanizes its finite strict-reachable set and exact
+  executable judgment. `checkUnit` is now the canonical executable constructor
+  of `Unit.CheckedUnit`: it rejects duplicate rule IDs and R12 violations before
+  detailed program checking, retains the checked-node cache, and proves exact
+  compiled-edge coverage for every ordered attackable contrary pair (including
+  self-pairs). Generic `CheckedProgram` deliberately remains only the
+  attack-soundness boundary. Generic grounded conflict-freedom plus exact
+  `claimSupportFor` indexing proves that two computed `completeClaimFor` contrary
+  claims cannot both be justified. This supports result 7 for the Lean reference
+  PL only: it does not implement Path A, the production Haskell checker,
+  natural-language validation, or the full `holes(P,p)` /
+  `incompleteAlternative` computation.
 - **Dependencies**: C02
 - **Tags**: rationality-postulates, consistency, strict-rules, path-B
-- **Last revised**: 2026-07-24 (2026-07-24_002)
+- **Last revised**: 2026-07-26 (2026-07-25_005)
 
 ## C10: For a calculus-contribution paper, mechanized metatheory + worked examples + rejection conformance is the evaluation — not benchmarks or user studies
 - **Statement**: When a paper's contribution is a calculus rather than a system, the credible

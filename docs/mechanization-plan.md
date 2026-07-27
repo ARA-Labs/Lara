@@ -41,13 +41,13 @@ it; "test-only" = conformance evidence, no theorem.
 
 | # | Result | Status | Note |
 | --- | --- | --- | --- |
-| 1 | Decidability of program + attack checking | **mechanized (checker portion)** | `inferSupport`, `checkAttack`, and proof-bearing `checkProgram` terminate and agree exactly with the frozen relations. |
+| 1 | Decidability of program + attack checking | **mechanized (checker portion)** | Legacy `inferSupport`, `checkAttack`, and `checkProgram` remain generic and unchanged; `checkUnit` adds the detailed accepted-unit path. |
 | 2 | Strict-backend isolation | **must** | Structural: no term/attack/proof crosses the interface. Falls out of the `Backend` structure's typing. |
 | 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **must** | Inversion lemma on term structure (`spec.md` §6). |
 | 4 | Compilation soundness (no untyped node/attack; subargument closure) | **must** | The combinatorially fiddly one — positional attacks × closure. |
 | 5 | Termination + determinism of grounded evaluation | **must** | Monotone operator on a finite-height lattice; bounded iteration ≤ `|Args|`. |
-| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done (#17 closed)** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` now discharges `Faithful` constructively (no oracle hypothesis). Attack completeness (result 7) is the remaining neighbor, issue #18. |
-| 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **validator mechanized; theorem waits #18** | Path-B validation is executable and exact; status consistency still needs attack completeness. |
+| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done (#17 closed)** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` discharges `Faithful` constructively. Issue #18 separately closes the attack-completeness premise used by result 7. |
+| 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **mechanized for the Lean reference PL (#18 implementation; C09)** | `checkUnit` enforces Path B and exact conflict coverage; `Lara.Consistency` proves the computed-`completeClaimFor` headline, including self-conflict. |
 | 8 | Strict-certificate soundness (excludes `trusted-policy`) | **must** | A field/obligation of the `Backend` structure; proved once, per adapter. |
 | 9 | Backend replacement | **should** | Parametricity over the `Backend` structure + graph isomorphism under `eraseCert`. High reviewer value; the "backend internals are not part of claim-status semantics" result. |
 | 10 | Reference natural-deduction adapter soundness + exact dependencies | **must** | The one shipped adapter; induction on the typing derivation (`spec.md` §5.1). |
@@ -101,8 +101,9 @@ serialization is the differential-testing anchor.
   checking judgments as inductive relations *and* as decidable functions proved to agree, the
   `Backend` structure, the ND adapter as an instance, `compile`, and grounded labelling as a bounded
   lfp. Plus the results in §1.
-- **Haskell = the production checker** (`engineering-plan.md` §3 layers 1–8). Faster to iterate,
-  drives the implementation.
+- **Haskell = the production-checker target** (`engineering-plan.md` §3 layers 1–8). The current
+  Haskell commands provide regression compatibility; issue #18 adds no production Haskell checker
+  or new Haskell acceptance flow.
 - **Shared = the serialized core.** The same S-expression programs and their expected four-state
   verdicts run through both. Because the Lean definitions are executable (result 1/5/11 are decidable),
   the Lean side *runs*, not just *proves* — so the differential test is model-vs-implementation, not
@@ -184,18 +185,34 @@ right precedent:
   (`spec.md` §8.1): least set closed under strict rules' premises→conclusion; reject policies whose
   `contrary` sides may overlap it at the ground-instance level. Then direct = indirect consistency
   by construction. Do *not* mechanize Path A (transposition + involutive contradictories) unless the
-  corpus forces the flip. **Validator done (2026-07-24):**
+  corpus forces the flip. **Issue #18 closes this scope for the Lean reference PL:**
   `Lara.Policy.strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, and `wfB_iff`, plus the
-  instantiated-contrary boundary theorems and located R12 payload. The status theorem still needs
-  attack completeness (issue #18); accepted programs currently prove only that
-  declared attacks are sound, not that every rebuttable conflict is declared.
+  instantiated-contrary boundary theorems and located R12 payload feed the public
+  `Lara.Check.Unit.checkUnit` boundary. `Unit.CheckedUnit` carries rule-ID uniqueness, Path-B
+  well-formedness, exact attack completeness, and the retained checker nodes.
+  `Lara.Consistency.contrary_claims_not_both_justified` combines those with generic grounded
+  conflict-freedom and exact complete-support aggregation. Its claims are computed by
+  `completeClaimFor`; arbitrary caller-supplied claims are outside the theorem. Ordered self-pairs
+  cover self-conflict.
 
 - **Result 1 (checking decidability).** `Lara.Check.inferSupport` and
   `checkAttack` exactly decide the frozen §6.1/§7.1 judgments, and
   `checkProgram` constructs a `CheckedProgram` from raw argument/attack
-  declarations. Its soundness/completeness theorems close the result-1 checker
-  portion. This is Lean mechanization, not a claim that the production Haskell
-  M3 checker exists.
+  declarations. That legacy `checkProgram`/`CheckedProgram` behavior remains
+  the generic attack-soundness boundary. `checkProgramDetailed` additionally
+  carries retained nodes and attack completeness, and the public `checkUnit`
+  canonicalizes whole-unit acceptance. Its fixed order is:
+
+  ```text
+  duplicate rule IDs → R12 policy violation → duplicate arguments
+                     → support → typed attacks → missing conflict
+  ```
+
+  The support stage builds the exact retained checked-node cache; the typed-attack
+  and missing-conflict stages reuse it, as does downstream claim aggregation, so
+  no support re-inference occurs. Manual proof-level construction of `CheckedUnit`
+  remains possible only by supplying all invariants. This is Lean
+  mechanization, not a claim that the production Haskell M3 checker exists.
 
 ## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed) ◐
 
@@ -230,14 +247,27 @@ the specialized wrappers `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_ch
 `srcStatus_iff_checked` state source-vs-compiled agreement over an accepted program with **no oracle
 hypothesis**. `Lara.Examples` pins the decider (`checked_edge_fixture_faithful`,
 `checked_closure_status`) on concrete fixtures. Executable replay and proof-bearing raw-source
-`checkProgram` are in place. This closes issue #17; attack completeness (result 7) remains issue
-#18.
+`checkProgram` are in place. This closes issue #17. Issue #18 separately closes the
+accepted-unit attack-completeness premise and result 7/C09 for the Lean reference PL.
 
 The two definitional holes that made the status function partial (N17) are addressed in `spec.md` §8:
 the **hole-vs-complete-alternative** case (a complete `in` alternative dominates; `statusC_gap_iff`
 mechanizes "gap only on empty complete support"; the `incompleteAlternative` diagnostic is a defined
 convention) and **`contested` = grounded `undec`** (SCC provenance a separate defined report). The
 four-state status is total and deterministic by construction.
+
+For result 7, `completeClaimFor` is only a complete-support projection with empty
+holes. No implementation of full `holes(P,p)` or `incompleteAlternative` is
+claimed. Nor does issue #18 claim Path A, NL-to-structure validation, the
+production Haskell checker, or an optimized grounded evaluator:
+`Lara.Grounded` remains the proof-oriented reference implementation.
+
+**Issue-#18 verification.** All 70 traceability IDs and six author flows pass;
+`lake build` completes 25 jobs; AxCheck emits 430 reports with no `sorryAx` and
+only `propext`, `Classical.choice`, and `Quot.sound`; and the multiline CI axiom
+parser is repaired and negative-tested. `cabal build` and `cabal test` pass (one
+suite, 30 QuickCheck groups, 100 cases each), but these are
+regression-compatibility evidence only, not new Lean acceptance-flow evidence.
 
 ## 6. Sequencing and artifact hygiene
 

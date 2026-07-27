@@ -20,6 +20,9 @@ import Lara.Compile
 import Lara.Policy
 import Lara.Check
 import Lara.Examples
+import Lara.Examples.AttackCompleteness
+import Lara.Examples.PolicyAcceptance
+import Lara.Examples.GroundedConsistency
 
 open Lara
 
@@ -408,3 +411,117 @@ open Lara
 #print axioms Lara.Grounded.status_preservation
 #print axioms Lara.Grounded.compile_attack_iff
 #print axioms Lara.Grounded.statusC_gap_iff
+
+-- Issue 18 / result 7: attack-complete checked units. This section audits the
+-- exact executable/declarative bridges, accepted-unit projections, generic
+-- grounded conflict-freedom, and every focused matrix fixture added with the
+-- feature.
+#print axioms Lara.Attack.contraryMatch_congr
+#print axioms Lara.Compile.conflictAttackableB_iff
+#print axioms Lara.Compile.coveredB_iff
+#print axioms Lara.Compile.complete_conflict_edge
+#print axioms Lara.Check.missingConflict_no_rejectClass
+#print axioms Lara.Check.CheckedArguments.nodes_terms
+#print axioms Lara.Check.sourceAttackBucket_mem_iff
+#print axioms Lara.Check.conflictCache_terms
+#print axioms Lara.Check.sourceAttackBucket_coveredB_iff
+#print axioms Lara.Check.firstMissingConflict_none_iff
+#print axioms Lara.Check.checkProgramDetailed_sound
+#print axioms Lara.Check.checkProgramDetailed_complete
+#print axioms Lara.Policy.firstDuplicateRuleId?_none_iff
+#print axioms Lara.Policy.lookupRuleDecl_some_mem
+#print axioms Lara.Policy.lookupRuleDecl_of_mem_nodup
+#print axioms Lara.Policy.firstViolation_none_iff
+#print axioms Lara.Policy.firstViolation_some_sound
+#print axioms Lara.Check.Unit.checkUnit_sound
+#print axioms Lara.Check.Unit.checkUnit_complete
+#print axioms Lara.Unit.CheckedUnit.nodes_terms
+#print axioms Lara.Unit.CheckedUnit.attack_complete
+#print axioms Lara.Grounded.iter_conflictFree
+#print axioms Lara.Grounded.grounded_conflictFree
+#print axioms Lara.Grounded.labelC_inn_no_attack
+#print axioms Lara.Grounded.statusC_justified_iff
+#print axioms Lara.Grounded.statusC_empty_support_not_justified
+#print axioms Lara.Grounded.statusC_all_out_not_justified
+#print axioms Lara.Consistency.wellFormed_contrary_target_attackable
+#print axioms Lara.Consistency.mem_claimSupportFor_iff
+#print axioms Lara.Consistency.contrary_args_not_both_grounded
+#print axioms Lara.Consistency.contrary_claims_not_both_justified
+
+#print axioms Lara.Examples.check_unit_valid
+#print axioms Lara.Examples.rawUnitCheck_ok
+#print axioms Lara.Examples.check_unit_duplicate_rule_location
+#print axioms Lara.Examples.check_unit_r12_location
+#print axioms Lara.Examples.check_unit_policy_before_duplicate_argument
+#print axioms Lara.Examples.check_unit_duplicate_rule_before_policy_and_program
+#print axioms Lara.Examples.unit_error_reject_classes
+#print axioms Lara.Examples.check_unit_duplicate_argument_wrapped
+#print axioms Lara.Examples.check_unit_support_error_wrapped
+#print axioms Lara.Examples.check_unit_typed_attack_error_wrapped
+#print axioms Lara.Examples.check_unit_missing_conflict_wrapped
+#print axioms Lara.Examples.checked_unit_retained_alignment
+#print axioms Lara.Examples.checked_unit_final_status
+
+#print axioms Lara.Examples.AttackCompleteness.leaf_conflict_attackable
+#print axioms Lara.Examples.AttackCompleteness.defeasible_root_conflict_attackable
+#print axioms Lara.Examples.AttackCompleteness.strict_root_not_conflict_attackable
+#print axioms Lara.Examples.AttackCompleteness.unknown_rule_not_conflict_attackable
+#print axioms Lara.Examples.AttackCompleteness.direct_attack_covered
+#print axioms Lara.Examples.AttackCompleteness.wrapper_closure_covered
+#print axioms Lara.Examples.AttackCompleteness.wrong_target_not_covered
+#print axioms Lara.Examples.AttackCompleteness.no_attacks_not_covered
+#print axioms Lara.Examples.AttackCompleteness.same_edge_rebut_typed
+#print axioms Lara.Examples.AttackCompleteness.same_edge_different_reason_covered
+#print axioms Lara.Examples.AttackCompleteness.missing_conflict_no_reject_class
+#print axioms Lara.Examples.AttackCompleteness.first_missing_pair
+#print axioms Lara.Examples.AttackCompleteness.crossing_pair_source_major
+#print axioms Lara.Examples.AttackCompleteness.closure_covered_wrapper_accepted
+#print axioms Lara.Examples.AttackCompleteness.nonmatching_attack_decoy
+#print axioms Lara.Examples.AttackCompleteness.self_conflict_missing_at_origin
+#print axioms Lara.Examples.AttackCompleteness.support_error_precedes_missing_conflict
+#print axioms Lara.Examples.AttackCompleteness.attack_error_precedes_missing_conflict
+#print axioms Lara.Examples.AttackCompleteness.detailed_empty_accepted
+#print axioms Lara.Examples.AttackCompleteness.detailed_no_contrary_accepted
+#print axioms Lara.Examples.AttackCompleteness.detailed_strict_root_contrary_not_required
+#print axioms Lara.Examples.AttackCompleteness.legacy_acceptance_unchanged
+#print axioms Lara.Examples.AttackCompleteness.legacy_support_error_unchanged
+#print axioms Lara.Examples.AttackCompleteness.legacy_attack_error_unchanged
+#print axioms Lara.Examples.AttackCompleteness.detailed_default_heartbeat_stress
+#print axioms Lara.Examples.AttackCompleteness.stressDetailed_ok
+#print axioms Lara.Examples.AttackCompleteness.retained_node_alignment
+#print axioms Lara.Examples.AttackCompleteness.nonempty_source_buckets_exact
+#print axioms Lara.Examples.AttackCompleteness.stress_source_bucket_adequacy
+#print axioms Lara.Examples.AttackCompleteness.detailed_sound_fixture
+#print axioms Lara.Examples.AttackCompleteness.detailed_complete_fixture
+
+#print axioms Lara.Examples.PolicyAcceptance.empty_policy_accepted
+#print axioms Lara.Examples.PolicyAcceptance.defeasible_only_accepted
+#print axioms Lara.Examples.PolicyAcceptance.first_strict_violation_located
+#print axioms Lara.Examples.PolicyAcceptance.multiple_violations_report_first_rule
+#print axioms Lara.Examples.PolicyAcceptance.multiple_violations_report_first_contrary_pair
+#print axioms Lara.Examples.PolicyAcceptance.duplicate_rule_identifier_has_first_two_indices
+#print axioms Lara.Examples.PolicyAcceptance.valid_unique_policy_accepted
+#print axioms Lara.Examples.PolicyAcceptance.known_rule_lookup
+#print axioms Lara.Examples.PolicyAcceptance.duplicate_rule_lookup_returns_first_declaration
+#print axioms Lara.Examples.PolicyAcceptance.unknown_rule_lookup_none
+
+#print axioms Lara.Examples.GroundedConsistency.one_way_grounded
+#print axioms Lara.Examples.GroundedConsistency.one_way_grounded_conflict_free
+#print axioms Lara.Examples.GroundedConsistency.cycle_grounded_empty
+#print axioms Lara.Examples.GroundedConsistency.cycle_allowed_and_conflict_free
+#print axioms Lara.Examples.GroundedConsistency.empty_support_not_justified
+#print axioms Lara.Examples.GroundedConsistency.all_out_support_not_justified
+#print axioms Lara.Examples.GroundedConsistency.grounded_default_heartbeat_regression
+#print axioms Lara.Examples.GroundedConsistency.numeric_unit_accepted
+#print axioms Lara.Examples.GroundedConsistency.claim_support_zero
+#print axioms Lara.Examples.GroundedConsistency.claim_support_one_with_decoy
+#print axioms Lara.Examples.GroundedConsistency.claim_support_multiple_canonical_equivalent
+#print axioms Lara.Examples.GroundedConsistency.claim_support_noisy_equivalent_same_order
+#print axioms Lara.Examples.GroundedConsistency.complete_claim_projection_holes_empty
+#print axioms Lara.Examples.GroundedConsistency.missing_self_edge_rejected
+#print axioms Lara.Examples.GroundedConsistency.typed_self_edge_accepted
+#print axioms Lara.Examples.GroundedConsistency.covered_self_edge_check_ok
+#print axioms Lara.Examples.GroundedConsistency.self_attacking_node_not_grounded
+#print axioms Lara.Examples.GroundedConsistency.self_claim_support_includes_node
+#print axioms Lara.Examples.GroundedConsistency.computed_self_claim_not_justified
+#print axioms Lara.Examples.GroundedConsistency.computed_self_claim_result7

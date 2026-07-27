@@ -44,9 +44,16 @@ Design notes:
   term-identical declarations compile to one node (declaration names are
   report/`eraseCert` plumbing, not AF semantics — two structurally equal
   terms contain the same occurrences and receive identical edge sets).
+  This remains the legacy/generic attack-*soundness* boundary: it says every
+  declared attack is typed, not that all relevant conflicts were declared.
+  `AttackComplete` is a separate postcondition carried by
+  `Check.Program.ProgramAcceptance` and `Unit.CheckedUnit`.
 * Everything stays Prop-level until the bridge; `toAF` indexes arguments by
   list position (`Grounded.Arg = Nat`), and `Faithful` ties the oracle to
   `Edge` exactly on in-range indices and forces it false off-range.
+* `coveredB` is the one exact declared-edge coverage scan reused by `edgeB`.
+  Accepted-unit checking obtains its retained node metadata from the checker
+  cache; this compile layer never re-infers support for that flow.
 -/
 
 import Lara.Attack
@@ -383,6 +390,79 @@ theorem attackClosureB_iff {target : SupportTerm} (hwf : DisNodup target)
       rw [ht]
       exact (containsB_iff hwf t).mpr hc
 
+/-! ### Conflict attackability and declared-edge coverage -/
+
+/-- A support term can be the target of a conflict attack exactly when it is a
+leaf or its root rule is known defeasible. In the checked-target context where
+this predicate is used, the two cases correspond to undermining (the leaf is
+declared in `Gamma`, so a contrary premise attacks it) and rebutting (a
+contrary conclusion attacks the defeasible root). Positional undercuts are
+governed separately — by the rule at the attacked positional subterm plus its
+exception declaration (`Attack.undercut_pos_defeasible`) — and can land on a
+target whose root is strict, so they are deliberately not modeled here. This
+predicate deliberately says nothing about a particular source or attack
+reason. -/
+def ConflictAttackable
+    (Pi : RuleId → Option Rule) : SupportTerm → Prop
+  | .leaf _ => True
+  | .inst rn _ _ _ _ _ =>
+      ∃ r, Pi rn = some r ∧ r.mode = .defeasible
+
+/-- Executable counterpart of `ConflictAttackable`. -/
+def conflictAttackableB
+    (Pi : RuleId → Option Rule) : SupportTerm → Bool
+  | .leaf _ => true
+  | .inst rn _ _ _ _ _ =>
+      match Pi rn with
+      | some r => decide (r.mode = .defeasible)
+      | none => false
+
+theorem conflictAttackableB_iff
+    (Pi : RuleId → Option Rule) (target : SupportTerm) :
+    conflictAttackableB Pi target = true ↔
+      ConflictAttackable Pi target := by
+  cases target with
+  | leaf l => simp [conflictAttackableB, ConflictAttackable]
+  | inst rn θ ws D H a =>
+    cases h : Pi rn with
+    | none => simp [conflictAttackableB, ConflictAttackable, h]
+    | some r => simp [conflictAttackableB, ConflictAttackable, h]
+
+/-- A declared attack covers a compiled edge when it has the requested source
+and its attacked occurrence is contained in the requested target. Thus one
+attack can cover both its direct target and any declared wrappers containing
+that occurrence. -/
+def Covered (atts : List Attack.Attack)
+    (source target : SupportTerm) : Prop :=
+  ∃ k ∈ atts, k.source = source ∧
+    ∃ t, AttackOcc k t ∧ Contains target t
+
+/-- Executable counterpart of `Covered`. -/
+def coveredB (atts : List Attack.Attack)
+    (source target : SupportTerm) : Bool :=
+  atts.any (fun k =>
+    decide (k.source = source) && attackClosureB k target)
+
+theorem coveredB_iff {target : SupportTerm}
+    (hwf : DisNodup target)
+    (atts : List Attack.Attack) (source : SupportTerm) :
+    coveredB atts source target = true ↔
+      Covered atts source target := by
+  constructor
+  · intro h
+    obtain ⟨k, hk, hcovered⟩ := List.any_eq_true.mp h
+    rw [Bool.and_eq_true] at hcovered
+    obtain ⟨hsource, hclosure⟩ := hcovered
+    obtain ⟨t, hocc, hcontains⟩ :=
+      (attackClosureB_iff hwf k).mp hclosure
+    exact ⟨k, hk, of_decide_eq_true hsource, t, hocc, hcontains⟩
+  · rintro ⟨k, hk, hsource, t, hocc, hcontains⟩
+    rw [coveredB, List.any_eq_true]
+    refine ⟨k, hk, ?_⟩
+    rw [Bool.and_eq_true]
+    exact ⟨decide_eq_true hsource,
+      (attackClosureB_iff hwf k).mpr ⟨t, hocc, hcontains⟩⟩
+
 /-- A well-formed source program at the compile boundary: declared arguments
 with evidence they are complete checked support terms (`O = ∅`, spec §8
 `Args`), and declared attacks with evidence they type (§7.1). Compilation is
@@ -407,14 +487,65 @@ structure CheckedProgram (canon : String → String) (Pi : RuleId → Option Rul
   /-- every declared attack target is a declared argument (R1 boundary) -/
   target_declared : ∀ k ∈ atts, k.target ∈ args
 
+/-- Exact checked metadata for one retained argument-cache entry. The public
+program representation remains intentionally lean; callers that need indexed
+conclusions retain this view from the checker's cache. -/
+structure CheckedNode
+    (canon : String → String) (Pi : RuleId → Option Rule)
+    (Gamma : LeafId → Option Atom)
+    (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop) where
+  term       : SupportTerm
+  conclusion : Atom
+  valid      : HasSupport canon Pi Gamma CertOk term conclusion []
+
 /-- **The compiled attack relation (spec §8 `Attack(P)`, v0.1-frozen).**
 `Edge P a b`: both endpoints are declared complete arguments, and some
 declared attack has source `a` and an attacked occurrence contained in `b` —
 ASPIC+ subargument closure. -/
 def Edge (P : CheckedProgram canon Pi Gamma CertOk dp)
-    (a b : SupportTerm) : Prop :=
-  a ∈ P.args ∧ b ∈ P.args ∧
-    ∃ k ∈ P.atts, k.source = a ∧ ∃ t, AttackOcc k t ∧ Contains b t
+    (source target : SupportTerm) : Prop :=
+  source ∈ P.args ∧ target ∈ P.args ∧
+    Covered P.atts source target
+
+/-- Every contrary conflict between complete declared arguments whose target
+can be attacked at its root is represented by a compiled closure edge.  This
+is a checker postcondition rather than a field of `CheckedProgram`: the
+generic compile boundary remains usable by callers that establish only the
+frozen structural invariants. -/
+def AttackComplete
+    (canon : String → String) (Pi : RuleId → Option Rule)
+    (Gamma : LeafId → Option Atom)
+    (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop)
+    (dp : Attack.DefeatPolicy)
+    (args : List SupportTerm) (atts : List Attack.Attack) : Prop :=
+  ∀ source, source ∈ args →
+    ∀ target, target ∈ args →
+    ∀ sourceConclusion targetConclusion,
+      HasSupport canon Pi Gamma CertOk source sourceConclusion [] →
+      HasSupport canon Pi Gamma CertOk target targetConclusion [] →
+      Attack.ContraryMatch canon dp sourceConclusion targetConclusion →
+      ConflictAttackable Pi target →
+      Covered atts source target
+
+/-- The edge consequence of an independently supplied attack-completeness
+witness. -/
+theorem complete_conflict_edge
+    (P : CheckedProgram canon Pi Gamma CertOk dp)
+    (hcomplete : AttackComplete canon Pi Gamma CertOk dp P.args P.atts)
+    {source target : SupportTerm}
+    (hsource : source ∈ P.args) (htarget : target ∈ P.args)
+    {sourceConclusion targetConclusion : Atom}
+    (hsourceConclusion :
+      HasSupport canon Pi Gamma CertOk source sourceConclusion [])
+    (htargetConclusion :
+      HasSupport canon Pi Gamma CertOk target targetConclusion [])
+    (hcontrary :
+      Attack.ContraryMatch canon dp sourceConclusion targetConclusion)
+    (hattackable : ConflictAttackable Pi target) :
+    Edge P source target :=
+  ⟨hsource, htarget,
+    hcomplete source hsource target htarget sourceConclusion targetConclusion
+      hsourceConclusion htargetConclusion hcontrary hattackable⟩
 
 /-! ### Result 4: no untyped node or attack in the target AF -/
 
@@ -486,9 +617,7 @@ occurrence is structurally contained in `b` (`attackClosureB`). -/
 def edgeB (P : CheckedProgram canon Pi Gamma CertOk dp)
     (i j : Nat) : Bool :=
   match P.args[i]?, P.args[j]? with
-  | some source, some target =>
-      P.atts.any (fun k =>
-        decide (k.source = source) && attackClosureB k target)
+  | some source, some target => coveredB P.atts source target
   | _, _ => false
 
 /-- **`edgeB` decides `Edge` on declared endpoints.** With the source/target
@@ -507,19 +636,12 @@ theorem edgeB_iff {P : CheckedProgram canon Pi Gamma CertOk dp}
   · intro h
     unfold edgeB at h
     rw [hsource, htarget] at h
-    obtain ⟨k, hk, hpk⟩ := List.any_eq_true.mp h
-    rw [Bool.and_eq_true] at hpk
-    obtain ⟨hsrc, hcl⟩ := hpk
-    have hsrceq : k.source = source := of_decide_eq_true hsrc
-    obtain ⟨t, hocc, hcont⟩ := (attackClosureB_iff hdn k).mp hcl
-    exact ⟨List.mem_of_getElem? hsource, hmem, k, hk, hsrceq, t, hocc, hcont⟩
-  · rintro ⟨_, _, k, hk, hsrceq, t, hocc, hcont⟩
+    exact ⟨List.mem_of_getElem? hsource, hmem,
+      (coveredB_iff hdn P.atts source).mp h⟩
+  · rintro ⟨_, _, hcovered⟩
     unfold edgeB
     rw [hsource, htarget]
-    rw [List.any_eq_true]
-    refine ⟨k, hk, ?_⟩
-    rw [Bool.and_eq_true]
-    exact ⟨decide_eq_true hsrceq, (attackClosureB_iff hdn k).mpr ⟨t, hocc, hcont⟩⟩
+    exact (coveredB_iff hdn P.atts source).mpr hcovered
 
 /-- **`edgeB` is a faithful decider.** `ranged`: an edge forces the `some,some`
 branch, so both positions are in range; `agrees` is `edgeB_iff` under the

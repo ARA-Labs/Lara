@@ -1089,3 +1089,148 @@ tree:
       - "Lara.Examples.checked_edge_fixture_faithful / checked_closure_status"
       - "lake env lean AxCheck.lean (no sorryAx, standard trio)"
       - "cabal test all --test-show-details=direct (30 groups, pass)"
+
+  - id: N60
+    type: decision
+    provenance: ai-suggested
+    timestamp: "2026-07-25T18:03"
+    source_refs:
+      - "plans/2026-07-25-issue-18-attack-completeness-result-7.md"
+      - "GitHub issue #18"
+      - "lean/Lara/Compile.lean"
+      - "lean/Lara/Check/Program.lean"
+      - "lean/Lara/Policy.lean"
+      - "lean/Lara/Grounded.lean"
+    also_depends_on: [N44, N53, N59]
+    title: "Plan result 7 around compiled-edge coverage and a Path-B attackability bridge"
+    choice: >
+      Define attack completeness as coverage by the frozen compiled Edge
+      relation for every ordered contrary pair whose target is attackable,
+      rather than requiring a duplicate canonical root attack. Reuse the
+      checker-built closure scan, reject the first uncovered pair
+      lexicographically, let Path B prove that every contrary target in a
+      well-formed policy is a leaf or defeasible-root instance, and finish the
+      theorem through generic grounded conflict-freedom plus exact claim-support
+      indexing.
+    alternatives:
+      - "Require one canonical rebut/undermine declaration per contrary argument pair, which would reject wrappers already covered by subargument closure"
+      - "Demand completeness for strict-root targets, which would steal R12's policy-well-formedness responsibility and produce misleading missing-edge diagnostics"
+      - "Prove claim consistency directly over hand-written AF fixtures without strengthening the accepted-program boundary"
+    evidence: >
+      Repository/API trace and issue hierarchy inspection recorded in the
+      implementation plan; no implementation or proof gate has run yet, so
+      this remains ai-suggested pending execution/review.
+
+    children:
+      - id: N61
+        type: decision
+        provenance: user
+        timestamp: "2026-07-26T00:49"
+        support_level: explicit
+        source_refs:
+          - "plans/2026-07-25-issue-18-attack-completeness-result-7.md"
+          - "lean/Lara/Check/Unit.lean"
+          - "lean/Lara/Unit.lean"
+          - "lean/Lara/Check/Program.lean"
+          - "lean/Lara/Compile.lean"
+        title: "Make checkUnit the complete accepted-program boundary without strengthening generic CheckedProgram"
+        choice: >
+          Use the fixed six-stage order: duplicate rule IDs, R12/Path-B policy
+          violations, duplicate arguments, support failures, typed-attack failures,
+          and missing contrary-conflict coverage. ProgramAcceptance and CheckedUnit
+          carry attack completeness and the retained checked-node cache; generic
+          CheckedProgram keeps its reusable attack-soundness contract. Coverage is
+          the unlabelled frozen compiled Edge over every ordered attackable contrary
+          pair, including alternate attack reasons, subargument closure, and
+          self-pairs. Strict-root conflicts remain R12's responsibility.
+        alternatives:
+          - "Strengthen every CheckedProgram consumer with completeness and policy invariants"
+          - "Re-infer support or build a full pair/edge matrix during completeness checking"
+          - "Require the same attack label rather than endpoint coverage in the compiled graph"
+          - "Report strict-root conflicts as missing attacks after program checking"
+        evidence: >
+          User-approved implementation plan executed in commits a0cf49c, 8ed5714,
+          3acd6e0, and 7b79004; exact scan and constructor adequacy are audited by
+          AxCheck.
+        children:
+          - id: N62
+            type: dead_end
+            provenance: ai-executed
+            timestamp: "2026-07-26T00:49"
+            support_level: explicit
+            source_refs:
+              - "lean/Lara/Examples.lean"
+              - "Task 4 implementation trace"
+            title: "A wrapper-heavy nominally valid unit exposed an uncovered source conflict"
+            hypothesis: >
+              A three-node fixture with a wrapping support term and one declared
+              attack would satisfy the new complete accepted-unit boundary.
+            failure_mode: >
+              The wrapper introduced an additional ordered contrary source pair
+              whose compiled edge was not covered by the single declaration, so
+              checkUnit correctly returned the missing-conflict rejection.
+            lesson: >
+              Completeness is quantified over retained source arguments, not merely
+              the intended illustrative endpoints. The positive constructor fixture
+              was reduced to a genuinely complete two-node program; separate
+              fixtures retain closure behavior.
+
+          - id: N63
+            type: dead_end
+            provenance: ai-executed
+            timestamp: "2026-07-26T00:49"
+            support_level: explicit
+            source_refs:
+              - ".github/workflows/ci.yml"
+              - "lean/AxCheck.lean"
+              - "Task 6 synthetic Fake.nonStandard parser test"
+            title: "Line-oriented CI axiom parsing silently missed multiline axiom lists"
+            hypothesis: >
+              Extracting bracketed axiom lists independently from each Lean output
+              line would reject every non-standard axiom reported by AxCheck.
+            failure_mode: >
+              A synthetic theorem using Fake.nonStandard printed its axiom list
+              across lines. The old parser extracted an empty set and falsely
+              passed.
+            lesson: >
+              Normalize the complete AxCheck stream to one line before bracket
+              extraction. The repaired parser catches Fake.nonStandard while the
+              real 430-report audit contains only propext, Classical.choice, and
+              Quot.sound.
+
+          - id: N64
+            type: experiment
+            provenance: ai-executed
+            timestamp: "2026-07-26T00:49"
+            support_level: explicit
+            source_refs:
+              - "lean/Lara/Compile.lean"
+              - "lean/Lara/Check/Program.lean"
+              - "lean/Lara/Check/Unit.lean"
+              - "lean/Lara/Grounded.lean"
+              - "lean/Lara/Consistency.lean"
+              - "lean/Lara/Examples.lean"
+              - "lean/AxCheck.lean"
+              - "ara/evidence/status/mechanization_status.md"
+            also_depends_on: [N62, N63]
+            title: "Issue #18 closes checked-unit attack completeness and computed-claim result 7"
+            result: >
+              The Lean reference PL now proves exact compiled-edge coverage at the
+              checkUnit-built CheckedUnit boundary, generic grounded
+              conflict-freedom, exact stable complete-claim support extraction, and
+              non-joint justification of contrary computed claims, including
+              self-conflict. The proof-oriented evaluator and completeClaimFor
+              projection do not claim an optimized production evaluator, full
+              holes/incompleteAlternative computation, Path A, a production
+              Haskell checker, or NL validation. All 70 traceability obligations
+              and six author flows pass; lake build completes 25 jobs; 430 AxCheck
+              reports contain no sorryAx and only the standard trio; cabal build
+              and all 30 QuickCheck groups pass as regression compatibility
+              evidence.
+            evidence:
+              - "a0cf49c refactor(compile): expose exact conflict coverage"
+              - "8ed5714 feat(check): reject uncovered contrary conflicts"
+              - "3acd6e0 feat(policy): prove exact accepted lookup boundary"
+              - "7b79004 feat(check): add proof-bearing unit acceptance"
+              - "677cf8b feat(lean): prove checked-unit result 7"
+              - "27b36c3 test(lean): audit checked-unit consistency"

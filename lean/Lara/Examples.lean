@@ -38,11 +38,14 @@ judgment is relational.
 -/
 
 import Lara.Compile
+import Lara.Consistency
 import Lara.Check
+import Lara.Check.Unit
 
 namespace Lara.Examples
 
 open Lara.Support Lara.Compile Lara.Check
+open Lara.Check.Unit
 
 /-! ### Fixture -/
 
@@ -1748,5 +1751,165 @@ theorem checked_src_status_exists :
     ∃ s, Compile.SrcStatus PEx ⟨[2], []⟩ s :=
   ⟨Grounded.Status.defeated,
     Compile.srcStatus_checked PEx ⟨[2], []⟩⟩
+
+/-! ### Public unit-acceptance boundary -/
+
+/-- The finite policy whose derived lookup supplies every rule used by the
+closed unit fixture.  All declarations are defeasible, so R12 is satisfied. -/
+def unitPolicyEx : Policy.Policy :=
+  { rules :=
+      [ ⟨rMixId, ruleMix⟩
+      , ⟨rWrapId, ruleWrap⟩
+      , ⟨rPairId, rulePair⟩ ]
+  , defeat := dpEx }
+
+def rawUnitEx : Lara.Unit :=
+  { policy := unitPolicyEx
+  , args := [.leaf l2, .leaf l1]
+  , atts := [kAtk] }
+
+def rawUnitCheck :=
+  checkUnit ΓEx registryEx rawUnitEx
+
+/-- Matrix case 1: the canonical executable boundary accepts the complete
+unit. -/
+theorem check_unit_valid : rawUnitCheck.isOk = true := by decide
+
+def acceptedUnitEx :
+    Lara.Unit.CheckedUnit id ΓEx (certOkOf registryEx) :=
+  rawUnitCheck.toOption.get (by decide)
+
+theorem rawUnitCheck_ok : rawUnitCheck = .ok acceptedUnitEx := by
+  cases h : rawUnitCheck with
+  | error error =>
+      have hs := check_unit_valid
+      rw [h] at hs
+      contradiction
+  | ok accepted =>
+      have hoption : rawUnitCheck.toOption = some accepted :=
+        congrArg Except.toOption h
+      have haccepted : acceptedUnitEx = accepted := by
+        unfold acceptedUnitEx
+        apply Option.get_of_eq_some
+        exact hoption
+      rw [haccepted]
+
+/-- Matrix case 2: duplicate rule identifiers win first and retain both
+declaration locations. -/
+def duplicateRuleUnit : Lara.Unit :=
+  { policy :=
+      { rules := [⟨rMixId, ruleMix⟩, ⟨rMixId, ruleMix⟩]
+      , defeat := dpEx }
+  , args := []
+  , atts := [] }
+
+theorem check_unit_duplicate_rule_location :
+    checkUnit ΓEx registryEx duplicateRuleUnit =
+      .error (.duplicateRule ⟨rMixId, 0, 1⟩) := by rfl
+
+/-- One strict rule whose conclusion touches the second side of the declared
+contrary pair. -/
+def r12PolicyEx : Policy.Policy :=
+  { rules := [⟨rStrictId, ruleStrict⟩]
+  , defeat := dpEx }
+
+def r12UnitEx : Lara.Unit :=
+  { policy := r12PolicyEx
+  , args := []
+  , atts := [] }
+
+/-- Matrix case 3: R12 retains the offending rule and contrary declaration. -/
+theorem check_unit_r12_location :
+    checkUnit ΓEx registryEx r12UnitEx =
+      .error (.policyViolation
+        ⟨rStrictId, apA, (apB, apA)⟩) := by rfl
+
+/-- Matrix case 4: the policy pass precedes the detailed program pass, even
+when the raw argument declarations contain an immediate duplicate. -/
+theorem check_unit_policy_before_duplicate_argument :
+    checkUnit ΓEx registryEx
+      { r12UnitEx with args := [.leaf l1, .leaf l1] } =
+      .error (.policyViolation
+        ⟨rStrictId, apA, (apB, apA)⟩) := by rfl
+
+/-- AF-02 precedence pin: duplicate-rule validation wins even when the same
+raw unit would also fail R12 and the program's duplicate-argument check. -/
+theorem check_unit_duplicate_rule_before_policy_and_program :
+    checkUnit ΓEx registryEx
+      { policy :=
+          { rules :=
+              [⟨rStrictId, ruleStrict⟩, ⟨rStrictId, ruleStrict⟩]
+          , defeat := dpEx }
+      , args := [.leaf l1, .leaf l1]
+      , atts := [] } =
+      .error (.duplicateRule ⟨rStrictId, 0, 1⟩) := by rfl
+
+/-- The unit error wrapper preserves the policy's frozen R12 class while
+structural duplicate rules remain unclassified. -/
+theorem unit_error_reject_classes :
+    (UnitError.duplicateRule ⟨rMixId, 0, 1⟩).rejectClass = none ∧
+    (UnitError.policyViolation
+      ⟨rStrictId, apA, (apB, apA)⟩).rejectClass = some .R12 := by
+  decide
+
+/-- Task-6 UNT-05 pin: program-level argument duplication is wrapped without
+changing its exact pair of locations. -/
+theorem check_unit_duplicate_argument_wrapped :
+    checkUnit ΓEx registryEx
+      { policy := unitPolicyEx
+      , args := [.leaf l1, .leaf l2, .leaf l1]
+      , atts := [] } =
+      .error (.program (.duplicateArgument 0 2)) := by rfl
+
+/-- Matrix case 5: support diagnostics retain both their declaration location
+and typed checker payload. -/
+theorem check_unit_support_error_wrapped :
+    checkUnit ΓEx registryEx
+      { policy := unitPolicyEx
+      , args := [.leaf l1, badSource]
+      , atts := [] } =
+      .error (.program (.rejection (.argument 1)
+        (.R1 .root (.missingLeaf ⟨"missing-source"⟩)))) := by rfl
+
+/-- Matrix case 6: typed-attack diagnostics are wrapped exactly. -/
+theorem check_unit_typed_attack_error_wrapped :
+    checkUnit ΓEx registryEx
+      { policy := unitPolicyEx
+      , args := [.leaf l2, .leaf l1]
+      , atts := [.rebut (.leaf l2) (.leaf l1)] } =
+      .error (.program (.rejection (.attack 0)
+        (.R10 .root [] .rebut
+          (.wrongOccurrenceKind .rule .leaf)))) := by rfl
+
+/-- Matrix case 7: a fully typed program that omits a required conflict edge
+reaches the final missing-conflict diagnostic. -/
+theorem check_unit_missing_conflict_wrapped :
+    checkUnit ΓEx registryEx
+      { policy := unitPolicyEx
+      , args := [.leaf l2, .leaf l1, vWrap]
+      , atts := [] } =
+      .error (.program
+        (.missingConflict ⟨0, 1, pB, pA⟩)) := by rfl
+
+/-- Matrix case 8: raw declarations, retained node order, and retained exact
+conclusions all agree through the checked unit. -/
+theorem checked_unit_retained_alignment :
+    acceptedUnitEx.program.args = rawUnitEx.args ∧
+    acceptedUnitEx.program.atts = rawUnitEx.atts ∧
+    acceptedUnitEx.nodes.map (·.term) = acceptedUnitEx.program.args ∧
+    acceptedUnitEx.nodes.map (·.conclusion) = [pB, pA] := by
+  refine ⟨
+    (checkUnit_sound rawUnitCheck_ok).2.2.2.1,
+    (checkUnit_sound rawUnitCheck_ok).2.2.2.2.1,
+    acceptedUnitEx.nodes_terms,
+    ?_⟩
+  decide
+
+/-- Matrix case 9: the final executable claim status is obtained from the
+program carried by the accepted unit, with no external edge oracle. -/
+theorem checked_unit_final_status :
+    Grounded.statusC (Compile.checkedAF acceptedUnitEx.program)
+      ⟨[1], []⟩ = Grounded.Status.defeated := by
+  decide
 
 end Lara.Examples

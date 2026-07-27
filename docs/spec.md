@@ -1008,10 +1008,11 @@ rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-rea
 the conservative overlap check and its ground-instance soundness lemma
 `aPatMayOverlap_of_instances`, executable `wfB`, its exactness theorem `wfB_iff`, the bridge
 `wellFormed_no_strict_contrary_left/right`, and the located `firstViolation?` R12 payload. The
-remaining §9 result 7 consistency theorem needs an accepted-program
-attack-completeness invariant: the current proof-bearing checker proves every accepted declared
-attack is typed, but not yet that every rebuttable contrary conflict yields a
-declared/compiled edge (issue #18)._
+public Lean reference-PL boundary `Lara.Check.Unit.checkUnit` rejects duplicate rule identifiers
+and then R12 violations before beginning program checking. It canonically constructs
+`Unit.CheckedUnit`, which carries both policy invariants and exact attack completeness. Manual
+proof-level construction of that structure remains possible only by supplying every invariant.
+Issue #18 closes this accepted-unit premise and the §9 result-7/C09 consistency theorem._
 
 **Flip criterion.** If the corpus shows strict rules genuinely feeding contested claims, switch to
 Path A — require the contrary relation to be a total, involutive contradictory map (`−φ`, `−−φ = φ`)
@@ -1066,17 +1067,46 @@ state result 6's source-vs-compiled half over an accepted program with **no orac
 `lean/Lara/Examples.lean` pins the checker-built decider and its grounded verdict on concrete
 fixtures. This closes issue #17. It does **not** relate an independent source calculus to the AF —
 `SrcIn`/`SrcOut` are the Prop-level shadow of the compiled edge closure that `edgeB` executes — and
-it does not establish grounded consistency or attack completeness; the residual half of result 6's
-neighborhood (attack completeness, needed for result 7) remains issue #18.
+it does not by itself establish grounded consistency. That downstream theorem now lives in
+`Lara.Consistency`: issue #18 supplies attack completeness at the accepted-unit boundary and closes
+result 7/C09 for the Lean reference PL.
 The development is `sorry`-free within the standard axiom trio.
+
+**Accepted-unit flow (Lean reference PL).** `checkUnit` has the fixed diagnostic order
+
+```text
+duplicate rule IDs → R12 policy violation → duplicate arguments
+                   → support → typed attacks → missing conflict
+```
+
+The first two checks precede program checking. Within program checking, duplicate detection precedes
+cache construction; the support stage then builds one retained checked-node cache. Typed-attack
+sources, the deterministic source-major/target-major completeness scan, and downstream claim
+aggregation reuse that cache and do not re-infer support. Legacy `checkProgram`/`CheckedProgram` remains the
+unchanged generic attack-soundness boundary; detailed `ProgramAcceptance` and `CheckedUnit` carry
+attack completeness.
+
+`Lara.Consistency.claimSupportFor` aggregates exactly all retained complete checked nodes whose
+conclusions canonically match the requested proposition. The result-7 headline
+`contrary_claims_not_both_justified` consumes only claims computed by `completeClaimFor`; it does not
+quantify over arbitrary caller-supplied claims. Ordered pairs include the self-pair, so the missing
+self-edge is rejected and a typed self-edge prevents joint/self justification. `completeClaimFor`
+is a complete-only projection with definitionally empty holes—not an implementation of full
+`holes(P,p)` or `incompleteAlternative`.
+
+This mechanized result does not claim Path A, a production Haskell checker, NL-to-structure
+validation, full hole computation, or incomplete-alternative computation. `Lara.Grounded` is the
+proof-oriented executable reference evaluator; its transparent repeated scans are not the deferred
+optimized production evaluator.
 
 ## 9. Static and semantic results required before freeze
 
 1. Decidability of program and attack checking (including positional attack checking).
    *(Checker portion mechanized: `Lara.Check.inferSupport`,
    `checkAttack`, and `checkProgram` execute and have exact relational
-   soundness/completeness theorems. `checkProgram` also constructs the
-   proof-bearing compile boundary from accepted raw declarations.)*
+   soundness/completeness theorems. Legacy `checkProgram`/`CheckedProgram` remains generic and
+   unchanged. The canonical `checkUnit` flow adds the accepted-unit policy and completeness
+   invariants in the fixed six-stage order stated in §8.2.)*
 2. Strict-backend isolation: programs cannot extend `R`, backend theories are digest-addressed, and
    no support term, attack, or backend proof term crosses the strict-certificate interface.
 3. Dependency accountability: the reported leaf set equals `leaves(w)` and every member is declared
@@ -1096,15 +1126,20 @@ The development is `sorry`-free within the standard axiom trio.
    judgments over the subargument-closed `Edge` closure to executable grounded status over an
    accepted program with **no `Faithful` hypothesis** — the checker-built `edgeB`/`edgeB_faithful`
    discharge it constructively; `lean/Lara/Examples.lean` pins the decider on fixtures. Issue #17
-   closed. Attack completeness (result 7) remains issue #18; see §8.2.)*
+   closed. Issue #18 separately closes the accepted-unit attack-completeness premise for result 7;
+   see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
-   semantics, so two contrary claims are never jointly `justified`. *(The §8.1 validator is
-   mechanized in `lean/Lara/Policy.lean`: `strictReachable_iff_mem`,
-   `aPatMayOverlap_of_instances`, `wfB_iff`, and
-   `wellFormed_no_strict_contrary_left/right`. The status theorem additionally needs attack
-   completeness (issue #18); the accepted program currently supplies only the
-   soundness direction.)*
+   semantics, so two contrary claims are never jointly `justified`. *(Partially mechanized for the
+   Lean reference PL. Direct consistency for computed complete claims is proved:
+   `checkUnit` canonically builds `Unit.CheckedUnit` with unique rule IDs, Path B before
+   program checking, exact attack completeness, and retained checked nodes, and
+   `Lara.Consistency.contrary_claims_not_both_justified` combines those invariants with
+   generic grounded conflict-freedom to show two directionally contrary claims computed by
+   `completeClaimFor` — including self-conflict — are never jointly `justified`. Still open:
+   grounded-status closure under strict-rule application (`Policy.strictReachable_closed`
+   closes only the syntactic `StrictReachable` pattern set, not grounded status) and
+   indirect consistency.)*
 8. Strict-certificate soundness: every certified instance's encoded conclusion is a consequence of
    its encoded premise conclusions and declared backend theory. This result excludes
    `trusted-policy` instances.
@@ -1127,6 +1162,13 @@ Core results 1-9 and the reference-adapter result 10 should be mechanized in a p
 Additional adapter soundness may be imported from a separately verified checker only with an
 explicit theorem and encoding correspondence. Tests of executable checkers are conformance evidence,
 not substitutes for these theorems.
+
+For issue #18, the Lean evidence is 70 traceability IDs and six author flows,
+`lake build` (25 jobs), and 430 AxCheck reports with no `sorryAx` and only
+`propext`, `Classical.choice`, and `Quot.sound`; the multiline CI axiom parser is
+also repaired and negative-tested. Passing `cabal build`/`cabal test` (one
+suite, 30 QuickCheck groups, 100 cases each) is regression-compatibility
+evidence only, not evidence for the new Lean-only acceptance flow.
 
 ## 10. Presentation example
 

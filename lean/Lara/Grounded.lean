@@ -1,38 +1,23 @@
 /-
-Mechanized whole-status layer (`Lara.Grounded`). Mechanizes the abstract
-argumentation-framework core of spec §9 **result 6** (status preservation) and the
-determinism / termination core of **result 5** (grounded evaluation + claim
-aggregation).
+Mechanized whole-status layer (`Lara.Grounded`). This file supplies the generic
+finite-AF core used by spec §9 results 5–7: a proof-oriented executable grounded
+evaluator, a declarative least-fixed-point judgment, total four-state
+aggregation, and conflict-freedom of every grounded extension.
 
-**Scope — read before citing this as "result 6" (honest boundary).** What is
-proved here is the equivalence, over an *arbitrary* finite framework `F : AF`, of
-two definitions of the grounded semantics: a **declarative** least-fixed-point
-judgment (`DirectIn`/`DirectOut`) and the **executable** bounded-iteration
-labelling (`labelC`), aggregated to four-state status. This is genuine and
-non-trivial, but it is *not yet* the full spec §9 result 6, which is preservation
-between a direct semantics on the *source program* and the semantics of the
-*compiled* AF (`grounded(compile(W))`). `compile : Source → AF` and its subargument
-closure are defined and characterized (`compile_attack_iff`) but are **not
-exercised** by the equivalence theorems below — every one of them quantifies over a
-single already-given `F : AF`, and `statusDirect`/`statusC` read the *same*
-`F.attack`. Instantiating the equivalence at `F := compile W` and proving a
-source-level status matches it (thereby exercising the subargument-closure edges)
-is supplied oracle-parametrically by `Lara.Compile`; constructing the general
-edge decider from raw source is M2 work.
-(M1 update: `Lara/Compile.lean` now defines the concrete closure-edge relation
-over the frozen §6.1/§7.1 layers and bridges a source-level declarative judgment
-to this abstract layer — `srcIn_iff_directIn`/`srcIn_iff_grounded` — parametric
-in an executable edge oracle (`Compile.Faithful`); the oracle is the remaining
-gap, supplied when the decision procedures land.)
+**Scope.** All theorems here quantify over an arbitrary finite `F : AF`; this
+module knows nothing about policies, support terms, checkers, or accepted units.
+`Lara.Compile` instantiates the result-6 bridge with the exact checker-built edge
+decider. `Lara.Consistency`, strictly downstream, combines generic
+`grounded_conflictFree` with `Unit.CheckedUnit`'s Path-B and attack-completeness
+invariants for result 7. Keeping those facts out of this module preserves the
+acyclic dependency direction.
 
-Background (why this file exists). Spec §8 originally defined claim status *only*
-through the compiled route `compile → grounded → aggregate`, so result 6 had
-nothing to preserve — a documented dead end (exploration tree **N16**). This
-development supplies the first half: an **independent, declarative** grounded
-semantics (`DirectIn` / `DirectOut`), defined as the least fixed point of the
-defense operator *without* running the iteration, proved to agree with the
-executable labelling over any AF. That closes the "no independent semantics
-exists" gap at the abstract layer; the compile step remains.
+Background: spec §8 originally defined claim status only through
+`compile → grounded → aggregate`, leaving result 6 with no independent semantics
+to preserve (the N16 dead end). `DirectIn`/`DirectOut` provide that declarative
+semantics and are proved equivalent to bounded executable iteration over the
+same finite AF. The source-program composition and exact edge decision live in
+`Lara.Compile`, not here.
 
 Two semantics over one finite framework `AF = (args, attack)`:
 
@@ -54,15 +39,10 @@ complete `in` alternative dominates open holes (which become a defined
 `incompleteAlternative` diagnostic — a modeling convention, not a theorem); and
 `contested := grounded undec`.
 
-Kept deliberately abstract (spec §8 is the whole-status layer, above the frozen
-strict-step layer): `compile` carries the one distinctive compilation feature,
-ASPIC+ subargument closure (an attack on an occurrence defeats every complete term
-built on it), and `compile_attack_iff` characterizes exactly which edges it emits —
-but, per the scope note above, no equivalence theorem here consumes `compile`, so
-the subargument-closure construction is defined and characterized, not yet shown
-preserving. The metatheory does not depend on the shape of support terms, which are
-corpus-gated (M0/M3). No Mathlib: the finite-fixpoint argument is done by hand in
-core Lean 4.
+The evaluator intentionally favors transparent nested scans over production
+performance. It is a proof-oriented reference implementation, not the deferred
+cached-adjacency production evaluator. No Mathlib: the finite-fixpoint and
+conflict-freedom arguments are done by hand in core Lean 4.
 -/
 
 namespace Lara.Grounded
@@ -99,7 +79,10 @@ def memB (a : Arg) (S : List Arg) : Bool := decide (a ∈ S)
 /-! ### The characteristic operator and the grounded extension (compiled semantics) -/
 
 /-- `a` is **defended** by `S`: every attacker of `a` (within the framework) is
-itself attacked by some member of `S`. Executable form of Dung's acceptability. -/
+itself attacked by some member of `S`. This is the proof-oriented executable
+reference semantics: its nested carrier scans favor a small transparent
+definition over production-evaluator performance. Cached adjacency is deferred
+to M3. -/
 def defendedB (F : AF) (S : List Arg) (a : Arg) : Bool :=
   F.args.all (fun b => (! F.attack b a) || S.any (fun c => F.attack c b))
 
@@ -120,7 +103,9 @@ theorem defendedB_iff {F : AF} {S : List Arg} {a : Arg} :
     · exact Or.inr (h b hb hab)
     · exact Or.inl (by simp only [Bool.not_eq_true', Bool.not_eq_true] at hab ⊢; exact hab)
 
-/-- One round of the characteristic operator: the arguments defended by `S`. -/
+/-- One proof-oriented reference round of the characteristic operator. It scans
+the carrier and delegates each node to the nested scans in `defendedB`; it is
+not the optimized production evaluator. -/
 def step (F : AF) (S : List Arg) : List Arg :=
   F.args.filter (fun a => defendedB F S a)
 
@@ -142,14 +127,17 @@ theorem step_mono {F : AF} {S T : List Arg} (hST : ∀ x, x ∈ S → x ∈ T) :
   obtain ⟨c, hcS, hcb⟩ := ha.2 b hb hab
   exact ⟨c, hST c hcS, hcb⟩
 
-/-- The iteration from `∅`. Structural recursion, so `iter (k+1) = step F (iter k)`
-holds definitionally. -/
+/-- The proof-oriented reference iteration from `∅`. Structural recursion, so
+`iter (k+1) = step F (iter k)` holds definitionally. Its repeated scans are
+intentional here; an optimized evaluator is deferred to M3. -/
 def iter (F : AF) : Nat → List Arg
   | 0 => []
   | k + 1 => step F (iter F k)
 
-/-- The grounded extension: iterate `|args|` times. `grounded_stable` proves this
-is already the least fixed point (the chain stabilizes within `|args|` steps). -/
+/-- The grounded extension computed by the proof-oriented reference evaluator:
+iterate `|args|` times. `grounded_stable` proves this is already the least fixed
+point (the chain stabilizes within `|args|` steps). Production use should employ
+the cached-adjacency evaluator deferred to M3. -/
 def grounded (F : AF) : List Arg := iter F F.args.length
 
 theorem iter_subset_args {F : AF} : ∀ k a, a ∈ iter F k → a ∈ F.args
@@ -162,6 +150,35 @@ theorem iter_mono {F : AF} : ∀ k a, a ∈ iter F k → a ∈ iter F (k + 1)
   | k + 1, a, h => by
     have IH : ∀ x, x ∈ iter F k → x ∈ iter F (k + 1) := iter_mono k
     exact step_mono IH a h
+
+/-! ### Conflict-freedom of the executable grounded iteration -/
+
+/-- No member of `S` attacks another member of `S`. -/
+def ConflictFree (F : AF) (S : List Arg) : Prop :=
+  ∀ a, a ∈ S → ∀ b, b ∈ S → F.attack a b ≠ true
+
+/-- Every stage of the executable grounded iteration is conflict-free. In the
+successor case, defending the target against the source yields an earlier
+attacker of the source; defending the source against that attacker yields the
+edge that contradicts the induction hypothesis. -/
+theorem iter_conflictFree (F : AF) :
+    ∀ k, ConflictFree F (iter F k)
+  | 0 => by
+      intro a ha
+      simp [iter] at ha
+  | k + 1 => by
+      intro a ha b hb hab
+      rw [iter, mem_step] at ha hb
+      obtain ⟨c, hc, hca⟩ :=
+        defendedB_iff.mp hb.2 a ha.1 hab
+      obtain ⟨d, hd, hdc⟩ :=
+        defendedB_iff.mp ha.2 c (iter_subset_args k c hc) hca
+      exact (iter_conflictFree F k d hd c hc) hdc
+
+/-- The final executable grounded extension is conflict-free. -/
+theorem grounded_conflictFree {F : AF} :
+    ConflictFree F (grounded F) := by
+  exact iter_conflictFree F F.args.length
 
 /-! ### The direct (declarative) semantics
 
@@ -419,6 +436,14 @@ theorem labelC_inn_iff {F : AF} (a : Arg) : labelC F a = Label.inn ↔ DirectIn 
   · simp [h]
   · by_cases h2 : DirectOut F a <;> simp [h, h2]
 
+/-- Two arguments labelled `in` cannot be connected by an attack edge. -/
+theorem labelC_inn_no_attack {F : AF} {a b : Arg}
+    (ha : labelC F a = Label.inn) (hb : labelC F b = Label.inn) :
+    F.attack a b ≠ true := by
+  apply grounded_conflictFree
+  · exact (directIn_iff a).mp ((labelC_inn_iff a).mp ha)
+  · exact (directIn_iff b).mp ((labelC_inn_iff b).mp hb)
+
 /-- **Result 6 (abstract AF layer, out).** `labelC = out` exactly on the arguments that are not
 directly `in` but are directly out (defeated by an `in` argument). -/
 theorem labelC_out_iff {F : AF} (a : Arg) :
@@ -510,6 +535,53 @@ theorem statusC_gap_iff (F : AF) (c : Claim) : statusC F c = Status.gap ↔ c.su
         · exact absurd h (by decide)
         · exact absurd h (by decide)
   · intro h; unfold statusC; rw [if_pos h]
+
+/-- A claim is justified exactly when one retained complete-support argument is
+labelled `in`. -/
+theorem statusC_justified_iff (F : AF) (c : Claim) :
+    statusC F c = Status.justified ↔
+      ∃ i ∈ c.support, labelC F i = Label.inn := by
+  unfold statusC
+  by_cases hs : c.support = []
+  · simp [hs]
+  · rw [if_neg hs]
+    by_cases hi :
+        c.support.any (fun a => labelC F a == Label.inn) = true
+    · rw [if_pos hi]
+      constructor
+      · intro _
+        obtain ⟨i, himem, hilabel⟩ := List.any_eq_true.mp hi
+        exact ⟨i, himem, by simpa using hilabel⟩
+      · intro
+        rfl
+    · rw [if_neg hi]
+      constructor
+      · intro h
+        split at h <;> contradiction
+      · rintro ⟨i, himem, hilabel⟩
+        exfalso
+        apply hi
+        exact List.any_eq_true.mpr
+          ⟨i, himem, by simp [hilabel]⟩
+
+/-- Empty complete support can never justify a claim. -/
+theorem statusC_empty_support_not_justified (F : AF) (holes : List Arg) :
+    statusC F { support := [], holes := holes } ≠ Status.justified := by
+  intro h
+  have := (statusC_justified_iff F
+    { support := [], holes := holes }).mp h
+  simp at this
+
+/-- If every complete-support argument is labelled `out`, the claim is not
+justified. -/
+theorem statusC_all_out_not_justified (F : AF) (c : Claim)
+    (hout : ∀ i ∈ c.support, labelC F i = Label.out) :
+    statusC F c ≠ Status.justified := by
+  intro h
+  obtain ⟨i, hi, hin⟩ := (statusC_justified_iff F c).mp h
+  have := hout i hi
+  rw [hin] at this
+  contradiction
 
 /-- Diagnostic accompanying `statusC`: an incomplete alternative exists (N17 (1)).
 Defined for reporting; `statusC` does not consume it. -/

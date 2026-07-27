@@ -13,19 +13,29 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **10** (ND adapter soundness + dependency exactness) | `Lara/ND.lean` | ✅ **mechanized** — `nd_sound`, `nd_relevance`, `fv_in_range`, `hyp_out_of_range_untypable`, plus the `infer` decision-procedure bridge. No `sorry`; `propext`/`Quot.sound` only. |
 | **8** (strict-certificate soundness / Theorem 1) | `Lara/Strict.lean` | ✅ **mechanized** — abstract `Backend`/`StrictJudgment`, `strict_step_sound`, ND instantiation. No `sorry`; `strict_step_sound` needs no axioms, while `nd_strict_step_sound` uses the standard trio (`propext`, `Classical.choice`, `Quot.sound`). |
 | **2** (strict-backend isolation / Theorem 3, non-factivity) | `Lara/Strict.lean` | ✅ **mechanized** — `no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute` (the factivity firewall). No `sorry`; AxCheck reports the standard trio (`propext`, `Classical.choice`, `Quot.sound`) for all three results. |
-| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **source-vs-compiled half complete: the `Faithful` oracle is now constructively supplied by `Compile.edgeB_faithful`** — the checker-built closure decider `edgeB` (from `containsB`/`attackClosureB`) decides the frozen closure `Edge` exactly (`edgeB_faithful`), so the specialized wrappers `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` state source-vs-compiled status agreement over an accepted program with **no oracle hypothesis** (`SrcIn`/`SrcOut`/`SrcStatus` being the Prop-level shadow of that same compiled closure, not an independent calculus). `Lara/Examples.lean` pins the decider on concrete fixtures. Issue #17 closed. Residual half — attack completeness for grounded consistency (result 7) — is issue #18. |
+| **6** (status preservation: direct vs compiled) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ◐ **source-vs-compiled half complete: the `Faithful` oracle is constructively supplied by `Compile.edgeB_faithful`** — the checker-built closure decider `edgeB` decides `Edge` exactly, so the specialized wrappers state agreement over a checked program with no oracle hypothesis. Issue #17 closed; issue #18 separately closed the attack-completeness premise needed by result 7. |
 | **5** (grounded termination + determinism) | `Lara/Grounded.lean`, `Lara/Compile.lean` | ✅ **mechanized** — bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|` steps; `toAF` instantiates the result for checked programs. |
 | **4** (compilation soundness) | `Lara/Compile.lean`, `Lara/Examples.lean` | ✅ **mechanized (relational compile layer)** — only complete checked terms become nodes; only typed declared attacks produce edges; direct and strict-superset closure behavior are proved concretely. |
 | **3** (dependency accountability) | `Lara/Support.lean` | ◐ **partially mechanized** — `leaves_declared` proves the source-leaf half; backend `certDeps` accountability separately awaits a `Backend.uses` field. |
-| **1** (checking decidability) | `Lara/Check/` | ✅ **checker portion mechanized** — `inferSupport`, `checkAttack`, and proof-bearing `checkProgram` execute over the finite backend registry and have exact soundness/completeness theorems for the frozen support, positional-attack, and raw-program judgments. Deterministic duplicate and located rejection behavior are pinned by closed fixtures. |
-| **7** (Path-B consistency) | `Lara/Policy.lean` | ◐ **validator mechanized** — `StrictReachable`, conservative instance-overlap checking, `aPatMayOverlap_of_instances`, and `wfB_iff` prove the finite `wf(Pi)` check catches canonically equivalent ground instances; `wellFormed_no_strict_contrary_left/right` connect it to `ContraryMatch`, and `firstViolation?` carries the located R12 rule/pair. The status-consistency theorem still needs attack completeness (issue #18), which `CheckedProgram.typed` does not provide. |
+| **1** (checking decidability) | `Lara/Check/` | ✅ **checker portion mechanized** — the legacy `inferSupport`, `checkAttack`, and `checkProgram` behavior remains generic and unchanged. The public `checkUnit` path additionally constructs `Unit.CheckedUnit` in the fixed order rule-ID duplicates → R12 → argument duplicates → support → typed attacks → missing conflict. |
+| **7** (Path-B consistency; C09) | `Lara/Policy.lean`, `Lara/Unit.lean`, `Lara/Check/Unit.lean`, `Lara/Consistency.lean` | ✅ **mechanized for the Lean reference PL; issue #18 closes this scope** — `checkUnit` canonically constructs the accepted-program abstraction with unique rule IDs, Path B enforced before program checking, exact attack completeness, and retained checker nodes. `claimSupportFor` exactly aggregates complete checked nodes and `contrary_claims_not_both_justified` applies only to computed `completeClaimFor` claims. Ordered self-pairs cover self-conflict. |
 | **9** (backend replacement) | — | **statement-model blocker recorded** — `CheckedProgram` currently identifies nodes only by certificate-bearing `SupportTerm`; it lacks stable argument ids and a certificate-erased skeleton/bijection. Add that representation before stating payload-varying AF isomorphism faithfully. |
 
-The development now covers the frozen M1 relational support, attack, and
-compile layers in addition to the earlier `nf`/`≡`, ND, strict-backend, and
-grounded-semantics cores. `Lara/Examples.lean` provides closed conformance
-fixtures for duplicate-free obligation accounting, all three attack forms,
-position traversal, and closure behavior.
+`Unit.CheckedUnit` is the accepted-program abstraction. `checkUnit` is its
+canonical executable constructor; manual proof-level construction remains
+possible only by supplying every invariant. The retained nodes come directly
+from the support-checker cache and are reused by typed-attack checking,
+attack-completeness checking, and complete-claim aggregation—support is not
+re-inferred. `CheckedProgram` and legacy `checkProgram` remain the unchanged
+generic attack-soundness boundary.
+
+The result-7/C09 scope is deliberately narrow. It proves that directionally
+contrary claims computed by `completeClaimFor` from all retained, canonically
+matching complete nodes cannot both be justified. It does not implement or
+claim Path A, the production Haskell checker, NL-to-structure validation, full
+`holes(P,p)`, or `incompleteAlternative` computation. `Lara.Grounded` is a
+transparent proof-oriented reference evaluator, not the deferred optimized
+production evaluator.
 
 ## Build
 
@@ -46,6 +56,14 @@ Every main theorem stays within the standard trio (`propext`,
 the `lean` job fails if any theorem's transitive axiom set contains `sorryAx` or
 anything outside that trio.
 
+The issue-#18 verification snapshot is: 70 traceability IDs and six author
+flows pass; `lake build` completes 25 jobs; AxCheck emits 430 theorem reports
+with no `sorryAx` and only `propext`, `Classical.choice`, and `Quot.sound`; and
+the multiline CI axiom parser is repaired and negative-tested. `cabal build`
+and `cabal test` also pass (one suite, 30 QuickCheck groups, 100 cases each),
+but those Haskell commands are regression-compatibility evidence only—not new
+Lean accepted-unit-flow evidence.
+
 ## Modeling notes
 
 - The proposition type is `Atom` (Lean reserves `Prop` for its sort of props).
@@ -64,8 +82,10 @@ The grounded least-fixpoint (result 5 core) is done **in core Lean 4** —
 a deficit-measure stabilization argument), so no Mathlib dependency was needed.
 The checker-built `Faithful` edge decider (issue #17, closing result 6's
 source-vs-compiled half) is now done — `Compile.edgeB`/`edgeB_faithful` discharge
-the oracle constructively. Remaining work: backend dependency accountability (the
-remaining half of result 3); the result-7 consistency theorem after adding attack
-completeness (issue #18); and the certificate-erased argument identity needed to
-state backend replacement (result 9). The shared serialized first-order core AST is
-the Haskell↔Lean differential-testing anchor (mechanization-plan §3).
+the oracle constructively. Issue #18 now closes attack completeness and result 7
+for the Lean reference PL. Remaining work includes backend dependency
+accountability (the remaining half of result 3), the certificate-erased argument
+identity needed to state backend replacement (result 9), the production Haskell
+checker, and the deferred full hole/incomplete-alternative computation. The shared
+serialized first-order core AST remains the Haskell↔Lean differential-testing
+anchor (mechanization-plan §3).

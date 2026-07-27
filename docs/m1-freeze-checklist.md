@@ -41,14 +41,14 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 2 | Proposition / leaf shape (`nl`/`formal`/`binding`, per-cell grain) | §3, §3.1 | **Frozen** | none (C15); distribution-valued leaf → Defer (C17) | serializes into core AST |
 | 3 | Policy language: patterns, substitution, CQ discharge, admission table | §4.1–§4.4 | **Frozen** | ✅ §4.1 instantiation + §4.2 accounting markers; §4.3 `Gamma(P)` construction figure; Lean: `instPat`/`instAPat`, `InstSide`, `DefeatPolicy` | §9 r1, r3 (see rows 8/9) |
 | 4 | Reference scheme vocabulary (9 families) | §4.5 | **Frozen** | none (C13); spellings revisitable until `empirical-v1` ships | schema instances, no new theorem |
-| 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12 | §9 r7 — validator ✅ (`lean/Lara/Policy.lean`); consistency theorem needs attack completeness |
+| 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12; duplicate rule IDs and R12 run before program checking | §9 r7/C09 ✅ for the Lean reference PL (`Lara.Policy`, `Lara.Check.Unit`, `Lara.Consistency`; #18 implementation) |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
 | 7 | Shipped adapter portfolio (arithmetic-recheck, code-inspection; LP non-shipping) | §5.2 | **Frozen** | none (C14); per-adapter soundness is M2/M3 | §9 r10 per shipped adapter — **pending** |
 | 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules and exact executable Lean checker (`Lara.Check.inferSupport`) landed — pending: `certDeps` | §9 r1 support/program checker ✅; r3 leaf half ✅; r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
-| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ compile rules, proof-bearing raw `checkProgram`, and checker-built edge decider (`edgeB`/`edgeB_faithful`, #17) landed — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅ (oracle eliminated); r9 pending |
-| 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅ (oracle eliminated, #17 closed); r7 consistency pending attack completeness (#18) |
+| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅ (#17); r7 attack completeness ✅ (#18); r9 pending |
+| 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅ (#17 closed); r7/C09 computed-complete-claim consistency ✅ for the Lean reference PL (#18 implementation) |
 | 13 | Abstract syntax + JSON wire schema, **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 (with M3 codec) |
 | 14 | Specified rejection behavior (located, per rejection class) | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
 
@@ -82,17 +82,23 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
 
 ## M2 backlog (opened at freeze; ordered by dependency, all corpus-independent)
 
-1. **§8.1 validator — validator done**: `lean/Lara/Policy.lean` defines the finite
+1. **§8.1 validator + accepted-unit consistency — done for the Lean reference PL
+   (#18 implementation)**: `lean/Lara/Policy.lean` defines the finite
    strict-reachable set, proves `strictReachable_iff_mem`, conservatively checks instance overlap,
    proves canonically equivalent ground instances are caught
    (`aPatMayOverlap_of_instances`), decides `wf(Pi)` via `wfB_iff`, connects the judgment to
-   `ContraryMatch`, and returns a located R12 rule/pair. The remaining §9 r7 status-consistency
-   theorem is not yet provable from `CheckedProgram`: `typed` is attack soundness (every declared
-   attack is typed), but the theorem also needs attack completeness (every rebuttable contrary
-   conflict produces a declared/compiled edge). Add that checker postcondition under issue #18.
+   `ContraryMatch`, and returns a located R12 rule/pair. Public `checkUnit`
+   canonically constructs `Unit.CheckedUnit` in the fixed order duplicate rule
+   IDs → R12 → duplicate arguments → support → typed attacks → missing conflict.
+   Detailed acceptance carries exact attack completeness and the retained
+   checker cache; support is not re-inferred. `Lara.Consistency` is
+   downstream-only and proves result 7/C09 for claims computed by exact
+   `completeClaimFor`, including self-conflict. Manual proof-level
+   `CheckedUnit` construction still requires all invariants.
 2. **Executable checkers — result-1 portion done**: `Lara.Check.inferSupport`,
    `checkAttack`, and `checkProgram` exactly decide the frozen support,
-   positional-attack, and raw-program judgments. The checker-built
+   positional-attack, and raw-program judgments; their legacy generic behavior
+   is unchanged. The checker-built
    `Compile.edgeB`/`edgeB_faithful` edge decider (issue #17) now discharges
    `Compile.Faithful` constructively, closing r6's source-vs-compiled half.
 3. **`certDeps` accountability**: extend the abstract `Backend` with `uses`, prove r3's
@@ -105,6 +111,16 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
 5. **Shipped-adapter obligations (r10)**: arithmetic-recheck and code-inspection adapters
    discharge the same soundness/dependency obligations as ND (with their M3 implementations).
 6. **r12 codec round-trip**: once `Lara.Json`/`Lara.Syntax` exist (M3 boundary layer).
+
+Issue #18 does **not** claim Path A, a production Haskell checker,
+NL-to-structure validation, full `holes(P,p)`, or `incompleteAlternative`
+computation. `Lara.Grounded` is the proof-oriented reference evaluator, not the
+deferred optimized implementation. The passing Haskell gates (`cabal build`;
+one test suite with 30 QuickCheck groups at 100 cases each) are
+regression-compatibility evidence only. Lean evidence comprises all 70
+traceability IDs and six author flows, `lake build` (25 jobs), 430 AxCheck
+reports with no `sorryAx` and only the allowed axiom trio, plus the repaired,
+negative-tested multiline CI axiom parser.
 
 _Done so far (2026-07-22): §8 #8 resolved — TCB written into spec §1.1, host fixed to Lean 4.
 Lock pass item 8 — support-term typing rules made explicit and v0.1-frozen in spec §6.1 (defect

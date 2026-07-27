@@ -118,3 +118,17 @@ sessions:
     events_count: 0
     claims_touched: []
     open_threads: 0
+  - id: "2026-07-25_004"
+    date: "2026-07-25"
+    summary: "Planned Issue #18 attack completeness and result-7 consistency against the merged checker, edge-decider, Path-B, and grounded theorem surfaces."
+    turn_count: 1
+    events_count: 1
+    claims_touched: []
+    open_threads: 2
+  - id: "2026-07-25_005"
+    date: "2026-07-25"
+    summary: "Implemented Issue #18: exact checked-unit attack completeness, Path-B grounded consistency, computed complete-claim result 7, and full verification."
+    turn_count: 1
+    events_count: 4
+    claims_touched: [C09]
+    open_threads: 4

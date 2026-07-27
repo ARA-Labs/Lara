@@ -85,20 +85,5 @@ jobs:
 
       - name: Axiom audit (no `sorry`, only standard axioms)
         run: |
-          out="$(lake env lean AxCheck.lean)"
-          echo "$out"
-          if echo "$out" | grep -q 'sorryAx'; then
-            echo "::error::A proof depends on sorryAx (sorry/admit)."
-            exit 1
-          fi
-          # Every axiom named in a `[...]` list must be in the standard trio.
-          bad="$(echo "$out" \
-            | grep -oE '\[[^]]*\]' \
-            | tr -d '[]' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-            | grep -vE '^(propext|Classical\.choice|Quot\.sound)$' \
-            | grep -v '^$' || true)"
-          if [ -n "$bad" ]; then
-            echo "::error::A proof depends on a non-standard axiom: $bad"
-            exit 1
-          fi
-          echo "Axiom audit passed."
+          ../scripts/test-check-axioms.sh
+          lake env lean AxCheck.lean | ../scripts/check-axioms.sh

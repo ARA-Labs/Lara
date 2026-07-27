@@ -88,6 +88,22 @@ def ContraryMatch (canon : String → String) (dp : DefeatPolicy)
     instAPat ρ ab.1 = some pa ∧ instAPat ρ ab.2 = some pb ∧
     equiv canon pa p ∧ equiv canon pb q
 
+/-- Contrary matching depends only on the canonical-equivalence classes of
+its two ground endpoints. -/
+theorem contraryMatch_congr
+    {p p' q q' : Atom}
+    (hp : equiv canon p p') (hq : equiv canon q q') :
+    ContraryMatch canon dp p q ↔
+      ContraryMatch canon dp p' q' := by
+  constructor
+  · rintro ⟨ab, hab, ρ, pa, pb, hpa, hpb, hep, heq⟩
+    exact ⟨ab, hab, ρ, pa, pb, hpa, hpb,
+      equiv_trans canon hep hp, equiv_trans canon heq hq⟩
+  · rintro ⟨ab, hab, ρ, pa, pb, hpa, hpb, hep, heq⟩
+    exact ⟨ab, hab, ρ, pa, pb, hpa, hpb,
+      equiv_trans canon hep (equiv_symm canon hp),
+      equiv_trans canon heq (equiv_symm canon hq)⟩
+
 /-! ### Exact executable contrary matching
 
 Bindings retain the ground term as it occurred in the proposition.  The

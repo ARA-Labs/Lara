@@ -160,10 +160,10 @@ observations:
     context: "Technical evaluation and implementation of the §8.1 validator."
     potential_type: constraint
     bound_to: [N44]
-    promoted: false
-    promoted_to: null
-    crystallized_via: null
-    stale: true
+    promoted: true
+    promoted_to: ["N60", "N61", "N64", "logic/claims.md:C09"]
+    crystallized_via: "checked-unit attack-completeness implementation + machine-checked result-7 theorem"
+    stale: false
   - id: O11
     timestamp: "2026-07-24T08:48"
     provenance: user

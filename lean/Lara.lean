@@ -12,7 +12,9 @@
 --     strict-unattackability, position-kind partition, local/global conclusion
 --     coherence — Lara.Attack
 --   * executable support, positional-attack, and whole-program checking with
---     exact relational adequacy (result 1 checker portion) — Lara.Check
+--     exact relational adequacy (result 1 checker portion); legacy
+--     checkProgram/CheckedProgram remains the generic attack-soundness
+--     boundary, while detailed acceptance adds completeness — Lara.Check
 --   * compilation with subargument closure (spec §8, v0.1-frozen): result 4
 --     both halves, closure ⊇ direct, and the N16 bridge from source-level
 --     declarative status to the abstract grounded layer — with result 6's
@@ -22,11 +24,17 @@
 --     — Lara.Compile
 --   * the §8.1 Path-B policy validator: strict-reachable patterns, executable
 --     wf(Pi), and located R12 violations — Lara.Policy
--- To come: the result-7 consistency theorem (issue #18, needs attack
--- completeness — also the residual result-6 dependency), certDeps
--- accountability (result 3 certificate half, needs Backend.uses), and backend
--- replacement (result 9, needs certificate-erased argument identity). See
--- docs/mechanization-plan.md.
+--   * the public checkUnit boundary, in fixed order: duplicate rule IDs → R12
+--     → duplicate arguments → support → typed attacks → missing conflict.
+--     CheckedUnit carries detailed attack completeness and exact retained
+--     checker nodes; support is not re-inferred — Lara.Unit / Lara.Check.Unit
+--   * downstream-only accepted-unit consistency (result 7 / C09): Path-B
+--     attackability, generic grounded conflict-freedom, self-conflict, exact
+--     completeClaimFor projection from retained nodes, and the computed-claim
+--     headline theorem — Lara.Consistency
+-- To come: certDeps accountability (result 3 certificate half, needs
+-- Backend.uses), and backend replacement (result 9, needs certificate-erased
+-- argument identity). See docs/mechanization-plan.md.
 import Lara.Prop
 import Lara.ND
 import Lara.Certificate
@@ -36,5 +44,11 @@ import Lara.Support
 import Lara.Attack
 import Lara.Compile
 import Lara.Policy
+import Lara.Unit
 import Lara.Check
+import Lara.Check.Unit
+import Lara.Consistency
 import Lara.Examples
+import Lara.Examples.AttackCompleteness
+import Lara.Examples.PolicyAcceptance
+import Lara.Examples.GroundedConsistency
