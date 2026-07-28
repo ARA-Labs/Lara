@@ -1,0 +1,1 @@
+(unit (policy (rules (rule d (mode defeasible) (params) (premises) (conclusion (apat c)) (questions (question q1 (apat ans) mandatory)) (allow-trusted false) (certifiers))) (contraries) (exceptions)) (leaves (leaf l_wrong (atom other))) (args (arg a (inst d (subst) (premises) (discharges (q1 (leaf l_wrong))) (holes) (assurance none)))) (queries (atom c)))

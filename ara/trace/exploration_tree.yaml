@@ -1234,3 +1234,85 @@ tree:
               - "7b79004 feat(check): add proof-bearing unit acceptance"
               - "677cf8b feat(lean): prove checked-unit result 7"
               - "27b36c3 test(lean): audit checked-unit consistency"
+
+  - id: N65
+    type: pivot
+    provenance: user
+    timestamp: "2026-07-27T00:00"
+    support_level: explicit
+    source_refs:
+      - "plans/2026-07-26-m3-production-checker.md"
+      - "GitHub issue #27"
+    also_depends_on: [N60]
+    from: "Lean reference PL complete on main (checkUnit -> CheckedUnit, f33e084)"
+    to: "M3: production Haskell runtime online, held byte-exact to the Lean semantics through the S-expr wire anchor"
+    trigger: >
+      Approved M3 plan (eng review CLEAR); resume after a prior session was cut
+      off mid Task 0 and again on a Fable-5 credit exhaustion mid Task 1.
+    status: resolved
+    children:
+      - id: N66
+        type: experiment
+        provenance: ai-executed
+        timestamp: "2026-07-27T05:00"
+        support_level: explicit
+        source_refs:
+          - "src/Lara/Wire.hs"
+          - "lean/Lara/Driver.lean"
+          - "src/Lara/{Policy,SupportTerm,Attack,Compile,Check,Grounded,Diagnostics,Driver}.hs"
+          - "src/Lara/Runtime.hs"
+          - "src/Lara/Reporting.hs"
+          - "scripts/differential.sh"
+          - "fixtures/corpus/"
+        also_depends_on: [N60]
+        title: "Implement the M3 production checker spine, cached runtime, reporting, and the N11 differential anchor"
+        result: >
+          Five plan steps landed as five commits. Task 0: Lara.Wire canonical
+          S-expr codec + lean/Lara/Driver.lean thin shim + `lara check` CLI, the
+          N11 differential anchor. Task 1: the seven-module checker spine
+          (Policy, SupportTerm, Attack, Compile, Check, Grounded, Diagnostics,
+          Driver) as a 1:1 executable mirror of the Lean semantics; six-stage
+          checkUnit in exact Lean order; grounded fixpoint defined once over an
+          edge-access record (D5); statusC over Claim{support,holes} (D7). Task
+          2: Lara.Runtime cached-adjacency evaluator reusing the single fixpoint,
+          the production default, random-AF cached==naive equivalence over
+          cyclic/self-looping/disconnected graphs. Task 3: Lara.Reporting full
+          holes(P,p)/incompleteAlternative (spec §8, deliberately unmechanized in
+          Lean), kept distinct from the complete-only completeClaimFor. Task 4:
+          conformance corpus + scripts/differential.sh + R1-R14 mutation suite.
+          Verification: 19/19 corpus fixtures agree byte-exact across both
+          drivers (incl. a 120-arg stress); cabal test green; cabal build -Wall
+          no new warnings; Lean untouched, lake build clean, AxCheck sorry-free
+          within the standard axiom trio. An independent line-by-line Lean-
+          fidelity review of the spine returned PASS with no MUST-FIX.
+        evidence:
+          - "1950e84 feat: S-expr wire codec, Lean driver, and lara check CLI skeleton"
+          - "c4399fd feat: Haskell M3 checker spine (layers 3-8)"
+          - "c9e237f feat: cached grounded adjacency production evaluator (T9)"
+          - "25ebd16 feat: full claim holes and incompleteAlternative diagnostics (T10)"
+          - "62aaaf4 test: differential harness, conformance corpus, R1-R14 mutation suite; docs closeout"
+        status: resolved
+        children:
+          - id: N67
+            type: decision
+            provenance: ai-executed
+            timestamp: "2026-07-27T04:30"
+            support_level: explicit
+            source_refs:
+              - "scripts/gen-corpus.hs"
+              - "scripts/differential.sh"
+              - "docs/m3-closeout-notes.md"
+            also_depends_on: [N66]
+            title: "Generate the differential corpus from Haskell Unit values + both-drivers harness, not a Lean dump-mode"
+            choice: >
+              Author the wire corpus from real Haskell Unit values and let
+              scripts/differential.sh enforce Lean-is-oracle byte-exact
+              agreement, instead of extending the Lean driver with a unit
+              dump-mode as the plan preferred.
+            alternatives:
+              - "Extend lean/Lara/Driver.lean with `dump <exampleName>` to emit its own Examples as wire text (plan's strong preference) — rejected: no existing Lean Unit carries 100+ args, and Lean Unit stores no argument ids and has no encodeUnit, so a faithful emitter is a non-trivial addition to proof-critical code"
+              - "Hand-author every corpus fixture including the 120-arg stress — rejected as error-prone"
+            evidence:
+              - "scripts/differential.sh: pass=19 fail=0, byte-exact stdout + exit code"
+              - "docs/m3-closeout-notes.md (deviation recorded)"
+            status: resolved

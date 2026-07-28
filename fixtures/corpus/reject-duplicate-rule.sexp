@@ -1,0 +1,1 @@
+(unit (policy (rules (rule r (mode defeasible) (params) (premises) (conclusion (apat q)) (questions) (allow-trusted false) (certifiers)) (rule r (mode defeasible) (params) (premises) (conclusion (apat q)) (questions) (allow-trusted false) (certifiers))) (contraries) (exceptions)))

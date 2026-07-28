@@ -253,3 +253,27 @@ observations:
     promoted_to: "logic/claims.md:C20"
     crystallized_via: "verbal-affirmation + artifact-commitment"
     stale: false
+
+  - id: O15
+    timestamp: "2026-07-27T04:30"
+    provenance: ai-executed
+    content: >
+      The M3 Haskell production runtime and the Lean reference driver agree on
+      the wire verdict byte-for-byte on every corpus fixture (19/19) EXCEPT
+      under non-canonical numeric literals: the Haskell core normalizes numbers
+      via canonNum (Lara.Prop.nfTerm) while the Lean driver runs at canon = id
+      and does not canonicalize numbers (a documented deferred extension point
+      in lean/Lara/Driver.lean). A unit carrying a non-canonical numeric literal
+      can therefore diverge between the two drivers. The differential corpus
+      avoids non-canonical numeric literals so the anchor stays exact; the
+      caveat must persist into any future differential work.
+    context: >
+      Surfaced by the Task 1 fidelity review and confirmed during the Task 4
+      differential closeout while choosing conformance fixtures; recorded in
+      docs/m3-closeout-notes.md and referenced in the spec §8 status note.
+    potential_type: constraint
+    bound_to: [N66]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false

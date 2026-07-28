@@ -1,0 +1,1 @@
+(unit (policy (rules) (contraries) (exceptions)) (leaves (leaf l0 (atom p0)) (leaf l1 (atom p1)) (leaf l2 (atom p2))) (args (arg a0 (leaf l0)) (arg a1 (leaf l1)) (arg a2 (leaf l2))) (queries (atom p0) (atom p1) (atom p2)))

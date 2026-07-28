@@ -1099,6 +1099,13 @@ validation, full hole computation, or incomplete-alternative computation. `Lara.
 proof-oriented executable reference evaluator; its transparent repeated scans are not the deferred
 optimized production evaluator.
 
+_M3 status (2026-07-27):_ the deferred Haskell pieces named here have since landed as the executable
+mirror of this frozen semantics, with no change to the definitions above: the production checker is
+`Lara.Check.checkUnit`, the optimized production evaluator is `Lara.Runtime` (cached adjacency,
+verdict byte-identical to the reference path), and the `holes(P,p)` / `incompleteAlternative`
+diagnostics of §8 are computed by `Lara.Reporting`. Soundness remains carried by the Lean proofs;
+the two implementations are cross-checked byte-for-byte through the `Lara.Wire` differential anchor.
+
 ## 9. Static and semantic results required before freeze
 
 1. Decidability of program and attack checking (including positional attack checking).

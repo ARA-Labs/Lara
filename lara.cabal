@@ -31,6 +31,20 @@ library
                       Lara.Formula
                       Lara.ConstantSpec
                       Lara.Kernel
+                      Lara.Wire
+                      Lara.Policy
+                      Lara.SupportTerm
+                      Lara.SupportTerm.Internal
+                      Lara.Attack
+                      Lara.Compile
+                      Lara.Compile.Internal
+                      Lara.Grounded
+                      Lara.Runtime
+                      Lara.Check
+                      Lara.Check.Internal
+                      Lara.Reporting
+                      Lara.Diagnostics
+                      Lara.Driver
     build-depends:    base >=4 && <5
                     , containers
     default-language: GHC2021
@@ -50,8 +64,17 @@ test-suite lara-test
     main-is:          Spec.hs
     other-modules:    PropSpec
                       StrictSpec
+                      WireSpec
+                      CheckSpec
+                      DifferentialSpec
+                      RuntimeSpec
+                      ReportingSpec
+                      CliSpec
     build-depends:    base >=4 && <5
                     , lara
                     , containers
+                    , directory
+                    , process
                     , QuickCheck
+    build-tool-depends: lara:lara
     default-language: GHC2021

@@ -1,39 +1,62 @@
--- | A \"hello, kernel\" demo: build one derivation by hand and check it.
+-- | The @lara@ command-line driver — a thin shell over "Lara.Driver".
 --
--- Claim to justify: @(c0 · x) : Q@, from
---   * constant @c0@ justifying the axiom instance @P → Q@, and
---   * hypothesis @x : P@.
--- Then show sum-monotonicity: wrapping the term in @+ y@ still checks.
+-- Contract (M3 plan, review D16 — identical to the Lean driver
+-- @lean/Lara/Driver.lean@):
+--
+-- * @lara check \<file.sexp\>@ reads one wire unit ("Lara.Wire", the N11
+--   differential anchor), runs the real six-stage pipeline
+--   ('Lara.Driver.runUnit'), and prints an S-expression verdict on @stdout@
+--   through the same codec the Lean driver uses, byte-identical.
+-- * Exit codes: @0@ = accept, @1@ = checker rejection, @2@ = codec or usage
+--   error (with a located message on @stderr@).
+--
+-- The verdict is printed with a single trailing newline via 'putStrLn' —
+-- 'printSExpr' emits no newline, so both drivers' stdout is @printSExpr
+-- (encodeVerdict v)@ plus one @\\n@ and differential comparison is byte equality.
 module Main (main) where
 
-import Lara.ConstantSpec (emptyContext, emptySpec, insertContext, insertSpec)
-import Lara.Formula (Atom (..), Formula (..))
-import Lara.Kernel (Derivation (..), check, judgmentFormula, judgmentTerm)
-import Lara.Term (Con (..), Term (..), Var (..), prettyTerm)
-import Lara.Formula (prettyFormula)
+import Control.Exception (IOException, evaluate, try)
+import System.Environment (getArgs)
+import System.Exit (ExitCode (..), exitWith)
+import System.IO (hPutStrLn, stderr)
+
+import Lara.Driver (runUnit)
+import Lara.Wire
+  ( Verdict (..)
+  , WireError (..)
+  , decodeUnitFile
+  , encodeVerdict
+  , printSExpr
+  )
 
 main :: IO ()
 main = do
-  let p = FAtom (Atom "P")
-      q = FAtom (Atom "Q")
-      c0 = Con "c0"
-      x = Var "x"
-      y = Var "y"
+  args <- getArgs
+  case args of
+    ["check", file] -> check file
+    _ -> usage >> exitWith (ExitFailure 2)
 
-      spec = insertSpec c0 (Imp p q) emptySpec
-      ctx = insertContext x p (insertContext y p emptyContext)
+usage :: IO ()
+usage = hPutStrLn stderr "usage: lara check <file.sexp>"
 
-      -- (c0 · x) : Q
-      modusPonens = DApp (DConst c0 (Imp p q)) (DHyp x p)
-      -- ((c0 · x) + y) : Q   — monotonicity: extra evidence never invalidates
-      withSummand = DSumL modusPonens (TVar y)
-
-  report "modus ponens" (check spec ctx modusPonens)
-  report "sum monotonicity" (check spec ctx withSummand)
-  where
-    report label result = do
-      putStr (label ++ ": ")
-      case result of
-        Left err -> putStrLn ("REJECTED — " ++ show err)
-        Right j ->
-          putStrLn (prettyTerm (judgmentTerm j) ++ " : " ++ prettyFormula (judgmentFormula j))
+check :: FilePath -> IO ()
+check file = do
+  contentsOrError <- try $ do
+    contents <- readFile file
+    _ <- evaluate (length contents) -- force the read inside 'try'
+    pure contents
+  case contentsOrError of
+    Left err -> do
+      hPutStrLn stderr ("lara: cannot read " ++ file ++ ": " ++ show (err :: IOException))
+      exitWith (ExitFailure 2)
+    Right contents ->
+      case decodeUnitFile contents of
+        Left (WireError ctx msg) -> do
+          hPutStrLn stderr ("lara: codec error at " ++ ctx ++ ": " ++ msg)
+          exitWith (ExitFailure 2)
+        Right unit -> do
+          let verdict = runUnit unit
+          putStrLn (printSExpr (encodeVerdict verdict))
+          case verdict of
+            VAccept{} -> pure ()
+            VReject{} -> exitWith (ExitFailure 1)

@@ -117,3 +117,10 @@ entries:
       - "Packaging/recovery turn — no new claim/experiment. Same partial-squash pattern recurred: PR #23 squash (a5328b5) stranded its final commit 0427cf7 (§11.6 + C20). Recovered by cherry-pick onto a fresh main-based branch; opened PR #24."
       - "Flagged the recurrence explicitly in open_threads (twice now: #22 and #23) — root cause is squash-merging before the branch's last push lands. Added a merge-completeness note to the PR body."
       - "No logic/ edit: §11.6 + C20 content already correct from turn 6; this turn only relocates it to a landable PR."
+  - turn: "2026-07-27_001#1"
+    notes:
+      - "Recorded the M3 milestone as a pivot (N65, phase boundary) + experiment (N66, the implementation) + decision (N67, corpus method) directly in the trace — journey facts, ai-executed under a user-approved plan."
+      - "Advanced C12 hypothesis->testing via artifact-commitment: the claim was explicitly conditioned on a shared serialized core 'not yet built', which M3 built (Lara.Wire + differential.sh). Did NOT jump to 'supported' — that needs an empirical divergence result the researcher comments on; 19/19 agreement + one localized non-bug divergence is testing-stage evidence only."
+      - "NEAR-MISS: considered rewriting C09's Evidence-basis clause 'does not implement ... the production Haskell checker ... or the full holes/incompleteAlternative computation' now that M3 implements both. Rejected: that clause scopes what the LEAN result-7 PROOF covers (still PL-only, unchanged by M3, which adds a separate implementation). Editing it would conflate proof-scope with project-state. Left C09 untouched."
+      - "Staged O15 (numeric-literal canonNum-vs-id divergence) as potential_type: constraint, not promoted: it is documented and the corpus avoids it, but it is a latent boundary caveat the researcher has not yet affirmed as a project constraint; near closure via artifact-commitment but held for conservatism."
+      - "Provenance on the C12 edits is ai-suggested (autonomous reconciliation on an artifact signal); the researcher can revert."

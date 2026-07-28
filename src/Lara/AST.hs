@@ -71,11 +71,18 @@ module Lara.AST
   , Arg (..)
   , Decl (..)
   , Program (..)
+    -- * Checker-boundary units (the M3 wire anchor)
+  , Unit (..)
     -- * Claim status (spec §8)
   , Status (..)
+  , Label (..)
+    -- * Rejection outcomes (spec §10.1)
+  , RejectClass (..)
+  , Rejection (..)
   ) where
 
 import Lara.Prop (FunSym (..), Pred (..), Prop, Term)
+import Lara.Strict (SExpr)
 
 -- ---------------------------------------------------------------------------
 -- Names (spec §2)
@@ -215,7 +222,7 @@ data Question = Question
 -- backend paired with the theory digest it is allowed to use.
 data CertRef = CertRef
   { certRefBackend :: BackendId
-  , certRefVersion :: String
+  , certRefVersion :: Int -- ^ backend version (a wire NAT)
   , certRefTheory :: TheoryDigest
   }
   deriving (Eq, Show)
@@ -285,13 +292,16 @@ newtype TheoryDigest = TheoryDigest String deriving (Eq, Ord, Show)
 
 -- | An __opaque__ strict-certificate payload (spec §5). The source calculus is
 -- independent of every backend's formulas and proof terms, so at this layer a
--- certificate is just bytes tagged by backend and theory. The natural-deduction
--- reference adapter (spec §5.1) and the optional LP adapter (spec §5.2,
--- "Lara.Kernel") decode and check it; this type never inspects it.
+-- certificate is the frozen triple @(beta, theory-digest, kappa)@ — a versioned
+-- backend, a digest-addressed theory, and the opaque certificate as an
+-- 'SExpr' wire value (the N11 anchor; only the named backend decodes it). The
+-- natural-deduction reference adapter (spec §5.1) and the optional LP adapter
+-- (spec §5.2, "Lara.Kernel") decode and check it; this type never inspects it.
 data Cert = Cert
   { certBackend :: BackendId
+  , certVersion :: Int -- ^ backend version (a wire NAT)
   , certTheory :: TheoryDigest
-  , certPayload :: String -- ^ opaque, backend-decoded (kappa)
+  , certPayload :: SExpr -- ^ opaque, backend-decoded (kappa)
   }
   deriving (Eq, Show)
 
@@ -417,6 +427,34 @@ data Program = Program
   deriving (Eq, Show)
 
 -- ---------------------------------------------------------------------------
+-- Checker-boundary units (the M3 wire anchor)
+-- ---------------------------------------------------------------------------
+
+-- | A checker-boundary unit: exactly the data the executable checker consumes,
+-- mirroring @lean/Lara/Unit.lean@ ('Lara.Unit') plus its environment inputs
+-- (the leaf context @Gamma@ and the closed backend-registry theory table).
+-- This is the shape the S-expression wire codec ("Lara.Wire", the N11
+-- differential anchor) decodes to; the richer presentation-layer 'Program'
+-- (artifact digests, claim NL text and bindings, leaf kinds) elaborates to it.
+--
+-- Attacks reference arguments by 'ArgId' (spec §2: @a@, @w@, @u@ are argument
+-- identifiers); resolution to terms is a decode-boundary step both drivers
+-- perform identically: argument identifiers must be unique and every attack
+-- endpoint must be declared. Those two invariants are wire well-formedness
+-- (R14), not checker rejection classes.
+data Unit = Unit
+  { unitRules :: [Rule] -- ^ policy rules, declaration order (ids inline)
+  , unitContraries :: [Contrary] -- ^ the policy's @contrary@ pairs
+  , unitExceptions :: [Exception] -- ^ the policy's @exception@ declarations
+  , unitTheories :: [(TheoryDigest, [Prop])] -- ^ theory table for @nd\@1@ (closed registry)
+  , unitLeaves :: [(LeafId, Prop)] -- ^ the leaf context @Gamma@
+  , unitArgs :: [(ArgId, SupportTerm)] -- ^ named arguments, declaration order
+  , unitAttacks :: [Attack] -- ^ declared typed attacks (id-based)
+  , unitQueries :: [Prop] -- ^ claim atoms whose status is requested
+  }
+  deriving (Eq, Show)
+
+-- ---------------------------------------------------------------------------
 -- Claim status (spec §8)
 -- ---------------------------------------------------------------------------
 
@@ -428,4 +466,32 @@ data Program = Program
 -- * 'Contested' — none @in@, some @undec@.
 -- * 'Defeated' — support is nonempty and every argument is @out@.
 data Status = Gap | Justified | Contested | Defeated
+  deriving (Eq, Ord, Show)
+
+-- | A grounded argument label (spec §8): the grounded labelling maps each
+-- compiled argument to @in@, @out@, or @undec@.
+data Label = LIn | LOut | LUndec
+  deriving (Eq, Ord, Show)
+
+-- ---------------------------------------------------------------------------
+-- Rejection outcomes (spec §10.1)
+-- ---------------------------------------------------------------------------
+
+-- | The frozen rejection classes decidable by the executable checker (spec
+-- §10.1; mirrors @lean/Lara/Check/Error.lean@ 'RejectClass'). R2 (signature),
+-- R8 (admission), and R9 (data-integrity) are outside the executable core;
+-- R14 (codec) is reported at the decode boundary, never as a checker verdict.
+data RejectClass = R1 | R3 | R4 | R5 | R6 | R7 | R10 | R11 | R12 | R13
+  deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | A unit-level rejection outcome (mirrors @lean/Lara/Check/Unit.lean@
+-- 'UnitError' and @lean/Lara/Check/Program.lean@ 'ProgramError'): either a
+-- frozen rejection class or a structural program-boundary outcome that has no
+-- R-class by design.
+data Rejection
+  = RejectClass RejectClass
+  | DuplicateRule -- ^ duplicate policy rule identifier
+  | DuplicateArgument -- ^ two structurally identical argument terms
+  | IncompleteArgument -- ^ an argument with open root obligations
+  | MissingConflict -- ^ an undeclared contrary pair between complete arguments
   deriving (Eq, Ord, Show)

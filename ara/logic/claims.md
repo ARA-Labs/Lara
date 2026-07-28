@@ -295,18 +295,25 @@ the result is stated but not yet proved or mechanized._
   any divergence a real defect.
 - **Conditions**: Holds for the Haskell↔Lean cross-check once both share one serialized first-order
   core AST; LARA's grounded status is deterministic (C07), so the single-interpretation precondition
-  holds by construction, with no undefined behavior to quotient out.
-- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:129 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:130 «JEST found 44 engine bugs and 27 spec bugs» [input]"]
-- **Status**: hypothesis
+  holds by construction, with no undefined behavior to quotient out. The shared serialized core is
+  now built (`Lara.Wire` S-expr codec, the N11 anchor) and the harness (`scripts/differential.sh`)
+  runs both drivers byte-for-byte; the framing localized one concrete Haskell-vs-Lean divergence to a
+  spec/implementation choice (non-canonical numeric literals: `canonNum` vs `canon = id`, O15) rather
+  than a voting tie, consistent with the N+1 frame.
+- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:129 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:130 «JEST found 44 engine bugs and 27 spec bugs» [input]", "19/19 fixtures agree byte-exact across both drivers ← scripts/differential.sh «pass=19 fail=0» [result]"]
+- **Status**: testing
 - **Falsification criteria**: A demonstration that the shared-core differential setup cannot localize
   whether a divergence is a Haskell-checker bug or a Lean-model bug (i.e. the N+1 framing gives no
   more than oracle-free voting here) — undercutting the methodological claim.
-- **Proof**: [E02]
+- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: 19/19 corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence is localized as an implementation/spec choice (docs/m3-closeout-notes.md)"]
 - **Evidence basis**: Deep-research report (Csmith PLDI 2011 = oracle-free voting; JEST ICSE 2021 =
   N+1; Marmsoler–Brucker executable-oracle-from-Isabelle); folded into `docs/mechanization-plan.md` §3.
-  The shared-core serialization is an M1 design requirement, not yet built.
+  The shared-core serialization, an M1 design requirement, is now realized in M3 as `Lara.Wire` with a
+  both-drivers differential harness; no divergence has yet indicted a genuine bug (the one localized
+  divergence is a documented deferred normalization choice, not a defect).
 - **Dependencies**: C07, C10
 - **Tags**: differential-testing, conformance, mechanization, methodology
+- **Last revised**: 2026-07-27 (2026-07-27_001)
 
 ## C13: A small fixed scheme vocabulary covers the corpus's argument shapes
 - **Statement**: The inference schemes that ARA corpus claims instantiate collapse into a small

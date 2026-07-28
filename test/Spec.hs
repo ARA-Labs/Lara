@@ -22,8 +22,14 @@ import Lara.Kernel
   )
 import Lara.Term (Con (..), Term (..), Var (..))
 
+import CheckSpec (checkSpecProps)
+import CliSpec (cliSpecProps)
+import DifferentialSpec (differentialSpecProps)
 import PropSpec (propSpecProps)
+import ReportingSpec (reportingSpecProps)
+import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
+import WireSpec (wireSpecProps)
 
 -- ---------------------------------------------------------------------------
 -- Generators
@@ -171,6 +177,12 @@ main = do
       ]
         ++ [run name act | (name, act) <- propSpecProps]
         ++ [run name act | (name, act) <- strictSpecProps]
+        ++ [run name act | (name, act) <- wireSpecProps]
+        ++ [run name act | (name, act) <- checkSpecProps]
+        ++ [run name act | (name, act) <- differentialSpecProps]
+        ++ [run name act | (name, act) <- runtimeSpecProps]
+        ++ [run name act | (name, act) <- reportingSpecProps]
+        ++ [run name act | (name, act) <- cliSpecProps]
   unless (and results) exitFailure
   where
     run name act = do

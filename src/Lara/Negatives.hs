@@ -511,7 +511,7 @@ strictAssuranceViolation =
                     [AtomPat (Pred "p") []]
                     (AtomPat (Pred "q") [])
                     False -- allow-trusted = false
-                    [CertRef (BackendId "nd") "1" (TheoryDigest "sha256:theory…")]
+                    [CertRef (BackendId "nd") 1 (TheoryDigest "sha256:theory…")]
                 ]
             , policyContraries = []
             , policyExceptions = []

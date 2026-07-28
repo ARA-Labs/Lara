@@ -1,0 +1,108 @@
+session:
+  id: "2026-07-27_001"
+  date: "2026-07-27"
+  started: "2026-07-27T00:00"
+  last_turn: "2026-07-27T05:30"
+  turn_count: 1
+  summary: >
+    Implemented the full M3 production checker per the approved plan: the N11 S-expr
+    wire anchor + Lean driver + CLI, the seven-module Haskell checker spine (1:1 Lean
+    mirror), the cached-adjacency runtime, spec §8 holes/incompleteAlternative
+    reporting, and a both-drivers differential harness with an R1-R14 mutation suite.
+    Five commits; 19/19 corpus fixtures byte-exact across both drivers; AxCheck clean.
+
+events_logged:
+  - turn: 1
+    type: pivot
+    id: "N65"
+    routing: direct
+    provenance: user
+    summary: "Phase boundary: Lean reference PL complete -> M3 production runtime online, held byte-exact via the wire anchor"
+  - turn: 1
+    type: experiment
+    id: "N66"
+    routing: direct
+    provenance: ai-executed
+    summary: "M3 spine + runtime + reporting + N11 anchor implemented; 5 commits; 19/19 differential; -Wall clean; AxCheck sorry-free"
+  - turn: 1
+    type: decision
+    id: "N67"
+    routing: direct
+    provenance: ai-executed
+    summary: "Corpus generated from Haskell Unit values + both-drivers harness, not a Lean dump-mode (no 100+-arg Lean Unit; Lean Unit has no encodeUnit/arg-ids)"
+  - turn: 1
+    type: observation
+    id: "O15"
+    routing: staged
+    provenance: ai-executed
+    summary: "Haskell/Lean drivers agree byte-exact except under non-canonical numeric literals (canonNum vs canon=id); corpus avoids them"
+
+ai_actions:
+  - turn: 1
+    action: "Committed the five M3 plan steps"
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Wire.hs"
+      - "lean/Lara/Driver.lean"
+      - "app/Main.hs"
+      - "src/Lara/Policy.hs"
+      - "src/Lara/SupportTerm.hs"
+      - "src/Lara/Attack.hs"
+      - "src/Lara/Compile.hs"
+      - "src/Lara/Check.hs"
+      - "src/Lara/Grounded.hs"
+      - "src/Lara/Diagnostics.hs"
+      - "src/Lara/Driver.hs"
+      - "src/Lara/Runtime.hs"
+      - "src/Lara/Reporting.hs"
+      - "test/{WireSpec,CheckSpec,RuntimeSpec,ReportingSpec,DifferentialSpec}.hs"
+      - "fixtures/corpus/"
+      - "scripts/differential.sh"
+      - "scripts/gen-corpus.hs"
+      - "docs/{engineering-plan,m1-freeze-checklist,spec,m3-closeout-notes}.md"
+
+claims_touched:
+  - id: C12
+    action: advanced
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C12
+    field: Status
+    before: "hypothesis"
+    after: "testing"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The shared serialized core the claim was conditioned on ('not yet built') is now built (Lara.Wire) with a both-drivers differential harness; the commitment is the test."
+  - turn: 1
+    entry: C12
+    field: Conditions
+    before: "Holds for the Haskell↔Lean cross-check once both share one serialized first-order core AST; LARA's grounded status is deterministic (C07), so the single-interpretation precondition holds by construction, with no undefined behavior to quotient out."
+    after: "…(unchanged first sentence)… The shared serialized core is now built (Lara.Wire S-expr codec, the N11 anchor) and the harness (scripts/differential.sh) runs both drivers byte-for-byte; the framing localized one concrete Haskell-vs-Lean divergence to a spec/implementation choice (non-canonical numeric literals: canonNum vs canon = id, O15) rather than a voting tie, consistent with the N+1 frame."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Records the harness + the one localized (non-bug) divergence as testing-stage evidence."
+  - turn: 1
+    entry: C12
+    field: Evidence basis
+    before: "…The shared-core serialization is an M1 design requirement, not yet built."
+    after: "…The shared-core serialization, an M1 design requirement, is now realized in M3 as Lara.Wire with a both-drivers differential harness; no divergence has yet indicted a genuine bug (the one localized divergence is a documented deferred normalization choice, not a defect)."
+    signal: artifact-commitment
+    provenance: ai-suggested
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User invoked /implement on the M3 plan ('previous session was cut off, let's finish'),
+      then 'continue' after a Fable-5 credit exhaustion killed the first Task 1 agent and the
+      model was switched to Opus 4.8. The whole M3 milestone was implemented via per-task
+      subagents with spec + quality + Lean-fidelity reviews, each task committed in plan order.
+
+open_threads:
+  - "Open PR closing issue #27 (M3 tracker) — final step of the /implement flow."
+  - "O15 numeric-literal divergence: any future differential work must avoid non-canonical numeric literals or handle the canonNum-vs-id gap; candidate to crystallize as a constraint once the M4 numeral-normalization extension point is scheduled."
+  - "R6/R10/R11/R13 now covered; full R1-R14 mutation enumeration complete at the Unit boundary (R2/R8/R9 out-of-core, R14 codec-boundary)."
+
+ai_suggestions_pending:
+  - "C12 advanced hypothesis->testing on artifact-commitment; not yet 'supported' (no researcher comment on an empirical divergence result). Revisit if a real reference/impl bug is localized by the harness."

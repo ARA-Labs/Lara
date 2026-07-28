@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara"]
+defaultTargets = ["Lara", "lara-driver"]
 
 # Mechanized reference semantics for the LARA claim-support calculus.
 # No Mathlib dependency yet: the frozen nf/≡ carve-out (spec §9 result 11) is
@@ -8,3 +8,10 @@ defaultTargets = ["Lara"]
 
 [[lean_lib]]
 name = "Lara"
+
+# The executable semantics driver (M3 plan, Task 0 Step 3 — the Lean side of
+# the N11 differential anchor). A thin decode → call → encode shim over the
+# theorem-bearing definitions of the `Lara` library.
+[[lean_exe]]
+name = "lara-driver"
+root = "Lara.Driver"

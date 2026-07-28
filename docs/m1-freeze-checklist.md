@@ -122,6 +122,44 @@ traceability IDs and six author flows, `lake build` (25 jobs), 430 AxCheck
 reports with no `sorryAx` and only the allowed axiom trio, plus the repaired,
 negative-tested multiline CI axiom parser.
 
+### M3 delivered (2026-07-27): production checker + differential anchor
+
+The deferrals the #18 note lists above are now implemented in Haskell, each the
+executable mirror of the frozen Lean development:
+
+- **Production Haskell checker** — `Lara.Check.checkUnit` decides the six-stage
+  whole-unit boundary (duplicate rule ids → R12 → duplicate arguments → support
+  → typed attacks → missing conflict), the exact order of the Lean `checkUnit`.
+  Layers 3–8 landed as `Lara.{Policy,SupportTerm,Attack,Compile,Grounded,
+  Diagnostics}`.
+- **Cached-adjacency runtime** — `Lara.Runtime` is the deferred optimized
+  evaluator; `RuntimeSpec` proves its verdict byte-identical to the un-cached
+  reference path over random AFs, with a 120-argument ≤5 s perf guard.
+- **`holes(P,p)` / `incompleteAlternative`** — `Lara.Reporting` computes the
+  claim-diagnostic projections (spec §8, §10.1); `ReportingSpec` covers gap
+  routing, located unresolved alternatives, and non-suppression of complete
+  winners.
+- **N11 differential anchor** — `Lara.Wire` is the single S-expression codec;
+  the `lara check` CLI (`app/Main.hs`) and the Lean driver
+  (`lean/Lara/Driver.lean`, exe `lara-driver`) print verdicts through it.
+  `scripts/differential.sh` runs every `fixtures/**/*.sexp` through both drivers
+  and asserts byte-exact stdout + exit-code agreement (Lean is the oracle);
+  `test/DifferentialSpec.hs` pins the agreed verdict bytes for `cabal test`.
+- **R1–R14 mutation coverage** (row 14) — the executable checker decides R1, R3,
+  R4, R5, R6, R7, R10, R11, R12, R13, each with a rejected golden in `CheckSpec`
+  and a `fixtures/corpus/` fixture, plus the four structural outcomes
+  (duplicate-rule, duplicate-argument, incomplete-argument, missing-conflict).
+  R2 (signature), R8 (admission), R9 (data-integrity) stay outside the
+  executable core; R14 (codec) is the decode-boundary class, covered by
+  `WireSpec`'s malformed-input matrix. This lands the "M5 mutation-suite spine"
+  the row-14 mechanization pointer anticipated, at the executable `checkUnit`
+  boundary.
+
+These Haskell tests are conformance evidence; soundness stays in the Lean
+proofs. Numeric caveat: the Lean driver runs at `canon = id` and does not
+canonicalize numbers, so every corpus fixture avoids non-canonical numeric
+literals to keep the two drivers byte-identical.
+
 _Done so far (2026-07-22): §8 #8 resolved — TCB written into spec §1.1, host fixed to Lean 4.
 Lock pass item 8 — support-term typing rules made explicit and v0.1-frozen in spec §6.1 (defect
 found and fixed on review: the syntactic hole set `H` covers optional questions, only

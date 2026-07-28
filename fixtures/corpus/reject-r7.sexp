@@ -1,0 +1,1 @@
+(unit (policy (rules (rule s (mode strict) (params) (premises (apat pp)) (conclusion (apat q)) (questions) (allow-trusted false) (certifiers (certifier nd 1 h)))) (contraries) (exceptions)) (leaves (leaf e_p (atom pp))) (args (arg a (inst s (subst) (premises (leaf e_p)) (discharges) (holes) (assurance trusted)))) (queries (atom q)))
