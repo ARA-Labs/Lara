@@ -68,6 +68,8 @@ module Lara.AST
   , Attack (..)
     -- * Programs (spec §2, §4.4)
   , Digest (..)
+  , ChallengeTarget (..)
+  , ArgConcl (..)
   , Arg (..)
   , Decl (..)
   , Program (..)
@@ -384,15 +386,62 @@ data Attack
 -- replay identity (spec §2).
 newtype Digest = Digest String deriving (Eq, Ord, Show)
 
--- | An @arg@ declaration naming a support term for a claim (spec §4.4).
+-- | The presentation-syntax target of a @challenges(…)@ argument conclusion
+-- (spec §7 defeat layer; presentation-only, __not__ a checker input).
 --
--- > arg a : supports(c) by <support term>
+-- An argument authored purely to attack another names, in surface form, /what/
+-- it challenges. This is human-facing intent recorded verbatim by the parser;
+-- the argument's real conclusion (what the checker sees, spec §6.1) is still its
+-- support term's conclusion, and the actual defeat edge is the separate typed
+-- 'Attack' line ('Rebut'\/'Undercut'\/'Undermine'). The elaborator (M4a A1) uses
+-- the target only for diagnostics, never to build the AF.
+--
+-- The two surface forms mirror the two attackable non-root positions (spec §7):
+--
+-- > challenges(external_validity(a1))   -- ChallengesQuestion external_validity a1
+-- > challenges(e6)                      -- ChallengesLeaf e6
+data ChallengeTarget
+  = -- | @challenges(q(u))@: the critical question @q@ of argument @u@ (the CQ
+    -- discharge position @u\@π.q@, spec §4.2). Pairs with an 'Undercut'\/'Undermine'.
+    ChallengesQuestion QuestionId ArgId
+  | -- | @challenges(l)@: a frontier evidence leaf @l@. Pairs with an 'Undermine'.
+    ChallengesLeaf LeafId
+  deriving (Eq, Show)
+
+-- | The conclusion an @arg@ declaration announces (spec §4.4, §7). A
+-- presentation-only sum: the checker consumes only the support term's own
+-- 'concl' (spec §6.1), so which arm is used never changes the compiled AF — it
+-- records the /author's stated role/ for the argument, which the elaborator
+-- resolves and validates.
+--
+-- > arg a  : supports(c1)                        -- SupportsClaim  (c1 declared)
+-- > arg d3 : supports(c1_neg)                     -- SupportsDerived (c1_neg NOT declared)
+-- > arg d1 : challenges(external_validity(a1))    -- Challenges …
+data ArgConcl
+  = -- | @supports(c)@ where @c@ is a declared 'Claim'; the elaborator checks
+    -- @concl(w) ≡ c.claimFormal@ (spec §3.1).
+    SupportsClaim PropId
+  | -- | @supports(c)@ where the named id is __not__ a declared claim: its formal
+    -- proposition is /derived by the elaborator/ (A1) from the support term's
+    -- conclusion. A0.5 records only the surface label; no claim status is
+    -- requested for it unless a separate @status@ declaration names it.
+    SupportsDerived PropId
+  | -- | @challenges(…)@: an argument whose reason for existing is to attack. Its
+    -- conclusion for the Unit is still its support term's conclusion; the target
+    -- is presentation intent (see 'ChallengeTarget').
+    Challenges ChallengeTarget
+  deriving (Eq, Show)
+
+-- | An @arg@ declaration naming a support term and the conclusion it announces
+-- (spec §4.4).
+--
+-- > arg a : <arg-conclusion> by <support term>
 --
 -- Multiple independent supports for the same claim are separate 'Arg's — never
 -- merged into one term — so defeat can eliminate one while another survives.
 data Arg = Arg
   { argId :: ArgId
-  , argClaim :: PropId
+  , argConcl :: ArgConcl
   , argTerm :: SupportTerm
   }
   deriving (Eq, Show)

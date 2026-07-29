@@ -1,0 +1,1 @@
+(unit (policy (rules (rule s (mode strict) (params X) (premises (apat basis (var X))) (conclusion (apat derived (var X))) (questions) (allow-trusted true) (certifiers))) (contraries (contrary (apat derived (var X)) (apat refuted (var X))) (contrary (apat refuted (var X)) (apat derived (var X)))) (exceptions)) (queries (atom derived (con x))))

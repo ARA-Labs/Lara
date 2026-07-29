@@ -25,11 +25,14 @@ import Lara.Term (Con (..), Term (..), Var (..))
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
 import DifferentialSpec (differentialSpecProps)
+import ElaborateSpec (elaborateSpecProps)
 import PropSpec (propSpecProps)
 import ReportingSpec (reportingSpecProps)
 import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
+import SyntaxSpec (syntaxSpecProps)
 import WireSpec (wireSpecProps)
+import WorkedExamplesSpec (workedExamplesSpecProps)
 
 -- ---------------------------------------------------------------------------
 -- Generators
@@ -178,6 +181,9 @@ main = do
         ++ [run name act | (name, act) <- propSpecProps]
         ++ [run name act | (name, act) <- strictSpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
+        ++ [run name act | (name, act) <- syntaxSpecProps]
+        ++ [run name act | (name, act) <- elaborateSpecProps]
+        ++ [run name act | (name, act) <- workedExamplesSpecProps]
         ++ [run name act | (name, act) <- checkSpecProps]
         ++ [run name act | (name, act) <- differentialSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]

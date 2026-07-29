@@ -13,8 +13,14 @@
 module CliSpec (cliSpecProps) where
 
 import Control.Exception (bracket)
-import System.Directory (getTemporaryDirectory, removeFile)
+import System.Directory
+  ( createDirectoryIfMissing
+  , getTemporaryDirectory
+  , removeDirectoryRecursive
+  , removeFile
+  )
 import System.Exit (ExitCode (..))
+import System.FilePath ((</>))
 import System.IO (hClose, hPutStr, openTempFile)
 import System.Process (readProcessWithExitCode)
 import Test.QuickCheck
@@ -40,6 +46,35 @@ withTempSexp contents k = do
     )
     removeFile
     k
+
+-- | Write a @.lara@ artifact named @art.lara@ (plus optional co-located files)
+-- into a fresh temp directory, run the body over the artifact path, then remove
+-- the directory tree. Hermetic: no dependency on the committed @examples/@ tree.
+withTempLaraDir
+  :: String -- ^ artifact (@art.lara@) contents
+  -> [(FilePath, String)] -- ^ co-located siblings (name, contents)
+  -> (FilePath -> IO a) -- ^ body over the artifact path
+  -> IO a
+withTempLaraDir art siblings k = do
+  tmp <- getTemporaryDirectory
+  bracket
+    ( do
+        (dirFile, h) <- openTempFile tmp "lara-cli-dir"
+        hClose h
+        removeFile dirFile
+        let dir = dirFile ++ ".d"
+        createDirectoryIfMissing True dir
+        writeFile (dir </> "art.lara") art
+        mapM_ (\(nm, c) -> writeFile (dir </> nm) c) siblings
+        pure dir
+    )
+    removeDirectoryRecursive
+    (\dir -> k (dir </> "art.lara"))
+
+-- | A minimal well-formed program (parses, zero declarations). Used by the
+-- missing-policy path: parsing must succeed so the policy read is what fails.
+minimalProgram :: String
+minimalProgram = "artifact x at sha256:aaaa... policy nopolicy use backends []\n"
 
 -- | accept: exit 0 and exactly the verdict bytes plus one trailing newline
 -- ('putStrLn'), byte-identical to the pinned Lean-driver golden.
@@ -98,6 +133,66 @@ prop_cliUsage = once $ ioProperty $ do
       , counterexample "stdout empty" (out === "")
       ]
 
+-- | @.lara@ end-to-end, Example A: parse + co-located policy resolution
+-- (@empirical-v1.policy.lara@) + elaborate + runUnit, exit 0 and exactly the
+-- accept verdict bytes. a1 is @out@ (undercut+undermine+rebut, all @in@), d1/d2/d3
+-- @in@, c1 @defeated@. These bytes equal the in-process elaborate+runUnit path
+-- (the CLI is a thin shell) — the plan's A1 gate for A.
+prop_cliLaraAcceptA :: Property
+prop_cliLaraAcceptA = once $ ioProperty $ do
+  (code, out, _) <- runLara ["check", "examples/A/example.lara"]
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitSuccess)
+      , counterexample "stdout" $
+          out
+            === "(verdict accept (labels (0 out) (1 in) (2 in) (3 in))"
+              ++ " (edges (0 3) (1 0) (2 0) (3 0))"
+              ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)))\n"
+      ]
+
+-- | @.lara@ end-to-end, Example B: two mutually-attacking arguments (a 2-cycle),
+-- both @undec@, both claims @contested@. Exit 0 and exactly the contested verdict
+-- bytes; resolves the same co-located @empirical-v1.policy.lara@.
+prop_cliLaraAcceptB :: Property
+prop_cliLaraAcceptB = once $ ioProperty $ do
+  (code, out, _) <- runLara ["check", "examples/B/example.lara"]
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitSuccess)
+      , counterexample "stdout" $
+          out
+            === "(verdict accept (labels (0 undec) (1 undec)) (edges (0 1) (1 0))"
+              ++ " (statuses"
+              ++ " (status (atom improves (con M) (con accuracy) (con D)) contested)"
+              ++ " (status (atom not_improves (con M) (con accuracy) (con D)) contested)))\n"
+      ]
+
+-- | @.lara@ parse error: a malformed artifact exits 2 with nothing on stdout (the
+-- located parse message goes to stderr, sharing the codec error's exit code).
+prop_cliLaraParseError :: Property
+prop_cliLaraParseError = once $ ioProperty $
+  withTempLaraDir "this is not a program\n" [] $ \path -> do
+    (code, out, _) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        ]
+
+-- | @.lara@ missing co-located policy: the program parses but
+-- @<policyId>.policy.lara@ is absent from the artifact's directory, so the policy
+-- read fails — exit 2, nothing on stdout.
+prop_cliLaraMissingPolicy :: Property
+prop_cliLaraMissingPolicy = once $ ioProperty $
+  withTempLaraDir minimalProgram [] $ \path -> do
+    (code, out, _) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        ]
+
 cliSpecProps :: [(String, IO Result)]
 cliSpecProps =
   [ ("cli accept exit 0 + bytes", quickCheckResult prop_cliAccept)
@@ -105,4 +200,8 @@ cliSpecProps =
   , ("cli codec error exit 2", quickCheckResult prop_cliCodecError)
   , ("cli unreadable file exit 2", quickCheckResult prop_cliUnreadable)
   , ("cli usage exit 2", quickCheckResult prop_cliUsage)
+  , ("cli .lara accept A exit 0 + bytes", quickCheckResult prop_cliLaraAcceptA)
+  , ("cli .lara accept B exit 0 + bytes", quickCheckResult prop_cliLaraAcceptB)
+  , ("cli .lara parse error exit 2", quickCheckResult prop_cliLaraParseError)
+  , ("cli .lara missing policy exit 2", quickCheckResult prop_cliLaraMissingPolicy)
   ]

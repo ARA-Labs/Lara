@@ -44,9 +44,11 @@ rule null_result(M, Q, D, Exp)
 contrary improves(M, Q, D)     not_improves(M, Q, D)
 contrary not_improves(M, Q, D) improves(M, Q, D)
 
-# Contrary on a leaf proposition, used by the undermine attack in example A.
-contrary measured(M, Q, D, positive) instrument_artifact(M, Q, D)
-contrary instrument_artifact(M, Q, D) measured(M, Q, D, positive)
+# Contrary on the external-validity (generalization) proposition, used by the undermine
+# attack in example A: the robustness appendix's `not_generalizes` defeats the leaf that
+# discharges a1's external_validity CQ (`generalizes`).
+contrary generalizes(M, Q, D)     not_generalizes(M, Q, D)
+contrary not_generalizes(M, Q, D) generalizes(M, Q, D)
 
 # --- Exceptions (undercutting conditions) ------------------------------------------------------
 
@@ -56,8 +58,8 @@ contrary instrument_artifact(M, Q, D) measured(M, Q, D, positive)
 # vs defeat-producing (an `exception`). external_validity appears as BOTH by design.
 exception controlled_experiment : distribution_shift(M, Q, D)
 
-# WELL-FORMEDNESS (spec §8.1, Path B): none of `improves`, `not_improves`, `measured`,
-# `instrument_artifact` is the consequent of a strict rule or reachable on a strict chain — the
+# WELL-FORMEDNESS (spec §8.1, Path B): none of `improves`, `not_improves`, `generalizes`,
+# `not_generalizes` is the consequent of a strict rule or reachable on a strict chain — the
 # only schemes above are defeasible — so every proposition in a `contrary` pair is defeasibly
 # attackable. The policy is therefore accepted; a contrary pair touching a strict-reachable
 # proposition would be rejected at compile time (see the planned R2 example).

@@ -11,6 +11,7 @@ script greps this output and fails on `sorryAx` or any axiom outside the standar
 Lean trio (`propext`, `Classical.choice`, `Quot.sound`). See `lean/README.md`.
 -/
 import Lara.Prop
+import Lara.Presentation
 import Lara.ND
 import Lara.Strict
 import Lara.Grounded
@@ -40,6 +41,85 @@ open Lara
 #print axioms nf_idem
 #print axioms equiv_nf
 #print axioms no_reorder
+
+-- Result 12: presentation-AST codec round-trip (`parse ∘ print = id`). The two
+-- top-level theorems plus every helper round-trip lemma the module proves
+-- (CLAUDE.md: AxCheck covers every new theorem).
+#print axioms Lara.Presentation.parse_printProgram
+#print axioms Lara.Presentation.parse_printPolicy
+-- Generic list/pair combinators.
+#print axioms Lara.Presentation.listOfSx_sxOfList
+#print axioms Lara.Presentation.unSxList_sxList
+#print axioms Lara.Presentation.unSxPair_sxPair
+-- Primitive leaves.
+#print axioms Lara.Presentation.unStr_sxStr
+#print axioms Lara.Presentation.unInt_sxInt
+#print axioms Lara.Presentation.unBool_sxBool
+-- Identifier newtypes.
+#print axioms Lara.Presentation.un_PropId
+#print axioms Lara.Presentation.un_QuestionId
+#print axioms Lara.Presentation.un_LeafId
+#print axioms Lara.Presentation.un_RuleId
+#print axioms Lara.Presentation.un_ArgId
+#print axioms Lara.Presentation.un_ObligationId
+#print axioms Lara.Presentation.un_BackendId
+#print axioms Lara.Presentation.un_PolicyId
+#print axioms Lara.Presentation.un_Param
+#print axioms Lara.Presentation.un_SourceRef
+#print axioms Lara.Presentation.un_TheoryDigest
+#print axioms Lara.Presentation.un_Digest
+-- Closed enum vocabularies.
+#print axioms Lara.Presentation.un_LeafKind
+#print axioms Lara.Presentation.un_Provenance
+#print axioms Lara.Presentation.un_AuditStatus
+#print axioms Lara.Presentation.un_Mode
+#print axioms Lara.Presentation.un_Necessity
+#print axioms Lara.Presentation.un_Admission
+#print axioms Lara.Presentation.un_sxStep
+-- Propositions (reused semantic core).
+#print axioms Lara.Presentation.un_sxTerm
+#print axioms Lara.Presentation.un_sxTerms
+#print axioms Lara.Presentation.un_sxAtom
+-- Patterns.
+#print axioms Lara.Presentation.un_sxPat
+#print axioms Lara.Presentation.un_sxPats
+#print axioms Lara.Presentation.un_sxAtomPat
+-- Certificates, assurance, and the recursive support-term algebra.
+#print axioms Lara.Presentation.un_sxCert
+#print axioms Lara.Presentation.un_sxAssurance
+#print axioms Lara.Presentation.un_sxSubst
+#print axioms Lara.Presentation.un_sxHoles
+#print axioms Lara.Presentation.un_sxST
+#print axioms Lara.Presentation.un_sxSTs
+#print axioms Lara.Presentation.un_sxDis
+-- Record layer + list-field round-trips.
+#print axioms Lara.Presentation.un_sxList_SourceRef
+#print axioms Lara.Presentation.un_sxList_Param
+#print axioms Lara.Presentation.un_sxList_AtomPat
+#print axioms Lara.Presentation.un_sxLeaf
+#print axioms Lara.Presentation.un_sxBinding
+#print axioms Lara.Presentation.un_sxClaim
+#print axioms Lara.Presentation.un_sxQuestion
+#print axioms Lara.Presentation.un_sxList_Question
+#print axioms Lara.Presentation.un_sxCertRef
+#print axioms Lara.Presentation.un_sxList_CertRef
+#print axioms Lara.Presentation.un_sxRule
+#print axioms Lara.Presentation.un_sxList_Rule
+#print axioms Lara.Presentation.un_sxContrary
+#print axioms Lara.Presentation.un_sxList_Contrary
+#print axioms Lara.Presentation.un_sxException
+#print axioms Lara.Presentation.un_sxList_Exception
+#print axioms Lara.Presentation.un_sxAdmEntry
+#print axioms Lara.Presentation.un_sxList_AdmEntry
+#print axioms Lara.Presentation.un_sxList_Step
+#print axioms Lara.Presentation.un_sxAttack
+#print axioms Lara.Presentation.un_sxChallengeTarget
+#print axioms Lara.Presentation.un_sxArgConcl
+#print axioms Lara.Presentation.un_sxArg
+#print axioms Lara.Presentation.un_sxDecl
+#print axioms Lara.Presentation.un_sxList_Decl
+#print axioms Lara.Presentation.un_sxBackend
+#print axioms Lara.Presentation.un_sxList_Backend
 
 -- Result 10 / C05: ND reference-adapter soundness + dependency exactness.
 #print axioms Lara.ND.nd_relevance

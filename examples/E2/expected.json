@@ -1,0 +1,16 @@
+{
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "improves(M, accuracy, D)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

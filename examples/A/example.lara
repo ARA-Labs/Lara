@@ -42,15 +42,18 @@ leaf e4 : distribution_shift(M, accuracy, D)
   provenance = user
   refs       = [paper_17.pdf#sec=7-limitations]
 
-# ...and the paper's OWN robustness appendix reports the headline metric is an instrument
-# artifact — the declared contrary of the leaf the main support relies on.
-leaf e5 : instrument_artifact(M, accuracy, D)
+# ...and the paper's OWN robustness appendix reports the result does NOT generalize (an
+# external-validity failure) — the declared contrary of the leaf that discharges a1's
+# external_validity critical question.
+leaf e5 : not_generalizes(M, accuracy, D)
   kind       = observed
   provenance = ai-executed
   refs       = [paper_17.pdf#appendix=C]
 
-# The measurement leaf the support term's frontier rests on (undermine target).
-leaf e6 : measured(M, accuracy, D, positive)
+# The external-validity (generalization) leaf a1's external_validity CQ rests on — this is
+# what the undermine attacks. It answers the policy's external_validity question pattern
+# generalizes(M, Q, D), so a1 is a COMPLETE argument (all mandatory CQs discharged).
+leaf e6 : generalizes(M, accuracy, D)
   kind       = observed
   provenance = ai-executed
   refs       = [evidence/table_2.csv#row=raw]
@@ -60,7 +63,7 @@ leaf e6 : measured(M, accuracy, D, positive)
 arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_3)
   discharge randomization     with e2
   discharge adequate_power    with e3
-  discharge external_validity with e6   # rests on the raw measurement leaf e6
+  discharge external_validity with e6   # e6 : generalizes(...), answers the CQ pattern
 # NOTE: external_validity is discharged (not left open) so this example exercises DEFEAT, not a
 # gap. The planned E2 covers the open-hole/gap path; here we want live attacks.
 
@@ -72,8 +75,8 @@ arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_3)
 arg d1 : challenges(external_validity(a1)) by leaf(e4)
 undercut d1 a1.rule
 
-# (2) UNDERMINE — the robustness appendix attacks the measurement LEAF e6 that discharges
-# external_validity. `instrument_artifact` is a declared contrary of `measured(...,positive)`.
+# (2) UNDERMINE — the robustness appendix attacks the generalization LEAF e6 that discharges
+# external_validity. `not_generalizes(...)` is a declared contrary of `generalizes(...)`.
 arg d2 : challenges(e6) by leaf(e5)
 undermine d2 a1.external_validity.leaf
 
@@ -84,10 +87,27 @@ leaf e7 : reports(exp_9, effect(M, accuracy, D, negligible))
   provenance = ai-executed
   refs       = [evidence/table_5.csv#row=ablation]
 
+# The null ablation is its OWN experiment (exp_9), so it carries its own randomization and
+# power leaves — the null_result scheme's CQs are about exp_9, not exp_3.
+leaf e8 : randomized(exp_9)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=6-ablations]
+
+leaf e9 : powered(exp_9)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=6-ablations]
+
 arg d3 : supports(c1_neg) by null_result(M, accuracy, D, exp_9)
-  discharge randomization  with e2
-  discharge adequate_power with e3
+  discharge randomization  with e8
+  discharge adequate_power with e9
 rebut d3 a1
+# improves / not_improves are contrary in BOTH directions (empirical-v1), so the headline and
+# the null ablation genuinely conflict both ways; attack completeness (spec §8) requires the
+# reverse edge too. It does not change the verdict: a1 is already `out` (undercut+undermine+
+# rebut), so it cannot defeat d3 — d3 stays `in`.
+rebut a1 d3
 
 status c1
 

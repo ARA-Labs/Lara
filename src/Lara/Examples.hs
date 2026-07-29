@@ -155,7 +155,7 @@ nanogptTailEma =
         , DeclArg
             Arg
               { argId = ArgId "a02"
-              , argClaim = PropId "c02"
+              , argConcl = SupportsClaim (PropId "c02")
               , argTerm =
                   inst
                     "leave_one_out_ranking"
@@ -253,7 +253,7 @@ nanogptV12Quarantine =
         , DeclArg
             Arg
               { argId = ArgId "a_rec"
-              , argClaim = PropId "c05_record"
+              , argConcl = SupportsClaim (PropId "c05_record")
               , argTerm =
                   inst
                     "record_from_crossing"
@@ -265,7 +265,9 @@ nanogptV12Quarantine =
         , DeclArg
             Arg
               { argId = ArgId "d_comp"
-              , argClaim = PropId "c05_compliance" -- concludes forward_path_rewrite(rmsnorm)
+              , -- c05_compliance is not a declared claim; its proposition
+                -- (forward_path_rewrite(rmsnorm)) is derived from the term's conclusion.
+                argConcl = SupportsDerived (PropId "c05_compliance")
               , argTerm =
                   inst
                     "forward_path_violation"
@@ -369,7 +371,7 @@ ls20SwitchDispute =
         , DeclArg
             Arg
               { argId = ArgId "a08"
-              , argClaim = PropId "c08_hidden"
+              , argConcl = SupportsClaim (PropId "c08_hidden")
               , argTerm =
                   inst
                     "undersampled_inference"
@@ -381,7 +383,7 @@ ls20SwitchDispute =
         , DeclArg
             Arg
               { argId = ArgId "a09"
-              , argClaim = PropId "c09_single"
+              , argConcl = SupportsClaim (PropId "c09_single")
               , argTerm =
                   inst
                     "repeated_sampling"

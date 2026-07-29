@@ -1,0 +1,68 @@
+{
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "improves(M_j, accuracy, D_j)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "improves(M_d, accuracy, D_d)",
+        "status": "defeated",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "improves(M_c, accuracy, D_c)",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "not_improves(M_c, accuracy, D_c)",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a_j",
+        "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a_d",
+        "index": 1,
+        "label": "out"
+      },
+      {
+        "arg": "d_uc",
+        "index": 2,
+        "label": "in"
+      },
+      {
+        "arg": "d_um",
+        "index": 3,
+        "label": "in"
+      },
+      {
+        "arg": "a_c",
+        "index": 4,
+        "label": "undec"
+      },
+      {
+        "arg": "a_cn",
+        "index": 5,
+        "label": "undec"
+      }
+    ]
+  }
+}

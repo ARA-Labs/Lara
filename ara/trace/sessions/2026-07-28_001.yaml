@@ -1,0 +1,135 @@
+session:
+  id: "2026-07-28_001"
+  date: "2026-07-28"
+  started: "2026-07-28T12:00"
+  last_turn: "2026-07-28T12:00"
+  turn_count: 1
+  summary: >
+    Implemented M4a end-to-end (#31, PR #33): the .lara front-end (hand-rolled
+    Lara.Syntax parser/printer in the TCB, no new dep; pure Lara.Elaborate
+    Program+Policy->Unit; lara check extension-dispatch + co-located policy), the
+    worked-examples suite (E1-E3 justified/gap/defeated+contested+justified, R1/R12/R10
+    rejections, + A/B) each with a per-example dir + .core.sexp + expected.json, and
+    result 12 mechanized in Lean over the FULL presentation AST (parse.print=id,
+    sorry-free). 9 commits; 32/32 both-drivers byte-exact; AxCheck clean. Example A was
+    mis-authored (rejected R6 then missing-conflict) and corrected — user-approved — to
+    reach its UNCHANGED golden.
+
+events_logged:
+  - turn: 1
+    type: pivot
+    id: "N68"
+    routing: direct
+    provenance: ai-executed
+    summary: "Phase boundary M3->M4a: compiler end-to-end on the worked-examples suite (trusted surface front-end)."
+  - turn: 1
+    type: experiment
+    id: "N69"
+    routing: direct
+    provenance: ai-executed
+    summary: "Implement M4a: Lara.Syntax + Lara.Elaborate + CLI dispatch + 8-example suite + result-12 Lean. Result: 32/32 both-drivers byte-exact, all verdicts as intended, AxCheck sorry-free."
+  - turn: 1
+    type: decision
+    id: "N70"
+    routing: direct
+    provenance: ai-executed
+    summary: "A0.5 grammar freeze: premises implicit / discharges explicit; ArgConcl sum; reuse frozen Attack for positions; hand-rolled parser (no dep, TCB); #-in-refs two-mode lexer; two keyword-disambiguated top-levels."
+  - turn: 1
+    type: decision
+    id: "N71"
+    routing: direct
+    provenance: user
+    summary: "Correct Example A (not its golden) to reach the frozen a1->out/c1->Defeated verdict — user chose 'Correct A to reach its golden' over making A a reject example or a policy redesign."
+  - turn: 1
+    type: decision
+    id: "N72"
+    routing: direct
+    provenance: ai-executed
+    summary: "Defeasible-only R-series mapping R1/R12/R10 (forced by the frozen grammar's lack of support-term assurance syntax); supersedes the plan's speculative 'R7'. Strict-cert/R7 teachings deferred to TODOS."
+  - turn: 1
+    type: decision
+    id: "N73"
+    routing: direct
+    provenance: ai-executed
+    summary: "Scope result 12 to a structured-codec round-trip over the frozen presentation AST (test-only strength per mechanization-plan.md:55); NOT a proof of the concrete-syntax Haskell parser."
+  - turn: 1
+    type: observation
+    id: "O16"
+    routing: staged
+    provenance: ai-executed
+    summary: "A hand-authored .lara is a certificate but not self-checking: the checker caught Example A's latent policy inconsistency a human 'golden oracle' had missed."
+  - turn: 1
+    type: observation
+    id: "O17"
+    routing: crystallized
+    provenance: ai-executed
+    summary: "M4a suite is defeasible-only (grammar has no support-term assurance syntax; nd@1 inert) -> constraints.md via artifact-commitment (honesty note + TODOS + coverage test scope)."
+  - turn: 1
+    type: observation
+    id: "O18"
+    routing: staged
+    provenance: ai-executed
+    summary: "Lean result 12 anchors that the frozen presentation AST shape round-trips through a structured codec (no field loses info); it does NOT transfer to the Haskell parser (QuickCheck is the conformance evidence)."
+  - turn: 1
+    type: observation
+    id: "O15"
+    routing: crystallized
+    provenance: ai-executed
+    summary: "Numeric-literal canonNum-vs-id driver divergence caveat -> constraints.md; now guarded by a SECOND no-num-literal differential prop over the 8 worked-example anchors (artifact-commitment, previously held for conservatism)."
+
+ai_actions:
+  - turn: 1
+    action: "Executed the M4a plan task-by-task (fresh subagent per task + spec/quality review): A0 freeze, A0.5 grammar, A1a parser, A1b elaborator, A1c-1 CLI, A1c-2 examples, A2-1 dirs+differential, A2-2 expected.json, A3 Lean. Committed each step; pushed; refreshed PR #33."
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Syntax.hs"
+      - "src/Lara/Elaborate.hs"
+      - "src/Lara/ExpectedJson.hs"
+      - "src/Lara/AST.hs"
+      - "app/Main.hs"
+      - "lean/Lara/Presentation.lean"
+      - "lean/AxCheck.lean"
+      - "examples/{A,B,E1,E2,E3,R1,R2,R3}/{example.lara,*.policy.lara,example.core.sexp,expected.json}"
+      - "docs/lara-surface-grammar.md"
+      - "docs/m4a-checklist.md"
+      - "scripts/{differential.sh,gen-worked-examples.hs}"
+      - "test/{Syntax,Elaborate,Cli,Differential,WorkedExamples,Spec}*.hs"
+  - turn: 1
+    action: "Corrected examples/A-self-defeating-paper.lara + empirical-v1.policy.lara so A checks to its frozen golden (external_validity discharged by a real generalizes leaf; contrary swapped to generalizes/not_generalizes; d3 given exp_9 leaves; reverse rebut a1 d3 for attack completeness)."
+    provenance: ai-executed
+    files_changed:
+      - "examples/A/example.lara"
+      - "examples/A/empirical-v1.policy.lara"
+      - "docs/m4a-checklist.md"
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Wiring the compiler revealed Example A (a paper motivating example) did NOT pass the
+      checker: it discharged the mandatory CQ external_validity (policy pattern generalizes)
+      with a measured(...) leaf -> R6, and separately missed one orientation of the
+      improves/not_improves mutual rebut -> missing-conflict. Per Lean-is-oracle discipline the
+      GOLDEN was not re-annotated; the EXAMPLE was corrected. User chose 'Correct A to reach its
+      golden' (over reject-example / policy-redesign). Golden values unchanged, now
+      checker-verified end-to-end.
+  - turn: 1
+    excerpt: >
+      The frozen grammar has no support-term assurance syntax, so the suite is defeasible-only
+      and a strict-arg cannot be authored; the plan's speculative R3->'R7' was therefore
+      unauthorable. Resolved the three rejection reps to R1 (undeclared leaf) / R12 (strict rule
+      conclusion in a contrary pair, a policy-wf reject with a defeasible artifact) / R10 (rebut
+      targeting a leaf occurrence).
+
+open_threads:
+  - "PR #33 awaits human review; the load-bearing check is Example A's narrative correction (undermine now targets the generalization leaf) in the m4a-checklist correction log."
+  - "A1a left two round-trip-guarded code-quality follow-ups: centralize structural keyword spellings (currently duplicated parser/printer); drop a double-reverse no-op in commaSep1."
+  - "Deferred to TODOS as planned: a strict-certificate worked example (nd@1 frontend cert path); result-9 backend-replacement mechanization (eraseCert/CheckedProgram)."
+  - "O16 (hand-authored-cert-not-self-checking) staged as a claim candidate bound to N71 + C11 — awaits affirmation or further instances."
+
+ai_suggestions_pending:
+  - "O16: the trusted checker catching Example A's inconsistency is concrete evidence for the trusted-checker thesis (C11) and for worked examples being load-bearing (C10 methodology); not yet affirmed as a claim."
+  - "O18: result-12 codec-round-trip scope note (metatheory anchor, not a Haskell-parser proof) — staged as a concept clarification."

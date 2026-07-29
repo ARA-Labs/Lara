@@ -1,0 +1,16 @@
+{
+  "verdict-class": "reject R1",
+  "located-diagnostic": {
+    "kind": "reject",
+    "class": "R1",
+    "stage": "support",
+    "constituent": {
+      "kind": "argument",
+      "id": "a1",
+      "index": 0
+    },
+    "reason": "missing-leaf",
+    "leaf": "e_missing",
+    "term-position": "root"
+  }
+}

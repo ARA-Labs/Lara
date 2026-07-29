@@ -1,0 +1,34 @@
+{
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "improves(M, accuracy, D)",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "not_improves(M, accuracy, D)",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "pa",
+        "index": 0,
+        "label": "undec"
+      },
+      {
+        "arg": "pb",
+        "index": 1,
+        "label": "undec"
+      }
+    ]
+  }
+}

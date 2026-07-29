@@ -86,13 +86,17 @@ examples live in [`examples/`](examples/), answering the design question *"if
 one paper cannot rebut itself, what is the unit of argumentation?"* (the
 support term, not the paper):
 
-- [`A-self-defeating-paper.lara`](examples/A-self-defeating-paper.lara) — one
-  paper attacks its own headline claim with all three attack kinds → **defeated**.
-- [`B-two-paper-contested.lara`](examples/B-two-paper-contested.lara) — two
-  papers with contrary conclusions, a mutual rebut 2-cycle → **contested** ×2,
-  with no new calculus for corpus scale.
-- [`empirical-v1.policy.lara`](examples/empirical-v1.policy.lara) — the shared
-  trusted policy both check against.
+Each example is a self-contained directory `examples/<NAME>/` holding the surface
+artifact `example.lara`, its co-located policy, and the derived wire anchor
+`example.core.sexp` (the byte-exact Haskell↔Lean differential target):
+
+- [`A/example.lara`](examples/A/example.lara) — one paper attacks its own
+  headline claim with all three attack kinds → **defeated**.
+- [`B/example.lara`](examples/B/example.lara) — two papers with contrary
+  conclusions, a mutual rebut 2-cycle → **contested** ×2, with no new calculus for
+  corpus scale.
+- [`A/empirical-v1.policy.lara`](examples/A/empirical-v1.policy.lara) — the shared
+  trusted policy A, B, and the E-series check against (co-located in each dir).
 
 `Lara.Examples` additionally transcribes real
 [ARA-Demo](https://github.com/ARA-Labs/ARA-Demo) claims (nanoGPT-speedrun,

@@ -1,6 +1,10 @@
 -- LARA mechanized reference semantics — library root.
 -- Currently mechanized:
 --   * the frozen nf/≡ carve-out (spec §9 result 11 / claim C01)  — Lara.Prop
+--   * the presentation-AST codec round-trip (spec §9 result 12): the frozen
+--     Program/Policy shape serializes to a structured S-expression and parses
+--     back exactly (parse ∘ print = id) — a metatheory anchor for the AST shape,
+--     NOT a proof of the concrete-syntax Haskell parser — Lara.Presentation
 --   * the ND reference adapter: soundness + dependency exactness (results 10, 8) — Lara.ND
 --   * the abstract strict-backend seam: Theorem 1 + ND instantiation (result 8) — Lara.Strict
 --   * the whole-status layer: direct vs compiled grounded semantics agreement
@@ -36,6 +40,7 @@
 -- Backend.uses), and backend replacement (result 9, needs certificate-erased
 -- argument identity). See docs/mechanization-plan.md.
 import Lara.Prop
+import Lara.Presentation
 import Lara.ND
 import Lara.Certificate
 import Lara.Strict

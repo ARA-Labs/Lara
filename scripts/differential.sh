@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Differential harness for the N11 wire anchor (M3 plan D8/D16).
 #
-# Runs every fixture under fixtures/**/*.sexp through BOTH drivers — the Haskell
-# production runtime (`cabal run exe:lara -- check`) and the Lean executable
-# semantics (`lean/.lake/build/bin/lara-driver`) — and asserts byte-exact
-# agreement on stdout AND exit code. The Lean executable is the oracle: any
-# disagreement is a bug (in Haskell or in a fixture), never silently
-# re-annotated.
+# Runs every fixture under fixtures/**/*.sexp AND every worked-example anchor
+# under examples/**/*.core.sexp (a *.sexp glob covers both) through BOTH drivers —
+# the Haskell production runtime (`cabal run exe:lara -- check`) and the Lean
+# executable semantics (`lean/.lake/build/bin/lara-driver`) — and asserts
+# byte-exact agreement on stdout AND exit code. The Lean executable is the oracle:
+# any disagreement is a bug (in Haskell or in a fixture), never silently
+# re-annotated. The worked-example anchors are derived from their `.lara` sources
+# by `scripts/gen-worked-examples.hs` (parse → elaborate → encodeUnit).
 #
 # Usage:  bash scripts/differential.sh
 # Exit:   0 iff every fixture agrees; 1 on any disagreement; 2 on a build/setup
@@ -45,12 +47,12 @@ while IFS= read -r f; do
     printf '  haskell (exit %s): %s\n' "$hs_exit" "$hs_out"
     printf '  lean    (exit %s): %s\n' "$lean_exit" "$lean_out"
   fi
-done < <(find fixtures -name '*.sexp' | sort)
+done < <(find fixtures examples -name '*.sexp' | sort)
 
 printf -- '---------------------------------------------------------------------------\n'
 echo "pass=$pass fail=$fail"
 if [ "$((pass + fail))" -eq 0 ]; then
-  echo "FAIL: no fixtures compared — fixtures/ is empty, missing, or renamed"
+  echo "FAIL: no fixtures compared — fixtures/ or examples/ is empty, missing, or renamed"
   exit 2
 fi
 [ "$fail" -eq 0 ] && [ "$pass" -gt 0 ]

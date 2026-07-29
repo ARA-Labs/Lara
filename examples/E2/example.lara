@@ -1,0 +1,64 @@
+# Example E2 — open-gap (the claim with no assembled support)
+#
+# Witnesses: `gap` = EMPTY COMPLETE SUPPORT (M4a decision #8). The paper STATES the claim and
+# even lays out the evidence leaves, but never assembles an argument that concludes it — no
+# support term concludes improves(M, accuracy, D). With zero complete support arguments for the
+# queried atom, `statusC` returns `gap` on the empty-support branch alone (Grounded.hs:127,
+# spec §8), independent of any holes.
+#
+# This is deliberately NOT the "open mandatory CQ" mechanism: a declared argument with an open
+# mandatory question is an IncompleteArgument REJECTION (Check.hs), not a gap. So E2 witnesses the
+# gap the only way `runUnit` produces one — a claim whose complete-support set is empty.
+#
+# This is E2 of the M4a coverage matrix (docs/worked-examples-plan.md §3): status = gap, no attacks.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact resnet_c01_stated at sha256:e2e2...
+policy empirical-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but never argued -----------------------------------------------
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = unreviewed }
+
+# --- Evidence leaves are present … -------------------------------------------------------------
+
+# The paper's data is on the page — the report of a positive effect, and the randomization /
+# power attestations — but no `arg` is ever declared to bind them into a controlled_experiment
+# instance concluding improves(M, accuracy, D). The evidence sits in Γ, unused by any support term.
+leaf e1 : reports(exp_1, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_1.csv#row=mean]
+
+leaf e2 : randomized(exp_1)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=4.1]
+
+leaf e3 : powered(exp_1)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=4.1]
+
+# --- … but no argument concludes the claim -----------------------------------------------------
+
+# (Intentionally no `arg` declaration. The claim's complete-support set is therefore empty.)
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c1  -> gap   (empty complete support: no support term concludes improves(M, accuracy, D);
+#                 statusC = Gap iff null claimSupport, spec §8 / Grounded.hs)
+#
+# Teaching point: `gap` is the honest verdict for "asserted but not argued". It is distinct from
+# `defeated` (argued but the argument lost) — the evidence exists, but the paper never built the
+# bridge from evidence to claim, so there is nothing for the calculus to accept or defeat.

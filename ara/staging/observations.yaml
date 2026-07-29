@@ -273,6 +273,76 @@ observations:
       docs/m3-closeout-notes.md and referenced in the spec §8 status note.
     potential_type: constraint
     bound_to: [N66]
+    promoted: true
+    promoted_to: "logic/solution/constraints.md#m4a-surface-front-end-constraints"
+    crystallized_via: "artifact-commitment"
+    stale: false
+
+  - id: O16
+    timestamp: "2026-07-28T12:00"
+    provenance: ai-executed
+    content: >
+      A hand-authored .lara file IS a certificate but NOT a self-checking one. Wiring the
+      compiler end-to-end surfaced that Example A (a committed paper motivating example with a
+      human-computed inline 'golden oracle') did not actually pass the checker: it discharged
+      the mandatory CQ external_validity (policy answer pattern generalizes) with a measured(...)
+      leaf -> R6, and separately declared only one orientation of the improves/not_improves
+      mutual rebut -> missing-conflict. The trusted checker caught two latent inconsistencies the
+      hand-computed oracle had missed. Concrete evidence for the trusted-checker thesis (a checked
+      certificate strictly dominates a hand-authored one even for the author's own examples) and
+      for worked examples being load-bearing rather than illustrative.
+    context: >
+      A1b elaborator brought the surface->Unit->verdict path online; running it on the committed
+      examples/A rejected R6, then missing-conflict after the R6 fix. User approved correcting the
+      example (N71) to reach its unchanged golden. The finding is the compiler's first act of
+      catching a bug in previously-trusted content.
+    potential_type: claim
+    bound_to: [N71]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+
+  - id: O17
+    timestamp: "2026-07-28T12:00"
+    provenance: ai-executed
+    content: >
+      The M4a worked-examples suite is DEFEASIBLE-ONLY. The frozen .lara grammar has no
+      support-term assurance syntax (cert/trusted appear in the vocabulary table but no support-term
+      production uses them), so a strict argument instance cannot be authored; use backends [nd@1]
+      is inert on the suite. Consequences: (1) the strict-certificate frontend path (nd@1 replay
+      from surface) is NOT exercised by M4a — deferred to TODOS; (2) the three rejection reps are
+      the defeasible-authorable R1/R12/R10, not the plan's speculative strict R3/'R7'. R12 is still
+      reachable because a strict RULE DECLARATION in the policy (with its conclusion in a contrary
+      pair) is a policy-well-formedness reject independent of any strict argument.
+    context: >
+      Surfaced while authoring the R-series (A1c-2) and scoping the elaborator (A1b, defeasible-only
+      forced AssuranceNone). Recorded as the honesty note in docs/m4a-checklist.md + examples/README,
+      the strict-cert TODO in TODOS.md, and the coverage-matrix test's scope.
+    potential_type: constraint
+    bound_to: [N69, N72]
+    promoted: true
+    promoted_to: "logic/solution/constraints.md#m4a-surface-front-end-constraints"
+    crystallized_via: "artifact-commitment"
+    stale: false
+
+  - id: O18
+    timestamp: "2026-07-28T12:00"
+    provenance: ai-executed
+    content: >
+      Lean result 12 (parse.print=id, proved over the full presentation Program/Policy AST via a
+      structured S-expression codec, sorry-free) is a metatheory anchor for the frozen AST SHAPE:
+      it certifies that no field of the presentation AST loses information through a codec. It is
+      NOT a proof that the concrete-syntax Haskell parser is correct — a Lean re-implementation of a
+      different codec cannot transfer. The conformance evidence for the actual .lara surface syntax
+      remains the Haskell QuickCheck parse.print==id (SyntaxSpec, maxSuccess=2000). This split
+      (Lean = frozen-shape codec anchor; QuickCheck = concrete-syntax conformance) is the honest
+      reading of result 12's 'test-only, mechanize if cheap' strength (mechanization-plan.md:55).
+    context: >
+      Scoping decision N73 before dispatching A3; documented in lean/Lara/Presentation.lean's
+      docstring, the lean/Lara.lean comment, and the AxCheck Result-12 section.
+    potential_type: concept
+    bound_to: [N73]
     promoted: false
     promoted_to: null
     crystallized_via: null

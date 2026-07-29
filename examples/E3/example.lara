@@ -1,0 +1,203 @@
+# Example E3 — defeat-suite (three claims, three attack kinds, three non-gap statuses)
+#
+# Witnesses: the centerpiece. Three independent (M, D) contexts on the shared empirical-v1 policy,
+# each carrying one claim, arranged so the compiled AF exhibits all three attack constructors and
+# three distinct claim statuses in one graph:
+#
+#   * JUSTIFIED — a complete controlled_experiment argument with no attackers (context _j).
+#   * DEFEATED  — a complete controlled_experiment argument killed by an UNDERCUT (the exception
+#                 distribution_shift) AND an UNDERMINE (the contrary of its external_validity leaf)
+#                 (context _d).
+#   * CONTESTED — two complete arguments concluding a declared contrary pair in a mutual REBUT
+#                 2-cycle, which grounded semantics labels undec (context _c).
+#
+# Together with E1 (justified) and E2 (gap) this closes the status matrix (justified / gap /
+# contested / defeated) and the attack matrix (rebut / undercut / undermine). The three contexts
+# use DISTINCT M/D constants so no cross-context contrary pair ever matches — each conflict is
+# local, and the only edges are the four declared attacks.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact resnet_suite at sha256:e3e3...
+policy empirical-v1
+use backends [nd@1]
+
+# ===============================================================================================
+# CONTEXT J — justified: a clean argument, no attackers
+# ===============================================================================================
+
+claim c_j
+  nl      = "Method M_j improves accuracy on distribution D_j"
+  formal  = improves(M_j, accuracy, D_j)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf ej1 : reports(exp_j, effect(M_j, accuracy, D_j, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/j.csv#row=mean]
+
+leaf ej2 : randomized(exp_j)
+  kind       = attested
+  provenance = user
+  refs       = [paper_j.pdf#sec=4]
+
+leaf ej3 : powered(exp_j)
+  kind       = attested
+  provenance = user
+  refs       = [paper_j.pdf#sec=4]
+
+leaf ej4 : generalizes(M_j, accuracy, D_j)
+  kind       = attested
+  provenance = user
+  refs       = [paper_j.pdf#sec=5]
+
+arg a_j : supports(c_j) by controlled_experiment(M_j, accuracy, D_j, exp_j)
+  discharge randomization     with ej2
+  discharge adequate_power    with ej3
+  discharge external_validity with ej4
+
+# ===============================================================================================
+# CONTEXT D — defeated: a complete argument hit by an undercut AND an undermine
+# ===============================================================================================
+
+claim c_d
+  nl      = "Method M_d improves accuracy on distribution D_d"
+  formal  = improves(M_d, accuracy, D_d)
+  binding = { author = bob, audit-status = reviewed }
+
+leaf ed1 : reports(exp_d, effect(M_d, accuracy, D_d, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/d.csv#row=mean]
+
+leaf ed2 : randomized(exp_d)
+  kind       = attested
+  provenance = user
+  refs       = [paper_d.pdf#sec=4]
+
+leaf ed3 : powered(exp_d)
+  kind       = attested
+  provenance = user
+  refs       = [paper_d.pdf#sec=4]
+
+leaf ed4 : generalizes(M_d, accuracy, D_d)
+  kind       = attested
+  provenance = user
+  refs       = [paper_d.pdf#sec=5]
+
+# The undercut source: an eval-distribution shift, the declared `exception` for
+# controlled_experiment. Undercuts succeed regardless of preference (spec §7).
+leaf ed_ds : distribution_shift(M_d, accuracy, D_d)
+  kind       = attested
+  provenance = user
+  refs       = [paper_d.pdf#sec=7-limitations]
+
+# The undermine source: the declared contrary of the external_validity leaf ed4.
+leaf ed_ng : not_generalizes(M_d, accuracy, D_d)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paper_d.pdf#appendix=C]
+
+arg a_d : supports(c_d) by controlled_experiment(M_d, accuracy, D_d, exp_d)
+  discharge randomization     with ed2
+  discharge adequate_power    with ed3
+  discharge external_validity with ed4
+
+# UNDERCUT — the distribution shift defeats the rule application (licensed by the exception).
+arg d_uc : challenges(external_validity(a_d)) by leaf(ed_ds)
+undercut d_uc a_d.rule
+
+# UNDERMINE — not_generalizes defeats the external_validity leaf ed4 (a declared contrary).
+arg d_um : challenges(ed4) by leaf(ed_ng)
+undermine d_um a_d.external_validity.leaf
+
+# ===============================================================================================
+# CONTEXT C — contested: a mutual-rebut 2-cycle
+# ===============================================================================================
+
+claim c_c
+  nl      = "Method M_c improves accuracy on distribution D_c"
+  formal  = improves(M_c, accuracy, D_c)
+  binding = { author = carol, audit-status = reviewed }
+
+claim c_cn
+  nl      = "Method M_c does not improve accuracy on distribution D_c"
+  formal  = not_improves(M_c, accuracy, D_c)
+  binding = { author = dave, audit-status = reviewed }
+
+leaf ec1 : reports(exp_c, effect(M_c, accuracy, D_c, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/c_pos.csv#row=mean]
+
+leaf ec2 : randomized(exp_c)
+  kind       = attested
+  provenance = user
+  refs       = [paper_c.pdf#sec=4]
+
+leaf ec3 : powered(exp_c)
+  kind       = attested
+  provenance = user
+  refs       = [paper_c.pdf#sec=4]
+
+leaf ec4 : generalizes(M_c, accuracy, D_c)
+  kind       = attested
+  provenance = user
+  refs       = [paper_c.pdf#sec=5]
+
+leaf ecn1 : reports(exp_cn, effect(M_c, accuracy, D_c, negligible))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/c_null.csv#row=mean]
+
+leaf ecn2 : randomized(exp_cn)
+  kind       = attested
+  provenance = user
+  refs       = [paper_cn.pdf#sec=3]
+
+leaf ecn3 : powered(exp_cn)
+  kind       = attested
+  provenance = user
+  refs       = [paper_cn.pdf#sec=3]
+
+arg a_c : supports(c_c) by controlled_experiment(M_c, accuracy, D_c, exp_c)
+  discharge randomization     with ec2
+  discharge adequate_power    with ec3
+  discharge external_validity with ec4
+
+arg a_cn : supports(c_cn) by null_result(M_c, accuracy, D_c, exp_cn)
+  discharge randomization  with ecn2
+  discharge adequate_power with ecn3
+
+# REBUT — improves / not_improves are contrary in BOTH directions (empirical-v1), so both
+# orientations are declared; attack completeness (spec §8) requires both edges, and together they
+# form the 2-cycle grounded semantics labels undec.
+rebut a_cn a_c
+rebut a_c a_cn
+
+status c_j
+status c_d
+status c_c
+status c_cn
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# Arguments in declaration order (all complete):
+#   a_j (0)  -> in     (LIn; no attackers)
+#   a_d (1)  -> out    (LOut; undercut by d_uc and undermined by d_um, both unattacked ⇒ in)
+#   d_uc (2) -> in     (LIn; unattacked)
+#   d_um (3) -> in     (LIn; unattacked)
+#   a_c (4)  -> undec  (LUndec; 2-cycle with a_cn)
+#   a_cn (5) -> undec  (LUndec; 2-cycle with a_c)
+# Claim statuses:
+#   c_j  -> justified   (support a_j is in)
+#   c_d  -> defeated    (support a_d is out)
+#   c_c  -> contested   (support a_c is undec, none in)
+#   c_cn -> contested   (support a_cn is undec, none in)
+#
+# Teaching point: three conflict shapes coexist without interference because their (M, D) contexts
+# are disjoint. The undercut and undermine both target the SAME argument (a_d) at DIFFERENT
+# positions (the root rule vs the external_validity leaf) — either alone already drives a_d out;
+# together they show exact-occurrence targeting. The 2-cycle is the honest `contested`, not a
+# silent "both justified".

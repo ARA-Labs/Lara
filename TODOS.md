@@ -1,7 +1,9 @@
 # TODOS
 
 > M3 closed (GitHub issue #27, PR #28). Remaining items below are post-M3
-> backlog; M4 (walking skeleton) scope is tracked separately.
+> backlog. M4 is tracked under umbrella issue #29 — split into M4a (#31,
+> `plans/2026-07-27-m4a-compiler-worked-examples.md`) and M4b (#32,
+> `plans/2026-07-27-m4b-walking-skeleton.md`).
 
 ## Performance
 
@@ -52,6 +54,57 @@ closed issue #27.
 **Effort:** L
 **Priority:** P3
 **Depends on:** M3 closeout (#27)
+
+## Mechanization (split from M4a #31)
+
+### Result-9 backend-replacement: eraseCert + stable argument-id representation
+
+**What:** An argument-id / `eraseCert` compile-boundary representation for the
+Lean `CheckedProgram`, then the result-9 (backend replacement) proof: node
+bijection transport, graph isomorphism, and grounded-status invariance.
+
+**Why:** `/plan-eng-review` (2026-07-27) split this out of M4a's Task A3. Result
+12 (the parser round-trip) needs none of it; the machinery belongs to **result 9**
+(`docs/spec.md:1153-1159`). The current `CheckedProgram` "cannot state the required
+payload-varying node bijection: nodes are certificate-bearing `SupportTerm`s with
+no stable argument id or erased skeleton."
+
+**Pros:** Unblocks the only remaining unmechanized backend-independence result;
+already flagged in `ara/evidence/status/mechanization_status.md` as the result-9
+statement-model blocker.
+
+**Cons:** A substantial Lean representation refactor; genuine proof risk.
+
+**Context:** `eraseCert` behavioral definition at `docs/spec.md:882` (preserves
+argument names, rule instances, conclusions, obligations, positions; replaces
+payloads with a `certified` marker). No `eraseCert` exists in Haskell or Lean yet.
+
+**Effort:** L
+**Priority:** P3
+**Depends on:** the M4a `Lara.AST` / presentation-AST freeze (#31); not blocked by
+anything inside M4a.
+
+### Strict-certificate worked example (nd@1 frontend cert path)
+
+**What:** One worked example whose claim is supported by a **strict** rule with an
+`nd@1` certificate, end-to-end (`.lara` → elaborate → verdict + `.core.sexp`).
+
+**Why:** `/plan-eng-review` (2026-07-27), outside-voice #14: the M4a worked
+examples declare `use backends [nd@1]` but the empirical policy is all-defeasible
+with no certificates, so `nd@1` is inert. The frontend's certificate parse +
+elaborate path ships untested by the worked-examples suite.
+
+**Pros:** End-to-end golden for the strict-cert frontend path.
+
+**Cons:** Adds certificate surface syntax + elaboration scope; the Unit-level cert
+path is already tested (`buildCertOk` / `Lara.Strict.ND`).
+
+**Context:** M4a's four-status discriminating examples are legitimately
+defeasible-argumentation; this closes the frontend-cert gap without expanding M4a.
+
+**Effort:** M
+**Priority:** P3
+**Depends on:** M4a frontend (#31) — parser + elaborator + grammar (A0.5/A1).
 
 ## Completed
 

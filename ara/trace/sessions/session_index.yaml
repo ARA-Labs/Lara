@@ -139,3 +139,10 @@ sessions:
     events_count: 4
     claims_touched: [C12]
     open_threads: 3
+  - id: "2026-07-28_001"
+    date: "2026-07-28"
+    summary: "M4a end-to-end (#31, PR #33): .lara front-end (hand-rolled Lara.Syntax + pure Lara.Elaborate + CLI dispatch), 8-example suite (per-example dirs + .core.sexp + expected.json), result 12 mechanized in Lean over the full presentation AST. 9 commits, 32/32 both-drivers byte-exact, AxCheck clean. Example A corrected (user-approved) to reach its unchanged golden."
+    turn_count: 1
+    events_count: 10
+    claims_touched: []
+    open_threads: 4

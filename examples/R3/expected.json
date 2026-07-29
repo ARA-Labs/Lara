@@ -1,0 +1,13 @@
+{
+  "verdict-class": "reject R10",
+  "located-diagnostic": {
+    "kind": "reject",
+    "class": "R10",
+    "stage": "typed-attack",
+    "constituent": {
+      "kind": "attack",
+      "index": 0,
+      "attack": "rebut a1 d_leaf"
+    }
+  }
+}

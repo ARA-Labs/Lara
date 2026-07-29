@@ -1316,3 +1316,149 @@ tree:
               - "scripts/differential.sh: pass=19 fail=0, byte-exact stdout + exit code"
               - "docs/m3-closeout-notes.md (deviation recorded)"
             status: resolved
+  - id: N68
+    type: pivot
+    provenance: ai-executed
+    timestamp: "2026-07-28T12:00"
+    from: "M3 production checker (Unit anchor + both-drivers differential)"
+    to: "M4a: compiler end-to-end on the worked-examples suite"
+    trigger: >
+      M3 froze the Unit checker anchor; M4a adds the trusted surface front-end that
+      lowers .lara to that anchor, plus the self-authored worked-examples suite that
+      exhibits the calculus's discriminating power (defeated/contested/gap/justified +
+      illegal-attack rejection). Executed under the eng-review-CLEAR plan
+      plans/2026-07-27-m4a-compiler-worked-examples.md (#31).
+    also_depends_on: [N66]
+    status: resolved
+    children:
+      - id: N69
+        type: experiment
+        provenance: ai-executed
+        timestamp: "2026-07-28T12:00"
+        title: "Implement M4a: Lara.Syntax + Lara.Elaborate + CLI + 8-example suite + result-12 Lean"
+        description: >
+          Two layers, one derivation path: Lara.Syntax (hand-rolled parser/printer, TCB,
+          no new dep) -> Program/Policy; Lara.Elaborate (pure, deterministic,
+          total-on-wf-input) Program+Policy+Sigma+registry -> Unit (rebuilds the full
+          SupportTerm from the shallow surface: re-associates positional theta with real
+          params, reconstructs implicit premises by unique nf-match, resolves discharges;
+          all-admit Gamma; reclassifies non-parameter pattern idents PVar->PCon);
+          Lara.Wire.encodeUnit -> canonical .core.sexp -> {Haskell runUnit, Lean driver}.
+          lara check extension-dispatches .lara vs .sexp with co-located policy resolution;
+          the .sexp path is preserved byte-for-byte. Eight worked examples in per-example
+          dirs, each with example.core.sexp + expected.json (verdict-class + Haskell-only
+          located diagnostic). Result 12 mechanized in Lean over the full presentation AST.
+        result: >
+          32/32 both-drivers byte-exact (24 fixtures + 8 worked examples); every worked
+          example checks to its intended verdict (E1 justified, E2 gap, E3
+          justified+defeated+contested with all three attack kinds, R1/R12/R10 rejects,
+          A defeated, B contested); parse.print==id @2000 (Haskell) and proved sorry-free
+          in Lean; .core.sexp + expected.json freshness holds; a measured coverage-matrix
+          test witnesses every status/attack-kind/reject-class; cabal test green, no new
+          -Wall warnings, AxCheck axiom audit passes (0 sorryAx, only propext/Quot.sound).
+        evidence:
+          - "a7849fe A0.5 freeze .lara grammar + extend presentation AST"
+          - "4b596c5 A1a Lara.Syntax parser + label-preserving printer"
+          - "787a94e A1b Lara.Elaborate + correct Example A"
+          - "ab0d9de A1c-1 lara check extension-dispatch + co-located policy"
+          - "5838be5 A1c-2 author + freeze the E1-E3/R1-R3 worked-examples suite"
+          - "8c50e74 A2-1 per-example dirs + .core.sexp + Haskell<->Lean differential (32 fixtures)"
+          - "2373e7a A2-2 expected.json goldens + measured coverage matrix"
+          - "3e6243e A3 mechanize result 12 (presentation codec round-trip) in Lean"
+          - "PR #33"
+        status: resolved
+        children:
+          - id: N70
+            type: decision
+            provenance: ai-executed
+            timestamp: "2026-07-28T12:00"
+            also_depends_on: [N32]
+            title: "Freeze the .lara surface grammar (A0.5): premises implicit / discharges explicit, ArgConcl sum, reuse frozen Attack, hand-rolled TCB parser"
+            choice: >
+              Premises are IMPLICIT (the by r(...) application supplies the full ground theta;
+              the elaborator reconstructs each premise by unique nf-match — deterministic per
+              D3) while critical-question discharges stay EXPLICIT (matches A/B verbatim, no
+              premise edits). Argument conclusions become a presentation-only ArgConcl sum
+              (SupportsClaim / SupportsDerived / Challenges) so attack-supporting args and
+              undeclared conclusions are representable. Attack positions REUSE the frozen
+              checker Attack/Position with one canonical .rule/.leaf spelling per (kind,
+              position), so no presentation attack type is added and parse.print round-trips.
+              The parser is hand-rolled (like Lara.Wire) with NO new dependency, keeping the
+              TCB dependency-light. # is a comment except inside refs=[...] (two-mode lexer);
+              two top-levels (artifact->Program, policy->Policy) disambiguated by leading keyword.
+            alternatives:
+              - "Parse .lara directly to Unit (original D1) — rejected upstream: Unit cannot hold the surface's metadata and result 12 must be stated over the presentation AST"
+              - "Explicit premise binding in the surface — rejected: clutters the paper examples; unique-nf-match keeps determinism without it (grounds C-audience N32)"
+              - "A megaparsec/parsec dependency — rejected: enlarges the trusted surface (the parser is inside the TCB)"
+            evidence:
+              - "docs/lara-surface-grammar.md (frozen EBNF + the five decisions)"
+              - "test/SyntaxSpec.hs: parse.print==id @maxSuccess=2000 over Program+Policy"
+            status: resolved
+          - id: N71
+            type: decision
+            provenance: user
+            timestamp: "2026-07-28T12:00"
+            also_depends_on: [N69]
+            title: "Correct Example A (not its golden) so it actually checks to the frozen a1->out / c1->Defeated verdict"
+            choice: >
+              Wiring the compiler showed Example A — a paper motivating example — was rejected
+              R6 (external_validity discharged by measured(...) instead of the policy's
+              generalizes pattern) and, once that was fixed, missing-conflict (only one
+              orientation of the improves/not_improves mutual rebut declared). Per the
+              Lean-is-oracle discipline the GOLDEN was never re-annotated; the EXAMPLE was
+              corrected: external_validity now discharged by a real generalizes leaf, the
+              shared policy's measured/instrument_artifact contrary swapped to
+              generalizes/not_generalizes, d3 given its own exp_9 randomized/powered leaves,
+              and a reverse rebut a1 d3 added for attack completeness. Golden values
+              (a1 out, d1/d2/d3 in, c1 Defeated) UNCHANGED and now checker-verified.
+            alternatives:
+              - "Make A a reject-R6 example (change its golden) — rejected by the user: abandons A's self-defeating-paper teaching"
+              - "Preserve the measurement-undermine narrative by redesigning the shared policy's controlled_experiment scheme — rejected: more invasive, ripples into Example B"
+            evidence:
+              - "docs/m4a-checklist.md correction log (2026-07-28)"
+              - "test/ElaborateSpec.hs: elaborate+runUnit on A reproduces the frozen golden"
+              - "AskUserQuestion 2026-07-28: user selected 'Correct A to reach its golden (Rec.)'"
+            status: resolved
+          - id: N72
+            type: decision
+            provenance: ai-executed
+            timestamp: "2026-07-28T12:00"
+            also_depends_on: [N69, N70]
+            title: "Defeasible-only rejection reps R1/R12/R10 (supersede the plan's speculative 'R7')"
+            choice: >
+              The frozen grammar has no support-term assurance syntax, so a strict argument
+              cannot be authored and the suite is defeasible-only. The three rejection
+              representatives are therefore all defeasible-authorable: R1 (a support term
+              references an undeclared leaf), R12 (a policy declares a strict RULE whose
+              conclusion sits in a contrary pair — a policy-well-formedness reject with a
+              minimal defeasible artifact), and R10 (a rebut targeting a leaf occurrence, the
+              wrong occurrence kind). The plan's speculative R3->'R7' (strict assurance) was
+              unauthorable under the grammar.
+            alternatives:
+              - "Extend the grammar with support-term assurance syntax to author a strict R3/R7 — rejected: the plan scopes the suite defeasible-only and defers strict-cert to TODOS"
+            evidence:
+              - "examples/R1/ (reject R1), examples/R2/ + strict-bad-v1.policy.lara (reject R12), examples/R3/ (reject R10)"
+              - "docs/m4a-checklist.md §3 (R-series mapping resolved; §4 'R7' item resolved)"
+            status: resolved
+          - id: N73
+            type: decision
+            provenance: ai-executed
+            timestamp: "2026-07-28T12:00"
+            also_depends_on: [N69]
+            title: "Scope result 12 (Lean) to a structured-codec round-trip over the frozen presentation AST — test-only strength"
+            choice: >
+              mechanization-plan.md:55 classifies result 12 as test-only ('QuickCheck in
+              Haskell; mechanize only if cheap. Not a soundness result'). A Lean re-implementation
+              of the concrete-syntax parser cannot transfer to Haskell, so the Lean lemma is
+              scoped to a provable STRUCTURED (S-expression) codec over the full presentation
+              AST: parseProgram (printProgram p) = some p (and the Policy analogue), proved
+              sorry-free by structural induction (63 helper round-trips). This anchors that the
+              frozen AST shape loses no information through a codec; it does NOT prove the
+              Haskell parser correct (the QuickCheck round-trip remains the conformance evidence).
+            alternatives:
+              - "Verify the full concrete-.lara-syntax parser in Lean — rejected: not cheap, and its value doesn't transfer to the Haskell parser"
+              - "Prove result 12 over only a small AST fragment — not needed: the full-AST proof closed sorry-free"
+            evidence:
+              - "lean/Lara/Presentation.lean (parse_printProgram / parse_printPolicy, full AST)"
+              - "lean/AxCheck.lean Result-12 section: 0 sorryAx, only propext/Quot.sound"
+            status: resolved
