@@ -168,6 +168,19 @@ prop_cliLaraAcceptB = once $ ioProperty $ do
               ++ " (status (atom not_improves (con M) (con accuracy) (con D)) contested)))\n"
       ]
 
+-- | @.lara@ end-to-end, Example S1: policy-carried theory and surface
+-- AssuranceCert replay through nd@1 to a justified accept verdict.
+prop_cliLaraAcceptS1 :: Property
+prop_cliLaraAcceptS1 = once $ ioProperty $ do
+  (code, out, _) <- runLara ["check", "examples/S1/example.lara"]
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitSuccess)
+      , counterexample "stdout bytes" $
+          out
+            === "(verdict accept (labels (0 in)) (edges) (statuses (status (atom holds (con safety_invariant) (con D)) justified)))\n"
+      ]
+
 -- | @.lara@ parse error: a malformed artifact exits 2 with nothing on stdout (the
 -- located parse message goes to stderr, sharing the codec error's exit code).
 prop_cliLaraParseError :: Property
@@ -202,6 +215,7 @@ cliSpecProps =
   , ("cli usage exit 2", quickCheckResult prop_cliUsage)
   , ("cli .lara accept A exit 0 + bytes", quickCheckResult prop_cliLaraAcceptA)
   , ("cli .lara accept B exit 0 + bytes", quickCheckResult prop_cliLaraAcceptB)
+  , ("cli .lara accept S1 strict cert exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS1)
   , ("cli .lara parse error exit 2", quickCheckResult prop_cliLaraParseError)
   , ("cli .lara missing policy exit 2", quickCheckResult prop_cliLaraMissingPolicy)
   ]

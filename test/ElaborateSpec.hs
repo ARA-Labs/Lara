@@ -24,6 +24,7 @@ import Lara.AST
 import Lara.Driver (runUnit)
 import Lara.Elaborate
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
+import Lara.Strict (SExpr (..))
 import Lara.Syntax (parseProgram, parsePolicy)
 import Lara.Wire (Verdict (..))
 
@@ -60,6 +61,101 @@ loadPolicy path = do
 policyPath :: FilePath
 policyPath = "examples/A/empirical-v1.policy.lara"
 
+strictProgramSource :: String
+strictProgramSource =
+  unlines
+    [ "artifact paper_42 at sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    , "policy strict-v1"
+    , "use backends [nd@1]"
+    , ""
+    , "claim c1"
+    , "  nl = \"The safety invariant holds for deployment D\""
+    , "  formal = holds(safety_invariant, D)"
+    , "  binding = { author = alice, rationale = \"r\", audit-status = reviewed }"
+    , ""
+    , "leaf e1 : holds(safety_invariant, D)"
+    , "  kind = attested"
+    , "  provenance = user"
+    , "  refs = [evidence/safety_audit.txt#section=invariants]"
+    , ""
+    , "arg a1 : supports(c1) by certified_citation(safety_invariant, D)"
+    , "  assurance = cert(nd@1, sha256:strict-v1-theory-0, (hyp 0))"
+    , ""
+    , "status c1"
+    ]
+
+strictPolicySource :: Bool -> String
+strictPolicySource declareTheory =
+  unlines $
+    [ "policy strict-v1"
+    , "rule certified_citation(X, D)"
+    , "  mode = strict"
+    , "  premises = [ holds(X, D) ]"
+    , "  conclusion = holds(X, D)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (nd@1, sha256:strict-v1-theory-0) ]"
+    ]
+      ++ ["theory sha256:strict-v1-theory-0 = []" | declareTheory]
+
+-- | The lara-syntax@0.2 strict-certificate path preserves its assurance,
+-- threads the policy theory table, and replays through nd@1 to acceptance.
+prop_strictCertificatePresentationAccepts :: Property
+prop_strictCertificatePresentationAccepts =
+  case (parseProgram strictProgramSource, parsePolicy (strictPolicySource True)) of
+    (Left e, _) -> counterexample ("program parse failed: " ++ show e) False
+    (_, Left e) -> counterexample ("policy parse failed: " ++ show e) False
+    (Right prog, Right pol) ->
+      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+        Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
+        Right unit ->
+          conjoin
+            [ counterexample "surface assurance survives elaboration" $
+                lookup (ArgId "a1") (unitArgs unit)
+                  === Just
+                    ( SRule
+                        (RuleId "certified_citation")
+                        [ (Param "X", con "safety_invariant")
+                        , (Param "D", con "D")
+                        ]
+                        [SLeaf (LeafId "e1")]
+                        []
+                        []
+                        ( AssuranceCert
+                            ( Cert
+                                (BackendId "nd")
+                                1
+                                (TheoryDigest "sha256:strict-v1-theory-0")
+                                (SList [SAtom "hyp", SAtom "0"])
+                            )
+                        )
+                    )
+            , counterexample "policy theories reach Unit" $
+                unitTheories unit
+                  === [(TheoryDigest "sha256:strict-v1-theory-0", [])]
+            , counterexample "strict certificate replays to accept" $
+                runUnit unit
+                  === VAccept
+                    { verdictLabels = [(0, LIn)]
+                    , verdictEdges = []
+                    , verdictStatuses =
+                        [(Prop (Pred "holds") [con "safety_invariant", con "D"], Justified)]
+                    }
+            ]
+
+-- | A certifier-allowed certificate whose digest is absent from the policy
+-- theory table reaches backend replay and is rejected as R13.
+prop_strictCertificateMissingTheoryRejectsR13 :: Property
+prop_strictCertificateMissingTheoryRejectsR13 =
+  case (parseProgram strictProgramSource, parsePolicy (strictPolicySource False)) of
+    (Left e, _) -> counterexample ("program parse failed: " ++ show e) False
+    (_, Left e) -> counterexample ("policy parse failed: " ++ show e) False
+    (Right prog, Right pol) ->
+      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+        Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
+        Right unit ->
+          counterexample ("expected R13, got " ++ show (runUnit unit)) $
+            runUnit unit === VReject (RejectClass R13)
+
 -- ---------------------------------------------------------------------------
 -- Example B — the frozen end-to-end golden (byte-exact)
 -- ---------------------------------------------------------------------------
@@ -78,7 +174,7 @@ prop_B_frozenGolden = once $ ioProperty $ do
           , verdictStatuses =
               [(improvesMAD, Contested), (notImprovesMAD, Contested)]
           }
-  pure $ case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample ("B: unexpected ElabError: " ++ elabErrorMessage e) False
     Right u -> runUnit u === expected
 
@@ -97,7 +193,7 @@ prop_A_frozenGolden :: Property
 prop_A_frozenGolden = once $ ioProperty $ do
   prog <- loadProgram "examples/A/example.lara"
   pol <- loadPolicy policyPath
-  pure $ case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample ("A: unexpected ElabError: " ++ elabErrorMessage e) False
     Right u -> case runUnit u of
       VReject r -> counterexample ("A: unexpected reject " ++ show r) False
@@ -133,7 +229,7 @@ prop_negatives = once $ ioProperty $ do
   progA <- loadProgram "examples/A/example.lara"
   pol <- loadPolicy policyPath
   let decls = programDecls progA
-      elab p q = elaborate defeasibleSuiteSigma emptyRegistry p q
+      elab p q = elaborate defeasibleSuiteSigma (registryOf q) p q
 
       -- 1. policy-id mismatch: hand a policy whose id differs from the header.
       polMismatch = pol {policyId = PolicyId "not-empirical-v1"}
@@ -229,7 +325,9 @@ prop_negatives = once $ ioProperty $ do
 
 elaborateSpecProps :: [(String, IO Result)]
 elaborateSpecProps =
-  [ ("elaborate A reproduces the frozen A0 golden (vertical slice)", quickCheckResult prop_A_frozenGolden)
+  [ ("elaborate strict nd@1 cert presentation path accepts", quickCheckResult prop_strictCertificatePresentationAccepts)
+  , ("elaborate strict cert missing theory rejects R13", quickCheckResult prop_strictCertificateMissingTheoryRejectsR13)
+  , ("elaborate A reproduces the frozen A0 golden (vertical slice)", quickCheckResult prop_A_frozenGolden)
   , ("elaborate B reproduces the frozen A0 golden (byte-exact)", quickCheckResult prop_B_frozenGolden)
   , ("elaborate negatives are located Left ElabError", quickCheckResult prop_negatives)
   ]

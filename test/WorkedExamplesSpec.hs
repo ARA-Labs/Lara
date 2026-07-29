@@ -1,4 +1,4 @@
--- | Golden verdicts for the six worked examples E1–E3 / R1–R3 (M4a Task A1).
+-- | Golden verdicts for E1–E3 / R1–R3 plus strict-certificate example S1.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
 -- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', runs the real six-stage
@@ -16,10 +16,11 @@
 --   * __R1__ @undeclared-leaf@ — VReject R1  (leaf not in Γ).
 --   * __R2__ @strict-contrary@ — VReject R12 (policy §8.1 Path-B well-formedness).
 --   * __R3__ @bad-attack-target@ — VReject R10 (rebut on a leaf occurrence).
+--   * __S1__ @strict-cert@ — VAccept; nd@1 cert replay; status justified.
 --
--- A final __freshness__ property re-derives all eight @example.core.sexp@ anchors
--- (A, B, and E1–E3 / R1–R3) from their surface @.lara@ + policy and asserts the
--- committed bytes match, guarding against surface/anchor drift.
+-- A final __freshness__ property re-derives all nine @example.core.sexp@
+-- anchors (A, B, E1–E3, R1–R3, and S1) from their surface @.lara@ + policy and
+-- asserts the committed bytes match, guarding against surface/anchor drift.
 module WorkedExamplesSpec (workedExamplesSpecProps) where
 
 import Test.QuickCheck
@@ -41,7 +42,7 @@ import Lara.Elaborate
   ( defeasibleSuiteSigma
   , elabErrorMessage
   , elaborate
-  , emptyRegistry
+  , registryOf
   )
 import Lara.ExpectedJson (expectedJson)
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
@@ -62,6 +63,10 @@ improves m d = Prop (Pred "improves") [con m, con "accuracy", con d]
 -- | @not_improves(m, accuracy, d)@.
 notImproves :: String -> String -> Prop
 notImproves m d = Prop (Pred "not_improves") [con m, con "accuracy", con d]
+
+-- | @holds(x, d)@ over two nullary-constant names.
+holdsP :: String -> String -> Prop
+holdsP x d = Prop (Pred "holds") [con x, con d]
 
 loadProgram :: FilePath -> IO Program
 loadProgram path = do
@@ -91,6 +96,7 @@ examplePolicies =
   , ("examples/R1", "empirical-v1.policy.lara")
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
+  , ("examples/S1", "strict-v1.policy.lara")
   ]
 
 -- | The shared empirical-v1 policy basename (co-located in each example's dir).
@@ -105,7 +111,7 @@ runExample :: FilePath -> FilePath -> (Verdict -> Property) -> IO Property
 runExample dir policyBase k = do
   prog <- loadProgram (dir ++ "/example.lara")
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
-  pure $ case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
     Right u -> k (runUnit u)
 
@@ -163,6 +169,21 @@ prop_E3 = once $ ioProperty $
                     ]
           ]
 
+-- | S1: the strict nd@1 certificate replays; the certified arg is @in@ and
+-- the claim is justified.
+prop_S1 :: Property
+prop_S1 = once $ ioProperty $
+  runExample "examples/S1" "strict-v1.policy.lara" $ \v ->
+    case v of
+      VReject r -> counterexample ("S1: unexpected reject " ++ show r) False
+      VAccept{} ->
+        conjoin
+          [ counterexample "S1 labels: a1 → in" $
+              verdictLabels v === [(0, LIn)]
+          , counterexample "S1 status: c1 → justified" $
+              verdictStatuses v === [(holdsP "safety_invariant" "D", Justified)]
+          ]
+
 -- ---------------------------------------------------------------------------
 -- R-series — rejected with a specific class
 -- ---------------------------------------------------------------------------
@@ -192,7 +213,7 @@ prop_R3 = once $ ioProperty $
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
 -- ---------------------------------------------------------------------------
 
--- | For every example (all eight: A, B, E1–E3, R1–R3), re-running the full
+-- | For every example (all nine: A, B, E1–E3, R1–R3, S1), re-running the full
 -- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
 -- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
 -- the committed @example.core.sexp@ bytes __exactly__ (matching
@@ -208,7 +229,7 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
       committed <- readFile (dir ++ "/example.core.sexp")
       pure $ case (parseProgram progText, parsePolicy polText) of
         (Right prog, Right pol) ->
-          case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+          case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
             Left e ->
               counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
             Right u ->
@@ -217,7 +238,7 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
         (pr, pp) ->
           counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
 
--- | For every example (all eight), re-render @expected.json@ from the elaborated
+-- | For every example (all nine), re-render @expected.json@ from the elaborated
 -- 'Unit' ("Lara.ExpectedJson".@expectedJson@) and assert it equals the committed
 -- @examples\/\<NAME\>\/expected.json@ bytes exactly — the located-diagnostic
 -- freshness sibling of 'prop_freshness'. @expected.json@ is the __Haskell-only__
@@ -230,7 +251,7 @@ prop_expectedJsonFresh = once (ioProperty (conjoin <$> mapM checkOne examplePoli
       prog <- loadProgram (dir ++ "/example.lara")
       pol <- loadPolicy (dir ++ "/" ++ policyBase)
       committed <- readFile (dir ++ "/expected.json")
-      pure $ case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+      pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
         Left e ->
           counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
         Right u ->
@@ -255,8 +276,8 @@ attackKind Undermine{} = "undermine"
 -- stops being witnessed (a status vanishes, an attack kind is dropped, a reject
 -- reclassifies), this fails.
 --
--- The suite is the six §1 examples E1–E3 / R1–R3 plus the two teaching examples
--- A and B — all eight in 'examplePolicies'.
+-- The suite is the six §1 examples E1–E3 / R1–R3, the two teaching examples A
+-- and B, plus strict-certificate example S1 — all nine in 'examplePolicies'.
 prop_coverageMatrix :: Property
 prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
@@ -285,7 +306,7 @@ loadVerdict :: (FilePath, FilePath) -> IO (FilePath, Either String Verdict)
 loadVerdict (dir, policyBase) = do
   prog <- loadProgram (dir ++ "/example.lara")
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
-  pure $ (,) dir $ case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+  pure $ (,) dir $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> Left (elabErrorMessage e)
     Right u -> Right (runUnit u)
 
@@ -294,7 +315,7 @@ loadUnit :: (FilePath, FilePath) -> IO (FilePath, Unit)
 loadUnit (dir, policyBase) = do
   prog <- loadProgram (dir ++ "/example.lara")
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
-  case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+  case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> error (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e)
     Right u -> pure (dir, u)
 
@@ -311,6 +332,7 @@ workedExamplesSpecProps =
   [ ("E1 justified-clean → accept, arg in, claim justified", quickCheckResult prop_E1)
   , ("E2 open-gap → accept, claim gap", quickCheckResult prop_E2)
   , ("E3 defeat-suite → accept, justified+defeated+contested, all attack kinds", quickCheckResult prop_E3)
+  , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
   , ("R1 undeclared-leaf → reject R1", quickCheckResult prop_R1)
   , ("R2 strict-contrary → reject R12", quickCheckResult prop_R2)
   , ("R3 bad-attack-target → reject R10", quickCheckResult prop_R3)

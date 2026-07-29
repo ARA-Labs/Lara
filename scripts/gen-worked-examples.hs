@@ -25,7 +25,7 @@
 -- the Lean @canon = id@ caveat that @gen-corpus.hs@ documents does not bite here.
 module Main (main) where
 
-import Lara.Elaborate (defeasibleSuiteSigma, elabErrorMessage, elaborate, emptyRegistry)
+import Lara.Elaborate (defeasibleSuiteSigma, elabErrorMessage, elaborate, registryOf)
 import Lara.ExpectedJson (expectedJson)
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Wire (encodeUnit, printSExpr)
@@ -43,6 +43,7 @@ examples =
   , ("examples/R1", "empirical-v1.policy.lara")
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
+  , ("examples/S1", "strict-v1.policy.lara")
   ]
 
 main :: IO ()
@@ -57,7 +58,7 @@ main = mapM_ genOne examples
       polText <- readFile policyPath
       prog <- either (fail . ((artifactPath ++ ": parse: ") ++) . show) pure (parseProgram progText)
       pol <- either (fail . ((policyPath ++ ": parse: ") ++) . show) pure (parsePolicy polText)
-      case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
         Left e -> fail (artifactPath ++ ": elaborate: " ++ elabErrorMessage e)
         Right u -> do
           writeFile corePath (printSExpr (encodeUnit u) ++ "\n")

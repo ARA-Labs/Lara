@@ -487,3 +487,46 @@ The inline `EXPECTED VERDICT (golden oracle)` blocks in A and B are **untouched*
 they remain the A0 goldens frozen in `docs/m4a-checklist.md` §1.
 
 _Frozen 2026-07-27 as Task A0.5. Gates A1 (`Lara.Syntax` + `Lara.Elaborate`)._
+
+---
+
+## Appendix A — `lara-syntax@0.2` (additive, 2026-07-29)
+
+Two additive constructs over `lara-syntax@0.1`, both decoding to the same
+`lara-core@0.1` abstract syntax (spec result 12 unaffected; no Unit-reachable
+type changes). Motivation: the strict-certificate worked example
+(`plans/2026-07-29-strict-cert-worked-example.md`); the Unit-level cert path
+(`Lara.Strict.ND`, `Driver.buildCertOk`) predates this surface.
+
+### A.1 Support-term assurance (arg blocks)
+
+assuranceLine ::= "assurance" "=" assuranceValue
+assuranceValue ::= "none" | "trusted" | "cert" "(" backendRef "," digest "," sexp ")"
+
+- Optional, at most one per `arg` block; folds with `discharge`/`open` lines
+  in any order. Absent means `none` (`AssuranceNone`). A second `assurance`
+  line in the same block is a **parse error** (not last-wins).
+- Only meaningful on a rule application; `assurance` on a bare `leaf(…)`
+  support term is a **parse error** (the checker has no rule to check it
+  against, and silently dropping it would mislead the author).
+- `sexp` is the wire S-expression sub-grammar (canonical atom/string rules of
+  `Lara.Wire`); the payload is opaque — only the named backend decodes it
+  (spec §5).
+- Legality (strict rule, `allow-trusted`, certifier allowlist, replay) is
+  enforced by the checker as R7/R13 (spec §4, §5, §10.1), never by the parser
+  or elaborator.
+
+### A.2 Policy theory table (trusted input)
+
+theoryLine ::= "theory" digest "=" "[" [ prop { "," prop } ] "]"
+
+- A policy-level declaration, partitioned like `rule`/`contrary`/`exception`;
+  order-insensitive, canonical printer emits it last.
+- The theory table is a *trusted* input (spec §5: theory digests are part of
+  replay identity, §2.1). It lives in the co-located policy file so replay
+  pinning covers it; artifact programs may reference digests (in `cert(…)`)
+  but may never define the table.
+- `theory h = [p1, …]` declares that digest `h` names the theory whose entries
+  are the ground propositions `p1, …` (empty list allowed: the empty theory).
+- Declaring the same digest twice in one policy is a **parse error** (the
+  replay oracle's `lookup` would otherwise silently use the first entry).

@@ -1,0 +1,22 @@
+{
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "holds(safety_invariant, D)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      }
+    ]
+  }
+}

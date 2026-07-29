@@ -281,6 +281,9 @@ data Policy = Policy
   , policyContraries :: [Contrary]
   , policyExceptions :: [Exception]
   , policyAdmission :: [((LeafKind, Provenance), Admission)]
+  , policyTheories :: [(TheoryDigest, [Prop])]
+    -- ^ Trusted theory table (lara-syntax@0.2, grammar App. A.2); lowered to
+    -- 'unitTheories' via the elaborator's 'TheoryRegistry'.
   }
   deriving (Eq, Show)
 

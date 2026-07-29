@@ -37,7 +37,7 @@ import Lara.Elaborate
   ( elaborate
   , elabErrorMessage
   , defeasibleSuiteSigma
-  , emptyRegistry
+  , registryOf
   )
 import qualified Lara.Syntax as Syntax
 import Lara.Wire
@@ -110,7 +110,7 @@ checkLara file = do
               case Syntax.parsePolicy polText of
                 Left pe -> die2 (locatedParseError policyPath pe)
                 Right pol ->
-                  case elaborate defeasibleSuiteSigma emptyRegistry prog pol of
+                  case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
                     Left ee -> die2 ("lara: elaboration error: " ++ elabErrorMessage ee)
                     Right unit -> emitVerdict (runUnit unit)
 

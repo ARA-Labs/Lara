@@ -26,6 +26,7 @@ import Test.QuickCheck
 
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..))
+import Lara.Strict (SExpr (..))
 import Lara.Syntax
 
 -- ---------------------------------------------------------------------------
@@ -45,9 +46,9 @@ reservedWords :: [String]
 reservedWords =
   [ "artifact", "policy", "at", "use", "backends", "claim", "leaf", "arg"
   , "status", "rule", "mode", "premises", "conclusion", "question", "contrary"
-  , "exception", "admission", "nl", "formal", "binding", "kind", "provenance"
+  , "exception", "admission", "theory", "nl", "formal", "binding", "kind", "provenance"
   , "refs", "author", "rationale", "audit-status", "by", "supports"
-  , "challenges", "discharge", "with", "open", "as", "rebut", "undercut"
+  , "challenges", "discharge", "with", "open", "as", "assurance", "rebut", "undercut"
   , "undermine", "allow-trusted", "certifiers", "cert", "trusted", "none"
   , "strict", "defeasible", "observed", "attested", "assumed", "certified"
   , "user", "ai-executed", "checker", "unreviewed", "reviewed", "disputed"
@@ -202,7 +203,7 @@ genChallengeTarget =
 
 -- | A surface support term: either @leaf(l)@, or a rule instance with positional
 -- θ (parameter names @\"1\"..\"n\"@), no premises, 'SLeaf' discharge targets,
--- no holes, and 'AssuranceNone' (see "Lara.Syntax"'s header).
+-- no holes, and a surface-representable assurance (see "Lara.Syntax"'s header).
 genSupportTerm :: Gen SupportTerm
 genSupportTerm =
   oneof
@@ -214,6 +215,7 @@ genSupportTerm =
         disch <-
           smallListOf
             ((,) <$> (QuestionId <$> genIdent) <*> (SLeaf . LeafId <$> genIdent))
+        assurance <- genAssurance
         pure
           SRule
             { srRule = RuleId r
@@ -221,9 +223,33 @@ genSupportTerm =
             , srPremises = []
             , srDischarge = disch
             , srHoles = []
-            , srAssurance = AssuranceNone
+            , srAssurance = assurance
             }
     ]
+
+genAssurance :: Gen Assurance
+genAssurance =
+  frequency
+    [ (6, pure AssuranceNone)
+    , (2, pure AssuranceTrusted)
+    , (2, AssuranceCert <$> genCert)
+    ]
+  where
+    genCert =
+      Cert
+        <$> (BackendId <$> genIdent)
+        <*> choose (0, 99)
+        <*> (TheoryDigest <$> genDigestStr)
+        <*> (SList <$> smallListOf genSExpr)
+    genSExpr =
+      sized $ \n ->
+        if n <= 0
+          then SAtom <$> oneof [genIdent, genStr]
+          else
+            frequency
+              [ (3, SAtom <$> oneof [genIdent, genStr])
+              , (1, SList <$> smallListOf (resize (n `div` 2) genSExpr))
+              ]
 
 genArg :: Gen Arg
 genArg = Arg <$> (ArgId <$> genIdent) <*> genArgConcl <*> genSupportTerm
@@ -337,13 +363,27 @@ genAdmissionRow =
     <*> elements [Admit, Quarantine, Reject]
 
 genPolicy :: Gen Policy
-genPolicy =
-  Policy
-    <$> (PolicyId <$> genIdent)
-    <*> smallListOf genRule
-    <*> smallListOf genContrary
-    <*> smallListOf genException
-    <*> smallListOf genAdmissionRow
+genPolicy = do
+  pid <- PolicyId <$> genIdent
+  rs <- smallListOf genRule
+  cs <- smallListOf genContrary
+  es <- smallListOf genException
+  adm <- smallListOf genAdmissionRow
+  theoryCount <- choose (0, 3)
+  theoryProps <- vectorOf theoryCount (smallListOf genProp)
+  let ts =
+        [ (TheoryDigest ("sha256:theory-" ++ show i), ps)
+        | (i, ps) <- zip [0 :: Int ..] theoryProps
+        ]
+  pure
+    Policy
+      { policyId = pid
+      , policyRules = rs
+      , policyContraries = cs
+      , policyExceptions = es
+      , policyAdmission = adm
+      , policyTheories = ts
+      }
 
 -- ---------------------------------------------------------------------------
 -- Result 12 round-trip (the crux)
@@ -353,9 +393,62 @@ prop_programRoundTrip :: Property
 prop_programRoundTrip =
   forAll genProgram $ \p -> parseProgram (printProgram p) === Right p
 
+prop_argAssuranceRoundTrip :: Property
+prop_argAssuranceRoundTrip =
+  let src =
+        unlines
+          [ "artifact paper_42 at sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          , "policy strict-v1"
+          , "use backends [nd@1]"
+          , ""
+          , "claim c1"
+          , "  nl = \"The safety invariant holds for deployment D\""
+          , "  formal = holds(safety_invariant, D)"
+          , "  binding = { author = alice, rationale = \"r\", audit-status = reviewed }"
+          , ""
+          , "leaf e1 : holds(safety_invariant, D)"
+          , "  kind = attested"
+          , "  provenance = user"
+          , "  refs = [evidence/safety_audit.txt#section=invariants]"
+          , ""
+          , "arg a1 : supports(c1) by certified_citation(safety_invariant, D)"
+          , "  assurance = cert(nd@1, sha256:strict-v1-theory-0, (hyp 0))"
+          , ""
+          , "status c1"
+          ]
+   in case parseProgram src of
+        Left e -> counterexample ("parse failed: " ++ show e) False
+        Right prog ->
+          counterexample "round-trip" $
+            parseProgram (printProgram prog) === Right prog
+
 prop_policyRoundTrip :: Property
 prop_policyRoundTrip =
   forAll genPolicy $ \p -> parsePolicy (printPolicy p) === Right p
+
+prop_policyTheoriesRoundTrip :: Property
+prop_policyTheoriesRoundTrip =
+  let src =
+        unlines
+          [ "policy strict-v1"
+          , "rule certified_citation(X, D)"
+          , "  mode = strict"
+          , "  premises = [ holds(X, D) ]"
+          , "  conclusion = holds(X, D)"
+          , "  allow-trusted = false"
+          , "  certifiers = [ (nd@1, sha256:strict-v1-theory-0) ]"
+          , "theory sha256:strict-v1-theory-0 = []"
+          ]
+   in case parsePolicy src of
+        Left e -> counterexample ("parse failed: " ++ show e) False
+        Right pol ->
+          conjoin
+            [ counterexample "round-trip" $
+                parsePolicy (printPolicy pol) === Right pol
+            , counterexample "theories" $
+                policyTheories pol
+                  === [(TheoryDigest "sha256:strict-v1-theory-0", [])]
+            ]
 
 -- | The keyword-dispatch entry ('parseSource') round-trips both top-levels.
 prop_sourceRoundTrip :: Property
@@ -491,7 +584,47 @@ programNegatives =
         ++ "claim c\n  nl = \"x\"\n  binding = { author = a, audit-status = reviewed }\n"
     , "formal"
     )
+  , ( "duplicate assurance line"
+    , assuranceProgram
+        "arg a : supports(c) by r()\n"
+        ++ "  assurance = none\n"
+        ++ "  assurance = trusted\n"
+    , "duplicate assurance"
+    )
+  , ( "assurance on bare leaf"
+    , assuranceProgram
+        "arg a : supports(c) by leaf(e)\n"
+        ++ "  assurance = trusted\n"
+    , "bare leaf"
+    )
+  , ( "unknown assurance"
+    , assuranceProgram
+        "arg a : supports(c) by r()\n"
+        ++ "  assurance = maybe\n"
+    , "expected an assurance"
+    )
+  , ( "non-parenthesised certificate payload"
+    , assuranceProgram
+        "arg a : supports(c) by r()\n"
+        ++ "  assurance = cert(nd@1, sha256:t, hyp)\n"
+    , "parenthesised S-expression"
+    )
+  , ( "unterminated certificate payload"
+    , assuranceProgram
+        "arg a : supports(c) by r()\n"
+        ++ "  assurance = cert(nd@1, sha256:t, (hyp 0"
+    , "unterminated certificate payload"
+    )
+  , ( "malformed certificate payload"
+    , assuranceProgram
+        "arg a : supports(c) by r()\n"
+        ++ "  assurance = cert(nd@1, sha256:t, (hyp \"bad\\q\"))\n"
+    , "malformed certificate payload"
+    )
   ]
+  where
+    assuranceProgram body =
+      "artifact a at sha256:aa\npolicy p\nuse backends []\n" ++ body
 
 policyNegatives :: [(String, String, String)]
 policyNegatives =
@@ -503,6 +636,22 @@ policyNegatives =
   , ( "bad mode"
     , "policy p\nrule r()\n  mode = bogus\n  premises = []\n  conclusion = a\n"
     , "mode"
+    )
+  , ( "duplicate theory digest"
+    , "policy p\ntheory sha256:t = []\ntheory sha256:t = []\n"
+    , "duplicate theory digest"
+    )
+  , ( "theory missing equals"
+    , "policy p\ntheory sha256:t []\n"
+    , "'='"
+    )
+  , ( "unterminated theory list"
+    , "policy p\ntheory sha256:t = [p\n"
+    , "']'"
+    )
+  , ( "malformed theory digest"
+    , "policy p\ntheory sha256 = []\n"
+    , "':'"
     )
   ]
 
@@ -557,7 +706,9 @@ deepCheck = quickCheckWithResult stdArgs {maxSuccess = 2000}
 syntaxSpecProps :: [(String, IO Result)]
 syntaxSpecProps =
   [ ("syntax program round-trip (result 12)", deepCheck prop_programRoundTrip)
+  , ("syntax arg assurance round-trip", quickCheckResult prop_argAssuranceRoundTrip)
   , ("syntax policy round-trip (result 12)", deepCheck prop_policyRoundTrip)
+  , ("syntax policy theory table round-trip", quickCheckResult prop_policyTheoriesRoundTrip)
   , ("syntax source round-trip", deepCheck prop_sourceRoundTrip)
   , ("syntax golden programs (A, B) parse + idempotent", quickCheckResult prop_goldenPrograms)
   , ("syntax golden policy parse + idempotent", quickCheckResult prop_goldenPolicy)

@@ -9,8 +9,9 @@ different population sizes (spec §8, cross-framework non-monotonicity) — not 
 
 Each example is a **self-contained directory** `examples/<NAME>/` (a paper
 artifact): the surface `example.lara`, its co-located policy (`empirical-v1.policy.lara`,
-or `strict-bad-v1.policy.lara` for R2), the derived `example.core.sexp` wire
-anchor, and the derived `expected.json` golden. Both derived files are regenerated
+`strict-bad-v1.policy.lara` for R2, or `strict-v1.policy.lara` for S1), the
+derived `example.core.sexp` wire anchor, and the derived `expected.json` golden.
+Both derived files are regenerated
 by `scripts/gen-worked-examples.hs` (parse → elaborate, then `encodeUnit` /
 `Lara.ExpectedJson.expectedJson`); a freshness test (`test/WorkedExamplesSpec.hs`)
 asserts each stays in sync with its `.lara` source.
@@ -29,15 +30,16 @@ asserts each stays in sync with its `.lara` source.
 | `A/empirical-v1.policy.lara` | the shared trusted policy both examples check against | declares all contraries + the one exception | — | cross-paper attack can only form through the *same* declared `contrary` relation |
 | `A/example.lara` | one paper attacks its own headline claim | rebut + undercut + undermine (all three), all in-paper | **defeated** | "a paper can't rebut itself" is a category error; self-attacks = the paper's honesty about its limits |
 | `B/example.lara` | two papers, contrary conclusions | rebut (mutual, a 2-cycle) | **contested** ×2 | no new calculus for corpus scale; and the attack only forms because both claims hit the *same atoms* under `≡` |
+| `S1/example.lara` | strict rule with an `nd@1` certificate | — | **justified** | closes the frontend certificate path: surface assurance + policy theory → elaboration → replay |
 
 ## Relationship to the planned E-series (`docs/worked-examples-plan.md`)
 
 The plan's E1–E3 / R1–R3 are the paper's coverage-matrix set. These two are complementary teaching
 artifacts aimed at the design question above:
 
-The E1–E3 / R1–R3 examples now live alongside A and B as sibling per-example
-directories (`examples/E1/`, …, `examples/R3/`), each with the same
-`example.lara` + policy + `example.core.sexp` layout.
+The E1–E3 / R1–R3 examples and strict-certificate S1 now live alongside A and B
+as sibling per-example directories (`examples/E1/`, …, `examples/S1/`), each
+with the same `example.lara` + policy + `example.core.sexp` layout.
 
 - **A** overlaps E3 (`defeat-suite`) on attack coverage but foregrounds *self-attack from a single
   artifact* — the specific intuition to dislodge. Its `distribution_shift` undercut is literally the
@@ -46,6 +48,9 @@ directories (`examples/E1/`, …, `examples/R3/`), each with the same
   **atom-matching stress test** (assumption A3, the load-bearing `binding` step). It is the example
   that would trigger the spec §8.1 **flip criterion** if a corpus deployment wanted replication
   *preferences* instead of a symmetric `contested` 2-cycle.
+- **S1** is the strict-backend demonstrator: its policy carries the trusted empty
+  theory, its artifact carries `assurance = cert(…)`, and `nd@1` replays the
+  certificate before the claim becomes justified.
 
 ## Two design constraints these examples expose (not the self-rebuttal one)
 
@@ -73,13 +78,19 @@ their verdicts, not from prose — that the suite witnesses every claim status
 (justified / gap / contested / defeated), every attack kind (rebut / undercut /
 undermine), and the three rejection classes (R1 / R12 / R10).
 
-### Honesty note — the suite is defeasible-only
+### Honesty note — what S1's certificate establishes
 
-Every artifact declares `use backends [nd@1]`, but the empirical policy is
-all-defeasible with no certificates, so **`nd@1` is inert**: no support term here
-carries an assurance, and the strict-certificate frontend path (certificate
-surface syntax → elaboration → `buildCertOk`) is **not** exercised by this suite.
-That gap is captured as a P3 backlog item in `TODOS.md` ("Strict-certificate
-worked example (nd@1 frontend cert path)"). R2's `strict-bad-v1` policy declares a
-strict *rule* only to exercise the R12 policy-well-formedness reject; its artifact
-stays defeasible.
+The suite is no longer defeasible-only: S1 exercises certificate surface syntax
+→ elaboration → `Driver.buildCertOk` → `nd@1` replay. The empirical examples
+remain defeasible, and R2's strict rule still exists only to exercise R12.
+
+S1 deliberately uses premise ≡ conclusion with `(hyp 0)`. `nd@1` encodes every
+source proposition — premises and theory entries alike — as a flat atom
+(`src/Lara/Strict/ND.hs`, `encodeND`), so hypothesis reuse over a premise or
+theory slot is the only certificate shape that references source-level content.
+Richer `lam`/`app` structure is technically replayable only by hand-spelling the
+backend's internal atom keys in payload-embedded formulas
+(`decodeCert`/`decodeFormula`) — opaque, produced by no surface encoding, and
+certifying nothing about source-level structure; `abort` cannot close a goal
+from atomic premises. The premise ≡ conclusion shape is therefore the maximal
+honest shape under the current backend encoding, not a simplification.

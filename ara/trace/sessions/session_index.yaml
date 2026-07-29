@@ -146,3 +146,10 @@ sessions:
     events_count: 10
     claims_touched: []
     open_threads: 4
+  - id: "2026-07-29_001"
+    date: "2026-07-29"
+    summary: "Strict-cert frontend closed: lara-syntax@0.2 + S1, justified accept, R13 mutation, full suite green, 33/33 both-driver agreement."
+    turn_count: 1
+    events_count: 1
+    claims_touched: []
+    open_threads: 3

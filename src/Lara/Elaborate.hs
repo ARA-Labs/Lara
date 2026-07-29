@@ -27,12 +27,12 @@
 -- __zero__ ⇒ 'UnresolvedPremise', __≥2__ ⇒ 'AmbiguousPremise'. No search, no
 -- backtracking.
 --
--- == Defeasible-only
+-- == Assurance
 --
--- The frozen grammar has no assurance syntax in support terms, so every
--- elaborated support term carries 'AssuranceNone'. Strict /rules/ may appear as
--- policy declarations (they pass through into 'unitRules' and @checkUnit@ runs
--- R12 etc.), but no strict /support term/ is ever built here.
+-- Strict /rules/ pass through into 'unitRules' as policy declarations.
+-- Support-term assurance (lara-syntax@0.2, grammar App. A.1) is lowered
+-- verbatim from the surface; the elaborator performs no mode or certifier
+-- check — R7/R13 at @checkUnit@ are the single enforcement point.
 module Lara.Elaborate
   ( -- * Caller-supplied environment inputs
     Sigma (..)
@@ -40,6 +40,7 @@ module Lara.Elaborate
   , defeasibleSuiteSigma
   , TheoryRegistry (..)
   , emptyRegistry
+  , registryOf
     -- * Elaboration errors (located-ish: they name the arg/rule/leaf/claim)
   , ElabError (..)
   , elabErrorMessage
@@ -84,6 +85,13 @@ newtype TheoryRegistry = TheoryRegistry {registryTheories :: [(TheoryDigest, [Pr
 -- | The empty theory registry (the defeasible-suite default).
 emptyRegistry :: TheoryRegistry
 emptyRegistry = TheoryRegistry []
+
+-- | The theory registry a policy declares (lara-syntax@0.2, grammar App. A.2).
+-- Every caller that elaborates against a parsed policy should pass
+-- @registryOf pol@ instead of 'emptyRegistry' so the policy's theory table
+-- reaches 'unitTheories'.
+registryOf :: Policy -> TheoryRegistry
+registryOf = TheoryRegistry . policyTheories
 
 -- ---------------------------------------------------------------------------
 -- Elaboration errors
@@ -240,7 +248,7 @@ elabTerm
 elabTerm env priors aid term = case term of
   -- A leaf stays a leaf; an undeclared id is left for checkUnit (R1).
   SLeaf l -> pure (SLeaf l)
-  SRule r posTheta _shallowPrems shallowDisch holes _assurance -> do
+  SRule r posTheta _shallowPrems shallowDisch holes assurance -> do
     rule <-
       maybe (Left (UnknownRule aid r)) Right $
         find ((== r) . ruleId) (policyRules (envPolicy env))
@@ -252,9 +260,9 @@ elabTerm env priors aid term = case term of
     let theta = zip params (map snd posTheta)
     prems <- resolvePremises env priors aid r rule theta
     disch <- resolveDischarges env priors aid shallowDisch
-    -- Defeasible-only: force AssuranceNone (the grammar has no support-term
-    -- assurance syntax).
-    pure (SRule r theta prems disch holes AssuranceNone)
+    -- lara-syntax@0.2: lower assurance verbatim. Legality (strict mode,
+    -- allow-trusted, certifier allowlist, replay) belongs to R7/R13.
+    pure (SRule r theta prems disch holes assurance)
 
 -- | Reconstruct each implicit premise by unique @≡@-match (spec §5). Preserves
 -- premise order.

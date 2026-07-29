@@ -1,5 +1,6 @@
 -- | The concrete @.lara@ surface syntax: parser and label-preserving printer
--- (@lara-syntax\@0.1@, frozen in @docs/lara-surface-grammar.md@).
+-- (@lara-syntax\@0.2@, additive over the frozen @0.1@ grammar in
+-- @docs/lara-surface-grammar.md@).
 --
 -- == Position in the pipeline
 --
@@ -29,17 +30,19 @@
 --
 -- == Surface support terms (the A1a → A1b contract)
 --
--- The surface @by r(g1,…,gn)@ form plus its @discharge@\/@open@ lines carries
--- strictly less than the frozen 'SupportTerm' (spec §5): premises are implicit,
--- θ is positional with the parameter /names/ living in the policy, and a
--- discharge target is a bare identifier whose leaf-vs-argument nature is a
--- scoping question. The parser records what the surface states, using these
--- conventions, and leaves the rest for the elaborator:
+-- The surface @by r(g1,…,gn)@ form plus its
+-- @discharge@\/@open@\/@assurance@ lines carries strictly less than the frozen
+-- 'SupportTerm' (spec §5): premises are implicit, θ is positional with the
+-- parameter /names/ living in the policy, and a discharge target is a bare
+-- identifier whose leaf-vs-argument nature is a scoping question. The parser
+-- records what the surface states, using these conventions, and leaves the rest
+-- for the elaborator:
 --
 --   * @leaf(l)@                         ↦ @'SLeaf' (LeafId l)@.
 --   * @r(g1,…,gn)@                      ↦ @'SRule'@ with @srSubst =
 --     [(Param \"1\", g1), …, (Param \"n\", gn)]@ (positional, 1-based — §5's
---     \"i-th parameter ↦ gi\"), @srPremises = []@, @srAssurance = AssuranceNone@.
+--     \"i-th parameter ↦ gi\"), @srPremises = []@, with optional assurance
+--     supplied by the arg block (default 'AssuranceNone').
 --   * @discharge q with ref@            ↦ appends @(QuestionId q, 'SLeaf'
 --     (LeafId ref))@ to @srDischarge@ (the elaborator re-points a target that is
 --     actually a prior argument).
@@ -68,6 +71,8 @@ import Data.List (intercalate)
 
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..))
+import Lara.Strict (SExpr)
+import Lara.Wire (parseSExpr, printSExpr)
 
 -- ---------------------------------------------------------------------------
 -- Located parse errors
@@ -716,11 +721,11 @@ supportTermP = do
           , srAssurance = AssuranceNone
           }
 
--- | Fold @discharge@\/@open@ lines into the base support term.
+-- | Fold @discharge@\/@open@\/@assurance@ lines into the base support term.
 argBody :: SupportTerm -> P SupportTerm
-argBody base = go base
+argBody base = go base False
   where
-    go acc = do
+    go acc seenAssurance = do
       mw <- peekIdent
       case mw of
         Just "discharge" -> do
@@ -728,13 +733,21 @@ argBody base = go base
           q <- identifier
           keyword "with"
           ref <- identifier
-          go (addDischarge acc (QuestionId q) (SLeaf (LeafId ref)))
+          go (addDischarge acc (QuestionId q) (SLeaf (LeafId ref))) seenAssurance
         Just "open" -> do
           keyword "open"
           _q <- identifier
           keyword "as"
           o <- identifier
-          go (addHole acc (ObligationId o))
+          go (addHole acc (ObligationId o)) seenAssurance
+        Just "assurance" ->
+          if seenAssurance
+            then failP "duplicate assurance line in arg block"
+            else case acc of
+              SRule {} -> do
+                assurance <- assuranceP
+                go (setAssurance acc assurance) True
+              _ -> failP "assurance requires a rule application, not a bare leaf"
         _ -> pure acc
 
 addDischarge :: SupportTerm -> QuestionId -> SupportTerm -> SupportTerm
@@ -744,6 +757,10 @@ addDischarge t _ _ = t -- a discharge on a bare leaf is elaborator-rejected
 addHole :: SupportTerm -> ObligationId -> SupportTerm
 addHole (SRule r th pr ds hs as) o = SRule r th pr ds (hs ++ [o]) as
 addHole t _ = t
+
+setAssurance :: SupportTerm -> Assurance -> SupportTerm
+setAssurance (SRule r th pr ds hs _) assurance = SRule r th pr ds hs assurance
+setAssurance t _ = t -- unreachable: 'argBody' rejects a non-rule base
 
 -- | @attackDecl@ / @posTarget@ (grammar §3, §7).
 attackP :: P Attack
@@ -825,13 +842,15 @@ parsePolicy = runComplete (policyP <* eof)
 
 -- | Accumulator for policy declarations, which the grammar allows in any order
 -- but which the AST partitions by kind (grammar §4).
-data PolicyAcc = PolicyAcc [Rule] [Contrary] [Exception] [((LeafKind, Provenance), Admission)]
+data PolicyAcc
+  = PolicyAcc [Rule] [Contrary] [Exception]
+      [((LeafKind, Provenance), Admission)] [(TheoryDigest, [Prop])]
 
 policyP :: P Policy
 policyP = do
   keyword "policy"
   pid <- identifier
-  PolicyAcc rs cs es adm <- policyDecls (PolicyAcc [] [] [] [])
+  PolicyAcc rs cs es adm ts <- policyDecls (PolicyAcc [] [] [] [] [])
   pure
     Policy
       { policyId = PolicyId pid
@@ -839,17 +858,33 @@ policyP = do
       , policyContraries = cs
       , policyExceptions = es
       , policyAdmission = adm
+      , policyTheories = ts
       }
 
 policyDecls :: PolicyAcc -> P PolicyAcc
-policyDecls acc@(PolicyAcc rs cs es adm) = do
+policyDecls acc@(PolicyAcc rs cs es adm ts) = do
   mw <- peekIdent
   case mw of
-    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm)
-    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm)
-    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm)
-    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a))
+    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm ts)
+    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm ts)
+    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm ts)
+    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a) ts)
+    Just "theory" -> do
+      t@(TheoryDigest d, _) <- theoryLineP
+      if any (\(TheoryDigest d', _) -> d' == d) ts
+        then failP ("duplicate theory digest: " ++ d)
+        else policyDecls (PolicyAcc rs cs es adm (ts ++ [t]))
     _ -> pure acc
+
+-- | @theoryLine ::= "theory" digest "=" "[" [ prop { "," prop } ] "]"@
+-- (grammar App. A.2).
+theoryLineP :: P (TheoryDigest, [Prop])
+theoryLineP = do
+  keyword "theory"
+  Digest d <- digestLit
+  symbol '='
+  ps <- brackets propP
+  pure (TheoryDigest d, ps)
 
 ruleP :: P Rule
 ruleP = do
@@ -963,19 +998,93 @@ peekNecessityParen = do
             _ -> False
     scan _ = False
 
+-- | @backendRef ::= ident "@" nat@ — shared by 'certRefP' and 'assuranceP'.
+backendVersionP :: P (BackendId, Int)
+backendVersionP = do
+  b <- identifier
+  symbol '@'
+  v <- natLit
+  pure (BackendId b, v)
+
 -- | @certRef ::= \"(\" backendRef \",\" digest \")\"@ (grammar §4). The backend
 -- version is a checker-facing NAT here (@CertRef.certRefVersion :: Int@).
 certRefP :: P CertRef
 certRefP = do
   symbol '('
-  b <- identifier
-  symbol '@'
-  v <- natLit
+  (b, v) <- backendVersionP
   symbol ','
-  d <- digestLit
+  Digest dig <- digestLit
   symbol ')'
-  let Digest dig = d
-  pure (CertRef (BackendId b) v (TheoryDigest dig))
+  pure (CertRef b v (TheoryDigest dig))
+
+-- | @assuranceLine@ (grammar App. A.1). The cert payload is a raw
+-- S-expression captured by 'sexpLitP' and decoded by the wire codec.
+assuranceP :: P Assurance
+assuranceP = do
+  keyword "assurance"
+  symbol '='
+  mw <- peekIdent
+  case mw of
+    Just "none" -> AssuranceNone <$ keyword "none"
+    Just "trusted" -> AssuranceTrusted <$ keyword "trusted"
+    Just "cert" -> do
+      keyword "cert"
+      symbol '('
+      (b, v) <- backendVersionP
+      symbol ','
+      Digest dig <- digestLit
+      symbol ','
+      payload <- sexpLitP
+      symbol ')'
+      pure (AssuranceCert (Cert b v (TheoryDigest dig) payload))
+    _ -> failP "expected an assurance (none | trusted | cert(…))"
+
+-- | Consume one character without skipping trivia.
+char1 :: P Char
+char1 = do
+  s <- getInput
+  case s of
+    c : _ -> c <$ advanceP
+    [] -> failP "unexpected end of input"
+
+-- | A raw S-expression literal, captured by a quote-aware balanced-paren scan
+-- and decoded by 'Lara.Wire.parseSExpr' (the canonical wire parser). The
+-- payload must be a parenthesised form — every nd@1 certificate is a list.
+sexpLitP :: P SExpr
+sexpLitP = do
+  skipTrivia
+  s <- getInput
+  case s of
+    '(' : _ -> do
+      raw <- scan (0 :: Int) False False False ""
+      case parseSExpr raw of
+        Right e -> pure e
+        Left _ -> failP "malformed certificate payload S-expression"
+    _ -> failP "certificate payload must be a parenthesised S-expression"
+  where
+    scan depth inStr esc inComment acc = do
+      s <- getInput
+      case s of
+        [] -> failP "unterminated certificate payload"
+        c : _
+          | inComment && c == '\n' -> consume depth inStr False False
+          | inComment -> consume depth inStr False True
+          | esc -> consume depth inStr False False
+          | inStr && c == '\\' -> consume depth inStr True False
+          | inStr && c == '"' -> consume depth False False False
+          | inStr -> consume depth True False False
+          | c == ';' -> consume depth False False True
+          | c == '"' -> consume depth True False False
+          | c == '(' -> consume (depth + 1) False False False
+          | c == ')' && depth > 1 -> consume (depth - 1) False False False
+          | c == ')' && depth == 1 -> do
+              ch <- char1
+              pure (acc ++ [ch])
+          | otherwise -> consume depth False False False
+      where
+        consume nextDepth nextInStr nextEsc nextInComment = do
+          ch <- char1
+          scan nextDepth nextInStr nextEsc nextInComment (acc ++ [ch])
 
 -- | A canonical natural (no sign, no leading zeros beyond a lone @0@).
 natLit :: P Int
@@ -1134,15 +1243,25 @@ printArgConcl ac = case ac of
 printSupportTerm :: SupportTerm -> (String, [String])
 printSupportTerm t = case t of
   SLeaf (LeafId l) -> ("leaf(" ++ l ++ ")", [])
-  SRule (RuleId r) theta _prems disch _holes _assurance ->
+  SRule (RuleId r) theta _prems disch _holes assurance ->
     ( r ++ "(" ++ intercalate ", " (map printTerm (map snd theta)) ++ ")"
     , [ "  discharge " ++ q ++ " with " ++ dischargeRef w
       | (QuestionId q, w) <- disch
       ]
+        ++ assuranceLine assurance
     )
   where
     dischargeRef (SLeaf (LeafId l)) = l
     dischargeRef (SRule (RuleId r) _ _ _ _ _) = r -- totality fallback only
+
+assuranceLine :: Assurance -> [String]
+assuranceLine assurance = case assurance of
+  AssuranceNone -> []
+  AssuranceTrusted -> ["  assurance = trusted"]
+  AssuranceCert (Cert (BackendId b) v (TheoryDigest h) payload) ->
+    [ "  assurance = cert(" ++ b ++ "@" ++ show v ++ ", " ++ h ++ ", "
+        ++ printSExpr payload ++ ")"
+    ]
 
 printAttack :: Attack -> String
 printAttack k = case k of
@@ -1170,6 +1289,7 @@ printPolicy p =
       ++ prependBlank (map printContrary (policyContraries p))
       ++ prependBlank (map printException (policyExceptions p))
       ++ printAdmission (policyAdmission p)
+      ++ printTheories (policyTheories p)
   where
     prependBlank [] = []
     prependBlank xs = "" : xs
@@ -1211,6 +1331,14 @@ printAdmission rows =
   where
     printRow ((k, prov), a) =
       "(" ++ leafKindStr k ++ ", " ++ provenanceStr prov ++ ") = " ++ admissionStr a
+
+printTheories :: [(TheoryDigest, [Prop])] -> [String]
+printTheories [] = []
+printTheories ts =
+  "" :
+    [ "theory " ++ d ++ " = [" ++ intercalate ", " (map printProp ps) ++ "]"
+    | (TheoryDigest d, ps) <- ts
+    ]
 
 -- ---------------------------------------------------------------------------
 -- Shared value printers

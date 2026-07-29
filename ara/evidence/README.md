@@ -26,6 +26,7 @@ Instead, per the project's own decision, the empirical signal that grounds each 
 |------|--------|--------|-------------|
 | [results/prop_layer.md](results/prop_layer.md) | `cabal build`/`cabal test` on `Lara.Prop` | C01 | Build + property-suite run record for carve-out layer 1 |
 | [results/executable_nd_adapter.md](results/executable_nd_adapter.md) | Lean/Haskell ND adapter gates | C03, C05 | Exact replay adequacy, proved Atom codec inverse, shared golden vectors, and full gate results |
+| [results/strict_certificate_frontend.md](results/strict_certificate_frontend.md) | S1 `.lara` → elaborate → `nd@1` replay + both-driver differential | C03, C05 | Policy-carried theory and surface assurance reach an accepted, justified verdict; missing theory rejects R13 |
 
 ## Proofs
 | File | Source | Claims | Description |

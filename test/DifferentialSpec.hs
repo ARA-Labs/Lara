@@ -105,7 +105,8 @@ corpusGoldens =
   ]
     ++ workedExampleGoldens
 
--- | The eight worked-example anchors (M4a Task A2). Each @examples/<NAME>/
+-- | The nine worked-example anchors (M4a Task A2 plus strict-cert S1). Each
+-- @examples/<NAME>/
 -- example.core.sexp@ is /derived/ from its @example.lara@ + co-located policy by
 -- @scripts/gen-worked-examples.hs@ (parse → elaborate → @encodeUnit@), then run
 -- through both drivers by @scripts/differential.sh@. These are the exact bytes
@@ -142,6 +143,10 @@ workedExampleGoldens =
   , ("examples/R1/example.core.sexp", "(verdict reject R1)")
   , ("examples/R2/example.core.sexp", "(verdict reject R12)")
   , ("examples/R3/example.core.sexp", "(verdict reject R10)")
+  , ( "examples/S1/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom holds (con safety_invariant) (con D)) justified)))"
+    )
   ]
 
 stressFixture :: FilePath

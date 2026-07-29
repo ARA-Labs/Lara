@@ -290,6 +290,7 @@ premiseMismatch =
             , policyContraries = []
             , policyExceptions = []
             , policyAdmission = []
+            , policyTheories = []
             }
     , negDiagnostic =
         "arg 'a', premise 0: concl(e1) = reports(exp_3, effect(m, accuracy, d_shift, 2.1)) "
@@ -351,6 +352,7 @@ unaccountedQuestion =
             , policyContraries = []
             , policyExceptions = []
             , policyAdmission = []
+            , policyTheories = []
             }
     , negDiagnostic =
         "arg 'a': question 'randomization' of rule 'controlled_experiment' is "
@@ -399,6 +401,7 @@ illTypedAttack =
             , policyContraries = [Contrary (AtomPat (Pred "q") []) (AtomPat (Pred "not_q") [])]
             , policyExceptions = []
             , policyAdmission = []
+            , policyTheories = []
             }
     , negDiagnostic =
         "attack 'rebut d a_strict': target's top rule 'deductive_step' is strict; "
@@ -440,6 +443,7 @@ strictReachableContrary =
               policyContraries = [Contrary (AtomPat (Pred "derived") [PVar (Param "X")]) (AtomPat (Pred "refuted") [PVar (Param "X")])]
             , policyExceptions = []
             , policyAdmission = []
+            , policyTheories = []
             }
     , negDiagnostic =
         "policy 'illformed-policy-v1': strict-reachable proposition 'derived(X)' "
@@ -478,6 +482,7 @@ admissionReject =
             , policyContraries = []
             , policyExceptions = []
             , policyAdmission = [((Assumed, AiExecuted), Reject)]
+            , policyTheories = []
             }
     , negDiagnostic =
         "leaf 'e_assumed': admission(assumed, ai-executed) = reject (§4.3) — "
@@ -516,6 +521,7 @@ strictAssuranceViolation =
             , policyContraries = []
             , policyExceptions = []
             , policyAdmission = []
+            , policyTheories = []
             }
     , negDiagnostic =
         "arg 'a': assurance = trusted, but rule 'deductive_step' has "

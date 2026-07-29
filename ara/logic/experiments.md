@@ -163,3 +163,26 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 - **Artifacts**: `m0/` (claims-index.tsv, claim-types.tsv, sample.tsv, annotations/,
   double-annotation.tsv, annotation-summary.md), commits `75e2a65`…`6524e8c`.
 - **Grounds**: C13, C14, C15, C16, C17.
+
+## E10: Strict-certificate frontend conformance — S1
+- **Verifies**: the executable frontend reachability of C03/C05's strict
+  certificate seam (not the soundness theorem itself)
+- **Evidence**: evidence/results/strict_certificate_frontend.md
+- **Run**: `examples/S1/` through `.lara` parsing, policy theory derivation,
+  elaboration, `runUnit`, CLI bytes, and the Haskell↔Lean differential harness
+- **Setup**:
+  - Model: n/a (property/conformance testing)
+  - Dataset: one strict worked example plus an undeclared-theory R13 mutation
+  - System: `lara-syntax@0.2` → `Lara.Elaborate` → unchanged checker/`nd@1`
+- **Procedure**:
+  1. Parse and round-trip the policy theory table and support-term assurance.
+  2. Elaborate S1 and assert the certificate payload and theory table survive.
+  3. Replay `(hyp 0)` and assert the claim is justified; remove the theory and
+     assert R13.
+  4. Regenerate `.core.sexp`/`expected.json`, run the real CLI, and compare the
+     committed core across both drivers.
+- **Metrics**: exact verdict bytes; parser round-trip; expected rejection class;
+  both-driver fixture agreement.
+- **Outcome**: done (2026-07-29); S1 accepts as justified, its missing-theory
+  mutation rejects R13, and the differential harness reports 33/33 agreement.
+- **Dependencies**: E03.

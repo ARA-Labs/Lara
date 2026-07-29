@@ -35,8 +35,9 @@ checker (M4a) but not M4b's machine-producer clause.
 - The untrusted elaborator + the "no hand-authored certificate" clause → **M4b (#32)**.
 - The `eraseCert` / stable-argument-id `CheckedProgram` representation and **result-9**
   backend-replacement mechanization → `TODOS.md` (split from A3; A3 is result 12 only).
-- A **strict-certificate worked example** exercising the `nd@1` cert frontend path → `TODOS.md`
-  (the M4a suite is defeasible-only; `use backends [nd@1]` is inert).
+- A **strict-certificate worked example** was outside the original M4a scope and
+  has since landed as `examples/S1/`: `lara-syntax@0.2` assurance + policy theory
+  table → elaboration → `nd@1` replay.
 - `Lara.Json` LLM-producer surface (#30); PaperBench evaluation (M5); elaborator faithfulness
   measurement (M5).
 - Serializing gap-holes / located diagnostics into the frozen wire verdict (would reopen M3) — kept
@@ -223,8 +224,9 @@ incomplete-alternative reporting (`Lara.Reporting.claimReports`). `scripts/gen-w
 regenerates both goldens; `test/WorkedExamplesSpec.hs` adds an `expected.json` freshness assertion
 (sibling of the `.core.sexp` one) and a **measured** coverage-matrix test — read off the elaborated
 units and their verdicts, not asserted in prose — that every status (justified/gap/contested/defeated),
-every attack kind (rebut/undercut/undermine), and R1/R12/R10 are witnessed. The suite is
-**defeasible-only** (`nd@1` inert); the strict-certificate frontend path stays a `TODOS.md` P3 item.
+every attack kind (rebut/undercut/undermine), and R1/R12/R10 are witnessed. The
+original A2 suite was **defeasible-only** (`nd@1` inert); post-M4a example
+`examples/S1/` now exercises the strict-certificate frontend path end to end.
 
 ## Correction log
 

@@ -84,29 +84,37 @@ payloads with a `certified` marker). No `eraseCert` exists in Haskell or Lean ye
 **Depends on:** the M4a `Lara.AST` / presentation-AST freeze (#31); not blocked by
 anything inside M4a.
 
-### Strict-certificate worked example (nd@1 frontend cert path)
+### Print hole-lines in support terms
 
-**What:** One worked example whose claim is supported by a **strict** rule with an
-`nd@1` certificate, end-to-end (`.lara` → elaborate → verdict + `.core.sexp`).
+**What:** Make `printSupportTerm` preserve `open … as …` hole lines. It currently
+drops `srHoles`, so a parsed open obligation does not survive the surface
+round-trip.
 
-**Why:** `/plan-eng-review` (2026-07-27), outside-voice #14: the M4a worked
-examples declare `use backends [nd@1]` but the empirical policy is all-defeasible
-with no certificates, so `nd@1` is inert. The frontend's certificate parse +
-elaborate path ships untested by the worked-examples suite.
+**Context:** Low priority until an authored example needs `open`; recorded as an
+explicit out-of-scope item in the strict-certificate implementation plan.
 
-**Pros:** End-to-end golden for the strict-cert frontend path.
-
-**Cons:** Adds certificate surface syntax + elaboration scope; the Unit-level cert
-path is already tested (`buildCertOk` / `Lara.Strict.ND`).
-
-**Context:** M4a's four-status discriminating examples are legitimately
-defeasible-argumentation; this closes the frontend-cert gap without expanding M4a.
-
-**Effort:** M
+**Effort:** S
 **Priority:** P3
-**Depends on:** M4a frontend (#31) — parser + elaborator + grammar (A0.5/A1).
+
+### Theory-line groundness
+
+**What:** Enforce the grammar's requirement that policy `theory` entries are
+ground propositions, or revise the grammar to admit variables explicitly.
+
+**Context:** `propP` accepts variable-looking identifiers in theory entries
+(harmless in practice because `encodeND` flattens every entry to an atom).
+Tighten the parser or update the grammar.
+
+**Effort:** S
+**Priority:** P3
 
 ## Completed
+
+### Strict-certificate worked example (nd@1 frontend cert path)
+
+S1 lands the full frontend certificate path (`.lara` → elaborate → verdict +
+`.core.sexp`); the hypothesis-reuse boundary is recorded in
+`examples/S1/strict-v1.policy.lara`.
 
 ### Cache grounded adjacency for the M3 production evaluator (PR #28)
 

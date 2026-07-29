@@ -1462,3 +1462,27 @@ tree:
               - "lean/Lara/Presentation.lean (parse_printProgram / parse_printPolicy, full AST)"
               - "lean/AxCheck.lean Result-12 section: 0 sorryAx, only propext/Quot.sound"
             status: resolved
+  - id: N74
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-29T07:59"
+    parent: N69
+    also_depends_on: [N58, N69, N72]
+    title: "Close the strict-certificate worked-example gap with lara-syntax@0.2 and S1"
+    result: >
+      Added additive surface assurance and policy theory declarations, lowered
+      both through the pure elaborator, and authored S1 with a strict
+      certified_citation rule plus nd@1 `(hyp 0)`. The real CLI accepts S1 with
+      a1=in and holds(safety_invariant,D)=justified; the absent-theory mutation
+      rejects R13. `cabal test` passes, including 2000 program and 2000 policy
+      surface round-trips, S1 freshness/CLI goldens, and negative parser cases.
+      The Haskell and Lean drivers agree byte-exact on all 33 differential
+      fixtures (pass=33 fail=0).
+    evidence:
+      - "ara/evidence/results/strict_certificate_frontend.md"
+      - "examples/S1/{example.lara,strict-v1.policy.lara,example.core.sexp,expected.json}"
+      - "bedf59a support-term assurance surface"
+      - "4c204d6 assurance lowering + policy registry threading"
+      - "763704b S1 worked example + suite integration"
+      - "scripts/differential.sh: pass=33 fail=0"
+    status: resolved

@@ -1,0 +1,86 @@
+session:
+  id: "2026-07-29_001"
+  date: "2026-07-29"
+  started: "2026-07-29T07:59"
+  last_turn: "2026-07-29T07:59"
+  turn_count: 1
+  summary: >
+    Implemented the strict-certificate worked example: lara-syntax@0.2 adds
+    support-term assurance and policy theory tables; S1 replays nd@1 end to end,
+    missing theory rejects R13, the full suite passes, and both drivers agree on
+    all 33 fixtures.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N74"
+    routing: direct
+    provenance: ai-executed
+    summary: "S1 closes the surface strict-cert path: justified accept, R13 missing-theory reject, 33/33 both-driver agreement."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Executed plans/2026-07-29-strict-cert-worked-example.md task-by-task:
+      grammar @0.2, theory parser/printer, assurance parser/printer, elaborator
+      registry threading, S1 generation, suite/docs synchronization, and
+      experiment verification.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/{AST,Syntax,Elaborate,Negatives}.hs"
+      - "app/Main.hs"
+      - "examples/S1/"
+      - "scripts/gen-worked-examples.hs"
+      - "test/{Syntax,Elaborate,WorkedExamples,Cli,Differential}Spec.hs"
+      - "docs/lara-surface-grammar.md"
+      - "examples/README.md"
+      - "TODOS.md"
+  - turn: 1
+    action: >
+      Ran the full Haskell suite, the real S1 CLI, and the Haskell↔Lean
+      differential harness; recorded the outputs in
+      evidence/results/strict_certificate_frontend.md.
+    provenance: ai-executed
+    files_changed:
+      - "ara/evidence/results/strict_certificate_frontend.md"
+
+claims_touched: []
+
+logic_revisions:
+  - turn: 1
+    entry: "logic/solution/constraints.md#M4a-surface-front-end-constraints"
+    field: "defeasible-only limitation"
+    before: >
+      The M4a suite is defeasible-only; the grammar has no support-term
+      assurance syntax, nd@1 is inert, and the frontend path is deferred to
+      TODOS.
+    after: >
+      The original lara-syntax@0.1/M4a suite remains historically
+      defeasible-only; additive lara-syntax@0.2 and S1 now exercise surface
+      assurance, policy theory threading, and nd@1 replay end to end.
+    signal: artifact-commitment
+    provenance: ai-suggested
+  - turn: 1
+    entry: "logic/solution/constraints.md#M4a-surface-front-end-constraints"
+    field: "worked-example differential count"
+    before: "DifferentialSpec guards 8 example.core.sexp anchors."
+    after: "DifferentialSpec guards 9 example.core.sexp anchors, including S1."
+    signal: artifact-commitment
+    provenance: ai-suggested
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The plan's honesty constraint was preserved: because encodeND flattens
+      source propositions to atoms, S1 uses premise-equivalent conclusion with
+      `(hyp 0)`; richer lam/app payloads do not reference source-level formula
+      structure under the current encoding.
+
+open_threads:
+  - "The strict-cert feature branch is ready for PR review."
+  - "S1 closes frontend reachability, not the separate result-9 eraseCert/backend-replacement mechanization."
+  - "O16 and O18 remain staged without new closure signals."
+
+ai_suggestions_pending:
+  - "O16: a checked certificate can expose inconsistencies in hand-authored examples; still awaiting affirmation or another instance."
+  - "O18: result 12's Lean codec scope remains a concept clarification, not a concrete-parser proof."

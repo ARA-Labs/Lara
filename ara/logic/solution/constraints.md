@@ -116,17 +116,16 @@ The two evidence-model decisions that were open at gate time are now resolved in
 support or attack) and result-cell conflict (§4.3 — duplicate-report groups quarantined on `≡`
 disagreement; dependent claims surface as `gap`).
 
-## M4a surface front-end constraints (2026-07-28 — grounds: N68, N69, O15, O17)
+## M4a surface front-end constraints (2026-07-29 — grounds: N68, N69, N74, O15, O17)
 
-- **The M4a suite is defeasible-only (from O17).** The frozen `.lara` grammar
-  (`docs/lara-surface-grammar.md`) has no support-term assurance syntax — `cert`/`trusted`
-  appear in the vocabulary table but no support-term production uses them — so a *strict
-  argument instance* cannot be authored and `use backends [nd@1]` is inert on the suite.
-  Consequences: (1) the strict-certificate frontend path (nd@1 replay driven from surface
-  syntax) is **not** exercised by M4a — deferred to `TODOS.md`; (2) the three rejection
-  representatives are the defeasible-authorable **R1 / R12 / R10**, not a strict R7. R12 stays
-  reachable because a strict *rule declaration* whose conclusion sits in a `contrary` pair is a
-  policy-well-formedness reject independent of any strict argument.
+- **The original M4a suite was defeasible-only; S1 closes the frontend-cert
+  gap.** O17 remains the historical constraint on the `lara-syntax@0.1` suite:
+  its eight examples cannot author a strict argument and `use backends [nd@1]`
+  is inert. Additive `lara-syntax@0.2` now supplies support-term assurance and a
+  policy theory table; `examples/S1/` exercises `.lara` → elaboration →
+  `Driver.buildCertOk` → `nd@1` replay. The original rejection representatives
+  remain **R1 / R12 / R10**; S1 is an accepted strict-path witness, not a
+  remapping of that M4a rejection trio.
 
 - **Both drivers diverge only on non-canonical numeric literals (from O15).** The Haskell core
   normalizes numbers via `canonNum` (`Lara.Prop.nfTerm`) while the Lean driver runs at
@@ -134,7 +133,7 @@ disagreement; dependent claims surface as `gap`).
   carrying a **non-canonical numeric literal** can therefore make the two drivers disagree
   byte-for-byte. Both the M3 conformance corpus and the M4a worked-example anchors avoid num
   literals, and this is now enforced by two independent no-num-literal differential properties
-  (`DifferentialSpec`, over the fixtures and the 8 `example.core.sexp`). When adding differential
+  (`DifferentialSpec`, over the fixtures and the 9 `example.core.sexp`). When adding differential
   fixtures: avoid numeric literals, or use only already-canonical decimals; if the two drivers
   ever disagree, check for a num literal before suspecting a checker bug.
 

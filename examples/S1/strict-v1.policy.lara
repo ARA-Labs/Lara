@@ -1,0 +1,31 @@
+# strict-v1 — strict-certificate policy for worked example S1
+#
+# Exercises the nd@1 certificate path end-to-end (TODOS P3 strict-cert item).
+# The theory table is a trusted input (grammar App. A.2): S1's artifact
+# references the digest but may not define the table.
+
+policy strict-v1
+
+# A certified citation: the conclusion is a strict (backend-certified)
+# consequence of the premise. HONESTY NOTE: nd@1 encodes every source
+# proposition — premises and theory entries alike — as a flat atom
+# (src/Lara/Strict/ND.hs encodeND), so hypothesis reuse (`(hyp N)` over a
+# premise or theory slot) is the only certificate shape that references
+# source-level content. Richer lam/app structure is technically replayable
+# but only by hand-spelling the backend's internal atom keys in
+# payload-embedded formulas (decodeCert/decodeFormula,
+# src/Lara/Strict/ND.hs:346-364) — opaque, produced by no surface encoding,
+# and certifying nothing about source-level structure; abort cannot close a
+# goal from atomic premises at all. The premise ≡ conclusion shape below is
+# therefore the maximal honest shape, not a simplification.
+rule certified_citation(X, D)
+  mode       = strict
+  premises   = [ holds(X, D) ]
+  conclusion = holds(X, D)
+  allow-trusted = false
+  certifiers = [ (nd@1, sha256:strict-v1-theory-0) ]
+
+# The empty theory the certificate cites. The digest is a placeholder like the
+# artifact digests (no digest computation exists in the codebase — M4b B0
+# investigation, docs/m4b-b0-source-and-replay-bundle.md).
+theory sha256:strict-v1-theory-0 = []

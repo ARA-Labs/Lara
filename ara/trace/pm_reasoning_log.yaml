@@ -132,3 +132,9 @@ entries:
       - "Near-miss C12 (testing): 32/32 both-drivers agreement adds 8 more agreeing fixtures but no NEW divergence for the researcher to comment on — the 'fallible-oracle / N+1-version' framing needs a divergence event, not more agreement. Stays testing (same rule as the M3 #1 near-miss)."
       - "Crystallized O15 (num-literal caveat, staged since M3 and previously held for conservatism) -> constraints.md via artifact-commitment: a SECOND no-num-literal differential prop now guards it over the 8 worked-example anchors. Also crystallized O17 (defeasible-only) same turn via artifact-commitment (honesty note in m4a-checklist + TODOS + coverage-test scope) — constraints.md is exactly its home (Known limitations)."
       - "Staged O16 (hand-authored-cert-not-self-checking) as potential_type: claim, NOT crystallized: the user's affirmation was scoped to the FIX CHOICE (N71), not to the general lesson; the general claim awaits affirmation or a second instance. Staged O18 (result-12 codec-anchor scope) as potential_type: concept — a scoping clarification, no closure signal."
+  - turn: "2026-07-29_001#1"
+    notes:
+      - "Routed the completed strict-cert implementation as experiment N74: code, generated S1 artifacts, CLI output, R13 mutation, full Haskell suite, and 33/33 both-driver agreement are direct journey facts."
+      - "Reconciled the O17-derived limitation in constraints.md rather than editing O17: O17 remains append-only and historically true for lara-syntax@0.1/M4a; the mutable logic snapshot now records additive @0.2 + S1 as closing the gap."
+      - "Added E10 as a distinct frontend-conformance experiment instead of advancing C03/C05: S1 demonstrates reachability and cross-driver behavior, not the adapter soundness theorems those claims assert."
+      - "Did NOT promote O16 or O18: this turn supplied no user affirmation of the generalized hand-authored-certificate claim and did not change result 12's scope."
