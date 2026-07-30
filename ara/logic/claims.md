@@ -111,10 +111,14 @@ the result is stated but not yet proved or mechanized._
   a uniform injective certificate relabel `mapAssur f`. Relabeled programs share a definitionally equal
   `checkedAF` (nodes are list positions, so the bijection is the identity), giving equal grounded labels
   and statuses. Mechanizing surfaced that the paper's non-injective erase-to-`certified` form is not an
-  isomorphism; injectivity-on-used-certs is the faithful condition (see dead-end N76). `lake build`
-  47 jobs; AxCheck 0 sorryAx across 510 decls, only `propext`/`Quot.sound` for the new declarations.
+  isomorphism; injectivity-on-used-certs is the faithful condition (see dead-end N76). Now **non-vacuous
+  by construction** — `lean/Lara/EraseTransport.lean` transports well-checkedness (`hasSupport_mapAssur`,
+  `hasAttack_mapAssur`, `mapCertProg`) under any acceptance-preserving relabel, so
+  `backend_replacement_transport` exhibits the second `CheckedProgram` rather than assuming it, and
+  Theorem 2's "accept the same strict instances" clause is discharged constructively. AxCheck 0 sorryAx
+  across 516 decls, only `propext`/`Quot.sound` for the new declarations.
 - **Tags**: backend-parametricity, replacement, status-semantics
-- **Last revised**: 2026-07-30 (2026-07-30_001#1)
+- **Last revised**: 2026-07-30 (2026-07-30_001#3)
 
 ## C05: A registered backend's soundness discharges as a per-instance corollary when the interface carries soundness as an obligation
 - **Statement**: Structuring a backend as an interface that *carries its own soundness obligation* (a

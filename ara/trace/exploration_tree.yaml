@@ -1579,3 +1579,72 @@ tree:
       - "lean/README.md result-9 row"
       - "lake build: 47 jobs; AxCheck: 0 sorryAx / 510 decls, trio-only"
     status: resolved
+  - id: N79
+    type: decision
+    provenance: user
+    timestamp: "2026-07-30T12:00"
+    also_depends_on: [N78]
+    title: "PR #41 code review: drop the two unused companion lemmas"
+    choice: >
+      Review of PR #41 (result 9) raised two non-blocking items. Item 1: two
+      AxCheck-listed companion lemmas (mapAssurAtt_target, mapAssurDis_eq) are
+      unused downstream. Verified: both were referenced only by their AxCheck
+      #print-axioms lines, never in a proof (mapAssurAtt_source / mapAssurList_eq
+      are the used twins; the target side and dis-eq shape are unused because
+      coveredB matches only on the attack source and mapAssur_subterm takes the
+      discharge case through lookupDis_mapAssurDis). Removed both (YAGNI) —
+      user confirmed "keep them removed"; trivially re-derivable when a consumer
+      needs them. Item 2 (a concrete worked example / transport lemma making
+      backend_replacement non-vacuous) filed as issue #42, PR #41 left to merge.
+    alternatives:
+      - "Keep the two lemmas for API symmetry — rejected: dead exports, against the no-unused-code rule; re-add when a consumer (the transport lemma) uses them"
+    evidence:
+      - "commit 3db1e75 (drop unused companion lemmas); PR #41 merged as cd62b37"
+      - "issue #42 (worked example / transport lemma follow-up)"
+    status: resolved
+  - id: N80
+    type: decision
+    provenance: user
+    timestamp: "2026-07-30T12:30"
+    also_depends_on: [N79]
+    title: "Prioritize #42 transport lemma over a Haskell mapAssur conformance port"
+    choice: >
+      Between the two remaining result-9 P3 follow-ups, chose the #42 transport
+      lemma over a Haskell mapAssur port. Rationale: mapAssur/relabel is a proof
+      device, not a frozen spec definition any runtime path uses, so a Haskell
+      port would add relabel + QuickCheck code that no production code exercises,
+      only to re-confirm empirically what Lean already proves (conformance, not
+      soundness). The transport lemma instead stays in the soundness-bearing
+      layer and strengthens the result (general non-vacuity + constructive
+      discharge of the acceptance hypothesis). User: "do 42 first."
+    alternatives:
+      - "Haskell mapAssur conformance port — deprioritized: conformance-only, duplicates unused logic"
+      - "Pivot to #38 / M5 (evaluation corpus) — the bigger-picture next step; deferred until result 9 is airtight"
+    status: resolved
+  - id: N81
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-30T13:30"
+    also_depends_on: [N77, N78, N80]
+    title: "Result-9 transport mechanized: well-checkedness preserved, non-vacuous by construction"
+    result: >
+      Added lean/Lara/EraseTransport.lean (~230 lines). hasSupport_mapAssur and
+      hasAttack_mapAssur transport typing under a single acceptance-preservation
+      hypothesis hpres (AssuranceOk CertOk₁ … α → AssuranceOk CertOk₂ … (f α));
+      the cert payload enters typing only via the AssuranceOk premise, so all
+      other InstSide/HasAttack side conditions are preserved verbatim.
+      mapCertProg builds the second CheckedProgram and backend_replacement_transport
+      exhibits it with equal statuses — Erase.backend_replacement is now
+      non-vacuous by construction and Theorem 2's "accept the same strict
+      instances" is constructively discharged. Notable strengthening: the two
+      transport lemmas need only hpres, NOT injectivity (hf is required solely
+      for mapCertProg's nodup). Re-added mapAssurDis_eq / mapAssurAtt_target as
+      now-used lemmas. lake build 48 jobs; AxCheck 0 sorryAx / 516 decls,
+      trio-only. Independently verified. PR #43 (closes #42).
+    evidence:
+      - "lean/Lara/EraseTransport.lean (commit e72c884)"
+      - "lean/AxCheck.lean (transport #print axioms lines)"
+      - "ara/evidence/status/mechanization_status.md (result-9 transport verification run)"
+      - "lake build: 48 jobs; AxCheck: 0 sorryAx / 516 decls, trio-only"
+      - "PR #43; issue #42"
+    status: resolved

@@ -155,8 +155,8 @@ sessions:
     open_threads: 3
   - id: "2026-07-30_001"
     date: "2026-07-30"
-    summary: "M4 closed (#29); result 9 (backend replacement) mechanized in lean/Lara/Erase.lean under Model A (uniform injective relabel), sorry-free, AxCheck trio-only; C04 revised (machine-checked + injective-condition sharpened)."
-    turn_count: 1
-    events_count: 5
+    summary: "M4 closed (#29); result 9 (backend replacement) mechanized under Model A (lean/Lara/Erase.lean), then strengthened to non-vacuous-by-construction via well-checkedness transport (lean/Lara/EraseTransport.lean). PRs #40/#41 merged, #43 open (closes #42). Sorry-free, AxCheck 516 decls trio-only; C04 revised twice."
+    turn_count: 3
+    events_count: 8
     claims_touched: [C04]
     open_threads: 4

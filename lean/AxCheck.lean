@@ -19,6 +19,7 @@ import Lara.Support
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase
+import Lara.EraseTransport
 import Lara.Policy
 import Lara.Check
 import Lara.Examples
@@ -621,3 +622,13 @@ open Lara
 #print axioms Lara.Erase.checkedAF_relabel
 #print axioms Lara.Erase.backend_replacement
 #print axioms Lara.Erase.labelC_relabel
+
+-- Result 9 (transport): a uniform injective relabel preserves well-checkedness,
+-- so backend replacement is non-vacuous by construction.
+#print axioms Lara.Erase.mapAssurDis_eq
+#print axioms Lara.Erase.mapAssurAtt_target
+#print axioms Lara.Erase.hasSupport_mapAssur
+#print axioms Lara.Erase.hasAttack_mapAssur
+#print axioms Lara.Erase.mapCertProg_args
+#print axioms Lara.Erase.mapCertProg_atts
+#print axioms Lara.Erase.backend_replacement_transport

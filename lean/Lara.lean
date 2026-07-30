@@ -49,6 +49,7 @@ import Lara.Support
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase
+import Lara.EraseTransport
 import Lara.Policy
 import Lara.Unit
 import Lara.Check

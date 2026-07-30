@@ -146,3 +146,13 @@ entries:
       - "Provenance of the two decisions (N75 track, N77 Model A) = user: both were explicit AskUserQuestion selections. N76/N78 = ai-executed."
       - "Staged O19 (potential_type concept) instead of promoting: the methodological pattern (injective relabel vs collapse-to-marker) is broader than C04's wording, but has no independent closure signal this turn beyond the C04 fold — left for future crystallization."
       - "C04 revision provenance = ai-suggested: user chose the model but did not dictate the claim wording; revertible."
+  - turn: "2026-07-30_001#2"
+    notes:
+      - "PR-#41 review item 1: verified mapAssurAtt_target/mapAssurDis_eq are referenced ONLY by their AxCheck lines (grep, source-only) before removing — a real dead-export check, not taking the reviewer's word. Recorded as decision N79 (provenance user: 'keep them removed')."
+      - "Pushed back mildly on 'might we need them later': named the one concrete future consumer (CheckedProgram-relabel transport) but still recommended removal (trivially re-derivable, no-dead-code rule) — user agreed. The transport landed next turn and DID re-add both, vindicating the add-when-used call."
+      - "Item 2 routed to issue #42 rather than staged as an observation — it is a concrete work proposal, not an interpretive claim; the trace already carries the non-vacuity concern via N81."
+  - turn: "2026-07-30_001#3"
+    notes:
+      - "N80 (do #42 over Haskell port) provenance user ('do 42 first'); N81 (transport) ai-executed and independently verified (build + AxCheck), not trusting the fork's report."
+      - "Updated C04 Evidence basis (not Statement/Conditions/Status): the transport is new confirming evidence + constructive non-vacuity, not a scope change; status stays supported. Second logic_revision on C04 this day."
+      - "Did NOT crystallize O19 despite the transport being an artifact that uses the injective-relabel machinery: N81 refined O19 (forward typing transport needs only hpres, NOT injectivity — injectivity is only for nodup/edge-equality), so the staged wording ('injective relabel') is now imprecise as a general concept. Left staged pending a cleaner formulation; observations are append-only so the refinement lives in N81 + this log."
