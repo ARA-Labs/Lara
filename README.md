@@ -233,22 +233,29 @@ checker, never a substitute for the theorems (spec §9).
 
 ## Status
 
-M1 complete: the `lara-core@0.1` language is frozen in
-[`docs/spec.md`](docs/spec.md). **Mechanized in Lean 4** (`lean/`, `sorry`-free,
-standard axiom trio): results 2, 4, 5, 8, 10, and 11; the leaf half of result 3;
-the exact executable support/positional-attack/program-checker portion of
-result 1; the source-vs-compiled half of result 6 via the checker-built edge
-decider (#17 closed; attack completeness for result 7 remains, #18); and the §8.1
-strict-reachable/`wf(Pi)` validator underlying result 7. **Data-only skeleton:**
-the full claim-support AST, worked ARA-Demo examples, and rejection-class
-negatives. **Non-shipping seed:** the LP adapter that checks explicit LP
-derivations (M0 measured no corpus demand; spec §5.2). **Still to come
-(production Haskell M3 checker):** executable support/attack checking,
-Dung-framework compilation and grounded labelling (`Lara.Check`, `Lara.Compile`,
-`Lara.Grounded`), the leaf interface and ARA→core mapping, and the Python
-elaborator. The Haskell changes here are the strict-adapter serializer and
-conformance suite, not an M3 checker implementation. See the roadmap in
-[`docs/engineering-plan.md`](docs/engineering-plan.md).
+The implementation is complete through the M4 walking-skeleton milestone:
+
+- **M1 — frozen core language.** `lara-core@0.1` is specified in
+  [`docs/spec.md`](docs/spec.md); the additive `.lara` presentation frontend is
+  `lara-syntax@0.2`.
+- **M2 — mechanized reference core.** Lean proves the checker, compilation,
+  grounded evaluation, strict-backend soundness/isolation, result-7 consistency,
+  backend replacement (including constructive well-checkedness transport), the
+  ND adapter, and the presentation-codec round trip. Backend `certDeps`
+  accountability (the remaining half of result 3) is still open.
+- **M3 — production compiler/checker.** The Haskell parser, elaborator, checker,
+  compiler, grounded evaluator, diagnostics, CLI, replay bundle, and canonical
+  S-expression wire format are implemented and differential-tested byte-for-byte
+  against the Lean driver.
+- **M4 — walking skeleton.** The worked-example suite, untrusted deterministic
+  elaborator, hermetic replay bundle, and strict `nd@1` certificate example run
+  end to end without a hand-authored certificate step.
+
+The next milestone is **M5 — evaluation corpus**. Before freezing evaluation
+artifacts, the remaining spec-facing prerequisites are verdict-carried replay
+identity ([#36](https://github.com/EYH0602/lara/issues/36)) and duplicate-report
+groups/R9 checking ([#38](https://github.com/EYH0602/lara/issues/38)). See
+[`TODOS.md`](TODOS.md) for the smaller language-cleanup items.
 
 ## License
 

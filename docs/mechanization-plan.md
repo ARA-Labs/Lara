@@ -42,17 +42,17 @@ it; "test-only" = conformance evidence, no theorem.
 | # | Result | Status | Note |
 | --- | --- | --- | --- |
 | 1 | Decidability of program + attack checking | **mechanized (checker portion)** | Legacy `inferSupport`, `checkAttack`, and `checkProgram` remain generic and unchanged; `checkUnit` adds the detailed accepted-unit path. |
-| 2 | Strict-backend isolation | **must** | Structural: no term/attack/proof crosses the interface. Falls out of the `Backend` structure's typing. |
-| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **must** | Inversion lemma on term structure (`spec.md` §6). |
-| 4 | Compilation soundness (no untyped node/attack; subargument closure) | **must** | The combinatorially fiddly one — positional attacks × closure. |
-| 5 | Termination + determinism of grounded evaluation | **must** | Monotone operator on a finite-height lattice; bounded iteration ≤ `|Args|`. |
+| 2 | Strict-backend isolation | **mechanized** | Structural isolation plus the concrete non-factivity witness (`no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute`). |
+| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **partially mechanized** | `leaves_declared` proves the source-leaf half; exact backend certificate dependencies await `Backend.uses`/`certDeps`. |
+| 4 | Compilation soundness (no untyped node/attack; subargument closure) | **mechanized (relational)** | `compile_nodes_checked`, `edge_iff`, and `closure_includes_direct`; closed examples exercise direct and strict-superset closure. |
+| 5 | Termination + determinism of grounded evaluation | **mechanized** | Bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|`. |
 | 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done (#17 closed)** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` discharges `Faithful` constructively. Issue #18 separately closes the attack-completeness premise used by result 7. |
 | 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **mechanized for the Lean reference PL (#18 implementation; C09)** | `checkUnit` enforces Path B and exact conflict coverage; `Lara.Consistency` proves the computed-`completeClaimFor` headline, including self-conflict. |
-| 8 | Strict-certificate soundness (excludes `trusted-policy`) | **must** | A field/obligation of the `Backend` structure; proved once, per adapter. |
-| 9 | Backend replacement | **should** | Parametricity over the `Backend` structure + graph isomorphism under `eraseCert`. High reviewer value; the "backend internals are not part of claim-status semantics" result. |
-| 10 | Reference natural-deduction adapter soundness + exact dependencies | **must** | The one shipped adapter; induction on the typing derivation (`spec.md` §5.1). |
+| 8 | Strict-certificate soundness (excludes `trusted-policy`) | **mechanized** | `strict_step_sound` is the backend obligation projection; `ndBackend` discharges it via `nd_sound`. |
+| 9 | Backend replacement | **mechanized (Model A)** | `Erase.backend_replacement` proves status invariance under a uniform injective assurance relabel; `EraseTransport.backend_replacement_transport` constructs the relabeled well-checked program under acceptance preservation. |
+| 10 | Reference natural-deduction adapter soundness + exact dependencies | **mechanized and executable** | `nd_sound`, `nd_relevance`, `fv_in_range`, the sound/complete `infer` bridge, and the concrete `ndBackend` replay boundary. |
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** | `nf`/`≡` frozen (`spec.md` §3.2); property-tested in Haskell AND machine-checked in Lean 4 (`../lean/Lara/Prop.lean`: equivalence laws, decidability, idempotence, no-reorder; no `sorry`, axioms `propext` only). The completed warm-up. |
-| 12 | Codec round-trip to α-equivalent AST | **test-only** | QuickCheck in Haskell; mechanize only if cheap. Not a soundness result. |
+| 12 | Codec round-trip to α-equivalent AST | **mechanized presentation codec** (+ Haskell conformance) | Lean proves round-trip over the full frozen `Program`/`Policy` AST; Haskell QuickCheck covers the concrete `.lara` parser/printer separately. |
 
 Optional LP-adapter conservativity/realization (`spec.md` §5.2) is adapter-specific and mechanized
 only if the LP adapter ships (gated by corpus open question §8 #1).
@@ -211,8 +211,9 @@ right precedent:
   The support stage builds the exact retained checked-node cache; the typed-attack
   and missing-conflict stages reuse it, as does downstream claim aggregation, so
   no support re-inference occurs. Manual proof-level construction of `CheckedUnit`
-  remains possible only by supplying all invariants. This is Lean
-  mechanization, not a claim that the production Haskell M3 checker exists.
+  remains possible only by supplying all invariants. This paragraph states the
+  scope of the Lean proof; the existing production Haskell checker is separate
+  conformance evidence, not part of that proof.
 
 ## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed) ◐
 
@@ -290,10 +291,13 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
 - **Differential + property + golden + mutation tests remain conformance evidence** across the
   Haskell↔Lean boundary (`engineering-plan.md` §5); they do not replace the mechanized theorems.
 
-## 7. Open decisions
+## 7. Resolved decisions and remaining work
 
-1. **Result 9 in scope for the paper?** — high value, "should"; include if the M2 schedule holds.
-2. **General executable edge decider (#17)** — **done:** `Compile.edgeB`/`edgeB_faithful`
-   construct `Compile.Faithful` from accepted programs, closing result 6's source-vs-compiled half.
-3. **Attack completeness (#18)** — the next M2 tracker child: strengthen the accepted-program
-   invariant enough to state and prove result-7 status consistency.
+1. **Result 9** — done under Model A (uniform injective assurance relabel);
+   `EraseTransport` adds constructive well-checkedness transport.
+2. **General executable edge decider (#17)** — done:
+   `Compile.edgeB`/`edgeB_faithful` construct `Compile.Faithful`.
+3. **Attack completeness (#18)** — done for the Lean reference PL:
+   `checkUnit` constructs the exact accepted-unit invariant used by result 7.
+4. **Dependency accountability (result 3)** — remaining formal work:
+   add the backend `uses`/`certDeps` interface and prove exact certificate dependencies.

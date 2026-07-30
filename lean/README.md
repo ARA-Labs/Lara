@@ -20,6 +20,7 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **1** (checking decidability) | `Lara/Check/` | ✅ **checker portion mechanized** — the legacy `inferSupport`, `checkAttack`, and `checkProgram` behavior remains generic and unchanged. The public `checkUnit` path additionally constructs `Unit.CheckedUnit` in the fixed order rule-ID duplicates → R12 → argument duplicates → support → typed attacks → missing conflict. |
 | **7** (Path-B consistency; C09) | `Lara/Policy.lean`, `Lara/Unit.lean`, `Lara/Check/Unit.lean`, `Lara/Consistency.lean` | ✅ **mechanized for the Lean reference PL; issue #18 closes this scope** — `checkUnit` canonically constructs the accepted-program abstraction with unique rule IDs, Path B enforced before program checking, exact attack completeness, and retained checker nodes. `claimSupportFor` exactly aggregates complete checked nodes and `contrary_claims_not_both_justified` applies only to computed `completeClaimFor` claims. Ordered self-pairs cover self-conflict. |
 | **9** (backend replacement) | `Lara/Erase.lean`, `Lara/EraseTransport.lean` | ✅ **mechanized (Model A: uniform injective relabel)** — `backend_replacement`: two `CheckedProgram`s related by a uniform assurance relabel `mapAssur f` (`f` injective) compile to a definitionally equal AF (`checkedAF_relabel`), so every grounded label and claim status agrees. Nodes are list positions, so the bijection is the identity; `containsB_mapAssur`/`mapAssur_injective` carry edge-relation payload-independence. The doc's non-injective erase-to-`certified` marker is *not* an isomorphism (it can merge subterms and add closure edges); injectivity-on-used-certs is the faithful backend-swap condition. **Non-vacuous by construction** (`EraseTransport.lean`): `hasSupport_mapAssur`/`hasAttack_mapAssur`/`mapCertProg` transport well-checkedness under any acceptance-preserving relabel (`hpres`), so `backend_replacement_transport` exhibits the second program rather than assuming it. |
+| **12** (presentation-codec round trip) | `Lara/Presentation.lean` | ✅ **mechanized for the full frozen presentation AST** — structured encode/decode round trips every `Program`/`Policy` field. This anchors AST shape, not the concrete Haskell `.lara` parser; the latter is covered separately by QuickCheck conformance. |
 
 `Unit.CheckedUnit` is the accepted-program abstraction. `checkUnit` is its
 canonical executable constructor; manual proof-level construction remains
@@ -56,13 +57,11 @@ Every main theorem stays within the standard trio (`propext`,
 the `lean` job fails if any theorem's transitive axiom set contains `sorryAx` or
 anything outside that trio.
 
-The issue-#18 verification snapshot is: 70 traceability IDs and six author
-flows pass; `lake build` completes 25 jobs; AxCheck emits 430 theorem reports
-with no `sorryAx` and only `propext`, `Classical.choice`, and `Quot.sound`; and
-the multiline CI axiom parser is repaired and negative-tested. `cabal build`
-and `cabal test` also pass (one suite, 30 QuickCheck groups, 100 cases each),
-but those Haskell commands are regression-compatibility evidence only—not new
-Lean accepted-unit-flow evidence.
+The latest result-9 verification snapshot is: `lake build` completes 48 jobs;
+AxCheck emits 516 declaration reports with no `sorryAx` and no axiom outside
+`propext`, `Classical.choice`, and `Quot.sound`. The transport declarations use
+only `propext` and `Quot.sound`. Exact commands and per-result evidence are
+recorded in `../ara/evidence/status/mechanization_status.md`.
 
 ## Modeling notes
 
@@ -77,15 +76,14 @@ Lean accepted-unit-flow evidence.
 
 ## Next
 
-The grounded least-fixpoint (result 5 core) is done **in core Lean 4** —
-`Lara/Grounded.lean` builds the finite fixpoint by hand (bounded iteration +
-a deficit-measure stabilization argument), so no Mathlib dependency was needed.
-The checker-built `Faithful` edge decider (issue #17, closing result 6's
-source-vs-compiled half) is now done — `Compile.edgeB`/`edgeB_faithful` discharge
-the oracle constructively. Issue #18 now closes attack completeness and result 7
-for the Lean reference PL. Remaining work includes backend dependency
-accountability (the remaining half of result 3), the certificate-erased argument
-identity needed to state backend replacement (result 9), the production Haskell
-checker, and the deferred full hole/incomplete-alternative computation. The shared
-serialized first-order core AST remains the Haskell↔Lean differential-testing
-anchor (mechanization-plan §3).
+The headline Lean obligations are complete through result 9, including
+constructive well-checkedness transport, and result 12's presentation-codec
+round trip. The remaining formal gap is backend dependency accountability:
+result 3 has the source-leaf half (`leaves_declared`), while exact certificate
+dependencies still require a `Backend.uses`/`certDeps` interface.
+
+The project-level next milestone is M5. Its immediate cross-layer prerequisites
+are verdict-carried replay identity (#36) and duplicate-report groups with R9
+checking (#38); these are language/reporting additions, not missing pieces of
+the existing Lean checker proofs. The shared serialized first-order core AST
+remains the Haskell↔Lean differential-testing anchor.

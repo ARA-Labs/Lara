@@ -2,22 +2,18 @@ session:
   id: "2026-07-30_001"
   date: "2026-07-30"
   started: "2026-07-30T09:00"
-  last_turn: "2026-07-30T13:30"
-  turn_count: 3
+  last_turn: "2026-07-30T14:21"
+  turn_count: 4
   summary: >
-    M4 closed (retired TODOS backlog + closed umbrella #29); result 9 (backend
-    replacement / Theorem 2) mechanized in lean/Lara/Erase.lean under Model A
-    (uniform injective certificate relabel). Found the informal doc proof glosses
-    intra-program subterm sharing — containsB keys on exact payload equality, so
-    non-injective erase-to-marker is not an isomorphism. backend_replacement +
-    12 supporting lemmas, sorry-free; lake build 47 jobs; AxCheck 0 sorryAx /
-    510 decls, trio-only. C04 revised (machine-checked + faithful condition
-    sharpened to injective relabel). PRs #40/#41 merged. Turn 2: PR-#41 code
-    review — dropped two unused companion lemmas (YAGNI), filed worked-example/
-    transport follow-up #42. Turn 3: implemented the #42 transport lemma
-    (lean/Lara/EraseTransport.lean) — mapAssur preserves well-checkedness, so
-    backend_replacement is non-vacuous by construction; PR #43. 48 jobs, 516
-    decls, 0 sorryAx, trio-only. C04 evidence basis extended.
+    M4 closed and result 9 mechanized under Model A, then strengthened by
+    acceptance-preserving well-checkedness transport so backend replacement is
+    non-vacuous by construction. PR #43 merged. Turn 4 completed status
+    housekeeping: synchronized the root/Lean READMEs, TODO roadmap,
+    mechanization plan and status ledger, keynote proof ledger, and
+    Presentation.lean scope comment; closed completed trackers #31 and #37.
+    Next milestone M5 starts with #36 replay identity and #38 duplicate-report
+    groups. Result 3 backend certificate dependency accountability remains the
+    formal gap.
 
 events_logged:
   - turn: 1
@@ -69,6 +65,12 @@ events_logged:
     provenance: ai-executed
     summary: "Transport mechanized (EraseTransport.lean): mapAssur preserves well-checkedness; backend_replacement non-vacuous by construction; 48 jobs, 516 decls, 0 sorryAx; PR #43"
 
+  - turn: 4
+    type: decision
+    id: "N82"
+    routing: direct
+    provenance: user
+    summary: "Housekeeping before M5: synchronize completion status and close completed trackers #31/#37"
 ai_actions:
   - turn: 1
     action: "Retired M4 backlog in TODOS.md and closed GitHub umbrella issue #29"
@@ -95,6 +97,22 @@ ai_actions:
     provenance: ai-executed
     files_changed: ["lean/Lara/EraseTransport.lean", "lean/Lara.lean", "lean/AxCheck.lean", "ara/evidence/status/mechanization_status.md", "lean/README.md"]
 
+  - turn: 4
+    action: >
+      Updated README.md, lean/README.md, TODOS.md, docs/mechanization-plan.md,
+      ara/evidence/status/mechanization_status.md, docs/slides/keynote.html, and
+      lean/Lara/Presentation.lean to reflect M3/M4/result-9/result-12 completion,
+      the remaining result-3 formal gap, and M5 prerequisites #36/#38; closed
+      GitHub issues #31 and #37 as completed.
+    provenance: ai-executed
+    files_changed:
+      - "README.md"
+      - "lean/README.md"
+      - "TODOS.md"
+      - "docs/mechanization-plan.md"
+      - "ara/evidence/status/mechanization_status.md"
+      - "docs/slides/keynote.html"
+      - "lean/Lara/Presentation.lean"
 claims_touched:
   - id: C04
     action: revised
@@ -185,13 +203,26 @@ key_context:
       occurrence by EXACT SupportTerm equality incl. cert payload, so per-arg erase-equality does not
       preserve the AF and the doc's erase-to-marker can add closure edges. Injective uniform relabel
       is the faithful, provable condition.
+  - turn: 4
+    excerpt: >
+      User confirmed PR #43 was merged, asked whether the language/compiler/type
+      checker were complete, then directed: "do house keeping first" and "update
+      our readme and docs." The resulting status language distinguishes the
+      usable M4-complete core from the remaining spec/evaluation prerequisites.
 
 open_threads:
   - "M5 — evaluation corpus (research-proposal.md §7): gold annotations, mutation suite, baselines, ablations, blinded held-out set. No plan/issue yet — the bigger-picture next step after result-9 polish."
   - "#38 duplicate-report groups (M5 mutation-suite spine) and #36 verdict-carried replay identity (M5 audit story) remain the scoped M5 prerequisites."
-  - "PR #43 (transport, closes #42) open and awaiting CI/merge; #40 + #41 merged to main."
   - "O19 staged (methodological concept: erasure-invariance via injective relabel) — refined by N81 (forward typing transport needs only hpres, not injectivity); still awaiting a closure signal to crystallize."
 
 ai_suggestions_pending:
   - "Deprioritized: a Haskell mapAssur conformance port (conformance-only, duplicates logic no runtime path uses — soundness carried by the Lean proof)."
   - "Optional: a concrete worked example instantiating backend_replacement_transport with a specific program+f (now cheap given mapCertProg) — general non-vacuity already holds, so this is illustrative, not load-bearing."
+
+resolved_threads:
+  - turn: 4
+    thread: "PR #43 transport merge and result-9 close"
+    resolution: "Merged; issue #42 closed; status documents synchronized."
+  - turn: 4
+    thread: "Stale completed trackers #31 and #37"
+    resolution: "Closed as completed with PR #33/#39 evidence."

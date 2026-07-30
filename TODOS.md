@@ -4,14 +4,14 @@
 > (research-proposal.md §7) is satisfied — M4a compiler-on-worked-examples
 > (#31, PR #33) and M4b untrusted elaborator + replay bundle (#32, PR #34)
 > both landed; the strict-certificate `nd@1` worked example (#39) followed.
-> Umbrella #29's only remaining child, the LLM/JSON producer (#30), is a
-> later stage gated on the deterministic→LLM flip, not M4-critical.
+> Result 9 (backend replacement) is also complete: PR #41 mechanized the
+> uniform-injective-relabel theorem and PR #43 added well-checkedness transport,
+> making it non-vacuous by construction.
 >
-> Next milestone: **M5 — evaluation corpus** (research-proposal.md §7). The
-> two backlog items flagged as M5 prerequisites are duplicate-report groups
-> (#38, the mutation-suite spine) and verdict-carried replay identity (#36,
-> the audit story). The standing mechanization obligation is result 9
-> (backend replacement / `eraseCert`) below.
+> Next milestone: **M5 — evaluation corpus** (research-proposal.md §7). Its
+> implementation prerequisites are verdict-carried replay identity (#36, the
+> audit story) and duplicate-report groups (#38, the mutation-suite spine).
+> The LLM/JSON producer (#30) follows when the deterministic→LLM flip begins.
 
 ## Performance
 
@@ -63,7 +63,7 @@ closed issue #27.
 **Priority:** P3
 **Depends on:** M3 closeout (#27)
 
-## Mechanization (split from M4a #31)
+## M5 prerequisites and language cleanup
 
 ### Duplicate-report groups (spec §4.3): cross-layer implementation
 
@@ -126,31 +126,6 @@ plan-eng-review (2026-07-28).
 **Priority:** P3
 **Depends on:** nothing; natural fit with M5 planning
 
-### Result-9 backend-replacement: eraseCert + stable argument-id representation
-**What:** An argument-id / `eraseCert` compile-boundary representation for the
-Lean `CheckedProgram`, then the result-9 (backend replacement) proof: node
-bijection transport, graph isomorphism, and grounded-status invariance.
-
-**Why:** `/plan-eng-review` (2026-07-27) split this out of M4a's Task A3. Result
-12 (the parser round-trip) needs none of it; the machinery belongs to **result 9**
-(`docs/spec.md:1153-1159`). The current `CheckedProgram` "cannot state the required
-payload-varying node bijection: nodes are certificate-bearing `SupportTerm`s with
-no stable argument id or erased skeleton."
-
-**Pros:** Unblocks the only remaining unmechanized backend-independence result;
-already flagged in `ara/evidence/status/mechanization_status.md` as the result-9
-statement-model blocker.
-
-**Cons:** A substantial Lean representation refactor; genuine proof risk.
-
-**Context:** `eraseCert` behavioral definition at `docs/spec.md:882` (preserves
-argument names, rule instances, conclusions, obligations, positions; replaces
-payloads with a `certified` marker). No `eraseCert` exists in Haskell or Lean yet.
-
-**Effort:** L
-**Priority:** P3
-**Depends on:** the M4a `Lara.AST` / presentation-AST freeze (#31); not blocked by
-anything inside M4a.
 
 ### Print hole-lines in support terms
 
@@ -177,6 +152,14 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### Result-9 backend replacement (PRs #41 and #43)
+
+`lean/Lara/Erase.lean` proves backend replacement under a uniform injective
+assurance relabel. `lean/Lara/EraseTransport.lean` transports well-checkedness
+under acceptance preservation and constructs the relabeled `CheckedProgram`,
+so the theorem is non-vacuous by construction. Both developments are
+`sorry`-free and AxCheck-clean within the standard axiom trio.
 
 ### Strict-certificate worked example (nd@1 frontend cert path)
 

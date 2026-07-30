@@ -610,9 +610,9 @@ c₁ : <span class="r">defeated</span>     <span class="c">a₁ labelled out; d�
 /* ══════════════ 49 · backend replacement ══════════════ */
 `<div class="rise sec"><b>§9</b> The payoff of the opaque seam</div>
  <h2 class="rise">Claim status is <span class="em">independent</span> of certificate internals.</h2>
- <div class="box thm rise"><span class="lab">Backend replacement <span class="id">(result 9 · paper proof, M1 target)</span></span>
-   <p class="stmt">If two backends accept exactly the same strict instances, then source-identical programs compile — after certificate erasure — to isomorphic argumentation frameworks, and every claim receives the same four-state status.</p>
-   <p class="pf"><b>Proof:</b> structural induction on support checking → graph isomorphism of <code>compile</code> under <code>eraseCert</code> → invariance of the grounded least fixed point under that isomorphism.</p>
+ <div class="box thm rise"><span class="lab">Backend replacement <span class="id">(result 9 · mechanized, Model A)</span></span>
+   <p class="stmt">If a uniform injective relabel maps accepted strict assurances to accepted strict assurances, the relabeled checked program compiles to the same argumentation framework and every claim receives the same four-state status.</p>
+   <p class="pf"><b>Proof:</b> transport support and attack checking under acceptance preservation → construct the relabeled <code>CheckedProgram</code> → definitional equality of <code>checkedAF</code> under the injective relabel → equality of grounded labels and statuses.</p>
  </div>
  <p class="rise" style="margin-top:1.1rem;max-width:64ch">So <em>which</em> logic sits behind the seam — ND, LP, an arithmetic re-checker — is <strong>provably not part of claim-status semantics</strong>. Backend identity, theory, and dependencies stay visible in audit; only <em>status</em> is invariant. This is the formal reason we privilege no single logic.</p>`,
 
@@ -631,10 +631,11 @@ c₁ : <span class="r">defeated</span>     <span class="c">a₁ labelled out; d�
    <tr><td class="sys">10 · ND soundness + dep-exactness</td><td class="thm">nd_sound · infer_deps_eq_fv</td><td class="done">✓</td></tr>
    <tr><td class="sys">2 · non-factivity firewall</td><td class="thm">no_truth_projection</td><td class="done">✓</td></tr>
    <tr><td class="sys">5 · grounded determinism/termination</td><td class="thm">grounded_stable · statusC</td><td class="done">✓ core</td></tr>
-   <tr><td class="sys">6 · direct ≡ compiled semantics</td><td class="thm">directIn_iff · status_preservation</td><td class="part">◑ abstract AF layer</td></tr>
-   <tr><td class="sys">9 · backend replacement (full)</td><td class="thm">compile-step exercise</td><td class="todo">○ M1</td></tr>
+   <tr><td class="sys">6 · direct ≡ compiled semantics</td><td class="thm">edgeB_faithful · srcStatus_iff_checked</td><td class="done">✓ checked program</td></tr>
+   <tr><td class="sys">9 · backend replacement</td><td class="thm">backend_replacement · backend_replacement_transport</td><td class="done">✓ Model A</td></tr>
+   <tr><td class="sys">12 · presentation codec</td><td class="thm">parse_printProgram · parse_printPolicy</td><td class="done">✓ AST codec</td></tr>
  </table>
- <p class="rise note"><span class="cite">sorry</span>-free within the standard axiom trio {propext, Classical.choice, Quot.sound}. The compile step (subargument closure) is defined and characterized (<code>compile_attack_iff</code>) but not yet exercised end-to-end — the honest boundary of result 6. We say so out loud.</p>`,
+ <p class="rise note"><span class="cite">sorry</span>-free within the standard axiom trio {propext, Classical.choice, Quot.sound}. Results 6 and 9 are exercised over proof-bearing checked programs; result 9 also constructs the relabeled program from acceptance preservation. The remaining formal gap is exact backend certificate dependency accountability (result 3).</p>`,
 
 /* ══════════════ 52 · evaluation ══════════════ */
 `<div class="rise sec"><b>§10</b> Evaluation — for a calculus, proof is the experiment</div>

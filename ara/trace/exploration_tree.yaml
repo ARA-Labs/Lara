@@ -1648,3 +1648,23 @@ tree:
       - "lake build: 48 jobs; AxCheck: 0 sorryAx / 516 decls, trio-only"
       - "PR #43; issue #42"
     status: resolved
+  - id: N82
+    type: decision
+    provenance: user
+    timestamp: "2026-07-30T14:21"
+    also_depends_on: [N81]
+    title: "Complete status housekeeping before M5 implementation"
+    choice: >
+      With PR #43 merged and result 9 complete, synchronize the public README,
+      Lean README, TODO roadmap, mechanization plan/status ledger, presentation
+      slides, and source-level codec documentation before starting M5 work.
+      Close the completed M4a (#31) and strict-certificate frontend (#37)
+      trackers; leave #36 and #38 as the explicit M5 prerequisites.
+    alternatives:
+      - "Start #36 immediately while leaving stale result-9, result-12, M3, and tracker status text in place"
+    evidence:
+      - "PR #43 merged; issue #42 closed"
+      - "README.md; lean/README.md; TODOS.md; docs/mechanization-plan.md"
+      - "ara/evidence/status/mechanization_status.md; docs/slides/keynote.html"
+      - "GitHub issues #31 and #37 closed as completed"
+    status: resolved

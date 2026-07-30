@@ -156,3 +156,8 @@ entries:
       - "N80 (do #42 over Haskell port) provenance user ('do 42 first'); N81 (transport) ai-executed and independently verified (build + AxCheck), not trusting the fork's report."
       - "Updated C04 Evidence basis (not Statement/Conditions/Status): the transport is new confirming evidence + constructive non-vacuity, not a scope change; status stays supported. Second logic_revision on C04 this day."
       - "Did NOT crystallize O19 despite the transport being an artifact that uses the injective-relabel machinery: N81 refined O19 (forward typing transport needs only hpres, NOT injectivity — injectivity is only for nodup/edge-equality), so the staged wording ('injective relabel') is now imprecise as a general concept. Left staged pending a cleaner formulation; observations are append-only so the refinement lives in N81 + this log."
+  - turn: "2026-07-30_001#4"
+    notes:
+      - "Routed the explicit user sequencing choice ('do house keeping first') as decision N82; it closes status drift before M5 rather than asserting a new research claim."
+      - "Updated current-state status documents and presentation/source comments; closed #31/#37 from merged PR evidence. No code behavior changed, so verification was document re-read + stale-phrase scan + GitHub issue-state reads, not a test run."
+      - "Did NOT revise logic claims or promote O19: this turn changed project bookkeeping, not the backend-replacement mechanism or evidence."
