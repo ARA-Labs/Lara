@@ -57,8 +57,68 @@ closed issue #27.
 
 ## Mechanization (split from M4a #31)
 
-### Result-9 backend-replacement: eraseCert + stable argument-id representation
+### Duplicate-report groups (spec §4.3): cross-layer implementation
 
+**What:** Implement duplicate-report groups end-to-end: surface declaration
+syntax over leaf ids, AST/`Unit` carrier, wire codec, admission-time group
+consistency check (pairwise `≡` admits; otherwise quarantine every member
+with a located data-integrity diagnostic, R9, routed to `gap`), and the Lean
+side + differential fixtures.
+
+**Why:** The frozen spec (§4.3, R9) requires checker-enforced group
+consistency, but no implementation layer carries groups — zero `group`
+matches in `AST.hs`/`Wire.hs`/`Unit.lean`/`Policy.lean` (code-verified in the
+M4b plan-eng-review 2026-07-28). M4b's §11 task 2 was descoped to leaf
+extraction + source binding because the elaborator cannot emit a construct
+nothing downstream carries.
+
+**Pros:** R9 becomes implementable; the M5 mutation suite gains its
+data-integrity spine; §11 task 2 becomes fully exercisable.
+
+**Cons:** Cross-layer TCB work (grammar, AST, wire, checker, Lean +
+differential) — a milestone of its own.
+
+**Context:** Spec §4.3 "Conflicting duplicate reports of one result cell
+(M0, C16)" has the full design: distinct leaves per report, group declaration
+as untrusted elaborator output, `≡`-based quarantine with gap routing (a data
+conflict is absence of reliable evidence, never an attack). Discovered by the
+M4b outside voice, code-verified in review.
+
+**Issue:** #38.
+**Effort:** L
+**Priority:** P3
+**Depends on:** nothing inside M4b
+
+### Verdict-carried replay identity (spec §2.1)
+
+**What:** Extend the verdict codec (Haskell `Lara.Wire` + Lean `Lara.Driver`,
+byte-identical) to print the frozen `replayId` tuple: `(lara-core@0.1, policy
+id @ version, [backend@version*], {theory digests}, artifact digest)` — spec
+§2.1's "Reports print the tuple verbatim."
+
+**Why:** The obligation is frozen but unimplemented — no verdict path emits
+the tuple (only the `Digest` newtype exists, `AST.hs:387`). M4b works around
+it with the bundle manifest (checker-source revision as audit metadata);
+that covers bundles, not arbitrary checker runs.
+
+**Pros:** Every checker run carries its replay identity; verdict byte-diffing
+catches trusted-input drift for free; fulfills a frozen spec obligation.
+
+**Cons:** Coordinated change to the differential anchor plus every
+golden/fixture — wide, shallow, carefully sequenced. Policy id@version and
+artifact digest are presentation-layer metadata the `Unit` drops; the carrier
+(report-side vs `Unit`) needs a design call.
+
+**Context:** Becomes load-bearing when M5's audit/evaluation story needs
+machine-checkable replay identity on arbitrary runs. Discovered in the M4b
+plan-eng-review (2026-07-28).
+
+**Issue:** #36.
+**Effort:** M
+**Priority:** P3
+**Depends on:** nothing; natural fit with M5 planning
+
+### Result-9 backend-replacement: eraseCert + stable argument-id representation
 **What:** An argument-id / `eraseCert` compile-boundary representation for the
 Lean `CheckedProgram`, then the result-9 (backend replacement) proof: node
 bijection transport, graph isomorphism, and grounded-status invariance.

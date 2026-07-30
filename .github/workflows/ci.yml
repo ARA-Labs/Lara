@@ -20,6 +20,24 @@ jobs:
           cabal-version: 'latest'
           cabal-update: false
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: '0.11.2'
+
+      - name: Install elan (Lean toolchain manager)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain "$(cat lean/lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Cache lake build for differential
+        uses: actions/cache@v4
+        with:
+          path: lean/.lake
+          key: ${{ runner.os }}-integration-lake-${{ hashFiles('lean/lake-manifest.json', 'lean/lean-toolchain') }}
+          restore-keys: ${{ runner.os }}-integration-lake-
+
       - name: Update package index
         run: |
           cabal user-config update
@@ -57,6 +75,35 @@ jobs:
 
       - name: Test
         run: cabal test all --test-show-details=direct
+
+      - name: Elaborator unit tests
+        run: uv run --no-project python -m unittest discover -s elaborator -v
+
+      - name: Replay freezer unit tests
+        run: python3 -m unittest scripts/test_freeze_bundle.py -v
+
+      - name: Policy-copy authenticity (T7)
+        run: |
+          cmp -s \
+            examples/E1/empirical-v1.policy.lara \
+            bundles/walking-skeleton/empirical-v1.policy.lara
+          echo "PASS: bundle policy copy matches the canonical examples/E1 policy"
+
+      - name: Walking-skeleton golden and bundle-anchor freshness
+        run: |
+          lara_bin="$(cabal list-bin exe:lara)"
+          bash test/walking-skeleton-golden.sh "$lara_bin"
+
+      - name: Clean replay
+        run: |
+          lara_bin="$(cabal list-bin exe:lara)"
+          bash scripts/replay.sh bundles/walking-skeleton "$lara_bin"
+
+      - name: Replay tamper and schema gates
+        run: bash scripts/test-replay-tamper.sh
+
+      - name: Haskell-Lean differential (fixtures, examples, and bundles)
+        run: bash scripts/differential.sh
 
   lean:
     name: Lean (lake build)

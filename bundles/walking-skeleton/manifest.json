@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "core-sexp": "emitted.core.sexp",
+    "emitted-lara": "emitted.lara",
+    "policy-copy": "empirical-v1.policy.lara",
+    "provenance": "provenance.json",
+    "source": "source.yaml",
+    "verdict": "verdict.txt"
+  },
+  "checker-source-revision": "23a48836475bf7f16bbbc238127050de2a851943",
+  "format": "lara-replay-bundle@1",
+  "frozen-verdict": {
+    "exit-code": 0
+  },
+  "lara-core": "0.1",
+  "producer-toolchain": {
+    "elaborator": "elaborator/elaborate.py",
+    "python": "3.12.13",
+    "pyyaml": "6.0.2",
+    "uv": "0.11.2"
+  },
+  "skeleton": "walking-skeleton",
+  "trusted-inputs": {
+    "backends": [
+      "nd@1"
+    ],
+    "policy": {
+      "copied-from": "examples/E1/empirical-v1.policy.lara",
+      "id": "empirical-v1",
+      "sha256": "b10025b8b4de1614af71692ba574d8ddaa25543a805d17b286f29fe6c74ac4bc"
+    },
+    "theories": []
+  }
+}
