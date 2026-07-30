@@ -20,21 +20,34 @@
 | 6 | **Status preservation (direct vs compiled)** | **source-vs-compiled half mechanized (oracle eliminated)** | C08 | `Lara.Compile.srcIn_iff_grounded`/`srcStatus_iff` compose source status with grounded execution under `Faithful`; the checker-built decider `edgeB` (from `containsB`/`attackClosureB`) discharges `Faithful` constructively via `edgeB_faithful`, so `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` hold over an accepted program with no oracle hypothesis (`SrcIn`/`SrcOut` are the Prop shadow of the same compiled `Edge`, not an independent calculus). Issue #17 closed this half; issue #18 subsequently supplies checked-unit attack completeness for result 7. |
 | 7 | Rationality postulates (consistency under §8.1) | **mechanized for checked complete claims** | C09 | `checkUnit` constructs the proof-bearing `CheckedUnit` boundary after duplicate-rule, exact Path-B/R12, and detailed program checks. `coveredB_iff` and `checkUnit_sound` establish attack completeness for all ordered attackable contrary pairs, including self-pairs; `grounded_conflictFree`, exact `claimSupportFor`, and `contrary_claims_not_both_justified` prove computed `completeClaimFor` contrary claims are not jointly justified. This is the Lean reference PL result: no Path A, production Haskell checker, NL validation, or full holes computation is claimed. |
 | 8 | Strict-certificate soundness | **mechanized** (+Haskell conformance) | C03 | Theorem 1, `lean/Lara/Strict.lean`: backend-as-structure carrying obligation 3 as a field; `strict_step_sound` is its projection (needs **no** axioms) and `ndBackend` discharges the field via `nd_sound`. Its concrete projection `nd_strict_step_sound` uses the standard trio (`propext`, `Classical.choice`, `Quot.sound`). Excludes trusted-policy instances. |
-| 9 | Backend replacement | paper-proved; statement-model blocker | C04 | Theorem 2 is written, but Lean `CheckedProgram` needs stable argument ids and `eraseCert` skeletons before payload-varying node bijection/isomorphism can be stated faithfully (O09) |
+| 9 | Backend replacement | **mechanized** (Model A: uniform injective relabel) | C04 | Theorem 2, `lean/Lara/Erase.lean`: `backend_replacement` — two `CheckedProgram`s related by a uniform assurance relabel `mapAssur f` (`P₂.args = P₁.args.map (mapAssur f)`, `P₂.atts = P₁.atts.map (mapAssurAtt f)`) with `f` injective compile to a *definitionally equal* AF (`checkedAF_relabel`), hence agree on every grounded label (`labelC_relabel`) and every claim status. The node bijection is the identity on list positions (`toAF.args = List.range`); `containsB_mapAssur`/`mapAssur_injective` carry the payload-independence of the edge relation. Statement-model note: the doc's non-injective erase-to-a-single-`certified`-marker is *not* an isomorphism (it can merge distinct subterms and add subargument-closure edges — `containsB` keys on exact structural equality); injectivity-on-used-certs is the faithful backend-swap condition, and both programs being well-checked discharges "accept the same strict instances." No `sorry`; AxCheck reports only `propext` and `Quot.sound`. |
 | 10 | Reference ND adapter soundness + dependency exactness | **mechanized and executable** (+Haskell conformance) | C05 | Theorem 4 + Lemma 5, `lean/Lara/ND.lean`: `nd_sound`, `nd_relevance`, `fv_in_range`, and the sound/complete `infer` bridge. `lean/Lara/Strict.lean` now closes the concrete boundary: total Formula/Cert decoding, canonical Nat indices, exact `ndReplay`, `ndReplay_iff`, and the fully instantiated `ndBackend`. Its UTF-8 framed A/N/S/C/L atom codec has the proved left inverse `decodeAtomKey_encodeAtomKey`, yielding encoder injectivity and `ndEnc_iff` without `repr`. Theory-resolved backends append fixed selected-theory encodings after premise encodings. No `sorry`; AxCheck reports only the standard trio. The matching Haskell adapter passes normalization, golden-vector, malformed-wire, closed-decoder, replay, soundness, and registry conformance properties. |
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** (+implemented+tested) | C01 | `lean/Lara/Prop.lean`: `nf`/`≡`, equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only. Also `Lara.Prop` Haskell + 8 QuickCheck properties. |
 | 12 | Codec round-trip to α-equivalent AST | spec-only | C12 | test-only (not a soundness result); codec not built |
 
-**Summary**: results 2, 4 (relational), 5, 7 (checked complete claims), 8, 10, and 11 are mechanized;
-result 6's source-vs-compiled half is mechanized with the `Faithful` oracle eliminated (the
+**Summary**: results 2, 4 (relational), 5, 7 (checked complete claims), 8, 9 (Model A), 10, and 11 are
+mechanized; result 6's source-vs-compiled half is mechanized with the `Faithful` oracle eliminated (the
 checker-built `edgeB`/`edgeB_faithful` discharges it constructively); result 1 has
 an exact executable support/positional-attack/raw-program checker with relational adequacy; result 3
 has its mechanized leaf half; result 7 closes Path-B consistency at the Lean `CheckedUnit` boundary;
-result 9 remains
-paper-proved with an explicit representation prerequisite; result 12 remains spec-only. Every theorem
+result 9 is mechanized under the uniform injective certificate-relabel model (Model A), which supersedes
+the earlier statement-model blocker; result 12 remains spec-only. Every theorem
 is `sorry`-free and audited within the standard axiom trio. Haskell conformance still covers the
 implemented lower layers with 30 property groups and is regression evidence only for this Lean-only
 result.
+
+### Verification run (2026-07-30, result 9 close)
+
+- `cd lean && lake build` → **`Build completed successfully (47 jobs).`** (`Lara/Erase.lean` new,
+  ~290 lines; only pre-existing `unusedSimpArgs` warnings in `Examples.lean`).
+- `lake env lean AxCheck.lean` → **509 declaration reports**, `sorryAx` count **0**, and no axiom
+  outside `{propext, Classical.choice, Quot.sound}`. The new `Lara.Erase.*` declarations depend
+  only on `propext` and `Quot.sound` (two term-level lemmas depend on none).
+- Statement model chosen: **A (uniform injective relabel)** over the shared-skeleton (B) and
+  `EraseEq`+intra-program-canonicity (C) alternatives — see
+  `plans/2026-07-30-result9-backend-replacement.md` and the ara journey record. Purely additive,
+  Lean-only: no wire codec, Haskell, or differential-anchor change, so the Haskell↔Lean differential
+  is unaffected.
 
 ### Verification run (2026-07-26, issue #18 close)
 

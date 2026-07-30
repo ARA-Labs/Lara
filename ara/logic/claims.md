@@ -86,24 +86,35 @@ the result is stated but not yet proved or mechanized._
 - **Last revised**: 2026-07-24 (2026-07-24_004)
 
 ## C04: Confining strict logic behind an opaque interface makes claim-support status independent of certificate internals
-- **Statement**: If two backends accept exactly the same strict instances, then after erasing
-  certificate payloads the compiled argumentation frameworks are isomorphic and every claim gets the
-  same four-state status — so which strict logic (natural deduction, LP, an arithmetic or model
-  checker) sits behind the seam is not part of claim-status semantics. This is the formal reason not
-  to make any one logic foundational.
-- **Conditions**: Holds for source-identical programs differing only in strict-certificate payloads,
-  under grounded semantics; backend identity, theory, dependencies, and certificate size remain
-  visible in audit reports (only *status* is invariant).
-- **Sources**: ["\"status cannot distinguish LP from another adapter with the same strict acceptance profile\" ← docs/strict-backend-decision.md:302 «status cannot distinguish LP from another adapter with the same strict acceptance profile» [input]", "Theorem 2 (backend replacement), proved by AF isomorphism + grounded-lfp invariance ← evidence/proofs/backend_replacement.md [result]"]
+- **Statement**: If two well-checked programs differ only by a uniform certificate relabel — the same
+  source certified under two backends with identical strict-acceptance profiles — their compiled
+  argumentation frameworks coincide (identity node bijection) and every claim gets the same four-state
+  status, so which strict logic (natural deduction, LP, an arithmetic or model checker) sits behind the
+  seam is not part of claim-status semantics. This is the formal reason not to make any one logic
+  foundational.
+- **Conditions**: Holds under grounded semantics for programs related by a uniform *injective* relabel
+  of certificate payloads — a genuine backend swap: one payload per source step, so a shared source
+  subterm carries the same payload at every occurrence and distinct certificates stay distinct. This
+  injective condition is load-bearing: erasing every payload to a single `certified` marker (the paper's
+  non-injective `eraseCert`) is NOT itself an isomorphism — collapsing distinct subterms can merge
+  occurrences and add subargument-closure edges, because the compiled edge relation (`containsB`) keys on
+  exact structural equality (found while mechanizing, 2026-07-30). Backend identity, theory, dependencies,
+  and certificate size remain visible in audit reports; only *status* is invariant.
+- **Sources**: ["\"status cannot distinguish LP from another adapter with the same strict acceptance profile\" ← docs/strict-backend-decision.md:302 «status cannot distinguish LP from another adapter with the same strict acceptance profile» [input]", "Theorem 2 (backend replacement), proved by AF isomorphism + grounded-lfp invariance ← evidence/proofs/backend_replacement.md [result]", "backend_replacement mechanized (Model A, uniform injective relabel) ← lean/Lara/Erase.lean «theorem backend_replacement … statusC (checkedAF P₁) c = statusC (checkedAF P₂) c» [result]", "0 sorryAx across 509 declarations, axioms ⊆ trio ← lean AxCheck run 2026-07-30 «sorryAx count: 0 / none — all within the trio» [result]"]
 - **Status**: supported
-- **Falsification criteria**: Two backends with identical strict-acceptance profiles whose programs
-  nonetheless compile to non-isomorphic AFs or yield a differing claim status — i.e. a status
-  difference traceable purely to certificate internals.
-- **Proof**: [E04]
-- **Evidence basis**: Theorem 2 (strict-backend-decision §5) proves backend replacement via structural
-  induction, `eraseCert` graph isomorphism, and invariance of the grounded least fixed point; it is a
-  paper proof slated for mechanization (result 9), not yet machine-checked.
+- **Falsification criteria**: Two backends with identical strict-acceptance profiles whose programs,
+  related by a uniform injective certificate relabel, nonetheless compile to non-isomorphic AFs or yield
+  a differing claim status — i.e. a status difference traceable purely to certificate internals.
+- **Proof**: [E04, "lean/Lara/Erase.lean: backend_replacement / checkedAF_relabel / labelC_relabel"]
+- **Evidence basis**: Theorem 2 (strict-backend-decision §5) is now **machine-checked** in
+  `lean/Lara/Erase.lean` (`backend_replacement`, `checkedAF_relabel`, `labelC_relabel`) under Model A —
+  a uniform injective certificate relabel `mapAssur f`. Relabeled programs share a definitionally equal
+  `checkedAF` (nodes are list positions, so the bijection is the identity), giving equal grounded labels
+  and statuses. Mechanizing surfaced that the paper's non-injective erase-to-`certified` form is not an
+  isomorphism; injectivity-on-used-certs is the faithful condition (see dead-end N76). `lake build`
+  47 jobs; AxCheck 0 sorryAx across 510 decls, only `propext`/`Quot.sound` for the new declarations.
 - **Tags**: backend-parametricity, replacement, status-semantics
+- **Last revised**: 2026-07-30 (2026-07-30_001#1)
 
 ## C05: A registered backend's soundness discharges as a per-instance corollary when the interface carries soundness as an obligation
 - **Statement**: Structuring a backend as an interface that *carries its own soundness obligation* (a

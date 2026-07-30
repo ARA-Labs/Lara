@@ -138,3 +138,11 @@ entries:
       - "Reconciled the O17-derived limitation in constraints.md rather than editing O17: O17 remains append-only and historically true for lara-syntax@0.1/M4a; the mutable logic snapshot now records additive @0.2 + S1 as closing the gap."
       - "Added E10 as a distinct frontend-conformance experiment instead of advancing C03/C05: S1 demonstrates reachability and cross-driver behavior, not the adapter soundness theorems those claims assert."
       - "Did NOT promote O16 or O18: this turn supplied no user affirmation of the generalized hand-authored-certificate claim and did not change result 12's scope."
+  - turn: "2026-07-30_001#1"
+    notes:
+      - "Routed the result-9 mechanization as experiment N78 (direct): Erase.lean, the build, and the AxCheck run are journey facts I independently verified, not just the implementing fork's report."
+      - "Recorded N76 as a dead_end (not skipped): the naive per-arg erase-equality statement is a genuinely abandoned approach with a reusable lesson (containsB payload-sensitivity); it grounds the Model-A decision N77."
+      - "Reconciled C04 rather than crystallizing a new claim: result 9 IS C04's subject (backend replacement), so this turn is empirical resolution on C04. Kept Status 'supported' — mechanization confirms, and conservatism forbids demotion on one event; the finding sharpened Conditions, not the verdict."
+      - "Provenance of the two decisions (N75 track, N77 Model A) = user: both were explicit AskUserQuestion selections. N76/N78 = ai-executed."
+      - "Staged O19 (potential_type concept) instead of promoting: the methodological pattern (injective relabel vs collapse-to-marker) is broader than C04's wording, but has no independent closure signal this turn beyond the C04 fold — left for future crystallization."
+      - "C04 revision provenance = ai-suggested: user chose the model but did not dictate the claim wording; revertible."

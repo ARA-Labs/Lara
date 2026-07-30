@@ -347,3 +347,28 @@ observations:
     promoted_to: null
     crystallized_via: null
     stale: false
+
+  - id: O19
+    timestamp: "2026-07-30T09:35"
+    provenance: ai-executed
+    content: >
+      Mechanizing an "erasure-invariance" metatheorem the faithful way requires
+      the erasure to be a uniform INJECTIVE relabel, not a collapse-to-canonical-
+      marker: any compiled quantity that keys on exact structural equality
+      (here containsB over cert-payload-bearing SupportTerms) is preserved by an
+      injective uniform map in both directions, but a non-injective collapse only
+      preserves it forward (it can merge distinct subterms and manufacture new
+      structure). General pattern for isomorphism-under-erasure claims: state the
+      relation as an injective relabel and let "both artifacts are well-checked"
+      discharge the acceptance side, avoiding any re-typing transport.
+      Instance: result 9 / Theorem 2, lean/Lara/Erase.lean.
+    context: >
+      Design of the result-9 statement model (N76 dead_end, N77 decision).
+      Folded into C04 Conditions this turn; staged here as a candidate
+      methodological concept for future crystallization.
+    potential_type: concept
+    bound_to: [N76, N77, N78]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false

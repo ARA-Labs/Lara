@@ -1486,3 +1486,96 @@ tree:
       - "763704b S1 worked example + suite integration"
       - "scripts/differential.sh: pass=33 fail=0"
     status: resolved
+  - id: N75
+    type: decision
+    provenance: user
+    timestamp: "2026-07-30T09:00"
+    also_depends_on: [N74]
+    title: "M4 closed; retire backlog and pick M5 as the next milestone"
+    choice: >
+      After PR #34 (M4b) merged, both M4 children (M4a #31/PR #33, M4b #32/PR #34)
+      are done, so the research-proposal.md §7 walking-skeleton spine is
+      satisfied. Retired the M4 section of TODOS.md and closed umbrella issue
+      #29; the remaining child #30 (LLM/JSON producer) is a later gated stage.
+      User chose the next track: housekeeping first, then mechanize result 9
+      (over starting #38 groups or #36 replay-id, which are M5 prerequisites).
+    alternatives:
+      - "Start #38 duplicate-report groups now (M5 mutation-suite spine) — deferred to M5"
+      - "Start #36 verdict-carried replay identity — deferred to M5"
+      - "Draft the M5 evaluation-corpus plan first — deferred; result 9 is the standing mechanization obligation"
+    evidence:
+      - "TODOS.md header retired (branch chore/retire-m4-backlog, commit 711c361)"
+      - "GitHub issue #29 closed with M4-complete comment"
+    status: resolved
+  - id: N76
+    type: dead_end
+    provenance: ai-executed
+    timestamp: "2026-07-30T09:30"
+    also_depends_on: [N75]
+    title: "Naive per-argument erase-equality does NOT preserve the compiled AF"
+    hypothesis: >
+      Two CheckedPrograms with per-argument erase-equal args (certificate
+      payloads erased to a single `certified` marker, as the doc's eraseCert
+      states) compile to isomorphic AFs — the literal reading of Theorem 2.
+    failure_mode: >
+      The compiled edge relation bottoms out at containsB (Compile.lean:120-123),
+      which decides occurrence by EXACT structural SupportTerm equality —
+      cert payload included (DecidableEq bakes in Assurance, Support.lean:214-218).
+      A program can share a subterm exactly across two args (edge present); an
+      erase-equal program whose two occurrences carry different payloads does not
+      share it exactly (edge absent). Both are valid CheckedPrograms, so per-arg
+      erase-equality does not fix the AF, and the doc's non-injective
+      erase-to-marker can even ADD subargument-closure edges (it merges subterms).
+    lesson: >
+      The informal doc proof (strict-backend-decision.md:288-296) glosses
+      intra-program subterm sharing. The faithful, provable condition is a
+      uniform INJECTIVE certificate relabel (a genuine backend swap: one payload
+      per source step, distinct certs stay distinct) — Model A, N77.
+    status: resolved
+  - id: N77
+    type: decision
+    provenance: user
+    timestamp: "2026-07-30T09:35"
+    also_depends_on: [N76]
+    title: "Statement model for result 9: uniform injective certificate relabel (Model A)"
+    choice: >
+      Mechanize Theorem 2 as: two CheckedPrograms related by a uniform assurance
+      relabel mapAssur f with f injective (P2.args = P1.args.map (mapAssur f),
+      P2.atts = P1.atts.map (mapAssurAtt f)) compile to a definitionally equal
+      AF, hence equal statuses. Node bijection = identity on list positions
+      (toAF.args = List.range). Both programs given as CheckedProgram discharges
+      the "accept the same strict instances" hypothesis, so NO HasSupport/CertOk
+      transport is needed. Purely additive, Lean-only: no wire/Haskell/codec
+      change, so the differential anchor is untouched. Chosen by the user over B/C.
+    alternatives:
+      - "Model B — shared payload-free skeleton + two cert-assignment functions: closest to the doc's 'erased skeleton' wording but adds a whole skeleton type + position calculus (most code)"
+      - "Model C — structural EraseEq relation + intra-program cert-canonicity side condition: faithful to erase-to-marker but adds a program invariant not in CheckedProgram"
+    evidence:
+      - "plans/2026-07-30-result9-backend-replacement.md (design + Model-A outcome note)"
+    status: resolved
+  - id: N78
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-30T10:30"
+    also_depends_on: [N77]
+    title: "Result 9 mechanized: lean/Lara/Erase.lean, backend_replacement, sorry-free"
+    result: >
+      Added lean/Lara/Erase.lean (~290 lines): mapAssur/mapAssurList/mapAssurDis/
+      mapAssurAtt + a 13-declaration lemma chain — mapAssur_injective (from f
+      injective), mapAssur_subterm (relabel commutes with positional navigation),
+      containsB_mapAssur (payload-independence via injectivity), coveredB_relabel,
+      edgeB_relabel, checkedAF_relabel (definitional AF equality), and the final
+      backend_replacement (equal statusC) + labelC_relabel. `lake build` = 47 jobs
+      success. `lake env lean AxCheck.lean` = 510 declaration reports, 0 sorryAx,
+      no axiom outside {propext, Classical.choice, Quot.sound}; the new Erase
+      decls use only propext + Quot.sound. Closes the last unmechanized
+      backend-independence result (result 9). Ledger updated
+      (mechanization_status.md, lean/README.md). Independently verified (not just
+      the implementing agent's report).
+    evidence:
+      - "lean/Lara/Erase.lean (commit 178432e)"
+      - "lean/AxCheck.lean (13 new #print axioms lines)"
+      - "ara/evidence/status/mechanization_status.md (result 9 -> mechanized; verification run 2026-07-30)"
+      - "lean/README.md result-9 row"
+      - "lake build: 47 jobs; AxCheck: 0 sorryAx / 510 decls, trio-only"
+    status: resolved

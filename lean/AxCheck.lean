@@ -18,6 +18,7 @@ import Lara.Grounded
 import Lara.Support
 import Lara.Attack
 import Lara.Compile
+import Lara.Erase
 import Lara.Policy
 import Lara.Check
 import Lara.Examples
@@ -605,3 +606,18 @@ open Lara
 #print axioms Lara.Examples.GroundedConsistency.self_claim_support_includes_node
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_not_justified
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_result7
+
+-- Result 9 (backend replacement / Theorem 2, Model A): uniform injective
+-- certificate relabel preserves the compiled AF and every claim status.
+#print axioms Lara.Erase.mapAssur_injective
+#print axioms Lara.Erase.mapAssur_eq_iff
+#print axioms Lara.Erase.mapAssurAtt_source
+#print axioms Lara.Erase.lookupDis_mapAssurDis
+#print axioms Lara.Erase.mapAssur_subterm
+#print axioms Lara.Erase.containsB_mapAssur
+#print axioms Lara.Erase.attackClosureB_mapAssur
+#print axioms Lara.Erase.coveredB_relabel
+#print axioms Lara.Erase.edgeB_relabel
+#print axioms Lara.Erase.checkedAF_relabel
+#print axioms Lara.Erase.backend_replacement
+#print axioms Lara.Erase.labelC_relabel
