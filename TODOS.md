@@ -1,9 +1,17 @@
 # TODOS
 
-> M3 closed (GitHub issue #27, PR #28). Remaining items below are post-M3
-> backlog. M4 is tracked under umbrella issue #29 — split into M4a (#31,
-> `plans/2026-07-27-m4a-compiler-worked-examples.md`) and M4b (#32,
-> `plans/2026-07-27-m4b-walking-skeleton.md`).
+> M3 closed (issue #27, PR #28). M4 closed: the walking-skeleton spine
+> (research-proposal.md §7) is satisfied — M4a compiler-on-worked-examples
+> (#31, PR #33) and M4b untrusted elaborator + replay bundle (#32, PR #34)
+> both landed; the strict-certificate `nd@1` worked example (#39) followed.
+> Umbrella #29's only remaining child, the LLM/JSON producer (#30), is a
+> later stage gated on the deterministic→LLM flip, not M4-critical.
+>
+> Next milestone: **M5 — evaluation corpus** (research-proposal.md §7). The
+> two backlog items flagged as M5 prerequisites are duplicate-report groups
+> (#38, the mutation-suite spine) and verdict-carried replay identity (#36,
+> the audit story). The standing mechanization obligation is result 9
+> (backend replacement / `eraseCert`) below.
 
 ## Performance
 
