@@ -89,7 +89,7 @@
 -- STATUS    ::= gap | justified | contested | defeated
 -- REJECTION ::= duplicate-rule | duplicate-argument | incomplete-argument
 --             | missing-conflict | R1 | R3 | R4 | R5 | R6 | R7
---             | R10 | R11 | R12 | R13
+--             | R9 | R10 | R11 | R12 | R13
 -- @
 --
 -- Labels cover every compiled argument in declaration order; edges are the
@@ -106,6 +106,7 @@ module Lara.Wire
   , Tag (..)
   , tagToString
   , parseTag
+  , rejectClassTag
     -- * Unit and checker-input codecs
   , WireError (..)
   , decodeUnit
@@ -268,6 +269,8 @@ data Tag
   | TTheories | TTheory | TLeaves | TLeaf | TArgs | TArg | TAttacks
   | TQueries | TSubst | TDischarges | THoles | TAssurance | TCert
   | TPos | TPrem | TQues | TInst
+    -- duplicate-report groups (spec §4.3)
+  | TGroups | TGroup | TQuarantine
     -- modes, necessity, booleans, assurance
   | TStrict | TDefeasible | TMandatory | TOptional | TTrue | TFalse
   | TNone | TTrusted
@@ -280,7 +283,7 @@ data Tag
   | TIn | TOut | TUndec | TGap | TJustified | TContested | TDefeated
     -- rejection outcomes
   | TDupRule | TDupArgument | TIncompleteArgument | TMissingConflict
-  | TR1 | TR3 | TR4 | TR5 | TR6 | TR7 | TR10 | TR11 | TR12 | TR13
+  | TR1 | TR3 | TR4 | TR5 | TR6 | TR7 | TR9 | TR10 | TR11 | TR12 | TR13
   deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | The on-the-wire spelling of a keyword.
@@ -301,6 +304,7 @@ tagToString t = case t of
   TQueries -> "queries"; TSubst -> "subst"; TDischarges -> "discharges"
   THoles -> "holes"; TAssurance -> "assurance"; TCert -> "cert"
   TPos -> "pos"; TPrem -> "prem"; TQues -> "ques"; TInst -> "inst"
+  TGroups -> "groups"; TGroup -> "group"; TQuarantine -> "quarantine"
   TStrict -> "strict"; TDefeasible -> "defeasible"
   TMandatory -> "mandatory"; TOptional -> "optional"
   TTrue -> "true"; TFalse -> "false"; TNone -> "none"; TTrusted -> "trusted"
@@ -317,7 +321,8 @@ tagToString t = case t of
   TIncompleteArgument -> "incomplete-argument"
   TMissingConflict -> "missing-conflict"
   TR1 -> "R1"; TR3 -> "R3"; TR4 -> "R4"; TR5 -> "R5"; TR6 -> "R6"
-  TR7 -> "R7"; TR10 -> "R10"; TR11 -> "R11"; TR12 -> "R12"; TR13 -> "R13"
+  TR7 -> "R7"; TR9 -> "R9"; TR10 -> "R10"; TR11 -> "R11"; TR12 -> "R12"
+  TR13 -> "R13"
 
 -- | Parse a wire keyword, inverse to 'tagToString'. Derived from the same
 -- table by enumerating 'Tag', so it cannot drift out of sync.
@@ -764,7 +769,27 @@ encodeUnit u =
       ]
     , [tagged TAttacks (map encodeAttack (unitAttacks u)) | not (null (unitAttacks u))]
     , [tagged TQueries (map encodeAtom (unitQueries u)) | not (null (unitQueries u))]
+    , -- Duplicate-report groups (spec §4.3). Emitted only when non-empty, so
+      -- group-free units are byte-identical to the pre-groups wire; the
+      -- conflict mode rides as the section's first field (the default
+      -- 'QuarantineOnConflict' is spelled @quarantine@, never omitted here).
+      [ tagged
+          TGroups
+          ( SAtom (tagToString (groupModeTag (unitGroupMode u)))
+              : [ tagged TGroup [SAtom g, SList [SAtom l | LeafId l <- ms]]
+                | DupGroup (GroupId g) ms <- unitGroups u
+                ]
+          )
+      | not (null (unitGroups u))
+      ]
     ]
+
+-- | The wire spelling of a duplicate-report-group conflict mode (spec §4.3),
+-- kept in one place per the closed-vocabulary discipline.
+groupModeTag :: GroupConflictMode -> Tag
+groupModeTag m = case m of
+  QuarantineOnConflict -> TQuarantine
+  RejectOnConflict -> TReject
 
 decodeUnitM :: SExpr -> Decode Unit
 decodeUnitM e = do
@@ -775,7 +800,8 @@ decodeUnitM e = do
   (argsS, rest4) <- takeSection TArgs rest3
   (attacksS, rest5) <- takeSection TAttacks rest4
   (queriesS, rest6) <- takeSection TQueries rest5
-  case rest6 of
+  (groupsS, rest7) <- takeSection TGroups rest6
+  case rest7 of
     s : _ -> werr "unit" ("unexpected section: " ++ show s)
     [] -> ok ()
   (rules, contraries, exceptions) <- decodePolicy policyS
@@ -784,7 +810,9 @@ decodeUnitM e = do
   args <- decodeArgs argsS
   attacks <- decodeAttacks attacksS
   queries <- decodeQueries queriesS
+  (groups, groupMode) <- decodeGroups groupsS
   checkArgInvariants args attacks
+  checkGroupInvariants groups leaves
   ok
     Unit
       { unitRules = rules
@@ -795,6 +823,8 @@ decodeUnitM e = do
       , unitArgs = args
       , unitAttacks = attacks
       , unitQueries = queries
+      , unitGroups = groups
+      , unitGroupMode = groupMode
       }
   where
     -- Peel one optional section; sections are ordered and occur at most once.
@@ -859,6 +889,69 @@ decodeUnitM e = do
     decodeQueries Nothing = ok []
     decodeQueries (Just s) =
       sectionFields "queries" TQueries s >>= mapM decodeAtom
+
+    -- The groups section (spec §4.3): first field is the conflict mode, then
+    -- one @(group id (member*))@ per declared duplicate-report group. Absent
+    -- section ⇒ no groups and the default quarantine mode.
+    decodeGroups Nothing = ok ([], QuarantineOnConflict)
+    decodeGroups (Just s) = do
+      fs <- sectionFields "groups" TGroups s
+      case fs of
+        modeE : groupEs -> do
+          mode <- decodeGroupMode modeE
+          groups <- mapM decodeGroup groupEs
+          ok (groups, mode)
+        [] -> werr "groups" "groups section missing its conflict mode"
+      where
+        decodeGroupMode (SAtom t)
+          | parseTag t == Just TQuarantine = ok QuarantineOnConflict
+          | parseTag t == Just TReject = ok RejectOnConflict
+        decodeGroupMode other =
+          werr "groups mode" ("unknown group conflict mode: " ++ show other)
+        decodeGroup g = do
+          [gid, membersE] <- matchTagged "group" TGroup 2 g
+          g' <- GroupId <$> atomText "group" gid
+          members <- decodeMembers membersE
+          ok (DupGroup g' members)
+        decodeMembers (SList ms) = mapM (fmap LeafId . atomText "group member") ms
+        decodeMembers other =
+          werr "group members" ("malformed member list: " ++ show other)
+
+    -- Wire well-formedness (R14) for groups, identical in both drivers: at
+    -- least two distinct members, all declared leaves, and unique group ids.
+    -- A one-member "group" or a member without a leaf is malformed elaborator
+    -- output, not a data conflict.
+    checkGroupInvariants groups leaves = do
+      case firstDup [g | DupGroup g _ <- groups] of
+        Just (GroupId g) -> werr "groups" ("duplicate group id: " ++ show g)
+        Nothing -> ok ()
+      mapM_ checkGroup groups
+      where
+        declared = map fst leaves
+        checkGroup (DupGroup (GroupId g) members) = do
+          case firstDup members of
+            Just (LeafId l) ->
+              werr "group" ("group " ++ show g ++ " repeats member: " ++ show l)
+            Nothing -> ok ()
+          if length members < 2
+            then werr "group" ("group " ++ show g ++ " has fewer than two members")
+            else ok ()
+          mapM_ checkMember members
+          where
+            checkMember l
+              | l `elem` declared = ok ()
+              | otherwise =
+                  werr
+                    "group"
+                    ("group " ++ show g ++ " member is not a declared leaf: " ++ show l)
+
+    firstDup :: Eq a => [a] -> Maybe a
+    firstDup = go []
+      where
+        go _ [] = Nothing
+        go seen (x : rest)
+          | x `elem` seen = Just x
+          | otherwise = go (x : seen) rest
 
     -- Wire well-formedness (R14), identical in both drivers: argument
     -- identifiers are unique and every attack endpoint is declared.
@@ -1042,7 +1135,7 @@ encodeRejection r =
 rejectClassTag :: RejectClass -> Tag
 rejectClassTag c = case c of
   R1 -> TR1; R3 -> TR3; R4 -> TR4; R5 -> TR5; R6 -> TR6; R7 -> TR7
-  R10 -> TR10; R11 -> TR11; R12 -> TR12; R13 -> TR13
+  R9 -> TR9; R10 -> TR10; R11 -> TR11; R12 -> TR12; R13 -> TR13
 
 -- | Decode a verdict (the dual of 'encodeVerdict'; used by the conformance
 -- tests and any consumer of a driver's output).

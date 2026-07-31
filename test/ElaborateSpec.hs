@@ -235,7 +235,10 @@ leafPropOf :: String -> [Decl] -> Prop
 leafPropOf l ds =
   head [leafProp lf | DeclLeaf lf <- ds, leafId lf == LeafId l]
 
--- | All nine negatives share the parsed A + policy; run them in one IO property.
+-- | All thirteen negatives share the parsed A + policy; run them in one IO
+-- property. Cases 10–13 pin the four 'Lara.Elaborate'.@validateGroups@ error
+-- paths (R14 on the @.lara@ door), asserting the same checks in the same order
+-- as the wire decoder's @checkGroupInvariants@.
 prop_negatives :: Property
 prop_negatives = once $ ioProperty $ do
   progA <- loadProgram "examples/A/example.lara"
@@ -301,6 +304,19 @@ prop_negatives = once $ ioProperty $ do
             DeclArg a {argConcl = Challenges (ChallengesLeaf (LeafId "no_such_leaf"))}
       breakChallenge d = d
 
+      -- 10–13. duplicate-report-group R14 well-formedness (validateGroups):
+      -- duplicate group id / repeated member / singleton / undeclared member.
+      withGroups gs = withDecls (decls ++ map DeclGroup gs) progA
+      progDupGroupId =
+        withGroups
+          [ DupGroup (GroupId "g") [LeafId "e1", LeafId "e2"]
+          , DupGroup (GroupId "g") [LeafId "e3", LeafId "e4"]
+          ]
+      progGroupRepeat = withGroups [DupGroup (GroupId "g") [LeafId "e1", LeafId "e1"]]
+      progGroupSingleton = withGroups [DupGroup (GroupId "g") [LeafId "e1"]]
+      progGroupDangling =
+        withGroups [DupGroup (GroupId "g") [LeafId "e1", LeafId "no_such_leaf"]]
+
   pure $
     conjoin
       [ counterexample "policy-id mismatch" $
@@ -321,6 +337,14 @@ prop_negatives = once $ ioProperty $ do
           isErr "neither a declared leaf" (elab progBadDischarge pol)
       , counterexample "challenge target undeclared" $
           isErr "target is not a declared" (elab progBadChallenge pol)
+      , counterexample "duplicate group id" $
+          isErr "duplicate group id" (elab progDupGroupId pol)
+      , counterexample "group repeats member" $
+          isErr "repeats member" (elab progGroupRepeat pol)
+      , counterexample "singleton group" $
+          isErr "fewer than two members" (elab progGroupSingleton pol)
+      , counterexample "group member undeclared" $
+          isErr "is not a declared leaf" (elab progGroupDangling pol)
       ]
   where
     -- | The result is a 'Left' whose rendered message contains the marker.

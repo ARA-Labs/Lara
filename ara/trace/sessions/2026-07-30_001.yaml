@@ -2,8 +2,8 @@ session:
   id: "2026-07-30_001"
   date: "2026-07-30"
   started: "2026-07-30T09:00"
-  last_turn: "2026-07-30T14:21"
-  turn_count: 4
+  last_turn: "2026-07-30T17:10"
+  turn_count: 5
   summary: >
     M4 closed and result 9 mechanized under Model A, then strengthened by
     acceptance-preserving well-checkedness transport so backend replacement is
@@ -13,7 +13,12 @@ session:
     Presentation.lean scope comment; closed completed trackers #31 and #37.
     Next milestone M5 starts with #36 replay identity and #38 duplicate-report
     groups. Result 3 backend certificate dependency accountability remains the
-    formal gap.
+    formal gap. Turn 5 implemented #38 cross-layer (AST/surface/wire/driver +
+    Lean Lara.Groups with 6 sorry-free theorems); enforced §4.3 as a
+    driver-boundary check (R9) with quarantine→gap by drop-the-arg, escalation→
+    reject; all gates green (cabal test, lake build, check-axioms, differential
+    41/41); PR #45 opened (closes #38). C21 crystallized. Both M5 prerequisites
+    (#36, #38) now closed.
 
 events_logged:
   - turn: 1
@@ -71,6 +76,43 @@ events_logged:
     routing: direct
     provenance: user
     summary: "Housekeeping before M5: synchronize completion status and close completed trackers #31/#37"
+  - turn: 5
+    type: pivot
+    id: "N83"
+    routing: direct
+    provenance: user
+    summary: "M4/result-9 → M5 implementation: user directed 'do issue #38' in a worktree"
+  - turn: 5
+    type: decision
+    id: "N84"
+    routing: direct
+    provenance: ai-executed
+    summary: "Group-consistency (R9) enforced at driver boundary (like R13), not a checkUnit stage; Unit carries groups+mode via new wire section"
+  - turn: 5
+    type: dead_end
+    id: "N85"
+    routing: direct
+    provenance: ai-executed
+    summary: "Quarantine via Gamma-removal alone → checkArguments rejects R1, not gap; must drop the dependent arguments before checkUnit"
+  - turn: 5
+    type: experiment
+    id: "N86"
+    routing: direct
+    provenance: ai-executed
+    summary: "#38 landed cross-layer; cabal test PASS, lake build, check-axioms clean, differential 41/41 + 5/5; PR #45 (closes #38)"
+  - turn: 5
+    type: observation
+    id: "O20"
+    routing: staged
+    provenance: ai-executed
+    summary: "Concept: three-tier rejection architecture — R9 joins R13 as a driver-boundary reject; quarantine stays off the ladder"
+  - turn: 5
+    type: claim
+    id: "C21"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Duplicate-report data conflict → gap not defeat, escalatable to R9; sibling of C16, mechanized + differential-clean"
+
 ai_actions:
   - turn: 1
     action: "Retired M4 backlog in TODOS.md and closed GitHub umbrella issue #29"
@@ -113,6 +155,24 @@ ai_actions:
       - "ara/evidence/status/mechanization_status.md"
       - "docs/slides/keynote.html"
       - "lean/Lara/Presentation.lean"
+  - turn: 5
+    action: "Implemented #38 duplicate-report groups end-to-end (Haskell + Lean), added differential fixtures + R9 negatives, updated grammar doc/TODOS, committed + pushed, opened PR #45"
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/AST.hs"
+      - "src/Lara/Syntax.hs"
+      - "src/Lara/Wire.hs"
+      - "src/Lara/Driver.hs"
+      - "src/Lara/Elaborate.hs"
+      - "src/Lara/Negatives.hs"
+      - "lean/Lara/Groups.lean"
+      - "lean/Lara/Driver.lean"
+      - "lean/Lara/Check/Error.lean"
+      - "lean/AxCheck.lean"
+      - "scripts/gen-corpus.hs"
+      - "fixtures/corpus/{group-consistent-accept,group-conflict-quarantine,reject-r9}.sexp"
+      - "test/{CheckSpec,DifferentialSpec,WireSpec,SyntaxSpec,ReportingSpec,ReplaySpec,TestReplay,WorkedExamplesSpec}.hs"
+      - "docs/lara-surface-grammar.md; TODOS.md; plans/2026-07-30-issue-38-duplicate-report-groups.md"
 claims_touched:
   - id: C04
     action: revised
@@ -120,6 +180,9 @@ claims_touched:
   - id: C04
     action: revised
     turn: 3
+  - id: C21
+    action: crystallized
+    turn: 5
 
 logic_revisions:
   - turn: 1
@@ -209,11 +272,21 @@ key_context:
       checker were complete, then directed: "do house keeping first" and "update
       our readme and docs." The resulting status language distinguishes the
       usable M4-complete core from the remaining spec/evaluation prerequisites.
+  - turn: 5
+    excerpt: >
+      User: "go to a worktree, do issue #38", then "/commit-commands:commit-push-pr".
+      The decisive design finding was that checkUnit rejects (R1) on a missing-leaf
+      reference, so quarantine cannot be modelled by Gamma-removal alone — the
+      §4.3 "quarantine is not rejection / routes to gap" semantics forced dropping
+      the dependent arguments at the driver boundary in BOTH drivers, verified
+      byte-identical by differential.sh (41/41).
 
 open_threads:
   - "M5 — evaluation corpus (research-proposal.md §7): gold annotations, mutation suite, baselines, ablations, blinded held-out set. No plan/issue yet — the bigger-picture next step after result-9 polish."
-  - "#38 duplicate-report groups (M5 mutation-suite spine) and #36 verdict-carried replay identity (M5 audit story) remain the scoped M5 prerequisites."
+  - "Both scoped M5 prerequisites are now closed: #38 duplicate-report groups (this turn, PR #45) and #36 verdict-carried replay identity (PR #44). M5 corpus work itself has no plan/issue yet."
+  - "PR #45 is open, not merged: C21's artifact-commitment rests on the branch, not main. Revisit C21 status if the PR is revised or rejected in review."
   - "O19 staged (methodological concept: erasure-invariance via injective relabel) — refined by N81 (forward typing transport needs only hpres, not injectivity); still awaiting a closure signal to crystallize."
+  - "O20 staged (three-tier rejection architecture / driver-boundary tier) — awaiting a closure signal or reuse."
 
 ai_suggestions_pending:
   - "Deprioritized: a Haskell mapAssur conformance port (conformance-only, duplicates logic no runtime path uses — soundness carried by the Lean proof)."
@@ -226,3 +299,6 @@ resolved_threads:
   - turn: 4
     thread: "Stale completed trackers #31 and #37"
     resolution: "Closed as completed with PR #33/#39 evidence."
+  - turn: 5
+    thread: "#38 duplicate-report groups (M5 mutation-suite spine)"
+    resolution: "Implemented cross-layer + mechanized (Lara.Groups, 6 sorry-free theorems); differential 41/41 + 5/5; PR #45 opened (closes #38). C21 crystallized."

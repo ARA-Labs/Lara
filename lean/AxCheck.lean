@@ -16,6 +16,7 @@ import Lara.ND
 import Lara.Strict
 import Lara.Grounded
 import Lara.Support
+import Lara.Groups
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase
@@ -632,3 +633,12 @@ open Lara
 #print axioms Lara.Erase.mapCertProg_args
 #print axioms Lara.Erase.mapCertProg_atts
 #print axioms Lara.Erase.backend_replacement_transport
+
+-- Duplicate-report groups (spec §4.3, issue #38): the frozen consistency and
+-- quarantine/escalation definitions and their metatheory.
+#print axioms Lara.Groups.all_equiv_head_iff
+#print axioms Lara.Groups.consistentB_iff
+#print axioms Lara.Groups.mem_quarantined_iff
+#print axioms Lara.Groups.quarantined_arg_excluded
+#print axioms Lara.Groups.quarantined_leaf_absent
+#print axioms Lara.Groups.conflictReject_iff

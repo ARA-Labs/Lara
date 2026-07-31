@@ -13,8 +13,10 @@
 --   'Lara.Driver.runCheck' path. The CLI is a thin shell, so the @.lara@
 --   verdict bytes equal the in-process source construction + checker bytes.
 -- * Exit codes (shared by both paths): @0@ = accept, @1@ = checker rejection
---   (a replay-preflight R13 rejection additionally explains itself with one
---   'Lara.Replay.replayFailureMessage' line on @stderr@), @2@ =
+--   (a boundary rejection additionally explains itself with one
+--   'Lara.Driver.rejectionDiagnostics' line on @stderr@: a replay-preflight R13
+--   'Lara.Replay.replayFailureMessage', or an escalated group-conflict R9
+--   'Lara.Driver.groupConflictMessage'), @2@ =
 --   decode/elaborate-boundary or usage error (with a located message on
 --   @stderr@ and nothing on @stdout@). For @.lara@, a program\/policy parse
 --   error, a missing\/unreadable policy file, and an 'ElabError' are all
@@ -32,7 +34,7 @@ import System.FilePath (takeDirectory, takeExtension, (</>), (<.>))
 import System.IO (hPutStrLn, stderr)
 
 import Lara.AST (PolicyId (..), programPolicy)
-import Lara.Driver (runCheck)
+import Lara.Driver (rejectionDiagnostics, runCheck)
 import Lara.Elaborate
   ( elaborate
   , elabErrorMessage
@@ -41,8 +43,6 @@ import Lara.Elaborate
   )
 import Lara.Replay
   ( replayErrorMessage
-  , replayFailureMessage
-  , runtimeReplayFailure
   , sourceCheckInput
   )
 import qualified Lara.Syntax as Syntax
@@ -90,7 +90,7 @@ checkSexp file = do
           hPutStrLn stderr ("lara: codec error at " ++ ctx ++ ": " ++ msg)
           exitWith (ExitFailure 2)
         Right input -> do
-          mapM_ (hPutStrLn stderr . replayFailureMessage) (runtimeReplayFailure input)
+          mapM_ (hPutStrLn stderr) (rejectionDiagnostics input)
           emitVerdict (runCheck input)
 
 -- ---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ checkLara file = do
                       case sourceCheckInput prog pol unit of
                         Left err -> die2 ("lara: replay identity error: " ++ replayErrorMessage err)
                         Right input -> do
-                          mapM_ (hPutStrLn stderr . replayFailureMessage) (runtimeReplayFailure input)
+                          mapM_ (hPutStrLn stderr) (rejectionDiagnostics input)
                           emitVerdict (runCheck input)
 
 -- | Co-located policy resolution (D-Arch-2): read @\<policyId\>.policy.lara@ from

@@ -55,7 +55,14 @@ import Lara.Diagnostics
   , Stage (..)
   , locate
   )
-import Lara.Driver (buildCertOk, buildGamma, runCheck)
+import Lara.Driver
+  ( buildCertOk
+  , buildGamma
+  , groupConflictMessage
+  , groupConflictReject
+  , groupConsistent
+  , runCheck
+  )
 import Lara.Grounded (Claim (..))
 import Lara.Policy (lookupRule)
 import Lara.Replay
@@ -81,7 +88,7 @@ import Lara.SupportTerm
   , CheckLoc (..)
   , ReferenceReason (..)
   )
-import Lara.Wire (Outcome (..), Tag (..), Verdict (..), coreVersionText, tagToString)
+import Lara.Wire (Outcome (..), Tag (..), Verdict (..), coreVersionText, rejectClassTag, tagToString)
 
 -- ---------------------------------------------------------------------------
 -- The minimal JSON value + pretty-printer
@@ -183,10 +190,15 @@ expectedJsonValue input =
   where
     replayId = inputReplayId input
     unit = inputUnit input
+    -- Boundary rejections (R13 replay, R9 group conflict) never reach
+    -- 'checkUnit', so 'rejectDiag' below cannot recover them — mirror 'runCheck's
+    -- precedence and render them from the same source the drivers print.
     rejectDiagnostic =
       case runtimeReplayFailure input of
         Just failure -> replayFailureDiagnostic failure
-        Nothing -> rejectDiag
+        Nothing
+          | groupConflictReject unit -> groupConflictDiagnostic unit
+          | otherwise -> rejectDiag
     gamma = buildGamma (unitLeaves unit)
     certOk = buildCertOk (unitTheories unit)
     pI = lookupRule (unitRules unit)
@@ -315,6 +327,29 @@ replayFailureDiagnostic failure =
         , backend ++ "@" ++ show version
         )
 
+-- | The R9 located diagnostic for an escalated duplicate-report-group conflict.
+-- Like 'replayFailureDiagnostic', this is a boundary rejection that never reaches
+-- 'checkUnit', so it is rendered directly: it names the first @≢@ group (in
+-- declaration order) and its members, and carries the exact @stderr@ line
+-- 'Lara.Driver.groupConflictMessage' prints.
+groupConflictDiagnostic :: Unit -> JValue
+groupConflictDiagnostic unit =
+  JObject
+    ( [ ("kind", JString "reject")
+      , ("class", JString (rejectionClass (RejectClass R9)))
+      , ("stage", JString (diagnosticStageString GroupBoundaryStage))
+      ]
+        ++ groupDetail
+        ++ [("message", JString msg) | Just msg <- [groupConflictMessage unit]]
+    )
+  where
+    groupDetail = case filter (not . groupConsistent unit) (unitGroups unit) of
+      [] -> []
+      DupGroup (GroupId g) members : _ ->
+        [ ("constituent", JObject [("kind", JString "group"), ("id", JString g)])
+        , ("members", JArray [JString m | LeafId m <- members])
+        ]
+
 -- ---------------------------------------------------------------------------
 -- Renderers (closed vocabularies — one spelling table each)
 -- ---------------------------------------------------------------------------
@@ -341,14 +376,16 @@ labelString l = case l of
 data DiagnosticStage
   = CheckerStage Stage
   | ReplayPreflightStage
+  | GroupBoundaryStage
   deriving (Eq, Show)
 
 -- | The one spelling table for 'DiagnosticStage' (the goldens pin the
--- @backend@ preflight spelling).
+-- @backend@ preflight spelling and the @group-boundary@ R9 spelling).
 diagnosticStageString :: DiagnosticStage -> String
 diagnosticStageString ds = case ds of
   CheckerStage stage -> stageString stage
   ReplayPreflightStage -> "backend"
+  GroupBoundaryStage -> "group-boundary"
 
 -- | Which of the six 'checkUnit' stages produced a rejection.
 stageString :: Stage -> String
@@ -368,17 +405,9 @@ rejectionClass r = tagToString $ case r of
   DuplicateArgument -> TDupArgument
   IncompleteArgument -> TIncompleteArgument
   MissingConflict -> TMissingConflict
-  RejectClass c -> case c of
-    R1 -> TR1
-    R3 -> TR3
-    R4 -> TR4
-    R5 -> TR5
-    R6 -> TR6
-    R7 -> TR7
-    R10 -> TR10
-    R11 -> TR11
-    R12 -> TR12
-    R13 -> TR13
+  -- Reuse the wire tag table as the single source of truth so every
+  -- 'RejectClass' (incl. R9) is covered and the two can never drift.
+  RejectClass c -> rejectClassTag c
 
 -- | Extra located detail recovered from a whole-unit rejection: for a wrapped
 -- located checker failure ('PERejection'), the offending leaf\/rule id and the

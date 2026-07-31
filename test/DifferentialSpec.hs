@@ -84,6 +84,19 @@ corpusGoldens =
         ++ " (statuses (status (atom p0) justified) (status (atom p1) justified)"
         ++ " (status (atom p2) justified)))"
     )
+  , -- Duplicate-report groups (spec §4.3, issue #38): a ≡-consistent group
+    -- admits normally (justified); a ≢ group quarantines its members so the
+    -- dependent claim loses support and surfaces as gap (accept, not reject);
+    -- the same conflict escalated by policy is the R9 data-integrity reject.
+    ( "fixtures/corpus/group-consistent-accept.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom effect (con up)) justified)))"
+    )
+  , ( "fixtures/corpus/group-conflict-quarantine.sexp"
+    , "(verdict accept (labels) (edges)"
+        ++ " (statuses (status (atom effect (con up)) gap)))"
+    )
+  , ("fixtures/corpus/reject-r9.sexp", "(verdict reject R9)")
   , ("fixtures/corpus/reject-duplicate-rule.sexp", "(verdict reject duplicate-rule)")
   , ("fixtures/corpus/reject-duplicate-argument.sexp", "(verdict reject duplicate-argument)")
   , ("fixtures/corpus/reject-incomplete-argument.sexp", "(verdict reject incomplete-argument)")

@@ -9,9 +9,10 @@
 > making it non-vacuous by construction.
 >
 > Next milestone: **M5 — evaluation corpus** (research-proposal.md §7). Its
-> implementation prerequisites are verdict-carried replay identity (#36, the
-> audit story) and duplicate-report groups (#38, the mutation-suite spine).
-> The LLM/JSON producer (#30) follows when the deterministic→LLM flip begins.
+> implementation prerequisites are now both closed: verdict-carried replay
+> identity (#36, the audit story) and duplicate-report groups (#38, the
+> mutation-suite spine). The LLM/JSON producer (#30) follows when the
+> deterministic→LLM flip begins.
 
 ## Performance
 
@@ -64,38 +65,6 @@ closed issue #27.
 **Depends on:** M3 closeout (#27)
 
 ## M5 prerequisites and language cleanup
-
-### Duplicate-report groups (spec §4.3): cross-layer implementation
-
-**What:** Implement duplicate-report groups end-to-end: surface declaration
-syntax over leaf ids, AST/`Unit` carrier, wire codec, admission-time group
-consistency check (pairwise `≡` admits; otherwise quarantine every member
-with a located data-integrity diagnostic, R9, routed to `gap`), and the Lean
-side + differential fixtures.
-
-**Why:** The frozen spec (§4.3, R9) requires checker-enforced group
-consistency, but no implementation layer carries groups — zero `group`
-matches in `AST.hs`/`Wire.hs`/`Unit.lean`/`Policy.lean` (code-verified in the
-M4b plan-eng-review 2026-07-28). M4b's §11 task 2 was descoped to leaf
-extraction + source binding because the elaborator cannot emit a construct
-nothing downstream carries.
-
-**Pros:** R9 becomes implementable; the M5 mutation suite gains its
-data-integrity spine; §11 task 2 becomes fully exercisable.
-
-**Cons:** Cross-layer TCB work (grammar, AST, wire, checker, Lean +
-differential) — a milestone of its own.
-
-**Context:** Spec §4.3 "Conflicting duplicate reports of one result cell
-(M0, C16)" has the full design: distinct leaves per report, group declaration
-as untrusted elaborator output, `≡`-based quarantine with gap routing (a data
-conflict is absence of reliable evidence, never an attack). Discovered by the
-M4b outside voice, code-verified in review.
-
-**Issue:** #38.
-**Effort:** L
-**Priority:** P3
-**Depends on:** nothing inside M4b
 
 ### Verdict-carried replay identity (spec §2.1)
 
@@ -152,6 +121,22 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### Duplicate-report groups, spec §4.3 (issue #38)
+
+Groups are carried end-to-end: surface `group g = [l, …]` and the policy
+`duplicate-reports = quarantine|reject` setting (`Lara.Syntax`), the `DupGroup`
+/ `GroupConflictMode` AST carrier and `unitGroups` / `unitGroupMode` on `Unit`
+(`Lara.AST`), the wire `groups` section (`Lara.Wire`, byte-identical Lean
+`Lara.Driver`), the elaborator lowering (`Lara.Elaborate`), and the
+driver-boundary check (`Lara.Driver.runCheck` / Lean `runOnContents`): a
+`≡`-consistent group admits normally; an inconsistent group quarantines its
+members so the dependent claim routes to `gap`; an escalated conflict rejects
+R9 (a boundary reject like R13). Lean metatheory (`Lara.Groups`, AxCheck-clean):
+pairwise-`≡` ⟺ representative, quarantine membership, arg exclusion, the
+leaf-rule connection, and the escalation characterization. Differential
+fixtures `group-consistent-accept` / `group-conflict-quarantine` / `reject-r9`
+pass both drivers byte-exact; R9 negative in `Lara.Negatives` and `CheckSpec`.
 
 ### Result-9 backend replacement (PRs #41 and #43)
 

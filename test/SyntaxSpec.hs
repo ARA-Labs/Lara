@@ -281,6 +281,16 @@ genAttack =
 -- Programs
 -- ---------------------------------------------------------------------------
 
+-- | A duplicate-report group declaration (grammar §4.3). Round-trip is purely
+-- syntactic, so any member list (including empty / singleton) is a legal
+-- generator target — R14 well-formedness is the elaborator's job, exercised in
+-- "WireSpec" and "ElaborateSpec", not here.
+genGroup :: Gen DupGroup
+genGroup =
+  DupGroup
+    <$> (GroupId <$> genIdent)
+    <*> smallListOf (LeafId <$> genIdent)
+
 genDecl :: Gen Decl
 genDecl =
   oneof
@@ -289,6 +299,7 @@ genDecl =
     , DeclArg <$> genArg
     , DeclAttack <$> genAttack
     , DeclStatus . PropId <$> genIdent
+    , DeclGroup <$> genGroup
     ]
 
 genBackendRef :: Gen (BackendId, String)
@@ -375,6 +386,7 @@ genPolicy = do
         [ (TheoryDigest ("sha256:theory-" ++ show i), ps)
         | (i, ps) <- zip [0 :: Int ..] theoryProps
         ]
+  gm <- elements [QuarantineOnConflict, RejectOnConflict]
   pure
     Policy
       { policyId = pid
@@ -383,6 +395,7 @@ genPolicy = do
       , policyExceptions = es
       , policyAdmission = adm
       , policyTheories = ts
+      , policyGroupMode = gm
       }
 
 -- ---------------------------------------------------------------------------
@@ -652,6 +665,10 @@ policyNegatives =
   , ( "malformed theory digest"
     , "policy p\ntheory sha256 = []\n"
     , "':'"
+    )
+  , ( "bad duplicate-reports mode"
+    , "policy p\nduplicate-reports = bogus\n"
+    , "group conflict mode"
     )
   ]
 

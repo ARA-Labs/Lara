@@ -8,7 +8,7 @@ import Lara.Strict (SExpr (..))
 import Lara.Wire (decodeReplayId, encodeReplayId, parseSExpr, printSExpr)
 
 emptyUnit :: Unit
-emptyUnit = Unit [] [] [] [] [] [] [] []
+emptyUnit = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
 
 sourceProgram :: Program
 sourceProgram =
@@ -32,6 +32,7 @@ sourcePolicy =
         [ (TheoryDigest "sha256:z", [])
         , (TheoryDigest "sha256:a", [])
         ]
+    , policyGroupMode = QuarantineOnConflict
     }
 
 sourceUnit :: Unit

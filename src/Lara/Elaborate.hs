@@ -127,6 +127,16 @@ data ElabError
   | -- | a @challenges(…)@ whose target arg\/leaf is not declared (diagnostic
     -- only; never affects the 'Unit').
     ChallengeTargetUndeclared ArgId
+  | -- | two @group@ declarations share an id (R14 well-formedness): the id.
+    DuplicateGroupId GroupId
+  | -- | a @group@ repeats a member (R14 well-formedness): @group@, the member.
+    GroupRepeatedMember GroupId LeafId
+  | -- | a @group@ has fewer than two members, so it cannot report a conflict
+    -- (R14 well-formedness): the group id.
+    GroupTooFewMembers GroupId
+  | -- | a @group@ member is not a declared leaf (R14 well-formedness): @group@,
+    -- the undeclared member.
+    GroupMemberUndeclared GroupId LeafId
   deriving (Eq, Show)
 
 -- | Render an 'ElabError' as a single human-readable line.
@@ -155,6 +165,14 @@ elabErrorMessage e = case e of
     "status '" ++ c ++ "': not a declared claim"
   ChallengeTargetUndeclared (ArgId a) ->
     "arg '" ++ a ++ "': challenges(…) target is not a declared argument or leaf"
+  DuplicateGroupId (GroupId g) ->
+    "group '" ++ g ++ "': duplicate group id"
+  GroupRepeatedMember (GroupId g) (LeafId l) ->
+    "group '" ++ g ++ "': repeats member '" ++ l ++ "'"
+  GroupTooFewMembers (GroupId g) ->
+    "group '" ++ g ++ "': fewer than two members (cannot report a conflict)"
+  GroupMemberUndeclared (GroupId g) (LeafId l) ->
+    "group '" ++ g ++ "': member '" ++ l ++ "' is not a declared leaf"
 
 -- ---------------------------------------------------------------------------
 -- Internal environment
@@ -187,7 +205,9 @@ data Env = Env
 --   * @unitArgs@ in declaration order (order fixes AF node indices, hence labels);
 --     each shallow support term is rebuilt to the full 'SupportTerm';
 --   * @unitAttacks@ pass through (the surface already lowered positions);
---   * @unitQueries@ = the @status@-named claims' formals.
+--   * @unitQueries@ = the @status@-named claims' formals;
+--   * @unitGroups@ = the declared duplicate-report groups (spec §4.3), with
+--     @unitGroupMode@ baked from the policy's conflict escalation choice.
 elaborate :: Sigma -> TheoryRegistry -> Program -> Policy -> Either ElabError Unit
 elaborate _sigma reg prog pol0 = do
   when (programPolicy prog /= policyId pol0) $
@@ -203,6 +223,7 @@ elaborate _sigma reg prog pol0 = do
       argDecls = [a | DeclArg a <- decls]
       attacks = [k | DeclAttack k <- decls]
       statusIds = [pid | DeclStatus pid <- decls]
+      groups = [g | DeclGroup g <- decls]
       env =
         Env
           { envPolicy = pol
@@ -211,6 +232,7 @@ elaborate _sigma reg prog pol0 = do
           , envLeafIds = map fst gamma
           , envArgIds = map argId argDecls
           }
+  validateGroups (envLeafIds env) groups
   elaboratedRev <- foldM (elabOne env) [] argDecls
   queries <- mapM (resolveStatus claims) statusIds
   pure
@@ -223,7 +245,43 @@ elaborate _sigma reg prog pol0 = do
       , unitArgs = reverse elaboratedRev
       , unitAttacks = attacks
       , unitQueries = queries
+      , unitGroups = groups
+      , unitGroupMode = policyGroupMode pol
       }
+
+-- | Enforce duplicate-report-group well-formedness (R14) on the @.lara@ path,
+-- mirroring "Lara.Wire".@checkGroupInvariants@ so both front doors reject the
+-- same malformed group declarations. Without this a group naming an undeclared
+-- leaf would reach 'Lara.Driver.groupConsistent', whose @lookup@ would silently
+-- drop the dangling member and degenerate the group to a singleton — evading an
+-- intended R9 rejection (the worst failure mode for a data-integrity feature).
+-- The three checks — unique group ids, ≥2 distinct members, every member a
+-- declared leaf — are exactly the wire decoder's, in the same order.
+validateGroups :: [LeafId] -> [DupGroup] -> Either ElabError ()
+validateGroups declared groups = do
+  case firstDup [g | DupGroup g _ <- groups] of
+    Just gid -> Left (DuplicateGroupId gid)
+    Nothing -> Right ()
+  mapM_ checkGroup groups
+  where
+    checkGroup (DupGroup gid members) = do
+      case firstDup members of
+        Just l -> Left (GroupRepeatedMember gid l)
+        Nothing -> Right ()
+      when (length members < 2) $ Left (GroupTooFewMembers gid)
+      case find (`notElem` declared) members of
+        Just l -> Left (GroupMemberUndeclared gid l)
+        Nothing -> Right ()
+
+-- | The first element that repeats (declaration order), matching the wire
+-- decoder's @firstDup@.
+firstDup :: Eq a => [a] -> Maybe a
+firstDup = go []
+  where
+    go _ [] = Nothing
+    go seen (x : rest)
+      | x `elem` seen = Just x
+      | otherwise = go (x : seen) rest
 
 -- | Elaborate one argument, threading the prior arguments (accumulated in
 -- reverse declaration order) so premise reconstruction can resolve to them.

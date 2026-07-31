@@ -372,3 +372,81 @@ observations:
     promoted_to: null
     crystallized_via: null
     stale: false
+  - id: O20
+    timestamp: "2026-07-30T17:10"
+    provenance: ai-executed
+    content: >
+      LARA rejections fall in three architectural tiers, not one: (1) checkUnit's
+      six executable stages (R1,R3-R7,R10-R12 + structural dup/missing outcomes);
+      (2) driver-boundary rejects computed from the Unit before checkUnit runs —
+      R13 (replay preflight) and now R9 (escalated duplicate-report-group
+      conflict); (3) genuinely out-of-core (R2 signature, R8 admission, R14
+      codec-at-decode). R9 joining tier 2 is what made §4.3 implementable without
+      touching the executable core, and it keeps quarantine (the default) off the
+      rejection ladder entirely — a data conflict routes to gap, never a verdict.
+    context: >
+      Implementing #38 (N84 decision, N86 experiment). Candidate concept:
+      "driver-boundary rejection tier" as a named part of the checker
+      architecture. Staged pending a cleaner formulation / reuse.
+    potential_type: concept
+    bound_to: [N84, N86]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O21
+    timestamp: "2026-07-31T10:30"
+    provenance: ai-suggested
+    content: >
+      A trusted checker with more than one front door must enforce every
+      admission-tier well-formedness invariant at EACH door (or behind a shared
+      choke point), not only at one. LARA's .sexp path validates duplicate-report
+      group R14 well-formedness at the wire decoder; the .lara path (parse →
+      elaborate → runCheck, no wire round-trip) omitted it, so a misspelled group
+      member was silently dropped and an intended R9 rejection became an accept —
+      the two front doors disagreed on the same logical artifact. For a
+      data-integrity feature this is the worst failure mode (silent under-rejection).
+      General rule: an invariant enforced at one entry point is a per-door
+      obligation, and a differential/CI check should exercise every door on the
+      same malformed input, not just the wire one.
+    context: >
+      PR #45 review finding 1 (fenfenai, reproduced): fixed by Elaborate.validateGroups
+      mirroring Wire.checkGroupInvariants (N87). Candidate methodological concept
+      ("front-door invariant parity"); no reuse/affirmation beyond this fix yet and
+      PR #45 is unmerged, so staged pending a cleaner formulation. Sibling of O20
+      (rejection tiers): R14 is the out-of-core codec tier that must hold at both doors.
+    potential_type: concept
+    bound_to: [N84, N87]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O22
+    timestamp: "2026-07-31T21:30"
+    provenance: ai-suggested
+    content: >
+      In a dual-implementation (frozen-twin) architecture where one side carries
+      the soundness proofs, any semantic hardening of a shared definition must
+      land on BOTH sides in the same change-set — and the divergence class to
+      watch is exactly the one no test can reach: inputs excluded by upstream
+      validation. The dangling-member defense (unresolvable member => conflict)
+      went into Haskell groupConsistent but not Lean consistentB, so the twins
+      disagreed on a class of units unreachable past both R14-validating doors;
+      every fixture and property stayed green while three theorems mechanized the
+      obsolete semantics. Per the project rule that Lean proofs carry soundness
+      for frozen definitions, the twin must agree by construction, not by decoder
+      gating. Practical rule: a semantics change to a mirrored definition is
+      incomplete until the twin definition and its affected theorems are updated,
+      even when the behavior difference is unobservable end-to-end.
+    context: >
+      PR #45 second-round review finding (fenfenai) on remediation commit 7048b89;
+      fixed in 9c85c3d (N88): memberProps mapM/Option, consistentB none=>false,
+      consistentB_iff re-proved. Sibling of O21 (per-door invariant parity) —
+      this is per-TWIN definitional parity. Staged: single instance, no
+      reuse/affirmation yet, PR #45 unmerged.
+    potential_type: heuristic
+    bound_to: [N87, N88]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false

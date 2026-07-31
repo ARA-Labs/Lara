@@ -512,3 +512,15 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [docs/comparison-rit-lara.md §11.6 (conditional-roll-up + missing-edge analysis); trace N47]
 - **Dependencies**: [C19]
 - **Tags**: rit, verification-method, trust-architecture, composition, roll-up
+
+## C21: A duplicate-report data conflict is absence of evidence (→ gap), never a counter-argument (→ defeat), and is escalatable to a whole-program reject
+- **Statement**: When one measurand cell is reported by several leaves declared a duplicate-report group, disagreement among them is treated as *missing* evidence, not as an attack. An inconsistent group quarantines all its members, so the dependent claim loses that support and can only become `gap` — never `justified` (the evidence is gone), and never `contested`/`defeated` (no attack is created). A policy may instead escalate a detected conflict to a whole-program rejection. This is the same gap-not-defeat routing C16 fixes for unmet critical questions, applied to data integrity rather than argument completeness.
+- **Conditions**: The consistency test is decidable and local — group membership plus the frozen `≡` relation; because `≡` is an equivalence, pairwise-`≡` is exactly "every member `≡` the first". Default outcome is quarantine→gap; the escalation (rejection class R9) is a driver-boundary decision located at the group declaration, computed from the unit before the executable checker runs (the same tier as the R13 replay preflight), so the executable six-stage core is untouched. Untested boundary: groups spanning non-leaf occurrences, and interaction with strict-certificate leaves.
+- **Sources**: [41/41 ← trace N86:evidence «differential.sh: pass=41 fail=0» [result]; 6 ← trace N86:result «6 sorry-free theorems … Lara.Groups» [result]; R9-decidable-local ← docs/spec.md §4.3 «The check is decidable and local (group membership plus ≡)» [input]]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: A duplicate-report conflict whose dependent claim resolves to `justified`, `contested`, or `defeated` under the default policy (rather than `gap`), or a conflict under the escalating policy that fails to reject — either would disprove the routing.
+- **Proof**: [trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), lean/Lara/Groups.lean, PR #45]
+- **Dependencies**: [C01, C16]
+- **Last revised**: 2026-07-31 (2026-07-31_001#2)
+- **Tags**: admission, data-integrity, gap-not-defeat, mechanized, spec-4.3, R9

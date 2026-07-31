@@ -36,6 +36,9 @@ module Lara.AST
   , Provenance (..)
   , SourceRef (..)
   , Leaf (..)
+  , GroupId (..)
+  , DupGroup (..)
+  , GroupConflictMode (..)
     -- * Claims (spec §3.1)
   , AuditStatus (..)
   , Binding (..)
@@ -155,6 +158,38 @@ data Leaf = Leaf
   , leafRefs :: [SourceRef]
   }
   deriving (Eq, Show)
+
+-- | Duplicate-report-group identifier (@g@), named so an R9 data-integrity
+-- diagnostic can locate the group declaration (spec §4.3, §10.1).
+newtype GroupId = GroupId String deriving (Eq, Ord, Show)
+
+-- | A declared duplicate-report group (spec §4.3, M0 C16): one measurand cell
+-- reported more than once, each report a distinct leaf, declared as a group so
+-- the checker can enforce agreement within it by the frozen @≡@ relation. The
+-- declaration is untrusted elaborator output; measurand identity never enters
+-- the trusted kernel.
+--
+-- > group g = [ l1, l2, ... ]
+data DupGroup = DupGroup
+  { dgId :: GroupId
+  , dgMembers :: [LeafId]
+  }
+  deriving (Eq, Ord, Show)
+
+-- | Policy outcome for a duplicate-report group whose members are not pairwise
+-- @≡@ (spec §4.3). The default keeps one corrupted cell from rendering the rest
+-- of the artifact uncheckable; a policy may escalate to a whole-program error.
+--
+-- * @QuarantineOnConflict@ (default): every argument whose support term uses a
+--   conflicted member is dropped from the checked program (and the members leave
+--   the context @Γ@), so the dependent claim loses that support and routes to
+--   @gap@ — never a rejection. (The argument is dropped at the driver boundary,
+--   __not__ by letting a leaf occurrence fail the §6.1 leaf rule; that would be
+--   an R1 whole-program rejection, not @gap@ — see "Lara.Driver".'Lara.Driver.quarantineUnit'.)
+-- * @RejectOnConflict@: a detected conflict is a whole-program data-integrity
+--   error (rejection class R9), located at the group declaration.
+data GroupConflictMode = QuarantineOnConflict | RejectOnConflict
+  deriving (Eq, Ord, Show)
 
 -- ---------------------------------------------------------------------------
 -- Claims (spec §3.1)
@@ -284,6 +319,10 @@ data Policy = Policy
   , policyTheories :: [(TheoryDigest, [Prop])]
     -- ^ Trusted theory table (lara-syntax@0.2, grammar App. A.2); lowered to
     -- 'unitTheories' via the elaborator's 'TheoryRegistry'.
+  , policyGroupMode :: GroupConflictMode
+    -- ^ How a duplicate-report group with @≢@ members is handled (spec §4.3):
+    -- 'QuarantineOnConflict' (default) or 'RejectOnConflict' (R9). Lowered to
+    -- 'unitGroupMode'.
   }
   deriving (Eq, Show)
 
@@ -457,6 +496,7 @@ data Decl
   | DeclArg Arg
   | DeclAttack Attack
   | DeclStatus PropId
+  | DeclGroup DupGroup -- ^ a duplicate-report group (spec §4.3)
   deriving (Eq, Show)
 
 -- | A LARA program (spec §2):
@@ -499,10 +539,12 @@ data Unit = Unit
   , unitContraries :: [Contrary] -- ^ the policy's @contrary@ pairs
   , unitExceptions :: [Exception] -- ^ the policy's @exception@ declarations
   , unitTheories :: [(TheoryDigest, [Prop])] -- ^ theory table for @nd\@1@ (closed registry)
-  , unitLeaves :: [(LeafId, Prop)] -- ^ the leaf context @Gamma@
+  , unitLeaves :: [(LeafId, Prop)] -- ^ the leaf context @Gamma@ (pre-group filter)
   , unitArgs :: [(ArgId, SupportTerm)] -- ^ named arguments, declaration order
   , unitAttacks :: [Attack] -- ^ declared typed attacks (id-based)
   , unitQueries :: [Prop] -- ^ claim atoms whose status is requested
+  , unitGroups :: [DupGroup] -- ^ duplicate-report groups (spec §4.3)
+  , unitGroupMode :: GroupConflictMode -- ^ conflict outcome; default 'QuarantineOnConflict'
   }
   deriving (Eq, Show)
 
@@ -530,10 +572,12 @@ data Label = LIn | LOut | LUndec
 -- ---------------------------------------------------------------------------
 
 -- | The frozen rejection classes decidable by the executable checker (spec
--- §10.1; mirrors @lean/Lara/Check/Error.lean@ 'RejectClass'). R2 (signature),
--- R8 (admission), and R9 (data-integrity) are outside the executable core;
--- R14 (codec) is reported at the decode boundary, never as a checker verdict.
-data RejectClass = R1 | R3 | R4 | R5 | R6 | R7 | R10 | R11 | R12 | R13
+-- §10.1; mirrors @lean/Lara/Check/Error.lean@ 'RejectClass'). R9
+-- (data-integrity) is decided at the driver boundary before @checkUnit@ — an
+-- escalated duplicate-report-group conflict (spec §4.3), like R13's replay
+-- preflight. R2 (signature) and R8 (admission) remain outside the executable
+-- core; R14 (codec) is reported at the decode boundary, never as a verdict.
+data RejectClass = R1 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13
   deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | A unit-level rejection outcome (mirrors @lean/Lara/Check/Unit.lean@

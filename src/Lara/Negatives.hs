@@ -37,6 +37,7 @@ module Lara.Negatives
   , strictReachableContrary
   , admissionReject
   , strictAssuranceViolation
+  , duplicateReportGroupConflict
     -- * Index
   , allNegatives
   ) where
@@ -72,6 +73,10 @@ data RejectionClass
   | -- | A leaf's @(kind, provenance)@ maps to @reject@ in the admission table
     -- (spec §4.3) — the declaration itself violates policy.
     LeafAdmissionReject
+  | -- | A duplicate-report group has @≢@ members and the policy escalates the
+    -- conflict to @reject@ (spec §4.3, R9) — a whole-program data-integrity
+    -- error located at the group declaration.
+    DuplicateReportGroupConflict
   | -- | A strict instance uses @assurance = trusted@ when the rule has
     -- @allow-trusted = false@, or @cert(beta,h)@ with @(beta,h)@ absent from the
     -- rule's certifiers (spec §4, §5).
@@ -291,6 +296,7 @@ premiseMismatch =
             , policyExceptions = []
             , policyAdmission = []
             , policyTheories = []
+            , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
         "arg 'a', premise 0: concl(e1) = reports(exp_3, effect(m, accuracy, d_shift, 2.1)) "
@@ -353,6 +359,7 @@ unaccountedQuestion =
             , policyExceptions = []
             , policyAdmission = []
             , policyTheories = []
+            , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
         "arg 'a': question 'randomization' of rule 'controlled_experiment' is "
@@ -402,6 +409,7 @@ illTypedAttack =
             , policyExceptions = []
             , policyAdmission = []
             , policyTheories = []
+            , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
         "attack 'rebut d a_strict': target's top rule 'deductive_step' is strict; "
@@ -444,6 +452,7 @@ strictReachableContrary =
             , policyExceptions = []
             , policyAdmission = []
             , policyTheories = []
+            , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
         "policy 'illformed-policy-v1': strict-reachable proposition 'derived(X)' "
@@ -483,6 +492,7 @@ admissionReject =
             , policyExceptions = []
             , policyAdmission = [((Assumed, AiExecuted), Reject)]
             , policyTheories = []
+            , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
         "leaf 'e_assumed': admission(assumed, ai-executed) = reject (§4.3) — "
@@ -522,6 +532,7 @@ strictAssuranceViolation =
             , policyExceptions = []
             , policyAdmission = []
             , policyTheories = []
+            , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
         "arg 'a': assurance = trusted, but rule 'deductive_step' has "
@@ -541,6 +552,50 @@ strictAssuranceViolation =
       , DeclStatus (PropId "c")
       ]
 
+-- ===========================================================================
+-- N9 — DuplicateReportGroupConflict (spec §4.3, R9)
+-- ===========================================================================
+
+-- | Two leaves report one measurand cell with conflicting values
+-- (@effect(up) ≢ effect(down)@) and are declared a duplicate-report group. The
+-- policy escalates conflicts (@duplicate-reports = reject@), so the checker
+-- rejects the whole program with a data-integrity diagnostic located at the
+-- group declaration (spec §4.3, R9). Under the default @quarantine@ this would
+-- instead __accept__ with the dependent claim routed to @gap@ (spec §10.1), so
+-- only the escalated form is a negative here — the @quarantine@ counterpart is
+-- to R9 what a @quarantine@ leaf is to 'admissionReject' (R8).
+duplicateReportGroupConflict :: Negative
+duplicateReportGroupConflict =
+  Negative
+    { negName = "duplicate-report group with ≢ members, escalated to reject"
+    , negClass = DuplicateReportGroupConflict
+    , negSpecRef = "§4.3"
+    , negProgram =
+        prog
+          "dup-report-v1"
+          [ DeclClaim (claimD "c" "the reported effect" (atom "effect" [con "up"]))
+          , DeclLeaf (leafD "e1" (atom "effect" [con "up"]) Observed AiExecuted)
+          , DeclLeaf (leafD "e2" (atom "effect" [con "down"]) Observed AiExecuted)
+          , DeclGroup (DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"])
+          , DeclArg (Arg (ArgId "a") (SupportsClaim (PropId "c")) (SLeaf (LeafId "e1")))
+          , DeclStatus (PropId "c")
+          ]
+    , negPolicy =
+        Just $
+          Policy
+            { policyId = PolicyId "dup-report-v1"
+            , policyRules = []
+            , policyContraries = []
+            , policyExceptions = []
+            , policyAdmission = []
+            , policyTheories = []
+            , policyGroupMode = RejectOnConflict
+            }
+    , negDiagnostic =
+        "group 'g1': members e1, e2 report one cell with ≢ propositions and "
+          ++ "the policy escalates conflicts to reject (§4.3)"
+    }
+
 -- ---------------------------------------------------------------------------
 -- Index
 -- ---------------------------------------------------------------------------
@@ -556,4 +611,5 @@ allNegatives =
   , strictReachableContrary
   , admissionReject
   , strictAssuranceViolation
+  , duplicateReportGroupConflict
   ]

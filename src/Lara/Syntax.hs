@@ -360,6 +360,12 @@ admissionTable =
 boolTable :: [(String, Bool)]
 boolTable = [("true", True), ("false", False)]
 
+-- | Duplicate-report-group conflict outcome (spec §4.3): the @duplicate-reports@
+-- policy setting.
+groupModeTable :: [(String, GroupConflictMode)]
+groupModeTable =
+  [("quarantine", QuarantineOnConflict), ("reject", RejectOnConflict)]
+
 -- | Reverse table lookup for canonical printing (constructors are unique).
 tableToString :: (Eq a) => [(String, a)] -> a -> String
 tableToString tbl a = case [s | (s, b) <- tbl, b == a] of
@@ -383,6 +389,9 @@ admissionStr = tableToString admissionTable
 
 boolStr :: Bool -> String
 boolStr = tableToString boolTable
+
+groupModeStr :: GroupConflictMode -> String
+groupModeStr = tableToString groupModeTable
 
 -- | Provenance is a small closed vocabulary with one compound form,
 -- @checker(name, version)@ (grammar §1.4).
@@ -512,7 +521,7 @@ versionToken = do
 -- | The leading keywords that open a top-level @decl@ (grammar §3).
 declKeywords :: [String]
 declKeywords =
-  ["claim", "leaf", "arg", "rebut", "undercut", "undermine", "status"]
+  ["claim", "leaf", "arg", "rebut", "undercut", "undermine", "status", "group"]
 
 -- | Zero-or-more @decl@s in declaration order, stopping at the first token that
 -- is not a declaration keyword. Once a keyword is seen the declaration is parsed
@@ -540,7 +549,8 @@ declP = do
     Just "status" -> do
       keyword "status"
       DeclStatus . PropId <$> identifier
-    _ -> failP "expected a declaration (claim | leaf | arg | rebut | undercut | undermine | status)"
+    Just "group" -> DeclGroup <$> groupP
+    _ -> failP "expected a declaration (claim | leaf | arg | rebut | undercut | undermine | status | group)"
 
 claimP :: P Claim
 claimP = do
@@ -628,6 +638,17 @@ leafP = do
       , leafProvenance = prov
       , leafRefs = refs
       }
+
+-- | @group ident = [ leafId,… ]@ (grammar §3): a duplicate-report group over
+-- declared leaf ids (spec §4.3). The named id lets an R9 data-integrity
+-- diagnostic locate the group declaration.
+groupP :: P DupGroup
+groupP = do
+  keyword "group"
+  gid <- identifier
+  symbol '='
+  members <- brackets (LeafId <$> identifier)
+  pure (DupGroup (GroupId gid) members)
 
 -- | @refs = [ sourceRef,… ]@, lexed in ref-list mode: @\'#\'@ is literal and
 -- comment recognition is suspended inside the brackets (grammar §1.2).
@@ -845,12 +866,13 @@ parsePolicy = runComplete (policyP <* eof)
 data PolicyAcc
   = PolicyAcc [Rule] [Contrary] [Exception]
       [((LeafKind, Provenance), Admission)] [(TheoryDigest, [Prop])]
+      GroupConflictMode
 
 policyP :: P Policy
 policyP = do
   keyword "policy"
   pid <- identifier
-  PolicyAcc rs cs es adm ts <- policyDecls (PolicyAcc [] [] [] [] [])
+  PolicyAcc rs cs es adm ts gm <- policyDecls (PolicyAcc [] [] [] [] [] QuarantineOnConflict)
   pure
     Policy
       { policyId = PolicyId pid
@@ -859,21 +881,27 @@ policyP = do
       , policyExceptions = es
       , policyAdmission = adm
       , policyTheories = ts
+      , policyGroupMode = gm
       }
 
 policyDecls :: PolicyAcc -> P PolicyAcc
-policyDecls acc@(PolicyAcc rs cs es adm ts) = do
+policyDecls acc@(PolicyAcc rs cs es adm ts gm) = do
   mw <- peekIdent
   case mw of
-    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm ts)
-    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm ts)
-    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm ts)
-    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a) ts)
+    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm ts gm)
+    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm ts gm)
+    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm ts gm)
+    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a) ts gm)
+    Just "duplicate-reports" -> do
+      keyword "duplicate-reports"
+      symbol '='
+      gm' <- enumFromTable "a group conflict mode (quarantine | reject)" groupModeTable
+      policyDecls (PolicyAcc rs cs es adm ts gm')
     Just "theory" -> do
       t@(TheoryDigest d, _) <- theoryLineP
       if any (\(TheoryDigest d', _) -> d' == d) ts
         then failP ("duplicate theory digest: " ++ d)
-        else policyDecls (PolicyAcc rs cs es adm (ts ++ [t]))
+        else policyDecls (PolicyAcc rs cs es adm (ts ++ [t]) gm)
     _ -> pure acc
 
 -- | @theoryLine ::= "theory" digest "=" "[" [ prop { "," prop } ] "]"@
@@ -1195,6 +1223,12 @@ printDecl d = case d of
   DeclArg a -> printArg a
   DeclAttack k -> [printAttack k]
   DeclStatus (PropId c) -> ["status " ++ c]
+  DeclGroup g -> [printGroup g]
+
+-- | @group ident = [ leafId,… ]@ (grammar §3, spec §4.3).
+printGroup :: DupGroup -> String
+printGroup (DupGroup (GroupId g) members) =
+  "group " ++ g ++ " = [" ++ intercalate ", " [l | LeafId l <- members] ++ "]"
 
 printClaim :: Claim -> [String]
 printClaim c =
@@ -1289,10 +1323,15 @@ printPolicy p =
       ++ prependBlank (map printContrary (policyContraries p))
       ++ prependBlank (map printException (policyExceptions p))
       ++ printAdmission (policyAdmission p)
+      ++ printGroupMode (policyGroupMode p)
       ++ printTheories (policyTheories p)
   where
     prependBlank [] = []
     prependBlank xs = "" : xs
+    -- The default is omitted, mirroring the optional admission block, so
+    -- group-free policies print byte-identically to the pre-groups grammar.
+    printGroupMode QuarantineOnConflict = []
+    printGroupMode m = ["", "duplicate-reports = " ++ groupModeStr m]
 
 printRule :: Rule -> [String]
 printRule r =

@@ -31,4 +31,5 @@ testCheckInput unit =
         , policyExceptions = []
         , policyAdmission = []
         , policyTheories = unitTheories unit
+        , policyGroupMode = QuarantineOnConflict
         }

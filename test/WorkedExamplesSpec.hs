@@ -35,7 +35,11 @@ import Lara.AST
   , BackendId (..)
   , Cert (..)
   , Digest (..)
+  , DupGroup (..)
+  , GroupConflictMode (..)
+  , GroupId (..)
   , Label (..)
+  , LeafId (..)
   , Policy
   , Program
   , PolicyId (..)
@@ -268,7 +272,7 @@ prop_replayPreflightExpectedJson =
             ]
       ]
   where
-    empty = Unit [] [] [] [] [] [] [] []
+    empty = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
     duplicateInput = preflightInput [(BackendId "nd", "1"), (BackendId "nd", "1")] empty
     unknownInput = preflightInput [(BackendId "nd", "1"), (BackendId "other", "2")] empty
     certificate =
@@ -297,6 +301,59 @@ prop_replayPreflightExpectedJson =
         JObject
           [ ("replay-id", _)
           , ("verdict-class", JString "reject R13")
+          , ("located-diagnostic", value)
+          ] -> value
+        value -> value
+
+-- | The R9 (escalated duplicate-report-group conflict) @expected.json@ path.
+-- Like R13's preflight, an R9 boundary rejection never reaches @checkUnit@, so
+-- 'expectedJsonValue' must render it directly ('Lara.ExpectedJson' finding: the
+-- 'rejectDiag' @checkUnit@ branch would otherwise mis-locate or return @JNull@).
+-- This pins the located diagnostic and the byte-exact @message@ both drivers
+-- print on @stderr@.
+prop_groupConflictExpectedJson :: Property
+prop_groupConflictExpectedJson =
+  once $
+    r9Diagnostic groupConflictInput
+      === JObject
+        [ ("kind", JString "reject")
+        , ("class", JString "R9")
+        , ("stage", JString "group-boundary")
+        , ("constituent", JObject [("kind", JString "group"), ("id", JString "g1")])
+        , ("members", JArray [JString "e1", JString "e2"])
+        , ( "message"
+          , JString
+              ( "group 'g1': members e1, e2 report one cell with "
+                  ++ "≢ propositions and the policy escalates conflicts to reject (§4.3)"
+              )
+          )
+        ]
+  where
+    effect c = Prop (Pred "effect") [TCon (FunSym c) []]
+    empty = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+    groupConflictUnit =
+      empty
+        { unitLeaves = [(LeafId "e1", effect "up"), (LeafId "e2", effect "down")]
+        , unitArgs = [(ArgId "a1", SLeaf (LeafId "e1"))]
+        , unitQueries = [effect "up"]
+        , unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+        , unitGroupMode = RejectOnConflict
+        }
+    groupConflictInput =
+      let replayId =
+            either (error . replayErrorMessage) id $
+              mkReplayId
+                LaraCoreV01
+                (PolicyId "conformance-v1")
+                [(BackendId "nd", "1")]
+                []
+                (Digest "sha256:conformance-corpus-v1")
+       in either (error . replayErrorMessage) id (mkCheckInput replayId groupConflictUnit)
+    r9Diagnostic input =
+      case expectedJsonValue input of
+        JObject
+          [ ("replay-id", _)
+          , ("verdict-class", JString "reject R9")
           , ("located-diagnostic", value)
           ] -> value
         value -> value
@@ -440,6 +497,7 @@ workedExamplesSpecProps =
   , ("R2 strict-contrary → reject R12", quickCheckResult prop_R2)
   , ("R3 bad-attack-target → reject R10", quickCheckResult prop_R3)
   , ("expected JSON reports every replay preflight reason", quickCheckResult prop_replayPreflightExpectedJson)
+  , ("expected JSON reports the escalated group-conflict (R9)", quickCheckResult prop_groupConflictExpectedJson)
   , ("worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)", quickCheckResult prop_freshness)
   , ("worked-example expected.json goldens are fresh (elaborate+render == committed)", quickCheckResult prop_expectedJsonFresh)
   , ("coverage matrix: every status, attack kind, and R1/R12/R10 witnessed by the suite", quickCheckResult prop_coverageMatrix)

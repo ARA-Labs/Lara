@@ -31,7 +31,7 @@ import Data.Char (ord)
 import Data.List (sortBy)
 
 import Lara.AST
-import Lara.Prop (Prop (..), Term (..))
+import Lara.Prop (FunSym (..), Prop (..), Term (..))
 import Lara.Replay
 import Lara.Strict (SExpr (..))
 import Lara.Wire (encodeCheckInput, printSExpr)
@@ -53,6 +53,8 @@ mkUnit rules contraries exceptions ls as ats qs =
     , unitArgs = as
     , unitAttacks = ats
     , unitQueries = qs
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 defRule :: String -> [String] -> [AtomPat] -> AtomPat -> [Question] -> Rule
@@ -104,6 +106,55 @@ independentAccept =
     [(ArgId "a0", SLeaf (LeafId "l0")), (ArgId "a1", SLeaf (LeafId "l1")), (ArgId "a2", SLeaf (LeafId "l2"))]
     []
     [atom0 "p0" [], atom0 "p1" [], atom0 "p2" []]
+
+-- Duplicate-report groups (spec §4.3) --------------------------------------
+
+-- | A constant term (no numeric literals, per the corpus policy).
+c :: String -> Term
+c name = TCon (FunSym name) []
+
+-- | A ≡-consistent duplicate-report group: two leaves report one cell with the
+-- same value (@effect(up) ≡ effect(up)@) and are grouped. The group admits
+-- normally; the argument built on a member is @in@ / @justified@.
+groupConsistentAccept :: Unit
+groupConsistentAccept =
+  ( mkUnit
+      []
+      []
+      []
+      [(LeafId "e1", atom0 "effect" [c "up"]), (LeafId "e2", atom0 "effect" [c "up"])]
+      [(ArgId "a1", SLeaf (LeafId "e1"))]
+      []
+      [atom0 "effect" [c "up"]]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | A ≢ duplicate-report group under the default quarantine policy: two leaves
+-- report one cell with conflicting values (@effect(up) ≢ effect(down)@). Both
+-- members are quarantined, the argument on @e1@ is dropped, and the queried
+-- claim has no support — @gap@, never a rejection (§4.3).
+groupConflictQuarantine :: Unit
+groupConflictQuarantine =
+  ( mkUnit
+      []
+      []
+      []
+      [(LeafId "e1", atom0 "effect" [c "up"]), (LeafId "e2", atom0 "effect" [c "down"])]
+      [(ArgId "a1", SLeaf (LeafId "e1"))]
+      []
+      [atom0 "effect" [c "up"]]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | The same ≢ group escalated by policy (@duplicate-reports = reject@): the
+-- conflict is a whole-program data-integrity error — rejection class R9 (§4.3).
+groupConflictReject9 :: Unit
+groupConflictReject9 =
+  groupConflictQuarantine {unitGroupMode = RejectOnConflict}
 
 -- | Default-heartbeat stress: 120 independent leaf arguments over distinct
 -- atoms, all queried. Exercises 120-argument support checking, the O(n^2)
@@ -360,6 +411,8 @@ strictCertAccept =
               (SList [SAtom "hyp", SAtom "0"]))))]
     , unitAttacks = []
     , unitQueries = [atom0 "pp" []]
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 -- | C11 quoted-atom anchor: the 'strictCertAccept' shape with the theory
@@ -383,6 +436,8 @@ strictCertUnicodeTheory =
               (SList [SAtom "hyp", SAtom "0"]))))]
     , unitAttacks = []
     , unitQueries = [atom0 "pp" []]
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 -- Replay-preflight anchors (PR #44 review C3) -------------------------------
@@ -408,6 +463,8 @@ preflightCertUnit =
               (SList [SAtom "hyp", SAtom "0"]))))]
     , unitAttacks = []
     , unitQueries = [atom0 "pp" []]
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 -- ---------------------------------------------------------------------------
@@ -418,6 +475,9 @@ corpus :: [(FilePath, Unit)]
 corpus =
   [ ("fixtures/corpus/rebut-program.sexp", rebutProgram)
   , ("fixtures/corpus/independent-accept.sexp", independentAccept)
+  , ("fixtures/corpus/group-consistent-accept.sexp", groupConsistentAccept)
+  , ("fixtures/corpus/group-conflict-quarantine.sexp", groupConflictQuarantine)
+  , ("fixtures/corpus/reject-r9.sexp", groupConflictReject9)
   , ("fixtures/corpus/stress-independent-120.sexp", stressUnit 120)
   , ("fixtures/corpus/reject-duplicate-rule.sexp", negDuplicateRule)
   , ("fixtures/corpus/reject-duplicate-argument.sexp", negDuplicateArgument)

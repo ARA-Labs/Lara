@@ -119,6 +119,8 @@ mkUnit args attacks queries =
     , unitArgs = args
     , unitAttacks = attacks
     , unitQueries = queries
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 -- | Run the reporting analysis on a unit's queries.

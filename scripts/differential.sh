@@ -21,14 +21,16 @@
 # exception: the canonical-order anchor below also pins a per-driver stderr
 # substring, because exit-2-only cannot isolate which check fired there.
 #
-# Preflight precedence pinning (PR #44 re-review): the three
-# fixtures/corpus/reject-preflight-*.sexp anchors all emit the identical
-# stdout verdict "(verdict … reject R13)", so the duplicate → unknown →
-# unselected-certificate precedence is observable only on stderr. The
-# replayFailureMessage templates are byte-identical across drivers by
-# construction, so for these three anchors the harness additionally
-# byte-compares stderr — a Lean-side precedence regression turns red here
-# instead of passing silently.
+# Stderr pinning (PR #44 re-review + #45 R9): two rejection classes carry
+# their location only on stderr, because the stdout verdict is a bare class
+# atom. The three fixtures/corpus/reject-preflight-*.sexp anchors all emit
+# "(verdict … reject R13)", so the duplicate → unknown → unselected-certificate
+# precedence is observable only via the replayFailureMessage line; the
+# fixtures/corpus/reject-r9.sexp anchor emits "(verdict … reject R9)", which
+# cannot say which group conflicted — the groupConflictMessage line does. Both
+# template families are byte-identical across drivers by construction, so for
+# these anchors the harness additionally byte-compares stderr — a Lean-side
+# regression turns red here instead of passing silently.
 #
 # Usage:  bash scripts/differential.sh
 # Exit:   0 iff every anchor agrees (positive byte-parity AND negative
@@ -125,15 +127,19 @@ while IFS= read -r f; do
     stdout_matches=0
   fi
 
-  # Preflight precedence anchors (PR #44 re-review): all three ReplayFailure
-  # kinds collapse to the identical stdout verdict "reject R13", so the
-  # duplicate → unknown → unselected-certificate precedence is observable
-  # only via the stderr replayFailureMessage line. Those templates are
-  # byte-identical across drivers, so byte-compare stderr for these anchors
-  # (and require it non-empty); every other anchor's stderr stays free.
+  # Stderr-pinned anchors. Two rejection classes carry their location only on
+  # stderr because the stdout verdict is a bare class atom:
+  #   * reject-preflight-* (R13): all three ReplayFailure kinds collapse to the
+  #     identical "reject R13", so the duplicate → unknown → unselected-cert
+  #     precedence is observable only via the replayFailureMessage line;
+  #   * reject-r9 (R9): the escalated group-conflict verdict "reject R9" cannot
+  #     say which group conflicted — the groupConflictMessage line does.
+  # Both templates are byte-identical across drivers, so byte-compare stderr for
+  # these anchors (and require it non-empty); every other anchor's stderr stays
+  # free.
   stderr_matches=1
   case "$f" in
-    fixtures/corpus/reject-preflight-*.sexp)
+    fixtures/corpus/reject-preflight-*.sexp | fixtures/corpus/reject-r9.sexp)
       if ! cmp -s "$hs_stderr" "$lean_stderr" || [ ! -s "$hs_stderr" ]; then
         stderr_matches=0
       fi

@@ -240,6 +240,22 @@ genUnit = do
       then pure []
       else smallListOf (genAttackFrom (map fst args))
   queries <- smallListOf genProp
+  let leafIds = nub (map fst leaves)
+  groupMembers <-
+    if length leafIds < 2
+      then pure []
+      else choose (0, 2) >>= \n -> vectorOf n (sublistOf leafIds)
+  let groups =
+        [ DupGroup (GroupId ("g" ++ show i)) (nub ms)
+        | (i, ms) <- zip [0 :: Int ..] groupMembers
+        , length (nub ms) >= 2
+        ]
+  -- The conflict mode is only wire-carried when groups exist, so keep it at the
+  -- canonical default otherwise (else @decode ∘ encode@ would not be identity).
+  groupMode <-
+    if null groups
+      then pure QuarantineOnConflict
+      else elements [QuarantineOnConflict, RejectOnConflict]
   pure
     Unit
       { unitRules = rules
@@ -250,6 +266,8 @@ genUnit = do
       , unitArgs = args
       , unitAttacks = attacks
       , unitQueries = queries
+      , unitGroups = groups
+      , unitGroupMode = groupMode
       }
 
 -- ---------------------------------------------------------------------------
@@ -514,6 +532,8 @@ goldenUnit =
         , Undermine (ArgId "a0") (ArgId "a1") [StepPremise 0]
         ]
     , unitQueries = [Prop (Pred "p") [], Prop (Pred "q") []]
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 goldenReplayText :: String
@@ -639,7 +659,7 @@ prop_unitGoldenLayoutVariants =
     spelled =
       "(unit (policy (rules) (contraries) (exceptions)) (theories) \
       \(leaves) (args) (attacks) (queries))"
-    minimalUnit = Unit [] [] [] [] [] [] [] []
+    minimalUnit = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
 
 -- | The unit round trip: decode ∘ encode = Right id, through the text layer.
 prop_unitRoundTrip :: Property
@@ -791,6 +811,15 @@ prop_unitMalformedMatrix = all isLeft (map decodeUnit malformed)
       -- wire well-formedness (R14 invariants)
       , SList [SAtom "unit", SList [SAtom "args", argA0, argA0']] -- duplicate arg ids
       , SList [SAtom "unit", SList [SAtom "attacks", SList [SAtom "rebut", SAtom "a0", SAtom "a1"]]] -- undeclared endpoint
+      -- duplicate-report groups (spec §4.3): decode shape + R14 well-formedness
+      , SList [SAtom "unit", SList [SAtom "groups"]] -- groups section missing its conflict mode
+      , SList [SAtom "unit", groupLeaves, SList [SAtom "groups", SAtom "bogus", groupG12]] -- unknown conflict mode
+      , SList [SAtom "unit", SList [SAtom "groups", SAtom "reject", SList [SAtom "group", SAtom "g"]]] -- group bad arity (no members list)
+      , SList [SAtom "unit", SList [SAtom "groups", SAtom "reject", SList [SAtom "group", SAtom "g", SAtom "notalist"]]] -- members not a list
+      , SList [SAtom "unit", groupLeaves, SList [SAtom "groups", SAtom "reject", groupG12, groupG12]] -- duplicate group id
+      , SList [SAtom "unit", groupLeaves, SList [SAtom "groups", SAtom "reject", SList [SAtom "group", SAtom "g", SList [SAtom "l1", SAtom "l1"]]]] -- repeated member
+      , SList [SAtom "unit", groupLeaves, SList [SAtom "groups", SAtom "reject", SList [SAtom "group", SAtom "g", SList [SAtom "l1"]]]] -- fewer than two members
+      , SList [SAtom "unit", groupLeaves, SList [SAtom "groups", SAtom "reject", SList [SAtom "group", SAtom "g", SList [SAtom "l1", SAtom "lX"]]]] -- dangling member (not a declared leaf)
       ]
     leavesSec = SList [SAtom "leaves", SList [SAtom "leaf", SAtom "l", apatAtomP]]
     policySec = SList [SAtom "policy", rulesSec, contrariesSec, exceptionsSec]
@@ -831,6 +860,13 @@ prop_unitMalformedMatrix = all isLeft (map decodeUnit malformed)
         , SList [SAtom "arg", SAtom "a0", SList [SAtom "leaf", SAtom "l"]]
         , SList [SAtom "arg", SAtom "a1", SList [SAtom "leaf", SAtom "l"]]
         ]
+    groupLeaves =
+      SList
+        [ SAtom "leaves"
+        , SList [SAtom "leaf", SAtom "l1", apatAtomP]
+        , SList [SAtom "leaf", SAtom "l2", apatAtomP]
+        ]
+    groupG12 = SList [SAtom "group", SAtom "g", SList [SAtom "l1", SAtom "l2"]]
 
 -- | Malformed verdicts are rejected at the decode boundary.
 prop_verdictMalformedMatrix :: Bool

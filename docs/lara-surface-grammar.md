@@ -110,12 +110,17 @@ namespace because they are terminal markers in attack position suffixes (§8):
 ### 1.4 Keyword & tag vocabulary (single `toString`/`parse` table)
 
 Per CLAUDE.md ("keep the core symbolic"), each fixed-vocabulary word has **one**
-surface spelling bound to one AST constructor — the `Lara.Syntax` codec owns this
-table; no scattered string literals. Structural keywords:
+surface spelling, and the `Lara.Syntax` codec owns this table — no scattered
+string literals. A given spelling may bind to more than one AST constructor when
+its meaning is fixed by syntactic position (e.g. `quarantine` / `reject` name an
+`Admission` outcome on a leaf and a `GroupConflictMode` on a `duplicate-reports`
+policy field); the codec still resolves each occurrence from its position, so the
+surface↔AST mapping stays single-valued per position. Structural keywords:
 
 ```
-artifact  policy  at  use  backends  claim  leaf  arg  status
+artifact  policy  at  use  backends  claim  leaf  arg  status  group
 rule  mode  premises  conclusion  question  contrary  exception  admission
+duplicate-reports  quarantine
 nl  formal  binding  kind  provenance  refs  author  rationale  audit-status
 by  supports  challenges  discharge  with  open  as
 rebut  undercut  undermine
@@ -132,6 +137,7 @@ Closed tag enumerations (surface ↔ `Lara.AST` constructor):
 | `audit-status` | `unreviewed` / `reviewed` / `disputed` | `AuditStatus` `Unreviewed` / `Reviewed` / `Disputed` |
 | question necessity | `(mandatory)` / `(optional)` | `Necessity` `Mandatory` / `Optional` (default `mandatory`) |
 | admission outcome | `admit` / `quarantine` / `reject` | `Admission` `Admit` / `Quarantine` / `Reject` |
+| duplicate-reports mode | `quarantine` / `reject` | `GroupConflictMode` `QuarantineOnConflict` / `RejectOnConflict` |
 | assurance | `none` / `trusted` / `cert(…)` | `Assurance` `AssuranceNone` / `AssuranceTrusted` / `AssuranceCert` |
 
 ---
@@ -180,7 +186,7 @@ program   ::= "artifact" ident "at" digest
               "use" "backends" "[" [ backendRef { "," backendRef } ] "]"
               { decl }
 
-decl      ::= claimDecl | leafDecl | argDecl | attackDecl | statusDecl
+decl      ::= claimDecl | leafDecl | argDecl | attackDecl | statusDecl | groupDecl
 
 claimDecl ::= "claim" ident
               "nl"      "=" string
@@ -199,6 +205,9 @@ leafDecl  ::= "leaf" ident ":" prop
               "refs"       "=" refsList
 
 refsList  ::= "[" [ sourceRef { "," sourceRef } ] "]"   -- lexed in ref-list mode (§1.2)
+
+groupDecl ::= "group" ident "=" "[" [ ident { "," ident } ] "]"   -- duplicate-report group (spec §4.3)
+              -- members are declared leaf ids; the named group locates an R9 diagnostic
 
 argDecl   ::= "arg" ident ":" argConcl "by" supportTerm { dischargeLine | openLine }
 
@@ -245,7 +254,7 @@ Notes:
 ```
 policyTop  ::= "policy" ident { policyDecl }
 
-policyDecl ::= ruleDecl | contraryDecl | exceptionDecl | admissionDecl
+policyDecl ::= ruleDecl | contraryDecl | exceptionDecl | admissionDecl | groupModeDecl
 
 ruleDecl   ::= "rule" ident "(" [ param { "," param } ] ")"
                "mode"       "=" mode
@@ -264,6 +273,9 @@ exceptionDecl ::= "exception" ident ":" apat             -- exception r : E
 
 admissionDecl ::= "admission" "{" [ admitRow { "," admitRow } ] "}"   -- OPTIONAL block
 admitRow      ::= "(" leafKind "," provenance ")" "=" admission
+
+groupModeDecl ::= "duplicate-reports" "=" groupMode   -- OPTIONAL; default "quarantine"
+groupMode     ::= "quarantine" | "reject"             -- §4.3 conflict outcome (R9 on "reject")
 ```
 
 Notes:

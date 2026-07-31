@@ -155,8 +155,15 @@ sessions:
     open_threads: 3
   - id: "2026-07-30_001"
     date: "2026-07-30"
-    summary: "M4 and result 9 closed; Model-A backend replacement strengthened by constructive transport. PR #43 merged. Status housekeeping synchronized READMEs, roadmap, mechanization ledger/plan, keynote, and source docs; #31/#37 closed. Next M5 prerequisites: #36/#38."
-    turn_count: 4
-    events_count: 9
-    claims_touched: [C04]
+    summary: "M4 and result 9 closed; Model-A backend replacement strengthened by constructive transport (PR #43). Status housekeeping; #31/#37 closed. Then #38 duplicate-report groups implemented cross-layer + mechanized (Lara.Groups) with §4.3 quarantine→gap / R9 escalation at the driver boundary; differential 41/41; PR #45 (closes #38); C21 crystallized. Both M5 prerequisites (#36/#38) now closed."
+    turn_count: 5
+    events_count: 15
+    claims_touched: [C04, C21]
+    open_threads: 4
+  - id: "2026-07-31_001"
+    date: "2026-07-31"
+    summary: "PR #45 review remediation, two rounds. R1 (N87): reproduced R9-evasion hole fixed (.lara R14 parity), byte-identical R9 stderr diagnostic + differential anchor, rejectionClass total over R9, coverage + provenance fixes. R2 (N88): Lean twin re-synced to Haskell dangling-member semantics (consistentB_iff re-proved), validateGroups negatives, R13-over-R9 stderr pin, 3 sibling malformed fixtures (negatives 9/9). All gates green both rounds. N87+N88; O21+O22 staged; C21 evidence extended twice."
+    turn_count: 2
+    events_count: 4
+    claims_touched: [C21]
     open_threads: 3

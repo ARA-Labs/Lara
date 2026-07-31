@@ -1668,3 +1668,146 @@ tree:
       - "ara/evidence/status/mechanization_status.md; docs/slides/keynote.html"
       - "GitHub issues #31 and #37 closed as completed"
     status: resolved
+  - id: N83
+    type: pivot
+    provenance: user
+    timestamp: "2026-07-30T16:30"
+    also_depends_on: [N82]
+    from: "M4 / result-9 mechanization complete; status housekeeping done"
+    to: "M5 implementation track: #38 duplicate-report groups, cross-layer"
+    trigger: "user: 'go to a worktree, do issue #38'"
+    status: resolved
+  - id: N84
+    type: decision
+    provenance: ai-executed
+    timestamp: "2026-07-30T16:40"
+    also_depends_on: [N83]
+    title: "Group-consistency (R9) is a driver-boundary check, not a checkUnit stage"
+    choice: >
+      Enforce §4.3 group consistency at the shared driver boundary (runCheck /
+      Lean runOnContents), the same layer as the R13 replay preflight, and add
+      R9 to RejectClass. checkUnit's six executable stages stay untouched; the
+      Unit carries unitGroups + unitGroupMode, decoded from a new optional wire
+      `groups` section that both drivers read byte-identically.
+    alternatives:
+      - "A new checkUnit stage (would entangle admission with the executable core)"
+      - "Elaborator-only enforcement (not differential-checked, not mechanized)"
+    evidence:
+      - "PR #45; src/Lara/Driver.hs; lean/Lara/Driver.lean; src/Lara/Wire.hs"
+      - "spec §4.3, §10.1 (R9 located at the group declaration)"
+    status: resolved
+  - id: N85
+    type: dead_end
+    provenance: ai-executed
+    timestamp: "2026-07-30T16:50"
+    also_depends_on: [N84]
+    title: "Quarantine via Gamma-removal alone yields R1 reject, not gap"
+    hypothesis: >
+      Modelling quarantine by removing the conflicted leaves from Gamma (so the
+      §6.1 leaf rule fails at each occurrence) suffices to route the dependent
+      claim to gap.
+    failure_mode: >
+      checkUnit's checkArguments REJECTS on the first support error — a
+      missing-leaf reference raises R1 and aborts the whole program. That is a
+      rejection, contradicting spec §10.1 ("quarantine is not rejection"); the
+      verdict would be R1, not accept-with-gap.
+    lesson: >
+      Quarantine must DROP the arguments that reference a conflicted leaf (and
+      attacks whose endpoints vanish) at the boundary before checkUnit, so the
+      claim simply has no support and surfaces as gap — mirrored identically in
+      both drivers. Gamma-none is the reason the drop is safe (the arg could not
+      have typed), not the mechanism.
+    status: resolved
+  - id: N86
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-30T17:10"
+    also_depends_on: [N84, N85]
+    title: "#38 duplicate-report groups landed cross-layer; all gates green"
+    result: >
+      Implemented end-to-end: AST carrier (DupGroup/GroupConflictMode,
+      unitGroups/unitGroupMode, R9), surface parser/printer, wire codec,
+      elaborator lowering, and the driver boundary check (consistent→admit,
+      conflict→quarantine→gap, escalated→R9). Lean: new Lara.Groups module with
+      6 sorry-free theorems (pairwise-≡ ⟺ representative, quarantine membership,
+      arg exclusion, leaf-rule connection, escalation characterization).
+      Gates: `cabal test` PASS; `lake build` clean; `scripts/check-axioms.sh`
+      passed (all 6 Lara.Groups theorems trio-only, no sorryAx);
+      `scripts/differential.sh` pass=41 fail=0 + 5/5 malformed negatives.
+      Committed + pushed; PR #45 opened (closes #38).
+    evidence:
+      - "PR #45 (branch worktree-issue-38-duplicate-report-groups)"
+      - "differential.sh: «pass=41 fail=0» + «negative pass=5 fail=0» [result]"
+      - "check-axioms.sh: «Axiom audit passed.» [result]"
+      - "lean/Lara/Groups.lean; fixtures/corpus/{group-consistent-accept,group-conflict-quarantine,reject-r9}.sexp"
+    status: resolved
+  - id: N87
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-31T10:30"
+    also_depends_on: [N86]
+    title: "PR #45 review remediation: R9-evasion hole fixed, R9 diagnostic added, coverage hardened"
+    result: >
+      Addressed all findings of the CHANGES_REQUESTED review on PR #45. Key
+      correctness fix (reviewer-reproduced): the .lara elaborator never validated
+      duplicate-report-group R14 well-formedness (the .sexp wire decoder did), so
+      a dangling group member was silently dropped, degrading the group to a
+      vacuously-consistent singleton and turning an intended R9 rejection into an
+      ACCEPT — the two front doors disagreed on the same logical artifact. Fixed
+      by adding Elaborate.validateGroups (unique ids, ≥2 distinct members, all
+      members declared leaves — mirroring Wire.checkGroupInvariants) plus
+      defense-in-depth in Driver.groupConsistent (unresolvable member ⇒ conflict).
+      Also: R9 now emits a byte-identical stderr diagnostic in BOTH drivers
+      (Driver.groupConflictMessage / Lean groupConflictMessage via shared
+      rejectionDiagnostics), pinned by a new differential stderr anchor on
+      reject-r9.sexp; rejectionClass made total over R9 (reuses Wire.rejectClassTag);
+      expectedJsonValue renders the R9 boundary diagnostic directly. Coverage: group
+      R14 decode matrix (8 cases) + fixtures/malformed/group-dangling-member.sexp,
+      DeclGroup round-trip + duplicate-reports=bogus parse negative, R13→R9
+      precedence, quarantine arg+attack pruning over a rule-instance support term,
+      3-member partial-agreement, multi-group independence, R9 expected.json.
+      Doc/provenance corrections across plan §, grammar §1.4, AST/Groups haddock.
+      Gates: `cabal test` PASS (131 property blocks); `lake build` clean;
+      `check-axioms.sh` passed; `differential.sh` pass=41 + 6/6 negatives (R9
+      stderr now byte-compared across drivers).
+    evidence:
+      - "PR #45 review (fenfenai, CHANGES_REQUESTED); reviewer reproduced the R9-evasion on this branch"
+      - "differential.sh: «pass=41 fail=0» + «negative pass=6 fail=0» [result]"
+      - "check-axioms.sh: «Axiom audit passed.» [result]"
+      - "src/Lara/Elaborate.hs (validateGroups); src/Lara/Driver.hs + lean/Lara/Driver.lean (groupConflictMessage); scripts/differential.sh (R9 stderr anchor)"
+      - "fixtures/malformed/group-dangling-member.sexp; test/{CheckSpec,WireSpec,SyntaxSpec,WorkedExamplesSpec}.hs"
+    status: resolved
+  - id: N88
+    type: experiment
+    provenance: ai-executed
+    timestamp: "2026-07-31T21:30"
+    also_depends_on: [N87]
+    title: "PR #45 second-round remediation: Lean twin re-synced to Haskell dangling-member semantics; parity coverage completed"
+    result: >
+      All 6 first-round threads resolved by the reviewer (original exploit
+      re-reproduced as fixed); 4 new findings on remediation commit 7048b89, all
+      addressed in 9c85c3d. Headline: the first-round defense-in-depth
+      (groupConsistent: unresolvable member => conflict) had landed only on the
+      Haskell side — Lean Groups.memberProps still filterMap'd missing leaves, so
+      the two frozen twins disagreed on dangling-member units and consistentB_iff
+      / mem_quarantined_iff / conflictReject_iff mechanized the OLD skip
+      semantics (unreachable past both R14-validating doors, so no fixture could
+      expose it). Fixed by mirroring: memberProps := members.mapM (leafProp)
+      (none on an unresolvable member), consistentB none => false, Consistent
+      restated as exists-resolved-list + pairwise-equiv; consistentB_iff
+      re-proved, the other two theorems compile unchanged (they treat consistentB
+      opaquely). Also: 4 ElaborateSpec negatives pinning validateGroups' four
+      error paths (.lara-door R14 regression tests, same checks same order as the
+      wire decoder); a third conjunct in prop_groupPrecedenceR13BeatsR9 pinning
+      R13-over-R9 on stderr via rejectionDiagnostics; 3 sibling malformed
+      fixtures (duplicate-id / repeated-member / singleton) giving all four
+      malformed group shapes end-to-end Lean-vs-Haskell decode parity. Gates:
+      cabal test PASS; differential.sh pass=41 + 9/9 negatives; lake build clean;
+      check-axioms.sh passed. Commit 9c85c3d pushed; all 4 threads replied.
+    evidence:
+      - "PR #45 re-review (fenfenai, CHANGES_REQUESTED): 6/6 prior threads resolved, 4 new findings on 7048b89"
+      - "differential.sh: «pass=41 fail=0» + «negative pass=9 fail=0» [result]"
+      - "check-axioms.sh: «Axiom audit passed.» [result]"
+      - "cabal test: «elaborate negatives are located Left ElabError +++ OK» / «R13-over-R9 precedence +++ OK» [result]"
+      - "lean/Lara/Groups.lean (memberProps/consistentB/Consistent/consistentB_iff); test/{ElaborateSpec,CheckSpec}.hs; fixtures/malformed/group-{duplicate-id,repeated-member,singleton}.sexp"
+    status: resolved

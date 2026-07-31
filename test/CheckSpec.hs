@@ -37,7 +37,7 @@ import Lara.Wire
   , parseSExpr
   , printSExpr
   )
-import Lara.Driver (runCheck)
+import Lara.Driver (groupConflictMessage, rejectionDiagnostics, runCheck)
 import TestReplay (testCheckInput, testReplayId)
 
 -- ---------------------------------------------------------------------------
@@ -55,7 +55,7 @@ verdictString text =
       Right unit -> printSExpr (encodeVerdict (runCheck (testCheckInput unit)))
 
 emptyUnit :: Unit
-emptyUnit = Unit [] [] [] [] [] [] [] []
+emptyUnit = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
 
 testReplayText :: String
 testReplayText = printSExpr (encodeReplayId (testReplayId emptyUnit))
@@ -117,6 +117,13 @@ rejectionOfUnit unit = case verdictOutcome (runCheck (testCheckInput unit)) of
   Reject rejection -> Just rejection
   Accept{} -> Nothing
 
+-- | The four-state status of a query atom in an accepted unit (or 'Nothing' if
+-- the unit is rejected / the atom is not queried).
+statusOfUnit :: Unit -> Prop -> Maybe Status
+statusOfUnit unit p = case verdictOutcome (runCheck (testCheckInput unit)) of
+  Accept{verdictStatuses = sts} -> lookup p sts
+  Reject{} -> Nothing
+
 -- Small AST builders --------------------------------------------------------
 
 mkUnit
@@ -138,6 +145,8 @@ mkUnit rules contraries exceptions ls as ats qs =
     , unitArgs = as
     , unitAttacks = ats
     , unitQueries = qs
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
     }
 
 defRule :: String -> [String] -> [AtomPat] -> AtomPat -> [Question] -> Rule
@@ -498,15 +507,16 @@ mvAttackR11AndMissingConflict =
 -- 'RejectClass' haddock):
 --
 --   * __Executable classes__ (decided by 'checkUnit', one golden here each):
---     R1, R3, R4, R5, R6, R7, R10, R11, R12, R13 — plus the four structural
+--     R1, R3, R4, R5, R6, R7, R10, R11, R12 — plus the four structural
 --     program-boundary outcomes duplicate-rule, duplicate-argument,
 --     incomplete-argument, missing-conflict.
---   * __Out of the executable core__ (no 'checkUnit' golden by design): R2
---     (signature well-formedness), R8 (leaf admission), R9 (data-integrity /
---     replay identity) — outside the executable acceptance boundary per the
---     'RejectClass' haddock and spec §10.1; and R14 (codec), reported at the
---     wire decode boundary, never as a checker verdict — its rejection matrix
---     lives in "WireSpec" (the malformed-input matrix), not here.
+--   * __Driver-boundary classes__ (decided by 'runCheck' before 'checkUnit',
+--     one golden here each): R13 (replay preflight) and R9 (an escalated
+--     duplicate-report-group conflict, spec §4.3).
+--   * __Out of the executable core__ (no golden by design): R2 (signature
+--     well-formedness) and R8 (leaf admission); and R14 (codec), reported at
+--     the wire decode boundary, never as a checker verdict — its rejection
+--     matrix lives in "WireSpec" (the malformed-input matrix), not here.
 negatives :: [(String, Unit, Rejection)]
 negatives =
   [ ("duplicate-rule", negDuplicateRule, DuplicateRule)
@@ -524,8 +534,51 @@ negatives =
   , ("R11 rebut missing contrary", negR11, RejectClass R11)
   , ("R11 undercut missing exception", negUndercutMissingException, RejectClass R11)
   , ("R13 backend replay rejected", negR13, RejectClass R13)
+  , ("R9 duplicate-report-group conflict escalated", negR9, RejectClass R9)
   , ("missing-conflict", negMissingConflict, MissingConflict)
   ]
+
+-- | R9 data-integrity (spec §4.3): a ≢ duplicate-report group under the
+-- escalating policy (@duplicate-reports = reject@) is a whole-program reject,
+-- decided at the driver boundary before 'checkUnit' — like R13's replay
+-- preflight. Members @e1 : p@ and @e2 : q@ are not @≡@.
+negR9 :: Unit
+negR9 =
+  ( mkUnit
+      []
+      []
+      []
+      [(LeafId "e1", atom0 "p" []), (LeafId "e2", atom0 "q" [])]
+      [(ArgId "a1", SLeaf (LeafId "e1"))]
+      []
+      [atom0 "p" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+    , unitGroupMode = RejectOnConflict
+    }
+
+-- | The same ≢ group under the default quarantine policy: it must __accept__
+-- (quarantine is not a rejection, spec §10.1). The argument on the quarantined
+-- @e1@ is dropped, so the queried claim @p@ has no support and is @gap@.
+groupQuarantineUnit :: Unit
+groupQuarantineUnit = negR9 {unitGroupMode = QuarantineOnConflict}
+
+-- | A ≡-consistent group (both members @: p@) admits normally, so the argument
+-- on @e1@ stands and @p@ is justified.
+groupConsistentUnit :: Unit
+groupConsistentUnit =
+  ( mkUnit
+      []
+      []
+      []
+      [(LeafId "e1", atom0 "p" []), (LeafId "e2", atom0 "p" [])]
+      [(ArgId "a1", SLeaf (LeafId "e1"))]
+      []
+      [atom0 "p" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
 
 prop_negatives :: Property
 prop_negatives =
@@ -544,6 +597,200 @@ prop_negatives =
 -- valid unit (their valid forms are exercised elsewhere — R6's answer-matching
 -- accept in the support checker, R13's replay accept in "StrictSpec" and the
 -- @strict-cert-accept@ differential fixture).
+-- | Duplicate-report-group admission (spec §4.3): under the default quarantine
+-- policy a ≢ group __accepts__ (quarantine is not a rejection) with its
+-- dependent claim @gap@; a ≡-consistent group admits normally (justified). The
+-- escalated ≢ case (R9 reject) is pinned in 'negatives'.
+prop_groupQuarantine :: Property
+prop_groupQuarantine =
+  once $
+    conjoin
+      [ counterexample
+          "quarantine is not a rejection"
+          (rejectionOfUnit groupQuarantineUnit === Nothing)
+      , counterexample
+          "quarantined claim routes to gap"
+          (statusOfUnit groupQuarantineUnit (atom0 "p" []) === Just Gap)
+      , counterexample
+          "consistent group admits normally (justified)"
+          (statusOfUnit groupConsistentUnit (atom0 "p" []) === Just Justified)
+      ]
+
+-- | The exact R9 @stderr@ line both drivers print for 'negR9' (members @e1@,
+-- @e2@ of group @g1@). Pins the byte content of 'Lara.Driver.groupConflictMessage'
+-- — the differential harness byte-compares this line across drivers, so a drift
+-- here would desync them.
+prop_groupConflictMessage :: Property
+prop_groupConflictMessage =
+  once $
+    groupConflictMessage negR9
+      === Just
+        ( "group 'g1': members e1, e2 report one cell with "
+            ++ "≢ propositions and the policy escalates conflicts to reject (§4.3)"
+        )
+
+-- | Precedence: a preflight replay failure (R13) must win over an escalated
+-- group conflict (R9). 'runCheck' gates replay identity before the §4.3 group
+-- boundary. This unit fires BOTH — the same ≢ group under @reject@ alone gives
+-- R9, but wrapped in a check-input whose selected-backend set omits the arg's
+-- certificate backend the preflight fails first and the verdict is R13. Swapping
+-- the two guards in 'runCheck' flips the second assertion; the third pins the
+-- same precedence on @stderr@ ('Lara.Driver.rejectionDiagnostics'): exactly the
+-- R13 line, never the R9 'groupConflictMessage' line, when both fire.
+mixedR13AndR9 :: Unit
+mixedR13AndR9 =
+  negR13
+    { unitLeaves = unitLeaves negR13 ++ [(LeafId "e_conflict", atom0 "zz" [])]
+    , unitGroups = [DupGroup (GroupId "g1") [LeafId "e_p", LeafId "e_conflict"]]
+    , unitGroupMode = RejectOnConflict
+    }
+
+prop_groupPrecedenceR13BeatsR9 :: Property
+prop_groupPrecedenceR13BeatsR9 =
+  once $
+    conjoin
+      [ counterexample
+          "the ≢ group alone escalates to R9 (no preflight failure)"
+          (rejectionOfUnit mixedR13AndR9 === Just (RejectClass R9))
+      , counterexample
+          "preflight R13 wins over R9 when both fire"
+          (verdictOutcome (runCheck mixedInput) === Reject (RejectClass R13))
+      , counterexample
+          "stderr precedence: exactly the R13 line, never the R9 line"
+          ( case runtimeReplayFailure mixedInput of
+              Nothing -> counterexample "expected a preflight failure" (property False)
+              Just failure ->
+                rejectionDiagnostics mixedInput === [replayFailureMessage failure]
+          )
+      ]
+  where
+    mixedReplayId =
+      either (error . replayErrorMessage) id $
+        mkReplayId
+          LaraCoreV01
+          (PolicyId "conformance-v1")
+          []
+          []
+          (Digest "sha256:conformance-corpus-v1")
+    mixedInput =
+      either (error . replayErrorMessage) id (mkCheckInput mixedReplayId mixedR13AndR9)
+
+-- | Quarantine drops an argument whose support term uses a conflicted leaf
+-- __nested inside a rule instance__ (exercising 'Lara.Driver.supportUsesLeaf's
+-- recursion into rule premises), together with any attack that targets the
+-- dropped argument (exercising 'Lara.Driver.quarantineUnit's attack pruning).
+-- @a1@'s support is a rule instance whose premise is the quarantined leaf @e1@;
+-- @a2@ (a surviving leaf) rebuts @a1@. Under quarantine both @a1@ and the rebut
+-- are pruned before 'checkUnit', so the unit accepts (no dangling-endpoint
+-- error) and @a1@'s conclusion is @gap@.
+groupQuarantineDropsArgUnit :: Unit
+groupQuarantineDropsArgUnit =
+  ( mkUnit
+      [defRule "r" [] [apat0 "p" []] (apat0 "concl" []) []]
+      [Contrary (apat0 "concl" []) (apat0 "base" [])]
+      []
+      [ (LeafId "e1", atom0 "p" [])
+      , (LeafId "e2", atom0 "q" [])
+      , (LeafId "e3", atom0 "base" [])
+      ]
+      [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+      , (ArgId "a2", SLeaf (LeafId "e3"))
+      ]
+      [Rebut (ArgId "a2") (ArgId "a1")]
+      [atom0 "concl" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+prop_groupQuarantineDropsArgAndAttack :: Property
+prop_groupQuarantineDropsArgAndAttack =
+  once $
+    conjoin
+      [ counterexample
+          "accepts: the dropped arg's rebut is pruned, no dangling endpoint"
+          (rejectionOfUnit groupQuarantineDropsArgUnit === Nothing)
+      , counterexample
+          "the claim behind the dropped rule-instance arg is gap"
+          (statusOfUnit groupQuarantineDropsArgUnit (atom0 "concl" []) === Just Gap)
+      ]
+
+-- | A ≡-consistent group of __three__ members admits normally (all @: p@).
+group3ConsistentUnit :: Unit
+group3ConsistentUnit =
+  ( mkUnit
+      []
+      []
+      []
+      [ (LeafId "e1", atom0 "p" [])
+      , (LeafId "e2", atom0 "p" [])
+      , (LeafId "e3", atom0 "p" [])
+      ]
+      [(ArgId "a1", SLeaf (LeafId "e1"))]
+      []
+      [atom0 "p" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2", LeafId "e3"]]
+    , unitGroupMode = RejectOnConflict
+    }
+
+-- | The same three-member group with __partial__ agreement (@e1@, @e2 : p@ but
+-- @e3 : q@) is a conflict — pairwise-≡ fails on @e3@ — so under @reject@ it is R9.
+group3PartialConflictUnit :: Unit
+group3PartialConflictUnit =
+  group3ConsistentUnit
+    { unitLeaves =
+        [ (LeafId "e1", atom0 "p" [])
+        , (LeafId "e2", atom0 "p" [])
+        , (LeafId "e3", atom0 "q" [])
+        ]
+    }
+
+-- | Two independent groups: @g1@ (@e1@, @e2 : p@) is consistent, @g2@ (@e3 : q@,
+-- @e4 : r@) is not. A conflict in @g2@ must not quarantine @g1@'s members, so the
+-- claim on @e1@ stays justified while the claim on @e3@ is @gap@.
+multiGroupUnit :: Unit
+multiGroupUnit =
+  ( mkUnit
+      []
+      []
+      []
+      [ (LeafId "e1", atom0 "p" [])
+      , (LeafId "e2", atom0 "p" [])
+      , (LeafId "e3", atom0 "q" [])
+      , (LeafId "e4", atom0 "r" [])
+      ]
+      [ (ArgId "a1", SLeaf (LeafId "e1"))
+      , (ArgId "a2", SLeaf (LeafId "e3"))
+      ]
+      []
+      [atom0 "p" [], atom0 "q" []]
+  )
+    { unitGroups =
+        [ DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]
+        , DupGroup (GroupId "g2") [LeafId "e3", LeafId "e4"]
+        ]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+prop_groupMultiMemberAndMultiGroup :: Property
+prop_groupMultiMemberAndMultiGroup =
+  once $
+    conjoin
+      [ counterexample
+          "3-member all-≡ group admits (justified)"
+          (statusOfUnit group3ConsistentUnit (atom0 "p" []) === Just Justified)
+      , counterexample
+          "3-member partial agreement is a conflict (R9 under reject)"
+          (rejectionOfUnit group3PartialConflictUnit === Just (RejectClass R9))
+      , counterexample
+          "independent groups: the consistent group's claim stays justified"
+          (statusOfUnit multiGroupUnit (atom0 "p" []) === Just Justified)
+      , counterexample
+          "independent groups: only the conflicted group quarantines (gap)"
+          (statusOfUnit multiGroupUnit (atom0 "q" []) === Just Gap)
+      ]
+
 prop_mutationBaseAccepts :: Property
 prop_mutationBaseAccepts =
   once $
@@ -645,6 +892,11 @@ checkSpecProps =
   , ("check golden missing-self-edge", quickCheckResult prop_goldenMissing)
   , ("check golden rebut program", quickCheckResult prop_goldenRebut)
   , ("check rejection-class negatives", quickCheckResult prop_negatives)
+  , ("check duplicate-report-group quarantine/gap", quickCheckResult prop_groupQuarantine)
+  , ("check duplicate-report-group R9 stderr message", quickCheckResult prop_groupConflictMessage)
+  , ("check duplicate-report-group R13-over-R9 precedence", quickCheckResult prop_groupPrecedenceR13BeatsR9)
+  , ("check duplicate-report-group quarantine drops arg+attack", quickCheckResult prop_groupQuarantineDropsArgAndAttack)
+  , ("check duplicate-report-group multi-member and multi-group", quickCheckResult prop_groupMultiMemberAndMultiGroup)
   , ("check mutation base accepts", quickCheckResult prop_mutationBaseAccepts)
   , ("check multi-violation stage priority", quickCheckResult prop_multiViolationPriority)
   , ("check verdicts carry exactly one replay-id", quickCheckResult prop_verdictsCarryExactlyOneReplayId)

@@ -37,6 +37,7 @@ Design decisions (documented, faithful to the mechanized development):
 -/
 
 import Lara.Consistency
+import Lara.Groups
 import Lara.Strict
 
 namespace Lara.Driver
@@ -77,7 +78,8 @@ inductive Tag where
   | verdict | accept | reject | labels | edges | statuses | status
   | inL | outL | undecL | gap | justified | contested | defeated
   | dupRule | dupArgument | incompleteArgument | missingConflict
-  | r1 | r3 | r4 | r5 | r6 | r7 | r10 | r11 | r12 | r13
+  | groups | group | quarantine
+  | r1 | r3 | r4 | r5 | r6 | r7 | r9 | r10 | r11 | r12 | r13
 
 /-- The on-the-wire spelling of a keyword — the single source of truth. -/
 def tagToString : Tag → String
@@ -110,8 +112,10 @@ def tagToString : Tag → String
   | .dupRule => "duplicate-rule" | .dupArgument => "duplicate-argument"
   | .incompleteArgument => "incomplete-argument"
   | .missingConflict => "missing-conflict"
+  | .groups => "groups" | .group => "group" | .quarantine => "quarantine"
   | .r1 => "R1" | .r3 => "R3" | .r4 => "R4" | .r5 => "R5" | .r6 => "R6"
-  | .r7 => "R7" | .r10 => "R10" | .r11 => "R11" | .r12 => "R12" | .r13 => "R13"
+  | .r7 => "R7" | .r9 => "R9" | .r10 => "R10" | .r11 => "R11" | .r12 => "R12"
+  | .r13 => "R13"
 
 /-! ### Canonical printer (byte-identical to `Lara.Wire.printSExpr`) -/
 
@@ -575,6 +579,45 @@ def decodeQueries : Option Sx → Except String (List Atom)
   | none => .ok []
   | some s => (sectionFields "queries" .queries s) >>= (·.mapM decodeAtom)
 
+/-! ### Duplicate-report groups (spec §4.3) -/
+
+def decodeGroupMembers : Sx → Except String (List LeafId)
+  | .list ms => ms.mapM (fun m =>
+      match m with
+      | .atom l => .ok (⟨l⟩ : LeafId)
+      | _ => .error "group member: expected atom")
+  | _ => .error "group members: expected list"
+
+def decodeGroup (e : Sx) : Except String Groups.DupGroup :=
+  match e with
+  | .list [.atom k, .atom gid, membersS] =>
+      if k != tagToString .group then .error "group: expected group tag"
+      else do
+        let members ← decodeGroupMembers membersS
+        .ok { id := gid, members := members }
+  | _ => .error "group: malformed group"
+
+/-- Decode the optional `groups` section: the conflict mode, then one group per
+declared duplicate-report group. Mirrors `Lara.Wire.decodeGroups`. -/
+def decodeGroups :
+    Option Sx → Except String (List Groups.DupGroup × Groups.GroupConflictMode)
+  | none => .ok ([], .quarantine)
+  | some s => do
+      let fs ← sectionFields "groups" .groups s
+      match fs with
+      | modeE :: groupEs => do
+          let mode ← (match modeE with
+            | .atom m =>
+                if m == tagToString .quarantine then
+                  (.ok .quarantine : Except String Groups.GroupConflictMode)
+                else if m == tagToString .reject then
+                  .ok .reject
+                else .error "groups mode: unknown group conflict mode"
+            | _ => .error "groups mode: malformed group mode")
+          let groups ← groupEs.mapM decodeGroup
+          .ok (groups, mode)
+      | [] => .error "groups: groups section missing its conflict mode"
+
 /-! ### Wire well-formedness invariants (R14) and endpoint resolution -/
 
 def firstDup : List String → List String → Option String
@@ -631,6 +674,14 @@ structure Decoded where
   gamma : LeafId → Option Atom
   theories : List (Digest × List Atom)
   queries : List Atom
+  -- Raw pieces retained for the §4.3 duplicate-report-group boundary check,
+  -- which runs after replay preflight (on the full args) and before the
+  -- checker (on the quarantine-filtered args).
+  leaves : List (LeafId × Atom)
+  argsRaw : List (String × SupportTerm)
+  attacksRaw : List RawAttack
+  groups : List Groups.DupGroup
+  groupMode : Groups.GroupConflictMode
 
 /-! ### Validated replay boundary -/
 
@@ -685,6 +736,26 @@ def takeSection (t : Tag) (ss : List Sx) : Option Sx × List Sx :=
     | _ => (none, ss)
   | [] => (none, ss)
 
+/-- Wire well-formedness (R14) for groups, mirroring `Lara.Wire`: unique group
+ids, ≥2 distinct members, all declared leaves. -/
+def checkGroupInvariants (groups : List Groups.DupGroup)
+    (leaves : List (LeafId × Atom)) : Except String _root_.Unit := do
+  let _ ← (match firstDup (groups.map (·.id)) [] with
+           | some g => (.error ("groups: duplicate group id: " ++ g) : Except String _root_.Unit)
+           | none => .ok ())
+  let declared := leaves.map (fun e => e.1.name)
+  groups.forM (fun g => do
+    let names := g.members.map (·.name)
+    let _ ← (match firstDup names [] with
+             | some l => (.error ("group " ++ g.id ++ " repeats member: " ++ l) : Except String _root_.Unit)
+             | none => .ok ())
+    let _ ← (if names.length < 2 then
+               (.error ("group " ++ g.id ++ " has fewer than two members") : Except String _root_.Unit)
+             else .ok ())
+    names.forM (fun l =>
+      if declared.contains l then (.ok () : Except String _root_.Unit)
+      else .error ("group " ++ g.id ++ " member is not a declared leaf: " ++ l)))
+
 def decodeUnit (e : Sx) : Except String Decoded := do
   let sections ← sectionFields "unit" .unit e
   let s0 := takeSection .policy sections
@@ -693,7 +764,8 @@ def decodeUnit (e : Sx) : Except String Decoded := do
   let s3 := takeSection .args s2.2
   let s4 := takeSection .attacks s3.2
   let s5 := takeSection .queries s4.2
-  let _ ← (if s5.2.isEmpty then (.ok () : Except String _root_.Unit)
+  let s6 := takeSection .groups s5.2
+  let _ ← (if s6.2.isEmpty then (.ok () : Except String _root_.Unit)
            else .error "unit: unexpected section")
   let pol ← decodePolicy s0.1
   let theories ← decodeTheories s1.1
@@ -701,9 +773,11 @@ def decodeUnit (e : Sx) : Except String Decoded := do
   let argsRaw ← decodeArgs s3.1
   let attacksRaw ← decodeAttacks s4.1
   let queries ← decodeQueries s5.1
+  let (groups, groupMode) ← decodeGroups s6.1
   let _ ← (match firstDup (argsRaw.map (·.1)) [] with
            | some dup => (.error ("args: duplicate argument id: " ++ dup) : Except String _root_.Unit)
            | none => .ok ())
+  let _ ← checkGroupInvariants groups leaves
   let atts ← resolveAttacks argsRaw attacksRaw
   .ok
     { policy := { rules := pol.1, defeat := ⟨pol.2.1, pol.2.2⟩ }
@@ -712,7 +786,12 @@ def decodeUnit (e : Sx) : Except String Decoded := do
     , atts := atts
     , gamma := buildGamma leaves
     , theories := theories
-    , queries := queries }
+    , queries := queries
+    , leaves := leaves
+    , argsRaw := argsRaw
+    , attacksRaw := attacksRaw
+    , groups := groups
+    , groupMode := groupMode }
 
 def decodeReplayBackend (e : Sx) : Except String (String × String) :=
   match e with
@@ -884,6 +963,21 @@ def replayFailureMessage : ReplayFailure → String
         ++ " (index " ++ toString index ++ ") uses " ++ backend.name
         ++ "@" ++ toString backend.version
 
+/-- The stderr diagnostic for an escalated group-conflict rejection (R9): the
+first `≢` group in declaration order and its members. Mirrors the Haskell
+`Lara.Driver.groupConflictMessage` byte-for-byte so both drivers' stderr is
+comparable (the R13 `replayFailureMessage` precedent). `none` when no group is
+inconsistent — the caller only prints it on the R9 branch. -/
+def groupConflictMessage (canon : String → String)
+    (leaves : List (LeafId × Atom)) (groups : List Groups.DupGroup) : Option String :=
+  match groups.find? (fun g => ! Groups.consistentB canon leaves g) with
+  | none => none
+  | some g =>
+      some ("group '" ++ g.id ++ "': members "
+        ++ String.intercalate ", " (g.members.map (·.name))
+        ++ " report one cell with ≢ propositions and "
+        ++ "the policy escalates conflicts to reject (§4.3)")
+
 /-! ### Verdict encoders (mirror `Lara.Wire.encodeVerdict`) -/
 
 def sxNat (n : Nat) : Sx := .atom (toString n)
@@ -910,6 +1004,7 @@ def statusStr : Status → String
 def checkClassStr : RejectClass → String
   | .R1 => tagToString .r1 | .R3 => tagToString .r3 | .R4 => tagToString .r4
   | .R5 => tagToString .r5 | .R6 => tagToString .r6 | .R7 => tagToString .r7
+  | .R9 => tagToString .r9
   | .R10 => tagToString .r10 | .R11 => tagToString .r11
   | .R12 => tagToString .r12 | .R13 => tagToString .r13
 
@@ -1014,14 +1109,36 @@ def runOnContents (contents : String) : IO _root_.Unit := do
           IO.println (printSx (encodeReject rid (.rejectClass .R13)))
           IO.Process.exit 1
       | none =>
-          let reg := buildRegistry d.theories
-          match checkUnit d.gamma reg
-              ({ policy := d.policy, args := d.args, atts := d.atts } : Lara.Unit) with
-          | .error err =>
-              IO.println (printSx (encodeReject rid (rejectWire err)))
-              IO.Process.exit 1
-          | .ok accepted =>
-              IO.println (printSx (buildAccept rid accepted d.queries))
+          -- §4.3 duplicate-report-group boundary: an escalated conflict rejects
+          -- (R9); otherwise every argument using a quarantined leaf is dropped
+          -- so its claim surfaces as gap (quarantine is not a rejection).
+          if Groups.conflictReject dcanon d.groupMode d.leaves d.groups then
+            match groupConflictMessage dcanon d.leaves d.groups with
+            | some msg => IO.eprintln msg
+            | none => pure ()
+            IO.println (printSx (encodeReject rid (.rejectClass .R9)))
+            IO.Process.exit 1
+          else
+            let qs := Groups.quarantined dcanon d.leaves d.groups
+            let keptArgsRaw := Groups.quarantineArgs qs d.argsRaw
+            let keptIds := keptArgsRaw.map (·.1)
+            let keptAttacksRaw := d.attacksRaw.filter (fun ra =>
+              let (s, t) := ra.endpoints
+              keptIds.contains s && keptIds.contains t)
+            match resolveAttacks keptArgsRaw keptAttacksRaw with
+            | .error msg =>
+                IO.eprintln ("lara-driver: internal error at " ++ msg)
+                IO.Process.exit 2
+            | .ok atts =>
+              let reg := buildRegistry d.theories
+              let gamma := buildGamma (Groups.quarantineLeaves qs d.leaves)
+              match checkUnit gamma reg
+                  ({ policy := d.policy, args := keptArgsRaw.map (·.2), atts := atts } : Lara.Unit) with
+              | .error err =>
+                  IO.println (printSx (encodeReject rid (rejectWire err)))
+                  IO.Process.exit 1
+              | .ok accepted =>
+                  IO.println (printSx (buildAccept rid accepted d.queries))
 
 end Lara.Driver
 

@@ -11,7 +11,7 @@ namespace Lara.Check
 open Lara Lara.Support
 
 inductive RejectClass where
-  | R1 | R3 | R4 | R5 | R6 | R7 | R10 | R11 | R12 | R13
+  | R1 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13
 deriving DecidableEq
 
 inductive CheckLoc where
