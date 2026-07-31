@@ -10,7 +10,8 @@ theorem-bearing definitions of the Lean development (`Lara.Check.Unit.checkUnit`
 `Lara.Consistency.completeClaimFor`), and re-encodes the verdict.
 
 Contract (identical to `app/Main.hs`, plan D16):
-* `lara-driver <file.sexp>` reads one wire unit and prints an S-expression
+* `lara-driver <file.sexp>` reads one wire check-input envelope, runs replay
+  preflight before the checker, and prints an identity-bearing S-expression
   verdict on `stdout`, byte-identical to `Lara.Wire.encodeVerdict`.
 * Exit codes: `0` = accept, `1` = checker rejection, `2` = codec / usage error
   (with a located message on `stderr`).
@@ -72,6 +73,7 @@ inductive Tag where
   | strict | defeasible | mandatory | optional | truE | falsE | nonE | trusted
   | var | numLit | strLit | conApp | atom | apat
   | rebut | undercut | undermine
+  | checkInput | replayId | core | backends | backend | artifact
   | verdict | accept | reject | labels | edges | statuses | status
   | inL | outL | undecL | gap | justified | contested | defeated
   | dupRule | dupArgument | incompleteArgument | missingConflict
@@ -97,6 +99,8 @@ def tagToString : Tag → String
   | .var => "var" | .numLit => "num" | .strLit => "str" | .conApp => "con"
   | .atom => "atom" | .apat => "apat"
   | .rebut => "rebut" | .undercut => "undercut" | .undermine => "undermine"
+  | .checkInput => "check-input" | .replayId => "replay-id" | .core => "core"
+  | .backends => "backends" | .backend => "backend" | .artifact => "artifact"
   | .verdict => "verdict" | .accept => "accept" | .reject => "reject"
   | .labels => "labels" | .edges => "edges" | .statuses => "statuses"
   | .status => "status"
@@ -622,10 +626,55 @@ decode monad. -/
 structure Decoded where
   policy : Policy
   args : List SupportTerm
+  argIds : List String
   atts : List Attack
   gamma : LeafId → Option Atom
   theories : List (Digest × List Atom)
   queries : List Atom
+
+/-! ### Validated replay boundary -/
+
+/-- The one supported core-version spelling — the single source of truth,
+mirroring `Lara.Wire.coreVersionText`. -/
+def coreVersionText : String := "lara-core@0.1"
+
+structure ReplayId where
+  core : String
+  policy : String
+  backends : List (String × String)
+  theories : List String
+  artifact : String
+
+structure CheckInput where
+  replayId : ReplayId
+  decoded : Decoded
+
+def compareCharLists : List Char → List Char → Ordering
+  | [], [] => .eq
+  | [], _ => .lt
+  | _, [] => .gt
+  | a :: as, b :: bs =>
+      if a.toNat < b.toNat then .lt
+      else if b.toNat < a.toNat then .gt
+      else compareCharLists as bs
+
+def compareCodePointString (a b : String) : Ordering :=
+  compareCharLists a.toList b.toList
+
+def insertCodePointString (s : String) : List String → List String
+  | [] => [s]
+  | x :: xs =>
+      if compareCodePointString s x == .lt then s :: x :: xs
+      else x :: insertCodePointString s xs
+
+def sortCodePointStrings (xs : List String) : List String :=
+  xs.foldr insertCodePointString []
+
+def strictlySortedStrings : List String → Bool
+  | [] | [_] => true
+  | a :: b :: rest =>
+      compareCodePointString a b == .lt &&
+        strictlySortedStrings (b :: rest)
 
 /-- Peel one optional, ordered section. -/
 def takeSection (t : Tag) (ss : List Sx) : Option Sx × List Sx :=
@@ -659,10 +708,181 @@ def decodeUnit (e : Sx) : Except String Decoded := do
   .ok
     { policy := { rules := pol.1, defeat := ⟨pol.2.1, pol.2.2⟩ }
     , args := argsRaw.map (·.2)
+    , argIds := argsRaw.map (·.1)
     , atts := atts
     , gamma := buildGamma leaves
     , theories := theories
     , queries := queries }
+
+def decodeReplayBackend (e : Sx) : Except String (String × String) :=
+  match e with
+  | .list [.atom k, .atom name, .atom version] =>
+      if k == tagToString .backend then .ok (name, version)
+      else .error "replay backend: expected backend tag"
+  | _ => .error "replay backend: malformed backend"
+
+def validateReplayId (core : String) (policy : String)
+    (backends : List (String × String)) (theories : List String)
+    (artifact : String) : Except String ReplayId :=
+  if strictlySortedStrings theories then
+    .ok
+      { core := core
+      , policy := policy
+      , backends := backends
+      , theories := theories
+      , artifact := artifact }
+  else .error "replay-id: theories must be strictly sorted"
+
+def validateTheoryIdentity (rid : ReplayId) (decoded : Decoded) :
+    Except String _root_.Unit :=
+  let keys := decoded.theories.map (fun entry =>
+    match entry.1 with | ⟨s⟩ => s)
+  match firstDup keys [] with
+  | some digest => .error ("unit theories: duplicate digest: " ++ digest)
+  | none =>
+      if sortCodePointStrings keys == rid.theories then .ok ()
+      else .error "check-input: replay theories differ from unit theories"
+
+/-- Decode and validate the replay identity. The check order mirrors Haskell's
+`decodeReplayIdM`: replay-id tag (and arity, via the outer match) first, then
+the core section tag, then the core version value, then — in wire order — each
+remaining section's tag check immediately followed by its payload decode
+(policy, backends, theories, artifact), and finally the canonical-order
+validation. -/
+def decodeReplayId (e : Sx) : Except String ReplayId :=
+  match e with
+  | .list [.atom replayTag,
+      .list [.atom coreTag, .atom core],
+      .list [.atom policyTag, .atom policy],
+      .list (.atom backendsTag :: backends),
+      .list (.atom theoriesTag :: theories),
+      .list [.atom artifactTag, .atom artifact]] => do
+      let _ ←
+        if replayTag != tagToString .replayId then
+          (.error "replay-id: wrong field order" : Except String _root_.Unit)
+        else .ok ()
+      let _ ←
+        if coreTag != tagToString .core then
+          (.error "replay-id: wrong field order" : Except String _root_.Unit)
+        else .ok ()
+      let _ ←
+        if core != coreVersionText then
+          (.error "replay-id: unsupported core version" : Except String _root_.Unit)
+        else .ok ()
+      let _ ←
+        if policyTag != tagToString .policy then
+          (.error "replay-id: wrong field order" : Except String _root_.Unit)
+        else .ok ()
+      let _ ←
+        if backendsTag != tagToString .backends then
+          (.error "replay-id: wrong field order" : Except String _root_.Unit)
+        else .ok ()
+      let refs ← backends.mapM decodeReplayBackend
+      let _ ←
+        if theoriesTag != tagToString .theories then
+          (.error "replay-id: wrong field order" : Except String _root_.Unit)
+        else .ok ()
+      let digests ← theories.mapM (sxAtom "replay theory")
+      let _ ←
+        if artifactTag != tagToString .artifact then
+          (.error "replay-id: wrong field order" : Except String _root_.Unit)
+        else .ok ()
+      validateReplayId core policy refs digests artifact
+  | _ => .error "replay-id: malformed replay identity"
+
+def decodeCheckInput (e : Sx) : Except String CheckInput :=
+  match e with
+  | .list [.atom k, ridS, unitS] =>
+      if k != tagToString .checkInput then
+        .error "check-input: expected check-input tag"
+      else do
+        let rid ← decodeReplayId ridS
+        let decoded ← decodeUnit unitS
+        validateTheoryIdentity rid decoded
+        .ok
+          { replayId := rid
+          , decoded := decoded }
+
+  | _ => .error "check-input: malformed check input"
+
+def backendPair (backend : BackendId) : String × String :=
+  (backend.name, toString backend.version)
+
+def firstDuplicateBackend : List (String × String) →
+    List (String × String) → Option (String × String)
+  | [], _ => none
+  | backend :: rest, seen =>
+      if seen.contains backend then some backend
+      else firstDuplicateBackend rest (backend :: seen)
+
+def firstUnknownBackend : List (String × String) → Option (String × String)
+  | [] => none
+  | backend :: rest =>
+      if backend != backendPair ndBackendId then some backend
+      else firstUnknownBackend rest
+
+def firstSome {α β : Type} (f : α → Option β) : List α → Option β
+  | [] => none
+  | x :: xs =>
+      match f x with
+      | some value => some value
+      | none => firstSome f xs
+
+partial def firstUnselectedCertificate
+    (selected : List (String × String)) : SupportTerm → Option BackendId
+  | .leaf _ => none
+  | .inst _ _ premises discharges _ assurance =>
+      let atNode :=
+        match assurance with
+        | .cert backend _ _ =>
+            if selected.contains (backendPair backend) then none else some backend
+        | _ => none
+      match atNode with
+      | some backend => some backend
+      | none =>
+          match firstSome (firstUnselectedCertificate selected) premises with
+          | some backend => some backend
+          | none =>
+              firstSome
+                (fun discharge => firstUnselectedCertificate selected discharge.2)
+                discharges
+
+inductive ReplayFailure where
+  | duplicateSelectedBackend : (String × String) → ReplayFailure
+  | unknownSelectedBackend : (String × String) → ReplayFailure
+  | unselectedCertificate : Nat → String → BackendId → ReplayFailure
+
+/-- Visit the arguments in wire order (mirroring `Lara.Replay.firstUnselectedCertificate`):
+the first argument, with its 0-based index and wire id, whose support tree carries a
+certificate from an unselected backend. -/
+def firstUnselectedCertInArgs (selected : List (String × String)) :
+    List (String × SupportTerm) → Nat → Option ReplayFailure
+  | [], _ => none
+  | (argId, term) :: rest, index =>
+      match firstUnselectedCertificate selected term with
+      | some backend => some (.unselectedCertificate index argId backend)
+      | none => firstUnselectedCertInArgs selected rest (index + 1)
+
+def runtimeReplayFailure (rid : ReplayId) (argIds : List String)
+    (args : List SupportTerm) : Option ReplayFailure :=
+  match firstDuplicateBackend rid.backends [] with
+  | some backend => some (.duplicateSelectedBackend backend)
+  | none =>
+      match firstUnknownBackend rid.backends with
+      | some backend => some (.unknownSelectedBackend backend)
+      | none => firstUnselectedCertInArgs rid.backends (argIds.zip args) 0
+
+/-- The stderr diagnostic for a replay preflight failure — mirrors the Haskell
+CLI's `replayFailureMessage` templates. -/
+def replayFailureMessage : ReplayFailure → String
+  | .duplicateSelectedBackend (name, version) =>
+      "replay preflight: duplicate selected backend " ++ name ++ "@" ++ version
+  | .unknownSelectedBackend (name, version) =>
+      "replay preflight: unknown selected backend " ++ name ++ "@" ++ version
+  | .unselectedCertificate index argId backend =>
+      "replay preflight: certificate backend not selected: argument " ++ argId
+        ++ " (index " ++ toString index ++ ") uses " ++ backend.name
+        ++ "@" ++ toString backend.version
 
 /-! ### Verdict encoders (mirror `Lara.Wire.encodeVerdict`) -/
 
@@ -693,39 +913,76 @@ def checkClassStr : RejectClass → String
   | .R10 => tagToString .r10 | .R11 => tagToString .r11
   | .R12 => tagToString .r12 | .R13 => tagToString .r13
 
-/-- The rejection class atom for a `checkUnit` failure — the wire `REJECTION`
+/-- The closed wire `REJECTION` vocabulary, mirroring `Lara.Wire`'s rejection
+spellings: either a checker rejection class or one of the four unit-level
+failure keywords. Concrete spellings live in exactly one place,
+`wireRejectionString`. -/
+inductive WireRejection where
+  | rejectClass : RejectClass → WireRejection
+  | duplicateRule
+  | duplicateArgument
+  | incompleteArgument
+  | missingConflict
+
+/-- The on-the-wire spelling of a rejection — the single source of truth. -/
+def wireRejectionString : WireRejection → String
+  | .rejectClass cls => checkClassStr cls
+  | .duplicateRule => tagToString .dupRule
+  | .duplicateArgument => tagToString .dupArgument
+  | .incompleteArgument => tagToString .incompleteArgument
+  | .missingConflict => tagToString .missingConflict
+
+/-- The wire rejection for a `checkUnit` failure — the wire `REJECTION`
 vocabulary of `Lara.Wire`. -/
-def rejectString : UnitError → String
-  | .duplicateRule _ => tagToString .dupRule
-  | .policyViolation _ => tagToString .r12
+def rejectWire : UnitError → WireRejection
+  | .duplicateRule _ => .duplicateRule
+  | .policyViolation _ => .rejectClass .R12
   | .program e =>
     match e with
-    | .rejection _ ce => checkClassStr ce.rejectClass
-    | .duplicateArgument _ _ => tagToString .dupArgument
-    | .incompleteArgument _ _ => tagToString .incompleteArgument
-    | .missingConflict _ => tagToString .missingConflict
+    | .rejection _ ce => .rejectClass ce.rejectClass
+    | .duplicateArgument _ _ => .duplicateArgument
+    | .incompleteArgument _ _ => .incompleteArgument
+    | .missingConflict _ => .missingConflict
 
-def encodeReject (cls : String) : Sx :=
-  .list [.atom (tagToString .verdict), .atom (tagToString .reject), .atom cls]
-
-def encodeAccept (labels : List (Nat × Label)) (edges : List (Nat × Nat))
-    (statuses : List (Atom × Status)) : Sx :=
+def encodeReplayId (rid : ReplayId) : Sx :=
   .list
-    [ .atom (tagToString .verdict), .atom (tagToString .accept)
+    [ .atom (tagToString .replayId)
+    , .list [.atom (tagToString .core), .atom rid.core]
+    , .list [.atom (tagToString .policy), .atom rid.policy]
+    , .list (.atom (tagToString .backends) ::
+        rid.backends.map (fun bv =>
+          .list [.atom (tagToString .backend), .atom bv.1, .atom bv.2]))
+    , .list (.atom (tagToString .theories) :: rid.theories.map .atom)
+    , .list [.atom (tagToString .artifact), .atom rid.artifact]
+    ]
+
+def encodeReject (rid : ReplayId) (cls : WireRejection) : Sx :=
+  .list [.atom (tagToString .verdict), encodeReplayId rid,
+    .atom (tagToString .reject), .atom (wireRejectionString cls)]
+
+def encodeAccept (rid : ReplayId) (labels : List (Nat × Label))
+    (edges : List (Nat × Nat)) (statuses : List (Atom × Status)) : Sx :=
+  .list
+    [ .atom (tagToString .verdict)
+    , encodeReplayId rid
+    , .atom (tagToString .accept)
     , .list (.atom (tagToString .labels) ::
         labels.map (fun le => .list [sxNat le.1, .atom (labelStr le.2)]))
     , .list (.atom (tagToString .edges) ::
         edges.map (fun ij => .list [sxNat ij.1, sxNat ij.2]))
     , .list (.atom (tagToString .statuses) ::
         statuses.map (fun ps =>
-          .list [.atom (tagToString .status), encodeAtom ps.1, .atom (statusStr ps.2)])) ]
+          .list [.atom (tagToString .status), encodeAtom ps.1,
+            .atom (statusStr ps.2)]))
+    ]
 
 /-- Read the accept verdict off an accepted unit: grounded labels over the
 compiled AF (`checkedAF`), the compiled closure edges in ascending order, and
 one status per query atom in query order. -/
 def buildAccept {Γ : LeafId → Option Atom}
     {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk) (queries : List Atom) : Sx :=
+    (rid : ReplayId) (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk)
+    (queries : List Atom) : Sx :=
   let P := accepted.program
   let af := checkedAF P
   let n := P.args.length
@@ -734,7 +991,7 @@ def buildAccept {Γ : LeafId → Option Atom}
     (fun i acc => (List.range n).foldr
       (fun j acc2 => if af.attack i j then (i, j) :: acc2 else acc2) acc) []
   let statuses := queries.map (fun p => (p, statusC af (completeClaimFor accepted p)))
-  encodeAccept labels edges statuses
+  encodeAccept rid labels edges statuses
 
 /-! ### The driver -/
 
@@ -744,19 +1001,27 @@ def runOnContents (contents : String) : IO _root_.Unit := do
       IO.eprintln ("lara-driver: codec error at " ++ msg)
       IO.Process.exit 2
   | .ok e =>
-    match decodeUnit e with
+    match decodeCheckInput e with
     | .error msg =>
         IO.eprintln ("lara-driver: codec error at " ++ msg)
         IO.Process.exit 2
-    | .ok d =>
-      let reg := buildRegistry d.theories
-      match checkUnit d.gamma reg
-          ({ policy := d.policy, args := d.args, atts := d.atts } : Lara.Unit) with
-      | .error err =>
-          IO.println (printSx (encodeReject (rejectString err)))
+    | .ok input =>
+      let rid := input.replayId
+      let d := input.decoded
+      match runtimeReplayFailure rid d.argIds d.args with
+      | some failure =>
+          IO.eprintln (replayFailureMessage failure)
+          IO.println (printSx (encodeReject rid (.rejectClass .R13)))
           IO.Process.exit 1
-      | .ok accepted =>
-          IO.println (printSx (buildAccept accepted d.queries))
+      | none =>
+          let reg := buildRegistry d.theories
+          match checkUnit d.gamma reg
+              ({ policy := d.policy, args := d.args, atts := d.atts } : Lara.Unit) with
+          | .error err =>
+              IO.println (printSx (encodeReject rid (rejectWire err)))
+              IO.Process.exit 1
+          | .ok accepted =>
+              IO.println (printSx (buildAccept rid accepted d.queries))
 
 end Lara.Driver
 

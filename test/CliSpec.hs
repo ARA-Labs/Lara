@@ -24,6 +24,8 @@ import System.FilePath ((</>))
 import System.IO (hClose, hPutStr, openTempFile)
 import System.Process (readProcessWithExitCode)
 import Test.QuickCheck
+import Lara.Replay (inputReplayId)
+import Lara.Wire (decodeCheckInputFile, encodeReplayId, printSExpr)
 
 -- | The executable name; Cabal puts it on @PATH@ during @cabal test@ via the
 -- test-suite's @build-tool-depends: lara:lara@.
@@ -32,6 +34,13 @@ laraBin = "lara"
 
 runLara :: [String] -> IO (ExitCode, String, String)
 runLara args = readProcessWithExitCode laraBin args ""
+
+fixtureReplayText :: FilePath -> IO String
+fixtureReplayText path = do
+  bytes <- readFile path
+  case decodeCheckInputFile bytes of
+    Left err -> error (path ++ ": codec: " ++ show err)
+    Right input -> pure (printSExpr (encodeReplayId (inputReplayId input)))
 
 -- | Write @contents@ to a fresh temp @.sexp@ file, run the body, then delete it.
 withTempSexp :: String -> (FilePath -> IO a) -> IO a
@@ -80,24 +89,26 @@ minimalProgram = "artifact x at sha256:aaaa... policy nopolicy use backends []\n
 -- ('putStrLn'), byte-identical to the pinned Lean-driver golden.
 prop_cliAccept :: Property
 prop_cliAccept = once $ ioProperty $ do
+  replayText <- fixtureReplayText "fixtures/covered-self-edge.sexp"
   (code, out, _) <- runLara ["check", "fixtures/covered-self-edge.sexp"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
       , counterexample "stdout" $
           out
-            === "(verdict accept (labels (0 undec)) (edges (0 0))"
-              ++ " (statuses (status (atom p) contested)))\n"
+            === ("(verdict " ++ replayText ++ " accept (labels (0 undec)) (edges (0 0))"
+              ++ " (statuses (status (atom p) contested)))\n")
       ]
 
 -- | checker rejection: exit 1 and the reject verdict bytes on stdout.
 prop_cliReject :: Property
 prop_cliReject = once $ ioProperty $ do
+  replayText <- fixtureReplayText "fixtures/missing-self-edge.sexp"
   (code, out, _) <- runLara ["check", "fixtures/missing-self-edge.sexp"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitFailure 1)
-      , counterexample "stdout" (out === "(verdict reject missing-conflict)\n")
+      , counterexample "stdout" (out === ("(verdict " ++ replayText ++ " reject missing-conflict)\n"))
       ]
 
 -- | codec error (a well-formed file with malformed wire text): exit 2, nothing
@@ -134,21 +145,23 @@ prop_cliUsage = once $ ioProperty $ do
       ]
 
 -- | @.lara@ end-to-end, Example A: parse + co-located policy resolution
--- (@empirical-v1.policy.lara@) + elaborate + runUnit, exit 0 and exactly the
--- accept verdict bytes. a1 is @out@ (undercut+undermine+rebut, all @in@), d1/d2/d3
--- @in@, c1 @defeated@. These bytes equal the in-process elaborate+runUnit path
--- (the CLI is a thin shell) — the plan's A1 gate for A.
+-- (@empirical-v1.policy.lara@) + elaborate + 'sourceCheckInput' + 'runCheck',
+-- exit 0 and exactly the accept verdict bytes. a1 is @out@
+-- (undercut+undermine+rebut, all @in@), d1/d2/d3 @in@, c1 @defeated@. These
+-- bytes equal the in-process source-to-'CheckInput' path (the CLI is a thin
+-- shell) — the plan's A1 gate for A.
 prop_cliLaraAcceptA :: Property
 prop_cliLaraAcceptA = once $ ioProperty $ do
+  replayText <- fixtureReplayText "examples/A/example.core.sexp"
   (code, out, _) <- runLara ["check", "examples/A/example.lara"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
       , counterexample "stdout" $
           out
-            === "(verdict accept (labels (0 out) (1 in) (2 in) (3 in))"
+            === ("(verdict " ++ replayText ++ " accept (labels (0 out) (1 in) (2 in) (3 in))"
               ++ " (edges (0 3) (1 0) (2 0) (3 0))"
-              ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)))\n"
+              ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)))\n")
       ]
 
 -- | @.lara@ end-to-end, Example B: two mutually-attacking arguments (a 2-cycle),
@@ -156,29 +169,31 @@ prop_cliLaraAcceptA = once $ ioProperty $ do
 -- bytes; resolves the same co-located @empirical-v1.policy.lara@.
 prop_cliLaraAcceptB :: Property
 prop_cliLaraAcceptB = once $ ioProperty $ do
+  replayText <- fixtureReplayText "examples/B/example.core.sexp"
   (code, out, _) <- runLara ["check", "examples/B/example.lara"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
       , counterexample "stdout" $
           out
-            === "(verdict accept (labels (0 undec) (1 undec)) (edges (0 1) (1 0))"
+            === ("(verdict " ++ replayText ++ " accept (labels (0 undec) (1 undec)) (edges (0 1) (1 0))"
               ++ " (statuses"
               ++ " (status (atom improves (con M) (con accuracy) (con D)) contested)"
-              ++ " (status (atom not_improves (con M) (con accuracy) (con D)) contested)))\n"
+              ++ " (status (atom not_improves (con M) (con accuracy) (con D)) contested)))\n")
       ]
 
 -- | @.lara@ end-to-end, Example S1: policy-carried theory and surface
 -- AssuranceCert replay through nd@1 to a justified accept verdict.
 prop_cliLaraAcceptS1 :: Property
 prop_cliLaraAcceptS1 = once $ ioProperty $ do
+  replayText <- fixtureReplayText "examples/S1/example.core.sexp"
   (code, out, _) <- runLara ["check", "examples/S1/example.lara"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
       , counterexample "stdout bytes" $
           out
-            === "(verdict accept (labels (0 in)) (edges) (statuses (status (atom holds (con safety_invariant) (con D)) justified)))\n"
+            === ("(verdict " ++ replayText ++ " accept (labels (0 in)) (edges) (statuses (status (atom holds (con safety_invariant) (con D)) justified)))\n")
       ]
 
 -- | @.lara@ parse error: a malformed artifact exits 2 with nothing on stdout (the

@@ -23,22 +23,42 @@ module CheckSpec (checkSpecProps) where
 import Data.List (nub, sort)
 import Test.QuickCheck
 
-import Lara.AST
+import Lara.AST hiding (Reject)
 import Lara.Grounded (AF (..), grounded, iter)
 import Lara.Prop (Pred (..), Prop (..), Term (..))
+import Lara.Replay
 import Lara.Strict (SExpr (..))
-import Lara.Wire (Verdict (..), decodeUnitFile, encodeVerdict, printSExpr)
-import Lara.Driver (runUnit)
+import Lara.Wire
+  ( Outcome (..)
+  , Verdict (..)
+  , decodeUnit
+  , encodeReplayId
+  , encodeVerdict
+  , parseSExpr
+  , printSExpr
+  )
+import Lara.Driver (runCheck)
+import TestReplay (testCheckInput, testReplayId)
 
 -- ---------------------------------------------------------------------------
 -- Golden verdicts (the N11 differential contract, at the Unit boundary)
 -- ---------------------------------------------------------------------------
 
--- | Decode a wire unit and print its verdict, or a codec marker.
+-- | Decode a low-level wire unit, wrap it in the conformance replay identity,
+-- and print its identity-bearing verdict, or a codec marker.
 verdictString :: String -> String
-verdictString s = case decodeUnitFile s of
-  Left e -> "CODEC:" ++ show e
-  Right u -> printSExpr (encodeVerdict (runUnit u))
+verdictString text =
+  case parseSExpr text of
+    Left err -> "CODEC:" ++ show err
+    Right value -> case decodeUnit value of
+      Left err -> "CODEC:" ++ show err
+      Right unit -> printSExpr (encodeVerdict (runCheck (testCheckInput unit)))
+
+emptyUnit :: Unit
+emptyUnit = Unit [] [] [] [] [] [] [] []
+
+testReplayText :: String
+testReplayText = printSExpr (encodeReplayId (testReplayId emptyUnit))
 
 coveredSelfEdge :: String
 coveredSelfEdge =
@@ -74,17 +94,17 @@ prop_goldenCovered :: Property
 prop_goldenCovered =
   once $
     verdictString coveredSelfEdge
-      === "(verdict accept (labels (0 undec)) (edges (0 0)) (statuses (status (atom p) contested)))"
+      === ("(verdict " ++ testReplayText ++ " accept (labels (0 undec)) (edges (0 0)) (statuses (status (atom p) contested)))")
 
 prop_goldenMissing :: Property
 prop_goldenMissing =
-  once $ verdictString missingSelfEdge === "(verdict reject missing-conflict)"
+  once $ verdictString missingSelfEdge === ("(verdict " ++ testReplayText ++ " reject missing-conflict)")
 
 prop_goldenRebut :: Property
 prop_goldenRebut =
   once $
     verdictString rebutProgram
-      === ( "(verdict accept (labels (0 in) (1 out)) (edges (0 1))"
+      === ( "(verdict " ++ testReplayText ++ " accept (labels (0 in) (1 out)) (edges (0 1))"
               ++ " (statuses (status (atom q) justified) (status (atom not_q) defeated)))"
           )
 
@@ -93,9 +113,9 @@ prop_goldenRebut =
 -- ---------------------------------------------------------------------------
 
 rejectionOfUnit :: Unit -> Maybe Rejection
-rejectionOfUnit u = case runUnit u of
-  VReject r -> Just r
-  VAccept{} -> Nothing
+rejectionOfUnit unit = case verdictOutcome (runCheck (testCheckInput unit)) of
+  Reject rejection -> Just rejection
+  Accept{} -> Nothing
 
 -- Small AST builders --------------------------------------------------------
 
@@ -552,6 +572,37 @@ prop_multiViolationPriority =
       | (name, u, expected) <- multiViolationNegatives
       ]
 
+prop_verdictsCarryExactlyOneReplayId :: Property
+prop_verdictsCarryExactlyOneReplayId =
+  once $
+    conjoin
+      [ counterexample "ordinary R1 verdict replay-id section" $
+          replaySectionCount (runCheck (testCheckInput negR1)) === 1
+      , counterexample "preflight R13 verdict replay-id section" $
+          replaySectionCount (runCheck preflightInput) === 1
+      , counterexample "preflight outcome is R13" $
+          verdictOutcome (runCheck preflightInput) === Reject (RejectClass R13)
+      ]
+  where
+    preflightReplayId =
+      either (error . replayErrorMessage) id $
+        mkReplayId
+          LaraCoreV01
+          (PolicyId "conformance-v1")
+          []
+          []
+          (Digest "sha256:conformance-corpus-v1")
+    preflightInput =
+      either (error . replayErrorMessage) id (mkCheckInput preflightReplayId negR13)
+    replaySectionCount verdict =
+      case encodeVerdict verdict of
+        SList (SAtom "verdict" : fields) ->
+          length
+            [ ()
+            | SList (SAtom "replay-id" : _) <- fields
+            ]
+        _ -> 0
+
 -- ---------------------------------------------------------------------------
 -- Fixpoint termination bound (Lean @grounded_stable@)
 -- ---------------------------------------------------------------------------
@@ -596,5 +647,6 @@ checkSpecProps =
   , ("check rejection-class negatives", quickCheckResult prop_negatives)
   , ("check mutation base accepts", quickCheckResult prop_mutationBaseAccepts)
   , ("check multi-violation stage priority", quickCheckResult prop_multiViolationPriority)
+  , ("check verdicts carry exactly one replay-id", quickCheckResult prop_verdictsCarryExactlyOneReplayId)
   , ("check fixpoint termination bound", quickCheckResult prop_fixpointBound)
   ]

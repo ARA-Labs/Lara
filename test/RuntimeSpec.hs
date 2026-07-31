@@ -11,10 +11,11 @@
 --     'statusC' — the correctness contract that the cache changes only /how/
 --     edges are stored, never /what/ the fixpoint computes.
 --   * __Adjacency consistency.__ 'buildAdj' reconstructs exactly the edge set.
---   * __Fixture differential.__ On the two committed wire fixtures and a rebut
---     program, the un-cached 'checkedAF' and the cached 'runtimeAF' produce
---     identical labels\/statuses, and 'Lara.Driver.runUnit' (now on the cached
---     default) still prints the byte-identical Lean-driver verdicts.
+--   * __Fixture differential.__ On the two committed wire 'CheckInput'
+--     fixtures and a rebut program, the un-cached 'checkedAF' and cached
+--     'runtimeAF' produce identical labels\/statuses, and
+--     'Lara.Driver.runCheck' (now on the cached default) still prints the
+--     byte-identical identity-bearing Lean-driver verdicts.
 --   * __Perf guard (smoke).__ A 120-argument synthetic AF: the cached labels
 --     must equal the naive labels (the real assertion), completing under a
 --     loose wall-clock ceiling that catches a pathological per-iteration
@@ -28,9 +29,9 @@ import System.Timeout (timeout)
 import Test.QuickCheck
 
 import Lara.AST (Label, Unit (..))
-import Lara.Check (CheckedUnit, checkUnit, cuNodes, cuProgram)
+import Lara.Check (checkUnit, cuNodes, cuProgram)
 import Lara.Compile (checkedAF)
-import Lara.Driver (buildCertOk, buildGamma, runUnit)
+import Lara.Driver (buildCertOk, buildGamma, runCheck)
 import Lara.Grounded
   ( AF (..)
   , Claim (..)
@@ -39,8 +40,17 @@ import Lara.Grounded
   , labelC
   , statusC
   )
+import Lara.Replay (CheckInput, inputReplayId, inputUnit)
 import Lara.Runtime (CachedAdj (..), buildAdj, cachedAF, runtimeAF)
-import Lara.Wire (decodeUnitFile, encodeVerdict, printSExpr)
+import Lara.Wire
+  ( decodeCheckInputFile
+  , decodeUnit
+  , encodeReplayId
+  , encodeVerdict
+  , parseSExpr
+  , printSExpr
+  )
+import TestReplay (testCheckInput)
 
 -- ---------------------------------------------------------------------------
 -- Generators and helpers
@@ -130,21 +140,17 @@ rebutProgram =
     ++ " (queries (atom q) (atom not_q)))"
 
 -- | Build the un-cached ('checkedAF') and cached ('runtimeAF') backends from an
--- accepted unit and assert they agree on afAttack, grounded, every label, and
--- every query status. Fails loudly if the source does not accept (the callers
--- only feed accepting units).
-differentialUnit :: String -> Property
-differentialUnit src =
-  case decodeUnitFile src of
-    Left e -> counterexample ("codec: " ++ show e) (property False)
-    Right u ->
-      case checkUnit (buildGamma (unitLeaves u)) (buildCertOk (unitTheories u)) u of
+-- accepted check input and assert they agree on the complete result.
+differentialInput :: CheckInput -> Property
+differentialInput input =
+  let unit = inputUnit input
+   in case checkUnit (buildGamma (unitLeaves unit)) (buildCertOk (unitTheories unit)) unit of
         Left err -> counterexample ("unexpected reject: " ++ show err) (property False)
         Right cu ->
           let naive = checkedAF (cuProgram cu)
               cached = runtimeAF (cuProgram cu)
               args = afArgs naive
-              claims = [completeClaimFor (cuNodes cu) p | p <- unitQueries u]
+              claims = [completeClaimFor (cuNodes cu) p | p <- unitQueries unit]
            in conjoin
                 [ counterexample "carrier differs" (afArgs naive === afArgs cached)
                 , counterexample "afAttack differs" $
@@ -157,32 +163,51 @@ differentialUnit src =
                     property (and [statusC naive c == statusC cached c | c <- claims])
                 ]
 
-verdictBytes :: String -> String
-verdictBytes s = case decodeUnitFile s of
-  Right u -> printSExpr (encodeVerdict (runUnit u))
-  Left e -> "CODEC:" ++ show e
+verdictBytes :: CheckInput -> String
+verdictBytes = printSExpr . encodeVerdict . runCheck
+
+decodeUnitText :: String -> Either String Unit
+decodeUnitText text =
+  case parseSExpr text of
+    Left err -> Left (show err)
+    Right value -> either (Left . show) Right (decodeUnit value)
+
+expectedVerdictText :: CheckInput -> String -> String
+expectedVerdictText input outcomeTail =
+  "(verdict "
+    ++ printSExpr (encodeReplayId (inputReplayId input))
+    ++ " "
+    ++ outcomeTail
+    ++ ")"
 
 -- | The cached\/un-cached differential on the two committed fixtures (read from
 -- disk) and the rebut program. The missing fixture rejects, so it carries no AF
 -- to differentiate — it is pinned by 'prop_fixtureGoldenBytes' below.
 prop_fixtureDifferential :: Property
 prop_fixtureDifferential = once $ ioProperty $ do
-  covered <- readFile "fixtures/covered-self-edge.sexp"
-  pure $ conjoin [differentialUnit covered, differentialUnit rebutProgram]
+  coveredBytes <- readFile "fixtures/covered-self-edge.sexp"
+  pure $ case (decodeCheckInputFile coveredBytes, decodeUnitText rebutProgram) of
+    (Right coveredInput, Right rebutUnit) ->
+      conjoin [differentialInput coveredInput, differentialInput (testCheckInput rebutUnit)]
+    values -> counterexample ("fixture codec: " ++ show values) False
 
 -- | The Driver default now grounds accepted units over the cached backend; its
 -- printed verdicts must still be the byte-identical Lean-driver goldens for the
 -- two committed fixtures.
 prop_fixtureGoldenBytes :: Property
 prop_fixtureGoldenBytes = once $ ioProperty $ do
-  covered <- readFile "fixtures/covered-self-edge.sexp"
-  missing <- readFile "fixtures/missing-self-edge.sexp"
-  pure $
-    conjoin
-      [ verdictBytes covered
-          === "(verdict accept (labels (0 undec)) (edges (0 0)) (statuses (status (atom p) contested)))"
-      , verdictBytes missing === "(verdict reject missing-conflict)"
-      ]
+  coveredBytes <- readFile "fixtures/covered-self-edge.sexp"
+  missingBytes <- readFile "fixtures/missing-self-edge.sexp"
+  pure $ case (decodeCheckInputFile coveredBytes, decodeCheckInputFile missingBytes) of
+    (Right coveredInput, Right missingInput) ->
+      conjoin
+        [ verdictBytes coveredInput
+            === expectedVerdictText coveredInput
+              "accept (labels (0 undec)) (edges (0 0)) (statuses (status (atom p) contested))"
+        , verdictBytes missingInput
+            === expectedVerdictText missingInput "reject missing-conflict"
+        ]
+    values -> counterexample ("fixture codec: " ++ show values) False
 
 -- ---------------------------------------------------------------------------
 -- Perf guard (smoke, not a benchmark)

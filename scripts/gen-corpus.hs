@@ -1,9 +1,8 @@
 -- | Corpus generator for the differential harness (M3 plan D8).
 --
--- Constructs each conformance-corpus 'Unit' as a real symbolic-core value and
--- writes @fixtures/corpus/<name>.sexp@ = @printSExpr (encodeUnit u)@ — the
--- canonical wire text both drivers decode. This is the provenance record for
--- the corpus: the wire denotes exactly the 'Unit' value defined here.
+-- Constructs each conformance-corpus 'Unit', validates its replay identity, and
+-- writes @fixtures/corpus/<name>.sexp@ as a canonical 'CheckInput' envelope.
+-- This is the provenance record for the exact checker input defined here.
 --
 -- Run with the built library on the path:
 --
@@ -19,12 +18,23 @@
 -- therefore avoids non-canonical numeric literals (the atoms are nullary or
 -- constructor atoms; no @num@ terms appear), so the two drivers cannot diverge
 -- on numeric canonicalization.
+--
+-- PR #44 review anchors: three replay-preflight fixtures
+-- (@reject-preflight-*.sexp@, review C3) pin the runtime preflight's
+-- duplicate → unknown → unselected-certificate precedence (each rejects R13
+-- under a deliberately broken backend selection), and
+-- @strict-cert-unicode-theory.sexp@ (review C11) carries a non-ASCII theory
+-- digest so the harness byte-compares both drivers on the quoted-atom path.
 module Main (main) where
+
+import Data.Char (ord)
+import Data.List (sortBy)
 
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..))
+import Lara.Replay
 import Lara.Strict (SExpr (..))
-import Lara.Wire (encodeUnit, printSExpr)
+import Lara.Wire (encodeCheckInput, printSExpr)
 
 -- ---------------------------------------------------------------------------
 -- Small AST builders (mirror test/CheckSpec.hs)
@@ -352,6 +362,54 @@ strictCertAccept =
     , unitQueries = [atom0 "pp" []]
     }
 
+-- | C11 quoted-atom anchor: the 'strictCertAccept' shape with the theory
+-- digest renamed to the non-ASCII @sha256:é@ (@é@ is U+00E9, outside the bare
+-- atom set, so the digest prints quoted). The replay-id theories section, the
+-- unit theories section, the rule certifier, and the assurance certificate
+-- all carry the quoted digest; the verdict is unchanged.
+strictCertUnicodeTheory :: Unit
+strictCertUnicodeTheory =
+  Unit
+    { unitRules =
+        [strRule "s" [] [apat0 "pp" []] (apat0 "pp" []) False
+          [CertRef (BackendId "nd") 1 (TheoryDigest "sha256:é")]]
+    , unitContraries = []
+    , unitExceptions = []
+    , unitTheories = [(TheoryDigest "sha256:é", [])]
+    , unitLeaves = [(LeafId "e_p", atom0 "pp" [])]
+    , unitArgs =
+        [(ArgId "a", SRule (RuleId "s") [] [SLeaf (LeafId "e_p")] [] []
+            (AssuranceCert (Cert (BackendId "nd") 1 (TheoryDigest "sha256:é")
+              (SList [SAtom "hyp", SAtom "0"]))))]
+    , unitAttacks = []
+    , unitQueries = [atom0 "pp" []]
+    }
+
+-- Replay-preflight anchors (PR #44 review C3) -------------------------------
+
+-- | The shared unit for the preflight anchors: the 'strictCertAccept' shape
+-- with the assurance certificate (and its rule certifier) pointing at
+-- @nd\@2@, so the certificate's backend pair is unselected under every
+-- anchor's selection. The unit itself is checker-valid; only the replay-id
+-- backend selection decides which preflight failure fires (all reject R13).
+preflightCertUnit :: Unit
+preflightCertUnit =
+  Unit
+    { unitRules =
+        [strRule "s" [] [apat0 "pp" []] (apat0 "pp" []) False
+          [CertRef (BackendId "nd") 2 (TheoryDigest "t0")]]
+    , unitContraries = []
+    , unitExceptions = []
+    , unitTheories = [(TheoryDigest "t0", [])]
+    , unitLeaves = [(LeafId "e_p", atom0 "pp" [])]
+    , unitArgs =
+        [(ArgId "a", SRule (RuleId "s") [] [SLeaf (LeafId "e_p")] [] []
+            (AssuranceCert (Cert (BackendId "nd") 2 (TheoryDigest "t0")
+              (SList [SAtom "hyp", SAtom "0"]))))]
+    , unitAttacks = []
+    , unitQueries = [atom0 "pp" []]
+    }
+
 -- ---------------------------------------------------------------------------
 -- File table and driver
 -- ---------------------------------------------------------------------------
@@ -380,11 +438,65 @@ corpus =
   , ("fixtures/corpus/reject-undercut-bad-position.sexp", undercutBadPosition)
   , ("fixtures/corpus/strict-trusted-accept.sexp", strictTrustedAccept)
   , ("fixtures/corpus/strict-cert-accept.sexp", strictCertAccept)
+  , ("fixtures/corpus/strict-cert-unicode-theory.sexp", strictCertUnicodeTheory)
+  ]
+
+-- | The preflight anchors (PR #44 review C3), as
+-- @(path, backend selection, unit)@: each selection is a deliberate preflight
+-- violation, and lower-precedence violations ride along so the precedence
+-- order (duplicate → unknown → unselected certificate) is exercised. All
+-- three failure kinds emit the identical stdout verdict @reject R13@, so the
+-- precedence is pinned by @scripts/differential.sh@ byte-comparing the
+-- stderr @replayFailureMessage@ line for these three anchors.
+preflightCorpus :: [(FilePath, [(BackendId, String)], Unit)]
+preflightCorpus =
+  [ -- Duplicate selection; the unknown @foo\@1@ and the unselected @nd\@2@
+    -- certificate ride along to pin that duplicate wins.
+    ( "fixtures/corpus/reject-preflight-duplicate-backend.sexp"
+    , [(BackendId "nd", "1"), (BackendId "nd", "1"), (BackendId "foo", "1")]
+    , preflightCertUnit
+    )
+  , -- A single unknown selection; the unselected @nd\@2@ certificate rides
+    -- along to pin that unknown outranks it (again via the stderr
+    -- byte-compare in @scripts/differential.sh@).
+    ( "fixtures/corpus/reject-preflight-unknown-backend.sexp"
+    , [(BackendId "foo", "1")]
+    , preflightCertUnit
+    )
+  , -- The valid @nd\@1@ selection with an unselected @nd\@2@ certificate:
+    -- the only violation is the certificate backend.
+    ( "fixtures/corpus/reject-preflight-unselected-certificate.sexp"
+    , [(BackendId "nd", "1")]
+    , preflightCertUnit
+    )
   ]
 
 main :: IO ()
-main = mapM_ writeFixture corpus
+main = do
+  mapM_ (writeFixture conformanceBackends) corpus
+  mapM_ (\(path, backends, unit) -> writeFixture backends (path, unit)) preflightCorpus
   where
-    writeFixture (path, u) = do
-      writeFile path (printSExpr (encodeUnit u) ++ "\n")
+    writeFixture backends (path, unit) = do
+      input <- checkInput backends unit
+      writeFile path (printSExpr (encodeCheckInput input) ++ "\n")
       putStrLn ("wrote " ++ path)
+
+-- | The backend selection every conformance-corpus fixture shares; the
+-- preflight anchors override it with their deliberate violations.
+conformanceBackends :: [(BackendId, String)]
+conformanceBackends = [(BackendId "nd", "1")]
+
+checkInput :: [(BackendId, String)] -> Unit -> IO CheckInput
+checkInput backends unit = do
+  replayId <-
+    either (fail . replayErrorMessage) pure $
+      mkReplayId
+        LaraCoreV01
+        (PolicyId "conformance-v1")
+        backends
+        (sortBy compareTheoryDigest (map fst (unitTheories unit)))
+        (Digest "sha256:conformance-corpus-v1")
+  either (fail . replayErrorMessage) pure (mkCheckInput replayId unit)
+  where
+    compareTheoryDigest (TheoryDigest a) (TheoryDigest b) =
+      compare (map ord a) (map ord b)

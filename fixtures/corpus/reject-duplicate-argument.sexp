@@ -1,1 +1,1 @@
-(unit (policy (rules) (contraries) (exceptions)) (leaves (leaf l1 (atom p))) (args (arg a0 (leaf l1)) (arg a1 (leaf l1))))
+(check-input (replay-id (core lara-core@0.1) (policy conformance-v1) (backends (backend nd 1)) (theories) (artifact sha256:conformance-corpus-v1)) (unit (policy (rules) (contraries) (exceptions)) (leaves (leaf l1 (atom p))) (args (arg a0 (leaf l1)) (arg a1 (leaf l1)))))

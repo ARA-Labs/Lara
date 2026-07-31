@@ -1,4 +1,13 @@
 {
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "empirical-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:aaaa..."
+  },
   "verdict-class": "reject R1",
   "located-diagnostic": {
     "kind": "reject",

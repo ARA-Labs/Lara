@@ -9,8 +9,9 @@
 -- header). This module rebuilds the __full__ 'SupportTerm' the checker consumes:
 -- it re-associates θ with the rule's real parameter names, reconstructs each
 -- implicit premise by unique @≡@-match against the declared leaves and prior
--- arguments (spec §5), and re-points discharge targets. The resulting 'Unit'
--- feeds "Lara.Driver".@runUnit@ unchanged.
+-- arguments (spec §5), and re-points discharge targets. The caller combines the
+-- resulting 'Unit' with its source inputs via "Lara.Replay".'sourceCheckInput',
+-- then passes that validated 'CheckInput' to "Lara.Driver".'runCheck'.
 --
 -- == Trusted, pure, deterministic, total on well-formed input
 --

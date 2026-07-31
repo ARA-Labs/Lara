@@ -130,3 +130,39 @@ expect_schema_failure \
   "walking-skeleton manifest in renamed directory"
 
 echo "PASS: trusted-input and manifest identity tampering fail before checker execution"
+
+# Artifact-identity drift: change only the artifact digest in emitted.lara
+# (emitted.lara is untrusted, so manifest validation succeeds; the checker runs,
+# and verdict-carried replay identity detects drift).
+drift_bundle="$tmp_root/walking-skeleton"
+rm -rf "$drift_bundle"
+cp -R "$source_bundle" "$drift_bundle"
+sed -i.bak 's/\(^artifact kv_quant_suite at sha256:5ca1e\)\(.*\)/\1-drift\2/' "$drift_bundle/emitted.lara"
+rm -f "$drift_bundle/emitted.lara.bak"
+rm -f "$marker"
+drift_stderr="$tmp_root/drift.stderr"
+drift_stdout="$tmp_root/drift.stdout"
+set +e
+"$replay" "$drift_bundle" >"$drift_stdout" 2>"$drift_stderr"
+drift_exit=$?
+set -e
+if [ "$drift_exit" -eq 0 ]; then
+  echo "FAIL: artifact-drift replay was accepted (exit 0)" >&2
+  exit 1
+fi
+if [ "$drift_exit" -ne 1 ]; then
+  echo "FAIL: artifact-drift replay exited $drift_exit, expected 1" >&2
+  cat "$drift_stderr" >&2
+  exit 1
+fi
+if ! grep -q "replay verdict bytes differ" "$drift_stderr"; then
+  echo "FAIL: artifact-drift replay did not report verdict byte mismatch" >&2
+  cat "$drift_stderr" >&2
+  exit 1
+fi
+if [ -s "$drift_stdout" ]; then
+  echo "FAIL: artifact-drift replay wrote unexpected stdout" >&2
+  cat "$drift_stdout" >&2
+  exit 1
+fi
+echo "PASS: artifact-digest drift invokes checker and fails on verdict byte mismatch"

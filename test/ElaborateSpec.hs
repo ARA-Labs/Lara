@@ -2,9 +2,10 @@
 -- Policy → Unit@).
 --
 -- The crux is the frozen end-to-end slice: parse a committed @.lara@ file with
--- "Lara.Syntax", 'elaborate' it against the shared policy, run the result through
--- "Lara.Driver".@runUnit@, and assert the frozen A0 verdict
--- (@docs/m4a-checklist.md@ §1). IO lives here, never in the elaborator.
+-- "Lara.Syntax", 'elaborate' it against the shared policy, construct its source
+-- 'CheckInput' with 'sourceCheckInput', run it through "Lara.Driver".'runCheck',
+-- and assert the frozen A0 verdict (@docs/m4a-checklist.md@ §1). IO lives here,
+-- never in the elaborator.
 --
 --   * __Example B__ (`examples/B/example.lara`) reproduces its frozen golden
 --     __byte-exact__: @pa\/pb → LUndec@, @c_pos\/c_neg → Contested@ (the 2-cycle).
@@ -20,13 +21,14 @@ module ElaborateSpec (elaborateSpecProps) where
 import Data.List (isInfixOf)
 import Test.QuickCheck
 
-import Lara.AST
-import Lara.Driver (runUnit)
+import Lara.AST hiding (Reject)
+import Lara.Driver (runCheck)
 import Lara.Elaborate
+import Lara.Replay (ReplayError, sourceCheckInput)
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 import Lara.Syntax (parseProgram, parsePolicy)
-import Lara.Wire (Verdict (..))
+import Lara.Wire (Outcome (..), Verdict (..))
 
 -- ---------------------------------------------------------------------------
 -- Shared fixtures
@@ -57,6 +59,10 @@ loadPolicy path = do
   case parsePolicy src of
     Right p -> pure p
     Left e -> error (path ++ ": parse failed: " ++ show e)
+
+sourceVerdict :: Program -> Policy -> Unit -> Either ReplayError Verdict
+sourceVerdict program policy unit =
+  runCheck <$> sourceCheckInput program policy unit
 
 policyPath :: FilePath
 policyPath = "examples/A/empirical-v1.policy.lara"
@@ -133,13 +139,15 @@ prop_strictCertificatePresentationAccepts =
                 unitTheories unit
                   === [(TheoryDigest "sha256:strict-v1-theory-0", [])]
             , counterexample "strict certificate replays to accept" $
-                runUnit unit
-                  === VAccept
-                    { verdictLabels = [(0, LIn)]
-                    , verdictEdges = []
-                    , verdictStatuses =
-                        [(Prop (Pred "holds") [con "safety_invariant", con "D"], Justified)]
-                    }
+                fmap verdictOutcome (sourceVerdict prog pol unit)
+                  === Right
+                    ( Accept
+                        { verdictLabels = [(0, LIn)]
+                        , verdictEdges = []
+                        , verdictStatuses =
+                            [(Prop (Pred "holds") [con "safety_invariant", con "D"], Justified)]
+                        }
+                    )
             ]
 
 -- | A certifier-allowed certificate whose digest is absent from the policy
@@ -153,22 +161,23 @@ prop_strictCertificateMissingTheoryRejectsR13 =
       case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
         Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
         Right unit ->
-          counterexample ("expected R13, got " ++ show (runUnit unit)) $
-            runUnit unit === VReject (RejectClass R13)
+          counterexample ("expected R13, got " ++ show (sourceVerdict prog pol unit)) $
+            fmap verdictOutcome (sourceVerdict prog pol unit)
+              === Right (Reject (RejectClass R13))
 
 -- ---------------------------------------------------------------------------
 -- Example B — the frozen end-to-end golden (byte-exact)
 -- ---------------------------------------------------------------------------
 
--- | @elaborate@ + @runUnit@ on B reproduces the frozen A0 verdict exactly:
--- @pa → LUndec@, @pb → LUndec@ (the mutual 2-cycle), @c_pos → Contested@,
--- @c_neg → Contested@ (m4a-checklist §1).
+-- | @elaborate@ + @sourceCheckInput@ + @runCheck@ on B reproduces the frozen
+-- A0 verdict exactly: @pa → LUndec@, @pb → LUndec@ (the mutual 2-cycle),
+-- @c_pos → Contested@, @c_neg → Contested@ (m4a-checklist §1).
 prop_B_frozenGolden :: Property
 prop_B_frozenGolden = once $ ioProperty $ do
   prog <- loadProgram "examples/B/example.lara"
   pol <- loadPolicy policyPath
   let expected =
-        VAccept
+        Accept
           { verdictLabels = [(0, LUndec), (1, LUndec)]
           , verdictEdges = [(0, 1), (1, 0)]
           , verdictStatuses =
@@ -176,16 +185,17 @@ prop_B_frozenGolden = once $ ioProperty $ do
           }
   pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample ("B: unexpected ElabError: " ++ elabErrorMessage e) False
-    Right u -> runUnit u === expected
+    Right unit -> fmap verdictOutcome (sourceVerdict prog pol unit) === Right expected
 
 -- ---------------------------------------------------------------------------
 -- Example A — the frozen end-to-end golden (the vertical slice)
 -- ---------------------------------------------------------------------------
 
--- | @elaborate@ + @runUnit@ on A reproduces the frozen A0 verdict: a1 (the
--- self-defeating support) is driven @out@ by its three unattacked attackers
--- (@d1@ undercut, @d2@ undermine, @d3@ rebut), and c1 is @Defeated@
--- (m4a-checklist §1). Arguments are indexed in declaration order a1=0, d1=1,
+-- | @elaborate@ + @sourceCheckInput@ + @runCheck@ on A reproduces the frozen A0
+-- verdict: a1 (the self-defeating support) is driven @out@ by its three
+-- unattacked attackers (@d1@ undercut, @d2@ undermine, @d3@ rebut), and c1 is
+-- @Defeated@ (m4a-checklist §1). Arguments are indexed in declaration order
+-- a1=0, d1=1,
 -- d2=2, d3=3. This slice exercises implicit-premise reconstruction, θ
 -- re-association, all three attack kinds, and the @Challenges@ / @SupportsDerived@
 -- conclusion arms in one graph.
@@ -195,14 +205,16 @@ prop_A_frozenGolden = once $ ioProperty $ do
   pol <- loadPolicy policyPath
   pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample ("A: unexpected ElabError: " ++ elabErrorMessage e) False
-    Right u -> case runUnit u of
-      VReject r -> counterexample ("A: unexpected reject " ++ show r) False
-      v@(VAccept {}) ->
+    Right unit -> case sourceVerdict prog pol unit of
+      Left err -> counterexample ("A: replay identity error " ++ show err) False
+      Right (Verdict _ (Reject rejection)) ->
+        counterexample ("A: unexpected reject " ++ show rejection) False
+      Right (Verdict _ outcome@Accept{}) ->
         conjoin
           [ counterexample "grounded labels a1→out, d1/d2/d3→in" $
-              verdictLabels v === [(0, LOut), (1, LIn), (2, LIn), (3, LIn)]
+              verdictLabels outcome === [(0, LOut), (1, LIn), (2, LIn), (3, LIn)]
           , counterexample "claim c1 (improves(M,accuracy,D)) → Defeated" $
-              verdictStatuses v === [(improvesMAD, Defeated)]
+              verdictStatuses outcome === [(improvesMAD, Defeated)]
           ]
 
 -- ---------------------------------------------------------------------------

@@ -1,9 +1,9 @@
 -- | The whole-unit pipeline: decode → check → verdict (the Haskell side of the
 -- N11 differential anchor, mirroring @lean/Lara/Driver.lean@).
 --
--- 'runUnit' runs the real six-stage checker ("Lara.Check.checkUnit") on a
--- decoded 'Unit' and produces the wire 'Verdict' both drivers print. On
--- acceptance it reads the grounded labels over the compiled AF
+-- 'runCheck' runs replay preflight and the real six-stage checker
+-- ("Lara.Check.checkUnit") on a validated 'CheckInput', producing the wire
+-- 'Verdict' both drivers print. On acceptance it reads the grounded labels
 -- ('Lara.Runtime.runtimeAF' — the cached-adjacency production backend, whose
 -- verdict is byte-identical to the un-cached 'Lara.Compile.checkedAF' path),
 -- the compiled closure edges in ascending order,
@@ -17,7 +17,7 @@ module Lara.Driver
   ( buildGamma
   , buildCertOk
   , buildAccept
-  , runUnit
+  , runCheck
   ) where
 
 import Lara.AST
@@ -25,9 +25,12 @@ import Lara.AST
   , Cert (..)
   , LeafId
   , TheoryDigest (..)
+  , RejectClass (..)
+  , Rejection (..)
   , Unit (..)
   )
 import Lara.Check (CheckedUnit, checkUnit, cuNodes, cuProgram)
+import Lara.Replay (CheckInput, inputReplayId, inputUnit, runtimeReplayFailure)
 import Lara.Diagnostics (rejectionOf)
 import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
 import Lara.Runtime (runtimeAF)
@@ -35,14 +38,20 @@ import Lara.Prop (Prop)
 import Lara.SupportTerm (CertOk)
 import qualified Lara.Strict as St
 import qualified Lara.Strict.ND as ND
-import Lara.Wire (Verdict (..))
+import Lara.Wire (Outcome (..), Verdict (..))
 
--- | Run the checker on a decoded unit and produce its wire verdict.
-runUnit :: Unit -> Verdict
-runUnit unit =
-  case checkUnit (buildGamma (unitLeaves unit)) (buildCertOk (unitTheories unit)) unit of
-    Left err -> VReject (rejectionOf err)
-    Right accepted -> buildAccept unit accepted
+-- | Run replay preflight and the checker, retaining the validated identity.
+runCheck :: CheckInput -> Verdict
+runCheck input =
+  let replayId = inputReplayId input
+      unit = inputUnit input
+   in Verdict replayId $
+        case runtimeReplayFailure input of
+          Just _ -> Reject (RejectClass R13)
+          Nothing ->
+            case checkUnit (buildGamma (unitLeaves unit)) (buildCertOk (unitTheories unit)) unit of
+              Left err -> Reject (rejectionOf err)
+              Right accepted -> buildAccept unit accepted
 
 -- | The leaf context @Gamma@ from the wire @leaves@ section (first-match lookup,
 -- Lean @buildGamma@).
@@ -65,10 +74,10 @@ buildCertOk theories cert as c = case cert of
 toStrictDigest :: TheoryDigest -> St.TheoryDigest
 toStrictDigest (TheoryDigest s) = St.TheoryDigest s
 
--- | Read the accept verdict off an accepted unit (Lean @buildAccept@).
-buildAccept :: Unit -> CheckedUnit -> Verdict
+-- | Read the accept outcome off an accepted unit (Lean @buildAccept@).
+buildAccept :: Unit -> CheckedUnit -> Outcome
 buildAccept unit accepted =
-  VAccept
+  Accept
     { verdictLabels = [(i, labelC af i) | i <- [0 .. n - 1]]
     , verdictEdges = [(i, j) | i <- [0 .. n - 1], j <- [0 .. n - 1], afAttack af i j]
     , verdictStatuses =

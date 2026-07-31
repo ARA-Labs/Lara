@@ -1,0 +1,1 @@
+(check-input (replay-id (core lara-core@0.1) (policy conformance-v1) (backends (backend nd 1)) (theories sha256:z sha256:a) (artifact sha256:conformance-corpus-v1)) (unit (policy (rules) (contraries (contrary (apat p) (apat p))) (exceptions)) (theories (theory sha256:a) (theory sha256:z)) (leaves (leaf l1 (atom p))) (args (arg a0 (leaf l1))) (queries (atom p))))

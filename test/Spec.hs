@@ -28,6 +28,7 @@ import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
 import PropSpec (propSpecProps)
 import ReportingSpec (reportingSpecProps)
+import ReplaySpec (replaySpecProps)
 import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
 import SyntaxSpec (syntaxSpecProps)
@@ -180,6 +181,7 @@ main = do
       ]
         ++ [run name act | (name, act) <- propSpecProps]
         ++ [run name act | (name, act) <- strictSpecProps]
+        ++ [run name act | (name, act) <- replaySpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
         ++ [run name act | (name, act) <- syntaxSpecProps]
         ++ [run name act | (name, act) <- elaborateSpecProps]

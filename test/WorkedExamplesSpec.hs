@@ -1,22 +1,23 @@
 -- | Golden verdicts for E1–E3 / R1–R3 plus strict-certificate example S1.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
--- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', runs the real six-stage
--- pipeline ("Lara.Driver".@runUnit@), and asserts the frozen verdict — exactly
--- the in-process path @app\/Main.hs@ takes for a @.lara@ file, so these goldens
--- pin the same bytes the CLI prints. IO lives in the test, never in the
+-- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', validates the source
+-- replay boundary with 'sourceCheckInput', runs the real six-stage pipeline
+-- ("Lara.Driver".@runCheck@), and asserts the frozen identity-bearing verdict —
+-- exactly the in-process path @app\/Main.hs@ takes for a @.lara@ file, so these
+-- goldens pin the same bytes the CLI prints. IO lives in the test, never in the
 -- elaborator (mirrors "ElaborateSpec").
 --
 -- Coverage (docs/m4a-checklist.md §2–§3):
 --
---   * __E1__ @justified-clean@ — VAccept; the single support @in@; status justified.
---   * __E2__ @open-gap@        — VAccept; status gap (empty complete support).
---   * __E3__ @defeat-suite@    — VAccept; justified + defeated + contested in one
+--   * __E1__ @justified-clean@ — 'Accept'; the single support @in@; status justified.
+--   * __E2__ @open-gap@        — 'Accept'; status gap (empty complete support).
+--   * __E3__ @defeat-suite@    — 'Accept'; justified + defeated + contested in one
 --     graph, and all three attack kinds (undercut, undermine, rebut).
---   * __R1__ @undeclared-leaf@ — VReject R1  (leaf not in Γ).
---   * __R2__ @strict-contrary@ — VReject R12 (policy §8.1 Path-B well-formedness).
---   * __R3__ @bad-attack-target@ — VReject R10 (rebut on a leaf occurrence).
---   * __S1__ @strict-cert@ — VAccept; nd@1 cert replay; status justified.
+--   * __R1__ @undeclared-leaf@ — 'Reject' R1  (leaf not in Γ).
+--   * __R2__ @strict-contrary@ — 'Reject' R12 (policy §8.1 Path-B well-formedness).
+--   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
+--   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
 --
 -- A final __freshness__ property re-derives all nine @example.core.sexp@
 -- anchors (A, B, E1–E3, R1–R3, and S1) from their surface @.lara@ + policy and
@@ -29,25 +30,42 @@ import Data.List (sort)
 
 import Lara.AST
   ( Attack (..)
+  , ArgId (..)
+  , Assurance (..)
+  , BackendId (..)
+  , Cert (..)
+  , Digest (..)
   , Label (..)
   , Policy
   , Program
+  , PolicyId (..)
   , RejectClass (..)
   , Rejection (..)
+  , RuleId (..)
   , Status (..)
+  , SupportTerm (..)
+  , TheoryDigest (..)
   , Unit (..)
   )
-import Lara.Driver (runUnit)
+import Lara.Driver (runCheck)
 import Lara.Elaborate
   ( defeasibleSuiteSigma
   , elabErrorMessage
   , elaborate
   , registryOf
   )
-import Lara.ExpectedJson (expectedJson)
+import Lara.ExpectedJson (JValue (..), expectedJson, expectedJsonValue)
+import Lara.Replay
+  ( CoreVersion (..)
+  , mkCheckInput
+  , mkReplayId
+  , replayErrorMessage
+  , sourceCheckInput
+  )
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Syntax (parsePolicy, parseProgram)
-import Lara.Wire (Verdict (..), encodeUnit, printSExpr)
+import Lara.Strict (SExpr (..))
+import Lara.Wire (Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
 
 -- ---------------------------------------------------------------------------
 -- Fixtures
@@ -113,7 +131,9 @@ runExample dir policyBase k = do
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
   pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
-    Right u -> k (runUnit u)
+    Right unit -> case sourceCheckInput prog pol unit of
+      Left err -> counterexample (dir ++ ": replay identity error: " ++ replayErrorMessage err) False
+      Right input -> k (runCheck input)
 
 -- ---------------------------------------------------------------------------
 -- E-series — accepted
@@ -123,28 +143,28 @@ runExample dir policyBase k = do
 prop_E1 :: Property
 prop_E1 = once $ ioProperty $
   runExample "examples/E1" empiricalBase $ \v ->
-    case v of
-      VReject r -> counterexample ("E1: unexpected reject " ++ show r) False
-      VAccept{} ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
         conjoin
           [ counterexample "E1 labels: a1 → in" $
-              verdictLabels v === [(0, LIn)]
+              verdictLabels outcome === [(0, LIn)]
           , counterexample "E1 status: c1 → justified" $
-              verdictStatuses v === [(improves "M" "D", Justified)]
+              verdictStatuses outcome === [(improves "M" "D", Justified)]
           ]
 
 -- | E2: no arguments; the queried claim has empty complete support ⇒ gap.
 prop_E2 :: Property
 prop_E2 = once $ ioProperty $
   runExample "examples/E2" empiricalBase $ \v ->
-    case v of
-      VReject r -> counterexample ("E2: unexpected reject " ++ show r) False
-      VAccept{} ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E2: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
         conjoin
           [ counterexample "E2 labels: no arguments" $
-              verdictLabels v === []
+              verdictLabels outcome === []
           , counterexample "E2 status: c1 → gap" $
-              verdictStatuses v === [(improves "M" "D", Gap)]
+              verdictStatuses outcome === [(improves "M" "D", Gap)]
           ]
 
 -- | E3: justified (a_j in) + defeated (a_d out, undercut+undermine) + contested
@@ -153,15 +173,15 @@ prop_E2 = once $ ioProperty $
 prop_E3 :: Property
 prop_E3 = once $ ioProperty $
   runExample "examples/E3" empiricalBase $ \v ->
-    case v of
-      VReject r -> counterexample ("E3: unexpected reject " ++ show r) False
-      VAccept{} ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E3: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
         conjoin
           [ counterexample "E3 labels: a_j in, a_d out, d_uc/d_um in, a_c/a_cn undec" $
-              verdictLabels v
+              verdictLabels outcome
                 === [(0, LIn), (1, LOut), (2, LIn), (3, LIn), (4, LUndec), (5, LUndec)]
           , counterexample "E3 statuses: c_j justified, c_d defeated, c_c/c_cn contested" $
-              verdictStatuses v
+              verdictStatuses outcome
                 === [ (improves "M_j" "D_j", Justified)
                     , (improves "M_d" "D_d", Defeated)
                     , (improves "M_c" "D_c", Contested)
@@ -174,14 +194,14 @@ prop_E3 = once $ ioProperty $
 prop_S1 :: Property
 prop_S1 = once $ ioProperty $
   runExample "examples/S1" "strict-v1.policy.lara" $ \v ->
-    case v of
-      VReject r -> counterexample ("S1: unexpected reject " ++ show r) False
-      VAccept{} ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
         conjoin
           [ counterexample "S1 labels: a1 → in" $
-              verdictLabels v === [(0, LIn)]
+              verdictLabels outcome === [(0, LIn)]
           , counterexample "S1 status: c1 → justified" $
-              verdictStatuses v === [(holdsP "safety_invariant" "D", Justified)]
+              verdictStatuses outcome === [(holdsP "safety_invariant" "D", Justified)]
           ]
 
 -- ---------------------------------------------------------------------------
@@ -192,22 +212,94 @@ prop_S1 = once $ ioProperty $
 prop_R1 :: Property
 prop_R1 = once $ ioProperty $
   runExample "examples/R1" empiricalBase $ \v ->
-    counterexample ("R1: expected VReject R1, got " ++ show v) $
-      v === VReject (RejectClass R1)
+    counterexample ("R1: expected reject R1, got " ++ show v) $
+      verdictOutcome v === Reject (RejectClass R1)
 
 -- | R2: a strict-reachable conclusion in a contrary pair ⇒ policy class R12.
 prop_R2 :: Property
 prop_R2 = once $ ioProperty $
   runExample "examples/R2" "strict-bad-v1.policy.lara" $ \v ->
-    counterexample ("R2: expected VReject R12, got " ++ show v) $
-      v === VReject (RejectClass R12)
+    counterexample ("R2: expected reject R12, got " ++ show v) $
+      verdictOutcome v === Reject (RejectClass R12)
 
 -- | R3: a rebut targeting a leaf occurrence ⇒ attack-position class R10.
 prop_R3 :: Property
 prop_R3 = once $ ioProperty $
   runExample "examples/R3" empiricalBase $ \v ->
-    counterexample ("R3: expected VReject R10, got " ++ show v) $
-      v === VReject (RejectClass R10)
+    counterexample ("R3: expected reject R10, got " ++ show v) $
+      verdictOutcome v === Reject (RejectClass R10)
+
+prop_replayPreflightExpectedJson :: Property
+prop_replayPreflightExpectedJson =
+  once $
+    conjoin
+      [ diagnostic duplicateInput
+          === JObject
+            [ ("kind", JString "reject")
+            , ("class", JString "R13")
+            , ("stage", JString "backend")
+            , ("constituent", JObject [("kind", JString "policy")])
+            , ("reason", JString "duplicate-selection")
+            , ("backend", JString "nd@1")
+            ]
+      , diagnostic unknownInput
+          === JObject
+            [ ("kind", JString "reject")
+            , ("class", JString "R13")
+            , ("stage", JString "backend")
+            , ("constituent", JObject [("kind", JString "policy")])
+            , ("reason", JString "unknown-selection")
+            , ("backend", JString "other@2")
+            ]
+      , diagnostic certificateInput
+          === JObject
+            [ ("kind", JString "reject")
+            , ("class", JString "R13")
+            , ("stage", JString "backend")
+            , ( "constituent"
+              , JObject
+                  [ ("kind", JString "argument")
+                  , ("id", JString "outer")
+                  , ("index", JNumber 0)
+                  ]
+              )
+            , ("reason", JString "certificate-backend-not-selected")
+            , ("backend", JString "nd@1")
+            ]
+      ]
+  where
+    empty = Unit [] [] [] [] [] [] [] []
+    duplicateInput = preflightInput [(BackendId "nd", "1"), (BackendId "nd", "1")] empty
+    unknownInput = preflightInput [(BackendId "nd", "1"), (BackendId "other", "2")] empty
+    certificate =
+      Cert (BackendId "nd") 1 (TheoryDigest "sha256:t") (SAtom "proof")
+    certificateUnit =
+      empty
+        { unitArgs =
+            [ ( ArgId "outer"
+              , SRule (RuleId "strict") [] [] [] [] (AssuranceCert certificate)
+              )
+            ]
+        }
+    certificateInput = preflightInput [] certificateUnit
+    preflightInput backends unit =
+      let replayId =
+            either (error . replayErrorMessage) id $
+              mkReplayId
+                LaraCoreV01
+                (PolicyId "conformance-v1")
+                backends
+                []
+                (Digest "sha256:conformance-corpus-v1")
+       in either (error . replayErrorMessage) id (mkCheckInput replayId unit)
+    diagnostic input =
+      case expectedJsonValue input of
+        JObject
+          [ ("replay-id", _)
+          , ("verdict-class", JString "reject R13")
+          , ("located-diagnostic", value)
+          ] -> value
+        value -> value
 
 -- ---------------------------------------------------------------------------
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
@@ -232,9 +324,13 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
           case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
             Left e ->
               counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
-            Right u ->
-              counterexample (dir ++ ": .core.sexp is stale — regenerate with scripts/gen-worked-examples.hs") $
-                (printSExpr (encodeUnit u) ++ "\n") === committed
+            Right unit ->
+              case sourceCheckInput prog pol unit of
+                Left err ->
+                  counterexample (dir ++ ": replay identity error: " ++ replayErrorMessage err) False
+                Right input ->
+                  counterexample (dir ++ ": .core.sexp is stale — regenerate with scripts/gen-worked-examples.hs") $
+                    (printSExpr (encodeCheckInput input) ++ "\n") === committed
         (pr, pp) ->
           counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
 
@@ -254,10 +350,14 @@ prop_expectedJsonFresh = once (ioProperty (conjoin <$> mapM checkOne examplePoli
       pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
         Left e ->
           counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
-        Right u ->
-          counterexample
-            (dir ++ ": expected.json is stale — regenerate with scripts/gen-worked-examples.hs")
-            (expectedJson u === committed)
+        Right unit ->
+          case sourceCheckInput prog pol unit of
+            Left err ->
+              counterexample (dir ++ ": replay identity error: " ++ replayErrorMessage err) False
+            Right input ->
+              counterexample
+                (dir ++ ": expected.json is stale — regenerate with scripts/gen-worked-examples.hs")
+                (expectedJson input === committed)
 
 -- ---------------------------------------------------------------------------
 -- Coverage matrix — measured from the examples' verdicts, not asserted in prose
@@ -283,9 +383,9 @@ prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
   units <- mapM loadUnit examplePolicies -- [(dir, Unit)]
   let elabErrs = [dir ++ ": " ++ e | (dir, Left e) <- verdicts]
-      statuses = sort (nubOrd [s | (_, Right (VAccept _ _ sts)) <- verdicts, (_, s) <- sts])
+      statuses = sort (nubOrd [s | (_, Right (Verdict _ (Accept _ _ sts))) <- verdicts, (_, s) <- sts])
       attackTags = sort (nubOrd [attackKind k | (_, u) <- units, k <- unitAttacks u])
-      rejects = sort (nubOrd [r | (_, Right (VReject r)) <- verdicts])
+      rejects = sort (nubOrd [r | (_, Right (Verdict _ (Reject r))) <- verdicts])
   pure $
     conjoin
       [ counterexample ("elaboration errors: " ++ show elabErrs) (null elabErrs)
@@ -308,7 +408,10 @@ loadVerdict (dir, policyBase) = do
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
   pure $ (,) dir $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> Left (elabErrorMessage e)
-    Right u -> Right (runUnit u)
+    Right unit ->
+      case sourceCheckInput prog pol unit of
+        Left err -> Left (replayErrorMessage err)
+        Right input -> Right (runCheck input)
 
 -- | Load + elaborate one example to its 'Unit'.
 loadUnit :: (FilePath, FilePath) -> IO (FilePath, Unit)
@@ -336,6 +439,7 @@ workedExamplesSpecProps =
   , ("R1 undeclared-leaf → reject R1", quickCheckResult prop_R1)
   , ("R2 strict-contrary → reject R12", quickCheckResult prop_R2)
   , ("R3 bad-attack-target → reject R10", quickCheckResult prop_R3)
+  , ("expected JSON reports every replay preflight reason", quickCheckResult prop_replayPreflightExpectedJson)
   , ("worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)", quickCheckResult prop_freshness)
   , ("worked-example expected.json goldens are fresh (elaborate+render == committed)", quickCheckResult prop_expectedJsonFresh)
   , ("coverage matrix: every status, attack kind, and R1/R12/R10 witnessed by the suite", quickCheckResult prop_coverageMatrix)

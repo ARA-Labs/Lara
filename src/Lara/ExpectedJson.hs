@@ -19,9 +19,9 @@
 --
 -- == Design
 --
--- 'expectedJson' is a __pure__ function of a checked 'Unit' — the same 'Unit' the
--- surface elaborates to ("Lara.Elaborate".@elaborate@) and @encodeUnit@ serializes
--- to the @.core.sexp@ anchor. IO (reading the @.lara@ + policy) lives in the
+-- 'expectedJson' is a __pure__ function of a validated 'CheckInput': the exact
+-- source replay identity plus the unchanged 'Unit' serialized into each
+-- @.core.sexp@ anchor. IO (reading the @.lara@ + policy) lives in the
 -- caller (@scripts\/gen-worked-examples.hs@ and @test\/WorkedExamplesSpec.hs@),
 -- mirroring how the @.core.sexp@ generator is structured.
 --
@@ -43,7 +43,7 @@ import Data.Char (ord)
 import Data.List (intercalate)
 import Numeric (showHex)
 
-import Lara.AST hiding (Claim)
+import Lara.AST hiding (Claim, Reject)
 import Lara.Check
   ( ProgramError (..)
   , UnitError (..)
@@ -55,9 +55,22 @@ import Lara.Diagnostics
   , Stage (..)
   , locate
   )
-import Lara.Driver (buildCertOk, buildGamma, runUnit)
+import Lara.Driver (buildCertOk, buildGamma, runCheck)
 import Lara.Grounded (Claim (..))
 import Lara.Policy (lookupRule)
+import Lara.Replay
+  ( CheckInput
+  , ReplayFailure (..)
+  , ReplayId
+  , inputReplayId
+  , inputUnit
+  , replayArtifact
+  , replayBackends
+  , replayCore
+  , replayPolicy
+  , replayTheories
+  , runtimeReplayFailure
+  )
 import Lara.Prop (Prop, prettyProp)
 import Lara.Reporting
   ( ClaimReport (..)
@@ -68,7 +81,7 @@ import Lara.SupportTerm
   , CheckLoc (..)
   , ReferenceReason (..)
   )
-import Lara.Wire (Tag (..), Verdict (..), tagToString)
+import Lara.Wire (Outcome (..), Tag (..), Verdict (..), coreVersionText, tagToString)
 
 -- ---------------------------------------------------------------------------
 -- The minimal JSON value + pretty-printer
@@ -135,37 +148,45 @@ renderString s = '"' : concatMap esc s ++ "\""
         | otherwise -> [c]
 
 -- ---------------------------------------------------------------------------
--- The expected.json golden for a checked unit
+-- The expected.json golden for a validated check input
 -- ---------------------------------------------------------------------------
 
--- | The @expected.json@ content for a checked 'Unit': @renderJson@ of
+-- | The @expected.json@ content for a 'CheckInput': @renderJson@ of
 -- 'expectedJsonValue', with the single trailing newline @renderJson@ appends.
 -- This is the exact byte content the goldens store and the freshness test
 -- reproduces.
-expectedJson :: Unit -> String
+expectedJson :: CheckInput -> String
 expectedJson = renderJson . expectedJsonValue
 
--- | The structured @expected.json@ value for a checked 'Unit' (pure).
+-- | The structured @expected.json@ value for a 'CheckInput' (pure).
 --
--- The verdict is taken from the real pipeline ("Lara.Driver".'runUnit'), so the
--- class and accept statuses are exactly the wire verdict's. On a reject the
--- located diagnostic is recovered from the checker's 'UnitError'
--- ("Lara.Check".'checkUnit' + "Lara.Diagnostics".'locate') — the Haskell-only
--- detail the wire drops.
-expectedJsonValue :: Unit -> JValue
-expectedJsonValue unit =
-  case runUnit unit of
-    VAccept lbls _edges statuses ->
+-- The verdict is taken from the real pipeline ("Lara.Driver".'runCheck'), so
+-- its identity, class, and accept statuses are exactly the wire verdict's.
+-- On an ordinary reject, the located diagnostic is recovered from the
+-- checker's 'UnitError' ("Lara.Check".'checkUnit' +
+-- "Lara.Diagnostics".'locate') — the Haskell-only detail the wire drops.
+expectedJsonValue :: CheckInput -> JValue
+expectedJsonValue input =
+  case runCheck input of
+    Verdict _ (Accept labels _edges statuses) ->
       JObject
-        [ ("verdict-class", JString (tagToString TAccept))
-        , ("located-diagnostic", acceptDiag lbls statuses)
+        [ ("replay-id", replayIdValue replayId)
+        , ("verdict-class", JString (tagToString TAccept))
+        , ("located-diagnostic", acceptDiag labels statuses)
         ]
-    VReject r ->
+    Verdict _ (Reject rejection) ->
       JObject
-        [ ("verdict-class", JString ("reject " ++ rejectionClass r))
-        , ("located-diagnostic", rejectDiag)
+        [ ("replay-id", replayIdValue replayId)
+        , ("verdict-class", JString ("reject " ++ rejectionClass rejection))
+        , ("located-diagnostic", rejectDiagnostic)
         ]
   where
+    replayId = inputReplayId input
+    unit = inputUnit input
+    rejectDiagnostic =
+      case runtimeReplayFailure input of
+        Just failure -> replayFailureDiagnostic failure
+        Nothing -> rejectDiag
     gamma = buildGamma (unitLeaves unit)
     certOk = buildCertOk (unitTheories unit)
     pI = lookupRule (unitRules unit)
@@ -206,13 +227,13 @@ expectedJsonValue unit =
     -- carries them (e.g. R1 names the missing leaf and its occurrence).
     rejectDiag :: JValue
     rejectDiag = case checkUnit gamma certOk unit of
-      Right _ -> JNull -- unreachable: runUnit reported VReject
+      Right _ -> JNull -- unreachable: runCheck reported an ordinary rejection
       Left err ->
         let LocatedRejection rej stage constituent = locate err
          in JObject
               ( [ ("kind", JString "reject")
                 , ("class", JString (rejectionClass rej))
-                , ("stage", JString (stageString stage))
+                , ("stage", JString (diagnosticStageString (CheckerStage stage)))
                 , ("constituent", constituentValue constituent)
                 ]
                   ++ rejectDetail err
@@ -247,6 +268,53 @@ expectedJsonValue unit =
     argIdField :: Int -> [(String, JValue)]
     argIdField i = [("id", JString a) | Just (ArgId a) <- [fmap fst (safeIndex (unitArgs unit) i)]]
 
+replayIdValue :: ReplayId -> JValue
+replayIdValue replayId =
+  JObject
+    [ ("core", JString (coreVersionText (replayCore replayId)))
+    , ("policy", JString policy)
+    , ("backends", JArray (map (JString . renderBackendRef) (replayBackends replayId)))
+    , ("theories", JArray (map (JString . renderTheoryDigest) (replayTheories replayId)))
+    , ("artifact", JString artifact)
+    ]
+  where
+    PolicyId policy = replayPolicy replayId
+    Digest artifact = replayArtifact replayId
+    renderBackendRef (BackendId backend, version) = backend ++ "@" ++ version
+    renderTheoryDigest (TheoryDigest theory) = theory
+
+replayFailureDiagnostic :: ReplayFailure -> JValue
+replayFailureDiagnostic failure =
+  JObject
+    [ ("kind", JString "reject")
+    , ("class", JString (rejectionClass (RejectClass R13)))
+    , ("stage", JString (diagnosticStageString ReplayPreflightStage))
+    , ("constituent", constituent)
+    , ("reason", JString reason)
+    , ("backend", JString backendReference)
+    ]
+  where
+    (constituent, reason, backendReference) = case failure of
+      DuplicateSelectedBackend (BackendId backend) version ->
+        ( JObject [("kind", JString "policy")]
+        , "duplicate-selection"
+        , backend ++ "@" ++ version
+        )
+      UnknownSelectedBackend (BackendId backend) version ->
+        ( JObject [("kind", JString "policy")]
+        , "unknown-selection"
+        , backend ++ "@" ++ version
+        )
+      CertificateBackendNotSelected index (ArgId argumentId) (BackendId backend) version ->
+        ( JObject
+            [ ("kind", JString "argument")
+            , ("id", JString argumentId)
+            , ("index", JNumber index)
+            ]
+        , "certificate-backend-not-selected"
+        , backend ++ "@" ++ show version
+        )
+
 -- ---------------------------------------------------------------------------
 -- Renderers (closed vocabularies — one spelling table each)
 -- ---------------------------------------------------------------------------
@@ -265,6 +333,22 @@ labelString l = case l of
   LIn -> "in"
   LOut -> "out"
   LUndec -> "undec"
+
+-- | The stage a located diagnostic reports: one of the six 'checkUnit'
+-- stages for an ordinary checker rejection ('CheckerStage'), or the replay
+-- preflight for an R13 verdict ('ReplayPreflightStage', which has no
+-- counterpart in the checker's closed 'Stage' sum).
+data DiagnosticStage
+  = CheckerStage Stage
+  | ReplayPreflightStage
+  deriving (Eq, Show)
+
+-- | The one spelling table for 'DiagnosticStage' (the goldens pin the
+-- @backend@ preflight spelling).
+diagnosticStageString :: DiagnosticStage -> String
+diagnosticStageString ds = case ds of
+  CheckerStage stage -> stageString stage
+  ReplayPreflightStage -> "backend"
 
 -- | Which of the six 'checkUnit' stages produced a rejection.
 stageString :: Stage -> String

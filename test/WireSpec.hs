@@ -7,9 +7,13 @@
 --     textual codec (bare/quoted atoms, escapes, comments), one full unit,
 --     and verdicts;
 --   * __round-trip properties__ — @parse ∘ print = id@ on 'SExpr' trees, and
---     @decode ∘ encode = Right id@ on units and verdicts (generators respect
---     the documented AST invariants: 'PLit' literals only, non-negative
---     versions and indices, unique argument ids, declared attack endpoints);
+--     @decode ∘ encode = Right id@ on units, checker inputs, and verdicts
+--     (generators respect the documented AST invariants: 'PLit' literals
+--     only, non-negative versions and indices, unique argument ids, declared
+--     attack endpoints; checker inputs and verdicts carry varied canonical
+--     replay identities — 0-3 sorted theory digests, occasionally non-ASCII
+--     to exercise the quoted-atom path, and varied backend selections —
+--     PR #44 review C10);
 --   * __malformed-input rejection matrix__ — text-level errors, then one
 --     field short / one field long per grammar construct, unknown tags, bad
 --     naturals, and the two wire-well-formedness invariants (duplicate
@@ -21,10 +25,13 @@
 -- output against them.
 module WireSpec (wireSpecProps) where
 
-import Data.List (isPrefixOf)
+import Data.Char (ord)
+import Data.List (isPrefixOf, nub, sortBy)
+import Data.Ord (comparing)
 import Test.QuickCheck
 
-import Lara.AST
+import Lara.AST hiding (Reject)
+import Lara.Replay
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 import Lara.Wire
@@ -245,6 +252,69 @@ genUnit = do
       , unitQueries = queries
       }
 
+-- ---------------------------------------------------------------------------
+-- Varied replay identities (PR #44 review C10)
+-- ---------------------------------------------------------------------------
+
+-- | Theory-digest text: mostly bare @sha256:@ digests, occasionally carrying
+-- non-ASCII characters (@é@, @λ@, @π@, @雪@) to exercise the quoted-atom
+-- codec path and make Unicode code-point order observable.
+genTheoryDigestText :: Gen String
+genTheoryDigestText =
+  oneof
+    [ ("sha256:" ++) <$> genIdent
+    , ("sha256:" ++) <$> listOf1 (elements (['a' .. 'f'] ++ ['0' .. '9'] ++ "éλπ雪"))
+    ]
+
+-- | 0-3 distinct theory digests in canonical (strictly increasing Unicode
+-- code-point) order, as 'mkReplayId' requires.
+genCanonicalTheories :: Gen [TheoryDigest]
+genCanonicalTheories = do
+  k <- choose (0, 3)
+  texts <- vectorOf k genTheoryDigestText
+  pure (map TheoryDigest (sortBy (comparing (map ord)) (nub texts)))
+
+-- | A backend selection: 0-3 (name, version) pairs with arbitrary atom
+-- payloads, occasionally forcing quoted output. 'mkReplayId' does not
+-- validate the selection (that is the runtime preflight's job), so any
+-- strings are wire-valid here.
+genBackendSelection :: Gen [(BackendId, String)]
+genBackendSelection = do
+  k <- choose (0, 3)
+  vectorOf k ((,) <$> (BackendId <$> genBackendText) <*> genBackendText)
+  where
+    genBackendText = oneof [genIdent, show <$> genCanonicalNat, genAtomString]
+
+-- | A valid replay identity with varied policy, backend selection, canonical
+-- theories, and artifact digest — never the fixed golden identity.
+genReplayId :: Gen ReplayId
+genReplayId = do
+  policy <- PolicyId <$> genAtomString
+  backends <- genBackendSelection
+  theories <- genCanonicalTheories
+  artifact <- Digest <$> genAtomString
+  case mkReplayId LaraCoreV01 policy backends theories artifact of
+    Right replayId -> pure replayId
+    Left _ -> discard -- unreachable: the theories are canonical by construction
+
+-- | A full checker input with a varied replay identity (C10), built directly
+-- via 'mkReplayId' / 'mkCheckInput' (not 'testCheckInput''s fixed
+-- constants). The unit's theory table carries exactly the identity's digests
+-- as @(digest, [])@ pairs — the 'mkCheckInput' consistency gate compares the
+-- sorted theory keys only, and the generated digests are distinct and
+-- canonical, so construction always succeeds.
+genCheckInput :: Gen CheckInput
+genCheckInput = do
+  generatedUnit <- genUnit
+  replayId <- genReplayId
+  let unit =
+        generatedUnit
+          { unitTheories = [(digest, []) | digest <- replayTheories replayId]
+          }
+  case mkCheckInput replayId unit of
+    Right input -> pure input
+    Left _ -> discard -- unreachable: unit theory keys are the identity's
+
 genLabel :: Gen Label
 genLabel = elements [LIn, LOut, LUndec]
 
@@ -262,7 +332,8 @@ genRejection =
     ]
 
 genVerdict :: Gen Verdict
-genVerdict =
+genVerdict = do
+  replayId <- genReplayId
   oneof
     [ do
         n <- choose (0, 5)
@@ -274,8 +345,8 @@ genVerdict =
               listOf
                 ((,) <$> choose (0, n - 1) <*> choose (0, n - 1))
         statuses <- listOf ((,) <$> genProp <*> genStatus)
-        pure (VAccept lbls edges statuses)
-    , VReject <$> genRejection
+        pure (Verdict replayId (Accept lbls edges statuses))
+    , Verdict replayId . Reject <$> genRejection
     ]
 
 -- ---------------------------------------------------------------------------
@@ -445,19 +516,123 @@ goldenUnit =
     , unitQueries = [Prop (Pred "p") [], Prop (Pred "q") []]
     }
 
+goldenReplayText :: String
+goldenReplayText =
+  "(replay-id (core lara-core@0.1) (policy empirical-v1) "
+    ++ "(backends (backend nd 1)) "
+    ++ "(theories sha256:theory-a) "
+    ++ "(artifact sha256:artifact-0))"
+
+goldenReplayId :: ReplayId
+goldenReplayId =
+  either (error . replayErrorMessage) id $
+    mkReplayId
+      LaraCoreV01
+      (PolicyId "empirical-v1")
+      [(BackendId "nd", "1")]
+      [TheoryDigest "sha256:theory-a"]
+      (Digest "sha256:artifact-0")
+
+goldenCheckInputText :: String
+goldenCheckInputText =
+  "(check-input " ++ goldenReplayText ++ " " ++ goldenUnitText ++ ")"
+
+goldenCheckInput :: CheckInput
+goldenCheckInput =
+  either (error . replayErrorMessage) id (mkCheckInput goldenReplayId goldenUnit)
+
+goldenAcceptText :: String
+goldenAcceptText =
+  "(verdict " ++ goldenReplayText
+    ++ " accept (labels (0 in)) (edges) "
+    ++ "(statuses (status (atom p) justified)))"
+
+goldenRejectText :: String
+goldenRejectText =
+  "(verdict " ++ goldenReplayText ++ " reject R13)"
+
+prop_replayEnvelopeGoldenVectors :: Bool
+prop_replayEnvelopeGoldenVectors =
+  and
+    [ printSExpr (encodeReplayId goldenReplayId) == goldenReplayText
+    , decodeText decodeReplayId goldenReplayText == Right goldenReplayId
+    , printSExpr (encodeCheckInput goldenCheckInput) == goldenCheckInputText
+    , decodeText decodeCheckInput goldenCheckInputText == Right goldenCheckInput
+    , decodeCheckInputFile goldenCheckInputText == Right goldenCheckInput
+    , printSExpr (encodeVerdict acceptVerdict) == goldenAcceptText
+    , decodeText decodeVerdict goldenAcceptText == Right acceptVerdict
+    , printSExpr (encodeVerdict rejectVerdict) == goldenRejectText
+    , decodeText decodeVerdict goldenRejectText == Right rejectVerdict
+    ]
+  where
+    acceptVerdict =
+      Verdict
+        goldenReplayId
+        (Accept [(0, LIn)] [] [(Prop (Pred "p") [], Justified)])
+    rejectVerdict = Verdict goldenReplayId (Reject (RejectClass R13))
+
+prop_replayEnvelopeMalformedMatrix :: Bool
+prop_replayEnvelopeMalformedMatrix =
+  all (isLeft . decodeText decodeReplayId) malformedReplay
+    && all (isLeft . decodeText decodeCheckInput) malformedInput
+    && isLeft (decodeCheckInputFile "(unit)")
+    && isLeft (decodeText decodeVerdict "(verdict reject R1)")
+  where
+    malformedReplay =
+      [ "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a) extra)"
+      , "(replay-id (core) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1 extra) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1 extra) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd 1 extra)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories (x)) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a extra))"
+      , "(replay-id (policy empirical-v1) (core lara-core@0.1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core (lara-core@0.1)) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy (empirical-v1)) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend (nd) 1)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd (1))) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories (sha256:a)) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact (sha256:a)))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories sha256:z sha256:a) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories sha256:a sha256:a) (artifact sha256:a))"
+      ]
+    malformedInput =
+      [ "(check-input " ++ goldenReplayText ++ ")"
+      , "(check-input " ++ goldenReplayText ++ " " ++ goldenUnitText ++ " extra)"
+      , "(check-input "
+          ++ goldenReplayText
+          ++ " (unit (theories (theory sha256:theory-a) (theory sha256:theory-a))))"
+      , "(check-input "
+          ++ goldenReplayText
+          ++ " (unit (theories (theory sha256:other))))"
+      ]
+    isLeft (Left _) = True
+    isLeft _ = False
+
+decodeText :: (SExpr -> Either WireError a) -> String -> Either WireError a
+decodeText decoder text =
+  case parseSExpr text of
+    Left err -> Left (WireError "text" (show err))
+    Right value -> decoder value
+
 prop_unitGoldenVector :: Bool
 prop_unitGoldenVector =
-  decodeUnitFile goldenUnitText == Right goldenUnit
+  decodeText decodeUnit goldenUnitText == Right goldenUnit
     && printSExpr (encodeUnit goldenUnit) == goldenUnitText
-    && decodeUnitFile (printSExpr (encodeUnit goldenUnit)) == Right goldenUnit
+    && decodeText decodeUnit (printSExpr (encodeUnit goldenUnit)) == Right goldenUnit
 
 -- | The same unit decodes identically with noisy layout and comments, and
 -- with empty sections spelled out or omitted.
 prop_unitGoldenLayoutVariants :: Bool
 prop_unitGoldenLayoutVariants =
-  decodeUnitFile commented == Right goldenUnit
-    && decodeUnitFile minimal == Right minimalUnit
-    && decodeUnitFile spelled == Right minimalUnit
+  decodeText decodeUnit commented == Right goldenUnit
+    && decodeText decodeUnit minimal == Right minimalUnit
+    && decodeText decodeUnit spelled == Right minimalUnit
   where
     commented = "; header\n" ++ goldenUnitText ++ "\n; footer\n"
     minimal = "(unit)"
@@ -471,8 +646,19 @@ prop_unitRoundTrip :: Property
 prop_unitRoundTrip =
   forAll genUnit $ \u ->
     decodeUnit (encodeUnit u) == Right u
-      && decodeUnitFile (printSExpr (encodeUnit u)) == Right u
+      && decodeText decodeUnit (printSExpr (encodeUnit u)) == Right u
 
+
+-- | The checker-input round trip over varied replay identities (C10):
+-- @decode ∘ encode = Right id@ at both the tree and the text layer, with
+-- 0-3 canonical theory digests (occasionally non-ASCII, exercising the
+-- quoted-atom path) and a varied backend selection in the replay-id.
+prop_checkInputRoundTrip :: Property
+prop_checkInputRoundTrip =
+  forAll genCheckInput $ \input ->
+    let encoded = encodeCheckInput input
+     in decodeCheckInput encoded == Right input
+          && decodeCheckInputFile (printSExpr encoded) == Right input
 -- | The wire tag table is self-consistent.
 prop_tagRoundTrip :: Property
 prop_tagRoundTrip =
@@ -489,34 +675,44 @@ prop_verdictGoldenVectors =
     [ printSExpr (encodeVerdict acceptV) == acceptText
     , decodeVerdict (encodeVerdict acceptV) == Right acceptV
     , parseSExpr acceptText == Right (encodeVerdict acceptV)
-    , printSExpr (encodeVerdict rejectR5) == "(verdict reject R5)"
+    , printSExpr (encodeVerdict rejectR5) == rejectText (RejectClass R5)
     , decodeVerdict (encodeVerdict rejectR5) == Right rejectR5
-    , printSExpr (encodeVerdict rejectDup) == "(verdict reject duplicate-rule)"
+    , printSExpr (encodeVerdict rejectDup) == rejectText DuplicateRule
     , decodeVerdict (encodeVerdict rejectDup) == Right rejectDup
     , printSExpr (encodeVerdict rejectIncomplete)
-        == "(verdict reject incomplete-argument)"
+        == rejectText IncompleteArgument
     , decodeVerdict (encodeVerdict rejectIncomplete) == Right rejectIncomplete
     , printSExpr (encodeVerdict rejectMissing)
-        == "(verdict reject missing-conflict)"
+        == rejectText MissingConflict
     , decodeVerdict (encodeVerdict rejectMissing) == Right rejectMissing
     ]
   where
     acceptV =
-      VAccept
-        [(0, LIn), (1, LOut), (2, LUndec)]
-        [(0, 1), (0, 2)]
-        [ (Prop (Pred "p") [], Justified)
-        , (Prop (Pred "q") [TNum "2"], Defeated)
-        ]
+      Verdict goldenReplayId $
+        Accept
+          [(0, LIn), (1, LOut), (2, LUndec)]
+          [(0, 1), (0, 2)]
+          [ (Prop (Pred "p") [], Justified)
+          , (Prop (Pred "q") [TNum "2"], Defeated)
+          ]
     acceptText =
-      "(verdict accept (labels (0 in) (1 out) (2 undec)) \
-      \(edges (0 1) (0 2)) \
-      \(statuses (status (atom p) justified) \
-      \(status (atom q (num 2)) defeated)))"
-    rejectR5 = VReject (RejectClass R5)
-    rejectDup = VReject DuplicateRule
-    rejectIncomplete = VReject IncompleteArgument
-    rejectMissing = VReject MissingConflict
+      "(verdict " ++ goldenReplayText
+        ++ " accept (labels (0 in) (1 out) (2 undec)) "
+        ++ "(edges (0 1) (0 2)) "
+        ++ "(statuses (status (atom p) justified) "
+        ++ "(status (atom q (num 2)) defeated)))"
+    rejectText rejection =
+      "(verdict " ++ goldenReplayText ++ " reject " ++ rejectionText rejection ++ ")"
+    rejectionText rejection = case rejection of
+      RejectClass R5 -> "R5"
+      DuplicateRule -> "duplicate-rule"
+      IncompleteArgument -> "incomplete-argument"
+      MissingConflict -> "missing-conflict"
+      _ -> error "unexpected rejection fixture"
+    rejectR5 = Verdict goldenReplayId (Reject (RejectClass R5))
+    rejectDup = Verdict goldenReplayId (Reject DuplicateRule)
+    rejectIncomplete = Verdict goldenReplayId (Reject IncompleteArgument)
+    rejectMissing = Verdict goldenReplayId (Reject MissingConflict)
 
 prop_verdictRoundTrip :: Property
 prop_verdictRoundTrip =
@@ -666,13 +862,13 @@ prop_verdictMalformedMatrix = all isLeft (map decodeVerdict malformed)
     statusesSec = SList [SAtom "statuses"]
     apatAtomP = SList [SAtom "atom", SAtom "p"]
 
--- | Whole-file rejections through 'decodeUnitFile'.
+-- | Whole-file text and low-level Unit grammar rejections.
 prop_fileMalformedRejected :: Bool
 prop_fileMalformedRejected =
   and
-    [ isLeft (decodeUnitFile "(unit") -- truncated text
-    , isLeft (decodeUnitFile "(unit) (unit)") -- two units
-    , isLeft (decodeUnitFile "bogus") -- not a unit
+    [ isLeft (decodeText decodeUnit "(unit") -- truncated text
+    , isLeft (decodeText decodeUnit "(unit) (unit)") -- two units
+    , isLeft (decodeText decodeUnit "bogus") -- not a unit
     ]
   where
     isLeft (Left _) = True
@@ -681,7 +877,7 @@ prop_fileMalformedRejected =
 -- | Codec errors are located: the failure carries a context path.
 prop_errorIsLocated :: Bool
 prop_errorIsLocated =
-  case decodeUnitFile "(unit (leaves (leaf l1 (atom))))" of
+  case decodeText decodeUnit "(unit (leaves (leaf l1 (atom))))" of
     Left (WireError ctx _) -> "leaf" `isPrefixOf` ctx || ctx == "atom"
     Right _ -> False
 
@@ -701,14 +897,14 @@ prop_leanDriverAcceptGolden =
     && printSExpr (encodeVerdict expected) == leanText
   where
     leanText =
-      "(verdict accept (labels (0 undec)) (edges (0 0)) \
-      \(statuses (status (atom p) contested)))"
+      "(verdict " ++ goldenReplayText
+        ++ " accept (labels (0 undec)) (edges (0 0)) "
+        ++ "(statuses (status (atom p) contested)))"
     Right leanBytes = parseSExpr leanText
     expected =
-      VAccept
-        [(0, LUndec)]
-        [(0, 0)]
-        [(Prop (Pred "p") [], Contested)]
+      Verdict
+        goldenReplayId
+        (Accept [(0, LUndec)] [(0, 0)] [(Prop (Pred "p") [], Contested)])
 
 -- | Fixture: the missing-self-edge unit of the same file
 -- ('missingSelfEdgeUnit') — no attack covers the declared contrary. Pins the
@@ -718,9 +914,9 @@ prop_leanDriverRejectGolden =
   decodeVerdict leanBytes == Right expected
     && printSExpr (encodeVerdict expected) == leanText
   where
-    leanText = "(verdict reject missing-conflict)"
+    leanText = "(verdict " ++ goldenReplayText ++ " reject missing-conflict)"
     Right leanBytes = parseSExpr leanText
-    expected = VReject MissingConflict
+    expected = Verdict goldenReplayId (Reject MissingConflict)
 
 -- ---------------------------------------------------------------------------
 -- Exported runner
@@ -735,7 +931,10 @@ wireSpecProps =
   , ("wire unit golden vector", quickCheckResult prop_unitGoldenVector)
   , ("wire unit golden layout variants", quickCheckResult prop_unitGoldenLayoutVariants)
   , ("wire unit round-trip", quickCheckResult prop_unitRoundTrip)
+  , ("wire check-input round-trip", quickCheckResult prop_checkInputRoundTrip)
   , ("wire tag round-trip", quickCheckResult prop_tagRoundTrip)
+  , ("wire replay/envelope golden vectors", quickCheckResult prop_replayEnvelopeGoldenVectors)
+  , ("wire replay/envelope malformed matrix", quickCheckResult prop_replayEnvelopeMalformedMatrix)
   , ("wire verdict golden vectors", quickCheckResult prop_verdictGoldenVectors)
   , ("wire verdict round-trip", quickCheckResult prop_verdictRoundTrip)
   , ("wire unit malformed matrix", quickCheckResult prop_unitMalformedMatrix)

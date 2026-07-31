@@ -2,12 +2,12 @@
 
 -- | The S-expression wire codec (the N11 differential anchor).
 --
--- One textual S-expression format carries checker-boundary 'Unit's and checker
--- 'Verdict's between the Haskell production runtime and the Lean executable
--- semantics (@lean/Lara/Driver.lean@). Both drivers print verdicts through this
--- exact codec, so differential testing is byte comparison (plan D16). This is
--- the /only/ wire front end: there is deliberately no JSON codec (plan, global
--- constraints).
+-- One textual S-expression format carries validated checker-boundary
+-- 'CheckInput's and identity-bearing 'Verdict's between the Haskell production
+-- runtime and the Lean executable semantics (@lean/Lara/Driver.lean@).
+-- Both drivers print verdicts through this exact codec, so differential testing
+-- is byte comparison (plan D16). This is the /only/ wire front end: there is
+-- deliberately no JSON checker-input codec.
 --
 -- == Canonical text format
 --
@@ -26,9 +26,13 @@
 -- * A file holds __exactly one__ top-level form; trailing whitespace or
 --   comments are allowed, a second form is a codec error.
 --
--- == Unit grammar (input)
+-- == Check-input grammar (input)
 --
 -- @
+-- \<check-input\> ::= (check-input \<replay-id\> \<unit\>)
+-- \<replay-id\>   ::= (replay-id (core lara-core\@0.1) (policy ID)
+--                       (backends (backend ID STRING)*) (theories STRING*)
+--                       (artifact STRING))
 -- \<unit\>     ::= (unit \<policy-sec\>? \<theories-sec\>? \<leaves-sec\>?
 --                        \<args-sec\>? \<attacks-sec\>? \<queries-sec\>?)
 -- \<policy-sec\>   ::= (policy (rules \<rule\>*) (contraries \<contrary\>*)
@@ -78,10 +82,10 @@
 -- == Verdict grammar (output)
 --
 -- @
--- \<verdict\> ::= (verdict accept (labels (NAT in | out | undec)*)
---                               (edges (NAT NAT)*)
---                               (statuses (status \<atom\> STATUS)*))
---               | (verdict reject REJECTION)
+-- \<verdict\> ::= (verdict \<replay-id\> accept
+--                    (labels (NAT in | out | undec)*) (edges (NAT NAT)*)
+--                    (statuses (status \<atom\> STATUS)*))
+--               | (verdict \<replay-id\> reject REJECTION)
 -- STATUS    ::= gap | justified | contested | defeated
 -- REJECTION ::= duplicate-rule | duplicate-argument | incomplete-argument
 --             | missing-conflict | R1 | R3 | R4 | R5 | R6 | R7
@@ -102,12 +106,18 @@ module Lara.Wire
   , Tag (..)
   , tagToString
   , parseTag
-    -- * Unit codec
+    -- * Unit and checker-input codecs
   , WireError (..)
   , decodeUnit
   , encodeUnit
-  , decodeUnitFile
+  , decodeReplayId
+  , encodeReplayId
+  , coreVersionText
+  , decodeCheckInput
+  , encodeCheckInput
+  , decodeCheckInputFile
     -- * Verdict codec
+  , Outcome (..)
   , Verdict (..)
   , decodeVerdict
   , encodeVerdict
@@ -116,7 +126,8 @@ module Lara.Wire
 import Data.Char (ord)
 import Data.List (intercalate)
 
-import Lara.AST
+import Lara.AST hiding (Reject)
+import Lara.Replay
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 
@@ -248,8 +259,10 @@ printAtom s
 -- spell raw string literals as independent ground truth — do not \"fix\" them
 -- to consume this table.)
 data Tag
-  = -- unit structure
-    TUnit | TPolicy | TRules | TRule | TMode | TParams | TPremises
+  = -- checker input and replay identity
+    TCheckInput | TReplayId | TCore | TBackends | TBackend | TArtifact
+    -- unit structure
+  | TUnit | TPolicy | TRules | TRule | TMode | TParams | TPremises
   | TConclusion | TQuestions | TQuestion | TAllowTrusted | TCertifiers
   | TCertifier | TContraries | TContrary | TExceptions | TException
   | TTheories | TTheory | TLeaves | TLeaf | TArgs | TArg | TAttacks
@@ -273,6 +286,9 @@ data Tag
 -- | The on-the-wire spelling of a keyword.
 tagToString :: Tag -> String
 tagToString t = case t of
+  TCheckInput -> "check-input"; TReplayId -> "replay-id"
+  TCore -> "core"; TBackends -> "backends"; TBackend -> "backend"
+  TArtifact -> "artifact"
   TUnit -> "unit"; TPolicy -> "policy"; TRules -> "rules"; TRule -> "rule"
   TMode -> "mode"; TParams -> "params"; TPremises -> "premises"
   TConclusion -> "conclusion"; TQuestions -> "questions"
@@ -873,74 +889,142 @@ decodeUnitM e = do
 decodeUnit :: SExpr -> Either WireError Unit
 decodeUnit = runDecode . decodeUnitM
 
--- | Decode a whole wire file: exactly one top-level form, then the unit
--- grammar. Text parse errors and grammar errors are both R14 codec failures.
-decodeUnitFile :: String -> Either WireError Unit
-decodeUnitFile = runDecode . decodeUnitFileM
+encodeReplayId :: ReplayId -> SExpr
+encodeReplayId replayId =
+  tagged
+    TReplayId
+    [ tagged TCore [SAtom (coreVersionText (replayCore replayId))]
+    , tagged TPolicy [SAtom policy]
+    , tagged
+        TBackends
+        [tagged TBackend [SAtom backend, SAtom version] | (BackendId backend, version) <- replayBackends replayId]
+    , tagged TTheories [SAtom theory | TheoryDigest theory <- replayTheories replayId]
+    , tagged TArtifact [SAtom artifact]
+    ]
+  where
+    PolicyId policy = replayPolicy replayId
+    Digest artifact = replayArtifact replayId
 
-decodeUnitFileM :: String -> Decode Unit
-decodeUnitFileM input =
+decodeReplayId :: SExpr -> Either WireError ReplayId
+decodeReplayId = runDecode . decodeReplayIdM
+
+decodeReplayIdM :: SExpr -> Decode ReplayId
+decodeReplayIdM value = do
+  [coreSection, policySection, backendsSection, theoriesSection, artifactSection] <-
+    matchTagged "replay-id" TReplayId 5 value
+  [coreValue] <- matchTagged "replay-id core" TCore 1 coreSection
+  coreText <- atomText "replay-id core" coreValue
+  core <-
+    if coreText == coreVersionText LaraCoreV01
+      then ok LaraCoreV01
+      else werr "replay-id" ("unsupported core version: " ++ show coreText)
+  [policyValue] <- matchTagged "replay-id policy" TPolicy 1 policySection
+  policy <- PolicyId <$> atomText "replay-id policy" policyValue
+  backendValues <- sectionFields "replay-id backends" TBackends backendsSection
+  backends <- mapM decodeBackend backendValues
+  theoryValues <- sectionFields "replay-id theories" TTheories theoriesSection
+  theories <- mapM (fmap TheoryDigest . atomText "replay-id theories") theoryValues
+  [artifactValue] <- matchTagged "replay-id artifact" TArtifact 1 artifactSection
+  artifact <- Digest <$> atomText "replay-id artifact" artifactValue
+  replayResult "replay-id" (mkReplayId core policy backends theories artifact)
+  where
+    decodeBackend backendValue = do
+      [backendName, backendVersion] <-
+        matchTagged "replay-id backend" TBackend 2 backendValue
+      (,)
+        <$> fmap BackendId (atomText "replay-id backend" backendName)
+        <*> atomText "replay-id backend" backendVersion
+
+encodeCheckInput :: CheckInput -> SExpr
+encodeCheckInput input =
+  tagged TCheckInput [encodeReplayId (inputReplayId input), encodeUnit (inputUnit input)]
+
+decodeCheckInput :: SExpr -> Either WireError CheckInput
+decodeCheckInput = runDecode . decodeCheckInputM
+
+decodeCheckInputM :: SExpr -> Decode CheckInput
+decodeCheckInputM value = do
+  [replayValue, unitValue] <- matchTagged "check-input" TCheckInput 2 value
+  replayId <- decodeReplayIdM replayValue
+  unit <- decodeUnitM unitValue
+  case mkCheckInput replayId unit of
+    Left err@(DuplicateUnitTheory _) -> replayResult "unit theories" (Left err)
+    result -> replayResult "check-input" result
+
+decodeCheckInputFile :: String -> Either WireError CheckInput
+decodeCheckInputFile = runDecode . decodeCheckInputFileM
+
+decodeCheckInputFileM :: String -> Decode CheckInput
+decodeCheckInputFileM input =
   case parseSExpr input of
-    Left (ParseError ln col msg) ->
+    Left (ParseError line column message) ->
       werr
-        ("line " ++ show ln ++ ", column " ++ show col)
-        msg
-    Right e -> decodeUnitM e
+        ("line " ++ show line ++ ", column " ++ show column)
+        message
+    Right value -> decodeCheckInputM value
+
+replayResult :: String -> Either ReplayError a -> Decode a
+replayResult context = either (werr context . replayErrorMessage) ok
+
+coreVersionText :: CoreVersion -> String
+coreVersionText LaraCoreV01 = "lara-core@0.1"
 
 -- ---------------------------------------------------------------------------
 -- Verdicts
 -- ---------------------------------------------------------------------------
 
--- | The checker output both drivers print (plan D16 contract).
-data Verdict
-  = -- | accepted: grounded labels for every argument (declaration order),
-    -- the compiled closure edges (ascending), and one status per query atom
-    VAccept
+-- | The checker outcome, nested under its replay identity.
+data Outcome
+  = Accept
       { verdictLabels :: [(Int, Label)]
       , verdictEdges :: [(Int, Int)]
       , verdictStatuses :: [(Prop, Status)]
       }
-  | -- | rejected: the rejection class atom only (located diagnostics live in
-    -- the checker's result type, not on the wire)
-    VReject Rejection
+  | Reject Rejection
+  deriving (Eq, Show)
+
+-- | The checker output both drivers print, carrying the input replay identity.
+data Verdict = Verdict
+  { verdictReplayId :: ReplayId
+  , verdictOutcome :: Outcome
+  }
   deriving (Eq, Show)
 
 encodeVerdict :: Verdict -> SExpr
-encodeVerdict v = case v of
-  VReject r -> tagged TVerdict [SAtom (tagToString TReject), encodeRejection r]
-  VAccept lbls edges statuses ->
-    tagged
-      TVerdict
-      [ SAtom (tagToString TAccept)
-      , tagged
-          TLabels
-          [ SList
-              [ SAtom (show i)
-              , SAtom
-                  ( tagToString
-                      (case l of LIn -> TIn; LOut -> TOut; LUndec -> TUndec)
-                  )
-              ]
-          | (i, l) <- lbls
-          ]
-      , tagged TEdges [SList [SAtom (show i), SAtom (show j)] | (i, j) <- edges]
-      , tagged
-          TStatuses
-          [ tagged TStatus [encodeAtom p, encodeStatus s]
-          | (p, s) <- statuses
-          ]
-      ]
-  where
-    encodeStatus s =
-      SAtom
-        ( tagToString
-            ( case s of
-                Gap -> TGap
-                Justified -> TJustified
-                Contested -> TContested
-                Defeated -> TDefeated
-            )
-        )
+encodeVerdict (Verdict replayId outcome) =
+  case outcome of
+    Reject rejection ->
+      tagged TVerdict [encodeReplayId replayId, SAtom (tagToString TReject), encodeRejection rejection]
+    Accept labels edges statuses ->
+      tagged
+        TVerdict
+        [ encodeReplayId replayId
+        , SAtom (tagToString TAccept)
+        , tagged
+            TLabels
+            [SList [SAtom (show index), encodeLabel label] | (index, label) <- labels]
+        , tagged
+            TEdges
+            [SList [SAtom (show source), SAtom (show target)] | (source, target) <- edges]
+        , tagged
+            TStatuses
+            [tagged TStatus [encodeAtom proposition, encodeStatusValue status] | (proposition, status) <- statuses]
+        ]
+
+encodeLabel :: Label -> SExpr
+encodeLabel label =
+  SAtom . tagToString $ case label of
+    LIn -> TIn
+    LOut -> TOut
+    LUndec -> TUndec
+
+encodeStatusValue :: Status -> SExpr
+encodeStatusValue status =
+  SAtom . tagToString $ case status of
+    Gap -> TGap
+    Justified -> TJustified
+    Contested -> TContested
+    Defeated -> TDefeated
 
 encodeRejection :: Rejection -> SExpr
 encodeRejection r =
@@ -966,61 +1050,84 @@ decodeVerdict :: SExpr -> Either WireError Verdict
 decodeVerdict = runDecode . decodeVerdictM
 
 decodeVerdictM :: SExpr -> Decode Verdict
-decodeVerdictM e = case e of
-  SList (SAtom v : SAtom h : rest)
-    | parseTag v == Just TVerdict
-    , parseTag h == Just TReject
-    , [payload] <- rest -> VReject <$> decodeRejection payload
-    | parseTag v == Just TVerdict
-    , parseTag h == Just TAccept
-    , [labelsS, edgesS, statusesS] <- rest -> do
-        lbls <- sectionFields "verdict labels" TLabels labelsS >>= mapM decodeLabel
-        edges <- sectionFields "verdict edges" TEdges edgesS >>= mapM decodeEdge
-        statuses <-
-          sectionFields "verdict statuses" TStatuses statusesS
-            >>= mapM decodeStatusEntry
-        ok (VAccept lbls edges statuses)
-  _ -> werr "verdict" ("malformed verdict: " ++ show e)
+decodeVerdictM value = case value of
+  SList [SAtom verdictTag, replayValue, SAtom outcomeTag, rejectionValue]
+    | parseTag verdictTag == Just TVerdict
+    , parseTag outcomeTag == Just TReject -> do
+        replayId <- decodeReplayIdM replayValue
+        rejection <- decodeRejection rejectionValue
+        ok (Verdict replayId (Reject rejection))
+  SList
+    [ SAtom verdictTag
+    , replayValue
+    , SAtom outcomeTag
+    , labelsSection
+    , edgesSection
+    , statusesSection
+    ]
+      | parseTag verdictTag == Just TVerdict
+      , parseTag outcomeTag == Just TAccept -> do
+          replayId <- decodeReplayIdM replayValue
+          labels <- sectionFields "verdict labels" TLabels labelsSection >>= mapM decodeLabel
+          edges <- sectionFields "verdict edges" TEdges edgesSection >>= mapM decodeEdge
+          statuses <-
+            sectionFields "verdict statuses" TStatuses statusesSection
+              >>= mapM decodeStatusEntry
+          ok (Verdict replayId (Accept labels edges statuses))
+  _ -> werr "verdict" ("malformed verdict: " ++ show value)
   where
-    decodeLabel l = case l of
-      SList [i, a] -> do
-        i' <- parseNatText "verdict label" i
-        l' <- case a of
-          SAtom s
-            | parseTag s == Just TIn -> ok LIn
-            | parseTag s == Just TOut -> ok LOut
-            | parseTag s == Just TUndec -> ok LUndec
-          _ -> werr "verdict label" ("expected in|out|undec, got " ++ show a)
-        ok (i', l')
-      _ -> werr "verdict label" ("malformed label: " ++ show l)
-    decodeEdge ed = case ed of
-      SList [i, j] -> do
-        i' <- parseNatText "verdict edge" i
-        j' <- parseNatText "verdict edge" j
-        ok (i', j')
-      _ -> werr "verdict edge" ("malformed edge: " ++ show ed)
-    decodeStatusEntry se = do
-      [atom, statusS] <- matchTagged "verdict status" TStatus 2 se
-      p <- decodeAtom atom
-      s <- case statusS of
-        SAtom x
-          | parseTag x == Just TGap -> ok Gap
-          | parseTag x == Just TJustified -> ok Justified
-          | parseTag x == Just TContested -> ok Contested
-          | parseTag x == Just TDefeated -> ok Defeated
+    decodeLabel labelValue = case labelValue of
+      SList [indexValue, encodedLabel] -> do
+        index <- parseNatText "verdict label" indexValue
+        label <- case encodedLabel of
+          SAtom text
+            | parseTag text == Just TIn -> ok LIn
+            | parseTag text == Just TOut -> ok LOut
+            | parseTag text == Just TUndec -> ok LUndec
+          _ ->
+            werr
+              "verdict label"
+              ("expected in|out|undec, got " ++ show encodedLabel)
+        ok (index, label)
+      _ -> werr "verdict label" ("malformed label: " ++ show labelValue)
+
+    decodeEdge edgeValue = case edgeValue of
+      SList [sourceValue, targetValue] -> do
+        source <- parseNatText "verdict edge" sourceValue
+        target <- parseNatText "verdict edge" targetValue
+        ok (source, target)
+      _ -> werr "verdict edge" ("malformed edge: " ++ show edgeValue)
+
+    decodeStatusEntry statusValue = do
+      [atomValue, encodedStatus] <-
+        matchTagged "verdict status" TStatus 2 statusValue
+      proposition <- decodeAtom atomValue
+      status <- case encodedStatus of
+        SAtom text
+          | parseTag text == Just TGap -> ok Gap
+          | parseTag text == Just TJustified -> ok Justified
+          | parseTag text == Just TContested -> ok Contested
+          | parseTag text == Just TDefeated -> ok Defeated
         _ ->
           werr
             "verdict status"
-            ("expected gap|justified|contested|defeated, got " ++ show statusS)
-      ok (p, s)
-    decodeRejection r = case r of
-      SAtom s -> case parseTag s of
+            ("expected gap|justified|contested|defeated, got " ++ show encodedStatus)
+      ok (proposition, status)
+
+    decodeRejection rejectionValue = case rejectionValue of
+      SAtom text -> case parseTag text of
         Just TDupRule -> ok DuplicateRule
         Just TDupArgument -> ok DuplicateArgument
         Just TIncompleteArgument -> ok IncompleteArgument
         Just TMissingConflict -> ok MissingConflict
-        Just t
-          | Just c <- tagRejectClass t -> ok (RejectClass c)
-        _ -> werr "verdict reject" ("unknown rejection: " ++ show s)
-      _ -> werr "verdict reject" ("malformed rejection: " ++ show r)
-    tagRejectClass t = lookup t [(rejectClassTag c, c) | c <- [minBound .. maxBound]]
+        Just tag
+          | Just rejectionClass <- tagRejectClass tag ->
+              ok (RejectClass rejectionClass)
+        _ -> werr "verdict reject" ("unknown rejection: " ++ show text)
+      _ ->
+        werr
+          "verdict reject"
+          ("malformed rejection: " ++ show rejectionValue)
+
+    tagRejectClass tag =
+      lookup tag [(rejectClassTag rejectionClass, rejectionClass) | rejectionClass <- [minBound .. maxBound]]
