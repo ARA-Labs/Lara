@@ -9,9 +9,10 @@
 --   * the abstract strict-backend seam: Theorem 1 + ND instantiation (result 8) — Lara.Strict
 --   * the whole-status layer: direct vs compiled grounded semantics agreement
 --     (result 6) + grounded termination/determinism (result 5 core) — Lara.Grounded
---   * support-term typing (spec §6.1, v0.1-frozen): leaf-dependency
---     accountability (result 3 leaf half), uniqueness/determinism, the D⊎H
---     accounting invariants, and the cert-assurance ∘ Theorem-1 seam — Lara.Support
+--   * support-term typing (spec §6.1, v0.1-frozen): dependency accountability
+--     (result 3, both halves — leaves_declared and the certDeps layer over
+--     Backend.uses), uniqueness/determinism, the D⊎H accounting invariants,
+--     and the cert-assurance ∘ Theorem-1 seam — Lara.Support
 --   * typed positional attacks (spec §7.1, v0.1-frozen): checked source,
 --     strict-unattackability, position-kind partition, local/global conclusion
 --     coherence — Lara.Attack
@@ -36,9 +37,10 @@
 --     attackability, generic grounded conflict-freedom, self-conflict, exact
 --     completeClaimFor projection from retained nodes, and the computed-claim
 --     headline theorem — Lara.Consistency
--- To come: certDeps accountability (result 3 certificate half, needs
--- Backend.uses), and backend replacement (result 9, needs certificate-erased
--- argument identity). See docs/mechanization-plan.md.
+--   * backend replacement (result 9): uniform injective assurance relabel,
+--     with constructive well-checkedness transport making it non-vacuous —
+--     Lara.Erase / Lara.EraseTransport
+-- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
 import Lara.ND

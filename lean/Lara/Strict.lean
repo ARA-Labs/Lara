@@ -3,7 +3,25 @@ Mechanized abstract strict-certificate backend (`Lara.Strict`).  Mathematical
 acceptance remains proposition-valued, while every backend also supplies a
 Boolean replay and proves it adequate.  Backends are indexed by the source
 canonicalizer, preventing a registry constructed for one normalization policy
-from being used by another.
+from being used by another.  A `Backend` is a theory-free *core*, fixed per
+registered `(name, version)` identity: its consequence/acceptance/replay
+operate on an explicit full consulted context `Γ = Δ ++ T` (the Haskell
+adapter's `free = premises ++ theory`), where the digest-addressed theory `T`
+enters only as *data* supplied at resolution time — digest resolution cannot
+introduce behavior.  Every core also reports its certificate dependencies
+(`uses`, spec §5 `uses_beta`) and proves obligation 4 as three laws over the
+full context (result 3 certificate half): coverage (`uses_covers` — replay
+consults no premise *or theory entry* outside the report), validity
+(`uses_valid` — every reported slot names an entry of the consulted
+context), and semantic accounting (`uses_account` — an accepted
+certificate's conclusion follows from just the reported entries).  Because
+theory is data in the quantified context, coverage specializes to
+`replay_theory_covers`: swapping the resolved theory is observable only
+through reported theory slots, so a core cannot consult a digest-selected
+entry without reporting it.  The ND adapter discharges the laws via
+`infer_agree`, `fv_in_range`, and `nd_relevance`, with
+`ndUses_eq_infer_deps` tying the report to the running checker's dependency
+output.
 -/
 
 import Lara.Prop
@@ -17,9 +35,45 @@ namespace Lara.Strict
 /-- Source propositions at the strict seam. -/
 abbrev SourceProp := Lara.Atom
 
-/-- A registered strict backend for one fixed source canonicalizer.  A resolved
-backend may close both `models` and `accepts`/`replay` over a fixed theory; the
-only list supplied by a caller is the encoded source-premise list. -/
+/-- The sublist of `Γ` addressed by dependency slots `ids`, order- and
+multiplicity-preserving.  The load-bearing callers pass the *full consulted
+context* `Γ = Δ ++ T` (submitted premise encodings, then the resolved theory
+data), so a slot below the premise count selects a premise and a slot at or
+beyond it selects the corresponding theory entry; only a slot at or beyond
+`Γ.length` selects nothing. -/
+def selectSlots {α : Type _} (Γ : List α) (ids : List Nat) : List α :=
+  ids.filterMap (fun i => Γ[i]?)
+
+theorem mem_selectSlots {α : Type _} {Δ : List α} {ids : List Nat} {a : α} :
+    a ∈ selectSlots Δ ids ↔ ∃ i, i ∈ ids ∧ Δ[i]? = some a := by
+  simp [selectSlots, List.mem_filterMap]
+
+/-- Slot selection commutes with encoding the premise list. -/
+theorem selectSlots_map {α β : Type _} (f : α → β) (Δ : List α)
+    (ids : List Nat) : selectSlots (Δ.map f) ids = (selectSlots Δ ids).map f := by
+  induction ids with
+  | nil => rfl
+  | cons i ids ih =>
+    cases h : Δ[i]? with
+    | none =>
+      simp [selectSlots, h]
+      simpa [selectSlots] using ih
+    | some a =>
+      simp [selectSlots, h]
+      simpa [selectSlots] using ih
+
+/-- A registered strict backend **core** for one fixed source canonicalizer.
+One core is registered per exact `(name, version)` identity; it carries *no*
+theory of its own.  Its consequence/acceptance/replay operate on the explicit
+**full consulted context** `Γ = Δ ++ T` (submitted premise encodings in
+front, then the digest-resolved theory data — exactly the Haskell adapter's
+`free = premises ++ theory`).  The dependency laws range over that full
+context, so the core cannot consult a premise *or a resolved theory entry*
+without the coverage law seeing it; whatever a core consults beyond `Γ` is
+extensionally constant — part of the backend identity `β` named by the
+assurance triple, not hidden data.  The caller-facing closed forms `models`
+/ `accepts` / `replay` (resolved theory appended internally) are derived
+below. -/
 structure Backend (canon : String → String) where
   /-- Backend-private formula type. -/
   Form : Type
@@ -27,47 +81,143 @@ structure Backend (canon : String → String) where
   enc : SourceProp → Form
   /-- Encoding identifies exactly canonical source identity. -/
   enc_iff : ∀ p q, enc p = enc q ↔ Lara.equiv canon p q
-  /-- Mathematical consequence, with any selected theory closed over. -/
-  models : List Form → Form → Prop
-  /-- Proposition-level acceptance of the exact submitted certificate. -/
-  accepts : Lara.Support.CertRef → List Form → Form → Prop
-  /-- Executable replay of the exact submitted certificate. -/
-  replay : Lara.Support.CertRef → List Form → Form → Bool
+  /-- Mathematical consequence over an explicit full context. -/
+  modelsFull : List Form → Form → Prop
+  /-- Proposition-level acceptance of the exact submitted certificate, over
+  an explicit full context. -/
+  acceptsFull : Lara.Support.CertRef → List Form → Form → Prop
+  /-- Executable replay of the exact submitted certificate, over an explicit
+  full context. -/
+  replayFull : Lara.Support.CertRef → List Form → Form → Bool
   /-- Replay is adequate for mathematical acceptance. -/
-  replay_iff : ∀ κ Δ φ, replay κ Δ φ = true ↔ accepts κ Δ φ
+  replayFull_iff : ∀ κ Γ φ, replayFull κ Γ φ = true ↔ acceptsFull κ Γ φ
   /-- Certificate soundness. -/
-  sound : ∀ κ Δ φ, accepts κ Δ φ → models Δ φ
+  soundFull : ∀ κ Γ φ, acceptsFull κ Γ φ → modelsFull Γ φ
+  /-- Reported certificate dependencies (spec §5 `uses_beta : Cert_beta → Set
+  Dependency`): dependency slots as indices into the full consulted context.
+  A function of the certificate alone; a slot below the submitted premise
+  count names a premise, and a slot at or beyond it names entry
+  `i - Δ.length` of the digest-addressed theory. -/
+  uses : Lara.Support.CertRef → List Nat
+  /-- Obligation 4, coverage clause (decision doc §2: "every free premise or
+  theory entry consulted by `κ` is returned by `uses_beta(κ)`"), in
+  extensional form over the full context: replay consults nothing outside
+  the report — two consulted contexts (premises *and* theory entries) that
+  agree on every reported slot replay identically. -/
+  uses_covers : ∀ κ Γ Γ' φ, (∀ i, i ∈ uses κ → Γ[i]? = Γ'[i]?) →
+    replayFull κ Γ φ = replayFull κ Γ' φ
+  /-- Obligation 4, validity clause (decision doc §2: "every returned
+  dependency names a declared premise slot or an entry in the
+  digest-addressed `T`"): on acceptance every reported slot is in range of
+  the full consulted context. -/
+  uses_valid : ∀ κ Γ φ, acceptsFull κ Γ φ → ∀ i, i ∈ uses κ → i < Γ.length
+  /-- Semantic dependency accounting (spec §9 result 3): an accepted
+  certificate's conclusion is a consequence of just the reported entries of
+  the full consulted context — selected premises and selected theory entries
+  alike; no free strict assumption is hidden. -/
+  uses_account : ∀ κ Γ φ, acceptsFull κ Γ φ →
+    modelsFull (selectSlots Γ (uses κ)) φ
 
-/-- A checked strict step.  Its acceptance field stays proposition-level, so
-the theorem surface speaks about mathematical acceptance rather than Boolean
-implementation details. -/
-structure StrictJudgment {canon : String → String} (B : Backend canon) where
+namespace Backend
+
+variable {canon : String → String} (B : Backend canon)
+
+/-- Caller-facing consequence of the core resolved with theory data `T`:
+the resolved theory is appended internally. -/
+def models (T : List B.Form) (Δ : List B.Form) (φ : B.Form) : Prop :=
+  B.modelsFull (Δ ++ T) φ
+
+/-- Caller-facing acceptance of the core resolved with theory data `T`. -/
+def accepts (T : List B.Form) (κ : Lara.Support.CertRef) (Δ : List B.Form)
+    (φ : B.Form) : Prop :=
+  B.acceptsFull κ (Δ ++ T) φ
+
+/-- Caller-facing replay of the core resolved with theory data `T`. -/
+def replay (T : List B.Form) (κ : Lara.Support.CertRef) (Δ : List B.Form)
+    (φ : B.Form) : Bool :=
+  B.replayFull κ (Δ ++ T) φ
+
+theorem replay_iff (T : List B.Form) (κ : Lara.Support.CertRef)
+    (Δ : List B.Form) (φ : B.Form) :
+    B.replay T κ Δ φ = true ↔ B.accepts T κ Δ φ :=
+  B.replayFull_iff κ (Δ ++ T) φ
+
+theorem sound (T : List B.Form) (κ : Lara.Support.CertRef) (Δ : List B.Form)
+    (φ : B.Form) (h : B.accepts T κ Δ φ) : B.models T Δ φ :=
+  B.soundFull κ (Δ ++ T) φ h
+
+/-- Closed-form validity: every reported slot of an accepted certificate
+names a submitted premise or one of the resolved theory's `T.length`
+entries. -/
+theorem uses_valid_closed (T : List B.Form) (κ : Lara.Support.CertRef)
+    (Δ : List B.Form) (φ : B.Form) (h : B.accepts T κ Δ φ) :
+    ∀ i, i ∈ B.uses κ → i < Δ.length + T.length := by
+  intro i hi
+  simpa [List.length_append] using
+    B.uses_valid κ (Δ ++ T) φ h i hi
+
+/-- **Theory coverage.** Replay consults the resolved theory only at the
+reported theory slots: resolving the same core with theories that agree on
+every reported theory slot replays identically.  `uses_covers` specialized
+along the premise/theory split of the full context — since the core is fixed
+per backend identity and a digest resolves only to theory *data*, a
+certificate cannot consult a digest-selected entry its report does not
+name. -/
+theorem replay_theory_covers (κ : Lara.Support.CertRef) (Δ : List B.Form)
+    {T T' : List B.Form} (φ : B.Form)
+    (hag : ∀ i, i ∈ B.uses κ → Δ.length ≤ i →
+      T[i - Δ.length]? = T'[i - Δ.length]?) :
+    B.replay T κ Δ φ = B.replay T' κ Δ φ := by
+  apply B.uses_covers
+  intro i hi
+  rcases Nat.lt_or_ge i Δ.length with hlt | hge
+  · rw [List.getElem?_append_left hlt, List.getElem?_append_left hlt]
+  · rw [List.getElem?_append_right hge, List.getElem?_append_right hge,
+      hag i hi hge]
+
+/-- A certificate whose report names no theory slot replays identically under
+*every* resolved theory: an unreported theory swap cannot change
+acceptance. -/
+theorem replay_theory_agnostic (κ : Lara.Support.CertRef) (Δ : List B.Form)
+    (T T' : List B.Form) (φ : B.Form)
+    (hprem : ∀ i, i ∈ B.uses κ → i < Δ.length) :
+    B.replay T κ Δ φ = B.replay T' κ Δ φ :=
+  B.replay_theory_covers κ Δ φ
+    (fun i hi hge => absurd (hprem i hi) (Nat.not_lt.mpr hge))
+
+end Backend
+
+/-- A checked strict step against a core resolved with theory data `T`.  Its
+acceptance field stays proposition-level, so the theorem surface speaks about
+mathematical acceptance rather than Boolean implementation details. -/
+structure StrictJudgment {canon : String → String} (B : Backend canon)
+    (T : List B.Form) where
   premises : List SourceProp
   goal : SourceProp
   certificate : Lara.Support.CertRef
-  accepted : B.accepts certificate (premises.map B.enc) (B.enc goal)
+  accepted : B.accepts T certificate (premises.map B.enc) (B.enc goal)
 
 namespace StrictJudgment
 
 /-- Construct a proposition-level judgment from raw data accepted by executable
 replay.  This is the intended boundary constructor for checker output. -/
-def ofReplay {canon : String → String} {B : Backend canon}
+def ofReplay {canon : String → String} {B : Backend canon} {T : List B.Form}
     (premises : List SourceProp) (goal : SourceProp)
     (certificate : Lara.Support.CertRef)
-    (h : B.replay certificate (premises.map B.enc) (B.enc goal) = true) :
-    StrictJudgment B where
+    (h : B.replay T certificate (premises.map B.enc) (B.enc goal) = true) :
+    StrictJudgment B T where
   premises := premises
   goal := goal
   certificate := certificate
-  accepted := (B.replay_iff _ _ _).mp h
+  accepted := (B.replay_iff _ _ _ _).mp h
 
 end StrictJudgment
 
 /-- **Theorem 1 (certified strict-step soundness).** -/
 theorem strict_step_sound {canon : String → String} {B : Backend canon}
-    (j : StrictJudgment B) :
-    B.models (j.premises.map B.enc) (B.enc j.goal) :=
-  B.sound _ _ _ j.accepted
+    {T : List B.Form} (j : StrictJudgment B T) :
+    B.models T (j.premises.map B.enc) (B.enc j.goal) :=
+  B.sound _ _ _ _ j.accepted
 
 /-! ### Exact source-atom wire encoding
 
@@ -539,40 +689,96 @@ theorem ndReplay_iff (κ : Lara.Support.CertRef) (Δ : List Lara.ND.Formula)
     obtain ⟨deps, hi⟩ := Lara.ND.infer_complete (free := Δ) [] e φ (by simpa using ht)
     simp [ndReplay, hd, hi]
 
+/-- Reported dependency slots of an ND certificate: the free de Bruijn
+variables of the decoded proof term.  A function of the certificate alone; an
+undecodable certificate reports nothing (it is never accepted). -/
+def ndUses (κ : Lara.Support.CertRef) : List Nat :=
+  match Lara.ND.decodeCert κ.payload with
+  | none => []
+  | some e => Lara.ND.fv e
+
+/-- **Dependency accounting for the ND adapter (result 10, exactness half).**
+An accepted certificate's conclusion already follows from just the premises
+its free-variable report selects — `nd_relevance` at the backend interface. -/
+theorem ndUses_account (κ : Lara.Support.CertRef)
+    (Δ : List Lara.ND.Formula) (φ : Lara.ND.Formula)
+    (hacc : ndAccepts κ Δ φ) :
+    ndModels (selectSlots Δ (ndUses κ)) φ := by
+  obtain ⟨e, hdec, ht⟩ := hacc
+  have hu : ndUses κ = Lara.ND.fv e := by simp [ndUses, hdec]
+  intro v hv
+  refine Lara.ND.nd_relevance ht v ?_
+  intro i ψ hi hlook
+  refine hv ψ ?_
+  rw [hu]
+  exact mem_selectSlots.mpr
+    ⟨i, hi, by rw [← Lara.ND.lookup_eq_getElem?]; exact hlook⟩
+
+/-- **Obligation 4, coverage (ND).** Replay consults the context only at the
+reported slots: contexts agreeing there replay identically
+(`infer_agree` at the certificate boundary; no arity hypothesis needed). -/
+theorem ndReplay_agree (κ : Lara.Support.CertRef)
+    {Δ Δ' : List Lara.ND.Formula} (φ : Lara.ND.Formula)
+    (hag : ∀ i, i ∈ ndUses κ → Δ[i]? = Δ'[i]?) :
+    ndReplay κ Δ φ = ndReplay κ Δ' φ := by
+  cases hdec : Lara.ND.decodeCert κ.payload with
+  | none => simp [ndReplay, hdec]
+  | some e =>
+    have hu : ndUses κ = Lara.ND.fv e := by simp [ndUses, hdec]
+    have hinf := Lara.ND.infer_agree (free := Δ) (free' := Δ') [] e (by
+      intro j hj
+      rw [Lara.ND.lookup_eq_getElem?, Lara.ND.lookup_eq_getElem?]
+      exact hag j (by rw [hu]; simpa using hj))
+    simp [ndReplay, hdec, hinf]
+
+/-- **Obligation 4, validity (ND).** An accepted certificate's reported slots
+all name entries of the consulted context (`fv_in_range`). -/
+theorem ndUses_valid (κ : Lara.Support.CertRef)
+    (Γ : List Lara.ND.Formula) (φ : Lara.ND.Formula)
+    (hacc : ndAccepts κ Γ φ) : ∀ i, i ∈ ndUses κ → i < Γ.length := by
+  obtain ⟨e, hdec, ht⟩ := hacc
+  have hu : ndUses κ = Lara.ND.fv e := by simp [ndUses, hdec]
+  intro i hi
+  exact Lara.ND.fv_in_range ht i (hu ▸ hi)
+
+/-- The reported slots are exactly what the running checker computes: on a
+decodable certificate accepted by `infer`, `ndUses` is the algorithm's
+dependency output (`infer_deps_eq_fv` at the certificate boundary). -/
+theorem ndUses_eq_infer_deps {κ : Lara.Support.CertRef}
+    {Δ : List Lara.ND.Formula} {e : Lara.ND.Cert} {φ : Lara.ND.Formula}
+    {ds : List Nat} (hdec : Lara.ND.decodeCert κ.payload = some e)
+    (hinf : Lara.ND.infer Δ [] e = some (φ, ds)) :
+    ndUses κ = ds := by
+  have hfv := Lara.ND.infer_deps_eq_fv e φ ds hinf
+  simp [ndUses, hdec, hfv]
+
+/-- The one fixed ND backend core.  A registered digest resolves only to
+theory *data* (ND-encoded entries) that the derived closed forms append after
+the caller-supplied premise encodings — digest resolution never changes the
+core. -/
 def ndBackend (canon : String → String) : Backend canon where
   Form := Lara.ND.Formula
   enc := ndEnc canon
   enc_iff := ndEnc_iff canon
-  models := ndModels
-  accepts := ndAccepts
-  replay := ndReplay
-  replay_iff := ndReplay_iff
-  sound := by
-    rintro κ Δ φ ⟨e, _, ht⟩
+  modelsFull := ndModels
+  acceptsFull := ndAccepts
+  replayFull := ndReplay
+  replayFull_iff := ndReplay_iff
+  soundFull := by
+    rintro κ Γ φ ⟨e, _, ht⟩
     exact Lara.ND.nd_sound ht
+  uses := ndUses
+  uses_covers := fun κ Γ Γ' φ hag => ndReplay_agree κ φ hag
+  uses_valid := ndUses_valid
+  uses_account := ndUses_account
 
-/-- Resolve a registered digest by closing replay and consequence over that
-digest's fixed theory entries, after the caller-supplied premise encodings. -/
-def ndBackendWithTheory (canon : String → String) (theory : List SourceProp) :
-    Backend canon where
-  Form := Lara.ND.Formula
-  enc := ndEnc canon
-  enc_iff := ndEnc_iff canon
-  models := fun Δ φ => ndModels (Δ ++ theory.map (ndEnc canon)) φ
-  accepts := fun κ Δ φ => ndAccepts κ (Δ ++ theory.map (ndEnc canon)) φ
-  replay := fun κ Δ φ => ndReplay κ (Δ ++ theory.map (ndEnc canon)) φ
-  replay_iff := by
-    intro κ Δ φ
-    exact ndReplay_iff κ (Δ ++ theory.map (ndEnc canon)) φ
-  sound := by
-    rintro κ Δ φ ⟨e, _, ht⟩
-    exact Lara.ND.nd_sound ht
-
-/-- Theorem 1 specialized to the executable ND backend. -/
-theorem nd_strict_step_sound (j : StrictJudgment (ndBackend id)) :
+/-- Theorem 1 specialized to the executable ND backend (empty theory). -/
+theorem nd_strict_step_sound (j : StrictJudgment (ndBackend id) []) :
     ndModels (j.premises.map (ndBackend id).enc)
-      ((ndBackend id).enc j.goal) :=
-  strict_step_sound j
+      ((ndBackend id).enc j.goal) := by
+  have h : ndModels (j.premises.map (ndEnc id) ++ []) (ndEnc id j.goal) :=
+    strict_step_sound j
+  rwa [List.append_nil] at h
 
 /-! ### Theorem 3 (source non-factivity — the factivity firewall) -/
 
@@ -580,7 +786,7 @@ def nonfactiveAtom : SourceProp := .atom "p" .nil
 
 /-- The accepted symbolic ND identity step `p ⊢ p`, constructed through the
 Boolean-to-proposition replay bridge. -/
-def nonfactiveJudgment : StrictJudgment (ndBackend id) :=
+def nonfactiveJudgment : StrictJudgment (ndBackend id) [] :=
   StrictJudgment.ofReplay [nonfactiveAtom] nonfactiveAtom ⟨ndHypZero⟩ (by
     apply (ndReplay_iff _ _ _).mpr
     exact ⟨.hyp 0, by
@@ -600,11 +806,12 @@ theorem nd_nonfactive_witness :
   exact Bool.noConfusion hp
 
 /-- There is no uniform premise-free truth projection from checked strict
-steps, even when quantified over canonicalizers and backends. -/
+steps, even when quantified over canonicalizers, backend cores, and resolved
+theories. -/
 theorem no_truth_projection :
-    ¬ ∀ (canon : String → String) (B : Backend canon)
-      (j : StrictJudgment B), B.models [] (B.enc j.goal) :=
-  fun h => nd_nonfactive_witness (h id (ndBackend id) nonfactiveJudgment)
+    ¬ ∀ (canon : String → String) (B : Backend canon) (T : List B.Form)
+      (j : StrictJudgment B T), B.models T [] (B.enc j.goal) :=
+  fun h => nd_nonfactive_witness (h id (ndBackend id) [] nonfactiveJudgment)
 
 /-- Relative soundness and non-factivity side by side. -/
 theorem nd_relative_not_absolute :

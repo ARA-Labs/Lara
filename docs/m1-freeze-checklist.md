@@ -44,7 +44,7 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12; duplicate rule IDs and R12 run before program checking | §9 r7/C09 ✅ for the Lean reference PL (`Lara.Policy`, `Lara.Check.Unit`, `Lara.Consistency`; #18 implementation) |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
 | 7 | Shipped adapter portfolio (arithmetic-recheck, code-inspection; LP non-shipping) | §5.2 | **Frozen** | none (C14); per-adapter soundness is M2/M3 | §9 r10 per shipped adapter — **pending** |
-| 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules and exact executable Lean checker (`Lara.Check.inferSupport`) landed — pending: `certDeps` | §9 r1 support/program checker ✅; r3 leaf half ✅; r11 relational ✅ |
+| 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.inferSupport`), and the `certDeps` layer over `Backend.uses` landed (#46) | §9 r1 support/program checker ✅; r3 both halves ✅; r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
 | 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅ (#17); r7 attack completeness ✅ (#18); r9 pending |
@@ -101,8 +101,19 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    is unchanged. The checker-built
    `Compile.edgeB`/`edgeB_faithful` edge decider (issue #17) now discharges
    `Compile.Faithful` constructively, closing r6's source-vs-compiled half.
-3. **`certDeps` accountability**: extend the abstract `Backend` with `uses`, prove r3's
-   certificate half (obligation 4).
+3. **`certDeps` accountability — done (#46)**: the abstract `Backend` is a
+   theory-free core, fixed per registered `(name, version)`; a digest
+   resolves only to theory *data* (`RegisteredBackend.resolveTheory`), and
+   the core carries `uses` with obligation 4's coverage (`uses_covers`),
+   validity (`uses_valid`), and semantic accounting (`uses_account`) laws
+   over the explicit full consulted context `Δ ++ T` (so a digest swap is
+   observable only through reported theory slots —
+   `certOkBOf_theory_covers`); the ND adapter discharges them via
+   `infer_agree`/`fv_in_range`/`nd_relevance`,
+   and `Lara.Support`'s `certDeps` layer proves r3's certificate half over
+   the typed premise/theory `CertDep` report: `cert_steps_accounted`,
+   `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved`,
+   `certDeps_theory_valid`.
 4. **r9 backend replacement — representation blocker**: the relational §6.1/§8 layers are frozen,
    but `CheckedProgram` stores certificate-bearing `SupportTerm` nodes and has no stable argument
    ids or certificate-erased skeleton. Payload-different programs therefore lack the node bijection

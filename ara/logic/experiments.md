@@ -135,19 +135,38 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 - **Baselines**: none.
 - **Dependencies**: none.
 
-## E08: Dependency accountability (leaves(w) = frontier) + status preservation (partially closed gap)
+## E08: Dependency accountability (leaves(w) = frontier) + status preservation (source-vs-compiled half)
 - **Verifies**: C08
-- **Evidence**: **result 6 abstract core mechanized; leaf accountability + compile step still pending.** `lean/Lara/Grounded.lean` defines the direct big-step judgment (`DirectIn`/`DirectOut`, no iteration) and proves it equals the executable grounded labelling over any AF (`directIn_iff`, `labelC_*_iff`, `status_preservation`) — an independent semantics now exists, closing N16's core objection. STILL OPEN: (a) leaf accountability (`Lara.SupportTerm` spec-only); (b) the source-vs-compiled *preservation itself* — the equivalence quantifies over one `F : AF`, so `compile`/subargument closure are only characterized (`compile_attack_iff`), not exercised (M1). (canonical status: `evidence/status/mechanization_status.md` result 6 = "partially mechanized (abstract AF layer)")
+- **Evidence**: **result 3 mechanized in both halves; result 6's source-vs-compiled half mechanized
+  (oracle eliminated).** Result 3, leaf half: `leaves(w)` is derived from
+  term structure (the accountability claim is an inversion lemma), and `Lara.Support.leaves_declared`
+  proves every leaf of a checked term is declared in `Γ`. Result 3, certificate half (#46/PR #47):
+  one fixed backend core per registered `(name, version)` carries obligation 4's three `uses` laws
+  over the full consulted context `Δ ++ T` (`uses_covers`/`uses_valid`/`uses_account`), digests
+  resolve only to theory *data* (`replay_theory_covers`/`certOkBOf_theory_covers` — no hidden theory
+  consultation through the digest mechanism), and the support-level `certDeps` layer resolves every
+  reported slot to a typed premise/theory `CertDep` (`cert_steps_accounted`, `certDeps_resolved`,
+  `certDeps_theory_valid`); the ND adapter discharges the laws with exactness
+  (`ndUses_eq_infer_deps`). Result 6: the direct big-step judgment (`DirectIn`/`DirectOut`) agrees
+  with the executable grounded labelling, and #17 closed the source-vs-compiled half — the
+  checker-built decider `edgeB` discharges the former `Faithful` oracle constructively
+  (`edgeB_faithful`), so `srcIn_iff_checkedGrounded`/`srcStatus_iff_checked` hold over an accepted
+  program with subargument-closure edges exercised. Caveat: `SrcIn`/`SrcOut` are the Prop shadow of
+  the same compiled `Edge`, not an independent source calculus — this is the half of result 6 that
+  is mechanized, per spec §8.2 and the ledger. (canonical status:
+  `evidence/status/mechanization_status.md` result 3 = "mechanized", result 6 = "source-vs-compiled
+  half mechanized (oracle eliminated)")
 - **Run**: docs/spec.md §6 (`leaves`/`certDeps`), §8.2 (direct semantics), §9 results 3 & 6; docs/mechanization-plan.md §5
 - **Setup**:
   - Model: n/a
-  - System: support-term checker + compilation + direct source semantics (abstract layer defined; concrete layer M1)
+  - System: support-term checker + compilation + direct source semantics, all in `lean/`
 - **Procedure**:
-  1. Prove the reported leaf set equals `leaves(w)` by inversion on term structure; strict deps via `uses`. *(pending)*
-  2. ✅ **Direct big-step claim-status semantics defined** (spec §8.2, `DirectIn`/`DirectOut`) and proved to agree with the executable grounded labelling over any AF (abstract core of result 6).
-  3. **Still to do (M1):** instantiate the agreement at `F = compile(W)` with a source-level status, so the subargument-closure edges are exercised — the genuine source-vs-compiled preservation.
-- **Metrics**: proof status per part; whether the compile step exercises `compile`/subargument closure.
-- **Expected outcome**: exact dependency accountability; a genuine two-semantics preservation theorem once the compile step is instantiated over concrete support terms.
+  1. ✅ Leaf half: `leaves(w)` derived by inversion on term structure; `leaves_declared` for declaredness.
+  2. ✅ Direct big-step claim-status semantics defined (spec §8.2) and proved to agree with the executable grounded labelling over any AF.
+  3. ✅ Agreement instantiated at the checker-built AF (#17): `edgeB_faithful` eliminates the `Faithful` hypothesis, exercising `compile`/subargument closure — the genuine source-vs-compiled preservation.
+  4. ✅ Certificate half (#46/PR #47): fixed-core registry, data-only digests, `uses` report laws, and the typed `certDeps` resolution layer.
+- **Metrics**: proof status per part; `sorry`-free within the standard axiom trio (AxCheck-audited).
+- **Expected outcome**: dependency accountability mechanized in both halves; source-vs-compiled status preservation over accepted programs. *(achieved)*
 - **Baselines**: none.
 - **Dependencies**: E07.
 

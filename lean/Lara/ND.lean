@@ -339,6 +339,18 @@ theorem lookup_lt {Γ : List Formula} {i : Nat} {φ : Formula}
       have := ih (i := k) (by simpa [lookup] using h)
       simpa using Nat.succ_lt_succ this
 
+/-- `lookup` is positional indexing: the self-contained lookup agrees with the
+standard `Γ[i]?`, so dependency slots can be read against either. -/
+theorem lookup_eq_getElem? : ∀ (Γ : List Formula) (i : Nat), lookup Γ i = Γ[i]? := by
+  intro Γ
+  induction Γ with
+  | nil => intro i; cases i <;> rfl
+  | cons φ rest ih =>
+    intro i
+    cases i with
+    | zero => rfl
+    | succ k => simpa [lookup] using ih k
+
 /-! ### The theorems -/
 
 /-- **Lemma 5 (operational core).** Only the free-variable slots of a certificate
@@ -778,6 +790,54 @@ theorem infer_deps_eq_fv {free : List Formula} :
       | atom _ => simp at hinf
       | imp _ _ => simp at hinf
     | none => simp [hbody] at hinf
+
+/-- **Congruence on unreported slots.** `infer` consults the free context only
+at the projected free-variable slots: two free contexts that agree there (both
+values and both failures) produce identical results — the extensional form of
+"every consulted premise or theory entry is reported" (decision doc §2,
+obligation 4 coverage clause). -/
+theorem infer_agree {free free' : List Formula} :
+    ∀ (ls : List Formula) (e : Cert),
+      (∀ j, j ∈ depProj ls.length (fv e) → lookup free j = lookup free' j) →
+      infer free ls e = infer free' ls e := by
+  intro ls e
+  induction e generalizing ls with
+  | hyp i =>
+    intro hag
+    simp only [infer]
+    cases hloc : lookup ls i with
+    | some φ => rfl
+    | none =>
+      have hge : ls.length ≤ i := by
+        rcases Nat.lt_or_ge i ls.length with hlt | hge
+        · obtain ⟨ψ, hψ⟩ := lookup_of_lt hlt
+          rw [hψ] at hloc
+          simp at hloc
+        · exact hge
+      have hmem : i - ls.length ∈ depProj ls.length (fv (.hyp i)) := by
+        simp [fv, depProj, Nat.not_lt.mpr hge]
+      rw [hag (i - ls.length) hmem]
+  | lam ψ0 e ih =>
+    intro hag
+    simp only [infer]
+    rw [ih (ψ0 :: ls) (by
+      intro j hj
+      refine hag j ?_
+      rw [fv, ← depProj_succ_shiftDown]
+      simpa using hj)]
+  | app f x ihf ihx =>
+    intro hag
+    simp only [infer]
+    rw [ihf ls (fun j hj => hag j (by
+          simp only [fv, depProj_append, List.mem_append]
+          exact Or.inl hj)),
+        ihx ls (fun j hj => hag j (by
+          simp only [fv, depProj_append, List.mem_append]
+          exact Or.inr hj))]
+  | abort ψ0 e ih =>
+    intro hag
+    simp only [infer]
+    rw [ih ls (fun j hj => hag j (by simpa [fv] using hj))]
 
 /-- **Layer-C bridge (type adequacy).** At the top level (`ls = []`, the Haskell
 `inferType []`), the algorithm accepts with type `φ` exactly when the relation

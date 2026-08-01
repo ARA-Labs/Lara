@@ -725,9 +725,21 @@ duplicate elimination, missing- and overlapping-accounting rejection) are pinned
 `lean/Lara/Examples.lean`.
 `lean/Lara/Check/Support.lean` and `SupportProof.lean` now provide the
 executable support checker and exact soundness/completeness bridge; the finite
-backend registry exposes Boolean replay with proved adequacy. The remaining
-result-3 `certDeps` certificate half is separate and needs a `uses` field on
-the abstract backend.)*
+backend registry exposes Boolean replay with proved adequacy. The result-3
+`certDeps` certificate half is also mechanized: `Backend.uses` carries
+obligation 4 as coverage (`uses_covers`), validity (`uses_valid`), and
+semantic accounting (`uses_account`), each stated over the explicit full
+consulted context `Δ ++ T` for one fixed backend core per registered
+identity — a digest resolves only to theory data, so a digest swap is
+observable only through reported theory slots
+(`certOkBOf_theory_covers`); the `certDeps` layer resolves every
+reported slot to a typed `CertDep` — a premise occurrence or a
+digest-addressed theory entry, nothing filtered — collects exactly the
+per-node reports (`mem_certDeps_step` / `certStep_deps_subset`), accounts
+every certificate node (`cert_steps_accounted`), resolves premise entries to
+the corresponding premise subterms of their reporting node
+(`certDeps_resolved`), and bounds theory entries by the digest-resolved
+theory data (`certDeps_theory_valid`).)*
 
 ## 7. Typed positional attacks
 
@@ -1118,9 +1130,18 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    no support term, attack, or backend proof term crosses the strict-certificate interface.
 3. Dependency accountability: the reported leaf set equals `leaves(w)` and every member is declared
    in `Gamma`; backend-reported dependencies equal or conservatively contain every free premise and
-   theory entry used by each accepted certificate. *(Leaf half mechanized:
-   `lean/Lara/Support.lean` `leaves_declared`, with report = `leaves(w)` definitional; the
-   certificate half needs `Backend.uses`.)*
+   theory entry used by each accepted certificate. *(Mechanized:
+   `lean/Lara/Support.lean` `leaves_declared`, with report = `leaves(w)` definitional, for the
+   leaf half; the certificate half via `Backend.uses` under obligation 4's three laws over
+   the explicit full consulted context `Δ ++ T` — coverage `uses_covers`, validity
+   `uses_valid`, semantic accounting `uses_account` (`lean/Lara/Strict.lean`, ND instance
+   discharged by `infer_agree`/`fv_in_range`/`nd_relevance`; one fixed core per registered
+   identity, digests resolve only to theory data, so hidden theory consultation through
+   the digest mechanism is impossible — `certOkBOf_theory_covers`) — lifted to the support
+   level by the typed
+   `CertDep` report (premise occurrence or digest-addressed theory entry, nothing filtered):
+   `cert_steps_accounted`, `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved`,
+   and `certDeps_theory_valid`.)*
 4. Compilation soundness: no untyped node or attack appears in the target AF, and subargument
    closure introduces edges only onto arguments containing the attacked occurrence. *(Mechanized:
    `lean/Lara/Compile.lean` `compile_nodes_checked`, `edge_iff`, `closure_includes_direct`.)*

@@ -204,17 +204,22 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds for checked support terms; every leaf in `leaves(w)` must be declared in the
   admitted context `Γ`, and backend dependencies (`certDeps`) are unioned in from accepted certificates.
 - **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:424 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
-- **Status**: testing
+- **Status**: supported
 - **Falsification criteria**: A checked support term whose actual load-bearing leaf set differs from
   `leaves(w)`, or a strict certificate whose consulted theory/premise dependency is not returned by
   its adapter's `uses` — refuting dependency accountability (spec §9 result 3).
 - **Proof**: [E08]
 - **Evidence basis**: spec §6 defines `leaves(w)`/`certDeps(w)`;
-  `lean/Lara/Support.lean` proves `leaves_declared` for the source-leaf half, while backend
-  `certDeps` accountability still awaits a `uses` field on the executable backend interface.
+  `lean/Lara/Support.lean` proves `leaves_declared` for the source-leaf half, and (as of #46/PR #47)
+  the certificate half is mechanized: one fixed backend core per registered `(name, version)` carries
+  obligation 4's coverage/validity/accounting laws over the full consulted context, digests resolve
+  only to theory *data* (so hidden theory consultation through the digest mechanism is impossible —
+  `replay_theory_covers`/`certOkBOf_theory_covers`), and the support-level `certDeps` layer resolves
+  every reported slot to a premise occurrence or digest-addressed theory entry
+  (`cert_steps_accounted`, `certDeps_resolved`, `certDeps_theory_valid`).
 - **Dependencies**: C01
 - **Tags**: dependency-accountability, leaves, inversion-lemma
-- **Last revised**: 2026-07-22 (2026-07-22_002)
+- **Last revised**: 2026-07-31 (PR #47: certificate-half mechanization, fixed-core/data-only-digest registry; status testing → supported)
 
 ## C09: Restricting contrary-instance overlap off strict-reachable patterns buys consistency by construction
 - **Provenance**: ai-suggested

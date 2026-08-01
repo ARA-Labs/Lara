@@ -241,8 +241,9 @@ The implementation is complete through the M4 walking-skeleton milestone:
 - **M2 — mechanized reference core.** Lean proves the checker, compilation,
   grounded evaluation, strict-backend soundness/isolation, result-7 consistency,
   backend replacement (including constructive well-checkedness transport), the
-  ND adapter, and the presentation-codec round trip. Backend `certDeps`
-  accountability (the remaining half of result 3) is still open.
+  ND adapter, the presentation-codec round trip, and dependency accountability
+  in both halves (result 3): the source-leaf inversion lemma and backend
+  `certDeps` via the `Backend.uses` report laws.
 - **M3 — production compiler/checker.** The Haskell parser, elaborator, checker,
   compiler, grounded evaluator, diagnostics, CLI, replay bundle, and canonical
   S-expression wire format are implemented and differential-tested byte-for-byte

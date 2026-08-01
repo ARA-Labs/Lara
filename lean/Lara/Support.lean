@@ -6,11 +6,20 @@ frozen 2026-07-22 in the M1 lock pass). Per the mechanization discipline
 
 What this file discharges, against the exact §6.1 figure:
 
-* **Result 3 (dependency accountability), leaf half** — `leaves_declared`:
-  every leaf constant of a typed term is declared in `Gamma`. The other half
-  ("the reported leaf set equals `leaves(w)`") is definitional: the report *is*
-  `leaves w` (spec §6). `certDeps` accountability needs a `uses` field on the
-  abstract `Backend` (obligation 4) and is a recorded follow-up.
+* **Result 3 (dependency accountability), both halves.** Leaf half —
+  `leaves_declared`: every leaf constant of a typed term is declared in
+  `Gamma`; "the reported leaf set equals `leaves(w)`" is definitional (the
+  report *is* `leaves w`, spec §6). Certificate half — the `certDeps` layer
+  at the end of this file over the `Backend.uses` report laws (obligation 4):
+  every reported slot resolves to a typed `CertDep` (premise occurrence or
+  digest-addressed theory entry — the Haskell `Dependency` split, nothing
+  filtered); `cert_steps_accounted` (every certificate node's conclusion
+  follows from just the reported entries of the full consulted context —
+  selected premises and selected theory entries alike), the collection
+  identity `mem_certDeps_step` / `certStep_deps_subset`, `certDeps_resolved`
+  (premise entries resolve to the corresponding premise subterm of their own
+  reporting node, up to `≡`), and `certDeps_theory_valid` (theory entries
+  name genuine entries of the digest-resolved theory data).
 * **Result 1 (decidability), uniqueness half** — `hasSupport_unique`: a term
   has at most one conclusion and obligation set. `Lara.Check.Support` supplies
   the executable checker; `Lara.Check.SupportProof` proves soundness and exact
@@ -45,7 +54,8 @@ Design notes (same conventions as the sibling files):
   indexed predicate `CertOk β h κ As C`, gated per-rule by the `certifiers`
   allowlist (spec §4: an instance may use `cert(beta, h, ...)` only when
   `(beta@version, h)` appears in `certifiers`); `certOkOf` instantiates it
-  from a backend-first registry whose inner resolver selects a fixed theory.
+  from a backend-first registry: one fixed backend core per identity, whose
+  inner resolver returns only the digest's theory data.
 * Rule-instance children are indexed by `l[i]?` lookups rather than nested
   `Forall₂`-style premises, keeping every recursive occurrence directly under
   `∀`/`→` (strictly positive, clean induction principles). List-shape helper
@@ -799,40 +809,53 @@ theorem dh_partition {canon Pi CertOk}
 
 /-! ### The seam: §6.1's `cert` assurance meets Theorem 1 -/
 
-/-- One registered outer backend identity, with an inner fixed-theory resolver. -/
+/-- One registered outer backend identity: one fixed backend *core* per exact
+`(name, version)`, plus an inner resolver that returns only the digest's
+theory **data**.  Digest resolution cannot introduce behavior — every digest
+of a registered identity is replayed by the same core, and the selected
+theory enters acceptance only as data appended to the consulted context,
+where the core's coverage law ranges over it
+(`certOkBOf_theory_covers`). -/
 structure RegisteredBackend (canon : String → String) where
-  /-- Resolve a selected digest to a backend specialized to that fixed theory. -/
-  resolve : Digest → Option (Strict.Backend canon)
+  /-- The fixed backend core for this `(name, version)` identity. -/
+  core : Strict.Backend canon
+  /-- Resolve a selected digest to that digest's theory data, core-encoded. -/
+  resolveTheory : Digest → Option (List core.Form)
 
 /-- Backend-first closed registry.  The complete `(name, version)` is the outer
 identity; digest selection occurs only after that exact lookup succeeds. -/
 abbrev BackendRegistry (canon : String → String) :=
   BackendId → Option (RegisteredBackend canon)
 
-/-- `CertOk` from a backend-first registry: exact identity `β` is resolved
-before digest `h`, and the resulting theory-specialized backend receives the
-unchanged symbolic certificate and encoded source premises. -/
+/-- `CertOk` from a backend-first registry: exact identity `β` resolves to the
+fixed core before digest `h` resolves to theory data, and the core receives
+the unchanged symbolic certificate, the encoded source premises, and that
+data-only theory. -/
 def certOkOf {canon : String → String} (reg : BackendRegistry canon) :
     BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun β h κ As C =>
     match reg β with
     | none => False
     | some registered =>
-        match registered.resolve h with
+        match registered.resolveTheory h with
         | none => False
-        | some B => B.accepts κ (As.map B.enc) (B.enc C)
+        | some T =>
+            registered.core.accepts T κ (As.map registered.core.enc)
+              (registered.core.enc C)
 
 /-- Executable certificate check over the same backend-first resolution path. -/
 def certOkBOf {canon : String → String} (reg : BackendRegistry canon)
     (β : BackendId) (h : Digest) (κ : CertRef) (As : List Atom)
     (C : Atom) : Bool :=
-  -- β -> closed registry -> h -> fixed-theory backend -> exact replay
+  -- β -> closed registry -> fixed core; h -> theory data -> exact replay
   match reg β with
   | none => false
   | some registered =>
-      match registered.resolve h with
+      match registered.resolveTheory h with
       | none => false
-      | some B => B.replay κ (As.map B.enc) (B.enc C)
+      | some T =>
+          registered.core.replay T κ (As.map registered.core.enc)
+            (registered.core.enc C)
 
 /-- Executable replay is adequate for proposition-level certificate
 acceptance, including both lookup layers. -/
@@ -843,11 +866,34 @@ theorem certOkBOf_iff {canon : String → String} (reg : BackendRegistry canon)
   cases hreg : reg β with
   | none => simp [certOkBOf, certOkOf, hreg]
   | some registered =>
-      cases hresolve : registered.resolve h with
+      cases hresolve : registered.resolveTheory h with
       | none => simp [certOkBOf, certOkOf, hreg, hresolve]
-      | some B =>
+      | some T =>
           simpa [certOkBOf, certOkOf, hreg, hresolve] using
-            (B.replay_iff κ (As.map B.enc) (B.enc C))
+            (registered.core.replay_iff T κ (As.map registered.core.enc)
+              (registered.core.enc C))
+
+/-- **Registry-level theory coverage.** Under one registered identity, a
+digest swap is observable only through reported theory slots: two digests
+whose resolved theory data agree on every reported theory slot replay
+identically.  Because the core is fixed per `(name, version)` and a digest
+resolves only to data, hidden theory consultation through the digest
+mechanism is impossible — this was false for a registry whose digest
+resolver could return arbitrary backend behavior. -/
+theorem certOkBOf_theory_covers {canon : String → String}
+    {reg : BackendRegistry canon} {β : BackendId} {h h' : Digest}
+    {κ : CertRef} {As : List Atom} {C : Atom}
+    {registered : RegisteredBackend canon}
+    {T T' : List registered.core.Form}
+    (hreg : reg β = some registered)
+    (hT : registered.resolveTheory h = some T)
+    (hT' : registered.resolveTheory h' = some T')
+    (hag : ∀ i, i ∈ registered.core.uses κ → As.length ≤ i →
+      T[i - As.length]? = T'[i - As.length]?) :
+    certOkBOf reg β h κ As C = certOkBOf reg β h' κ As C := by
+  simp only [certOkBOf, hreg, hT, hT']
+  exact registered.core.replay_theory_covers κ _ _
+    (by simpa [List.length_map] using hag)
 
 /-- The §6.1 `cert` side condition composed with the abstract seam is exactly
 Theorem 1: an accepted strict instance's conclusion is a backend consequence
@@ -857,16 +903,448 @@ theorem certOkOf_strict_step {canon : String → String}
     {reg : BackendRegistry canon}
     {β : BackendId} {h : Digest} {κ : CertRef} {As : List Atom} {C : Atom}
     (hacc : certOkOf reg β h κ As C) :
-    ∃ registered B, reg β = some registered ∧
-      registered.resolve h = some B ∧
-      B.models (As.map B.enc) (B.enc C) := by
+    ∃ registered T, reg β = some registered ∧
+      registered.resolveTheory h = some T ∧
+      registered.core.models T (As.map registered.core.enc)
+        (registered.core.enc C) := by
   simp only [certOkOf] at hacc
   split at hacc
   · contradiction
   · rename_i registered hregistered
     split at hacc
     · contradiction
-    · rename_i B hB
-      exact ⟨registered, B, hregistered, hB, B.sound _ _ _ hacc⟩
+    · rename_i T hT
+      exact ⟨registered, T, hregistered, hT,
+        registered.core.sound _ _ _ _ hacc⟩
+
+/-! ### Result 3 (certificate half): strict-dependency accountability
+
+`certDeps(w)` (spec §6) is the union, over every certificate-assured instance
+in the term, of that certificate's reported dependencies, each resolved to a
+`CertDep`: a premise slot resolved to its instantiated premise atom, or an
+entry of the certificate's digest-addressed theory `(β, h)` — the same
+premise/theory split as the Haskell `Lara.Strict.Dependency`.  No slot is
+filtered: every reported index resolves to exactly one constructor.  The
+theorems mirror `leaves_declared`: `certDeps` collects exactly the per-node
+reports (`mem_certDeps_step` / `certStep_deps_subset`); every premise entry
+resolves to the corresponding premise subterm of its own reporting node
+(`certDeps_resolved`); every theory entry names a genuine entry of the
+digest-resolved theory data (`certDeps_theory_valid`); and every accepted
+certificate's conclusion follows from just the reported entries of the full
+consulted context (`cert_steps_accounted`). -/
+
+/-- A resolved strict-certificate dependency (spec §6; the Haskell
+`Lara.Strict.Dependency` premise/theory split): premise slot `i`, resolved to
+its instantiated premise atom, or entry `t` of the reporting certificate's
+digest-addressed theory `(β, h)`. -/
+inductive CertDep where
+  | premise : Nat → Atom → CertDep
+  | theoryEntry : BackendId → Digest → Nat → CertDep
+deriving DecidableEq
+
+/-- Resolve one reported slot against the instantiated premises: a slot below
+`As.length` names that premise occurrence; any other slot names entry
+`i - As.length` of the certificate's digest-addressed theory.  Total — no
+reported slot is dropped. -/
+def resolveSlot (β : BackendId) (h : Digest) (As : List Atom) (i : Nat) :
+    CertDep :=
+  match As[i]? with
+  | some A => .premise i A
+  | none => .theoryEntry β h (i - As.length)
+
+/-- The reported dependencies of one support-term node: for a
+certificate-assured instance whose rule, premise instantiation, and backend
+resolve, every reported slot resolved via `resolveSlot`; empty for any other
+node.  A typed certificate node always resolves (`cert_node_accounted`). -/
+def stepDeps {canon : String → String} (Pi : RuleId → Option Rule)
+    (reg : BackendRegistry canon) : SupportTerm → List CertDep
+  | .inst rn θ _ _ _ (.cert β h κ) =>
+    (match Pi rn with
+     | none => []
+     | some r =>
+       match instAPats θ r.premises with
+       | none => []
+       | some As =>
+         match reg β with
+         | none => []
+         | some registered =>
+           match registered.resolveTheory h with
+           | none => []
+           | some _ => (registered.core.uses κ).map (resolveSlot β h As))
+  | _ => []
+
+/-- `CertStepIn w u`: the certificate-assured instance node `u` occurs in `w`
+— at the root, inside a premise subterm, or inside a discharge subterm.  The
+occurrence carries the node itself, so downstream theorems can name that
+node's own premise subterms. -/
+inductive CertStepIn : SupportTerm → SupportTerm → Prop where
+  | here {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+      {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
+      {β : BackendId} {hd : Digest} {κ : CertRef} :
+      CertStepIn (.inst rn θ ws D H (.cert β hd κ))
+        (.inst rn θ ws D H (.cert β hd κ))
+  | prem {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+      {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
+      {α : Assurance} {u : SupportTerm} {i : Nat} {w : SupportTerm}
+      (hw : ws[i]? = some w) (hstep : CertStepIn w u) :
+      CertStepIn (.inst rn θ ws D H α) u
+  | dis {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+      {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
+      {α : Assurance} {u : SupportTerm} {j : Nat} {q : QuestionId}
+      {w : SupportTerm}
+      (hw : D[j]? = some (q, w)) (hstep : CertStepIn w u) :
+      CertStepIn (.inst rn θ ws D H α) u
+
+/- `certDeps(w)` (spec §6): the strict-certificate half of the dependency
+report `leaves(w) ∪ certDeps(w)` — every certificate node's resolved report,
+discharge subterms included. -/
+mutual
+  def certDeps {canon : String → String} (Pi : RuleId → Option Rule)
+      (reg : BackendRegistry canon) : SupportTerm → List CertDep
+    | .leaf _ => []
+    | .inst rn θ ws D H α =>
+        stepDeps Pi reg (.inst rn θ ws D H α) ++
+          certDepsList Pi reg ws ++ certDepsDis Pi reg D
+  def certDepsList {canon : String → String} (Pi : RuleId → Option Rule)
+      (reg : BackendRegistry canon) : List SupportTerm → List CertDep
+    | [] => []
+    | w :: ws => certDeps Pi reg w ++ certDepsList Pi reg ws
+  def certDepsDis {canon : String → String} (Pi : RuleId → Option Rule)
+      (reg : BackendRegistry canon) :
+      List (QuestionId × SupportTerm) → List CertDep
+    | [] => []
+    | (_, w) :: rest => certDeps Pi reg w ++ certDepsDis Pi reg rest
+end
+
+theorem mem_certDepsList {canon : String → String} {Pi : RuleId → Option Rule}
+    {reg : BackendRegistry canon} :
+    ∀ {ws : List SupportTerm} {d : CertDep}, d ∈ certDepsList Pi reg ws →
+      ∃ (i : Nat) (w : SupportTerm), ws[i]? = some w ∧ d ∈ certDeps Pi reg w := by
+  intro ws
+  induction ws with
+  | nil => intro d h; simp [certDepsList] at h
+  | cons w ws ih =>
+    intro d h
+    simp only [certDepsList] at h
+    rcases List.mem_append.mp h with h1 | h2
+    · exact ⟨0, w, by simp, h1⟩
+    · obtain ⟨i, w', hw', hd'⟩ := ih h2
+      exact ⟨i + 1, w', by simpa using hw', hd'⟩
+
+theorem mem_certDepsDis {canon : String → String} {Pi : RuleId → Option Rule}
+    {reg : BackendRegistry canon} :
+    ∀ {D : List (QuestionId × SupportTerm)} {d : CertDep},
+      d ∈ certDepsDis Pi reg D →
+      ∃ (j : Nat) (q : QuestionId) (w : SupportTerm),
+        D[j]? = some (q, w) ∧ d ∈ certDeps Pi reg w := by
+  intro D
+  induction D with
+  | nil => intro d h; simp [certDepsDis] at h
+  | cons qw rest ih =>
+    intro d h
+    obtain ⟨q, w⟩ := qw
+    simp only [certDepsDis] at h
+    rcases List.mem_append.mp h with h1 | h2
+    · exact ⟨0, q, w, by simp, h1⟩
+    · obtain ⟨j, q', w', hw', hd'⟩ := ih h2
+      exact ⟨j + 1, q', w', by simpa using hw', hd'⟩
+
+theorem certDeps_mem_list {canon : String → String} {Pi : RuleId → Option Rule}
+    {reg : BackendRegistry canon} :
+    ∀ {ws : List SupportTerm} {i : Nat} {w : SupportTerm} {d : CertDep},
+      ws[i]? = some w → d ∈ certDeps Pi reg w → d ∈ certDepsList Pi reg ws := by
+  intro ws
+  induction ws with
+  | nil => intro i w d hw _; simp at hw
+  | cons w₀ ws ih =>
+    intro i w d hw hd'
+    cases i with
+    | zero =>
+      have : w₀ = w := by simpa using hw
+      subst this
+      exact List.mem_append.mpr (Or.inl hd')
+    | succ k =>
+      exact List.mem_append.mpr (Or.inr (ih (by simpa using hw) hd'))
+
+theorem certDeps_mem_dis {canon : String → String} {Pi : RuleId → Option Rule}
+    {reg : BackendRegistry canon} :
+    ∀ {D : List (QuestionId × SupportTerm)} {j : Nat} {q : QuestionId}
+      {w : SupportTerm} {d : CertDep},
+      D[j]? = some (q, w) → d ∈ certDeps Pi reg w → d ∈ certDepsDis Pi reg D := by
+  intro D
+  induction D with
+  | nil => intro j q w d hw _; simp at hw
+  | cons qw rest ih =>
+    intro j q w d hw hd'
+    obtain ⟨q₀, w₀⟩ := qw
+    cases j with
+    | zero =>
+      have h0 : q₀ = q ∧ w₀ = w := by simpa using hw
+      obtain ⟨_, rfl⟩ := h0
+      exact List.mem_append.mpr (Or.inl hd')
+    | succ k =>
+      exact List.mem_append.mpr (Or.inr (ih (by simpa using hw) hd'))
+
+/-- A certificate node occurring in a typed term is itself typed, under the
+same contexts. -/
+theorem certStepIn_typed {canon Pi Gamma CertOk} {w : SupportTerm} {C : Atom}
+    {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk w C O) :
+    ∀ u, CertStepIn w u →
+      ∃ C' O', HasSupport canon Pi Gamma CertOk u C' O' := by
+  induction h with
+  | leaf hΓ =>
+    intro u hstep
+    cases hstep
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    intro u hstep
+    cases hstep with
+    | here => exact ⟨_, _, .inst hside hprems hdis⟩
+    | @prem _ _ _ _ _ _ _ i w' hw hstep' =>
+      have hi := lt_of_getElem?_some hw
+      obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i
+        (by have := hside.lenCs; omega)
+      obtain ⟨O', hO⟩ := getElem?_some_of_lt Os i
+        (by have := hside.lenOs; omega)
+      exact ihprems i w' A O' hw hA hO u hstep'
+    | @dis _ _ _ _ _ _ _ j q w' hw hstep' =>
+      have hj := lt_of_getElem?_some hw
+      obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j
+        (by have := hside.lenDCs; omega)
+      obtain ⟨O', hO⟩ := getElem?_some_of_lt DOs j
+        (by have := hside.lenDOs; omega)
+      exact ihdis j q w' A O' hw hA hO u hstep'
+
+/-- `certOkOf` composed with the backend's semantic accounting law: an
+accepted certificate's encoded conclusion is a consequence of just the
+reported entries of the full consulted context — selected premise encodings
+and selected digest-addressed theory entries alike; `certOkOf_strict_step`
+strengthened from the full context to the reported slots. -/
+theorem certOkOf_uses_account {canon : String → String}
+    {reg : BackendRegistry canon}
+    {β : BackendId} {h : Digest} {κ : CertRef} {As : List Atom} {C : Atom}
+    (hacc : certOkOf reg β h κ As C) :
+    ∃ registered T, reg β = some registered ∧
+      registered.resolveTheory h = some T ∧
+      registered.core.modelsFull
+        (Strict.selectSlots (As.map registered.core.enc ++ T)
+          (registered.core.uses κ))
+        (registered.core.enc C) := by
+  simp only [certOkOf] at hacc
+  split at hacc
+  · contradiction
+  · rename_i registered hregistered
+    split at hacc
+    · contradiction
+    · rename_i T hT
+      exact ⟨registered, T, hregistered, hT,
+        registered.core.uses_account _ _ _ hacc⟩
+
+/-- **Result 3 (certificate half), per-node accounting.** A typed
+certificate-assured node resolves end to end — strict rule, allowlisted
+`(β, h)`, instantiated premises and conclusion, registered core, resolved
+theory data — its report is exactly the core's `uses` resolved slotwise, and
+its encoded conclusion is a consequence of just the reported entries of the
+full consulted context: selected premises and selected digest-addressed
+theory entries alike. -/
+theorem cert_node_accounted {canon Pi Gamma} {reg : BackendRegistry canon}
+    {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+    {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
+    {β : BackendId} {hd : Digest} {κ : CertRef} {C : Atom}
+    {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma (certOkOf reg)
+      (.inst rn θ ws D H (.cert β hd κ)) C O) :
+    ∃ r As registered T,
+      Pi rn = some r ∧ r.mode = .strict ∧ (β, hd) ∈ r.certifiers ∧
+      instAPats θ r.premises = some As ∧ instAPat θ r.concl = some C ∧
+      reg β = some registered ∧ registered.resolveTheory hd = some T ∧
+      stepDeps Pi reg (.inst rn θ ws D H (.cert β hd κ)) =
+        (registered.core.uses κ).map (resolveSlot β hd As) ∧
+      registered.core.modelsFull
+        (Strict.selectSlots (As.map registered.core.enc ++ T)
+          (registered.core.uses κ))
+        (registered.core.enc C) := by
+  cases h with
+  | @inst _ _ _ _ _ _ r As Cs Os DCs DOs _ hside hprems hdis =>
+    cases hside.assur with
+    | cert hm hallow hacc =>
+      obtain ⟨registered, T, hreg, hres, hmodels⟩ := certOkOf_uses_account hacc
+      refine ⟨r, As, registered, T, hside.rule, hm, hallow, hside.prems,
+        hside.concl, hreg, hres, ?_, hmodels⟩
+      simp [stepDeps, hside.rule, hside.prems, hreg, hres]
+
+/-- **Per-step accounting over the whole term.** Every certificate-assured
+node occurring anywhere in a typed term is dependency-accounted: no free
+strict assumption is hidden anywhere in the term. -/
+theorem cert_steps_accounted {canon Pi Gamma} {reg : BackendRegistry canon}
+    {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma (certOkOf reg) w C O) :
+    ∀ rn θ ws D H β hd κ,
+      CertStepIn w (.inst rn θ ws D H (.cert β hd κ)) →
+      ∃ r As Cn registered T,
+        Pi rn = some r ∧ r.mode = .strict ∧ (β, hd) ∈ r.certifiers ∧
+        instAPats θ r.premises = some As ∧ instAPat θ r.concl = some Cn ∧
+        reg β = some registered ∧ registered.resolveTheory hd = some T ∧
+        registered.core.modelsFull
+          (Strict.selectSlots (As.map registered.core.enc ++ T)
+            (registered.core.uses κ))
+          (registered.core.enc Cn) := by
+  intro rn θ ws D H β hd κ hstep
+  obtain ⟨C', O', h'⟩ := certStepIn_typed h _ hstep
+  obtain ⟨r, As, registered, T, hr, hm, hallow, hAs, hC, hreg, hres, _,
+    hmodels⟩ := cert_node_accounted h'
+  exact ⟨r, As, C', registered, T, hr, hm, hallow, hAs, hC, hreg, hres,
+    hmodels⟩
+
+/-- Collection, one direction: every entry of `certDeps w` is a reported
+dependency of some certificate node occurring in `w`. -/
+theorem mem_certDeps_step {canon Pi Gamma} {reg : BackendRegistry canon}
+    {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma (certOkOf reg) w C O) :
+    ∀ d, d ∈ certDeps Pi reg w →
+      ∃ u, CertStepIn w u ∧ d ∈ stepDeps Pi reg u := by
+  induction h with
+  | leaf hΓ => intro d hd'; simp [certDeps] at hd'
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    intro d hd'
+    simp only [certDeps] at hd'
+    rcases List.mem_append.mp hd' with hroot | hD
+    · rcases List.mem_append.mp hroot with hstep | hws
+      · cases α with
+        | none => simp [stepDeps] at hstep
+        | trusted => simp [stepDeps] at hstep
+        | cert β hd κ => exact ⟨_, .here, hstep⟩
+      · obtain ⟨i, w', hw', hd''⟩ := mem_certDepsList hws
+        have hi := lt_of_getElem?_some hw'
+        obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i
+          (by have := hside.lenCs; omega)
+        obtain ⟨O', hO⟩ := getElem?_some_of_lt Os i
+          (by have := hside.lenOs; omega)
+        obtain ⟨u, hu, hmem⟩ := ihprems i w' A O' hw' hA hO d hd''
+        exact ⟨u, .prem hw' hu, hmem⟩
+    · obtain ⟨j, q, w', hw', hd''⟩ := mem_certDepsDis hD
+      have hj := lt_of_getElem?_some hw'
+      obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j
+        (by have := hside.lenDCs; omega)
+      obtain ⟨O', hO⟩ := getElem?_some_of_lt DOs j
+        (by have := hside.lenDOs; omega)
+      obtain ⟨u, hu, hmem⟩ := ihdis j q w' A O' hw' hA hO d hd''
+      exact ⟨u, .dis hw' hu, hmem⟩
+
+/-- Collection, other direction: every certificate node's reported
+dependencies appear in `certDeps` of the surrounding term.  Together with
+`mem_certDeps_step`, `certDeps(w)` is exactly the union of the per-node
+reports (spec §6). -/
+theorem certStep_deps_subset {canon : String → String}
+    {Pi : RuleId → Option Rule} {reg : BackendRegistry canon}
+    {w u : SupportTerm} (hstep : CertStepIn w u) :
+    ∀ d, d ∈ stepDeps Pi reg u → d ∈ certDeps Pi reg w := by
+  induction hstep with
+  | here =>
+    intro d hd'
+    exact List.mem_append.mpr
+      (Or.inl (List.mem_append.mpr (Or.inl hd')))
+  | prem hw _ ih =>
+    intro d hd'
+    exact List.mem_append.mpr
+      (Or.inl (List.mem_append.mpr (Or.inr (certDeps_mem_list hw (ih d hd')))))
+  | dis hw _ ih =>
+    intro d hd'
+    exact List.mem_append.mpr (Or.inr (certDeps_mem_dis hw (ih d hd')))
+
+/-- **Every reported premise dependency resolves to the corresponding premise
+subterm of its own reporting node.** For any certificate node occurring in a
+typed term, a `premise i A` entry of that node's report names the node's
+`i`-th instantiated premise, and the node's `i`-th premise subterm exists and
+is typed with a conclusion `≡ A` — spec §6's "resolving premise slots to the
+corresponding subterms". -/
+theorem certDeps_resolved {canon Pi Gamma} {reg : BackendRegistry canon}
+    {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma (certOkOf reg) w C O) :
+    ∀ rn θ ws D H β hd κ,
+      CertStepIn w (.inst rn θ ws D H (.cert β hd κ)) →
+      ∀ i A,
+        CertDep.premise i A ∈
+          stepDeps Pi reg (.inst rn θ ws D H (.cert β hd κ)) →
+        ∃ w' C' O', ws[i]? = some w' ∧
+          HasSupport canon Pi Gamma (certOkOf reg) w' C' O' ∧
+          equiv canon C' A := by
+  intro rn θ ws D H β hd κ hstep i A hmem
+  obtain ⟨C₀, O₀, h₀⟩ := certStepIn_typed h _ hstep
+  cases h₀ with
+  | @inst _ _ _ _ _ _ r As Cs Os DCs DOs _ hside hprems hdis =>
+    cases hside.assur with
+    | cert hm hallow hacc =>
+      obtain ⟨registered, T, hreg, hres, _⟩ := certOkOf_strict_step hacc
+      have hdeps : stepDeps Pi reg (.inst rn θ ws D H (.cert β hd κ)) =
+          (registered.core.uses κ).map (resolveSlot β hd As) := by
+        simp [stepDeps, hside.rule, hside.prems, hreg, hres]
+      rw [hdeps] at hmem
+      obtain ⟨j, hj, hslot⟩ := List.mem_map.mp hmem
+      cases hAsj : As[j]? with
+      | none => simp [resolveSlot, hAsj] at hslot
+      | some A' =>
+        obtain ⟨hji, hAA⟩ : j = i ∧ A' = A := by
+          simpa [resolveSlot, hAsj] using hslot
+        rw [← hji, ← hAA]
+        have hjlt : j < As.length := lt_of_getElem?_some hAsj
+        obtain ⟨w', hw'⟩ := getElem?_some_of_lt ws j
+          (by have := hside.lenAs; omega)
+        obtain ⟨C', hC'⟩ := getElem?_some_of_lt Cs j
+          (by have := hside.lenCs; have := hside.lenAs; omega)
+        obtain ⟨O', hO'⟩ := getElem?_some_of_lt Os j
+          (by have := hside.lenOs; have := hside.lenAs; omega)
+        exact ⟨w', C', O', hw', hprems j w' C' O' hw' hC' hO',
+          hside.premEq j C' A' hC' hAsj⟩
+
+/-- **Every reported theory dependency names a genuine digest-addressed
+entry.** For any certificate node occurring in a typed term, a
+`theoryEntry β h t` in its report satisfies `t < T.length` for the theory
+data `T` its `(β, h)` triple resolves to — obligation 4's validity clause
+at the support level. -/
+theorem certDeps_theory_valid {canon Pi Gamma} {reg : BackendRegistry canon}
+    {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma (certOkOf reg) w C O) :
+    ∀ rn θ ws D H β hd κ,
+      CertStepIn w (.inst rn θ ws D H (.cert β hd κ)) →
+      ∀ t,
+        CertDep.theoryEntry β hd t ∈
+          stepDeps Pi reg (.inst rn θ ws D H (.cert β hd κ)) →
+        ∃ registered T, reg β = some registered ∧
+          registered.resolveTheory hd = some T ∧ t < T.length := by
+  intro rn θ ws D H β hd κ hstep t hmem
+  obtain ⟨C₀, O₀, h₀⟩ := certStepIn_typed h _ hstep
+  cases h₀ with
+  | @inst _ _ _ _ _ _ r As Cs Os DCs DOs _ hside hprems hdis =>
+    cases hside.assur with
+    | cert hm hallow hacc =>
+      simp only [certOkOf] at hacc
+      split at hacc
+      · contradiction
+      · rename_i registered hreg
+        split at hacc
+        · contradiction
+        · rename_i T hres
+          have hdeps : stepDeps Pi reg (.inst rn θ ws D H (.cert β hd κ)) =
+              (registered.core.uses κ).map (resolveSlot β hd As) := by
+            simp [stepDeps, hside.rule, hside.prems, hreg, hres]
+          rw [hdeps] at hmem
+          obtain ⟨j, hj, hslot⟩ := List.mem_map.mp hmem
+          cases hAsj : As[j]? with
+          | some A' => simp [resolveSlot, hAsj] at hslot
+          | none =>
+            have ht : j - As.length = t := by
+              simpa [resolveSlot, hAsj] using hslot
+            have hge : As.length ≤ j := by
+              rcases Nat.lt_or_ge j As.length with hlt | hge
+              · obtain ⟨A', hA'⟩ := getElem?_some_of_lt As j hlt
+                rw [hA'] at hAsj
+                cases hAsj
+              · exact hge
+            have hrange :=
+              registered.core.uses_valid_closed T κ
+                (As.map registered.core.enc) (registered.core.enc C₀) hacc j hj
+            rw [List.length_map] at hrange
+            exact ⟨registered, T, hreg, hres, by omega⟩
 
 end Lara.Support

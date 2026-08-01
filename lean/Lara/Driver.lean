@@ -27,7 +27,8 @@ Design decisions (documented, faithful to the mechanized development):
   normalization is the deferred extension point). The two fixtures do not
   involve numeric literals, so this reproduces the goldens exactly.
 * The backend registry is built from the wire `theories` section over the one
-  implemented backend, `nd@1` (`Lara.Strict.ndBackendWithTheory`), mirroring
+  implemented backend core, `nd@1` (`Lara.Strict.ndBackend`, with digests
+  resolving to ND-encoded theory data), mirroring
   `Lara.Examples.registryEx`. Units that reference other backends fall through
   to a certificate rejection, which is the honest behaviour given only ND is
   mechanized.
@@ -652,14 +653,16 @@ def buildGamma (leaves : List (LeafId × Atom)) : LeafId → Option Atom :=
 def ndBackendId : BackendId := ⟨"nd", 1⟩
 
 /-- Backend registry built from the wire `theories` section over `nd@1`,
-mirroring `Lara.Examples.registryEx`. -/
+mirroring `Lara.Examples.registryEx`: the fixed ND core, with each declared
+digest resolving to that digest's ND-encoded theory data. -/
 def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcanon :=
   fun β =>
     if β = ndBackendId then
-      some { resolve := fun h =>
-        match theories.find? (fun t => decide (t.1 = h)) with
-        | some t => some (Lara.Strict.ndBackendWithTheory dcanon t.2)
-        | none => none }
+      some { core := Lara.Strict.ndBackend dcanon
+             resolveTheory := fun h =>
+               match theories.find? (fun t => decide (t.1 = h)) with
+               | some t => some (t.2.map (Lara.Strict.ndEnc dcanon))
+               | none => none }
     else none
 
 /-- The decoded wire unit plus the derived checker inputs. Only `Type 0` data

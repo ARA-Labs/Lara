@@ -148,6 +148,8 @@ open Lara
 #print axioms Lara.ND.decodeFormula_unknown_atom
 #print axioms Lara.ND.decodeFormula_unknown_list
 #print axioms Lara.ND.decodeCert_unknown_list
+#print axioms Lara.ND.lookup_eq_getElem?
+#print axioms Lara.ND.infer_agree
 
 -- Result 8 / C03: abstract strict-step soundness (Theorem 1) + ND instantiation.
 #print axioms Lara.Strict.StrictJudgment.ofReplay
@@ -173,8 +175,30 @@ open Lara
 #print axioms Lara.Strict.decodeAtomKey_encodeAtomKey
 #print axioms Lara.Strict.encodeAtomKey_injective
 #print axioms Lara.Strict.ndEnc_iff
-#print axioms Lara.Strict.ndBackendWithTheory
 #print axioms Lara.Strict.nd_strict_step_sound
+
+-- Result 3 (certificate half) / result 10 (dependency exactness), backend
+-- layer: the fixed-core `uses` report interface (coverage, validity,
+-- accounting over the full consulted context `Δ ++ T`), the derived closed
+-- forms over data-only resolved theory (incl. the theory-coverage
+-- specializations of `uses_covers`), and the ND adapter's discharging
+-- proofs.
+#print axioms Lara.Strict.selectSlots
+#print axioms Lara.Strict.mem_selectSlots
+#print axioms Lara.Strict.selectSlots_map
+#print axioms Lara.Strict.Backend.models
+#print axioms Lara.Strict.Backend.accepts
+#print axioms Lara.Strict.Backend.replay
+#print axioms Lara.Strict.Backend.replay_iff
+#print axioms Lara.Strict.Backend.sound
+#print axioms Lara.Strict.Backend.uses_valid_closed
+#print axioms Lara.Strict.Backend.replay_theory_covers
+#print axioms Lara.Strict.Backend.replay_theory_agnostic
+#print axioms Lara.Strict.ndUses
+#print axioms Lara.Strict.ndUses_account
+#print axioms Lara.Strict.ndReplay_agree
+#print axioms Lara.Strict.ndUses_valid
+#print axioms Lara.Strict.ndUses_eq_infer_deps
 
 -- Result 2 / C03: source non-factivity (Theorem 3, the factivity firewall).
 #print axioms Lara.Strict.nd_nonfactive_witness
@@ -210,10 +234,36 @@ open Lara
 #print axioms Lara.Support.complete_mandatory_discharged
 #print axioms Lara.Support.dh_partition
 #print axioms Lara.Support.certOkBOf_iff
+#print axioms Lara.Support.certOkBOf_theory_covers
 #print axioms Lara.Support.certOkOf_strict_step
 #print axioms Lara.Support.SupportTerm.decEq
 #print axioms Lara.Support.SupportTerm.decEqList
 #print axioms Lara.Support.SupportTerm.decEqDischarges
+
+-- Result 3 (certificate half) / spec §6 `certDeps`: strict-dependency
+-- accountability at the support level — the per-node accounting through the
+-- registry, the `certDeps` collection identity (both directions), and the
+-- two resolution results: premise dependencies resolve to the exact premise
+-- occurrence of their reporting node (`certDeps_resolved`), and theory
+-- dependencies name a valid entry of the digest-resolved theory
+-- (`certDeps_theory_valid`).
+#print axioms Lara.Support.resolveSlot
+#print axioms Lara.Support.stepDeps
+#print axioms Lara.Support.certDeps
+#print axioms Lara.Support.certDepsList
+#print axioms Lara.Support.certDepsDis
+#print axioms Lara.Support.mem_certDepsList
+#print axioms Lara.Support.mem_certDepsDis
+#print axioms Lara.Support.certDeps_mem_list
+#print axioms Lara.Support.certDeps_mem_dis
+#print axioms Lara.Support.certStepIn_typed
+#print axioms Lara.Support.certOkOf_uses_account
+#print axioms Lara.Support.cert_node_accounted
+#print axioms Lara.Support.cert_steps_accounted
+#print axioms Lara.Support.mem_certDeps_step
+#print axioms Lara.Support.certStep_deps_subset
+#print axioms Lara.Support.certDeps_resolved
+#print axioms Lara.Support.certDeps_theory_valid
 
 -- Result 1 executable half: Boolean side conditions and the support checker's
 -- exact soundness/completeness bridge to `HasSupport`.
@@ -330,7 +380,7 @@ open Lara
 -- Concrete conformance examples: obligation accounting (mixed/nested/missing),
 -- subterm traversal boundaries, and subargument-closure superset behavior with
 -- a concrete edge decider and grounded verdict.
-#print axioms Lara.Examples.slotBackend
+#print axioms Lara.Examples.slotTheory
 #print axioms Lara.Examples.registry_exact_digest_accepts
 #print axioms Lara.Examples.registry_exact_digest_rejects
 #print axioms Lara.Examples.registry_backend_absent
@@ -386,6 +436,8 @@ open Lara
 #print axioms Lara.Examples.check_strict_questions
 #print axioms Lara.Examples.check_strict_trusted_success
 #print axioms Lara.Examples.check_strict_cert_success
+#print axioms Lara.Examples.certDeps_theory_entry_reported
+#print axioms Lara.Examples.certDeps_premise_reported
 #print axioms Lara.Examples.check_assurance_wrong_mode
 #print axioms Lara.Examples.check_assurance_trusted_disallowed
 #print axioms Lara.Examples.check_assurance_unallowlisted

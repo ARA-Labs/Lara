@@ -377,7 +377,7 @@ def assuranceError (reg : BackendRegistry canon) (r : Rule)
         match reg β with
         | none => .R13 loc (.backendMissing β)
         | some registered =>
-            match registered.resolve hd with
+            match registered.resolveTheory hd with
             | none => .R13 loc (.digestMissing β hd)
             | some _ => .R13 loc (.replayRejected β hd κ)
 

@@ -43,7 +43,7 @@ it; "test-only" = conformance evidence, no theorem.
 | --- | --- | --- | --- |
 | 1 | Decidability of program + attack checking | **mechanized (checker portion)** | Legacy `inferSupport`, `checkAttack`, and `checkProgram` remain generic and unchanged; `checkUnit` adds the detailed accepted-unit path. |
 | 2 | Strict-backend isolation | **mechanized** | Structural isolation plus the concrete non-factivity witness (`no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute`). |
-| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **partially mechanized** | `leaves_declared` proves the source-leaf half; exact backend certificate dependencies await `Backend.uses`/`certDeps`. |
+| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **mechanized** | `leaves_declared` proves the source-leaf half; `Backend.uses` under obligation 4's coverage/validity/accounting laws and the support-level `certDeps` layer (typed premise/theory `CertDep` report, `cert_steps_accounted`, collection in both directions, `certDeps_resolved`, `certDeps_theory_valid`) close the certificate half (#46). |
 | 4 | Compilation soundness (no untyped node/attack; subargument closure) | **mechanized (relational)** | `compile_nodes_checked`, `edge_iff`, and `closure_includes_direct`; closed examples exercise direct and strict-superset closure. |
 | 5 | Termination + determinism of grounded evaluation | **mechanized** | Bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|`. |
 | 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done (#17 closed)** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` discharges `Faithful` constructively. Issue #18 separately closes the attack-completeness premise used by result 7. |
@@ -299,5 +299,20 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
    `Compile.edgeB`/`edgeB_faithful` construct `Compile.Faithful`.
 3. **Attack completeness (#18)** — done for the Lean reference PL:
    `checkUnit` constructs the exact accepted-unit invariant used by result 7.
-4. **Dependency accountability (result 3)** — remaining formal work:
-   add the backend `uses`/`certDeps` interface and prove exact certificate dependencies.
+4. **Dependency accountability (result 3)** — done (#46): `Backend.uses`
+   carries obligation 4 as three laws over the explicit full consulted
+   context `Δ ++ T`, for one fixed backend core per registered identity
+   with digests resolving only to theory data — coverage (`uses_covers`:
+   replay consults no premise or theory entry outside the report; its
+   specialization `certOkBOf_theory_covers` makes a digest swap observable
+   only through reported theory slots), validity (`uses_valid`:
+   reported slots stay within the consulted context), and semantic
+   accounting (`uses_account`: the conclusion follows from just the
+   reported entries);
+   the ND adapter discharges them via `infer_agree`/`fv_in_range`/
+   `nd_relevance`, with `ndUses_eq_infer_deps` tying the report to the
+   running checker's output. `Lara.Support` lifts it to `certDeps` over the
+   typed premise/theory `CertDep` report — `cert_steps_accounted`,
+   `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved`,
+   `certDeps_theory_valid`; `Lara.Examples.certDeps_theory_entry_reported`
+   pins the accepted theory-consuming fixture's report.

@@ -234,8 +234,8 @@ def certOkNone : BackendId → Digest → CertRef → List Atom → Atom → Pro
 
 /-! ### Executable strict registry matrix
 
-These fixtures use the real ND decoder and executable replay. Each resolved
-backend closes over exactly one fixed theory list.
+These fixtures use the real ND decoder and executable replay. One fixed ND
+core is registered; each digest resolves to exactly one theory-data list.
 -/
 
 /-- Exact Haskell-conformant ND identity. -/
@@ -252,16 +252,18 @@ def slot0Cert : CertRef := ⟨.list [.atom "hyp", .atom "0"]⟩
 def slot1Cert : CertRef := ⟨.list [.atom "hyp", .atom "1"]⟩
 def rejectCert : CertRef := ⟨.list [.atom "hyp", .atom "01"]⟩
 
-/-- The real ND backend closed over a selected fixed theory. -/
-def slotBackend (canon : String → String) (theoryForms : List Atom) :
-    Lara.Strict.Backend canon :=
-  Lara.Strict.ndBackendWithTheory canon theoryForms
+/-- Fixture theory data: source atoms, ND-encoded for the fixed core. -/
+def slotTheory (canon : String → String) (theoryForms : List Atom) :
+    List Lara.ND.Formula :=
+  theoryForms.map (Lara.Strict.ndEnc canon)
 
-/-- `digestA` and `digestB` select distinct fixed theory lists. -/
+/-- One fixed ND core; `digestA` and `digestB` resolve to distinct
+theory-data lists. -/
 def ndRegistered : RegisteredBackend id where
-  resolve := fun h =>
-    if h = digestA then some (slotBackend id [pB])
-    else if h = digestB then some (slotBackend id [pC])
+  core := Lara.Strict.ndBackend id
+  resolveTheory := fun h =>
+    if h = digestA then some (slotTheory id [pB])
+    else if h = digestB then some (slotTheory id [pC])
     else none
 
 /-- Backend-first registry: only exact identity `nd@1` has an outer entry. -/
@@ -967,6 +969,42 @@ theorem check_assurance_replay_rejected :
     apA, apB, l1, substDomainB, atomsEquivB, questionNames, hequiv,
     memB, knownAnswersOkB, strictNoQuestionB, assuranceOkB,
     hcert, assuranceError, registryEx, ndRegistered]
+
+/-! ### Result 3 regression: reports keep digest-addressed theory entries
+
+The accepted `slot1Cert` node (`check_strict_cert_success`) consults slot 1:
+one source premise occupies slot 0, so the certificate consumes the first
+entry of `digestA`'s fixed theory.  Its report must be exactly that
+digest-addressed entry — a `certDeps` that dropped theory slots would return
+`[]` here. -/
+
+theorem certDeps_theory_entry_reported :
+    certDeps PiCert registryEx
+      (.inst rCertId [] [.leaf l1] [] [] (.cert ndId digestA slot1Cert)) =
+      [.theoryEntry ndId digestA 0] := by
+  have h1 : Lara.ND.decodeNat "1" = some 1 := by
+    change Lara.ND.decodeNat (Nat.repr 1) = some 1
+    exact Lara.ND.decodeNat_repr 1
+  simp [certDeps, certDepsList, certDepsDis, stepDeps, resolveSlot,
+    PiCert, ruleCert, registryEx, ndRegistered, slotTheory,
+    Lara.Strict.ndBackend, Lara.Strict.ndUses, slot1Cert,
+    Lara.ND.decodeCert, Lara.ND.Tag.parse, h1, Lara.ND.fv,
+    instAPats, instAPat, instPats, apA]
+
+/-- The premise-consuming companion: `slot0Cert` reports premise occurrence 0
+resolved to the instantiated premise atom. -/
+theorem certDeps_premise_reported :
+    certDeps PiCert registryEx
+      (.inst rCertId [] [.leaf l1] [] [] (.cert ndId digestA slot0Cert)) =
+      [.premise 0 (Atom.atom "p" .nil)] := by
+  have h0 : Lara.ND.decodeNat "0" = some 0 := by
+    change Lara.ND.decodeNat (Nat.repr 0) = some 0
+    exact Lara.ND.decodeNat_repr 0
+  simp [certDeps, certDepsList, certDepsDis, stepDeps, resolveSlot,
+    PiCert, ruleCert, registryEx, ndRegistered, slotTheory,
+    Lara.Strict.ndBackend, Lara.Strict.ndUses, slot0Cert,
+    Lara.ND.decodeCert, Lara.ND.Tag.parse, h0, Lara.ND.fv,
+    instAPats, instAPat, instPats, apA]
 
 /-! ### §7.1 successful attacks at nested positions -/
 

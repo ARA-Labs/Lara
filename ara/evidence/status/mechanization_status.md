@@ -2,7 +2,7 @@
 
 - **Source**: spec.md §9 (the 12 required results); docs/mechanization-plan.md §1 (the status table);
   docs/strict-backend-decision.md §5 (the paper proofs).
-- **As of**: 2026-07-30.
+- **As of**: 2026-08-01.
 - **Legend**: `paper-proved` = proof written in a decision record; `mechanized` = machine-checked in
   Lean/Rocq; `implemented+tested` = Haskell code + passing
   properties; `spec-only` = defined in the spec, no proof or code yet; `open` = not yet provable /
@@ -14,7 +14,7 @@
 |---|--------|--------|---------|------|
 | 1 | Decidability of program + attack checking | **checker portion mechanized** | C02 | `Lara.Check.inferSupport_sound/complete`, `checkAttack_sound/complete`, and `checkProgram_sound/complete` exactly decide the frozen support, positional-attack, and raw-program judgments over the finite executable backend registry. `checkProgram` constructs the proof-bearing `CheckedProgram` boundary, with deterministic duplicate and located rejection behavior. This is Lean mechanization; the production Haskell M3 checker is not implemented here. |
 | 2 | Strict-backend isolation | **mechanized** (+Haskell conformance) | C03 | Theorem 3 (non-factivity, the factivity firewall). `lean/Lara/Strict.lean`: `no_truth_projection` — no uniform map from a checked `StrictJudgment B` to premise-free truth `B.models [] (enc goal)` — proved via the reference ND witness `nd_nonfactive_witness` (the backend accepts `p ⊢ p` yet `⊨_ND p` fails under the all-false valuation), so it bites even against a factive backend; `nd_relative_not_absolute` pairs the relative-consequence projection (`strict_step_sound`) against the failure of absolute truth. No `sorry`; AxCheck reports `propext`, `Classical.choice`, and `Quot.sound` for all three results. Also enforced structurally in both Haskell (sealed `StrictJudgment`, opaque `SExpr` cert, no backend formula exported) and Lean (`StrictJudgment` carries only source data). |
-| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **partially mechanized** | C08 | `Lara.Support.leaves_declared` proves the leaf half; `certDeps` awaits `Backend.uses` |
+| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **mechanized** | C08 | `Lara.Support.leaves_declared` proves the leaf half. Certificate half (#46/PR #47): the registry binds **one fixed backend core per registered `(name, version)`**, and digest resolution returns only theory *data* (`RegisteredBackend.resolveTheory : Digest → Option (List Form)`) — resolution cannot introduce behavior. The core carries the spec §5 `uses` report with obligation 4's three laws over the explicit full consulted context `Δ ++ T` — coverage (`uses_covers`: replay consults no premise *or theory entry* outside the report), validity (`uses_valid`: every reported slot names an entry of the consulted context), and semantic accounting (`uses_account`: the conclusion follows from just the reported entries). Because theory enters only as data in the quantified context, coverage specializes to `replay_theory_covers`/`certOkBOf_theory_covers`: a digest swap is observable only through reported theory slots, so hidden theory consultation through the digest mechanism is impossible (whatever a core consults beyond the context is extensionally constant — part of the audited backend identity `β`, the same per-backend trust base as its soundness law). The ND adapter discharges all three laws via `nd_relevance`/`infer_agree`/`fv_in_range`, with `ndUses_eq_infer_deps` tying the report to the running checker's output. `Lara.Support.certDeps` resolves every reported slot to a typed `CertDep` (premise occurrence or digest-addressed theory entry — the Haskell `Dependency` split, nothing filtered), with `cert_steps_accounted`, the collection identity `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved` (premise entries resolve to the corresponding premise subterm of their own reporting node), and `certDeps_theory_valid` (theory entries are genuine: `t < T.length` for the digest-resolved data). |
 | 4 | Compilation soundness + subargument closure | **mechanized (relational)** | C02 | `Lara.Compile.compile_nodes_checked`, `edge_iff`, and `closure_includes_direct`; closed examples exercise direct and strict-superset closure |
 | 5 | Grounded determinism + termination | **mechanized** (core) | C07 | `lean/Lara/Grounded.lean`: grounded extension = bounded characteristic-operator iteration; `grounded_stable` proves the ascending chain reaches the least fixed point within `\|Args\|` steps (deficit measure + strict-filter-length), so the labelling is a total, deterministic function and aggregation (`statusC`) is total. `Lara.Compile.toAF` instantiates the core for proof-bearing checked programs. |
 | 6 | **Status preservation (direct vs compiled)** | **source-vs-compiled half mechanized (oracle eliminated)** | C08 | `Lara.Compile.srcIn_iff_grounded`/`srcStatus_iff` compose source status with grounded execution under `Faithful`; the checker-built decider `edgeB` (from `containsB`/`attackClosureB`) discharges `Faithful` constructively via `edgeB_faithful`, so `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` hold over an accepted program with no oracle hypothesis (`SrcIn`/`SrcOut` are the Prop shadow of the same compiled `Edge`, not an independent calculus). Issue #17 closed this half; issue #18 subsequently supplies checked-unit attack completeness for result 7. |
@@ -25,17 +25,36 @@
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** (+implemented+tested) | C01 | `lean/Lara/Prop.lean`: `nf`/`≡`, equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only. Also `Lara.Prop` Haskell + 8 QuickCheck properties. |
 | 12 | Codec round-trip to α-equivalent AST | **mechanized presentation codec** (+Haskell conformance) | C12 | `lean/Lara/Presentation.lean` proves structured encode/decode round-trip over every field of the frozen `Program`/`Policy` AST. This is an AST-shape anchor, not a proof of the concrete Haskell `.lara` parser; `Lara.Syntax` separately checks `parse ∘ print = id` with 2,000-case QuickCheck conformance on its documented surface subset. |
 
-**Summary**: results 2, 4 (relational), 5, 7 (checked complete claims), 8, 9 (Model A),
-10, 11, and 12 (presentation codec) are mechanized; result 6's
-source-vs-compiled half is mechanized with the `Faithful` oracle eliminated.
-Result 1 has an exact executable support/positional-attack/raw-program checker
-with relational adequacy, while result 3 has its mechanized source-leaf half and
-still awaits exact backend certificate dependencies. Result 9 includes
+**Summary**: results 2, 3 (both halves), 4 (relational), 5, 7 (checked complete
+claims), 8, 9 (Model A), 10, 11, and 12 (presentation codec) are mechanized;
+result 6's source-vs-compiled half is mechanized with the `Faithful` oracle
+eliminated. Result 1 has an exact executable
+support/positional-attack/raw-program checker with relational adequacy.
+Result 3's certificate half (#46/PR #47) states obligation 4 over the explicit
+full consulted context `Δ ++ T` for one fixed core per registered identity,
+with digests resolving only to theory data — so a digest swap is observable
+only through reported theory slots (`certOkBOf_theory_covers`) and hidden
+theory consultation through the digest mechanism is impossible. Result 9 includes
 acceptance-preserving well-checkedness transport, so the replacement theorem
 constructs its second checked program rather than assuming one. Every theorem is
 `sorry`-free and audited within the standard axiom trio. Haskell property,
 golden, mutation, and differential tests remain conformance evidence rather than
 substitutes for these Lean proofs.
+
+### Verification run (2026-07-31, result 3 certificate half — fixed-core registry)
+
+- `cd lean && lake build` → **`Build completed successfully (50 jobs).`** (only pre-existing
+  `unusedSimpArgs` warnings in `Examples.lean`).
+- `lake env lean AxCheck.lean | scripts/check-axioms.sh` → **559 declaration reports**, no `sorryAx`,
+  no axiom outside the trio. New declarations: `Backend.replay_theory_covers`,
+  `Backend.replay_theory_agnostic`, `Support.certOkBOf_theory_covers`.
+- `scripts/differential.sh` → positive anchors **41/41**, malformed negatives **9/9** — the registry
+  restructure is behavior-preserving at the wire (the ND core resolved with digest data is
+  definitionally the prior theory-closing adapter's acceptance).
+- Contract change (PR #47 round 3): `Backend` lost its `theory` field (it is now a theory-free core,
+  fixed per registered identity); `RegisteredBackend` = `{core, resolveTheory : Digest → Option
+  (List core.Form)}`. This closes the reviewer's registry-level counterexample class — a digest
+  resolver can no longer manufacture per-digest function suites that close over undeclared theory.
 
 ### Verification run (2026-07-30, result 9 close)
 

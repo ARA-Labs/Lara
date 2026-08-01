@@ -627,6 +627,7 @@ c₁ : <span class="r">defeated</span>     <span class="c">a₁ labelled out; d�
  <table class="dt rise">
    <tr><th>Result</th><th>Lean witness</th><th></th></tr>
    <tr><td class="sys">11 · support adequacy</td><td class="thm">equiv_iff_nf_eq · nfTerm_idem</td><td class="done">✓</td></tr>
+   <tr><td class="sys">3 · dependency accountability</td><td class="thm">leaves_declared · cert_steps_accounted</td><td class="done">✓</td></tr>
    <tr><td class="sys">8 · strict-step soundness</td><td class="thm">strict_step_sound</td><td class="done">✓</td></tr>
    <tr><td class="sys">10 · ND soundness + dep-exactness</td><td class="thm">nd_sound · infer_deps_eq_fv</td><td class="done">✓</td></tr>
    <tr><td class="sys">2 · non-factivity firewall</td><td class="thm">no_truth_projection</td><td class="done">✓</td></tr>
@@ -635,7 +636,7 @@ c₁ : <span class="r">defeated</span>     <span class="c">a₁ labelled out; d�
    <tr><td class="sys">9 · backend replacement</td><td class="thm">backend_replacement · backend_replacement_transport</td><td class="done">✓ Model A</td></tr>
    <tr><td class="sys">12 · presentation codec</td><td class="thm">parse_printProgram · parse_printPolicy</td><td class="done">✓ AST codec</td></tr>
  </table>
- <p class="rise note"><span class="cite">sorry</span>-free within the standard axiom trio {propext, Classical.choice, Quot.sound}. Results 6 and 9 are exercised over proof-bearing checked programs; result 9 also constructs the relabeled program from acceptance preservation. The remaining formal gap is exact backend certificate dependency accountability (result 3).</p>`,
+ <p class="rise note"><span class="cite">sorry</span>-free within the standard axiom trio {propext, Classical.choice, Quot.sound}. Results 6 and 9 are exercised over proof-bearing checked programs; result 9 also constructs the relabeled program from acceptance preservation. Result 3 closes both halves: <span class="cite">leaves_declared</span> plus the <span class="cite">Backend.uses</span> report laws and the support-level <span class="cite">certDeps</span> layer (premise slots resolve to their premise subterms; theory slots to digest-addressed entries).</p>`,
 
 /* ══════════════ 52 · evaluation ══════════════ */
 `<div class="rise sec"><b>§10</b> Evaluation — for a calculus, proof is the experiment</div>
