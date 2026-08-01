@@ -1,4 +1,6 @@
--- | Golden verdicts for E1–E3 / R1–R3 plus strict-certificate example S1.
+-- | Golden verdicts for E1–E5 / R1–R3 plus strict-certificate example S1;
+-- the teaching examples A and B join them in 'examplePolicies' for the
+-- freshness and coverage properties (eleven examples in all).
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
 -- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', validates the source
@@ -14,13 +16,17 @@
 --   * __E2__ @open-gap@        — 'Accept'; status gap (empty complete support).
 --   * __E3__ @defeat-suite@    — 'Accept'; justified + defeated + contested in one
 --     graph, and all three attack kinds (undercut, undermine, rebut).
+--   * __E4__ @reinstatement@   — 'Accept'; justified UNDER each attack kind
+--     (attacker defeated by an unattacked defender).
+--   * __E5__ @contested-beyond-rebut@ — 'Accept'; contested via undermine- and
+--     undercut-native 2-cycles, plus gap amid attacks.
 --   * __R1__ @undeclared-leaf@ — 'Reject' R1  (leaf not in Γ).
 --   * __R2__ @strict-contrary@ — 'Reject' R12 (policy §8.1 Path-B well-formedness).
 --   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
 --   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
 --
--- A final __freshness__ property re-derives all nine @example.core.sexp@
--- anchors (A, B, E1–E3, R1–R3, and S1) from their surface @.lara@ + policy and
+-- A final __freshness__ property re-derives all eleven @example.core.sexp@
+-- anchors (A, B, E1–E5, R1–R3, and S1) from their surface @.lara@ + policy and
 -- asserts the committed bytes match, guarding against surface/anchor drift.
 module WorkedExamplesSpec (workedExamplesSpecProps) where
 
@@ -115,6 +121,8 @@ examplePolicies =
   , ("examples/E1", "empirical-v1.policy.lara")
   , ("examples/E2", "empirical-v1.policy.lara")
   , ("examples/E3", "empirical-v1.policy.lara")
+  , ("examples/E4", "empirical-v2.policy.lara")
+  , ("examples/E5", "empirical-v2.policy.lara")
   , ("examples/R1", "empirical-v1.policy.lara")
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
@@ -190,6 +198,53 @@ prop_E3 = once $ ioProperty $
                     , (improves "M_d" "D_d", Defeated)
                     , (improves "M_c" "D_c", Contested)
                     , (notImproves "M_c" "D_c", Contested)
+                    ]
+          ]
+
+-- | E4: reinstatement — three claims stay justified UNDER an attack (one per
+-- attack kind) because each attacker is itself defeated by an unattacked
+-- defender. Arg indices are declaration order a_r=0, a_rn=1, d_sr=2, a_u=3,
+-- n_ng=4, n_rm=5, a_x=6, x_shift=7, x_aud=8.
+prop_E4 :: Property
+prop_E4 = once $ ioProperty $
+  runExample "examples/E4" "empirical-v2.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E4: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E4 labels: a_r/a_u/a_x reinstated in, attackers out, defenders in" $
+              verdictLabels outcome
+                === [ (0, LIn), (1, LOut), (2, LIn)
+                    , (3, LIn), (4, LOut), (5, LIn)
+                    , (6, LIn), (7, LOut), (8, LIn)
+                    ]
+          , counterexample "E4 statuses: c_r/c_u/c_x justified under rebut/undermine/undercut, c_rn defeated" $
+              verdictStatuses outcome
+                === [ (improves "M_r" "D_r", Justified)
+                    , (notImproves "M_r" "D_r", Defeated)
+                    , (improves "M_u" "D_u", Justified)
+                    , (improves "M_x" "D_x", Justified)
+                    ]
+          ]
+
+-- | E5: contested via an undermine 2-cycle (context V) and an undercut 2-cycle
+-- (context W), plus a gap claim in a unit full of attacks (context G). Arg
+-- indices are declaration order a_v=0, m_ng=1, m_g=2, a_w=3, w_shift=4, w_aud=5.
+prop_E5 :: Property
+prop_E5 = once $ ioProperty $
+  runExample "examples/E5" "empirical-v2.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E5: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E5 labels: both cycles and both support args undec" $
+              verdictLabels outcome
+                === [(0, LUndec), (1, LUndec), (2, LUndec), (3, LUndec), (4, LUndec), (5, LUndec)]
+          , counterexample "E5 statuses: c_v contested (undermine), c_w contested (undercut), c_g gap" $
+              verdictStatuses outcome
+                === [ (improves "M_v" "D_v", Contested)
+                    , (improves "M_w" "D_w", Contested)
+                    , (improves "M_g" "D_g", Gap)
                     ]
           ]
 
@@ -362,7 +417,7 @@ prop_groupConflictExpectedJson =
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
 -- ---------------------------------------------------------------------------
 
--- | For every example (all nine: A, B, E1–E3, R1–R3, S1), re-running the full
+-- | For every example (all eleven: A, B, E1–E5, R1–R3, S1), re-running the full
 -- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
 -- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
 -- the committed @example.core.sexp@ bytes __exactly__ (matching
@@ -391,7 +446,7 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
         (pr, pp) ->
           counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
 
--- | For every example (all nine), re-render @expected.json@ from the elaborated
+-- | For every example (all eleven), re-render @expected.json@ from the elaborated
 -- 'Unit' ("Lara.ExpectedJson".@expectedJson@) and assert it equals the committed
 -- @examples\/\<NAME\>\/expected.json@ bytes exactly — the located-diagnostic
 -- freshness sibling of 'prop_freshness'. @expected.json@ is the __Haskell-only__
@@ -426,6 +481,29 @@ attackKind Rebut{} = "rebut"
 attackKind Undercut{} = "undercut"
 attackKind Undermine{} = "undermine"
 
+-- | The attacked argument of a wire attack (for measured label-cell coverage).
+attackTargetId :: Attack -> ArgId
+attackTargetId (Rebut _ u) = u
+attackTargetId (Undercut _ u _) = u
+attackTargetId (Undermine _ u _) = u
+
+-- | For one accepted example, the (attack-kind, target-label) pairs its
+-- declared attacks realize — the measured form of \"a claim can be justified
+-- while attacked\" (target in), \"contested is not a rebut artifact\" (target
+-- undec via undercut\/undermine), and E3's defeats (target out). Arg order in
+-- 'unitArgs' is label-index order, so the pairing is positional.
+attackCells :: Unit -> Outcome -> [(String, Label)]
+attackCells u outcome = case outcome of
+  Reject _ -> []
+  Accept{} ->
+    [ (attackKind k, l)
+    | k <- unitAttacks u
+    , Just i <- [lookupIndex (attackTargetId k) (map fst (unitArgs u))]
+    , Just l <- [lookup i (verdictLabels outcome)]
+    ]
+  where
+    lookupIndex x xs = lookup x (zip xs [0 :: Int ..])
+
 -- | The measured coverage of the whole suite: every accept status, every attack
 -- kind, and the three rejection classes are __read off the elaborated units and
 -- their verdicts__ (docs/worked-examples-plan.md §1, docs/m4a-checklist.md §2).
@@ -433,8 +511,9 @@ attackKind Undermine{} = "undermine"
 -- stops being witnessed (a status vanishes, an attack kind is dropped, a reject
 -- reclassifies), this fails.
 --
--- The suite is the six §1 examples E1–E3 / R1–R3, the two teaching examples A
--- and B, plus strict-certificate example S1 — all nine in 'examplePolicies'.
+-- The suite is the §1 examples E1–E3 / R1–R3, the M5 worked cases E4/E5, the
+-- two teaching examples A and B, plus strict-certificate example S1 — all
+-- eleven in 'examplePolicies'.
 prop_coverageMatrix :: Property
 prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
@@ -443,6 +522,20 @@ prop_coverageMatrix = once $ ioProperty $ do
       statuses = sort (nubOrd [s | (_, Right (Verdict _ (Accept _ _ sts))) <- verdicts, (_, s) <- sts])
       attackTags = sort (nubOrd [attackKind k | (_, u) <- units, k <- unitAttacks u])
       rejects = sort (nubOrd [r | (_, Right (Verdict _ (Reject r))) <- verdicts])
+      outcomes = [(dir, o) | (dir, Right (Verdict _ o)) <- verdicts]
+      cells =
+        sort . nubOrd $
+          [ cell
+          | (dir, u) <- units
+          , Just o <- [lookup dir outcomes]
+          , cell <- attackCells u o
+          ]
+      gapAmidAttacks =
+        or
+          [ not (null (unitAttacks u)) && Gap `elem` map snd sts
+          | (dir, u) <- units
+          , Just (Accept _ _ sts) <- [lookup dir outcomes]
+          ]
   pure $
     conjoin
       [ counterexample ("elaboration errors: " ++ show elabErrs) (null elabErrs)
@@ -455,6 +548,22 @@ prop_coverageMatrix = once $ ioProperty $ do
       , counterexample
           ("rejection-class coverage incomplete — witnessed " ++ show rejects)
           (all (`elem` rejects) [RejectClass R1, RejectClass R12, RejectClass R10])
+      , -- The M5/T4 label cells: every attack kind must be witnessed with an
+        -- attacked target that survives (LIn — reinstatement, E4), one that is
+        -- defeated (LOut — E3/A), and one left undecided (LUndec — contested
+        -- beyond rebut, E5).
+        counterexample
+          ("attack-kind × target-label coverage incomplete — witnessed " ++ show cells)
+          ( all
+              (`elem` cells)
+              [ (kind, l)
+              | kind <- ["rebut", "undercut", "undermine"]
+              , l <- [LIn, LOut, LUndec]
+              ]
+          )
+      , counterexample
+          "no example witnesses a gap claim in a unit that carries attacks (E5 context G)"
+          gapAmidAttacks
       ]
 
 -- | Load + elaborate + run one example to a labelled 'Verdict' (or its
@@ -492,6 +601,8 @@ workedExamplesSpecProps =
   [ ("E1 justified-clean → accept, arg in, claim justified", quickCheckResult prop_E1)
   , ("E2 open-gap → accept, claim gap", quickCheckResult prop_E2)
   , ("E3 defeat-suite → accept, justified+defeated+contested, all attack kinds", quickCheckResult prop_E3)
+  , ("E4 reinstatement → accept, justified UNDER rebut/undermine/undercut", quickCheckResult prop_E4)
+  , ("E5 contested via undermine+undercut cycles, gap amid attacks", quickCheckResult prop_E5)
   , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
   , ("R1 undeclared-leaf → reject R1", quickCheckResult prop_R1)
   , ("R2 strict-contrary → reject R12", quickCheckResult prop_R2)
@@ -500,5 +611,5 @@ workedExamplesSpecProps =
   , ("expected JSON reports the escalated group-conflict (R9)", quickCheckResult prop_groupConflictExpectedJson)
   , ("worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)", quickCheckResult prop_freshness)
   , ("worked-example expected.json goldens are fresh (elaborate+render == committed)", quickCheckResult prop_expectedJsonFresh)
-  , ("coverage matrix: every status, attack kind, and R1/R12/R10 witnessed by the suite", quickCheckResult prop_coverageMatrix)
+  , ("coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10 witnessed", quickCheckResult prop_coverageMatrix)
   ]

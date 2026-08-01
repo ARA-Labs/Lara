@@ -9,7 +9,8 @@ different population sizes (spec §8, cross-framework non-monotonicity) — not 
 
 Each example is a **self-contained directory** `examples/<NAME>/` (a paper
 artifact): the surface `example.lara`, its co-located policy (`empirical-v1.policy.lara`,
-`strict-bad-v1.policy.lara` for R2, or `strict-v1.policy.lara` for S1), the
+`empirical-v2.policy.lara` for E4/E5, `strict-bad-v1.policy.lara` for R2, or
+`strict-v1.policy.lara` for S1), the
 derived `example.core.sexp` wire anchor, and the derived `expected.json` golden.
 Both derived files are regenerated
 by `scripts/gen-worked-examples.hs` (parse → elaborate, then `encodeUnit` /
@@ -31,6 +32,8 @@ asserts each stays in sync with its `.lara` source.
 | `A/example.lara` | one paper attacks its own headline claim | rebut + undercut + undermine (all three), all in-paper | **defeated** | "a paper can't rebut itself" is a category error; self-attacks = the paper's honesty about its limits |
 | `B/example.lara` | two papers, contrary conclusions | rebut (mutual, a 2-cycle) | **contested** ×2 | no new calculus for corpus scale; and the attack only forms because both claims hit the *same atoms* under `≡` |
 | `S1/example.lara` | strict rule with an `nd@1` certificate | — | **justified** | closes the frontend certificate path: surface assurance + policy theory → elaboration → replay |
+| `E4/example.lara` | reinstatement — three claims justified **while attacked** (policy `empirical-v2`) | rebut + undermine + undercut, each defended | **justified** ×3 (under attack) + **defeated** | defense is policy vocabulary (an exception, a one-directional contrary, a withheld edge), not a new mechanism |
+| `E5/example.lara` | contested beyond rebut + gap amid attacks (policy `empirical-v2`) | undermine 2-cycle + undercut 2-cycle | **contested** ×2 + **gap** | `contested` is any-kind undec, not a rebut artifact; `gap` is missing support, orthogonal to conflict |
 
 ## Relationship to the planned E-series (`docs/worked-examples-plan.md`)
 
@@ -51,6 +54,17 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
 - **S1** is the strict-backend demonstrator: its policy carries the trusted empty
   theory, its artifact carries `assurance = cert(…)`, and `nd@1` replays the
   certificate before the claim becomes justified.
+- **E4/E5** are the M5 worked cases (tracker #48, T4). E1–E3/A/B leave three
+  label cells structurally empty: an attacked argument that *survives* (E4 —
+  grounded reinstatement, one context per attack kind), a `contested` produced
+  by something other than a rebut 2-cycle (E5 — undermine-native and
+  undercut-native cycles), and a `gap` claim coexisting with attacks (E5). They
+  share the `empirical-v2` policy — `empirical-v1` plus the defense vocabulary
+  (a `null_result` exception, a one-directional meta-review contrary, and the
+  deliberately circular `shift_report`/`miscalibration_report` exception pair).
+  E4's context X and E5's context W are the same graph up to ONE voluntary
+  undercut edge — the pair demonstrates that reinstatement vs. contested is
+  decided by the declared attack set, not by the attack kinds available.
 
 ## Two design constraints these examples expose (not the self-rebuttal one)
 
@@ -76,7 +90,10 @@ inline at the bottom of its `example.lara` as a human oracle. A coverage-matrix
 test (`test/WorkedExamplesSpec.hs`) *measures* — from the elaborated units and
 their verdicts, not from prose — that the suite witnesses every claim status
 (justified / gap / contested / defeated), every attack kind (rebut / undercut /
-undermine), and the three rejection classes (R1 / R12 / R10).
+undermine), every attack-kind × target-label cell (each kind with an attacked
+target that is `in`, `out`, and `undec` — E4/E5 close the `in`/`undec`-beyond-
+rebut cells), a gap claim in an attack-carrying unit, and the three rejection
+classes (R1 / R12 / R10).
 
 ### Honesty note — what S1's certificate establishes
 

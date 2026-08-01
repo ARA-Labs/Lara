@@ -26,6 +26,7 @@ import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
 import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
+import MutationSpec (mutationSpecProps)
 import PropSpec (propSpecProps)
 import ReportingSpec (reportingSpecProps)
 import ReplaySpec (replaySpecProps)
@@ -188,6 +189,7 @@ main = do
         ++ [run name act | (name, act) <- workedExamplesSpecProps]
         ++ [run name act | (name, act) <- checkSpecProps]
         ++ [run name act | (name, act) <- differentialSpecProps]
+        ++ [run name act | (name, act) <- mutationSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]

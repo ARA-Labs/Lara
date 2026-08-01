@@ -17,9 +17,21 @@
 # deliberately malformed check-input envelope. Both drivers must reject each
 # one at the codec boundary — exit code 2 with empty stdout — reported as
 # "negative pass=N fail=M" and folded into the exit status. stderr
-# diagnostics are free to differ and are never compared — with ONE
-# exception: the canonical-order anchor below also pins a per-driver stderr
-# substring, because exit-2-only cannot isolate which check fired there.
+# diagnostics are free to differ and are never compared — with TWO
+# exceptions: the canonical-order anchor below also pins a per-driver stderr
+# substring, because exit-2-only cannot isolate which check fired there; and
+# every generated codec mutant (fixtures/mutants/malformed/) pins the
+# per-operator stderr substrings recorded in the mutant manifest's
+# hs-diagnostic / lean-diagnostic columns, for the same reason — with a codec
+# check deleted, its mutants would still exit 2 via a different downstream
+# check and stay silently green (PR #49 review).
+#
+# Mutant suite discovery (PR #49 review): the generated suite under
+# fixtures/mutants/ is discovered from fixtures/mutants/MANIFEST.tsv, never
+# by globbing, and each half (verdict mutants, codec mutants) must be
+# non-empty on its own — legacy fixtures/malformed anchors can no longer
+# satisfy the counters for an absent suite. The manifest and the committed
+# *.sexp files must also agree exactly (no missing, no unlisted files).
 #
 # Stderr pinning (PR #44 re-review + #45 R9): two rejection classes carry
 # their location only on stderr, because the stdout verdict is a bare class
@@ -82,8 +94,11 @@ for root in fixtures examples bundles; do
 
   root_anchor_list="$tmp_dir/anchors.$root"
   # The deliberately malformed envelopes of fixtures/malformed/ are the
-  # negative half below, not byte-parity anchors: exclude them here.
-  if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -print >"$root_anchor_list"; then
+  # negative half below, not byte-parity anchors. The whole generated mutant
+  # suite (fixtures/mutants/) is excluded from globbing entirely: it is
+  # discovered manifest-driven below, so an absent or half-written suite
+  # fails loudly instead of shrinking the anchor set (PR #49 review).
+  if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"
     exit 2
   fi
@@ -93,10 +108,61 @@ for root in fixtures examples bundles; do
   fi
 done
 
+# ---------------------------------------------------------------------------
+# Mutant suite (fixtures/mutants/, M5 tracker #48 T1): manifest-driven
+# discovery. The manifest is the source of truth: split its rows into the
+# verdict half (byte-parity anchors) and the codec half (negative anchors),
+# require EACH half non-empty, and require the committed *.sexp files to
+# match the manifest exactly — a missing suite, a stale manifest, or an
+# unlisted stray file is a setup failure, never a silent pass.
+# ---------------------------------------------------------------------------
+mutant_root="fixtures/mutants"
+mutant_manifest="$mutant_root/MANIFEST.tsv"
+if [ ! -f "$mutant_manifest" ]; then
+  echo "FAIL: mutant manifest not found: $mutant_manifest (regenerate with scripts/gen-mutants.hs)"
+  exit 2
+fi
+
+mutant_positive_rel="$tmp_dir/mutants.positive.rel"
+mutant_codec_rel="$tmp_dir/mutants.codec.rel"
+if ! awk -F'\t' '!/^#/ && NF >= 5 && $5 == "codec-reject" {print $1}' "$mutant_manifest" >"$mutant_codec_rel" ||
+  ! awk -F'\t' '!/^#/ && NF >= 5 && $5 != "codec-reject" {print $1}' "$mutant_manifest" >"$mutant_positive_rel"; then
+  echo "FAIL: could not parse mutant manifest: $mutant_manifest"
+  exit 2
+fi
+if [ ! -s "$mutant_positive_rel" ]; then
+  echo "FAIL: mutant manifest lists no verdict mutants: $mutant_manifest"
+  exit 2
+fi
+if [ ! -s "$mutant_codec_rel" ]; then
+  echo "FAIL: mutant manifest lists no codec mutants: $mutant_manifest"
+  exit 2
+fi
+
+mutant_listed="$tmp_dir/mutants.listed"
+mutant_committed="$tmp_dir/mutants.committed"
+if ! sed "s|^|$mutant_root/|" "$mutant_positive_rel" "$mutant_codec_rel" | sort >"$mutant_listed" ||
+  ! find "$mutant_root" -name '*.sexp' -print | sort >"$mutant_committed"; then
+  echo "FAIL: could not enumerate mutant suite files under $mutant_root"
+  exit 2
+fi
+if ! cmp -s "$mutant_listed" "$mutant_committed"; then
+  echo "FAIL: mutant manifest and committed *.sexp files disagree (regenerate with scripts/gen-mutants.hs)"
+  echo "  only in manifest:"
+  comm -23 "$mutant_listed" "$mutant_committed" | sed 's/^/    /'
+  echo "  only on disk:"
+  comm -13 "$mutant_listed" "$mutant_committed" | sed 's/^/    /'
+  exit 2
+fi
+
+mutant_positive_list="$tmp_dir/mutants.positive"
+sed "s|^|$mutant_root/|" "$mutant_positive_rel" >"$mutant_positive_list"
+
 if ! sort \
   "$tmp_dir/anchors.fixtures" \
   "$tmp_dir/anchors.examples" \
-  "$tmp_dir/anchors.bundles" >"$anchor_list"; then
+  "$tmp_dir/anchors.bundles" \
+  "$mutant_positive_list" >"$anchor_list"; then
   echo "FAIL: could not sort discovered anchors"
   exit 2
 fi
@@ -205,27 +271,38 @@ fi
 # Negative anchors (PR #44 review C8): every fixtures/malformed/*.sexp is a
 # deliberately malformed check-input envelope. BOTH drivers must reject it at
 # the codec boundary: exit code 2 AND empty stdout. stderr diagnostics are
-# free to differ and are never compared (one exception: the canonical-order
-# anchor above).
+# free to differ and are never compared (two exceptions: the canonical-order
+# anchor above, and the generated codec mutants' manifest-pinned per-operator
+# diagnostics — PR #49 review).
 # ---------------------------------------------------------------------------
-printf '\n== negative anchors (fixtures/malformed): both drivers must exit 2 with empty stdout\n'
+printf '\n== negative anchors (fixtures/malformed + manifest codec mutants): both drivers must exit 2 with empty stdout\n'
 
-if [ ! -d fixtures/malformed ]; then
+if [ ! -d "fixtures/malformed" ]; then
   echo "FAIL: required negative-anchor root is not a directory: fixtures/malformed"
   exit 2
 fi
 
-negative_list="$tmp_dir/negative.list"
-if ! find fixtures/malformed -name '*.sexp' -print >"$negative_list.unsorted"; then
+# The legacy hand-written negatives are discovered by glob and must be
+# non-empty ON THEIR OWN; the generated codec mutants come from the manifest
+# codec half validated above (also non-empty on its own). Merging happens
+# only after both counters are satisfied, so neither half can stand in for
+# an absent other (PR #49 review).
+legacy_negative_list="$tmp_dir/negative.legacy"
+if ! find fixtures/malformed -name '*.sexp' -print >"$legacy_negative_list"; then
   echo "FAIL: could not discover negative anchors under fixtures/malformed"
   exit 2
 fi
-if ! sort "$negative_list.unsorted" >"$negative_list"; then
-  echo "FAIL: could not sort discovered negative anchors"
+if [ ! -s "$legacy_negative_list" ]; then
+  echo "FAIL: no *.sexp negative anchors found under fixtures/malformed"
   exit 2
 fi
-if [ ! -s "$negative_list" ]; then
-  echo "FAIL: no *.sexp negative anchors found under fixtures/malformed"
+
+mutant_codec_list="$tmp_dir/mutants.codec"
+sed "s|^|$mutant_root/|" "$mutant_codec_rel" >"$mutant_codec_list"
+
+negative_list="$tmp_dir/negative.list"
+if ! sort "$legacy_negative_list" "$mutant_codec_list" >"$negative_list"; then
+  echo "FAIL: could not sort discovered negative anchors"
   exit 2
 fi
 
@@ -243,19 +320,36 @@ while IFS= read -r f; do
   "$lean_bin" "$f" >"$lean_stdout" 2>"$lean_stderr"
   lean_exit=$?
 
-  # Canonical-order pin (see header): for this anchor, require that the
-  # canonical-order check — not the list-ordered theory-identity check — is
-  # the rejection that fired, on EACH driver, via a fixed substring of its
-  # codec diagnostic.
+  # Diagnostic pins (see header): exit-2-only cannot isolate WHICH codec
+  # check fired, so two anchor families additionally pin per-driver stderr
+  # substrings:
+  #   * the canonical-order anchor: the canonical-order check — not the
+  #     list-ordered theory-identity check — must be the rejection that fired;
+  #   * every generated codec mutant: the operator's intended check must be
+  #     the one that fired, via the hs-diagnostic / lean-diagnostic columns
+  #     of the mutant manifest (empty pins are a manifest bug and fail).
   diag_matches=1
+  hs_pin=''
+  lean_pin=''
   case "$f" in
     fixtures/malformed/non-canonical-theory-order.sexp)
-      if ! grep -qF 'not in strictly increasing Unicode-scalar order' "$hs_stderr" ||
-        ! grep -qF 'theories must be strictly sorted' "$lean_stderr"; then
+      hs_pin='not in strictly increasing Unicode-scalar order'
+      lean_pin='theories must be strictly sorted'
+      ;;
+    "$mutant_root"/malformed/*.sexp)
+      rel="${f#"$mutant_root"/}"
+      hs_pin="$(awk -F'\t' -v p="$rel" '!/^#/ && $1 == p {print $6; exit}' "$mutant_manifest")"
+      lean_pin="$(awk -F'\t' -v p="$rel" '!/^#/ && $1 == p {print $7; exit}' "$mutant_manifest")"
+      if [ -z "$hs_pin" ] || [ -z "$lean_pin" ]; then
         diag_matches=0
       fi
       ;;
   esac
+  if [ "$diag_matches" -eq 1 ] && [ -n "$hs_pin" ]; then
+    if ! grep -qF "$hs_pin" "$hs_stderr" || ! grep -qF "$lean_pin" "$lean_stderr"; then
+      diag_matches=0
+    fi
+  fi
 
   if [ "$hs_exit" -eq 2 ] && [ "$lean_exit" -eq 2 ] && [ ! -s "$hs_stdout" ] && [ ! -s "$lean_stdout" ] && [ "$diag_matches" -eq 1 ]; then
     neg_pass=$((neg_pass + 1))
@@ -266,9 +360,9 @@ while IFS= read -r f; do
     printf '  haskell: exit=%s stdout-bytes=%s\n' "$hs_exit" "$(wc -c <"$hs_stdout")"
     printf '  lean:    exit=%s stdout-bytes=%s\n' "$lean_exit" "$(wc -c <"$lean_stdout")"
     if [ "$diag_matches" -eq 0 ]; then
-      printf '  stderr pin failed: the canonical-order check did not fire on at least one driver\n'
-      printf '  (expected haskell stderr to contain "not in strictly increasing Unicode-scalar order",\n'
-      printf '   lean stderr to contain "theories must be strictly sorted")\n'
+      printf '  stderr pin failed: the intended codec check did not fire on at least one driver\n'
+      printf '  (expected haskell stderr to contain "%s",\n' "$hs_pin"
+      printf '   lean stderr to contain "%s")\n' "$lean_pin"
     fi
     if [ -s "$hs_stdout" ]; then
       printf '  haskell stdout: %s\n' "$(cat "$hs_stdout")"

@@ -45,6 +45,8 @@ examples =
   , ("examples/E1", "empirical-v1.policy.lara")
   , ("examples/E2", "empirical-v1.policy.lara")
   , ("examples/E3", "empirical-v1.policy.lara")
+  , ("examples/E4", "empirical-v2.policy.lara")
+  , ("examples/E5", "empirical-v2.policy.lara")
   , ("examples/R1", "empirical-v1.policy.lara")
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")

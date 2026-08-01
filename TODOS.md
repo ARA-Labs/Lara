@@ -8,11 +8,21 @@
 > uniform-injective-relabel theorem and PR #43 added well-checkedness transport,
 > making it non-vacuous by construction.
 >
-> Next milestone: **M5 — evaluation corpus** (research-proposal.md §7). Its
-> implementation prerequisites are now both closed: verdict-carried replay
+> Next milestone: **M5 — evaluation corpus, deterministic scope** (tracker
+> #48; research-proposal.md §7). The paper targets PLDI/POPL and presents the
+> core language and its calculus, so M5 covers only the LLM-independent axes:
+> axis (a) mutation/differential testing and checker-side axis (c) metrics.
+> Its implementation prerequisites are both closed: verdict-carried replay
 > identity (#36, the audit story) and duplicate-report groups (#38, the
-> mutation-suite spine). The LLM/JSON producer (#30) follows when the
-> deterministic→LLM flip begins.
+> mutation-suite spine). All LLM work — the D3 flip and the JSON producer
+> (#30, tagged `post-pldi`) — is deferred to an ACL/EMNLP follow-up paper.
+> M5 progress: T4 (worked cases E4/E5) is complete. T1 (seeded mutation
+> generators) has landed its worked-example half — every executable rejection
+> class is exercised by generated mutants over the eight accept anchors — but
+> stays partially open: #48's T1 also requires generators over corpus units
+> and generated mutants exercising every status/attack kind, which need T2.
+> T2 (corpus units), T3 (measurement harness), T5 (freeze protocol), and T6
+> (ablation baselines) remain.
 
 ## Performance
 
@@ -121,6 +131,26 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### M5 T1 (worked-example half) + T4 — seeded mutation suite and worked cases (tracker #48)
+
+T1, worked-example half: `Lara.Mutate` + `scripts/gen-mutants.hs` generate a
+seeded (SplitMix64, committed seed), verified-at-generation mutation suite
+over the accept-verdict worked examples: every executable rejection class
+(R1/R3/R4/R5/R6/R7/R9/R10/R11/R12/R13) is exercised by generated mutants,
+codec corruption lands in the `fixtures/mutants/malformed/` negative half
+(both drivers exit 2, per-operator diagnostic pinned via the manifest), and
+the constructed rebut-cycle family is the specified non-rejection (accept,
+all-undec/contested). `test/MutationSpec.hs` re-verifies specified outcomes,
+seeded reproducibility, and class coverage; `scripts/differential.sh` holds
+every mutant byte-identical across drivers. T1's corpus-unit half — the #48
+requirement that the generators also run over corpus units and that generated
+mutants exercise every status/attack kind — stays open until T2 lands the
+corpus units. T4: worked examples E4
+(reinstatement — justified UNDER each attack kind) and E5 (contested via
+undermine- and undercut-native 2-cycles, gap amid attacks) on policy
+`empirical-v2` close the attack-kind × target-label matrix, measured by the
+extended `prop_coverageMatrix`.
 
 ### Duplicate-report groups, spec §4.3 (issue #38)
 

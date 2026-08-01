@@ -49,6 +49,7 @@ library
                       Lara.Diagnostics
                       Lara.Driver
                       Lara.ExpectedJson
+                      Lara.Mutate
     build-depends:    base >=4 && <5
                     , containers
     default-language: GHC2021
@@ -77,6 +78,7 @@ test-suite lara-test
                       WorkedExamplesSpec
                       CheckSpec
                       DifferentialSpec
+                      MutationSpec
                       RuntimeSpec
                       ReportingSpec
                       CliSpec

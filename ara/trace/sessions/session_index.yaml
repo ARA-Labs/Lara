@@ -167,3 +167,10 @@ sessions:
     events_count: 4
     claims_touched: [C21]
     open_threads: 3
+  - id: "2026-08-01_001"
+    date: "2026-08-01"
+    summary: "M5 T1+T4 (PR #49): E4/E5 worked cases close the attack-kind x target-label matrix (reinstatement + contested-beyond-rebut + gap-amid-attacks); Lara.Mutate seeded suite = 148 verified mutants covering all 11 executable reject classes; differential 146/0 + 54/0. N89-N91; O23-O25 staged; C21 evidence extended."
+    turn_count: 1
+    events_count: 6
+    claims_touched: [C21]
+    open_threads: 3

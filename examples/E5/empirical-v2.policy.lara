@@ -1,0 +1,88 @@
+# empirical-v2 — the M5 worked-case policy (empirical-v1 plus defense vocabulary)
+#
+# empirical-v1 can express attack but not defense: every attacker in E3/A/B is unattackable
+# (leaf-rooted with no contrary on its leaf, or licensed by the only declared exception). The two
+# M5 worked cases need attackers that can themselves be defeated (E4, reinstatement) or locked in
+# a cycle (E5, contested via undercut/undermine), so v2 extends v1 with exactly that vocabulary.
+# v1 declarations are unchanged — every E1/E2/E3/A/B unit still checks identically under v2.
+#
+# Design notes (the teaching points of E4/E5 live here, not in the artifacts):
+#
+#   * `contrary refuted_by_metareview A not_generalizes` is declared in ONE direction only.
+#     Attack completeness (spec §8) is arg-conclusion-level: a symmetric pair would force the
+#     reverse edge between any two args concluding the pair's sides, collapsing E4's
+#     undermine-reinstatement chain into a 2-cycle (contested), never reinstatement.
+#   * The `shift_report` / `miscalibration_report` exception pair is deliberately circular:
+#     each rule's conclusion is the other's undercutting condition. Two instances on the same
+#     (M, Q, D) therefore undercut each other — the undercut-native 2-cycle E5 needs. Exceptions
+#     do not participate in the completeness scan, so both cycle edges are voluntary declarations
+#     (unlike E5's undermine cycle, whose edges the symmetric contrary pair mandates).
+
+policy empirical-v2
+
+# --- Inference schemes (empirical-v1) ----------------------------------------------------------
+
+rule controlled_experiment(M, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, effect(M, Q, D, positive)) ]
+  conclusion = improves(M, Q, D)
+  question randomization    : randomized(Exp)        (mandatory)
+  question adequate_power   : powered(Exp)           (mandatory)
+  question external_validity: generalizes(M, Q, D)   (mandatory)
+
+rule null_result(M, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, effect(M, Q, D, negligible)) ]
+  conclusion = not_improves(M, Q, D)
+  question randomization    : randomized(Exp)        (mandatory)
+  question adequate_power   : powered(Exp)           (mandatory)
+
+# --- Inference schemes (new in v2) -------------------------------------------------------------
+
+# A detected eval-distribution shift, reported by a monitoring source Src. Concludes the
+# undercutting condition of controlled_experiment, so an instance undercuts a
+# controlled_experiment instance on the same (M, Q, D) — E5's first cycle edge.
+rule shift_report(M, Q, D, Src)
+  mode       = defeasible
+  premises   = [ reports_shift(Src, M, Q, D) ]
+  conclusion = distribution_shift(M, Q, D)
+  question calibration : calibrated(Src) (mandatory)
+
+# An audit finding that the monitoring source is miscalibrated. Concludes the undercutting
+# condition of shift_report — E5's second cycle edge.
+rule miscalibration_report(M, Q, D, Aud)
+  mode       = defeasible
+  premises   = [ audits(Aud, M, Q, D) ]
+  conclusion = miscalibrated(M, Q, D)
+
+# --- Conflict (empirical-v1) -------------------------------------------------------------------
+
+contrary improves(M, Q, D)     not_improves(M, Q, D)
+contrary not_improves(M, Q, D) improves(M, Q, D)
+
+contrary generalizes(M, Q, D)     not_generalizes(M, Q, D)
+contrary not_generalizes(M, Q, D) generalizes(M, Q, D)
+
+# --- Conflict (new in v2) ----------------------------------------------------------------------
+
+# A meta-review retraction defeats a not_generalizes finding. ONE direction only (see header):
+# nothing licenses a not_generalizes instance to attack the meta-review back, which is exactly
+# what lets E4's defender reinstate instead of forming a cycle.
+contrary refuted_by_metareview(M, Q, D) not_generalizes(M, Q, D)
+
+# --- Exceptions (undercutting conditions) ------------------------------------------------------
+
+# empirical-v1: a proven eval-distribution shift undercuts a controlled experiment.
+exception controlled_experiment : distribution_shift(M, Q, D)
+
+# New in v2: a null replication is undercut when shown to be selectively reported (E4's
+# defense against the rebutting replication).
+exception null_result : selective_reporting(M, Q, D)
+
+# New in v2: the circular pair (see header) — the audit undercuts the shift report, and a true
+# distribution shift undercuts the audit instrument.
+exception shift_report          : miscalibrated(M, Q, D)
+exception miscalibration_report : distribution_shift(M, Q, D)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): every rule above is defeasible, so no proposition in a
+# contrary pair is strict-reachable and the policy passes the R12 check, exactly as in v1.

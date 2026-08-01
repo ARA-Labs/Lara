@@ -184,3 +184,10 @@ entries:
       - "Considered artifact-commitment crystallization for O21 (this turn's ElaborateSpec negatives + 3 fixtures follow its 'exercise every door on the same malformed input' rule) — rejected: PR still unmerged and prior turn deliberately deferred on the same ground. Near-miss logged."
       - "Extended C21 Proof only (empirical-resolution: gates green, twin re-synced, negatives 9/9). Did NOT touch Statement/Conditions/Status: the twin divergence was a mechanization-integrity gap on an unreachable input class, not evidence against the routing. Considered and rejected weakening."
       - "Chose to mirror the Haskell semantics in Lean rather than the reviewer's alternative (document skip-semantics): CLAUDE.md says Lean proofs carry soundness for frozen §4.3 definitions — twins must agree by construction, not decoder gating."
+  - turn: "2026-08-01_001#1"
+    notes:
+      - "Routed the milestone opening as pivot N89 (provenance user: branch scope was a user directive) and the two workstreams as separate experiment nodes N90 (T4) / N91 (T1) — one node each, not per-file, since each has a single verifiable outcome (matrix closed; suite verified)."
+      - "Staged O23 (completeness-scope lever) as potential claim rather than crystallizing on artifact commitment: PR #49 is unmerged — same precedent as O21/O22 deferral on PR #45. Near-miss logged; revisit on merge."
+      - "Staged O24 as concept (a boundary/definition, not a falsifiable mechanism) and O25 as heuristic (a 'how')."
+      - "Extended C21 Proof only (empirical-resolution: 7 generated R9 mutants byte-identical across drivers). Did NOT touch other supported claims despite the suite exercising their classes — the mutants confirm checker behavior generally; only C21 has a routing claim the R9 family bears on directly."
+      - "Did NOT create a dead_end for the abandoned symmetric-contrary undermine-reinstatement design: it was an in-turn design iteration, never committed or run; captured inside N90 result + O23 context instead."

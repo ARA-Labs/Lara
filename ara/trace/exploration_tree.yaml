@@ -1811,3 +1811,78 @@ tree:
       - "cabal test: «elaborate negatives are located Left ElabError +++ OK» / «R13-over-R9 precedence +++ OK» [result]"
       - "lean/Lara/Groups.lean (memberProps/consistentB/Consistent/consistentB_iff); test/{ElaborateSpec,CheckSpec}.hs; fixtures/malformed/group-{duplicate-id,repeated-member,singleton}.sexp"
     status: resolved
+  - id: N89
+    type: pivot
+    title: "M5 opens: deterministic evaluation corpus (mutation/differential axis a + checker-side axis c)"
+    provenance: user
+    timestamp: "2026-08-01T00:20"
+    from: "M4 walking skeleton + result mechanization (all 12 frozen-spec results proved, #47)"
+    to: "M5 evaluation corpus, deterministic scope (tracker #48): T1 seeded mutation generators + T4 worked cases first"
+    trigger: >
+      User directive to execute branch feat/m5-mutation-suite-worked-cases end to
+      end (implement, experiment, record, PR). Paper targets PLDI/POPL, so M5 is
+      scoped to the LLM-independent axes; T1/T4 chosen together per #48 ("choose
+      them while designing T1/T2 so mutation coverage and case selection agree").
+    status: resolved
+    also_depends_on: [N86, N88]
+  - id: N90
+    type: experiment
+    title: "T4 worked cases E4/E5: reinstatement and contested-beyond-rebut close the attack-kind x target-label matrix"
+    provenance: ai-executed
+    timestamp: "2026-08-01T00:45"
+    also_depends_on: [N89]
+    result: >
+      Survey showed E1-E3/A/B already span all four statuses and three attack
+      kinds but leave three label cells structurally empty: attacked-yet-in
+      (reinstatement), contested via non-rebut attacks, gap amid attacks. E4
+      (three contexts, one reinstatement per attack kind) and E5 (undermine-native
+      and undercut-native 2-cycles + gap claim) close all nine kind x label cells
+      on new policy empirical-v2 = v1 + defense vocabulary (null_result exception
+      'selective_reporting', ONE-directional contrary refuted_by_metareview ->
+      not_generalizes, circular shift_report/miscalibration_report exception
+      pair). Both anchors byte-identical through Haskell and Lean drivers on
+      first regeneration; prop_coverageMatrix extended to MEASURE the nine cells
+      + gap-amid-attacks. Key structural finding: attack completeness is
+      arg-conclusion-level (firstMissingConflictInfo), so symmetric contrary
+      pairs FORCE mutual edges (E5 undermine cycle is mandated) while exceptions
+      are outside the scan (undercut cycles and E4's withheld back edge are
+      voluntary); E4 context X and E5 context W are the same graph up to one
+      voluntary undercut edge - reinstatement vs contested.
+    evidence:
+      - "examples/E4/example.lara + examples/E5/example.lara + empirical-v2.policy.lara (committed, PR #49)"
+      - "test/WorkedExamplesSpec.hs prop_E4/prop_E5/prop_coverageMatrix: «coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10 witnessed +++ OK» [result]"
+      - "E4 verdict: «(labels (0 in) (1 out) (2 in) (3 in) (4 out) (5 in) (6 in) (7 out) (8 in))… justified/defeated/justified/justified» [result]"
+      - "E5 verdict: «(labels … all undec) … contested/contested/gap» [result]"
+    status: resolved
+  - id: N91
+    type: experiment
+    title: "T1 seeded mutation suite: 148 verified mutants, all 11 executable reject classes, byte-identical across both drivers"
+    provenance: ai-executed
+    timestamp: "2026-08-01T01:05"
+    also_depends_on: [N89, N90]
+    result: >
+      Lara.Mutate (new library module): closed operator vocabulary realizing the
+      Phase D mutation classes plus certificate/replay tampering and R9 group
+      escalation; all randomness via hand-rolled SplitMix64 keyed by (base,
+      operator) from committed seed 20260801 - regeneration byte-reproducible.
+      scripts/gen-mutants.hs derives mutants from the 8 accept-verdict
+      worked-example anchors and VERIFIES each against the production checker
+      before writing; zero specification mismatches on the first full generation
+      run (148/148). Coverage: R1=20 R3=7 R4=6 R5=6 R6=6 R7=7 R9=7 R10=8 R11=7
+      R12=8 R13=17 mutants; 45 codec-corruption negatives (fixtures/mutants/
+      malformed/, both drivers exit 2, empty stdout); 4 constructed rebut-cycle
+      units as the specified non-rejection (accept, all-undec/contested).
+      Differential harness (Lean as oracle): positive pass=146 fail=0, negative
+      pass=54 fail=0. cabal test 136 properties green incl. three new
+      MutationSpec properties (specified outcomes, seeded reproducibility,
+      coverage). Boundary pinned: cert theory-digest tamper lands in R7
+      (CertifierUnallowlisted), NOT R13; R13 reachable only via allowlisted-cert
+      payload corruption or replay preflight. No Lean changes: generator is
+      corpus tooling, not a frozen definition. PR #49 opened (T1+T4 of #48).
+    evidence:
+      - "scripts/differential.sh: «pass=146 fail=0» + «negative pass=54 fail=0» [result]"
+      - "scripts/gen-mutants.hs: «wrote 148 verified mutants to fixtures/mutants» [result]"
+      - "fixtures/mutants/MANIFEST.tsv per-class tally: 20/7/6/6/6/7/7/8/7/8/17 + 45 codec + 4 cycles [result]"
+      - "cabal test: «mutation suite: every mutant produces its specified outcome +++ OK» x3 [result]"
+      - "PR https://github.com/EYH0602/lara/pull/49"
+    status: resolved

@@ -525,7 +525,7 @@ the result is stated but not yet proved or mechanized._
 - **Status**: supported
 - **Provenance**: ai-suggested
 - **Falsification**: A duplicate-report conflict whose dependent claim resolves to `justified`, `contested`, or `defeated` under the default policy (rather than `gap`), or a conflict under the escalating policy that fails to reject — either would disprove the routing.
-- **Proof**: [trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), lean/Lara/Groups.lean, PR #45]
+- **Proof**: [trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), trace N91 (7 seeded R9 group-escalation mutants generated over the worked examples all verify as reject R9 byte-identically through both drivers), lean/Lara/Groups.lean, PR #45]
 - **Dependencies**: [C01, C16]
-- **Last revised**: 2026-07-31 (2026-07-31_001#2)
+- **Last revised**: 2026-08-01 (2026-08-01_001#1)
 - **Tags**: admission, data-integrity, gap-not-defeat, mechanized, spec-4.3, R9

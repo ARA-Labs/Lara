@@ -1,0 +1,149 @@
+# file	base	family	operator	expected	hs-diagnostic	lean-diagnostic
+A--undeclared-leaf-0.sexp	A	undeclared-leaves	undeclared-leaf	reject-R1		
+A--undeclared-leaf-1.sexp	A	undeclared-leaves	undeclared-leaf	reject-R1		
+A--hidden-rule-0.sexp	A	hidden-policy-extension	hidden-rule	reject-R1		
+A--hidden-contrary-0.sexp	A	hidden-policy-extension	hidden-contrary	reject-R12		
+A--wrong-subst-domain-0.sexp	A	wrong-formulas	wrong-subst-domain	reject-R3		
+A--wrong-premise-0.sexp	A	wrong-formulas	wrong-premise	reject-R4		
+A--open-obligation-0.sexp	A	open-obligations	open-obligation	reject-R5		
+A--wrong-discharge-0.sexp	A	open-obligations	wrong-discharge	reject-R6		
+A--trusted-assurance-0.sexp	A	certificate-tampering	trusted-assurance	reject-R7		
+A--bad-attack-position-0.sexp	A	bad-attack-targets	bad-attack-position	reject-R10		
+A--bad-attack-position-1.sexp	A	bad-attack-targets	bad-attack-position	reject-R10		
+A--unlicensed-attack-0.sexp	A	bad-attack-targets	unlicensed-attack	reject-R11		
+A--group-conflict-0.sexp	A	data-integrity	group-conflict	reject-R9		
+A--duplicate-backend-0.sexp	A	certificate-tampering	duplicate-backend	reject-R13		
+A--unknown-backend-0.sexp	A	certificate-tampering	unknown-backend	reject-R13		
+malformed/A--codec-junk-section-0.sexp	A	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/A--codec-core-version-0.sexp	A	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/A--codec-replay-order-0.sexp	A	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/A--codec-theory-mismatch-0.sexp	A	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/A--codec-dangling-attack-0.sexp	A	codec-corruption	codec-dangling-attack	codec-reject	attack endpoint is not a declared argument	attack endpoint is not a declared argument
+malformed/A--codec-truncate-0.sexp	A	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+B--undeclared-leaf-0.sexp	B	undeclared-leaves	undeclared-leaf	reject-R1		
+B--undeclared-leaf-1.sexp	B	undeclared-leaves	undeclared-leaf	reject-R1		
+B--hidden-rule-0.sexp	B	hidden-policy-extension	hidden-rule	reject-R1		
+B--hidden-contrary-0.sexp	B	hidden-policy-extension	hidden-contrary	reject-R12		
+B--wrong-subst-domain-0.sexp	B	wrong-formulas	wrong-subst-domain	reject-R3		
+B--wrong-premise-0.sexp	B	wrong-formulas	wrong-premise	reject-R4		
+B--open-obligation-0.sexp	B	open-obligations	open-obligation	reject-R5		
+B--wrong-discharge-0.sexp	B	open-obligations	wrong-discharge	reject-R6		
+B--trusted-assurance-0.sexp	B	certificate-tampering	trusted-assurance	reject-R7		
+B--unlicensed-attack-0.sexp	B	bad-attack-targets	unlicensed-attack	reject-R11		
+B--group-conflict-0.sexp	B	data-integrity	group-conflict	reject-R9		
+B--duplicate-backend-0.sexp	B	certificate-tampering	duplicate-backend	reject-R13		
+B--unknown-backend-0.sexp	B	certificate-tampering	unknown-backend	reject-R13		
+malformed/B--codec-junk-section-0.sexp	B	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/B--codec-core-version-0.sexp	B	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/B--codec-replay-order-0.sexp	B	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/B--codec-theory-mismatch-0.sexp	B	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/B--codec-dangling-attack-0.sexp	B	codec-corruption	codec-dangling-attack	codec-reject	attack endpoint is not a declared argument	attack endpoint is not a declared argument
+malformed/B--codec-truncate-0.sexp	B	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+E1--undeclared-leaf-0.sexp	E1	undeclared-leaves	undeclared-leaf	reject-R1		
+E1--undeclared-leaf-1.sexp	E1	undeclared-leaves	undeclared-leaf	reject-R1		
+E1--hidden-rule-0.sexp	E1	hidden-policy-extension	hidden-rule	reject-R1		
+E1--hidden-contrary-0.sexp	E1	hidden-policy-extension	hidden-contrary	reject-R12		
+E1--wrong-subst-domain-0.sexp	E1	wrong-formulas	wrong-subst-domain	reject-R3		
+E1--wrong-premise-0.sexp	E1	wrong-formulas	wrong-premise	reject-R4		
+E1--open-obligation-0.sexp	E1	open-obligations	open-obligation	reject-R5		
+E1--wrong-discharge-0.sexp	E1	open-obligations	wrong-discharge	reject-R6		
+E1--trusted-assurance-0.sexp	E1	certificate-tampering	trusted-assurance	reject-R7		
+E1--unlicensed-attack-0.sexp	E1	bad-attack-targets	unlicensed-attack	reject-R11		
+E1--group-conflict-0.sexp	E1	data-integrity	group-conflict	reject-R9		
+E1--duplicate-backend-0.sexp	E1	certificate-tampering	duplicate-backend	reject-R13		
+E1--unknown-backend-0.sexp	E1	certificate-tampering	unknown-backend	reject-R13		
+malformed/E1--codec-junk-section-0.sexp	E1	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/E1--codec-core-version-0.sexp	E1	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/E1--codec-replay-order-0.sexp	E1	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/E1--codec-theory-mismatch-0.sexp	E1	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/E1--codec-truncate-0.sexp	E1	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+E2--hidden-contrary-0.sexp	E2	hidden-policy-extension	hidden-contrary	reject-R12		
+E2--group-conflict-0.sexp	E2	data-integrity	group-conflict	reject-R9		
+E2--duplicate-backend-0.sexp	E2	certificate-tampering	duplicate-backend	reject-R13		
+E2--unknown-backend-0.sexp	E2	certificate-tampering	unknown-backend	reject-R13		
+malformed/E2--codec-junk-section-0.sexp	E2	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/E2--codec-core-version-0.sexp	E2	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/E2--codec-replay-order-0.sexp	E2	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/E2--codec-theory-mismatch-0.sexp	E2	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/E2--codec-truncate-0.sexp	E2	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+E3--undeclared-leaf-0.sexp	E3	undeclared-leaves	undeclared-leaf	reject-R1		
+E3--undeclared-leaf-1.sexp	E3	undeclared-leaves	undeclared-leaf	reject-R1		
+E3--hidden-rule-0.sexp	E3	hidden-policy-extension	hidden-rule	reject-R1		
+E3--hidden-contrary-0.sexp	E3	hidden-policy-extension	hidden-contrary	reject-R12		
+E3--wrong-subst-domain-0.sexp	E3	wrong-formulas	wrong-subst-domain	reject-R3		
+E3--wrong-premise-0.sexp	E3	wrong-formulas	wrong-premise	reject-R4		
+E3--open-obligation-0.sexp	E3	open-obligations	open-obligation	reject-R5		
+E3--wrong-discharge-0.sexp	E3	open-obligations	wrong-discharge	reject-R6		
+E3--trusted-assurance-0.sexp	E3	certificate-tampering	trusted-assurance	reject-R7		
+E3--bad-attack-position-0.sexp	E3	bad-attack-targets	bad-attack-position	reject-R10		
+E3--bad-attack-position-1.sexp	E3	bad-attack-targets	bad-attack-position	reject-R10		
+E3--unlicensed-attack-0.sexp	E3	bad-attack-targets	unlicensed-attack	reject-R11		
+E3--group-conflict-0.sexp	E3	data-integrity	group-conflict	reject-R9		
+E3--duplicate-backend-0.sexp	E3	certificate-tampering	duplicate-backend	reject-R13		
+E3--unknown-backend-0.sexp	E3	certificate-tampering	unknown-backend	reject-R13		
+malformed/E3--codec-junk-section-0.sexp	E3	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/E3--codec-core-version-0.sexp	E3	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/E3--codec-replay-order-0.sexp	E3	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/E3--codec-theory-mismatch-0.sexp	E3	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/E3--codec-dangling-attack-0.sexp	E3	codec-corruption	codec-dangling-attack	codec-reject	attack endpoint is not a declared argument	attack endpoint is not a declared argument
+malformed/E3--codec-truncate-0.sexp	E3	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+E4--undeclared-leaf-0.sexp	E4	undeclared-leaves	undeclared-leaf	reject-R1		
+E4--undeclared-leaf-1.sexp	E4	undeclared-leaves	undeclared-leaf	reject-R1		
+E4--hidden-rule-0.sexp	E4	hidden-policy-extension	hidden-rule	reject-R1		
+E4--hidden-contrary-0.sexp	E4	hidden-policy-extension	hidden-contrary	reject-R12		
+E4--wrong-subst-domain-0.sexp	E4	wrong-formulas	wrong-subst-domain	reject-R3		
+E4--wrong-premise-0.sexp	E4	wrong-formulas	wrong-premise	reject-R4		
+E4--open-obligation-0.sexp	E4	open-obligations	open-obligation	reject-R5		
+E4--wrong-discharge-0.sexp	E4	open-obligations	wrong-discharge	reject-R6		
+E4--trusted-assurance-0.sexp	E4	certificate-tampering	trusted-assurance	reject-R7		
+E4--bad-attack-position-0.sexp	E4	bad-attack-targets	bad-attack-position	reject-R10		
+E4--bad-attack-position-1.sexp	E4	bad-attack-targets	bad-attack-position	reject-R10		
+E4--unlicensed-attack-0.sexp	E4	bad-attack-targets	unlicensed-attack	reject-R11		
+E4--group-conflict-0.sexp	E4	data-integrity	group-conflict	reject-R9		
+E4--duplicate-backend-0.sexp	E4	certificate-tampering	duplicate-backend	reject-R13		
+E4--unknown-backend-0.sexp	E4	certificate-tampering	unknown-backend	reject-R13		
+malformed/E4--codec-junk-section-0.sexp	E4	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/E4--codec-core-version-0.sexp	E4	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/E4--codec-replay-order-0.sexp	E4	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/E4--codec-theory-mismatch-0.sexp	E4	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/E4--codec-dangling-attack-0.sexp	E4	codec-corruption	codec-dangling-attack	codec-reject	attack endpoint is not a declared argument	attack endpoint is not a declared argument
+malformed/E4--codec-truncate-0.sexp	E4	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+E5--undeclared-leaf-0.sexp	E5	undeclared-leaves	undeclared-leaf	reject-R1		
+E5--undeclared-leaf-1.sexp	E5	undeclared-leaves	undeclared-leaf	reject-R1		
+E5--hidden-rule-0.sexp	E5	hidden-policy-extension	hidden-rule	reject-R1		
+E5--hidden-contrary-0.sexp	E5	hidden-policy-extension	hidden-contrary	reject-R12		
+E5--wrong-subst-domain-0.sexp	E5	wrong-formulas	wrong-subst-domain	reject-R3		
+E5--wrong-premise-0.sexp	E5	wrong-formulas	wrong-premise	reject-R4		
+E5--open-obligation-0.sexp	E5	open-obligations	open-obligation	reject-R5		
+E5--wrong-discharge-0.sexp	E5	open-obligations	wrong-discharge	reject-R6		
+E5--trusted-assurance-0.sexp	E5	certificate-tampering	trusted-assurance	reject-R7		
+E5--bad-attack-position-0.sexp	E5	bad-attack-targets	bad-attack-position	reject-R10		
+E5--bad-attack-position-1.sexp	E5	bad-attack-targets	bad-attack-position	reject-R10		
+E5--unlicensed-attack-0.sexp	E5	bad-attack-targets	unlicensed-attack	reject-R11		
+E5--group-conflict-0.sexp	E5	data-integrity	group-conflict	reject-R9		
+E5--duplicate-backend-0.sexp	E5	certificate-tampering	duplicate-backend	reject-R13		
+E5--unknown-backend-0.sexp	E5	certificate-tampering	unknown-backend	reject-R13		
+malformed/E5--codec-junk-section-0.sexp	E5	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/E5--codec-core-version-0.sexp	E5	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/E5--codec-replay-order-0.sexp	E5	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/E5--codec-theory-mismatch-0.sexp	E5	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/E5--codec-dangling-attack-0.sexp	E5	codec-corruption	codec-dangling-attack	codec-reject	attack endpoint is not a declared argument	attack endpoint is not a declared argument
+malformed/E5--codec-truncate-0.sexp	E5	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+S1--undeclared-leaf-0.sexp	S1	undeclared-leaves	undeclared-leaf	reject-R1		
+S1--hidden-rule-0.sexp	S1	hidden-policy-extension	hidden-rule	reject-R1		
+S1--hidden-contrary-0.sexp	S1	hidden-policy-extension	hidden-contrary	reject-R12		
+S1--wrong-subst-domain-0.sexp	S1	wrong-formulas	wrong-subst-domain	reject-R3		
+S1--cert-theory-swap-0.sexp	S1	certificate-tampering	cert-theory-swap	reject-R7		
+S1--cert-payload-tamper-0.sexp	S1	certificate-tampering	cert-payload-tamper	reject-R13		
+S1--unlicensed-attack-0.sexp	S1	bad-attack-targets	unlicensed-attack	reject-R11		
+S1--duplicate-backend-0.sexp	S1	certificate-tampering	duplicate-backend	reject-R13		
+S1--unknown-backend-0.sexp	S1	certificate-tampering	unknown-backend	reject-R13		
+malformed/S1--codec-junk-section-0.sexp	S1	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input
+malformed/S1--codec-core-version-0.sexp	S1	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version
+malformed/S1--codec-replay-order-0.sexp	S1	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order
+malformed/S1--codec-theory-mismatch-0.sexp	S1	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories
+malformed/S1--codec-truncate-0.sexp	S1	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list
+cycle-rebut-6.sexp	-	cycles	rebut-cycle	accept-all-contested		
+cycle-rebut-2.sexp	-	cycles	rebut-cycle	accept-all-contested		
+cycle-rebut-4.sexp	-	cycles	rebut-cycle	accept-all-contested		
+cycle-rebut-5.sexp	-	cycles	rebut-cycle	accept-all-contested		

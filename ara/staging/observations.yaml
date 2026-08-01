@@ -450,3 +450,72 @@ observations:
     promoted_to: null
     crystallized_via: null
     stale: false
+  - id: O23
+    timestamp: "2026-08-01T01:11"
+    provenance: ai-suggested
+    content: >
+      Reinstatement vs contested is decided by the declared attack SET, not the
+      attack kinds available, and the lever is the completeness scan's scope:
+      attack completeness is arg-conclusion-level over declared contrary pairs
+      (firstMissingConflictInfo), so a symmetric contrary pair forces mutual
+      edges (any two args concluding the pair's sides are locked into a 2-cycle
+      -> contested), a ONE-directional contrary permits an unattackable defender
+      (-> reinstatement), and exceptions are outside the scan entirely (undercut
+      edges are always voluntary - the same vocabulary yields E4's reinstatement
+      chain or E5's contested cycle depending on one declared edge).
+    context: >
+      Discovered while designing E4/E5 (N90): the first undermine-reinstatement
+      design used the symmetric generalizes/not_generalizes pair and would have
+      collapsed into a cycle; fixed with the one-directional
+      refuted_by_metareview contrary. E4 context X vs E5 context W differ by
+      exactly one voluntary undercut edge.
+    potential_type: claim
+    bound_to: [N90]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O24
+    timestamp: "2026-08-01T01:11"
+    provenance: ai-suggested
+    content: >
+      The R7/R13 boundary for certificate defects: tampering with a cert's
+      theory digest lands in R7 (CertifierUnallowlisted - the (backend, version,
+      digest) triple is no longer in the rule's certifiers allowlist), not R13.
+      R13 is reachable only when the certificate is allowlisted but replay
+      fails (payload corruption) or at the replay preflight (duplicate/unknown
+      selected backend). Assurance misuse and replay failure are different
+      trust boundaries even though both involve certificates.
+    context: >
+      Pinned empirically by the T1 mutation suite (N91): cert-theory-swap
+      mutants verify as R7, cert-payload-tamper and duplicate/unknown-backend
+      mutants verify as R13, across both drivers. Source: assuranceError in
+      Lara.SupportTerm (certAllowed check precedes the replay oracle).
+    potential_type: concept
+    bound_to: [N91]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
+  - id: O25
+    timestamp: "2026-08-01T01:11"
+    provenance: ai-suggested
+    content: >
+      Verify-at-generation for specified-outcome corpora: a fixture generator
+      that runs each artifact through the production pipeline and ABORTS on any
+      specification mismatch makes the committed suite verified-by-construction,
+      turning generation itself into the first experiment run (148/148 mutants
+      matched their specified class/status on the first full generation).
+      Standing re-verification (MutationSpec) plus seeded reproducibility
+      (committed PRNG seed, byte-stable regeneration) then keep the suite
+      honest without trusting the generation event.
+    context: >
+      Design choice in scripts/gen-mutants.hs (N91), motivated by the risk of
+      committing mutants whose expected class was mis-specified (e.g. the
+      R7-vs-R13 cert boundary would have been wrong a priori).
+    potential_type: heuristic
+    bound_to: [N91]
+    promoted: false
+    promoted_to: null
+    crystallized_via: null
+    stale: false
