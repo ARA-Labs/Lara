@@ -1,0 +1,69 @@
+# Corpus unit self-composing-policies/C04 — gap (policy-mandatory variance CQ unmet)
+#
+# Source: m0/annotations/self-composing-policies.yaml C04 (comparative, controlled_comparison;
+# corpus pin 62e9b54). Headline: CompoNet's empirical inference time grows substantially slower
+# than ProgressiveNet as tasks increase from 1 to 300 (CompoNet gradual, ProgressiveNet clearly
+# quadratic), measured on identical hardware (AMD EPYC 7252 CPU + NVIDIA A5000 GPU), 1-minute /
+# >=40-inference averaging, batch 8 (E04, Figure 3 left).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * E04 Procedure step 3 averages >=40 inferences but Metrics reports only point values -- no
+#     timing variance / CI. corpus-v1 makes variance_reported MANDATORY family-wide, so no honest
+#     variance leaf exists: the complete-support set is empty and the claim lands `gap` (E2-style,
+#     no arg), exactly like adaptive-pruning/C03.
+#   * Policy-vs-annotation divergence (uniform-standard rule): the M0 annotator rated the timing-
+#     variance CQ OPTIONAL ("no stated margin ... does not defeat"); corpus-v1's family-wide call
+#     wins and it is mandatory. The other CQs are annotated met -- baseline_parity <- CQ2/CQ3
+#     (ProgressiveNet over the full k=1..300 sweep, same batch size / synthetic instantiation);
+#     measurement_validity <- CQ1 (identical hardware and timing protocol for both models).
+#   * The claim's mechanistic rider ("because parallel attention over previous module outputs")
+#     is an annotated `assumed` leaf with no isolating experiment; `assumed` is never used in
+#     lowering, so the rider stays in nl, not a leaf. Q = inference_time_scaling; D scopes the
+#     tested range (up to 300 tasks). Both dead ends (N03, N05) are rejected-alternative
+#     motivations, not attacks.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact self-composing-policies at sha256:74f7fb5d060a
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c04
+  nl      = "CompoNet empirical inference time grows substantially slower than ProgressiveNet as tasks increase from 1 to 300 (CompoNet gradual, ProgressiveNet clearly quadratic), on identical hardware with a 1-minute / at-least-40-inference averaging protocol and batch size 8 for both models"
+  formal  = better(componet, prognet, inference_time_scaling, tasks_up_to_300)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E04's two timing curves (CompoNet gradual vs ProgressiveNet quadratic) over
+# k=1..300, per result cell in the annotation and folded into refs.
+leaf e1 : reports(e04, compares(componet, prognet, inference_time_scaling, tasks_up_to_300, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C04, Figure-3-left, Figure-C.1, logic/experiments.md#E04-Expected-outcome, trace/exploration_tree.yaml#N08]
+
+leaf e2 : matched_setup(componet, prognet, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Setup, logic/experiments.md#E04-Procedure-step-1, logic/experiments.md#E04-Baselines, Figure-3-caption]
+
+leaf e3 : valid_measurement(inference_time_scaling, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Setup, logic/experiments.md#E04-Procedure-step-3]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e04) has no honest leaf -- E04 reports point timings
+# only -- and corpus-v1 makes that obligation mandatory. The claim's complete-support set is empty.)
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

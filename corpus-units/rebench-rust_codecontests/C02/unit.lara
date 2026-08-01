@@ -1,0 +1,70 @@
+# Corpus unit rebench-rust_codecontests/C02 — justified (all-CQs-met path; batch: rebench)
+#
+# Source: m0/annotations/rebench-rust_codecontests.yaml C02 (implementation-behavioral,
+# code_inspection; corpus pin 62e9b54). Headline: N=18 parallel generations per batch is the
+# shipped scaffold's configured operating point — solve_code_contests_rust.py binds tries=18 and
+# num_global_loops=3 at module level, passes n=tries into chat.completions.create, and returns
+# early once a batch yields a survivor, bounding candidates at 18 x 3 = 54.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * code_inspection -> corpus-v1 `code_inspection(P, Src, Insp)`; conclusion
+#     code_property(rust_codecontests_solver, batch_of_18_generations). Constants (18, 3, 54)
+#     stay in nl and refs; the formal atom uses the property constant only.
+#   * BOTH mandatory CQs met: version_match (annotation CQ1 — the inspected module is the shipped
+#     kernel that produced score.log, e2) and path_coverage (annotation CQ2 — tries=18 is traced
+#     to the n=tries call site, and CQ3 confirms no mutation of n or the loop count between
+#     iterations, e3). Complete unattacked support -> justified. double_annotate=yes -> reviewed.
+#   * annotation CQ4 (do runtime API logs confirm the provider returned 18 completions per call?)
+#     is unmet-gap but OPTIONAL — a runtime-confirmation theme with no mandatory corpus-v1 home
+#     (the static reading is what the claim asserts). Omitted; no status effect.
+#   * All 7 dead ends are decision:none (MALT-harness failures / rejected alternatives), so there
+#     are no corpus-native attacks.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-rust_codecontests at sha256:1aeed0ad50c4
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c02
+  nl      = "N=18 parallel generations per batch is the shipped scaffold configured operating point: solve_code_contests_rust.py binds tries=18 and num_global_loops=3 at module level, passes n=tries into chat.completions.create, and returns early once a batch yields a survivor, bounding candidates at 18 x 3 = 54"
+  formal  = code_property(rust_codecontests_solver, batch_of_18_generations)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: the static inspection of the shipped module (constants, the n=tries call
+# site, and the early-return control flow), per line in the annotation.
+leaf e1 : inspects(e01, rust_codecontests_solver, batch_of_18_generations)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C02, src/kernel/solve_code_contests_rust.py#25, src/kernel/solve_code_contests_rust.py#27, src/kernel/solve_code_contests_rust.py#173, src/kernel/solve_code_contests_rust.py#188-194, logic/experiments.md#E01, logic/experiments.md#E05]
+
+# version_match: the inspected module is the exact kernel scored for score.log.
+leaf e2 : version_matched(rust_codecontests_solver, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E10, src/kernel/solve_code_contests_rust.py#25]
+
+# path_coverage: tries=18 reaches the generation call site (n=tries), constants never reassigned.
+leaf e3 : covers_paths(e01, rust_codecontests_solver)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [src/kernel/solve_code_contests_rust.py#173, src/kernel/solve_code_contests_rust.py#188-194, logic/experiments.md#E05]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c02) by code_inspection(batch_of_18_generations, rust_codecontests_solver, e01)
+  discharge version_match with e2
+  discharge path_coverage with e3
+
+status c02
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c02 -> justified (its complete support a1 is `in`; spec §8 aggregation)

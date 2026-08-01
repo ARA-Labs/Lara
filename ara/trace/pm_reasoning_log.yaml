@@ -1,193 +1,401 @@
 entries:
-  - turn: "2026-07-21_001#1-4"
-    notes:
-      - "First PM epilogue in this artifact — created staging/, trace/sessions/, this log; covered the whole session (no prior epilogue)."
-      - "N21 submodule decision tagged provenance: user — the user proposed the submodule; AI endorsed and executed."
-      - "Staged O01 (group-dependent claim-type mix) rather than crystallizing: AI-derived this turn, no affirmation; sample design used corpus-map's paperbench-first rule, not O01, so no artifact commitment."
-      - "Did NOT stage the typing distribution numbers as an observation — they are the experiment result on N25, journey fact, direct."
-      - "N23 routed as dead_end (parser assumption refuted by count reconciliation), child of N22."
-  - turn: "2026-07-22_001#1"
-    notes:
-      - "N27/N28 routed direct as experiments (journey facts with recorded results); interpretive syntheses staged as O02-O04."
-      - "Did NOT crystallize O02-O04 despite artifact commitment to annotation-summary.md — the summary IS the observation's source, not a downstream dependent; awaiting affirmation or spec commitment."
-      - "Did NOT promote O01: gate verdict O04 references pooled numbers; per-population split still unadopted."
-      - "lbcs C03 near-miss: suspected scheme mis-assignment, inspection showed coherent two-strand reading; no edit."
-      - "Adjudicated 4 typing disagreements to blind annotator B on rubric grounds (precedence rule); recorded in double-annotation.tsv, propagated to 3 label files."
-  - turn: "2026-07-22_001#2"
-    notes:
-      - "Crystallized O02→C13/C14/C15, O03→C16(+constraints.md), O04→C17 via verbal affirmation ('makes sense to me' on the summary); provenance upgraded ai-suggested → user-revised."
-      - "Status supported (not hypothesis): empirical resolution (E09) and verbal affirmation landed in the same window; C17 carries the preliminary/pooled boundary in Conditions."
-      - "O02 split into three claims (three distinct open questions); promoted_to lists all targets."
-      - "N29 recorded as user decision; propagated into C16/C17 Conditions, constraints.md, annotation-summary.md, m0/README.md — replacing my earlier 'mine the rebench reserve' recommendation."
-      - "Did NOT promote O01 (per-population gate split): the affirmed summary uses pooled numbers; left staged."
-  - turn: "2026-07-22_001#3-10"
-    notes:
-      - "N30-N33 all routed direct as decisions (journey facts with user selections via AskUserQuestion); provenance user except N33 (user-revised: AI analyzed the annotation, user selected the recommended split)."
-      - "N31 recorded as ONE node carrying its same-session revision (audit-only -> quarantine-to-gap) in choice+alternatives — the initial selection was never separately epilogued, so no append-only violation."
-      - "Staged O05 (ND-backend bracketing) rather than crystallizing despite the sentence living in committed spec §5.2 — same precedent as O02-O04 turn 1: the spec sentence IS the observation's source, not a downstream dependent."
-      - "C14 Conditions revision recorded with before/after; Statement untouched (portfolio conclusion unchanged) so status stays supported — no weakening signal."
-      - "C17 Statement narrowed (dropped 'plus three evidence-model decisions') on artifact-commitment; ai-suggested provenance, user can revert."
-      - "Audience principle routed to constraints.md direct (user-dictated, first-person) — not staged; also mirrored in persistent memory."
-      - "Did NOT create a tree node for the M0-frozen marker (documentation act, not a research decision); logged as session event only."
-      - "O01 unpromoted and not stale (1 session-day); C17's pooled-gate Conditions still reference it."
-  - turn: "2026-07-23_001#1"
-    notes:
-      - "Routed the failed HTTPS-only CI repair as dead_end N35 because the logs directly refuted the assumed transport-only cause."
-      - "Routed the verified direct-index workaround as experiment N36; the successful GitHub Actions run is direct evidence."
-      - "Did NOT touch claims or stage an observation: this was infrastructure recovery, not a new interpretation of the research."
-  - turn: "2026-07-22_001#11-18"
-    notes:
-      - "Reconciled after PR #14 rebase under fresh IDs N38-N43/O07-O08 because main already used N34-N37/O06 for later PR #10 sessions."
-      - "Restored the original turn-1 blocks byte-for-structure and appended the M1 material under *_turns11_18 keys; the deleted rebut/undermine open thread is present again."
-      - "C02 advanced hypothesis→testing from the sorry-free Attack theorems; C07/C08 advances remain recorded historically, while main's later stronger states stay authoritative."
-      - "N39 is user-revised because the user accepted the port-as-we-lock recommendation; O07 remains staged because its generalized defect-detection claim has single-instance evidence."
-  - turn: "2026-07-24_001#1"
-    notes:
-      - "Routed the completed review pass as experiment N44: it produced a rebased branch, a new mechanized validator, and reproducible Lean/Haskell results."
-      - "Staged O09/O10 as constraints, not claims: they identify missing model/checker preconditions for results 9 and 7 rather than asserting the results themselves."
-      - "Advanced C09 hypothesis→testing because the validator half is now machine-checked; kept it below supported because attack completeness and the grounded consistency theorem remain."
-      - "Advanced C02 only as historical reconciliation from 2026-07-22; no stronger status was inferred from this session."
-      - "Maturity tracker marked O01/O05/O06 stale after three or more later sessions; no topic had three unpromoted observations requiring promotion."
-  - turn: "2026-07-24_003#1"
-    notes:
-      - "Routed the README sync as a documentation act (session event only, no tree node) — same precedent as the M0-frozen marker; it applies already-frozen decisions rather than making one."
-      - "Considered staging an observation for the LP 'optional → non-shipping' relabel but rejected it: C14 already crystallizes that decision; the README merely catches up."
-      - "No Stage 3/4 activity: no closure signals fired, no logic entries touched."
-  - turn: "2026-07-24_003#2"
-    notes:
-      - "Routed the proof-assistant-style README restructure as a user-directed documentation act (session event, no tree node) — presentation form, not a research decision."
-      - "Verified the CI-badge claim against .github/workflows/ci.yml before writing it (lake build + AxCheck audit both present) rather than asserting from memory."
-      - "No staging, no crystallization, no logic edits; open threads carried unchanged."
-  - turn: "2026-07-24_003#3"
-    notes:
-      - "User question 'did we state purpose and formal framework?' treated as a gap report → purpose paragraph + Theoretical foundations section added; sourced from novelty-and-related-work.md §1-§2 wording, not from memory."
-      - "Kept 'argumentation schemes with critical questions' unattributed (no Walton citation in the repo's own docs); named only lineages the delta table itself names."
-      - "Still no tree node: README content, even theory framing, restates positions already crystallized in the novelty doc and C13-C17."
-  - turn: "2026-07-24_003#4"
-    notes:
-      - "Transcript retrieval logged as a reference, not an event or observation — external context about the ARA ecosystem's motivation, no bearing yet on LARA claims."
-      - "Noted for future turns: the interview articulates the ARA thesis LARA consumes (artifacts carry dead ends + trajectories); if the user draws design conclusions from it, stage them then."
-  - turn: "2026-07-24_003#5"
-    notes:
-      - "User directive to 'record that in a doc' routed as a documentation decision (provenance user) + ai-executed reference note; followed the docs/references/ house style incl. a provenance flag since the source is auto-captions."
-      - "Considered staging the interview's ecosystem premises (infinite-bandwidth consumers, format-as-compounding-mechanism) as observations; rejected — they are ARA-side assumptions, and the note itself marks them motivational, not evidence for LARA claims."
-      - "No tree node: the doc restates external positions; LARA design decisions it echoes (C13-C17) are already crystallized."
-  - turn: "2026-07-24_003#6"
-    notes:
-      - "Chose the [09:01] ARA-primitive quote for the README epigraph over [04:00] (knowledge-compounding, too philosophical for a checker's README) and [10:00] (dead-ends, narrower); it names the exact objects LARA types."
-      - "Quote is condensed with visible ellipses and links to the reference note rather than restating the auto-caption caveat inline."
-      - "Documentation act; no tree node, no staging, no logic edits."
-  - turn: "2026-07-24_003#7"
-    notes:
-      - "User overrode the epigraph choice: [04:00] knowledge-compounding quote, unattributed — earlier 'too philosophical' judgment reversed by the user ('we are doing logic theory already'); provenance user-revised for the epigraph."
-      - "Attribution line dropped per user; the reference note still documents the source, so provenance is preserved one hop away."
-  - turn: "2026-07-25_001#1-3"
-    notes:
-      - "Backfilled the 2026-07-24 late-evening comparison-discussion turn as event turn-8 in 2026-07-24_003 (calendar-day rule; different conversation, same day) — no tree node there since its interpretive content only became recordable once source-verified today."
-      - "Crystallized C18 same-turn (allowed: empirical resolution — rit source read — AND artifact commitment — §11 addendum + delta row committed d192047 — fired together); provenance user-revised: hypothesis is the user's ('only numerical comparison'), the grounding-interface generalization is AI sharpening."
-      - "Number grounding for C18 done from verbatim rit source quotes (primitives.py RELATIONS/OBJECTS dicts, grammar.py `by decide` docstring, the 'why is NOT formalizable' admission)."
-      - "Staged O12 (composition architecture) rather than crystallizing: written into §11.4 but nothing depends on it — a doc recording an idea is not artifact commitment."
-      - "Did NOT stage the boss-comment positioning separately: it restates C06/C18 and the comparison doc; no independent content."
-      - "Stage 4: revised the related_work.md rit line (empirical-resolution signal); considered but rejected promoting rit to a full RW11 entry — the additional-citations tier still fits a sibling project without a publication."
-      - "Near-miss: O05/O06 remain stale-staged, untouched by this turn's topic; no abandonment action beyond the existing stale flags."
-  - turn: "2026-07-25_001#4"
-    notes:
-      - "N47 routed direct as experiment (source audit with a definite result — five confirmed discrepancies); the numbers/file:line are journey facts, not interpretation."
-      - "Crystallized O13 -> C19 same-turn via empirical-resolution + artifact-commitment, mirroring the C18 precedent (user hypothesis, source-verified, committed to doc/PR). Signal is the source audit result + the §11.5 commit (ba6c45e) on PR #22."
-      - "C19 provenance user-revised, not ai-suggested: the core methodological principle ('describe rit by what its gate enforces, not its write-up') was a first-person user directive this turn, without exact claim wording — the user-revised case. Empirical-resolution/artifact-commitment do not themselves upgrade provenance, but the user directive does."
-      - "C19 depends on C18 (both about rit; C19 is the implementation-vs-spec layer, C18 the expressiveness layer) — sibling claims, C18 is the nearer premise (grounding interface is where finding #3, the Python extractor in the TCB, bites)."
-      - "Did NOT rewrite O12 (append-only): finding #3 qualifies but does not hard-contradict its K-tier premise (O12 speaks of rit's designed capability; K-tier is designed, just unwired). Added a NOTE comment on O12 + a designed-but-not-yet-wired caveat in doc §11.4 instead of an unresolved decision node — the gap is reconciled, not adversarial."
-      - "Did NOT revise C18: no signal touched it this turn; the new finding is a distinct claim, not evidence for/against C18's expressiveness statement."
-      - "Number grounding for C19: each of the five Sources entries opened the live rit source and copied the matched construct verbatim ([result] — code the audit found), not from memory."
-  - turn: "2026-07-25_001#5"
-    notes:
-      - "Packaging/consistency turn — no new claim or experiment crystallized. Logged as ai_actions + an open-thread update only; the nitpick edited docs/, not ara/logic/, so no logic_revisions entry."
-      - "Discovered PR #22's squash (29c7570) captured only d192047+5307671; ba6c45e (§11.5) + 3692817 (C19 capture) were stranded on the old branch. Recovered by cherry-picking both onto a fresh main-based branch — clean apply because main already holds the squashed base content."
-      - "Nitpick was a doc-internal-consistency fix: §4 asserted rit's K-tier as fact, which §11.5 #3 refutes. Chose forward-pointers over deleting the K-tier framing (K-tier is real as rit's design, just unwired) — keeps the dual-strategy narrative while flagging the shipping reality."
-      - "Did NOT touch C19 or any logic/ entry — its content already reflects the finding; this turn only moved it to a landable PR."
-  - turn: "2026-07-25_001#6"
-    notes:
-      - "Staged O14 and crystallized same-turn to C20 via verbal-affirmation ('this summary is very good, did you write it down?') + artifact-commitment (§11.6 + C20 written). Both signals present, matching the C18/C19 precedent."
-      - "C20 kept distinct from C19 (depends on it): C19 = 'guarantee is the gate's fixed point' (general); C20 = the specific mechanism/failure mode by which node-level verification fails to compose (missing-edge laundering). C20 is the falsifiable sharpening C19's Falsification did not cover."
-      - "Provenance user-revised: the framing was mine but the user's affirmation + 'did you write it down?' is a first-person adoption; empirical-resolution/artifact-commitment alone would not upgrade, the affirmation does."
-      - "C20 Falsification is asymmetric-edge-specific (a gate path that derives true edges from proof terms), not a re-run of the C19 gate — kept it a real-world/system-behavior disproof per the schema."
-      - "Did NOT promote O12: this turn sharpened the lara-side division of labor (proven propagation) but still no code/milestone depends on the rit<->lara integration; O12 stays staged."
-  - turn: "2026-07-25_001#7"
-    notes:
-      - "Packaging/recovery turn — no new claim/experiment. Same partial-squash pattern recurred: PR #23 squash (a5328b5) stranded its final commit 0427cf7 (§11.6 + C20). Recovered by cherry-pick onto a fresh main-based branch; opened PR #24."
-      - "Flagged the recurrence explicitly in open_threads (twice now: #22 and #23) — root cause is squash-merging before the branch's last push lands. Added a merge-completeness note to the PR body."
-      - "No logic/ edit: §11.6 + C20 content already correct from turn 6; this turn only relocates it to a landable PR."
-  - turn: "2026-07-27_001#1"
-    notes:
-      - "Recorded the M3 milestone as a pivot (N65, phase boundary) + experiment (N66, the implementation) + decision (N67, corpus method) directly in the trace — journey facts, ai-executed under a user-approved plan."
-      - "Advanced C12 hypothesis->testing via artifact-commitment: the claim was explicitly conditioned on a shared serialized core 'not yet built', which M3 built (Lara.Wire + differential.sh). Did NOT jump to 'supported' — that needs an empirical divergence result the researcher comments on; 19/19 agreement + one localized non-bug divergence is testing-stage evidence only."
-      - "NEAR-MISS: considered rewriting C09's Evidence-basis clause 'does not implement ... the production Haskell checker ... or the full holes/incompleteAlternative computation' now that M3 implements both. Rejected: that clause scopes what the LEAN result-7 PROOF covers (still PL-only, unchanged by M3, which adds a separate implementation). Editing it would conflate proof-scope with project-state. Left C09 untouched."
-      - "Staged O15 (numeric-literal canonNum-vs-id divergence) as potential_type: constraint, not promoted: it is documented and the corpus avoids it, but it is a latent boundary caveat the researcher has not yet affirmed as a project constraint; near closure via artifact-commitment but held for conservatism."
-      - "Provenance on the C12 edits is ai-suggested (autonomous reconciliation on an artifact signal); the researcher can revert."
-  - turn: "2026-07-28_001#1"
-    notes:
-      - "Recorded M4a as a pivot (N68, M3->M4a phase boundary) + experiment (N69, the implementation) + four decisions (N70 grammar freeze, N71 Example-A correction, N72 R1/R12/R10 mapping, N73 result-12 scope) directly in the trace — journey facts, ai-executed under an eng-review-CLEAR plan. N71 provenance is USER: the AskUserQuestion selection 'Correct A to reach its golden' is a first-person decision."
-      - "Stage 4 NO logic edits (conservative). Near-miss C10: M4a is the first actual delivery of the 'worked examples + rejection conformance' C10 posits, BUT C10 is a methodology meta-claim explicitly scoped 'not about LARA's own internals' (its Conditions) and already supported by field exemplars — LARA's own delivery is not evidence for the methodology claim. No edit."
-      - "Near-miss C11 (hypothesis): M4a built the trusted-checker half + adversarially-validated rejection conformance (R1/R12/R10) and the Example-A catch is concrete trusted-checker evidence — but C11 bundles the UNTRUSTED PRODUCER (M4b, unbuilt), so its core isn't testable yet. Left at hypothesis; staged the trusted-checker-value evidence as O16 (claim candidate) instead of forcing C11."
-      - "Near-miss C12 (testing): 32/32 both-drivers agreement adds 8 more agreeing fixtures but no NEW divergence for the researcher to comment on — the 'fallible-oracle / N+1-version' framing needs a divergence event, not more agreement. Stays testing (same rule as the M3 #1 near-miss)."
-      - "Crystallized O15 (num-literal caveat, staged since M3 and previously held for conservatism) -> constraints.md via artifact-commitment: a SECOND no-num-literal differential prop now guards it over the 8 worked-example anchors. Also crystallized O17 (defeasible-only) same turn via artifact-commitment (honesty note in m4a-checklist + TODOS + coverage-test scope) — constraints.md is exactly its home (Known limitations)."
-      - "Staged O16 (hand-authored-cert-not-self-checking) as potential_type: claim, NOT crystallized: the user's affirmation was scoped to the FIX CHOICE (N71), not to the general lesson; the general claim awaits affirmation or a second instance. Staged O18 (result-12 codec-anchor scope) as potential_type: concept — a scoping clarification, no closure signal."
-  - turn: "2026-07-29_001#1"
-    notes:
-      - "Routed the completed strict-cert implementation as experiment N74: code, generated S1 artifacts, CLI output, R13 mutation, full Haskell suite, and 33/33 both-driver agreement are direct journey facts."
-      - "Reconciled the O17-derived limitation in constraints.md rather than editing O17: O17 remains append-only and historically true for lara-syntax@0.1/M4a; the mutable logic snapshot now records additive @0.2 + S1 as closing the gap."
-      - "Added E10 as a distinct frontend-conformance experiment instead of advancing C03/C05: S1 demonstrates reachability and cross-driver behavior, not the adapter soundness theorems those claims assert."
-      - "Did NOT promote O16 or O18: this turn supplied no user affirmation of the generalized hand-authored-certificate claim and did not change result 12's scope."
-  - turn: "2026-07-30_001#1"
-    notes:
-      - "Routed the result-9 mechanization as experiment N78 (direct): Erase.lean, the build, and the AxCheck run are journey facts I independently verified, not just the implementing fork's report."
-      - "Recorded N76 as a dead_end (not skipped): the naive per-arg erase-equality statement is a genuinely abandoned approach with a reusable lesson (containsB payload-sensitivity); it grounds the Model-A decision N77."
-      - "Reconciled C04 rather than crystallizing a new claim: result 9 IS C04's subject (backend replacement), so this turn is empirical resolution on C04. Kept Status 'supported' — mechanization confirms, and conservatism forbids demotion on one event; the finding sharpened Conditions, not the verdict."
-      - "Provenance of the two decisions (N75 track, N77 Model A) = user: both were explicit AskUserQuestion selections. N76/N78 = ai-executed."
-      - "Staged O19 (potential_type concept) instead of promoting: the methodological pattern (injective relabel vs collapse-to-marker) is broader than C04's wording, but has no independent closure signal this turn beyond the C04 fold — left for future crystallization."
-      - "C04 revision provenance = ai-suggested: user chose the model but did not dictate the claim wording; revertible."
-  - turn: "2026-07-30_001#2"
-    notes:
-      - "PR-#41 review item 1: verified mapAssurAtt_target/mapAssurDis_eq are referenced ONLY by their AxCheck lines (grep, source-only) before removing — a real dead-export check, not taking the reviewer's word. Recorded as decision N79 (provenance user: 'keep them removed')."
-      - "Pushed back mildly on 'might we need them later': named the one concrete future consumer (CheckedProgram-relabel transport) but still recommended removal (trivially re-derivable, no-dead-code rule) — user agreed. The transport landed next turn and DID re-add both, vindicating the add-when-used call."
-      - "Item 2 routed to issue #42 rather than staged as an observation — it is a concrete work proposal, not an interpretive claim; the trace already carries the non-vacuity concern via N81."
-  - turn: "2026-07-30_001#3"
-    notes:
-      - "N80 (do #42 over Haskell port) provenance user ('do 42 first'); N81 (transport) ai-executed and independently verified (build + AxCheck), not trusting the fork's report."
-      - "Updated C04 Evidence basis (not Statement/Conditions/Status): the transport is new confirming evidence + constructive non-vacuity, not a scope change; status stays supported. Second logic_revision on C04 this day."
-      - "Did NOT crystallize O19 despite the transport being an artifact that uses the injective-relabel machinery: N81 refined O19 (forward typing transport needs only hpres, NOT injectivity — injectivity is only for nodup/edge-equality), so the staged wording ('injective relabel') is now imprecise as a general concept. Left staged pending a cleaner formulation; observations are append-only so the refinement lives in N81 + this log."
-  - turn: "2026-07-30_001#4"
-    notes:
-      - "Routed the explicit user sequencing choice ('do house keeping first') as decision N82; it closes status drift before M5 rather than asserting a new research claim."
-      - "Updated current-state status documents and presentation/source comments; closed #31/#37 from merged PR evidence. No code behavior changed, so verification was document re-read + stale-phrase scan + GitHub issue-state reads, not a test run."
-      - "Did NOT revise logic claims or promote O19: this turn changed project bookkeeping, not the backend-replacement mechanism or evidence."
-  - turn: "2026-07-30_001#5"
-    notes:
-      - "Crystallized C21 (data-conflict → gap/R9) on TWO signals: artifact-commitment (code committed + PR #45 depends on the routing) AND empirical-resolution (differential 41/41 + AxCheck-clean this turn). Provenance ai-suggested, NOT user: the routing is frozen spec §4.3 but the user never verbally affirmed C21-as-claim; reversible on review. Flagged in open_threads that the PR is unmerged, so revisit if review changes it."
-      - "C21 Dependencies [C01, C16]: C01 (≡ decides identity) is the real premise — the group check IS decidable because ≡ is; C16 is the sibling gap-not-defeat principle (spec explicitly says 'same gap-not-defeat routing'), included as the conceptual parent it generalizes alongside, not a logical premise."
-      - "Did NOT revise C16: #38 extends the gap-not-defeat family to data conflicts but C16's scope (unmet critical questions) is unchanged — no signal to touch it; near-miss noted."
-      - "Staged O20 (three-tier rejection architecture) rather than crystallizing a concept: the 'driver-boundary tier' framing is my synthesis this turn with no reuse/affirmation yet — default to non-promotion."
-      - "N85 routed as dead_end (not a decision): the Gamma-removal approach was tried in reasoning and abandoned because checkArguments rejects R1 — a genuine failed hypothesis with a reusable lesson (drop args, don't null Gamma)."
-      - "Skipped the Edit-tool-wrote-to-main-repo incident: a tooling/process slip (fixed same turn, main left clean), not research-significant — no trace node."
-  - turn: "2026-07-31_001#1"
-    notes:
-      - "Routed the review-remediation work as ONE experiment node N87 (not a dead_end): the original #38 design was incomplete-then-completed, not tried-and-abandoned — no failed hypothesis with a reusable lesson of its own. The reusable lesson (front-door parity) went to staging as O21."
-      - "Finding 1 was a genuine correctness hole (reviewer-reproduced): via .lara a dangling group member silently evaded R9. Captured as N87's headline result + staged O21 concept. Did NOT create a separate dead_end — the fix restores the intended routing, it does not abandon it."
-      - "Updated C21 Proof (evidence only), NOT Statement/Conditions/Status: the R9 stderr differential anchor + closed evasion hole are confirming evidence; C21 was already supported and the routing model was never wrong (one front door was under-enforced). Signal logged as empirical-resolution; provenance ai-suggested (revertible)."
-      - "Did NOT weaken C21 despite the discovered hole: per conservatism, a single implementation gap in one front door is not a demotion of a supported semantic claim — it is an evidence event that the routing now holds at BOTH doors. Near-miss considered and rejected."
-      - "Staged O21 (front-door invariant parity) rather than crystallizing: sibling of O20 (rejection tiers), no reuse/affirmation yet and PR #45 unmerged — default to non-promotion."
-      - "The doc/grammar/haddock fixes (findings 2,5,6,7,8,10) are provenance-record corrections, not new research content — folded into N87's action list, no separate nodes/observations."
-  - turn: "2026-07-31_001#2"
-    notes:
-      - "Routed the second-round remediation as ONE experiment node N88 (not a dead_end): the Haskell-only defense was an incomplete change completed, not an abandoned hypothesis. The reusable lesson went to staging as O22."
-      - "Staged O22 as potential_type: heuristic (twin-parity discipline is a 'how'), sibling of O21 (per-door parity) but distinct axis: per-TWIN definitional parity vs per-DOOR invariant parity. Default non-promotion: single instance, PR #45 unmerged, no user affirmation."
-      - "Considered artifact-commitment crystallization for O21 (this turn's ElaborateSpec negatives + 3 fixtures follow its 'exercise every door on the same malformed input' rule) — rejected: PR still unmerged and prior turn deliberately deferred on the same ground. Near-miss logged."
-      - "Extended C21 Proof only (empirical-resolution: gates green, twin re-synced, negatives 9/9). Did NOT touch Statement/Conditions/Status: the twin divergence was a mechanization-integrity gap on an unreachable input class, not evidence against the routing. Considered and rejected weakening."
-      - "Chose to mirror the Haskell semantics in Lean rather than the reviewer's alternative (document skip-semantics): CLAUDE.md says Lean proofs carry soundness for frozen §4.3 definitions — twins must agree by construction, not decoder gating."
-  - turn: "2026-08-01_001#1"
-    notes:
-      - "Routed the milestone opening as pivot N89 (provenance user: branch scope was a user directive) and the two workstreams as separate experiment nodes N90 (T4) / N91 (T1) — one node each, not per-file, since each has a single verifiable outcome (matrix closed; suite verified)."
-      - "Staged O23 (completeness-scope lever) as potential claim rather than crystallizing on artifact commitment: PR #49 is unmerged — same precedent as O21/O22 deferral on PR #45. Near-miss logged; revisit on merge."
-      - "Staged O24 as concept (a boundary/definition, not a falsifiable mechanism) and O25 as heuristic (a 'how')."
-      - "Extended C21 Proof only (empirical-resolution: 7 generated R9 mutants byte-identical across drivers). Did NOT touch other supported claims despite the suite exercising their classes — the mutants confirm checker behavior generally; only C21 has a routing claim the R9 family bears on directly."
-      - "Did NOT create a dead_end for the abandoned symmetric-contrary undermine-reinstatement design: it was an in-turn design iteration, never committed or run; captured inside N90 result + O23 context instead."
+- turn: 2026-07-21_001#1-4
+  notes:
+  - First PM epilogue in this artifact — created staging/, trace/sessions/, this log; covered the whole
+    session (no prior epilogue).
+  - 'N21 submodule decision tagged provenance: user — the user proposed the submodule; AI endorsed and
+    executed.'
+  - 'Staged O01 (group-dependent claim-type mix) rather than crystallizing: AI-derived this turn, no affirmation;
+    sample design used corpus-map''s paperbench-first rule, not O01, so no artifact commitment.'
+  - Did NOT stage the typing distribution numbers as an observation — they are the experiment result on
+    N25, journey fact, direct.
+  - N23 routed as dead_end (parser assumption refuted by count reconciliation), child of N22.
+- turn: 2026-07-22_001#1
+  notes:
+  - N27/N28 routed direct as experiments (journey facts with recorded results); interpretive syntheses
+    staged as O02-O04.
+  - Did NOT crystallize O02-O04 despite artifact commitment to annotation-summary.md — the summary IS
+    the observation's source, not a downstream dependent; awaiting affirmation or spec commitment.
+  - 'Did NOT promote O01: gate verdict O04 references pooled numbers; per-population split still unadopted.'
+  - 'lbcs C03 near-miss: suspected scheme mis-assignment, inspection showed coherent two-strand reading;
+    no edit.'
+  - Adjudicated 4 typing disagreements to blind annotator B on rubric grounds (precedence rule); recorded
+    in double-annotation.tsv, propagated to 3 label files.
+- turn: 2026-07-22_001#2
+  notes:
+  - Crystallized O02→C13/C14/C15, O03→C16(+constraints.md), O04→C17 via verbal affirmation ('makes sense
+    to me' on the summary); provenance upgraded ai-suggested → user-revised.
+  - 'Status supported (not hypothesis): empirical resolution (E09) and verbal affirmation landed in the
+    same window; C17 carries the preliminary/pooled boundary in Conditions.'
+  - O02 split into three claims (three distinct open questions); promoted_to lists all targets.
+  - N29 recorded as user decision; propagated into C16/C17 Conditions, constraints.md, annotation-summary.md,
+    m0/README.md — replacing my earlier 'mine the rebench reserve' recommendation.
+  - 'Did NOT promote O01 (per-population gate split): the affirmed summary uses pooled numbers; left staged.'
+- turn: 2026-07-22_001#3-10
+  notes:
+  - 'N30-N33 all routed direct as decisions (journey facts with user selections via AskUserQuestion);
+    provenance user except N33 (user-revised: AI analyzed the annotation, user selected the recommended
+    split).'
+  - N31 recorded as ONE node carrying its same-session revision (audit-only -> quarantine-to-gap) in choice+alternatives
+    — the initial selection was never separately epilogued, so no append-only violation.
+  - 'Staged O05 (ND-backend bracketing) rather than crystallizing despite the sentence living in committed
+    spec §5.2 — same precedent as O02-O04 turn 1: the spec sentence IS the observation''s source, not
+    a downstream dependent.'
+  - C14 Conditions revision recorded with before/after; Statement untouched (portfolio conclusion unchanged)
+    so status stays supported — no weakening signal.
+  - C17 Statement narrowed (dropped 'plus three evidence-model decisions') on artifact-commitment; ai-suggested
+    provenance, user can revert.
+  - Audience principle routed to constraints.md direct (user-dictated, first-person) — not staged; also
+    mirrored in persistent memory.
+  - Did NOT create a tree node for the M0-frozen marker (documentation act, not a research decision);
+    logged as session event only.
+  - O01 unpromoted and not stale (1 session-day); C17's pooled-gate Conditions still reference it.
+- turn: 2026-07-23_001#1
+  notes:
+  - Routed the failed HTTPS-only CI repair as dead_end N35 because the logs directly refuted the assumed
+    transport-only cause.
+  - Routed the verified direct-index workaround as experiment N36; the successful GitHub Actions run is
+    direct evidence.
+  - 'Did NOT touch claims or stage an observation: this was infrastructure recovery, not a new interpretation
+    of the research.'
+- turn: 2026-07-22_001#11-18
+  notes:
+  - 'Reconciled after PR #14 rebase under fresh IDs N38-N43/O07-O08 because main already used N34-N37/O06
+    for later PR #10 sessions.'
+  - Restored the original turn-1 blocks byte-for-structure and appended the M1 material under *_turns11_18
+    keys; the deleted rebut/undermine open thread is present again.
+  - C02 advanced hypothesis→testing from the sorry-free Attack theorems; C07/C08 advances remain recorded
+    historically, while main's later stronger states stay authoritative.
+  - N39 is user-revised because the user accepted the port-as-we-lock recommendation; O07 remains staged
+    because its generalized defect-detection claim has single-instance evidence.
+- turn: 2026-07-24_001#1
+  notes:
+  - 'Routed the completed review pass as experiment N44: it produced a rebased branch, a new mechanized
+    validator, and reproducible Lean/Haskell results.'
+  - 'Staged O09/O10 as constraints, not claims: they identify missing model/checker preconditions for
+    results 9 and 7 rather than asserting the results themselves.'
+  - Advanced C09 hypothesis→testing because the validator half is now machine-checked; kept it below supported
+    because attack completeness and the grounded consistency theorem remain.
+  - Advanced C02 only as historical reconciliation from 2026-07-22; no stronger status was inferred from
+    this session.
+  - Maturity tracker marked O01/O05/O06 stale after three or more later sessions; no topic had three unpromoted
+    observations requiring promotion.
+- turn: 2026-07-24_003#1
+  notes:
+  - Routed the README sync as a documentation act (session event only, no tree node) — same precedent
+    as the M0-frozen marker; it applies already-frozen decisions rather than making one.
+  - 'Considered staging an observation for the LP ''optional → non-shipping'' relabel but rejected it:
+    C14 already crystallizes that decision; the README merely catches up.'
+  - 'No Stage 3/4 activity: no closure signals fired, no logic entries touched.'
+- turn: 2026-07-24_003#2
+  notes:
+  - Routed the proof-assistant-style README restructure as a user-directed documentation act (session
+    event, no tree node) — presentation form, not a research decision.
+  - Verified the CI-badge claim against .github/workflows/ci.yml before writing it (lake build + AxCheck
+    audit both present) rather than asserting from memory.
+  - No staging, no crystallization, no logic edits; open threads carried unchanged.
+- turn: 2026-07-24_003#3
+  notes:
+  - User question 'did we state purpose and formal framework?' treated as a gap report → purpose paragraph
+    + Theoretical foundations section added; sourced from novelty-and-related-work.md §1-§2 wording, not
+    from memory.
+  - Kept 'argumentation schemes with critical questions' unattributed (no Walton citation in the repo's
+    own docs); named only lineages the delta table itself names.
+  - 'Still no tree node: README content, even theory framing, restates positions already crystallized
+    in the novelty doc and C13-C17.'
+- turn: 2026-07-24_003#4
+  notes:
+  - Transcript retrieval logged as a reference, not an event or observation — external context about the
+    ARA ecosystem's motivation, no bearing yet on LARA claims.
+  - 'Noted for future turns: the interview articulates the ARA thesis LARA consumes (artifacts carry dead
+    ends + trajectories); if the user draws design conclusions from it, stage them then.'
+- turn: 2026-07-24_003#5
+  notes:
+  - User directive to 'record that in a doc' routed as a documentation decision (provenance user) + ai-executed
+    reference note; followed the docs/references/ house style incl. a provenance flag since the source
+    is auto-captions.
+  - Considered staging the interview's ecosystem premises (infinite-bandwidth consumers, format-as-compounding-mechanism)
+    as observations; rejected — they are ARA-side assumptions, and the note itself marks them motivational,
+    not evidence for LARA claims.
+  - 'No tree node: the doc restates external positions; LARA design decisions it echoes (C13-C17) are
+    already crystallized.'
+- turn: 2026-07-24_003#6
+  notes:
+  - Chose the [09:01] ARA-primitive quote for the README epigraph over [04:00] (knowledge-compounding,
+    too philosophical for a checker's README) and [10:00] (dead-ends, narrower); it names the exact objects
+    LARA types.
+  - Quote is condensed with visible ellipses and links to the reference note rather than restating the
+    auto-caption caveat inline.
+  - Documentation act; no tree node, no staging, no logic edits.
+- turn: 2026-07-24_003#7
+  notes:
+  - 'User overrode the epigraph choice: [04:00] knowledge-compounding quote, unattributed — earlier ''too
+    philosophical'' judgment reversed by the user (''we are doing logic theory already''); provenance
+    user-revised for the epigraph.'
+  - Attribution line dropped per user; the reference note still documents the source, so provenance is
+    preserved one hop away.
+- turn: 2026-07-25_001#1-3
+  notes:
+  - Backfilled the 2026-07-24 late-evening comparison-discussion turn as event turn-8 in 2026-07-24_003
+    (calendar-day rule; different conversation, same day) — no tree node there since its interpretive
+    content only became recordable once source-verified today.
+  - 'Crystallized C18 same-turn (allowed: empirical resolution — rit source read — AND artifact commitment
+    — §11 addendum + delta row committed d192047 — fired together); provenance user-revised: hypothesis
+    is the user''s (''only numerical comparison''), the grounding-interface generalization is AI sharpening.'
+  - Number grounding for C18 done from verbatim rit source quotes (primitives.py RELATIONS/OBJECTS dicts,
+    grammar.py `by decide` docstring, the 'why is NOT formalizable' admission).
+  - 'Staged O12 (composition architecture) rather than crystallizing: written into §11.4 but nothing depends
+    on it — a doc recording an idea is not artifact commitment.'
+  - 'Did NOT stage the boss-comment positioning separately: it restates C06/C18 and the comparison doc;
+    no independent content.'
+  - 'Stage 4: revised the related_work.md rit line (empirical-resolution signal); considered but rejected
+    promoting rit to a full RW11 entry — the additional-citations tier still fits a sibling project without
+    a publication.'
+  - 'Near-miss: O05/O06 remain stale-staged, untouched by this turn''s topic; no abandonment action beyond
+    the existing stale flags.'
+- turn: 2026-07-25_001#4
+  notes:
+  - N47 routed direct as experiment (source audit with a definite result — five confirmed discrepancies);
+    the numbers/file:line are journey facts, not interpretation.
+  - 'Crystallized O13 -> C19 same-turn via empirical-resolution + artifact-commitment, mirroring the C18
+    precedent (user hypothesis, source-verified, committed to doc/PR). Signal is the source audit result
+    + the §11.5 commit (ba6c45e) on PR #22.'
+  - 'C19 provenance user-revised, not ai-suggested: the core methodological principle (''describe rit
+    by what its gate enforces, not its write-up'') was a first-person user directive this turn, without
+    exact claim wording — the user-revised case. Empirical-resolution/artifact-commitment do not themselves
+    upgrade provenance, but the user directive does.'
+  - 'C19 depends on C18 (both about rit; C19 is the implementation-vs-spec layer, C18 the expressiveness
+    layer) — sibling claims, C18 is the nearer premise (grounding interface is where finding #3, the Python
+    extractor in the TCB, bites).'
+  - 'Did NOT rewrite O12 (append-only): finding #3 qualifies but does not hard-contradict its K-tier premise
+    (O12 speaks of rit''s designed capability; K-tier is designed, just unwired). Added a NOTE comment
+    on O12 + a designed-but-not-yet-wired caveat in doc §11.4 instead of an unresolved decision node —
+    the gap is reconciled, not adversarial.'
+  - 'Did NOT revise C18: no signal touched it this turn; the new finding is a distinct claim, not evidence
+    for/against C18''s expressiveness statement.'
+  - 'Number grounding for C19: each of the five Sources entries opened the live rit source and copied
+    the matched construct verbatim ([result] — code the audit found), not from memory.'
+- turn: 2026-07-25_001#5
+  notes:
+  - Packaging/consistency turn — no new claim or experiment crystallized. Logged as ai_actions + an open-thread
+    update only; the nitpick edited docs/, not ara/logic/, so no logic_revisions entry.
+  - 'Discovered PR #22''s squash (29c7570) captured only d192047+5307671; ba6c45e (§11.5) + 3692817 (C19
+    capture) were stranded on the old branch. Recovered by cherry-picking both onto a fresh main-based
+    branch — clean apply because main already holds the squashed base content.'
+  - 'Nitpick was a doc-internal-consistency fix: §4 asserted rit''s K-tier as fact, which §11.5 #3 refutes.
+    Chose forward-pointers over deleting the K-tier framing (K-tier is real as rit''s design, just unwired)
+    — keeps the dual-strategy narrative while flagging the shipping reality.'
+  - Did NOT touch C19 or any logic/ entry — its content already reflects the finding; this turn only moved
+    it to a landable PR.
+- turn: 2026-07-25_001#6
+  notes:
+  - Staged O14 and crystallized same-turn to C20 via verbal-affirmation ('this summary is very good, did
+    you write it down?') + artifact-commitment (§11.6 + C20 written). Both signals present, matching the
+    C18/C19 precedent.
+  - 'C20 kept distinct from C19 (depends on it): C19 = ''guarantee is the gate''s fixed point'' (general);
+    C20 = the specific mechanism/failure mode by which node-level verification fails to compose (missing-edge
+    laundering). C20 is the falsifiable sharpening C19''s Falsification did not cover.'
+  - 'Provenance user-revised: the framing was mine but the user''s affirmation + ''did you write it down?''
+    is a first-person adoption; empirical-resolution/artifact-commitment alone would not upgrade, the
+    affirmation does.'
+  - C20 Falsification is asymmetric-edge-specific (a gate path that derives true edges from proof terms),
+    not a re-run of the C19 gate — kept it a real-world/system-behavior disproof per the schema.
+  - 'Did NOT promote O12: this turn sharpened the lara-side division of labor (proven propagation) but
+    still no code/milestone depends on the rit<->lara integration; O12 stays staged.'
+- turn: 2026-07-25_001#7
+  notes:
+  - 'Packaging/recovery turn — no new claim/experiment. Same partial-squash pattern recurred: PR #23 squash
+    (a5328b5) stranded its final commit 0427cf7 (§11.6 + C20). Recovered by cherry-pick onto a fresh main-based
+    branch; opened PR #24.'
+  - 'Flagged the recurrence explicitly in open_threads (twice now: #22 and #23) — root cause is squash-merging
+    before the branch''s last push lands. Added a merge-completeness note to the PR body.'
+  - 'No logic/ edit: §11.6 + C20 content already correct from turn 6; this turn only relocates it to a
+    landable PR.'
+- turn: 2026-07-27_001#1
+  notes:
+  - Recorded the M3 milestone as a pivot (N65, phase boundary) + experiment (N66, the implementation)
+    + decision (N67, corpus method) directly in the trace — journey facts, ai-executed under a user-approved
+    plan.
+  - 'Advanced C12 hypothesis->testing via artifact-commitment: the claim was explicitly conditioned on
+    a shared serialized core ''not yet built'', which M3 built (Lara.Wire + differential.sh). Did NOT
+    jump to ''supported'' — that needs an empirical divergence result the researcher comments on; 19/19
+    agreement + one localized non-bug divergence is testing-stage evidence only.'
+  - 'NEAR-MISS: considered rewriting C09''s Evidence-basis clause ''does not implement ... the production
+    Haskell checker ... or the full holes/incompleteAlternative computation'' now that M3 implements both.
+    Rejected: that clause scopes what the LEAN result-7 PROOF covers (still PL-only, unchanged by M3,
+    which adds a separate implementation). Editing it would conflate proof-scope with project-state. Left
+    C09 untouched.'
+  - 'Staged O15 (numeric-literal canonNum-vs-id divergence) as potential_type: constraint, not promoted:
+    it is documented and the corpus avoids it, but it is a latent boundary caveat the researcher has not
+    yet affirmed as a project constraint; near closure via artifact-commitment but held for conservatism.'
+  - Provenance on the C12 edits is ai-suggested (autonomous reconciliation on an artifact signal); the
+    researcher can revert.
+- turn: 2026-07-28_001#1
+  notes:
+  - 'Recorded M4a as a pivot (N68, M3->M4a phase boundary) + experiment (N69, the implementation) + four
+    decisions (N70 grammar freeze, N71 Example-A correction, N72 R1/R12/R10 mapping, N73 result-12 scope)
+    directly in the trace — journey facts, ai-executed under an eng-review-CLEAR plan. N71 provenance
+    is USER: the AskUserQuestion selection ''Correct A to reach its golden'' is a first-person decision.'
+  - 'Stage 4 NO logic edits (conservative). Near-miss C10: M4a is the first actual delivery of the ''worked
+    examples + rejection conformance'' C10 posits, BUT C10 is a methodology meta-claim explicitly scoped
+    ''not about LARA''s own internals'' (its Conditions) and already supported by field exemplars — LARA''s
+    own delivery is not evidence for the methodology claim. No edit.'
+  - 'Near-miss C11 (hypothesis): M4a built the trusted-checker half + adversarially-validated rejection
+    conformance (R1/R12/R10) and the Example-A catch is concrete trusted-checker evidence — but C11 bundles
+    the UNTRUSTED PRODUCER (M4b, unbuilt), so its core isn''t testable yet. Left at hypothesis; staged
+    the trusted-checker-value evidence as O16 (claim candidate) instead of forcing C11.'
+  - 'Near-miss C12 (testing): 32/32 both-drivers agreement adds 8 more agreeing fixtures but no NEW divergence
+    for the researcher to comment on — the ''fallible-oracle / N+1-version'' framing needs a divergence
+    event, not more agreement. Stays testing (same rule as the M3 #1 near-miss).'
+  - 'Crystallized O15 (num-literal caveat, staged since M3 and previously held for conservatism) -> constraints.md
+    via artifact-commitment: a SECOND no-num-literal differential prop now guards it over the 8 worked-example
+    anchors. Also crystallized O17 (defeasible-only) same turn via artifact-commitment (honesty note in
+    m4a-checklist + TODOS + coverage-test scope) — constraints.md is exactly its home (Known limitations).'
+  - 'Staged O16 (hand-authored-cert-not-self-checking) as potential_type: claim, NOT crystallized: the
+    user''s affirmation was scoped to the FIX CHOICE (N71), not to the general lesson; the general claim
+    awaits affirmation or a second instance. Staged O18 (result-12 codec-anchor scope) as potential_type:
+    concept — a scoping clarification, no closure signal.'
+- turn: 2026-07-29_001#1
+  notes:
+  - 'Routed the completed strict-cert implementation as experiment N74: code, generated S1 artifacts,
+    CLI output, R13 mutation, full Haskell suite, and 33/33 both-driver agreement are direct journey facts.'
+  - 'Reconciled the O17-derived limitation in constraints.md rather than editing O17: O17 remains append-only
+    and historically true for lara-syntax@0.1/M4a; the mutable logic snapshot now records additive @0.2
+    + S1 as closing the gap.'
+  - 'Added E10 as a distinct frontend-conformance experiment instead of advancing C03/C05: S1 demonstrates
+    reachability and cross-driver behavior, not the adapter soundness theorems those claims assert.'
+  - 'Did NOT promote O16 or O18: this turn supplied no user affirmation of the generalized hand-authored-certificate
+    claim and did not change result 12''s scope.'
+- turn: 2026-07-30_001#1
+  notes:
+  - 'Routed the result-9 mechanization as experiment N78 (direct): Erase.lean, the build, and the AxCheck
+    run are journey facts I independently verified, not just the implementing fork''s report.'
+  - 'Recorded N76 as a dead_end (not skipped): the naive per-arg erase-equality statement is a genuinely
+    abandoned approach with a reusable lesson (containsB payload-sensitivity); it grounds the Model-A
+    decision N77.'
+  - 'Reconciled C04 rather than crystallizing a new claim: result 9 IS C04''s subject (backend replacement),
+    so this turn is empirical resolution on C04. Kept Status ''supported'' — mechanization confirms, and
+    conservatism forbids demotion on one event; the finding sharpened Conditions, not the verdict.'
+  - 'Provenance of the two decisions (N75 track, N77 Model A) = user: both were explicit AskUserQuestion
+    selections. N76/N78 = ai-executed.'
+  - 'Staged O19 (potential_type concept) instead of promoting: the methodological pattern (injective relabel
+    vs collapse-to-marker) is broader than C04''s wording, but has no independent closure signal this
+    turn beyond the C04 fold — left for future crystallization.'
+  - 'C04 revision provenance = ai-suggested: user chose the model but did not dictate the claim wording;
+    revertible.'
+- turn: 2026-07-30_001#2
+  notes:
+  - 'PR-#41 review item 1: verified mapAssurAtt_target/mapAssurDis_eq are referenced ONLY by their AxCheck
+    lines (grep, source-only) before removing — a real dead-export check, not taking the reviewer''s word.
+    Recorded as decision N79 (provenance user: ''keep them removed'').'
+  - 'Pushed back mildly on ''might we need them later'': named the one concrete future consumer (CheckedProgram-relabel
+    transport) but still recommended removal (trivially re-derivable, no-dead-code rule) — user agreed.
+    The transport landed next turn and DID re-add both, vindicating the add-when-used call.'
+  - 'Item 2 routed to issue #42 rather than staged as an observation — it is a concrete work proposal,
+    not an interpretive claim; the trace already carries the non-vacuity concern via N81.'
+- turn: 2026-07-30_001#3
+  notes:
+  - 'N80 (do #42 over Haskell port) provenance user (''do 42 first''); N81 (transport) ai-executed and
+    independently verified (build + AxCheck), not trusting the fork''s report.'
+  - 'Updated C04 Evidence basis (not Statement/Conditions/Status): the transport is new confirming evidence
+    + constructive non-vacuity, not a scope change; status stays supported. Second logic_revision on C04
+    this day.'
+  - 'Did NOT crystallize O19 despite the transport being an artifact that uses the injective-relabel machinery:
+    N81 refined O19 (forward typing transport needs only hpres, NOT injectivity — injectivity is only
+    for nodup/edge-equality), so the staged wording (''injective relabel'') is now imprecise as a general
+    concept. Left staged pending a cleaner formulation; observations are append-only so the refinement
+    lives in N81 + this log.'
+- turn: 2026-07-30_001#4
+  notes:
+  - Routed the explicit user sequencing choice ('do house keeping first') as decision N82; it closes status
+    drift before M5 rather than asserting a new research claim.
+  - 'Updated current-state status documents and presentation/source comments; closed #31/#37 from merged
+    PR evidence. No code behavior changed, so verification was document re-read + stale-phrase scan +
+    GitHub issue-state reads, not a test run.'
+  - 'Did NOT revise logic claims or promote O19: this turn changed project bookkeeping, not the backend-replacement
+    mechanism or evidence.'
+- turn: 2026-07-30_001#5
+  notes:
+  - 'Crystallized C21 (data-conflict → gap/R9) on TWO signals: artifact-commitment (code committed + PR
+    #45 depends on the routing) AND empirical-resolution (differential 41/41 + AxCheck-clean this turn).
+    Provenance ai-suggested, NOT user: the routing is frozen spec §4.3 but the user never verbally affirmed
+    C21-as-claim; reversible on review. Flagged in open_threads that the PR is unmerged, so revisit if
+    review changes it.'
+  - 'C21 Dependencies [C01, C16]: C01 (≡ decides identity) is the real premise — the group check IS decidable
+    because ≡ is; C16 is the sibling gap-not-defeat principle (spec explicitly says ''same gap-not-defeat
+    routing''), included as the conceptual parent it generalizes alongside, not a logical premise.'
+  - 'Did NOT revise C16: #38 extends the gap-not-defeat family to data conflicts but C16''s scope (unmet
+    critical questions) is unchanged — no signal to touch it; near-miss noted.'
+  - 'Staged O20 (three-tier rejection architecture) rather than crystallizing a concept: the ''driver-boundary
+    tier'' framing is my synthesis this turn with no reuse/affirmation yet — default to non-promotion.'
+  - 'N85 routed as dead_end (not a decision): the Gamma-removal approach was tried in reasoning and abandoned
+    because checkArguments rejects R1 — a genuine failed hypothesis with a reusable lesson (drop args,
+    don''t null Gamma).'
+  - 'Skipped the Edit-tool-wrote-to-main-repo incident: a tooling/process slip (fixed same turn, main
+    left clean), not research-significant — no trace node.'
+- turn: 2026-07-31_001#1
+  notes:
+  - 'Routed the review-remediation work as ONE experiment node N87 (not a dead_end): the original #38
+    design was incomplete-then-completed, not tried-and-abandoned — no failed hypothesis with a reusable
+    lesson of its own. The reusable lesson (front-door parity) went to staging as O21.'
+  - 'Finding 1 was a genuine correctness hole (reviewer-reproduced): via .lara a dangling group member
+    silently evaded R9. Captured as N87''s headline result + staged O21 concept. Did NOT create a separate
+    dead_end — the fix restores the intended routing, it does not abandon it.'
+  - 'Updated C21 Proof (evidence only), NOT Statement/Conditions/Status: the R9 stderr differential anchor
+    + closed evasion hole are confirming evidence; C21 was already supported and the routing model was
+    never wrong (one front door was under-enforced). Signal logged as empirical-resolution; provenance
+    ai-suggested (revertible).'
+  - 'Did NOT weaken C21 despite the discovered hole: per conservatism, a single implementation gap in
+    one front door is not a demotion of a supported semantic claim — it is an evidence event that the
+    routing now holds at BOTH doors. Near-miss considered and rejected.'
+  - 'Staged O21 (front-door invariant parity) rather than crystallizing: sibling of O20 (rejection tiers),
+    no reuse/affirmation yet and PR #45 unmerged — default to non-promotion.'
+  - The doc/grammar/haddock fixes (findings 2,5,6,7,8,10) are provenance-record corrections, not new research
+    content — folded into N87's action list, no separate nodes/observations.
+- turn: 2026-07-31_001#2
+  notes:
+  - 'Routed the second-round remediation as ONE experiment node N88 (not a dead_end): the Haskell-only
+    defense was an incomplete change completed, not an abandoned hypothesis. The reusable lesson went
+    to staging as O22.'
+  - 'Staged O22 as potential_type: heuristic (twin-parity discipline is a ''how''), sibling of O21 (per-door
+    parity) but distinct axis: per-TWIN definitional parity vs per-DOOR invariant parity. Default non-promotion:
+    single instance, PR #45 unmerged, no user affirmation.'
+  - 'Considered artifact-commitment crystallization for O21 (this turn''s ElaborateSpec negatives + 3
+    fixtures follow its ''exercise every door on the same malformed input'' rule) — rejected: PR still
+    unmerged and prior turn deliberately deferred on the same ground. Near-miss logged.'
+  - 'Extended C21 Proof only (empirical-resolution: gates green, twin re-synced, negatives 9/9). Did NOT
+    touch Statement/Conditions/Status: the twin divergence was a mechanization-integrity gap on an unreachable
+    input class, not evidence against the routing. Considered and rejected weakening.'
+  - 'Chose to mirror the Haskell semantics in Lean rather than the reviewer''s alternative (document skip-semantics):
+    CLAUDE.md says Lean proofs carry soundness for frozen §4.3 definitions — twins must agree by construction,
+    not decoder gating.'
+- turn: 2026-08-01_001#1
+  notes:
+  - 'Routed the milestone opening as pivot N89 (provenance user: branch scope was a user directive) and
+    the two workstreams as separate experiment nodes N90 (T4) / N91 (T1) — one node each, not per-file,
+    since each has a single verifiable outcome (matrix closed; suite verified).'
+  - 'Staged O23 (completeness-scope lever) as potential claim rather than crystallizing on artifact commitment:
+    PR #49 is unmerged — same precedent as O21/O22 deferral on PR #45. Near-miss logged; revisit on merge.'
+  - Staged O24 as concept (a boundary/definition, not a falsifiable mechanism) and O25 as heuristic (a
+    'how').
+  - 'Extended C21 Proof only (empirical-resolution: 7 generated R9 mutants byte-identical across drivers).
+    Did NOT touch other supported claims despite the suite exercising their classes — the mutants confirm
+    checker behavior generally; only C21 has a routing claim the R9 family bears on directly.'
+  - 'Did NOT create a dead_end for the abandoned symmetric-contrary undermine-reinstatement design: it
+    was an in-turn design iteration, never committed or run; captured inside N90 result + O23 context
+    instead.'
+- turn: 2026-08-01_001#2
+  notes:
+  - 'Crystallized O23/O24/O25 via artifact-commitment: PR #49 merged this turn (user statement), matching
+    last turn''s anticipation; provenance stays ai-suggested (commitment does not upgrade).'
+  - 'C22 created at supported (not hypothesis): mechanically pinned by committed E4/E5 goldens + both-driver
+    byte parity — same precedent as C21.'
+  - 'Staged O27 (gap-dominated corpus) rather than crystallizing despite strong evidence: interpretive
+    framing of fresh numbers; let T3 metrics + user reaction close it.'
+  - 'Did NOT flip C17 despite corroboration (60/60 lowering, residue finite): already supported; T2 evidence
+    noted in O28 instead.'
+  - 'differential.sh dual-site root-list bug recorded inside N94 result, not as a dead_end node: found+fixed
+    within the turn, below node granularity.'
+  - 'lbcs/C03 scheme divergence (annotator dose_response vs analytic lowering) recorded as open thread,
+    not a contradiction: unit header documents it; annotation file remains authoritative for the annotation
+    pass.'

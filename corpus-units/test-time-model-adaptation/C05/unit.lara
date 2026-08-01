@@ -1,0 +1,70 @@
+# Corpus unit test-time-model-adaptation/C05 — gap (policy-mandatory variance CQ unmet; annotator optional)
+#
+# Source: m0/annotations/test-time-model-adaptation.yaml C05 (causal, component_ablation;
+# corpus pin 62e9b54). Headline: activation-discrepancy fitness enables stable CMA-ES learning
+# for online unsupervised TTA — on ImageNet-C severity 5 it lifts CMA prompt adaptation from
+# 55.5% NoAdapt to 63.4% alone and 66.3% with activation shifting (best of all FOA variants),
+# in contrast to the entropy-only failure (C04) (E05/E06, Table 5/Table 2).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * component_ablation(C, S, Q, Exp), conclusion contributes(C, S, Q). The ablation ladder
+#     (NoAdapt -> discrepancy-only -> + shifting) supports a positive contribution of the
+#     discrepancy fitness.
+#   * Policy-vs-annotation divergence (uniform-standard rule, as in adaptive-pruning/C03): the
+#     mandatory variance_reported CQ maps onto the annotation's "is 'stable/consistent learning
+#     signal' measured directly (variance, convergence traces, seeds)?", which the annotator rated
+#     OPTIONAL and unmet-gap (metrics are endpoint accuracy and ECE only; no seeds or variance).
+#     corpus-v1 makes variance mandatory family-wide (27 mandatory vs 16 optional annotations),
+#     and the policy call wins: an open mandatory obligation is IncompleteArgument, so NO complete
+#     arg is declarable -> E2-style gap. The claim's own "stable learning signal" wording is
+#     exactly the unmeasured quantity, which sharpens the divergence.
+#   * single_variable (mandatory) is annotated met (E05's 7-way ablation isolates the discrepancy
+#     term); protocol_parity (mandatory) is supplied by the identical ImageNet-C severity-5,
+#     15-corruption protocol across all variants and NoAdapt. Both leaves are supplied. The
+#     optimizer-independence CQ (SGD) is optional-met, no effect.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact test-time-model-adaptation at sha256:59da7e38fd9f
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c05
+  nl      = "On ImageNet-C severity 5 the activation-discrepancy fitness lifts CMA-ES prompt adaptation from 55.5 percent NoAdapt to 63.4 percent alone and 66.3 percent with activation shifting (best of all FOA variants), contrasting the entropy-only failure; stability is inferred from endpoint accuracy only, with no seeds or variance reported"
+  formal  = contributes(activation_discrepancy_fitness, cma_es_prompt_tta, adaptation_accuracy)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E05's ablation-ladder cells (55.5 -> 63.4 -> 66.3), per result cell.
+leaf e1 : reports(e05, ablation_effect(activation_discrepancy_fitness, cma_es_prompt_tta, adaptation_accuracy, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C05, logic/experiments.md#E05, trace/exploration_tree.yaml#N08-N11, Table-5]
+
+leaf e2 : isolated(activation_discrepancy_fitness, e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Procedure-step-3, logic/experiments.md#E05-Procedure-step-5]
+
+leaf e3 : matched_protocol(e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Setup, logic/experiments.md#E06-baselines]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e05) has no honest leaf — endpoint accuracy/ECE only,
+# no seeds or variance — and corpus-v1 makes that obligation mandatory even though the annotator
+# rated it optional. The complete-support set is therefore empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

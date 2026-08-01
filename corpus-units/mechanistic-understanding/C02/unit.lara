@@ -1,0 +1,72 @@
+# Corpus unit mechanistic-understanding/C02 — gap (variance mandatory in policy, optional in
+# the annotation)
+#
+# Source: m0/annotations/mechanistic-understanding.yaml C02 (causal, controlled_comparison;
+# corpus pin 62e9b54). Headline: subtracting a toxic vector (wtoxic, mlp_v19, or svd_utoxic0)
+# from the last-layer residual stream drops Perspective toxicity below the No Op baseline
+# (0.453 -> 0.245/0.305/0.268) while preserving language quality — perplexity 23.30-23.56
+# (comparable to DPO 23.34) and F1 0.192-0.193 (comparable to No Op 0.193) (E02, Table 2).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * The causal claim lowers as a controlled comparison of the intervention against the No Op
+#     baseline: better(subtract_toxic, no_op, toxicity_at_matched_ppl, gpt2_medium). Q folds the
+#     quality-preservation constraint (comparison held at DPO-matched perplexity) into one
+#     constant; the three vectors and the F1/ppl cells stay in nl and refs.
+#   * Policy-vs-annotation divergence, recorded per the uniform-standard rule: the annotator
+#     rated the seeds/variance CQ OPTIONAL and unmet ("effect-vs-noise is asserted, not shown"),
+#     but corpus-v1 makes variance_reported mandatory family-wide (27 mandatory vs 16 optional
+#     annotations corpus-wide), and the policy call wins. E02 runs a single generation pass over
+#     1,199 prompts with no seeds or variance in Metrics, so variance_reported has no honest
+#     leaf. An open mandatory obligation is an IncompleteArgument rejection, so no complete
+#     controlled_comparison is declarable — E2-style gap on empty complete support
+#     (adaptive-pruning/C03 pattern).
+#   * baseline_parity (No Op scored under identical decoding) and measurement_validity (alpha
+#     calibrated to DPO perplexity, NOT to the toxicity outcome; quality checked on both fluency
+#     and content-overlap axes) are annotated met and kept as leaves.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact mechanistic-understanding at sha256:04b48a8cb1d4
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, not assemblable at corpus-v1's evidential bar --------------------------
+
+claim c02
+  nl      = "Subtracting a toxic vector (wtoxic, mlp_v19, or svd_utoxic0) from the last-layer residual stream reduces Perspective toxicity below No Op (0.453 -> 0.245/0.305/0.268) while preserving quality at DPO-matched perplexity (ppl 23.30-23.56 vs DPO 23.34; F1 ~0.193)"
+  formal  = better(subtract_toxic, no_op, toxicity_at_matched_ppl, gpt2_medium)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: Table 2's per-vector toxicity/ppl/F1 cells against the No Op row, per
+# result cell, folded into refs.
+leaf e1 : reports(e02, compares(subtract_toxic, no_op, toxicity_at_matched_ppl, gpt2_medium, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table2_interventions_results.md, evidence/tables/table3_topk_continuations.md, trace/exploration_tree.yaml#N07]
+
+leaf e2 : matched_setup(subtract_toxic, no_op, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Baselines, evidence/tables/table2_interventions_results.md]
+
+leaf e3 : valid_measurement(toxicity_at_matched_ppl, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Procedure-step-3, logic/experiments.md#E02-Procedure-steps-5-6]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e02) has no honest leaf — E02 is a single
+# generation pass with no seeds or uncertainty — and corpus-v1 makes that obligation mandatory,
+# though the annotator rated it optional. The claim's complete-support set is therefore empty.)
+
+status c02
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

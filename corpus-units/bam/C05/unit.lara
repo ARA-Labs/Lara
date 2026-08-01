@@ -1,0 +1,83 @@
+# Corpus unit bam/C05 — justified (all mandatory CQs met; the one gap maps to optional scope)
+#
+# Source: m0/annotations/bam.yaml C05 (comparative, controlled_comparison; corpus pin 62e9b54).
+# Headline: BaM converges faster than ADVI in gradient evaluations across four benchmark families
+# (Gaussian, sinh-arcsinh, PosteriorDB, CIFAR-10 VAE) — lower KL or relative mean error at equal
+# gradient evaluations, with ADVI's learning rate grid-tuned so the baseline is not handicapped
+# (E01-E04, Fig 5.1/5.2).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * controlled_comparison family; conclusion better(bam, advi, convergence_speed, vi_benchmarks).
+#     The disjunctive metric ("KL or relative mean error") and the per-benchmark cells stay in
+#     `nl` and the leaf refs.
+#   * All THREE mandatory corpus-v1 CQs are annotated met: baseline_parity (ADVI learning rate
+#     grid-searched, E04 runs a per-batch pilot for both methods), measurement_validity (a
+#     method-neutral unit, gradient evaluations = B x iterations; E04 matches a 3000-grad budget),
+#     and variance_reported (E01/E02 use 10 seeds, E03 uses 5 seeds with mean +/- standard error).
+#     The rare comparison claim that clears the full bar (cf. sample-specific-masks/C06) — hence a
+#     justified status.
+#   * The annotated unmet-gap CQ "does BaM win on every benchmark family under the claimed
+#     metrics?" (E02 high-skew forward KL is higher for BaM) maps onto corpus-v1's OPTIONAL
+#     scope_match: it is omitted, with no status effect. The claim's disjunctive metric wording
+#     preserves the universal reading; recorded here per the optional-CQ rule.
+#   * Judgment call / hole: E04 evaluates one sampled test image with no stated repetition; E01-E03
+#     supply the variance the mandatory CQ requires, so variance_reported is discharged on E01-E03.
+#     Dead ends N05 (rejected direct-D minimization) and N12 (rejected constant lambda_t) attack no
+#     premise or inference of C05 — no undercut.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bam at sha256:b5d04d69e41d
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c05
+  nl      = "BaM converges faster than ADVI in gradient evaluations across benchmark families (Gaussian, sinh-arcsinh, PosteriorDB, CIFAR-10 VAE): lower KL or relative mean error at equal gradient evaluations, ADVI learning rate grid-tuned so the baseline is not handicapped"
+  formal  = better(bam, advi, convergence_speed, vi_benchmarks)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: E01-E04's per-benchmark convergence cells, per result cell in the annotation
+# and folded into refs.
+leaf e1 : reports(e01, compares(bam, advi, convergence_speed, vi_benchmarks, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01, logic/experiments.md#E02, logic/experiments.md#E03, logic/experiments.md#E04, Figure-5-1, Figure-5-2, trace/exploration_tree.yaml#N11]
+
+leaf e2 : matched_setup(bam, advi, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-step-3, logic/experiments.md#E03-step-4, logic/experiments.md#E04-step-3]
+
+leaf e3 : valid_measurement(convergence_speed, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Metrics, logic/experiments.md#E04-step-8]
+
+leaf e4 : variance_reported(e01)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01, logic/experiments.md#E02, logic/experiments.md#E03]
+
+# --- The support argument ----------------------------------------------------------------------
+
+# scope_match (optional) is left OPEN, not discharged: the "wins on every benchmark family" gap
+# (E02 high-skew forward KL is higher for BaM) lives there. An optional open hole does not enter
+# the obligation set, so complete support is preserved and the claim stays justified.
+arg a1 : supports(c05) by controlled_comparison(bam, advi, convergence_speed, vi_benchmarks, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  discharge variance_reported    with e4
+  open      scope_match          as scope_match
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c05 -> justified (its complete support a1 is `in`; spec §8 aggregation)

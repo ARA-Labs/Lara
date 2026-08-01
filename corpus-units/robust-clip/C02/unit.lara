@@ -1,0 +1,69 @@
+# Corpus unit robust-clip/C02 — gap (unmet-mandatory-CQ path: measurement + variance)
+#
+# Source: m0/annotations/robust-clip.yaml C02 (comparative, controlled_comparison;
+# corpus pin 62e9b54). Headline: FARE-CLIP preserves the original CLIP embedding structure
+# better than TeCoA at matched training radius — mean clean embedding loss FARE2 32.7 vs
+# TeCoA2 236.9 and FARE4 47.6 vs TeCoA4 292.7; mean adversarial loss (eps 4/255) FARE2 103.9
+# vs TeCoA2 301.9 and FARE4 81.9 vs TeCoA4 335.0 (Table 14, E06).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Bundled four-cell comparison (clean/adversarial x radius {2/255, 4/255}). Binding conjunct
+#     is the clean embedding loss at matched radius 2 (FARE2 vs TeCoA2); the other cells stay in
+#     nl and the premise leaf refs (nearest-competitor / binding-conjunct convention).
+#   * Two mandatory corpus-v1 CQs are unmet, so no complete controlled_comparison is declarable:
+#       - measurement_validity: annotation CQ "is the single 100-step APGD strong enough that
+#         L_adv is not differentially underestimated (gradient masking)?" is mandatory unmet-gap
+#         (one APGD run, no restarts / alternative attacks / strength sanity check).
+#       - variance_reported: no leaf exists. The annotation reports only means over 500 images
+#         with no variance or statistical test ("significantly lower" is means-only), and
+#         corpus-v1 makes variance mandatory family-wide.
+#     An open mandatory obligation is an IncompleteArgument rejection, so this is an E2-style
+#     gap: the claim and its met-CQ leaves are on the page, no arg binds them.
+#   * baseline_parity IS met (annotation CQ1 same 500 images / same L_clean-L_adv formulas /
+#     same 100-step APGD, and CQ2 matched training radius). The optional scope CQ (does
+#     ImageNet-val distortion support the general "preserves structure" wording?) is unmet-gap
+#     and omitted (optional, no status effect).
+#   * The strict table-inequality re-check adapter (annotation strict_certifier) does not exist
+#     yet; the comparison lowers through the defeasible controlled_comparison.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact robust-clip at sha256:6fa440686d0a
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar ---------------
+
+claim c02
+  nl      = "FARE-CLIP preserves the original CLIP embedding structure better than TeCoA at matched training radius: mean clean embedding loss FARE2 32.7 vs TeCoA2 236.9 and FARE4 47.6 vs TeCoA4 292.7; mean adversarial loss at eps 4/255 FARE2 103.9 vs TeCoA2 301.9 and FARE4 81.9 vs TeCoA4 335.0"
+  formal  = better(fare, tecoa, embedding_preservation, imagenet_val)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: Table 14's radius-matched embedding-loss cells, folded into refs per cell.
+leaf e1 : reports(e06, compares(fare, tecoa, embedding_preservation, imagenet_val, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C02, evidence/tables/table14_embedding_loss.md, trace/exploration_tree.yaml#N05]
+
+leaf e2 : matched_setup(fare, tecoa, e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Setup, logic/experiments.md#E06-Procedure]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: valid_measurement(embedding_preservation, e06) is unmet — one
+# 100-step APGD run risks differential underestimation via gradient masking — and
+# variance_reported(e06) has no honest leaf. Both are mandatory, so the claim's
+# complete-support set is empty.)
+
+status c02
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8)

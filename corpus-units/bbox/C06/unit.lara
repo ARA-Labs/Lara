@@ -1,0 +1,67 @@
+# Corpus unit bbox/C06 — gap (negative-result; noninferiority_comparison -> null_comparison dual)
+#
+# Source: m0/annotations/bbox.yaml C06 (negative-result; corpus pin 62e9b54). Headline: selecting
+# positive samples via a GPT-4 judge (no ground-truth labels) is competitive with ground-truth
+# selection — max accuracy gap 1.77 points over 4 datasets, well under the 5-point falsification
+# margin.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * A negative-result "competitive with / no meaningful difference" claim is genuinely the
+#     negation of a comparison conclusion, so it lowers through the null_comparison dual:
+#     conclusion not_better(ai_feedback, ground_truth_labels, reasoning_accuracy, bbox_datasets).
+#     Only this one arg-conclusion side appears; the positive better() side is NOT declared, so no
+#     contrary pair is instantiated and no mutual rebut edges are forced (attack completeness holds
+#     vacuously).
+#   * The annotation's mandatory CQ3 is unmet-gap: no variance/repeats justify the 1.77-point
+#     equivalence margin. A non-inferiority claim needs power to detect a difference, so this maps
+#     onto null_comparison's mandatory adequate_power(e01) -> unmet. An open mandatory obligation is
+#     an IncompleteArgument rejection -> E2-style gap.
+#   * CQ1 (arms identical except positive-sample selection) discharges baseline_parity; CQ2 (no
+#     ground-truth leakage through the judge) discharges measurement_validity. Both leaves are on
+#     the page. The optional best-of-two-sizes CQ4 is omitted.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bbox at sha256:bb06e592cef6
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c06
+  nl      = "Selecting positive samples via a GPT-4 judge (no ground-truth labels) is competitive with ground-truth selection: max accuracy gap 1.77 points over 4 datasets, well under the 5-point falsification margin; no variance reported"
+  formal  = not_better(ai_feedback, ground_truth_labels, reasoning_accuracy, bbox_datasets)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e01, compares(ai_feedback, ground_truth_labels, reasoning_accuracy, bbox_datasets, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C06, Table-2, logic/experiments.md#E01-Metrics]
+
+leaf e2 : matched_setup(ai_feedback, ground_truth_labels, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-step-4]
+
+leaf e3 : valid_measurement(reasoning_accuracy, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-step-4]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: adequate_power(e01) has no honest leaf — E01 reports single best-of-two
+# numbers with no repeats or confidence intervals (CQ3, unmet-gap), so the 1.77-point equivalence
+# margin is uncalibrated against noise — and corpus-v1 makes power mandatory for null_comparison.
+# The claim's complete-support set is therefore empty.)
+
+status c06
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

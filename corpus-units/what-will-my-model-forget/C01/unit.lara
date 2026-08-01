@@ -1,0 +1,78 @@
+# Corpus unit what-will-my-model-forget/C01 — gap (mandatory variance CQ unmet)
+#
+# Source: m0/annotations/what-will-my-model-forget.yaml C01 (comparative, controlled_comparison;
+# corpus pin 62e9b54). Headline: representation-based forecasting achieves the best overall
+# forecasting performance — representation-with-prior attains the highest binary F1 in 7 of 8
+# Table 1 (model, dataset, tuning) configurations, the lone exception being fixed-logit 68.37 vs
+# 67.81 on FLAN-T5Large head tuning (E01, Table 1, section 5.1).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * controlled_comparison(S, B, Q, D, Exp), conclusion better(S, B, Q, D). Nearest-competitor
+#     convention: the binding comparand is fixed_logit (the single method that beats representation
+#     in the one exceptional column, hence the tightest competitor); the other three baselines
+#     (threshold, trainable_logit, representation-without-prior) and the 7-of-8 count stay in nl
+#     and refs. D = forgetting_configs names the 8 enumerated configurations.
+#   * The mandatory variance_reported CQ maps onto the annotation's mandatory "are F1 scores
+#     reported with seeds or uncertainty so per-column argmax is stable?" — annotated unmet-gap
+#     (no repeated runs, seeds, or intervals; several margins are small, e.g. 67.81 vs 68.37). An
+#     open mandatory obligation is IncompleteArgument, so NO complete arg is declarable: E2-style
+#     gap.
+#   * baseline_parity (baseline run in every config) and measurement_validity (one shared pipeline,
+#     binary F1 scored identically) are annotated met; scope_match (the single exception config
+#     identified and consistent with scope) is annotated met and maps onto corpus-v1's optional
+#     scope_match. Their leaves are supplied. Per-method hyperparameter-tuning parity is
+#     optional-unmet, no effect.
+#   * Leaf kinds are attested (Table 1 cells cited via trace N04/N07/N08/N10/N11, read from the
+#     paper's table rather than independently observed).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact what-will-my-model-forget at sha256:d5369ef41c64
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c01
+  nl      = "Representation-with-prior forecasting attains the highest binary F1 in 7 of 8 Table 1 (model, dataset, tuning) configurations, the lone exception being fixed-logit 68.37 vs 67.81 on FLAN-T5Large head tuning; no seeds or uncertainty are reported for the Table 1 cells so the per-column argmax rests on single runs"
+  formal  = better(representation_with_prior, fixed_logit, forecasting_f1, forgetting_configs)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: Table 1's per-configuration F1 argmax (representation-with-prior best in 7/8),
+# per result cell, with the fixed-logit exception folded into refs.
+leaf e1 : reports(e01, compares(representation_with_prior, fixed_logit, forecasting_f1, forgetting_configs, favorable))
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C01, logic/experiments.md#E01-Metrics, trace/exploration_tree.yaml#N10, trace/exploration_tree.yaml#N04, Table-1]
+
+leaf e2 : matched_setup(representation_with_prior, fixed_logit, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Baselines, logic/experiments.md#E01-Procedure-step-4]
+
+leaf e3 : valid_measurement(forecasting_f1, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-step-1, logic/experiments.md#E01-Metrics]
+
+leaf e4 : scope_matched(representation_with_prior, forecasting_f1, forgetting_configs)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Expected-outcome, trace/exploration_tree.yaml#N04]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e01) has no honest leaf — single-run F1 per cell, no
+# seeds or intervals, with sub-point margins carrying the 7-of-8 count — and controlled_comparison
+# makes that obligation mandatory. The complete-support set is therefore empty.)
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

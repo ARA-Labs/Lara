@@ -1,0 +1,70 @@
+# Corpus unit self-composing-policies/C01 — justified (all mandatory CQs met)
+#
+# Source: m0/annotations/self-composing-policies.yaml C01 (descriptive, analytic_proof/strict;
+# corpus pin 62e9b54). Headline: CompoNet's parameter count grows linearly in the number of tasks
+# n -- each self-composing module has a fixed set of six linear maps + one feed-forward block whose
+# sizes depend only on d_enc, d_model, |A| (constants w.r.t. n), so total(n) = c0 + c1*n = O(n),
+# confirmed by counting parameters of models instantiated for k=1..300 (E04, Figure 3 right).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Strict-flavored annotation (analytic_proof, strict) lowered through the DEFEASIBLE
+#     analytic_argument rule: the arithmetic/param-count strict adapter does not exist yet
+#     (LOWERING "6 strict-flavored annotations" note); migration to a strict rule + certificate is
+#     future work. Q content (the c0 + c1*n formula, k=1..300 sweep) lives in nl and refs.
+#   * Parametric growth-rate claims are a kind-(b) construct on the v0.1 wishlist
+#     (m0/annotation-summary.md S3: "parametric growth-rate claims (nanogpt_chat_rl C04)"): corpus-v1
+#     has no first-class growth-order predicate, so the linear-growth content is carried by the
+#     single conclusion constant `linear_param_growth_componet` plus nl, not a rate atom.
+#   * Both mandatory corpus-v1 CQs are annotated met: assumptions_hold <- CQ1 (d_enc/d_model/|A|
+#     fixed across the k sweep, the arithmetic's constant-module-size assumption); scope_licensed <-
+#     CQ3 (the architectural constant-module argument licenses the asymptotic O(n) beyond the finite
+#     n<=300 sweep). CQ2 (measurement covers the range, counts total+trainable) has no policy CQ and
+#     folds into the premise leaf refs. Both dead ends (N03, N05) are rejected-alternative
+#     motivations, not attacks -- so a complete, unattacked argument stands.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact self-composing-policies at sha256:74f7fb5d060a
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c01
+  nl      = "CompoNet parameter count grows linearly in the number of tasks n: each module has six linear maps and one feed-forward block sized only by d_enc, d_model and |A| (constants in n), so total(n) = c0 + c1*n = O(n), matched by counting parameters of models instantiated for k=1..300"
+  formal  = holds_analytically(linear_param_growth_componet)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: the Appendix-B per-module parameter-count derivation (six linear maps + FF
+# block over fixed d_enc, d_model, |A|), confirmed by E04's deterministic parameter-count sweep.
+leaf e1 : derives(appendix_b_arith, linear_param_growth_componet)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C01, Appendix-B, logic/experiments.md#E04-Procedure-steps-1-2, Figure-3-right, Figure-B.1, trace/exploration_tree.yaml#N07]
+
+leaf e2 : assumptions_established(appendix_b_arith)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Setup, Figure-3-caption, Appendix-B]
+
+leaf e3 : scope_licensed(linear_param_growth_componet)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Setup, Appendix-B, trace/exploration_tree.yaml#N07]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c01) by analytic_argument(linear_param_growth_componet, appendix_b_arith)
+  discharge assumptions_hold with e2
+  discharge scope_licensed   with e3
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c01 -> justified (its complete support a1 is `in`; spec §8 aggregation)

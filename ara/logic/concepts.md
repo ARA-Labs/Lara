@@ -122,3 +122,16 @@
 - **Boundary conditions**: Backend identity, theory, dependencies, and certificate size remain visible
   in audit reports; only *status* is invariant. The formal reason no single logic is foundational.
 - **Related concepts**: Backend-parametric strict interface, Grounded four-state status
+
+## R7/R13 certificate-defect boundary
+- **Notation**: theory-digest tamper → R7; allowlisted-but-unreplayable → R13
+- **Definition**: The two certificate rejection classes name different trust boundaries. Tampering
+  with a certificate's theory digest changes the (backend, version, digest) triple out of the
+  rule's certifiers allowlist, so it rejects as R7 (CertifierUnallowlisted) — an assurance-misuse
+  defect. R13 (replay failure) is reachable only when the certificate IS allowlisted but its
+  payload fails the replay oracle, or at the replay preflight (duplicate/unknown selected
+  backend) — a replay-integrity defect.
+- **Boundary conditions**: Pinned by the T1 mutation suite across both drivers (cert-theory-swap
+  mutants → R7; cert-payload-tamper and duplicate/unknown-backend mutants → R13). Source order:
+  `assuranceError`'s certAllowed check precedes the replay oracle.
+- **Related concepts**: Backend replacement, Strict certificate

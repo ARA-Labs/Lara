@@ -3,8 +3,11 @@
 #
 # Runs every fixture under fixtures/**/*.sexp (excluding the deliberately
 # malformed envelopes of fixtures/malformed/), every worked-example anchor
-# under examples/**/*.core.sexp, and every replay-bundle anchor under
-# bundles/**/*.core.sexp (a *.sexp glob covers all three) through BOTH drivers —
+# under examples/**/*.core.sexp, every replay-bundle anchor under
+# bundles/**/*.core.sexp, and every T2 corpus-unit anchor under
+# corpus-units/**/unit.core.sexp (a *.sexp glob covers all four; the
+# corpus-unit set itself is pinned manifest-exact by test/CorpusUnitsSpec.hs,
+# so the glob here cannot silently shrink it) through BOTH drivers —
 # the Haskell production runtime (`cabal run exe:lara -- check`) and the Lean
 # executable semantics (`lean/.lake/build/bin/lara-driver`) — and asserts
 # byte-exact agreement on stdout AND exit code. The Lean executable is the oracle:
@@ -48,7 +51,8 @@
 # Exit:   0 iff every anchor agrees (positive byte-parity AND negative
 #         exit-2/empty-stdout); 1 on any disagreement; 2 on a build/setup
 #         error or when no anchors were found (an empty corpus must never be a
-#         green pass — it means fixtures/, examples/, or bundles/ moved).
+#         green pass — it means fixtures/, examples/, bundles/, or
+#         corpus-units/ moved).
 set -u
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -86,7 +90,7 @@ lean_bin="lean/.lake/build/bin/lara-driver"
 [ -x "$lean_bin" ] || { echo "FAIL: no Lean driver binary at $lean_bin"; exit 2; }
 
 anchor_list="$tmp_dir/anchors.list"
-for root in fixtures examples bundles; do
+for root in fixtures examples bundles corpus-units; do
   if [ ! -d "$root" ]; then
     echo "FAIL: required anchor root is not a directory: $root"
     exit 2
@@ -162,6 +166,7 @@ if ! sort \
   "$tmp_dir/anchors.fixtures" \
   "$tmp_dir/anchors.examples" \
   "$tmp_dir/anchors.bundles" \
+  "$tmp_dir/anchors.corpus-units" \
   "$mutant_positive_list" >"$anchor_list"; then
   echo "FAIL: could not sort discovered anchors"
   exit 2
@@ -251,7 +256,7 @@ done <"$anchor_list"
 printf -- '---------------------------------------------------------------------------\n'
 echo "pass=$pass fail=$fail"
 if [ "$((pass + fail))" -eq 0 ]; then
-  echo "FAIL: no anchors compared — fixtures/, examples/, and bundles/ are empty, missing, or renamed"
+  echo "FAIL: no anchors compared — fixtures/, examples/, bundles/, or corpus-units/ are empty, missing, or renamed"
   exit 2
 fi
 

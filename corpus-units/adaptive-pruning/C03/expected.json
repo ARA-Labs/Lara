@@ -1,0 +1,25 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:de3685165a53"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "better(apt, prune_distill_cofi, train_cost_at_parity, roberta_mnli_sst2)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

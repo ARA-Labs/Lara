@@ -1,0 +1,70 @@
+# Corpus unit semantic-self-consistency/C03 — gap (policy-mandatory measurement-validity CQ unmet)
+#
+# Source: m0/annotations/semantic-self-consistency.yaml C03 (comparative, controlled_comparison;
+# corpus pin 62e9b54). Headline: embedding-based outlier removal (Isolation Forest / kNN / OCSVM)
+# before the self-consistency vote improves or matches the SC baseline in the majority of the 45
+# method-model-dataset cells of Table 2, with gains persisting at reduced sample sizes.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Bundled claim: the binding conjunct is the majority-exceeds-baseline comparison (S =
+#     embedding_outlier_removal, B = sc_baseline, Q = best_accuracy, D = model_dataset_conditions);
+#     the reduced-sample-size persistence rider (CQ3, unmet-gap, no exhibited reduced-k table)
+#     stays in nl per the bundled-claim convention, not a second conjunct.
+#   * The decisive gap is measurement_validity: CQ2 (best-configuration selection with no held-out
+#     set and no correction against an untuned baseline) is a policy-mandatory measurement-validity
+#     obligation with no honest discharging leaf -- best_accuracy is a post-hoc-selected quantity,
+#     so valid_measurement(best_accuracy, e02) cannot be attested. No complete controlled_comparison
+#     is declarable; the claim lands `gap` (E2-style). The annotation itself reads it as "weakly
+#     established rather than defeated" -- i.e. gap.
+#   * Met CQs kept as leaves: baseline_parity <- CQ1 (SC baseline measured under the same k=10 /
+#     temperature=0.8 / same-featurizer sampling, reusing E01 generation); variance_reported <-
+#     CQ4 (Table 4 reports per-config accuracy deviation 0.33-2.13%, below most gains). Strict
+#     table-aggregation certifier is future work; lowered defeasible. Dead ends N06/N07/N12 are
+#     rejected design alternatives -- no attacks.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact semantic-self-consistency at sha256:970cd14ac108
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c03
+  nl      = "Embedding-based outlier removal (Isolation Forest, kNN, OCSVM) before the self-consistency vote improves or matches the SC baseline in the majority of the 45 method-model-dataset cells of Table 2, with gains persisting at reduced sample sizes"
+  formal  = better(embedding_outlier_removal, sc_baseline, best_accuracy, model_dataset_conditions)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the Table 2 per-cell best-config vs SC-baseline accuracies (45 triples,
+# including below-baseline cells the majority count must survive), folded into refs.
+leaf e1 : reports(e02, compares(embedding_outlier_removal, sc_baseline, best_accuracy, model_dataset_conditions, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C03, evidence/tables/table2_outlier_detection.md, logic/experiments.md#E02-Procedure-step-6, trace/exploration_tree.yaml#N10]
+
+leaf e2 : matched_setup(embedding_outlier_removal, sc_baseline, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-Baselines, logic/experiments.md#E02-Procedure-step-1]
+
+leaf e4 : variance_reported(e02)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table4_config_deviation.md, Appendix-B]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: valid_measurement(best_accuracy, e02) has no honest leaf -- E02 selects
+# the best configuration per cell with no held-out set and no correction against the untuned SC
+# baseline (CQ2), and corpus-v1 makes measurement_validity mandatory. Complete support is empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

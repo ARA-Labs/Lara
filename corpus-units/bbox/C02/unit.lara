@@ -1,0 +1,66 @@
+# Corpus unit bbox/C02 — gap (comparative; cost_accounting_comparison -> controlled_comparison)
+#
+# Source: m0/annotations/bbox.yaml C02 (comparative; corpus pin 62e9b54). Headline: BBOX-ADAPTER
+# full-step training costs $3.48 (StrategyQA) / $11.58 (GSM8K) vs Azure SFT $153.00 / $216.50, an
+# ~31.30x mean cost reduction under one gpt-3.5-turbo-1106 pricing snapshot.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: cost_accounting_comparison -> controlled_comparison. Q = training_cost names the
+#     compared quantity; the four dollar cells and the 31.30x mean-of-ratios aggregation live in
+#     `nl` and refs (constants-only formal atoms).
+#   * The annotation's own mandatory CQ3 is unmet-gap: the A100 adapter-training compute listed in
+#     E03 Setup is never dollarized, so the total-cost premise is unestablished. Mapped onto the
+#     nearest policy-mandatory CQ measurement_validity (the cost metric does not validly capture
+#     total training cost). An open mandatory obligation is an IncompleteArgument rejection, so no
+#     complete controlled_comparison is declarable -> E2-style gap.
+#   * variance_reported (policy-mandatory) also has no discharging leaf: costs are single-snapshot
+#     deterministic API billing with no repeats, so under the uniform standard it is undischarged
+#     as well. Either blocker forces gap; measurement_validity is the annotation-grounded driver.
+#   * CQ1 (same pricing/accounting) discharges baseline_parity; CQ2 (accuracy recorded, cost not
+#     confounded by a quality drop) maps to the optional scope_match. Both leaves are on the page.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bbox at sha256:bb06e592cef6
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c02
+  nl      = "BBOX-ADAPTER full-step training costs $3.48 (StrategyQA) and $11.58 (GSM8K) vs Azure SFT $153.00 and $216.50, an approximately 31.30x mean cost reduction under one gpt-3.5-turbo-1106 pricing snapshot; A100 adapter compute is never dollarized"
+  formal  = better(bbox_adapter, azure_sft, training_cost, strategyqa_gsm8k)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e03, compares(bbox_adapter, azure_sft, training_cost, strategyqa_gsm8k, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C02, logic/experiments.md#E03, logic/experiments.md#E03-Procedure-step-5]
+
+leaf e2 : matched_setup(bbox_adapter, azure_sft, e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Setup, logic/experiments.md#E03-Procedure-steps-1-5]
+
+leaf e3 : scope_matched(bbox_adapter, training_cost, strategyqa_gsm8k)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Procedure-step-7, logic/experiments.md#E03-Metrics]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: measurement_validity(training_cost, e03) has no honest leaf — E03 counts
+# only Azure API tokens and never dollarizes the A100 adapter compute (CQ3, unmet-gap) — and
+# variance_reported(e03) has none either (single-snapshot deterministic billing). Both are
+# policy-mandatory, so the claim's complete-support set is empty.)
+
+status c02
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

@@ -1,0 +1,183 @@
+# corpus-v1 — the shared claim-support policy for the T2 corpus units (tracker #48)
+#
+# One policy for all 60 units lowered from the M0 sample (`m0/sample.tsv`): a review policy is a
+# uniform standard, so per-claim disagreement with a policy call is recorded in the unit's header
+# comment, never by forking the policy (plans/2026-08-01-m5-t2-corpus-units.md).
+#
+# Vocabulary provenance: one defeasible rule per scheme family from the M0 aggregation
+# (`m0/annotation-summary.md` §2 — 22 raw annotator scheme names normalize to 9 families), plus
+# null-conclusion duals only where the sample's negative-result claims support through them
+# (null_comparison, null_benchmark, null_correlation). Critical questions are the recurring
+# per-family themes of the 249 annotated CQs; a CQ is mandatory here iff the annotators
+# predominantly marked that theme mandatory (e.g. variance/seeds: 27 mandatory vs 16 optional
+# annotations, so `variance_reported` is mandatory — the corpus's most systematic gap, 39% of
+# mandatory CQs unmet, surfaces as `gap` statuses exactly as the gap-vs-defeater design intends).
+#
+# Design notes:
+#   * All rules are defeasible. The 6 strict-flavored annotations (analytic proofs, arithmetic
+#     table re-checks) still lower through `analytic_argument`: the smallest useful strict adapter
+#     is a rational-arithmetic/table-recheck checker (summary §2), which does not exist yet; when
+#     it does, those units migrate to a strict rule + certificate without touching this vocabulary.
+#   * Quantitative content (thresholds, ratios, table cells) lives in `nl` strings, bindings, and
+#     leaf refs — formal atoms use constants only, never `num` literals (the Lean `canon = id`
+#     caveat, scripts/gen-corpus.hs header).
+#   * Contrary pairs are declared symmetric ONLY where the sample genuinely concludes both sides
+#     (comparison, benchmark, correlation). Attack completeness is arg-conclusion-level, so a
+#     symmetric pair forces mutual rebut edges whenever both sides appear in one unit — units
+#     that instantiate a dual must declare the forced edges or land R-missing-conflict.
+#   * Every rule carries at least one exception (component_ablation carries two:
+#     confounded_ablation and within_noise), so each family's undercut is licensed: the four dead-end
+#     undercuts (m0 annotations: nanogpt_chat_rl N604, fix_embedding N603/N759, ttma N03) and the
+#     unmet-defeater CQs lower as leaf-rooted challenge args concluding these exception atoms.
+#
+# Scheme variable conventions: S = subject system/method, B = baseline/comparand, Q = metric,
+# D = dataset/domain/scope, C = component/factor, P = property, Exp = experiment/evidence source,
+# Prf = proof/derivation, Src = source tree, Insp = inspection record, X/Y = correlated variables.
+
+policy corpus-v1
+
+# --- Family 1: controlled comparison (25 claims; merges cost-accounting, resource, spectral,
+# --- noninferiority, compute-matched, cross-model-transfer variants) ---------------------------
+
+rule controlled_comparison(S, B, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, compares(S, B, Q, D, favorable)) ]
+  conclusion = better(S, B, Q, D)
+  question baseline_parity      : matched_setup(S, B, Exp)   (mandatory)
+  question measurement_validity : valid_measurement(Q, Exp)  (mandatory)
+  question variance_reported    : variance_reported(Exp)     (mandatory)
+  question scope_match          : scope_matched(S, Q, D)     (optional)
+
+rule null_comparison(S, B, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, compares(S, B, Q, D, null)) ]
+  conclusion = not_better(S, B, Q, D)
+  question baseline_parity      : matched_setup(S, B, Exp)   (mandatory)
+  question measurement_validity : valid_measurement(Q, Exp)  (mandatory)
+  question adequate_power       : powered(Exp)               (mandatory)
+
+# --- Family 2: intervention / ablation (14 claims; component_ablation, component_substitution,
+# --- dose_response) -----------------------------------------------------------------------------
+
+rule component_ablation(C, S, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, ablation_effect(C, S, Q, positive)) ]
+  conclusion = contributes(C, S, Q)
+  question single_variable   : isolated(C, Exp)        (mandatory)
+  question protocol_parity   : matched_protocol(Exp)   (mandatory)
+  question variance_reported : variance_reported(Exp)  (mandatory)
+
+# --- Family 3: observation / measurement (7 claims; cross_run_observation,
+# --- exhaustive_pairwise_measurement, case_demonstration) ---------------------------------------
+
+rule measurement(P, S, Exp)
+  mode       = defeasible
+  premises   = [ observes(Exp, P, S) ]
+  conclusion = holds(P, S)
+  question instrument_validity : valid_instrument(P, Exp)     (mandatory)
+  question coverage            : covers_scope(Exp, S)         (mandatory)
+  question confound_control    : confounds_controlled(Exp)    (optional)
+
+# --- Family 4: analytic (4 claims; analytic_proof, analytic_bound_with_consequence_check) -------
+
+rule analytic_argument(P, Prf)
+  mode       = defeasible
+  premises   = [ derives(Prf, P) ]
+  conclusion = holds_analytically(P)
+  question assumptions_hold : assumptions_established(Prf)  (mandatory)
+  question scope_licensed   : scope_licensed(P)             (mandatory)
+
+# --- Family 5: benchmark / stress evaluation (3 claims; benchmark_evaluation,
+# --- adversarial_stress_test) -------------------------------------------------------------------
+
+rule benchmark_evaluation(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, benchmark_result(S, B, Q, positive)) ]
+  conclusion = performs(S, B, Q)
+  question protocol_fixed    : fixed_protocol(S, B, Exp)   (mandatory)
+  question benchmark_valid   : valid_benchmark(B, Q)       (mandatory)
+  question environment_match : matched_environment(Exp)    (optional)
+
+rule null_benchmark(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, benchmark_result(S, B, Q, negative)) ]
+  conclusion = not_performs(S, B, Q)
+  question protocol_fixed    : fixed_protocol(S, B, Exp)   (mandatory)
+  question environment_match : matched_environment(Exp)    (mandatory)
+
+# --- Family 6: code inspection (3 claims; code_inspection, plan_vs_shipped_diff) ----------------
+
+rule code_inspection(P, Src, Insp)
+  mode       = defeasible
+  premises   = [ inspects(Insp, Src, P) ]
+  conclusion = code_property(Src, P)
+  question version_match : version_matched(Src, Insp)  (mandatory)
+  question path_coverage : covers_paths(Insp, Src)     (mandatory)
+
+# --- Family 7: statistical correlation (2 claims) -----------------------------------------------
+
+rule statistical_correlation(X, Y, S, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, correlation(X, Y, S, present)) ]
+  conclusion = correlated(X, Y, S)
+  question significance     : significance_reported(Exp)  (mandatory)
+  question independence     : independent_samples(Exp)    (mandatory)
+  question confound_control : confounds_controlled(Exp)   (optional)
+
+rule null_correlation(X, Y, S, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, correlation(X, Y, S, absent)) ]
+  conclusion = not_correlated(X, Y, S)
+  question significance   : significance_reported(Exp)  (mandatory)
+  question adequate_power : powered(Exp)                (mandatory)
+
+# --- Family 8: inductive generalization (1 claim) -----------------------------------------------
+
+rule inductive_generalization(P, C, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, instances(P, C, positive)) ]
+  conclusion = generalizes_to(P, C)
+  question sample_representative : representative_sample(Exp, C)  (mandatory)
+  question instance_validity     : valid_instances(Exp)           (mandatory)
+
+# --- Family 9: blind paired human evaluation (1 claim) ------------------------------------------
+
+rule human_evaluation(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, human_preference(S, B, Q, favorable)) ]
+  conclusion = preferred(S, B, Q)
+  question blinding        : blinded(Exp)            (mandatory)
+  question rater_power     : sufficient_raters(Exp)  (mandatory)
+  question preregistration : preregistered(Exp)      (optional)
+
+# --- Conflict ------------------------------------------------------------------------------------
+# Symmetric pairs only where the sample concludes both sides through the duals above. Units
+# containing args on both sides of one pair must declare the mutual rebut edges (completeness).
+
+contrary better(S, B, Q, D)     not_better(S, B, Q, D)
+contrary not_better(S, B, Q, D) better(S, B, Q, D)
+
+contrary performs(S, B, Q)     not_performs(S, B, Q)
+contrary not_performs(S, B, Q) performs(S, B, Q)
+
+contrary correlated(X, Y, S)     not_correlated(X, Y, S)
+contrary not_correlated(X, Y, S) correlated(X, Y, S)
+
+# --- Exceptions (undercutting conditions), at least one per rule (component_ablation carries two) --
+
+exception controlled_comparison    : confounded_comparison(S, B, Q, D)
+exception null_comparison          : underpowered_null(S, B, Q, D)
+exception component_ablation       : confounded_ablation(C, S, Q)
+exception component_ablation       : within_noise(C, S, Q)
+exception measurement              : measurement_artifact(P, S)
+exception analytic_argument        : unsound_assumption(P)
+exception benchmark_evaluation     : protocol_deviation(S, B, Q)
+exception null_benchmark           : environment_mismatch(S, B, Q)
+exception code_inspection          : version_skew(Src)
+exception statistical_correlation  : confounding_variable(X, Y, S)
+exception null_correlation         : underpowered_correlation(X, Y, S)
+exception inductive_generalization : biased_sample(P, C)
+exception human_evaluation         : rater_bias(S, B, Q)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): every rule above is defeasible, so no proposition in a
+# contrary pair is strict-reachable and the policy passes the R12 check, as in empirical-v1/v2.

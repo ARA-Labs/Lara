@@ -1,0 +1,66 @@
+# Corpus unit bridging-data-gaps/C03 — gap (comparative; resource_benchmarking_comparison -> controlled_comparison)
+#
+# Source: m0/annotations/bridging-data-gaps.yaml C03 (comparative; corpus pin 62e9b54). Headline:
+# DDPM-TAN dominates full fine-tuning on FFHQ -> 10-shot Sunglasses across trainable params
+# (1.3% vs 100%), iterations (300 vs ~5000), GPU-hours (3 vs 7.5), and peak memory (9 vs 20 GB),
+# at equal-or-better FID.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: resource_benchmarking_comparison -> controlled_comparison. This is a multi-metric
+#     conjunction; modeled as one predicate over Q = training_resource_cost, with the per-metric
+#     inequality chain and the FID-parity side condition folded into `nl` and refs.
+#   * The annotation's mandatory CQ2 is unmet-gap: the two conditions run asymmetric configs
+#     (baseline batch 5 / 1 GPU vs TAN batch 40 / 8x A100) that are never normalized, so the 9-vs-20
+#     GB and 3-vs-7.5 GPU-h numbers are not comparable. Mapped onto policy-mandatory baseline_parity
+#     -> unmet. An open mandatory obligation is an IncompleteArgument rejection -> E2-style gap.
+#   * CQ1 (FID at convergence equal-or-better, so resources are not traded for quality) discharges
+#     the optional scope_match; the resource metrics themselves are recorded for both methods
+#     (E03 steps 1-3), discharging measurement_validity. Both leaves are on the page.
+#   * variance_reported also has no leaf (single measurement per config, no repeats) — a second
+#     policy-mandatory blocker; baseline_parity is the annotation-grounded driver.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bridging-data-gaps at sha256:5325ea757258
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c03
+  nl      = "DDPM-TAN dominates full fine-tuning on FFHQ to 10-shot Sunglasses: 1.3% vs 100% trained params, 300 vs ~5000 iters, 3 vs 7.5 GPU h, 9 vs 20 GB peak, at equal-or-better FID; the batch 40 / 8x A100 vs batch 5 / 1 GPU configs are never normalized"
+  formal  = better(ddpm_tan, full_finetune, training_resource_cost, ffhq_sunglasses_10shot)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e03, compares(ddpm_tan, full_finetune, training_resource_cost, ffhq_sunglasses_10shot, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03, logic/experiments.md#E03-Setup, trace/exploration_tree.yaml#N11-N12, PAPER.md#overview]
+
+leaf e2 : valid_measurement(training_resource_cost, e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Procedure-steps-1-3]
+
+leaf e3 : scope_matched(ddpm_tan, training_resource_cost, ffhq_sunglasses_10shot)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Procedure-step-4, evidence/tables/table2_fid.md, evidence/figures/figure4_ablation.md]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: matched_setup(ddpm_tan, full_finetune, e03) has no honest leaf — the
+# asymmetric batch/GPU configurations are never normalized (CQ2, unmet-gap) — and
+# variance_reported(e03) has none either (single measurement per config). Both are policy-mandatory,
+# so the claim's complete-support set is empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

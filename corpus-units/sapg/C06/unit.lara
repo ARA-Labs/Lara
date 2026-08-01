@@ -1,0 +1,69 @@
+# Corpus unit sapg/C06 — gap (unmet-mandatory-CQ path: variance reporting)
+#
+# Source: m0/annotations/sapg.yaml C06 (causal, dose_response; corpus pin 62e9b54). Headline:
+# entropy regularization of the follower policies improves performance on harder exploration
+# tasks — sigma=0.005 improves Reorientation by up to 16.5% over sigma=0, while sigma=0 is
+# optimal on the easier AllegroHand, Regrasping, and Throw; a three-level sweep
+# sigma in {0, 0.003, 0.005} on all tasks with a sigma=0 baseline (E04 / E06, Figure 6).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * dose_response maps to component_ablation (3-level coefficient sweep with a sigma=0
+#     no-treatment baseline). Task-conditional claim; binding conjunct is the positive effect on
+#     the hard task Reorientation: contributes(follower_entropy_reg, sapg, reorientation_performance).
+#     The null/negative effect on the easy tasks is the scope qualifier, kept in nl and refs.
+#   * The mandatory variance_reported CQ is unmet, so no complete component_ablation is
+#     declarable (E2-style gap). Annotation CQ "is seed-level variance reported so the 16.5%
+#     effect is distinguishable from noise?" is mandatory unmet-gap — E06 specifies 5 seeds but
+#     Procedure step 2 asks only to "report final performance and learning curves", with no
+#     stderr (unlike E02). This is the corpus's most systematic gap (M0 summary section 2).
+#   * single_variable and protocol_parity ARE met: annotation CQ (only sigma varies, all other
+#     SAPG settings held fixed) and CQ (sigma=0 baseline present on every task). The optional
+#     mechanism CQ (entropy -> exploration tested beyond correlation with task difficulty) is
+#     unmet-gap and omitted (optional, no status effect).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact sapg at sha256:f4108aa329a9
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar ---------------
+
+claim c06
+  nl      = "Follower entropy regularization (sigma=0.005) improves SAPG on the harder exploration task Reorientation by up to 16.5 percent over sigma=0, while sigma=0 is optimal on the easier AllegroHand, Regrasping, and Throw; only sigma varies across {0, 0.003, 0.005} with a sigma=0 baseline on every task, but no per-seed variance is reported"
+  formal  = contributes(follower_entropy_reg, sapg, reorientation_performance)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the E06 per-(sigma, task) sweep cells (Reorientation up to +16.5% at
+# sigma=0.005, Figure 6), folded into refs per result cell.
+leaf e1 : reports(e06, ablation_effect(follower_entropy_reg, sapg, reorientation_performance, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C06, logic/experiments.md#E06, Figure-6, trace/exploration_tree.yaml#N11]
+
+leaf e2 : isolated(follower_entropy_reg, e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Procedure-step-1]
+
+leaf e3 : matched_protocol(e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Setup, logic/experiments.md#E06-Baselines]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e06) has no honest leaf — E06 reports final
+# performance and learning curves only, no stderr — and that obligation is mandatory, so the
+# claim's complete-support set is empty.)
+
+status c06
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8)

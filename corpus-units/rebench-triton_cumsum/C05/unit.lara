@@ -1,0 +1,60 @@
+# Corpus unit rebench-triton_cumsum/C05 — gap (mandatory-CQ-unmet path; batch: rebench)
+#
+# Source: m0/annotations/rebench-triton_cumsum.yaml C05 (implementation-behavioral,
+# benchmark_evaluation; corpus pin 62e9b54). Headline: the superblock + atomic-suffix 3-kernel
+# Triton pipeline achieves the reference score 0.47 (1.6 ms) on N=1e8 int32 on H100.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * benchmark_evaluation -> corpus-v1 `benchmark_evaluation(S, B, Q, Exp)`; conclusion
+#     performs(superblock_atomic_pipeline, rebench_reference, triton_cumsum_score). The 0.47 / 1.6
+#     ms / config figures stay in nl and refs.
+#   * BOTH mandatory CQs are unmet-gap: protocol_fixed (annotation CQ1 — no scorer invocation of
+#     tao_correct_solution.py exists anywhere; the 0.47 is transcribed from the metr-re-bench
+#     README, and claims.md marks C05 untested) and benchmark_valid (annotation CQ2 — correctness
+#     on all inputs, incl. the n<1e6 PyTorch fallback path, is inferred from the check's structure,
+#     not from a logged results_match=True run). A mandatory policy CQ with no honest discharging
+#     leaf is an IncompleteArgument rejection, so NO complete benchmark_evaluation(...) instance is
+#     declarable: E2-style unit, `gap` on empty support.
+#   * annotation CQ3 (does the execution environment match the reference number?) is unmet-gap too
+#     but maps to the OPTIONAL environment_match; CQ4 (JIT excluded via 3-warmup CUDA-graph
+#     capture) is met but optional. Neither changes the gap.
+#   * The claim is unestablished-in-artifact (benchmark instantiated only vicariously through the
+#     README's run), NOT defeated — N04/N06 are motivating dead ends (decision:none), no attack.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-triton_cumsum at sha256:1fb18ee0f3ca
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c05
+  nl      = "The superblock + atomic-suffix 3-kernel Triton pipeline achieves the reference score 0.47 (1.6 ms) on N=1e8 int32 on H100, but the score is transcribed from the README and no scorer run of the shipped kernel is recorded in the artifact"
+  formal  = performs(superblock_atomic_pipeline, rebench_reference, triton_cumsum_score)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- The benchmark premise is present ... -------------------------------------------------------
+
+# Principal premise: the reference-score report — but attested (transcribed from the README),
+# never an in-artifact scorer run.
+leaf e1 : reports(e03, benchmark_result(superblock_atomic_pipeline, rebench_reference, triton_cumsum_score, positive))
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C05, evidence/tables/reference_scores.md, metr-re-bench/ai_rd_triton_cumsum/README.md, logic/experiments.md#E03]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: fixed_protocol(superblock_atomic_pipeline, rebench_reference, e03) has
+# no honest leaf — no scorer invocation is recorded, the 0.47 is transcribed — and valid_benchmark
+# is unestablished — correctness on all inputs is inferred from the check's structure, not a logged
+# pass. Both are mandatory in corpus-v1. Complete support is empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

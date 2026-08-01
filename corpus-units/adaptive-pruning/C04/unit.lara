@@ -1,0 +1,67 @@
+# Corpus unit adaptive-pruning/C04 — gap (unmet mandatory variance CQ, annotator-optional)
+#
+# Source: m0/annotations/adaptive-pruning.yaml C04 (causal, component_ablation; corpus pin
+# 62e9b54). Headline: removing the kurtosis (outlier-aware) salience term from APT drops the
+# LLaMA2-7B four-task OpenLLM average from 50.0 to 38.1 at 30% sparsity — a 23.8% relative drop
+# ((50.0 - 38.1) / 50.0) — so the kurtosis term is critical for large-LM pruning (E03, Table 5).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * component_ablation family; conclusion contributes(kurtosis_salience, apt_llama2_7b,
+#     openllm_avg). single_variable (E03 step 6 omits only the kurtosis term) and protocol_parity
+#     (E03 steps 7/8 test at fixed 30% sparsity, E02 fixes the eval harness) are annotated met.
+#   * variance_reported is annotated UNMET-GAP: E03 reports single runs (no seeds/repeats). The
+#     annotator rated this CQ OPTIONAL, reasoning the 23.8% relative effect makes noise an
+#     unlikely full explanation; corpus-v1 makes variance mandatory family-wide (uniform-standard
+#     rule, adaptive-pruning/C03), so the policy call wins and the mandatory obligation has no
+#     discharging leaf. No complete component_ablation instance is declarable — E2-style gap.
+#   * Divergence from test-time-model-adaptation/C04: there variance had NO annotated CQ, so
+#     margins licensed a discharge; here the annotator explicitly evaluated variance and rated it
+#     unmet, so no honest margins-discharge is available — the claim lands `gap`, not `justified`.
+#   * The '23.8% reduction' arithmetic and the <5%-relative falsification threshold are a
+#     rational-arithmetic re-check (annotation strict_certifier: domain-checker); that strict
+#     adapter does not exist yet, so this unit stays defeasible (summary migration note).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact adaptive-pruning at sha256:de3685165a53
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c04
+  nl      = "Removing the kurtosis (outlier-aware) salience term from APT drops the LLaMA2-7B four-task OpenLLM average from 50.0 to 38.1 at 30% sparsity, a 23.8% relative drop, so the kurtosis term is critical for large-LM pruning"
+  formal  = contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E03's kurtosis ablation cells (full 50.0 vs ablated 38.1), per result cell.
+leaf e1 : reports(e03, ablation_effect(kurtosis_salience, apt_llama2_7b, openllm_avg, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03, Table-5, trace/exploration_tree.yaml#N09-N10]
+
+leaf e2 : isolated(kurtosis_salience, e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-step-6, logic/experiments.md#E03-Setup]
+
+leaf e3 : matched_protocol(e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-step-7, logic/experiments.md#E02-step-5]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e03) has no honest leaf — E03 reports single runs —
+# and corpus-v1 makes that obligation mandatory. The claim's complete-support set is empty.)
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

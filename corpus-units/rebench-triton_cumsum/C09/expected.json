@@ -1,0 +1,36 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:1fb18ee0f3ca"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "holds(bandwidth_bound_floor, pytorch_two_cumsum)",
+        "status": "defeated",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "out"
+      },
+      {
+        "arg": "d1",
+        "index": 1,
+        "label": "in"
+      }
+    ]
+  }
+}

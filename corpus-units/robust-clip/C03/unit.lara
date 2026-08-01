@@ -1,0 +1,71 @@
+# Corpus unit robust-clip/C03 — gap (unmet-mandatory-CQ path: benchmark validity)
+#
+# Source: m0/annotations/robust-clip.yaml C03 (descriptive, adversarial_stress_test;
+# corpus pin 62e9b54). Headline: FARE makes LVLMs "fully robust" against stealthy targeted
+# linf attacks — FARE4 0/150 successes at both eps 2/255 and 4/255 (0%); FARE2 0% at 2/255
+# and 3/150 (2.0%) at 4/255, each cell a mean over 6 target captions x 25 images (Table 3, E02);
+# original CLIP is 25/25 (100%) on every target (attack-validity anchor).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * adversarial_stress_test maps to benchmark_evaluation. S = fare, B = original_clip
+#     (the vulnerable anchor / comparand), Q = targeted_attack_robustness, Exp = e02.
+#   * Bundled four-cell result; binding conjunct is FARE4 0% at both radii, the strongest cell.
+#     FARE2's 0% / 2.0% cells stay in nl and the premise leaf refs.
+#   * The mandatory benchmark_valid CQ is unmet, so no complete benchmark_evaluation is
+#     declarable (E2-style gap). Annotation CQ "is 'fully robust' supported without adaptive or
+#     non-APGD attacks tailored to FARE?" is mandatory unmet-gap: a single non-adaptive attack
+#     family (APGD on autoregressive cross-entropy) does not validly establish full robustness
+#     of the claimed metric — 0% under one protocol is a gap, not a demonstrated defence. This
+#     is the mandatoriness call the batch note flagged: the "fully robust" wording maps onto
+#     valid_benchmark(B, Q), a MANDATORY question, so gap wins over reading it as the optional
+#     environment_match.
+#   * protocol_fixed IS met: annotation CQ2 (APGD, 10,000 iterations per combination, documented
+#     budget) plus CQ1 (attack succeeds 100% on original CLIP under the same protocol) establish
+#     a fixed, biting protocol. The optional CQs (exact-string success criterion; unbiased image
+#     selection) are met but omitted (optional, no status effect).
+#   * Scope holes (only LLaVA-1.5 attacked though the title says LVLMs; robustness only within
+#     linf eps <= 4/255) are recorded in nl / holes, not lowered.
+#   * The strict count-to-rate arithmetic adapter does not exist yet; lowers through the
+#     defeasible benchmark_evaluation.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact robust-clip at sha256:6fa440686d0a
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar ---------------
+
+claim c03
+  nl      = "FARE makes LVLMs fully robust against stealthy targeted linf attacks: FARE4 has 0/150 attack successes at both eps 2/255 and 4/255 (0 percent), and FARE2 is 0 percent at 2/255 and 2.0 percent at 4/255, each cell a mean over 6 targets x 25 images; original CLIP is 100 percent under the same protocol"
+  formal  = performs(fare, original_clip, targeted_attack_robustness)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: Table 3's per-target success counts (FARE cells plus the original-CLIP
+# 100% attack-validity anchor), folded into refs per result cell.
+leaf e1 : reports(e02, benchmark_result(fare, original_clip, targeted_attack_robustness, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C03, evidence/tables/table3_targeted_attacks.md, trace/exploration_tree.yaml#N02]
+
+leaf e2 : fixed_protocol(fare, original_clip, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-System, logic/experiments.md#E02-Procedure]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: valid_benchmark(original_clip, targeted_attack_robustness) is unmet —
+# a single non-adaptive attack family cannot validly establish the claimed "full" robustness —
+# and that CQ is mandatory, so the claim's complete-support set is empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8)

@@ -1,0 +1,69 @@
+# Corpus unit stochastic-interpolants/C03 — gap (mandatory variance CQ unmet)
+#
+# Source: m0/annotations/stochastic-interpolants.yaml C03 (causal, controlled_comparison;
+# corpus pin 62e9b54). Headline: on ImageNet-256 inpainting the data-dependent coupling reaches
+# FID-50k = 1.13 vs 1.35 for the uncoupled interpolant baseline under a matched U-Net and
+# training budget, attributing the 0.22 FID gain to the coupling (E02, Table 2, section 4.1).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * controlled_comparison(S, B, Q, D, Exp), conclusion better(S, B, Q, D). Causal claim carried
+#     by a clean-form controlled comparison; the causal attribution rides on the CQs.
+#   * The mandatory variance_reported CQ maps onto the annotation's mandatory "are seeds/repeated
+#     runs/FID variability reported so 1.13 vs 1.35 is distinguishable from noise?" — annotated
+#     unmet-gap (a single training run per condition, no seed count or uncertainty). An open
+#     mandatory obligation is IncompleteArgument, so NO complete arg is declarable: E2-style gap.
+#   * Two further mandatory CQs are also unmet-gap and reinforce the gap: the baseline evaluation
+#     protocol at sampling time is unstated (baseline_parity aspect), and the known-pixel
+#     compositing confound is not separated from the coupling (annotated unmet-GAP, not
+#     unmet-defeater, so it surfaces as a hole, no undercut). baseline_parity's training-side
+#     matching (CQ1) and the one-protocol FID computation (CQ5) are the two met CQs whose leaves
+#     the paper supplies.
+#   * The E02 step-3 sign inconsistency (I'_t = x0 - x1 vs stated x1 - x0) is an internal-
+#     consistency hole noted in nl-adjacent refs, not a defeat edge.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact stochastic-interpolants at sha256:73bd49c9083c
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c03
+  nl      = "On ImageNet-256 inpainting the data-dependent coupling reaches FID-50k 1.13 vs 1.35 for the uncoupled interpolant baseline under a matched U-Net and training budget; no seeds or FID variability are reported, the baseline evaluation protocol is unstated, and known-pixel compositing is not separated from the coupling effect"
+  formal  = better(dependent_coupling, uncoupled_baseline, fid, imagenet256_inpainting)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E02's two FID-50k cells (dependent 1.13, uncoupled 1.35), per result cell.
+leaf e1 : reports(e02, compares(dependent_coupling, uncoupled_baseline, fid, imagenet256_inpainting, favorable))
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C03, logic/experiments.md#E02, trace/exploration_tree.yaml#N07, Table-2]
+
+leaf e2 : matched_setup(dependent_coupling, uncoupled_baseline, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-Procedure-step-4]
+
+leaf e3 : valid_measurement(fid, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Procedure-step-7]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e02) has no honest leaf — one training run per
+# condition, no seeds or FID uncertainty — and controlled_comparison makes that obligation
+# mandatory. The evaluation-protocol and compositing CQs are also unmet-gap. Complete support is
+# empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

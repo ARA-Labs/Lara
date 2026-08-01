@@ -48,3 +48,20 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: high
 - **Code ref**: ["lean/Lara/Check/Support.lean", "lean/Lara/Check/SupportProof.lean"]
+
+## H06: Verify specified-outcome fixtures at generation time
+- **Rationale**: A fixture generator that runs each generated artifact through the
+  production pipeline and ABORTS on any specification mismatch makes the committed
+  suite verified-by-construction — generation itself is the first experiment run
+  (148/148 mutants matched their specified class/status on the first full
+  generation, which would otherwise have silently mis-pinned the R7-vs-R13 cert
+  boundary). Standing re-verification (MutationSpec / CorpusUnitsSpec freshness +
+  expected-status pins) plus seeded or manifest-driven reproducibility then keep
+  the suite honest without trusting the generation event. Reused for the T2
+  corpus units: the generator fails loudly on parse/elaborate/replay errors and
+  the spec cross-checks manifest expected_status against computed verdicts.
+- **Sources**: ["148 ← plans/2026-08-01-m5-mutation-suite-worked-cases.md:97 «Generated suite: **148 mutants** over 8 accept bases (A, B, E1–E5, S1), seed» [result]", "zero mismatches ← plans/2026-08-01-m5-mutation-suite-worked-cases.md:99 «decodeCheckInputFile` — zero specification mismatches on the first full» [result]"]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: medium
+- **Code ref**: ["scripts/gen-mutants.hs", "scripts/gen-corpus-units.hs", "test/MutationSpec.hs", "test/CorpusUnitsSpec.hs"]

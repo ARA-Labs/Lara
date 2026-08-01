@@ -1,0 +1,25 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:bb06e592cef6"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "better(bbox_adapter, azure_sft, training_cost, strategyqa_gsm8k)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

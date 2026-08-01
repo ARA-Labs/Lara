@@ -1,0 +1,25 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:c1bb86743873"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "performs(fre_all, gc_baselines, cross_family_return)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

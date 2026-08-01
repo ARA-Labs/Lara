@@ -1,0 +1,70 @@
+# Corpus unit test-time-model-adaptation/C07 — gap (mandatory baseline_parity + variance CQs unmet)
+#
+# Source: m0/annotations/test-time-model-adaptation.yaml C07 (comparative, controlled_comparison;
+# corpus pin 62e9b54; double-annotated -> reviewed). Headline: FOA outperforms TENT and SAR under
+# non-i.i.d. test scenarios — online imbalanced label shift FOA 62.1% vs SAR 60.8% / TENT 60.2%,
+# mixed domain shift FOA 62.0% vs SAR 61.4% / TENT 56.9%, with lower ECE (E08, scenarios 1-2).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * controlled_comparison(S, B, Q, D, Exp), conclusion better(S, B, Q, D). Nearest-competitor
+#     convention: the binding comparand is SAR (the stronger baseline, designed for non-i.i.d.
+#     operation, smaller margin than TENT); TENT stays in nl and refs.
+#   * The mandatory baseline_parity CQ (matched_setup) is only partly established: the same stream
+#     construction is applied to every method (CQ1 met) but baseline hyperparameter configuration
+#     under shift is unstated (annotated mandatory unmet-gap; unlike E07, E08 says nothing about
+#     method configuration). Fairness of the comparand is therefore unestablished -> the argument
+#     cannot honestly discharge baseline_parity. NO complete arg is declarable: E2-style gap.
+#   * Reinforcing (policy-vs-annotation divergence, uniform-standard rule): the mandatory
+#     variance_reported CQ maps onto the annotation's "is the mixed stream repeated across seeds?",
+#     rated OPTIONAL and unmet-gap (a single unseeded interleaving); corpus-v1 makes it mandatory,
+#     so it independently blocks a complete arg. e2 (matched_setup) captures only the met stream-
+#     construction aspect (CQ1); e3 (valid_measurement) the standard accuracy/ECE metrics.
+#   * Leaf kinds are attested, not observed: the annotation notes no exploration-tree node covers
+#     E08 (the trace ends at N12), so the non-i.i.d. cells are attested from claims/experiments
+#     text with no trace-level provenance.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact test-time-model-adaptation at sha256:59da7e38fd9f
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c07
+  nl      = "Under non-i.i.d. test streams FOA beats SAR and TENT: online imbalanced label shift 62.1 percent vs SAR 60.8 and TENT 60.2, mixed domain shift 62.0 percent vs SAR 61.4 and TENT 56.9, with lower ECE; baseline configuration under shift is unstated and the mixed stream is a single unseeded interleaving"
+  formal  = better(foa, sar, adaptation_accuracy, non_iid_shift)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E08's two-scenario comparison cells (FOA vs SAR/TENT), per result cell.
+leaf e1 : reports(e08, compares(foa, sar, adaptation_accuracy, non_iid_shift, favorable))
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C07, logic/experiments.md#E08-scenario-1, logic/experiments.md#E08-scenario-2]
+
+leaf e2 : matched_setup(foa, sar, e08)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E08-Procedure-step-1, logic/experiments.md#E08-Procedure-step-2]
+
+leaf e3 : valid_measurement(adaptation_accuracy, e08)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E08-Procedure-step-3]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: baseline_parity is only partly met — the stream is matched but baseline
+# hyperparameter configuration under shift is unstated — and variance_reported(e08) has no honest
+# leaf (a single unseeded interleaving). Both are mandatory, so the complete-support set is empty.)
+
+status c07
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c07 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

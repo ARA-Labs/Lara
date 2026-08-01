@@ -1,0 +1,65 @@
+# Corpus unit bridging-data-gaps/C05 — gap (causal; component_ablation)
+#
+# Source: m0/annotations/bridging-data-gaps.yaml C05 (causal; corpus pin 62e9b54). Headline: along
+# the TAN ablation chain (adaptor-only 41.88 -> +similarity guidance 26.41 -> +adversarial noise
+# 20.06 FID on FFHQ -> 10-shot Sunglasses at 300 iters), each component contributes incrementally.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: component_ablation. Bundled two-component claim; binding conjunct is
+#     C = adversarial_noise (the smaller +6.4-point increment, 26.41 -> 20.06) — a fortiori the
+#     larger +15.5-point similarity-guidance step (41.88 -> 26.41) holds too. S = ddpm_tan,
+#     Q = fid_improvement. The full chain lives in `nl` and refs.
+#   * E05 reports a single FID per variant, no repeats or error bars (CQ3, unmet-gap), so
+#     variance_reported (policy-mandatory) has no discharging leaf: the 6.4- and 15.5-point deltas
+#     rest on single runs. An open mandatory obligation is an IncompleteArgument rejection, so no
+#     complete component_ablation is declarable -> E2-style gap (mirrors adaptive-pruning/C03).
+#   * CQ1 (each variant differs from its neighbor by exactly the ablated component) discharges
+#     single_variable; CQ2 (direct full fine-tuning anchor baseline present, identical 300-iter
+#     training) discharges protocol_parity. Both leaves are on the page. The optional 2x2-factorial
+#     CQ4 (adversarial noise measured only atop similarity guidance) and the FID-consistency CQ5 are
+#     omitted (no status effect); the 20.06-vs-20.66 body-text discrepancy stays a header note.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bridging-data-gaps at sha256:5325ea757258
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c05
+  nl      = "Along the TAN ablation chain (adaptor-only 41.88, +similarity guidance 26.41, +adversarial noise 20.06 FID on FFHQ to 10-shot Sunglasses at 300 iters), adversarial noise adds a 6.4-point drop and similarity guidance a larger 15.5-point drop; single run per variant"
+  formal  = contributes(adversarial_noise, ddpm_tan, fid_improvement)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e05, ablation_effect(adversarial_noise, ddpm_tan, fid_improvement, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/figures/figure4_ablation.md, evidence/tables/table2_fid.md]
+
+leaf e2 : isolated(adversarial_noise, e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Setup]
+
+leaf e3 : matched_protocol(e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Setup, logic/experiments.md#E05-Baselines]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e05) has no honest leaf — E05 reports a single FID per
+# variant, no repeats — and corpus-v1 makes that obligation mandatory. The claim's complete-support
+# set is therefore empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

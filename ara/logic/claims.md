@@ -529,3 +529,14 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: [C01, C16]
 - **Last revised**: 2026-08-01 (2026-08-01_001#1)
 - **Tags**: admission, data-integrity, gap-not-defeat, mechanized, spec-4.3, R9
+
+## C22: Reinstatement vs contested is decided by the declared attack set, and the lever is the completeness scan's scope
+- **Statement**: Which of reinstatement (justified-under-attack) and contested a unit exhibits is determined by the declared attack SET, not by which attack kinds are available. The mechanism is the scope of the attack-completeness scan: completeness is arg-conclusion-level over declared contrary pairs, so a symmetric contrary pair forces mutual rebut/undermine edges between any two args concluding the pair's sides (locking them into a 2-cycle → contested), a one-directional contrary permits an unattackable defender (→ reinstatement), and exceptions sit outside the scan entirely, so undercut edges are always voluntary — the same policy vocabulary yields reinstatement or contested depending on one declared edge.
+- **Conditions**: Grounded semantics with the frozen v0.1 checker (completeness = `firstMissingConflictInfo`, arg-conclusion-level, contraries only); holds for rebut/undermine (contrary-licensed) vs undercut (exception-licensed). Untested boundary: alternative semantics (preferred/stable) and completeness scans over sub-argument occurrences.
+- **Sources**: []
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: An accepted unit with two args concluding the two sides of a declared symmetric contrary pair but no mutual edges; or a one-directional contrary whose reverse edge the checker mandates; or an undercut edge required by the completeness scan. Any of these breaks the claimed decision boundary.
+- **Proof**: [trace N90 (E4/E5 designed against this mechanism: E4's undermine-reinstatement needs the one-directional refuted_by_metareview contrary — the symmetric pair collapsed it into a cycle; E4 context X vs E5 context W differ by exactly one voluntary undercut edge), examples/E4, examples/E5, test/WorkedExamplesSpec.hs prop_coverageMatrix (all nine attack-kind × target-label cells measured), differential harness byte-parity on the E4/E5 anchors (both drivers)]
+- **Dependencies**: []
+- **Tags**: attack-completeness, reinstatement, contested, grounded-semantics, worked-examples

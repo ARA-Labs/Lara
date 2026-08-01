@@ -1,90 +1,207 @@
 session:
-  id: "2026-08-01_001"
-  date: "2026-08-01"
-  started: "2026-08-01T00:15"
-  last_turn: "2026-08-01T01:11"
-  turn_count: 1
-  summary: "M5 opens (T1+T4 of #48, PR #49): worked cases E4 (reinstatement per attack kind) + E5 (contested via undermine/undercut cycles, gap amid attacks) on empirical-v2 close all nine attack-kind x target-label cells; Lara.Mutate seeded mutation suite (SplitMix64 seed 20260801) yields 148 verified-at-generation mutants covering all 11 executable reject classes + 45 codec negatives + 4 cycle accepts; differential positive 146/0 negative 54/0, cabal test 136 props green."
-
+  id: 2026-08-01_001
+  date: '2026-08-01'
+  started: 2026-08-01T00:15
+  last_turn: 2026-08-01T19:05
+  turn_count: 2
+  summary: 'M5 opens (T1+T4 of #48, PR #49): worked cases E4 (reinstatement per attack kind) + E5 (contested
+    via undermine/undercut cycles, gap amid attacks) on empirical-v2 close all nine attack-kind x target-label
+    cells; Lara.Mutate seeded mutation suite (SplitMix64 seed 20260801) yields 148 verified-at-generation
+    mutants covering all 11 executable reject classes + 45 codec negatives + 4 cycle accepts; differential
+    positive 146/0 negative 54/0, cabal test 136 props green. Turn 2 (PR #49 merged): T2 corpus units
+    complete on branch m5-t2-corpus-units — all 60 M0-sample claims lowered under corpus-v1 (9 justified
+    / 48 gap / 3 defeated), cabal 141 props + differential 206/54 byte-exact; O23/O24/O25 crystallized
+    (C22, R7/R13 concept, H06).'
 events_logged:
-  - turn: 1
-    type: pivot
-    id: "N89"
-    routing: direct
-    provenance: user
-    summary: "M4 -> M5 deterministic evaluation scope; branch feat/m5-mutation-suite-worked-cases executed end to end on user directive"
-  - turn: 1
-    type: experiment
-    id: "N90"
-    routing: direct
-    provenance: ai-executed
-    summary: "E4/E5 worked cases close the kind x label matrix; completeness-scan scope (symmetric contrary forces edges, exceptions voluntary) is the reinstatement-vs-contested lever"
-  - turn: 1
-    type: experiment
-    id: "N91"
-    routing: direct
-    provenance: ai-executed
-    summary: "148 seeded mutants, zero spec mismatches at generation; differential 146/0 + 54/0; R7-vs-R13 cert boundary pinned"
-  - turn: 1
-    type: observation
-    id: "O23"
-    routing: staged
-    provenance: ai-suggested
-    summary: "declared attack set + completeness-scan scope decide reinstatement vs contested (potential claim)"
-  - turn: 1
-    type: observation
-    id: "O24"
-    routing: staged
-    provenance: ai-suggested
-    summary: "R7/R13 certificate-defect boundary: allowlist miss vs replay failure (potential concept)"
-  - turn: 1
-    type: observation
-    id: "O25"
-    routing: staged
-    provenance: ai-suggested
-    summary: "verify-at-generation makes a specified-outcome corpus verified-by-construction (potential heuristic)"
-
+- turn: 1
+  type: pivot
+  id: N89
+  routing: direct
+  provenance: user
+  summary: M4 -> M5 deterministic evaluation scope; branch feat/m5-mutation-suite-worked-cases executed
+    end to end on user directive
+- turn: 1
+  type: experiment
+  id: N90
+  routing: direct
+  provenance: ai-executed
+  summary: E4/E5 worked cases close the kind x label matrix; completeness-scan scope (symmetric contrary
+    forces edges, exceptions voluntary) is the reinstatement-vs-contested lever
+- turn: 1
+  type: experiment
+  id: N91
+  routing: direct
+  provenance: ai-executed
+  summary: 148 seeded mutants, zero spec mismatches at generation; differential 146/0 + 54/0; R7-vs-R13
+    cert boundary pinned
+- turn: 1
+  type: observation
+  id: O23
+  routing: staged
+  provenance: ai-suggested
+  summary: declared attack set + completeness-scan scope decide reinstatement vs contested (potential
+    claim)
+- turn: 1
+  type: observation
+  id: O24
+  routing: staged
+  provenance: ai-suggested
+  summary: 'R7/R13 certificate-defect boundary: allowlist miss vs replay failure (potential concept)'
+- turn: 1
+  type: observation
+  id: O25
+  routing: staged
+  provenance: ai-suggested
+  summary: verify-at-generation makes a specified-outcome corpus verified-by-construction (potential heuristic)
+- turn: 2
+  type: decision
+  id: N92
+  routing: direct
+  provenance: ai-suggested
+  summary: T2 corpus = frozen M0 60-claim sample; one shared corpus-v1 policy; CQ mandatoriness by annotator
+    majority
+- turn: 2
+  type: decision
+  id: N93
+  routing: direct
+  provenance: ai-suggested
+  summary: 'Lowering semantics: unmet mandatory CQ = E2-style gap; defeat only via licensed undercut on
+    complete arg; gap pre-empts defeat'
+- turn: 2
+  type: experiment
+  id: N94
+  routing: direct
+  provenance: ai-executed
+  summary: '60/60 units lowered+verified: 9 justified/48 gap/3 defeated; 141 props; differential 206/54
+    byte-exact'
+- turn: 2
+  type: observation
+  id: O26
+  routing: staged
+  provenance: ai-executed
+  summary: 'R5 accounting covers optional CQs: discharge-or-open; open optional adds no obligation'
+- turn: 2
+  type: observation
+  id: O27
+  routing: staged
+  provenance: ai-suggested
+  summary: Polished corpus is gap-dominated under a uniform policy bar (48/60); defeats only from papers'
+    own internal evidence
+- turn: 2
+  type: observation
+  id: O28
+  routing: staged
+  provenance: ai-suggested
+  summary: C17 wishlist residue recurs as finite policy vocabulary gaps at lowering time
+- turn: 2
+  type: observation
+  id: O23
+  routing: crystallized
+  provenance: ai-suggested
+  summary: 'O23 -> C22 via artifact-commitment (PR #49 merged)'
+- turn: 2
+  type: observation
+  id: O24
+  routing: crystallized
+  provenance: ai-suggested
+  summary: O24 -> concepts.md R7/R13 certificate-defect boundary via artifact-commitment
+- turn: 2
+  type: observation
+  id: O25
+  routing: crystallized
+  provenance: ai-suggested
+  summary: O25 -> H06 verify-at-generation via artifact-commitment (pattern reused by gen-corpus-units.hs)
 ai_actions:
-  - turn: 1
-    action: "Authored examples/E4 + examples/E5 + empirical-v2 policy; extended WorkedExamplesSpec (prop_E4/prop_E5, kind x label coverage matrix) and DifferentialSpec goldens; regenerated anchors"
-    provenance: ai-executed
-    files_changed: ["examples/E4/", "examples/E5/", "examples/README.md", "scripts/gen-worked-examples.hs", "test/WorkedExamplesSpec.hs", "test/DifferentialSpec.hs"]
-  - turn: 1
-    action: "Implemented Lara.Mutate + scripts/gen-mutants.hs (verify-at-generation) + test/MutationSpec.hs; extended differential.sh with fixtures/mutants/malformed negative root; generated + committed 148-mutant suite with MANIFEST + measured README"
-    provenance: ai-executed
-    files_changed: ["src/Lara/Mutate.hs", "scripts/gen-mutants.hs", "test/MutationSpec.hs", "test/Spec.hs", "lara.cabal", "scripts/differential.sh", "fixtures/mutants/"]
-  - turn: 1
-    action: "Ran experiments (differential.sh positive 146/0 negative 54/0; cabal test 136 props); recorded results in plan doc; committed 3-commit series; opened PR #49; updated TODOS.md"
-    provenance: ai-executed
-    files_changed: ["plans/2026-08-01-m5-mutation-suite-worked-cases.md", "TODOS.md"]
-
+- turn: 1
+  action: Authored examples/E4 + examples/E5 + empirical-v2 policy; extended WorkedExamplesSpec (prop_E4/prop_E5,
+    kind x label coverage matrix) and DifferentialSpec goldens; regenerated anchors
+  provenance: ai-executed
+  files_changed:
+  - examples/E4/
+  - examples/E5/
+  - examples/README.md
+  - scripts/gen-worked-examples.hs
+  - test/WorkedExamplesSpec.hs
+  - test/DifferentialSpec.hs
+- turn: 1
+  action: Implemented Lara.Mutate + scripts/gen-mutants.hs (verify-at-generation) + test/MutationSpec.hs;
+    extended differential.sh with fixtures/mutants/malformed negative root; generated + committed 148-mutant
+    suite with MANIFEST + measured README
+  provenance: ai-executed
+  files_changed:
+  - src/Lara/Mutate.hs
+  - scripts/gen-mutants.hs
+  - test/MutationSpec.hs
+  - test/Spec.hs
+  - lara.cabal
+  - scripts/differential.sh
+  - fixtures/mutants/
+- turn: 1
+  action: 'Ran experiments (differential.sh positive 146/0 negative 54/0; cabal test 136 props); recorded
+    results in plan doc; committed 3-commit series; opened PR #49; updated TODOS.md'
+  provenance: ai-executed
+  files_changed:
+  - plans/2026-08-01-m5-mutation-suite-worked-cases.md
+  - TODOS.md
+- turn: 2
+  action: 'Ticked T1/T4 checkboxes on issue #48; branch m5-t2-corpus-units created'
+  provenance: ai-executed
+  files_changed: []
+- turn: 2
+  action: 'T2 pipeline: corpus-v1 policy, LOWERING.md conventions, 3 exemplar units, gen-corpus-units.hs,
+    check-corpus-unit.hs, CorpusUnitsSpec, differential corpus-units root'
+  provenance: ai-executed
+  files_changed:
+  - corpus-units/corpus-v1.policy.lara
+  - corpus-units/LOWERING.md
+  - scripts/gen-corpus-units.hs
+  - scripts/check-corpus-unit.hs
+  - test/CorpusUnitsSpec.hs
+  - scripts/differential.sh
+  - plans/2026-08-01-m5-t2-corpus-units.md
+- turn: 2
+  action: 7 parallel lowering agents wrote the remaining 57 units from m0/annotations/*.yaml; manifest
+    assembled in frozen sample order; anchors+goldens generated; full verification green
+  provenance: ai-executed
+  files_changed:
+  - corpus-units/ (60 unit dirs)
+  - corpus-units/MANIFEST.tsv
 claims_touched:
-  - id: C21
-    action: advanced
-    turn: 1
-
+- id: C21
+  action: advanced
+  turn: 1
+- id: C22
+  action: crystallized
+  turn: 2
 logic_revisions:
-  - turn: 1
-    entry: C21
-    field: Proof
-    before: "[trace N86 (...), trace N87 (...), trace N88 (...), lean/Lara/Groups.lean, PR #45]"
-    after: "[trace N86 (...), trace N87 (...), trace N88 (...), trace N91 (7 seeded R9 group-escalation mutants generated over the worked examples all verify as reject R9 byte-identically through both drivers), lean/Lara/Groups.lean, PR #45]"
-    signal: empirical-resolution
-    provenance: ai-suggested
-    note: "Evidence-only append: T1's generated R9 mutants are systematic (generated, per-base) confirmation of the escalation routing; Statement/Conditions/Status untouched."
-
+- turn: 1
+  entry: C21
+  field: Proof
+  before: '[trace N86 (...), trace N87 (...), trace N88 (...), lean/Lara/Groups.lean, PR #45]'
+  after: '[trace N86 (...), trace N87 (...), trace N88 (...), trace N91 (7 seeded R9 group-escalation
+    mutants generated over the worked examples all verify as reject R9 byte-identically through both drivers),
+    lean/Lara/Groups.lean, PR #45]'
+  signal: empirical-resolution
+  provenance: ai-suggested
+  note: 'Evidence-only append: T1''s generated R9 mutants are systematic (generated, per-base) confirmation
+    of the escalation routing; Statement/Conditions/Status untouched.'
 key_context:
-  - turn: 1
-    excerpt: "User: 'we are doing m5-mutation-suite-worked-cases, do it, do experiment, record ara, and pr. no need to ask anything' — full autonomous execution of T1+T4."
-  - turn: 1
-    excerpt: "Design pivot mid-T4: undermine-reinstatement was inexpressible with the symmetric generalizes/not_generalizes contrary (completeness forces the reverse edge -> cycle); introduced the one-directional refuted_by_metareview contrary instead. This asymmetry is load-bearing for defense."
-
+- turn: 1
+  excerpt: 'User: ''we are doing m5-mutation-suite-worked-cases, do it, do experiment, record ara, and
+    pr. no need to ask anything'' — full autonomous execution of T1+T4.'
+- turn: 1
+  excerpt: 'Design pivot mid-T4: undermine-reinstatement was inexpressible with the symmetric generalizes/not_generalizes
+    contrary (completeness forces the reverse edge -> cycle); introduced the one-directional refuted_by_metareview
+    contrary instead. This asymmetry is load-bearing for defense.'
+- turn: 2
+  excerpt: 'User: "https://github.com/EYH0602/lara/pull/49 is merged, what is the next step?" then "check
+    out a new branch to do it" — T2 selected as next, executed end-to-end this turn.'
 open_threads:
-  - "PR #49 awaiting review/merge (T1+T4 of #48)."
-  - "M5 remaining: T2 corpus units (m0/claims-index.tsv stratified sample), T3 measurement harness (axis-c metrics incl. checking time + certificate size), T5 freeze protocol, T6 ablation baselines."
-  - "O23/O24/O25 staged; O23 is a strong claim candidate once PR #49 merges (artifact commitment)."
-
+- 'Branch m5-t2-corpus-units ready: push + open PR for T2 (not yet pushed; user has not asked).'
+- 'M5 remaining: T3 measurement harness (axis-c metrics; can now anchor on the 60 corpus units + 148 mutants),
+  T1 open half (rerun mutation generators over corpus-unit anchors), T5 freeze protocol, T6 ablation baselines.'
+- 'Review flags from lowering: lbcs/C03 scheme divergence (annotator dose_response -> lowered analytic);
+  rice/C01 bound to the analytic strand (alternative reading lands gap); O27/O28 staged claim candidates.'
 ai_suggestions_pending:
-  - "O23: completeness-scan scope as the reinstatement-vs-contested lever (claim candidate)."
-  - "O24: R7-vs-R13 certificate-defect boundary (concept candidate)."
-  - "O25: verify-at-generation corpus discipline (heuristic candidate)."
+- O26 (R5 optional-CQ accounting), O27 (gap-dominated corpus), O28 (policy vocabulary gaps) staged; O27
+  is a strong claim candidate for the paper's evaluation section once T3 numbers exist.

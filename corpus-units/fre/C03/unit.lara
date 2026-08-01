@@ -1,0 +1,62 @@
+# Corpus unit fre/C03 — gap (generalization; benchmark_evaluation)
+#
+# Source: m0/annotations/fre.yaml C03 (generalization; corpus pin 62e9b54). Headline: a single
+# frozen FRE-all agent beats GC-IQL/GC-BC on non-goal-reaching families (ant-directional 55.2 vs
+# 4.8/6.5; kitchen 66 vs 3/1) while staying competitive on goal-reaching (ant-goal 48.8 vs 0.0).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: benchmark_evaluation. S = fre_all, B = gc_baselines (GC-IQL/GC-BC),
+#     Q = cross_family_return. Per-family cells live in `nl` and refs.
+#   * The annotation's mandatory CQ2 is unmet-gap: the conditioning protocol for the goal-
+#     conditioned baselines on non-goal tasks (directional, simplex, path) is never stated, so their
+#     near-zero scores could be partly a task-specification artifact. Mapped onto policy-mandatory
+#     benchmark_valid (is the benchmark valid for the comparands?) -> unmet. An open mandatory
+#     obligation is an IncompleteArgument rejection, so no complete benchmark_evaluation is
+#     declarable -> E2-style gap.
+#   * CQ1 (one frozen FRE-all checkpoint across every family, no per-family specialists) discharges
+#     protocol_fixed; that leaf is on the page. The optional variance CQ3 (met, mean +- std) is
+#     omitted (no status effect).
+#   * The path-task tension (GC-IQL scores 46.6/70.3 on ant-path, above FRE) is internal to the
+#     artifact's own table, not a dead-end node with decision=undercut, so per the annotation it
+#     surfaces as this header note, not an attack edge.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact fre at sha256:c1bb86743873
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c03
+  nl      = "A single frozen FRE-all agent beats GC-IQL/GC-BC on non-goal-reaching families (ant-directional 55.2 vs 4.8/6.5; kitchen 66 vs 3/1) while staying competitive on goal-reaching (ant-goal 48.8 vs 0.0); the GC conditioning protocol on non-goal tasks is unspecified"
+  formal  = performs(fre_all, gc_baselines, cross_family_return)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e01, benchmark_result(fre_all, gc_baselines, cross_family_return, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table1_main_results.md, Table-1-row-ant-directional, Table-1-row-kitchen]
+
+leaf e2 : fixed_protocol(fre_all, gc_baselines, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-steps-2-5]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: benchmark_valid(gc_baselines, cross_family_return) has no honest leaf —
+# the conditioning protocol for the goal-conditioned baselines on non-goal tasks is unspecified
+# (CQ2, unmet-gap), so their near-zero scores may be a task-spec artifact — and corpus-v1 makes
+# benchmark validity mandatory. The claim's complete-support set is therefore empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

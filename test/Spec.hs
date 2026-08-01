@@ -24,6 +24,7 @@ import Lara.Term (Con (..), Term (..), Var (..))
 
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
+import CorpusUnitsSpec (corpusUnitsSpecProps)
 import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
 import MutationSpec (mutationSpecProps)
@@ -187,6 +188,7 @@ main = do
         ++ [run name act | (name, act) <- syntaxSpecProps]
         ++ [run name act | (name, act) <- elaborateSpecProps]
         ++ [run name act | (name, act) <- workedExamplesSpecProps]
+        ++ [run name act | (name, act) <- corpusUnitsSpecProps]
         ++ [run name act | (name, act) <- checkSpecProps]
         ++ [run name act | (name, act) <- differentialSpecProps]
         ++ [run name act | (name, act) <- mutationSpecProps]

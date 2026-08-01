@@ -1,0 +1,77 @@
+# Corpus unit ftrl/C01 — gap (negative-result through the null_comparison dual)
+#
+# Source: m0/annotations/ftrl.yaml C01 (negative-result, controlled_comparison; corpus pin
+# 62e9b54). Headline: vanilla RL fine-tuning fails to leverage pre-trained capabilities and
+# ends up comparable to or worse than training from scratch, because of forgetting of pre-
+# trained capabilities (FPC) — NetHack vanilla FT collapses to ~1K return (frozen model ~5K);
+# RoboticSequence vanilla FT is indistinguishable from scratch with FAR stages at 0% within
+# 100K steps; Montezuma Room-7 success drops in the first 20M steps (E01/E02/E03).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * The claim is genuinely the negation of a comparison conclusion (proposition_shape
+#     final_perf_leq(vanilla_ft, from_scratch, ...)), so it lowers through the null_comparison
+#     dual: conclusion not_better(vanilla_ft, from_scratch, final_return, rl_envs). The FPC
+#     mechanism and per-environment collapse cells live in nl and the leaf refs.
+#   * Only one side (not_better) appears, so no contrary/rebut edge is forced (attack
+#     completeness is arg-conclusion-level; corpus-v1 §Conflict).
+#   * null_comparison's mandatory adequate_power CQ (seeds/uncertainty for every environment)
+#     has no discharging leaf: E01 reports 5 seeds and E03 20 seeds/90% CIs, but E02
+#     (Montezuma) states no seed count or interval, so the seeds obligation is unmet corpus-
+#     wide for this claim. An open mandatory obligation is an IncompleteArgument rejection, so
+#     no complete null_comparison instance is declarable — the unit is E2-style: the claim and
+#     the supplied leaves are on the page, no arg binds them, and the claim lands `gap` on
+#     empty complete support (adaptive-pruning/C03 pattern). baseline_parity (scratch baseline
+#     run per environment) and measurement_validity (FAR-state collapse directly measured) are
+#     annotated met and kept as leaves.
+#   * Coverage flag (kind-a, summary §3): the majority quantifier "in most practical scenarios"
+#     over an open environment class has no direct construct; it instantiates per tested env in
+#     the atom and its class-vs-tested-set scope lives in the binding, audited on faithfulness.
+#     E02 expects vanilla FT to finish ABOVE scratch in final return, so the scratch-comparison
+#     leg rests on E01/E03 while E02 supports only the FAR-forgetting leg (annotation hole 2).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact ftrl at sha256:9d5807db04eb
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, not assemblable at corpus-v1's evidential bar --------------------------
+
+claim c01
+  nl      = "Vanilla RL fine-tuning fails to leverage pre-trained capabilities: due to forgetting (FPC) its final performance is comparable to or worse than training from scratch across NetHack, Montezuma, and RoboticSequence (NetHack ~1K vs frozen ~5K return; RoboticSequence FAR stages 0% within 100K steps)"
+  formal  = not_better(vanilla_ft, from_scratch, final_return, rl_envs)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the null comparison against scratch, per result cell across E01/E03 (the
+# scratch-comparison legs), folded into refs.
+leaf e1 : reports(e01, compares(vanilla_ft, from_scratch, final_return, rl_envs, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01, logic/experiments.md#E03, Figure-3a, Table-4, Table-5, trace/exploration_tree.yaml#N06, trace/exploration_tree.yaml#N11]
+
+leaf e2 : matched_setup(vanilla_ft, from_scratch, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-step-4a, logic/experiments.md#E02-Procedure-step-4a, logic/experiments.md#E03-Procedure-step-4a, logic/experiments.md#E01-Baselines]
+
+leaf e3 : valid_measurement(final_return, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-step-5, logic/experiments.md#E03-step-5, logic/experiments.md#E01-trajectory-metrics]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: powered(e01) has no honest leaf — E02/Montezuma reports no seed
+# count or uncertainty — and corpus-v1 makes that obligation mandatory. The claim's complete-
+# support set is therefore empty.)
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

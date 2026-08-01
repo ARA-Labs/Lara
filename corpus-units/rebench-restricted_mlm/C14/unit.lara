@@ -1,0 +1,83 @@
+# Corpus unit rebench-restricted_mlm/C14 — justified (dead-end-as-SUPPORT, kind-c; batch: rebench)
+#
+# Source: m0/annotations/rebench-restricted_mlm.yaml C14 (implementation-behavioral,
+# cross_run_observation; corpus pin 62e9b54). Headline: hand-rolled 1/x reciprocal normalisations
+# NaN at init under the restricted primitive set — 7 of 22 MALT runs (01,06,09,11,16,19,20) hit
+# NaN when normalisation used a hand-rolled reciprocal, and substituting a fixed scalar residual
+# restored training.
+# (The upstream artifact labels this scheme `Evidence` rather than `Proof`; the YAML is standard.)
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * cross_run_observation -> corpus-v1 `measurement(P, S, Exp)`; conclusion
+#     holds(hand_rolled_reciprocal_nan, restricted_primitive_mlm). The 7/22 rate and per-run ids
+#     stay in nl and refs.
+#   * kind-(c) dead-end-as-SUPPORT (M0 summary flag): M05 is a dead_end trace node but it IS the
+#     claim's primary evidence, so it is cited in the premise leaf e1 refs, NOT modelled as an
+#     attack. The typed-attack vocabulary (rebut/undercut/undermine/none) has no support edge from
+#     a dead end; recording M05 as the premise is the faithful lowering of that relation.
+#   * measurement's two mandatory CQs are MET via annotation CQ1 (all 22 sub-runs staged with one
+#     uniform NaN-attribution criterion, cross-run table in malt_attempts.md): instrument_validity
+#     (same criterion detecting the reciprocal-NaN phenomenon, e2) and coverage (the observation
+#     spans all 22 runs, e3). Complete unattacked support -> justified.
+#   * Policy-vs-annotation divergences (uniform-standard rule): the annotation rates CQ2 (run
+#     enumeration off-by-one: run_13 is cited yet absent from the 7-run list) and CQ3 (run_16's
+#     cited insight is 'SGD divergence', not a reciprocal NaN) mandatory + unmet-gap. In corpus-v1
+#     these are finer than the measurement vocabulary: CQ3 maps to the OPTIONAL confound_control
+#     theme (controlling optimizer/lr/init as alternative causes) — omitted, no status effect; CQ2
+#     is a document-consistency nitpick (+-1 run within an otherwise-covered scope) with no
+#     mandatory-CQ home. Neither unmet a mandatory policy question, so the support stands; both
+#     caveats are recorded here rather than in the AF.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-restricted_mlm at sha256:d7b11148b949
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c14
+  nl      = "Hand-rolled 1/x reciprocal normalisations NaN at init under the restricted primitive set: 7 of 22 MALT runs (01,06,09,11,16,19,20) hit NaN when normalisation used a hand-rolled reciprocal, and substituting a fixed scalar residual restored training"
+  formal  = holds(hand_rolled_reciprocal_nan, restricted_primitive_mlm)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: the cross-run failure-mode summary (7/22 NaN, fixed-scalar cure), whose
+# source is the dead-end node M05 (kind-c dead-end-as-support), folded into refs.
+leaf e1 : observes(em05, hand_rolled_reciprocal_nan, restricted_primitive_mlm)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C14, evidence/tables/malt_attempts.md#Failure-mode-summary-row-1, trace/exploration_tree.yaml#M05]
+
+# instrument_validity: one uniform NaN-attribution criterion applied across all sub-runs.
+leaf e2 : valid_instrument(hand_rolled_reciprocal_nan, em05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#EM05-MALT-preamble, evidence/tables/malt_attempts.md]
+
+# coverage: all 22 sub-runs staged and scanned.
+leaf e3 : covers_scope(em05, restricted_primitive_mlm)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#EM05-MALT-preamble, evidence/tables/malt_attempts.md]
+
+# --- The support argument ----------------------------------------------------------------------
+
+# confound_control (optional) is left OPEN, not discharged: annotation CQ3 (each NaN attributed to
+# the reciprocal rather than optimizer/lr/init) is unmet — run_16's cited insight is 'SGD
+# divergence' and no per-run ablation isolates the normalisation term. An optional open hole does
+# not enter the obligation set, so complete support is preserved and the claim stays justified.
+arg a1 : supports(c14) by measurement(hand_rolled_reciprocal_nan, restricted_primitive_mlm, em05)
+  discharge instrument_validity with e2
+  discharge coverage            with e3
+  open      confound_control    as confound_control
+
+status c14
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c14 -> justified (its complete support a1 is `in`; spec §8 aggregation)

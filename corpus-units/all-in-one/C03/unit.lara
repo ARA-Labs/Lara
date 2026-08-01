@@ -1,0 +1,59 @@
+# Corpus unit all-in-one/C03 — gap (unmet mandatory sample-representativeness CQ)
+#
+# Source: m0/annotations/all-in-one.yaml C03 (generalization, inductive_generalization; corpus
+# pin 62e9b54). Headline: Simformer accurately estimates all arbitrary conditionals of the joint
+# distribution — mean C2ST over 100 randomly sampled conditionals stays below 0.7 on Tree, HMM,
+# Two Moons, SLCP at 1e5 sims (E02, Fig 4b). The single inductive_generalization claim in the
+# M0 sample.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * inductive_generalization family; conclusion generalizes_to(accurate_conditional_estimation,
+#     arbitrary_conditionals). instance_validity is annotated met (E02 uses task-specific
+#     HMC/slice+MH MCMC references, and every task clears the C2ST < 0.7 threshold at 1e5 sims).
+#   * sample_representative is annotated UNMET-GAP and mandatory on BOTH the annotator's and
+#     corpus-v1's standard: E02 samples 100 conditionals while the claim generalizes to all
+#     arbitrary conditionals. The annotation's coverage_flag records that this sample-to-'all'
+#     generalization has no native strict warrant. The mandatory obligation has no discharging
+#     leaf, so no complete inductive_generalization instance is declarable — E2-style gap.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact all-in-one at sha256:62b9c8db2538
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c03
+  nl      = "Simformer accurately estimates all arbitrary conditionals of the joint: mean C2ST over 100 sampled conditionals stays below 0.7 on Tree, HMM, Two Moons, and SLCP at 1e5 sims"
+  formal  = generalizes_to(accurate_conditional_estimation, arbitrary_conditionals)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E02's per-task mean-C2ST cells over the 100 sampled conditionals, per result
+# cell in the annotation and folded into refs.
+leaf e1 : reports(e02, instances(accurate_conditional_estimation, arbitrary_conditionals, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02, Fig-4b, trace/exploration_tree.yaml#N09]
+
+leaf e2 : valid_instances(e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-Expected-outcome]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: representative_sample(e02, arbitrary_conditionals) has no honest leaf —
+# 100 sampled conditionals do not warrant the universal over all arbitrary conditionals — and
+# corpus-v1 makes that obligation mandatory. Complete support is empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

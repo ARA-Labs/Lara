@@ -1,0 +1,31 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:1aeed0ad50c4"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "code_property(rust_codecontests_solver, batch_of_18_generations)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      }
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+# Corpus unit rebench-fix_embedding/C12 — gap (mandatory-CQ-unmet path; batch: rebench)
+#
+# Source: m0/annotations/rebench-fix_embedding.yaml C12 (implementation-behavioral,
+# cross_run_observation; corpus pin 62e9b54). Headline: the official scorer's 180 s hard
+# timeout interacts pathologically with large checkpoints — a 1.56B-param 3.1 GB fp16 .pth
+# spends about 60 s just deserialising, timeouts cascade within a run (run 11: six in a row),
+# and run 5's computed score 1.291 was discarded as invalidSubmission at teardown.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * cross_run_observation -> corpus-v1 `measurement(P, S, Exp)` (scheme-family map). The
+#     negative-content is a positive property constant: holds(timeout_checkpoint_pathology,
+#     fix_embedding_scoring). Thresholds (180 s, 3.1 GB, ~60 s, run ids) stay in nl and refs.
+#   * instrument_validity is MET: CQ1 (the 180 s ceiling, attested from problem.md:50-51 citing
+#     ai_rd_fix_embedding.py:80) and CQ5 (run-5 lost-score payload observed in N312 /
+#     malt_attempts row 13). Folded into leaf e2.
+#   * coverage (covers_scope) is UNMET-gap: annotation CQ3 (is the within-run cascade consistent
+#     across the cited runs?) is unmet — run 14's msg-157 timeout (N759) was FOLLOWED by three
+#     successful official scores (N756-N758), so 'subsequent calls tend to time out' is
+#     unquantified and unestablished. A mandatory policy CQ with no honest discharging leaf is an
+#     IncompleteArgument rejection, so NO complete measurement(...) instance is declarable: the
+#     unit is E2-style (claim + met-CQ leaves present, no arg), landing `gap` on empty support.
+#   * confound_control (optional) is UNMET too: annotation CQ2 (does the observation isolate
+#     checkpoint size from GPU co-tenant contention?) is unmet, and it is exactly the theme of the
+#     two dead-end undercuts N603 and N759 (decision: undercut of C12's support — both name
+#     GPU/self-inflicted contention as the live alternative cause). Per LOWERING Attacks, when a
+#     mandatory CQ of the same arg is independently unmet-gap the gap rule wins: there is no arg to
+#     undercut, so this undercut evidence is recorded here as a header note, NOT as an arg. Status
+#     is `gap`, not `defeated`.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-fix_embedding at sha256:db4bd6019427
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c12
+  nl      = "The scorer 180 s hard timeout interacts pathologically with large checkpoints: a 1.56B-param 3.1 GB fp16 .pth spends about 60 s just deserialising, timeouts cascade within a run (run 11 six in a row), and run 5 computed score 1.291 was discarded as invalidSubmission"
+  formal  = holds(timeout_checkpoint_pathology, fix_embedding_scoring)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the cross-run timeout observations (E10/E16/E19/E21), per trace node in the
+# annotation and folded into refs.
+leaf e1 : observes(cross_run_scoring, timeout_checkpoint_pathology, fix_embedding_scoring)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C12, logic/experiments.md#E10, logic/experiments.md#E16, logic/experiments.md#E19, logic/experiments.md#E21, trace/exploration_tree.yaml#N312-N313, trace/exploration_tree.yaml#N603-N608, evidence/tables/malt_attempts.md]
+
+# instrument_validity: the 180 s ceiling (attested from the scorer source citation) plus the
+# run-5 invalidSubmission payload (observed) — CQ1 and CQ5 both met, folded here.
+leaf e2 : valid_instrument(timeout_checkpoint_pathology, cross_run_scoring)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/problem.md#50-51, trace/exploration_tree.yaml#N312, evidence/tables/malt_attempts.md#run-345746-row-13]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: coverage/covers_scope(cross_run_scoring, fix_embedding_scoring) has no
+# honest leaf — the cascade generalization is contradicted in run 14 (N756-N758 succeeded after
+# the N759 timeout) — and corpus-v1 makes coverage mandatory. Dead ends N603 and N759 are
+# annotated `decision: undercut` against the checkpoint-size attribution (GPU / self-inflicted
+# contention), but with a mandatory CQ independently unmet the gap rule wins, so that undercut
+# evidence stays a header note rather than an arg. The claim's complete-support set is empty.)
+
+status c12
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c12 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

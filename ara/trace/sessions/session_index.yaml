@@ -1,176 +1,244 @@
 sessions:
-  - id: "2026-07-21_001"
-    date: "2026-07-21"
-    summary: "M0 kickoff: corpus submodule pin, extraction pipeline (231/279), six-way typing pass, seeded 60-claim stratified sample (PR #8)."
-    turn_count: 4
-    events_count: 7
-    claims_touched: []
-    open_threads: 5
-  - id: "2026-07-22_001"
-    date: "2026-07-22"
-    summary: "M0 annotation and scheme freeze (N29-N33), then M1 complete: TCB/host, port-as-we-lock, frozen support/attack/compile chain, and lara-core@0.1 (N38-N43)."
-    turn_count: 18
-    events_count: 28
-    claims_touched: [C02, C07, C08, C13, C14, C15, C16, C17]
-    open_threads: 5
-  - id: "2026-07-22_002"
-    date: "2026-07-22"
-    summary: "PR #10 review hardening: formal-model boundaries strengthened, adversarial Lean fixtures added, CI-equivalent checks pass."
-    turn_count: 1
-    events_count: 2
-    claims_touched: [C08]
-    open_threads: 2
-  - id: "2026-07-23_001"
-    date: "2026-07-23"
-    summary: "PR #10 CI recovery: bypassed a retired Hackage mirror and verified the complete Haskell/Lean workflow."
-    turn_count: 1
-    events_count: 2
-    claims_touched: []
-    open_threads: 1
-  - id: "2026-07-23_002"
-    date: "2026-07-23"
-    summary: "PR #10 re-review: five semantic/security gaps closed with exact replay, exact status, set obligations, rebut fixtures, and secure Hackage metadata."
-    turn_count: 1
-    events_count: 2
-    claims_touched: [C07]
-    open_threads: 2
-  - id: "2026-07-24_001"
-    date: "2026-07-24"
-    summary: "PR #14 review remediation: branch rebased onto #10, §8.1 validator mechanized, docs and append-only ARA history reconciled, full Lean/Haskell checks pass."
-    turn_count: 1
-    events_count: 3
-    claims_touched: [C02, C09]
-    open_threads: 3
-  - id: "2026-07-24_002"
-    date: "2026-07-24"
-    summary: "Additional PR #14 review closed the syntactic-vs-instance wf(Pi) gap with conservative overlap proofs and an exact regression."
-    turn_count: 1
-    events_count: 3
-    claims_touched: [C09]
-    open_threads: 2
-  - id: "2026-07-24_003"
-    date: "2026-07-24"
-    summary: "README synced/restructured with purpose + theory sections (PR #19); ARA-founder interview transcript captured and its artifact-format discussion recorded as a reference doc; late rit-vs-lara comparison discussion opened."
-    turn_count: 8
-    events_count: 5
-    claims_touched: []
-    open_threads: 2
-  - id: "2026-07-24_004"
-    date: "2026-07-24"
-    summary: "Concrete ND replay: proved UTF-8 Atom codec inverse, exact submitted-cert adequacy, fixed-theory closure, and shared Lean/Haskell conformance."
-    turn_count: 1
-    events_count: 4
-    claims_touched: [C03, C05]
-    open_threads: 2
-  - id: "2026-07-24_005"
-    date: "2026-07-24"
-    summary: "ND spec-review hardening: universal malformed-wire properties, complete constructor arity/replay matrices, and 27 passing Haskell property groups."
-    turn_count: 1
-    events_count: 1
-    claims_touched: [C03, C05]
-    open_threads: 2
-  - id: "2026-07-24_006"
-    date: "2026-07-24"
-    summary: "Exact contrary matcher and executable positional attack checker, with arbitrary-canon adequacy, closed diagnostics, and full fixture matrix."
-    turn_count: 1
-    events_count: 2
-    claims_touched: []
-    open_threads: 2
-  - id: "2026-07-24_007"
-    date: "2026-07-24"
-    summary: "Proof-bearing whole-program checker with structural identity, cached attack sources, strengthened endpoint boundary, and exact adequacy."
-    turn_count: 1
-    events_count: 2
-    claims_touched: []
-    open_threads: 1
-  - id: "2026-07-24_008"
-    date: "2026-07-24"
-    summary: "Issue #16 closure: reviewed executable checker architecture, codegen-safe support adequacy, full Lean/Haskell gates, and result-1 evidence reconciliation."
-    turn_count: 30
-    events_count: 6
-    claims_touched: [C02]
-    open_threads: 4
-  - id: "2026-07-24_009"
-    date: "2026-07-24"
-    summary: "Executable strict-certificate seam: symbolic wire payloads, canon-indexed replay adequacy, backend-first theory resolution, and registry conformance fixtures."
-    turn_count: 1
-    events_count: 1
-    claims_touched: []
-    open_threads: 2
-  - id: "2026-07-25_001"
-    date: "2026-07-25"
-    summary: "rit comparison source-verified: C18 (grounding-interface expressiveness bound), §11 addendum + novelty row (d192047), PR #22 merged. Commit-path audit found five write-up-vs-code discrepancies → C19 + §11.5, rebased onto PR #23. Then C20 + §11.6: rit's formal verification is node-level only; the weakest-link roll-up is a conditional guarantee over an untrusted (proposer-declared) edge set — missing-edge laundering."
-    turn_count: 7
-    events_count: 12
-    claims_touched: [C18, C19, C20]
-    open_threads: 5
-  - id: "2026-07-25_002"
-    date: "2026-07-25"
-    summary: "PR #21 review remediation: enforced Lean matrices, symbolic frame tags, corrected TCB docs, and full Lean/Haskell gates."
-    turn_count: 1
-    events_count: 2
-    claims_touched: [C03, C05]
-    open_threads: 1
-  - id: "2026-07-25_003"
-    date: "2026-07-25"
-    summary: "PR #21 conflict resolution: preserved upstream rit-comparison ARA history, reassigned branch-local trace IDs, and revalidated all project gates."
-    turn_count: 1
-    events_count: 0
-    claims_touched: []
-    open_threads: 0
-  - id: "2026-07-25_004"
-    date: "2026-07-25"
-    summary: "Planned Issue #18 attack completeness and result-7 consistency against the merged checker, edge-decider, Path-B, and grounded theorem surfaces."
-    turn_count: 1
-    events_count: 1
-    claims_touched: []
-    open_threads: 2
-  - id: "2026-07-25_005"
-    date: "2026-07-25"
-    summary: "Implemented Issue #18: exact checked-unit attack completeness, Path-B grounded consistency, computed complete-claim result 7, and full verification."
-    turn_count: 1
-    events_count: 4
-    claims_touched: [C09]
-    open_threads: 4
-  - id: "2026-07-27_001"
-    date: "2026-07-27"
-    summary: "Implemented the full M3 production checker (wire anchor + Lean driver + CLI, 7-module Haskell spine, cached runtime, holes/incompleteAlternative reporting, both-drivers differential + R1-R14 mutation suite); 5 commits, 19/19 byte-exact, AxCheck clean."
-    turn_count: 1
-    events_count: 4
-    claims_touched: [C12]
-    open_threads: 3
-  - id: "2026-07-28_001"
-    date: "2026-07-28"
-    summary: "M4a end-to-end (#31, PR #33): .lara front-end (hand-rolled Lara.Syntax + pure Lara.Elaborate + CLI dispatch), 8-example suite (per-example dirs + .core.sexp + expected.json), result 12 mechanized in Lean over the full presentation AST. 9 commits, 32/32 both-drivers byte-exact, AxCheck clean. Example A corrected (user-approved) to reach its unchanged golden."
-    turn_count: 1
-    events_count: 10
-    claims_touched: []
-    open_threads: 4
-  - id: "2026-07-29_001"
-    date: "2026-07-29"
-    summary: "Strict-cert frontend closed: lara-syntax@0.2 + S1, justified accept, R13 mutation, full suite green, 33/33 both-driver agreement."
-    turn_count: 1
-    events_count: 1
-    claims_touched: []
-    open_threads: 3
-  - id: "2026-07-30_001"
-    date: "2026-07-30"
-    summary: "M4 and result 9 closed; Model-A backend replacement strengthened by constructive transport (PR #43). Status housekeeping; #31/#37 closed. Then #38 duplicate-report groups implemented cross-layer + mechanized (Lara.Groups) with §4.3 quarantine→gap / R9 escalation at the driver boundary; differential 41/41; PR #45 (closes #38); C21 crystallized. Both M5 prerequisites (#36/#38) now closed."
-    turn_count: 5
-    events_count: 15
-    claims_touched: [C04, C21]
-    open_threads: 4
-  - id: "2026-07-31_001"
-    date: "2026-07-31"
-    summary: "PR #45 review remediation, two rounds. R1 (N87): reproduced R9-evasion hole fixed (.lara R14 parity), byte-identical R9 stderr diagnostic + differential anchor, rejectionClass total over R9, coverage + provenance fixes. R2 (N88): Lean twin re-synced to Haskell dangling-member semantics (consistentB_iff re-proved), validateGroups negatives, R13-over-R9 stderr pin, 3 sibling malformed fixtures (negatives 9/9). All gates green both rounds. N87+N88; O21+O22 staged; C21 evidence extended twice."
-    turn_count: 2
-    events_count: 4
-    claims_touched: [C21]
-    open_threads: 3
-  - id: "2026-08-01_001"
-    date: "2026-08-01"
-    summary: "M5 T1+T4 (PR #49): E4/E5 worked cases close the attack-kind x target-label matrix (reinstatement + contested-beyond-rebut + gap-amid-attacks); Lara.Mutate seeded suite = 148 verified mutants covering all 11 executable reject classes; differential 146/0 + 54/0. N89-N91; O23-O25 staged; C21 evidence extended."
-    turn_count: 1
-    events_count: 6
-    claims_touched: [C21]
-    open_threads: 3
+- id: 2026-07-21_001
+  date: '2026-07-21'
+  summary: 'M0 kickoff: corpus submodule pin, extraction pipeline (231/279), six-way typing pass, seeded
+    60-claim stratified sample (PR #8).'
+  turn_count: 4
+  events_count: 7
+  claims_touched: []
+  open_threads: 5
+- id: 2026-07-22_001
+  date: '2026-07-22'
+  summary: 'M0 annotation and scheme freeze (N29-N33), then M1 complete: TCB/host, port-as-we-lock, frozen
+    support/attack/compile chain, and lara-core@0.1 (N38-N43).'
+  turn_count: 18
+  events_count: 28
+  claims_touched:
+  - C02
+  - C07
+  - C08
+  - C13
+  - C14
+  - C15
+  - C16
+  - C17
+  open_threads: 5
+- id: 2026-07-22_002
+  date: '2026-07-22'
+  summary: 'PR #10 review hardening: formal-model boundaries strengthened, adversarial Lean fixtures added,
+    CI-equivalent checks pass.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C08
+  open_threads: 2
+- id: 2026-07-23_001
+  date: '2026-07-23'
+  summary: 'PR #10 CI recovery: bypassed a retired Hackage mirror and verified the complete Haskell/Lean
+    workflow.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 1
+- id: 2026-07-23_002
+  date: '2026-07-23'
+  summary: 'PR #10 re-review: five semantic/security gaps closed with exact replay, exact status, set
+    obligations, rebut fixtures, and secure Hackage metadata.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C07
+  open_threads: 2
+- id: 2026-07-24_001
+  date: '2026-07-24'
+  summary: 'PR #14 review remediation: branch rebased onto #10, §8.1 validator mechanized, docs and append-only
+    ARA history reconciled, full Lean/Haskell checks pass.'
+  turn_count: 1
+  events_count: 3
+  claims_touched:
+  - C02
+  - C09
+  open_threads: 3
+- id: 2026-07-24_002
+  date: '2026-07-24'
+  summary: 'Additional PR #14 review closed the syntactic-vs-instance wf(Pi) gap with conservative overlap
+    proofs and an exact regression.'
+  turn_count: 1
+  events_count: 3
+  claims_touched:
+  - C09
+  open_threads: 2
+- id: 2026-07-24_003
+  date: '2026-07-24'
+  summary: 'README synced/restructured with purpose + theory sections (PR #19); ARA-founder interview
+    transcript captured and its artifact-format discussion recorded as a reference doc; late rit-vs-lara
+    comparison discussion opened.'
+  turn_count: 8
+  events_count: 5
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-24_004
+  date: '2026-07-24'
+  summary: 'Concrete ND replay: proved UTF-8 Atom codec inverse, exact submitted-cert adequacy, fixed-theory
+    closure, and shared Lean/Haskell conformance.'
+  turn_count: 1
+  events_count: 4
+  claims_touched:
+  - C03
+  - C05
+  open_threads: 2
+- id: 2026-07-24_005
+  date: '2026-07-24'
+  summary: 'ND spec-review hardening: universal malformed-wire properties, complete constructor arity/replay
+    matrices, and 27 passing Haskell property groups.'
+  turn_count: 1
+  events_count: 1
+  claims_touched:
+  - C03
+  - C05
+  open_threads: 2
+- id: 2026-07-24_006
+  date: '2026-07-24'
+  summary: Exact contrary matcher and executable positional attack checker, with arbitrary-canon adequacy,
+    closed diagnostics, and full fixture matrix.
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-24_007
+  date: '2026-07-24'
+  summary: Proof-bearing whole-program checker with structural identity, cached attack sources, strengthened
+    endpoint boundary, and exact adequacy.
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 1
+- id: 2026-07-24_008
+  date: '2026-07-24'
+  summary: 'Issue #16 closure: reviewed executable checker architecture, codegen-safe support adequacy,
+    full Lean/Haskell gates, and result-1 evidence reconciliation.'
+  turn_count: 30
+  events_count: 6
+  claims_touched:
+  - C02
+  open_threads: 4
+- id: 2026-07-24_009
+  date: '2026-07-24'
+  summary: 'Executable strict-certificate seam: symbolic wire payloads, canon-indexed replay adequacy,
+    backend-first theory resolution, and registry conformance fixtures.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-25_001
+  date: '2026-07-25'
+  summary: 'rit comparison source-verified: C18 (grounding-interface expressiveness bound), §11 addendum
+    + novelty row (d192047), PR #22 merged. Commit-path audit found five write-up-vs-code discrepancies
+    → C19 + §11.5, rebased onto PR #23. Then C20 + §11.6: rit''s formal verification is node-level only;
+    the weakest-link roll-up is a conditional guarantee over an untrusted (proposer-declared) edge set
+    — missing-edge laundering.'
+  turn_count: 7
+  events_count: 12
+  claims_touched:
+  - C18
+  - C19
+  - C20
+  open_threads: 5
+- id: 2026-07-25_002
+  date: '2026-07-25'
+  summary: 'PR #21 review remediation: enforced Lean matrices, symbolic frame tags, corrected TCB docs,
+    and full Lean/Haskell gates.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C03
+  - C05
+  open_threads: 1
+- id: 2026-07-25_003
+  date: '2026-07-25'
+  summary: 'PR #21 conflict resolution: preserved upstream rit-comparison ARA history, reassigned branch-local
+    trace IDs, and revalidated all project gates.'
+  turn_count: 1
+  events_count: 0
+  claims_touched: []
+  open_threads: 0
+- id: 2026-07-25_004
+  date: '2026-07-25'
+  summary: 'Planned Issue #18 attack completeness and result-7 consistency against the merged checker,
+    edge-decider, Path-B, and grounded theorem surfaces.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-25_005
+  date: '2026-07-25'
+  summary: 'Implemented Issue #18: exact checked-unit attack completeness, Path-B grounded consistency,
+    computed complete-claim result 7, and full verification.'
+  turn_count: 1
+  events_count: 4
+  claims_touched:
+  - C09
+  open_threads: 4
+- id: 2026-07-27_001
+  date: '2026-07-27'
+  summary: Implemented the full M3 production checker (wire anchor + Lean driver + CLI, 7-module Haskell
+    spine, cached runtime, holes/incompleteAlternative reporting, both-drivers differential + R1-R14 mutation
+    suite); 5 commits, 19/19 byte-exact, AxCheck clean.
+  turn_count: 1
+  events_count: 4
+  claims_touched:
+  - C12
+  open_threads: 3
+- id: 2026-07-28_001
+  date: '2026-07-28'
+  summary: 'M4a end-to-end (#31, PR #33): .lara front-end (hand-rolled Lara.Syntax + pure Lara.Elaborate
+    + CLI dispatch), 8-example suite (per-example dirs + .core.sexp + expected.json), result 12 mechanized
+    in Lean over the full presentation AST. 9 commits, 32/32 both-drivers byte-exact, AxCheck clean. Example
+    A corrected (user-approved) to reach its unchanged golden.'
+  turn_count: 1
+  events_count: 10
+  claims_touched: []
+  open_threads: 4
+- id: 2026-07-29_001
+  date: '2026-07-29'
+  summary: 'Strict-cert frontend closed: lara-syntax@0.2 + S1, justified accept, R13 mutation, full suite
+    green, 33/33 both-driver agreement.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 3
+- id: 2026-07-30_001
+  date: '2026-07-30'
+  summary: 'M4 and result 9 closed; Model-A backend replacement strengthened by constructive transport
+    (PR #43). Status housekeeping; #31/#37 closed. Then #38 duplicate-report groups implemented cross-layer
+    + mechanized (Lara.Groups) with §4.3 quarantine→gap / R9 escalation at the driver boundary; differential
+    41/41; PR #45 (closes #38); C21 crystallized. Both M5 prerequisites (#36/#38) now closed.'
+  turn_count: 5
+  events_count: 15
+  claims_touched:
+  - C04
+  - C21
+  open_threads: 4
+- id: 2026-07-31_001
+  date: '2026-07-31'
+  summary: 'PR #45 review remediation, two rounds. R1 (N87): reproduced R9-evasion hole fixed (.lara R14
+    parity), byte-identical R9 stderr diagnostic + differential anchor, rejectionClass total over R9,
+    coverage + provenance fixes. R2 (N88): Lean twin re-synced to Haskell dangling-member semantics (consistentB_iff
+    re-proved), validateGroups negatives, R13-over-R9 stderr pin, 3 sibling malformed fixtures (negatives
+    9/9). All gates green both rounds. N87+N88; O21+O22 staged; C21 evidence extended twice.'
+  turn_count: 2
+  events_count: 4
+  claims_touched:
+  - C21
+  open_threads: 3
+- id: 2026-08-01_001
+  date: '2026-08-01'
+  summary: 'M5 T1+T4 land (PR #49 merged) and T2 completes on branch: all 60 M0-sample claims lowered
+    to corpus units under corpus-v1 (9 justified/48 gap/3 defeated), differential 206/54 byte-exact; C22
+    + H06 + R7/R13 concept crystallized.'
+  turn_count: 2
+  events_count: 15
+  claims_touched:
+  - C21
+  - C22
+  open_threads: 3

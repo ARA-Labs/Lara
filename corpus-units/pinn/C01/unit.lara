@@ -1,0 +1,78 @@
+# Corpus unit pinn/C01 — justified (a measurement whose mandatory CQs are all met)
+#
+# Source: m0/annotations/pinn.yaml C01 (descriptive, cross_run_observation; corpus pin 62e9b54).
+# Headline: near-zero training loss is necessary for accurate PINN solutions — pooled over the
+# (PDE, optimizer, width, seed) sweep the final-loss-to-L2RE scatter is monotone, reaching
+# L2RE ~ 1e-2 requires final loss ~ 1e-5 (order of magnitude, per PDE), and the loss~0/L2RE~1
+# runs are near-constant trivial solutions (satisfy IC, fail BC) (E01, E06, Figure 2).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * cross_run_observation maps to the measurement family: conclusion
+#     holds(low_loss_necessary_for_accuracy, pinn_benchmarks). The per-PDE threshold (~1e-5) and
+#     the monotone-trend / trivial-solution content live in nl and refs.
+#   * The measurement family carries NO variance_reported CQ; both of its mandatory CQs are
+#     annotated met, so unlike the comparison/ablation gaps this claim clears the full bar and
+#     is justified: instrument_validity (L2RE computed against ground truth on an independent
+#     evaluation grid) and coverage (the sweep spans all optimizer combinations x widths
+#     {50,100,200,400} x seeds, 41000 iterations each). The optional confound_control CQ is also
+#     met — the loss~0/L2RE~1 runs are explained as trivial constant solutions, not scatter
+#     noise — and is discharged.
+#   * The optional "beyond three benchmark PDEs" CQ is unmet (convection/reaction/wave only);
+#     omitted, no status effect, and absorbed by the binding (class-vs-tested scope).
+#   * Coverage flag (kind-b wishlist, summary §3): the claim's core is a monotone functional
+#     relationship between two continuous quantities (loss vs L2RE); no LARA construct expresses
+#     graded functional dependence, so the atom is a per-PDE threshold surrogate — a concrete
+#     v0.1-freeze construct candidate, noted here, not a lowering error.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact pinn at sha256:116d458ce7eb
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c01
+  nl      = "Near-zero training loss is necessary for accurate PINN solutions: the pooled (PDE, optimizer, width, seed) loss-to-L2RE scatter is monotone, reaching L2RE ~ 1e-2 requires final loss ~ 1e-5 per PDE, and the loss ~ 0 / L2RE ~ 1 runs are near-constant trivial solutions (satisfy IC, fail BC)"
+  formal  = holds(low_loss_necessary_for_accuracy, pinn_benchmarks)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: the pooled monotone loss-to-L2RE observation over the full sweep, per run
+# in the annotation and folded into refs.
+leaf e1 : observes(e01, low_loss_necessary_for_accuracy, pinn_benchmarks)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [Figure-2, logic/experiments.md#E01-Procedure-step-3, section-4, trace/exploration_tree.yaml#N02]
+
+leaf e2 : valid_instrument(low_loss_necessary_for_accuracy, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-step-2, logic/experiments.md#E06-Baselines]
+
+leaf e3 : covers_scope(e01, pinn_benchmarks)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Setup, logic/experiments.md#E01-Procedure]
+
+leaf e4 : confounds_controlled(e01)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-step-4, logic/experiments.md#E06, Figure-2, trace/exploration_tree.yaml#N02]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c01) by measurement(low_loss_necessary_for_accuracy, pinn_benchmarks, e01)
+  discharge instrument_validity with e2
+  discharge coverage            with e3
+  discharge confound_control    with e4
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c01 -> justified (its complete support a1 is `in`; spec §8 aggregation)
