@@ -14,7 +14,8 @@
 -- >  fixtures/mutants/cycle-rebut-<n>.sexp          (specified-status anchors)
 -- >  fixtures/mutants/malformed/<BASE>--codec-*.sexp (negative half, exit 2)
 -- >  fixtures/mutants/MANIFEST.tsv                  (file, base, family, operator,
--- >                                                  expected, hs-diagnostic, lean-diagnostic)
+-- >                                                  expected, hs-diagnostic, lean-diagnostic,
+-- >                                                  expected-location)
 --
 -- A mutant whose actual outcome differs from its specification aborts
 -- generation: the committed suite is verified-by-construction on the Haskell
@@ -39,6 +40,8 @@ import System.FilePath ((</>))
 import Lara.AST (Label (..), Rejection (..), Status (..))
 import Lara.Driver (runCheck)
 import Lara.Mutate
+import Lara.Mutate.Accept (acceptMutants, acceptStructureOk)
+import Lara.Replay (CheckInput)
 import Lara.Wire (Outcome (..), Verdict (..), WireError (..), decodeCheckInputFile)
 
 suiteRoot :: FilePath
@@ -53,20 +56,51 @@ main = do
       Left err -> fail (anchor ++ ": decode: " ++ show err)
       Right input -> pure input
     pure (mutantsForBase base input ++ codecMutantsForBase base bytes)
-  let mutants = concat perBase ++ cycleMutants
+  corpusBases <- readCorpusBases
+  let mutants =
+        concat perBase
+          ++ cycleMutants
+          ++ corpusMutants corpusBases
+          ++ acceptMutants corpusBases
   forM_ mutants verify
   fresh <- doesDirectoryExist suiteRoot
   when fresh (removeDirectoryRecursive suiteRoot)
   createDirectoryIfMissing True (suiteRoot </> "malformed")
   forM_ mutants $ \m -> writeFile (suiteRoot </> mutantPath m) (mutantBytes m)
   writeFile (suiteRoot </> "MANIFEST.tsv") (manifestFor mutants)
-  writeFile (suiteRoot </> "README.md") (readmeFor mutants)
+  writeFile (suiteRoot </> "README.md") (readmeFor corpusBases mutants)
   putStrLn ("wrote " ++ show (length mutants) ++ " verified mutants to " ++ suiteRoot)
+
+-- | The corpus units as mutation bases, in @corpus-units/MANIFEST.tsv@ order,
+-- each labelled @\<artifact\>.\<claim_id\>@ and decoded from its committed
+-- @unit.core.sexp@ anchor (the same discovery @test/CorpusUnitsSpec.hs@ uses;
+-- never a glob). The @.@ base separator cannot collide with the @--@ operator
+-- separator in a mutant filename.
+readCorpusBases :: IO [(String, CheckInput)]
+readCorpusBases = do
+  raw <- readFile ("corpus-units" </> "MANIFEST.tsv")
+  let rows =
+        [ (artifact, claimId)
+        | ln <- drop 1 (lines raw)
+        , not (null ln)
+        , (_group : artifact : claimId : _) <- [splitTabs ln]
+        ]
+  forM rows $ \(artifact, claimId) -> do
+    let anchor = "corpus-units" </> artifact </> claimId </> "unit.core.sexp"
+    bytes <- readFile anchor
+    case decodeCheckInputFile bytes of
+      Left err -> fail (anchor ++ ": decode: " ++ show err)
+      Right input -> pure (artifact ++ "." ++ claimId, input)
+
+splitTabs :: String -> [String]
+splitTabs s = case break (== '\t') s of
+  (field, []) -> [field]
+  (field, _ : rest) -> field : splitTabs rest
 
 -- | The suite README, regenerated with the suite (counts are measured, not
 -- prose).
-readmeFor :: [Mutant] -> String
-readmeFor mutants =
+readmeFor :: [(String, CheckInput)] -> [Mutant] -> String
+readmeFor corpusBases mutants =
   unlines $
     [ "# Generated mutation suite (M5 tracker #48, T1)"
     , ""
@@ -78,17 +112,21 @@ readmeFor mutants =
     , "(`examples/<NAME>/example.core.sexp`, bases: "
         ++ unwords mutationBases
         ++ ")"
-    , "by the seeded operators of `Lara.Mutate` (seed "
+    , "and the "
+        ++ show (length corpusBases)
+        ++ " committed corpus-unit anchors"
+    , "(`corpus-units/<artifact>/<claim_id>/unit.core.sexp`, base label"
+    , "`<artifact>.<claim_id>`), by the seeded operators of `Lara.Mutate` (seed "
         ++ show mutationSeed
-        ++ "), verified"
-    , "against the production checker at generation time, re-verified on every"
-    , "`cabal test` run (`test/MutationSpec.hs`: specified outcomes, seeded"
-    , "reproducibility, class coverage), and held byte-identical across the"
-    , "Haskell and Lean drivers by `scripts/differential.sh` (`malformed/` is"
-    , "the negative half: both drivers exit 2 with no verdict AND the"
-    , "per-operator stderr diagnostic pinned in the manifest's last two"
-    , "columns, so a deleted codec check cannot stay green via a different"
-    , "downstream failure)."
+        ++ "),"
+    , "verified against the production checker at generation time, re-verified on"
+    , "every `cabal test` run (`test/MutationSpec.hs`: specified outcomes, seeded"
+    , "reproducibility, class coverage, corpus sweep budget), and held"
+    , "byte-identical across the Haskell and Lean drivers by"
+    , "`scripts/differential.sh` (`malformed/` is the negative half: both drivers"
+    , "exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the"
+    , "manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec"
+    , "check cannot stay green via a different downstream failure)."
     , ""
     , "Total mutants: " ++ show (length mutants)
     , ""
@@ -104,6 +142,22 @@ readmeFor mutants =
          ]
       ++ [ "| `" ++ family ++ "` | " ++ show n ++ " |"
          | (family, n) <- tally (opFamily . mutantOp)
+         ]
+      ++ [ ""
+         , "## Corpus sweep (uniform derived-applicability, B = "
+            ++ show corpusBudget
+            ++ ")"
+         , ""
+         , "Per rejection operator over the corpus units: how many bases carry ≥1"
+         , "site (applicable) and how many were selected (all when ≤ B, else B"
+         , "picked by the operator-keyed stream). Cert operators find no corpus"
+         , "site (corpus units carry no strict certificates), recorded as 0/0."
+         , ""
+         , "| corpus operator | applicable bases | selected |"
+         , "| --- | --- | --- |"
+         ]
+      ++ [ "| `" ++ opName op ++ "` | " ++ show applicable ++ " | " ++ show selected ++ " |"
+         | (op, applicable, selected) <- corpusSweepReport corpusBases
          ]
   where
     tally key =
@@ -149,10 +203,21 @@ verify m = case mutantExpected m of
             && all ((== Contested) . snd) statuses ->
             pure ()
       outcome -> bad ("expected all-undec/all-contested accept, got " ++ describe outcome)
+  ExpectPrimaryStatus status -> withInputVerdict $ \input verdict ->
+    if acceptStructureOk (mutantOp m) status input verdict
+      then pure ()
+      else
+        bad
+          ( "accept-family structural check failed: expected primary status "
+              ++ show status
+              ++ " and the operator's label shape, got "
+              ++ describe (verdictOutcome verdict)
+          )
   where
-    withDecoded k = case decodeCheckInputFile (mutantBytes m) of
+    withDecoded k = withInputVerdict (\_ verdict -> k verdict)
+    withInputVerdict k = case decodeCheckInputFile (mutantBytes m) of
       Left err -> bad ("failed to decode its own bytes: " ++ show err)
-      Right input -> k (runCheck input)
+      Right input -> k input (runCheck input)
     describe outcome = case outcome of
       Reject r -> "reject " ++ show r
       Accept labels _ statuses ->

@@ -25,6 +25,7 @@ module Lara.Driver
   , buildCertOk
   , buildAccept
   , runCheck
+  , runCheckLocated
   ) where
 
 import Data.List (intercalate)
@@ -47,12 +48,19 @@ import Lara.AST
 import Lara.Check (CheckedUnit, checkUnit, cuNodes, cuProgram)
 import Lara.Replay
   ( CheckInput
+  , ReplayFailure (..)
   , inputReplayId
   , inputUnit
   , replayFailureMessage
   , runtimeReplayFailure
   )
-import Lara.Diagnostics (rejectionOf)
+import Lara.Diagnostics
+  ( Constituent (..)
+  , LocatedRejection (..)
+  , Stage (..)
+  , locate
+  , rejectionOf
+  )
 import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
 import Lara.Runtime (runtimeAF)
 import Lara.Prop (Prop, equiv)
@@ -69,19 +77,57 @@ import Lara.Wire (Outcome (..), Verdict (..))
 -- claim then has no support and surfaces as @gap@, per §4.3 — quarantine is not
 -- a rejection); then @checkUnit@ runs on the reduced unit.
 runCheck :: CheckInput -> Verdict
-runCheck input =
+runCheck = fst . runCheckLocated
+
+-- | 'runCheck' paired with the located rejection that produced its verdict, from
+-- the /same/ decision path — so every reject carries a 'Constituent' located by
+-- the code that also picked its class, across all three reject paths: the
+-- replay preflight (R13) and the §4.3 group check (R9), which both reject here
+-- before 'checkUnit' and never become a 'Lara.Check.UnitError' that 'locate'
+-- could reach, plus the ordinary six-stage 'checkUnit' rejection ('locate').
+-- 'Nothing' on acceptance. The iron invariant @runCheck ≡ fst . runCheckLocated@
+-- holds by construction (the measurement harness re-asserts it over every
+-- manifest-discovered input).
+runCheckLocated :: CheckInput -> (Verdict, Maybe LocatedRejection)
+runCheckLocated input =
   let replayId = inputReplayId input
       unit = inputUnit input
-   in Verdict replayId $
-        case runtimeReplayFailure input of
-          Just _ -> Reject (RejectClass R13)
-          Nothing
-            | groupConflictReject unit -> Reject (RejectClass R9)
-            | otherwise ->
-                let checked = quarantineUnit unit
-                 in case checkUnit (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
-                      Left err -> Reject (rejectionOf err)
-                      Right accepted -> buildAccept checked accepted
+      verdict outcome = Verdict replayId outcome
+   in case runtimeReplayFailure input of
+        Just failure ->
+          ( verdict (Reject (RejectClass R13))
+          , Just (LocatedRejection (RejectClass R13) StageReplayPreflight (replayFailureConstituent failure))
+          )
+        Nothing
+          | groupConflictReject unit ->
+              ( verdict (Reject (RejectClass R9))
+              , Just (LocatedRejection (RejectClass R9) StageGroupBoundary (groupConflictConstituent unit))
+              )
+          | otherwise ->
+              let checked = quarantineUnit unit
+               in case checkUnit (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
+                    Left err -> (verdict (Reject (rejectionOf err)), Just (locate err))
+                    Right accepted -> (verdict (buildAccept checked accepted), Nothing)
+
+-- | The located constituent of a replay-preflight (R13) failure: the
+-- backend-selection failures locate at the replay envelope (the ground truth
+-- the @duplicate-backend@\/@unknown-backend@ operators seed); an unselected
+-- certificate backend locates at its argument (mirroring the @expected.json@
+-- rendering).
+replayFailureConstituent :: ReplayFailure -> Constituent
+replayFailureConstituent failure = case failure of
+  DuplicateSelectedBackend{} -> CReplayEnvelope
+  UnknownSelectedBackend{} -> CReplayEnvelope
+  CertificateBackendNotSelected index _ _ _ -> CArgument index
+
+-- | The located constituent of an escalated group-conflict (R9): the first @≢@
+-- group in declaration order (the same group 'groupConflictMessage' names).
+-- 'CPolicy' is unreachable when 'groupConflictReject' held.
+groupConflictConstituent :: Unit -> Constituent
+groupConflictConstituent unit =
+  case filter (not . groupConsistent unit) (unitGroups unit) of
+    DupGroup gid _ : _ -> CGroup gid
+    [] -> CPolicy
 
 -- | The leaf context @Gamma@ from the wire @leaves@ section (first-match lookup,
 -- Lean @buildGamma@).

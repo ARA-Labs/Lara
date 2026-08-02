@@ -273,6 +273,12 @@ expectedJsonValue input =
           , ("source", endpoint i)
           , ("target", endpoint j)
           ]
+      -- The two boundary constituents are produced only by
+      -- 'Lara.Driver.runCheckLocated'; 'locate' (this renderer's only source)
+      -- never yields them, so these arms exist for totality alone and no golden
+      -- exercises them.
+      CReplayEnvelope -> JObject [("kind", JString "replay")]
+      CGroup (GroupId g) -> JObject [("kind", JString "group"), ("id", JString g)]
 
     endpoint :: Int -> JValue
     endpoint i = JObject (argIdField i ++ [("index", JNumber i)])
@@ -396,6 +402,11 @@ stageString s = case s of
   StageSupport -> "support"
   StageTypedAttack -> "typed-attack"
   StageMissingConflict -> "missing-conflict"
+  -- Boundary stages: produced only by 'Lara.Driver.runCheckLocated', never by
+  -- 'locate'. This renderer keeps the pre-existing 'DiagnosticStage' spellings
+  -- for the goldens, so these arms are for totality only.
+  StageReplayPreflight -> "backend"
+  StageGroupBoundary -> "group-boundary"
 
 -- | The wire class atom of a rejection (reusing the wire tag vocabulary so the
 -- JSON text equals the @.core.sexp@ verdict's class atom).

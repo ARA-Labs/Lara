@@ -604,3 +604,53 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O29
+  timestamp: 2026-08-01T21:45
+  provenance: ai-suggested
+  content: >
+    Single-defect mutation localization is a verification-style number, not a discriminating benchmark:
+    because each mutant seeds exactly one defect at a known constituent, the checker's first-failure
+    ordering localizes there by construction, so measured location-accuracy is 246/246 = 100% and any
+    deviation would be a diagnostic-ordering finding, not a detection failure. A discriminating
+    localization benchmark needs multi-defect / off-site mutants (recorded as the T6 follow-up).
+  context: T3 measurement smoke run (N96); eng review D10 realized empirically. Fresh unmerged numbers.
+  potential_type: claim
+  bound_to:
+  - N96
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O30
+  timestamp: 2026-08-01T21:45
+  provenance: ai-suggested
+  content: >
+    In the v0.1 wire format the fixed policy image dominates certificate size: the ~7 KB corpus-v1 policy
+    inlined into every unit's .core.sexp makes total bytes (median 7520 B) nearly constant, so
+    payload = total - policy (median 841 B) is the distribution-bearing size number for the paper, not
+    total. Suggests a policy-by-reference wire optimization would shrink corpus artifacts ~9x.
+  context: T3 measurement smoke run (N96) certificate-size columns; eng review D11. Fresh unmerged numbers.
+  potential_type: claim
+  bound_to:
+  - N96
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O31
+  timestamp: 2026-08-01T21:45
+  provenance: ai-suggested
+  content: >
+    The two checking-time measurements are different protocols and not comparable: hs_check (in-process,
+    decode excluded, verdict forced) medians ~7 us while lean_wall (subprocess wall, startup + decode
+    included) medians ~2.6 ms - a ~370x gap that is process-startup, not semantics. Any cross-driver
+    speed claim must come from a same-protocol measurement, never this ratio; the harness labels them
+    separately for exactly this reason (D8/5A: an unforced lazy runCheck would instead read ~0 ns).
+  context: T3 measurement smoke run (N96) checking-time columns.
+  potential_type: constraint
+  bound_to:
+  - N96
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

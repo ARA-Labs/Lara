@@ -2203,3 +2203,69 @@ tree:
   - N92
   - N93
   children: []
+- id: N95
+  type: experiment
+  title: 'T1 corpus half + accept-verdict family: mutation generators over the 60 corpus units'
+  provenance: ai-executed
+  timestamp: 2026-08-01T21:30
+  evidence:
+  - src/Lara/Mutate.hs
+  - src/Lara/Mutate/Accept.hs
+  - fixtures/mutants/MANIFEST.tsv
+  - test/MutationSpec.hs
+  result: >
+    /implement of plans/2026-08-01-m5-t1corpus-t3-measurement.md, steps 1-3.
+    Rejection operators swept over the 60 corpus units under the uniform
+    derived-applicability rule (per-operator applicability from site enumeration,
+    B=12, no hand partition; cert operators self-gate to 0/0): 148 -> 295 mutants.
+    New Lara.Mutate.Accept adds five accept-verdict operators over the 9 justified
+    units (drop-support->gap, attach-undercut/attach-undermine->defeated,
+    attach-rebut-cycle->contested, attach-reinstate->justified), each verified
+    STRUCTURALLY (verdict + per-operator label shape, not status alone; D7/4A):
+    295 -> 340 mutants. Every executable reject class (R1/R3-R7/R9-R13), every
+    claim status {gap, justified, defeated, contested}, and every attack kind
+    {rebut, undercut, undermine} is now witnessed by generated corpus mutants.
+    attach-rebut-cycle reuses the declared better/not_better contrary on the 3
+    units querying `better` and injects a symmetric pair on the other 6 (D13);
+    rebut targets must be rule-rooted (spec R10), so its attacker is a minimal
+    injected defeasible rule. cabal test PASS (new corpus-coverage/budget/
+    status-attack/4A properties); differential.sh positive pass=398 negative
+    pass=54 (byte-identical across Haskell + Lean drivers).
+  status: resolved
+  also_depends_on:
+  - N90
+  - N91
+  - N94
+  children: []
+- id: N96
+  type: experiment
+  title: 'T3 axis-(c) measurement harness: one-command evaluation report over both manifests'
+  provenance: ai-executed
+  timestamp: 2026-08-01T21:45
+  evidence:
+  - src/Lara/Measure.hs
+  - scripts/measure.hs
+  - test/MeasureSpec.hs
+  - measurements/report.json
+  result: >
+    /implement steps 1+4. Lara.Diagnostics gained the shared located-rejection
+    vocabulary (constituentText/parseConstituent, CReplayEnvelope/CGroup) and
+    Lara.Driver.runCheckLocated unifying all three reject paths (R13 preflight,
+    R9 group, checkUnit) with runCheck = fst . runCheckLocated. Lara.Measure
+    (pure metrics, house JValue codec) + scripts/measure.hs (IO: lake-build
+    preflight, in-process hs_check timing forcing the rendered verdict, Lean
+    subprocess lean_wall + lean_agree). Smoke run: 400 records (340 mutants + 60
+    corpus units). class-match 400/400, lean-agree 400/400 (byte-identical across
+    drivers via subprocess), location-accuracy 246/246, replay 60/60. Certificate
+    size: total median 7520 B, policy ~7 KB (the inlined corpus-v1 image), payload
+    median 841 B. Checking time: hs_check median ~7 us (in-process, decode
+    excluded, verdict forced) vs lean_wall median ~2.6 ms (subprocess, startup +
+    decode) - different protocols, not comparable. Hand-inspection of report.json
+    caught + fixed a policyBytes bug (was matching the replay-id's (policy <id>)
+    form, not the unit's policy body). aeson is a test-only dependency (D12); src
+    stays base+containers. 5 commits (11c5c2a, 74176cf, 2e02829, 510b5ff,
+    aac72bd); PR #51 opened.
+  status: resolved
+  also_depends_on:
+  - N95
+  children: []

@@ -25,16 +25,23 @@ module Lara.Mutate
     -- * Specified outcomes
   , Expected (..)
   , expectedText
+  , parseExpected
+  , statusText
   , codecDiagnostics
     -- * Mutants
   , Mutant (..)
   , mutantPath
+  , mutantFileName
   , mutationSeed
   , mutationBases
   , mutantsForBase
   , codecMutantsForBase
   , cycleMutants
   , manifestFor
+    -- * Corpus sweep (uniform derived-applicability, D9)
+  , corpusBudget
+  , corpusMutants
+  , corpusSweepReport
     -- * Seeded stream (exposed for tests)
   , splitMix64
   , stringSeed
@@ -46,6 +53,7 @@ import Data.List (find)
 import Data.Word (Word64)
 
 import Lara.AST
+import Lara.Diagnostics (Constituent (..), constituentText)
 import Lara.Prop (Prop (..), Term (..), equiv)
 import Lara.Replay
   ( CheckInput
@@ -92,6 +100,11 @@ data MutationOp
   | OpUnknownBackend -- ^ replay selects an unknown backend → R13
   | OpGroupConflict -- ^ escalated ≢ duplicate-report group → R9
   | OpRebutCycle -- ^ constructed rebut N-cycle → accept, all contested
+  | OpDropSupport -- ^ remove the claim's support → accept, gap
+  | OpAttachUndercut -- ^ undercut via the rule's exception → accept, defeated
+  | OpAttachRebutCycle -- ^ symmetric-contrary rebut 2-cycle → accept, contested
+  | OpAttachUndermine -- ^ undermine a premise leaf (1-dir contrary) → accept, defeated
+  | OpAttachReinstate -- ^ undercut + counter-undercut → accept, justified under attack
   | OpCodecJunkSection -- ^ trailing junk form in the envelope
   | OpCodecCoreVersion -- ^ unsupported core version
   | OpCodecReplayOrder -- ^ replay-id sections out of order
@@ -119,6 +132,11 @@ opName op = case op of
   OpUnknownBackend -> "unknown-backend"
   OpGroupConflict -> "group-conflict"
   OpRebutCycle -> "rebut-cycle"
+  OpDropSupport -> "drop-support"
+  OpAttachUndercut -> "attach-undercut"
+  OpAttachRebutCycle -> "attach-rebut-cycle"
+  OpAttachUndermine -> "attach-undermine"
+  OpAttachReinstate -> "attach-reinstate"
   OpCodecJunkSection -> "codec-junk-section"
   OpCodecCoreVersion -> "codec-core-version"
   OpCodecReplayOrder -> "codec-replay-order"
@@ -145,6 +163,11 @@ opFamily op = case op of
   OpUnknownBackend -> "certificate-tampering"
   OpGroupConflict -> "data-integrity"
   OpRebutCycle -> "cycles"
+  OpDropSupport -> "accept-verdict"
+  OpAttachUndercut -> "accept-verdict"
+  OpAttachRebutCycle -> "accept-verdict"
+  OpAttachUndermine -> "accept-verdict"
+  OpAttachReinstate -> "accept-verdict"
   OpCodecJunkSection -> "codec-corruption"
   OpCodecCoreVersion -> "codec-corruption"
   OpCodecReplayOrder -> "codec-corruption"
@@ -164,6 +187,11 @@ data Expected
   = ExpectClass RejectClass
   | ExpectCodecReject
   | ExpectAllContested
+  | ExpectPrimaryStatus Status
+  -- ^ the accept-family outcome: the verdict accepts and the queried claim's
+  -- status is exactly this one (spelled @accept-\<status\>@). Structural
+  -- verification of the constructed attack shape lives in "Lara.Mutate.Accept"
+  -- ('Lara.Mutate.Accept.acceptStructureOk'), not in the manifest spelling.
   deriving (Eq, Ord, Show)
 
 -- | Manifest spelling of an expected outcome.
@@ -172,6 +200,29 @@ expectedText e = case e of
   ExpectClass c -> "reject-" ++ show c
   ExpectCodecReject -> "codec-reject"
   ExpectAllContested -> "accept-all-contested"
+  ExpectPrimaryStatus s -> "accept-" ++ statusText s
+
+-- | Manifest spelling of a claim status (the accept-family @accept-\<status\>@
+-- suffix; matches @corpus-units/expected.json@'s status strings).
+statusText :: Status -> String
+statusText s = case s of
+  Gap -> "gap"
+  Justified -> "justified"
+  Contested -> "contested"
+  Defeated -> "defeated"
+
+-- | Inverse of 'expectedText' — the one parse table for the @expected@ manifest
+-- column (shared by @test\/MutationSpec.hs@, "Lara.Measure", and
+-- @scripts\/measure.hs@). 'Nothing' on any spelling this table does not produce.
+parseExpected :: String -> Maybe Expected
+parseExpected s =
+  lookup s $
+    ("codec-reject", ExpectCodecReject)
+      : ("accept-all-contested", ExpectAllContested)
+      : [(expectedText (ExpectClass c), ExpectClass c) | c <- [minBound .. maxBound]]
+      ++ [ (expectedText (ExpectPrimaryStatus st), ExpectPrimaryStatus st)
+         | st <- [Gap, Justified, Contested, Defeated]
+         ]
 
 -- | The deletion-sensitivity pin of a codec-corruption operator: a fixed
 -- substring of the Haskell decode failure (the driver's
@@ -229,6 +280,11 @@ data Mutant = Mutant
   , mutantBase :: String -- ^ base anchor label (worked-example name), or @-@
   , mutantOp :: MutationOp
   , mutantExpected :: Expected
+  , mutantSite :: Maybe Constituent
+  -- ^ the seeded ground-truth location (the constituent the operator mutated),
+  -- rendered as the @expected-location@ manifest column; 'Nothing' for mutants
+  -- with no single seeded site (the codec family and the constructed
+  -- rebut-cycle family), which render @-@.
   , mutantBytes :: String
   }
   deriving (Eq, Show)
@@ -255,13 +311,17 @@ mutantPath m = case mutantExpected m of
   _ -> mutantName m
 
 -- | Render the manifest rows for a mutant list (TSV: file, base, family,
--- operator, expected, hs-diagnostic, lean-diagnostic). The diagnostic
--- columns are the 'codecDiagnostics' deletion-sensitivity pins — non-empty
--- exactly for the codec-corruption rows.
+-- operator, expected, hs-diagnostic, lean-diagnostic, expected-location). The
+-- diagnostic columns are the 'codecDiagnostics' deletion-sensitivity pins —
+-- non-empty exactly for the codec-corruption rows. @expected-location@ is the
+-- seeded ground-truth constituent ('mutantSite'), appended as column 8 (@-@
+-- when there is no single seeded site); it is appended, never inserted earlier,
+-- because @scripts\/differential.sh@ hardcodes the expected column (@$5@) and
+-- the diagnostic pins (@$6@\/@$7@).
 manifestFor :: [Mutant] -> String
 manifestFor ms =
   unlines
-    ( "# file\tbase\tfamily\toperator\texpected\ths-diagnostic\tlean-diagnostic"
+    ( "# file\tbase\tfamily\toperator\texpected\ths-diagnostic\tlean-diagnostic\texpected-location"
         : [ mutantPath m
               ++ "\t"
               ++ mutantBase m
@@ -275,6 +335,8 @@ manifestFor ms =
               ++ hsDiag
               ++ "\t"
               ++ leanDiag
+              ++ "\t"
+              ++ maybe "-" constituentText (mutantSite m)
           | m <- ms
           , let (hsDiag, leanDiag) =
                   maybe ("", "") id (codecDiagnostics (mutantOp m))
@@ -299,28 +361,38 @@ stringSeed = foldl step 0xCBF29CE484222325
   where
     step h c = (h `xor` fromIntegral (ord c)) * 0x100000001B3
 
--- | The infinite output stream of the @(base, operator)@-keyed generator.
-streamFor :: String -> MutationOp -> [Word64]
-streamFor base op = go (mutationSeed `xor` stringSeed (base ++ "/" ++ opName op))
+-- | The infinite output stream of a string-keyed generator (the one place the
+-- @mutationSeed@ is folded into a stream key).
+streamForKey :: String -> [Word64]
+streamForKey key = go (mutationSeed `xor` stringSeed key)
   where
     go s = let (s', w) = splitMix64 s in w : go s'
 
--- | Deterministically pick at most @k@ elements (first-draw order, no
--- repeats) from the applicable sites.
-pickSome :: String -> MutationOp -> Int -> [a] -> [a]
-pickSome base op k xs
+-- | The infinite output stream of the @(base, operator)@-keyed generator.
+streamFor :: String -> MutationOp -> [Word64]
+streamFor base op = streamForKey (base ++ "/" ++ opName op)
+
+-- | Deterministically pick at most @k@ elements (first-draw order, no repeats)
+-- from a list, driven by a given stream.
+pickWithStream :: [Word64] -> Int -> [a] -> [a]
+pickWithStream ws k xs
   | n <= k = xs
   | otherwise = [xs !! i | i <- chosen]
   where
     n = length xs
-    chosen = go [] (take (16 * k) (streamFor base op))
+    chosen = go [] (take (16 * k) ws)
     go acc _ | length acc == k = reverse acc
     go acc [] = reverse acc
-    go acc (w : ws)
-      | i `elem` acc = go acc ws
-      | otherwise = go (i : acc) ws
+    go acc (w : rest)
+      | i `elem` acc = go acc rest
+      | otherwise = go (i : acc) rest
       where
         i = fromIntegral (w `mod` fromIntegral n)
+
+-- | Deterministically pick at most @k@ elements from the applicable sites,
+-- keyed by @(base, operator)@.
+pickSome :: String -> MutationOp -> Int -> [a] -> [a]
+pickSome base op = pickWithStream (streamFor base op)
 
 -- ---------------------------------------------------------------------------
 -- Support-term sites
@@ -416,17 +488,19 @@ mutantsForBase base input =
     , replayMutants base input
     ]
 
--- | Assemble the picked unit-mutation sites of one operator into mutants.
+-- | Assemble the picked unit-mutation sites of one operator into mutants. Each
+-- site carries its seeded ground-truth 'Constituent', threaded into
+-- 'mutantSite'.
 unitMutants
   :: String
   -> CheckInput
   -> MutationOp
   -> Int
-  -> (Unit -> [(Expected, Unit -> Unit)])
+  -> (Unit -> [(Expected, Constituent, Unit -> Unit)])
   -> [Mutant]
 unitMutants base input op cap sites =
-  [ Mutant (mutantFileName base op k) base op expected bytes
-  | (k, (expected, mutate)) <- zip [0 :: Int ..] picked
+  [ Mutant (mutantFileName base op k) base op expected (Just site) bytes
+  | (k, (expected, site, mutate)) <- zip [0 :: Int ..] picked
   , Right mutated <- [mkCheckInput (inputReplayId input) (mutate u)]
   , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
   ]
@@ -439,18 +513,20 @@ mutantFileName base op k =
   base ++ "--" ++ opName op ++ "-" ++ show k ++ ".sexp"
 
 -- R1: rewrite one leaf reference to an undeclared id.
-undeclaredLeafSites :: Unit -> [(Expected, Unit -> Unit)]
+undeclaredLeafSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 undeclaredLeafSites u =
   [ ( ExpectClass R1
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos (const (SLeaf (LeafId "mut_undeclared"))))
     )
   | (ix, pos, _) <- leafSites u
   ]
 
 -- R1: instantiate a rule id the policy section never declares.
-hiddenRuleSites :: Unit -> [(Expected, Unit -> Unit)]
+hiddenRuleSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 hiddenRuleSites u =
   [ ( ExpectClass R1
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos setRule)
     )
   | (ix, pos, _) <- ruleSites u
@@ -461,9 +537,10 @@ hiddenRuleSites u =
 
 -- R12: extend the carried policy with a strict rule and a contrary pair on
 -- its conclusion (spec §8.1 Path-B well-formedness violation).
-hiddenContrarySites :: Unit -> [(Expected, Unit -> Unit)]
+hiddenContrarySites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 hiddenContrarySites _ =
   [ ( ExpectClass R12
+    , CPolicy
     , \u ->
         u
           { unitRules = unitRules u ++ [mutStrictRule]
@@ -479,9 +556,10 @@ hiddenContrarySites _ =
     mutContrary = Contrary mutQ mutP
 
 -- R3: rename one substitution key off the rule's parameter list.
-wrongSubstSites :: Unit -> [(Expected, Unit -> Unit)]
+wrongSubstSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 wrongSubstSites u =
   [ ( ExpectClass R3
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos renameKey)
     )
   | (ix, pos, SRule _ theta _ _ _ _) <- ruleSites u
@@ -494,9 +572,10 @@ wrongSubstSites u =
 
 -- R4: swap the first premise child for a declared leaf whose proposition is
 -- ≢ the instantiated premise pattern.
-wrongPremiseSites :: Unit -> [(Expected, Unit -> Unit)]
+wrongPremiseSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 wrongPremiseSites u =
   [ ( ExpectClass R4
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos (swapPremise l'))
     )
   | (ix, pos, SRule rn theta (_ : _) _ _ _) <- ruleSites u
@@ -509,9 +588,10 @@ wrongPremiseSites u =
     swapPremise _ t = t
 
 -- R5: drop one discharge of a mandatory question without opening a hole.
-openObligationSites :: Unit -> [(Expected, Unit -> Unit)]
+openObligationSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 openObligationSites u =
   [ ( ExpectClass R5
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos (dropDischarge q))
     )
   | (ix, pos, SRule rn _ _ d _ _) <- ruleSites u
@@ -526,9 +606,10 @@ openObligationSites u =
     dropDischarge _ t = t
 
 -- R6: answer one known question with a declared-but-≢ leaf.
-wrongDischargeSites :: Unit -> [(Expected, Unit -> Unit)]
+wrongDischargeSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 wrongDischargeSites u =
   [ ( ExpectClass R6
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos (swapDischarge q l'))
     )
   | (ix, pos, SRule rn theta _ d _ _) <- ruleSites u
@@ -549,9 +630,10 @@ wrongDischargeSites u =
     swapDischarge _ _ t = t
 
 -- R7: claim @trusted@ assurance on a defeasible instance.
-trustedAssuranceSites :: Unit -> [(Expected, Unit -> Unit)]
+trustedAssuranceSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 trustedAssuranceSites u =
   [ ( ExpectClass R7
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos setTrusted)
     )
   | (ix, pos, SRule _ _ _ _ _ AssuranceNone) <- ruleSites u
@@ -561,9 +643,10 @@ trustedAssuranceSites u =
     setTrusted t = t
 
 -- R7: point an allowlisted certificate at a theory digest no certifier lists.
-certTheorySwapSites :: Unit -> [(Expected, Unit -> Unit)]
+certTheorySwapSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 certTheorySwapSites u =
   [ ( ExpectClass R7
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos swapTheory)
     )
   | (ix, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites u
@@ -574,9 +657,10 @@ certTheorySwapSites u =
     swapTheory t = t
 
 -- R13: corrupt an allowlisted certificate's opaque payload (replay reject).
-certPayloadSites :: Unit -> [(Expected, Unit -> Unit)]
+certPayloadSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 certPayloadSites u =
   [ ( ExpectClass R13
+    , CArgument ix
     , rewriteArg ix (rewriteAt pos tamper)
     )
   | (ix, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites u
@@ -588,9 +672,9 @@ certPayloadSites u =
 
 -- R10: push an attack position off the target term (undercut/undermine) or
 -- retarget a rebut at a leaf-rooted argument (wrong occurrence kind).
-badAttackPositionSites :: Unit -> [(Expected, Unit -> Unit)]
+badAttackPositionSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 badAttackPositionSites u =
-  [ (ExpectClass R10, \u' -> u' {unitAttacks = replaceIx i k' (unitAttacks u')})
+  [ (ExpectClass R10, CAttack i, \u' -> u' {unitAttacks = replaceIx i k' (unitAttacks u')})
   | (i, k) <- zip [0 :: Int ..] (unitAttacks u)
   , Just k' <- [mutateAttack k]
   ]
@@ -606,9 +690,10 @@ badAttackPositionSites u =
 
 -- R11: declare a self-rebut on a rule-rooted argument; no contrary pair
 -- relates a conclusion to itself in any base policy.
-unlicensedAttackSites :: Unit -> [(Expected, Unit -> Unit)]
+unlicensedAttackSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 unlicensedAttackSites u =
   [ ( ExpectClass R11
+    , CAttack (length (unitAttacks u)) -- the appended self-rebut's index
     , \u' -> u' {unitAttacks = unitAttacks u' ++ [Rebut aid aid]}
     )
   | Just aid <- [fst <$> find (isRule . snd) (unitArgs u)]
@@ -619,9 +704,10 @@ unlicensedAttackSites u =
 
 -- R9: group two ≢ leaves as duplicate reports of one cell under the
 -- escalating conflict mode.
-groupConflictSites :: Unit -> [(Expected, Unit -> Unit)]
+groupConflictSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 groupConflictSites u =
   [ ( ExpectClass R9
+    , CGroup (GroupId "mut_g")
     , \u' ->
         u'
           { unitGroups = unitGroups u' ++ [DupGroup (GroupId "mut_g") [l1, l2]]
@@ -641,31 +727,134 @@ groupConflictSites u =
         (pair : _) -> Just pair
         [] -> Nothing
 
--- R13 (replay preflight): duplicate or unknown selected backend.
+-- R13 (replay preflight): duplicate or unknown selected backend. Both replay
+-- operators over one base.
 replayMutants :: String -> CheckInput -> [Mutant]
 replayMutants base input =
-  concat
-    [ replayMutant OpDuplicateBackend (backends ++ take 1 backends)
-    , replayMutant OpUnknownBackend (backends ++ [(BackendId "mut_backend", "9")])
-    ]
+  replayMutant base input OpDuplicateBackend
+    ++ replayMutant base input OpUnknownBackend
+
+-- | The single R13 replay-preflight mutant of one base for one replay operator
+-- ('OpDuplicateBackend' repeats a selected backend, 'OpUnknownBackend' appends
+-- an unselected one). Empty when the base declares no backends to corrupt; the
+-- seeded ground truth is the replay envelope ('CReplayEnvelope').
+replayMutant :: String -> CheckInput -> MutationOp -> [Mutant]
+replayMutant base input op
+  | null backends = []
+  | otherwise =
+      [ Mutant (mutantFileName base op 0) base op (ExpectClass R13) (Just CReplayEnvelope) bytes
+      | Right rid' <-
+          [ mkReplayId
+              (replayCore rid)
+              (replayPolicy rid)
+              (corruptedBackends op)
+              (replayTheories rid)
+              (replayArtifact rid)
+          ]
+      , Right mutated <- [mkCheckInput rid' (inputUnit input)]
+      , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
+      ]
   where
     rid = inputReplayId input
     backends = replayBackends rid
-    replayMutant op backends'
-      | null backends = []
-      | otherwise =
-          [ Mutant (mutantFileName base op 0) base op (ExpectClass R13) bytes
-          | Right rid' <-
-              [ mkReplayId
-                  (replayCore rid)
-                  (replayPolicy rid)
-                  backends'
-                  (replayTheories rid)
-                  (replayArtifact rid)
-              ]
-          , Right mutated <- [mkCheckInput rid' (inputUnit input)]
-          , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
-          ]
+    corruptedBackends OpUnknownBackend = backends ++ [(BackendId "mut_backend", "9")]
+    corruptedBackends OpDuplicateBackend = backends ++ take 1 backends
+    corruptedBackends other = error ("replayMutant: not a replay operator: " ++ opName other)
+
+-- ---------------------------------------------------------------------------
+-- Corpus sweep (uniform derived-applicability rule, eng review D9)
+-- ---------------------------------------------------------------------------
+
+-- | The per-operator base budget for the corpus sweep. When an operator's
+-- applicable set exceeds this, a budget-sized subset is picked by the
+-- operator-keyed stream; at or below it, the whole set is taken (full
+-- coverage). A frozen generation constant — changing it regenerates a
+-- different, equally valid corpus half and must be an explicit decision.
+corpusBudget :: Int
+corpusBudget = 12
+
+-- | One rejection operator, viewed for the corpus sweep: its applicability
+-- predicate (does this base carry ≥1 site?) and its cap-1 producer at a base.
+data SweepOp = SweepOp
+  { sweepOp :: MutationOp
+  , sweepApplicable :: CheckInput -> Bool
+  , sweepAt :: String -> CheckInput -> [Mutant]
+  }
+
+-- | The rejection operators swept over corpus bases, in fixed order. This is
+-- the same operator set 'mutantsForBase' runs over the worked examples (cert
+-- and other arg-dependent operators self-gate via their site enumerators — a
+-- gap corpus unit with no args yields no sites, so they propose nothing there,
+-- no special casing). Codec corruption and the constructed cycle family are not
+-- part of the corpus sweep (they are base-independent structural families).
+sweepOps :: [SweepOp]
+sweepOps =
+  [ unitSweep OpUndeclaredLeaf undeclaredLeafSites
+  , unitSweep OpHiddenRule hiddenRuleSites
+  , unitSweep OpHiddenContrary hiddenContrarySites
+  , unitSweep OpWrongSubstDomain wrongSubstSites
+  , unitSweep OpWrongPremise wrongPremiseSites
+  , unitSweep OpOpenObligation openObligationSites
+  , unitSweep OpWrongDischarge wrongDischargeSites
+  , unitSweep OpTrustedAssurance trustedAssuranceSites
+  , unitSweep OpCertTheorySwap certTheorySwapSites
+  , unitSweep OpCertPayloadTamper certPayloadSites
+  , unitSweep OpBadAttackPosition badAttackPositionSites
+  , unitSweep OpUnlicensedAttack unlicensedAttackSites
+  , unitSweep OpGroupConflict groupConflictSites
+  , replaySweep OpDuplicateBackend
+  , replaySweep OpUnknownBackend
+  ]
+  where
+    unitSweep op sites =
+      SweepOp
+        op
+        (\input -> not (null (sites (inputUnit input))))
+        (\base input -> unitMutants base input op 1 sites)
+    replaySweep op =
+      SweepOp
+        op
+        (\input -> not (null (replayBackends (inputReplayId input))))
+        (\base input -> replayMutant base input op)
+
+-- | The bases at which a sweep operator finds ≥1 site (corpus manifest order).
+sweepApplicableBases :: SweepOp -> [(String, CheckInput)] -> [(String, CheckInput)]
+sweepApplicableBases op bases = [b | b@(_, input) <- bases, sweepApplicable op input]
+
+-- | The bases one sweep operator selects: all applicable bases when they number
+-- ≤ 'corpusBudget', else a 'corpusBudget'-sized subset picked by the
+-- operator-keyed stream. Order is the applicable-set order (corpus manifest
+-- order), so the selection is deterministic.
+sweepSelected :: SweepOp -> [(String, CheckInput)] -> [(String, CheckInput)]
+sweepSelected op bases =
+  pickWithStream
+    (streamForKey ("corpus-sweep/" ++ opName (sweepOp op)))
+    corpusBudget
+    (sweepApplicableBases op bases)
+
+-- | Every corpus-base mutant, operator-major: for each rejection operator, one
+-- mutant at each selected base (the seeded first site). The @(base, input)@
+-- list is the corpus units in manifest order, each base labelled
+-- @\<artifact\>.\<claim_id\>@; @scripts\/gen-mutants.hs@ and
+-- @test\/MutationSpec.hs@ pass the same list, so the output is identical.
+corpusMutants :: [(String, CheckInput)] -> [Mutant]
+corpusMutants bases =
+  concat
+    [ sweepAt op base input
+    | op <- sweepOps
+    , (base, input) <- sweepSelected op bases
+    ]
+
+-- | The measured per-operator applicable and selected base counts of the corpus
+-- sweep, in operator order — the "no silent caps" record the regenerated
+-- @README.md@ prints and @test\/MutationSpec.hs@ pins against the manifest.
+-- Operators that find no corpus site (the cert operators) appear with
+-- @(applicable, selected) = (0, 0)@, so absence is documented, not hidden.
+corpusSweepReport :: [(String, CheckInput)] -> [(MutationOp, Int, Int)]
+corpusSweepReport bases =
+  [ (sweepOp op, length (sweepApplicableBases op bases), length (sweepSelected op bases))
+  | op <- sweepOps
+  ]
 
 -- ---------------------------------------------------------------------------
 -- Codec-corruption mutants (R14 family: exit 2, no verdict)
@@ -679,7 +868,7 @@ codecMutantsForBase :: String -> String -> [Mutant]
 codecMutantsForBase base bytes = case parseSExpr bytes of
   Left _ -> []
   Right top ->
-    [ Mutant (mutantFileName base op 0) base op ExpectCodecReject out
+    [ Mutant (mutantFileName base op 0) base op ExpectCodecReject Nothing out
     | (op, mutate) <- ops
     , Just mutated <- [mutate top]
     , let out = printSExpr mutated ++ "\n"
@@ -689,6 +878,7 @@ codecMutantsForBase base bytes = case parseSExpr bytes of
              base
              OpCodecTruncate
              ExpectCodecReject
+             Nothing
              (truncateBytes bytes)
          ]
   where
@@ -752,6 +942,7 @@ cycleMutants =
       "-"
       OpRebutCycle
       ExpectAllContested
+      Nothing
       (cycleBytes n)
   | n <- sizes
   ]

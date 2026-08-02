@@ -16,13 +16,16 @@
 > identity (#36, the audit story) and duplicate-report groups (#38, the
 > mutation-suite spine). All LLM work — the D3 flip and the JSON producer
 > (#30, tagged `post-pldi`) — is deferred to an ACL/EMNLP follow-up paper.
-> M5 progress: T4 (worked cases E4/E5) is complete. T1 (seeded mutation
-> generators) has landed its worked-example half — every executable rejection
-> class is exercised by generated mutants over the eight accept anchors — but
-> stays partially open: #48's T1 also requires generators over corpus units
-> and generated mutants exercising every status/attack kind, which need T2.
-> T2 (corpus units), T3 (measurement harness), T5 (freeze protocol), and T6
-> (ablation baselines) remain.
+> M5 progress: T1 (seeded mutation generators), T2 (corpus units), T3
+> (measurement harness), and T4 (worked cases E4/E5) are complete. T1 now
+> covers both halves — the worked-example rejection-class sweep AND generators
+> over the 60 corpus units (uniform derived-applicability sweep, B=12), with a
+> new accept-verdict operator family exercising every claim status and every
+> attack kind. T3 emits the one-command machine-readable axis-(c) report
+> (`scripts/measure.hs`: rejection outcome, defect location vs ground truth,
+> replay success, certificate size, checking time), all byte-identical across
+> the Haskell and Lean drivers. T5 (freeze protocol) and T6 (ablation
+> baselines) remain.
 
 ## Performance
 
@@ -76,35 +79,43 @@ closed issue #27.
 
 ## M5 prerequisites and language cleanup
 
-### Verdict-carried replay identity (spec §2.1)
+### Split `Lara.Mutate` into right-sized modules
 
-**What:** Extend the verdict codec (Haskell `Lara.Wire` + Lean `Lara.Driver`,
-byte-identical) to print the frozen `replayId` tuple: `(lara-core@0.1, policy
-id @ version, [backend@version*], {theory digests}, artifact digest)` — spec
-§2.1's "Reports print the tuple verbatim."
+**What:** `Lara.Mutate` is ~900 lines (well past the 400-line guideline). The
+accept-verdict family already lives in `Lara.Mutate.Accept` (M5 T1); finish the
+split — e.g. `Lara.Mutate.Sites` (site enumerators), `Lara.Mutate.Codec` (the
+codec-corruption family), `Lara.Mutate.Corpus` (the sweep) — leaving `Lara.Mutate`
+as the vocabulary + `Mutant`/`Expected` core.
 
-**Why:** The obligation is frozen but unimplemented — no verdict path emits
-the tuple (only the `Digest` newtype exists, `AST.hs:387`). M4b works around
-it with the bundle manifest (checker-source revision as audit metadata);
-that covers bundles, not arbitrary checker runs.
+**Why:** The module grew organically across T1's worked-example, corpus-sweep,
+and accept-family stages; the vocabulary/construction boundary is now clear
+enough to factor cleanly.
 
-**Pros:** Every checker run carries its replay identity; verdict byte-diffing
-catches trusted-input drift for free; fulfills a frozen spec obligation.
+**Context:** Deferred from the M5 T1-corpus + T3 PR to keep that change reviewable
+(the accept family already split off the largest new block).
 
-**Cons:** Coordinated change to the differential anchor plus every
-golden/fixture — wide, shallow, carefully sequenced. Policy id@version and
-artifact digest are presentation-layer metadata the `Unit` drops; the carrier
-(report-side vs `Unit`) needs a design call.
+**Effort:** S
+**Priority:** P3
+**Depends on:** nothing.
 
-**Context:** Becomes load-bearing when M5's audit/evaluation story needs
-machine-checkable replay identity on arbitrary runs. Discovered in the M4b
-plan-eng-review (2026-07-28).
+### Discriminating localization benchmark (multi-defect / off-site) — T6
 
-**Issue:** #36.
+**What:** The T3 harness's `location_match` is a verification-style number:
+single-defect mutants localize at the mutated constituent by construction, so
+the measured rate is ≈100% and any deviation is a diagnostic-ordering finding,
+not a discriminating benchmark (eng review D10). Add the discriminating variant
+— multi-defect mutants and mutants whose manifestation is off the mutated site —
+so location accuracy becomes a real signal.
+
+**Why:** The paper's location-accuracy claim is only interesting once the metric
+can be < 100%; the current corpus establishes the harness, not the hard case.
+
+**Context:** Recorded as a T6 (ablation/robustness) follow-up when folding the
+M5 T1-corpus + T3 measurement work; out of scope for that PR.
+
 **Effort:** M
 **Priority:** P3
-**Depends on:** nothing; natural fit with M5 planning
-
+**Depends on:** M5 T3 measurement harness (landed).
 
 ### Print hole-lines in support terms
 
@@ -131,6 +142,30 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### M5 T1 (corpus half) + T3 measurement harness (tracker #48)
+
+T1's corpus half and the status/attack requirement: `Lara.Mutate` runs every
+rejection operator over the 60 T2 corpus units under the uniform
+derived-applicability sweep (B=12, per-operator applicability from site
+enumeration, no hand partition), and `Lara.Mutate.Accept` adds five
+accept-verdict operators over the 9 justified units exercising every claim
+status {gap, justified, defeated, contested} and every attack kind {rebut,
+undercut, undermine}, each verified structurally (verdict + label shape, not
+status alone — eng review D7/4A). T3: `Lara.Measure` + `scripts/measure.hs`
+emit the one-command axis-(c) report (rejection outcome + defect location vs
+seeded ground truth, replay success, certificate size, checking time) from both
+manifests, rendered via the house `JValue` codec (aeson is a test-only check);
+`Lara.Diagnostics` gained the shared located-rejection vocabulary
+(`constituentText`/`parseConstituent`, `CReplayEnvelope`/`CGroup`) and
+`Lara.Driver.runCheckLocated` unifying all three reject paths. 340 mutants +
+60 corpus units are byte-identical across the Haskell and Lean drivers
+(`scripts/differential.sh`). Verdict-carried replay identity (#36, spec §2.1)
+is closed: the `.core.sexp` anchors carry the `replayId` tuple and the harness
+measures replay success on every corpus unit. No new Lean metatheory —
+generator and harness are corpus tooling; soundness stays with the Lean driver
++ differential harness. T5 (freeze) and T6 (discriminating localization)
+remain.
 
 ### M5 T1 (worked-example half) + T4 — seeded mutation suite and worked cases (tracker #48)
 

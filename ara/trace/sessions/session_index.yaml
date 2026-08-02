@@ -235,10 +235,13 @@ sessions:
   date: '2026-08-01'
   summary: 'M5 T1+T4 land (PR #49 merged) and T2 completes on branch: all 60 M0-sample claims lowered
     to corpus units under corpus-v1 (9 justified/48 gap/3 defeated), differential 206/54 byte-exact; C22
-    + H06 + R7/R13 concept crystallized.'
-  turn_count: 2
-  events_count: 15
+    + H06 + R7/R13 concept crystallized. Turn 3 (/implement, PR #51): T1 corpus half + T3 measurement
+    harness — corpus rejection sweep + accept-verdict family grow the suite 148->340 (every reject class,
+    status, attack kind), Lara.Measure emits the axis-(c) report (400 records, all rates green,
+    location-accuracy 246/246, replay 60/60); differential 398/54; C22 Proof extended; O29/O30/O31 staged.'
+  turn_count: 3
+  events_count: 20
   claims_touched:
   - C21
   - C22
-  open_threads: 3
+  open_threads: 4

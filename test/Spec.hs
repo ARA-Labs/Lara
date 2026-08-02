@@ -27,6 +27,7 @@ import CliSpec (cliSpecProps)
 import CorpusUnitsSpec (corpusUnitsSpecProps)
 import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
+import MeasureSpec (measureSpecProps)
 import MutationSpec (mutationSpecProps)
 import PropSpec (propSpecProps)
 import ReportingSpec (reportingSpecProps)
@@ -192,6 +193,7 @@ main = do
         ++ [run name act | (name, act) <- checkSpecProps]
         ++ [run name act | (name, act) <- differentialSpecProps]
         ++ [run name act | (name, act) <- mutationSpecProps]
+        ++ [run name act | (name, act) <- measureSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]

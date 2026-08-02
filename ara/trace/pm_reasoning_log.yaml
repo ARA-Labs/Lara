@@ -399,3 +399,11 @@ entries:
   - 'lbcs/C03 scheme divergence (annotator dose_response vs analytic lowering) recorded as open thread,
     not a contradiction: unit header documents it; annotation file remains authoritative for the annotation
     pass.'
+  - turn: "2026-08-01_001#3"
+    notes:
+      - "Turn 3 was /implement execution of the already-eng-reviewed T1-corpus+T3 plan: routed the two deliverables as experiment nodes N95 (generation) + N96 (measurement) DIRECT to trace; the user directive was execution, not a new research decision, so no new pivot/decision node."
+      - "Appended corpus-scale evidence to C22.Proof (empirical-resolution, evidence-only) rather than authoring a new claim: the accept-verdict family (symmetric->contested, one-directional->defeat, voluntary undercut->reinstatement) IS C22's completeness-scan mechanism instantiated at corpus scale — exact precedent of the turn-1 C21 R9-mutant Proof append. Statement/Conditions/Status untouched; added Last revised."
+      - "Did NOT crystallize O29/O30/O31 despite strong committed evidence: PR #51 is OPEN not MERGED (last turn's crystallizations fired on PR #49 MERGED), and these are interpretive framings of fresh smoke-run numbers. Conservative precedent (O27 staged last turn) — let merge / user reaction / T5 freeze close them."
+      - "O30 flagged potential_type claim not constraint: it asserts a size-distribution relationship (payload is the signal) with a concrete downstream implication (policy-by-reference), which is a what, not a design rule."
+      - "No stale flags: O26/O27/O28 staged 2026-08-01 (same day), under the 3-session-day threshold."
+      - "Reviewer git-clean/policyBytes-bug recorded inside N96 result + turn-3 key_context, not as dead_end nodes: both found+fixed within the turn, below node granularity (same treatment as the turn-2 differential.sh dual-site bug)."
