@@ -65,3 +65,20 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium
 - **Code ref**: ["scripts/gen-mutants.hs", "scripts/gen-corpus-units.hs", "test/MutationSpec.hs", "test/CorpusUnitsSpec.hs"]
+
+## H07: Audit gate coverage of the mutation suite before trusting any ablation number
+- **Rationale**: An ablation over a mutation suite measures nothing unless the
+  suite contains inputs that actually exercise the ablated check. The pre-T6
+  suite had zero mutants reaching the obligation gate — its open-obligation
+  operator dropped a discharge without leaving a hole, so those mutants were
+  caught earlier by an always-on rule (R5 Uncovered) — which would have made the
+  no-cq ablation report a vacuous null (0 missed of 0 reachable) that reads like
+  a passing result. The fix belongs in the SUITE (add an operator that seeds
+  inputs reaching the gate — `OpHoleObligation`, 18 mutants, suite 340→358), not
+  in widening the ablation to reach into the kernel. Confirm each ablated check
+  has ≥1 reaching input before reporting its miss rate.
+- **Sources**: ["0 reaching / 340 ← trace/exploration_tree.yaml:N97.result «the pre-T6 suite had ZERO inputs reaching the obligation gate (open-obligation fires R5 Uncovered instead)» [result]", "18 / 340→358 ← trace/exploration_tree.yaml:N97.result «18 new mutants, additions-only, suite 340->358, first cross-driver coverage of the IncompleteArgument reject path» [result]"]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["src/Lara/Mutate.hs", "test/AblationSpec.hs", "scripts/measure.hs"]

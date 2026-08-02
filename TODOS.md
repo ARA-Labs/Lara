@@ -26,9 +26,14 @@
 > replay success, certificate size, checking time), all byte-identical across
 > the Haskell and Lean drivers. T6 (ablation baselines) is complete: the
 > `CheckConfig` no-cq / no-typed cells run over the suite, grown 340→358 by
-> the hole-seeding `OpHoleObligation` operator. T5 (freeze protocol) remains;
-> its freeze inputs now include the ablation config definitions and the
-> 358-mutant suite.
+> the hole-seeding `OpHoleObligation` operator. T5 (freeze protocol) is complete:
+> `docs/m5-freeze-checklist.md` pins the frozen inputs (358-mutant suite, 60
+> corpus units, 11 worked examples, seed 20260801) by git-tree content hash, the
+> post-freeze `scripts/measure.hs` run is committed under `measurements/frozen/`,
+> and tag `m5-freeze-v1` will mark the freeze commit (post-merge). **M5 is complete** for the
+> PLDI/POPL scope; the human-authored natural-defect ablation (#52) and all
+> LLM-producer axes stay in the ACL/EMNLP follow-up. Next: M6/M7 — the paper
+> package (`research-proposal.md` §7, milestone M7).
 
 ## Performance
 
@@ -169,6 +174,26 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### M5 T5 — freeze protocol (tracker #48)
+
+`docs/m5-freeze-checklist.md` freezes the deterministic evaluation corpus before
+the final measurement runs (the analogue of the proposal's blinded held-out
+freeze). Frozen inputs are pinned by git-tree content hash: the 358-mutant suite
+(`fixtures/mutants/`), 60 corpus units (`corpus-units/`), 11 worked examples
+(`examples/`), and `mutationSeed = 20260801` (verified byte-identically
+reproducible — regeneration leaves an empty `git diff`). Pre-freeze gates all
+green: `scripts/differential.sh` positive 416/0 + negative 54/0, `cabal test all`
+PASS. The one-command post-freeze run (`cabal exec -- runghc scripts/measure.hs`)
+is committed under `measurements/frozen/` (the working `measurements/` stays
+gitignored): 418 records, class-match 418/418, cross-driver `lean_agree` 418/418,
+ablation surgical (no-cq misses exactly 18 `IncompleteArgument`, no-typed exactly
+30 R10/R11). Timing columns are reported but excluded from the reproducibility
+anchors (wall-clock, environment-dependent); the deterministic projection
+(`report.tsv` cols 1–14) and `ablation.tsv` are hashed in the checklist. Tag
+`m5-freeze-v1` will mark the freeze commit (post-merge). **M5 is complete** for the PLDI/POPL
+scope; #52 (human-authored natural defects) and the LLM-producer axes remain in
+the ACL/EMNLP follow-up.
 
 ### M5 T6 — deterministic ablation baselines (tracker #48, PR #53)
 

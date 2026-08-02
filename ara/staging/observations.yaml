@@ -668,9 +668,9 @@ observations:
   potential_type: claim
   bound_to:
   - N97
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/claims.md:C24
+  crystallized_via: artifact-commitment
   stale: false
 - id: O33
   timestamp: 2026-08-01T23:50
@@ -703,6 +703,24 @@ observations:
   potential_type: heuristic
   bound_to:
   - N97
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H07
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O35
+  timestamp: 2026-08-02T12:00
+  provenance: ai-executed
+  content: >
+    A frozen reproducibility anchor for a measurement corpus must hash the DETERMINISTIC PROJECTION of
+    the output, not the whole file: measure.hs report.tsv carries two wall-clock timing columns
+    (hs_check_ns, lean_wall_ns) that vary per run, so a whole-file hash is not reproducible. The T5
+    freeze hashes cut -f1-14 (drops timing) plus the fully-deterministic ablation.tsv, and pins the
+    frozen INPUTS by git-tree object SHA (which is itself a content hash) rather than per-file digests.
+    Timing is reported but explicitly excluded from the freeze anchors.
+  context: T5 freeze execution (N99); docs/m5-freeze-checklist.md determinism note + reproduce recipe.
+  potential_type: heuristic
+  bound_to:
+  - N99
   promoted: false
   promoted_to: null
   crystallized_via: null

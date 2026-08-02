@@ -24,4 +24,5 @@ cabal.project.local~
 .gstack/
 __pycache__/
 .worktrees/
-measurements/
+measurements/*
+!measurements/frozen/

@@ -1,0 +1,110 @@
+session:
+  id: "2026-08-02_001"
+  date: "2026-08-02"
+  started: "2026-08-02T11:00"
+  last_turn: "2026-08-02T12:05"
+  turn_count: 2
+  summary: >
+    Project-status turn then the M5 T5 freeze. Turn 1: assessed "are we done / can we write the paper" —
+    established that M5 T5 (freeze) was the only remaining gate for the PLDI/POPL paper, that the full
+    4-axis evaluation is deliberately two papers, and that #52 is out of scope. Turn 2: created branch
+    m5-t5-freeze-protocol; the user first chose "land #52 first" but reversed to "freeze now, defer #52"
+    after the manager surfaced that #52 is post-pldi, LLM-gated, and its natural-defect corpus does not
+    exist (N98). Executed T5 (N99): pinned frozen inputs by git-tree SHA + seed 20260801, gates green
+    (seed byte-identical, differential 416/0 + 54/0, cabal test PASS), post-freeze measure.hs committed
+    under measurements/frozen/ (418 records, class-match + lean_agree 418/418), docs/m5-freeze-checklist.md
+    written, tag m5-freeze-v1 deferred to merge. M5 complete for PLDI scope → pivot to M7 (N100).
+    Crystallized O32→C24 (surgical/monotone ablation) and O34→H07 (audit gate coverage) via
+    artifact-commitment (#53 merged + post-freeze reproduction); staged O35 (freeze reproducibility-anchor
+    heuristic). Freeze committed on branch 51be992; PR/push not yet done (held for user).
+
+events_logged:
+  - turn: 2
+    type: decision
+    id: "N98"
+    routing: direct
+    provenance: user-revised
+    summary: "Defer #52 from the T5 freeze — freeze deterministic corpus now; #52 stays ACL/EMNLP (user reversed after evidence)"
+  - turn: 2
+    type: decision
+    id: "N99"
+    routing: direct
+    provenance: ai-executed
+    summary: "M5 T5 executed: git-tree-SHA input freeze + committed post-freeze snapshot (measurements/frozen/), deterministic-projection anchors, tag deferred to merge"
+  - turn: 2
+    type: pivot
+    id: "N100"
+    routing: direct
+    provenance: ai-suggested
+    summary: "M5 complete (deterministic axes a+c) → M7 POPL paper package next; citable frozen tables exist"
+  - turn: 2
+    type: observation
+    id: "O32"
+    routing: crystallized
+    provenance: ai-executed
+    summary: "→ C24: single-rule ablation surgical + monotone, confirmatory-by-construction (via #53 merge + post-freeze reproduction)"
+  - turn: 2
+    type: observation
+    id: "O34"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "→ H07: audit gate coverage of the mutation suite before trusting any ablation number"
+  - turn: 2
+    type: observation
+    id: "O35"
+    routing: staged
+    provenance: ai-executed
+    summary: "Freeze reproducibility anchor must hash the deterministic projection, not timing-laden whole output (staged heuristic)"
+
+ai_actions:
+  - turn: 2
+    action: "Created branch m5-t5-freeze-protocol; ran post-freeze measure.hs (418 records), differential.sh (416/0, 54/0), gen-mutants.hs (byte-identical), cabal test all (PASS)"
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: "Wrote docs/m5-freeze-checklist.md; un-ignored measurements/frozen/ (.gitignore); committed canonical report/ablation.{json,tsv} snapshot; retired T5 / marked M5 complete in TODOS.md; commit 51be992"
+    provenance: ai-executed
+    files_changed:
+      - docs/m5-freeze-checklist.md
+      - measurements/frozen/report.json
+      - measurements/frozen/report.tsv
+      - measurements/frozen/ablation.json
+      - measurements/frozen/ablation.tsv
+      - .gitignore
+      - TODOS.md
+
+claims_touched:
+  - id: C24
+    action: crystallized
+    turn: 2
+  - id: H07
+    action: crystallized
+    turn: 2
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User: "we just merged #53 — is our project largely finished, can we write the complete paper?"
+      Manager assessment: M0–M4 + result 9 done, M2 all 12 results proved; M5 T1–T4/T6 done, only T5
+      (freeze) open; the complete 4-axis evaluation is deliberately two papers (PLDI = axes a+c;
+      ACL/EMNLP = axes b/d + LLM producer). T5 is a real gate: "final numbers come only from post-freeze
+      runs," so pre-freeze tables are not citable.
+  - turn: 2
+    excerpt: >
+      User initially answered "Land #52 first, then freeze." Manager read #52 in full (labelled
+      post-pldi; "belongs to the ACL/EMNLP follow-up, not the PLDI/POPL paper"; gated on LLM elaborator /
+      D3) and verified the natural-defect corpus is absent from the repo, then surfaced the conflict.
+      User reversed: "Freeze now, defer #52." This reversal is why N98 provenance is user-revised.
+
+open_threads:
+  - "Push branch m5-t5-freeze-protocol and open the T5 PR (held for user)"
+  - "After merge: apply annotated tag m5-freeze-v1 and fill the <FILL-AFTER-COMMIT> freeze SHA in docs/m5-freeze-checklist.md"
+  - "M7 (POPL paper package) — write from measurements/frozen/; check whether ara/PAPER.md has a draft skeleton"
+  - "O33 (accept-justified is the alarming case) still staged — frozen run partially contradicts its 'both columns' wording; needs narrowing before adoption"
+  - "In-scope harder-number option not yet built: seeded multi-defect/off-site discriminating localization benchmark (TODOS P3)"
+
+ai_suggestions_pending:
+  - "C24 status supported and H07 active are ai-suggested crystallizations — user has not verbally affirmed either wording"
+  - "N100 pivot to M7 is ai-suggested — user has not explicitly said 'start the paper'"

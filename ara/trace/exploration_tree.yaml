@@ -2306,3 +2306,89 @@ tree:
   also_depends_on:
   - N96
   children: []
+- id: N98
+  type: decision
+  provenance: user-revised
+  timestamp: 2026-08-02T11:30
+  source_refs:
+  - 'GitHub issue #52'
+  - 'GitHub issue #48'
+  - plans/popl-research-review.md §Phase-F
+  - docs/m5-freeze-checklist.md
+  title: 'Defer #52 (human-authored natural-defect ablation) from the T5 freeze; freeze the deterministic
+    corpus now'
+  choice: >
+    Freeze the LLM-independent evaluation corpus now and keep #52 in the ACL/EMNLP follow-up. The user
+    first directed "land #52 first, then freeze"; the manager surfaced that #52 is labelled post-pldi,
+    is gated on the LLM elaborator / D3 flip (the same boundary as #30 and axes b/d), and its
+    human-authored NATURAL-defect certificate corpus does not exist in the repo (examples/ are golden,
+    fixtures/mutants/ are seeded, no natural-defect corpus present). On that evidence the user reversed
+    to "freeze now, defer #52." The in-scope way to get a harder-than-confirmatory number is the seeded
+    discriminating localization benchmark (TODOS P3), not #52.
+  alternatives:
+  - 'Land #52 first, then freeze (original user direction) — pulls post-pldi, LLM-gated substrate into
+    the PLDI paper''s freeze and blocks on a corpus that must be authored'
+  - 'Build the seeded multi-defect / off-site discriminating localization benchmark before freezing —
+    in-scope and LLM-free, but delays the freeze'
+  evidence:
+  - 'gh issue view 52 (labels: enhancement, post-pldi; body: "belongs to the ACL/EMNLP LLM follow-up
+    paper, not the PLDI/POPL paper")'
+  - 'find over repo: no human-authored natural-defect certificate corpus (examples/ golden, mutants/ seeded)'
+  - 'AskUserQuestion answer "Freeze now, defer #52"'
+  status: resolved
+  also_depends_on:
+  - N97
+- id: N99
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-02T12:00
+  source_refs:
+  - docs/m5-freeze-checklist.md
+  - measurements/frozen/report.tsv
+  - measurements/frozen/ablation.tsv
+  - .gitignore
+  - src/Lara/Mutate.hs
+  title: 'M5 T5 executed: freeze the deterministic evaluation corpus with git-tree content hashes + a
+    committed post-freeze snapshot'
+  choice: >
+    Freeze mechanism (analogue of the M1 spec-v0.1 freeze): pin the frozen INPUTS by git-tree object
+    SHA — fixtures/mutants (baaa4ac5), corpus-units (00b25fae), examples (95e978b1) — plus seed
+    mutationSeed=20260801; run the gates (seed regen leaves empty git diff = byte-identical;
+    differential.sh 416/0 + 54/0; cabal test all PASS); run the one-command post-freeze measurement
+    (cabal exec -- runghc scripts/measure.hs, 418 records, class-match 418/418, lean_agree 418/418);
+    commit the canonical numbers under measurements/frozen/ (un-ignored via measurements/* +
+    !measurements/frozen/, since working measurements/ stays gitignored as regenerable). Reproducibility
+    anchors hash the DETERMINISTIC PROJECTION only (report.tsv cut -f1-14 = b241a576; ablation.tsv =
+    e744bbd7); the two wall-clock timing columns are reported but excluded. Committed on branch
+    m5-t5-freeze-protocol (51be992); tag m5-freeze-v1 is a post-merge step (goes on the merge commit,
+    per the M1 precedent). M5 is complete for the PLDI/POPL scope.
+  alternatives:
+  - Record hashes-only without committing the numbers — no durable, directly-citable frozen snapshot
+  - Un-ignore all of measurements/ — tracks regenerable timing-laden working output, not just the frozen snapshot
+  - Whole-file hash of report.tsv as the anchor — not reproducible (embeds per-run timing)
+  evidence:
+  - 'seed reproducibility: cabal exec -- runghc scripts/gen-mutants.hs → empty git diff (358 mutants)'
+  - 'scripts/differential.sh: pass=416 fail=0, negative pass=54 fail=0'
+  - 'cabal test all: Test suite lara-test PASS'
+  - measurements/frozen/ablation.json aggregate (no-cq missed 18, no-typed missed 30)
+  status: resolved
+  also_depends_on:
+  - N97
+  - N98
+- id: N100
+  type: pivot
+  provenance: ai-suggested
+  timestamp: 2026-08-02T12:05
+  source_refs:
+  - plans/research-proposal.md §7
+  - TODOS.md
+  - docs/m5-freeze-checklist.md
+  title: 'M5 complete → M7 (POPL paper package) next'
+  from: 'M5 — evaluation corpus (deterministic axes a + c): mutation suite, corpus units, measurement
+    harness, ablations, freeze'
+  to: 'M7 — POPL package: write the paper from the frozen axis-(c) tables (measurements/frozen/)'
+  trigger: 'T5 freeze landed — the citable, reproducible axis-(c) numbers now exist; every M5 task is
+    closed for the PLDI/POPL scope. #52 and the LLM-producer axes (b/d, #30) remain the ACL/EMNLP follow-up.'
+  status: open
+  also_depends_on:
+  - N99
