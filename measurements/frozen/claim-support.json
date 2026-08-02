@@ -1,0 +1,775 @@
+{
+  "environment": {
+    "git-rev": "ee01ae3bbe736f2d911aed866afef48983c5ab3b",
+    "git-dirty": false,
+    "ghc": "9.14.1",
+    "lean": "",
+    "os": "darwin",
+    "cpu": "aarch64"
+  },
+  "corpus": {
+    "frozen-tag": "m5-freeze-v1",
+    "seed": 20260801,
+    "units": 60
+  },
+  "status-distribution": {
+    "gap": 48,
+    "justified": 9,
+    "defeated": 3
+  },
+  "load-bearing-leaves": {
+    "total": 36,
+    "provenance": {
+      "ai-executed": 36
+    },
+    "kind": {
+      "attested": 20,
+      "observed": 16
+    },
+    "paper-anchored": 13,
+    "note": "All load-bearing leaves are agent-produced (provenance ai-executed); none human/paper-authored. `paper-anchored` counts those additionally citing a direct paper-document locator (an E<n># experiment pointer, or a Table/Figure/Appendix/Theorem/Lemma/Corollary/Proposition/Equation/Section/paper locator)."
+  },
+  "all-leaves": {
+    "total": 167,
+    "provenance": {
+      "ai-executed": 167
+    },
+    "kind": {
+      "attested": 106,
+      "observed": 61
+    },
+    "paper-anchored": 49
+  },
+  "dead-end-attacks": {
+    "typed-attacks-total": 3,
+    "dead-end-sourced": 2
+  },
+  "strict-certificates": {
+    "load-bearing-strict-steps": 0,
+    "carrying-checked-certificate": 0,
+    "documented-strict-flavored": 5,
+    "note": "corpus-v1 is all-defeasible; fraction is 0/0 by construction. Strict/certificate path is future work (issue #57)."
+  },
+  "units": [
+    {
+      "unit": "adaptive-pruning.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "adaptive-pruning.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "all-in-one.C01",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "all-in-one.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "all-in-one.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "all-in-one.C06",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bam.C05",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 4,
+      "load-bearing-paper-anchored": 1,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bam.C06",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bbox.C02",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bbox.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bbox.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bbox.C06",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bridging-data-gaps.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "bridging-data-gaps.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "fre.C01",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 4,
+      "load-bearing-paper-anchored": 3,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "fre.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "fre.C04",
+      "status": [
+        "defeated"
+      ],
+      "load-bearing-leaves": 1,
+      "load-bearing-paper-anchored": 1,
+      "typed-attacks": 1,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "ftrl.C01",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "lbcs.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "lbcs.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "mechanistic-understanding.C02",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "mechanistic-understanding.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "pinn.C01",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 4,
+      "load-bearing-paper-anchored": 2,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "pinn.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "pinn.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rice.C01",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 3,
+      "load-bearing-paper-anchored": 2,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "robust-clip.C02",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "robust-clip.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "robust-clip.C07",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "sample-specific-masks.C05",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 4,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "sample-specific-masks.C06",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 5,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "sapg.C01",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "sapg.C02",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "sapg.C06",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "self-composing-policies.C01",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 3,
+      "load-bearing-paper-anchored": 3,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "self-composing-policies.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "self-expansion.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "self-expansion.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "semantic-self-consistency.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "semantic-self-consistency.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "semantic-self-consistency.C06",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "sequential-neural-score-estimation.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "stay-on-topic-with-classifier-free-guidance.C02",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "stay-on-topic-with-classifier-free-guidance.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "stay-on-topic-with-classifier-free-guidance.C06",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "stochastic-interpolants.C01",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "stochastic-interpolants.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "test-time-model-adaptation.C04",
+      "status": [
+        "defeated"
+      ],
+      "load-bearing-leaves": 1,
+      "load-bearing-paper-anchored": 1,
+      "typed-attacks": 1,
+      "dead-end-attacks": 1,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "test-time-model-adaptation.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "test-time-model-adaptation.C07",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "what-will-my-model-forget.C01",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "what-will-my-model-forget.C03",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-fix_embedding.C12",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-nanogpt_chat_rl.C04",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-restricted_mlm.C07",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-restricted_mlm.C14",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 3,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-rust_codecontests.C02",
+      "status": [
+        "justified"
+      ],
+      "load-bearing-leaves": 3,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-rust_codecontests.C09",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-triton_cumsum.C05",
+      "status": [
+        "gap"
+      ],
+      "load-bearing-leaves": 0,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 0,
+      "dead-end-attacks": 0,
+      "strict-steps": 0,
+      "strict-certified": 0
+    },
+    {
+      "unit": "rebench-triton_cumsum.C09",
+      "status": [
+        "defeated"
+      ],
+      "load-bearing-leaves": 1,
+      "load-bearing-paper-anchored": 0,
+      "typed-attacks": 1,
+      "dead-end-attacks": 1,
+      "strict-steps": 0,
+      "strict-certified": 0
+    }
+  ]
+}

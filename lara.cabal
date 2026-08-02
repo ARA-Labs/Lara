@@ -52,6 +52,8 @@ library
                       Lara.Mutate
                       Lara.Mutate.Accept
                       Lara.Measure
+                      Lara.ClaimSupport
+                      Lara.ClaimSupport.Load
     build-depends:    base >=4 && <5
                     , containers
     default-language: GHC2021
@@ -71,6 +73,7 @@ test-suite lara-test
     hs-source-dirs:   test
     main-is:          Spec.hs
     other-modules:    CorpusUnitsSpec
+                      ClaimSupportSpec
                       PropSpec
                       ReplaySpec
                       TestReplay
