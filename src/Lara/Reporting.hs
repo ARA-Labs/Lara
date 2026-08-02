@@ -10,8 +10,9 @@
 -- question (spec §6.1), so they are excluded from the AF and never reach an
 -- accepted 'Lara.Check.CheckedUnit'.
 --
--- Because 'Lara.Check.checkArguments' /rejects/ the whole unit on the first
--- incomplete argument ('Lara.Check.PEIncompleteArgument'), the incomplete
+-- Because 'Lara.Check.checkArguments' (under 'Lara.Check.fullConfig') /rejects/
+-- the whole unit on the first incomplete argument
+-- ('Lara.Check.PEIncompleteArgument'), the incomplete
 -- alternatives are invisible to the accept path. This module therefore runs a
 -- separate __lenient__ scan over the raw 'Unit' arguments: it records each
 -- incomplete alternative (located by its raw-argument index) instead of
@@ -88,7 +89,8 @@ data IncompleteAlternative = IncompleteAlternative
 -- nodes (obligation set @[]@, AF-eligible) and located incomplete alternatives
 -- (obligation set nonempty, AF-excluded). A hard type error (a 'Left' from
 -- 'inferSupport') is dropped: it is neither complete support nor a hole. Unlike
--- 'Lara.Check.checkArguments', this never rejects — every argument is scanned.
+-- 'Lara.Check.checkArguments' under 'Lara.Check.fullConfig', this never
+-- rejects — every argument is scanned.
 --
 -- The retained nodes are in declaration order, so their positions are exactly
 -- the AF indices 'reportAF' compiles them into.

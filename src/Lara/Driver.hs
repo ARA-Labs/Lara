@@ -26,6 +26,7 @@ module Lara.Driver
   , buildAccept
   , runCheck
   , runCheckLocated
+  , runCheckLocatedWith
   ) where
 
 import Data.List (intercalate)
@@ -45,7 +46,7 @@ import Lara.AST
   , Rejection (..)
   , Unit (..)
   )
-import Lara.Check (CheckedUnit, checkUnit, cuNodes, cuProgram)
+import Lara.Check (CheckConfig, CheckedUnit, checkUnitWith, cuNodes, cuProgram, fullConfig)
 import Lara.Replay
   ( CheckInput
   , ReplayFailure (..)
@@ -89,7 +90,15 @@ runCheck = fst . runCheckLocated
 -- holds by construction (the measurement harness re-asserts it over every
 -- manifest-discovered input).
 runCheckLocated :: CheckInput -> (Verdict, Maybe LocatedRejection)
-runCheckLocated input =
+runCheckLocated = runCheckLocatedWith fullConfig
+
+-- | 'runCheckLocated' under an explicit 'Lara.Check.CheckConfig' (the M5
+-- ablation entry point): the config reaches only 'Lara.Check.checkUnitWith' —
+-- the R13 replay preflight and the R9 group boundary are never ablated.
+-- @runCheckLocatedWith fullConfig = runCheckLocated@ definitionally, and the
+-- config is never carried on the wire.
+runCheckLocatedWith :: CheckConfig -> CheckInput -> (Verdict, Maybe LocatedRejection)
+runCheckLocatedWith cfg input =
   let replayId = inputReplayId input
       unit = inputUnit input
       verdict outcome = Verdict replayId outcome
@@ -105,7 +114,7 @@ runCheckLocated input =
               )
           | otherwise ->
               let checked = quarantineUnit unit
-               in case checkUnit (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
+               in case checkUnitWith cfg (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
                     Left err -> (verdict (Reject (rejectionOf err)), Just (locate err))
                     Right accepted -> (verdict (buildAccept checked accepted), Nothing)
 

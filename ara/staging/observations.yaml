@@ -617,9 +617,9 @@ observations:
   potential_type: claim
   bound_to:
   - N96
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/claims.md:C23
+  crystallized_via: artifact-commitment
   stale: false
 - id: O30
   timestamp: 2026-08-01T21:45
@@ -650,6 +650,59 @@ observations:
   potential_type: constraint
   bound_to:
   - N96
+  promoted: true
+  promoted_to: logic/solution/constraints.md (timing-protocol bullet)
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O32
+  timestamp: 2026-08-01T23:50
+  provenance: ai-executed
+  content: >
+    Seeded-mutant ablations are surgical and monotone: disabling exactly one checker rule admits
+    exactly its mapped defect class and nothing else (no-cq: the 18 reject-IncompleteArgument rows;
+    no-typed: the 30 reject-R10/R11 rows; zero non-miss rows change; all full-accepts byte-identical).
+    This is rule-is-load-bearing evidence, confirmatory-by-construction - each seeded defect class is
+    caught only by its rule; it does not measure defect diversity or discovery (the discriminating
+    version over natural defects is #52).
+  context: T6 ablation smoke run (N97); pre-freeze numbers, PR #53 open.
+  potential_type: claim
+  bound_to:
+  - N97
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O33
+  timestamp: 2026-08-01T23:50
+  provenance: ai-suggested
+  content: >
+    The dominant accept class on a missed reject is full justification, not a hedged status: 10/18
+    no-cq misses and 3/11 no-typed R10 misses land accept-justified - the ablated checker does not
+    merely pass the defective certificate, it certifies the claim as justified. This is the paper's
+    alarming case for both ablation columns.
+  context: T6 ablation smoke run (N97), accept-class breakdown in ablation.json aggregate.
+  potential_type: claim
+  bound_to:
+  - N97
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O34
+  timestamp: 2026-08-01T23:50
+  provenance: ai-suggested
+  content: >
+    An ablation measures nothing unless the mutation suite contains inputs that reach the ablated
+    check: the pre-T6 suite's open-obligation operator dropped a discharge without a hole, firing R5
+    Uncovered (a check every ablation keeps ON), so 0 of 340 mutants reached the obligation gate and
+    the original no-cq config would have reported a vacuous null result. Audit gate coverage of the
+    suite before trusting any ablation number; the fix belongs in the suite (a hole-seeding operator),
+    not in widening the ablation into the kernel.
+  context: Eng-review D8 confirmed empirically this turn (N97) - OpHoleObligation added, 18 mutants now
+    reach the gate and flip under no-cq.
+  potential_type: heuristic
+  bound_to:
+  - N97
   promoted: false
   promoted_to: null
   crystallized_via: null

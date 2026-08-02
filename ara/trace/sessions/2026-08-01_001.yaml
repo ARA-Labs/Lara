@@ -2,8 +2,8 @@ session:
   id: 2026-08-01_001
   date: '2026-08-01'
   started: 2026-08-01T00:15
-  last_turn: 2026-08-01T21:45
-  turn_count: 3
+  last_turn: 2026-08-01T23:50
+  turn_count: 4
   summary: 'M5 opens (T1+T4 of #48, PR #49): worked cases E4 (reinstatement per attack kind) + E5 (contested
     via undermine/undercut cycles, gap amid attacks) on empirical-v2 close all nine attack-kind x target-label
     cells; Lara.Mutate seeded mutation suite (SplitMix64 seed 20260801) yields 148 verified-at-generation
@@ -16,7 +16,11 @@ session:
     Lara.Mutate.Accept accept-verdict family (every status + attack kind) grow the suite 148 -> 340;
     Lara.Diagnostics located-rejection vocabulary + Driver.runCheckLocated; Lara.Measure + scripts/measure.hs
     emit the axis-(c) report; differential 398/54 byte-exact, smoke run class-match/lean-agree 400/400,
-    location-accuracy 246/246, replay 60/60. C22 Proof extended (corpus-scale evidence); O29/O30/O31 staged.'
+    location-accuracy 246/246, replay 60/60. C22 Proof extended (corpus-scale evidence); O29/O30/O31 staged.
+    Turn 4 (/implement, PR #53): T6 ablation baselines — CheckConfig (no-cq / no-typed) surgical over
+    seeded mutants (18 IncompleteArgument / 11 R10 + 19 R11 misses, zero else) and monotone; suite
+    340->358 via OpHoleObligation; differential 416/54; C23 crystallized (localization verification-style),
+    O31 -> timing-protocol constraint; O32/O33/O34 staged.'
 events_logged:
 - turn: 1
   type: pivot
@@ -151,6 +155,49 @@ events_logged:
   provenance: ai-suggested
   summary: 'hs_check (~7us in-process) vs lean_wall (~2.6ms subprocess) are non-comparable protocols
     (potential constraint)'
+- turn: 4
+  type: experiment
+  id: N97
+  routing: direct
+  provenance: ai-executed
+  summary: 'T6 ablation baselines (/implement, PR #53) — CheckConfig ablations surgical (no-cq 18 IncompleteArgument,
+    no-typed 11 R10 + 19 R11, zero other changes) and monotone; suite 340->358 via OpHoleObligation;
+    differential 416/54; first cross-driver IncompleteArgument coverage'
+- turn: 4
+  type: observation
+  id: O32
+  routing: staged
+  provenance: ai-executed
+  summary: seeded-mutant ablations surgical+monotone = rule-is-load-bearing evidence, confirmatory-by-construction
+    (potential claim; pre-freeze numbers)
+- turn: 4
+  type: observation
+  id: O33
+  routing: staged
+  provenance: ai-suggested
+  summary: dominant miss class is accept-justified (10/18 no-cq) — ablated checker certifies, not merely
+    passes, the defective certificate (potential claim)
+- turn: 4
+  type: observation
+  id: O34
+  routing: staged
+  provenance: ai-suggested
+  summary: ablations need suite inputs that reach the ablated check — pre-T6 suite had 0 obligation-gate
+    inputs; fix belongs in the suite, not the kernel (potential heuristic; D8 confirmed)
+- turn: 4
+  type: observation
+  id: O29
+  routing: crystallized
+  provenance: ai-suggested
+  summary: 'O29 -> C23 (localization verification-style) via artifact-commitment (PR #51 merged; T6 plan
+    D10 + TODOS localization entry depend on it)'
+- turn: 4
+  type: observation
+  id: O31
+  routing: crystallized
+  provenance: ai-suggested
+  summary: O31 -> constraints.md timing-protocol bullet via artifact-commitment (merged harness labels
+    the two columns separately)
 ai_actions:
 - turn: 1
   action: Authored examples/E4 + examples/E5 + empirical-v2 policy; extended WorkedExamplesSpec (prop_E4/prop_E5,
@@ -246,6 +293,25 @@ ai_actions:
   files_changed:
   - TODOS.md
   - plans/2026-08-01-m5-t1corpus-t3-measurement.md
+- turn: 4
+  action: '/implement of the T6 plan in 5 reviewed commits (PR #53) — CheckConfig refactor, OpHoleObligation
+    + 18 regenerated mutants (additions-only), Measure ablation core + AblationSpec (10 props),
+    measure.hs ablation.{json,tsv} + --ablation-only, execution record + TODOS note + Reporting
+    comment qualifier'
+  provenance: ai-executed
+  files_changed:
+  - src/Lara/Check.hs
+  - src/Lara/Driver.hs
+  - src/Lara/Mutate.hs
+  - src/Lara/Measure.hs
+  - scripts/gen-mutants.hs
+  - scripts/measure.hs
+  - test/AblationSpec.hs
+  - test/MutationSpec.hs
+  - fixtures/mutants/
+  - plans/2026-08-02-m5-t6-ablation-baselines.md
+  - TODOS.md
+  - src/Lara/Reporting.hs
 claims_touched:
 - id: C21
   action: advanced
@@ -256,6 +322,9 @@ claims_touched:
 - id: C22
   action: advanced
   turn: 3
+- id: C23
+  action: crystallized
+  turn: 4
 logic_revisions:
 - turn: 1
   entry: C21
@@ -300,12 +369,20 @@ key_context:
     (all 10 review passes PASS). Reviewer git-clean deleted untracked accept fixtures mid-Step-3; detected,
     regenerated deterministically, re-ran differential before committing. Hand-inspection of report.json
     caught a policyBytes bug (matched replay-id policy-id, not the unit policy body) — fixed.'
+- turn: 4
+  excerpt: '/implement plans/2026-08-02-m5-t6-ablation-baselines.md — autonomous execution of the
+    eng-cleared T6 plan; per-step spec+quality reviews all PASS; holistic final review clean. Smoke:
+    misses exactly match the manifest partition (18 / 11+19), surgical and monotone.'
 open_threads:
-- 'PR #51 (branch m5-t1corpus-t3) open against main, not merged; CI runs differential.sh. Merge when green.'
-- 'M5 remaining: T5 freeze protocol (can now freeze the 340-mutant suite + measurement harness), T6
-  ablation baselines incl. the discriminating (multi-defect/off-site) localization benchmark (O29).'
 - 'Deferred cleanup (TODOS): full Lara.Mutate module split (Accept already split off the largest block).'
 - 'Review flags from lowering (still open from turn 2): lbcs/C03 scheme divergence; rice/C01 analytic strand.'
+- '[turn 4] PR #51 merged (main 1d91bdb). PR #53 (feat/m5-t6-ablation-baselines) open: T6 ablations.
+  Merge when CI green.'
+- '[turn 4] M5 remaining after #53: T5 freeze protocol only (freeze covers the 358-mutant suite incl.
+  OpHoleObligation + the ablation config definitions; final paper numbers post-freeze).'
+- '[turn 4] Follow-ups recorded: discriminating localization benchmark (C23 boundary), standalone
+  conflict-scan ablation (D11), Lara.Mutate split (more pressing after OpHoleObligation), #52
+  human-cert discriminating ablation.'
 ai_suggestions_pending:
 - 'O29 (localization is verification-style / T6 discriminating benchmark), O30 (payload is the cert-size
   signal, not total — ~9x policy-by-reference win), O31 (hs_check vs lean_wall non-comparable) staged from
@@ -313,3 +390,7 @@ ai_suggestions_pending:
 - 'O27 (gap-dominated corpus) remains a strong evaluation-section claim candidate; T3 per-class accuracy
   (all 400/400) does not yet reinterpret it.'
 - 'O26 (R5 optional-CQ accounting), O28 (policy vocabulary gaps) still staged from turn 2.'
+- '[turn 4] O32 (ablations rule-is-load-bearing), O33 (accept-justified dominant miss class), O34
+  (gate-coverage audit heuristic) staged from the T6 smoke — pre-freeze numbers on an open PR; let
+  PR #53 merge / T5 freeze / paper-table adoption close them. O30 (payload vs total) still staged:
+  merged code computes both, paper framing unconfirmed.'

@@ -11,6 +11,11 @@
 -- Every column is defined for BOTH manifest regimes — verdict-bearing rows
 -- (mutants + corpus units) and codec\/malformed rows — with 'Nothing' (rendered
 -- @-@) marking a column outside a row's domain (eng review D5\/2A, D13\/OV-3).
+--
+-- The M5 T6 ablation baselines (@measurements\/ablation.{json,tsv}@) are a
+-- second projection of the same decode+check core: 'computeAblation' runs the
+-- checker under an ablated 'CheckConfig' and records the misses ('AblationCell',
+-- aggregated per expected class by 'classSummaries').
 module Lara.Measure
   ( -- * Discovery
     InputKind (..)
@@ -20,6 +25,16 @@ module Lara.Measure
     -- * Deterministic per-input metrics
   , Deterministic (..)
   , computeDeterministic
+  , codecFailText
+    -- * Ablation baselines (M5 T6)
+  , AblationBucket (..)
+  , ablationBucket
+  , ablationConfigs
+  , AblationCell (..)
+  , computeAblation
+  , ClassSummary (..)
+  , classSummaries
+  , AblationReport (..)
     -- * Cross-driver agreement comparators (pure; unit-tested)
   , leanAgreeVerdict
   , leanAgreeCodec
@@ -32,18 +47,22 @@ module Lara.Measure
   , reportJson
   , reportTsv
   , tsvHeader
+  , ablationJson
+  , ablationTsv
+  , ablationTsvHeader
   ) where
 
 import Data.List (intercalate, isInfixOf, isPrefixOf, nub, sort)
 
-import Lara.AST (Label (..), RejectClass, Rejection (..), Status (..))
+import Lara.AST (Label (..), RejectClass (..), Rejection (..), Status (..))
+import Lara.Check (CheckConfig, fullConfig, noCQConfig, noTypedConfig)
 import Lara.Diagnostics
   ( Constituent
   , LocatedRejection (..)
   , constituentText
   , parseConstituent
   )
-import Lara.Driver (runCheck, runCheckLocated)
+import Lara.Driver (runCheck, runCheckLocatedWith)
 import Lara.ExpectedJson (JValue (..), renderJson)
 import Lara.Mutate (Expected (..), parseExpected, statusText)
 import Lara.Replay (CheckInput, inputReplayId)
@@ -148,21 +167,58 @@ data Deterministic = Deterministic
   }
   deriving (Eq, Show)
 
--- | Compute the deterministic metrics for one input from its file bytes.
+-- | The shared decode+check core of 'computeDeterministic' and
+-- 'computeAblation' (eng review D6): the decode boundary, the
+-- config-parameterized checker call, and the outcome spelling exist exactly
+-- once. A codec row fails before any config is consulted, so it is identical
+-- under every 'CheckConfig' by construction.
+data RowOutcome
+  = RowCodecFail String
+    -- ^ the rendered @ctx: msg@ decode diagnostic (matched against the
+    -- manifest's deletion-sensitivity pin)
+  | RowChecked CheckInput Verdict (Maybe LocatedRejection)
+
+-- | Decode one input's bytes and, on success, check it under the config.
+rowOutcome :: CheckConfig -> String -> RowOutcome
+rowOutcome cfg bytes = case decodeCheckInputFile bytes of
+  Left (WireError ctx msg) -> RowCodecFail (ctx ++ ": " ++ msg)
+  Right input ->
+    let (verdict, located) = runCheckLocatedWith cfg input
+     in RowChecked input verdict located
+
+-- | The row's outcome in report spelling ('actualText', or 'codecFailText').
+rowActual :: RowOutcome -> String
+rowActual row = case row of
+  RowCodecFail _ -> codecFailText
+  RowChecked _ verdict _ -> actualText (verdictOutcome verdict)
+
+-- | Whether the row is a checker reject. A codec failure is not one — it
+-- happens before the checker (and before any config) is reached.
+rowRejects :: RowOutcome -> Bool
+rowRejects row = case row of
+  RowCodecFail _ -> False
+  RowChecked _ verdict _ -> case verdictOutcome verdict of
+    Reject{} -> True
+    Accept{} -> False
+
+-- | The @actual@ spelling of a row whose bytes fail to decode.
+codecFailText :: String
+codecFailText = "codec-fail"
+
+-- | Compute the deterministic metrics for one input from its file bytes — the
+-- 'fullConfig' projection of the shared 'rowOutcome' core.
 computeDeterministic :: InputMeta -> String -> Deterministic
-computeDeterministic im bytes = case decodeCheckInputFile bytes of
-  Left (WireError ctx msg) ->
-    let rendered = ctx ++ ": " ++ msg
-        classMatch = case imExpected im of
+computeDeterministic im bytes = case rowOutcome fullConfig bytes of
+  RowCodecFail rendered ->
+    let classMatch = case imExpected im of
           -- codec row: the decode must fail AND carry the operator's pinned
           -- diagnostic (any-failure is not enough — the deletion-sensitivity pin
           -- carries into the metric).
           ExpectCodecReject -> not (null (imHsDiag im)) && imHsDiag im `isInfixOf` rendered
           _ -> False -- a verdict row that fails to decode is a mismatch
-     in base {detActual = "codec-fail", detClassMatch = classMatch}
-  Right input ->
-    let (verdict, located) = runCheckLocated input
-        outcome = verdictOutcome verdict
+     in base {detActual = codecFailText, detClassMatch = classMatch}
+  RowChecked input verdict located ->
+    let outcome = verdictOutcome verdict
         loc = lrConstituent <$> located
      in base
           { detActual = actualText outcome
@@ -173,6 +229,7 @@ computeDeterministic im bytes = case decodeCheckInputFile bytes of
               -- construction; a deviation is an honest diagnostic-ordering data
               -- point, not a generation failure (measured, never gated).
               ExpectClass _ -> Just (loc == imExpectedLocation im)
+              ExpectIncompleteArgument -> Just (loc == imExpectedLocation im)
               _ -> Nothing
           , detReplayOk = case imKind im of
               CorpusRow -> Just (replayStable input verdict)
@@ -200,6 +257,7 @@ classMatches :: Expected -> Outcome -> Bool
 classMatches e outcome = case e of
   ExpectCodecReject -> False -- decoded cleanly; expected a codec failure
   ExpectClass c -> outcome == Reject (RejectClass c)
+  ExpectIncompleteArgument -> outcome == Reject IncompleteArgument
   ExpectAllContested -> allContested outcome
   ExpectPrimaryStatus s -> primaryStatus outcome == Just s
 
@@ -255,6 +313,113 @@ findSection tag = go
     go (SList kids) = firstJust (map go kids)
     go _ = Nothing
     firstJust = foldr (\x acc -> maybe acc Just x) Nothing
+
+-- ---------------------------------------------------------------------------
+-- Ablation baselines (M5 T6): per-input cells + per-class aggregate
+-- ---------------------------------------------------------------------------
+
+-- | The ablation partition over the typed 'Expected' vocabulary (not a prose
+-- family list — hand lists drift; the spelling table is
+-- 'Lara.Mutate.parseExpected'). Total by construction: every constructor is
+-- handled, so a future class or spelling cannot silently fall outside the
+-- partition. Drives the per-ablation table and the surgical assertions.
+data AblationBucket
+  = FlipUnderNoCQ
+    -- ^ 'noCQConfig' must flip reject→accept (the hole-obligation mutants)
+  | FlipUnderNoTyped
+    -- ^ 'noTypedConfig' must flip reject→accept (R10\/R11 bad-attack-targets)
+  | UnchangedUnderAblations
+    -- ^ identical under both ablations: rejects decided by rules behind no
+    -- flag, codec rows (decode fails before any config), and all accepts
+    -- (monotonicity: the config only removes rejections)
+  deriving (Eq, Ord, Show)
+
+-- | Which bucket an expected class belongs to.
+ablationBucket :: Expected -> AblationBucket
+ablationBucket e = case e of
+  ExpectIncompleteArgument -> FlipUnderNoCQ
+  ExpectClass R10 -> FlipUnderNoTyped
+  ExpectClass R11 -> FlipUnderNoTyped
+  ExpectClass _ -> UnchangedUnderAblations -- R1/R3/…: rules behind no flag
+  ExpectCodecReject -> UnchangedUnderAblations
+  ExpectAllContested -> UnchangedUnderAblations
+  ExpectPrimaryStatus _ -> UnchangedUnderAblations
+
+-- | The named ablation runs the script and tests iterate, each with the
+-- partition bucket it must flip (and must flip nothing else).
+ablationConfigs :: [(String, CheckConfig, AblationBucket)]
+ablationConfigs =
+  [ ("no-cq", noCQConfig, FlipUnderNoCQ)
+  , ("no-typed", noTypedConfig, FlipUnderNoTyped)
+  ]
+
+-- | One (input × ablation-config) measurement. No @status_shift@ column —
+-- provably vacuous: the config only ever removes rejections, so on full-accepts
+-- the ablation path is byte-identical (eng review D5). The informative datum on
+-- a missed reject is the ablation's accept class (@accept-justified@ vs
+-- @accept-gap@ — the former is the paper's alarming case), carried by
+-- 'acAblationActual' via the shared outcome spelling.
+data AblationCell = AblationCell
+  { acMeta :: InputMeta
+  , acFullActual :: String -- ^ the full system's outcome text
+  , acAblationActual :: String -- ^ the ablation's outcome text
+  , acMissedReject :: Bool -- ^ the full system rejects, the ablation accepts
+  }
+  deriving (Eq, Show)
+
+-- | Measure one input under an ablation config: both projections of the shared
+-- 'rowOutcome' core, plus the miss flag.
+computeAblation :: CheckConfig -> InputMeta -> String -> AblationCell
+computeAblation cfg im bytes =
+  AblationCell
+    { acMeta = im
+    , acFullActual = rowActual full
+    , acAblationActual = rowActual ablated
+    , acMissedReject = rowRejects full && not (rowRejects ablated)
+    }
+  where
+    full = rowOutcome fullConfig bytes
+    ablated = rowOutcome cfg bytes
+
+-- | Per-expected-class aggregate of one ablation run (one paper-table cell):
+-- how many full-system rejects the ablation misses in the class, the
+-- accept-class breakdown of those misses, and how many rows are unchanged (the
+-- surgical check: outside the flipped bucket, @unchanged == total@).
+data ClassSummary = ClassSummary
+  { csExpected :: String -- ^ manifest expected spelling
+  , csTotal :: Int
+  , csMissed :: Int -- ^ full-system rejects the ablation accepts
+  , csMissedAcceptClasses :: [(String, Int)]
+    -- ^ ablation outcome text of the misses (sorted, counted)
+  , csUnchanged :: Int -- ^ rows whose ablation outcome equals the full one
+  }
+  deriving (Eq, Show)
+
+-- | Summarize an ablation run's cells per expected class (sorted spelling).
+classSummaries :: [AblationCell] -> [ClassSummary]
+classSummaries cells =
+  [ ClassSummary
+      { csExpected = cls
+      , csTotal = length inClass
+      , csMissed = length missed
+      , csMissedAcceptClasses = counted (map acAblationActual missed)
+      , csUnchanged = length [c | c <- inClass, acAblationActual c == acFullActual c]
+      }
+  | cls <- nub (sort (map expectedOf cells))
+  , let inClass = [c | c <- cells, expectedOf c == cls]
+        missed = filter acMissedReject inClass
+  ]
+  where
+    expectedOf = imExpectedText . acMeta
+    counted xs = [(x, length [y | y <- xs, y == x]) | x <- nub (sort xs)]
+
+-- | One ablation run over the manifests: the named config's cells. The
+-- renderers derive the aggregate ('classSummaries') from the cells.
+data AblationReport = AblationReport
+  { abrAblation :: String -- ^ the 'ablationConfigs' name (@no-cq@ \/ @no-typed@)
+  , abrCells :: [AblationCell]
+  }
+  deriving (Eq, Show)
 
 -- ---------------------------------------------------------------------------
 -- Cross-driver agreement (pure comparators; the Lean subprocess is IO)
@@ -480,3 +645,98 @@ boolCell b = if b then "true" else "false"
 
 maybeBoolCell :: Maybe Bool -> String
 maybeBoolCell = maybe "-" boolCell
+
+-- ---------------------------------------------------------------------------
+-- Ablation rendering (measurements/ablation.{json,tsv} — the paper's
+-- ablation-table input; same house codec and env block as report.{json,tsv})
+-- ---------------------------------------------------------------------------
+
+-- | The full @ablation.json@ content: environment + one block per ablation
+-- (per-expected-class aggregate + per-input records).
+ablationJson :: EnvBlock -> [AblationReport] -> String
+ablationJson env reports =
+  renderJson $
+    JObject
+      [ ("environment", envJson env)
+      , ("ablations", JArray (map ablationBlockJson reports))
+      ]
+
+ablationBlockJson :: AblationReport -> JValue
+ablationBlockJson (AblationReport name cells) =
+  JObject
+    [ ("ablation", JString name)
+    , ("aggregate", ablationAggregateJson cells)
+    , ("records", JArray (map ablationCellJson cells))
+    ]
+
+ablationAggregateJson :: [AblationCell] -> JValue
+ablationAggregateJson cells =
+  JObject
+    [ ("count", JNumber (length cells))
+    , ("missed-rejects", JNumber (sum (map csMissed sums)))
+    , ("unchanged", JNumber (sum (map csUnchanged sums)))
+    , ("by-expected", JObject [(csExpected s, classSummaryJson s) | s <- sums])
+    ]
+  where
+    sums = classSummaries cells
+
+classSummaryJson :: ClassSummary -> JValue
+classSummaryJson s =
+  JObject
+    [ ("total", JNumber (csTotal s))
+    , ("missed-rejects", JNumber (csMissed s))
+    , ("missed-accept-classes", JObject [(cls, JNumber n) | (cls, n) <- csMissedAcceptClasses s])
+    , ("unchanged", JNumber (csUnchanged s))
+    ]
+
+ablationCellJson :: AblationCell -> JValue
+ablationCellJson (AblationCell im fullActual ablActual missed) =
+  JObject
+    [ ("input", JString (imPath im))
+    , ("base", JString (imBase im))
+    , ("family", JString (imFamily im))
+    , ("operator", maybe JNull JString (imOperator im))
+    , ("expected", JString (imExpectedText im))
+    , ("full-actual", JString fullActual)
+    , ("ablation-actual", JString ablActual)
+    , ("missed-reject", JBool missed)
+    ]
+
+-- | The flat @ablation.tsv@ columns (one row per ablation × input).
+ablationTsvHeader :: String
+ablationTsvHeader =
+  intercalate
+    "\t"
+    [ "ablation"
+    , "input"
+    , "base"
+    , "family"
+    , "operator"
+    , "expected"
+    , "full_actual"
+    , "ablation_actual"
+    , "missed_reject"
+    ]
+
+-- | The full @ablation.tsv@ content (header + every run's rows, in run order).
+ablationTsv :: [AblationReport] -> String
+ablationTsv reports =
+  unlines
+    ( ablationTsvHeader
+        : [ablationCellTsv name c | AblationReport name cells <- reports, c <- cells]
+    )
+
+ablationCellTsv :: String -> AblationCell -> String
+ablationCellTsv name (AblationCell im fullActual ablActual missed) =
+  intercalate
+    "\t"
+    [ name
+    , imPath im
+    , imBase im
+    , imFamily im
+    , maybe "-" id (imOperator im)
+    , imExpectedText im
+    , fullActual
+    , ablActual
+    , boolCell missed
+    ]

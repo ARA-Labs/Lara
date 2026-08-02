@@ -6,6 +6,7 @@ A--hidden-contrary-0.sexp	A	hidden-policy-extension	hidden-contrary	reject-R12		
 A--wrong-subst-domain-0.sexp	A	wrong-formulas	wrong-subst-domain	reject-R3			arg:0
 A--wrong-premise-0.sexp	A	wrong-formulas	wrong-premise	reject-R4			arg:3
 A--open-obligation-0.sexp	A	open-obligations	open-obligation	reject-R5			arg:3
+A--hole-obligation-0.sexp	A	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
 A--wrong-discharge-0.sexp	A	open-obligations	wrong-discharge	reject-R6			arg:0
 A--trusted-assurance-0.sexp	A	certificate-tampering	trusted-assurance	reject-R7			arg:0
 A--bad-attack-position-0.sexp	A	bad-attack-targets	bad-attack-position	reject-R10			attack:2
@@ -27,6 +28,7 @@ B--hidden-contrary-0.sexp	B	hidden-policy-extension	hidden-contrary	reject-R12		
 B--wrong-subst-domain-0.sexp	B	wrong-formulas	wrong-subst-domain	reject-R3			arg:0
 B--wrong-premise-0.sexp	B	wrong-formulas	wrong-premise	reject-R4			arg:1
 B--open-obligation-0.sexp	B	open-obligations	open-obligation	reject-R5			arg:1
+B--hole-obligation-0.sexp	B	open-obligations	hole-obligation	reject-IncompleteArgument			arg:1
 B--wrong-discharge-0.sexp	B	open-obligations	wrong-discharge	reject-R6			arg:1
 B--trusted-assurance-0.sexp	B	certificate-tampering	trusted-assurance	reject-R7			arg:1
 B--unlicensed-attack-0.sexp	B	bad-attack-targets	unlicensed-attack	reject-R11			attack:2
@@ -46,6 +48,7 @@ E1--hidden-contrary-0.sexp	E1	hidden-policy-extension	hidden-contrary	reject-R12
 E1--wrong-subst-domain-0.sexp	E1	wrong-formulas	wrong-subst-domain	reject-R3			arg:0
 E1--wrong-premise-0.sexp	E1	wrong-formulas	wrong-premise	reject-R4			arg:0
 E1--open-obligation-0.sexp	E1	open-obligations	open-obligation	reject-R5			arg:0
+E1--hole-obligation-0.sexp	E1	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
 E1--wrong-discharge-0.sexp	E1	open-obligations	wrong-discharge	reject-R6			arg:0
 E1--trusted-assurance-0.sexp	E1	certificate-tampering	trusted-assurance	reject-R7			arg:0
 E1--unlicensed-attack-0.sexp	E1	bad-attack-targets	unlicensed-attack	reject-R11			attack:0
@@ -73,6 +76,7 @@ E3--hidden-contrary-0.sexp	E3	hidden-policy-extension	hidden-contrary	reject-R12
 E3--wrong-subst-domain-0.sexp	E3	wrong-formulas	wrong-subst-domain	reject-R3			arg:4
 E3--wrong-premise-0.sexp	E3	wrong-formulas	wrong-premise	reject-R4			arg:5
 E3--open-obligation-0.sexp	E3	open-obligations	open-obligation	reject-R5			arg:5
+E3--hole-obligation-0.sexp	E3	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
 E3--wrong-discharge-0.sexp	E3	open-obligations	wrong-discharge	reject-R6			arg:0
 E3--trusted-assurance-0.sexp	E3	certificate-tampering	trusted-assurance	reject-R7			arg:1
 E3--bad-attack-position-0.sexp	E3	bad-attack-targets	bad-attack-position	reject-R10			attack:1
@@ -94,6 +98,7 @@ E4--hidden-contrary-0.sexp	E4	hidden-policy-extension	hidden-contrary	reject-R12
 E4--wrong-subst-domain-0.sexp	E4	wrong-formulas	wrong-subst-domain	reject-R3			arg:3
 E4--wrong-premise-0.sexp	E4	wrong-formulas	wrong-premise	reject-R4			arg:3
 E4--open-obligation-0.sexp	E4	open-obligations	open-obligation	reject-R5			arg:0
+E4--hole-obligation-0.sexp	E4	open-obligations	hole-obligation	reject-IncompleteArgument			arg:7
 E4--wrong-discharge-0.sexp	E4	open-obligations	wrong-discharge	reject-R6			arg:6
 E4--trusted-assurance-0.sexp	E4	certificate-tampering	trusted-assurance	reject-R7			arg:0
 E4--bad-attack-position-0.sexp	E4	bad-attack-targets	bad-attack-position	reject-R10			attack:0
@@ -115,6 +120,7 @@ E5--hidden-contrary-0.sexp	E5	hidden-policy-extension	hidden-contrary	reject-R12
 E5--wrong-subst-domain-0.sexp	E5	wrong-formulas	wrong-subst-domain	reject-R3			arg:0
 E5--wrong-premise-0.sexp	E5	wrong-formulas	wrong-premise	reject-R4			arg:4
 E5--open-obligation-0.sexp	E5	open-obligations	open-obligation	reject-R5			arg:3
+E5--hole-obligation-0.sexp	E5	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
 E5--wrong-discharge-0.sexp	E5	open-obligations	wrong-discharge	reject-R6			arg:0
 E5--trusted-assurance-0.sexp	E5	certificate-tampering	trusted-assurance	reject-R7			arg:4
 E5--bad-attack-position-0.sexp	E5	bad-attack-targets	bad-attack-position	reject-R10			attack:1
@@ -219,6 +225,18 @@ test-time-model-adaptation.C04--open-obligation-0.sexp	test-time-model-adaptatio
 rebench-restricted_mlm.C14--open-obligation-0.sexp	rebench-restricted_mlm.C14	open-obligations	open-obligation	reject-R5			arg:0
 rebench-rust_codecontests.C02--open-obligation-0.sexp	rebench-rust_codecontests.C02	open-obligations	open-obligation	reject-R5			arg:0
 rebench-triton_cumsum.C09--open-obligation-0.sexp	rebench-triton_cumsum.C09	open-obligations	open-obligation	reject-R5			arg:0
+bam.C05--hole-obligation-0.sexp	bam.C05	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+fre.C01--hole-obligation-0.sexp	fre.C01	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+fre.C04--hole-obligation-0.sexp	fre.C04	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+pinn.C01--hole-obligation-0.sexp	pinn.C01	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+rice.C01--hole-obligation-0.sexp	rice.C01	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+sample-specific-masks.C05--hole-obligation-0.sexp	sample-specific-masks.C05	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+sample-specific-masks.C06--hole-obligation-0.sexp	sample-specific-masks.C06	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+self-composing-policies.C01--hole-obligation-0.sexp	self-composing-policies.C01	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+test-time-model-adaptation.C04--hole-obligation-0.sexp	test-time-model-adaptation.C04	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+rebench-restricted_mlm.C14--hole-obligation-0.sexp	rebench-restricted_mlm.C14	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+rebench-rust_codecontests.C02--hole-obligation-0.sexp	rebench-rust_codecontests.C02	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
+rebench-triton_cumsum.C09--hole-obligation-0.sexp	rebench-triton_cumsum.C09	open-obligations	hole-obligation	reject-IncompleteArgument			arg:0
 bam.C05--wrong-discharge-0.sexp	bam.C05	open-obligations	wrong-discharge	reject-R6			arg:0
 fre.C01--wrong-discharge-0.sexp	fre.C01	open-obligations	wrong-discharge	reject-R6			arg:0
 fre.C04--wrong-discharge-0.sexp	fre.C04	open-obligations	wrong-discharge	reject-R6			arg:0

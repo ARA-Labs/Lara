@@ -18,7 +18,7 @@
 --   * __Fixpoint termination bound.__ The grounded iteration reaches a fixed
 --     point within @|args|@ steps, over random small frameworks — the same
 --     bound as the Lean proof (@grounded_stable@).
-module CheckSpec (checkSpecProps) where
+module CheckSpec (checkSpecProps, negMissingConflict) where
 
 import Data.List (nub, sort)
 import Test.QuickCheck

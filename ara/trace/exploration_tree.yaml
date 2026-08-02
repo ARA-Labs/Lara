@@ -2269,3 +2269,40 @@ tree:
   also_depends_on:
   - N95
   children: []
+- id: N97
+  type: experiment
+  title: 'T6 ablation baselines: CheckConfig ablations surgical and monotone over seeded mutants'
+  provenance: ai-executed
+  timestamp: 2026-08-01T23:50
+  evidence:
+  - plans/2026-08-02-m5-t6-ablation-baselines.md
+  - src/Lara/Check.hs
+  - src/Lara/Mutate.hs
+  - src/Lara/Measure.hs
+  - test/AblationSpec.hs
+  - scripts/measure.hs
+  - measurements/ablation.tsv
+  result: >
+    /implement of the eng-reviewed T6 plan (5 commits a58a6fa/30bf673/a8a1e78/
+    2cb743c/d880a1f, PR #53; per-step spec+quality subagent reviews all PASS).
+    CheckConfig {ccObligationGate, ccTypedAttacks} threaded through Check.hs/
+    Driver.hs gating exactly three sites (obligation gate, checkAttack call,
+    conflict scan); wire format and Lean driver untouched; checkUnit kept its
+    signature via checkUnitWith (out-of-scope callers). New OpHoleObligation
+    operator (mandatory discharge -> declared hole) closes the suite gap - the
+    pre-T6 suite had ZERO inputs reaching the obligation gate (open-obligation
+    fires R5 Uncovered instead); 18 new mutants, additions-only, suite 340->358,
+    first cross-driver coverage of the IncompleteArgument reject path.
+    Ablation smoke over 418 inputs: no-cq misses exactly the 18
+    reject-IncompleteArgument rows (accept classes 10 justified / 4 defeated /
+    1 all-contested / 3 other); no-typed misses exactly the 30 reject-R10 (11) +
+    reject-R11 (19) rows; zero changed rows outside the 48 misses (surgical);
+    all full-accepts byte-identical under both configs (monotone). AblationSpec:
+    10 pure properties green. report.{json,tsv} bit-stable across the refactor
+    (before/after cmp). Final gates: cabal test all green; differential.sh
+    pass=416 fail=0, negative 54/0; lean_agree 418/418. Numbers are pre-freeze
+    smoke; paper numbers come from post-freeze runs (T5).
+  status: resolved
+  also_depends_on:
+  - N96
+  children: []

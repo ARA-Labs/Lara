@@ -238,10 +238,15 @@ sessions:
     + H06 + R7/R13 concept crystallized. Turn 3 (/implement, PR #51): T1 corpus half + T3 measurement
     harness — corpus rejection sweep + accept-verdict family grow the suite 148->340 (every reject class,
     status, attack kind), Lara.Measure emits the axis-(c) report (400 records, all rates green,
-    location-accuracy 246/246, replay 60/60); differential 398/54; C22 Proof extended; O29/O30/O31 staged.'
-  turn_count: 3
-  events_count: 20
+    location-accuracy 246/246, replay 60/60); differential 398/54; C22 Proof extended; O29/O30/O31 staged.
+    Turn 4 (/implement, PR #53): T6 ablation baselines — CheckConfig (no-cq / no-typed) surgical over
+    seeded mutants (18 IncompleteArgument / 11 R10 + 19 R11 misses, zero else) and monotone; suite
+    340->358 via OpHoleObligation; differential 416/54; C23 crystallized (localization verification-style),
+    O31 -> timing-protocol constraint; O32/O33/O34 staged.'
+  turn_count: 4
+  events_count: 26
   claims_touched:
   - C21
   - C22
-  open_threads: 4
+  - C23
+  open_threads: 5

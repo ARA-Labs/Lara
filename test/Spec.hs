@@ -22,6 +22,7 @@ import Lara.Kernel
   )
 import Lara.Term (Con (..), Term (..), Var (..))
 
+import AblationSpec (ablationSpecProps)
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
 import CorpusUnitsSpec (corpusUnitsSpecProps)
@@ -194,6 +195,7 @@ main = do
         ++ [run name act | (name, act) <- differentialSpecProps]
         ++ [run name act | (name, act) <- mutationSpecProps]
         ++ [run name act | (name, act) <- measureSpecProps]
+        ++ [run name act | (name, act) <- ablationSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]

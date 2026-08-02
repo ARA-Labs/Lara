@@ -24,8 +24,11 @@
 > attack kind. T3 emits the one-command machine-readable axis-(c) report
 > (`scripts/measure.hs`: rejection outcome, defect location vs ground truth,
 > replay success, certificate size, checking time), all byte-identical across
-> the Haskell and Lean drivers. T5 (freeze protocol) and T6 (ablation
-> baselines) remain.
+> the Haskell and Lean drivers. T6 (ablation baselines) is complete: the
+> `CheckConfig` no-cq / no-typed cells run over the suite, grown 340→358 by
+> the hole-seeding `OpHoleObligation` operator. T5 (freeze protocol) remains;
+> its freeze inputs now include the ablation config definitions and the
+> 358-mutant suite.
 
 ## Performance
 
@@ -92,7 +95,9 @@ and accept-family stages; the vocabulary/construction boundary is now clear
 enough to factor cleanly.
 
 **Context:** Deferred from the M5 T1-corpus + T3 PR to keep that change reviewable
-(the accept family already split off the largest new block).
+(the accept family already split off the largest new block). T6 added another
+operator (`OpHoleObligation` + its site enumerator), making the split marginally
+more pressing.
 
 **Effort:** S
 **Priority:** P3
@@ -116,6 +121,28 @@ M5 T1-corpus + T3 measurement work; out of scope for that PR.
 **Effort:** M
 **Priority:** P3
 **Depends on:** M5 T3 measurement harness (landed).
+
+### Standalone completeness (conflict-scan) ablation — result 7 evidence
+
+**What:** Add a third ablation dimension (`ccConflictScan`) plus a
+drop-covering-attack mutation operator (expected `reject-MissingConflict`), so
+the missing-conflict scan's load-bearing-ness is measured on its own, the way
+T6 measures typing and CQ obligations.
+
+**Why:** T6's eng review (D9) folded `firstMissingConflictInfo` into the
+No-typed flag to match the paper's "nodes and arbitrary attack edges" baseline,
+so no T6 cell isolates result 7 (attack completeness, the frozen
+unlabelled-edge theorem) — and the mutant manifest has zero
+expected-MissingConflict rows today.
+
+**Context:** Surfaced while reviewing the T6 ablation plan
+(`plans/2026-08-02-m5-t6-ablation-baselines.md`, review D9/D11). Same harness
+and partition pattern as T6; one more `gen-mutants.hs` regeneration cycle.
+
+**Effort:** S
+**Priority:** P3
+**Depends on:** T6 ablation baselines (this branch); land before the T5 freeze
+or record as a post-freeze suite extension.
 
 ### Print hole-lines in support terms
 
@@ -142,6 +169,25 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### M5 T6 — deterministic ablation baselines (tracker #48, PR #53)
+
+`Lara.Check.CheckConfig` (`ccObligationGate` / `ccTypedAttacks`) gates exactly
+three checker sites, each flag only ever removing a rejection arm; `fullConfig`
+is behavior-identical to the frozen semantics, is what every production caller
+uses, and never reaches the wire. The two ablation cells — no-cq (obligation
+gate off) and no-typed (attack typing + conflict scan off) — are computed by a
+pure pass in `Lara.Measure` (`scripts/measure.hs`, with `--ablation-only`
+skipping the Lean timing sweep) and rendered as `ablation.{json,tsv}`. The new
+`OpHoleObligation` operator seeds 18 `reject-IncompleteArgument` mutants,
+growing the suite 340→358 (verified at generation, byte-identical on re-run);
+the differential harness holds 416/54 byte-exact across drivers — the first
+differential coverage of the `IncompleteArgument` path. The ablations are
+surgical and monotone: no-cq misses exactly the 18 hole rows, no-typed exactly
+the 30 `reject-R10`/`reject-R11` rows, every other row byte-identical — pinned
+by the `AblationSpec` properties (partition totality, surgical flips,
+monotonicity, conflict-scan gating, renderer shape). T5 (freeze) remains, with
+the ablation configs and the 358-mutant suite as freeze inputs.
 
 ### M5 T1 (corpus half) + T3 measurement harness (tracker #48)
 

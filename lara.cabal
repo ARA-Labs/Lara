@@ -83,6 +83,7 @@ test-suite lara-test
                       DifferentialSpec
                       MutationSpec
                       MeasureSpec
+                      AblationSpec
                       RuntimeSpec
                       ReportingSpec
                       CliSpec

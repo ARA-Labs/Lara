@@ -197,7 +197,8 @@ prop_seededReproducibility = once $ ioProperty $ do
           (mutantBytes m === committed)
 
 -- | The rejection-class half of the T1 exit criterion, measured from the
--- manifest: every executable rejection class, the codec negatives, and the
+-- manifest: every executable rejection class, the structural obligation-gate
+-- reject (@reject-IncompleteArgument@, M5 T6), the codec negatives, and the
 -- cycle family are witnessed. The status\/attack-kind half of the criterion
 -- needs T2 corpus units and is not asserted here.
 prop_mutationCoverage :: Property
@@ -208,6 +209,10 @@ prop_mutationCoverage = once $ ioProperty $ do
       wanted =
         ExpectCodecReject
           : ExpectAllContested
+          -- The obligation-gate witness (M5 T6): `hole-obligation` is the one
+          -- operator specified to `reject-IncompleteArgument`, so requiring the
+          -- outcome here requires the operator to produce mutants of its class.
+          : ExpectIncompleteArgument
           : map ExpectClass [minBound .. maxBound]
   pure $
     conjoin
@@ -281,8 +286,10 @@ prop_expectedLocationColumn = once $ ioProperty $ do
       )
   where
     wellFormed row = case rowExpected row of
-      ExpectClass _ -> rowSite row /= "-" && roundTrips (rowSite row)
+      ExpectClass _ -> sited row
+      ExpectIncompleteArgument -> sited row -- single-seeded-site reject too
       _ -> rowSite row == "-"
+    sited row = rowSite row /= "-" && roundTrips (rowSite row)
     roundTrips s = maybe False ((== s) . constituentText) (parseConstituent s)
 
 -- | The corpus half of the T1 coverage criterion (tracker #48): every

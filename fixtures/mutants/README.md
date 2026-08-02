@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 340
+Total mutants: 358
 
 | expected outcome | mutants |
 | --- | --- |
@@ -28,6 +28,7 @@ Total mutants: 340
 | `accept-gap` | 9 |
 | `accept-justified` | 9 |
 | `codec-reject` | 45 |
+| `reject-IncompleteArgument` | 18 |
 | `reject-R1` | 44 |
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
@@ -49,7 +50,7 @@ Total mutants: 340
 | `cycles` | 4 |
 | `data-integrity` | 19 |
 | `hidden-policy-extension` | 39 |
-| `open-obligations` | 36 |
+| `open-obligations` | 54 |
 | `undeclared-leaves` | 25 |
 | `wrong-formulas` | 37 |
 
@@ -68,6 +69,7 @@ site (corpus units carry no strict certificates), recorded as 0/0.
 | `wrong-subst-domain` | 12 | 12 |
 | `wrong-premise` | 12 | 12 |
 | `open-obligation` | 12 | 12 |
+| `hole-obligation` | 12 | 12 |
 | `wrong-discharge` | 12 | 12 |
 | `trusted-assurance` | 12 | 12 |
 | `cert-theory-swap` | 0 | 0 |

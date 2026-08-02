@@ -194,6 +194,11 @@ verify m = case mutantExpected m of
     case verdictOutcome verdict of
       Reject (RejectClass c') | c' == c -> pure ()
       outcome -> bad ("expected reject " ++ show c ++ ", got " ++ describe outcome)
+  ExpectIncompleteArgument -> withDecoded $ \verdict ->
+    case verdictOutcome verdict of
+      Reject IncompleteArgument -> pure ()
+      outcome ->
+        bad ("expected reject " ++ show IncompleteArgument ++ ", got " ++ describe outcome)
   ExpectAllContested -> withDecoded $ \verdict ->
     case verdictOutcome verdict of
       Accept labels _ statuses

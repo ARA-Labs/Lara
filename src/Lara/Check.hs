@@ -37,6 +37,11 @@ module Lara.Check
   , cuNodes
     -- * Structural duplicate detection
   , firstDuplicate
+    -- * Checker configuration (ablation switches)
+  , CheckConfig (..)
+  , fullConfig
+  , noCQConfig
+  , noTypedConfig
     -- * The detailed program checker and its conflict scan
   , ProgramAcceptance (..)
   , ConflictNode (..)
@@ -46,6 +51,7 @@ module Lara.Check
     -- * Attack resolution and the public boundary
   , resolveAttacks
   , checkUnit
+  , checkUnitWith
   ) where
 
 import Data.Maybe (mapMaybe)
@@ -157,41 +163,80 @@ firstDuplicate = go 0
       | otherwise = firstEqualIndex w (j + 1) xs
 
 -- ---------------------------------------------------------------------------
+-- Checker configuration (ablation switches)
+-- ---------------------------------------------------------------------------
+
+-- | Ablation switches over the detailed program checker. Each flag only ever
+-- /removes/ a rejection arm, so @accept(fullConfig) ⊆ accept(cfg)@ for every
+-- @cfg@. The config never reaches the support kernel ('inferSupport' and the
+-- R3–R7 rules run unconditionally) and is never carried on the wire: it exists
+-- only at the checker boundary, for the M5 ablation baselines.
+data CheckConfig = CheckConfig
+  { ccObligationGate :: Bool
+    -- ^ Enforce the open-obligation gate ('PEIncompleteArgument' in
+    -- 'checkArguments'). Off, an argument with open critical-question
+    -- obligations is retained instead of rejected.
+  , ccTypedAttacks :: Bool
+    -- ^ Enforce the typed-attack bundle: the per-attack 'checkAttack' typing in
+    -- 'checkAttacks' and the 'firstMissingConflictInfo' completeness scan. Off,
+    -- attacks still must reference declared arguments (R1), but are not typed
+    -- and completeness is not required.
+  }
+  deriving (Eq, Show)
+
+-- | The frozen semantics: every gate enforced. All production callers use this.
+fullConfig :: CheckConfig
+fullConfig = CheckConfig True True
+
+-- | Ablation: no critical-question obligation gate.
+noCQConfig :: CheckConfig
+noCQConfig = fullConfig{ccObligationGate = False}
+
+-- | Ablation: no typed-attack bundle.
+noTypedConfig :: CheckConfig
+noTypedConfig = fullConfig{ccTypedAttacks = False}
+
+-- ---------------------------------------------------------------------------
 -- The checked argument cache and the attack pass
 -- ---------------------------------------------------------------------------
 
 -- | Check every argument in declaration order, retaining the completed
 -- support-check result for each (Lean @checkArguments@). Rejects on the first
--- support error ('PERejection') or the first argument with open obligations
--- ('PEIncompleteArgument').
+-- support error ('PERejection') or — when 'ccObligationGate' is on — the first
+-- argument with open obligations ('PEIncompleteArgument').
 checkArguments
-  :: (RuleId -> Maybe Rule)
+  :: CheckConfig
+  -> (RuleId -> Maybe Rule)
   -> (LeafId -> Maybe Prop)
   -> CertOk
   -> [SupportTerm]
   -> Either ProgramError [(SupportTerm, SupportResult)]
-checkArguments pI gamma certOk = go 0
+checkArguments cfg pI gamma certOk = go 0
   where
     go _ [] = Right []
     go i (w : ws) = case inferSupport pI gamma certOk LocRoot w of
       Left e -> Left (PERejection (DLArgument i) e)
       Right result -> case srObligations result of
-        (_ : _) -> Left (PEIncompleteArgument i (srObligations result))
-        [] -> do
+        obs@(_ : _)
+          | ccObligationGate cfg -> Left (PEIncompleteArgument i obs)
+        -- gate off: retain the argument despite open obligations
+        _ -> do
           rest <- go (i + 1) ws
           pure ((w, result) : rest)
 
 -- | Check every typed attack in declaration order (Lean @checkAttacks@): both
--- endpoints must be declared arguments (R1), then the attack must type.
+-- endpoints must be declared arguments (R1), then — when 'ccTypedAttacks' is on
+-- — the attack must type.
 checkAttacks
-  :: (RuleId -> Maybe Rule)
+  :: CheckConfig
+  -> (RuleId -> Maybe Rule)
   -> (LeafId -> Maybe Prop)
   -> CertOk
   -> DefeatPolicy
   -> [SupportTerm]
   -> [RAttack]
   -> Either ProgramError ()
-checkAttacks pI gamma certOk dp args = go 0
+checkAttacks cfg pI gamma certOk dp args = go 0
   where
     go _ [] = Right ()
     go i (k : ks)
@@ -199,6 +244,7 @@ checkAttacks pI gamma certOk dp args = go 0
           Left (PERejection (DLAttack i) (CE_R1 LocRoot (UndeclaredAttackSource (rSource k))))
       | rTarget k `notElem` args =
           Left (PERejection (DLAttack i) (CE_R1 LocRoot (UndeclaredAttackTarget (rTarget k))))
+      | not (ccTypedAttacks cfg) = go (i + 1) ks
       | otherwise = case checkAttack pI gamma certOk dp k of
           Left e -> Left (PERejection (DLAttack i) e)
           Right () -> go (i + 1) ks
@@ -272,22 +318,28 @@ data ProgramAcceptance = ProgramAcceptance
 
 -- | Stages 3–6: duplicate arguments, support, typed attacks, missing conflict
 -- (Lean @checkProgramDetailed@ = @checkProgramBase@ then the conflict scan).
+-- The conflict scan is part of the typed-attack bundle and is skipped when
+-- 'ccTypedAttacks' is off.
 checkProgramDetailed
-  :: (RuleId -> Maybe Rule)
+  :: CheckConfig
+  -> (RuleId -> Maybe Rule)
   -> (LeafId -> Maybe Prop)
   -> CertOk
   -> DefeatPolicy
   -> [SupportTerm]
   -> [RAttack]
   -> Either ProgramError ProgramAcceptance
-checkProgramDetailed pI gamma certOk dp args atts =
+checkProgramDetailed cfg pI gamma certOk dp args atts =
   case firstDuplicate args of
     Just (i, j) -> Left (PEDuplicateArgument i j)
     Nothing -> do
-      cache <- checkArguments pI gamma certOk args
-      checkAttacks pI gamma certOk dp args atts
+      cache <- checkArguments cfg pI gamma certOk args
+      checkAttacks cfg pI gamma certOk dp args atts
       let nodes = [CheckedNode w (srConclusion res) | (w, res) <- cache]
-      case firstMissingConflictInfo dp (conflictCache pI atts nodes) of
+          missing
+            | ccTypedAttacks cfg = firstMissingConflictInfo dp (conflictCache pI atts nodes)
+            | otherwise = Nothing
+      case missing of
         Just m -> Left (PEMissingConflict m)
         Nothing ->
           Right (ProgramAcceptance (CheckedProgram args atts) nodes)
@@ -339,7 +391,18 @@ checkUnit
   -> CertOk
   -> Unit
   -> Either UnitError CheckedUnit
-checkUnit gamma certOk unit =
+checkUnit = checkUnitWith fullConfig
+
+-- | 'checkUnit' under an explicit 'CheckConfig'. The ablation entry point:
+-- @checkUnitWith fullConfig = checkUnit@ definitionally, and the input contract
+-- above applies verbatim.
+checkUnitWith
+  :: CheckConfig
+  -> (LeafId -> Maybe Prop)
+  -> CertOk
+  -> Unit
+  -> Either UnitError CheckedUnit
+checkUnitWith cfg gamma certOk unit =
   case firstDuplicateRuleId (unitRules unit) of
     Just dup -> Left (UEDuplicateRule dup)
     Nothing ->
@@ -350,6 +413,6 @@ checkUnit gamma certOk unit =
               dp = DefeatPolicy (unitContraries unit) (unitExceptions unit)
               args = map snd (unitArgs unit)
               atts = resolveAttacks (unitArgs unit) (unitAttacks unit)
-           in case checkProgramDetailed pI gamma certOk dp args atts of
+           in case checkProgramDetailed cfg pI gamma certOk dp args atts of
                 Left e -> Left (UEProgram e)
                 Right acc -> Right (CheckedUnit (paProgram acc) (paNodes acc))

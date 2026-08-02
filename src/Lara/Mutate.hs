@@ -93,6 +93,7 @@ data MutationOp
   | OpBadAttackPosition -- ^ attack position off the term / wrong kind → R10
   | OpUnlicensedAttack -- ^ self-rebut with no declared contrary → R11
   | OpOpenObligation -- ^ drop a mandatory discharge, no hole → R5
+  | OpHoleObligation -- ^ swap a mandatory discharge for a declared hole → obligation gate
   | OpTrustedAssurance -- ^ @trusted@ on a defeasible instance → R7
   | OpCertTheorySwap -- ^ certificate theory not allowlisted → R7
   | OpCertPayloadTamper -- ^ corrupt an allowlisted cert payload → R13
@@ -125,6 +126,7 @@ opName op = case op of
   OpBadAttackPosition -> "bad-attack-position"
   OpUnlicensedAttack -> "unlicensed-attack"
   OpOpenObligation -> "open-obligation"
+  OpHoleObligation -> "hole-obligation"
   OpTrustedAssurance -> "trusted-assurance"
   OpCertTheorySwap -> "cert-theory-swap"
   OpCertPayloadTamper -> "cert-payload-tamper"
@@ -156,6 +158,7 @@ opFamily op = case op of
   OpBadAttackPosition -> "bad-attack-targets"
   OpUnlicensedAttack -> "bad-attack-targets"
   OpOpenObligation -> "open-obligations"
+  OpHoleObligation -> "open-obligations"
   OpTrustedAssurance -> "certificate-tampering"
   OpCertTheorySwap -> "certificate-tampering"
   OpCertPayloadTamper -> "certificate-tampering"
@@ -180,11 +183,18 @@ opFamily op = case op of
 -- ---------------------------------------------------------------------------
 
 -- | The outcome a mutant is specified to have (spec §10.1): a rejection with
--- a fixed class, a codec-boundary reject (exit 2, no verdict), or — for the
--- cycle family — an accept in which every label is @undec@ and every queried
--- status is @contested@.
+-- a fixed class, the structural obligation-gate reject, a codec-boundary
+-- reject (exit 2, no verdict), or — for the cycle family — an accept in which
+-- every label is @undec@ and every queried status is @contested@.
 data Expected
   = ExpectClass RejectClass
+  | ExpectIncompleteArgument
+  -- ^ the structural obligation-gate reject ('Lara.AST.IncompleteArgument', a
+  -- 'Rejection' with no R-class by design): the mutant is schema-valid — R5
+  -- coverage holds because the open question is covered by a declared hole —
+  -- and the full system rejects it only at the obligation gate
+  -- ('Lara.Check.ccObligationGate'), i.e. an argument reaching the root with
+  -- an open mandatory obligation.
   | ExpectCodecReject
   | ExpectAllContested
   | ExpectPrimaryStatus Status
@@ -198,6 +208,7 @@ data Expected
 expectedText :: Expected -> String
 expectedText e = case e of
   ExpectClass c -> "reject-" ++ show c
+  ExpectIncompleteArgument -> "reject-" ++ show IncompleteArgument
   ExpectCodecReject -> "codec-reject"
   ExpectAllContested -> "accept-all-contested"
   ExpectPrimaryStatus s -> "accept-" ++ statusText s
@@ -219,6 +230,7 @@ parseExpected s =
   lookup s $
     ("codec-reject", ExpectCodecReject)
       : ("accept-all-contested", ExpectAllContested)
+      : (expectedText ExpectIncompleteArgument, ExpectIncompleteArgument)
       : [(expectedText (ExpectClass c), ExpectClass c) | c <- [minBound .. maxBound]]
       ++ [ (expectedText (ExpectPrimaryStatus st), ExpectPrimaryStatus st)
          | st <- [Gap, Justified, Contested, Defeated]
@@ -478,6 +490,7 @@ mutantsForBase base input =
     , unitMutants base input OpWrongSubstDomain 1 wrongSubstSites
     , unitMutants base input OpWrongPremise 1 wrongPremiseSites
     , unitMutants base input OpOpenObligation 1 openObligationSites
+    , unitMutants base input OpHoleObligation 1 holeObligationSites
     , unitMutants base input OpWrongDischarge 1 wrongDischargeSites
     , unitMutants base input OpTrustedAssurance 1 trustedAssuranceSites
     , unitMutants base input OpCertTheorySwap 1 certTheorySwapSites
@@ -604,6 +617,33 @@ openObligationSites u =
     dropDischarge q (SRule r theta ws d hs a) =
       SRule r theta ws [entry | entry@(q', _) <- d, q' /= q] hs a
     dropDischarge _ t = t
+
+-- Obligation gate: replace one mandatory discharge with a declared hole. The
+-- clone of 'openObligationSites' that swaps the entry into the hole set
+-- instead of deleting it: R5 coverage still holds (the question is covered by
+-- the hole), so the schema-valid argument reaches the obligation gate with an
+-- open mandatory obligation — the full system rejects with
+-- 'IncompleteArgument', and only 'Lara.Check.noCQConfig' accepts it. Only
+-- mandatory discharges are sites: holing an optional question's discharge
+-- contributes no obligation ('Lara.SupportTerm.openMandatory') and the full
+-- system would accept.
+holeObligationSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
+holeObligationSites u =
+  [ ( ExpectIncompleteArgument
+    , CArgument ix
+    , rewriteArg ix (rewriteAt pos (holeDischarge q))
+    )
+  | (ix, pos, SRule rn _ _ d _ _) <- ruleSites u
+  , Just r <- [ruleOf u rn]
+  , (q, _) <- take 1 [entry | entry@(q, _) <- d, mandatoryIn r q]
+  ]
+  where
+    mandatoryIn r q =
+      any (\qd -> questionId qd == q && questionNecessity qd == Mandatory) (ruleQuestions r)
+    holeDischarge q (SRule r theta ws d hs a) =
+      SRule r theta ws [entry | entry@(q', _) <- d, q' /= q] (hs ++ [holeOf q]) a
+    holeDischarge _ t = t
+    holeOf (QuestionId s) = ObligationId s
 
 -- R6: answer one known question with a declared-but-≢ leaf.
 wrongDischargeSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
@@ -795,6 +835,7 @@ sweepOps =
   , unitSweep OpWrongSubstDomain wrongSubstSites
   , unitSweep OpWrongPremise wrongPremiseSites
   , unitSweep OpOpenObligation openObligationSites
+  , unitSweep OpHoleObligation holeObligationSites
   , unitSweep OpWrongDischarge wrongDischargeSites
   , unitSweep OpTrustedAssurance trustedAssuranceSites
   , unitSweep OpCertTheorySwap certTheorySwapSites

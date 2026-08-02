@@ -17,13 +17,20 @@
 -- protocols and not comparable — no cross-driver time ratio may be derived.
 --
 -- Output: @measurements\/report.json@ (full records + aggregate + environment)
--- and @measurements\/report.tsv@ (flat, the table-generator input).
+-- and @measurements\/report.tsv@ (flat, the table-generator input), plus the
+-- ablation-baseline report @measurements\/ablation.{json,tsv}@ (M5 T6): every
+-- input re-checked under each ablated 'CheckConfig' from 'ablationConfigs' —
+-- Haskell-only by construction, no Lean run, no timing.
 -- @measurements\/@ is gitignored: pre-freeze numbers are development output;
 -- committed records are T5's post-freeze deliverable, from this same harness.
 --
 -- Run with the built library on the path:
 --
 -- >  cabal exec -- runghc scripts/measure.hs
+--
+-- @--ablation-only@ skips the Lean preflight and the timing\/agreement sweep
+-- and emits only @measurements\/ablation.{json,tsv}@ (a seconds-long smoke
+-- loop instead of the full sampling run).
 module Main (main) where
 
 import Control.Exception (evaluate)
@@ -32,6 +39,7 @@ import Data.List (dropWhileEnd)
 import Data.Char (isSpace)
 import GHC.Clock (getMonotonicTimeNSec)
 import System.Directory (createDirectoryIfMissing, doesFileExist)
+import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitFailure)
 import System.Info (arch, os)
 import System.IO (hPutStrLn, stderr)
@@ -42,6 +50,7 @@ import System.Process
   , readProcessWithExitCode
   )
 
+import Lara.Check (CheckConfig)
 import Lara.Driver (runCheck)
 import Lara.Measure
 import Lara.Mutate (Expected (..))
@@ -55,17 +64,30 @@ samples = 5
 
 main :: IO ()
 main = do
-  preflightLean
+  args <- getArgs
+  ablationOnly <- case args of
+    [] -> pure False
+    ["--ablation-only"] -> pure True
+    _ -> die ("unrecognized arguments: " ++ unwords args ++ " (only --ablation-only is accepted)")
+  unless ablationOnly preflightLean
   mutantManifest <- readFile "fixtures/mutants/MANIFEST.tsv"
   corpusManifest <- readFile "corpus-units/MANIFEST.tsv"
   let inputs = parseMutantManifest mutantManifest ++ parseCorpusManifest corpusManifest
   when (null inputs) (die "no inputs discovered from the manifests")
   env <- gatherEnv
-  records <- mapM measureInput inputs
   createDirectoryIfMissing True "measurements"
-  writeFile "measurements/report.json" (reportJson env records)
-  writeFile "measurements/report.tsv" (reportTsv records)
-  putStrLn ("wrote " ++ show (length records) ++ " records to measurements/")
+  ablations <- mapM (runAblation inputs) ablationConfigs
+  writeFile "measurements/ablation.json" (ablationJson env ablations)
+  writeFile "measurements/ablation.tsv" (ablationTsv ablations)
+  putStrLn
+    ( "wrote " ++ show (length ablations) ++ " ablation runs over "
+        ++ show (length inputs) ++ " inputs to measurements/ablation.{json,tsv}"
+    )
+  unless ablationOnly $ do
+    records <- mapM measureInput inputs
+    writeFile "measurements/report.json" (reportJson env records)
+    writeFile "measurements/report.tsv" (reportTsv records)
+    putStrLn ("wrote " ++ show (length records) ++ " records to measurements/")
 
 -- | Build the Lean driver the way @scripts\/differential.sh@ does, failing
 -- loudly with a build hint rather than a mid-run subprocess error.
@@ -77,6 +99,19 @@ preflightLean = do
     ExitFailure _ -> die ("lake build failed (run `cd lean && lake build`):\n" ++ err)
   present <- doesFileExist leanBin
   unless present (die ("Lean driver missing after lake build: " ++ leanBin))
+
+-- | One named ablation pass over every input: 'computeAblation' re-runs the
+-- checker under the ablated config against the full one. Haskell-only by
+-- construction — no Lean subprocess, no timing samples.
+runAblation :: [InputMeta] -> (String, CheckConfig, AblationBucket) -> IO AblationReport
+runAblation inputs (name, cfg, _bucket) = do
+  cells <- mapM cellFor inputs
+  pure (AblationReport name cells)
+  where
+    -- Force the read so at most one file handle is open at a time.
+    cellFor im = do
+      bytes <- readFile (imPath im)
+      length bytes `seq` pure (computeAblation cfg im bytes)
 
 -- | Measure one input: the deterministic metrics (pure), the @hs_check@ timing
 -- samples, and the Lean subprocess timing + agreement.

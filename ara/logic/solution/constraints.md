@@ -142,3 +142,10 @@ disagreement; dependent claims surface as `gap`).
   S-expression codec on the frozen presentation AST — it proves no field loses information, but
   does not transfer to the concrete-syntax Haskell parser; the QuickCheck round-trip
   (`SyntaxSpec`, 2000 iters) remains the surface-syntax conformance evidence.
+
+- **The two checking-time columns are different protocols and must never be ratioed (from O31).**
+  `hs_check` is in-process, decode excluded, verdict forced (median ~7 µs); `lean_wall` is
+  subprocess wall time including startup + decode (median ~2.6 ms, trace N96). The ~370× gap is
+  process startup, not semantics — any cross-driver speed claim needs a same-protocol measurement.
+  The harness labels the columns separately for exactly this reason, and an unforced lazy
+  `runCheck` would instead read ~0 ns (D8/5A), so the forcing discipline is part of the protocol.

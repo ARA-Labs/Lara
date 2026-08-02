@@ -407,3 +407,12 @@ entries:
       - "O30 flagged potential_type claim not constraint: it asserts a size-distribution relationship (payload is the signal) with a concrete downstream implication (policy-by-reference), which is a what, not a design rule."
       - "No stale flags: O26/O27/O28 staged 2026-08-01 (same day), under the 3-session-day threshold."
       - "Reviewer git-clean/policyBytes-bug recorded inside N96 result + turn-3 key_context, not as dead_end nodes: both found+fixed within the turn, below node granularity (same treatment as the turn-2 differential.sh dual-site bug)."
+  - turn: "2026-08-01_001#4"
+    notes:
+      - "Turn 4 was /implement of the eng-cleared T6 plan: one experiment node N97 DIRECT (same one-node-per-implement precedent as N95/N96); execution decisions (checkUnitWith wrapper, fd-strictness fix) recorded inside N97.result, below node granularity."
+      - "Crystallized O29 -> C23 via artifact-commitment: PR #51 (its bound experiment) is now MERGED into main (1d91bdb), and three committed artifacts depend on the observation (T6 plan D10 scoping, TODOS localization entry, T6 execution record). Status testing not supported: 246/246 is consistent-with, and the discriminating-suite boundary is untested."
+      - "Crystallized O31 -> constraints.md bullet via the same merge commitment: the merged harness code labels hs_check/lean_wall as separate protocols — code depends on the constraint. Constraint, not claim: it is a measurement design rule."
+      - "Did NOT crystallize O30 despite the same merge: merged code computes both size numbers; which one the paper leads with is a framing choice with no committed artifact yet."
+      - "Staged O32/O33/O34 (surgical-ablation claim, accept-justified miss class, gate-coverage heuristic) rather than crystallizing: pre-freeze smoke numbers on an OPEN PR #53 — exact O29-precedent; let merge / T5 freeze / paper adoption close them."
+      - "Near-miss: considered appending T6 ablation evidence to C11 (rejection adversarially validated) — rejected: the ablation validates rule necessity, not the producer/checker split; no signal named C11."
+      - "No stale flags: all unpromoted observations (O26-O28, O30, O32-O34) staged 2026-08-01, under the 3-session-day threshold."
