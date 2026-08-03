@@ -1,0 +1,187 @@
+# rebuttal-v1 — the D1 rebuttal-replay policy (corpus-v1's defeasible fragment plus
+# review/rebuttal defense vocabulary)
+#
+# The demo (examples/rebuttal-replay/, issue #62) checks a paper, then a review round, then a
+# rebuttal round as three programs over ONE artifact under this ONE trusted policy. The policy is
+# the fixed reviewing standard; the program grows each round, and grounded semantics re-adjudicates
+# the whole graph — so a claim's status can move justified -> defeated -> justified without any
+# change to the policy. That non-monotonicity at a FIXED replay identity is the demo's point.
+#
+# rebuttal-v1 is corpus-v1's defeasible families (1-9) verbatim, minus corpus-v1's strict Family 10
+# (the ra@1 rational-arithmetic re-check and its theory — the demo carries no certificate, so the
+# suite stays defeasible-only and num-literal-free, exactly like empirical-v1/v2), plus TWO defense
+# contraries the review/rebuttal round needs (see the "new in rebuttal-v1" block). Every corpus-v1
+# claim that avoids Family 10 checks identically under rebuttal-v1, so round 0 reproduces the
+# adaptive-pruning corpus-unit verdicts (gap on the kurtosis ablation) under the corpus standard.
+#
+# Design notes (the defense mechanism, mirroring empirical-v2's E4 reinstatement vocabulary):
+#   * `contrary not_fixed_protocol B fixed_protocol` lets a reviewer UNDERMINE a benchmark
+#     argument's protocol_fixed leaf (Reviewer 1: "the protocol was not actually held fixed").
+#   * `contrary protocol_confirmed B not_fixed_protocol` is declared in ONE direction only, so an
+#     author leaf concluding protocol_confirmed can undermine the reviewer's not_fixed_protocol
+#     leaf with no reverse edge — the unattacked defender reinstates the benchmark argument
+#     (grounded reinstatement, spec §8; the E4 one-directional-contrary trick). A symmetric pair
+#     would force the reverse edge and collapse the reinstatement into a contested 2-cycle.
+#   * The rebut counter-attack (author undercuts the reviewer's null replication) and the reviewer
+#     undercut on the measurement claim reuse EXISTING corpus-v1 exceptions
+#     (null_benchmark : environment_mismatch, measurement : measurement_artifact) — no new
+#     vocabulary. Defense is policy vocabulary, not a new mechanism.
+
+policy rebuttal-v1
+
+# --- Family 1: controlled comparison ------------------------------------------------------------
+
+rule controlled_comparison(S, B, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, compares(S, B, Q, D, favorable)) ]
+  conclusion = better(S, B, Q, D)
+  question baseline_parity      : matched_setup(S, B, Exp)   (mandatory)
+  question measurement_validity : valid_measurement(Q, Exp)  (mandatory)
+  question variance_reported    : variance_reported(Exp)     (mandatory)
+  question scope_match          : scope_matched(S, Q, D)     (optional)
+
+rule null_comparison(S, B, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, compares(S, B, Q, D, null)) ]
+  conclusion = not_better(S, B, Q, D)
+  question baseline_parity      : matched_setup(S, B, Exp)   (mandatory)
+  question measurement_validity : valid_measurement(Q, Exp)  (mandatory)
+  question adequate_power       : powered(Exp)               (mandatory)
+
+# --- Family 2: intervention / ablation ----------------------------------------------------------
+
+rule component_ablation(C, S, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, ablation_effect(C, S, Q, positive)) ]
+  conclusion = contributes(C, S, Q)
+  question single_variable   : isolated(C, Exp)        (mandatory)
+  question protocol_parity   : matched_protocol(Exp)   (mandatory)
+  question variance_reported : variance_reported(Exp)  (mandatory)
+
+# --- Family 3: observation / measurement --------------------------------------------------------
+
+rule measurement(P, S, Exp)
+  mode       = defeasible
+  premises   = [ observes(Exp, P, S) ]
+  conclusion = holds(P, S)
+  question instrument_validity : valid_instrument(P, Exp)     (mandatory)
+  question coverage            : covers_scope(Exp, S)         (mandatory)
+  question confound_control    : confounds_controlled(Exp)    (optional)
+
+# --- Family 4: analytic -------------------------------------------------------------------------
+
+rule analytic_argument(P, Prf)
+  mode       = defeasible
+  premises   = [ derives(Prf, P) ]
+  conclusion = holds_analytically(P)
+  question assumptions_hold : assumptions_established(Prf)  (mandatory)
+  question scope_licensed   : scope_licensed(P)             (mandatory)
+
+# --- Family 5: benchmark / stress evaluation ----------------------------------------------------
+
+rule benchmark_evaluation(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, benchmark_result(S, B, Q, positive)) ]
+  conclusion = performs(S, B, Q)
+  question protocol_fixed    : fixed_protocol(S, B, Exp)   (mandatory)
+  question benchmark_valid   : valid_benchmark(B, Q)       (mandatory)
+  question environment_match : matched_environment(Exp)    (optional)
+
+rule null_benchmark(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, benchmark_result(S, B, Q, negative)) ]
+  conclusion = not_performs(S, B, Q)
+  question protocol_fixed    : fixed_protocol(S, B, Exp)   (mandatory)
+  question environment_match : matched_environment(Exp)    (mandatory)
+
+# --- Family 6: code inspection ------------------------------------------------------------------
+
+rule code_inspection(P, Src, Insp)
+  mode       = defeasible
+  premises   = [ inspects(Insp, Src, P) ]
+  conclusion = code_property(Src, P)
+  question version_match : version_matched(Src, Insp)  (mandatory)
+  question path_coverage : covers_paths(Insp, Src)     (mandatory)
+
+# --- Family 7: statistical correlation ----------------------------------------------------------
+
+rule statistical_correlation(X, Y, S, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, correlation(X, Y, S, present)) ]
+  conclusion = correlated(X, Y, S)
+  question significance     : significance_reported(Exp)  (mandatory)
+  question independence     : independent_samples(Exp)    (mandatory)
+  question confound_control : confounds_controlled(Exp)   (optional)
+
+rule null_correlation(X, Y, S, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, correlation(X, Y, S, absent)) ]
+  conclusion = not_correlated(X, Y, S)
+  question significance   : significance_reported(Exp)  (mandatory)
+  question adequate_power : powered(Exp)                (mandatory)
+
+# --- Family 8: inductive generalization ---------------------------------------------------------
+
+rule inductive_generalization(P, C, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, instances(P, C, positive)) ]
+  conclusion = generalizes_to(P, C)
+  question sample_representative : representative_sample(Exp, C)  (mandatory)
+  question instance_validity     : valid_instances(Exp)           (mandatory)
+
+# --- Family 9: blind paired human evaluation ----------------------------------------------------
+
+rule human_evaluation(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, human_preference(S, B, Q, favorable)) ]
+  conclusion = preferred(S, B, Q)
+  question blinding        : blinded(Exp)            (mandatory)
+  question rater_power     : sufficient_raters(Exp)  (mandatory)
+  question preregistration : preregistered(Exp)      (optional)
+
+# --- Conflict (corpus-v1) -----------------------------------------------------------------------
+# Symmetric pairs only where the sample concludes both sides through the dual rules above. A unit
+# with args on both sides of one pair must declare the mutual rebut edges (attack completeness).
+
+contrary better(S, B, Q, D)     not_better(S, B, Q, D)
+contrary not_better(S, B, Q, D) better(S, B, Q, D)
+
+contrary performs(S, B, Q)     not_performs(S, B, Q)
+contrary not_performs(S, B, Q) performs(S, B, Q)
+
+contrary correlated(X, Y, S)     not_correlated(X, Y, S)
+contrary not_correlated(X, Y, S) correlated(X, Y, S)
+
+# --- Conflict (new in rebuttal-v1) --------------------------------------------------------------
+
+# A reviewer UNDERMINE on a benchmark argument's protocol_fixed leaf: the reviewer finds the
+# protocol was not held fixed (hyperparameters tuned on the eval tasks). Declared so an arg
+# concluding not_fixed_protocol attacks the leaf that discharges benchmark_evaluation's
+# protocol_fixed CQ.
+contrary not_fixed_protocol(S, B, Exp) fixed_protocol(S, B, Exp)
+
+# The author's REBUTTAL counter-undermine: a leaf concluding protocol_confirmed defeats the
+# reviewer's not_fixed_protocol leaf. ONE direction only (see header): nothing licenses the
+# reviewer's finding to attack the author's confirmation back, so the unattacked defender
+# reinstates the benchmark argument instead of forming a contested 2-cycle.
+contrary protocol_confirmed(S, B, Exp) not_fixed_protocol(S, B, Exp)
+
+# --- Exceptions (undercutting conditions), at least one per rule (component_ablation carries two) --
+
+exception controlled_comparison    : confounded_comparison(S, B, Q, D)
+exception null_comparison          : underpowered_null(S, B, Q, D)
+exception component_ablation       : confounded_ablation(C, S, Q)
+exception component_ablation       : within_noise(C, S, Q)
+exception measurement              : measurement_artifact(P, S)
+exception analytic_argument        : unsound_assumption(P)
+exception benchmark_evaluation     : protocol_deviation(S, B, Q)
+exception null_benchmark           : environment_mismatch(S, B, Q)
+exception code_inspection          : version_skew(Src)
+exception statistical_correlation  : confounding_variable(X, Y, S)
+exception null_correlation         : underpowered_correlation(X, Y, S)
+exception inductive_generalization : biased_sample(P, C)
+exception human_evaluation         : rater_bias(S, B, Q)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): every rule here is defeasible (rebuttal-v1 drops corpus-v1's
+# sole strict rule), so no proposition in any contrary pair — including the two new defense pairs —
+# is strict-reachable, and the policy passes the R12 check exactly as empirical-v1/v2 do.

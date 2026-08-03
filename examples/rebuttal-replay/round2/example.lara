@@ -1,0 +1,230 @@
+# D1 rebuttal replay — ROUND 2 (rebuttal): the paper, the reviews, and the author's response
+#
+# Round 2 is round 1 (examples/rebuttal-replay/round1) plus the author's rebuttal. Artifact and
+# policy are still unchanged. The author does three distinct things, each a standard move rendered
+# in existing calculus vocabulary:
+#
+#   * DISCHARGE a gap (c_kurt gap -> justified): the rebuttal supplies 5-seed variance runs for the
+#     kurtosis ablation, so variance_reported now has a discharging leaf. The previously
+#     undeclarable component_ablation argument becomes complete and, unattacked, is `in` -> the
+#     claim moves gap -> justified. This is the headline gap->justified discharge (issue #62).
+#   * COUNTER-ATTACK to reinstate (c_bench defeated -> justified): the author defeats BOTH reviewer
+#     attacks on the benchmark claim (E4-style reinstatement):
+#       - vs Reviewer 1's UNDERMINE: an author leaf concluding protocol_confirmed undermines the
+#         reviewer's not_fixed_protocol leaf (ru_np). protocol_confirmed/not_fixed_protocol is a
+#         ONE-directional contrary, so the author's leaf is unattacked -> the undermine goes out.
+#       - vs Reviewer 2's REBUT: the author shows the cited replication ran in a mismatched
+#         environment (a different eval harness), undercutting the reviewer's null_benchmark at its
+#         rule via corpus-v1's exception null_benchmark : environment_mismatch.
+#     With both reviewer attackers out, a_bench is reinstated -> c_bench moves defeated -> justified.
+#   * CONCEDE (c_measure defeated -> defeated): the author agrees the memory number is confounded by
+#     gradient checkpointing and does NOT contest it. No rebuttal argument is added, so a_meas stays
+#     out and c_measure stays defeated. Concession = no new argument; the status is simply unchanged.
+#
+# "at least ONE gap->justified discharge and at least ONE counter-attack on a reviewer leaf": the
+# variance discharge (c_kurt) and the counter-undermine of ru_np (r_um) both hold. "Some statuses
+# recover, some don't": c_bench recovers, c_kurt is filled, c_measure does not.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact adaptive-pruning at sha256:de3685165a53
+policy rebuttal-v1
+use backends [nd@1]
+
+# ===============================================================================================
+# THE PAPER (unchanged from round 0/1)
+# ===============================================================================================
+
+# --- c_bench: benchmark performance vs the dense baseline --------------------------------------
+
+claim c_bench
+  nl      = "APT at 30% sparsity performs competitively with the dense LLaMA2-7B baseline on the OpenLLM four-task average"
+  formal  = performs(apt, dense_baseline, openllm_avg)
+  binding = { author = apt-authors, audit-status = reviewed }
+
+leaf pb1 : reports(e02, benchmark_result(apt, dense_baseline, openllm_avg, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02, Table-4]
+
+leaf pb2 : fixed_protocol(apt, dense_baseline, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-step-3]
+
+leaf pb3 : valid_benchmark(dense_baseline, openllm_avg)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Metrics]
+
+arg a_bench : supports(c_bench) by benchmark_evaluation(apt, dense_baseline, openllm_avg, e02)
+  discharge protocol_fixed    with pb2
+  discharge benchmark_valid   with pb3
+  open      environment_match as environment_match
+
+# --- c_measure: low training-memory footprint -------------------------------------------------
+
+claim c_measure
+  nl      = "APT trains with a low peak-memory footprint (41.6 percent of the Prune+Distill baseline)"
+  formal  = holds(low_memory_footprint, apt)
+  binding = { author = apt-authors, audit-status = reviewed }
+
+leaf pm1 : observes(e04, low_memory_footprint, apt)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04, Table-10]
+
+leaf pm2 : valid_instrument(low_memory_footprint, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-step-2]
+
+leaf pm3 : covers_scope(e04, apt)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Setup]
+
+arg a_meas : supports(c_measure) by measurement(low_memory_footprint, apt, e04)
+  discharge instrument_validity with pm2
+  discharge coverage            with pm3
+  open      confound_control     as confound_control
+
+# --- c_kurt: the kurtosis-salience ablation ----------------------------------------------------
+
+claim c_kurt
+  nl      = "Removing the kurtosis (outlier-aware) salience term drops the LLaMA2-7B OpenLLM average from 50.0 to 38.1 at 30 percent sparsity, so the kurtosis term is critical for large-LM pruning"
+  formal  = contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)
+  binding = { author = apt-authors, audit-status = reviewed }
+
+leaf pk1 : reports(e03, ablation_effect(kurtosis_salience, apt_llama2_7b, openllm_avg, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03, Table-5, trace/exploration_tree.yaml#N09-N10]
+
+leaf pk2 : isolated(kurtosis_salience, e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-step-6]
+
+leaf pk3 : matched_protocol(e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-step-7]
+
+# ===============================================================================================
+# THE REVIEW ROUND (unchanged from round 1)
+# ===============================================================================================
+
+# --- Reviewer 1 (UNDERMINE): the OpenLLM protocol was not held fixed --------------------------
+leaf ru_np : not_fixed_protocol(apt, dense_baseline, e02)
+  kind       = attested
+  provenance = user
+  refs       = [openreview#R1-official-review-weakness-2]
+
+arg d_um : challenges(pb2) by leaf(ru_np)
+undermine d_um a_bench.protocol_fixed.leaf
+
+# --- Reviewer 2 (REBUT): a concurrent replication finds APT does NOT match dense ---------------
+leaf ru_nb1 : reports(e_rep, benchmark_result(apt, dense_baseline, openllm_avg, negative))
+  kind       = attested
+  provenance = user
+  refs       = [openreview#R2-official-review-weakness-1]
+
+leaf ru_nb2 : fixed_protocol(apt, dense_baseline, e_rep)
+  kind       = attested
+  provenance = user
+  refs       = [openreview#R2-official-review-appendix]
+
+leaf ru_nb3 : matched_environment(e_rep)
+  kind       = attested
+  provenance = user
+  refs       = [openreview#R2-official-review-appendix]
+
+arg d_rebut : supports(c_bench_neg) by null_benchmark(apt, dense_baseline, openllm_avg, e_rep)
+  discharge protocol_fixed    with ru_nb2
+  discharge environment_match with ru_nb3
+
+rebut d_rebut a_bench
+rebut a_bench d_rebut
+
+# --- Reviewer 3 (UNDERCUT): the memory number is a measurement artifact ------------------------
+leaf ru_ma : measurement_artifact(low_memory_footprint, apt)
+  kind       = attested
+  provenance = user
+  refs       = [openreview#R3-official-review-weakness-1]
+
+arg d_meas : challenges(instrument_validity(a_meas)) by leaf(ru_ma)
+undercut d_meas a_meas.rule
+
+# ===============================================================================================
+# THE REBUTTAL (new in round 2)
+# ===============================================================================================
+
+# --- Discharge the gap: variance runs for the kurtosis ablation (c_kurt gap -> justified) -------
+# The author's response supplies 5-seed variance runs of the E03 kurtosis ablation. variance_reported
+# now has a discharging leaf, so the component_ablation argument that was undeclarable in rounds 0/1
+# becomes complete. Unattacked, it is `in` -> c_kurt moves gap -> justified.
+leaf rk_var : variance_reported(e03)
+  kind       = observed
+  provenance = user
+  refs       = [openreview#author-response-Table-A1-5-seeds]
+
+arg a_kurt : supports(c_kurt) by component_ablation(kurtosis_salience, apt_llama2_7b, openllm_avg, e03)
+  discharge single_variable   with pk2
+  discharge protocol_parity   with pk3
+  discharge variance_reported with rk_var
+
+# --- Counter-attack #1: reinstate against Reviewer 1's UNDERMINE --------------------------------
+# The author re-runs the OpenLLM eval with the frozen released config and confirms the protocol was
+# fixed. protocol_confirmed is the ONE-directional contrary of not_fixed_protocol, so this leaf
+# undermines ru_np and is itself unattacked -> d_um goes out.
+leaf rk_pc : protocol_confirmed(apt, dense_baseline, e02)
+  kind       = observed
+  provenance = user
+  refs       = [openreview#author-response-frozen-config-rerun]
+
+arg r_um : challenges(ru_np) by leaf(rk_pc)
+undermine r_um d_um.leaf
+
+# --- Counter-attack #2: reinstate against Reviewer 2's REBUT ------------------------------------
+# The author shows the cited replication ran on a different eval harness (a mismatched environment),
+# undercutting the reviewer's null_benchmark at its rule via the exception
+# null_benchmark : environment_mismatch. The undercutter is unattacked -> d_rebut goes out.
+leaf rk_em : environment_mismatch(apt, dense_baseline, openllm_avg)
+  kind       = observed
+  provenance = user
+  refs       = [openreview#author-response-harness-diff]
+
+arg r_rebut : challenges(environment_match(d_rebut)) by leaf(rk_em)
+undercut r_rebut d_rebut.rule
+
+# --- Concession: c_measure is NOT defended -----------------------------------------------------
+# The author accepts Reviewer 3's point (the memory number is confounded by gradient checkpointing)
+# and adds no counter-argument. a_meas stays out, so c_measure stays defeated. Concession is the
+# absence of a defense, not a special construct.
+
+status c_bench
+status c_measure
+status c_kurt
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# Compiled AF (declaration order):
+#   a_bench (0) -> in    (LIn; both attackers d_um and d_rebut are out — REINSTATED)
+#   a_meas  (1) -> out   (LOut; undercut by the unattacked d_meas; conceded, no defense)
+#   d_um    (2) -> out   (LOut; undermined by the unattacked r_um)
+#   d_rebut (3) -> out   (LOut; undercut by the unattacked r_rebut)
+#   d_meas  (4) -> in    (LIn; leaf-rooted, unattacked)
+#   a_kurt  (5) -> in    (LIn; complete after the variance discharge, unattacked)
+#   r_um    (6) -> in    (LIn; one-directional contrary, unattacked)
+#   r_rebut (7) -> in    (LIn; leaf-rooted, unattacked)
+# Claim statuses:
+#   c_bench   -> justified  (support a_bench reinstated to in)
+#   c_measure -> defeated   (support a_meas still out; conceded)
+#   c_kurt    -> justified  (support a_kurt complete and in after the variance discharge)
+#
+# Full trajectory (round0 -> round1 -> round2):
+#   c_bench   : justified -> defeated  -> justified   (reinstated across undermine + rebut)
+#   c_kurt    : gap       -> gap       -> justified   (variance-runs discharge)
+#   c_measure : justified -> defeated  -> defeated    (conceded)

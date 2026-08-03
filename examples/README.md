@@ -7,6 +7,11 @@ The answer, made concrete here: **the unit of argumentation is the support term 
 paper.** Single-paper, paper-plus-reviews, and field-corpus are the *same* Dung framework at
 different population sizes (spec §8, cross-framework non-monotonicity) — not three calculi.
 
+The **paper + reviews** population is exhibited end-to-end in the D1 demo
+([`docs/demos/d1-rebuttal-replay.md`](../docs/demos/d1-rebuttal-replay.md)): a paper, its reviews,
+and the rebuttal replayed as three checked programs under one policy, with the claim status
+flipping across rounds — the concrete answer to the design question above.
+
 Each example is a **self-contained directory** `examples/<NAME>/` (a paper
 artifact): the surface `example.lara`, its co-located policy (`empirical-v1.policy.lara`,
 `empirical-v2.policy.lara` for E4/E5, `strict-bad-v1.policy.lara` for R2, or

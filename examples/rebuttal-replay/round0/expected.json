@@ -1,0 +1,50 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "rebuttal-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:de3685165a53"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "performs(apt, dense_baseline, openllm_avg)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "holds(low_memory_footprint, apt)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a_bench",
+        "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a_meas",
+        "index": 1,
+        "label": "in"
+      }
+    ]
+  }
+}

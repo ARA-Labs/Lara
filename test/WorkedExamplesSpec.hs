@@ -1,6 +1,7 @@
 -- | Golden verdicts for E1–E5 / R1–R3 plus strict-certificate example S1;
 -- the teaching examples A and B join them in 'examplePolicies' for the
--- freshness and coverage properties (eleven examples in all).
+-- freshness and coverage properties, together with the three D1
+-- rebuttal-replay rounds (round0–round2) — fourteen examples in all.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
 -- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', validates the source
@@ -25,9 +26,10 @@
 --   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
 --   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
 --
--- A final __freshness__ property re-derives all eleven @example.core.sexp@
--- anchors (A, B, E1–E5, R1–R3, and S1) from their surface @.lara@ + policy and
--- asserts the committed bytes match, guarding against surface/anchor drift.
+-- A final __freshness__ property re-derives all fourteen @example.core.sexp@
+-- anchors (A, B, E1–E5, R1–R3, S1, and the D1 rebuttal-replay rounds round0–round2)
+-- from their surface @.lara@ + policy and asserts the committed bytes match,
+-- guarding against surface/anchor drift.
 module WorkedExamplesSpec (workedExamplesSpecProps) where
 
 import Test.QuickCheck
@@ -96,6 +98,16 @@ notImproves m d = Prop (Pred "not_improves") [con m, con "accuracy", con d]
 holdsP :: String -> String -> Prop
 holdsP x d = Prop (Pred "holds") [con x, con d]
 
+-- | The D1 rebuttal-replay benchmark claim @performs(apt, dense_baseline, openllm_avg)@.
+performsP :: Prop
+performsP = Prop (Pred "performs") [con "apt", con "dense_baseline", con "openllm_avg"]
+
+-- | The D1 rebuttal-replay ablation claim
+-- @contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)@.
+contributesP :: Prop
+contributesP =
+  Prop (Pred "contributes") [con "kurtosis_salience", con "apt_llama2_7b", con "openllm_avg"]
+
 loadProgram :: FilePath -> IO Program
 loadProgram path = do
   src <- readFile path
@@ -127,6 +139,9 @@ examplePolicies =
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
   , ("examples/S1", "strict-v1.policy.lara")
+  , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
+  , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
+  , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
   ]
 
 -- | The shared empirical-v1 policy basename (co-located in each example's dir).
@@ -261,6 +276,77 @@ prop_S1 = once $ ioProperty $
               verdictLabels outcome === [(0, LIn)]
           , counterexample "S1 status: c1 → justified" $
               verdictStatuses outcome === [(holdsP "safety_invariant" "D", Justified)]
+          ]
+
+-- ---------------------------------------------------------------------------
+-- D1 rebuttal replay — the paper+reviews trajectory (issue #62)
+-- ---------------------------------------------------------------------------
+
+-- | The co-located rebuttal-v1 policy basename (in each round's dir).
+rebuttalBase :: FilePath
+rebuttalBase = "rebuttal-v1.policy.lara"
+
+-- | D1 round 0 (submission): the paper alone. Both support args unattacked and @in@;
+-- the kurtosis ablation has no arg (variance CQ unmet) ⇒ gap. Arg order a_bench=0, a_meas=1.
+prop_D1Round0 :: Property
+prop_D1Round0 = once $ ioProperty $
+  runExample "examples/rebuttal-replay/round0" rebuttalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("D1 round0: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "D1 round0 labels: a_bench in, a_meas in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "D1 round0 statuses: c_bench/c_measure justified, c_kurt gap" $
+              verdictStatuses outcome
+                === [ (performsP, Justified)
+                    , (holdsP "low_memory_footprint" "apt", Justified)
+                    , (contributesP, Gap)
+                    ]
+          ]
+
+-- | D1 round 1 (reviews): three reviewer attacks. The undermine (d_um) + rebut (d_rebut) drive
+-- a_bench out; the undercut (d_meas) drives a_meas out; c_kurt stays gap. Arg order a_bench=0,
+-- a_meas=1, d_um=2, d_rebut=3, d_meas=4.
+prop_D1Round1 :: Property
+prop_D1Round1 = once $ ioProperty $
+  runExample "examples/rebuttal-replay/round1" rebuttalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("D1 round1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "D1 round1 labels: both paper args out, three reviewer attacks in" $
+              verdictLabels outcome
+                === [(0, LOut), (1, LOut), (2, LIn), (3, LIn), (4, LIn)]
+          , counterexample "D1 round1 statuses: c_bench/c_measure defeated, c_kurt gap" $
+              verdictStatuses outcome
+                === [ (performsP, Defeated)
+                    , (holdsP "low_memory_footprint" "apt", Defeated)
+                    , (contributesP, Gap)
+                    ]
+          ]
+
+-- | D1 round 2 (rebuttal): the author reinstates a_bench (both reviewer attackers defeated),
+-- concedes a_meas (no defense), and discharges the c_kurt gap with variance runs. Arg order
+-- a_bench=0, a_meas=1, d_um=2, d_rebut=3, d_meas=4, a_kurt=5, r_um=6, r_rebut=7.
+prop_D1Round2 :: Property
+prop_D1Round2 = once $ ioProperty $
+  runExample "examples/rebuttal-replay/round2" rebuttalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("D1 round2: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "D1 round2 labels: a_bench reinstated in, a_meas out, attackers out, defenders in" $
+              verdictLabels outcome
+                === [ (0, LIn), (1, LOut), (2, LOut), (3, LOut)
+                    , (4, LIn), (5, LIn), (6, LIn), (7, LIn)
+                    ]
+          , counterexample "D1 round2 statuses: c_bench justified, c_measure defeated, c_kurt justified" $
+              verdictStatuses outcome
+                === [ (performsP, Justified)
+                    , (holdsP "low_memory_footprint" "apt", Defeated)
+                    , (contributesP, Justified)
+                    ]
           ]
 
 -- ---------------------------------------------------------------------------
@@ -417,7 +503,8 @@ prop_groupConflictExpectedJson =
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
 -- ---------------------------------------------------------------------------
 
--- | For every example (all eleven: A, B, E1–E5, R1–R3, S1), re-running the full
+-- | For every example (all fourteen: A, B, E1–E5, R1–R3, S1, and the D1
+-- rebuttal-replay rounds round0–round2), re-running the full
 -- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
 -- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
 -- the committed @example.core.sexp@ bytes __exactly__ (matching
@@ -446,7 +533,7 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
         (pr, pp) ->
           counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
 
--- | For every example (all eleven), re-render @expected.json@ from the elaborated
+-- | For every example (all fourteen), re-render @expected.json@ from the elaborated
 -- 'Unit' ("Lara.ExpectedJson".@expectedJson@) and assert it equals the committed
 -- @examples\/\<NAME\>\/expected.json@ bytes exactly — the located-diagnostic
 -- freshness sibling of 'prop_freshness'. @expected.json@ is the __Haskell-only__
@@ -512,8 +599,8 @@ attackCells u outcome = case outcome of
 -- reclassifies), this fails.
 --
 -- The suite is the §1 examples E1–E3 / R1–R3, the M5 worked cases E4/E5, the
--- two teaching examples A and B, plus strict-certificate example S1 — all
--- eleven in 'examplePolicies'.
+-- two teaching examples A and B, strict-certificate example S1, plus the three
+-- D1 rebuttal-replay rounds round0–round2 — all fourteen in 'examplePolicies'.
 prop_coverageMatrix :: Property
 prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
@@ -604,6 +691,9 @@ workedExamplesSpecProps =
   , ("E4 reinstatement → accept, justified UNDER rebut/undermine/undercut", quickCheckResult prop_E4)
   , ("E5 contested via undermine+undercut cycles, gap amid attacks", quickCheckResult prop_E5)
   , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
+  , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
+  , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)
+  , ("D1 round2 rebuttal → accept, reinstate + concede + gap discharge", quickCheckResult prop_D1Round2)
   , ("R1 undeclared-leaf → reject R1", quickCheckResult prop_R1)
   , ("R2 strict-contrary → reject R12", quickCheckResult prop_R2)
   , ("R3 bad-attack-target → reject R10", quickCheckResult prop_R3)
