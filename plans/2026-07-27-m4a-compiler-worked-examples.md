@@ -1,5 +1,7 @@
 # M4a Implementation Plan — compiler end to end on the worked-examples suite
 
+> **Status: complete — closed by PR #33.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `executing-plans` to
 > implement this plan task by task. Keep checkbox state current as each focused
 > test, proof, and gate lands.

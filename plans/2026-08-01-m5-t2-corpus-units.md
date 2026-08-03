@@ -1,5 +1,7 @@
 # M5 — T2 corpus units (tracker #48)
 
+> **Status: complete — closed by PR #50 (T2 of #48).**
+
 Branch `m5-t2-corpus-units`. Scope: T2 of issue #48 — hand-lower a stratified
 sample of M0 claims into `.lara` units, each a claim-support instance with a
 golden verdict through both drivers. T3/T5/T6 follow separately.

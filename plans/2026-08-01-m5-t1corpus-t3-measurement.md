@@ -1,5 +1,7 @@
 # M5 — T1 corpus half + T3 measurement harness (tracker #48)
 
+> **Status: complete — closed by PR #51 (T1 corpus half + T3 of #48).**
+
 Branch `m5-t1corpus-t3`. Scope: the open half of T1 (mutation generators over
 the corpus units, generated mutants exercising every status and attack kind)
 and T3 (the axis-(c) measurement harness). They land together because they

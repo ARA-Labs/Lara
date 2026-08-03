@@ -1,5 +1,7 @@
 # Claim-Support Repository Rename Implementation Plan
 
+> **Status: complete — landed as commit `4978d99` (docs: rename warrant calculus to claim-support calculus), 2026-07-21.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace LARA's project-owned "warrant" terminology with the approved claim-support vocabulary across documentation, metadata, module plans, and internal links without changing formal behavior or rewriting prior-art terminology.

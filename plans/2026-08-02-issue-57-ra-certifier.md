@@ -1,5 +1,7 @@
 # Issue #57 — exercise the strict/certificate path: `ra@1` rational-arithmetic certifier
 
+> **Status: complete — closed by PR #59 (2026-08-03).**
+
 Goal: make the paper's claim-support number (4) — fraction of load-bearing
 strict steps carrying a checked certificate — a real, non-zero measurement.
 Target unit: `corpus-units/adaptive-pruning/C04` (annotation

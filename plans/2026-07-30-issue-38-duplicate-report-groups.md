@@ -1,6 +1,6 @@
 # Issue #38 — Duplicate-report groups (spec §4.3): cross-layer implementation
 
-Status: complete (worktree `worktree-issue-38-duplicate-report-groups`).
+Status: complete — closed by PR #45 (worktree `worktree-issue-38-duplicate-report-groups`).
 
 ## Problem
 

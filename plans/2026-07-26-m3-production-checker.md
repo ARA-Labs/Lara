@@ -1,5 +1,7 @@
 # M3 Production Checker and Status Engine Implementation Plan
 
+> **Status: complete — closed by PR #28.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use
 > `executing-plans` to implement this plan task by task. Keep checkbox
 > state current as each focused test, proof, and gate lands.

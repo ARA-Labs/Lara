@@ -1,5 +1,7 @@
 # M5 — mutation suite + worked cases (tracker #48, T1 + T4)
 
+> **Status: complete — closed by PR #49 (T1 + T4 of #48).**
+
 Branch `feat/m5-mutation-suite-worked-cases`. Scope: T1 (seeded mutation
 generators) and T4 (worked cases) of issue #48. T2/T3/T5/T6 follow separately.
 

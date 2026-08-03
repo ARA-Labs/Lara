@@ -1,5 +1,7 @@
 # Issue #16 Executable Support and Attack Checkers Implementation Plan
 
+> **Status: complete — closed by PR #21.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use
 > `executing-plans` to implement this plan task by task.
 

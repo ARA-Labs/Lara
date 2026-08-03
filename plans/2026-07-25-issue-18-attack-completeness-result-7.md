@@ -1,5 +1,7 @@
 # Issue #18 Attack Completeness and Result 7 Consistency Implementation Plan
 
+> **Status: complete — closed by PR #26.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `executing-plans` to
 > implement this plan task-by-task. Keep checkbox state current as each focused
 > test, proof, and gate lands.

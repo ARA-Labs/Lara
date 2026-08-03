@@ -1,5 +1,7 @@
 # Issue #17 Faithful Edge Decider Implementation Plan
 
+> **Status: complete — closed by PR #25.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Construct the executable compiled-edge relation directly from every `Compile.CheckedProgram`, prove it `Compile.Faithful`, and expose the source-to-grounded result-6 bridge without a caller-supplied oracle.

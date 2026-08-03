@@ -1,6 +1,6 @@
 # Result 9 — backend replacement: eraseCert + stable-argument-id mechanization
 
-> **Outcome (2026-07-30): DONE — `lean/Lara/Erase.lean`, sorry-free, axioms ⊆ trio.**
+> **Outcome (2026-07-30): DONE — closed by PRs #41/#43. `lean/Lara/Erase.lean`, sorry-free, axioms ⊆ trio.**
 > During design we found the informal doc proof glosses *intra-program subterm
 > sharing*: `containsB` keys on exact structural equality (cert payload included),
 > so per-argument erase-equality alone does **not** preserve the AF. The faithful,

@@ -1,5 +1,7 @@
 # Strict-Certificate Worked Example Implementation Plan
 
+> **Status: complete — closed by PR #39.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `executing-plans` to
 > implement this plan task by task. Keep checkbox state current as each focused
 > test and gate lands.

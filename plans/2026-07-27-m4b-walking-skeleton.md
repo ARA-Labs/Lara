@@ -1,5 +1,7 @@
 # M4b Implementation Plan — walking skeleton, no hand-authored certificate
 
+> **Status: complete — closed by PR #34.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `executing-plans` to
 > implement this plan task by task. Keep checkbox state current as each focused
 > test and gate lands.

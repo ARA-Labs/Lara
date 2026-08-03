@@ -1,5 +1,7 @@
 # M5 — T6 ablation baselines (tracker #48)
 
+> **Status: complete — closed by PR #53 (T6 of #48).**
+
 Branch `feat/m5-t6-ablation-baselines`. Scope: the last open task of M5 — the
 two deterministic Phase F ablations (`popl-research-review.md` §5 / §7,
 `research-proposal.md` §7): **LARA without typed attacks** and **LARA without

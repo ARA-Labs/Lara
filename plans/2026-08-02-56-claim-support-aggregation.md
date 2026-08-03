@@ -1,5 +1,7 @@
 # #56 — Corpus claim-support aggregation (the paper's `\msfive` numbers)
 
+> **Status: complete — closed by PR #58.**
+
 Branch: `56-corpus-claim-support`. Follow-up milestone (non-zero certificate
 path): #57.
 
