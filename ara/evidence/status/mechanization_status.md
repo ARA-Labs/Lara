@@ -65,7 +65,7 @@ substitutes for these Lean proofs.
   only on `propext` and `Quot.sound` (two term-level lemmas depend on none).
 - Statement model chosen: **A (uniform injective relabel)** over the shared-skeleton (B) and
   `EraseEq`+intra-program-canonicity (C) alternatives — see
-  `plans/2026-07-30-result9-backend-replacement.md` and the ara journey record. Purely additive,
+  `docs/mechanization-plan.md` (result 9, Model A) and the ara journey record. Purely additive,
   Lean-only: no wire codec, Haskell, or differential-anchor change, so the Haskell↔Lean differential
   is unaffected.
 

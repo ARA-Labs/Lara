@@ -1,5 +1,5 @@
 -- | Seeded mutation generators for the M5 evaluation corpus (tracker #48, T1;
--- spec §10.1 mutation table; plan @plans/2026-08-01-m5-mutation-suite-worked-cases.md@).
+-- spec §10.1 mutation table; freeze @docs/m5-freeze-checklist.md@).
 --
 -- Each 'MutationOp' is a surgical, single-defect transformation of a decoded
 -- worked-example 'CheckInput' (or, for the codec family, of its wire bytes)

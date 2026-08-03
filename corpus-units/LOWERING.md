@@ -3,7 +3,8 @@
 How the 60 claims of `m0/sample.tsv` lower into `.lara` units under
 `corpus-units/corpus-v1.policy.lara`. Every unit's header comment cites this
 file; per-claim judgment calls are recorded in that header, never silently.
-Plan: `plans/2026-08-01-m5-t2-corpus-units.md`. Exemplars:
+Plan: M5 T2 corpus units (tracker #48; freeze `docs/m5-freeze-checklist.md`).
+Exemplars:
 
 - `sample-specific-masks/C06` — justified (all mandatory CQs met).
 - `adaptive-pruning/C03` — gap (mandatory CQ unmet ⇒ E2-style, no arg).

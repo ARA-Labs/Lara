@@ -147,9 +147,9 @@ so no T6 cell isolates result 7 (attack completeness, the frozen
 unlabelled-edge theorem) — and the mutant manifest has zero
 expected-MissingConflict rows today.
 
-**Context:** Surfaced while reviewing the T6 ablation plan
-(`plans/2026-08-02-m5-t6-ablation-baselines.md`, review D9/D11). Same harness
-and partition pattern as T6; one more `gen-mutants.hs` regeneration cycle.
+**Context:** Surfaced during the M5 T6 ablation work (review D9/D11;
+`docs/m5-freeze-checklist.md`). Same harness and partition pattern as T6; one
+more `gen-mutants.hs` regeneration cycle.
 
 **Effort:** S
 **Priority:** P3
@@ -168,9 +168,9 @@ carries a real certificate (adaptive-pruning/C04, #57). The D1 payload design
 (the fraction IS the certified value) exists precisely to make this corruption
 meaningful.
 
-**Context:** Deferred from the #57 PR (decision D3, plan
-`plans/2026-08-02-issue-57-ra-certifier.md`) to keep it reviewable. A suite
-extension: regenerating cuts `m5-freeze-v3` per the checklist's post-freeze rule.
+**Context:** Deferred from the #57 PR (decision D3; `docs/m5-freeze-checklist.md`)
+to keep it reviewable. A suite extension: regenerating cuts `m5-freeze-v3` per
+the checklist's post-freeze rule.
 
 **Effort:** S
 **Priority:** P3

@@ -1,6 +1,6 @@
 # LARA surface grammar — frozen (`lara-syntax@0.1`)
 
-_Task **A0.5** of `plans/2026-07-27-m4a-compiler-worked-examples.md` (GitHub #31).
+_Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
 printer (`Lara.Syntax`) and the `Program → Unit` elaborator (`Lara.Elaborate`)
 implement a fixed contract instead of inventing language semantics. It is grounded
@@ -507,7 +507,7 @@ _Frozen 2026-07-27 as Task A0.5. Gates A1 (`Lara.Syntax` + `Lara.Elaborate`)._
 Two additive constructs over `lara-syntax@0.1`, both decoding to the same
 `lara-core@0.1` abstract syntax (spec result 12 unaffected; no Unit-reachable
 type changes). Motivation: the strict-certificate worked example
-(`plans/2026-07-29-strict-cert-worked-example.md`); the Unit-level cert path
+(`examples/S1/`; `docs/worked-examples-plan.md`); the Unit-level cert path
 (`Lara.Strict.ND`, `Driver.buildCertOk`) predates this surface.
 
 ### A.1 Support-term assurance (arg blocks)

@@ -45,6 +45,29 @@ Attack coverage: rebut, undercut, undermine (E3) — all three; plus the *illega
 Rejection coverage spans three distinct classes; the full mutation suite (`engineering-plan.md` §5)
 covers the rest, but these three are the human-readable representatives.
 
+## 1.5 M5 additions — E4 and E5 (landed in PR #49)
+
+M6 pulled forward (issue #48, T4) added two further worked cases to close
+coverage cells the six-example matrix cannot reach, both on policy
+`empirical-v2` (= `empirical-v1` + the rules/exceptions/contrary below) with
+golden verdicts through both drivers (`examples/{E4,E5}/`):
+
+- **E4 — reinstatement** (`examples/E4/`): a claim stays `justified` *while
+  attacked* because its attacker is itself defeated — `justified-under-rebut`
+  (context R) and `justified-under-undermine` (context U, via the
+  one-directional `contrary refuted_replication not_generalizes`; a symmetric
+  pair would force the reverse edge and collapse the reinstatement into a
+  cycle).
+- **E5 — contested beyond rebut, and gap amid attacks** (`examples/E5/`):
+  `contested` via a mutual-undermine 2-cycle (context V) and via a
+  mutual-undercut 2-cycle (context W — undercut cycles are voluntary because
+  exceptions don't participate in the completeness scan), plus a `gap` claim
+  coexisting with attacks (context G).
+
+`prop_coverageMatrix` extends with the new cells (justified-under-attack,
+contested-via-undercut/undermine, gap-with-attacks-present); the frozen suite
+carries them — contested is held by E5 (`docs/m5-freeze-checklist.md`).
+
 ## 2. Anchoring in the real corpus
 
 The examples must not be toy-only. Anchor them in the ResNet ARA dissected in `corpus-map.md` §3 so

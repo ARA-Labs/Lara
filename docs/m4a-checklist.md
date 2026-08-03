@@ -1,7 +1,7 @@
 # M4a checklist — compiler end to end on the worked-examples suite
 
-_Operational freeze/tracker for milestone **M4a** (`plans/2026-07-27-m4a-compiler-worked-examples.md`,
-GitHub #31, child of the #29 M4 umbrella). Companion to `docs/worked-examples-plan.md` (the six-example
+_Operational freeze/tracker for milestone **M4a** (GitHub #31, child of the #29
+M4 umbrella). Companion to `docs/worked-examples-plan.md` (the six-example
 coverage design) and `docs/spec.md` (the frozen contract). Mirrors `docs/m1-freeze-checklist.md` and
 `docs/m3-closeout-notes.md` in role: it records what M4a locks before frontend code lands, freezes the
 verdicts that already have oracles, and lists what stays provisional until the parser + elaborator exist.
@@ -260,5 +260,5 @@ original A2 suite was **defeasible-only** (`nd@1` inert); post-M4a example
       owners noted (§4).
 - [ ] Reviewed and committed **before** frontend code lands (A0 gate; orchestrator commits after review).
 
-_Frozen 2026-07-27 as Task A0 of `plans/2026-07-27-m4a-compiler-worked-examples.md`. Next: A0.5 grammar
+_Frozen 2026-07-27 as Task A0 of M4a. Next: A0.5 grammar
 freeze (gates A1), then A1 (E1 vertical slice first)._

@@ -595,8 +595,8 @@ observations:
     variance_reported (fre/C01), a significance CQ for the measurement family (stay-on-topic/C06), and
     a family-agnostic records-consistency CQ (restricted_mlm/C14). None blocked an honest lowering; candidates
     for corpus-v2 / spec discussion.'
-  context: Aggregated from the 7 lowering agents' NOTES sections; recorded in plans/2026-08-01-m5-t2-corpus-units.md
-    execution record.
+  context: Aggregated from the 7 lowering agents' NOTES sections; recorded in corpus-units/LOWERING.md
+    and docs/m5-freeze-checklist.md.
   potential_type: constraint
   bound_to:
   - N94

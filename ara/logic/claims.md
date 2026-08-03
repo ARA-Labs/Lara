@@ -549,7 +549,7 @@ the result is stated but not yet proved or mechanized._
 - **Status**: testing
 - **Provenance**: ai-suggested
 - **Falsification**: A single-defect seeded run in this harness whose localization accuracy lands significantly below 100% without any change to the checker's diagnostic ordering — i.e., the number moving as a detection signal in the very regime where the claim says it cannot.
-- **Proof**: [trace N96 (T3 smoke: location-accuracy 246/246 over the single-defect manifest), plans/2026-08-02-m5-t6-ablation-baselines.md (eng review D10: T6 scoped confirmatory-by-construction on this ground), TODOS.md "Discriminating localization benchmark" entry]
+- **Proof**: [trace N96 (T3 smoke: location-accuracy 246/246 over the single-defect manifest), docs/m5-freeze-checklist.md (T6 scoped confirmatory-by-construction on this ground), TODOS.md "Discriminating localization benchmark" entry]
 - **Dependencies**: []
 - **Tags**: evaluation, mutation-testing, localization, methodology, benchmark-design
 

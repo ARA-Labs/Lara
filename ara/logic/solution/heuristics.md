@@ -60,7 +60,7 @@
   the suite honest without trusting the generation event. Reused for the T2
   corpus units: the generator fails loudly on parse/elaborate/replay errors and
   the spec cross-checks manifest expected_status against computed verdicts.
-- **Sources**: ["148 ← plans/2026-08-01-m5-mutation-suite-worked-cases.md:97 «Generated suite: **148 mutants** over 8 accept bases (A, B, E1–E5, S1), seed» [result]", "zero mismatches ← plans/2026-08-01-m5-mutation-suite-worked-cases.md:99 «decodeCheckInputFile` — zero specification mismatches on the first full» [result]"]
+- **Sources**: ["148 → 295 seeded mutants over 8 accept bases (A, B, E1–E5, S1), then the frozen 358→360 suite ← docs/m5-freeze-checklist.md", "zero specification mismatches on the first full sweep ← test/MutationSpec.hs"]
 - **Status**: active
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium

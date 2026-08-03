@@ -2,16 +2,14 @@
 
 _Operational record for milestone **M5 — evaluation corpus** task **T5 (freeze
 protocol)** (`plans/research-proposal.md` §7, tracker #48). Companion to the M1
-analogue (`docs/m1-freeze-checklist.md`) and the T6 ablation plan
-(`plans/2026-08-02-m5-t6-ablation-baselines.md`). This file freezes the fixture
+analogue (`docs/m1-freeze-checklist.md`). This file freezes the fixture
 set, corpus sample, and generator seeds before the final measurement runs; the
 paper's axis-(c) tables are generated only from post-freeze runs against the
 inputs pinned here._
 
 _**Re-freeze history.** `m5-freeze-v1` (tag on the #55 merge commit) froze the
 358-mutant suite over the all-defeasible corpus. Issue #57 (the `ra@1`
-rational-arithmetic certifier; plan
-`plans/2026-08-02-issue-57-ra-certifier.md`) changed frozen inputs — the
+rational-arithmetic certifier, PR #59) changed frozen inputs — the
 shared policy gained the strict Family-10 rule (rippling through every
 `unit.core.sexp`), `adaptive-pruning/C04` gained the certificate-checked
 strict arg, and the seeded sweep grew the suite 358 → 360 — so per the

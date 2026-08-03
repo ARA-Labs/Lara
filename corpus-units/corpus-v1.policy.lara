@@ -2,7 +2,7 @@
 #
 # One policy for all 60 units lowered from the M0 sample (`m0/sample.tsv`): a review policy is a
 # uniform standard, so per-claim disagreement with a policy call is recorded in the unit's header
-# comment, never by forking the policy (plans/2026-08-01-m5-t2-corpus-units.md).
+# comment, never by forking the policy (docs/m5-freeze-checklist.md).
 #
 # Vocabulary provenance: one defeasible rule per scheme family from the M0 aggregation
 # (`m0/annotation-summary.md` §2 — 22 raw annotator scheme names normalize to 9 families), plus

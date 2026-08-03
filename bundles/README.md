@@ -8,8 +8,9 @@ manifest and provenance schemas, the source-trace schema, the derivation rules
 the elaborator must follow, and the canonicalization rules that make every byte
 a function of the source and the trusted inputs only (reviews 2A/T4/T8).
 
-This spec is written at task **B0** of `plans/2026-07-27-m4b-walking-skeleton.md`
-and is binding on B1 (elaborator), B2 (replay), and B3 (golden + CI). The only
+This spec is written at task **B0** of the M4b walking skeleton
+(`plans/research-proposal.md` §7, M4) and is binding on B1 (elaborator), B2
+(replay), and B3 (golden + CI). The only
 bundle today is `bundles/walking-skeleton/` (§2).
 
 ## 1. Decisions confirmed and scope honesty
