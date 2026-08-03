@@ -437,3 +437,10 @@ entries:
       - "Did NOT create a claim for 'RA conformance evidence' itself: per CLAUDE.md, Haskell property tests are conformance evidence, not soundness — the suite is Proof-grade material for a future strict-path claim, not a claim of its own."
       - "No Stage-4 edits: no crystallized logic entry references the ra@1 backend (the #57 turn that would have created one is part of the unrecorded gap); nothing to reconcile. Near-miss considered: appending RASpec to C11's adversarial-validation Proof — rejected, C11 is about producer/checker rejection, not backend conformance."
       - "No stale flags: O26-O28/O30/O33 origin 2026-08-01 (1 session-day), O35/O36 today."
+- turn: "2026-08-03_001#1-2"
+  notes:
+    - "Routed both the #68 audit (N102) and the paper validation (N103) as experiment nodes with results — they are verification acts with observable outcomes, not decisions."
+    - "Did NOT stage the 'cite srcStatus_iff_checked not status_preservation' finding as an observation — it is fully recorded in docs/paper-lean-name-map.md and both repos' provenance comments (repo already records it; skip filter)."
+    - "Near-miss: C09 (strict-chain consistency) — audit re-verified its Lean hypothesis verbatim; consistent-with, not new evidence; no status change."
+    - "No closure signals for the 19 unpromoted staged observations (O35/O36 topics untouched this turn); skipped a full stale sweep, flagged as inherited debt."
+    - "Noted in the session record that earlier 2026-08-03 conversations (PLDI plan, PRs #65-#67, #71) ran without epilogues — gap acknowledged, not fabricated."

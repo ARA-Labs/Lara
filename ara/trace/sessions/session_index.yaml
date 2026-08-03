@@ -269,3 +269,12 @@ sessions:
   - C24
   - H07
   open_threads: 7
+- id: 2026-08-03_001
+  date: '2026-08-03'
+  summary: 'P1-P3 gate closed (#68): Lean name-map audit confirms the two-sided equivalence oracle-free
+    (srcStatus_iff_checked); contingency moot; docs/paper-lean-name-map.md landed via PR #72; paper
+    side-by-side validation passed with comment-only fixes (Overleaf 418e423).'
+  turn_count: 2
+  events_count: 2
+  claims_touched: []
+  open_threads: 4

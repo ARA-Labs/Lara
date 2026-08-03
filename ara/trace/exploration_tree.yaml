@@ -2420,3 +2420,60 @@ tree:
   - "commit 69264a1"
   status: resolved
   also_depends_on: []
+- id: N102
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-03T13:30
+  source_refs:
+  - "issue #68"
+  - docs/paper-lean-name-map.md
+  - "PR #72 (commit e43be03)"
+  title: 'P1-P3 gate: read-only Lean name-map audit (#68) — equivalence confirmed two-sided'
+  description: >
+    The PLDI revision plan gates paper items P1-P3 on a read-only audit mapping each paper
+    statement to its Lean declaration, carrying the P1 contingency: does a true two-sided
+    equivalence over an INDEPENDENT direct source semantics exist, or must the paper weaken
+    "full equivalence"? Audited Grounded/Compile/Consistency/Policy/Unit/Strict/ND/RA.
+  result: >
+    Contingency moot. The headline is Compile.srcStatus_iff_checked (SrcStatus P c s <->
+    s = statusC (checkedAF P) c), oracle-free: SrcIn/SrcOut/SrcStatus are defined over the
+    Prop-level Edge relation (no AF, no iteration), and the Faithful oracle is discharged
+    constructively by edgeB_faithful. Grounded.status_preservation is only the abstract-AF
+    core (both sides read the same F.attack) and must never be cited as the headline.
+    Issue #68's pointer "Compile.lean:606" for the scope note is a typo — it lives in
+    Grounded.lean (module header + status_preservation docstring). B1 (deterministic
+    terminating replay) has no separate termination lemma: replayFull is a total Lean
+    function into Bool, so the paper states totality + adequacy (replayFull_iff).
+    Strict-chain hypothesis = Policy.WellFormed over Policy.StrictReachable, quoted
+    verbatim. All ~60 mapped declaration names spot-checked; every headline theorem
+    already AxCheck-gated. Deliverable docs/paper-lean-name-map.md; PR #72.
+  evidence:
+  - docs/paper-lean-name-map.md
+  - "lean/AxCheck.lean (srcStatus_iff_checked :381, contrary_claims_not_both_justified :600)"
+  status: resolved
+  also_depends_on:
+  - N100
+- id: N103
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-03T13:36
+  source_refs:
+  - "paper repo (Overleaf) commit 418e423"
+  - "paper plan/lean-name-map.md"
+  title: 'Paper-side P1-P3 side-by-side validation against the finalized name map'
+  description: >
+    With the #68 audit landed, validated the already-transcribed paper displays
+    (def:direct-status, thm:preservation, def:grounded, def:status, def:strict-wf,
+    def:registry-entry B1-B4) side-by-side against the Lean statements.
+  result: >
+    All transcriptions match (same quantifiers, same hypotheses) — zero wording changes
+    needed; the transcribe-never-invent rule held. Only comment-level fixes: two drifted
+    line numbers (Backend :77, wfB_iff :620), status_preservation annotated abstract-core-only
+    in thm:preservation's provenance comment, plan/lean-name-map.md records gate closure
+    (code-repo doc canonical on disagreement). Clean latexmk build, no undefined refs.
+    Commit 418e423 pushed to Overleaf.
+  evidence:
+  - "paper src/metatheory.tex, src/semantics.tex, src/language.tex provenance comments"
+  status: resolved
+  also_depends_on:
+  - N102
