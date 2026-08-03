@@ -25,6 +25,7 @@ import Data.List (find, sortBy)
 import Lara.AST
 import qualified Lara.Strict as Strict
 import qualified Lara.Strict.ND as ND
+import qualified Lara.Strict.RA as RA
 
 data CoreVersion = LaraCoreV01
   deriving (Eq, Show)
@@ -107,7 +108,7 @@ runtimeReplayFailure input =
   case firstDuplicate selectedBackends of
     Just (backend, version) -> Just (DuplicateSelectedBackend backend version)
     Nothing ->
-      case find (/= supportedBackend) selectedBackends of
+      case find (`notElem` supportedBackends) selectedBackends of
         Just (backend, version) -> Just (UnknownSelectedBackend backend version)
         Nothing -> firstUnselectedCertificate selectedBackends (unitArgs (inputUnit input))
   where
@@ -168,11 +169,13 @@ firstDuplicate = go []
       | item `elem` seen = Just item
       | otherwise = go (item : seen) rest
 
-supportedBackend :: (BackendId, String)
-supportedBackend =
-  ( BackendId (Strict.backendName ND.ndBackendId)
-  , show (Strict.backendVersion ND.ndBackendId)
-  )
+supportedBackends :: [(BackendId, String)]
+supportedBackends =
+  [ ( BackendId (Strict.backendName b)
+    , show (Strict.backendVersion b)
+    )
+  | b <- [ND.ndBackendId, RA.raBackendId]
+  ]
 
 firstUnselectedCertificate
   :: [(BackendId, String)]

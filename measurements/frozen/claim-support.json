@@ -1,6 +1,6 @@
 {
   "environment": {
-    "git-rev": "ee01ae3bbe736f2d911aed866afef48983c5ab3b",
+    "git-rev": "6ee4f79050abbc7f54bda8b15d33c951c492ea56",
     "git-dirty": false,
     "ghc": "9.14.1",
     "lean": "",
@@ -8,7 +8,7 @@
     "cpu": "aarch64"
   },
   "corpus": {
-    "frozen-tag": "m5-freeze-v1",
+    "frozen-tag": "m5-freeze-v2",
     "seed": 20260801,
     "units": 60
   },
@@ -18,37 +18,37 @@
     "defeated": 3
   },
   "load-bearing-leaves": {
-    "total": 36,
+    "total": 38,
     "provenance": {
-      "ai-executed": 36
+      "ai-executed": 38
     },
     "kind": {
       "attested": 20,
-      "observed": 16
+      "observed": 18
     },
-    "paper-anchored": 13,
+    "paper-anchored": 15,
     "note": "All load-bearing leaves are agent-produced (provenance ai-executed); none human/paper-authored. `paper-anchored` counts those additionally citing a direct paper-document locator (an E<n># experiment pointer, or a Table/Figure/Appendix/Theorem/Lemma/Corollary/Proposition/Equation/Section/paper locator)."
   },
   "all-leaves": {
-    "total": 167,
+    "total": 169,
     "provenance": {
-      "ai-executed": 167
+      "ai-executed": 169
     },
     "kind": {
       "attested": 106,
-      "observed": 61
+      "observed": 63
     },
-    "paper-anchored": 49
+    "paper-anchored": 51
   },
   "dead-end-attacks": {
     "typed-attacks-total": 3,
     "dead-end-sourced": 2
   },
   "strict-certificates": {
-    "load-bearing-strict-steps": 0,
-    "carrying-checked-certificate": 0,
+    "load-bearing-strict-steps": 1,
+    "carrying-checked-certificate": 1,
     "documented-strict-flavored": 5,
-    "note": "corpus-v1 is all-defeasible; fraction is 0/0 by construction. Strict/certificate path is future work (issue #57)."
+    "note": "The certificate path is exercised since #57: adaptive-pruning/C04's derived-arithmetic leg is a strict rational_drop_recheck step under a checked ra@1 certificate. The remaining documented strict-flavored claims await their own certifier backends."
   },
   "units": [
     {
@@ -68,12 +68,12 @@
       "status": [
         "gap"
       ],
-      "load-bearing-leaves": 0,
-      "load-bearing-paper-anchored": 0,
+      "load-bearing-leaves": 2,
+      "load-bearing-paper-anchored": 2,
       "typed-attacks": 0,
       "dead-end-attacks": 0,
-      "strict-steps": 0,
-      "strict-certified": 0
+      "strict-steps": 1,
+      "strict-certified": 1
     },
     {
       "unit": "all-in-one.C01",

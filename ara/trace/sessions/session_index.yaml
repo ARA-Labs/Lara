@@ -259,10 +259,13 @@ sessions:
     cabal test PASS), post-freeze measure.hs committed under measurements/frozen/ (418 records, class-match
     + lean_agree 418/418), docs/m5-freeze-checklist.md, tag m5-freeze-v1 deferred to merge. M5 complete →
     pivot M7 (N100). Crystallized O32→C24 (surgical/monotone ablation) + O34→H07 (audit gate coverage);
-    staged O35. Freeze on branch 51be992; PR/push held for user.'
-  turn_count: 2
-  events_count: 6
+    staged O35. Freeze on branch 51be992; PR/push held for user. Turn 3 (separate conversation;
+    intervening #55–#58/#57 turns unrecorded): PR #59 review addressed — RASpec conformance suite
+    for ra@1 (15 properties green, commit 69264a1, N101); staged O36 (Haskell/Lean
+    parity-by-construction).'
+  turn_count: 3
+  events_count: 8
   claims_touched:
   - C24
   - H07
-  open_threads: 5
+  open_threads: 7

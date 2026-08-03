@@ -1,6 +1,6 @@
 unit	status	load_bearing_leaves	lb_paper_anchored	typed_attacks	dead_end_attacks	strict_steps	strict_certified	strict_flavored
 adaptive-pruning.C03	gap	0	0	0	0	0	0	no
-adaptive-pruning.C04	gap	0	0	0	0	0	0	yes
+adaptive-pruning.C04	gap	2	2	0	0	1	1	yes
 all-in-one.C01	gap	0	0	0	0	0	0	no
 all-in-one.C03	gap	0	0	0	0	0	0	no
 all-in-one.C05	gap	0	0	0	0	0	0	no

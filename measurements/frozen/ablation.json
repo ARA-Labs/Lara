@@ -1,6 +1,6 @@
 {
   "environment": {
-    "git-rev": "cfe76071224999cb9236b9a8f09ef0ade2fc4c11",
+    "git-rev": "6ee4f79050abbc7f54bda8b15d33c951c492ea56",
     "git-dirty": false,
     "ghc": "9.14.1",
     "lean": "Lean (version 4.32.0, arm64-apple-darwin24.6.0, commit 8c9756b28d64dab099da31a4c09229a9e6a2ef35, Release)",
@@ -11,9 +11,9 @@
     {
       "ablation": "no-cq",
       "aggregate": {
-        "count": 418,
+        "count": 420,
         "missed-rejects": 18,
-        "unchanged": 400,
+        "unchanged": 402,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -87,10 +87,10 @@
             "unchanged": 20
           },
           "reject-R13": {
-            "total": 41,
+            "total": 42,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 41
+            "unchanged": 42
           },
           "reject-R3": {
             "total": 19,
@@ -117,10 +117,10 @@
             "unchanged": 18
           },
           "reject-R7": {
-            "total": 19,
+            "total": 20,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 20
           },
           "reject-R9": {
             "total": 19,
@@ -1672,108 +1672,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--undeclared-leaf-0.sexp",
-          "base": "bam.C05",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C01--undeclared-leaf-0.sexp",
-          "base": "fre.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--undeclared-leaf-0.sexp",
-          "base": "fre.C04",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/pinn.C01--undeclared-leaf-0.sexp",
-          "base": "pinn.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rice.C01--undeclared-leaf-0.sexp",
-          "base": "rice.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C05--undeclared-leaf-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C06--undeclared-leaf-0.sexp",
-          "base": "sample-specific-masks.C06",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/self-composing-policies.C01--undeclared-leaf-0.sexp",
-          "base": "self-composing-policies.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--undeclared-leaf-0.sexp",
-          "base": "test-time-model-adaptation.C04",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
           "input": "fixtures/mutants/rebench-restricted_mlm.C14--undeclared-leaf-0.sexp",
           "base": "rebench-restricted_mlm.C14",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--undeclared-leaf-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
           "family": "undeclared-leaves",
           "operator": "undeclared-leaf",
           "expected": "reject-R1",
@@ -1792,70 +1692,100 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--hidden-rule-0.sexp",
-          "base": "bam.C05",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--undeclared-leaf-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/fre.C01--hidden-rule-0.sexp",
-          "base": "fre.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/fre.C04--undeclared-leaf-0.sexp",
           "base": "fre.C04",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/pinn.C01--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/self-composing-policies.C01--undeclared-leaf-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--undeclared-leaf-0.sexp",
+          "base": "fre.C01",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C01--undeclared-leaf-0.sexp",
           "base": "pinn.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/rice.C01--hidden-rule-0.sexp",
-          "base": "rice.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "input": "fixtures/mutants/bam.C05--undeclared-leaf-0.sexp",
+          "base": "bam.C05",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C05--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/adaptive-pruning.C04--undeclared-leaf-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--undeclared-leaf-0.sexp",
           "base": "sample-specific-masks.C05",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C06--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/rice.C01--undeclared-leaf-0.sexp",
+          "base": "rice.C01",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--undeclared-leaf-0.sexp",
           "base": "sample-specific-masks.C06",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
@@ -1864,16 +1794,6 @@
         {
           "input": "fixtures/mutants/self-composing-policies.C01--hidden-rule-0.sexp",
           "base": "self-composing-policies.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--hidden-rule-0.sexp",
-          "base": "test-time-model-adaptation.C04",
           "family": "hidden-policy-extension",
           "operator": "hidden-rule",
           "expected": "reject-R1",
@@ -1904,6 +1824,86 @@
         {
           "input": "fixtures/mutants/rebench-triton_cumsum.C09--hidden-rule-0.sexp",
           "base": "rebench-triton_cumsum.C09",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--hidden-rule-0.sexp",
+          "base": "fre.C01",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--hidden-rule-0.sexp",
+          "base": "fre.C04",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--hidden-rule-0.sexp",
+          "base": "sample-specific-masks.C06",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--hidden-rule-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--hidden-rule-0.sexp",
+          "base": "bam.C05",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--hidden-rule-0.sexp",
+          "base": "rice.C01",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--hidden-rule-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--hidden-rule-0.sexp",
+          "base": "test-time-model-adaptation.C04",
           "family": "hidden-policy-extension",
           "operator": "hidden-rule",
           "expected": "reject-R1",
@@ -2032,28 +2032,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--wrong-subst-domain-0.sexp",
-          "base": "bam.C05",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C01--wrong-subst-domain-0.sexp",
-          "base": "fre.C01",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--wrong-subst-domain-0.sexp",
-          "base": "fre.C04",
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-subst-domain-0.sexp",
+          "base": "test-time-model-adaptation.C04",
           "family": "wrong-formulas",
           "operator": "wrong-subst-domain",
           "expected": "reject-R3",
@@ -2072,26 +2052,6 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/rice.C01--wrong-subst-domain-0.sexp",
-          "base": "rice.C01",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-subst-domain-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
           "input": "fixtures/mutants/sample-specific-masks.C06--wrong-subst-domain-0.sexp",
           "base": "sample-specific-masks.C06",
           "family": "wrong-formulas",
@@ -2102,8 +2062,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/self-composing-policies.C01--wrong-subst-domain-0.sexp",
-          "base": "self-composing-policies.C01",
+          "input": "fixtures/mutants/rice.C01--wrong-subst-domain-0.sexp",
+          "base": "rice.C01",
           "family": "wrong-formulas",
           "operator": "wrong-subst-domain",
           "expected": "reject-R3",
@@ -2112,28 +2072,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-subst-domain-0.sexp",
-          "base": "test-time-model-adaptation.C04",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-subst-domain-0.sexp",
-          "base": "rebench-restricted_mlm.C14",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-subst-domain-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
+          "input": "fixtures/mutants/bam.C05--wrong-subst-domain-0.sexp",
+          "base": "bam.C05",
           "family": "wrong-formulas",
           "operator": "wrong-subst-domain",
           "expected": "reject-R3",
@@ -2152,8 +2092,68 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--wrong-premise-0.sexp",
-          "base": "bam.C05",
+          "input": "fixtures/mutants/self-composing-policies.C01--wrong-subst-domain-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-subst-domain-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-subst-domain-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--wrong-subst-domain-0.sexp",
+          "base": "fre.C04",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-subst-domain-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--wrong-subst-domain-0.sexp",
+          "base": "fre.C01",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-premise-0.sexp",
+          "base": "adaptive-pruning.C04",
           "family": "wrong-formulas",
           "operator": "wrong-premise",
           "expected": "reject-R4",
@@ -2172,8 +2172,58 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-premise-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-premise-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-triton_cumsum.C09--wrong-premise-0.sexp",
+          "base": "rebench-triton_cumsum.C09",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-premise-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/fre.C04--wrong-premise-0.sexp",
           "base": "fre.C04",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--wrong-premise-0.sexp",
+          "base": "bam.C05",
           "family": "wrong-formulas",
           "operator": "wrong-premise",
           "expected": "reject-R4",
@@ -2202,26 +2252,6 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-premise-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C06--wrong-premise-0.sexp",
-          "base": "sample-specific-masks.C06",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
           "input": "fixtures/mutants/self-composing-policies.C01--wrong-premise-0.sexp",
           "base": "self-composing-policies.C01",
           "family": "wrong-formulas",
@@ -2234,36 +2264,6 @@
         {
           "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-premise-0.sexp",
           "base": "test-time-model-adaptation.C04",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-premise-0.sexp",
-          "base": "rebench-restricted_mlm.C14",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-premise-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-triton_cumsum.C09--wrong-premise-0.sexp",
-          "base": "rebench-triton_cumsum.C09",
           "family": "wrong-formulas",
           "operator": "wrong-premise",
           "expected": "reject-R4",
@@ -2752,6 +2752,26 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/adaptive-pruning.C04--cert-theory-swap-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--cert-payload-tamper-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/fre.C04--bad-attack-position-0.sexp",
           "base": "fre.C04",
           "family": "bad-attack-targets",
@@ -2782,28 +2802,18 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--unlicensed-attack-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/bam.C05--unlicensed-attack-0.sexp",
           "base": "bam.C05",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "reject-R11",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C01--unlicensed-attack-0.sexp",
-          "base": "fre.C01",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "reject-R11",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--unlicensed-attack-0.sexp",
-          "base": "fre.C04",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -2822,8 +2832,18 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/rice.C01--unlicensed-attack-0.sexp",
-          "base": "rice.C01",
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--unlicensed-attack-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--unlicensed-attack-0.sexp",
+          "base": "fre.C04",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -2842,8 +2862,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C06--unlicensed-attack-0.sexp",
-          "base": "sample-specific-masks.C06",
+          "input": "fixtures/mutants/fre.C01--unlicensed-attack-0.sexp",
+          "base": "fre.C01",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -2852,8 +2872,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/self-composing-policies.C01--unlicensed-attack-0.sexp",
-          "base": "self-composing-policies.C01",
+          "input": "fixtures/mutants/rebench-triton_cumsum.C09--unlicensed-attack-0.sexp",
+          "base": "rebench-triton_cumsum.C09",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -2862,18 +2882,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--unlicensed-attack-0.sexp",
-          "base": "test-time-model-adaptation.C04",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "reject-R11",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-restricted_mlm.C14--unlicensed-attack-0.sexp",
-          "base": "rebench-restricted_mlm.C14",
+          "input": "fixtures/mutants/adaptive-pruning.C04--unlicensed-attack-0.sexp",
+          "base": "adaptive-pruning.C04",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -2892,8 +2902,18 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/rebench-triton_cumsum.C09--unlicensed-attack-0.sexp",
-          "base": "rebench-triton_cumsum.C09",
+          "input": "fixtures/mutants/rice.C01--unlicensed-attack-0.sexp",
+          "base": "rice.C01",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C01--unlicensed-attack-0.sexp",
+          "base": "self-composing-policies.C01",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -4316,9 +4336,9 @@
     {
       "ablation": "no-typed",
       "aggregate": {
-        "count": 418,
+        "count": 420,
         "missed-rejects": 30,
-        "unchanged": 388,
+        "unchanged": 390,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -4382,8 +4402,9 @@
             "total": 19,
             "missed-rejects": 19,
             "missed-accept-classes": {
-              "accept-all-contested": 12,
+              "accept-all-contested": 11,
               "accept-defeated": 4,
+              "accept-gap": 1,
               "accept-other": 3
             },
             "unchanged": 0
@@ -4395,10 +4416,10 @@
             "unchanged": 20
           },
           "reject-R13": {
-            "total": 41,
+            "total": 42,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 41
+            "unchanged": 42
           },
           "reject-R3": {
             "total": 19,
@@ -4425,10 +4446,10 @@
             "unchanged": 18
           },
           "reject-R7": {
-            "total": 19,
+            "total": 20,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 20
           },
           "reject-R9": {
             "total": 19,
@@ -5980,108 +6001,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--undeclared-leaf-0.sexp",
-          "base": "bam.C05",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C01--undeclared-leaf-0.sexp",
-          "base": "fre.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--undeclared-leaf-0.sexp",
-          "base": "fre.C04",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/pinn.C01--undeclared-leaf-0.sexp",
-          "base": "pinn.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rice.C01--undeclared-leaf-0.sexp",
-          "base": "rice.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C05--undeclared-leaf-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C06--undeclared-leaf-0.sexp",
-          "base": "sample-specific-masks.C06",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/self-composing-policies.C01--undeclared-leaf-0.sexp",
-          "base": "self-composing-policies.C01",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--undeclared-leaf-0.sexp",
-          "base": "test-time-model-adaptation.C04",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
           "input": "fixtures/mutants/rebench-restricted_mlm.C14--undeclared-leaf-0.sexp",
           "base": "rebench-restricted_mlm.C14",
-          "family": "undeclared-leaves",
-          "operator": "undeclared-leaf",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--undeclared-leaf-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
           "family": "undeclared-leaves",
           "operator": "undeclared-leaf",
           "expected": "reject-R1",
@@ -6100,70 +6021,100 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--hidden-rule-0.sexp",
-          "base": "bam.C05",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--undeclared-leaf-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/fre.C01--hidden-rule-0.sexp",
-          "base": "fre.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/fre.C04--undeclared-leaf-0.sexp",
           "base": "fre.C04",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/pinn.C01--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/self-composing-policies.C01--undeclared-leaf-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--undeclared-leaf-0.sexp",
+          "base": "fre.C01",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C01--undeclared-leaf-0.sexp",
           "base": "pinn.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/rice.C01--hidden-rule-0.sexp",
-          "base": "rice.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "input": "fixtures/mutants/bam.C05--undeclared-leaf-0.sexp",
+          "base": "bam.C05",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C05--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/adaptive-pruning.C04--undeclared-leaf-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--undeclared-leaf-0.sexp",
           "base": "sample-specific-masks.C05",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C06--hidden-rule-0.sexp",
+          "input": "fixtures/mutants/rice.C01--undeclared-leaf-0.sexp",
+          "base": "rice.C01",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--undeclared-leaf-0.sexp",
           "base": "sample-specific-masks.C06",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
           "expected": "reject-R1",
           "full-actual": "reject-R1",
           "ablation-actual": "reject-R1",
@@ -6172,16 +6123,6 @@
         {
           "input": "fixtures/mutants/self-composing-policies.C01--hidden-rule-0.sexp",
           "base": "self-composing-policies.C01",
-          "family": "hidden-policy-extension",
-          "operator": "hidden-rule",
-          "expected": "reject-R1",
-          "full-actual": "reject-R1",
-          "ablation-actual": "reject-R1",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--hidden-rule-0.sexp",
-          "base": "test-time-model-adaptation.C04",
           "family": "hidden-policy-extension",
           "operator": "hidden-rule",
           "expected": "reject-R1",
@@ -6212,6 +6153,86 @@
         {
           "input": "fixtures/mutants/rebench-triton_cumsum.C09--hidden-rule-0.sexp",
           "base": "rebench-triton_cumsum.C09",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--hidden-rule-0.sexp",
+          "base": "fre.C01",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--hidden-rule-0.sexp",
+          "base": "fre.C04",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--hidden-rule-0.sexp",
+          "base": "sample-specific-masks.C06",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--hidden-rule-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--hidden-rule-0.sexp",
+          "base": "bam.C05",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--hidden-rule-0.sexp",
+          "base": "rice.C01",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--hidden-rule-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--hidden-rule-0.sexp",
+          "base": "test-time-model-adaptation.C04",
           "family": "hidden-policy-extension",
           "operator": "hidden-rule",
           "expected": "reject-R1",
@@ -6340,28 +6361,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--wrong-subst-domain-0.sexp",
-          "base": "bam.C05",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C01--wrong-subst-domain-0.sexp",
-          "base": "fre.C01",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--wrong-subst-domain-0.sexp",
-          "base": "fre.C04",
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-subst-domain-0.sexp",
+          "base": "test-time-model-adaptation.C04",
           "family": "wrong-formulas",
           "operator": "wrong-subst-domain",
           "expected": "reject-R3",
@@ -6380,26 +6381,6 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/rice.C01--wrong-subst-domain-0.sexp",
-          "base": "rice.C01",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-subst-domain-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
           "input": "fixtures/mutants/sample-specific-masks.C06--wrong-subst-domain-0.sexp",
           "base": "sample-specific-masks.C06",
           "family": "wrong-formulas",
@@ -6410,8 +6391,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/self-composing-policies.C01--wrong-subst-domain-0.sexp",
-          "base": "self-composing-policies.C01",
+          "input": "fixtures/mutants/rice.C01--wrong-subst-domain-0.sexp",
+          "base": "rice.C01",
           "family": "wrong-formulas",
           "operator": "wrong-subst-domain",
           "expected": "reject-R3",
@@ -6420,28 +6401,8 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-subst-domain-0.sexp",
-          "base": "test-time-model-adaptation.C04",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-subst-domain-0.sexp",
-          "base": "rebench-restricted_mlm.C14",
-          "family": "wrong-formulas",
-          "operator": "wrong-subst-domain",
-          "expected": "reject-R3",
-          "full-actual": "reject-R3",
-          "ablation-actual": "reject-R3",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-subst-domain-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
+          "input": "fixtures/mutants/bam.C05--wrong-subst-domain-0.sexp",
+          "base": "bam.C05",
           "family": "wrong-formulas",
           "operator": "wrong-subst-domain",
           "expected": "reject-R3",
@@ -6460,8 +6421,68 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/bam.C05--wrong-premise-0.sexp",
-          "base": "bam.C05",
+          "input": "fixtures/mutants/self-composing-policies.C01--wrong-subst-domain-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-subst-domain-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-subst-domain-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--wrong-subst-domain-0.sexp",
+          "base": "fre.C04",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-subst-domain-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--wrong-subst-domain-0.sexp",
+          "base": "fre.C01",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-premise-0.sexp",
+          "base": "adaptive-pruning.C04",
           "family": "wrong-formulas",
           "operator": "wrong-premise",
           "expected": "reject-R4",
@@ -6480,8 +6501,58 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-premise-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-premise-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-triton_cumsum.C09--wrong-premise-0.sexp",
+          "base": "rebench-triton_cumsum.C09",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-premise-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/fre.C04--wrong-premise-0.sexp",
           "base": "fre.C04",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--wrong-premise-0.sexp",
+          "base": "bam.C05",
           "family": "wrong-formulas",
           "operator": "wrong-premise",
           "expected": "reject-R4",
@@ -6510,26 +6581,6 @@
           "missed-reject": false
         },
         {
-          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-premise-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C06--wrong-premise-0.sexp",
-          "base": "sample-specific-masks.C06",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
           "input": "fixtures/mutants/self-composing-policies.C01--wrong-premise-0.sexp",
           "base": "self-composing-policies.C01",
           "family": "wrong-formulas",
@@ -6542,36 +6593,6 @@
         {
           "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-premise-0.sexp",
           "base": "test-time-model-adaptation.C04",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-premise-0.sexp",
-          "base": "rebench-restricted_mlm.C14",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-premise-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
-          "family": "wrong-formulas",
-          "operator": "wrong-premise",
-          "expected": "reject-R4",
-          "full-actual": "reject-R4",
-          "ablation-actual": "reject-R4",
-          "missed-reject": false
-        },
-        {
-          "input": "fixtures/mutants/rebench-triton_cumsum.C09--wrong-premise-0.sexp",
-          "base": "rebench-triton_cumsum.C09",
           "family": "wrong-formulas",
           "operator": "wrong-premise",
           "expected": "reject-R4",
@@ -7060,6 +7081,26 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/adaptive-pruning.C04--cert-theory-swap-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--cert-payload-tamper-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/fre.C04--bad-attack-position-0.sexp",
           "base": "fre.C04",
           "family": "bad-attack-targets",
@@ -7090,6 +7131,16 @@
           "missed-reject": true
         },
         {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--unlicensed-attack-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-all-contested",
+          "missed-reject": true
+        },
+        {
           "input": "fixtures/mutants/bam.C05--unlicensed-attack-0.sexp",
           "base": "bam.C05",
           "family": "bad-attack-targets",
@@ -7100,68 +7151,8 @@
           "missed-reject": true
         },
         {
-          "input": "fixtures/mutants/fre.C01--unlicensed-attack-0.sexp",
-          "base": "fre.C01",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "accept-all-contested",
-          "missed-reject": true
-        },
-        {
-          "input": "fixtures/mutants/fre.C04--unlicensed-attack-0.sexp",
-          "base": "fre.C04",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "accept-defeated",
-          "missed-reject": true
-        },
-        {
           "input": "fixtures/mutants/pinn.C01--unlicensed-attack-0.sexp",
           "base": "pinn.C01",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "accept-all-contested",
-          "missed-reject": true
-        },
-        {
-          "input": "fixtures/mutants/rice.C01--unlicensed-attack-0.sexp",
-          "base": "rice.C01",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "accept-all-contested",
-          "missed-reject": true
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C05--unlicensed-attack-0.sexp",
-          "base": "sample-specific-masks.C05",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "accept-all-contested",
-          "missed-reject": true
-        },
-        {
-          "input": "fixtures/mutants/sample-specific-masks.C06--unlicensed-attack-0.sexp",
-          "base": "sample-specific-masks.C06",
-          "family": "bad-attack-targets",
-          "operator": "unlicensed-attack",
-          "expected": "reject-R11",
-          "full-actual": "reject-R11",
-          "ablation-actual": "accept-all-contested",
-          "missed-reject": true
-        },
-        {
-          "input": "fixtures/mutants/self-composing-policies.C01--unlicensed-attack-0.sexp",
-          "base": "self-composing-policies.C01",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -7180,8 +7171,18 @@
           "missed-reject": true
         },
         {
-          "input": "fixtures/mutants/rebench-restricted_mlm.C14--unlicensed-attack-0.sexp",
-          "base": "rebench-restricted_mlm.C14",
+          "input": "fixtures/mutants/fre.C04--unlicensed-attack-0.sexp",
+          "base": "fre.C04",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-defeated",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--unlicensed-attack-0.sexp",
+          "base": "sample-specific-masks.C05",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -7190,8 +7191,8 @@
           "missed-reject": true
         },
         {
-          "input": "fixtures/mutants/rebench-rust_codecontests.C02--unlicensed-attack-0.sexp",
-          "base": "rebench-rust_codecontests.C02",
+          "input": "fixtures/mutants/fre.C01--unlicensed-attack-0.sexp",
+          "base": "fre.C01",
           "family": "bad-attack-targets",
           "operator": "unlicensed-attack",
           "expected": "reject-R11",
@@ -7207,6 +7208,46 @@
           "expected": "reject-R11",
           "full-actual": "reject-R11",
           "ablation-actual": "accept-defeated",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--unlicensed-attack-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-gap",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--unlicensed-attack-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-all-contested",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--unlicensed-attack-0.sexp",
+          "base": "rice.C01",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-all-contested",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C01--unlicensed-attack-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-all-contested",
           "missed-reject": true
         },
         {

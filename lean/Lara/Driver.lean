@@ -40,6 +40,7 @@ Design decisions (documented, faithful to the mechanized development):
 import Lara.Consistency
 import Lara.Groups
 import Lara.Strict
+import Lara.RA
 
 namespace Lara.Driver
 
@@ -649,12 +650,16 @@ def resolveAttacks (argsRaw : List (String × SupportTerm)) :
 def buildGamma (leaves : List (LeafId × Atom)) : LeafId → Option Atom :=
   fun l => (leaves.find? (fun e => decide (e.1 = l))).map (·.2)
 
-/-- The one implemented backend identity, `nd@1`. -/
+/-- The reference backend identity, `nd@1`. -/
 def ndBackendId : BackendId := ⟨"nd", 1⟩
 
-/-- Backend registry built from the wire `theories` section over `nd@1`,
-mirroring `Lara.Examples.registryEx`: the fixed ND core, with each declared
-digest resolving to that digest's ND-encoded theory data. -/
+/-- The rational-arithmetic backend identity, `ra@1`. -/
+def raBackendId : BackendId := ⟨"ra", 1⟩
+
+/-- Backend registry built from the wire `theories` section over the fixed
+`nd@1` / `ra@1` pair, mirroring `Lara.Examples.registryEx` and the Haskell
+`buildCertOk`: each fixed core, with each declared digest resolving to that
+digest's core-encoded theory data. -/
 def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcanon :=
   fun β =>
     if β = ndBackendId then
@@ -662,6 +667,12 @@ def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcan
              resolveTheory := fun h =>
                match theories.find? (fun t => decide (t.1 = h)) with
                | some t => some (t.2.map (Lara.Strict.ndEnc dcanon))
+               | none => none }
+    else if β = raBackendId then
+      some { core := Lara.RA.raBackend dcanon
+             resolveTheory := fun h =>
+               match theories.find? (fun t => decide (t.1 = h)) with
+               | some t => some (t.2.map (Lara.nf dcanon))
                | none => none }
     else none
 
@@ -897,10 +908,14 @@ def firstDuplicateBackend : List (String × String) →
       if seen.contains backend then some backend
       else firstDuplicateBackend rest (backend :: seen)
 
+/-- The supported backend selections, mirroring `Lara.Replay.supportedBackends`. -/
+def supportedBackends : List (String × String) :=
+  [backendPair ndBackendId, backendPair raBackendId]
+
 def firstUnknownBackend : List (String × String) → Option (String × String)
   | [] => none
   | backend :: rest =>
-      if backend != backendPair ndBackendId then some backend
+      if !supportedBackends.contains backend then some backend
       else firstUnknownBackend rest
 
 def firstSome {α β : Type} (f : α → Option β) : List α → Option β

@@ -14,6 +14,7 @@ import Lara.Prop
 import Lara.Presentation
 import Lara.ND
 import Lara.Strict
+import Lara.RA
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
@@ -176,6 +177,21 @@ open Lara
 #print axioms Lara.Strict.encodeAtomKey_injective
 #print axioms Lara.Strict.ndEnc_iff
 #print axioms Lara.Strict.nd_strict_step_sound
+
+-- Issue #57: the rational-arithmetic domain-checker backend `ra@1` — the
+-- full `Backend` instantiation (replay adequacy, certificate soundness via
+-- witness cancellation, and the three obligation-4 laws), plus its
+-- supporting integer-cancellation and extraction lemmas.
+#print axioms Lara.RA.raBackend
+#print axioms Lara.RA.raReplay_iff
+#print axioms Lara.RA.raSound
+#print axioms Lara.RA.raUses_covers
+#print axioms Lara.RA.raUses_valid
+#print axioms Lara.RA.raUses_account
+#print axioms Lara.RA.mul_right_cancel
+#print axioms Lara.RA.dropEq_of_witness
+#print axioms Lara.RA.checkB_extract
+#print axioms Lara.RA.decodeCert_witness_den_pos
 
 -- Result 3 (certificate half) / result 10 (dependency exactness), backend
 -- layer: the fixed-core `uses` report interface (coverage, validity,

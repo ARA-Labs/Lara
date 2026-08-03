@@ -14,9 +14,11 @@ Plan: `plans/2026-08-01-m5-t2-corpus-units.md`. Exemplars:
 - One unit per sampled claim: `corpus-units/<artifact>/<claim_id>/unit.lara`,
   where `<artifact>`/`<claim_id>` match `m0/sample.tsv` exactly.
 - Header: `artifact <artifact> at sha256:<digest>` / `policy corpus-v1` /
-  `use backends [nd@1]`. The digest is the first 12 hex chars of
-  `sha256("ara-paperbench@62e9b54 <artifact>")` — one digest per artifact,
-  shared by its units (the corpus pin is the trusted-input identity).
+  `use backends [nd@1]` (a unit carrying an `ra@1` certificate additionally
+  selects `ra@1`: `adaptive-pruning/C04`). The digest is the first 12 hex
+  chars of `sha256("ara-paperbench@62e9b54 <artifact>")` — one digest per
+  artifact, shared by its units (the corpus pin is the trusted-input
+  identity).
 - Claim block fields in order `nl`, `formal`, `binding`. Claim id is the
   lowercased annotation id (`C04` → `c04`).
 - `binding = { author = m0-annotator, audit-status = reviewed|unreviewed }`:
@@ -30,7 +32,11 @@ Plan: `plans/2026-08-01-m5-t2-corpus-units.md`. Exemplars:
 - Constants only — never `num` literals (Lean `canon = id` caveat,
   `scripts/gen-corpus.hs` header). Thresholds, ratios, and table cells live in
   `nl`, `binding`, and leaf `refs`; constants are snake_case
-  (`apt`, `mnli`, `train_cost_at_parity`).
+  (`apt`, `mnli`, `train_cost_at_parity`). SOLE exception: the Family-10
+  certificate-checked atoms (`rational_drop_recheck` premises/conclusion,
+  issue #57), whose cells are `num` literals in CANONICAL spelling (`50`,
+  never `50.0`) so the identity canonicalizer and `canonNum` agree
+  byte-for-byte.
 - The scheme instance fixes the atom: pick the policy rule via the family map
   below, instantiate its variables with claim constants, and let the claim's
   `formal` be exactly the rule's instantiated conclusion.
@@ -60,9 +66,13 @@ Plan: `plans/2026-08-01-m5-t2-corpus-units.md`. Exemplars:
 | inductive_generalization | `inductive_generalization(P, C, Exp)` |
 | blind_paired_human_evaluation | `human_evaluation(S, B, Q, Exp)` |
 
-The 6 strict-flavored annotations still lower through `analytic_argument`
-(defeasible): the arithmetic/table-recheck strict adapter does not exist yet;
-migration to a strict rule + certificate is future work, noted per unit.
+The strict-flavored annotations lower through `analytic_argument` (defeasible)
+by default. Since #57 the rational-arithmetic re-check adapter (`ra@1`)
+exists: `adaptive-pruning/C04`'s derived-arithmetic leg migrates onto the
+strict `rational_drop_recheck` rule (Family 10) under a checked certificate —
+the headline claim itself stays on its defeasible family and its status is
+unchanged. The remaining strict-flavored units await their own certifier
+backends, noted per unit.
 
 ## Leaves
 

@@ -3,9 +3,12 @@
     "core": "lara-core@0.1",
     "policy": "corpus-v1",
     "backends": [
-      "nd@1"
+      "nd@1",
+      "ra@1"
     ],
-    "theories": [],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
     "artifact": "sha256:de3685165a53"
   },
   "verdict-class": "accept",
@@ -20,6 +23,12 @@
         "incomplete-alternative": false
       }
     ],
-    "labels": []
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      }
+    ]
   }
 }

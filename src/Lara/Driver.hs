@@ -68,6 +68,7 @@ import Lara.Prop (Prop, equiv)
 import Lara.SupportTerm (CertOk)
 import qualified Lara.Strict as St
 import qualified Lara.Strict.ND as ND
+import qualified Lara.Strict.RA as RA
 import Lara.Wire (Outcome (..), Verdict (..))
 
 -- | Run replay preflight, the duplicate-report-group boundary check, and the
@@ -243,18 +244,22 @@ rejectionDiagnostics input =
   where
     unit = inputUnit input
 
--- | The certificate oracle from the wire @theories@ section over the one
--- implemented backend @nd\@1@ (Lean @buildRegistry@ \/ 'Lara.Examples' style). A
--- unit referencing any other backend falls through to certificate rejection.
+-- | The certificate oracle from the wire @theories@ section over the fixed
+-- backend registry — @nd\@1@ and @ra\@1@ (Lean @buildRegistry@ \/
+-- 'Lara.Examples' style). A unit referencing any other backend falls through
+-- to certificate rejection.
 buildCertOk :: [(TheoryDigest, [Prop])] -> CertOk
 buildCertOk theories cert as c = case cert of
   Cert (BackendId name) v _ payload ->
-    (name, v) == (St.backendName ND.ndBackendId, St.backendVersion ND.ndBackendId)
-      && case St.runBackend ndBackend (toStrictDigest (certTheory cert)) as c payload of
-        Right _ -> True
-        Left _ -> False
+    case St.lookupBackend registry (St.BackendId name v) of
+      Nothing -> False
+      Just backend ->
+        case St.runBackend backend (toStrictDigest (certTheory cert)) as c payload of
+          Right _ -> True
+          Left _ -> False
   where
-    ndBackend = ND.mkNDBackend [(toStrictDigest d, ps) | (d, ps) <- theories]
+    registry = St.mkRegistry [ND.mkNDBackend table, RA.mkRABackend table]
+    table = [(toStrictDigest d, ps) | (d, ps) <- theories]
 
 toStrictDigest :: TheoryDigest -> St.TheoryDigest
 toStrictDigest (TheoryDigest s) = St.TheoryDigest s

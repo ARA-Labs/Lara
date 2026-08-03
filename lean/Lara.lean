@@ -46,6 +46,7 @@ import Lara.Presentation
 import Lara.ND
 import Lara.Certificate
 import Lara.Strict
+import Lara.RA
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups

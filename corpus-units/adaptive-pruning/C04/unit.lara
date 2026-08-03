@@ -1,4 +1,5 @@
-# Corpus unit adaptive-pruning/C04 — gap (unmet mandatory variance CQ, annotator-optional)
+# Corpus unit adaptive-pruning/C04 — gap (unmet mandatory variance CQ, annotator-optional),
+# with the derived-arithmetic leg certificate-checked (issue #57)
 #
 # Source: m0/annotations/adaptive-pruning.yaml C04 (causal, component_ablation; corpus pin
 # 62e9b54). Headline: removing the kurtosis (outlier-aware) salience term from APT drops the
@@ -17,21 +18,39 @@
 #   * Divergence from test-time-model-adaptation/C04: there variance had NO annotated CQ, so
 #     margins licensed a discharge; here the annotator explicitly evaluated variance and rated it
 #     unmet, so no honest margins-discharge is available — the claim lands `gap`, not `justified`.
-#   * The '23.8% reduction' arithmetic and the <5%-relative falsification threshold are a
-#     rational-arithmetic re-check (annotation strict_certifier: domain-checker); that strict
-#     adapter does not exist yet, so this unit stays defeasible (summary migration note).
+#   * The '23.8% reduction' arithmetic and the 5%-relative falsification threshold ARE now
+#     certificate-checked (annotation strict_certifier: domain-checker(rational-arithmetic);
+#     issue #57): sub-claim c04a carries the derived identity rel_drop_ge(50, 38.1, 0.238, 0.05)
+#     supported by the strict Family-10 rule under an ra@1 certificate — the two score cells
+#     enter as premise leaves (e4/e5), the certificate names those slots and carries the drop as
+#     the exact fraction 119/500, and the backend recomputes (50 - 38.1) / 50 = 119/500 = 0.238
+#     >= 0.05 in exact rational arithmetic. Numerals use CANONICAL spellings (`50`, not `50.0`)
+#     per the Family-10 exception to the constants-only rule (canon = id caveat).
+#   * c04a is intentionally NOT statused: the unit's queried claim stays the headline c04 (one
+#     claim-support instance per unit, m0/sample.tsv grain). The strict step is measured through
+#     the compiled AF (a1 in) and the #56 aggregator's load-bearing scan, not through a second
+#     status row. The certificate discharges ONLY the arithmetic identity relative to the cited
+#     cells — the truth of the cells stays with the defeasible observed leaves (factivity
+#     firewall), and the headline ablation claim itself remains gap exactly as before.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
 artifact adaptive-pruning at sha256:de3685165a53
 policy corpus-v1
-use backends [nd@1]
+use backends [nd@1, ra@1]
 
 # --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
 
 claim c04
   nl      = "Removing the kurtosis (outlier-aware) salience term from APT drops the LLaMA2-7B four-task OpenLLM average from 50.0 to 38.1 at 30% sparsity, a 23.8% relative drop, so the kurtosis term is critical for large-LM pruning"
   formal  = contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- The certificate-checked derived-arithmetic sub-claim (issue #57) ---------------------------
+
+claim c04a
+  nl      = "The kurtosis ablation's OpenLLM-average drop from 50.0 to 38.1 is a 23.8% relative drop, exceeding the 5% falsification threshold"
+  formal  = rel_drop_ge(50, 38.1, 0.238, 0.05)
   binding = { author = m0-annotator, audit-status = reviewed }
 
 # --- Evidence leaves are present ... ------------------------------------------------------------
@@ -52,16 +71,38 @@ leaf e3 : matched_protocol(e03)
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-step-7, logic/experiments.md#E02-step-5]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# The two score cells the certificate consults, one leaf per Table-5 cell (per-result-cell
+# grain). These carry the raw numbers; their truth is observed evidence, not certified content.
+leaf e4 : reports(e03, score_cell(full_config(kurtosis_salience, apt_llama2_7b), openllm_avg, 50))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03, Table-5]
 
-# (Intentionally no `arg`: variance_reported(e03) has no honest leaf — E03 reports single runs —
-# and corpus-v1 makes that obligation mandatory. The claim's complete-support set is empty.)
+leaf e5 : reports(e03, score_cell(ablated_config(kurtosis_salience, apt_llama2_7b), openllm_avg, 38.1))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03, Table-5]
+
+# --- ... the derived arithmetic is certificate-checked ... --------------------------------------
+
+# The ra@1 certificate: consults premise slots 0 (full cell) and 1 (ablated cell) and carries
+# the claimed drop as the exact lowest-terms fraction 119/500 = 0.238. Replay recomputes
+# (50 - 38.1) / 50 exactly and checks 0.238 >= 0.05.
+arg a1 : supports(c04a) by rational_drop_recheck(kurtosis_salience, apt_llama2_7b, openllm_avg, e03, 50, 38.1, 0.238, 0.05)
+  assurance = cert(ra@1, sha256:corpus-v1-ra-theory-0, (radrop (prem 0) (prem 1) (frac 119 500)))
+
+# --- ... but no complete argument for the headline claim is declarable --------------------------
+
+# (Intentionally no `arg` for c04: variance_reported(e03) has no honest leaf — E03 reports
+# single runs — and corpus-v1 makes that obligation mandatory. The headline claim's
+# complete-support set is empty.)
 
 status c04
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: a1 alone (the strict certificate step), unattacked -> in (grounded).
 # Claim status:
-#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the
+#               strict sub-claim's arg supports c04a, not c04)

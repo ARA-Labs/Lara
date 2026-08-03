@@ -5,7 +5,9 @@
     "backends": [
       "nd@1"
     ],
-    "theories": [],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
     "artifact": "sha256:7d6532a2b09e"
   },
   "verdict-class": "accept",

@@ -32,6 +32,7 @@ import ClaimSupportSpec (claimSupportSpecProps)
 import MeasureSpec (measureSpecProps)
 import MutationSpec (mutationSpecProps)
 import PropSpec (propSpecProps)
+import RASpec (raSpecProps)
 import ReportingSpec (reportingSpecProps)
 import ReplaySpec (replaySpecProps)
 import RuntimeSpec (runtimeSpecProps)
@@ -186,6 +187,7 @@ main = do
       ]
         ++ [run name act | (name, act) <- propSpecProps]
         ++ [run name act | (name, act) <- strictSpecProps]
+        ++ [run name act | (name, act) <- raSpecProps]
         ++ [run name act | (name, act) <- replaySpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
         ++ [run name act | (name, act) <- syntaxSpecProps]

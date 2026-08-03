@@ -2392,3 +2392,31 @@ tree:
   status: open
   also_depends_on:
   - N99
+- id: N101
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-02T16:52
+  source_refs:
+  - test/RASpec.hs
+  - "PR #59 review (fenfenai)"
+  title: 'PR #59 review response: RASpec conformance suite for the ra@1 backend'
+  description: >
+    External review of PR #59 (ra@1 rational-arithmetic certifier, issue #57 — implemented in a session
+    with no trace record here) found one important issue: Lara.Strict.RA had no dedicated conformance
+    suite (the ND backend has StrictSpec; ra@1 had only corpus coverage). Verified against the codebase
+    (no test module referenced RA), then added test/RASpec.hs mirroring the StrictSpec conventions.
+  result: >
+    15 properties, all green, full suite PASS: wire serialization shares the adapter's Tag table;
+    literal golden vectors pin the certificate grammar (incl. corpus-v1 Family-10 witness 119/500);
+    closed-decoder rejection matrix (unknown tags, arity, non-canonical numerals, non-lowest-terms
+    fractions, non-positive denominators); Int-bound slot asymmetry with Lean pinned as a decode
+    rejection; parseDecimal golden + generated round-trip over the canonNum image; premise-cell
+    exactly-one-literal convention; generated drop scenarios (F=f, C=c/10^k, A=F(1-C)) replay to
+    acceptance with exact premise/theory dependencies end-to-end through strictCheck; single-field
+    mutations (wrong witness, swapped cells, out-of-range slot, unknown digest) all reject.
+    Commit 69264a1 pushed to issue-57-strict-certifier; replied on PR #59.
+  evidence:
+  - test/RASpec.hs
+  - "commit 69264a1"
+  status: resolved
+  also_depends_on: []

@@ -429,3 +429,11 @@ entries:
       - "Staged O35 (freeze reproducibility-anchor: hash the deterministic projection, not timing) rather than crystallizing a third entry this turn: genuinely committed by the freeze manifest (artifact-commitment present) but new-this-turn and distinct from the existing timing constraint (constraints.md:146 no-ratio rule); conservatism — let it mature. It is a how (heuristic), not the no-ratio what."
       - "No Stage-4 edits: no existing logic entry took a status/content/structural change this turn (logic_revisions empty). C23 untouched — the freeze reproduces its regime but adds no off-site/multi-defect evidence that would move it off testing."
       - "No stale flags: O33 re-touched this turn (still 2026-08-01 origin); O26-O28/O30 under the 3-session-day threshold (2 days)."
+  - turn: "2026-08-02_001#3"
+    notes:
+      - "This conversation is only the PR #59 review-response; the intervening #55/#56/#57/re-freeze work has no ara/ record (epilogues not run in those conversations). Recorded the gap explicitly in open_threads rather than reconstructing unobserved turns — never fabricate."
+      - "Routed the review response as one experiment node N101 DIRECT (one-node-per-action precedent, N95-N97): the conformance suite ran and passed, which is the node's result; the review finding itself is external input recorded in N101.description, not a decision node."
+      - "Staged O36 (differential parity by construction) rather than crystallizing: it is the external reviewer's interpretive analysis (provenance ai-suggested), and no closure signal fired — PR #59 is OPEN, no user affirmation. Same OPEN-PR conservatism as O29/O32 precedents."
+      - "Did NOT create a claim for 'RA conformance evidence' itself: per CLAUDE.md, Haskell property tests are conformance evidence, not soundness — the suite is Proof-grade material for a future strict-path claim, not a claim of its own."
+      - "No Stage-4 edits: no crystallized logic entry references the ra@1 backend (the #57 turn that would have created one is part of the unrecorded gap); nothing to reconcile. Near-miss considered: appending RASpec to C11's adversarial-validation Proof — rejected, C11 is about producer/checker rejection, not backend conformance."
+      - "No stale flags: O26-O28/O30/O33 origin 2026-08-01 (1 session-day), O35/O36 today."

@@ -24,6 +24,7 @@ library
                       Lara.Strict
                       Lara.Strict.ND
                       Lara.Strict.ND.Internal
+                      Lara.Strict.RA
                       Lara.AST
                       Lara.Replay
                       Lara.Syntax
@@ -78,6 +79,7 @@ test-suite lara-test
                       ReplaySpec
                       TestReplay
                       StrictSpec
+                      RASpec
                       WireSpec
                       SyntaxSpec
                       ElaborateSpec

@@ -3,7 +3,7 @@
 -- corpus-descriptive numbers the paper's /Claim-support outcomes/ paragraph
 -- (@\\msfive@ in the external paper repo's @evaluation.tex@; this repo ships no
 -- @.tex@) cites, over the FROZEN 60 corpus units (@corpus-units\/MANIFEST.tsv@,
--- tag @m5-freeze-v1@, seed 20260801).
+-- tag @m5-freeze-v2@, seed 20260801).
 --
 -- Discovery is manifest-driven (never a glob), reusing
 -- 'Lara.Measure.parseCorpusManifest'. The per-unit decode + 'runCheck' + surface

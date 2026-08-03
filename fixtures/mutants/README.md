@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 358
+Total mutants: 360
 
 | expected outcome | mutants |
 | --- | --- |
@@ -33,19 +33,19 @@ Total mutants: 358
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
 | `reject-R12` | 20 |
-| `reject-R13` | 41 |
+| `reject-R13` | 42 |
 | `reject-R3` | 19 |
 | `reject-R4` | 18 |
 | `reject-R5` | 18 |
 | `reject-R6` | 18 |
-| `reject-R7` | 19 |
+| `reject-R7` | 20 |
 | `reject-R9` | 19 |
 
 | mutation family | mutants |
 | --- | --- |
 | `accept-verdict` | 45 |
 | `bad-attack-targets` | 30 |
-| `certificate-tampering` | 60 |
+| `certificate-tampering` | 62 |
 | `codec-corruption` | 45 |
 | `cycles` | 4 |
 | `data-integrity` | 19 |
@@ -63,19 +63,19 @@ site (corpus units carry no strict certificates), recorded as 0/0.
 
 | corpus operator | applicable bases | selected |
 | --- | --- | --- |
-| `undeclared-leaf` | 12 | 12 |
-| `hidden-rule` | 12 | 12 |
+| `undeclared-leaf` | 13 | 12 |
+| `hidden-rule` | 13 | 12 |
 | `hidden-contrary` | 60 | 12 |
-| `wrong-subst-domain` | 12 | 12 |
-| `wrong-premise` | 12 | 12 |
+| `wrong-subst-domain` | 13 | 12 |
+| `wrong-premise` | 13 | 12 |
 | `open-obligation` | 12 | 12 |
 | `hole-obligation` | 12 | 12 |
 | `wrong-discharge` | 12 | 12 |
 | `trusted-assurance` | 12 | 12 |
-| `cert-theory-swap` | 0 | 0 |
-| `cert-payload-tamper` | 0 | 0 |
+| `cert-theory-swap` | 1 | 1 |
+| `cert-payload-tamper` | 1 | 1 |
 | `bad-attack-position` | 3 | 3 |
-| `unlicensed-attack` | 12 | 12 |
+| `unlicensed-attack` | 13 | 12 |
 | `group-conflict` | 55 | 12 |
 | `duplicate-backend` | 60 | 12 |
 | `unknown-backend` | 60 | 12 |

@@ -725,3 +725,25 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O36
+  timestamp: 2026-08-02T16:52
+  provenance: ai-suggested
+  content: >
+    The ra@1 Haskell/Lean pair achieves differential parity BY CONSTRUCTION despite different internal
+    representations: Haskell reduces to Rational, Lean keeps unreduced Dec and compares by
+    cross-multiplication, and the canonical-numeral / lowest-terms wire grammar makes the seam
+    byte-identical without importing Rat/Mathlib into Lean. The one representational asymmetry (Haskell
+    bounds slots by host Int at decode; Lean decodes unbounded Nat and rejects at replay) is
+    unobservable at the seam because both sides reject. Source: PR #59 external review's branch-level
+    trace (fenfenai, confidence 78 review, found no accept/reject divergence); the Haskell half of the
+    asymmetry is now mechanically pinned by RASpec (prop_raHugeSlotRejected).
+  context: >
+    PR #59 review-response turn (N101). The parity argument is the reviewer's interpretive analysis
+    plus the new RASpec pin; the repo's differential harness is the standing empirical check.
+  potential_type: claim
+  bound_to:
+  - N101
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

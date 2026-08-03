@@ -30,7 +30,14 @@
 > `docs/m5-freeze-checklist.md` pins the frozen inputs (358-mutant suite, 60
 > corpus units, 11 worked examples, seed 20260801) by git-tree content hash, the
 > post-freeze `scripts/measure.hs` run is committed under `measurements/frozen/`,
-> and tag `m5-freeze-v1` will mark the freeze commit (post-merge). **M5 is complete** for the
+> and tag `m5-freeze-v1` marks the #55 merge commit. Issue #57 then exercised
+> the strict/certificate path: the registered `ra@1` rational-arithmetic
+> backend (both drivers + Lean metatheory), the strict Family-10
+> `rational_drop_recheck` rule in corpus-v1, and `adaptive-pruning/C04`'s
+> certificate-checked derived-arithmetic arg — growing the suite 358→360
+> (cert tamper/theory-swap now exercised on the corpus) and re-freezing as
+> `m5-freeze-v2` (420 records, class-match 420/420, `lean_agree` 420/420,
+> claim-support number (4) now **1/1**). **M5 is complete** for the
 > PLDI/POPL scope; the human-authored natural-defect ablation (#52) and all
 > LLM-producer axes stay in the ACL/EMNLP follow-up. Next: M6/M7 — the paper
 > package (`research-proposal.md` §7, milestone M7).
@@ -149,6 +156,26 @@ and partition pattern as T6; one more `gen-mutants.hs` regeneration cycle.
 **Depends on:** T6 ablation baselines (this branch); land before the T5 freeze
 or record as a post-freeze suite extension.
 
+### Wrong-fraction certificate mutation operator (semantic cert corruption)
+
+**What:** A mutation operator producing a WELL-FORMED `ra@1` payload carrying a
+wrong lowest-terms fraction (expected `reject-R13`), distinguishing "the checker
+rejects garbage" (the generic `OpCertPayloadTamper`) from "the checker rejects a
+plausible-looking but false certificate."
+
+**Why:** Strengthens the axis-(c) invalid-certificate datum now that the corpus
+carries a real certificate (adaptive-pruning/C04, #57). The D1 payload design
+(the fraction IS the certified value) exists precisely to make this corruption
+meaningful.
+
+**Context:** Deferred from the #57 PR (decision D3, plan
+`plans/2026-08-02-issue-57-ra-certifier.md`) to keep it reviewable. A suite
+extension: regenerating cuts `m5-freeze-v3` per the checklist's post-freeze rule.
+
+**Effort:** S
+**Priority:** P3
+**Depends on:** #57 (landed).
+
 ### Print hole-lines in support terms
 
 **What:** Make `printSupportTerm` preserve `open … as …` hole lines. It currently
@@ -174,6 +201,26 @@ Tighten the parser or update the grammar.
 **Priority:** P3
 
 ## Completed
+
+### ra@1 rational-arithmetic certifier — the strict/certificate path (issue #57)
+
+The registered `ra@1` backend re-checks `rel_drop_ge(F, A, C, T)` in exact
+rational arithmetic on both sides of the differential seam
+(`src/Lara/Strict/RA.hs`, `lean/Lara/RA.lean`): the certificate
+`(radrop (prem N) (prem M) (frac P Q))` names its two consulted slots and
+carries the claimed drop as a lowest-terms fraction; replay recomputes
+`(F − A)/F` exactly — no floats. The Lean `Backend` instance is `sorry`-free
+within the standard trio (replay adequacy, soundness via witness cancellation,
+and the three obligation-4 dependency laws; AxCheck extended). The fixed
+registry generalizes to `[nd@1, ra@1]` (`buildCertOk`, `buildRegistry`, replay
+preflight `supportedBackends`). corpus-v1 gains the strict Family-10
+`rational_drop_recheck` rule + empty theory; `adaptive-pruning/C04`'s
+derived-arithmetic leg migrates onto it (score cells as observed premise
+leaves, unstatused sub-claim `c04a`, headline claim honestly stays `gap`).
+All 60 anchors regenerated; suite 358→360 (C04 cert tamper/theory-swap picked
+up by the existing operators); differential 418/54 byte-identical; re-frozen
+as `m5-freeze-v2` with claim-support number (4) = 1/1. The wrong-fraction
+semantic-corruption operator is recorded above as the deferred follow-up.
 
 ### M5 T5 — freeze protocol (tracker #48)
 

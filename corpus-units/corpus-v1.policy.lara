@@ -14,13 +14,16 @@
 # mandatory CQs unmet, surfaces as `gap` statuses exactly as the gap-vs-defeater design intends).
 #
 # Design notes:
-#   * All rules are defeasible. The 6 strict-flavored annotations (analytic proofs, arithmetic
-#     table re-checks) still lower through `analytic_argument`: the smallest useful strict adapter
-#     is a rational-arithmetic/table-recheck checker (summary §2), which does not exist yet; when
-#     it does, those units migrate to a strict rule + certificate without touching this vocabulary.
+#   * All scheme-family rules are defeasible. The strict-flavored annotations (analytic proofs,
+#     arithmetic table re-checks) lower through `analytic_argument` by default; the smallest
+#     useful strict adapter — the rational-arithmetic re-check (`ra@1`, summary §2, issue #57) —
+#     now exists as Family 10 below, and `adaptive-pruning/C04` migrates its derived-arithmetic
+#     leg onto it. The remaining strict-flavored units await their own certifier backends.
 #   * Quantitative content (thresholds, ratios, table cells) lives in `nl` strings, bindings, and
 #     leaf refs — formal atoms use constants only, never `num` literals (the Lean `canon = id`
-#     caveat, scripts/gen-corpus.hs header).
+#     caveat, scripts/gen-corpus.hs header). SOLE exception: Family 10's certificate-checked
+#     atoms, whose cells are `num` literals in CANONICAL spelling (`50`, not `50.0`) so the
+#     identity canonicalizer and the Haskell `canonNum` agree byte-for-byte.
 #   * Contrary pairs are declared symmetric ONLY where the sample genuinely concludes both sides
 #     (comparison, benchmark, correlation). Attack completeness is arg-conclusion-level, so a
 #     symmetric pair forces mutual rebut edges whenever both sides appear in one unit — units
@@ -150,6 +153,27 @@ rule human_evaluation(S, B, Q, Exp)
   question rater_power     : sufficient_raters(Exp)  (mandatory)
   question preregistration : preregistered(Exp)      (optional)
 
+# --- Family 10: certificate-checked rational-arithmetic re-check (issue #57) --------------------
+# The strict leg of the strict-flavored annotations: derived arithmetic over two reported score
+# cells (`(F - A) / F = R`, `R >= T`), re-checked exactly by the registered `ra@1` backend
+# (src/Lara/Strict/RA.hs, lean/Lara/RA.lean). The certificate names its two consulted premise
+# slots and carries the claimed drop as an exact fraction in lowest terms; the checker recomputes
+# the drop in exact rational arithmetic — no floats. F = full-configuration cell, A = ablated
+# cell, R = claimed relative drop, T = falsification threshold; C/S/Q/Exp as above. The ablation
+# INFERENCE stays defeasible (component_ablation); only the arithmetic identity is strict.
+
+rule rational_drop_recheck(C, S, Q, Exp, F, A, R, T)
+  mode       = strict
+  premises   = [ reports(Exp, score_cell(full_config(C, S), Q, F)),
+                 reports(Exp, score_cell(ablated_config(C, S), Q, A)) ]
+  conclusion = rel_drop_ge(F, A, R, T)
+  allow-trusted = false
+  certifiers = [ (ra@1, sha256:corpus-v1-ra-theory-0) ]
+
+# The empty theory the ra@1 certificates cite: the certified identity is pure arithmetic, so the
+# theory contributes no entries — the digest is selection identity only (the S1 precedent).
+theory sha256:corpus-v1-ra-theory-0 = []
+
 # --- Conflict ------------------------------------------------------------------------------------
 # Symmetric pairs only where the sample concludes both sides through the duals above. Units
 # containing args on both sides of one pair must declare the mutual rebut edges (completeness).
@@ -179,5 +203,6 @@ exception null_correlation         : underpowered_correlation(X, Y, S)
 exception inductive_generalization : biased_sample(P, C)
 exception human_evaluation         : rater_bias(S, B, Q)
 
-# WELL-FORMEDNESS (spec §8.1, Path B): every rule above is defeasible, so no proposition in a
-# contrary pair is strict-reachable and the policy passes the R12 check, as in empirical-v1/v2.
+# WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is rational_drop_recheck, whose
+# conclusion pattern rel_drop_ge(F, A, R, T) heads no contrary pair, so no contrary side is
+# strict-reachable and the policy passes the R12 check, as in empirical-v1/v2 and strict-v1.

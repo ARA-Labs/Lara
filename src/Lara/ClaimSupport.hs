@@ -29,10 +29,10 @@
 --      exploration-trace ref (the corpus-native dead-end undercuts), separated
 --      from CQ-driven paper-evidence undercuts.
 --   4. Fraction of LOAD-BEARING STRICT STEPS carrying a checked certificate.
---      corpus-v1 is all-defeasible, so this is @0 \/ 0@ by construction; the
---      count is computed from real rule modes so it goes non-zero automatically
---      once the certifier work (#57) lands. The documented @strict_certifier@
---      population is reported alongside as context.
+--      Computed from real rule modes; since #57 the corpus exercises the
+--      certificate path (adaptive-pruning\/C04's @rational_drop_recheck@ arg
+--      under an @ra\@1@ certificate), so this is 1 \/ 1. The documented
+--      @strict_certifier@ population is reported alongside as context.
 module Lara.ClaimSupport
   ( -- * Paper anchoring (refs axis of number 2)
     isPaperAnchorRef
@@ -343,7 +343,7 @@ claimSupportJson env rep recs =
   renderJson $
     JObject
       [ ("environment", envJson env)
-      , ("corpus", JObject [("frozen-tag", JString "m5-freeze-v1"), ("seed", JNumber 20260801), ("units", JNumber (csUnits rep))])
+      , ("corpus", JObject [("frozen-tag", JString "m5-freeze-v2"), ("seed", JNumber 20260801), ("units", JNumber (csUnits rep))])
       , ("status-distribution", JObject (map statusCell (csStatus rep)))
       , ( "load-bearing-leaves"
         , JObject
@@ -373,7 +373,7 @@ claimSupportJson env rep recs =
             [ ("load-bearing-strict-steps", JNumber (csStrictSteps rep))
             , ("carrying-checked-certificate", JNumber (csStrictCertified rep))
             , ("documented-strict-flavored", JNumber (csStrictFlavored rep))
-            , ("note", JString "corpus-v1 is all-defeasible; fraction is 0/0 by construction. Strict/certificate path is future work (issue #57).")
+            , ("note", JString "The certificate path is exercised since #57: adaptive-pruning/C04's derived-arithmetic leg is a strict rational_drop_recheck step under a checked ra@1 certificate. The remaining documented strict-flavored claims await their own certifier backends.")
             ]
         )
       , ("units", JArray (map unitJson recs))
