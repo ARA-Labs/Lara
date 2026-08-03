@@ -8,6 +8,91 @@ A peer-review exchange — the submitted paper, the review round, and the author
 
 The demo is three checked programs, one per round, in `examples/rebuttal-replay/{round0,round1,round2}/`. All three share **one artifact identity** and **one policy** (`rebuttal-v1`): the reviews and the rebuttal are *about* the paper, not a new artifact, and the reviewing standard is fixed. Only the argument population grows. The status trajectory is therefore a property of the growing graph under a constant replay identity — the demonstration the paper needs.
 
+## Read it first as a paper exchange
+
+The following is an **illustrative reconstruction**, not text quoted from the
+APT paper or from a real OpenReview thread. It is the natural-language document
+whose claims and responses are represented by the three checked `.lara`
+programs.
+
+### Round 0 — excerpt from the submitted paper
+
+> **Adaptive pruning for large language models.** At 30% sparsity, APT remains
+> competitive with the dense LLaMA2-7B baseline on the four-task OpenLLM
+> average. APT also reduces peak training memory to 41.6% of the Prune+Distill
+> baseline. In our ablation, removing the kurtosis-based salience term reduces
+> the OpenLLM average from 50.0 to 38.1, suggesting that this term is critical
+> for large-model pruning.
+
+The first two sentences have complete support under `rebuttal-v1`, so LARA
+reports them as `justified`. The ablation reports only one run. Because the
+policy requires variance for a component-ablation claim, LARA does not promote
+the last sentence to a checked argument; it reports `gap`.
+
+### Round 1 — excerpts from the reviews
+
+> **Reviewer 1.** The OpenLLM protocol does not appear to have been fixed in
+> advance. The released configuration indicates that hyperparameters were tuned
+> against the evaluation tasks, so the protocol-control premise does not hold.
+
+> **Reviewer 2.** A concurrent replication using the same model, baseline, and
+> benchmark finds that APT does not match the dense model. This directly
+> conflicts with the paper's headline benchmark claim.
+
+> **Reviewer 3.** The reported memory reduction is confounded by gradient
+> checkpointing, which was enabled for APT but not for the baseline. The number
+> therefore does not establish an intrinsic memory advantage.
+
+> **Shared request.** The kurtosis ablation is a single run. Please report
+> results across seeds with error bars.
+
+These comments correspond, respectively, to an `undermine` of a premise, a
+`rebut` of a conclusion, an `undercut` of an inference, and an already-open
+mandatory obligation. The first three defeat the two submitted arguments; the
+last one explains why the ablation remains a `gap` rather than introducing an
+additional attack.
+
+### Round 2 — excerpt from the author rebuttal
+
+> **Response to Reviewer 1.** We reran the OpenLLM evaluation with the frozen
+> released configuration and confirmed the result; we have added the rerun to
+> the artifact.
+>
+> **Response to Reviewer 2.** The cited replication used a different evaluation
+> harness and prompt template. We therefore do not believe it is a matched
+> replication of our OpenLLM result.
+>
+> **Response to the shared request.** We reran the kurtosis ablation with five
+> seeds and now report the variance in the revised table. The effect persists.
+>
+> **Response to Reviewer 3.** We agree that gradient checkpointing confounds
+> the memory comparison and have narrowed the claim. We do not rely on the
+> original low-memory claim.
+
+The first two responses defeat both attackers of the benchmark argument, so
+that argument is reinstated. The new seed evidence discharges the ablation's
+missing obligation. The final response adds no defense for the memory argument,
+which is how concession appears in LARA: the claim remains `defeated` without a
+special `concede` construct.
+
+| Natural-language move | LARA representation | Status consequence |
+| --- | --- | --- |
+| Paper reports a supported benchmark result | complete `benchmark_evaluation` argument `a_bench` | `c_bench`: `justified` |
+| Reviewer disputes a supporting protocol statement | `undermine d_um a_bench.protocol_fixed.leaf` | contributes to `c_bench`: `defeated` |
+| Replication reports the contrary result | mutual `rebut` between `d_rebut` and `a_bench` | contributes to `c_bench`: `defeated` |
+| Author supplies a frozen-config rerun and identifies a harness mismatch | counter-undermine plus undercut of `d_rebut` | `c_bench`: reinstated to `justified` |
+| Reviewer asks for missing error bars | still-open mandatory `variance_reported` obligation | `c_kurt`: remains `gap` |
+| Author adds five-seed variance | completed `component_ablation` argument `a_kurt` | `c_kurt`: `justified` |
+| Author concedes the checkpointing confound | no counter-argument is added | `c_measure`: remains `defeated` |
+
+The natural-language layer also exposes the abstraction boundary. The checked
+benchmark atom is `performs(apt, dense_baseline, openllm_avg)`; “30% sparsity”
+is retained in the claim text and evidence references but is not a coordinate
+of that atom. Likewise, `holds(low_memory_footprint, apt)` does not retain the
+41.6% value or comparison baseline. This demo checks the hand-authored bindings
+shown here; it does not establish that those predicates are the only or best
+formalization of the paper sentences.
+
 ## Candidate: `adaptive-pruning` (APT)
 
 Chosen from the ara-paperbench corpus as issue #62 flags: APT's kurtosis-salience ablation is **single-run**, so `corpus-v1`'s mandatory `variance_reported` critical question has no discharging leaf and the ablation claim lands `gap` (corpus unit `corpus-units/adaptive-pruning/C04`). That annotated gap is exactly what a rebuttal round can discharge when the author supplies variance runs — a real `gap → justified` transition, not a synthetic one. The demo carries the **defeasible ablation leg only**; C04's separate `ra@1` arithmetic certificate is orthogonal to the review exchange and is omitted here.

@@ -12,6 +12,15 @@ The **paper + reviews** population is exhibited end-to-end in the D1 demo
 and the rebuttal replayed as three checked programs under one policy, with the claim status
 flipping across rounds — the concrete answer to the design question above.
 
+For readers who want to see the formal examples as ordinary research writing
+before reading `.lara`, the demo documents now include natural-language
+companions: D1 reconstructs a submission/review/rebuttal exchange,
+[`D2`](../docs/demos/d2-mechanical-reviewer.md) pairs paper excerpts with each
+review-diagnostic shape, and
+[`D3`](../docs/demos/d3-agreement-map.md) presents its four checked arguments as
+miniature paper abstracts. These passages are explicitly illustrative rather
+than purported quotations.
+
 Each example is a **self-contained directory** `examples/<NAME>/` (a paper
 artifact): the surface `example.lara`, its co-located policy (`empirical-v1.policy.lara`,
 `empirical-v2.policy.lara` for E4/E5, `strict-bad-v1.policy.lara` for R2, or

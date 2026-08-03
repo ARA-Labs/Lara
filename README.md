@@ -98,6 +98,12 @@ artifact `example.lara`, its co-located policy, and the derived wire anchor
 - [`A/empirical-v1.policy.lara`](examples/A/empirical-v1.policy.lara) — the shared
   trusted policy A, B, and the E-series check against (co-located in each dir).
 
+For a prose-first reading, the demo write-ups reconstruct the checked artifacts
+as a [paper/review/rebuttal exchange](docs/demos/d1-rebuttal-replay.md),
+[mechanical review comments](docs/demos/d2-mechanical-reviewer.md), and four
+[cross-paper abstract excerpts](docs/demos/d3-agreement-map.md) before mapping
+them back to LARA.
+
 `Lara.Examples` additionally transcribes real
 [ARA-Demo](https://github.com/ARA-Labs/ARA-Demo) claims (nanoGPT-speedrun,
 ARC-AGI-3 ls20) into hand-built `Program` values, and `Lara.Negatives` supplies

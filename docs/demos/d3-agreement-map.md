@@ -22,10 +22,63 @@ outcomes by **atom identity** (spec §3.2), not by prose:
    manufacture the disagreement; the open comparability critical question
    (below) names exactly what evidence would connect them.
 
-The two pairs have **identical prose-level disagreement structure**. Only the
-setting index differs, and that single difference flips the verdict from
-`contested ×2` to `justified ×2`. That is the point: the calculus recognizes a
-disagreement only when the formalized atoms license it.
+Once their setting qualifiers are elided, the two pairs have the same
+positive-versus-negative comparison rhetoric. At full claim granularity, the
+setting index differs only in the second pair, and that difference flips the
+verdict from `contested ×2` to `justified ×2`. That is the point: the calculus
+recognizes a disagreement only when the formalized atoms license it.
+
+## Read it first as four paper abstracts
+
+The following miniature abstracts are **illustrative reconstructions**, not
+quotations from published papers. They are the natural-language counterparts of
+the four checked arguments in `examples/agreement-map/example.lara`.
+
+### Pair 1 — a genuine same-setting disagreement
+
+> **Paper A — “Adaptive Pruning at High Sparsity.”** We compare APT with CoFi on
+> RoBERTa-base at 60% sparsity using MNLI accuracy. Across matched runs, APT
+> achieves higher accuracy than CoFi. We conclude that APT outperforms CoFi in
+> this setting.
+
+> **Paper B — “Re-evaluating Adaptive Pruning.”** We replicate the APT–CoFi
+> comparison on RoBERTa-base, MNLI, and 60% sparsity. Under the same evaluation
+> protocol, we find no accuracy advantage for APT. We conclude that APT does not
+> outperform CoFi in this setting.
+
+A literature review may reasonably say that these papers disagree. LARA reaches
+the same result because every comparison coordinate matches: system, baseline,
+metric, and setting. Their conclusions instantiate a declared contrary pair,
+so the two arguments rebut one another and both claims become `contested`.
+
+### Pair 2 — similar prose about different experimental worlds
+
+> **Paper C — “Magnitude Pruning Improves BERT at Moderate Sparsity.”** On BERT
+> evaluated across GLUE at 50% sparsity, magnitude pruning achieves higher
+> accuracy than the dense baseline. We conclude that it performs better in this
+> setting.
+
+> **Paper D — “No Accuracy Benefit from Magnitude Pruning at Extreme
+> Sparsity.”** On LLaMA2-7B evaluated with OpenLLM at 90% sparsity, magnitude
+> pruning does not achieve higher accuracy than the dense model. We conclude
+> that it is not better in this setting.
+
+At the slogan level—“pruning is better” versus “pruning is not better”—these
+papers sound contradictory. Their experiments do not, however, answer the same
+proposition. Model family, benchmark, and sparsity are bundled into different
+setting atoms (`bert_glue_s50` and `llama_openllm_s90`). LARA therefore creates
+no rebuttal edge and leaves both claims `justified`. This does **not** mean the
+papers agree; it means that a cross-setting conclusion would require an
+additional bridging experiment or a policy that explicitly licenses such
+generalization.
+
+| What a literature reviewer asks | Pair 1 | Pair 2 |
+| --- | --- | --- |
+| Are the systems and baselines aligned? | yes | yes at the coarse method level |
+| Are metric and experimental setting aligned? | yes: RoBERTa/MNLI, 60% sparsity | no: BERT/GLUE at 50% vs LLaMA/OpenLLM at 90% |
+| Do the conclusions instantiate one contrary pair? | yes | no |
+| LARA result | mutual rebuttal; both `contested` | no attack; both `justified` |
+| What evidence would move the map? | evidence that defeats or privileges one same-setting result | a shared-setting bridging comparison |
 
 ## The cluster and the propositions
 
@@ -52,8 +105,8 @@ instance → mutual `rebut` → both `contested`.
 
 | Paper | Claim | `formal` | Scheme |
 | --- | --- | --- | --- |
-| C | pruning near-lossless | `better(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50)` | `controlled_comparison` |
-| D | pruning destructive | `not_better(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90)` | `null_comparison` |
+| C | magnitude pruning has higher accuracy than the dense baseline | `better(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50)` | `controlled_comparison` |
+| D | magnitude pruning does not have higher accuracy than the dense baseline | `not_better(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90)` | `null_comparison` |
 
 Same system, baseline, and metric; the **only** non-matching atom is the setting
 index `D` (`bert_glue_s50` vs `llama_openllm_s90`). The `contrary` pattern
