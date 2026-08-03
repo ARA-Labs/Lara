@@ -29,6 +29,7 @@ import CorpusUnitsSpec (corpusUnitsSpecProps)
 import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
 import ClaimSupportSpec (claimSupportSpecProps)
+import MechReviewSpec (mechReviewSpecProps)
 import MeasureSpec (measureSpecProps)
 import MutationSpec (mutationSpecProps)
 import PropSpec (propSpecProps)
@@ -199,6 +200,7 @@ main = do
         ++ [run name act | (name, act) <- mutationSpecProps]
         ++ [run name act | (name, act) <- measureSpecProps]
         ++ [run name act | (name, act) <- claimSupportSpecProps]
+        ++ [run name act | (name, act) <- mechReviewSpecProps]
         ++ [run name act | (name, act) <- ablationSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
