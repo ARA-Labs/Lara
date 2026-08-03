@@ -1,7 +1,7 @@
 -- | Golden verdicts for E1–E5 / R1–R3 plus strict-certificate example S1;
 -- the teaching examples A and B join them in 'examplePolicies' for the
--- freshness and coverage properties, together with the three D1
--- rebuttal-replay rounds (round0–round2) — fourteen examples in all.
+-- freshness and coverage properties, together with the D3 agreement-map and
+-- the three D1 rebuttal-replay rounds (round0–round2) — fifteen examples in all.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
 -- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', validates the source
@@ -25,11 +25,14 @@
 --   * __R2__ @strict-contrary@ — 'Reject' R12 (policy §8.1 Path-B well-formedness).
 --   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
 --   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
+--   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
+--     a same-atom contrary pair contested via a rebut 2-cycle, and a
+--     setting-index-mismatch pair left justified (zero attacks).
 --
--- A final __freshness__ property re-derives all fourteen @example.core.sexp@
--- anchors (A, B, E1–E5, R1–R3, S1, and the D1 rebuttal-replay rounds round0–round2)
--- from their surface @.lara@ + policy and asserts the committed bytes match,
--- guarding against surface/anchor drift.
+-- A final __freshness__ property re-derives all fifteen @example.core.sexp@
+-- anchors (A, B, E1–E5, R1–R3, S1, agreement-map, and the D1 rebuttal-replay
+-- rounds round0–round2) from their surface @.lara@ + policy and asserts the
+-- committed bytes match, guarding against surface/anchor drift.
 module WorkedExamplesSpec (workedExamplesSpecProps) where
 
 import Test.QuickCheck
@@ -98,6 +101,13 @@ notImproves m d = Prop (Pred "not_improves") [con m, con "accuracy", con d]
 holdsP :: String -> String -> Prop
 holdsP x d = Prop (Pred "holds") [con x, con d]
 
+-- | @better(s, b, q, d)@ over four nullary-constant names (agreement-map, D3).
+betterP :: String -> String -> String -> String -> Prop
+betterP s b q d = Prop (Pred "better") [con s, con b, con q, con d]
+
+-- | @not_better(s, b, q, d)@ (agreement-map, D3).
+notBetterP :: String -> String -> String -> String -> Prop
+notBetterP s b q d = Prop (Pred "not_better") [con s, con b, con q, con d]
 -- | The D1 rebuttal-replay benchmark claim @performs(apt, dense_baseline, openllm_avg)@.
 performsP :: Prop
 performsP = Prop (Pred "performs") [con "apt", con "dense_baseline", con "openllm_avg"]
@@ -139,6 +149,7 @@ examplePolicies =
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
   , ("examples/S1", "strict-v1.policy.lara")
+  , ("examples/agreement-map", "agreement-v1.policy.lara")
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
@@ -276,6 +287,31 @@ prop_S1 = once $ ioProperty $
               verdictLabels outcome === [(0, LIn)]
           , counterexample "S1 status: c1 → justified" $
               verdictStatuses outcome === [(holdsP "safety_invariant" "D", Justified)]
+          ]
+
+-- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
+-- grain. The genuine-disagreement pair (P1) shares the SAME (S,B,Q,D) atoms, so
+-- @better@/@not_better@ form a contrary instance ⇒ a rebut 2-cycle ⇒ both
+-- @contested@. The setting-mismatch pair (P2) differs ONLY in the setting index
+-- D, so the contrary pattern does not unify ⇒ ZERO attacks ⇒ both @justified@.
+-- Arg indices in declaration order pa=0, pb=1, pc=2, pd=3.
+prop_agreementMap :: Property
+prop_agreementMap = once $ ioProperty $
+  runExample "examples/agreement-map" "agreement-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("agreement-map: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "agreement-map labels: pa/pb undec (2-cycle), pc/pd in (unattacked)" $
+              verdictLabels outcome
+                === [(0, LUndec), (1, LUndec), (2, LIn), (3, LIn)]
+          , counterexample "agreement-map statuses: P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)" $
+              verdictStatuses outcome
+                === [ (betterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Contested)
+                    , (notBetterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Contested)
+                    , (betterP "magnitude_pruning" "dense_baseline" "accuracy" "bert_glue_s50", Justified)
+                    , (notBetterP "magnitude_pruning" "dense_baseline" "accuracy" "llama_openllm_s90", Justified)
+                    ]
           ]
 
 -- ---------------------------------------------------------------------------
@@ -503,8 +539,8 @@ prop_groupConflictExpectedJson =
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
 -- ---------------------------------------------------------------------------
 
--- | For every example (all fourteen: A, B, E1–E5, R1–R3, S1, and the D1
--- rebuttal-replay rounds round0–round2), re-running the full
+-- | For every example (all fifteen: A, B, E1–E5, R1–R3, S1, agreement-map, and
+-- the D1 rebuttal-replay rounds round0–round2), re-running the full
 -- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
 -- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
 -- the committed @example.core.sexp@ bytes __exactly__ (matching
@@ -533,7 +569,7 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
         (pr, pp) ->
           counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
 
--- | For every example (all fourteen), re-render @expected.json@ from the elaborated
+-- | For every example (all fifteen), re-render @expected.json@ from the elaborated
 -- 'Unit' ("Lara.ExpectedJson".@expectedJson@) and assert it equals the committed
 -- @examples\/\<NAME\>\/expected.json@ bytes exactly — the located-diagnostic
 -- freshness sibling of 'prop_freshness'. @expected.json@ is the __Haskell-only__
@@ -599,8 +635,9 @@ attackCells u outcome = case outcome of
 -- reclassifies), this fails.
 --
 -- The suite is the §1 examples E1–E3 / R1–R3, the M5 worked cases E4/E5, the
--- two teaching examples A and B, strict-certificate example S1, plus the three
--- D1 rebuttal-replay rounds round0–round2 — all fourteen in 'examplePolicies'.
+-- two teaching examples A and B, strict-certificate example S1, plus the D3
+-- agreement-map and the three D1 rebuttal-replay rounds round0–round2 — all
+-- fifteen in 'examplePolicies'.
 prop_coverageMatrix :: Property
 prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
@@ -691,6 +728,7 @@ workedExamplesSpecProps =
   , ("E4 reinstatement → accept, justified UNDER rebut/undermine/undercut", quickCheckResult prop_E4)
   , ("E5 contested via undermine+undercut cycles, gap amid attacks", quickCheckResult prop_E5)
   , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
+  , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)
   , ("D1 round2 rebuttal → accept, reinstate + concede + gap discharge", quickCheckResult prop_D1Round2)

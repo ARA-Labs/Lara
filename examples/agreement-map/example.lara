@@ -1,0 +1,247 @@
+# Example agreement-map (D3, issue #64) — a cross-paper agreement map at real-corpus grain
+#
+# Purpose: exhibit, in ONE multi-paper unit, the two outcomes the calculus distinguishes when
+# papers in the same field appear to disagree — and show that the distinction is decided by ATOM
+# IDENTITY (spec §3.2), not by prose. Example `B` proves the shape synthetically; this scales it
+# to the pruning cluster's real vocabulary (`corpus-units/corpus-v1.policy.lara`, family 1) with
+# two claim pairs side by side.
+#
+# The cluster: structured/unstructured pruning of transformer LMs — the four "papers" below are
+# the pruning family the corpus already annotates (`corpus-units/adaptive-pruning/`, whose C03
+# claim is exactly `better(apt, prune_distill_cofi, ...)`). Two propositions are hand-aligned:
+#
+#   P1 (genuine disagreement): APT vs Prune+Distill (CoFi), accuracy, RoBERTa-base/MNLI at 60%
+#      sparsity. One paper reports APT superior; an independent replication reports no advantage.
+#      Both formalize to the SAME (S, B, Q, D) atoms, so `better` / `not_better` are a declared
+#      contrary instance -> mutual rebut -> a `contested` 2-cycle.
+#
+#   P2 (setting mismatch): magnitude pruning vs the dense baseline, accuracy. One paper concludes
+#      pruning is (near-)lossless; another concludes pruning destroys accuracy. In prose this is a
+#      flat contradiction. But they measured DIFFERENT settings — BERT/GLUE at 50% sparsity vs
+#      LLaMA2-7B/OpenLLM at 90% sparsity — so they formalize to `better(mp, dense, accuracy,
+#      bert_glue_s50)` and `not_better(mp, dense, accuracy, llama_openllm_s90)`. Same system,
+#      baseline, and metric; the ONLY difference is the setting index D. The contrary pair
+#      requires the SAME D, so it does not unify: ZERO attacks. Both claims stand justified.
+#
+# A3 (atom-matching) discipline, README.md design constraint #1: the alignment decision is
+# recorded per proposition in the `binding` rationale below. For P1 the rationale ASSERTS atom
+# identity (that is what makes the attack real); for P2 it asserts the deliberate NON-identity of
+# the setting index (that is what makes the non-attack honest, not an oversight).
+#
+# Expected verdict is at the bottom of this file (golden oracle). Agreement map + comparability
+# CQ: docs/demos/d3-agreement-map.md.
+
+artifact pruning_cluster at sha256:cccc...
+policy agreement-v1
+use backends [nd@1]
+
+# ===============================================================================================
+# P1 — GENUINE DISAGREEMENT (same atoms -> contrary instance -> contested 2-cycle)
+# ===============================================================================================
+
+# --- Paper A: APT beats Prune+Distill (CoFi) at matched sparsity -------------------------------
+
+claim c_pos
+  nl      = "APT outperforms Prune+Distill (CoFi) in accuracy on RoBERTa-base MNLI at 60% sparsity"
+  formal  = better(apt, cofi, accuracy, roberta_mnli_s60)
+  binding = { author = alice, audit-status = reviewed,
+              rationale = "A3: same (apt, cofi, accuracy, roberta_mnli_s60) atoms as c_neg; replication targets the identical system-baseline-metric-setting, verified identical under nf, so this pair is a real contrary instance" }
+
+leaf a_e1 : reports(paperA_exp1, compares(apt, cofi, accuracy, roberta_mnli_s60, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperA/table_2.csv#row=mnli-60]
+
+leaf a_e2 : matched_setup(apt, cofi, paperA_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4-setup]
+
+leaf a_e3 : valid_measurement(accuracy, paperA_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4-metrics]
+
+leaf a_e4 : variance_reported(paperA_exp1)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperA/table_2.csv#col=stddev]
+
+leaf a_e5 : scope_matched(apt, accuracy, roberta_mnli_s60)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4-scope]
+
+arg pa : supports(c_pos) by controlled_comparison(apt, cofi, accuracy, roberta_mnli_s60, paperA_exp1)
+  discharge baseline_parity      with a_e2
+  discharge measurement_validity with a_e3
+  discharge variance_reported    with a_e4
+  discharge scope_match          with a_e5
+
+# --- Paper B: an independent replication finds no advantage at the SAME setting -----------------
+
+claim c_neg
+  nl      = "An independent replication finds APT is not better than Prune+Distill (CoFi) in accuracy on RoBERTa-base MNLI at 60% sparsity"
+  formal  = not_better(apt, cofi, accuracy, roberta_mnli_s60)
+  binding = { author = bob, audit-status = reviewed,
+              rationale = "A3: SAME (apt, cofi, accuracy, roberta_mnli_s60) as c_pos -- same system, baseline, accuracy metric, RoBERTa/MNLI, and 60% sparsity; a failed replication of paperA, not a different measurement" }
+
+leaf b_e1 : reports(paperB_exp1, compares(apt, cofi, accuracy, roberta_mnli_s60, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperB/table_1.csv#row=mnli-60]
+
+leaf b_e2 : matched_setup(apt, cofi, paperB_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperB.pdf#sec=3-protocol]
+
+leaf b_e3 : valid_measurement(accuracy, paperB_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperB.pdf#sec=3-metrics]
+
+leaf b_e4 : powered(paperB_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperB.pdf#sec=3-power]
+
+arg pb : supports(c_neg) by null_comparison(apt, cofi, accuracy, roberta_mnli_s60, paperB_exp1)
+  discharge baseline_parity      with b_e2
+  discharge measurement_validity with b_e3
+  discharge adequate_power       with b_e4
+
+# Mutual rebuttal: pa concludes better(...), pb concludes not_better(...) on the SAME atoms, and
+# both orientations are declared contrary in agreement-v1. Neither paper is preferred (v0.1 has no
+# preference ordering), so neither defeat is one-sided: a 2-cycle. Attack completeness (spec §8)
+# requires BOTH edges once both sides of the contrary instance are present.
+rebut pb pa    # paper B rebuts paper A's positive claim
+rebut pa pb    # paper A rebuts paper B's null claim
+
+# ===============================================================================================
+# P2 — SETTING MISMATCH (same S/B/Q, different setting index D -> no contrary instance -> no edge)
+# ===============================================================================================
+
+# --- Paper C: magnitude pruning is near-lossless (BERT/GLUE, 50% sparsity) ----------------------
+
+claim c_low
+  nl      = "Magnitude pruning matches the dense baseline in accuracy on BERT GLUE at 50% sparsity (pruning is near-lossless)"
+  formal  = better(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50)
+  binding = { author = carol, audit-status = reviewed,
+              rationale = "A3: setting index D = bert_glue_s50 is DELIBERATELY distinct from c_high llama_openllm_s90; same system-baseline-metric, so the ONLY non-matching atom is the setting -- the prose disagreement with c_high is not an atom-level conflict" }
+
+leaf c_e1 : reports(paperC_exp1, compares(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperC/table_3.csv#row=glue-50]
+
+leaf c_e2 : matched_setup(magnitude_pruning, dense_baseline, paperC_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=5-setup]
+
+leaf c_e3 : valid_measurement(accuracy, paperC_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=5-metrics]
+
+leaf c_e4 : variance_reported(paperC_exp1)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperC/table_3.csv#col=stddev]
+
+leaf c_e5 : scope_matched(magnitude_pruning, accuracy, bert_glue_s50)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=5-scope]
+
+arg pc : supports(c_low) by controlled_comparison(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50, paperC_exp1)
+  discharge baseline_parity      with c_e2
+  discharge measurement_validity with c_e3
+  discharge variance_reported    with c_e4
+  discharge scope_match          with c_e5
+
+# --- Paper D: magnitude pruning destroys accuracy (LLaMA2-7B/OpenLLM, 90% sparsity) -------------
+
+claim c_high
+  nl      = "Magnitude pruning is not better than the dense baseline in accuracy on LLaMA2-7B OpenLLM at 90% sparsity (pruning is destructive)"
+  formal  = not_better(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90)
+  binding = { author = dave, audit-status = reviewed,
+              rationale = "A3: setting index D = llama_openllm_s90 is DELIBERATELY distinct from c_low bert_glue_s50; the prose reads as a contradiction of c_low but the pair shares no atom on D, so no contrary instance is formed" }
+
+leaf d_e1 : reports(paperD_exp1, compares(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperD/table_1.csv#row=openllm-90]
+
+leaf d_e2 : matched_setup(magnitude_pruning, dense_baseline, paperD_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperD.pdf#sec=2-setup]
+
+leaf d_e3 : valid_measurement(accuracy, paperD_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperD.pdf#sec=2-metrics]
+
+leaf d_e4 : powered(paperD_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperD.pdf#sec=2-power]
+
+arg pd : supports(c_high) by null_comparison(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90, paperD_exp1)
+  discharge baseline_parity      with d_e2
+  discharge measurement_validity with d_e3
+  discharge adequate_power       with d_e4
+
+# NO attack between pc and pd: better(mp, dense, accuracy, bert_glue_s50) and
+# not_better(mp, dense, accuracy, llama_openllm_s90) do NOT unify with either orientation of the
+# contrary pattern (the pattern requires the SAME D on both sides; here D differs). Attack
+# completeness forces no edge because there is no contrary instance to complete. This is the
+# demonstrated feature — see the comparability CQ in docs/demos/d3-agreement-map.md.
+
+status c_pos
+status c_neg
+status c_low
+status c_high
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF (args in declaration order pa=0, pb=1, pc=2, pd=3; all complete):
+#   pa <-> pb    (a 2-cycle: rebut pb pa, rebut pa pb)
+#   pc           (unattacked)
+#   pd           (unattacked)
+# Grounded labelling:
+#   pa -> undec  (2-cycle with pb; neither in, neither out — spec §8, assumption A5)
+#   pb -> undec  (2-cycle with pa)
+#   pc -> in     (unattacked)
+#   pd -> in     (unattacked)
+# Claim status (spec §8 aggregation):
+#   c_pos  -> contested   (its support pa is undec, none in)   } P1 genuine disagreement
+#   c_neg  -> contested   (its support pb is undec, none in)   }
+#   c_low  -> justified   (its support pc is in)               } P2 setting mismatch:
+#   c_high -> justified   (its support pd is in)               } ZERO attacks, NOT contested
+#
+# The agreement map, in one graph:
+#   - P1's two papers ATTACK each other (contested x2) because they share the same atoms.
+#   - P2's two papers do NOT attack (justified x2) because their setting index D differs — the
+#     calculus refuses to manufacture a disagreement the atoms do not license (a silent
+#     false-independence made explicit).
+#
+# §8.1 note: the contested propositions here (better/not_better on roberta_mnli_s60) are the
+# HEADLINE claims, exactly the condition README.md flags for a Path-B well-formedness collision.
+# No collision occurs: both are conclusions of DEFEASIBLE schemes only (no strict rule, no strict
+# chain touches them), so agreement-v1 passes the §8.1 R12 check and no flip to Path A is forced.
+# Recorded, not routed around — see docs/demos/d3-agreement-map.md.
+#
+# Teaching points:
+#  1. Corpus scale needs no new calculus (spec §8): P1 is example B's shape at the pruning
+#     cluster's real grain; adding papers is adding arguments + edges to the same AF.
+#  2. `contested` (not "both justified") is the honest verdict for an unresolved same-setting
+#     field disagreement, and it falls out of grounded semantics.
+#  3. Atom identity is load-bearing (A3): P1 and P2 have IDENTICAL prose-level "disagreement"
+#     structure; only the setting index D differs, and that single difference flips the verdict
+#     from contested x2 to justified x2. The open comparability CQ names what evidence would
+#     connect P2's papers — a shared-setting bridging experiment — since v0.1 has no cross-setting
+#     contrary to link them (the possible-worlds follow-up, out of scope here).
