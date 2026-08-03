@@ -1,0 +1,35 @@
+# fig:example run 1 — the mandatory external_validity question has no
+# discharging leaf, so no complete support argument can be declared for c1;
+# the evidence leaves (and the recorded dead end e4) are admitted, but the
+# claim has no assembled support: gap.
+
+artifact paper_17 at sha256:aaaa...
+policy empirical-v1
+use backends [nd@1]
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=mean]
+
+leaf e2 : randomized(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e3 : powered(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e4 : distribution_shift(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=7-limitations]
+
+status c1

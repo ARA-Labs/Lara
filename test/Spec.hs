@@ -36,6 +36,7 @@ import PropSpec (propSpecProps)
 import RASpec (raSpecProps)
 import ReportingSpec (reportingSpecProps)
 import ReplaySpec (replaySpecProps)
+import RunningExampleSpec (runningExampleSpecProps)
 import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
 import SyntaxSpec (syntaxSpecProps)
@@ -201,6 +202,7 @@ main = do
         ++ [run name act | (name, act) <- measureSpecProps]
         ++ [run name act | (name, act) <- claimSupportSpecProps]
         ++ [run name act | (name, act) <- mechReviewSpecProps]
+        ++ [run name act | (name, act) <- runningExampleSpecProps]
         ++ [run name act | (name, act) <- ablationSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]

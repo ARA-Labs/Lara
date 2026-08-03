@@ -55,6 +55,8 @@ examples =
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
+  , ("examples/running-example/run1", "empirical-v1.policy.lara")
+  , ("examples/running-example/run2", "empirical-v1.policy.lara")
   ]
 
 main :: IO ()

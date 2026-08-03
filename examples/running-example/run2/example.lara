@@ -1,0 +1,46 @@
+# fig:example run 2 — the external-validity question is discharged by e6,
+# so a1 is complete; the recorded dead end lowers to an undercut d1.
+
+artifact paper_17 at sha256:aaaa...
+policy empirical-v1
+use backends [nd@1]
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=mean]
+
+leaf e2 : randomized(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e3 : powered(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e4 : distribution_shift(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=7-limitations]
+
+leaf e6 : generalizes(M, accuracy, D)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_4.csv#row=ood]
+
+arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_3)
+  discharge randomization     with e2
+  discharge adequate_power    with e3
+  discharge external_validity with e6
+
+arg d1 : challenges(external_validity(a1)) by leaf(e4)
+undercut d1 a1.rule
+
+status c1

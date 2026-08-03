@@ -153,6 +153,8 @@ examplePolicies =
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
+  , ("examples/running-example/run1", "empirical-v1.policy.lara")
+  , ("examples/running-example/run2", "empirical-v1.policy.lara")
   ]
 
 -- | The shared empirical-v1 policy basename (co-located in each example's dir).

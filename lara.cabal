@@ -57,6 +57,7 @@ library
                       Lara.ClaimSupport.Load
                       Lara.MechReview
                       Lara.MechReview.Load
+                      Lara.RunningExample
     build-depends:    base >=4 && <5
                     , containers
     default-language: GHC2021
@@ -78,6 +79,7 @@ test-suite lara-test
     other-modules:    CorpusUnitsSpec
                       ClaimSupportSpec
                       MechReviewSpec
+                      RunningExampleSpec
                       PropSpec
                       ReplaySpec
                       TestReplay
