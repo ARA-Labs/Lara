@@ -280,8 +280,8 @@ sessions:
   open_threads: 4
 - id: 2026-08-04_001
   date: '2026-08-04'
-  summary: 'RIT audit + next-step plan: comparison rewritten; evidence admission isolated as the calculus extension; core v0.1 preserved after correcting the initial hole reading; external history protocol separated; C19/O12 conflict remains; committed and opened as PR #74.'
-  turn_count: 3
-  events_count: 7
+  summary: 'RIT audit + reviewed roadmap: evidence admission remains the narrow calculus extension; deep review adds structural quarantine pruning, conservative evidence-blocked reporting, failure-path dependency traces, abstract Lean scope, and external registration receipts; follow-up is open as stacked chore PR #75; C19/O12 remains unresolved.'
+  turn_count: 5
+  events_count: 10
   claims_touched: []
-  open_threads: 2
+  open_threads: 4

@@ -2561,3 +2561,38 @@ tree:
   also_depends_on:
   - N104
   - N93
+
+- id: N107
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-05T01:54
+  source_refs:
+  - plans/2026-08-04-rit-informed-evidence-admission.md
+  - docs/comparison-rit-lara.md
+  - src/Lara/Elaborate.hs
+  - src/Lara/AST.hs
+  - docs/spec.md
+  - https://www.w3.org/TR/prov-o/
+  - https://doi.org/10.1016/j.ijar.2024.109282
+  - https://doi.org/10.1186/2041-1480-5-28
+  - https://doi.org/10.1371/journal.pone.0309210
+  title: 'Deep literature and architecture review of the RIT-informed roadmap'
+  description: >
+    Reviewed the proposed evidence-admission and goal-history design against current LARA source,
+    structured argumentation semantics, scientific evidence models, provenance standards,
+    preregistration practice, and proof-carrying-data trust boundaries.
+  result: >
+    Retained the evidence-admission subcalculus but narrowed its paper claim to a deterministic
+    abstract byte-to-leaf judgment composed with the unchanged argumentation core. Replaced implicit
+    quarantine-to-gap behavior with structural pruning plus conservative evidence-blocked reporting;
+    required exact dependency traces on checker failure; kept SHA-256 and concrete extractors outside
+    Lean; and replaced the bespoke goal-event system with external registration receipts. Updated the
+    plan and comparison accordingly. Documentation contract checks and git diff whitespace checks
+    passed; no checker code changed.
+  evidence:
+  - plans/2026-08-04-rit-informed-evidence-admission.md
+  - docs/comparison-rit-lara.md
+  status: resolved
+  also_depends_on:
+  - N106
+  - N104

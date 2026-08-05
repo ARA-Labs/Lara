@@ -2,8 +2,8 @@ session:
   id: "2026-08-04_001"
   date: "2026-08-04"
   started: "2026-08-04T23:48"
-  last_turn: "2026-08-05T00:58"
-  turn_count: 3
+  last_turn: "2026-08-05T02:01"
+  turn_count: 5
   summary: >
     Re-read the supplied rit paper and current source alongside LARA, then rewrote
     docs/comparison-rit-lara.md. The comparison separates paper claims, CLI behavior, gated API
@@ -12,8 +12,11 @@ session:
     lara-core@0.1, and keeps goal/attempt history as an external protocol. Re-reading N93,
     corpus-units/LOWERING.md, and the frozen rejection table corrected the initial hole interpretation:
     policyAdmission is the demonstrated source defect; IncompleteArgument is a deliberate v0.1
-    rejection. The C19/O12 tier-guarantee conflict remains for researcher adjudication.
-    The reviewed artifacts were committed as 440db13 and opened as PR #74 after the full project gate.
+    rejection. A deep literature and architecture review then narrowed quarantine to structural
+    pruning plus evidence-blocked reporting, required failure-path dependency traces, kept concrete
+    hashing outside Lean, and replaced bespoke goal events with external registration receipts.
+    The C19/O12 tier-guarantee conflict remains for researcher adjudication. PR #74 contains the
+    earlier comparison and plan; follow-up commit d5ffa0f is open as stacked chore PR #75.
 
 events_logged:
   - turn: 1
@@ -58,6 +61,24 @@ events_logged:
     routing: staged
     provenance: ai-suggested
     summary: "preserve core v0.1; repair only policyAdmission now; partial alternatives require a separate v0.2 decision"
+  - turn: 4
+    type: experiment
+    id: "N107"
+    routing: direct
+    provenance: ai-executed
+    summary: "deep literature and architecture review narrowed quarantine, theorem scope, dependency tracing, and registration protocol"
+  - turn: 4
+    type: observation
+    id: "O41"
+    routing: staged
+    provenance: ai-suggested
+    summary: "quarantine requires structural pruning and a conservative evidence-blocked overlay, not a fifth core status or automatic gap"
+  - turn: 4
+    type: observation
+    id: "O42"
+    routing: staged
+    provenance: ai-suggested
+    summary: "mechanized admission should abstract from hashing and preserve exact dependency traces on checker failure"
 
 ai_actions:
   - turn: 1
@@ -98,6 +119,31 @@ ai_actions:
       - "ara/trace/pm_reasoning_log.yaml"
       - "ara/trace/sessions/session_index.yaml"
       - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 4
+    action: >
+      Researched structured and incomplete argumentation, scientific evidence graphs, PROV-O,
+      preregistration, assurance cases, and proof-carrying-data boundaries; re-checked current LARA
+      source; revised the comparison and implementation plan; and validated their explicit design
+      contracts plus diff whitespace.
+    provenance: ai-executed
+    files_changed:
+      - "docs/comparison-rit-lara.md"
+      - "plans/2026-08-04-rit-informed-evidence-admission.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 5
+    action: >
+      Created worktree branch chore/rit-plan-deep-review from PR #74's head, reran the full
+      Haskell/Lean/AxCheck/differential/replay/tamper gate, committed the research revisions as
+      d5ffa0f, pushed the branch, and opened stacked chore PR #75.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
 
 claims_touched: []
 logic_revisions: []
@@ -120,12 +166,26 @@ key_context:
       User requested that the plan live in plans/, then asked for the complete change set to be
       committed and opened as a pull request. PR #74 carries the comparison, executable plan,
       correction trace, and unresolved adjudication without changing checker behavior.
+  - turn: 4
+    excerpt: >
+      User requested a deep conceptual review of the proposed LARA additions. The review retained
+      evidence admission as a narrow calculus contribution, but required structural quarantine
+      pruning, conservative reporting, exact failure-path dependency logs, abstract theorem scope,
+      and external registration receipts instead of a bespoke local event log.
+  - turn: 5
+    excerpt: >
+      User requested that the reviewed plan be committed from a worktree and opened as a chore PR.
+      PR #75 is stacked on open PR #74 so its diff contains only the follow-up research revisions.
 
 open_threads:
   - "Researcher adjudication required for N105: narrow C19 Conditions and replace O12's K-tier wording, or provide a current enforced L1/K replay path."
   - "N106/O40 and O39 remain AI recommendations: evidence admission, paper promotion, and the external goal/attempt protocol have not been approved or implemented."
+  - "N107/O41/O42 remain AI recommendations: the revised quarantine semantics, theorem boundary, and checker API require researcher review before implementation."
+  - "PR #75 is stacked on PR #74; after #74 merges, retarget #75 to main before merging."
 
 ai_suggestions_pending:
   - "Enforce policyAdmission at the presentation boundary while preserving lara-core@0.1."
   - "Mechanize and prototype a closed, deterministic byte-to-leaf checker seam with exact dependency reporting, then measure before paper promotion."
   - "Treat goal history as HARKing-resistant only when a trusted checkpoint predates run start, outside the calculus."
+  - "Model quarantine as structural removal plus a conservative evidence-blocked source overlay; do not map it to gap or add a fifth core status."
+  - "Formalize only abstract admission/composition properties in Lean; keep hashing, parsing, extractor correctness, and registration receipts at the implementation/protocol boundary."

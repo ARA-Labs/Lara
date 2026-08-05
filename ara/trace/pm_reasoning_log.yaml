@@ -463,3 +463,15 @@ entries:
   notes:
   - "Recorded publication as an execution event only: moving the plan, running verification, committing 440db13, and opening PR #74 do not constitute researcher approval of N106/O40."
   - "No new research claim, decision, observation, crystallization, or stale-state transition occurred; N105 remains unresolved and the checker is unchanged."
+- turn: "2026-08-04_001#4"
+  notes:
+  - "Routed the deep literature/source review as experiment N107 DIRECT: it produced observable plan and comparison revisions plus explicit contract checks."
+  - "Staged O41/O42 rather than crystallizing: structural quarantine/reporting and the abstract theorem/checker boundary remain AI recommendations with no first-person researcher approval."
+  - "Did not duplicate O39: the review strengthened the existing conclusion that preregistration requires an external witness and changed Task 6 to consume registration receipts rather than build a bespoke event log."
+  - "No Stage-4 logic edit: N107 resolved a design review, not the separate C19/O12 contradiction; N105 remains unresolved."
+  - "No stale-state transition: this turn revisited O39/O40 and added O41/O42; existing stale entries remain unchanged."
+- turn: "2026-08-04_001#5"
+  notes:
+  - "Recorded publication as an AI action only: commit d5ffa0f and stacked PR #75 publish the N107 plan review but do not constitute researcher approval of O41/O42."
+  - "Used PR #74's branch as #75's base because the revised plan depends on #74 and a main-based PR would duplicate its commits; recorded retargeting #75 after #74 merges as an open thread."
+  - "No new research event, crystallization, logic revision, or stale-state transition occurred."

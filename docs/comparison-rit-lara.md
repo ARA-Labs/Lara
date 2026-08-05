@@ -12,10 +12,7 @@ Yes. The most useful idea LARA should borrow is **executable grounding for evide
 content-address the evidence bytes, pin a versioned extractor or other leaf checker, replay it before
 argument checking, and report exactly which bytes and checker produced the admitted leaf.
 
-The second useful idea is **immutable goal and attempt history**: register a formal target before an
-experiment, retain failed attempts as inert records, and derive the current checked snapshot by replay.
-This adds temporal honesty—especially protection against changing the target after seeing the result—
-without changing LARA’s argumentation semantics.
+The second reusable idea is **externally witnessed registration**: bind a formal target or analysis plan to a content digest before an experiment, retain failures as inert records, and cite the witness receipt from later snapshots. A local Git log establishes ancestry, not wall-clock priority; it is not preregistration. This remains process metadata outside LARA’s argumentation semantics, and existing services should be used before building a LARA-specific history service.
 
 LARA should not adopt `rit`’s analytical move as its organizing principle: narrowing research claims
 to Lean-checkable arithmetic. That mechanism is valuable for numeric subclaims, but it does not
@@ -29,6 +26,8 @@ policy-relative status. A good composition is:
 After enforcing the current admission policy at the presentation boundary, the first new capability
 should be a real leaf-certificate seam. Today `certified` is vocabulary; it is not yet an end-to-end
 replay path in the presentation checker.
+
+Prior art narrows the novelty claim. SACM already organizes auditable claims, arguments, and evidence; ASPIC+ already gives strict/defeasible rules and typed attack locations; Micropublications and Evidence Graphs model scientific claims, data, methods, support, and challenge; PROV-O and Workflow Run RO-Crate model entity/activity/agent and workflow-run provenance. LARA's contribution must therefore remain its executable typed certificate language, checked compilation, replay identity, and structured-argumentation guarantees. Byte admission is a secondary assurance boundary unless real-artifact evaluation proves otherwise.
 
 ## 2. What each system is
 
@@ -171,7 +170,7 @@ now and which are still design input.
 | claim edges are theorem dependencies | `formal.uses.used_constants` is a TODO returning `[]`; `claim_deps` are declared | do not borrow this graph until dependencies are kernel-derived or structurally explicit |
 | all empirical numbers re-extract | `grounding.bind` creates L1 or L2; `reextract` accepts L1 while stating the value is taken on trust | require replay for a LARA `certified` leaf; never label trusted input as rechecked |
 | K-tier and L3 shrink the trust base | the active `bind` path emits only L1/L2; K/L3 are vocabulary/helpers, not reachable outcomes | treat K/L3 as future checker capabilities, not implemented evidence |
-| Turn-0 blueprints prevent target drift | no active implementation under `src/rit` | borrow the temporal contract in a separate event envelope |
+| Turn-0 blueprints prevent target drift | no active implementation under `src/rit` | borrow only an external registration-receipt contract; do not build a bespoke event envelope in this paper cycle |
 | perspective refs and boundary-limit theorems resolve disputes | current active path records a `conflict` event and refuses a same-label collision; the paper’s perspective protocol is not wired | borrow inert conflict receipts first; keep LARA’s typed defeat semantics |
 | contradiction is enforced at admission | `gate.entail.contradicts` exists, but `admit.gate` checks only proof files and groundings | do not cite contradiction-free graph admission as a shipping guarantee |
 | failed attempts remain useful research knowledge | `_document_conflict` attempts to commit rejected/colliding attempts as inert events, but persistence is best-effort and failures are swallowed | borrow guaranteed, transactional failure receipts without letting them affect verdicts |
@@ -235,11 +234,9 @@ must, and needs independent audit.
 
 ### Prerequisite — enforce the existing presentation admission policy
 
-Before extending the language, make the current implementation honor `policyAdmission`: reject
-aborts; admit enters `Gamma`; quarantine removes the leaf **and every dependent argument and attack**
-before `checkUnit`, while retaining an audit record and a `gap` explanation. Removing only the
-`Gamma` entry is wrong because the surviving leaf occurrence becomes an R1 whole-program rejection.
-Generalize the existing `Driver.quarantineUnit` filtering pattern.
+Before extending the language, make the current implementation honor `policyAdmission`: reject aborts; admit enters `Gamma`; quarantine removes the leaf **and every dependent argument and attack** before the conditional `checkUnit` run. Removing only the `Gamma` entry is wrong because the surviving leaf occurrence becomes an R1 whole-program rejection.
+
+Deletion is not a sound final status policy. Removing an unavailable attacker can improve a grounded label. Compute a conservative quarantine-relevance component on the declared presentation graph and report `evidence-blocked` for every affected root; preserve the smaller graph's core label only as a conditional diagnostic. Unrelated roots keep their normal status. A future version may use explicit incomplete-argumentation semantics to reduce overblocking.
 
 Do not bundle open-obligation semantics into that repair. `IncompleteArgument` is the frozen v0.1
 contract, and `corpus-units/LOWERING.md` deliberately represents accepted gaps with no submitted
@@ -258,27 +255,25 @@ The seam should parallel `strictCheck` but remain separate because it validates 
 
 ```text
 leafCheck(delta@version,
-          artifactDigest,
-          sourceRefs,
           leafProposition,
           kappa)
-  -> accept { evidenceDeps, checkerDeps, capabilities }
+  -> accept { checkedProposition, capabilities }
+   | quarantine { locatedDiagnostic }
    | reject { locatedError }
+
+runLeafCheck(snapshot, sourceRefs, leafCheck)
+  -> outcome { runnerGeneratedEvidenceDeps, checkerIdentity, canonicalPayload }
 ```
 
 Required properties:
 
-1. **Closed registration.** An artifact selects a checker/version; it cannot upload executable
-   verifier code.
+1. **Closed registration.** An artifact selects a checker/version; it cannot upload executable verifier code.
 2. **Content identity.** Every consulted evidence object and extractor/spec is digest-addressed.
-3. **Deterministic replay.** Equal input bytes and checker identity produce equal results and
-   diagnostics.
-4. **Dependency accountability.** Acceptance reports every evidence object, selector, extractor, and
-   theory/config entry consulted.
-5. **Narrow guarantee.** Acceptance means the proposition was derived from those bytes according to
-   that checker. It does not mean the experiment was well designed or the claim is true.
-6. **Replay identity.** Selected leaf-checker versions and resolved evidence digests appear in the
-   verdict identity.
+3. **Deterministic replay.** Equal input bytes and checker identity produce equal results and diagnostics.
+4. **Dependency accountability by construction.** Checker code obtains bytes only through an access API that records reads; the runner, not the checker, emits every evidence-object dependency.
+5. **Conservative unavailability.** Quarantined evidence cannot make a public claim status stronger by deleting an attacker.
+6. **Narrow guarantee.** Acceptance means the proposition was derived from those bytes according to that checker. It does not mean the experiment was well designed, the mapping is scientifically faithful, or the claim is true.
+7. **Replay identity.** Selected leaf-checker versions, canonical payloads, and runner-resolved evidence digests appear in the verdict identity.
 
 A possible presentation extension, not a frozen syntax proposal:
 
@@ -312,41 +307,29 @@ orthogonal. Record a capability set in the leaf verdict and let the versioned LA
 is admissible for a particular scheme. Never let “higher tier wins” silently replace a typed rebut,
 undercut, or undermine.
 
-### Priority 1 — add an append-only goal/attempt envelope outside `lara-core@0.1`
+### Deferred protocol — cite external registration receipts, not a bespoke event log
 
-An unsupported LARA claim already yields `gap`; adding another `open` status would be redundant. What
-LARA lacks is chronology. The reusable part of RIT’s Turn-0 idea is:
+An unsupported LARA claim already yields `gap`; adding another `open` status would be redundant. The useful part of RIT’s Turn-0 idea is a small external receipt containing a provider, immutable record ID, registered content digest, witness-issued time, and witness proof.
 
-- open a goal with NL text, formal target, success criterion, code digest, environment digest, and
-  parent snapshot **before** the run;
-- append attempts without mutating that goal;
-- changing the target creates a new goal/revision linked to the old one;
-- derive a normal LARA snapshot from the event history for checking;
-- keep rejected attempts inert unless later lowered through ordinary LARA constructs into support or
-  a typed attack.
+Use exact labels:
 
-This should be a protocol/envelope layer, not a change to grounded semantics. To resist HARKing, the
-goal event must be anchored to a trusted remote or transparency-log checkpoint **before** run start;
-a local append-only log alone proves only tamper-evident recorded order because it can be created
-after the result. With that anchor, the layer supports multi-agent accumulation and reproducible
-longitudinal demos while preserving the frozen core calculus.
+- `preregistered` only when a verified external immutable timestamp covers the goal or analysis-plan digest before the attempt;
+- `prior-in-checkpoint-history` when content-addressed ancestry proves only that the goal precedes the attempt in that history;
+- `post-hoc` when the goal and attempt first appear together or the goal follows the attempt.
 
-### Priority 1 — persist rejection and conflict receipts
+The receipt is not a new LARA status and never enters `Gamma` or the AF. OSF-style time-stamped, read-only registrations are the reference model. Do not build a LARA event-log schema, validator, or Git backend unless evaluation identifies a workflow that existing registration services plus a digest receipt cannot express.
 
-A checker rejection often contains research knowledge: an extractor found a different value, a strict
-certificate failed, or an attempted support term left a mandatory question open. Preserve a receipt
-with:
+### Priority 1 — persist canonical rejection reports
+
+A checker rejection often contains research knowledge: an extractor found a different value, a strict certificate failed, or an attempted support term left a mandatory question open. Preserve a report with:
 
 - proposed construct and target;
 - exact replay identity;
-- evidence/checker dependencies;
+- evidence/checker dependencies available before failure;
 - located diagnostic;
-- parent event and timestamp.
+- source snapshot identity and, if one exists, an external registration receipt.
 
-Receipts must be **inert by construction**: they do not enter `Gamma`, the compiled AF, or claim
-status. An author may later cite the receipt when constructing a regular negative-result claim or a
-typed attack. This copies the good separation in `rit`’s `conflict` events without confusing failure
-to verify with evidence of falsity.
+Reports must be **inert by construction**: they do not enter `Gamma`, the compiled AF, or claim status. An author may later cite one when constructing a regular negative-result claim or a typed attack. This copies the useful separation in `rit`’s `conflict` events without requiring a bespoke event log or confusing failure to verify with evidence of falsity.
 
 ### Priority 2 — expose an inspection and repair interface
 
@@ -389,8 +372,7 @@ evidence layer, not to the argument kernel:
 5. **Do not reject every contradiction from history.** Scientific disagreement is often the object to
    represent. Reject malformed programs, but preserve well-typed competing arguments and report
    `contested` or `defeated`.
-6. **Do not put Git history inside the frozen calculus.** A replayable event envelope can produce
-   ordinary `lara-core@0.1` snapshots. This keeps temporal workflow concerns out of status semantics.
+6. **Do not put Git history or registration logic inside the frozen calculus.** External registration receipts may be cited by ordinary snapshots; local Git ancestry alone is not preregistration.
 7. **Do not call trusted leaves “rechecked.”** A declared hash, provenance tag, or L1 callable is not
    byte-to-value replay.
 
@@ -398,17 +380,15 @@ evidence layer, not to the argument kernel:
 
 | Order | Change | Layer | Observable acceptance criterion |
 | --- | --- | --- | --- |
-| 0 | enforce `policyAdmission` at the presentation boundary without changing `lara-core@0.1` | elaboration + driver/reporting | admit enters `Gamma`; reject aborts; quarantine filters dependent arguments/attacks and reports the resulting `gap`; all-admit inputs preserve current core bytes |
-| 1 | leaf-certificate checker interface and one deterministic table/log extractor | new versioned evidence seam | altering bytes, selector, claimed value, checker version, or certificate makes the leaf reject before support checking |
-| 2 | resolve artifact/source refs and include all consulted digests in replay output | decode/replay boundary | a missing or changed referenced object fails preflight; equal identities replay byte-identically |
-| 3 | capability-set reporting and policy admission over capabilities | policy + reporting | an attested leaf cannot masquerade as re-extracted; policy can require exact capabilities |
-| 4 | `inspect claim` / `inspect leaf` / full `verify-artifact` | CLI/reporting | one command explains the decisive support, hole, attack, and evidence replay chain |
-| 5 | append-only goal/attempt/conflict envelope | protocol outside core | an attempt is pre-registered only if its goal is in a trusted checkpoint that predates run start; late registration is marked post hoc; target changes create revisions; failure receipts persist transactionally but cannot alter a verdict |
-| 6 | stable measurand identities across snapshots | evidence/event layer | conflicting values are detected and preserved without automatic winner selection |
+| 0 | enforce `policyAdmission` at the presentation boundary without changing `lara-core@0.1` | elaboration + driver/reporting | admit enters `Gamma`; reject aborts; quarantine filters dependents, affected roots report `evidence-blocked`, and all-admit inputs preserve current core bytes |
+| 1 | inventory original artifact formats and freeze the evaluation contract | corpus/evaluation | at least two artifacts, ten leaves, two claim families, and two checker families are feasible without hand-authored assertion files |
+| 2 | leaf-certificate checker interface plus closed deterministic checkers | new versioned evidence seam | altering bytes, selector, claimed value, checker version, or certificate rejects before support checking |
+| 3 | traced artifact resolver and replay identity | decode/replay boundary | every object read is runner-reported; missing or changed objects fail preflight; equal identities replay byte-identically |
+| 4 | conservative quarantine reporting | source reporting | a quarantined sole attacker cannot improve the public target status; unrelated roots retain normal status |
+| 5 | capability reporting and `inspect` / full `verify-artifact` | policy + CLI/reporting | output separates byte checking, conditional core status, public status, and semantic-faithfulness limits |
+| 6 | external registration-receipt contract only | documentation/protocol boundary | local Git order is never labelled preregistration; no history service enters the paper's TCB |
 
-Do not modify `lara-core@0.1` merely to copy vocabulary. Prototype the evidence seam and event envelope
-as versioned layers, measure them on the existing corpus, then decide whether a `lara-core@0.2` change
-is justified.
+Do not modify `lara-core@0.1` merely to copy vocabulary. Build the evidence seam only if the corpus inventory passes the frozen coverage gate. Evaluate payload-to-result and proposition-to-result faithfulness with the proposal's two-annotator protocol. Evidence admission is at most a secondary contribution; the structured-argumentation calculus remains the paper's center.
 
 ## 10. Bottom line
 
@@ -422,13 +402,14 @@ The old comparison overemphasized which project was more “formal.” The usefu
 LARA becomes materially more useful when these strengths are composed. A claim should be able to say:
 
 1. this leaf was re-derived from these exact bytes by this exact checker;
-2. this strict arithmetic/code step replayed under this backend;
-3. this defeasible scheme licenses the scientific inference subject to these critical questions;
-4. these typed attacks survive or defeat the argument under grounded semantics; and
-5. this verdict belongs to this immutable goal/attempt history.
+2. every object the checker read is in the replay identity;
+3. this strict arithmetic/code step replayed under this backend;
+4. this defeasible scheme licenses the scientific inference subject to these critical questions;
+5. these typed attacks survive or defeat the argument under grounded semantics;
+6. no unavailable evidence silently strengthened the public result; and
+7. if a preregistration claim is made, this external witness fixed the registered digest before the attempt.
 
-That is a stronger and more honest language than either “the Lean file compiles” or “the argument is
-well typed” alone.
+That is a stronger and more honest language than either “the Lean file compiles” or “the argument is well typed” alone. Items 1–2 certify transcription, items 3–6 certify policy-relative argument structure and reporting safety, and item 7 certifies only externally witnessed chronology. None alone proves empirical truth.
 
 ## 11. Source map
 
@@ -467,3 +448,15 @@ well typed” alone.
   diagnostics.
 - `examples/running-example/` and `examples/rebuttal-replay/`: gap, defeat, reinstatement, and
   multi-snapshot behavior.
+
+### External research anchors
+
+- Dung (1995), grounded argumentation and non-monotonic acceptance: <https://www.cs.ait.ac.th/~dung/Site/Publications_files/n-games.pdf>
+- Modgil and Prakken (2014), ASPIC+ structured argumentation: <https://doi.org/10.1080/19462166.2013.869766>
+- Mailly (2024), grounded semantics for incomplete argumentation frameworks: <https://doi.org/10.1016/j.ijar.2024.109282>
+- Clark, Ciccarese, and Goble (2014), Micropublications: <https://doi.org/10.1186/2041-1480-5-28>
+- Al Manir et al. (2021), Evidence Graphs: <https://doi.org/10.1101/2021.03.29.437561>
+- OMG SACM 2.3: <https://www.omg.org/spec/SACM/2.3/About-SACM>
+- W3C PROV-O: <https://www.w3.org/TR/prov-o/>
+- Workflow Run RO-Crate: <https://doi.org/10.1371/journal.pone.0309210>
+- OSF registrations and preregistrations: <https://help.osf.io/article/330-welcome-to-registrations>

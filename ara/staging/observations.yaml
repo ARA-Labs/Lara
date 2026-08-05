@@ -832,3 +832,44 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O41
+  timestamp: 2026-08-05T01:54
+  provenance: ai-suggested
+  content: >
+    Evidence quarantine should not be encoded as a fifth argumentation status or mapped directly to
+    gap. The admission layer should remove the quarantined leaf, every argument whose transitive
+    support contains it, and every attack with a removed endpoint before core checking; reporting may
+    conservatively overlay evidence-blocked on roots connected to the quarantined leaf in the
+    declared presentation graph while retaining any conditional core diagnostic.
+  context: >
+    Derived from the deep plan review in N107 by reconciling LARA's frozen four-state core,
+    IncompleteArgument rejection, structural support relation, and incomplete-argumentation
+    literature. The revised plan depends on this architecture, but researcher approval is absent.
+  potential_type: architecture
+  bound_to:
+  - N107
+  - N106
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O42
+  timestamp: 2026-08-05T01:54
+  provenance: ai-suggested
+  content: >
+    The evidence-admission paper theorem should quantify over an abstract deterministic checker
+    registry, immutable snapshot, successful leaf judgments, and complete dependency reports.
+    Concrete SHA-256 parsing and extractor correctness remain trusted implementation obligations.
+    Checker failure must preserve the exact read trace, which requires the error transformer outside
+    dependency state or an equivalent outcome carrying both error and log.
+  context: >
+    Derived from N107's proof-carrying-data and implementation-boundary review. The claim prevents the
+    mechanized calculus from overstating cryptographic, parser, or extractor guarantees.
+  potential_type: architecture
+  bound_to:
+  - N107
+  - N106
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
