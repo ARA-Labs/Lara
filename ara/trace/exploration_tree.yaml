@@ -2477,3 +2477,87 @@ tree:
   status: resolved
   also_depends_on:
   - N102
+- id: N104
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-04T23:48
+  source_refs:
+  - rit.pdf
+  - ../rit/src/rit.py
+  - ../rit/src/rit/action/push.py
+  - ../rit/src/rit/admit/__init__.py
+  - ../rit/src/rit/grounding/__init__.py
+  - docs/comparison-rit-lara.md
+  title: 'RIT paper/source and LARA guarantee-boundary audit'
+  description: >
+    Re-read the supplied 28-page rit paper and traced the current RIT CLI, gated Python API,
+    grounding replay, dependency extraction, and conflict-recording paths. Compared those contracts
+    with LARA's presentation AST, elaboration, replay identity, admission, open-obligation, strict
+    backend, and grounded-status paths; then fresh-reader-tested the rewritten comparison.
+  result: >
+    Rewrote docs/comparison-rit-lara.md with separate paper/source columns and an implementation
+    order. Confirmed five load-bearing boundaries: rit CLI commit is non-blocking; CLI verify can
+    report CLEAN for a reproducible compile failure; gate/audit replay L2 but trust stored L1 values;
+    conflict receipts are best-effort; LARA currently all-admits presentation leaves and rejects open
+    obligations despite the frozen quarantine/gap design. The recommended composition is a separate
+    byte-to-leaf checker seam plus LARA's existing argumentation layer, after admission/hole
+    conformance is repaired. Markdown fences and diff whitespace validated; no code changed.
+  evidence:
+  - docs/comparison-rit-lara.md
+  - "ComparisonReader fresh-reader report"
+  status: resolved
+  also_depends_on:
+  - N46
+  - N47
+- id: N105
+  type: decision
+  provenance: ai-suggested
+  timestamp: 2026-08-04T23:48
+  title: 'Unresolved: reconcile prior rit guarantee records with tier-specific replay'
+  choice: >
+    Unresolved. C19 Conditions and O12 should be narrowed to distinguish active L2 replay from
+    trusted L1 values and paper-only K-tier design, unless a source path enforcing L1/K replay is
+    produced.
+  alternatives:
+  - "Revise C19 Conditions and O12's future replacement to state the L2-only guarantee."
+  - "Demonstrate a current admission path that serializes and replays L1 callable behavior or reaches K-tier."
+  evidence:
+  - C19
+  - O12
+  - O37
+  - ../rit/src/rit/grounding/__init__.py
+  - ../rit/src/rit/admit/__init__.py
+  status: unresolved
+  also_depends_on:
+  - N104
+  - N47
+
+- id: N106
+  type: decision
+  provenance: ai-suggested
+  timestamp: 2026-08-05T00:44
+  source_refs:
+  - plans/2026-08-04-rit-informed-evidence-admission.md
+  - src/Lara/Elaborate.hs
+  - src/Lara/Check.hs
+  - docs/spec.md
+  - corpus-units/LOWERING.md
+  title: 'RIT-informed roadmap: evidence admission subcalculus, unchanged v0.1 core, external history protocol'
+  choice: >
+    Treat the abstract byte-to-leaf admission judgment and its composition properties as the only
+    RIT-derived calculus extension. First enforce the existing policyAdmission table at the
+    presentation boundary while preserving lara-core@0.1 and its IncompleteArgument rejection; then
+    mechanize admission, prototype one closed manifest-backed tsv-row@1 checker, integrate a
+    guarantee-labelled evidence report, and evaluate before promoting the result into the paper.
+    Specify goal/attempt history separately with a trusted pre-run checkpoint rule.
+  alternatives:
+  - "Make Lean arithmetic or scalar grounding tiers the language's organizing principle."
+  - "Change open-obligation semantics and evidence admission together in lara-core@0.2."
+  - "Add Git-shaped goal history directly to the support/attack calculus."
+  evidence:
+  - plans/2026-08-04-rit-informed-evidence-admission.md
+  - "Plan contains per-task files, invariants, theorem targets, tamper cases, smoke scenarios, full project gates, and an explicit paper-promotion criterion; no implementation or researcher approval has occurred."
+  status: open
+  also_depends_on:
+  - N104
+  - N93

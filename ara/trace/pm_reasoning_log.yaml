@@ -444,3 +444,22 @@ entries:
     - "Near-miss: C09 (strict-chain consistency) — audit re-verified its Lean hypothesis verbatim; consistent-with, not new evidence; no status change."
     - "No closure signals for the 19 unpromoted staged observations (O35/O36 topics untouched this turn); skipped a full stale sweep, flagged as inherited debt."
     - "Noted in the session record that earlier 2026-08-03 conversations (PLDI plan, PRs #65-#67, #71) ran without epilogues — gap acknowledged, not fabricated."
+- turn: "2026-08-04_001#1"
+  notes:
+  - "Routed the comparison/source audit as experiment N104 DIRECT: it produced a concrete rewritten document and source-verified findings, not merely a literature interpretation."
+  - "Staged O37/O38/O39 rather than crystallizing: the tier-specific rit guarantee, repaired LARA admission architecture, and pre-run anchoring constraint are AI recommendations with no user affirmation."
+  - "Flagged C19 and O12 instead of silently revising them: current source evidence that L1 values pass gate/audit on trust contradicts their unqualified per-fact/K-tier wording. N105 preserves the unresolved adjudication."
+  - "Marked O16/O18/O19/O20/O21/O22 stale: none was promoted or referenced in the last three session-days. O12 was touched by N104; O26-O36 were referenced on 2026-08-02/03 and remain active."
+  - "No Stage-4 content or status rewrite: the contradiction requires researcher adjudication; no first-person adoption signal occurred."
+
+- turn: "2026-08-04_001#2"
+  notes:
+  - "Routed the executable roadmap as decision N106 DIRECT with ai-suggested provenance: the user requested a plan, but did not approve its architecture or execution."
+  - "Corrected the prior mixed hole recommendation after re-reading N93, corpus-units/LOWERING.md, spec §10.1, and CheckConfig: IncompleteArgument is deliberate v0.1 behavior, not the demonstrated conformance defect. Marked O38 stale and staged corrected O40 rather than silently rewriting the old observation."
+  - "The only demonstrated source defect carried into Task 2 is Elaborate's all-declared Gamma despite policyAdmission. Accepted partial alternatives are isolated as a future lara-core@0.2 decision so the plan does not destabilize the frozen core."
+  - "No crystallization or logic-layer revision: N106/O40 remain AI recommendations, and the user supplied no adoption or empirical-resolution signal."
+  - "N105 remains unresolved; the plan does not adjudicate the separate C19/O12 tier-guarantee conflict."
+- turn: "2026-08-04_001#3"
+  notes:
+  - "Recorded publication as an execution event only: moving the plan, running verification, committing 440db13, and opening PR #74 do not constitute researcher approval of N106/O40."
+  - "No new research claim, decision, observation, crystallization, or stale-state transition occurred; N105 remains unresolved and the checker is unchanged."

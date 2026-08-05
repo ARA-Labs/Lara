@@ -278,3 +278,10 @@ sessions:
   events_count: 2
   claims_touched: []
   open_threads: 4
+- id: 2026-08-04_001
+  date: '2026-08-04'
+  summary: 'RIT audit + next-step plan: comparison rewritten; evidence admission isolated as the calculus extension; core v0.1 preserved after correcting the initial hole reading; external history protocol separated; C19/O12 conflict remains; committed and opened as PR #74.'
+  turn_count: 3
+  events_count: 7
+  claims_touched: []
+  open_threads: 2

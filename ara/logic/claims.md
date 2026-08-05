@@ -464,6 +464,7 @@ the result is stated but not yet proved or mechanized._
 - **Last revised**: 2026-07-25 (2026-07-25_001#3)
 
 ## C19: A verification system's real guarantee is what its commit gate enforces, not what its write-up claims
+<!-- CONFLICT: N104/O37 show that rit accepts stored L1 values without replay; C19 Conditions' unqualified “per-fact re-extraction core does hold” requires user adjudication. See N105. -->
 - **Statement**: For a kernel-attestation research verifier, the trust guarantee actually delivered
   is the fixed point of its admission gate — the set of checks that run before a commit is accepted —
   and this can be strictly weaker than the trust architecture the system's own documentation

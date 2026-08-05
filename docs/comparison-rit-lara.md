@@ -1,442 +1,469 @@
-# `rit` vs `lara` — what each verifies, and what it does not
+# `rit` and LARA: verified comparison and design lessons
 
-_Status: analysis note. First written 2026-07-20; revised 2026-07-21 against the POPL-track
-`docs/spec.md` and `docs/strict-backend-decision.md`; §11 addendum 2026-07-25 verified against
-`rit`'s current source tree. LP is now an optional strict adapter, and the
-evidence→claim support lives in a versioned policy of defeasible schemes. Compares the two sibling
-projects under `ara/`: `rit` (a verification core built on the Lean kernel) and `lara` (this project,
-a claim-support language with a backend-parametric strict seam plus an argumentation layer). Goal:
-state precisely what each checks, where they agree, where they differ, and where the framing promises
-more than the mechanism delivers._
+_Status: engineering and research note, rewritten 2026-08-04. Evidence snapshot: the supplied
+28-page `rit.pdf`; `../rit` on clean branch `benchmarks-integration` at commit `24a6140`; LARA at
+commit `c05412a`. “Paper” below means the design and results claimed in `rit.pdf`. “Current source”
+means the executable path in those repository snapshots. This distinction matters because the paper,
+CLI, and Python API currently enforce different contracts._
 
----
+## 1. Answer first
 
-## 1. One-line theses
+Yes. The most useful idea LARA should borrow is **executable grounding for evidence leaves**:
+content-address the evidence bytes, pin a versioned extractor or other leaf checker, replay it before
+argument checking, and report exactly which bytes and checker produced the admitted leaf.
 
-- **`rit`** — an *untrusted* agent runs experiments and proposes claims; a *trusted*
-  verification core turns each claim into a machine-recheckable proof-or-evidence.
-  "Trust comes from the verification layer, not the agent." Kernel = **Lean 4** +
-  deterministic extractors + sha256 integrity locks.
-- **`lara`** — a small language of proof-carrying, **policy-relative** claim support. A
-  program declares propositions, evidence leaves, instances of strict or defeasible inference
-  schemes, their obligations, typed attacks, and claim roots. The checker compiles this to a Dung
-  framework and reports, per claim, one of `justified / gap / defeated / contested`. Strict steps use
-  a small certificate interface with a natural-deduction reference adapter and optional LP adapter;
-  the empirical evidence→claim step is a **defeasible scheme in a versioned policy `Pi`**, not a
-  proof term.
+The second useful idea is **immutable goal and attempt history**: register a formal target before an
+experiment, retain failed attempts as inert records, and derive the current checked snapshot by replay.
+This adds temporal honesty—especially protection against changing the target after seeing the result—
+without changing LARA’s argumentation semantics.
 
-Both are the *same architecture* — untrusted proposer, tiny trusted checker — applied to
-research artifacts. They differ in the kernel logic and, more importantly, in **where each
-draws the line between what the checker guarantees and what it merely assumes.**
+LARA should not adopt `rit`’s analytical move as its organizing principle: narrowing research claims
+to Lean-checkable arithmetic. That mechanism is valuable for numeric subclaims, but it does not
+decide whether an experiment supports a scientific claim. LARA’s reason to exist remains the formal
+argumentation layer: named support schemes, explicit critical questions, typed defeat, and
+policy-relative status. A good composition is:
 
----
+> `rit`-style checkers establish **what the bytes say**; LARA establishes **what those checked facts
+> are allowed to support, what remains open, and what defeats the support**.
 
-## 2. What the pipeline actually does (jargon removed)
+After enforcing the current admission policy at the presentation boundary, the first new capability
+should be a real leaf-certificate seam. Today `certified` is vocabulary; it is not yet an end-to-end
+replay path in the presentation checker.
 
-Take a concrete claim: *"v3 hit the target in 2875 steps, beating the 2900 baseline."*
+## 2. What each system is
 
-- **`rit`:** split the claim into a **fact** ("2875 steps") and a **relation** ("2875 < 2900").
-  Lean proves the relation; the fact is *pinned* — hash the log, re-run an extractor to confirm
-  the number came from those bytes. Roll up AND/OR over a claim DAG; print an attestation.
-- **`lara`:** the fact enters as a **leaf** (`observed`, provenance `ai-executed`, bound to a
-  data ref). The step "this experiment supports the claim" is **not** proved — it is an instance
-  of a named **defeasible rule** in the policy (e.g. `controlled_experiment`), which carries
-  *critical questions* (randomization, power, external validity) that must each be discharged or
-  left as an explicit hole. A recorded dead-end can attack the argument. Grounded labelling over
-  the compiled graph yields the four-state status.
+### `rit` paper
 
-The honest one-liner still holds for both: **the checker validates the argument structure —
-that steps instantiate declared rules, obligations are explicit, attacks are type-correct, and
-the status is the grounded result. It does not establish that the evidence is true, nor that the
-declared scheme is a correct account of what supports a claim.** That judgment lives in the leaves
-(both systems) and now, for `lara`, also in the policy.
+The paper proposes a zero-trust research ledger with four main ideas:
 
----
+1. split assertions into empirical groundings and analytical propositions;
+2. re-extract empirical values from hash-locked evidence;
+3. check analytical propositions with Lean 4;
+4. accumulate claims in a content-addressed Claim Flow Graph, with open goals, disputes, revisions,
+   and pre-registered “Turn 0” blueprints.
 
-## 3. What is the same
+The paper’s strongest practical insight is not Curry–Howard. It is the refusal rule: if a value cannot
+be re-derived from available evidence, the system should remain open or reject rather than let an LLM
+guess. Table 6’s completed cell reports a 26-point uplift on PRL-Bench and zero degradation of
+previously correct answers; the following prose calls the PRL-Bench gain “+31,” an internal numeric
+inconsistency. The evidence is still preliminary: RQ3 is explicitly design-only, RQ4 has one completed
+paper/prover cell (FTRL, 27% resolved), most model-pair cells are blank, and the PaperBench-E
+pass-rate columns are labelled illustrative.
 
-| | Shared design |
-|---|---|
-| Trust model | Untrusted proposer, tiny trusted checker. Proof-Carrying Code / de Bruijn / LCF lineage. A bad proposal costs one failed check, never a false attestation. |
-| Sealed kernel | `rit` seals the Lean `Judgment`; `lara` seals `Judgment` via a hidden Haskell constructor. The only way to get one is a successful `check`. |
-| Input | Both consume an ARA and decompose it into a graph of claims (`rit`: *claim DAG*; `lara`: *claim-support graph / compiled Dung framework*). |
-| Hume's fork | Both refuse to prove the empirical. Empirical content enters as leaves / groundings; only structural relations are checked. |
-| Dependency exposure | Both surface exactly which unverified inputs a conclusion rests on (`rit`: tiers T0–T4, `#print axioms`; `lara`: the leaf-dependency set `L` and open obligations `O` reported per argument). |
-| Two-axis honesty | Both keep deterministic structural correctness separate from noisy empirical reliability, and never average the two. |
+### `rit` current source
 
----
+There are two materially different executable surfaces:
 
-## 4. Where they differ
+- The Git-shaped CLI in `src/rit.py` exposes `claim`, `add`, `commit`, `verify`, `inspect`, and `push`.
+  `cmd_commit` compiles staged Lean files and archives the compiler output, but deliberately **does not
+  block the commit**. `cmd_verify` recompiles tracked Lean files and compares the new report with
+  `.rit/compile.log`; it does not replay the grounding manifest or require compilation to succeed. A
+  fresh failing report that byte-matches an archived failing report is printed as `CLEAN` and exits
+  successfully. This command checks report integrity and reproducibility, not proof validity.
+- The stronger Python API in `src/rit/action/push.py:push` binds facts to evidence, checks same-label
+  collisions, emits a self-contained Lean proof, calls `admit.gate`, commits an accepted event, and
+  machine-settles a referenced open claim. Its logical gate is strict; its empirical guarantee is
+  conditional: L2 declarative extractors replay, while accepted L1 callable values are later taken on
+  trust. `action.audit` reruns the same gate and checks declared claim dependencies for cycles.
 
-| Dimension | `rit` | `lara` (current spec) |
-|---|---|---|
-| Kernel logic | Lean 4 / CIC (dependent type theory) | typed argumentation checker + registered strict-certificate adapters (natural deduction required; LP optional) |
-| The evidence→claim step | analytic relations proved; extraction pulled INTO the kernel (K-tier — *designed only*; §11.5 finds it unwired, so shipping `rit` extracts in Python) | a **defeasible scheme** in a versioned policy `Pi`, with critical questions — *not* proved |
-| Empirical content | sha256 byte-capture + deterministic re-extraction; compressed *toward* the kernel (in design; today the Python extractor stays in the TCB — §11.5) | untrusted leaves (`observed/attested/assumed/certified`), kept *out* of the kernel |
-| Monotonic? | **Yes** — Lean is monotonic; proved is proved | **No** — typed attacks (rebut/undercut/undermine) + grounded semantics on top |
-| Failure knowledge | not first-class; a claim simply fails to verify | first-class: a dead-end that constructs a typed attack can **defeat** a claim |
-| `gap` vs `defeated` | not distinguished | distinguished by design (`gap` = no complete argument / open obligation; `defeated` = complete but labelled `out`) |
-| Trust locus beyond leaves | the byte-capture event | the byte-capture event **and the policy `Pi`** (trusted input) |
-| Human surface | Lean source + `@claim` NL comment | a declarative presentation syntax (`claim`/`leaf`/`arg`/`undercut`/`status`) over a shared abstract syntax; JSON is the wire format |
-| Stack | Python front-end + Lean | Haskell core + Python front-end (Phase 3) |
+The paper’s “strict `rit commit` gate” therefore corresponds most closely to the programmatic
+`action.push(..., gate=True)` path—not to the current CLI command named `rit commit`—with the L1
+grounding caveat above.
 
-**The deepest difference is a dual strategy toward the same wall.** `rit`'s *design* pushes as much
-of the empirical world *into* the kernel as it can: embed the evidence bytes as a Lean literal, ship
-the extractor as a Lean function, so the grounding itself becomes a theorem and the world enters at
-one byte-capture event. (That is the K-tier aspiration; §11.5 finds it unwired in the shipping code,
-where every committed fact still passes through a Python extractor at tier L1/L2.) `lara` does the
-opposite: it keeps the empirical content *outside* as
-untrusted leaves, and spends its formal budget on the layer Lean cannot express — **typed,
-non-monotonic defeat**, where a recorded dead-end retracts a claim. That defeat capability is
-`lara`'s actual novelty and is invisible to a purely Lean approach.
+### LARA current language
 
----
+LARA is a snapshot language for policy-relative argument checking. A program declares:
 
-## 5. The dependent-type question: can a kernel "express" a research claim?
+- a natural-language claim and an adjacent formal target;
+- evidence leaves with kind, provenance, and source references;
+- strict or defeasible support-scheme instances;
+- explicit critical-question discharges and holes;
+- typed rebut, undercut, and undermine attacks; and
+- claims whose four-state status is requested.
 
-No — and neither project claims it can, once you read the fine print. A dependent-type kernel
-cannot express, let alone prove, the empirical content of a claim. "v3 reached the target in 2875
-steps" is not a theorem; it enters as an assumption:
+The checker validates support terms and strict certificates, compiles complete arguments to a Dung
+framework, and computes `justified`, `gap`, `contested`, or `defeated` under grounded semantics. It
+already has a closed strict-backend registry, exact dependency reporting for accepted strict
+certificates, a natural-deduction backend, and an exact-rational table-recheck backend.
 
-```lean
-opaque best_steps : Nat
-axiom best_steps_grounded : best_steps = 2875   -- NOT proved; asserted
--- @claim: a real run reaches the target in under 3500 steps
-theorem reach_3500 : best_steps < 3500 := by rw [best_steps_grounded]; omega
+LARA does **not** establish empirical truth. More concretely, the current presentation path in
+`Lara.Elaborate` constructs `Gamma` with an all-admit default; `Unit` retains only `(LeafId, Prop)` and
+drops leaf kind, provenance, and source references before the core checker; and
+`Replay.sourceCheckInput` carries the declared artifact digest into replay identity without resolving
+or hashing the referenced artifact. These are the exact seams where `rit`’s grounding discipline is
+useful.
+
+Open obligations are not a second conformance defect. The term judgment records an obligation set
+and only complete terms can become graph nodes, but the frozen `lara-core@0.1` executable contract
+rejects a submitted open-obligation argument as `IncompleteArgument`. The M5 lowering convention
+therefore represents an accepted `gap` by declaring no support argument; `Lara.Reporting` can still
+locate holes on the reject path. Accepting a complete sibling while retaining an incomplete
+alternative would be a useful `lara-core@0.2` extension, not a v0.1 bug fix.
+
+## 3. Side-by-side comparison
+
+| Dimension | `rit` paper | `rit` current source | LARA current source |
+| --- | --- | --- | --- |
+| Primary object | append-only Claim Flow Graph | Git history + self-contained Lean files + grounding manifest + declared claims | one artifact snapshot plus a versioned policy and replay identity |
+| Main guarantee | admitted facts re-extract; propositions kernel-check; graph remains consistent | `action.push(..., gate=True)` kernel-checks proofs and replays L2 groundings, but trusts stored L1 values; CLI `commit` is non-blocking | argument structure, strict certificates, typed attacks, compiled status |
+| World-facing boundary | hash-locked bytes, extractor, code state | L2 declarative extractors replay; L1 callables are accepted but not re-derivable | leaf proposition, provenance, opaque source refs; no byte replay in the core path |
+| Analytical logic | Lean 4, mainly decidable arithmetic in the implemented path | one self-contained Lean compilation per proof file | backend-parametric strict seam (`nd@1`, `ra@1`) |
+| Evidence-to-claim inference | usually narrowed to an arithmetic proposition | outside the kernel; claim settlement matches proved propositions to declared goals | explicit named defeasible scheme with critical questions |
+| Non-monotonicity | revisions/disputes in the proposed ledger | collisions and rejected pushes attempt a best-effort inert `conflict` event; no active grounded defeat | first-class typed attacks and grounded argumentation semantics |
+| Incompleteness | `OPEN` / honest reject | open claims plus rejected or ungated events | `gap` when no complete support is submitted; a submitted open-obligation argument honestly rejects under frozen v0.1, with holes available to reporting |
+| Conflict handling | kernel contradiction, perspective refs, boundary-limit theorem | active push path checks same label/different value; contradiction helper is not in admission | declared contraries, typed attacks, duplicate-report quarantine, `contested`/`defeated` |
+| Dependency source | theorem dependencies in the proposed CFG | grounding dependencies come from `#print axioms`; claim dependencies remain declared | support-term leaves are structural; backend dependencies are checker-reported and validated |
+| History | foundational, append-only | Git-backed events, including `open`, `advance`, `settle`, `conflict`, `revert` | not a core construct; trajectories are represented by separate versioned snapshots |
+| Trusted policy | extractor semantics, Lean/kernel configuration, collision policy | extractor code/spec, Python gate, Lean toolchain, declared claim edges | proposition signature, claim-support policy, backend registry/theories, checker |
+
+The systems are complementary, not instances of one architecture. Both distrust the producer, but they
+validate different relations:
+
+```text
+rit-style grounding:  evidence bytes --extractor/checker--> observed value
+LARA support:          admitted leaves --named schemes/attacks--> claim status
 ```
 
-The kernel proves only the **analytic** slice (`2875 < 3500`). The empirical `= 2875` is
-established *outside* — `rit` re-hashes and re-extracts; `lara` records it as a leaf — and the
-dependency is exposed (`#print axioms` / the leaf set `L`).
+Neither relation implies the other. A correctly extracted number can support a badly designed
+comparison. A well-typed and undefeated LARA argument can rest on a fabricated leaf if the leaf was
+only declared.
 
-- **What dependent types express well:** the relational / analytic skeleton — inequalities,
-  logical combinations, "premises ⇒ claim." Arguably more power than the task needs.
-- **What they cannot express:** the truth of a measurement. That always enters as an assumption.
+## 4. One example, with the guarantee boundary visible
 
-`lara`'s current design draws the sharper conclusion: it does *not* try to express the
-evidence→claim step as a proof at all. That step is contingent (`supports(E,C) -> C` "is not a
-logical axiom", per `spec.md §5`), so it is modeled as a **defeasible rule**, checked by
-instantiation against a policy rather than by proving. Proof systems are reserved for genuinely
-strict sub-steps and connected through one explicit backend interface.
+Claim: “Method M improves accuracy on distribution D.”
 
----
+A `rit`-style grounding can establish:
 
-## 6. Curry-Howard: what "compiles" actually certifies
+```text
+sha256(table.csv) = h
+extract(table.csv, row=mean, column=accuracy) = 0.784
+0.784 > 0.771
+```
 
-The tempting slogan is *"by Curry-Howard, if the program compiles the paper's claim is valid."*
-The natural-deduction adapter and optional LP adapter genuinely have proof-term readings, but the
-claim they license is narrower than it sounds, and the whole credibility turns on one word.
+That is valuable. It rules out a fabricated number and arithmetic drift. It does not establish that
+0.771 is the correct baseline, that protocols were matched, that variance is acceptable, or that D is
+the intended deployment distribution.
 
-**Validity, not soundness.** A strict adapter validates that its encoded conclusion follows from
-encoded premise conclusions and a declared theory; the claim-support checker validates scheme
-instantiation. Leaves remain **hypotheses**, not theorems. Compilation therefore certifies a
-conditional, not premise truth. LARA's end-to-end guarantee is structural validity relative to the
-selected policy, backend theories, and admitted leaves; completeness is policy-relative.
+LARA represents those remaining steps explicitly:
 
-**The right analogy — and it is still a strong pitch.** No type-checker proves a program
-correct; it proves it well-typed. `tsc` passing means no category errors *given your
-annotations*, not that the code does what you want. `lara` is the exact analog:
+```text
+reports(exp, effect(M, accuracy, D, positive))
+matched_protocol(exp)
+adequate_power(exp)
+---------------------------------------------- controlled_comparison
+improves(M, accuracy, D)
+```
 
-> compiles ≠ claim true — compiles = **the argument is well-typed and undefeated, given its
-> evidence and the chosen policy.**
+An environment mismatch can undercut the rule instance; contrary measurement evidence can rebut its
+conclusion; and an unreported variance check remains a located hole. The useful composition is to make
+the first leaf a replay-checked leaf, then let the existing support and defeat calculus do the rest.
 
-That is a real contribution (mechanized well-typedness for research arguments); "compiles ⇒ true"
-is not, and a reviewer will reject the latter on sight.
+## 5. Paper claims versus the current `rit` implementation
 
-**Three things `compiles` does *not* cover** — name them first, because they are where every
-critique lives:
+This table is not a dismissal of the paper. It identifies which ideas are implemented enough to reuse
+now and which are still design input.
 
-1. **Leaf truth (soundness).** The evidence atoms are assumed. Empirical, untrusted.
-2. **NL→proposition faithfulness (the translation gap).** That the formal `F` faithfully renders
-   the prose claim. No checker can verify this; `spec.md §11` lists it as an untrusted elaborator
-   task evaluated against human annotations. It is the single most load-bearing unchecked step.
-3. **Policy faithfulness.** That the defeasible rule (and its critical questions) is a correct
-   account of what actually supports the claim. `Pi` is a *trusted input*.
+| Paper/design claim | Current-source finding | Reuse status for LARA |
+| --- | --- | --- |
+| `rit commit` is a strict empirical + logical admission gate | `src/rit.py:cmd_commit` records Lean output and commits even on compile failure; `action.push` is the closest gated API, subject to its trusted-L1 caveat | copy the strict API contract, not the current CLI behavior |
+| every receiver rechecks proofs and empirical groundings | `cmd_verify` checks report identity only and can report `CLEAN` for a reproducible compile failure; `action.audit` checks Lean, L2 groundings, cycles, and ungated events but accepts trusted L1 values | use one command whose name and behavior both mean successful full replay |
+| the repository is checked as one Lean environment | `admit.check_proofs` invokes Lean separately for every `proofs/*.lean` file | do not infer cross-proof guarantees from admission |
+| claim edges are theorem dependencies | `formal.uses.used_constants` is a TODO returning `[]`; `claim_deps` are declared | do not borrow this graph until dependencies are kernel-derived or structurally explicit |
+| all empirical numbers re-extract | `grounding.bind` creates L1 or L2; `reextract` accepts L1 while stating the value is taken on trust | require replay for a LARA `certified` leaf; never label trusted input as rechecked |
+| K-tier and L3 shrink the trust base | the active `bind` path emits only L1/L2; K/L3 are vocabulary/helpers, not reachable outcomes | treat K/L3 as future checker capabilities, not implemented evidence |
+| Turn-0 blueprints prevent target drift | no active implementation under `src/rit` | borrow the temporal contract in a separate event envelope |
+| perspective refs and boundary-limit theorems resolve disputes | current active path records a `conflict` event and refuses a same-label collision; the paper’s perspective protocol is not wired | borrow inert conflict receipts first; keep LARA’s typed defeat semantics |
+| contradiction is enforced at admission | `gate.entail.contradicts` exists, but `admit.gate` checks only proof files and groundings | do not cite contradiction-free graph admission as a shipping guarantee |
+| failed attempts remain useful research knowledge | `_document_conflict` attempts to commit rejected/colliding attempts as inert events, but persistence is best-effort and failures are swallowed | borrow guaranteed, transactional failure receipts without letting them affect verdicts |
 
-**Curry-Howard covers adapters, not LARA as a whole.** The clean story ("well-typed proof term
-implies valid derivation") applies to proof-term adapters in `spec.md` Section 5. The defeasible layer
-is argumentation-framework defeat, which is not a Curry-Howard phenomenon: a valid argument can be
-retracted by a dead end. The honest framing is a **typed argument checker with pluggable strict
-certificate adapters**, not a Curry-Howard proof system end-to-end.
+Two source-level points do hold strongly and are worth preserving:
 
----
+1. `action.push(..., gate=True)` is transactional at the verdict boundary: a failed gate removes the
+   generated proof and grounding-manifest changes before any `advance` event can settle a claim.
+2. When `_document_conflict` succeeds, it separates **recording** a failed attempt from **accepting**
+   it. `derive` reads only `advance` events for settlement, so a recorded failure receipt cannot turn
+   a claim green. The current implementation does not guarantee that the receipt itself persists.
 
-## 7. The necessity question: why a formal system at all?
+## 6. What LARA already gets right
 
-The earlier draft's sharpest critique was that a proof kernel is overkill for the shallow
-arithmetic that shows up between grounded facts and claims. The current `lara` design answers this
-by putting strict checkers behind one backend seam and moving the real work to the
-argumentation-scheme + policy + grounded-labelling layer. The necessity test now applies per
-adapter:
+### 6.1 It formalizes the inference `rit` leaves implicit
 
-- **What the formal system now does** is enforce, across a whole artifact, that every argument
-  correctly instantiates a declared scheme, every critical question is discharged or explicitly
-  held, attacks are type-correct, and defeat propagates — then locate the gaps. That is the
-  "type system for arguments" value, and it *does* survive the necessity test better than "a
-  prover for `2875 < 2900`", because the payoff is consistency-and-gap-location at scale, not
-  single-step depth.
-- **The live question is which optional adapters earn their keep.** Natural deduction is the small
-  reference implementation. LP, arithmetic, temporal, or code adapters ship only when corpus steps
-  use their distinct capabilities. Backend replacement proves none is foundational; corpus evidence
-  decides utility.
-- **For `rit`,** the original critique still lands unchanged: Lean is a heavyweight trusted base
-  (Mathlib; `native_decide` → compiler axiom; `grind` → classical axioms) doing the most trivial
-  job (`a < b`), while the components that do real work — sha256 locks, extractors, re-execution,
-  spec-checkers — are the *non-Lean* parts. The formal kernel is the least load-bearing piece
-  with the largest footprint.
+Converting “M improves” to `0.784 > 0.771` is not a neutral translation. It assumes metric validity,
+baseline comparability, protocol parity, and scope. `rit` checks the numeric shadow after this
+narrowing. LARA names the narrowing as a scheme instance and exposes its critical questions.
 
-**The criterion to keep.**
+### 6.2 It distinguishes absence, defeat, and unresolved conflict
 
-> A formal system earns its place when it enforces consistency a human cannot audit at scale and
-> emits a portable, re-checkable certificate. `lara`'s scheme/defeat checker plausibly clears
-> this bar; a heavyweight proof kernel over shallow arithmetic (`rit`'s Lean use) does not, and
-> each optional `lara` adapter must show it is used by real support derivations.
+At the language-semantics level, `gap`, `defeated`, and `contested` are different outcomes:
 
----
+- missing complete support produces `gap`;
+- a complete support argument labelled `out` produces `defeated`;
+- grounded `undec` produces `contested`.
 
-## 8. The honest read: what these systems are, and what they are not
+The current executable path realizes all three outcomes for accepted units. Under the frozen v0.1
+input contract, an explicitly submitted incomplete argument rejects rather than participating in an
+accepted status computation; accepted corpus gaps are encoded by submitting no support argument.
+Retaining incomplete alternatives beside complete ones would require a separately versioned
+semantics change.
 
-The grand framing on `rit`'s README is *"trust comes from the verification layer, not the
-agent."* But the research judgment — "does E support C?" — is a leaf, decided by an LLM or a
-human, never by the kernel. The kernel rigorously verifies what was never in doubt (`2875 <
-2900`) and not what decides whether the research is sound. That is the same lock-next-to-an-open-
-window as before.
+A rejected extractor should not automatically become a counter-argument. It is missing reliable
+support unless someone constructs a checked contrary argument. LARA’s typing discipline preserves
+that distinction.
 
-`lara`'s current spec is, to its credit, **already honest about this** — it states that
-acceptance is "structural validity only," that completeness is policy-relative, that realization
-does *not* justify the lowering (`§11`), and that the current LP code is a non-conforming adapter
-seed rather than the trusted core (`§5`). The critique therefore now
-differentiates the two projects:
+### 6.3 Dependencies are part of term structure
 
-- **`rit`** still over-frames: "verify claims" reads as epistemic verification the mechanism does
-  not deliver. The defensible description is *tamper-evident bookkeeping + arithmetic checking +
-  dependency exposure*.
-- **`lara`** describes itself accurately. Its exposure is not dishonest framing but a **relocated
-  hard problem**: the epistemic content moved into the policy `Pi`, which is trusted, unchecked
-  input. The checker's guarantee is now three-way conditional — *given* true leaves, *and* a
-  faithful policy, *and* a faithful NL→proposition translation, the argument is valid and
-  undefeated.
+A LARA support term contains its premise and discharge subterms. Its leaf dependency set is therefore
+structural, not a separately declared graph. Strict backends report their consulted premise/theory
+slots through the certificate seam. This is safer than building the roll-up over self-reported edges.
 
-**The modest, defensible version of each:**
+### 6.4 The formal target is already adjacent to the prose claim
 
-- **`rit`** = tamper-evident bookkeeping + arithmetic checking. Guarantees the numbers came from
-  the stored logs and the composition math is error-free; tracks per claim what it rests on. Real
-  and useful. Not "verification of research."
-- **`lara`** = a typed, policy-relative argument checker with first-class defeat. Guarantees that
-  a paper's argument instantiates declared schemes, discharges or flags every critical question,
-  and survives recorded defeaters — and *locates* the gaps and defeaters. The one capability `rit`
-  lacks: a recorded dead-end can flip a claim to `defeated`.
+The previous version of this note asked LARA to add a formal target next to claim text. That work is
+already complete:
 
----
+```lara
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+```
 
-## 9. The sharp questions each project should answer
+The remaining issue is not visibility. It is that the NL-to-formal binding remains unverified, as it
+must, and needs independent audit.
 
-- **To `rit`:** the stated hook is that LLM-judges pass ~97% while only ~66% is real. What
-  fraction of that gap is *arithmetic / tampering / composition* error (which the kernel catches)
-  versus *bad judgment about whether evidence supports a claim* (which lives in the leaves and the
-  kernel never sees)? If mostly the latter, the kernel attacks the minority failure mode while
-  being sold as closing the whole gap.
+## 7. What LARA should borrow
 
-- **To `lara`, three:**
-  1. **Who writes `Pi`, and why is it right?** The policy is now the load-bearing epistemic
-     artifact and it is trusted input. The rebuttal-bait question is "your checker is only as good
-     as its policy" — have the answer ready (schemes curated from methodology literature,
-     versioned, corpus-validated), and treat policy quality as an evaluated axis, not an
-     assumption.
-  2. **Which strict adapters earn their keep?** Measure certified strict steps by backend and
-     distinguish generic propositional consequence from genuinely LP-, arithmetic-, temporal-, or
-     code-specific checks. Keep adapters optional unless they reduce trust on real support derivations.
-  3. **Is the concrete syntax the audit surface it needs to be?** Today a `claim` carries only its
-     NL string; the formal proposition appears only inside the `supports(...)` argument. Put the
-     claim's formal target next to its NL (as `rit`'s `@claim` does) so the highest-risk
-     translation step is auditable at a glance.
+### Prerequisite — enforce the existing presentation admission policy
 
----
+Before extending the language, make the current implementation honor `policyAdmission`: reject
+aborts; admit enters `Gamma`; quarantine removes the leaf **and every dependent argument and attack**
+before `checkUnit`, while retaining an audit record and a `gap` explanation. Removing only the
+`Gamma` entry is wrong because the surviving leaf occurrence becomes an R1 whole-program rejection.
+Generalize the existing `Driver.quarantineUnit` filtering pattern.
+
+Do not bundle open-obligation semantics into that repair. `IncompleteArgument` is the frozen v0.1
+contract, and `corpus-units/LOWERING.md` deliberately represents accepted gaps with no submitted
+argument. If accepted partial alternatives become a requirement, design them as `lara-core@0.2` and
+refreeze the wire, proofs, corpus, mutations, measurements, and replay bundle separately.
+
+The leaf-certificate seam below should extend the repaired admission boundary, not create a second
+parallel path.
+
+### Priority 0 — add a leaf-certificate replay seam
+
+This is the highest-value language change. It closes the current gap between `kind = certified` and an
+actually replayed evidence check.
+
+The seam should parallel `strictCheck` but remain separate because it validates a different relation:
+
+```text
+leafCheck(delta@version,
+          artifactDigest,
+          sourceRefs,
+          leafProposition,
+          kappa)
+  -> accept { evidenceDeps, checkerDeps, capabilities }
+   | reject { locatedError }
+```
+
+Required properties:
+
+1. **Closed registration.** An artifact selects a checker/version; it cannot upload executable
+   verifier code.
+2. **Content identity.** Every consulted evidence object and extractor/spec is digest-addressed.
+3. **Deterministic replay.** Equal input bytes and checker identity produce equal results and
+   diagnostics.
+4. **Dependency accountability.** Acceptance reports every evidence object, selector, extractor, and
+   theory/config entry consulted.
+5. **Narrow guarantee.** Acceptance means the proposition was derived from those bytes according to
+   that checker. It does not mean the experiment was well designed or the claim is true.
+6. **Replay identity.** Selected leaf-checker versions and resolved evidence digests appear in the
+   verdict identity.
+
+A possible presentation extension, not a frozen syntax proposal:
+
+```lara
+leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+  kind         = certified
+  provenance   = checker(table-extract, 1)
+  refs         = [evidence/table_2.csv#row=mean]
+  verification = cert(table-extract@1, sha256:..., (column accuracy))
+```
+
+Until this exists, `certified` should be described as an admission annotation, not proof that LARA
+replayed the referenced evidence.
+
+### Priority 1 — represent grounding strength as capabilities, not one total rank
+
+Borrow RIT’s distinctions, but not its automatic tier winner:
+
+```text
+asserted
+cited
+hash-locked
+re-extracted
+re-executed
+kernel-replayed
+```
+
+These properties are not a universal epistemic ordering. Re-execution can be noisy; a kernel-checked
+extractor can still extract the wrong field; independent replication and source attribution are
+orthogonal. Record a capability set in the leaf verdict and let the versioned LARA policy decide what
+is admissible for a particular scheme. Never let “higher tier wins” silently replace a typed rebut,
+undercut, or undermine.
+
+### Priority 1 — add an append-only goal/attempt envelope outside `lara-core@0.1`
+
+An unsupported LARA claim already yields `gap`; adding another `open` status would be redundant. What
+LARA lacks is chronology. The reusable part of RIT’s Turn-0 idea is:
+
+- open a goal with NL text, formal target, success criterion, code digest, environment digest, and
+  parent snapshot **before** the run;
+- append attempts without mutating that goal;
+- changing the target creates a new goal/revision linked to the old one;
+- derive a normal LARA snapshot from the event history for checking;
+- keep rejected attempts inert unless later lowered through ordinary LARA constructs into support or
+  a typed attack.
+
+This should be a protocol/envelope layer, not a change to grounded semantics. To resist HARKing, the
+goal event must be anchored to a trusted remote or transparency-log checkpoint **before** run start;
+a local append-only log alone proves only tamper-evident recorded order because it can be created
+after the result. With that anchor, the layer supports multi-agent accumulation and reproducible
+longitudinal demos while preserving the frozen core calculus.
+
+### Priority 1 — persist rejection and conflict receipts
+
+A checker rejection often contains research knowledge: an extractor found a different value, a strict
+certificate failed, or an attempted support term left a mandatory question open. Preserve a receipt
+with:
+
+- proposed construct and target;
+- exact replay identity;
+- evidence/checker dependencies;
+- located diagnostic;
+- parent event and timestamp.
+
+Receipts must be **inert by construction**: they do not enter `Gamma`, the compiled AF, or claim
+status. An author may later cite the receipt when constructing a regular negative-result claim or a
+typed attack. This copies the good separation in `rit`’s `conflict` events without confusing failure
+to verify with evidence of falsity.
+
+### Priority 2 — expose an inspection and repair interface
+
+RIT’s Git-shaped surface is more useful to agents than a checker that only emits a verdict. LARA
+should add read-only tooling such as:
+
+```text
+lara inspect claim c1       # complete/incomplete supports, labels, attackers, holes
+lara inspect leaf e1        # refs, checker replay, evidence digests, capabilities
+lara explain verdict.json   # dependency cone and first decisive reason
+lara diff old new           # which leaves/arguments/attacks changed each status
+lara verify-artifact        # resolve digest, refs, and leaf certificates, then run full check
+```
+
+The commands should consume the same checked result as `lara check`, never reimplement semantics.
+Diagnostics should remain stable and machine-readable so an agent can repair one located failure and
+retry.
+
+### Priority 2 — add stable measurand identities for cross-snapshot collision detection
+
+LARA’s duplicate-report groups handle declared duplicates within one snapshot. RIT shows the value of
+a stable identity for “the same measured cell” across revisions and agents. Add this to the event or
+evidence layer, not to the argument kernel:
+
+- a measurand key identifies the metric, scope, run/config, and selector;
+- two different values for one key produce a conflict receipt;
+- the key declaration is audited because measurand identity is itself an untrusted modeling choice;
+- resolution requires explicit revision, new conditions, or a typed argument—not automatic overwrite.
+
+## 8. What LARA should not borrow
+
+1. **Do not make Lean the universal research kernel.** Keep Lean/RA/code checkers behind narrow
+   registered seams. The argumentation core is the contribution.
+2. **Do not collapse support into numeric entailment.** Numeric checks are strict substeps; the
+   evidence-to-scientific-claim step remains defeasible.
+3. **Do not use a scalar evidence tier as defeat semantics.** Evidence quality informs admission and
+   schemes; typed attacks decide defeat.
+4. **Do not accept declared graph edges as verified dependencies.** LARA’s structural support terms
+   and checked backend dependency reports are stronger.
+5. **Do not reject every contradiction from history.** Scientific disagreement is often the object to
+   represent. Reject malformed programs, but preserve well-typed competing arguments and report
+   `contested` or `defeated`.
+6. **Do not put Git history inside the frozen calculus.** A replayable event envelope can produce
+   ordinary `lara-core@0.1` snapshots. This keeps temporal workflow concerns out of status semantics.
+7. **Do not call trusted leaves “rechecked.”** A declared hash, provenance tag, or L1 callable is not
+   byte-to-value replay.
+
+## 9. Recommended implementation order
+
+| Order | Change | Layer | Observable acceptance criterion |
+| --- | --- | --- | --- |
+| 0 | enforce `policyAdmission` at the presentation boundary without changing `lara-core@0.1` | elaboration + driver/reporting | admit enters `Gamma`; reject aborts; quarantine filters dependent arguments/attacks and reports the resulting `gap`; all-admit inputs preserve current core bytes |
+| 1 | leaf-certificate checker interface and one deterministic table/log extractor | new versioned evidence seam | altering bytes, selector, claimed value, checker version, or certificate makes the leaf reject before support checking |
+| 2 | resolve artifact/source refs and include all consulted digests in replay output | decode/replay boundary | a missing or changed referenced object fails preflight; equal identities replay byte-identically |
+| 3 | capability-set reporting and policy admission over capabilities | policy + reporting | an attested leaf cannot masquerade as re-extracted; policy can require exact capabilities |
+| 4 | `inspect claim` / `inspect leaf` / full `verify-artifact` | CLI/reporting | one command explains the decisive support, hole, attack, and evidence replay chain |
+| 5 | append-only goal/attempt/conflict envelope | protocol outside core | an attempt is pre-registered only if its goal is in a trusted checkpoint that predates run start; late registration is marked post hoc; target changes create revisions; failure receipts persist transactionally but cannot alter a verdict |
+| 6 | stable measurand identities across snapshots | evidence/event layer | conflicting values are detected and preserved without automatic winner selection |
+
+Do not modify `lara-core@0.1` merely to copy vocabulary. Prototype the evidence seam and event envelope
+as versioned layers, measure them on the existing corpus, then decide whether a `lara-core@0.2` change
+is justified.
 
 ## 10. Bottom line
 
-Neither system verifies research claims, and both now say so — `rit` in its fine print ("the
-world enters at one arrow"), `lara` in its spec ("structural validity only… policy-relative
-completeness… realization is not a guarantee for this lowering"). What they build is auditing
-infrastructure: tamper-evidence and arithmetic soundness (`rit`); typed, policy-relative argument
-checking with located gaps and first-class defeat (`lara`).
+The old comparison overemphasized which project was more “formal.” The useful distinction is simpler:
 
-The accurate way to read `rit`'s README: **cross out "verify claims" and write "make the
-bookkeeping around claims tamper-evident."** `lara`'s current spec already reads accurately; its
-job now is to defend the **policy** as a first-class, evaluated object rather than a trusted
-given, and to prove the **defeat layer** carries the contribution.
+- `rit` is strongest at **local, byte-bound verification of a numeric fact** and at the workflow idea
+  of immutable goals and attempts.
+- LARA is strongest at **composing heterogeneous evidence into defeasible research arguments** and
+  explaining gaps, conflicts, defeat, and reinstatement.
 
-For `lara` specifically, the one claim that survives every version of this critique is the
-**typed defeat layer**: dead-end-defeats-claim is a real capability a holistic reviewer cannot
-produce, it is what the ARA data model uniquely enables, and it does not depend on the checker
-laundering the model's leaf judgments. That — not Curry-Howard, not justification logic — is the
-contribution to lead with.
+LARA becomes materially more useful when these strengths are composed. A claim should be able to say:
 
----
+1. this leaf was re-derived from these exact bytes by this exact checker;
+2. this strict arithmetic/code step replayed under this backend;
+3. this defeasible scheme licenses the scientific inference subject to these critical questions;
+4. these typed attacks survive or defeat the argument under grounded semantics; and
+5. this verdict belongs to this immutable goal/attempt history.
 
-## 11. Addendum (2026-07-25): the expressible fragment, verified against `rit`'s code
+That is a stronger and more honest language than either “the Lean file compiles” or “the argument is
+well typed” alone.
 
-_`rit` has restructured since its README was written (the `formal/core/action/algorithms` layout is
-gone; the package now lives in `src/rit/{formal,gate,action,admit,derive,grounding,store}` plus
-benchmark `adapters/` and `eval/`). The claims below were checked against the current tree, not the
-README. §11.1–11.4 read the formal **vocabulary**; §11.5 (added on a follow-up pass) reads the
-shipping **commit path** and records where the write-up's pipeline claims — one Lean environment, a
-kernel-read claim DAG, K-tier grounding, a falsifiability gate — are not what `admit.gate` actually
-enforces._
+## 11. Source map
 
-### 11.1 What `rit`'s formal layer can literally say
+### `rit` paper
 
-The entire world-facing vocabulary (`src/rit/formal/primitives.py`) is five object kinds — GOAL,
-EVIDENCE, FACT, RECORD, BASELINE — and six relations:
+- `rit.pdf` §§3–4: Hume split, grounding tiers, Claim Flow Graph, disputes, Turn-0 blueprint, stated
+  verification properties.
+- `rit.pdf` §§5–7 and appendices: evaluation status, honest-reject behavior, limitations, red-team
+  results, and future L3/Mathlib work.
 
-| Relation | Meaning |
-|---|---|
-| GROUNDS | evidence ⊢ fact (deterministic extraction, sha256) |
-| ORDER | record ≤ record |
-| BEAT | record vs. an external baseline constant |
-| BOUND | ∀ run in cohort, lo ≤ value ≤ hi |
-| ENTAIL | do the grounded records reach the goal (overclaim check) |
-| CONTRADICT | two claims whose conjunction proves ⊥ |
+### `rit` current source (`24a6140`)
 
-A FACT is a natural number extracted from a log. The grammar (`src/rit/formal/grammar.py`) renders
-each conclusion as a "decidable arithmetic fact" proved `by decide`, with preconditions (code hash,
-GPU count) as *documented* hypotheses whose truth is checked by sha256 outside Lean. Even ENTAIL and
-CONTRADICT are arithmetic over these scalars. **So the observation "rit can only express numerical
-comparison" is correct for the implemented system** — comparisons and interval bounds over
-extracted numbers.
+- `../rit/src/rit.py`: `cmd_commit`, `cmd_verify`, `cmd_inspect`.
+- `../rit/src/rit/action/push.py`: `push`, `_document_conflict`, transactional gate path.
+- `../rit/src/rit/admit/__init__.py`: `_check_one`, `check_proofs`, `gate`.
+- `../rit/src/rit/action/audit.py`: full API audit, cycle check, ungated-event check.
+- `../rit/src/rit/grounding/__init__.py`: `bind`, `reextract`, `collision`, active L1/L2 behavior.
+- `../rit/src/rit/formal/uses.py`: authoritative grounding dependencies; pending claim dependencies.
+- `../rit/src/rit/derive/__init__.py`: open/settled derivation and weakest-link grade.
+- `../rit/src/rit/gate/entail.py`: contradiction helper outside the active admission path.
+- `../rit/src/tests/test_actions.py`: executable contract for the programmatic API.
 
-The ceiling is not Lean (which can state arbitrary mathematics) but structural, and two-fold:
+### LARA current source (`c05412a`)
 
-1. **The grounding interface.** The only place the world enters is deterministic extraction of
-   values from bytes. Any empirical claim must therefore be *reducible to a predicate over
-   extractable quantities*. "top-1 = 78.4%" fits; "the gain comes from the attention mechanism,"
-   "this generalizes beyond the benchmark," "the comparison was fair" have no extractor.
-2. **The auto-discharge portfolio.** The solver tries `decide` → `omega` → `simp`, capping the
-   analytic side at decidable / linear-arithmetic goals in practice.
-
-`rit` concedes this in its own source: `primitives.py` states that "'why' as VALUE
-(important/novel) is NOT formalizable and is kept as context, never proven," and the `@claim`
-convention already conceded the NL sentence is unchecked.
-
-### 11.2 The silent narrowing — the sharpest form of the delta
-
-Every claim a paper makes reaches `rit`'s kernel only through a **narrowing step**: from "method M
-is faster" to "this extracted number beats that constant." That step is itself an inference, and a
-defeasible one — it presumes the runs are comparable, the metric is the right operationalization,
-the cohort is representative. `rit` performs it silently and unverifiably, in the gap between the
-NL sentence and the theorem; the claim either shrinks to its numeric shadow (`improves(M,D)` becomes
-`2875 < 3225`) or survives only as an unverified comment. `lara` types exactly this step: the leaf
-supports the claim *via a named scheme* whose critical questions must be discharged or stand as
-located holes, and which can be undercut. Our predicates need not be machine-decidable because
-their role is argumentative, not deductive; the decidable numeric fragment is what we delegate to
-a strict backend — which is the slot `rit` fits into.
-
-### 11.3 `rit`'s non-kernel defeat machinery is a shadow argumentation framework
-
-To handle disagreement `rit` had to build substantial machinery *outside* the kernel: a verdict
-lattice, collision detection ("same premises, different conclusion"), evidence-tier winner-picking,
-dispute branches, weakest-link trust roll-up. Structurally, collisions are rebuttals, "missing
-premises" are undischarged critical questions, and tier-based resolution is a preference-based
-defeat relation — an ad hoc, unproven argumentation layer. Their design doc lists honest
-aggregation as an open problem that "getting this wrong makes the whole ledger dishonest"
-(`rit/notes/DESIGN.md` §7b#3). That layer is `lara`'s object of study, with the grounded-labelling
-metatheory mechanized.
-
-### 11.4 The composition, stated as engineering
-
-- **`rit` as a `lara` strict backend / leaf oracle.** `rit`'s portable kernel certificates and
-  (designed-but-not-yet-wired, see §11.5) K-tier groundings are the shape of opaque certificate the
-  `Lara.Strict` seam accepts; its T0–K tiers map onto our leaf provenance vocabulary. This upgrades
-  our leaves from "declared" to "machine-rechecked" without widening our TCB — at the tier `rit`
-  actually reaches today (L1/L2, Python extractor in the TCB), not the K-tier its write-up advertises.
-- **`lara` as `rit`'s aggregation semantics.** Replacing their AND/OR + collision heuristics with
-  compilation to a Dung framework and grounded labelling would give their roll-up a proven
-  propagation story — a principled answer to their open problem §7b#3.
-
-Neither subsumes the other: a fully `rit`-verified artifact can still be *defeated* (valid
-measurement, undermined setup), and a fully `lara`-justified argument can still rest on fabricated
-leaves `rit` would catch. They compress the world into bytes; we adjudicate what the bytes are
-allowed to mean.
-
-### 11.5 Write-up vs. code: what the shipping commit path actually enforces
-
-§11.1's vocabulary finding read `rit`'s formal *layer* against source. This section reads its
-commit *path* — `rit.py` CLI → `action/push.py` → `admit.gate` → `grounding` + `formal/kernel` —
-against the README/DESIGN prose (verified 2026-07-25). Five claims the write-up makes do not
-survive contact with the shipping code. The rule this enforces: **describe `rit` by what
-`admit.gate` runs, not by what its prose asserts.**
-
-1. **Not "one Lean environment."** README and `admit/__init__.py` both say the repo "is checked as
-   one Lean environment." `admit.check_proofs` in fact loops and runs `kernel._run_lean(f)` on each
-   `.lean` file *separately* — N independent single-file compilations, each re-declaring its own
-   `opaque`/`axiom` shadows locally.
-2. **The claim→claim DAG is self-reported, not kernel-read.** README: "claim ↔ claim links =
-   theorem dependencies." But `formal/uses.used_constants` (the `getUsedConstants` read of real
-   inter-theorem edges) is a `return []` TODO stub; the edges actually come from
-   `declared_claim_deps` — the agent's hand-declared list (`push.py:158`). Only the empirical
-   `_grounded` axiom deps are genuinely kernel-read. This is a consequence of (1): isolated
-   single-file checks mean no proof consumes another's theorem, so there are no kernel claim→claim
-   edges to read.
-3. **K-tier grounding is unreachable in the write path.** DESIGN.md sells K-tier — extraction as a
-   `native_decide` theorem so "the Python interpreter then leaves the trust base entirely." But
-   `grounding.bind()` only ever assigns tier `"L1"` or `"L2"`; `lean_grounding_src`/`native_decide`
-   is never called by `push`. For **every fact `rit` actually commits, the Python regex extractor
-   is in the TCB** — the opposite of the K-tier claim. K-tier is an unused helper plus a demo.
-4. **The falsifiability gate is not enforced at commit.** `formal/__init__.py` lists "the
-   falsifiability gate rejects restatements" as a soundness component and `gate/solve.tautological`
-   implements it, but `admit.gate` checks only two things — proofs kernel-check, groundings
-   re-extract — and never calls `tautological`. A pure restatement/tautology passes the real gate.
-5. **Much of the verification machinery is a parallel dead world.**
-   `gate/{collision,dedup,simplify,mergecheck,grade}.py` operate over a `cfg` block-CFG the live
-   `push` path never builds; the commit path uses `grounding.collision` (manifest) and
-   `derive.grade` instead. Only `gate/entail.py` is on the live path (via `derive.settle`).
-
-**What does hold up.** The per-fact core is real: `push` writes `axiom <label>_grounded : <label>
-= <value>` with the value taken from the binding, and `admit.gate` re-extracts every binding
-(sha256 + regex re-derive), so the anti-gaming property genuinely holds via re-extraction; the
-kernel really rejects `sorry`/rogue axioms via `#print axioms`. Single-fact, single-proof
-attestation is sound at L1/L2.
-
-**Consequence for the comparison.** Shipping `rit` is narrower than its write-up: independently
-kernel-checked single-arithmetic-fact proofs with re-extracted numeric leaves, plus a
-**self-reported, unverified dependency graph** and aggregation modules that mostly do not run at
-the gate. This *strengthens* §11.3: the weakest-link roll-up runs over a DAG whose edges `rit`
-never verifies, and the K-tier that would shrink its TCB is not wired in. The shadow-argumentation
-reading is not just "unproven semantics" — much of the machinery is off the commit path entirely.
-
-### 11.6 What, then, does `rit`'s "formal verification" mean?
-
-Given §11.5, the phrase means something precise and much smaller than it sounds: **`rit` formally
-verifies *nodes*, never the *graph* that composes them.** The formal guarantee is real but local —
-a set of independently kernel-checked, hash-pinned atomic facts, plus the arithmetic immediately
-over each one. It is not "this research artifact has been verified."
-
-- **What one certificate says.** "This number was extracted from these exact bytes (sha256 + regex
-  re-derivation), and this arithmetic relation over it holds (kernel-checked)." Genuine
-  tamper-evidence on one quantity plus a genuine arithmetic fact — nothing fake survives at this
-  level.
-- **What the roll-up is.** The weakest-link grade and AND/OR status propagation are
-  *arithmetically faithful* — the code does what it says over whatever graph it is handed. But that
-  graph's edges are the agent's **declared** `claim_deps`, not read from the proof terms
-  (`used_constants` is a stub, §11.5#2). So the roll-up is a **conditional guarantee with an
-  unchecked antecedent**: "*if* these are the real dependencies, *then* the weakest link in the cone
-  is grade L1." The antecedent is never verified.
-- **The failure mode: missing-edge laundering.** A *spurious* extra edge is harmless
-  (over-conservative). An *omitted* real edge is not: a claim that actually rests on a weak or
-  refuted fact, but whose declared deps omit that edge, receives a falsely high grade, and `rit`
-  cannot catch it — it never derives the true dependency from the proof. The roll-up's one job is to
-  be conservative, and the single case it cannot see is the one that defeats conservatism.
-- **Where the overclaim lives.** Not in `grade.py` (honestly labelled a conservative heuristic, no
-  theorem asserted) — in the README's "claim ↔ claim links = theorem dependencies," which presents
-  agent-declared edges as kernel-derived facts. The verified bricks are shown inside a blueprint the
-  untrusted party drew.
-
-**Division of labor with `lara` (stated precisely).** *Nobody* can verify the NL→structure
-faithfulness — that "faster" means `2875 < 3225`, or that these are the right edges (Hume's fork;
-C18, C08). That trust is irreducible for both projects. The tractable question is narrower: *given*
-a declared structure, is the **propagation over it** proven sound? `rit`'s is not — the roll-up is
-ad hoc code over an untrusted edge set. `lara`'s is — compilation to a Dung framework with a
-grounded-labelling soundness theorem (result 6/7). `lara` does not verify the edges either; it
-verifies the layer `rit` currently leaves as untrusted code (how status flows across the graph),
-while both still rest on the same unverifiable leaf/edge trust at the bottom. That is the exact
-seam, and why the two are complementary rather than redundant.
+- `docs/spec.md`: frozen claim-support calculus, attack typing, grounded status, replay identity, and
+  lowering boundary.
+- `docs/lara-surface-grammar.md`: current presentation syntax.
+- `src/Lara/Elaborate.hs`: presentation lowering and the current all-admit leaf context.
+- `src/Lara/AST.hs`: presentation leaves versus checker-boundary `Unit`.
+- `src/Lara/Replay.hs`: replay identity construction and preflight.
+- `src/Lara/Strict.hs`, `src/Lara/Strict/ND.hs`, `src/Lara/Strict/RA.hs`: strict certificate seam and
+  shipped backends.
+- `src/Lara/SupportTerm.hs`, `src/Lara/Check.hs`, and `src/Lara/Driver.hs`: missing-leaf and
+  open-obligation rejection, duplicate-group quarantine filtering, and the production boundary.
+- `src/Lara/Compile.hs`, `src/Lara/Grounded.hs`, `src/Lara/Reporting.hs`: compilation, status, and
+  diagnostics.
+- `examples/running-example/` and `examples/rebuttal-replay/`: gap, defeat, reinstatement, and
+  multi-snapshot behavior.

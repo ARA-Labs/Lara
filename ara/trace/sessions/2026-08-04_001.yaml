@@ -1,0 +1,131 @@
+session:
+  id: "2026-08-04_001"
+  date: "2026-08-04"
+  started: "2026-08-04T23:48"
+  last_turn: "2026-08-05T00:58"
+  turn_count: 3
+  summary: >
+    Re-read the supplied rit paper and current source alongside LARA, then rewrote
+    docs/comparison-rit-lara.md. The comparison separates paper claims, CLI behavior, gated API
+    behavior, and LARA's actual presentation-to-core boundary. A follow-up executable plan classifies
+    the byte-to-leaf admission judgment as the only RIT-derived calculus extension, preserves
+    lara-core@0.1, and keeps goal/attempt history as an external protocol. Re-reading N93,
+    corpus-units/LOWERING.md, and the frozen rejection table corrected the initial hole interpretation:
+    policyAdmission is the demonstrated source defect; IncompleteArgument is a deliberate v0.1
+    rejection. The C19/O12 tier-guarantee conflict remains for researcher adjudication.
+    The reviewed artifacts were committed as 440db13 and opened as PR #74 after the full project gate.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N104"
+    routing: direct
+    provenance: ai-executed
+    summary: "RIT paper/source and LARA guarantee-boundary audit; comparison rewritten and reader-tested"
+  - turn: 1
+    type: observation
+    id: "O37"
+    routing: staged
+    provenance: ai-suggested
+    summary: "rit shipping empirical guarantee is L2 replay plus trusted L1, and CLI verify is report integrity"
+  - turn: 1
+    type: observation
+    id: "O38"
+    routing: staged
+    provenance: ai-suggested
+    summary: "mixed admission/hole recommendation from the comparison turn; superseded by corrected O40"
+  - turn: 1
+    type: observation
+    id: "O39"
+    routing: staged
+    provenance: ai-suggested
+    summary: "HARKing resistance requires a trusted pre-run checkpoint, not only local append-only order"
+  - turn: 1
+    type: decision
+    id: "N105"
+    routing: direct
+    provenance: ai-suggested
+    summary: "unresolved reconciliation of C19/O12 with tier-specific replay evidence"
+  - turn: 2
+    type: decision
+    id: "N106"
+    routing: direct
+    provenance: ai-suggested
+    summary: "seven-task RIT-informed roadmap separating evidence admission calculus from external history protocol"
+  - turn: 2
+    type: observation
+    id: "O40"
+    routing: staged
+    provenance: ai-suggested
+    summary: "preserve core v0.1; repair only policyAdmission now; partial alternatives require a separate v0.2 decision"
+
+ai_actions:
+  - turn: 1
+    action: >
+      Read rit.pdf, traced the RIT CLI/API/gate/grounding/dependency paths and LARA
+      elaboration/replay/check/driver paths, rewrote docs/comparison-rit-lara.md, ran a fresh-reader
+      review, corrected its findings, and validated Markdown structure and diff whitespace.
+    provenance: ai-executed
+    files_changed:
+      - "docs/comparison-rit-lara.md"
+      - "ara/staging/observations.yaml"
+      - "ara/logic/claims.md (conflict flag only)"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 2
+    action: >
+      Re-read the frozen hole/rejection contract and N93, corrected the initial interpretation, and
+      wrote plans/2026-08-04-rit-informed-evidence-admission.md with seven executable
+      tasks, exact interfaces, theorem targets, mutation cases, smoke scenarios, transactional
+      publication, version boundaries, and paper-promotion criteria.
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-04-rit-informed-evidence-admission.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 3
+    action: >
+      Moved the implementation plan to plans/, updated every recorded path, ran Markdown/YAML checks
+      and the full Haskell/Lean/differential/replay/tamper gate, committed the reviewed artifacts as
+      440db13, pushed docs/comparison-rit-lara, and opened PR #74.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+
+claims_touched: []
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User requested a source-grounded judgment on what LARA can borrow from rit and a full rewrite of
+      docs/comparison-rit-lara.md. The resulting recommendation preserves LARA's argumentation core:
+      rit-style checkers establish what exact bytes say; LARA decides what those checked facts may
+      support, what remains open, and what defeats the support.
+  - turn: 2
+    excerpt: >
+      User requested concrete next steps and asked whether RIT-derived ideas can contribute to the
+      calculus. The plan answers yes only for an abstract evidence-admission judgment and composition
+      theorems; manifests, extractors, receipts, and goal history remain implementation/protocol.
+      The frozen v0.1 IncompleteArgument behavior is preserved rather than bundled into the extension.
+  - turn: 3
+    excerpt: >
+      User requested that the plan live in plans/, then asked for the complete change set to be
+      committed and opened as a pull request. PR #74 carries the comparison, executable plan,
+      correction trace, and unresolved adjudication without changing checker behavior.
+
+open_threads:
+  - "Researcher adjudication required for N105: narrow C19 Conditions and replace O12's K-tier wording, or provide a current enforced L1/K replay path."
+  - "N106/O40 and O39 remain AI recommendations: evidence admission, paper promotion, and the external goal/attempt protocol have not been approved or implemented."
+
+ai_suggestions_pending:
+  - "Enforce policyAdmission at the presentation boundary while preserving lara-core@0.1."
+  - "Mechanize and prototype a closed, deterministic byte-to-leaf checker seam with exact dependency reporting, then measure before paper promotion."
+  - "Treat goal history as HARKing-resistant only when a trusted checkpoint predates run start, outside the calculus."

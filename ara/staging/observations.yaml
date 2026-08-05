@@ -208,6 +208,7 @@ observations:
   crystallized_via: Lean counterexample and ground-instance overlap soundness proof
   stale: false
 - id: O12
+  # CONFLICT: O37/N105 scopes the reusable integration to L2 replay and treats K-tier as paper design, not active source behavior.
   timestamp: 2026-07-25T00:10
   provenance: ai-suggested
   content: 'rit and lara compose as engineering, not competition: rit''s portable Lean kernel certificates
@@ -329,7 +330,7 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
-  stale: false
+  stale: true
 - id: O17
   timestamp: 2026-07-28T12:00
   provenance: ai-executed
@@ -378,7 +379,7 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
-  stale: false
+  stale: true
 - id: O19
   timestamp: 2026-07-30T09:35
   provenance: ai-executed
@@ -403,7 +404,7 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
-  stale: false
+  stale: true
 - id: O20
   timestamp: 2026-07-30T17:10
   provenance: ai-executed
@@ -426,7 +427,7 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
-  stale: false
+  stale: true
 - id: O21
   timestamp: 2026-07-31T10:30
   provenance: ai-suggested
@@ -453,7 +454,7 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
-  stale: false
+  stale: true
 - id: O22
   timestamp: 2026-07-31T21:30
   provenance: ai-suggested
@@ -482,7 +483,7 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
-  stale: false
+  stale: true
 - id: O23
   timestamp: 2026-08-01T01:11
   provenance: ai-suggested
@@ -743,6 +744,90 @@ observations:
   potential_type: claim
   bound_to:
   - N101
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O37
+  timestamp: 2026-08-04T23:48
+  provenance: ai-suggested
+  content: >
+    rit's current empirical gate is not uniformly byte-replaying: L2 declarative extractors replay,
+    but an L1 callable is discarded after bind and reextract later accepts the stored value on trust.
+    The CLI verify command is likewise report-integrity replay, not a proof-validity gate: a fresh
+    failing Lean report can be CLEAN when it byte-matches the archived failing report. Claims about
+    rit's shipping guarantee must therefore be scoped to the exact API and grounding tier.
+  context: >
+    Source-verified while rewriting docs/comparison-rit-lara.md against rit commit 24a6140 (N104).
+    This narrows O12's K-tier integration wording and conflicts with C19 Conditions' unqualified
+    statement that the per-fact re-extraction core holds.
+  potential_type: claim
+  bound_to:
+  - N104
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O38
+  timestamp: 2026-08-04T23:48
+  provenance: ai-suggested
+  content: >
+    LARA should repair its presentation-to-core boundary before adding evidence features:
+    Elaborate currently admits every leaf into Gamma despite policyAdmission, while fullConfig
+    rejects an open-obligation argument although the frozen spec excludes that alternative and
+    reports gap. Correct quarantine must filter the leaf plus every dependent argument and attack
+    before checkUnit; deleting only the Gamma entry turns the occurrence into an R1 rejection.
+    A later leaf-certificate seam should extend this repaired admission boundary and remain separate
+    from strictCheck because byte-to-leaf replay and premise-to-conclusion checking certify different
+    relations.
+  context: >
+    Source-verified in Lara.Elaborate, Lara.Check, Lara.SupportTerm, Lara.Driver, Lara.Replay, and
+    docs/spec.md during the RIT/LARA comparison rewrite (N104). Recommendation is not user-approved.
+  potential_type: architecture
+  bound_to:
+  - N104
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O39
+  timestamp: 2026-08-04T23:48
+  provenance: ai-suggested
+  content: >
+    An append-only local goal/attempt log does not by itself resist HARKing because the producer can
+    create the goal after seeing the result and backfill the local order. A pre-registration claim
+    requires the goal event to be anchored in a trusted remote or transparency-log checkpoint before
+    run start; without that external ordering witness the guarantee is only tamper-evident recorded
+    chronology.
+  context: >
+    Design boundary identified while adapting the rit paper's Turn-0 blueprint for LARA (N104).
+    Recommendation is not user-approved.
+  potential_type: constraint
+  bound_to:
+  - N104
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O40
+  timestamp: 2026-08-05T00:44
+  provenance: ai-suggested
+  content: >
+    The RIT-informed evidence plan should preserve lara-core@0.1. The demonstrated conformance defect
+    is that Lara.Elaborate ignores policyAdmission; source quarantine must remove the leaf plus every
+    dependent argument and attack before core checking. IncompleteArgument is instead a frozen v0.1
+    rejection, with accepted corpus gaps represented by no submitted support argument (N93 and
+    corpus-units/LOWERING.md). Admitting partial alternatives would require a separate lara-core@0.2
+    decision and refreeze, not a bug-fix commit.
+  context: >
+    Corrects and supersedes O38's mixed recommendation after re-reading the frozen rejection table,
+    CheckConfig obligation gate, corpus lowering contract, and trace decision N93 while writing the
+    executable next-steps plan N106. Recommendation remains unapproved.
+  potential_type: architecture
+  bound_to:
+  - N106
+  - N93
   promoted: false
   promoted_to: null
   crystallized_via: null
