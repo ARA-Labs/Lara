@@ -502,6 +502,10 @@ also remove an attacker and move another query's label. Public status is therefo
 conservative rule above — quarantine-affected claims report `evidence-blocked` rather than the
 pruned graph's label.
 
+Byte-level evidence admission — checking that a certified leaf is the exact output of a registered
+checker over pinned artifact bytes — is **not** part of v0.1; leaves on every v0.1 path are
+*evidence declared*, and the gated design record is `evidence-admission-decision.md`.
+
 ### 4.4 Instantiation in programs
 
 ```text

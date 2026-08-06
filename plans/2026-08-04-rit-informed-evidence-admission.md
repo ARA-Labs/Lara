@@ -1,5 +1,12 @@
 # RIT-Informed Evidence Admission and Research-History Plan
 
+> **Approved scope (see roadmap tracker #78):** Task 1 (reduced to
+> `docs/evidence-admission-decision.md` + one spec pointer), Task 2 (landed as
+> issues #76/#77), and Task 6 (reduced to
+> `docs/registration-receipt-contract.md`, documentation only). Tasks 3–5 and 7
+> are gated on the corpus inventory and explicit researcher approval — **do not
+> execute**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: use `subagent-driven-development` or `executing-plans` to execute this plan task by task. Work in an isolated worktree. Do not combine the calculus and protocol tracks into one implementation commit.
 
 > **2026-08-05 program split.** This document is the older evidence-admission sketch. Its
