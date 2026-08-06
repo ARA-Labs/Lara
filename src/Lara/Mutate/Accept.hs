@@ -39,7 +39,7 @@ module Lara.Mutate.Accept
 import Data.List (elemIndex, find)
 
 import Lara.AST hiding (Reject)
-import Lara.Driver (runCheck)
+import Lara.Driver (prune, pruneChecked, runCheck)
 import Lara.Mutate (Expected (..), Mutant (..), MutationOp (..), mutantFileName)
 import Lara.Prop (Prop (..), Term)
 import Lara.Replay
@@ -49,7 +49,7 @@ import Lara.Replay
   , mkCheckInput
   )
 import Lara.SupportTerm (instAPat)
-import Lara.Wire (Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
+import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..), encodeCheckInput, printSExpr)
 
 -- ---------------------------------------------------------------------------
 -- Generation
@@ -73,6 +73,7 @@ acceptMutants bases =
     operators =
       [ opDropSupport
       , opAttachUndercut
+      , opQuarantineAttacker
       , opAttachRebutCycle
       , opAttachUndermine
       , opAttachReinstate
@@ -82,8 +83,10 @@ acceptMutants bases =
 -- queried status is 'Justified').
 isJustified :: CheckInput -> Bool
 isJustified input = case runCheck input of
+  -- The conditional label of an @evidence-blocked@ query is not its status
+  -- (spec §4.3, issue #76): such a query is never counted justified.
   Verdict _ (Accept _ _ statuses) -> case unitQueries (inputUnit input) of
-    [q] -> lookup q statuses == Just Justified
+    [q] -> lookup q statuses == Just (Published Justified)
     _ -> False
   _ -> False
 
@@ -91,8 +94,16 @@ isJustified input = case runCheck input of
 -- or nothing if the mutated identity fails to reassemble (unreachable for these
 -- theory-preserving edits).
 acceptMutant :: String -> CheckInput -> MutationOp -> Status -> Unit -> [Mutant]
-acceptMutant base input op status u' =
-  [ Mutant (mutantFileName base op 0) base op (ExpectPrimaryStatus status) Nothing bytes
+acceptMutant base input op status = acceptMutantWith base input op (ExpectPrimaryStatus status)
+
+-- | 'acceptMutant' for the conservative-reporting class: the mutant accepts, but
+-- the queried claim's public status is @evidence-blocked@ (spec §4.3, #76).
+acceptMutantBlocked :: String -> CheckInput -> MutationOp -> Unit -> [Mutant]
+acceptMutantBlocked base input op = acceptMutantWith base input op ExpectEvidenceBlocked
+
+acceptMutantWith :: String -> CheckInput -> MutationOp -> Expected -> Unit -> [Mutant]
+acceptMutantWith base input op expected u' =
+  [ Mutant (mutantFileName base op 0) base op expected Nothing bytes
   | Right mutated <- [mkCheckInput (inputReplayId input) u']
   , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
   ]
@@ -205,6 +216,40 @@ opAttachUndercut base input =
     (aidS, r, theta, _) = theSupport base u (theQuery base u)
     excP = exceptionProp base u r theta
     leaf = LeafId "mut_undercut_leaf"
+
+-- | @quarantine-attacker@ (spec §4.3, issue #76): @attach-undercut@'s
+-- construction, plus a @≢@ duplicate-report group that quarantines the
+-- attacker's own leaf.
+--
+-- The checker therefore drops the undercutter and its attack before checking and
+-- sees the support argument /unattacked/ — the pruned graph says @justified@,
+-- the same status the unmutated unit had. That is the promotion hazard: the
+-- claim looks exactly as strong as before even though the evidence deciding its
+-- only objection turned out to be internally inconsistent. The mutant must
+-- therefore come back @accept-evidence-blocked@; an ordinary @accept-justified@
+-- here is the #76 bug.
+--
+-- The group's second member is a fresh leaf with a proposition that is not @≡@
+-- the attacker's (the exception atom wrapped in a distinct predicate), which is
+-- what makes the group inconsistent.
+opQuarantineAttacker :: String -> CheckInput -> [Mutant]
+opQuarantineAttacker base input =
+  acceptMutantBlocked base input OpQuarantineAttacker $
+    u
+      { unitLeaves = unitLeaves u ++ [(leaf, excP), (conflictLeaf, conflictP)]
+      , unitArgs = unitArgs u ++ [(attackerArg, SLeaf leaf)]
+      , unitAttacks = unitAttacks u ++ [Undercut attackerArg aidS []]
+      , unitGroups = unitGroups u ++ [DupGroup (GroupId "mut_quarantine_g") [leaf, conflictLeaf]]
+      , unitGroupMode = QuarantineOnConflict
+      }
+  where
+    u = inputUnit input
+    (aidS, r, theta, _) = theSupport base u (theQuery base u)
+    excP = exceptionProp base u r theta
+    leaf = LeafId "mut_undercut_leaf"
+    conflictLeaf = LeafId "mut_quarantine_leaf"
+    -- Not ≡ excP: a distinct predicate over the same arguments.
+    conflictP = case excP of Prop _ args -> Prop (Pred "mut_quarantine_conflict") args
 
 -- | @attach-undermine@: a leaf argument whose proposition is a fresh contrary of
 -- one of the support's premise leaves, undermining that premise. The contrary is
@@ -332,8 +377,8 @@ attackEndpoints k = case k of
 -- would pass status-only vacuously). The constructed args have fixed ids
 -- (@mut_attacker@\/@mut_defender@); the support arg is the one concluding the
 -- query. Grounded labels come from the verdict.
-acceptStructureOk :: MutationOp -> Status -> CheckInput -> Verdict -> Bool
-acceptStructureOk op status input (Verdict _ outcome) = case outcome of
+acceptStructureOk :: MutationOp -> Expected -> CheckInput -> Verdict -> Bool
+acceptStructureOk op expected input (Verdict _ outcome) = case outcome of
   Reject _ -> False
   Accept labels _edges statuses -> statusOk && shapeOk
     where
@@ -341,8 +386,23 @@ acceptStructureOk op status input (Verdict _ outcome) = case outcome of
       mq = case unitQueries u of
         [q] -> Just q
         _ -> Nothing
-      statusOk = (mq >>= (`lookup` statuses)) == Just status
-      labelOf aid = elemIndex aid (map fst (unitArgs u)) >>= (`lookup` labels)
+      statusOk = case expected of
+        -- A blocked query has no four-state public status, so it can never
+        -- match the operator's specified one (spec §4.3, issue #76).
+        ExpectPrimaryStatus status -> (mq >>= (`lookup` statuses)) == Just (Published status)
+        -- The quarantine class: the query must be published
+        -- @evidence-blocked@, and its conditional label must be @justified@ —
+        -- pinning that the prune really would have promoted the claim, so the
+        -- mutant witnesses the hazard rather than an inert edit.
+        ExpectEvidenceBlocked ->
+          (mq >>= (`lookup` statuses)) == Just (EvidenceBlocked Justified)
+        _ -> False
+      -- Verdict labels are indexed by the __checked__ argument list, which a
+      -- §4.3 prune can make shorter than the declared one (issue #76). Looking
+      -- the id up in the declared list would read the wrong label for any
+      -- operator that quarantines a non-final argument.
+      labelOf aid =
+        elemIndex aid (map fst (unitArgs (pruneChecked (prune u)))) >>= (`lookup` labels)
       attacker = labelOf attackerArg
       defender = labelOf defenderArg
       support = supportArgId u mq >>= labelOf
@@ -352,6 +412,9 @@ acceptStructureOk op status input (Verdict _ outcome) = case outcome of
         OpAttachUndermine -> attacker == Just LIn && support == Just LOut
         OpAttachRebutCycle -> attacker == Just LUndec && support == Just LUndec
         OpAttachReinstate -> attacker == Just LOut && defender == Just LIn && support == Just LIn
+        -- The undercutter was quarantined away, so it is not in the checked AF
+        -- at all and the support stands unattacked in the pruned graph.
+        OpQuarantineAttacker -> attacker == Nothing && support == Just LIn
         _ -> False
   where
     -- The argument (other than the constructed attacker/defender) whose

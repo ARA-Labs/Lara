@@ -82,3 +82,10 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: high
 - **Code ref**: ["src/Lara/Mutate.hs", "test/AblationSpec.hs", "scripts/measure.hs"]
+
+## H08: Filter declarations and derived values as one aligned view
+- **Rationale**: When a production transformation selects source declarations but checks or proves properties about values derived from them, pair each value with its source identity before filtering, or filter two already-aligned lists in lockstep. Re-resolving after filtering or matching derived values by structural equality creates an identity seam: duplicate terms can collapse distinct declarations, and the proof may describe a different AF from the checker. The quarantine bridge uses indexed argument pairs and aligned raw/resolved attack lists, yielding both the exact checked lists and their subset/lookup witnesses by construction.
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["lean/Lara/BlockedProgram.lean", "lean/Lara/Driver.lean", "src/Lara/Blocked.hs"]

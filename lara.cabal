@@ -45,6 +45,7 @@ library
                       Lara.Grounded
                       Lara.Runtime
                       Lara.Check
+                      Lara.Blocked
                       Lara.Check.Internal
                       Lara.Reporting
                       Lara.Diagnostics
@@ -90,6 +91,7 @@ test-suite lara-test
                       ElaborateSpec
                       WorkedExamplesSpec
                       CheckSpec
+                      BlockedSpec
                       DifferentialSpec
                       MutationSpec
                       MeasureSpec

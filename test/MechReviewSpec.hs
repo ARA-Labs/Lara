@@ -19,18 +19,31 @@ module MechReviewSpec (mechReviewSpecProps) where
 import Data.List (isInfixOf)
 import Test.QuickCheck
 
-import Lara.AST (ArgId (..), LeafId (..), QuestionId (..), Status (..), SupportTerm (..))
+import Lara.AST
+  ( ArgId (..)
+  , Digest (..)
+  , LeafId (..)
+  , PolicyId (..)
+  , Program (..)
+  , QuestionId (..)
+  , Status (..)
+  , SupportTerm (..)
+  )
+import qualified Lara.AST as AST
 import Lara.Grounded (Claim (..))
 import Lara.MechReview
   ( ReviewComment (..)
   , contestedBody
   , gapBody
   , renderReviews
+  , reviewBody
+  , summaryLine
   , unitReviewComments
   )
 import Lara.MechReview.Load (loadReviewUnits)
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Reporting (ClaimReport (..), IncompleteAlternative (..))
+import Lara.Wire (PublicStatus (..), decodeCheckInputFile)
 
 manifestPath, frozenPath :: FilePath
 manifestPath = "corpus-units/MANIFEST.tsv"
@@ -41,6 +54,9 @@ mechReviewSpecProps =
   [ ("mech-review: rendered corpus reviews re-diff the committed frozen golden", quickCheckResult prop_frozenGolden)
   , ("mech-review: one comment per non-justified claim, each naming its diagnostic", quickCheckResult prop_shape)
   , ("mech-review: gap obligation-naming and contested arms render their diagnostic", quickCheckResult prop_uncoveredArms)
+  , ("mech-review: evidence-blocked renders as a nonempty quarantine finding", quickCheckResult prop_evidenceBlocked)
+  , ("mech-review: blocked text binds the conditional-status payload", quickCheckResult prop_blockedPayloadBinding)
+  , ("mech-review: summary merges hidden conditional labels", quickCheckResult prop_blockedSummary)
   ]
 
 -- | Re-render the whole corpus document from the freshly loaded units and require
@@ -62,7 +78,7 @@ prop_shape :: Property
 prop_shape = once $ ioProperty $ do
   units <- loadReviewUnits manifestPath
   let comments = concatMap (\(n, ci, prog) -> unitReviewComments n ci prog) units
-      statuses = map (statusWord . rcStatus) comments
+      statuses = map (publicStatusWord . rcStatus) comments
       count w = length (filter (== w) statuses)
   pure $
     conjoin
@@ -72,10 +88,10 @@ prop_shape = once $ ioProperty $ do
       , counterexample "no justified comment" (count "justified" === 0)
       , counterexample
           "every defeated body names an attacking argument kind"
-          (property (all bodyNamesAttack (filter ((== "defeated") . statusWord . rcStatus) comments)))
+          (property (all bodyNamesAttack (filter ((== "defeated") . publicStatusWord . rcStatus) comments)))
       , counterexample
           "every gap body reports unsupported or names an obligation"
-          (property (all bodyReportsGap (filter ((== "gap") . statusWord . rcStatus) comments)))
+          (property (all bodyReportsGap (filter ((== "gap") . publicStatusWord . rcStatus) comments)))
       ]
   where
     bodyNamesAttack rc =
@@ -120,6 +136,97 @@ prop_uncoveredArms =
     twoObligations =
       gapBody (gapReport [QuestionId "external_validity", QuestionId "sample_size"])
 
+-- | The exact round-one regression: a conditionally justified blocked claim
+-- must survive the justified filter, render an @evidence-blocked@ heading and a
+-- nonempty quarantine explanation, while the unaffected justified query stays
+-- absent. The frozen corpus has no quarantine, so its golden cannot cover this
+-- branch.
+prop_evidenceBlocked :: Property
+prop_evidenceBlocked = once $ ioProperty $ do
+  bytes <- readFile "fixtures/corpus/group-conflict-quarantine-attacker.sexp"
+  pure $ case decodeCheckInputFile bytes of
+    Left err -> counterexample ("CODEC:" ++ show err) False
+    Right input ->
+      let comments = unitReviewComments "demo" input reviewProgram
+          rendered = renderReviews [("demo", input, reviewProgram)]
+       in case comments of
+            [rc] ->
+              conjoin
+                [ counterexample "blocked claim id" (rcClaimId rc === "concl")
+                , counterexample "blocked claim presentation binding" (rcClaimNl rc === "blocked claim")
+                , counterexample "blocked public status" (rcStatus rc === EvidenceBlocked Justified)
+                , counterexample "nonempty quarantine body" $
+                    property $
+                      not (null (rcBody rc))
+                        && "quarantined" `isInfixOf` rcBody rc
+                        && "conditional" `isInfixOf` rcBody rc
+                , counterexample "public heading" $
+                    property ("## demo — evidence-blocked" `isInfixOf` rendered)
+                , counterexample "conditional status is not promoted into the heading" $
+                    property (not ("## demo — justified" `isInfixOf` rendered))
+                , counterexample "unaffected justified query raises no comment" $
+                    property (not ("Claim `other`" `isInfixOf` rendered))
+                ]
+            other -> counterexample ("review comments: " ++ show other) False
+  where
+    -- The wire fixture has no surface sibling, so provide the minimal matching
+    -- presentation declarations that 'unitReviewComments' uses for claim ids
+    -- and natural-language bindings.
+    reviewProgram =
+      Program
+        "demo"
+        (Digest "sha256:demo")
+        (PolicyId "conformance-v1")
+        []
+        [AST.DeclClaim (surfaceClaim "concl" "blocked claim"), AST.DeclClaim (surfaceClaim "other" "ordinary claim")]
+    surfaceClaim name nl =
+      AST.Claim
+        { AST.claimId = AST.PropId name
+        , AST.claimNl = nl
+        , AST.claimFormal = Prop (Pred name) []
+        , AST.claimBinding = AST.Binding "review-test" "fixture" AST.Unreviewed
+        }
+
+-- | Summary categories are public words, not full 'PublicStatus' values: the
+-- hidden conditional labels below must collapse to one @evidence-blocked@
+-- bucket.
+prop_blockedSummary :: Property
+prop_blockedSummary =
+  once $
+    summaryLine [comment (EvidenceBlocked Justified), comment (EvidenceBlocked Contested)]
+      === "**2 review comments** — 2 evidence-blocked."
+  where
+    comment st =
+      ReviewComment
+        { rcUnit = "demo"
+        , rcClaimId = "concl"
+        , rcClaimFormal = "concl"
+        , rcClaimNl = ""
+        , rcStatus = st
+        , rcBody = "blocked"
+        }
+
+-- | The conditional label carried by 'EvidenceBlocked' is diagnostic payload,
+-- not a hard-coded renderer aside. Exercise all four payload values through
+-- the production 'reviewBody' dispatcher so hard-coding its blocked arm is
+-- falsified even though the production quarantine fixture currently happens
+-- to carry @Justified@.
+prop_blockedPayloadBinding :: Property
+prop_blockedPayloadBinding =
+  once $
+    conjoin
+      [ counterexample ("conditional payload " ++ statusWord st) $
+          property $
+            ("would be " ++ statusWord st) `isInfixOf` dispatched st
+              && all
+                (\other -> other == st || not (("would be " ++ statusWord other) `isInfixOf` dispatched st))
+                [Gap, Justified, Contested, Defeated]
+      | st <- [Gap, Justified, Contested, Defeated]
+      ]
+  where
+    dispatched st =
+      reviewBody Nothing [] [] (const Nothing) (EvidenceBlocked st) (gapReport [])
+
 -- | A minimal @gap@ 'ClaimReport' carrying one incomplete candidate alternative
 -- with the given open obligations — the shape 'gapBody's obligation branch reads
 -- (only 'crAlternatives' and each alternative's 'iaObligations' are consulted).
@@ -146,6 +253,13 @@ gapReport obligations =
 -- | The status word as the summary\/heading spells it (mirrors the renderer's
 -- private table; kept here so the shape prop can group by status without
 -- exporting the internal speller).
+-- | The heading word for a public status, mirroring
+-- "Lara.MechReview".@publicStatusWord@ (spec §4.3, issue #76).
+publicStatusWord :: PublicStatus -> String
+publicStatusWord ps = case ps of
+  EvidenceBlocked _ -> "evidence-blocked"
+  Published s -> statusWord s
+
 statusWord :: Status -> String
 statusWord s = case s of
   Gap -> "gap"

@@ -61,6 +61,8 @@ import Lara.Driver
   , groupConflictMessage
   , groupConflictReject
   , groupConsistent
+  , prune
+  , pruneChecked
   , runCheck
   )
 import Lara.Grounded (Claim (..))
@@ -88,7 +90,17 @@ import Lara.SupportTerm
   , CheckLoc (..)
   , ReferenceReason (..)
   )
-import Lara.Wire (Outcome (..), Tag (..), Verdict (..), coreVersionText, rejectClassTag, tagToString)
+import Lara.Wire
+  ( Outcome (..)
+  , PublicStatus (..)
+  , Tag (..)
+  , Verdict (..)
+  , conditionalStatus
+  , coreVersionText
+  , isPublished
+  , rejectClassTag
+  , tagToString
+  )
 
 -- ---------------------------------------------------------------------------
 -- The minimal JSON value + pretty-printer
@@ -206,7 +218,7 @@ expectedJsonValue input =
 
     -- Accept: per-claim statuses + Reporting detail, plus the per-argument
     -- grounded labels (both keyed to their declaration-order identity).
-    acceptDiag :: [(Int, Label)] -> [(Prop, Status)] -> JValue
+    acceptDiag :: [(Int, Label)] -> [(Prop, PublicStatus)] -> JValue
     acceptDiag lbls statuses =
       JObject
         [ ("kind", JString "accept")
@@ -214,20 +226,34 @@ expectedJsonValue input =
         , ("labels", JArray (map labelEntry lbls))
         ]
 
-    statusEntry :: (Prop, Status) -> ClaimReport -> JValue
+    statusEntry :: (Prop, PublicStatus) -> ClaimReport -> JValue
     statusEntry (p, st) rep =
-      JObject
+      JObject $
         [ ("claim", JString (prettyProp p))
-        , ("status", JString (statusString st))
+        , ("status", JString (publicStatusString st))
         , ("complete-support", JNumber (length (claimSupport (crClaim rep))))
         , ("holes", JNumber (length (claimHoles (crClaim rep))))
         , ("incomplete-alternative", JBool (crIncompleteAlternative rep))
         ]
+          -- Spec §4.3 / issue #76: an @evidence-blocked@ claim's four-state
+          -- label is a conditional diagnostic, so it goes in its own field —
+          -- mirroring the wire's statuses/conditional split — and never under
+          -- @status@, which must agree with the verdict.
+          ++ [ ("conditional-status", JString (statusString (conditionalStatus st)))
+             | not (isPublished st)
+             ]
+
+    -- The verdict's labels cover the __checked__ (post-§4.3-quarantine)
+    -- program, so the argument name must come from the checked argument list:
+    -- indexing the declared list would misattribute every label after a pruned
+    -- argument (issue #76 review round 2 — found while pinning the
+    -- quarantine-attacker golden). With nothing quarantined the lists are equal.
+    checkedArgs = unitArgs (pruneChecked (prune unit))
 
     labelEntry :: (Int, Label) -> JValue
     labelEntry (i, lbl) =
       JObject
-        ( [("arg", JString a) | Just (ArgId a) <- [fmap fst (safeIndex (unitArgs unit) i)]]
+        ( [("arg", JString a) | Just (ArgId a) <- [fmap fst (safeIndex checkedArgs i)]]
             ++ [ ("index", JNumber i)
                , ("label", JString (labelString lbl))
                ]
@@ -359,6 +385,14 @@ groupConflictDiagnostic unit =
 -- ---------------------------------------------------------------------------
 -- Renderers (closed vocabularies — one spelling table each)
 -- ---------------------------------------------------------------------------
+
+-- | The public claim status, exactly as the wire verdict spells it: the
+-- four-state word, or @evidence-blocked@ when a §4.3 prune made the label
+-- unpublishable (issue #76).
+publicStatusString :: PublicStatus -> String
+publicStatusString ps
+  | isPublished ps = statusString (conditionalStatus ps)
+  | otherwise = tagToString TEvidenceBlocked
 
 -- | The four-state claim status, spelled as in @docs\/m4a-checklist.md@.
 statusString :: Status -> String

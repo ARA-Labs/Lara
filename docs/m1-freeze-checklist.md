@@ -167,9 +167,8 @@ executable mirror of the frozen Lean development:
   boundary.
 
 These Haskell tests are conformance evidence; soundness stays in the Lean
-proofs. Numeric caveat: the Lean driver runs at `canon = id` and does not
-canonicalize numbers, so every corpus fixture avoids non-canonical numeric
-literals to keep the two drivers byte-identical.
+proofs. The former numeric caveat is resolved: both production drivers use
+`canonNum`, with a non-canonical numeric differential fixture pinning parity.
 
 _Done so far (2026-07-22): §8 #8 resolved — TCB written into spec §1.1, host fixed to Lean 4.
 Lock pass item 8 — support-term typing rules made explicit and v0.1-frozen in spec §6.1 (defect

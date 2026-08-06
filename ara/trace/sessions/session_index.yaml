@@ -285,3 +285,22 @@ sessions:
   events_count: 10
   claims_touched: []
   open_threads: 4
+- id: 2026-08-05_001
+  date: '2026-08-05'
+  summary: 'Issue #80 production bridge closed and published in PR #79 at bd2896a: aligned retained structures, compact-to-declared AF embedding, checker-instantiated non-promotion theorem; all 10 review threads answered; gates green at 435/435 + 54/54.'
+  turn_count: 2
+  events_count: 4
+  claims_touched:
+  - C21
+  - C25
+  - H08
+  open_threads: 2
+- id: 2026-08-05_002
+  date: '2026-08-05'
+  summary: 'Closed quarantine review gaps: shared Haskell/Lean canonNum, numeric two-blocked-query production differential, .lara ArgId uniqueness, directed-tightness/rendering/mutation regressions; gates green at 436/436 + 54/54.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C12
+  - C25
+  open_threads: 1

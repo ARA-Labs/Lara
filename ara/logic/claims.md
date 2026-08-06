@@ -317,23 +317,25 @@ the result is stated but not yet proved or mechanized._
   core AST; LARA's grounded status is deterministic (C07), so the single-interpretation precondition
   holds by construction, with no undefined behavior to quotient out. The shared serialized core is
   now built (`Lara.Wire` S-expr codec, the N11 anchor) and the harness (`scripts/differential.sh`)
-  runs both drivers byte-for-byte; the framing localized one concrete Haskell-vs-Lean divergence to a
-  spec/implementation choice (non-canonical numeric literals: `canonNum` vs `canon = id`, O15) rather
-  than a voting tie, consistent with the N+1 frame.
-- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:129 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:130 «JEST found 44 engine bugs and 27 spec bugs» [input]", "19/19 fixtures agree byte-exact across both drivers ← scripts/differential.sh «pass=19 fail=0» [result]"]
+  runs both drivers byte-for-byte; the framing localized one concrete Haskell-vs-Lean divergence to
+  inconsistent driver identity functions (non-canonical numeric literals: `canonNum` vs the former
+  Lean `canon = id`, O15), rather than a voting tie. The production Lean driver now uses `canonNum`, and the
+  numeric/multi-blocked differential fixture prevents that defect from recurring.
+- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:129 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:130 «JEST found 44 engine bugs and 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]"]
 - **Status**: testing
 - **Falsification criteria**: A demonstration that the shared-core differential setup cannot localize
   whether a divergence is a Haskell-checker bug or a Lean-model bug (i.e. the N+1 framing gives no
   more than oracle-free voting here) — undercutting the methodological claim.
-- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: 19/19 corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence is localized as an implementation/spec choice (docs/m3-closeout-notes.md)"]
+- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence was localized and is now a pinned production-driver regression"]
 - **Evidence basis**: Deep-research report (Csmith PLDI 2011 = oracle-free voting; JEST ICSE 2021 =
   N+1; Marmsoler–Brucker executable-oracle-from-Isabelle); folded into `docs/mechanization-plan.md` §3.
   The shared-core serialization, an M1 design requirement, is now realized in M3 as `Lara.Wire` with a
-  both-drivers differential harness; no divergence has yet indicted a genuine bug (the one localized
-  divergence is a documented deferred normalization choice, not a defect).
+  both-drivers differential harness. The numeric divergence indicted a genuine Lean production-driver
+  defect: the executable driver still used the deferred identity canonicalizer after Haskell normalized
+  numeric literals. The shared `canonNum` implementation and numeric fixture now pin the fix.
 - **Dependencies**: C07, C10
 - **Tags**: differential-testing, conformance, mechanization, methodology
-- **Last revised**: 2026-07-27 (2026-07-27_001)
+- **Last revised**: 2026-08-05 (2026-08-05_002)
 
 ## C13: A small fixed scheme vocabulary covers the corpus's argument shapes
 - **Statement**: The inference schemes that ARA corpus claims instantiate collapse into a small
@@ -519,16 +521,16 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: [C19]
 - **Tags**: rit, verification-method, trust-architecture, composition, roll-up
 
-## C21: A duplicate-report data conflict is absence of evidence (→ gap), never a counter-argument (→ defeat), and is escalatable to a whole-program reject
-- **Statement**: When one measurand cell is reported by several leaves declared a duplicate-report group, disagreement among them is treated as *missing* evidence, not as an attack. An inconsistent group quarantines all its members, so the dependent claim loses that support and can only become `gap` — never `justified` (the evidence is gone), and never `contested`/`defeated` (no attack is created). A policy may instead escalate a detected conflict to a whole-program rejection. This is the same gap-not-defeat routing C16 fixes for unmet critical questions, applied to data integrity rather than argument completeness.
-- **Conditions**: The consistency test is decidable and local — group membership plus the frozen `≡` relation; because `≡` is an equivalence, pairwise-`≡` is exactly "every member `≡` the first". Default outcome is quarantine→gap; the escalation (rejection class R9) is a driver-boundary decision located at the group declaration, computed from the unit before the executable checker runs (the same tier as the R13 replay preflight), so the executable six-stage core is untouched. Untested boundary: groups spanning non-leaf occurrences, and interaction with strict-certificate leaves.
+## C21: A duplicate-report data conflict is missing evidence, not a counter-argument, and is escalatable to a whole-program reject
+- **Statement**: When one measurand cell is reported by several leaves declared a duplicate-report group, disagreement among them is treated as *missing* evidence, not as an attack. An inconsistent group quarantines all its members. A claim whose own support is removed therefore has an evidence gap rather than acquiring a defeating attack. Other claims can nevertheless change status when quarantine removes attackers; the public verdict prevents that deletion from being reported as unqualified justification (C25). A policy may instead escalate a detected conflict to a whole-program rejection. This is the same gap-not-defeat routing C16 fixes for unmet critical questions, applied to data integrity rather than argument completeness.
+- **Conditions**: The consistency test is decidable and local — group membership plus the frozen `≡` relation; because `≡` is an equivalence, pairwise-`≡` is exactly "every member `≡` the first". Default outcome is quarantine plus evidence-blocking at the public boundary; the escalation (rejection class R9) is a driver-boundary decision located at the group declaration, computed from the unit before the executable checker runs (the same tier as the R13 replay preflight), so the executable six-stage core is untouched. Untested boundary: groups spanning non-leaf occurrences, and interaction with strict-certificate leaves.
 - **Sources**: [41/41 ← trace N86:evidence «differential.sh: pass=41 fail=0» [result]; 6 ← trace N86:result «6 sorry-free theorems … Lara.Groups» [result]; R9-decidable-local ← docs/spec.md §4.3 «The check is decidable and local (group membership plus ≡)» [input]]
 - **Status**: supported
 - **Provenance**: ai-suggested
-- **Falsification**: A duplicate-report conflict whose dependent claim resolves to `justified`, `contested`, or `defeated` under the default policy (rather than `gap`), or a conflict under the escalating policy that fails to reject — either would disprove the routing.
+- **Falsification**: A directly support-dependent claim whose quarantined support is retained as usable evidence, a quarantine operation that creates an attack rather than deleting evidence, or a conflict under the escalating policy that fails to reject would disprove the routing. Status changes in other claims after deletion are outside this claim and governed by C25.
 - **Proof**: [trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), trace N91 (7 seeded R9 group-escalation mutants generated over the worked examples all verify as reject R9 byte-identically through both drivers), lean/Lara/Groups.lean, PR #45]
 - **Dependencies**: [C01, C16]
-- **Last revised**: 2026-08-01 (2026-08-01_001#1)
+- **Last revised**: 2026-08-05 (2026-08-05_001#1)
 - **Tags**: admission, data-integrity, gap-not-defeat, mechanized, spec-4.3, R9
 
 ## C22: Reinstatement vs contested is decided by the declared attack set, and the lever is the completeness scan's scope
@@ -564,3 +566,14 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [measurements/frozen/ablation.{json,tsv} (post-freeze run: no-cq missed-rejects 18 all reject-IncompleteArgument / unchanged 400; no-typed missed-rejects 30 = R10 11 + R11 19 / unchanged 388), test/AblationSpec.hs (surgical-flip, monotonicity, partition-totality, conflict-scan gating — 10 pure properties), trace N97 (T6 execution, PR #53 merged)]
 - **Dependencies**: []
 - **Tags**: evaluation, ablation, rule-necessity, axis-a, confirmatory-by-construction
+
+## C25: Production quarantine cannot manufacture an unqualified justified verdict for a query omitted from evidence-blocked output
+- **Statement**: For the shipped quarantine path, if the compact checked argumentation framework labels a query's complete compact support `justified`, and that query is absent from the driver's evidence-blocked output, then the corresponding declared-index claim is justified in the structurally reconstructed pre-quarantine framework over all declared arguments. Thus deleting inconsistent evidence cannot be the sole reason an affected claim is publicly presented as unqualified `justified`. The reconstructed `declaredAF` is not itself asserted to be the output of a successful `checkUnit` run.
+- **Conditions**: At least one argument is quarantined. The retained arguments are the support-filtered subsequence selected by `Groups.keepArg` (each retained support uses no quarantined leaf); retained attacks are the resolved attacks aligned with raw declarations whose endpoint IDs both survive; `checkUnit` succeeds on exactly those retained support terms and attacks; the compact claim is `completeClaimFor` for the query; and the public blocked-query computation is the production `BlockedProgram.blockedQueries`. The result is a non-promotion theorem, not equality of statuses: unaffected attacks may still make the compact status more conservative. `statusC_agree` separately requires equal support sets.
+- **Sources**: ["436/436 ← scripts/differential.sh positive anchors [result]", "54/54 ← scripts/differential.sh negative anchors [result]", "axiom audit passed ← cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh [result]"]
+- **Status**: supported
+- **Provenance**: ai-executed
+- **Falsification**: A production input accepted by `checkUnit` for which a query is omitted from the evidence-blocked list, its compact complete claim is justified, but its lifted declared-index claim is not justified; or any hidden axiom in the checker-instantiated theorem's audit.
+- **Proof**: [ara/evidence/proofs/quarantine_nonpromotion.md, lean/Lara/BlockedProgram.lean `checked_production_justified_nonpromotion_of_not_blocked`, lean/AxCheck.lean, trace N108]
+- **Dependencies**: [C01, C21]
+- **Tags**: quarantine, non-promotion, production-bridge, mechanized, unblocked-query

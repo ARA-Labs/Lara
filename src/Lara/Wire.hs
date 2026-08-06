@@ -84,9 +84,12 @@
 -- @
 -- \<verdict\> ::= (verdict \<replay-id\> accept
 --                    (labels (NAT in | out | undec)*) (edges (NAT NAT)*)
---                    (statuses (status \<atom\> STATUS)*))
+--                    (statuses (status \<atom\> STATUS)*)
+--                    \<conditional-sec\>?)
 --               | (verdict \<replay-id\> reject REJECTION)
--- STATUS    ::= gap | justified | contested | defeated
+-- \<conditional-sec\> ::= (conditional (status \<atom\> CORE-STATUS)+)
+-- STATUS    ::= CORE-STATUS | evidence-blocked
+-- CORE-STATUS ::= gap | justified | contested | defeated
 -- REJECTION ::= duplicate-rule | duplicate-argument | incomplete-argument
 --             | missing-conflict | R1 | R3 | R4 | R5 | R6 | R7
 --             | R9 | R10 | R11 | R12 | R13
@@ -94,7 +97,14 @@
 --
 -- Labels cover every compiled argument in declaration order; edges are the
 -- compiled closure edges in ascending @(i, j)@ order; statuses follow the
--- query order of the unit. The rejection payload is the class atom only —
+-- query order of the unit.
+--
+-- @evidence-blocked@ is the public status of a query whose four-state label
+-- could have been changed by §4.3 quarantine deleting material under it
+-- (issue #76): the label is not the answer, it is a conditional diagnostic, and
+-- it moves to the @conditional@ section. That section is present exactly when
+-- some status is @evidence-blocked@, and it lists those queries in query order,
+-- so a verdict with nothing blocked is byte-identical to the pre-#76 format. The rejection payload is the class atom only —
 -- located diagnostics live in the checker's result type ("Lara.Check",
 -- Task 1), not on the wire.
 module Lara.Wire
@@ -118,6 +128,9 @@ module Lara.Wire
   , encodeCheckInput
   , decodeCheckInputFile
     -- * Verdict codec
+  , PublicStatus (..)
+  , conditionalStatus
+  , isPublished
   , Outcome (..)
   , Verdict (..)
   , decodeVerdict
@@ -280,7 +293,9 @@ data Tag
   | TRebut | TUndercut | TUndermine
     -- verdicts
   | TVerdict | TAccept | TReject | TLabels | TEdges | TStatuses | TStatus
+  | TConditional
   | TIn | TOut | TUndec | TGap | TJustified | TContested | TDefeated
+  | TEvidenceBlocked
     -- rejection outcomes
   | TDupRule | TDupArgument | TIncompleteArgument | TMissingConflict
   | TR1 | TR3 | TR4 | TR5 | TR6 | TR7 | TR9 | TR10 | TR11 | TR12 | TR13
@@ -313,10 +328,10 @@ tagToString t = case t of
   TRebut -> "rebut"; TUndercut -> "undercut"; TUndermine -> "undermine"
   TVerdict -> "verdict"; TAccept -> "accept"; TReject -> "reject"
   TLabels -> "labels"; TEdges -> "edges"; TStatuses -> "statuses"
-  TStatus -> "status"
+  TStatus -> "status"; TConditional -> "conditional"
   TIn -> "in"; TOut -> "out"; TUndec -> "undec"
   TGap -> "gap"; TJustified -> "justified"; TContested -> "contested"
-  TDefeated -> "defeated"
+  TDefeated -> "defeated"; TEvidenceBlocked -> "evidence-blocked"
   TDupRule -> "duplicate-rule"; TDupArgument -> "duplicate-argument"
   TIncompleteArgument -> "incomplete-argument"
   TMissingConflict -> "missing-conflict"
@@ -1066,12 +1081,52 @@ coreVersionText LaraCoreV01 = "lara-core@0.1"
 -- Verdicts
 -- ---------------------------------------------------------------------------
 
+-- | The public status of a queried claim.
+--
+-- 'Published' is the ordinary four-state answer. 'EvidenceBlocked' carries the
+-- four-state label the checker computed on the program it actually saw, which —
+-- because §4.3 quarantine removed material under the claim — is a __conditional
+-- diagnostic and not the answer__ (spec §4.3, issue #76; the rule is
+-- "Lara.Blocked", the metatheory @lean\/Lara\/Blocked.lean@).
+--
+-- Blockedness lives /inside/ the status rather than in a parallel list of
+-- blocked propositions, so a blocked query with no status entry, a blocked list
+-- permuted against the statuses, and a duplicated blocked entry are all
+-- unrepresentable — the @conditional@ wire section is then a pure projection of
+-- 'verdictStatuses' and consumers pattern-match instead of cross-referencing.
+data PublicStatus
+  = Published Status
+  | EvidenceBlocked Status
+  deriving (Eq, Show)
+
+-- | The four-state label under a public status: the answer for 'Published', the
+-- conditional diagnostic for 'EvidenceBlocked'. Callers that need the /public/
+-- reading must match on the constructor — this projection deliberately forgets
+-- the distinction, so it is only for consumers rendering the diagnostic.
+conditionalStatus :: PublicStatus -> Status
+conditionalStatus ps = case ps of
+  Published status -> status
+  EvidenceBlocked status -> status
+
+-- | Whether a public status is the ordinary four-state answer.
+isPublished :: PublicStatus -> Bool
+isPublished ps = case ps of
+  Published _ -> True
+  EvidenceBlocked _ -> False
+
 -- | The checker outcome, nested under its replay identity.
+--
+-- On the wire the honest value is the headline: the @statuses@ section prints
+-- @evidence-blocked@ for a blocked query and the conditional label moves to a
+-- trailing @conditional@ section, which is emitted exactly when some query is
+-- blocked. A verdict with nothing blocked is byte-identical to the pre-#76
+-- format, and a consumer that has never heard of @evidence-blocked@ fails to
+-- decode rather than silently reading a status that deletion inflated.
 data Outcome
   = Accept
       { verdictLabels :: [(Int, Label)]
       , verdictEdges :: [(Int, Int)]
-      , verdictStatuses :: [(Prop, Status)]
+      , verdictStatuses :: [(Prop, PublicStatus)]
       }
   | Reject Rejection
   deriving (Eq, Show)
@@ -1089,8 +1144,7 @@ encodeVerdict (Verdict replayId outcome) =
     Reject rejection ->
       tagged TVerdict [encodeReplayId replayId, SAtom (tagToString TReject), encodeRejection rejection]
     Accept labels edges statuses ->
-      tagged
-        TVerdict
+      tagged TVerdict $
         [ encodeReplayId replayId
         , SAtom (tagToString TAccept)
         , tagged
@@ -1101,8 +1155,19 @@ encodeVerdict (Verdict replayId outcome) =
             [SList [SAtom (show source), SAtom (show target)] | (source, target) <- edges]
         , tagged
             TStatuses
-            [tagged TStatus [encodeAtom proposition, encodeStatusValue status] | (proposition, status) <- statuses]
+            [ tagged TStatus [encodeAtom proposition, encodePublicStatusValue status]
+            | (proposition, status) <- statuses
+            ]
         ]
+          -- The conditional section is a projection of the statuses, emitted
+          -- exactly when some query is blocked (spec §4.3, issue #76).
+          ++ [ tagged
+                 TConditional
+                 [ tagged TStatus [encodeAtom proposition, encodeStatusValue status]
+                 | (proposition, EvidenceBlocked status) <- statuses
+                 ]
+             | any (not . isPublished . snd) statuses
+             ]
 
 encodeLabel :: Label -> SExpr
 encodeLabel label =
@@ -1110,6 +1175,13 @@ encodeLabel label =
     LIn -> TIn
     LOut -> TOut
     LUndec -> TUndec
+
+-- | The public status token: @evidence-blocked@ hides the conditional label of a
+-- quarantine-affected query (spec §4.3, issue #76).
+encodePublicStatusValue :: PublicStatus -> SExpr
+encodePublicStatusValue ps = case ps of
+  Published status -> encodeStatusValue status
+  EvidenceBlocked _ -> SAtom (tagToString TEvidenceBlocked)
 
 encodeStatusValue :: Status -> SExpr
 encodeStatusValue status =
@@ -1150,23 +1222,42 @@ decodeVerdictM value = case value of
         replayId <- decodeReplayIdM replayValue
         rejection <- decodeRejection rejectionValue
         ok (Verdict replayId (Reject rejection))
-  SList
-    [ SAtom verdictTag
-    , replayValue
-    , SAtom outcomeTag
-    , labelsSection
-    , edgesSection
-    , statusesSection
-    ]
-      | parseTag verdictTag == Just TVerdict
-      , parseTag outcomeTag == Just TAccept -> do
-          replayId <- decodeReplayIdM replayValue
-          labels <- sectionFields "verdict labels" TLabels labelsSection >>= mapM decodeLabel
-          edges <- sectionFields "verdict edges" TEdges edgesSection >>= mapM decodeEdge
-          statuses <-
-            sectionFields "verdict statuses" TStatuses statusesSection
-              >>= mapM decodeStatusEntry
-          ok (Verdict replayId (Accept labels edges statuses))
+  SList (SAtom verdictTag : replayValue : SAtom outcomeTag : sections)
+    | parseTag verdictTag == Just TVerdict
+    , parseTag outcomeTag == Just TAccept
+    , Just (labelsSection, edgesSection, statusesSection, conditionalSection) <-
+        acceptSections sections -> do
+        replayId <- decodeReplayIdM replayValue
+        labels <- sectionFields "verdict labels" TLabels labelsSection >>= mapM decodeLabel
+        edges <- sectionFields "verdict edges" TEdges edgesSection >>= mapM decodeEdge
+        publicStatuses <-
+          sectionFields "verdict statuses" TStatuses statusesSection
+            >>= mapM decodePublicStatusEntry
+        conditional <- case conditionalSection of
+          Nothing -> ok []
+          Just section -> do
+            entries <-
+              sectionFields "verdict conditional" TConditional section
+                >>= mapM decodeStatusEntry
+            -- The encoder emits the section exactly when something is blocked,
+            -- so a present-but-empty one is non-canonical wire text (R14) — not
+            -- an accept with nothing blocked.
+            if null entries
+              then
+                werr
+                  "verdict conditional"
+                  "conditional section is present but empty"
+              else ok entries
+        -- The two sections must line up entry for entry: a conditional entry
+        -- with no @evidence-blocked@ status (or the reverse) is a malformed
+        -- verdict (R14), never a silently-dropped diagnostic.
+        (statuses, leftover) <- resolveStatuses conditional publicStatuses
+        if null leftover
+          then ok (Verdict replayId (Accept labels edges statuses))
+          else
+            werr
+              "verdict conditional"
+              ("conditional entries with no evidence-blocked query: " ++ show (map fst leftover))
   _ -> werr "verdict" ("malformed verdict: " ++ show value)
   where
     decodeLabel labelValue = case labelValue of
@@ -1206,6 +1297,53 @@ decodeVerdictM value = case value of
             "verdict status"
             ("expected gap|justified|contested|defeated, got " ++ show encodedStatus)
       ok (proposition, status)
+
+    -- The accept sections: the pre-#76 three, plus the @conditional@ section
+    -- that appears exactly when a query is @evidence-blocked@ (spec §4.3).
+    acceptSections sections = case sections of
+      [labelsSection, edgesSection, statusesSection] ->
+        Just (labelsSection, edgesSection, statusesSection, Nothing)
+      [labelsSection, edgesSection, statusesSection, conditionalSection] ->
+        Just (labelsSection, edgesSection, statusesSection, Just conditionalSection)
+      _ -> Nothing
+
+    -- A status entry as printed: @Nothing@ for @evidence-blocked@, whose
+    -- conditional label lives in the @conditional@ section.
+    decodePublicStatusEntry statusValue = do
+      [atomValue, encodedStatus] <-
+        matchTagged "verdict status" TStatus 2 statusValue
+      proposition <- decodeAtom atomValue
+      status <- case encodedStatus of
+        SAtom text
+          | parseTag text == Just TEvidenceBlocked -> ok Nothing
+          | parseTag text == Just TGap -> ok (Just Gap)
+          | parseTag text == Just TJustified -> ok (Just Justified)
+          | parseTag text == Just TContested -> ok (Just Contested)
+          | parseTag text == Just TDefeated -> ok (Just Defeated)
+        _ ->
+          werr
+            "verdict status"
+            ( "expected gap|justified|contested|defeated|evidence-blocked, got "
+                ++ show encodedStatus
+            )
+      ok (proposition, status)
+
+    -- Walk both sections in step, so the pairing is positional rather than by
+    -- lookup: a repeated query keeps its own conditional entry.
+    resolveStatuses conditional [] = ok ([], conditional)
+    resolveStatuses conditional ((proposition, status) : rest) = case status of
+      Just s -> do
+        (resolved, leftover) <- resolveStatuses conditional rest
+        ok ((proposition, Published s) : resolved, leftover)
+      Nothing -> case conditional of
+        (conditionalProposition, s) : conditionalRest
+          | conditionalProposition == proposition -> do
+              (resolved, leftover) <- resolveStatuses conditionalRest rest
+              ok ((proposition, EvidenceBlocked s) : resolved, leftover)
+        _ ->
+          werr
+            "verdict status"
+            ("evidence-blocked query has no matching conditional entry: " ++ show proposition)
 
     decodeRejection rejectionValue = case rejectionValue of
       SAtom text -> case parseTag text of

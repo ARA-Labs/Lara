@@ -18,6 +18,8 @@ import Lara.RA
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
+import Lara.Blocked
+import Lara.BlockedProgram
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase
@@ -710,3 +712,46 @@ open Lara
 #print axioms Lara.Groups.quarantined_arg_excluded
 #print axioms Lara.Groups.quarantined_leaf_absent
 #print axioms Lara.Groups.conflictReject_iff
+
+-- Conservative public reporting for quarantine-affected claims (spec §4.3,
+-- issue #76): the locality lemma and the non-promotion / preservation results
+-- (preservation requires equal complete-support sets), plus the declared-index
+-- seed obligations and the compact production-AF bridge (issue #80).
+#print axioms Lara.Blocked.directIn_transfer
+#print axioms Lara.Blocked.directOut_transfer
+#print axioms Lara.Blocked.directIn_reflect
+#print axioms Lara.Blocked.directOut_reflect
+#print axioms Lara.Blocked.directIn_iff_of_unblocked
+#print axioms Lara.Blocked.directOut_iff_of_unblocked
+#print axioms Lara.Blocked.labelC_agree
+#print axioms Lara.Blocked.justified_nonpromotion
+#print axioms Lara.Blocked.statusC_agree
+#print axioms Lara.Blocked.closure_stable
+#print axioms Lara.Blocked.seed_subset_blocked
+#print axioms Lara.Blocked.blocked_closed
+#print axioms Lara.Blocked.blocking_of_seed
+#print axioms Lara.BlockedProgram.coveredB_mono
+#print axioms Lara.BlockedProgram.edgeIn_eq
+#print axioms Lara.BlockedProgram.edgeIn_mono
+#print axioms Lara.BlockedProgram.selectAligned_subset
+#print axioms Lara.BlockedProgram.retainedIndices_subset
+#print axioms Lara.BlockedProgram.retained_lengths_eq
+#print axioms Lara.BlockedProgram.retainedArguments_eq_filter
+#print axioms Lara.BlockedProgram.retained_lookup
+#print axioms Lara.BlockedProgram.retained_lookup_of_mem
+#print axioms Lara.BlockedProgram.directIn_embed
+#print axioms Lara.BlockedProgram.directOut_embed
+#print axioms Lara.BlockedProgram.labelC_inn_embed
+#print axioms Lara.BlockedProgram.statusC_justified_embed
+#print axioms Lara.BlockedProgram.compile_checkedAF_embedding
+#print axioms Lara.BlockedProgram.blockedSeed_hmissing
+#print axioms Lara.BlockedProgram.blockedSeed_hedge
+#print axioms Lara.BlockedProgram.blocking_of_blockedSeed
+#print axioms Lara.BlockedProgram.mem_liftSupport_iff
+#print axioms Lara.BlockedProgram.supportBlocked_false_unblocked
+#print axioms Lara.BlockedProgram.supportBlocked_false_of_not_mem
+#print axioms Lara.BlockedProgram.supportBlocked_false_of_not_mem_blockedQueries
+#print axioms Lara.BlockedProgram.claimSupportFor_mem_checkedAF
+#print axioms Lara.BlockedProgram.production_justified_nonpromotion
+#print axioms Lara.BlockedProgram.production_justified_nonpromotion_of_not_blocked
+#print axioms Lara.BlockedProgram.checked_production_justified_nonpromotion_of_not_blocked

@@ -51,17 +51,13 @@ disagreement is a bug (in Haskell or in a fixture), fixed with a recorded note â
 never a silent re-annotation of an expected verdict. No disagreements were found
 in this closeout.
 
-## Numeric-literal caveat (must persist)
+## Numeric-literal caveat (resolved 2026-08-05)
 
-The Haskell core normalizes numbers via `canonNum` (`Lara.Prop.nfTerm`); the
-Lean driver runs at `canon = id` and does **not** canonicalize numbers
-(documented in `lean/Lara/Driver.lean`). A unit containing a **non-canonical
-numeric literal** can therefore make the two drivers diverge. Every corpus /
-differential fixture avoids non-canonical numeric literals (the corpus uses
-nullary and constructor atoms; no `num` terms), so the drivers stay
-byte-identical. When adding fixtures: avoid numeric literals, or use only
-already-canonical decimals. If a divergence ever appears, check for a numeric
-literal before suspecting a real checker bug.
+This was the original M3 limitation: Haskell used `canonNum` while Lean used
+`canon = id`, so the corpus avoided non-canonical numerals. It no longer applies.
+Lean `Lara.Driver.dcanon` now delegates to the mechanized `Lara.canonNum`, and
+`group-quarantine-numeric-multi-blocked.sexp` is a positive differential anchor
+whose verdict would diverge under the old identity canonicalizer.
 
 _Deviation from the plan's strongly-preferred Lean `dump`-mode:_ the corpus is
 generated from real `Unit` values via the Haskell `encodeUnit` (not a Lean

@@ -304,7 +304,7 @@ observations:
   promoted: true
   promoted_to: logic/solution/constraints.md#m4a-surface-front-end-constraints
   crystallized_via: artifact-commitment
-  stale: false
+  stale: true
 - id: O16
   timestamp: 2026-07-28T12:00
   provenance: ai-executed
@@ -872,4 +872,36 @@ observations:
   promoted: false
   promoted_to: null
   crystallized_via: null
+  stale: false
+- id: O43
+  timestamp: 2026-08-05T15:45
+  provenance: ai-executed
+  content: >
+    The production quarantine path now has a checker-instantiated, corpus-independent non-promotion
+    theorem: compact justification plus absence from the exact production evidence-blocked list
+    implies declared-index justification after lifting completeClaimFor. The theorem is implication,
+    not status equality; equal status still needs statusC_agree's equal-support premise.
+  context: Issue #80 closure implementation and axiom/build/differential verification (N108-N111).
+  potential_type: claim
+  bound_to:
+  - N108
+  - N111
+  promoted: true
+  promoted_to: logic/claims.md:C25
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O44
+  timestamp: 2026-08-05T15:45
+  provenance: ai-suggested
+  content: >
+    Proof/production identity seams disappear when source declarations and derived checked values are
+    filtered as one aligned structure. Pair arguments with original indices before filtering and zip
+    raw/resolved attacks before selecting; do not recover identity later by term equality or re-resolution.
+  context: The first bridge draft used derived-value matching; duplicate declarations exposed that as insufficient, so the implementation pivoted to retainedView/selectAligned (N110).
+  potential_type: heuristic
+  bound_to:
+  - N110
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H08
+  crystallized_via: artifact-commitment
   stale: false

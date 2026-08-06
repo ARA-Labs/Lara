@@ -30,14 +30,12 @@ Exemplars:
 
 ## Formal atoms
 
-- Constants only — never `num` literals (Lean `canon = id` caveat,
-  `scripts/gen-corpus.hs` header). Thresholds, ratios, and table cells live in
+- Constants by convention. Thresholds, ratios, and table cells live in
   `nl`, `binding`, and leaf `refs`; constants are snake_case
   (`apt`, `mnli`, `train_cost_at_parity`). SOLE exception: the Family-10
   certificate-checked atoms (`rational_drop_recheck` premises/conclusion,
-  issue #57), whose cells are `num` literals in CANONICAL spelling (`50`,
-  never `50.0`) so the identity canonicalizer and `canonNum` agree
-  byte-for-byte.
+  issue #57), whose cells are `num` literals in canonical spelling (`50`,
+  never `50.0`). Both production drivers share `canonNum`.
 - The scheme instance fixes the atom: pick the policy rule via the family map
   below, instantiate its variables with claim constants, and let the claim's
   `formal` be exactly the rule's instantiated conclusion.

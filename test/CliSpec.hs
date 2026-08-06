@@ -13,6 +13,7 @@
 module CliSpec (cliSpecProps) where
 
 import Control.Exception (bracket)
+import Data.List (isInfixOf)
 import System.Directory
   ( createDirectoryIfMissing
   , getTemporaryDirectory
@@ -221,6 +222,62 @@ prop_cliLaraMissingPolicy = once $ ioProperty $
         , counterexample "stdout empty" (out === "")
         ]
 
+-- | @.lara@ rejects duplicate surface argument ids at elaboration, before the
+-- quarantine retained-index and raw\/resolved attack-alignment paths can use an
+-- ambiguous id. This is the production-CLI counterpart of the pure elaborator
+-- regression; the wire front door already enforces the same invariant.
+prop_cliLaraDuplicateArgId :: Property
+prop_cliLaraDuplicateArgId = once $ ioProperty $
+  withTempLaraDir duplicateArgProgram [("p.policy.lara", "policy p\n")] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "diagnostic" (property ("duplicate argument id" `isInfixOf` err))
+        ]
+  where
+    duplicateArgProgram =
+      unlines
+        [ "artifact x at sha256:aaaa..."
+        , "policy p"
+        , "use backends [nd@1]"
+        , "leaf e : fact"
+        , "  kind = observed"
+        , "  provenance = user"
+        , "  refs = []"
+        , "arg a : supports(derived) by leaf(e)"
+        , "arg a : supports(derived) by leaf(e)"
+        ]
+
+-- | The @.lara@ front door enforces the same R14 endpoint invariant as the
+-- wire decoder. In particular, a leading dangling attack cannot reach the
+-- lossy id-to-term resolver and shift quarantine's raw/resolved row alignment.
+prop_cliLaraDanglingAttack :: Property
+prop_cliLaraDanglingAttack = once $ ioProperty $
+  withTempLaraDir danglingAttackProgram [("p.policy.lara", "policy p\n")] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "diagnostic" $
+            property ("attack endpoint is not a declared argument" `isInfixOf` err)
+        ]
+  where
+    danglingAttackProgram =
+      unlines
+        [ "artifact x at sha256:aaaa..."
+        , "policy p"
+        , "use backends [nd@1]"
+        , "leaf e : fact"
+        , "  kind = observed"
+        , "  provenance = user"
+        , "  refs = []"
+        , "arg a : supports(derived) by leaf(e)"
+        , "rebut missing a"
+        ]
+
 cliSpecProps :: [(String, IO Result)]
 cliSpecProps =
   [ ("cli accept exit 0 + bytes", quickCheckResult prop_cliAccept)
@@ -233,4 +290,6 @@ cliSpecProps =
   , ("cli .lara accept S1 strict cert exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS1)
   , ("cli .lara parse error exit 2", quickCheckResult prop_cliLaraParseError)
   , ("cli .lara missing policy exit 2", quickCheckResult prop_cliLaraMissingPolicy)
+  , ("cli .lara duplicate argument id exit 2", quickCheckResult prop_cliLaraDuplicateArgId)
+  , ("cli .lara dangling attack endpoint exit 2", quickCheckResult prop_cliLaraDanglingAttack)
   ]

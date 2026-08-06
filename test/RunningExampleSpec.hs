@@ -15,7 +15,7 @@ import Test.QuickCheck
 
 import Lara.AST (Label (..), Status (..))
 import Lara.RunningExample (checkRun, goldenPath, loadRun, renderRuns, runPaths)
-import Lara.Wire (Outcome (..), Verdict (..))
+import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..))
 
 runningExampleSpecProps :: [(String, IO Result)]
 runningExampleSpecProps =
@@ -46,10 +46,10 @@ prop_shape = once $ ioProperty $ do
       pure $
         conjoin
           [ counterexample "run 1 framework is empty" (ls1 === [] .&&. es1 === [])
-          , counterexample "run 1 claim is gap" (map snd sts1 === [Gap])
+          , counterexample "run 1 claim is gap" (map snd sts1 === [Published Gap])
           , counterexample "run 2 labels a1 out, d1 in" (map snd ls2 === [LOut, LIn])
           , counterexample "run 2 has the one closure edge" (es2 === [(1, 0)])
-          , counterexample "run 2 claim is defeated" (map snd sts2 === [Defeated])
+          , counterexample "run 2 claim is defeated" (map snd sts2 === [Published Defeated])
           ]
     outcomes ->
       pure $ counterexample ("unexpected outcomes: " ++ show outcomes) (property False)

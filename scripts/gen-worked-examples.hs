@@ -22,8 +22,9 @@
 --
 -- The reject examples (R1/R2/R3) still elaborate to a structurally-valid 'Unit';
 -- the checker (not the elaborator) rejects them, so every example below produces
--- a @.core.sexp@. The suite carries no @num@ literals (constant atoms only), so
--- the Lean @canon = id@ caveat that @gen-corpus.hs@ documents does not bite here.
+-- a @.core.sexp@. The suite happens to carry constant atoms only; numeric
+-- literals are nevertheless safe because both production drivers share
+-- @canonNum@.
 module Main (main) where
 
 import Lara.AST (PolicyId (..), Program (..))

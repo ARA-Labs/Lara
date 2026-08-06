@@ -41,7 +41,14 @@ import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
 import Lara.Mutate.Accept (acceptMutants, acceptStructureOk)
 import Lara.Replay (CheckInput)
-import Lara.Wire (Outcome (..), Verdict (..), WireError (..), decodeCheckInputFile)
+import Lara.Wire
+  ( Outcome (..)
+  , PublicStatus (..)
+  , Verdict (..)
+  , WireError (..)
+  , decodeCheckInputFile
+  , isPublished
+  )
 
 suiteRoot :: FilePath
 suiteRoot = "fixtures/mutants"
@@ -114,11 +121,14 @@ actualOutcome bytes = case decodeCheckInputFile bytes of
   Right input -> case verdictOutcome (runCheck input) of
     Reject (RejectClass c) -> expectedText (ExpectClass c)
     Reject other -> "reject-" ++ show other
+    -- An @evidence-blocked@ query has no four-state public status (spec §4.3,
+    -- issue #76), so the accept is its own manifest class.
     Accept labels _ statuses
+      | any (not . isPublished . snd) statuses -> expectedText ExpectEvidenceBlocked
       | not (null labels)
           && all ((== LUndec) . snd) labels
           && not (null statuses)
-          && all ((== Contested) . snd) statuses ->
+          && all ((== Published Contested) . snd) statuses ->
           expectedText ExpectAllContested
       | otherwise -> "accept-other"
 
@@ -209,6 +219,7 @@ prop_mutationCoverage = once $ ioProperty $ do
       wanted =
         ExpectCodecReject
           : ExpectAllContested
+          : ExpectEvidenceBlocked
           -- The obligation-gate witness (M5 T6): `hole-obligation` is the one
           -- operator specified to `reject-IncompleteArgument`, so requiring the
           -- outcome here requires the operator to produce mutants of its class.
@@ -232,8 +243,12 @@ prop_mutationCoverage = once $ ioProperty $ do
               , "codec-corruption"
               , "certificate-tampering"
               , "data-integrity"
+              , "accept-verdict"
               ]
           )
+      , counterexample
+          "quarantine-attacker mutation operator disappeared"
+          ("quarantine-attacker" `elem` map rowOp rows)
       ]
 
 -- | The located driver's contract, over every verdict-bearing mutant (the codec
@@ -354,7 +369,7 @@ prop_corpusBudget = once $ ioProperty $ do
 primaryStatus :: String -> Maybe Status
 primaryStatus bytes = case decodeCheckInputFile bytes of
   Right input -> case verdictOutcome (runCheck input) of
-    Accept _ _ [(_, st)] -> Just st
+    Accept _ _ [(_, Published st)] -> Just st
     _ -> Nothing
   Left _ -> Nothing
 
@@ -405,8 +420,10 @@ prop_acceptStructure = once $ ioProperty $ do
       )
   where
     checkOne m = case (mutantExpected m, decodeCheckInputFile (mutantBytes m)) of
-      (ExpectPrimaryStatus s, Right input) ->
-        property (acceptStructureOk (mutantOp m) s input (runCheck input))
+      (expected@(ExpectPrimaryStatus _), Right input) ->
+        property (acceptStructureOk (mutantOp m) expected input (runCheck input))
+      (ExpectEvidenceBlocked, Right input) ->
+        property (acceptStructureOk (mutantOp m) ExpectEvidenceBlocked input (runCheck input))
       (_, Left err) ->
         counterexample ("failed to decode: " ++ show err) (property False)
       _ -> counterexample "not an accept-family mutant" (property False)

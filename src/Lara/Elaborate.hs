@@ -127,6 +127,11 @@ data ElabError
   | -- | a @challenges(…)@ whose target arg\/leaf is not declared (diagnostic
     -- only; never affects the 'Unit').
     ChallengeTargetUndeclared ArgId
+  | -- | two surface @arg@ declarations share an id (R14 well-formedness).
+    DuplicateArgId ArgId
+  | -- | a surface attack names an argument id that is not declared (R14
+    -- well-formedness): the first undeclared endpoint in attack order.
+    AttackEndpointUndeclared ArgId
   | -- | two @group@ declarations share an id (R14 well-formedness): the id.
     DuplicateGroupId GroupId
   | -- | a @group@ repeats a member (R14 well-formedness): @group@, the member.
@@ -165,6 +170,10 @@ elabErrorMessage e = case e of
     "status '" ++ c ++ "': not a declared claim"
   ChallengeTargetUndeclared (ArgId a) ->
     "arg '" ++ a ++ "': challenges(…) target is not a declared argument or leaf"
+  DuplicateArgId (ArgId a) ->
+    "arg '" ++ a ++ "': duplicate argument id"
+  AttackEndpointUndeclared (ArgId a) ->
+    "attack endpoint is not a declared argument: " ++ show a
   DuplicateGroupId (GroupId g) ->
     "group '" ++ g ++ "': duplicate group id"
   GroupRepeatedMember (GroupId g) (LeafId l) ->
@@ -232,6 +241,15 @@ elaborate _sigma reg prog pol0 = do
           , envLeafIds = map fst gamma
           , envArgIds = map argId argDecls
           }
+  -- Raw ids drive quarantine retention and raw/resolved attack alignment. Make
+  -- their uniqueness a front-door invariant before either operation can use an
+  -- ambiguous lookup, matching the wire decoder's R14 check.
+  case firstDup (envArgIds env) of
+    Just aid -> Left (DuplicateArgId aid)
+    Nothing -> Right ()
+  case find (`notElem` envArgIds env) (concatMap attackEndpoints attacks) of
+    Just aid -> Left (AttackEndpointUndeclared aid)
+    Nothing -> Right ()
   validateGroups (envLeafIds env) groups
   elaboratedRev <- foldM (elabOne env) [] argDecls
   queries <- mapM (resolveStatus claims) statusIds
@@ -248,6 +266,15 @@ elaborate _sigma reg prog pol0 = do
       , unitGroups = groups
       , unitGroupMode = policyGroupMode pol
       }
+
+-- | Raw argument endpoints of a surface attack, in source order. The @.lara@
+-- front door validates these before constructing a 'Unit', matching the wire
+-- decoder's R14 boundary and preserving raw/resolved attack alignment.
+attackEndpoints :: Attack -> [ArgId]
+attackEndpoints attack = case attack of
+  Rebut source target -> [source, target]
+  Undercut source target _ -> [source, target]
+  Undermine source target _ -> [source, target]
 
 -- | Enforce duplicate-report-group well-formedness (R14) on the @.lara@ path,
 -- mirroring "Lara.Wire".@checkGroupInvariants@ so both front doors reject the

@@ -25,6 +25,7 @@ import Lara.Driver (runCheckLocated, runCheckLocatedWith)
 import Lara.Measure
 import Lara.Mutate (Expected (..), parseExpected)
 import Lara.Prop (Pred (..), Prop (..))
+import Lara.Wire (PublicStatus (..))
 import Lara.Wire
   ( Outcome (..)
   , decodeCheckInputFile
@@ -308,7 +309,7 @@ prop_handWrittenHole =
             other -> counterexample (show other) (property False)
       , counterexample "no-CQ must accept with the query justified" $
           case (verdictOutcome vAbl, lAbl) of
-            (Accept _ _ [(_, Justified)], Nothing) -> property True
+            (Accept _ _ [(_, Published Justified)], Nothing) -> property True
             other -> counterexample (show other) (property False)
       ]
   where
@@ -360,7 +361,7 @@ prop_conflictScanGating =
             other -> counterexample (show other) (property False)
       , counterexample "no-typed must flip missing-conflict to accept (query justified)" $
           case (verdictOutcome vNoTyped, lNoTyped) of
-            (Accept _ _ [(_, Justified)], Nothing) -> property True
+            (Accept _ _ [(_, Published Justified)], Nothing) -> property True
             other -> counterexample (show other) (property False)
       ]
   where

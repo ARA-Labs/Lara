@@ -2596,3 +2596,116 @@ tree:
   also_depends_on:
   - N106
   - N104
+- id: N108
+  type: question
+  provenance: user
+  timestamp: 2026-08-05T15:10
+  source_refs:
+  - "issue #80"
+  - lean/Lara/BlockedProgram.lean
+  - lean/Lara/Driver.lean
+  title: Does the declared-index non-promotion proof actually cover the shipped compact production AF?
+  description: >
+    The retained declared-index framework had a proof, while Driver.buildAccept labelled
+    Compile.checkedAF using completeClaimFor. No theorem transported the compact AF, support sets,
+    and unblocked premise through that embedding or instantiated justified_nonpromotion for the
+    production checker. Conformance tests could not substitute for this missing soundness bridge.
+  children:
+  - id: N109
+    type: dead_end
+    provenance: user
+    timestamp: 2026-08-05T15:10
+    source_refs:
+    - "issue #80"
+    - lean/Lara/BlockedProgram.lean:171
+    title: Treat the abstract declared-index theorem plus differential tests as production mechanization
+    description: >
+      Rejected: the old file explicitly acknowledged that the compact checked AF, completeClaimFor
+      support, and production unblocked premise were not connected. The tests established behavior,
+      not the corpus-independent implication required by CLAUDE.md.
+    status: refuted
+  - id: N110
+    type: decision
+    provenance: ai-executed
+    timestamp: 2026-08-05T15:30
+    source_refs:
+    - lean/Lara/BlockedProgram.lean
+    - lean/Lara/Driver.lean
+    - src/Lara/Blocked.hs
+    title: Make retention structurally aligned and prove an explicit compact-to-declared AF embedding
+    choice: >
+      Pair declared arguments with original indices before filtering; filter raw attack declarations
+      and resolved attacks in lockstep; pass those exact lists to checkUnit; prove AFEmbedding attack
+      agreement, label/status transport, production blocked-support discharge, and a checkUnit_sound-
+      instantiated non-promotion wrapper.
+    alternatives:
+    - Re-resolve attacks after filtering — leaves an equality obligation between two resolution runs
+    - Match attacks or arguments by derived term equality — loses declaration identity with duplicates
+    status: resolved
+  - id: N111
+    type: experiment
+    provenance: ai-executed
+    timestamp: 2026-08-05T15:45
+    source_refs:
+    - lean/AxCheck.lean
+    - test/WireSpec.hs
+    - scripts/check-axioms.sh
+    - scripts/differential.sh
+    title: Production bridge and review-remediation verification
+    description: >
+      Built both implementations, audited every new bridge theorem for axioms, and exercised the
+      expanded multi-blocked wire grammar including positional failures.
+    result: >
+      cabal test PASS; lake build PASS (56 jobs, only pre-existing Lara/Examples warnings);
+      axiom audit PASS; differential positive 435/435 and negative 54/54. The checker-instantiated
+      theorem is sorry-free and the shipped driver supplies its exact retained argument/attack lists.
+    evidence:
+    - ara/evidence/proofs/quarantine_nonpromotion.md
+    status: resolved
+  - id: N112
+    type: decision
+    provenance: ai-executed
+    timestamp: 2026-08-05T16:20
+    source_refs:
+    - lean/Lara/Prop.lean
+    - lean/Lara/Driver.lean
+    - fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp
+    title: Replace the num-free differential workaround with one production numeric canonicalizer
+    choice: >
+      Port Haskell canonNum to Lean and make Driver.dcanon delegate to it. Preserve surface numerals
+      on the wire, but use the same normalized identity in group consistency, support matching,
+      blocking, certificates, and status aggregation in both production drivers.
+    alternatives:
+    - Keep Lean canon=id and forbid non-canonical numeric literals in differential inputs
+    - Canonicalize wire bytes at decode time, changing round-trip identity instead of semantic identity
+    evidence: >
+      The user supplied a valid numeric quarantine case where Haskell reported evidence-blocked but
+      Lean published justified. A two-blocked-query variant reproduced the mechanism: identity
+      canonicalization saw only the unattacked exact supports, while canonNum also associated the
+      attacked surface-variant supports with each query.
+    status: resolved
+  - id: N113
+    type: experiment
+    provenance: ai-executed
+    timestamp: 2026-08-05T16:32
+    source_refs:
+    - test/DifferentialSpec.hs
+    - test/BlockedSpec.hs
+    - test/ElaborateSpec.hs
+    - test/MechReviewSpec.hs
+    - test/MutationSpec.hs
+    - scripts/differential.sh
+    title: Numeric parity and quarantine review-gap verification
+    description: >
+      Exercised both real drivers on a valid numeric fixture with two blocked queries separated by
+      an ordinary query; added .lara duplicate-ArgId rejection, directed-tightness falsification,
+      conditional-payload rendering, and quarantine-attacker mutation-presence checks.
+    result: >
+      Both real CLIs emitted byte-identical evidence-blocked/justified/evidence-blocked statuses with
+      two ordered conditional entries. cabal test PASS; lake build PASS; axiom audit PASS;
+      differential positive 436/436 and negative 54/54; git diff --check clean.
+    evidence:
+    - fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp
+    - test/DifferentialSpec.hs
+    status: resolved
+  status: resolved

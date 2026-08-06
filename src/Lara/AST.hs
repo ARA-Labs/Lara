@@ -552,8 +552,10 @@ data Unit = Unit
 -- Claim status (spec §8)
 -- ---------------------------------------------------------------------------
 
--- | The four-state grounded claim status (spec §8), the checker's output for a
--- requested claim.
+-- | The four-state grounded claim label computed on one checked framework
+-- (spec §8). The public driver may demote this to the conditional payload of
+-- @evidence-blocked@ when quarantine edited the framework under the query; see
+-- "Lara.Wire".'Lara.Wire.PublicStatus'.
 --
 -- * 'Gap' — no support, or an unresolved hole no complete alternative closes.
 -- * 'Justified' — some complete support argument is labelled @in@.

@@ -3,7 +3,8 @@
 #
 # Guards the repaired false-negative path: a non-standard axiom reported on a
 # *continuation line* of a multiline `[...]` list must be rejected, and a
-# multiline list containing only the standard trio must pass.
+# multiline list containing only the standard trio must pass. Empty or
+# unrelated stdin must fail rather than producing a vacuous green audit.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -47,6 +48,11 @@ expect_fail "multiline non-standard axiom" \
 
 expect_fail "sorryAx" \
   "'Lara.foo' depends on axioms: [sorryAx]"
+
+expect_fail "empty input" ""
+
+expect_fail "unrelated input" \
+  "Build completed successfully."
 
 if [ "$failures" -gt 0 ]; then
   echo "$failures test(s) failed" >&2

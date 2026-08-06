@@ -79,7 +79,7 @@ import Lara.ExpectedJson (JValue (..), renderJson)
 import Lara.Measure (EnvBlock (..))
 import Lara.Replay (CheckInput (..))
 import Lara.SupportTerm (leaves)
-import Lara.Wire (Outcome (..), Verdict (..))
+import Lara.Wire (Outcome (..), Verdict (..), conditionalStatus, isPublished)
 
 -- ---------------------------------------------------------------------------
 -- Paper anchoring (the refs axis of number 2)
@@ -182,10 +182,16 @@ computeUnit
 computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
   case outcome of
     Reject _ -> error ("claim-support: non-accept corpus unit " ++ name)
+    -- A conditional label is not a claim status (spec §4.3, issue #76). No
+    -- frozen corpus unit quarantines, so refuse rather than let an
+    -- @evidence-blocked@ query enter the aggregate under its conditional label.
+    Accept _ _ statuses
+      | any (not . isPublished . snd) statuses ->
+          error ("claim-support: evidence-blocked corpus unit " ++ name)
     Accept labels _ statuses ->
       UnitRecord
         { urName = name
-        , urStatuses = map snd statuses
+        , urStatuses = map (conditionalStatus . snd) statuses
         , urLoadBearing = map leafFact loadBearingLeafIds
         , urAllLeaves = map leafFactFromLeaf surfaceLeaves
         , urTypedAttacks = length attacks

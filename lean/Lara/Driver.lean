@@ -22,10 +22,9 @@ that mirrors `Lara.Wire.tagToString`). Everything inward is the closed symbolic
 core of the Lean development.
 
 Design decisions (documented, faithful to the mechanized development):
-* `canon := id`. The Lean development's example theorems check units at the
-  identity canonicalizer (`Lara.Prop` fixes `canonId = id`; numeric literal
-  normalization is the deferred extension point). The two fixtures do not
-  involve numeric literals, so this reproduces the goldens exactly.
+* `canon := Lara.canonNum`. Numeric literals therefore use the same identity
+  relation as the Haskell production driver; identifier canonicalization remains
+  the separate `canonId = id` extension point.
 * The backend registry is built from the wire `theories` section over the one
   implemented backend core, `nd@1` (`Lara.Strict.ndBackend`, with digests
   resolving to ND-encoded theory data), mirroring
@@ -38,6 +37,8 @@ Design decisions (documented, faithful to the mechanized development):
 -/
 
 import Lara.Consistency
+import Lara.Blocked
+import Lara.BlockedProgram
 import Lara.Groups
 import Lara.Strict
 import Lara.RA
@@ -47,8 +48,8 @@ namespace Lara.Driver
 open Lara Lara.Support Lara.Attack Lara.Policy Lara.Check Lara.Check.Unit
 open Lara.Grounded Lara.Compile Lara.Consistency
 
-/-- The driver's canonicalizer (identity; see the file header). -/
-def dcanon : String → String := fun s => s
+/-- The production driver's numeric-literal canonicalizer (see `Lara.Prop`). -/
+def dcanon : String → String := Lara.canonNum
 
 /-! ### The textual S-expression token tree (the one place raw `String` lives) -/
 
@@ -77,8 +78,8 @@ inductive Tag where
   | var | numLit | strLit | conApp | atom | apat
   | rebut | undercut | undermine
   | checkInput | replayId | core | backends | backend | artifact
-  | verdict | accept | reject | labels | edges | statuses | status
-  | inL | outL | undecL | gap | justified | contested | defeated
+  | verdict | accept | reject | labels | edges | statuses | status | conditional
+  | inL | outL | undecL | gap | justified | contested | defeated | evidenceBlocked
   | dupRule | dupArgument | incompleteArgument | missingConflict
   | groups | group | quarantine
   | r1 | r3 | r4 | r5 | r6 | r7 | r9 | r10 | r11 | r12 | r13
@@ -107,10 +108,11 @@ def tagToString : Tag → String
   | .backends => "backends" | .backend => "backend" | .artifact => "artifact"
   | .verdict => "verdict" | .accept => "accept" | .reject => "reject"
   | .labels => "labels" | .edges => "edges" | .statuses => "statuses"
+  | .conditional => "conditional"
   | .status => "status"
   | .inL => "in" | .outL => "out" | .undecL => "undec"
   | .gap => "gap" | .justified => "justified" | .contested => "contested"
-  | .defeated => "defeated"
+  | .defeated => "defeated" | .evidenceBlocked => "evidence-blocked"
   | .dupRule => "duplicate-rule" | .dupArgument => "duplicate-argument"
   | .incompleteArgument => "incomplete-argument"
   | .missingConflict => "missing-conflict"
@@ -1073,29 +1075,77 @@ def encodeReject (rid : ReplayId) (cls : WireRejection) : Sx :=
   .list [.atom (tagToString .verdict), encodeReplayId rid,
     .atom (tagToString .reject), .atom (wireRejectionString cls)]
 
+/-- The public status of one query (issue #76) — mirrors
+`Lara.Wire.PublicStatus`. `published` is an ordinary four-state answer;
+`evidenceBlocked` says §4.3 quarantine edited the program under the claim, so
+its four-state label is only a conditional diagnostic. Keeping the conditional
+label *inside* the constructor (instead of a parallel `blocked : List Atom`)
+makes an orphan, permuted, or duplicated blocked query unrepresentable: both
+verdict sections below are projections of one list. -/
+inductive PublicStatus where
+  | published (st : Status)
+  | evidenceBlocked (conditional : Status)
+  deriving Repr, DecidableEq
+
+/-- The accept verdict. An `evidenceBlocked` status prints `evidence-blocked`
+in the `statuses` section and its conditional label moves to a trailing
+`conditional` section, which is emitted only when something is blocked. With
+nothing blocked this is the pre-#76 encoding byte-for-byte. Mirrors
+`Lara.Wire.encodeVerdict`. -/
 def encodeAccept (rid : ReplayId) (labels : List (Nat × Label))
-    (edges : List (Nat × Nat)) (statuses : List (Atom × Status)) : Sx :=
+    (edges : List (Nat × Nat)) (statuses : List (Atom × PublicStatus)) : Sx :=
+  let conditional := statuses.filterMap (fun ps =>
+    match ps.2 with
+    | .published _ => none
+    | .evidenceBlocked st => some (ps.1, st))
   .list
-    [ .atom (tagToString .verdict)
-    , encodeReplayId rid
-    , .atom (tagToString .accept)
-    , .list (.atom (tagToString .labels) ::
-        labels.map (fun le => .list [sxNat le.1, .atom (labelStr le.2)]))
-    , .list (.atom (tagToString .edges) ::
-        edges.map (fun ij => .list [sxNat ij.1, sxNat ij.2]))
-    , .list (.atom (tagToString .statuses) ::
-        statuses.map (fun ps =>
-          .list [.atom (tagToString .status), encodeAtom ps.1,
-            .atom (statusStr ps.2)]))
-    ]
+    ([ .atom (tagToString .verdict)
+     , encodeReplayId rid
+     , .atom (tagToString .accept)
+     , .list (.atom (tagToString .labels) ::
+         labels.map (fun le => .list [sxNat le.1, .atom (labelStr le.2)]))
+     , .list (.atom (tagToString .edges) ::
+         edges.map (fun ij => .list [sxNat ij.1, sxNat ij.2]))
+     , .list (.atom (tagToString .statuses) ::
+         statuses.map (fun ps =>
+           .list [.atom (tagToString .status), encodeAtom ps.1,
+             .atom (match ps.2 with
+                    | .published st => statusStr st
+                    | .evidenceBlocked _ => tagToString .evidenceBlocked)]))
+     ] ++
+     (if conditional.isEmpty then [] else
+       [ .list (.atom (tagToString .conditional) ::
+           conditional.map (fun ps =>
+             .list [.atom (tagToString .status), encodeAtom ps.1,
+               .atom (statusStr ps.2)])) ]))
+
+/-! ### Conservative reporting for quarantine-affected queries (spec §4.3, #76)
+
+The seed and declared-index framework definitions live in
+`Lara.BlockedProgram`, where the three abstract `Blocking` obligations are
+*proved* (`blocking_of_blockedSeed`). That module also transports the compact AF
+and `completeClaimFor` support labelled below through the retained-index
+embedding and instantiates production non-promotion (issue #80). The Haskell
+counterpart is `src/Lara/Blocked.hs`. -/
+
+/-- The queries whose public status is `evidence-blocked`: those with a complete
+support argument in the forward closure of the seed. A query with no complete
+support is `gap` and is never blocked — losing support cannot promote a claim. -/
+def blockedQueries (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm))
+    (declAtts keptAtts : List Attack) (support : Atom → List Nat)
+    (queries : List Atom) : List Atom :=
+  BlockedProgram.blockedQueries keep declared declAtts keptAtts support queries
 
 /-- Read the accept verdict off an accepted unit: grounded labels over the
 compiled AF (`checkedAF`), the compiled closure edges in ascending order, and
-one status per query atom in query order. -/
+one public status per query atom in query order — `evidenceBlocked` for the
+queries in `blocked`, carrying the four-state label as its conditional
+diagnostic. -/
 def buildAccept {Γ : LeafId → Option Atom}
     {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
     (rid : ReplayId) (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk)
-    (queries : List Atom) : Sx :=
+    (queries : List Atom) (blocked : List Atom) : Sx :=
   let P := accepted.program
   let af := checkedAF P
   let n := P.args.length
@@ -1103,7 +1153,10 @@ def buildAccept {Γ : LeafId → Option Atom}
   let edges := (List.range n).foldr
     (fun i acc => (List.range n).foldr
       (fun j acc2 => if af.attack i j then (i, j) :: acc2 else acc2) acc) []
-  let statuses := queries.map (fun p => (p, statusC af (completeClaimFor accepted p)))
+  let statuses := queries.map (fun p =>
+    let st := statusC af (completeClaimFor accepted p)
+    (p, if blocked.contains p then PublicStatus.evidenceBlocked st
+        else PublicStatus.published st))
   encodeAccept rid labels edges statuses
 
 /-! ### The driver -/
@@ -1138,25 +1191,30 @@ def runOnContents (contents : String) : IO _root_.Unit := do
             IO.Process.exit 1
           else
             let qs := Groups.quarantined dcanon d.leaves d.groups
-            let keptArgsRaw := Groups.quarantineArgs qs d.argsRaw
+            let keep := Groups.keepArg qs
+            let keptArgsRaw := BlockedProgram.retainedArguments keep d.argsRaw
             let keptIds := keptArgsRaw.map (·.1)
-            let keptAttacksRaw := d.attacksRaw.filter (fun ra =>
+            let keepAttack := fun ra =>
               let (s, t) := ra.endpoints
-              keptIds.contains s && keptIds.contains t)
-            match resolveAttacks keptArgsRaw keptAttacksRaw with
-            | .error msg =>
-                IO.eprintln ("lara-driver: internal error at " ++ msg)
-                IO.Process.exit 2
-            | .ok atts =>
-              let reg := buildRegistry d.theories
-              let gamma := buildGamma (Groups.quarantineLeaves qs d.leaves)
-              match checkUnit gamma reg
-                  ({ policy := d.policy, args := keptArgsRaw.map (·.2), atts := atts } : Lara.Unit) with
-              | .error err =>
-                  IO.println (printSx (encodeReject rid (rejectWire err)))
-                  IO.Process.exit 1
-              | .ok accepted =>
-                  IO.println (printSx (buildAccept rid accepted d.queries))
+              keptIds.contains s && keptIds.contains t
+            let atts := BlockedProgram.selectAligned keepAttack d.attacksRaw d.atts
+            let reg := buildRegistry d.theories
+            let gamma := buildGamma (Groups.quarantineLeaves qs d.leaves)
+            match checkUnit gamma reg
+                ({ policy := d.policy, args := keptArgsRaw.map (·.2), atts := atts } : Lara.Unit) with
+            | .error err =>
+                IO.println (printSx (encodeReject rid (rejectWire err)))
+                IO.Process.exit 1
+            | .ok accepted =>
+                -- The checker and the blocking proof consume the same
+                -- filtered sublist of the already-resolved declared attacks.
+                -- Thus the accepted program's compact AF is connected to the
+                -- declared-index framework by construction, rather than by an
+                -- unproved re-resolution equivalence.
+                let blocked :=
+                  blockedQueries keep d.argsRaw d.atts atts
+                    (fun p => claimSupportFor accepted p) d.queries
+                IO.println (printSx (buildAccept rid accepted d.queries blocked))
 
 end Lara.Driver
 

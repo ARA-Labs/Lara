@@ -80,7 +80,7 @@ import Lara.Replay
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Strict (SExpr (..))
-import Lara.Wire (Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
+import Lara.Wire (PublicStatus (..), conditionalStatus, Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
 
 -- ---------------------------------------------------------------------------
 -- Fixtures
@@ -190,7 +190,7 @@ prop_E1 = once $ ioProperty $
           [ counterexample "E1 labels: a1 → in" $
               verdictLabels outcome === [(0, LIn)]
           , counterexample "E1 status: c1 → justified" $
-              verdictStatuses outcome === [(improves "M" "D", Justified)]
+              verdictStatuses outcome === [(improves "M" "D", Published Justified)]
           ]
 
 -- | E2: no arguments; the queried claim has empty complete support ⇒ gap.
@@ -204,7 +204,7 @@ prop_E2 = once $ ioProperty $
           [ counterexample "E2 labels: no arguments" $
               verdictLabels outcome === []
           , counterexample "E2 status: c1 → gap" $
-              verdictStatuses outcome === [(improves "M" "D", Gap)]
+              verdictStatuses outcome === [(improves "M" "D", Published Gap)]
           ]
 
 -- | E3: justified (a_j in) + defeated (a_d out, undercut+undermine) + contested
@@ -222,10 +222,10 @@ prop_E3 = once $ ioProperty $
                 === [(0, LIn), (1, LOut), (2, LIn), (3, LIn), (4, LUndec), (5, LUndec)]
           , counterexample "E3 statuses: c_j justified, c_d defeated, c_c/c_cn contested" $
               verdictStatuses outcome
-                === [ (improves "M_j" "D_j", Justified)
-                    , (improves "M_d" "D_d", Defeated)
-                    , (improves "M_c" "D_c", Contested)
-                    , (notImproves "M_c" "D_c", Contested)
+                === [ (improves "M_j" "D_j", Published Justified)
+                    , (improves "M_d" "D_d", Published Defeated)
+                    , (improves "M_c" "D_c", Published Contested)
+                    , (notImproves "M_c" "D_c", Published Contested)
                     ]
           ]
 
@@ -248,10 +248,10 @@ prop_E4 = once $ ioProperty $
                     ]
           , counterexample "E4 statuses: c_r/c_u/c_x justified under rebut/undermine/undercut, c_rn defeated" $
               verdictStatuses outcome
-                === [ (improves "M_r" "D_r", Justified)
-                    , (notImproves "M_r" "D_r", Defeated)
-                    , (improves "M_u" "D_u", Justified)
-                    , (improves "M_x" "D_x", Justified)
+                === [ (improves "M_r" "D_r", Published Justified)
+                    , (notImproves "M_r" "D_r", Published Defeated)
+                    , (improves "M_u" "D_u", Published Justified)
+                    , (improves "M_x" "D_x", Published Justified)
                     ]
           ]
 
@@ -270,9 +270,9 @@ prop_E5 = once $ ioProperty $
                 === [(0, LUndec), (1, LUndec), (2, LUndec), (3, LUndec), (4, LUndec), (5, LUndec)]
           , counterexample "E5 statuses: c_v contested (undermine), c_w contested (undercut), c_g gap" $
               verdictStatuses outcome
-                === [ (improves "M_v" "D_v", Contested)
-                    , (improves "M_w" "D_w", Contested)
-                    , (improves "M_g" "D_g", Gap)
+                === [ (improves "M_v" "D_v", Published Contested)
+                    , (improves "M_w" "D_w", Published Contested)
+                    , (improves "M_g" "D_g", Published Gap)
                     ]
           ]
 
@@ -288,7 +288,7 @@ prop_S1 = once $ ioProperty $
           [ counterexample "S1 labels: a1 → in" $
               verdictLabels outcome === [(0, LIn)]
           , counterexample "S1 status: c1 → justified" $
-              verdictStatuses outcome === [(holdsP "safety_invariant" "D", Justified)]
+              verdictStatuses outcome === [(holdsP "safety_invariant" "D", Published Justified)]
           ]
 
 -- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
@@ -309,10 +309,10 @@ prop_agreementMap = once $ ioProperty $
                 === [(0, LUndec), (1, LUndec), (2, LIn), (3, LIn)]
           , counterexample "agreement-map statuses: P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)" $
               verdictStatuses outcome
-                === [ (betterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Contested)
-                    , (notBetterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Contested)
-                    , (betterP "magnitude_pruning" "dense_baseline" "accuracy" "bert_glue_s50", Justified)
-                    , (notBetterP "magnitude_pruning" "dense_baseline" "accuracy" "llama_openllm_s90", Justified)
+                === [ (betterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Published Contested)
+                    , (notBetterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Published Contested)
+                    , (betterP "magnitude_pruning" "dense_baseline" "accuracy" "bert_glue_s50", Published Justified)
+                    , (notBetterP "magnitude_pruning" "dense_baseline" "accuracy" "llama_openllm_s90", Published Justified)
                     ]
           ]
 
@@ -337,9 +337,9 @@ prop_D1Round0 = once $ ioProperty $
               verdictLabels outcome === [(0, LIn), (1, LIn)]
           , counterexample "D1 round0 statuses: c_bench/c_measure justified, c_kurt gap" $
               verdictStatuses outcome
-                === [ (performsP, Justified)
-                    , (holdsP "low_memory_footprint" "apt", Justified)
-                    , (contributesP, Gap)
+                === [ (performsP, Published Justified)
+                    , (holdsP "low_memory_footprint" "apt", Published Justified)
+                    , (contributesP, Published Gap)
                     ]
           ]
 
@@ -358,9 +358,9 @@ prop_D1Round1 = once $ ioProperty $
                 === [(0, LOut), (1, LOut), (2, LIn), (3, LIn), (4, LIn)]
           , counterexample "D1 round1 statuses: c_bench/c_measure defeated, c_kurt gap" $
               verdictStatuses outcome
-                === [ (performsP, Defeated)
-                    , (holdsP "low_memory_footprint" "apt", Defeated)
-                    , (contributesP, Gap)
+                === [ (performsP, Published Defeated)
+                    , (holdsP "low_memory_footprint" "apt", Published Defeated)
+                    , (contributesP, Published Gap)
                     ]
           ]
 
@@ -381,9 +381,9 @@ prop_D1Round2 = once $ ioProperty $
                     ]
           , counterexample "D1 round2 statuses: c_bench justified, c_measure defeated, c_kurt justified" $
               verdictStatuses outcome
-                === [ (performsP, Justified)
-                    , (holdsP "low_memory_footprint" "apt", Defeated)
-                    , (contributesP, Justified)
+                === [ (performsP, Published Justified)
+                    , (holdsP "low_memory_footprint" "apt", Published Defeated)
+                    , (contributesP, Published Justified)
                     ]
           ]
 
@@ -645,7 +645,7 @@ prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
   units <- mapM loadUnit examplePolicies -- [(dir, Unit)]
   let elabErrs = [dir ++ ": " ++ e | (dir, Left e) <- verdicts]
-      statuses = sort (nubOrd [s | (_, Right (Verdict _ (Accept _ _ sts))) <- verdicts, (_, s) <- sts])
+      statuses = sort (nubOrd [conditionalStatus s | (_, Right (Verdict _ (Accept _ _ sts))) <- verdicts, (_, s) <- sts])
       attackTags = sort (nubOrd [attackKind k | (_, u) <- units, k <- unitAttacks u])
       rejects = sort (nubOrd [r | (_, Right (Verdict _ (Reject r))) <- verdicts])
       outcomes = [(dir, o) | (dir, Right (Verdict _ o)) <- verdicts]
@@ -658,7 +658,7 @@ prop_coverageMatrix = once $ ioProperty $ do
           ]
       gapAmidAttacks =
         or
-          [ not (null (unitAttacks u)) && Gap `elem` map snd sts
+          [ not (null (unitAttacks u)) && Published Gap `elem` map snd sts
           | (dir, u) <- units
           , Just (Accept _ _ sts) <- [lookup dir outcomes]
           ]

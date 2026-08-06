@@ -40,6 +40,12 @@
 --   * backend replacement (result 9): uniform injective assurance relabel,
 --     with constructive well-checkedness transport making it non-vacuous —
 --     Lara.Erase / Lara.EraseTransport
+--   * conservative reporting for quarantine-affected claims (spec §4.3, issue
+--     #76): the locality lemma for the declarative grounded judgment, and the
+--     non-promotion result plus same-support status preservation — Lara.Blocked;
+--     a declared-index framework pair and the drivers' seed discharge the three
+--     abstract Blocking obligations — Lara.BlockedProgram. The reindexing and
+--     support bridge to the compact production AF closes issue #80.
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -50,6 +56,8 @@ import Lara.RA
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
+import Lara.Blocked
+import Lara.BlockedProgram
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase

@@ -45,7 +45,7 @@ substitutes for these Lean proofs.
 
 - `cd lean && lake build` → **`Build completed successfully (50 jobs).`** (only pre-existing
   `unusedSimpArgs` warnings in `Examples.lean`).
-- `lake env lean AxCheck.lean | scripts/check-axioms.sh` → **559 declaration reports**, no `sorryAx`,
+- `cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh` → **559 declaration reports**, no `sorryAx`,
   no axiom outside the trio. New declarations: `Backend.replay_theory_covers`,
   `Backend.replay_theory_agnostic`, `Support.certOkBOf_theory_covers`.
 - `scripts/differential.sh` → positive anchors **41/41**, malformed negatives **9/9** — the registry

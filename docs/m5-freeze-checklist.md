@@ -16,6 +16,26 @@ strict arg, and the seeded sweep grew the suite 358 → 360 — so per the
 post-freeze rule this file now records **`m5-freeze-v2`**. The v1 anchors
 remain addressable via the tag._
 
+_**Pending re-freeze (`m5-freeze-v3`), issue #76.** Conservative reporting for
+quarantine-affected claims added the `quarantine-attacker` accept-family
+operator, so the seeded sweep grew **360 → 369** mutants (9 new: one per
+justified corpus unit) and the measured input set **420 → 429**. Only additions:
+no existing mutant's bytes changed, and `corpus-units/`, `examples/`,
+`bundles/`, and `measurements/frozen/claim-support.*` are untouched — no frozen
+artifact declares a duplicate-report group, so nothing that was already frozen
+reports `evidence-blocked`._
+
+_Verified on the fix branch: `gen-mutants.hs` reproduces 369 mutants
+byte-identically, `differential.sh` is pass=436/436 positive and 54/54 negative,
+and a fresh `measure.hs` run is **429/429** on both `class_match` and
+`lean_agree`. The tables below still describe the **v2** snapshot committed under
+`measurements/frozen/`: re-running the post-freeze measurement is deliberately
+left to the merge commit, because the snapshot records the freeze commit SHA and
+the measuring environment, neither of which exists yet on a feature branch. At
+merge, run the two commands under "Post-freeze measurement run", commit the
+refreshed `measurements/frozen/{report,ablation}.{json,tsv}`, and record v3 in
+the history above with the new deterministic-projection hash._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,
@@ -58,7 +78,7 @@ semantics. Pinned by the freeze commit SHA below.
 | Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 360 mutants byte-identical (empty `git diff`) ✓ |
 | Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=418 fail=0 ✓ |
 | Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=54 fail=0 ✓ |
-| Lean axiom audit | `bash scripts/check-axioms.sh` | `sorry`-free, standard trio (incl. `Lara.RA`) ✓ |
+| Lean axiom audit | `cd lean && lake env lean AxCheck.lean \| ../scripts/check-axioms.sh` | `sorry`-free, standard trio (incl. `Lara.RA`) ✓ |
 | Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`) ✓ |
 
 ## Post-freeze measurement run

@@ -51,10 +51,12 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.Driver (runCheck)
+import Lara.ExpectedJson (JValue (..), expectedJsonValue)
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Replay (CheckInput, inputReplayId, inputUnit)
 import Lara.Wire
-  ( Outcome (..)
+  ( PublicStatus (..)
+  , Outcome (..)
   , Verdict (..)
   , decodeCheckInputFile
   , encodeCheckInput
@@ -95,6 +97,40 @@ corpusGoldens =
   , ( "fixtures/corpus/group-conflict-quarantine.sexp"
     , "(verdict accept (labels) (edges)"
         ++ " (statuses (status (atom effect (con up)) gap)))"
+    )
+  , -- The §4.3 promotion hazard (issue #76): quarantining the sole attacker
+    -- leaves the target unattacked, so the pruned graph says @justified@ — which
+    -- is published as @evidence-blocked@ with that label demoted to the
+    -- @conditional@ section. The unaffected query keeps its ordinary status.
+    ( "fixtures/corpus/group-conflict-quarantine-attacker.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom concl) evidence-blocked)"
+        ++ " (status (atom other) justified))"
+        ++ " (conditional (status (atom concl) justified)))"
+    )
+  , -- The lost-edge half of the same hazard: quarantine deletes an attack
+    -- /edge between two retained arguments/ (the undermine on the pruned
+    -- @aT@ also carried a closure edge onto @aW@), attack completeness has
+    -- nothing to say (@notk@ vs @cw@ are not contraries), and only the
+    -- lost-edge seed clause catches the promotion. Cross-driver anchor for
+    -- the retained-to-retained branch of the compact-index bridge (#80).
+    ( "fixtures/corpus/group-quarantine-lost-edge.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom cw) evidence-blocked))"
+        ++ " (conditional (status (atom cw) justified)))"
+    )
+  , -- Numeric-literal identity and multi-blocked positional regression. The
+    -- attacked supports use non-canonical numeric spellings while unattacked
+    -- supports and queries use canonical spellings. Both production drivers
+    -- must apply canonNum, block both numeric queries, and keep the ordinary
+    -- query between them out of the conditional projection.
+    ( "fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp"
+    , "(verdict accept (labels (0 in) (1 in) (2 in) (3 in) (4 in)) (edges)"
+        ++ " (statuses (status (atom score1 (num 1)) evidence-blocked)"
+        ++ " (status (atom other) justified)"
+        ++ " (status (atom score2 (num 2)) evidence-blocked))"
+        ++ " (conditional (status (atom score1 (num 1)) justified)"
+        ++ " (status (atom score2 (num 2)) justified)))"
     )
   , ("fixtures/corpus/reject-r9.sexp", "(verdict reject R9)")
   , ("fixtures/corpus/reject-duplicate-rule.sexp", "(verdict reject duplicate-rule)")
@@ -264,6 +300,56 @@ prop_corpusVerdicts = once (ioProperty runChecks)
             Right input -> expectedVerdictText input outcomeTail
       pure (counterexample path (got === expected))
 
+-- | The two Haskell-only presentation details that originally escaped the wire
+-- golden: @expected.json@ must publish the blocked status (with the smaller
+-- graph's label only as a conditional diagnostic), and its argument labels must
+-- use checked-program indices after the quarantined @a2@ disappears. A revert
+-- of either consumer fix leaves 'prop_corpusVerdicts' green, so pin the complete
+-- affected arrays here.
+prop_quarantineExpectedJson :: Property
+prop_quarantineExpectedJson = once $ ioProperty $ do
+  bytes <- readFile quarantineAttackerFixture
+  pure $ case decodeCheckInputFile bytes of
+    Left err -> counterexample ("CODEC:" ++ show err) False
+    Right input ->
+      case expectedJsonValue input of
+        JObject top ->
+          case lookup "located-diagnostic" top of
+            Just (JObject diag) ->
+              conjoin
+                [ counterexample "public and conditional statuses" $
+                    lookup "statuses" diag === Just (JArray expectedStatuses)
+                , counterexample "checked-program argument labels" $
+                    lookup "labels" diag === Just (JArray expectedLabels)
+                ]
+            other -> counterexample ("located-diagnostic: " ++ show other) False
+        other -> counterexample ("expected.json root: " ++ show other) False
+  where
+    expectedStatuses =
+      [ JObject
+          [ ("claim", JString "concl")
+          , ("status", JString "evidence-blocked")
+          , ("complete-support", JNumber 1)
+          , ("holes", JNumber 0)
+          , ("incomplete-alternative", JBool False)
+          , ("conditional-status", JString "justified")
+          ]
+      , JObject
+          [ ("claim", JString "other")
+          , ("status", JString "justified")
+          , ("complete-support", JNumber 1)
+          , ("holes", JNumber 0)
+          , ("incomplete-alternative", JBool False)
+          ]
+      ]
+    expectedLabels =
+      [ JObject [("arg", JString "a1"), ("index", JNumber 0), ("label", JString "in")]
+      , JObject [("arg", JString "a3"), ("index", JNumber 1), ("label", JString "in")]
+      ]
+
+quarantineAttackerFixture :: FilePath
+quarantineAttackerFixture = "fixtures/corpus/group-conflict-quarantine-attacker.sexp"
+
 expectedVerdictText :: CheckInput -> String -> String
 expectedVerdictText input identityFreeVerdict =
   case stripPrefix "(verdict " identityFreeVerdict of
@@ -290,14 +376,12 @@ prop_corpusCanonical = once (ioProperty runChecks)
       pure (counterexample path (reencoded === s))
 
 -- ---------------------------------------------------------------------------
--- Numeric-literal canonicalization guard (M3 review item 7)
+-- Numeric-literal canonicalization regression
 -- ---------------------------------------------------------------------------
 
 -- | Every numeric literal ('TNum') reachable in a unit. 'encodeTerm' reprints a
--- 'TNum' verbatim, so a non-canonical @(num 01)@ round-trips byte-exactly and
--- passes 'prop_corpusCanonical' — yet the Lean driver runs at @canon = id@ while
--- the Haskell core canonicalizes, so the two drivers /diverge/ on it. The corpus
--- policy is therefore to carry no @num@ literals at all (see @scripts/gen-corpus.hs@).
+-- 'TNum' verbatim, so this lets the regression assert that its surface variants
+-- remain present rather than being normalized away by fixture generation.
 numLiteralsInUnit :: Unit -> [String]
 numLiteralsInUnit u =
   concatMap numsInRule (unitRules u)
@@ -331,25 +415,21 @@ numLiteralsInUnit u =
           ++ concatMap numsInST prems
           ++ concatMap (numsInST . snd) disch
 
--- | No committed fixture carries any @num@ literal — the executable form of the
--- num-free corpus policy. This is the guard 'prop_corpusCanonical' cannot be:
--- a hand-added @(num 01)@ re-encodes to itself and slips past canonicity, but
--- diverges between the drivers, so it must be rejected structurally here.
-prop_corpusNoNumLiterals :: Property
-prop_corpusNoNumLiterals = once (ioProperty runChecks)
+-- | The production differential anchor deliberately retains non-canonical and
+-- canonical spellings of each value. Removing the variants would make the
+-- cross-driver test pass without exercising the identity boundary.
+prop_numericCanonicalizationAnchor :: Property
+prop_numericCanonicalizationAnchor = once (ioProperty check)
   where
-    paths = stressFixture : map fst corpusGoldens
-    runChecks :: IO Property
-    runChecks = conjoin <$> mapM checkOne paths
-    checkOne path = do
-      s <- readFile path
-      pure $ case decodeCheckInputFile s of
-        Left e -> counterexample (path ++ ": CODEC:" ++ show e) (property False)
+    path = "fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp"
+    check = do
+      bytes <- readFile path
+      pure $ case decodeCheckInputFile bytes of
+        Left e -> counterexample (path ++ ": CODEC:" ++ show e) False
         Right input ->
           let nums = numLiteralsInUnit (inputUnit input)
-           in counterexample
-                (path ++ ": non-policy num literals " ++ show nums)
-                (nums === [])
+           in counterexample (path ++ ": numeric surfaces " ++ show nums) $
+                nums === ["01.0", "1", "+02.00", "2", "1", "2"]
 
 -- | The 120-argument stress fixture: 120 independent leaf arguments, all @in@,
 -- no compiled edges, 120 @justified@ statuses. Checked structurally to avoid a
@@ -371,7 +451,7 @@ prop_stressAccept = once (ioProperty check)
               , counterexample "all in" (property (all ((== LIn) . snd) labels))
               , counterexample "no edges" (edges === [])
               , counterexample "status count" (length statuses === 120)
-              , counterexample "all justified" (property (all ((== Justified) . snd) statuses))
+              , counterexample "all justified" (property (all ((== Published Justified) . snd) statuses))
               ]
 
 -- ---------------------------------------------------------------------------
@@ -381,7 +461,8 @@ prop_stressAccept = once (ioProperty check)
 differentialSpecProps :: [(String, IO Result)]
 differentialSpecProps =
   [ ("differential corpus verdict goldens", quickCheckResult prop_corpusVerdicts)
+  , ("quarantine expected.json keeps public status and checked label indices", quickCheckResult prop_quarantineExpectedJson)
   , ("differential corpus fixtures canonical", quickCheckResult prop_corpusCanonical)
-  , ("differential corpus carries no num literals", quickCheckResult prop_corpusNoNumLiterals)
+  , ("differential numeric canonicalization anchor retains surface variants", quickCheckResult prop_numericCanonicalizationAnchor)
   , ("differential 120-arg stress accept", quickCheckResult prop_stressAccept)
   ]

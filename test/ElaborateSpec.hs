@@ -28,7 +28,7 @@ import Lara.Replay (ReplayError, sourceCheckInput)
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 import Lara.Syntax (parseProgram, parsePolicy)
-import Lara.Wire (Outcome (..), Verdict (..))
+import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..))
 
 -- ---------------------------------------------------------------------------
 -- Shared fixtures
@@ -145,7 +145,10 @@ prop_strictCertificatePresentationAccepts =
                         { verdictLabels = [(0, LIn)]
                         , verdictEdges = []
                         , verdictStatuses =
-                            [(Prop (Pred "holds") [con "safety_invariant", con "D"], Justified)]
+                            [ ( Prop (Pred "holds") [con "safety_invariant", con "D"]
+                              , Published Justified
+                              )
+                            ]
                         }
                     )
             ]
@@ -181,7 +184,7 @@ prop_B_frozenGolden = once $ ioProperty $ do
           { verdictLabels = [(0, LUndec), (1, LUndec)]
           , verdictEdges = [(0, 1), (1, 0)]
           , verdictStatuses =
-              [(improvesMAD, Contested), (notImprovesMAD, Contested)]
+              [(improvesMAD, Published Contested), (notImprovesMAD, Published Contested)]
           }
   pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
     Left e -> counterexample ("B: unexpected ElabError: " ++ elabErrorMessage e) False
@@ -214,7 +217,7 @@ prop_A_frozenGolden = once $ ioProperty $ do
           [ counterexample "grounded labels a1→out, d1/d2/d3→in" $
               verdictLabels outcome === [(0, LOut), (1, LIn), (2, LIn), (3, LIn)]
           , counterexample "claim c1 (improves(M,accuracy,D)) → Defeated" $
-              verdictStatuses outcome === [(improvesMAD, Defeated)]
+              verdictStatuses outcome === [(improvesMAD, Published Defeated)]
           ]
 
 -- ---------------------------------------------------------------------------
@@ -235,8 +238,11 @@ leafPropOf :: String -> [Decl] -> Prop
 leafPropOf l ds =
   head [leafProp lf | DeclLeaf lf <- ds, leafId lf == LeafId l]
 
--- | All thirteen negatives share the parsed A + policy; run them in one IO
--- property. Cases 10–13 pin the four 'Lara.Elaborate'.@validateGroups@ error
+-- | All fifteen negatives share the parsed A + policy; run them in one IO
+-- property. Case 10 pins unique surface argument ids before quarantine
+-- retention\/attack alignment; case 11 pins declared attack endpoints before
+-- resolution; cases 12–15 pin the four
+-- 'Lara.Elaborate'.@validateGroups@ error
 -- paths (R14 on the @.lara@ door), asserting the same checks in the same order
 -- as the wire decoder's @checkGroupInvariants@.
 prop_negatives :: Property
@@ -304,7 +310,19 @@ prop_negatives = once $ ioProperty $ do
             DeclArg a {argConcl = Challenges (ChallengesLeaf (LeafId "no_such_leaf"))}
       breakChallenge d = d
 
-      -- 10–13. duplicate-report-group R14 well-formedness (validateGroups):
+      -- 10. Duplicate surface ArgId: the .lara front door must reject this
+      -- before raw-id retention or attack alignment can observe ambiguity.
+      progDupArgId =
+        withDecls (decls ++ take 1 [DeclArg a | DeclArg a <- decls]) progA
+
+      -- 11. Undeclared attack endpoint: the .lara front door must reject this
+      -- before resolveAttacks can drop it and misalign raw/resolved rows.
+      progDanglingAttack =
+        withDecls
+          (DeclAttack (Rebut (ArgId "no_such_arg") (ArgId "a1")) : decls)
+          progA
+
+      -- 12–15. duplicate-report-group R14 well-formedness (validateGroups):
       -- duplicate group id / repeated member / singleton / undeclared member.
       withGroups gs = withDecls (decls ++ map DeclGroup gs) progA
       progDupGroupId =
@@ -337,6 +355,10 @@ prop_negatives = once $ ioProperty $ do
           isErr "neither a declared leaf" (elab progBadDischarge pol)
       , counterexample "challenge target undeclared" $
           isErr "target is not a declared" (elab progBadChallenge pol)
+      , counterexample "duplicate argument id" $
+          isErr "duplicate argument id" (elab progDupArgId pol)
+      , counterexample "undeclared attack endpoint" $
+          isErr "attack endpoint is not a declared argument" (elab progDanglingAttack pol)
       , counterexample "duplicate group id" $
           isErr "duplicate group id" (elab progDupGroupId pol)
       , counterexample "group repeats member" $

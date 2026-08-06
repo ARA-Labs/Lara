@@ -42,7 +42,14 @@ import Lara.Driver (runCheck)
 import Lara.Mutate
 import Lara.Mutate.Accept (acceptMutants, acceptStructureOk)
 import Lara.Replay (CheckInput)
-import Lara.Wire (Outcome (..), Verdict (..), WireError (..), decodeCheckInputFile)
+import Lara.Wire
+  ( Outcome (..)
+  , PublicStatus (..)
+  , Verdict (..)
+  , WireError (..)
+  , decodeCheckInputFile
+  , isPublished
+  )
 
 suiteRoot :: FilePath
 suiteRoot = "fixtures/mutants"
@@ -202,14 +209,25 @@ verify m = case mutantExpected m of
   ExpectAllContested -> withDecoded $ \verdict ->
     case verdictOutcome verdict of
       Accept labels _ statuses
-        | not (null labels)
+        | all (isPublished . snd) statuses
+            && not (null labels)
             && all ((== LUndec) . snd) labels
             && not (null statuses)
-            && all ((== Contested) . snd) statuses ->
+            && all ((== Published Contested) . snd) statuses ->
             pure ()
       outcome -> bad ("expected all-undec/all-contested accept, got " ++ describe outcome)
+  ExpectEvidenceBlocked -> withInputVerdict $ \input verdict ->
+    if acceptStructureOk (mutantOp m) ExpectEvidenceBlocked input verdict
+      then pure ()
+      else
+        bad
+          ( "accept-family structural check failed: expected an accept whose "
+              ++ "queried claim is evidence-blocked with conditional status "
+              ++ "justified (spec §4.3, issue #76), got "
+              ++ describe (verdictOutcome verdict)
+          )
   ExpectPrimaryStatus status -> withInputVerdict $ \input verdict ->
-    if acceptStructureOk (mutantOp m) status input verdict
+    if acceptStructureOk (mutantOp m) (ExpectPrimaryStatus status) input verdict
       then pure ()
       else
         bad

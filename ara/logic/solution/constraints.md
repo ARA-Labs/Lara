@@ -127,15 +127,12 @@ disagreement; dependent claims surface as `gap`).
   remain **R1 / R12 / R10**; S1 is an accepted strict-path witness, not a
   remapping of that M4a rejection trio.
 
-- **Both drivers diverge only on non-canonical numeric literals (from O15).** The Haskell core
-  normalizes numbers via `canonNum` (`Lara.Prop.nfTerm`) while the Lean driver runs at
-  `canon = id` (a documented deferred extension point in `lean/Lara/Driver.lean`). A unit
-  carrying a **non-canonical numeric literal** can therefore make the two drivers disagree
-  byte-for-byte. Both the M3 conformance corpus and the M4a worked-example anchors avoid num
-  literals, and this is now enforced by two independent no-num-literal differential properties
-  (`DifferentialSpec`, over the fixtures and the 9 `example.core.sexp`). When adding differential
-  fixtures: avoid numeric literals, or use only already-canonical decimals; if the two drivers
-  ever disagree, check for a num literal before suspecting a checker bug.
+- **Both production drivers share `canonNum` (O15 resolved 2026-08-05).** Haskell
+  `Lara.Prop.nfTerm` and Lean `Lara.Driver.dcanon` now normalize numeric literals with the same
+  function. `group-quarantine-numeric-multi-blocked.sexp` deliberately mixes canonical and
+  non-canonical spellings in a case where identity canonicalization would publish two false
+  `justified` statuses; `DifferentialSpec` and `scripts/differential.sh` pin the corrected
+  byte-identical `evidence-blocked` verdict. Numeric fixtures no longer require a num-free policy.
 
 - **Result 12's Lean anchor certifies the AST shape, not the concrete parser (from O18, staged).**
   The mechanized `parse ∘ print = id` (`lean/Lara/Presentation.lean`) is over a structured

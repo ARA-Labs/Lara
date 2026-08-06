@@ -18,7 +18,13 @@
 --   * __Fixpoint termination bound.__ The grounded iteration reaches a fixed
 --     point within @|args|@ steps, over random small frameworks — the same
 --     bound as the Lean proof (@grounded_stable@).
-module CheckSpec (checkSpecProps, negMissingConflict) where
+module CheckSpec
+  ( checkSpecProps
+  , negMissingConflict
+    -- * Quarantine fixtures, shared with "BlockedSpec" (spec §4.3, issue #76)
+  , quarantineFixtures
+  , unquarantinedFixtures
+  ) where
 
 import Data.List (nub, sort)
 import Test.QuickCheck
@@ -30,10 +36,14 @@ import Lara.Replay
 import Lara.Strict (SExpr (..))
 import Lara.Wire
   ( Outcome (..)
+  , PublicStatus (..)
   , Verdict (..)
+  , conditionalStatus
+  , decodeCheckInputFile
   , decodeUnit
   , encodeReplayId
   , encodeVerdict
+  , isPublished
   , parseSExpr
   , printSExpr
   )
@@ -119,10 +129,21 @@ rejectionOfUnit unit = case verdictOutcome (runCheck (testCheckInput unit)) of
 
 -- | The four-state status of a query atom in an accepted unit (or 'Nothing' if
 -- the unit is rejected / the atom is not queried).
+--
+-- Under §4.3 quarantine this is the __conditional__ label, not the public
+-- status: see 'blockedOfUnit' (issue #76).
 statusOfUnit :: Unit -> Prop -> Maybe Status
 statusOfUnit unit p = case verdictOutcome (runCheck (testCheckInput unit)) of
-  Accept{verdictStatuses = sts} -> lookup p sts
+  Accept{verdictStatuses = sts} -> conditionalStatus <$> lookup p sts
   Reject{} -> Nothing
+
+-- | The queries whose public status is @evidence-blocked@ (spec §4.3, issue
+-- #76): quarantine edited the program under them, so their four-state label is
+-- only a conditional diagnostic.
+blockedOfUnit :: Unit -> [Prop]
+blockedOfUnit unit = case verdictOutcome (runCheck (testCheckInput unit)) of
+  Accept{verdictStatuses = sts} -> [p | (p, st) <- sts, not (isPublished st)]
+  Reject{} -> []
 
 -- Small AST builders --------------------------------------------------------
 
@@ -715,6 +736,200 @@ prop_groupQuarantineDropsArgAndAttack =
           (statusOfUnit groupQuarantineDropsArgUnit (atom0 "concl" []) === Just Gap)
       ]
 
+-- | __The promotion hazard (spec §4.3, issue #76).__ The mirror image of
+-- 'groupQuarantineDropsArgUnit': here the conflicted leaf backs the
+-- __attacker__, not the target.
+--
+-- @a1@ (rule instance on @e1 : p@) concludes @concl@ and is rebutted by @a2@
+-- (leaf @e2 : base@). @e2@ is grouped with @e3 : q@, so the group is @≢@ and
+-- @e2@ is quarantined — taking @a2@ and its rebut with it. The checker then sees
+-- an /unattacked/ @a1@ and labels @concl@ @justified@: deleting the unavailable
+-- attacker made the claim look stronger than the declared program supports.
+--
+-- @other@ is queried too and is out of the edit's reach, so it must keep its
+-- ordinary status — the blocking rule is directed, not "block everything".
+groupQuarantinePromotionUnit :: Unit
+groupQuarantinePromotionUnit =
+  ( mkUnit
+      [defRule "r" [] [apat0 "p" []] (apat0 "concl" []) []]
+      [Contrary (apat0 "concl" []) (apat0 "base" [])]
+      []
+      [ (LeafId "e1", atom0 "p" [])
+      , (LeafId "e2", atom0 "base" [])
+      , (LeafId "e3", atom0 "q" [])
+      , (LeafId "e4", atom0 "other" [])
+      ]
+      [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+      , (ArgId "a2", SLeaf (LeafId "e2"))
+      , (ArgId "a3", SLeaf (LeafId "e4"))
+      ]
+      [Rebut (ArgId "a2") (ArgId "a1")]
+      [atom0 "concl" [], atom0 "other" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e2", LeafId "e3"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | Quarantining the sole attacker must not promote its target's public status
+-- (spec §4.3, issue #76; Lean @Lara.Blocked.justified_nonpromotion@).
+--
+-- The first two cases pin that the hazard is real — the unit accepts and the
+-- pruned graph really does label @concl@ @justified@ — and the third pins that
+-- the label is published as @evidence-blocked@ rather than as the answer. The
+-- last two are the completeness half: an unrelated claim keeps its ordinary
+-- status, so the directed rule does not block the whole program.
+prop_groupQuarantineNoPromotion :: Property
+prop_groupQuarantineNoPromotion =
+  once $
+    conjoin
+      [ counterexample
+          "accepts: quarantine is not a rejection"
+          (rejectionOfUnit groupQuarantinePromotionUnit === Nothing)
+      , counterexample
+          "the pruned graph would promote the target to justified"
+          (statusOfUnit groupQuarantinePromotionUnit (atom0 "concl" []) === Just Justified)
+      , counterexample
+          "so the target is published evidence-blocked, not justified"
+          (blockedOfUnit groupQuarantinePromotionUnit === [atom0 "concl" []])
+      , counterexample
+          "the unrelated claim is not blocked"
+          (notElem (atom0 "other" []) (blockedOfUnit groupQuarantinePromotionUnit))
+      , counterexample
+          "the unrelated claim keeps its ordinary status"
+          (statusOfUnit groupQuarantinePromotionUnit (atom0 "other" []) === Just Justified)
+      ]
+
+-- | The wire bytes of the hazard verdict: @concl@ prints @evidence-blocked@ in
+-- the @statuses@ section and its conditional label moves to the @conditional@
+-- section, while the unaffected @other@ prints its ordinary status.
+prop_goldenQuarantineBlocked :: Property
+prop_goldenQuarantineBlocked =
+  once $
+    printSExpr (encodeVerdict (runCheck (testCheckInput groupQuarantinePromotionUnit)))
+      === ( "(verdict " ++ testReplayText ++ " accept (labels (0 in) (1 in))"
+              ++ " (edges)"
+              ++ " (statuses (status (atom concl) evidence-blocked)"
+              ++ " (status (atom other) justified))"
+              ++ " (conditional (status (atom concl) justified)))"
+          )
+
+-- | Production-driver regression for ordered multi-query blocking. The
+-- numeric supports deliberately mix surface spellings, so this simultaneously
+-- pins canonical claim support and the blocked / published / blocked ordering
+-- at the public 'runCheck' boundary.
+prop_numericMultiBlockedDriver :: Property
+prop_numericMultiBlockedDriver = once (ioProperty check)
+  where
+    path = "fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp"
+    check = do
+      bytes <- readFile path
+      pure $ case decodeCheckInputFile bytes of
+        Left err -> counterexample (path ++ ": CODEC:" ++ show err) False
+        Right input -> case verdictOutcome (runCheck input) of
+          Reject rejection -> counterexample (path ++ ": " ++ show rejection) False
+          Accept{verdictStatuses = statuses} ->
+            statuses
+              === [ (atom0 "score1" [TNum "1"], EvidenceBlocked Justified)
+                  , (atom0 "other" [], Published Justified)
+                  , (atom0 "score2" [TNum "2"], EvidenceBlocked Justified)
+                  ]
+
+-- | __The lost-edge hazard (spec §4.3, issue #76).__ Quarantine removes an
+-- argument, and with it every attack that named the argument as an endpoint —
+-- but under subargument closure such an attack also carried edges onto /other/
+-- arguments containing the attacked occurrence. Dropping it therefore deletes an
+-- edge between two __retained__ arguments, which is the second, less obvious way
+-- a prune can promote a claim.
+--
+-- The construction has to dodge attack completeness, which is what makes the
+-- case subtle. @aS@ (leaf @La : notk@) undermines @aT@ at its @Lk@ premise;
+-- @aT@ also uses the quarantined @Lq@, so the prune removes @aT@ and the
+-- undermine with it. @aW@ is a /retained/ argument that also contains @SLeaf Lk@
+-- as a premise, so subargument closure gave it an incoming edge from @aS@ too —
+-- and now silently loses it. Completeness does not catch this: it compares whole
+-- conclusions (@notk@ vs @cw@), which are not contraries, so the pruned program
+-- accepts. Attacking a retained argument whose /conclusion/ is @k@ would instead
+-- be rejected as @missing-conflict@ — see 'groupQuarantineLostEdgeCompleteUnit'.
+groupQuarantineLostEdgeUnit :: Unit
+groupQuarantineLostEdgeUnit =
+  ( mkUnit
+      [ defRule "r" [] [apat0 "q" [], apat0 "k" []] (apat0 "concl" []) []
+      , defRule "rw" [] [apat0 "k" []] (apat0 "cw" []) []
+      ]
+      [Contrary (apat0 "k" []) (apat0 "notk" [])]
+      []
+      [ (LeafId "Lq", atom0 "q" [])
+      , (LeafId "Lk", atom0 "k" [])
+      , (LeafId "Lc", atom0 "conflictq" [])
+      , (LeafId "La", atom0 "notk" [])
+      ]
+      [ (ArgId "aT", instD "r" [] [SLeaf (LeafId "Lq"), SLeaf (LeafId "Lk")] [] [])
+      , (ArgId "aW", instD "rw" [] [SLeaf (LeafId "Lk")] [] [])
+      , (ArgId "aS", SLeaf (LeafId "La"))
+      ]
+      [Undermine (ArgId "aS") (ArgId "aT") [StepPremise 1]]
+      [atom0 "cw" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "Lq", LeafId "Lc"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | The same shape with the undermined leaf declared as its own argument, so the
+-- lost edge is one attack completeness /does/ require: the pruned program is
+-- rejected as @missing-conflict@ rather than accepted with a promoted status.
+-- Together with 'groupQuarantineLostEdgeUnit' this pins both halves — when the
+-- lost edge carries a conflict the checker refuses the program, and when it does
+-- not, the blocked set has to catch it.
+groupQuarantineLostEdgeCompleteUnit :: Unit
+groupQuarantineLostEdgeCompleteUnit =
+  groupQuarantineLostEdgeUnit
+    { unitArgs = unitArgs groupQuarantineLostEdgeUnit ++ [(ArgId "aK", SLeaf (LeafId "Lk"))]
+    , unitQueries = [atom0 "k" []]
+    }
+
+-- | Quarantine must not promote a claim by deleting an attack /edge/ rather than
+-- an attack's target (spec §4.3, issue #76). Seeding only the removed arguments
+-- fails this focused property; the corpus differential independently guards the
+-- same retained-to-retained lost-edge path.
+prop_groupQuarantineLostEdge :: Property
+prop_groupQuarantineLostEdge =
+  once $
+    conjoin
+      [ counterexample
+          "accepts: quarantine is not a rejection"
+          (rejectionOfUnit groupQuarantineLostEdgeUnit === Nothing)
+      , counterexample
+          "the pruned graph would promote the argument that lost an edge"
+          (statusOfUnit groupQuarantineLostEdgeUnit (atom0 "cw" []) === Just Justified)
+      , counterexample
+          "so it is published evidence-blocked: it lost an attacker it never declared gone"
+          (blockedOfUnit groupQuarantineLostEdgeUnit === [atom0 "cw" []])
+      , counterexample
+          "a lost edge that carries a conflict is refused by attack completeness"
+          (rejectionOfUnit groupQuarantineLostEdgeCompleteUnit === Just MissingConflict)
+      ]
+
+-- | The units in this module that exercise a §4.3 prune, shared with
+-- "BlockedSpec" so the blocked-set obligations are checked on the same
+-- fixtures the status properties above pin.
+quarantineFixtures :: [(String, Unit)]
+quarantineFixtures =
+  [ ("group-quarantine", groupQuarantineUnit)
+  , ("group-quarantine-drops-arg", groupQuarantineDropsArgUnit)
+  , ("group-quarantine-promotion", groupQuarantinePromotionUnit)
+  , ("group-quarantine-lost-edge", groupQuarantineLostEdgeUnit)
+  ]
+
+-- | Units with no @≢@ group: quarantine prunes nothing, so nothing may be
+-- blocked and their verdict bytes are the pre-#76 ones.
+unquarantinedFixtures :: [(String, Unit)]
+unquarantinedFixtures =
+  [ ("group-consistent", groupConsistentUnit)
+  , ("group3-consistent", group3ConsistentUnit)
+  , ("R10 rebut on leaf occurrence", negR10)
+  , ("missing-conflict", negMissingConflict)
+  ]
+
 -- | A ≡-consistent group of __three__ members admits normally (all @: p@).
 group3ConsistentUnit :: Unit
 group3ConsistentUnit =
@@ -896,6 +1111,10 @@ checkSpecProps =
   , ("check duplicate-report-group R9 stderr message", quickCheckResult prop_groupConflictMessage)
   , ("check duplicate-report-group R13-over-R9 precedence", quickCheckResult prop_groupPrecedenceR13BeatsR9)
   , ("check duplicate-report-group quarantine drops arg+attack", quickCheckResult prop_groupQuarantineDropsArgAndAttack)
+  , ("check quarantined attacker cannot promote its target", quickCheckResult prop_groupQuarantineNoPromotion)
+  , ("check golden evidence-blocked verdict", quickCheckResult prop_goldenQuarantineBlocked)
+  , ("check production driver preserves multi-blocked query positions", quickCheckResult prop_numericMultiBlockedDriver)
+  , ("check quarantine cannot promote by deleting an attack edge", quickCheckResult prop_groupQuarantineLostEdge)
   , ("check duplicate-report-group multi-member and multi-group", quickCheckResult prop_groupMultiMemberAndMultiGroup)
   , ("check mutation base accepts", quickCheckResult prop_mutationBaseAccepts)
   , ("check multi-violation stage priority", quickCheckResult prop_multiViolationPriority)

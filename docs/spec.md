@@ -388,14 +388,71 @@ enforces agreement *within* each declared group by the existing `≡` relation (
   cell fails type check at that occurrence, is excluded from the AF, and the dependent claim
   surfaces as `gap`.
 
-A data conflict is thus *absence of reliable evidence*, not a counter-argument: it can never make a
-claim `justified` (the evidence is gone) and never makes it `contested` or `defeated` (no attack is
-created) — the same gap-not-defeat routing the corpus fixed for unmet mandatory critical questions
-(Section 7). It is neither a typed attack nor a provenance grade, and declaring the conflicting atoms
-`contrary` is not the intended encoding. The check is decidable and local (group membership plus
-`≡`). A policy may escalate the outcome from `quarantine` (the default) to `reject`, making any
-detected conflict a whole-program well-formedness error; the default keeps one corrupted cell from
-rendering the rest of the artifact uncheckable.
+A data conflict is thus *absence of reliable evidence*, not a counter-argument: no attack is
+created, so a conflict never *directly* makes a claim `contested` or `defeated` — the same
+gap-not-defeat routing the corpus fixed for unmet mandatory critical questions (Section 7). It is
+neither a typed attack nor a provenance grade, and declaring the conflicting atoms `contrary` is not
+the intended encoding. The check is decidable and local (group membership plus `≡`). A policy may
+escalate the outcome from `quarantine` (the default) to `reject`, making any detected conflict a
+whole-program well-formedness error; the default keeps one corrupted cell from rendering the rest of
+the artifact uncheckable.
+
+**Quarantine does not publish the smaller graph's label (v0.1, issue #76).** Removing arguments is
+not a weakening operation: grounded status is non-monotonic across graph changes, so if the
+quarantined leaf backed an *attacker*, its target loses a defeater and its label can move
+`contested`/`defeated` → `justified`. Checking the pruned program and reporting its labels as claim
+statuses would therefore let missing evidence make a claim look **stronger**. (An earlier version of
+the paragraph above asserted the opposite — that a conflict "can never make a claim `justified`" —
+which holds only for the claim whose *own* support was quarantined.)
+
+The checker therefore reports conservatively. Let `G` be the declared framework, `F` the checked one
+after the prune, and `B` the forward closure, along `G`'s attack edges, of everything the prune
+touched: every removed argument, and every retained argument that lost an incoming edge (subargument
+closure means a dropped attack can also carry edges onto retained arguments). A queried claim with a
+complete support argument in `B` has public status **`evidence-blocked`**; its four-state label is
+retained in the verdict's `conditional` section as a `CORE-STATUS` diagnostic and is not the answer.
+Claims with no support argument in `B` keep their ordinary four-state status.
+
+The rule is directed, not "block the whole component": grounded labelling reads only a node's
+transitive attackers, so forward reachability is both sound and tight. `lara-core@0.1`'s labelling
+function, its input wire schema, and its rejection classes are unchanged — this is an outer
+reporting layer over the same core verdict. The *verdict* grammar does gain the `evidence-blocked`
+status and the optional `conditional` section (the verdict grammar below), so a consumer that has never heard of
+`evidence-blocked` fails to decode rather than misreading an inflated status; a program with nothing
+quarantined produces exactly the pre-#76 bytes.
+
+#### Verdict grammar (v0.1)
+
+```text
+VERDICT ::= (verdict REPLAY-ID accept
+              (labels (NAT LABEL)*)
+              (edges (NAT NAT)*)
+              (statuses (status ATOM STATUS)*)
+              CONDITIONAL-SEC?)
+          | (verdict REPLAY-ID reject REJECTION)
+CONDITIONAL-SEC ::= (conditional (status ATOM CORE-STATUS)+)
+STATUS ::= CORE-STATUS | evidence-blocked
+CORE-STATUS ::= gap | justified | contested | defeated
+LABEL ::= in | out | undec
+```
+
+The `conditional` entries are exactly the `evidence-blocked` queries, in query
+order. The executable codec grammar, including `REPLAY-ID` and `REJECTION`, is
+defined in `src/Lara/Wire.hs` and mirrored by `lean/Lara/Driver.lean`.
+
+Four results mechanize the layer (`lean/Lara/Blocked.lean`, `lean/Lara/BlockedProgram.lean`):
+`justified_nonpromotion` — a publicly `justified` claim is `justified` in `G`, with the quarantined
+material reinstated, so deletion never manufactured it; `statusC_agree`, its preservation companion —
+an unblocked claim whose complete-support set is the *same* in `F` and `G` keeps its status (the
+equal-support premise is load-bearing: a claim whose own support the prune removed can move
+`justified` → `gap` without being blocked, so blocking is conservative against promotion, not a
+guarantee that nothing changed); `blocking_of_blockedSeed`, which discharges the three
+obligations for the declared-index frameworks and seed the drivers compute; and
+`checked_production_justified_nonpromotion_of_not_blocked`, which maps the compact
+`Compile.checkedAF`, `completeClaimFor` support, and public unblocked decision through the
+retained-index embedding and obtains its AF lists from the successful `checkUnit` call, instantiating
+non-promotion for the shipped accept path (issue #80). The cross-driver differential suite carries
+conformance evidence that Haskell mirrors these proved definitions.
 
 **Admission as context construction (v0.1-frozen).** Admission is the total function that builds
 the checking context of the §6.1 judgment:
@@ -410,6 +467,11 @@ A `quarantine`d leaf (by table or by group conflict) simply has no `Gamma` entry
 it fails the §6.1 leaf rule at that occurrence with a located diagnostic and routes to `gap` —
 admission is enforced *by the typing judgment*, not by a separate check. A `reject`ed leaf aborts
 the program with rejection class R8/R9 (§10.1) before any term is checked.
+
+Routing the *dependent* claim to `gap` is only half the story: the same prune also removes any
+attacker built on the leaf, which can move an *unrelated* claim's label. Public status is therefore
+computed by the conservative rule above — quarantine-affected claims report `evidence-blocked`
+rather than the pruned graph's label.
 
 ### 4.4 Instantiation in programs
 

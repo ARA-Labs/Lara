@@ -475,3 +475,16 @@ entries:
   - "Recorded publication as an AI action only: commit d5ffa0f and stacked PR #75 publish the N107 plan review but do not constitute researcher approval of O41/O42."
   - "Used PR #74's branch as #75's base because the revised plan depends on #74 and a main-based PR would duplicate its commits; recorded retargeting #75 after #74 merges as an open thread."
   - "No new research event, crystallization, logic revision, or stale-state transition occurred."
+- turn: "2026-08-05_001#1"
+  notes:
+    - "Routed the user's production-proof finding as question N108, with the prior abstract-proof-plus-tests position as explicit dead end N109: CLAUDE.md distinguishes conformance from soundness, so the missing compact-AF bridge was a real blocker, not documentation debt."
+    - "N110 records the implementation pivot from derived-term identity to structural alignment. Duplicate declarations can share support terms, so re-identifying retained values by equality would not prove that the driver checked the same AF; retainedView/selectAligned make exactness and subset witnesses constructive."
+    - "Crystallized O43→C25 via artifact commitment: the shipped Driver now constructs the theorem's exact retained lists and AxCheck audits the fully checker-instantiated wrapper. Status supported because the claim is a sorry-free theorem with a passing axiom audit, not because differential tests pass."
+    - "Revised C21 rather than merely appending evidence. Its previous 'dependent claim can only become gap, never justified' wording was overbroad: quarantine can delete an attacker and promote a different claim internally. C21 now covers missing-evidence routing for own support; C25 covers public non-promotion for the full influence closure."
+    - "Crystallized O44→H08 via artifact commitment because both Haskell and Lean production code now depend on aligned raw/resolved selection. This is a reusable construction rule, not a one-off proof lemma."
+    - "Kept PR #79 and issue #80 as open external threads. The user supplied findings but did not authorize commit/push/PR editing or issue closure; moreover the remote PR must not claim the local theorem before the branch carries it."
+- turn: "2026-08-05_001#2"
+  notes:
+    - "No new research node, claim, heuristic, or observation: this turn was publication and review follow-up after the user explicitly authorized commit/push/reply. Per the skip rule, git operations themselves are session-only actions."
+    - "Updated the existing session rather than creating a second same-day session because this is the direct operational continuation of turn 1. The earlier external-authority open thread is now resolved; current state is PR awaiting re-review and issue #80 awaiting merge."
+    - "Did not self-resolve reviewer threads. Individual evidence replies and a top-level summary were posted; reviewer resolution remains the independent review signal."

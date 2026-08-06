@@ -69,10 +69,12 @@ recorded in `../ara/evidence/status/mechanization_status.md`.
 - A constructor's argument list is a bespoke `Terms` type mutual with `Term`
   (Lean's `deriving DecidableEq` doesn't recurse through `List`, but handles
   mutual inductives — and a mechanized AST wants derived decidable equality).
-- The literal canonicalizer is an explicit parameter `canon : String → String`
-  with an idempotence hypothesis, not a port of Haskell's `canonNum` string
-  surgery: idempotence is the only property the structural metatheory needs
-  (spec §3.2), so modeling it abstractly keeps the development axiom-free.
+- The structural metatheory keeps the literal canonicalizer as an explicit
+  parameter `canon : String → String` with an idempotence hypothesis, because
+  idempotence is the only property those proofs need (spec §3.2). The executable
+  `Lara.canonNum` is a port of Haskell's numeric canonicalizer, and the production
+  Lean driver instantiates the parameter with it so both drivers share one
+  numeric identity relation.
 
 ## Next
 

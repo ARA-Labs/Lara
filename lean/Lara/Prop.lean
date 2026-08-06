@@ -18,16 +18,49 @@ Design notes (faithful to the Haskell):
   through `List`, but supports mutual inductives directly — and a mechanized AST
   wants derived `DecidableEq` (it *is* the `≡`-decidability the spec claims). `Terms`
   is a plain cons-list; the Haskell `[Term]` maps to it directly.
-* The literal canonicalizer is an explicit parameter `canon : String → String`, and
-  idempotence lemmas take an explicit hypothesis `∀ s, canon (canon s) = canon s`,
-  rather than porting Haskell's `canonNum` string surgery. The only property the
-  *structural* metatheory needs from literal canonicalization is idempotence (spec
-  §3.2). Modeling it abstractly keeps this development axiom-free.
+* The structural definitions retain an explicit literal canonicalizer parameter
+  `canon : String → String`, and idempotence lemmas take the corresponding
+  hypothesis `∀ s, canon (canon s) = canon s`. The executable `canonNum` below is
+  the byte-for-byte driver canonicalizer shared with Haskell; keeping the core
+  parameterized lets the metatheory state exactly which property it consumes.
 * `canonId = id` in the Haskell (Unicode NFC is the deferred extension point), so
   constructor/predicate names are not normalized here either.
 -/
 
 namespace Lara
+
+/-! ## Executable decimal canonicalization
+
+This is the Lean counterpart of `Lara.Prop.canonNum`. It deliberately mirrors
+the Haskell function even on malformed input: strip one leading sign, normalize
+the portion before the first dot, trim trailing zeroes after that dot, and make
+zero unsigned. The wire decoder validates decimal syntax separately, but total
+agreement here keeps the two production drivers on one identity relation. -/
+
+private def stripLeadingZeros (chars : List Char) : List Char :=
+  match chars.dropWhile (fun c => c == '0') with
+  | [] => ['0']
+  | rest => rest
+
+private def stripTrailingZeros (chars : List Char) : List Char :=
+  (chars.reverse.dropWhile (fun c => c == '0')).reverse
+
+private def canonUnsigned (chars : List Char) : List Char :=
+  let (intPart, dotFrac) := chars.span (fun c => c != '.')
+  let normalizedInt := stripLeadingZeros intPart
+  let frac := match dotFrac with
+    | '.' :: rest => stripTrailingZeros rest
+    | _ => []
+  if frac.isEmpty then normalizedInt else normalizedInt ++ '.' :: frac
+
+/-- Canonicalize a decimal literal exactly as Haskell `Lara.Prop.canonNum`. -/
+def canonNum (s : String) : String :=
+  match s.toList with
+  | '+' :: rest => String.ofList (canonUnsigned rest)
+  | '-' :: rest =>
+      let normalized := canonUnsigned rest
+      if normalized == ['0'] then "0" else String.ofList ('-' :: normalized)
+  | chars => String.ofList (canonUnsigned chars)
 
 /- Ground terms and their argument lists (mutual so `deriving` works through the
 recursion). `Term` mirrors `Lara.Term` (`TNum`/`TStr`/`TCon`); `Terms` is the

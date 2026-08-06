@@ -69,6 +69,8 @@ import Lara.Replay (CheckInput, inputReplayId)
 import Lara.Strict (SExpr (..))
 import Lara.Wire
   ( Outcome (..)
+  , PublicStatus (..)
+  , isPublished
   , Verdict (..)
   , WireError (..)
   , decodeCheckInputFile
@@ -259,15 +261,19 @@ classMatches e outcome = case e of
   ExpectClass c -> outcome == Reject (RejectClass c)
   ExpectIncompleteArgument -> outcome == Reject IncompleteArgument
   ExpectAllContested -> allContested outcome
+  ExpectEvidenceBlocked -> evidenceBlocked outcome
   ExpectPrimaryStatus s -> primaryStatus outcome == Just s
 
 -- | The actual outcome in manifest spelling (for the report's @actual@ column).
 actualText :: Outcome -> String
 actualText outcome = case outcome of
   Reject r -> "reject-" ++ rejectionText r
+  -- An @evidence-blocked@ query has no four-state public status (spec §4.3,
+  -- issue #76), so it is its own class and never matches an expected status.
   Accept _ _ statuses
+    | evidenceBlocked outcome -> "accept-evidence-blocked"
     | allContested outcome -> "accept-all-contested"
-    | [(_, st)] <- statuses -> "accept-" ++ statusText st
+    | [(_, Published st)] <- statuses -> "accept-" ++ statusText st
     | otherwise -> "accept-other"
 
 rejectionText :: Rejection -> String
@@ -281,12 +287,19 @@ allContested outcome = case outcome of
     not (null labels)
       && all ((== LUndec) . snd) labels
       && not (null statuses)
-      && all ((== Contested) . snd) statuses
+      && all ((== Published Contested) . snd) statuses
+  _ -> False
+
+-- | The verdict accepts and some queried claim's public status is
+-- @evidence-blocked@ (spec §4.3, issue #76).
+evidenceBlocked :: Outcome -> Bool
+evidenceBlocked outcome = case outcome of
+  Accept _ _ statuses -> any (not . isPublished . snd) statuses
   _ -> False
 
 primaryStatus :: Outcome -> Maybe Status
 primaryStatus outcome = case outcome of
-  Accept _ _ [(_, st)] -> Just st
+  Accept _ _ [(_, Published st)] -> Just st
   _ -> Nothing
 
 -- | #36: the verdict carries the input's replay identity, and re-checking is
@@ -343,6 +356,9 @@ ablationBucket e = case e of
   ExpectClass _ -> UnchangedUnderAblations -- R1/R3/…: rules behind no flag
   ExpectCodecReject -> UnchangedUnderAblations
   ExpectAllContested -> UnchangedUnderAblations
+  -- Blocking is decided at the driver boundary from the §4.3 prune, behind no
+  -- ablation flag, and the mutant accepts either way (issue #76).
+  ExpectEvidenceBlocked -> UnchangedUnderAblations
   ExpectPrimaryStatus _ -> UnchangedUnderAblations
 
 -- | The named ablation runs the script and tests iterate, each with the

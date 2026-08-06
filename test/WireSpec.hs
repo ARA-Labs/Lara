@@ -339,6 +339,13 @@ genLabel = elements [LIn, LOut, LUndec]
 genStatus :: Gen Status
 genStatus = elements [Gap, Justified, Contested, Defeated]
 
+-- | A public status: ordinary, or @evidence-blocked@ over a conditional label
+-- (spec §4.3, issue #76). Blocked entries are generated at roughly one in three
+-- so the conditional section is exercised on most multi-query verdicts.
+genPublicStatus :: Gen PublicStatus
+genPublicStatus =
+  frequency [(2, Published <$> genStatus), (1, EvidenceBlocked <$> genStatus)]
+
 genRejection :: Gen Rejection
 genRejection =
   oneof
@@ -362,7 +369,11 @@ genVerdict = do
             else
               listOf
                 ((,) <$> choose (0, n - 1) <*> choose (0, n - 1))
-        statuses <- listOf ((,) <$> genProp <*> genStatus)
+        -- Some queries are @evidence-blocked@ (spec §4.3, issue #76), so the
+        -- round-trip covers the conditional section. Blockedness lives inside
+        -- the status, so the generator cannot construct an inconsistent
+        -- statuses/blocked pairing even by accident.
+        statuses <- listOf ((,) <$> genProp <*> genPublicStatus)
         pure (Verdict replayId (Accept lbls edges statuses))
     , Verdict replayId . Reject <$> genRejection
     ]
@@ -588,7 +599,7 @@ prop_replayEnvelopeGoldenVectors =
     acceptVerdict =
       Verdict
         goldenReplayId
-        (Accept [(0, LIn)] [] [(Prop (Pred "p") [], Justified)])
+        (Accept [(0, LIn)] [] [(Prop (Pred "p") [], Published Justified)])
     rejectVerdict = Verdict goldenReplayId (Reject (RejectClass R13))
 
 prop_replayEnvelopeMalformedMatrix :: Bool
@@ -705,6 +716,12 @@ prop_verdictGoldenVectors =
     , printSExpr (encodeVerdict rejectMissing)
         == rejectText MissingConflict
     , decodeVerdict (encodeVerdict rejectMissing) == Right rejectMissing
+    , printSExpr (encodeVerdict blockedV) == blockedText
+    , decodeVerdict (encodeVerdict blockedV) == Right blockedV
+    , parseSExpr blockedText == Right (encodeVerdict blockedV)
+    , printSExpr (encodeVerdict twoBlockedV) == twoBlockedText
+    , decodeVerdict (encodeVerdict twoBlockedV) == Right twoBlockedV
+    , parseSExpr twoBlockedText == Right (encodeVerdict twoBlockedV)
     ]
   where
     acceptV =
@@ -712,9 +729,49 @@ prop_verdictGoldenVectors =
         Accept
           [(0, LIn), (1, LOut), (2, LUndec)]
           [(0, 1), (0, 2)]
-          [ (Prop (Pred "p") [], Justified)
-          , (Prop (Pred "q") [TNum "2"], Defeated)
+          [ (Prop (Pred "p") [], Published Justified)
+          , (Prop (Pred "q") [TNum "2"], Published Defeated)
           ]
+    -- Spec §4.3 / issue #76: @p@'s support could have been affected by
+    -- quarantine, so its public status is @evidence-blocked@ and the four-state
+    -- label it would have had moves to the @conditional@ section. @q@ is out of
+    -- reach of the edit and keeps its ordinary status.
+    blockedV =
+      Verdict goldenReplayId $
+        Accept
+          [(0, LIn), (1, LOut), (2, LUndec)]
+          [(0, 1), (0, 2)]
+          [ (Prop (Pred "p") [], EvidenceBlocked Justified)
+          , (Prop (Pred "q") [TNum "2"], Published Defeated)
+          ]
+    blockedText =
+      "(verdict " ++ goldenReplayText
+        ++ " accept (labels (0 in) (1 out) (2 undec)) "
+        ++ "(edges (0 1) (0 2)) "
+        ++ "(statuses (status (atom p) evidence-blocked) "
+        ++ "(status (atom q (num 2)) defeated)) "
+        ++ "(conditional (status (atom p) justified)))"
+    -- Two blocked queries pin the positional invariant: the conditional
+    -- projection is in query order, including when an ordinary status sits
+    -- between the blocked entries.
+    twoBlockedV =
+      Verdict goldenReplayId $
+        Accept
+          [(0, LIn), (1, LOut), (2, LUndec)]
+          [(0, 1), (0, 2)]
+          [ (Prop (Pred "p") [], EvidenceBlocked Justified)
+          , (Prop (Pred "q") [TNum "2"], Published Defeated)
+          , (Prop (Pred "r") [], EvidenceBlocked Contested)
+          ]
+    twoBlockedText =
+      "(verdict " ++ goldenReplayText
+        ++ " accept (labels (0 in) (1 out) (2 undec)) "
+        ++ "(edges (0 1) (0 2)) "
+        ++ "(statuses (status (atom p) evidence-blocked) "
+        ++ "(status (atom q (num 2)) defeated) "
+        ++ "(status (atom r) evidence-blocked)) "
+        ++ "(conditional (status (atom p) justified) "
+        ++ "(status (atom r) contested)))"
     acceptText =
       "(verdict " ++ goldenReplayText
         ++ " accept (labels (0 in) (1 out) (2 undec)) "
@@ -892,10 +949,41 @@ prop_verdictMalformedMatrix = all isLeft (map decodeVerdict malformed)
       , SList [SAtom "verdict", SAtom "accept", labelsSec, edgesSec, SList [SAtom "statuses", SList [SAtom "status", apatAtomP, SAtom "bogus"]]] -- bad status
       , SList [SAtom "verdict", SAtom "accept", labelsSec, edgesSec, SList [SAtom "statuses", SList [SAtom "status", apatAtomP]]] -- status short
       , SList [SAtom "verdict", SAtom "accept", labelsSec, edgesSec, SList [SAtom "statuses", SList [SAtom "bogus", apatAtomP, SAtom "gap"]]] -- status entry tag
+      -- The rows above omit the replay-id, so they die on the outer shape and
+      -- never reach the section decoders. These carry a well-formed replay-id so
+      -- the section checks are the thing under test — including the four
+      -- rejection paths the conditional section adds (spec §4.3, issue #76).
+      , accept [labelsSec, edgesSec] -- accept short
+      , accept [labelsSec, edgesSec, statusesSec, conditionalSec, conditionalSec] -- accept long
+      , accept [labelsSec, edgesSec, blockedStatusesSec] -- evidence-blocked, no conditional section
+      , accept [labelsSec, edgesSec, statusesSec, conditionalSec] -- conditional entry, nothing blocked
+      , accept [labelsSec, edgesSec, blockedStatusesSec, SList [SAtom "conditional"]] -- present but empty
+      , accept [labelsSec, edgesSec, blockedStatusesSec, otherConditionalSec] -- conditional names another query
+      , accept [labelsSec, edgesSec, blockedStatusesSec, SList [SAtom "bogus", statusEntry "p" "gap"]] -- section tag
+      , accept [labelsSec, edgesSec, blockedStatusesSec, SList [SAtom "conditional", SList [SAtom "status", apatAtomP, SAtom "evidence-blocked"]]] -- conditional label not four-state
+      -- With multiple blocked queries the conditional projection is positional,
+      -- not a lookup table: reversal, truncation, and a duplicate\/extra suffix
+      -- are all non-canonical.
+      , accept [labelsSec, edgesSec, twoBlockedStatusesSec, SList [SAtom "conditional", statusEntry "q" "defeated", statusEntry "p" "gap"]]
+      , accept [labelsSec, edgesSec, twoBlockedStatusesSec, SList [SAtom "conditional", statusEntry "p" "gap"]]
+      , accept [labelsSec, edgesSec, twoBlockedStatusesSec, SList [SAtom "conditional", statusEntry "p" "gap", statusEntry "q" "defeated", statusEntry "q" "defeated"]]
       ]
+    accept sections =
+      SList ([SAtom "verdict", encodeReplayId goldenReplayId, SAtom "accept"] ++ sections)
     labelsSec = SList [SAtom "labels"]
     edgesSec = SList [SAtom "edges"]
-    statusesSec = SList [SAtom "statuses"]
+    statusesSec = SList [SAtom "statuses", statusEntry "p" "gap"]
+    blockedStatusesSec = SList [SAtom "statuses", statusEntry "p" "evidence-blocked"]
+    twoBlockedStatusesSec =
+      SList
+        [ SAtom "statuses"
+        , statusEntry "p" "evidence-blocked"
+        , statusEntry "q" "evidence-blocked"
+        ]
+    conditionalSec = SList [SAtom "conditional", statusEntry "p" "gap"]
+    otherConditionalSec = SList [SAtom "conditional", statusEntry "q" "gap"]
+    statusEntry name value =
+      SList [SAtom "status", SList [SAtom "atom", SAtom name], SAtom value]
     apatAtomP = SList [SAtom "atom", SAtom "p"]
 
 -- | Whole-file text and low-level Unit grammar rejections.
@@ -940,7 +1028,7 @@ prop_leanDriverAcceptGolden =
     expected =
       Verdict
         goldenReplayId
-        (Accept [(0, LUndec)] [(0, 0)] [(Prop (Pred "p") [], Contested)])
+        (Accept [(0, LUndec)] [(0, 0)] [(Prop (Pred "p") [], Published Contested)])
 
 -- | Fixture: the missing-self-edge unit of the same file
 -- ('missingSelfEdgeUnit') — no attack covers the declared contrary. Pins the

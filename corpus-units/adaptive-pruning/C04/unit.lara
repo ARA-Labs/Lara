@@ -25,7 +25,7 @@
 #     enter as premise leaves (e4/e5), the certificate names those slots and carries the drop as
 #     the exact fraction 119/500, and the backend recomputes (50 - 38.1) / 50 = 119/500 = 0.238
 #     >= 0.05 in exact rational arithmetic. Numerals use CANONICAL spellings (`50`, not `50.0`)
-#     per the Family-10 exception to the constants-only rule (canon = id caveat).
+#     per the Family-10 exception to the constants-only presentation convention.
 #   * c04a is intentionally NOT statused: the unit's queried claim stays the headline c04 (one
 #     claim-support instance per unit, m0/sample.tsv grain). The strict step is measured through
 #     the compiled AF (a1 in) and the #56 aggregator's load-bearing scan, not through a second

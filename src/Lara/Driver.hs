@@ -7,7 +7,9 @@
 -- ('Lara.Runtime.runtimeAF' — the cached-adjacency production backend, whose
 -- verdict is byte-identical to the un-cached 'Lara.Compile.checkedAF' path),
 -- the compiled closure edges in ascending order,
--- and one four-state status per query atom; on rejection it maps the located
+-- and one public status per query atom: an ordinary four-state answer, or
+-- @evidence-blocked@ with the checked graph's label retained only as a
+-- conditional diagnostic. On rejection it maps the located
 -- 'Lara.Check.UnitError' to the wire class ('Lara.Diagnostics.rejectionOf').
 --
 -- The @lara@ CLI ("app/Main.hs") is a thin shell over this: it adds file I/O,
@@ -15,13 +17,18 @@
 -- codec\/usage).
 module Lara.Driver
   ( buildGamma
+    -- * The §4.3 prune, re-exported from "Lara.Blocked"
   , quarantinedLeaves
   , groupConsistent
+  , supportUsesLeaf
+  , quarantineUnit
+  , Prune
+  , prune
+  , pruneDeclared
+  , pruneChecked
   , groupConflictReject
   , groupConflictMessage
   , rejectionDiagnostics
-  , supportUsesLeaf
-  , quarantineUnit
   , buildCertOk
   , buildAccept
   , runCheck
@@ -32,19 +39,27 @@ module Lara.Driver
 import Data.List (intercalate)
 
 import Lara.AST
-  ( Attack (..)
-  , ArgId
-  , BackendId (..)
+  ( BackendId (..)
   , Cert (..)
   , DupGroup (..)
   , GroupConflictMode (..)
   , GroupId (..)
   , LeafId (..)
-  , SupportTerm (..)
   , TheoryDigest (..)
   , RejectClass (..)
   , Rejection (..)
   , Unit (..)
+  )
+import Lara.Blocked
+  ( Prune
+  , blockedQueries
+  , groupConsistent
+  , prune
+  , pruneChecked
+  , pruneDeclared
+  , quarantineUnit
+  , quarantinedLeaves
+  , supportUsesLeaf
   )
 import Lara.Check (CheckConfig, CheckedUnit, checkUnitWith, cuNodes, cuProgram, fullConfig)
 import Lara.Replay
@@ -64,12 +79,12 @@ import Lara.Diagnostics
   )
 import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
 import Lara.Runtime (runtimeAF)
-import Lara.Prop (Prop, equiv)
+import Lara.Prop (Prop)
 import Lara.SupportTerm (CertOk)
 import qualified Lara.Strict as St
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.RA as RA
-import Lara.Wire (Outcome (..), Verdict (..))
+import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..))
 
 -- | Run replay preflight, the duplicate-report-group boundary check, and the
 -- checker, retaining the validated identity. Precedence mirrors the spec's
@@ -114,10 +129,11 @@ runCheckLocatedWith cfg input =
               , Just (LocatedRejection (RejectClass R9) StageGroupBoundary (groupConflictConstituent unit))
               )
           | otherwise ->
-              let checked = quarantineUnit unit
+              let pruned = prune unit
+                  checked = pruneChecked pruned
                in case checkUnitWith cfg (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
                     Left err -> (verdict (Reject (rejectionOf err)), Just (locate err))
-                    Right accepted -> (verdict (buildAccept checked accepted), Nothing)
+                    Right accepted -> (verdict (buildAccept pruned accepted), Nothing)
 
 -- | The located constituent of a replay-preflight (R13) failure: the
 -- backend-selection failures locate at the replay envelope (the ground truth
@@ -143,65 +159,6 @@ groupConflictConstituent unit =
 -- Lean @buildGamma@).
 buildGamma :: [(LeafId, Prop)] -> LeafId -> Maybe Prop
 buildGamma leaves l = lookup l leaves
-
--- | A declared duplicate-report group is @≡@-consistent iff its members'
--- propositions are pairwise @≡@ (spec §4.3). Because @≡@ is transitive, this is
--- exactly "every member @≡@ the first member". Both front doors validate group
--- well-formedness before a 'Unit' reaches here (wire "Lara.Wire".@checkGroupInvariants@
--- / @.lara@ "Lara.Elaborate".@validateGroups@), so every member normally resolves;
--- as defense-in-depth an /unresolvable/ member is treated as a conflict rather
--- than silently skipped, so a dangling member can never degrade a group to a
--- vacuously-consistent singleton and evade R9. The empty/singleton cases are
--- vacuously consistent.
-groupConsistent :: Unit -> DupGroup -> Bool
-groupConsistent unit (DupGroup _ members) =
-  case mapM (`lookup` unitLeaves unit) members of
-    Nothing -> False -- a member with no Γ entry cannot be shown ≡-consistent
-    Just [] -> True
-    Just (p : ps) -> all (equiv p) ps
-
--- | The leaf ids quarantined by a @≢@ duplicate-report group (spec §4.3): every
--- member of every inconsistent group leaves @Gamma@.
-quarantinedLeaves :: Unit -> [LeafId]
-quarantinedLeaves unit =
-  [ l
-  | g <- unitGroups unit
-  , not (groupConsistent unit g)
-  , l <- dgMembers g
-  ]
-
--- | Whether a support term uses any of the given leaves anywhere in its tree
--- (spec §4.3 "any argument using a conflicted cell"): the principal leaf, or a
--- premise\/discharge sub-term's leaf.
-supportUsesLeaf :: [LeafId] -> SupportTerm -> Bool
-supportUsesLeaf qs = go
-  where
-    go (SLeaf l) = l `elem` qs
-    go (SRule _ _ premises discharges _ _) =
-      any go premises || any (go . snd) discharges
-
--- | The unit the checker actually sees under §4.3 quarantine: every argument
--- that uses a quarantined leaf is removed (its claim loses that support and
--- surfaces as @gap@, never a rejection), together with every attack whose
--- endpoints no longer resolve, and the quarantined leaves themselves leave the
--- context. When no group conflicts, this is the identity.
-quarantineUnit :: Unit -> Unit
-quarantineUnit unit =
-  let quarantined = quarantinedLeaves unit
-      keptArgs = [pair | pair@(_, t) <- unitArgs unit, not (supportUsesLeaf quarantined t)]
-      keptIds = map fst keptArgs
-      keptAttacks = [k | k <- unitAttacks unit, all (`elem` keptIds) (attackEndpoints k)]
-   in unit
-        { unitArgs = keptArgs
-        , unitAttacks = keptAttacks
-        , unitLeaves = [entry | entry@(l, _) <- unitLeaves unit, l `notElem` quarantined]
-        }
-  where
-    attackEndpoints :: Attack -> [ArgId]
-    attackEndpoints k = case k of
-      Rebut w u -> [w, u]
-      Undercut w u _ -> [w, u]
-      Undermine w u _ -> [w, u]
 
 -- | Whether the policy escalates a detected group conflict to a whole-program
 -- data-integrity rejection (R9, spec §4.3): the mode is 'RejectOnConflict' and
@@ -265,14 +222,31 @@ toStrictDigest :: TheoryDigest -> St.TheoryDigest
 toStrictDigest (TheoryDigest s) = St.TheoryDigest s
 
 -- | Read the accept outcome off an accepted unit (Lean @buildAccept@).
-buildAccept :: Unit -> CheckedUnit -> Outcome
-buildAccept unit accepted =
+--
+-- Two units, because §4.3 quarantine makes them differ: @declared@ is the unit
+-- as submitted and @checked@ is 'quarantineUnit'\'s reduced program, the one the
+-- labels, edges, and statuses are computed on. When the two differ, the
+-- statuses are __conditional__ — grounded status is non-monotonic across graph
+-- changes, so a deleted attacker can inflate its target. 'blockedQueries' names
+-- the queries that could have moved; they are reported @evidence-blocked@ and
+-- their conditional label is retained as a diagnostic (issue #76; metatheory in
+-- @lean\/Lara\/Blocked.lean@). With nothing quarantined the two units are equal,
+-- the blocked list is empty, and this is the pre-#76 outcome exactly.
+buildAccept :: Prune -> CheckedUnit -> Outcome
+buildAccept pruned accepted =
   Accept
     { verdictLabels = [(i, labelC af i) | i <- [0 .. n - 1]]
     , verdictEdges = [(i, j) | i <- [0 .. n - 1], j <- [0 .. n - 1], afAttack af i j]
     , verdictStatuses =
-        [(p, statusC af (completeClaimFor (cuNodes accepted) p)) | p <- unitQueries unit]
+        [ (p, publicStatus p (statusC af (completeClaimFor (cuNodes accepted) p)))
+        | p <- queries
+        ]
     }
   where
     af = runtimeAF (cuProgram accepted)
     n = length (afArgs af)
+    queries = unitQueries (pruneDeclared pruned)
+    blocked = blockedQueries pruned (cuNodes accepted) queries
+    publicStatus p
+      | p `elem` blocked = EvidenceBlocked
+      | otherwise = Published

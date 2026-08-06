@@ -355,9 +355,10 @@ checkProgramDetailed cfg pI gamma certOk dp args atts =
 -- __Precondition (R14).__ Every attack endpoint must name a declared argument.
 -- Under R14 each 'lookup' succeeds, so the 'mapMaybe' drops nothing: it is the
 -- total id→term map, not a lenient filter that silently discards ill-formed
--- attacks. The sole sanctioned 'Unit' producer, 'Lara.Wire.decodeUnit',
--- discharges R14 up front (its @checkArgInvariants@ rejects a dangling endpoint
--- as an R14 __codec__ error), so every decoded unit satisfies the precondition —
+-- attacks. Both sanctioned 'Unit' producers discharge R14 up front:
+-- 'Lara.Wire.decodeUnit' rejects a dangling endpoint as an R14 codec error, and
+-- 'Lara.Elaborate.elaborate' rejects it as an elaboration error. Thus every
+-- admitted unit satisfies the precondition —
 -- this is the exact Haskell counterpart of the Lean driver's @resolveAttacks@
 -- (@Except String@). A 'Unit' that violates R14 is outside the 'checkUnit'
 -- contract below; in Lean such a unit is unrepresentable, since @Lara.Unit@

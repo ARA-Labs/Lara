@@ -27,6 +27,7 @@ Instead, per the project's own decision, the empirical signal that grounds each 
 | [results/prop_layer.md](results/prop_layer.md) | `cabal build`/`cabal test` on `Lara.Prop` | C01 | Build + property-suite run record for carve-out layer 1 |
 | [results/executable_nd_adapter.md](results/executable_nd_adapter.md) | Lean/Haskell ND adapter gates | C03, C05 | Exact replay adequacy, proved Atom codec inverse, shared golden vectors, and full gate results |
 | [results/strict_certificate_frontend.md](results/strict_certificate_frontend.md) | S1 `.lara` → elaborate → `nd@1` replay + both-driver differential | C03, C05 | Policy-carried theory and surface assurance reach an accepted, justified verdict; missing theory rejects R13 |
+| [results/numeric_quarantine_parity.md](results/numeric_quarantine_parity.md) | Real Haskell/Lean drivers + full regression gates | C12, C25 | Shared `canonNum` closes false-justified numeric divergence; two blocked queries retain positional byte parity |
 
 ## Proofs
 | File | Source | Claims | Description |
@@ -34,6 +35,7 @@ Instead, per the project's own decision, the empirical signal that grounds each 
 | [proofs/backend_replacement.md](proofs/backend_replacement.md) | strict-backend-decision §5 Thm 2 | C04 | Backend replacement preserves claim status (AF isomorphism + grounded-lfp invariance) |
 | [proofs/nd_adapter_soundness.md](proofs/nd_adapter_soundness.md) | strict-backend-decision §5 Thm 4 + Lemma 5 | C03, C05 | Natural-deduction adapter soundness + dependency exactness |
 | [proofs/nonfactivity_and_defeat.md](proofs/nonfactivity_and_defeat.md) | strict-backend-decision §5 Thm 3, §6 Prop 8 | C03, C06 | Source non-factivity + monotonic consequence cannot represent defeat |
+| [proofs/quarantine_nonpromotion.md](proofs/quarantine_nonpromotion.md) | Production `checkUnit` + compact-to-declared AF embedding | C21, C25 | Checker-instantiated proof that evidence quarantine cannot manufacture an unqualified justified verdict |
 
 ## Tables
 None — the source has no numbered tables (see above).

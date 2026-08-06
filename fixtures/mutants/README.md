@@ -18,13 +18,14 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 360
+Total mutants: 369
 
 | expected outcome | mutants |
 | --- | --- |
 | `accept-all-contested` | 4 |
 | `accept-contested` | 9 |
 | `accept-defeated` | 18 |
+| `accept-evidence-blocked` | 9 |
 | `accept-gap` | 9 |
 | `accept-justified` | 9 |
 | `codec-reject` | 45 |
@@ -43,7 +44,7 @@ Total mutants: 360
 
 | mutation family | mutants |
 | --- | --- |
-| `accept-verdict` | 45 |
+| `accept-verdict` | 54 |
 | `bad-attack-targets` | 30 |
 | `certificate-tampering` | 62 |
 | `codec-corruption` | 45 |

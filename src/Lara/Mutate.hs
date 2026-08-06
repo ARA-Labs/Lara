@@ -106,6 +106,7 @@ data MutationOp
   | OpAttachRebutCycle -- ^ symmetric-contrary rebut 2-cycle → accept, contested
   | OpAttachUndermine -- ^ undermine a premise leaf (1-dir contrary) → accept, defeated
   | OpAttachReinstate -- ^ undercut + counter-undercut → accept, justified under attack
+  | OpQuarantineAttacker -- ^ quarantine the sole attacker → accept, evidence-blocked
   | OpCodecJunkSection -- ^ trailing junk form in the envelope
   | OpCodecCoreVersion -- ^ unsupported core version
   | OpCodecReplayOrder -- ^ replay-id sections out of order
@@ -139,6 +140,7 @@ opName op = case op of
   OpAttachRebutCycle -> "attach-rebut-cycle"
   OpAttachUndermine -> "attach-undermine"
   OpAttachReinstate -> "attach-reinstate"
+  OpQuarantineAttacker -> "quarantine-attacker"
   OpCodecJunkSection -> "codec-junk-section"
   OpCodecCoreVersion -> "codec-core-version"
   OpCodecReplayOrder -> "codec-replay-order"
@@ -171,6 +173,7 @@ opFamily op = case op of
   OpAttachRebutCycle -> "accept-verdict"
   OpAttachUndermine -> "accept-verdict"
   OpAttachReinstate -> "accept-verdict"
+  OpQuarantineAttacker -> "accept-verdict"
   OpCodecJunkSection -> "codec-corruption"
   OpCodecCoreVersion -> "codec-corruption"
   OpCodecReplayOrder -> "codec-corruption"
@@ -197,6 +200,13 @@ data Expected
   -- an open mandatory obligation.
   | ExpectCodecReject
   | ExpectAllContested
+  | ExpectEvidenceBlocked
+  -- ^ the conservative-reporting outcome (spec §4.3, issue #76, spelled
+  -- @accept-evidence-blocked@): the verdict accepts, but §4.3 quarantine edited
+  -- the program under the queried claim, so its four-state label is only a
+  -- conditional diagnostic and its public status is @evidence-blocked@. A
+  -- mutant of this class that reported an ordinary status would be the #76 bug
+  -- back again.
   | ExpectPrimaryStatus Status
   -- ^ the accept-family outcome: the verdict accepts and the queried claim's
   -- status is exactly this one (spelled @accept-\<status\>@). Structural
@@ -211,6 +221,7 @@ expectedText e = case e of
   ExpectIncompleteArgument -> "reject-" ++ show IncompleteArgument
   ExpectCodecReject -> "codec-reject"
   ExpectAllContested -> "accept-all-contested"
+  ExpectEvidenceBlocked -> "accept-evidence-blocked"
   ExpectPrimaryStatus s -> "accept-" ++ statusText s
 
 -- | Manifest spelling of a claim status (the accept-family @accept-\<status\>@
@@ -230,6 +241,7 @@ parseExpected s =
   lookup s $
     ("codec-reject", ExpectCodecReject)
       : ("accept-all-contested", ExpectAllContested)
+      : (expectedText ExpectEvidenceBlocked, ExpectEvidenceBlocked)
       : (expectedText ExpectIncompleteArgument, ExpectIncompleteArgument)
       : [(expectedText (ExpectClass c), ExpectClass c) | c <- [minBound .. maxBound]]
       ++ [ (expectedText (ExpectPrimaryStatus st), ExpectPrimaryStatus st)

@@ -1,0 +1,108 @@
+session:
+  id: "2026-08-05_001"
+  date: "2026-08-05"
+  started: "2026-08-05T15:10"
+  last_turn: "2026-08-05T15:57"
+  turn_count: 2
+  summary: >
+    Closed issue #80's production mechanization gap locally: exact raw-ID retention,
+    aligned resolved attacks, compact-to-declared AF embedding, production blocked-support
+    discharge, and a checkUnit_sound-instantiated justified non-promotion theorem. Corrected
+    evidence-blocked wording/tag rendering, verdict-grammar locator, multi-blocked wire
+    malformed coverage, stale prose, and the frozen positive-anchor count. All gates pass:
+    cabal test, Lean build, axiom audit, differential 435/435 positive + 54/54 negative.
+    Turn 2 published commit bd2896a to PR #79, synchronized the PR description, and
+    replied with evidence on all 10 unresolved review threads without self-resolving them.
+
+events_logged:
+  - turn: 1
+    type: question
+    id: "N108"
+    routing: direct
+    provenance: user
+    summary: "Production compact-AF proof bridge missing; abstract proof plus tests insufficient"
+  - turn: 1
+    type: dead_end
+    id: "N109"
+    routing: child-of-N108
+    provenance: user
+    summary: "Rejected treating declared-index theorem and differential tests as shipped-path soundness"
+  - turn: 1
+    type: decision
+    id: "N110"
+    routing: child-of-N108
+    provenance: ai-executed
+    summary: "Use aligned retained structures and an explicit AF embedding"
+  - turn: 1
+    type: experiment
+    id: "N111"
+    routing: child-of-N108
+    provenance: ai-executed
+    summary: "All implementation, Lean, axiom, and differential gates pass"
+
+ai_actions:
+  - turn: 1
+    action: >
+      Implemented the production proof bridge and exact retained-list construction; synchronized
+      Haskell retention; fixed review prose/grammar/tag issues; added multi-blocked wire cases;
+      expanded AxCheck; ran all verification gates.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/BlockedProgram.lean
+      - lean/Lara/Driver.lean
+      - lean/AxCheck.lean
+      - lean/Lara.lean
+      - src/Lara/Blocked.hs
+      - src/Lara/MechReview.hs
+      - src/Lara/ExpectedJson.hs
+      - docs/spec.md
+      - docs/m5-freeze-checklist.md
+      - test/WireSpec.hs
+      - test/BlockedSpec.hs
+      - test/CheckSpec.hs
+      - test/DifferentialSpec.hs
+  - turn: 1
+    action: >
+      Revised C21's overbroad status claim, crystallized C25 and H08, and recorded the production
+      theorem chain in the evidence index.
+    provenance: ai-executed
+    files_changed:
+      - ara/logic/claims.md
+      - ara/logic/solution/heuristics.md
+      - ara/evidence/proofs/quarantine_nonpromotion.md
+      - ara/evidence/README.md
+  - turn: 2
+    action: >
+      Committed and pushed bd2896a; replaced the stale PR #79 description with the exact
+      production theorem/equal-support/count wording; replied individually to all 10 unresolved
+      review threads and posted a verification summary, leaving resolution to the reviewer.
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - C21
+  - C25
+  - H08
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User identified the decisive gap: the proved framework retained declared indices, while
+      Driver.buildAccept labelled compact Compile.checkedAF with completeClaimFor, with no theorem
+      transporting the AF, supports, or unblocked premise into justified_nonpromotion.
+  - turn: 1
+    excerpt: >
+      During implementation, derived-term filtering was rejected because duplicate declarations can
+      share terms. Raw declarations and resolved values are now selected in lockstep, preserving the
+      exact identity relation used by the driver and proof.
+  - turn: 2
+    excerpt: >
+      User explicitly authorized "commit, push, and reply". The pushed PR body now states that
+      statusC_agree requires equal support, cites the checker-instantiated shipped-path theorem,
+      reports 435/435 positive anchors, and reports existing Lean warnings accurately.
+
+open_threads:
+  - "PR #79 awaits reviewer re-review and thread resolution after bd2896a"
+  - "Issue #80 should close when the production bridge merges; it was not closed ahead of landing"
+
+ai_suggestions_pending: []

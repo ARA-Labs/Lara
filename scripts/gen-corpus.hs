@@ -13,11 +13,10 @@
 -- Haskell driver on every generated fixture. Any disagreement is a bug, fixed
 -- with a recorded note — never a silent re-annotation of the expected verdict.
 --
--- Numeric-literal caveat: the Lean driver runs at @canon = id@ and does not
--- canonicalize numbers, while the Haskell core does. Every corpus unit below
--- therefore avoids non-canonical numeric literals (the atoms are nullary or
--- constructor atoms; no @num@ terms appear), so the two drivers cannot diverge
--- on numeric canonicalization.
+-- Numeric-literal parity is exercised directly by
+-- @group-quarantine-numeric-multi-blocked.sexp@: its queries have both exact
+-- and surface-variant supports, so identity canonicalization would publish
+-- @justified@ while @canonNum@ correctly reports @evidence-blocked@.
 --
 -- PR #44 review anchors: three replay-preflight fixtures
 -- (@reject-preflight-*.sexp@, review C3) pin the runtime preflight's
@@ -147,6 +146,111 @@ groupConflictQuarantine =
       [atom0 "effect" [c "up"]]
   )
     { unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | The §4.3 promotion hazard (issue #76): the quarantined leaf backs the
+-- __attacker__, not the target. @a2@ (leaf @e2 : base@) rebuts @a1@ (rule
+-- instance on @e1 : p@), and @e2@ is grouped with @e3 : q@, so the group is @≢@
+-- and @a2@ is pruned — leaving @a1@ unattacked. The pruned graph therefore says
+-- @justified@, which is why @concl@ is published @evidence-blocked@ with that
+-- label kept only as a conditional diagnostic. @other@ is out of the edit's
+-- reach and keeps its ordinary status, pinning that the rule is directed.
+groupConflictQuarantineAttacker :: Unit
+groupConflictQuarantineAttacker =
+  ( mkUnit
+      [defRule "r" [] [apat0 "p" []] (apat0 "concl" []) []]
+      [Contrary (apat0 "concl" []) (apat0 "base" [])]
+      []
+      [ (LeafId "e1", atom0 "p" [])
+      , (LeafId "e2", atom0 "base" [])
+      , (LeafId "e3", atom0 "q" [])
+      , (LeafId "e4", atom0 "other" [])
+      ]
+      [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+      , (ArgId "a2", SLeaf (LeafId "e2"))
+      , (ArgId "a3", SLeaf (LeafId "e4"))
+      ]
+      [Rebut (ArgId "a2") (ArgId "a1")]
+      [atom0 "concl" [], atom0 "other" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e2", LeafId "e3"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | Production regression for numeric identity plus positional multi-blocked
+-- reporting. Each queried numeric claim has two retained supports: an attacked
+-- surface variant and an unattacked exact spelling. The attacker is
+-- quarantined. Under @canonNum@ both supports belong to the query, so the
+-- attacked variant puts each query in the blocked closure. Under identity
+-- canonicalization only the exact support belongs to the query, incorrectly
+-- publishing @justified@. The ordinary query between them pins that both
+-- drivers project the two conditional entries positionally, not by parallel
+-- list lookup.
+groupQuarantineNumericMultiBlocked :: Unit
+groupQuarantineNumericMultiBlocked =
+  ( mkUnit
+      [ defRule "r1_variant" [] [] (apat0 "score1" [PLit (TNum "01.0")]) []
+      , defRule "r1_exact" [] [] (apat0 "score1" [PLit (TNum "1")]) []
+      , defRule "r2_variant" [] [] (apat0 "score2" [PLit (TNum "+02.00")]) []
+      , defRule "r2_exact" [] [] (apat0 "score2" [PLit (TNum "2")]) []
+      ]
+      []
+      []
+      [ (LeafId "e_other", atom0 "other" [])
+      , (LeafId "e_bad", atom0 "base" [])
+      , (LeafId "e_conflict", atom0 "conflict" [])
+      ]
+      [ (ArgId "a1_variant", instD "r1_variant" [] [] [] [])
+      , (ArgId "a1_exact", instD "r1_exact" [] [] [] [])
+      , (ArgId "a_other", SLeaf (LeafId "e_other"))
+      , (ArgId "a2_variant", instD "r2_variant" [] [] [] [])
+      , (ArgId "a2_exact", instD "r2_exact" [] [] [] [])
+      , (ArgId "a_bad", SLeaf (LeafId "e_bad"))
+      ]
+      [ Rebut (ArgId "a_bad") (ArgId "a1_variant")
+      , Rebut (ArgId "a_bad") (ArgId "a2_variant")
+      ]
+      [ atom0 "score1" [TNum "1"]
+      , atom0 "other" []
+      , atom0 "score2" [TNum "2"]
+      ]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e_bad", LeafId "e_conflict"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | The lost-edge half of the §4.3 hazard (issue #76), mirroring
+-- @test\/CheckSpec.groupQuarantineLostEdgeUnit@ as a cross-driver differential
+-- anchor: the prune deletes an attack /edge between two retained arguments/
+-- rather than an argument. @aT@ (rule @r@ on premises @Lq@, @Lk@) is
+-- quarantined via @Lq@; the undermine on @aT@'s second premise also carried a
+-- closure edge onto @aW@ (rule @rw@ on @Lk@ — it contains the attacked
+-- occurrence without concluding it), so dropping the attack leaves @aW@
+-- unattacked. Attack completeness compares @notk@ vs @cw@ (not contraries) and
+-- accepts, so only the lost-edge seed clause catches the promotion: @cw@ is
+-- published @evidence-blocked@ with @justified@ as its conditional label.
+groupQuarantineLostEdge :: Unit
+groupQuarantineLostEdge =
+  ( mkUnit
+      [ defRule "r" [] [apat0 "q" [], apat0 "k" []] (apat0 "concl" []) []
+      , defRule "rw" [] [apat0 "k" []] (apat0 "cw" []) []
+      ]
+      [Contrary (apat0 "k" []) (apat0 "notk" [])]
+      []
+      [ (LeafId "Lq", atom0 "q" [])
+      , (LeafId "Lk", atom0 "k" [])
+      , (LeafId "Lc", atom0 "conflictq" [])
+      , (LeafId "La", atom0 "notk" [])
+      ]
+      [ (ArgId "aT", instD "r" [] [SLeaf (LeafId "Lq"), SLeaf (LeafId "Lk")] [] [])
+      , (ArgId "aW", instD "rw" [] [SLeaf (LeafId "Lk")] [] [])
+      , (ArgId "aS", SLeaf (LeafId "La"))
+      ]
+      [Undermine (ArgId "aS") (ArgId "aT") [StepPremise 1]]
+      [atom0 "cw" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "Lq", LeafId "Lc"]]
     , unitGroupMode = QuarantineOnConflict
     }
 
@@ -477,6 +581,13 @@ corpus =
   , ("fixtures/corpus/independent-accept.sexp", independentAccept)
   , ("fixtures/corpus/group-consistent-accept.sexp", groupConsistentAccept)
   , ("fixtures/corpus/group-conflict-quarantine.sexp", groupConflictQuarantine)
+  , ( "fixtures/corpus/group-conflict-quarantine-attacker.sexp"
+    , groupConflictQuarantineAttacker
+    )
+  , ( "fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp"
+    , groupQuarantineNumericMultiBlocked
+    )
+  , ("fixtures/corpus/group-quarantine-lost-edge.sexp", groupQuarantineLostEdge)
   , ("fixtures/corpus/reject-r9.sexp", groupConflictReject9)
   , ("fixtures/corpus/stress-independent-120.sexp", stressUnit 120)
   , ("fixtures/corpus/reject-duplicate-rule.sexp", negDuplicateRule)

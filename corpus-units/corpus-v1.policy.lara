@@ -20,10 +20,9 @@
 #     now exists as Family 10 below, and `adaptive-pruning/C04` migrates its derived-arithmetic
 #     leg onto it. The remaining strict-flavored units await their own certifier backends.
 #   * Quantitative content (thresholds, ratios, table cells) lives in `nl` strings, bindings, and
-#     leaf refs — formal atoms use constants only, never `num` literals (the Lean `canon = id`
-#     caveat, scripts/gen-corpus.hs header). SOLE exception: Family 10's certificate-checked
-#     atoms, whose cells are `num` literals in CANONICAL spelling (`50`, not `50.0`) so the
-#     identity canonicalizer and the Haskell `canonNum` agree byte-for-byte.
+#     leaf refs — formal atoms use constants except for Family 10's certificate-checked
+#     atoms. Both production drivers now share `canonNum`; Family 10 retains canonical
+#     spellings (`50`, not `50.0`) as a presentation convention.
 #   * Contrary pairs are declared symmetric ONLY where the sample genuinely concludes both sides
 #     (comparison, benchmark, correlation). Attack completeness is arg-conclusion-level, so a
 #     symmetric pair forces mutual rebut edges whenever both sides appear in one unit — units

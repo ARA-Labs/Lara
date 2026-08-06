@@ -4,7 +4,7 @@
 -- This is __untrusted presentation__ over the existing accept-path diagnostics —
 -- no LLM, no new trusted code. Each non-@justified@ claim yields one review
 -- comment whose text is a deterministic function of the checker's located
--- diagnostic (the per-claim 'Status', the grounded argument labels, the declared
+-- diagnostic (the per-claim 'PublicStatus', the grounded argument labels, the declared
 -- typed attacks, and — for a @gap@ with an incomplete candidate — the open
 -- mandatory obligations "Lara.Reporting" reports). The point the demo makes for
 -- the paper: the status the checker computes __is__ the review content. A @gap@
@@ -27,9 +27,12 @@ module Lara.MechReview
   , unitReviewComments
     -- * The rendered corpus document
   , renderReviews
+  , summaryLine
     -- * Pure phrasing renderers (exposed for focused test coverage)
+  , reviewBody
   , gapBody
   , contestedBody
+  , evidenceBlockedBody
   ) where
 
 import Data.List (intercalate, nub, sortBy)
@@ -56,21 +59,32 @@ import Lara.Policy (lookupRule)
 import Lara.Prop (equiv, prettyProp)
 import Lara.Replay (CheckInput, inputUnit)
 import Lara.Reporting (ClaimReport (..), IncompleteAlternative (..), claimReports)
-import Lara.Wire (Outcome (..), Verdict (..))
+import Lara.Wire
+  ( Outcome (..)
+  , PublicStatus (..)
+  , Tag (TEvidenceBlocked)
+  , Verdict (..)
+  , tagToString
+  )
 
 -- ---------------------------------------------------------------------------
 -- Per-claim review comments
 -- ---------------------------------------------------------------------------
 
--- | One reviewer-style comment about a single non-@justified@ claim: the unit it
--- belongs to, the claim's surface id + formal proposition + natural-language
--- statement, its four-state 'Status', and the deterministic review body.
+-- | One reviewer-style comment about a single non-@justified@ public claim: the
+-- unit it belongs to, the claim's surface id + formal proposition +
+-- natural-language statement, its 'PublicStatus', and the deterministic review
+-- body.
 data ReviewComment = ReviewComment
   { rcUnit :: String -- ^ manifest unit name (@artifact.claim@)
   , rcClaimId :: String -- ^ the surface claim id (e.g. @c03@)
   , rcClaimFormal :: String -- ^ 'prettyProp' of the claim atom
   , rcClaimNl :: String -- ^ the claim's natural-language statement
-  , rcStatus :: Status
+  , rcStatus :: PublicStatus
+  -- ^ the public status: 'Published' carries the four-state answer,
+  -- 'EvidenceBlocked' the conditional label a §4.3 prune made unpublishable
+  -- (issue #76). The heading and the body both read this, so a rendered review
+  -- can never disagree with the wire verdict.
   , rcBody :: String -- ^ the fixed-phrasing review sentence(s)
   }
   deriving (Eq, Show)
@@ -93,10 +107,12 @@ unitReviewComments :: String -> CheckInput -> Program -> [ReviewComment]
 unitReviewComments name ci prog =
   case verdictOutcome (runCheck ci) of
     Reject _ -> [] -- every frozen corpus unit is accept-class; nothing to render
+    -- An @evidence-blocked@ query is not a justified claim whatever its
+    -- conditional label says (spec §4.3, issue #76), so it still draws a comment.
     Accept labels _edges statuses ->
       [ comment p st rep
       | ((p, st), rep) <- zip statuses reports
-      , st /= Justified
+      , st /= Published Justified
       ]
       where
         unit = inputUnit ci
@@ -122,6 +138,8 @@ unitReviewComments name ci prog =
             , rcClaimNl = claimNlText p
             , rcStatus = st
             , rcBody = reviewBody (claimId <$> matchingClaim p) argViews attacks labelOf st rep
+            -- 'reviewBody' reads the public status, so the blocked case cannot
+            -- fall through to the four-state arms.
             }
 
         matchingClaim p = case [c | c <- surfaceClaims, equiv (claimFormal c) p] of
@@ -135,22 +153,27 @@ unitReviewComments name ci prog =
 -- Fixed phrasing table (keyed on diagnostic shape)
 -- ---------------------------------------------------------------------------
 
--- | The deterministic review sentence for one non-@justified@ claim, dispatched
--- on its 'Status'. Each arm is a fixed template filled from the checker's
--- located diagnostic; the wording is byte-stable so the corpus document goldens.
+-- | The deterministic review sentence for one non-@justified@ public claim,
+-- dispatched on its 'PublicStatus'. Each arm is a fixed template filled from
+-- the checker's located diagnostic; the wording is byte-stable so the corpus
+-- document goldens.
 reviewBody
   :: Maybe PropId -- ^ the declared claim id under review (scopes @defeated@ supports)
   -> [ArgView]
   -> [Attack]
   -> (Int -> Maybe Label)
-  -> Status
+  -> PublicStatus
   -> ClaimReport
   -> String
 reviewBody claimPid argViews attacks labelOf status rep = case status of
-  Gap -> gapBody rep
-  Defeated -> defeatedBody claimPid argViews attacks labelOf
-  Contested -> contestedBody
-  Justified -> "" -- unreachable: 'unitReviewComments' filters justified claims
+  -- Spec §4.3 / issue #76: the four-state label under an @evidence-blocked@
+  -- claim is a conditional diagnostic, so the body names the quarantine rather
+  -- than reporting the label as the finding.
+  EvidenceBlocked conditional -> evidenceBlockedBody conditional
+  Published Gap -> gapBody rep
+  Published Defeated -> defeatedBody claimPid argViews attacks labelOf
+  Published Contested -> contestedBody
+  Published Justified -> "" -- unreachable: 'unitReviewComments' filters justified claims
 
 -- | @gap@: the mandatory obligation left open, or — when the claim has no
 -- candidate argument at all — the empty complete-support set. The obligation
@@ -295,15 +318,15 @@ summaryLine comments =
     ++ show (length comments)
     ++ " review comments** — "
     ++ commaList
-      [ show n ++ " " ++ statusWord s
-      | (s, n) <- statusTally (map rcStatus comments)
+      [ show n ++ " " ++ w
+      | (w, n) <- statusTally (map rcStatus comments)
       ]
     ++ "."
 
 -- | One rendered review section for a single comment.
 section :: ReviewComment -> [String]
 section rc =
-  [ "## " ++ rcUnit rc ++ " — " ++ statusWord (rcStatus rc)
+  [ "## " ++ rcUnit rc ++ " — " ++ publicStatusWord (rcStatus rc)
   , ""
   , "Claim `" ++ rcClaimId rc ++ "`: `" ++ rcClaimFormal rc ++ "`"
   ]
@@ -321,7 +344,27 @@ section rc =
 -- Small deterministic helpers (closed spelling tables; no external deps)
 -- ---------------------------------------------------------------------------
 
--- | The status word as it appears in a review heading\/summary.
+-- | The reviewer sentence for an @evidence-blocked@ claim (spec §4.3, issue
+-- #76): the claim's own graph was edited by quarantine, so no four-state
+-- finding can be reported — and the conditional label is named as such rather
+-- than published.
+evidenceBlockedBody :: Status -> String
+evidenceBlockedBody conditional =
+  "evidence affecting this claim's argumentation graph was quarantined as internally inconsistent (§4.3), and the "
+    ++ "removed material could have changed the outcome, so no status is reported. On the "
+    ++ "remaining evidence alone the claim would be "
+    ++ statusWord conditional
+    ++ ", but that label is conditional on evidence the checker refused to admit."
+
+-- | The heading word for a public status: the canonical wire tag for a
+-- quarantine-affected claim, the four-state word otherwise (issue #76).
+publicStatusWord :: PublicStatus -> String
+publicStatusWord ps = case ps of
+  EvidenceBlocked _ -> tagToString TEvidenceBlocked
+  Published s -> statusWord s
+
+-- | The status word as it appears in a review heading\/summary for an ordinary
+-- four-state status.
 statusWord :: Status -> String
 statusWord s = case s of
   Gap -> "gap"
@@ -348,13 +391,18 @@ attackEndpoints a = case a of
   Undercut (ArgId s) (ArgId t) _ -> (s, t)
   Undermine (ArgId s) (ArgId t) _ -> (s, t)
 
--- | Count occurrences by status, most-frequent first (ties by spelling) — the
--- same determinism discipline "Lara.ClaimSupport".@tally@ uses.
-statusTally :: [Status] -> [(Status, Int)]
+-- | Count occurrences by /rendered/ status word, most-frequent first (ties by
+-- spelling) — the same determinism discipline "Lara.ClaimSupport".@tally@ uses.
+-- The key is the rendered word, not the 'PublicStatus' value:
+-- 'publicStatusWord' erases the conditional label of every @EvidenceBlocked _@,
+-- so tallying by value would split one public @evidence-blocked@ category by a
+-- label the summary never shows.
+statusTally :: [PublicStatus] -> [(String, Int)]
 statusTally xs =
-  sortBy (comparing (negate . snd) <> comparing (statusWord . fst))
-    [(s, length (filter (== s) xs)) | s <- distinct xs]
+  sortBy (comparing (negate . snd) <> comparing fst)
+    [(w, length (filter (== w) words')) | w <- distinct words']
   where
+    words' = map publicStatusWord xs
     distinct = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
 
 -- | Render an argument\/id token in backticks.
