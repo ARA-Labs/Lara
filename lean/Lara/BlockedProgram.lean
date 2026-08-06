@@ -1,5 +1,6 @@
 import Lara.Blocked
 import Lara.Consistency
+import Lara.RawAttack
 
 /-
 The program-level instance of conservative reporting for quarantine-affected
@@ -29,7 +30,8 @@ retained declaration have equal support terms.
 
 namespace Lara.BlockedProgram
 
-open Lara Lara.Support Lara.Attack Lara.Compile Lara.Blocked Lara.Consistency
+open Lara Lara.Support Lara.Attack Lara.RawAttack Lara.Compile
+open Lara.Blocked Lara.Consistency
 
 /-! ### The two frameworks in declared index space -/
 
@@ -76,15 +78,6 @@ def declaredAF (declared : List (String × SupportTerm)) (declAtts : List Attack
 def checkedAF (declared : List (String × SupportTerm)) (keptAtts : List Attack)
     (retained : List Nat) : Grounded.AF :=
   { args := retained, attack := edgeIn declared keptAtts }
-
-/-- Filter a value list by the corresponding raw declaration's keep predicate.
-Production uses this to drop attacks by raw endpoint id while retaining the
-already-resolved `Attack` in the same row. -/
-def selectAligned (keep : α → Bool) : List α → List β → List β
-  | key :: keys, value :: values =>
-      if keep key then value :: selectAligned keep keys values
-      else selectAligned keep keys values
-  | _, _ => []
 
 /-- The material the prune touched: every removed argument, plus every retained
 argument that lost an incoming edge. -/

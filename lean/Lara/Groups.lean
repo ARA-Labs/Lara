@@ -95,7 +95,6 @@ end
 /-- Keep an argument iff it uses no quarantined leaf. -/
 def keepArg (qs : List LeafId) (a : String × SupportTerm) : Bool :=
   ! usesLeaf qs a.2
-
 /-- The surviving arguments after §4.3 quarantine. -/
 def quarantineArgs (qs : List LeafId) (args : List (String × SupportTerm)) :
     List (String × SupportTerm) :=
@@ -212,6 +211,60 @@ theorem quarantined_leaf_absent (qs : List LeafId)
   intro hdec
   have : e.1 = l := of_decide_eq_true hdec
   exact hnotmem (this ▸ hl)
+
+-- **`usesLeaf` is monotone in the quarantined-leaf list.**  Enlarging the
+-- seed only makes more terms report use of a quarantined leaf.  This is the
+-- fact that makes a more restrictive admission policy unable to retain an
+-- argument (metatheory plan, `more_restrictive_cannot_add_structure`).  A
+-- `mutual` block because `SupportTerm` is a plain inductive with list fields
+-- (see `SupportTerm.decEq`); the definitions live in `Prop` and are used as
+-- theorems.
+mutual
+  def usesLeaf_mono {qs qs' : List LeafId} (h : ∀ l, l ∈ qs → l ∈ qs') :
+      (t : SupportTerm) → usesLeaf qs t = true → usesLeaf qs' t = true
+    | .leaf l, huse => by
+        simp [usesLeaf] at huse ⊢
+        exact h l huse
+    | .inst _ _ premises discharges _ _, huse => by
+        cases hleft : usesLeafList qs premises with
+        | true =>
+            have : usesLeafList qs' premises = true :=
+              usesLeafList_mono h premises hleft
+            simp [usesLeaf, this]
+        | false =>
+            have hright : usesLeafDisch qs discharges = true := by
+              simpa [usesLeaf, hleft] using huse
+            have : usesLeafDisch qs' discharges = true :=
+              usesLeafDisch_mono h discharges hright
+            simp [usesLeaf, hleft, this]
+  def usesLeafList_mono {qs qs' : List LeafId} (h : ∀ l, l ∈ qs → l ∈ qs') :
+      (ts : List SupportTerm) → usesLeafList qs ts = true → usesLeafList qs' ts = true
+    | [], huse => by simp [usesLeafList] at huse
+    | w :: ws, huse => by
+        cases hleft : usesLeaf qs w with
+        | true =>
+            have : usesLeaf qs' w = true := usesLeaf_mono h w hleft
+            simp [usesLeafList, this]
+        | false =>
+            have hright : usesLeafList qs ws = true := by
+              simpa [usesLeafList, hleft] using huse
+            have : usesLeafList qs' ws = true := usesLeafList_mono h ws hright
+            simp [usesLeafList, hleft, this]
+  def usesLeafDisch_mono {qs qs' : List LeafId} (h : ∀ l, l ∈ qs → l ∈ qs') :
+      (ds : List (QuestionId × SupportTerm)) →
+        usesLeafDisch qs ds = true → usesLeafDisch qs' ds = true
+    | [], huse => by simp [usesLeafDisch] at huse
+    | d :: ds, huse => by
+        cases hleft : usesLeaf qs d.2 with
+        | true =>
+            have : usesLeaf qs' d.2 = true := usesLeaf_mono h d.2 hleft
+            simp [usesLeafDisch, this]
+        | false =>
+            have hright : usesLeafDisch qs ds = true := by
+              simpa [usesLeafDisch, hleft] using huse
+            have : usesLeafDisch qs' ds = true := usesLeafDisch_mono h ds hright
+            simp [usesLeafDisch, hleft, this]
+end
 
 /-- **Escalation, characterized.** The R9 reject fires exactly when the policy
 escalates and some declared group is `≢`. -/

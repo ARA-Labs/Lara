@@ -495,8 +495,8 @@ admissionReject =
             , policyGroupMode = QuarantineOnConflict
             }
     , negDiagnostic =
-        "leaf 'e_assumed': admission(assumed, ai-executed) = reject (§4.3) — "
-          ++ "the declaration violates policy"
+        "leaf 'e_assumed': kind=assumed, provenance=ai-executed matched "
+          ++ "admission row (assumed, ai-executed) = reject (R8)"
     }
 
 -- ===========================================================================

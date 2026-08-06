@@ -1,0 +1,152 @@
+session:
+  id: "2026-08-06_001"
+  date: "2026-08-06"
+  started: "2026-08-06T05:57"
+  last_turn: "2026-08-06T21:45"
+  turn_count: 2
+  summary: >
+    Delivered policy admission end to end: source-runtime enforcement, raw-aligned Lean
+    metatheory, exact-manifest Haskell/Lean semantic differential, review hardening,
+    ARA evidence, and corrected paper claims. Code head 5d661fb and paper head 16f82b9
+    are pushed; PR #81 awaits hosted CI recovery and independent re-review. A second
+    review round then closed the public admission bypass, restored located rejections on
+    policy-pruned results, made R14 argument-id uniqueness a carried Lean invariant,
+    narrowed the overstated all-admit scope claims, and stopped the differential harness
+    from deleting its own failure diagnostics.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N116"
+    routing: direct
+    provenance: ai-executed
+    summary: "Deliver the policy admission metatheory, semantic differential, and paper gates"
+  - turn: 1
+    type: decision
+    id: "N117"
+    routing: direct
+    provenance: ai-executed
+    summary: "Repair all eight independent-review findings at their source"
+  - turn: 1
+    type: decision
+    id: "N118"
+    routing: direct
+    provenance: ai-executed
+    summary: "Carry validated raw attack identity through accepted admission and close protocol gaps"
+  - turn: 1
+    type: experiment
+    id: "N119"
+    routing: direct
+    provenance: ai-executed
+    summary: "Run final compatibility gates, obtain an independent local merge-ready review, publish both repositories, and request GitHub re-review"
+  - turn: 2
+    type: decision
+    id: "N120"
+    routing: direct
+    provenance: ai-executed
+    summary: "Repair all five second-round review findings at their source"
+  - turn: 2
+    type: experiment
+    id: "N121"
+    routing: direct
+    provenance: ai-executed
+    summary: "Re-run every gate the repairs could disturb, incl. an injected-oracle check of the harness fix"
+  - turn: 2
+    type: observation
+    id: "O45"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Trusted wrapper must be the only public path to its input -> H09"
+  - turn: 2
+    type: observation
+    id: "O46"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Harness must print captured stderr on every failure branch"
+  - turn: 2
+    type: observation
+    id: "O47"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Decoder well-formedness exported as a proof, not a boolean -> H10"
+  - turn: 2
+    type: observation
+    id: "O48"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Prose must restate a theorem at the granularity it proves"
+
+ai_actions:
+  - turn: 2
+    action: >
+      Moved the admission-free lowering into Lara.Elaborate.Internal; retained the located
+      rejection and checked argument ids on SourceResult and rendered class/stage/constituent
+      for policy-pruned rejections; added the ids_nodup invariant to AlignedAttacks with the
+      decoder proof and two supporting theorems; narrowed the all-admit scope prose; and made
+      the differential harness dump both drivers' exit codes and stderr on mismatch.
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Elaborate/Internal.hs
+      - src/Lara/Elaborate.hs
+      - src/Lara/ExpectedJson.hs
+      - lara.cabal
+      - test/AdmissionSpec.hs
+      - test/ElaborateSpec.hs
+      - test/WorkedExamplesSpec.hs
+      - lean/Lara/RawAttack.lean
+      - lean/Lara/Driver.lean
+      - lean/Lara/Admission.lean
+      - lean/Lara/AdmissionDriver.lean
+      - lean/AxCheck.lean
+      - scripts/admission-differential.sh
+      - plans/2026-08-05-policy-admission-metatheory.md
+      - docs/paper-lean-name-map.md
+      - ara/evidence/results/policy_admission_review_round2.md
+  - turn: 1
+    action: >
+      Implemented and reviewed the shared raw-attack layer, declarative and executable
+      admission semantics, twenty-fixture differential, source-consumer hardening,
+      strengthened Lean theorems, exact evidence records, and paper corrections.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/RawAttack.lean
+      - lean/Lara/Admission.lean
+      - lean/Lara/AdmissionDriver.lean
+      - test/Lara/AdmissionFixture.hs
+      - fixtures/admission/MANIFEST
+      - scripts/admission-differential.sh
+      - src/Lara/Elaborate.hs
+      - ara/evidence/results/policy_admission_boundary.md
+      - /Users/yfhe/overleaf/ara/lara/src/metatheory.tex
+      - /Users/yfhe/overleaf/ara/lara/tables/mechanization.tex
+  - turn: 1
+    action: >
+      Ran the full Haskell, Lean, axiom, core differential, admission differential,
+      replay, tamper, freeze, diff, and paper build gates; committed and pushed code
+      head 5d661fb and paper head 16f82b9; updated PR #81 and requested re-review.
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The user directed continuation from the stable runtime source contract through all
+      remaining Lean proofs, semantic differential, paper work, final gates, ARA record,
+      push, and PR delivery.
+  - turn: 2
+    excerpt: >
+      The user relayed a five-item follow-up review (one critical, four important) and
+      directed "address all". The critical finding was that the exported elaborate ->
+      mkReplayId -> mkCheckInput -> runCheck path still accepted a source rejected as R8
+      by prepareSource.
+
+logic_revisions: []
+
+open_threads:
+  - "Second-round repairs pushed as code head 3baca4d (5 commits); all five inline threads answered and re-review requested from @fenfenai on PR #81"
+  - "GitHub Actions major outage qcvjkzcs7j74 prevented a hosted run from dispatching at head 5d661fb; rerun when service recovers"
+  - "PR #81 remains CHANGES_REQUESTED until @fenfenai completes the requested re-review"
+
+ai_suggestions_pending: []

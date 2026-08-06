@@ -1,0 +1,22 @@
+# Exact admission differential corpus (TSV):
+# fixture	outcome-class	haskell-stderr-marker	lean-stderr-marker
+admit-defaults.sexp	accepted	-	-
+all-admit-group-only.sexp	accepted	-	-
+attack-endpoints-prune.sexp	accepted	-	-
+attacker-removal.sexp	accepted	-	-
+duplicate-key-invalid.sexp	invalid	-	-
+duplicate-key-precedence-invalid.sexp	invalid	-	-
+duplicate-leaf-id-invalid.sexp	invalid	-	-
+equal-terms-distinct-ids.sexp	accepted	-	-
+group-on-declared-leaves.sexp	accepted	-	-
+malformed-kind.sexp	codec-reject	check-admission: codec error at fixture: unknown leaf kind	admission-driver: codec error at fixture: unknown leaf kind
+malformed-expected-payload.sexp	codec-reject	check-admission: codec error at fixture: malformed expected outcome	admission-driver: codec error at fixture: malformed expected outcome
+malformed-expected-tag.sexp	codec-reject	check-admission: codec error at fixture: malformed expected section	admission-driver: codec error at fixture: malformed expected section
+malformed-trailing-meta.sexp	codec-reject	check-admission: codec error at fixture: malformed meta	admission-driver: codec error at fixture: malformed meta
+malformed-trailing-outer.sexp	codec-reject	check-admission: codec error at fixture: expected exact (admission	admission-driver: codec error at fixture: expected exact (admission
+metadata-order-invalid.sexp	invalid	-	-
+multi-group-causes.sexp	accepted	-	-
+policy-plus-group-causes.sexp	accepted	-	-
+quarantine-deps.sexp	accepted	-	-
+reject-first-leaf.sexp	rejected	-	-
+reject-second-leaf.sexp	rejected	-	-

@@ -304,3 +304,17 @@ sessions:
   - C12
   - C25
   open_threads: 1
+- id: 2026-08-05_003
+  date: '2026-08-05'
+  summary: 'Engineering review approved a split delivery: issue #77 runtime conformance first; dependent raw-aligned Lean admission metatheory, source differential, and paper updates second.'
+  turn_count: 5
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-06_001
+  date: '2026-08-06'
+  summary: 'Policy admission delivered end to end: runtime source enforcement, raw-aligned Lean metatheory, exact 20-fixture semantic differential, ARA evidence, and corrected paper (code 5d661fb, paper 16f82b9 pushed; hosted CI blocked by the GitHub Actions outage). A second review round then closed the public admission bypass, restored located rejections on policy-pruned results, made R14 argument-id uniqueness a carried Lean invariant, narrowed the all-admit scope claims, and fixed the differential harness diagnostics; H09 and H10 crystallized.'
+  turn_count: 2
+  events_count: 10
+  claims_touched: []
+  open_threads: 3

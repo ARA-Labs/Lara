@@ -24,6 +24,11 @@ Versioning: the presentation surface is versioned **separately** from the core
 invisible to the checker by spec result 12 (`parse ∘ print == id`, mechanized in
 A3).
 
+The runtime semantics of the existing `admission` and `duplicate-reports`
+constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
+That source layer does not change this grammar or `lara-core@0.1`. Byte-level
+`lara-evidence@0.1` syntax and verification remain gated under issue #78.
+
 ---
 
 ## 0. Two top-levels, one file, disambiguated by the leading keyword
@@ -246,6 +251,9 @@ Notes:
 - Every `decl` is order-free at the top level except that a name must be in scope
   by elaboration time (forward references across the file are allowed; scoping is
   the elaborator's job, not the grammar's).
+- Reusing a `LeafId` in two `leafDecl`s is source invalidity. It is rejected before
+  policy admission; it is neither R8 admission rejection nor core R1 reference
+  rejection.
 
 ---
 
@@ -284,10 +292,25 @@ Notes:
   only on strict rules (spec §4). The reference policy `empirical-v1` is
   defeasible-only, so neither appears there.
 - The `admission` block is **optional**. `empirical-v1.policy.lara` omits it; the
-  A1 elaborator chooses the default admission map (plan A1 / outside-voice #12 — a
-  decision **owned by A1**, not frozen here). The grammar only fixes that the block
-  *may* be omitted and, when present, is a total-ish association of
-  `(kind, provenance) ↦ outcome` rows.
+  runtime interprets the rows as a finite exact-key association from
+  `(LeafKind, Provenance)` to outcome. An omitted/empty block or an unmatched key
+  defaults to `admit`, making lookup total. Repeating a key is source invalidity,
+  not first- or last-row-wins.
+- The source outcome precedence is source invalidity, policy R8, replay R13,
+  duplicate-group R9, then core rejection. R8 is a valid source judgment, distinct
+  from group R9 and core R1: it selects the first leaf in source declaration order
+  whose exact key matches a `reject` row, and the CLI uses exit 1, empty stdout, and
+  exactly one deterministic stderr line identifying its leaf id, kind, provenance,
+  and matched admission row. Source invalidity uses exit 2 and empty stdout;
+  replay/group/accepted/core-rejection paths retain core-verdict stdout.
+- Group consistency reads all declared leaves before pruning. Policy-quarantine
+  and group-quarantine seeds are unioned once; one prune removes seeded leaves,
+  every dependent argument (including dependencies nested in premises and
+  discharges), and every attack with a removed raw endpoint. Blocked reporting and
+  the canonical audit derive from that same prune. Audit rows follow leaf
+  declaration order, list `PolicyQuarantine` before each causing
+  `GroupQuarantine` (once, in group order), and list removed arguments/attacks in
+  declaration order; every removed leaf has exactly one row with nonempty causes.
 
 ---
 

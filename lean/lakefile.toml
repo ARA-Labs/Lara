@@ -14,4 +14,12 @@ name = "Lara"
 # theorem-bearing definitions of the `Lara` library.
 [[lean_exe]]
 name = "lara-driver"
-root = "Lara.Driver"
+root = "Lara.DriverMain"
+
+# The admission differential driver (metatheory plan Task 3 — the Lean side
+# of scripts/admission-differential.sh). Reads one test-only fixture under
+# fixtures/admission/, runs the proved admission judgment, and prints the
+# canonical outcome encoding.
+[[lean_exe]]
+name = "admission-driver"
+root = "Lara.AdmissionDriverMain"

@@ -146,7 +146,7 @@ prop_cliUsage = once $ ioProperty $ do
       ]
 
 -- | @.lara@ end-to-end, Example A: parse + co-located policy resolution
--- (@empirical-v1.policy.lara@) + elaborate + 'sourceCheckInput' + 'runCheck',
+-- (@empirical-v1.policy.lara@) + 'prepareSource' + 'runSourceCheck',
 -- exit 0 and exactly the accept verdict bytes. a1 is @out@
 -- (undercut+undermine+rebut, all @in@), d1/d2/d3 @in@, c1 @defeated@. These
 -- bytes equal the in-process source-to-'CheckInput' path (the CLI is a thin
@@ -154,7 +154,7 @@ prop_cliUsage = once $ ioProperty $ do
 prop_cliLaraAcceptA :: Property
 prop_cliLaraAcceptA = once $ ioProperty $ do
   replayText <- fixtureReplayText "examples/A/example.core.sexp"
-  (code, out, _) <- runLara ["check", "examples/A/example.lara"]
+  (code, out, err) <- runLara ["check", "examples/A/example.lara"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
@@ -163,6 +163,7 @@ prop_cliLaraAcceptA = once $ ioProperty $ do
             === ("(verdict " ++ replayText ++ " accept (labels (0 out) (1 in) (2 in) (3 in))"
               ++ " (edges (0 3) (1 0) (2 0) (3 0))"
               ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)))\n")
+      , counterexample "audit stderr empty" (err === "")
       ]
 
 -- | @.lara@ end-to-end, Example B: two mutually-attacking arguments (a 2-cycle),
@@ -171,7 +172,7 @@ prop_cliLaraAcceptA = once $ ioProperty $ do
 prop_cliLaraAcceptB :: Property
 prop_cliLaraAcceptB = once $ ioProperty $ do
   replayText <- fixtureReplayText "examples/B/example.core.sexp"
-  (code, out, _) <- runLara ["check", "examples/B/example.lara"]
+  (code, out, err) <- runLara ["check", "examples/B/example.lara"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
@@ -181,6 +182,7 @@ prop_cliLaraAcceptB = once $ ioProperty $ do
               ++ " (statuses"
               ++ " (status (atom improves (con M) (con accuracy) (con D)) contested)"
               ++ " (status (atom not_improves (con M) (con accuracy) (con D)) contested)))\n")
+      , counterexample "audit stderr empty" (err === "")
       ]
 
 -- | @.lara@ end-to-end, Example S1: policy-carried theory and surface
@@ -188,14 +190,206 @@ prop_cliLaraAcceptB = once $ ioProperty $ do
 prop_cliLaraAcceptS1 :: Property
 prop_cliLaraAcceptS1 = once $ ioProperty $ do
   replayText <- fixtureReplayText "examples/S1/example.core.sexp"
-  (code, out, _) <- runLara ["check", "examples/S1/example.lara"]
+  (code, out, err) <- runLara ["check", "examples/S1/example.lara"]
   pure $
     conjoin
       [ counterexample "exit code" (code === ExitSuccess)
       , counterexample "stdout bytes" $
           out
             === ("(verdict " ++ replayText ++ " accept (labels (0 in)) (edges) (statuses (status (atom holds (con safety_invariant) (con D)) justified)))\n")
+      , counterexample "audit stderr empty" (err === "")
       ]
+
+-- ---------------------------------------------------------------------------
+-- Source admission CLI matrix
+-- ---------------------------------------------------------------------------
+
+admissionLeaf :: String -> String -> String -> String -> String
+admissionLeaf lid proposition kind provenance =
+  unlines
+    [ "leaf " ++ lid ++ " : " ++ proposition
+    , "  kind = " ++ kind
+    , "  provenance = " ++ provenance
+    , "  refs = []"
+    ]
+
+admissionProgram :: [String] -> String
+admissionProgram declarations =
+  unlines
+    [ "artifact admission_cli at sha256:admission-cli"
+    , "policy p"
+    , "use backends []"
+    ]
+    ++ concat declarations
+
+-- | Duplicate admission keys are source invalidity, not first-match R8.
+-- Every byte is pinned because this diagnostic is the only observable result.
+prop_cliDuplicateAdmissionKey :: Property
+prop_cliDuplicateAdmissionKey = once $ ioProperty $
+  withTempLaraDir artifact [("p.policy.lara", policyText)] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "exact stderr" $
+            err === "lara: source invalid: duplicate admission key (observed, user)\n"
+        ]
+  where
+    artifact = admissionProgram [admissionLeaf "e" "p" "observed" "user"]
+    policyText =
+      unlines
+        [ "policy p"
+        , "admission { (observed, user) = reject, (observed, user) = admit }"
+        ]
+
+-- | Duplicate source leaf identifiers are rejected before metadata alignment
+-- or admission can give either declaration a meaning.
+prop_cliDuplicateLeafId :: Property
+prop_cliDuplicateLeafId = once $ ioProperty $
+  withTempLaraDir artifact [("p.policy.lara", "policy p\n")] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "exact stderr" $
+            err === "lara: source invalid: duplicate leaf id 'e'\n"
+        ]
+  where
+    artifact =
+      admissionProgram
+        [ admissionLeaf "e" "p" "observed" "user"
+        , admissionLeaf "e" "q" "attested" "user"
+        ]
+
+-- | R8 is outside the core verdict codec: exit 1, no stdout, one line naming
+-- the first rejected leaf and its exact matched row.
+prop_cliAdmissionR8 :: Property
+prop_cliAdmissionR8 = once $ ioProperty $
+  withTempLaraDir artifact [("p.policy.lara", policyText)] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 1)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "exact stderr" $
+            err
+              === ( "lara: leaf 'e_first': kind=assumed, provenance=ai-executed matched "
+                      ++ "admission row (assumed, ai-executed) = reject (R8)\n"
+                  )
+        ]
+  where
+    artifact =
+      admissionProgram
+        [ admissionLeaf "e_first" "p" "assumed" "ai-executed"
+        , admissionLeaf "e_second" "q" "observed" "user"
+        ]
+    policyText =
+      unlines
+        [ "policy p"
+        , "admission { (assumed, ai-executed) = reject, (observed, user) = reject }"
+        ]
+
+-- | Accepted quarantine keeps the normal verdict channel and emits exactly the
+-- canonical audit on stderr.
+prop_cliAcceptedQuarantineAudit :: Property
+prop_cliAcceptedQuarantineAudit = once $ ioProperty $
+  withTempLaraDir artifact [("p.policy.lara", policyText)] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitSuccess)
+        , counterexample "verdict stdout" $
+            out
+              === ( "(verdict (replay-id (core lara-core@0.1) (policy p) (backends)"
+                      ++ " (theories) (artifact sha256:admission-cli)) accept"
+                      ++ " (labels) (edges) (statuses))\n"
+                  )
+        , counterexample "canonical audit stderr" $
+            err
+              === ( "lara: admission audit: leaves [e_q{policy-quarantine}]; "
+                      ++ "arguments [a_q]; attacks []\n"
+                  )
+        ]
+  where
+    artifact =
+      admissionProgram
+        [ admissionLeaf "e_q" "p" "observed" "user"
+        , "arg a_q : supports(derived) by leaf(e_q)\n"
+        ]
+    policyText =
+      unlines
+        [ "policy p"
+        , "admission { (observed, user) = quarantine }"
+        ]
+
+-- | One artifact contains an error at every source/runtime boundary.  Removing
+-- one higher-precedence defect at a time exposes exactly the next class:
+-- invalid > R8 > R13 > R9 > core.
+prop_cliAdmissionPrecedenceMatrix :: Property
+prop_cliAdmissionPrecedenceMatrix = once $ ioProperty $ do
+  invalid <- runVariant True True True True
+  r8 <- runVariant False True True True
+  r13 <- runVariant False False True True
+  r9 <- runVariant False False False True
+  core <- runVariant False False False False
+  pure $
+    conjoin
+      [ resultIs "invalid" (ExitFailure 2) "" "duplicate admission key" invalid
+      , resultIs "R8" (ExitFailure 1) "" "(R8)" r8
+      , resultIs "R13" (ExitFailure 1) "reject R13" "replay preflight" r13
+      , resultIs "R9" (ExitFailure 1) "reject R9" "group 'g'" r9
+      , resultIs "core" (ExitFailure 1) "reject missing-conflict" "" core
+      ]
+  where
+    runVariant duplicateKey hasR8 badBackend rejectGroup =
+      withTempLaraDir
+        (precedenceArtifact badBackend)
+        [("p.policy.lara", precedencePolicy duplicateKey hasR8 rejectGroup)]
+        (runLara . ("check" :) . (: []))
+
+    resultIs name expectedCode outMarker errMarker (code, out, err) =
+      counterexample (name ++ ": " ++ show (code, out, err)) $
+        conjoin
+          [ code === expectedCode
+          , property (if null outMarker then null out else outMarker `isInfixOf` out)
+          , property (if null errMarker then null err else errMarker `isInfixOf` err)
+          ]
+
+precedenceArtifact :: Bool -> String
+precedenceArtifact badBackend =
+  unlines
+    [ "artifact admission_precedence at sha256:admission-precedence"
+    , "policy p"
+    , "use backends " ++ if badBackend then "[bogus@1]" else "[]"
+    ]
+    ++ admissionLeaf "e_reject" "r8" "assumed" "ai-executed"
+    ++ admissionLeaf "e_g1" "group_one" "observed" "user"
+    ++ admissionLeaf "e_g2" "group_two" "attested" "user"
+    ++ admissionLeaf "e_core" "core" "certified" "user"
+    ++ unlines
+      [ "group g = [e_g1, e_g2]"
+      , "arg a_core : supports(core_claim) by leaf(e_core)"
+      ]
+
+precedencePolicy :: Bool -> Bool -> Bool -> String
+precedencePolicy duplicateKey hasR8 rejectGroup =
+  unlines $
+    [ "policy p"
+    , "contrary core core"
+    ]
+      ++ ["admission { " ++ rows ++ " }" | not (null rows)]
+      ++ ["duplicate-reports = " ++ if rejectGroup then "reject" else "quarantine"]
+  where
+    r8Rows = ["(assumed, ai-executed) = reject" | hasR8]
+    duplicateRows =
+      if duplicateKey
+        then ["(observed, user) = admit", "(observed, user) = quarantine"]
+        else []
+    rows = commaJoin (r8Rows ++ duplicateRows)
+    commaJoin [] = ""
+    commaJoin (x : xs) = x ++ concatMap (", " ++) xs
 
 -- | @.lara@ parse error: a malformed artifact exits 2 with nothing on stdout (the
 -- located parse message goes to stderr, sharing the codec error's exit code).
@@ -292,4 +486,9 @@ cliSpecProps =
   , ("cli .lara missing policy exit 2", quickCheckResult prop_cliLaraMissingPolicy)
   , ("cli .lara duplicate argument id exit 2", quickCheckResult prop_cliLaraDuplicateArgId)
   , ("cli .lara dangling attack endpoint exit 2", quickCheckResult prop_cliLaraDanglingAttack)
+  , ("cli .lara duplicate admission key exact source invalid", quickCheckResult prop_cliDuplicateAdmissionKey)
+  , ("cli .lara duplicate LeafId exact source invalid", quickCheckResult prop_cliDuplicateLeafId)
+  , ("cli .lara R8 exact first-leaf diagnostic", quickCheckResult prop_cliAdmissionR8)
+  , ("cli .lara accepted quarantine verdict+audit", quickCheckResult prop_cliAcceptedQuarantineAudit)
+  , ("cli .lara admission precedence invalid>R8>R13>R9>core", quickCheckResult prop_cliAdmissionPrecedenceMatrix)
   ]

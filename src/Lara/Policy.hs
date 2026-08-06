@@ -38,8 +38,6 @@ module Lara.Policy
   , touchingPair
   , firstViolation
   , wfB
-    -- * Admission table (spec §4.3; R8 is outside the executable core)
-  , lookupAdmission
   ) where
 
 import Lara.AST
@@ -173,20 +171,3 @@ wfB :: [Rule] -> [Contrary] -> Bool
 wfB rules contraries = case firstViolation rules contraries of
   Nothing -> True
   Just _ -> False
-
--- ---------------------------------------------------------------------------
--- Admission table (spec §4.3)
--- ---------------------------------------------------------------------------
-
--- | Look up the admission outcome for a @(kind, provenance)@ pair in a
--- policy's admission table (spec §4.3). The R8 admission rejection class is
--- outside the executable checker core (see 'Lara.AST.RejectClass'): admission
--- is applied when the leaf context @Gamma@ is assembled at the program
--- boundary — an admitted leaf enters @Gamma@, a quarantined or rejected leaf
--- does not — so this helper serves that boundary, not 'Lara.Check.checkUnit'.
-lookupAdmission
-  :: [((LeafKind, Provenance), Admission)]
-  -> LeafKind
-  -> Provenance
-  -> Maybe Admission
-lookupAdmission table k p = lookup (k, p) table

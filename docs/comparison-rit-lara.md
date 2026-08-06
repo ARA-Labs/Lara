@@ -6,6 +6,10 @@ commit `c05412a`. “Paper” below means the design and results claimed in `rit
 means the executable path in those repository snapshots. This distinction matters because the paper,
 CLI, and Python API currently enforce different contracts._
 
+_Update 2026-08-05: `policy-admission-calculus-decision.md` freezes the repair described below.
+Its runtime program and companion Lean metatheory program are separate from the byte-level
+`lara-evidence@0.1` work under issue #78, which remains gated._
+
 ## 1. Answer first
 
 Yes. The most useful idea LARA should borrow is **executable grounding for evidence leaves**:
@@ -234,7 +238,26 @@ must, and needs independent audit.
 
 ### Prerequisite — enforce the existing presentation admission policy
 
-Before extending the language, make the current implementation honor `policyAdmission`: reject aborts; admit enters `Gamma`; quarantine removes the leaf **and every dependent argument and attack** before the conditional `checkUnit` run. Removing only the `Gamma` entry is wrong because the surviving leaf occurrence becomes an R1 whole-program rejection.
+The frozen source contract is `policy-admission-calculus-decision.md`. Lookup uses the exact
+`(LeafKind, Provenance)` key and defaults unmatched or omitted rows to `admit`; duplicate admission
+keys and duplicate `LeafId`s are source invalidity. The boundary order is source invalidity, policy
+R8, replay R13, duplicate-group R9, then core rejection. R8 is a valid source judgment distinct from
+group R9 and core R1: it selects the first leaf in source declaration order whose exact key matches a
+`reject` row and uses CLI exit 1, empty stdout, and exactly one deterministic stderr line identifying
+the leaf id, kind, provenance, and matched admission row. Source invalidity uses exit 2/empty stdout;
+replay/group/accepted/core-rejection paths retain core-verdict stdout.
+
+Group consistency reads declared leaves before removal. Policy and group quarantine seeds are
+unioned once, and one combined prune removes leaves, **every dependent argument** (including leaves
+nested in premises and discharges), and attacks with a removed raw endpoint before the conditional
+`checkUnit` run. Removing only `Gamma(l)` is wrong: a surviving occurrence would become an R1
+whole-program rejection, not quarantine or a route to gap. Blocked reporting comes from that same
+prune.
+
+The runtime threads an opaque source carrier binding replay identity, the full declared unit, the
+policy seed, the combined prune, and a canonical audit. The audit is in leaf declaration order;
+`PolicyQuarantine` precedes every causing `GroupQuarantine`, group causes occur once in group order,
+removed arguments/attacks follow declaration order, and each removed leaf has one nonempty cause row.
 
 Deletion is not a sound final status policy. Removing an unavailable attacker can improve a grounded label. Compute a conservative quarantine-relevance component on the declared presentation graph and report `evidence-blocked` for every affected root; preserve the smaller graph's core label only as a conditional diagnostic. Unrelated roots keep their normal status. A future version may use explicit incomplete-argumentation semantics to reduce overblocking.
 
@@ -244,7 +267,8 @@ argument. If accepted partial alternatives become a requirement, design them as 
 refreeze the wire, proofs, corpus, mutations, measurements, and replay bundle separately.
 
 The leaf-certificate seam below should extend the repaired admission boundary, not create a second
-parallel path.
+parallel path. It is gated under issue #78 and is not part of the policy-admission runtime or
+metatheory program.
 
 ### Priority 0 — add a leaf-certificate replay seam
 
@@ -380,7 +404,7 @@ evidence layer, not to the argument kernel:
 
 | Order | Change | Layer | Observable acceptance criterion |
 | --- | --- | --- | --- |
-| 0 | enforce `policyAdmission` at the presentation boundary without changing `lara-core@0.1` | elaboration + driver/reporting | admit enters `Gamma`; reject aborts; quarantine filters dependents, affected roots report `evidence-blocked`, and all-admit inputs preserve current core bytes |
+| 0 | enforce the frozen source admission contract without changing `lara-core@0.1` | source boundary + driver/reporting | default-admit lookup; source/R8/R13/R9/core precedence; one policy+group prune and canonical audit; affected roots report `evidence-blocked`; all-admit inputs preserve current core bytes |
 | 1 | inventory original artifact formats and freeze the evaluation contract | corpus/evaluation | at least two artifacts, ten leaves, two claim families, and two checker families are feasible without hand-authored assertion files |
 | 2 | leaf-certificate checker interface plus closed deterministic checkers | new versioned evidence seam | altering bytes, selector, claimed value, checker version, or certificate rejects before support checking |
 | 3 | traced artifact resolver and replay identity | decode/replay boundary | every object read is runner-reported; missing or changed objects fail preflight; equal identities replay byte-identically |
@@ -388,7 +412,11 @@ evidence layer, not to the argument kernel:
 | 5 | capability reporting and `inspect` / full `verify-artifact` | policy + CLI/reporting | output separates byte checking, conditional core status, public status, and semantic-faithfulness limits |
 | 6 | external registration-receipt contract only | documentation/protocol boundary | local Git order is never labelled preregistration; no history service enters the paper's TCB |
 
-Do not modify `lara-core@0.1` merely to copy vocabulary. Build the evidence seam only if the corpus inventory passes the frozen coverage gate. Evaluate payload-to-result and proposition-to-result faithfulness with the proposal's two-annotator protocol. Evidence admission is at most a secondary contribution; the structured-argumentation calculus remains the paper's center.
+Do not modify `lara-core@0.1` merely to copy vocabulary. The byte-level evidence seam remains gated
+under #78 and should be built only if the corpus inventory passes the frozen coverage gate. Evaluate
+payload-to-result and proposition-to-result faithfulness with the proposal's two-annotator protocol.
+Evidence admission is at most a secondary contribution; the structured-argumentation calculus
+remains the paper's center.
 
 ## 10. Bottom line
 

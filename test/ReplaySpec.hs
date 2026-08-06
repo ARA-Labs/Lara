@@ -1,8 +1,10 @@
 module ReplaySpec (replaySpecProps) where
 
 import Test.QuickCheck
+import Data.List (sort)
 
 import Lara.AST
+import Lara.Elaborate (ElabError (..), SourceInvalid (..), defeasibleSuiteSigma, prepareSource)
 import Lara.Replay
 import Lara.Strict (SExpr (..))
 import Lara.Wire (decodeReplayId, encodeReplayId, parseSExpr, printSExpr)
@@ -58,6 +60,17 @@ plainRule :: [SupportTerm] -> [(QuestionId, SupportTerm)] -> SupportTerm
 plainRule premises discharges =
   SRule (RuleId "outer-rule") [] premises discharges [] AssuranceNone
 
+rawInputFor :: Program -> Policy -> Unit -> Either ReplayError CheckInput
+rawInputFor program policy unit = do
+  replayId <-
+    mkReplayId
+      LaraCoreV01
+      (policyId policy)
+      (programBackends program)
+      (sort (map fst (policyTheories policy)))
+      (programDigest program)
+  mkCheckInput replayId unit
+
 prop_sourceConstruction :: Property
 prop_sourceConstruction =
   fmap
@@ -68,7 +81,7 @@ prop_sourceConstruction =
       , replayTheories (inputReplayId i)
       , replayArtifact (inputReplayId i)
       ))
-    (sourceCheckInput sourceProgram sourcePolicy sourceUnit)
+    (rawInputFor sourceProgram sourcePolicy sourceUnit)
     === Right
       ( LaraCoreV01
       , PolicyId "empirical-v1"
@@ -79,7 +92,7 @@ prop_sourceConstruction =
 
 prop_checkInputPreservesUnitTheoryTable :: Property
 prop_checkInputPreservesUnitTheoryTable =
-  fmap inputUnit (sourceCheckInput sourceProgram sourcePolicy sourceUnit) === Right sourceUnit
+  fmap inputUnit (rawInputFor sourceProgram sourcePolicy sourceUnit) === Right sourceUnit
 
 prop_replayConstructionRequiresCanonicalTheories :: Property
 prop_replayConstructionRequiresCanonicalTheories =
@@ -96,8 +109,14 @@ prop_replayConstructionRequiresCanonicalTheories =
 
 prop_sourcePolicyMismatch :: Property
 prop_sourcePolicyMismatch =
-  sourceCheckInput sourceProgram (sourcePolicy {policyId = PolicyId "other-v1"}) sourceUnit
-    === Left (ReplayPolicyMismatch (PolicyId "empirical-v1") (PolicyId "other-v1"))
+  case prepareSource defeasibleSuiteSigma sourceProgram mismatched of
+    Left (SourceElaborationError (PolicyIdMismatch expected actual)) ->
+      (expected, actual) === (PolicyId "empirical-v1", PolicyId "other-v1")
+    result -> counterexample ("expected source policy mismatch, got " ++ showResult result) False
+  where
+    mismatched = sourcePolicy {policyId = PolicyId "other-v1"}
+    showResult (Left invalid) = show invalid
+    showResult (Right _) = "prepared source"
 
 prop_duplicateUnitTheoryRejected :: Property
 prop_duplicateUnitTheoryRejected =
@@ -131,7 +150,7 @@ prop_theoriesUseUnicodeScalarOrder =
     artifact = Digest "sha256:unicode-order"
     policy = sourcePolicy {policyTheories = [(supplementary, []), (bmp, [])]}
     unit = emptyUnit {unitTheories = policyTheories policy}
-    sourceResult = sourceCheckInput sourceProgram policy unit
+    sourceResult = rawInputFor sourceProgram policy unit
 
 -- | Wire-level quoted-atom golden (PR #44 review C11): a replay-id whose
 -- theories section carries QUOTED non-ASCII digests in canonical Unicode

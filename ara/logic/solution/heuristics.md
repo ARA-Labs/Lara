@@ -89,3 +89,17 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: high
 - **Code ref**: ["lean/Lara/BlockedProgram.lean", "lean/Lara/Driver.lean", "src/Lara/Blocked.hs"]
+
+## H09: Make the trusted wrapper the only public way to reach its input
+- **Rationale**: When a wrapper enforces a policy that its input type cannot carry — an admission table checked over a `Program`+`Policy` before lowering, not a property of the resulting `Unit` — the enforcement is exactly as narrow as the module's export list. Any other exported function that produces the same input is an equal-authority entry point, and documenting it as "the unsafe one" does not close it. Move the bare producer out of the public module into an `.Internal` escape hatch so the wrapper is the only public path, and keep the raw-wire front door (which has no policy to enforce) separately legitimate. `Lara.Elaborate` now exports only `prepareSource`/`runSourceCheck`; the admission-free lowering lives in `Lara.Elaborate.Internal` for tests and golden generators that study the lowering itself.
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["src/Lara/Elaborate.hs", "src/Lara/Elaborate/Internal.hs", "lara.cabal"]
+
+## H10: Export a decoder's well-formedness decision as a proof, not a boolean
+- **Rationale**: A front door that decides an invariant and then discards the decision forces every downstream consumer to re-decide it or silently assume it. Return the invariant instead: `firstDup xs [] = none → xs.Nodup` turns the wire decoder's R14 duplicate-argument-id rejection into a `Decoded.argIdsNodup` field, which the admission carrier (`AlignedAttacks.ids_nodup`) transports into the model where it is load-bearing. It is load-bearing because retention is decided per argument row while attacks are filtered by endpoint *id*: without uniqueness a surviving duplicate keeps an id present after the resolved row was pruned, so the prune retains an attack whose semantic source is gone. With the proof carried, kept id and kept row coincide (`lookupArg_of_mem_nodup`, `retained_attack_source_retained`). Related to [H08]: H08 aligns declarations with derived values, H10 supplies the uniqueness that makes id-based alignment exact.
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["lean/Lara/Driver.lean", "lean/Lara/RawAttack.lean", "lean/Lara/Admission.lean", "lean/AxCheck.lean"]

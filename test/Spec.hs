@@ -23,6 +23,7 @@ import Lara.Kernel
 import Lara.Term (Con (..), Term (..), Var (..))
 
 import AblationSpec (ablationSpecProps)
+import AdmissionSpec (admissionSpecProps)
 import BlockedSpec (blockedSpecProps)
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
@@ -206,6 +207,7 @@ main = do
         ++ [run name act | (name, act) <- mechReviewSpecProps]
         ++ [run name act | (name, act) <- runningExampleSpecProps]
         ++ [run name act | (name, act) <- ablationSpecProps]
+        ++ [run name act | (name, act) <- admissionSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]

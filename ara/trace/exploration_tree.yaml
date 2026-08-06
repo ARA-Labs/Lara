@@ -2561,6 +2561,35 @@ tree:
   also_depends_on:
   - N104
   - N93
+  children:
+  - id: N114
+    type: decision
+    provenance: user
+    timestamp: 2026-08-05T20:57
+    source_refs:
+    - plans/2026-08-05-policy-admission-calculus.md
+    - "issue #77"
+    - "PR #79"
+    - /Users/yfhe/overleaf/ara/lara/src/language.tex
+    - /Users/yfhe/overleaf/ara/lara/src/metatheory.tex
+    title: Formalize policy admission as context construction while repairing issue #77
+    choice: >
+      Execute the policyAdmission repair as both a source conformance fix and a small
+      mechanized calculus extension. Define the policy-to-Gamma judgment, preserve declared
+      and pruned units in one aligned carrier, prove exclusion, audit exactness, all-admit
+      identity, and composition with production quarantine non-promotion, then update the
+      paper after theorem names stabilize. Keep lara-core@0.1 and its wire unchanged.
+    alternatives:
+    - Repair the Haskell .lara path only and leave Gamma construction implicit in the metatheory
+    - Activate the gated byte-level lara-evidence@0.1 checker and manifest milestone in the same change
+    evidence: >
+      The paper already claims policy-relative admitted leaves, while Lara.Elaborate ignores
+      policyAdmission. The user explicitly chose to make the boundary a calculus/metatheory
+      contribution after reviewing the paper and the distinction between context construction
+      and the existing support judgment.
+    status: planned
+    also_depends_on:
+    - N108
 
 - id: N107
   type: experiment
@@ -2708,4 +2737,220 @@ tree:
     - fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp
     - test/DifferentialSpec.hs
     status: resolved
+  status: resolved
+
+- id: N115
+  type: decision
+  provenance: user-revised
+  timestamp: 2026-08-05T22:50
+  parent: N114
+  also_depends_on:
+  - N110
+  - N107
+  title: Split issue 77 runtime repair from dependent admission metatheory after engineering review
+  choice: >
+    Deliver issue #77 as a runtime source-conformance plan with one hidden source carrier,
+    typed invalid-versus-R8 outcomes, declared-table group evaluation, one canonical combined
+    prune/audit, and the exact invalid > R8 > R13 > R9 > core precedence. Deliver raw/resolved
+    Lean attack alignment, a declarative admission relation with evaluator correspondence, a
+    dedicated Haskell/Lean admission differential, and paper changes in a linked dependent plan.
+    Preserve lara-core@0.1 and require the runtime plan to merge independently.
+  alternatives:
+  - Keep the original 37-path runtime/proof/paper plan as one delivery unit
+  - Repair the Haskell source path only and leave policy-relative context construction implicit
+  evidence:
+  - plans/2026-08-05-policy-admission-calculus.md
+  - plans/2026-08-05-policy-admission-metatheory.md
+  - O40
+  - O41
+  status: resolved
+
+- id: N116
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-06
+  parent: N115
+  also_depends_on:
+  - N93
+  - N104
+  title: Deliver the policy admission metatheory, differential, and paper gates
+  choice: >
+    Implement the metatheory plan's three code-repository tasks as three
+    commits: (1) factor shared raw attack identity into Lara.RawAttack with
+    the filter/resolution commutation proof; (2) mechanize the declarative
+    admission judgment and evaluator in Lara.Admission with the thirteen
+    AxCheck-registered theorems, including source justified non-promotion
+    composed with the production blocking theorem; (3) add the dedicated
+    Haskell/Lean semantic admission differential over test-only fixtures,
+    using production admission/prune primitives on the Haskell side and the
+    proved evaluator on the Lean side. Lean proves the semantic judgment; the
+    differential validates those primitives' semantic outcome and audit
+    encoding. It does not exercise or prove the .lara parser, elaborator,
+    prepareSource/runSourceCheck seam, or final public verdict; production
+    source behavior is tested separately in Haskell. Paper edits are a
+    separate paper-repository commit.
+  alternatives:
+  - Port the admission semantics to Lean after the differential, risking misaligned models
+  - Have the differential reimplement the audit in the harness instead of exercising production functions
+  evidence:
+  - plans/2026-08-05-policy-admission-metatheory.md
+  - ara/evidence/results/policy_admission_boundary.md
+  status: resolved
+
+- id: N117
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-06
+  parent: N116
+  also_depends_on:
+  - N93
+  - N104
+  title: Harden admission context identity and semantic differential after review
+  choice: >
+    Resolve all eight independent-review findings at their source: retain the
+    source-aware SourceResult in artifact generation and fail closed when a
+    legacy core artifact would discard admission; require ordered metadata/leaf
+    alignment in the Lean judgment and derive Gamma_checked from the exact
+    checker leaf table; strengthen all-admit identity through the actual
+    checkUnit outcome; restore duplicate-key precedence; close fixture list
+    arities and tags; drive both adapters from one exact four-class manifest
+    with per-driver codec diagnostics; and explicitly separate the test-only
+    semantic differential from production prepareSource/runSourceCheck tests.
+  alternatives:
+  - Preserve the broad source-differential claim despite only comparing admission/audit primitives
+  - Keep unordered fixture alignment and normalize only one adapter's audit
+  evidence:
+  - https://github.com/EYH0602/lara/pull/81#discussion_r3730226506
+  - fixtures/admission/MANIFEST
+  - lean/Lara/Admission.lean
+  - test/AdmissionSpec.hs
+  - ara/evidence/results/policy_admission_boundary.md
+  status: resolved
+
+- id: N118
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-06
+  parent: N117
+  title: Make admission acceptance carry validated raw attack identity
+  choice: >
+    Close the final soundness and protocol gaps found in review. Admission now
+    accepts semantic attacks only through an AlignedAttacks carrier proving
+    resolveAttacks rawArgs rawAttacks = ok resolvedAttacks; the decoded wire
+    unit constructs that proof, accepted-result theorems recover it, and
+    restrictiveness proves subset preservation for retained semantic attacks,
+    not only the raw keep predicate. The test-only expected-outcome grammar is
+    validated recursively before evaluation in both adapters, with a manifest
+    fixture for malformed nested payloads. Legacy core export remains available
+    for all-admit group-only quarantine (already representable in
+    lara-core@0.1) and fails closed only when policy admission removed material.
+    Paper and evidence counts are derived from the executed 20-fixture
+    differential and 230-property Haskell suite rather than retained literals.
+  alternatives:
+  - Keep raw and resolved attacks as independent equal-length lists and weaken the paper claim
+  - Treat malformed expected payloads as ordinary oracle mismatches
+  - Reject every nonempty audit from the legacy core export, including representable group-only pruning
+  evidence:
+  - lean/Lara/RawAttack.lean
+  - lean/Lara/Admission.lean
+  - lean/Lara/Driver.lean
+  - fixtures/admission/MANIFEST
+  - test/Lara/AdmissionFixture.hs
+  - test/AdmissionSpec.hs
+  - ara/evidence/results/policy_admission_boundary.md
+  status: resolved
+
+- id: N119
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-06T18:14
+  parent: N118
+  title: Verify and publish the complete policy admission boundary
+  result: >
+    Final local gates passed at code head 5d661fb: the Haskell suite registered
+    230 properties; Lean built with the admission driver and the AxCheck audit
+    stayed within the standard axiom trio; the core differential remained
+    436/436 positive and 54/54 negative; the exact admission manifest produced
+    15/15 byte-identical semantic outcomes and 5/5 matching codec rejections;
+    replay, tamper, and freeze-bundle checks passed without committed core,
+    replay, corpus, frozen, or golden byte changes. Independent final review
+    reported no P0/P1 findings. Paper head 16f82b9 built to 30 pages and its
+    mechanization table was visually verified within page margins. Both heads
+    were pushed and PR #81 was updated for re-review. GitHub did not dispatch
+    hosted checks because Actions was in major outage incident qcvjkzcs7j74.
+  evidence:
+  - ara/evidence/results/policy_admission_boundary.md
+  - https://github.com/EYH0602/lara/pull/81
+  - https://www.githubstatus.com/incidents/qcvjkzcs7j74
+  - /Users/yfhe/overleaf/ara/lara/build/main.pdf
+  status: resolved
+
+- id: N120
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-06T21:30
+  parent: N119
+  title: Repair the second-round review findings on the admission boundary
+  choice: >
+    Fix all five findings of the follow-up review at their source rather than
+    documenting them as accepted limits. (1) The presentation lowering left the
+    public API: elaborate moved to a new exposed escape-hatch module
+    Lara.Elaborate.Internal, so the only public Program+Policy -> verdict path
+    is prepareSource/runSourceCheck and the elaborate -> mkReplayId ->
+    mkCheckInput -> runCheck bypass is no longer reachable from Lara.Elaborate.
+    (2) SourceResult now retains the Maybe LocatedRejection and the checked
+    argument ids that runCheckWithPrune produced, and sourceResultJsonValue
+    renders class/stage/constituent for a policy-pruned rejection instead of an
+    empty messages list; constituent indices are named from the checked, not
+    declared, argument list. (3) AlignedAttacks carries ids_nodup, the R14
+    argument-id uniqueness the wire decoder now exports as a proof
+    (firstDup_none_nodup, Decoded.argIdsNodup) rather than a discarded boolean;
+    retained_attack_source_retained uses it to show a kept attack's resolved
+    endpoints are kept arguments. (4) The all-admit docstring, metatheory plan,
+    and paper-Lean name map were narrowed to what is actually proved -- prune,
+    blocked queries, and the checkUnit outcome -- with R9/R13 and the emitted
+    public verdict labelled Haskell conformance evidence. (5) The differential
+    harness always prints both drivers' exit codes and stderr on mismatch.
+  alternatives:
+  - Keep elaborate public and document the admission bypass as a caller obligation
+  - Render only the driver stderr messages for policy-pruned rejections
+  - Leave R14 uniqueness as a decoder-only check and assume it inside the admission model
+  - Retain the "verdict identity" wording and qualify it only in the paper
+  evidence:
+  - src/Lara/Elaborate/Internal.hs
+  - src/Lara/Elaborate.hs
+  - src/Lara/ExpectedJson.hs
+  - test/AdmissionSpec.hs
+  - lean/Lara/RawAttack.lean
+  - lean/Lara/Driver.lean
+  - lean/Lara/Admission.lean
+  - lean/AxCheck.lean
+  - scripts/admission-differential.sh
+  - plans/2026-08-05-policy-admission-metatheory.md
+  - docs/paper-lean-name-map.md
+  status: resolved
+
+- id: N121
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-06T21:45
+  parent: N120
+  title: Re-run every gate the second-round repairs could disturb
+  result: >
+    All gates green after the repairs. cabal test all PASS (1/1 suites),
+    including the new property "admission pruned rejection keeps its located
+    stage/constituent", which pins class R1, stage support, and constituent
+    {argument a_bad, index 0} -- checked index 0 versus declared index 1,
+    confirming the constituent is named from the pruned list. lake build PASS
+    including admission-driver; AxCheck reported only propext, Classical.choice,
+    and Quot.sound with no sorryAx across the two new declarations
+    (RawAttack.lookupArg_of_mem_nodup, Admission.retained_attack_source_retained)
+    plus Driver.firstDup_none_nodup. scripts/differential.sh unchanged at 436/436
+    positive and 54/54 negative. scripts/admission-differential.sh 20/20.
+    The harness fix was verified adversarially rather than by inspection: an
+    injected wrong oracle in reject-first-leaf.sexp previously printed an empty
+    report, and now prints exit 1/1 plus both drivers' stderr including the
+    computed-versus-expected outcome lines; the fixture was restored from git.
+  evidence:
+  - ara/evidence/results/policy_admission_review_round2.md
   status: resolved

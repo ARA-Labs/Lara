@@ -13,7 +13,6 @@ module Lara.Replay
   , ReplayFailure (..)
   , mkReplayId
   , mkCheckInput
-  , sourceCheckInput
   , runtimeReplayFailure
   , replayFailureMessage
   , replayErrorMessage
@@ -88,20 +87,6 @@ mkCheckInput replayId unit =
   where
     theoryKeys = map fst (unitTheories unit)
     canonicalUnitTheories = sortBy compareTheoryDigest theoryKeys
-
-sourceCheckInput :: Program -> Policy -> Unit -> Either ReplayError CheckInput
-sourceCheckInput program policy unit
-  | programPolicy program /= policyId policy =
-      Left (ReplayPolicyMismatch (programPolicy program) (policyId policy))
-  | otherwise = do
-      replayId <-
-        mkReplayId
-          LaraCoreV01
-          (policyId policy)
-          (programBackends program)
-          (sortBy compareTheoryDigest (map fst (policyTheories policy)))
-          (programDigest program)
-      mkCheckInput replayId unit
 
 runtimeReplayFailure :: CheckInput -> Maybe ReplayFailure
 runtimeReplayFailure input =

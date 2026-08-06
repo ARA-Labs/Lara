@@ -5,31 +5,23 @@ module TestReplay
 
 import Lara.AST
 import Lara.Replay
+import Data.List (sort)
 
 testReplayId :: Unit -> ReplayId
 testReplayId = inputReplayId . testCheckInput
 
 testCheckInput :: Unit -> CheckInput
 testCheckInput unit =
-  case sourceCheckInput program policy unit of
+  case build of
     Right input -> input
     Left err -> error ("invalid conformance replay fixture: " ++ replayErrorMessage err)
   where
-    program =
-      Program
-        { programArtifact = "conformance-corpus"
-        , programDigest = Digest "sha256:conformance-corpus-v1"
-        , programPolicy = PolicyId "conformance-v1"
-        , programBackends = [(BackendId "nd", "1")]
-        , programDecls = []
-        }
-    policy =
-      Policy
-        { policyId = PolicyId "conformance-v1"
-        , policyRules = []
-        , policyContraries = []
-        , policyExceptions = []
-        , policyAdmission = []
-        , policyTheories = unitTheories unit
-        , policyGroupMode = QuarantineOnConflict
-        }
+    build = do
+      replayId <-
+        mkReplayId
+          LaraCoreV01
+          (PolicyId "conformance-v1")
+          [(BackendId "nd", "1")]
+          (sort (map fst (unitTheories unit)))
+          (Digest "sha256:conformance-corpus-v1")
+      mkCheckInput replayId unit

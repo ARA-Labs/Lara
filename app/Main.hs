@@ -34,16 +34,21 @@ import System.FilePath (takeDirectory, takeExtension, (</>), (<.>))
 import System.IO (hPutStrLn, stderr)
 
 import Lara.AST (PolicyId (..), programPolicy)
+import Lara.Admission
+  ( admissionAuditIsEmpty
+  , renderAdmissionAudit
+  , renderAdmissionRejection
+  )
 import Lara.Driver (rejectionDiagnostics, runCheck)
 import Lara.Elaborate
-  ( elaborate
-  , elabErrorMessage
+  ( PreparedSource (..)
   , defeasibleSuiteSigma
-  , registryOf
-  )
-import Lara.Replay
-  ( replayErrorMessage
-  , sourceCheckInput
+  , prepareSource
+  , renderSourceInvalid
+  , runSourceCheck
+  , sourceResultAudit
+  , sourceResultDiagnostics
+  , sourceResultVerdict
   )
 import qualified Lara.Syntax as Syntax
 import Lara.Wire
@@ -119,14 +124,22 @@ checkLara file = do
               case Syntax.parsePolicy polText of
                 Left pe -> die2 (locatedParseError policyPath pe)
                 Right pol ->
-                  case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
-                    Left ee -> die2 ("lara: elaboration error: " ++ elabErrorMessage ee)
-                    Right unit ->
-                      case sourceCheckInput prog pol unit of
-                        Left err -> die2 ("lara: replay identity error: " ++ replayErrorMessage err)
-                        Right input -> do
-                          mapM_ (hPutStrLn stderr) (rejectionDiagnostics input)
-                          emitVerdict (runCheck input)
+                  case prepareSource defeasibleSuiteSigma prog pol of
+                    Left invalid -> die2 ("lara: source invalid: " ++ renderSourceInvalid invalid)
+                    Right (SourceRejected rejection) -> do
+                      hPutStrLn stderr ("lara: " ++ renderAdmissionRejection rejection)
+                      exitWith (ExitFailure 1)
+                    Right (SourceAccepted input) -> do
+                      let result = runSourceCheck input
+                          audit = sourceResultAudit result
+                          verdict = sourceResultVerdict result
+                      mapM_ (hPutStrLn stderr) (sourceResultDiagnostics result)
+                      case verdictOutcome verdict of
+                        Accept{}
+                          | not (admissionAuditIsEmpty audit) ->
+                              hPutStrLn stderr ("lara: " ++ renderAdmissionAudit audit)
+                        _ -> pure ()
+                      emitVerdict verdict
 
 -- | Co-located policy resolution (D-Arch-2): read @\<policyId\>.policy.lara@ from
 -- the /same directory/ as the artifact. E.g. @examples\/A-…​.lara@ declaring

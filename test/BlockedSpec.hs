@@ -26,13 +26,20 @@ module BlockedSpec (blockedSpecProps) where
 import qualified Data.Set as Set
 import Test.QuickCheck
 
-import Lara.AST (Unit (..))
+import Lara.AST
+  ( ArgId (..)
+  , GroupConflictMode (..)
+  , LeafId (..)
+  , SupportTerm (..)
+  , Unit (..)
+  )
 import Lara.Blocked
   ( blockedQueries
   , blockedSeed
   , blockedSet
   , declaredEdge
   , prune
+  , pruneWithPolicySeed
   , pruneChecked
   , pruneDeclared
   , retainedEdge
@@ -41,6 +48,7 @@ import Lara.Blocked
 import Lara.Check (checkUnit, cuNodes)
 import Lara.Driver (buildCertOk, buildGamma)
 import Lara.Grounded (AF (..), claimSupportFor, labelC)
+import Lara.Prop (Pred (..), Prop (..))
 
 import CheckSpec (quarantineFixtures, unquarantinedFixtures)
 
@@ -267,6 +275,7 @@ blockedSpecProps =
   , ("blocked seed obligations on real units", quickCheckResult prop_seedObligations)
   , ("blocked unquarantined units block nothing", quickCheckResult prop_noQuarantine)
   , ("blocked queries are support-driven", quickCheckResult prop_blockedSupported)
+  , ("blocked prune accepts an explicit policy seed", quickCheckResult prop_explicitPolicySeed)
   ]
 
 -- The unit-level properties run over the in-memory "CheckSpec" quarantine
@@ -282,3 +291,36 @@ prop_noQuarantine =
 prop_blockedSupported :: Property
 prop_blockedSupported =
   once (conjoin [blockedQueriesAreSupported n u | (n, u) <- quarantineFixtures])
+
+-- | Policy quarantine enters the same 'Prune' carrier as group quarantine.
+-- With no groups at all, the explicit seed alone removes its leaf and every
+-- dependent argument while retaining declaration order in both projections.
+prop_explicitPolicySeed :: Property
+prop_explicitPolicySeed =
+  once $
+    let checked = pruneChecked (pruneWithPolicySeed [LeafId "policy"] policySeedUnit)
+     in conjoin
+          [ unitLeaves checked === [(LeafId "kept", Prop (Pred "kept") [])]
+          , unitArgs checked === [(ArgId "a_kept", SLeaf (LeafId "kept"))]
+          ]
+
+policySeedUnit :: Unit
+policySeedUnit =
+  Unit
+    { unitRules = []
+    , unitContraries = []
+    , unitExceptions = []
+    , unitTheories = []
+    , unitLeaves =
+        [ (LeafId "policy", Prop (Pred "policy") [])
+        , (LeafId "kept", Prop (Pred "kept") [])
+        ]
+    , unitArgs =
+        [ (ArgId "a_policy", SLeaf (LeafId "policy"))
+        , (ArgId "a_kept", SLeaf (LeafId "kept"))
+        ]
+    , unitAttacks = []
+    , unitQueries = []
+    , unitGroups = []
+    , unitGroupMode = QuarantineOnConflict
+    }

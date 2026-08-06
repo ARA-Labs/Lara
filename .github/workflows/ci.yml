@@ -105,6 +105,9 @@ jobs:
       - name: Haskell-Lean differential (fixtures, examples, and bundles)
         run: bash scripts/differential.sh
 
+      - name: Haskell-Lean semantic admission differential (test fixtures)
+        run: bash scripts/admission-differential.sh
+
   lean:
     name: Lean (lake build)
     runs-on: ubuntu-latest

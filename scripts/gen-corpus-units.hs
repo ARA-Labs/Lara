@@ -28,9 +28,17 @@
 module Main (main) where
 
 import Data.List (isPrefixOf)
-import Lara.Elaborate (defeasibleSuiteSigma, elabErrorMessage, elaborate, registryOf)
+import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
+import Lara.Elaborate
+  ( PreparedSource (..)
+  , defeasibleSuiteSigma
+  , prepareSource
+  , renderSourceInvalid
+  , runSourceCheck
+  , sourceResultCheckInput
+  )
 import Lara.ExpectedJson (expectedJson)
-import Lara.Replay (CheckInput, replayErrorMessage, sourceCheckInput)
+import Lara.Replay (CheckInput)
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Wire (encodeCheckInput, printSExpr)
 import System.FilePath ((</>))
@@ -63,11 +71,19 @@ main = do
           expectedPath = dir </> "expected.json"
       progText <- readFile unitPath
       prog <- either (fail . ((unitPath ++ ": parse: ") ++) . show) pure (parseProgram progText)
-      input <- case elaborate defeasibleSuiteSigma (registryOf policy) prog policy of
-        Left err -> fail (unitPath ++ ": elaborate: " ++ elabErrorMessage err)
-        Right unit ->
-          either (fail . ((unitPath ++ ": replay: ") ++) . replayErrorMessage) pure
-            (sourceCheckInput prog policy unit)
+      input <- case prepareSource defeasibleSuiteSigma prog policy of
+        Left invalid -> fail (unitPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
+        Right (SourceRejected rejection) ->
+          fail (unitPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+        Right (SourceAccepted source) ->
+          case sourceResultCheckInput (runSourceCheck source) of
+            Left audit ->
+              fail
+                ( unitPath
+                    ++ ": legacy core artifacts cannot encode source admission: "
+                    ++ renderAdmissionAudit audit
+                )
+            Right input -> pure input
       writeCore corePath input
       writeFile expectedPath (expectedJson input)
       putStrLn ("wrote " ++ expectedPath)

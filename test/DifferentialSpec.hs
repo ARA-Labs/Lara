@@ -34,9 +34,12 @@
 -- run from the package root (as @cabal test@ does).
 module DifferentialSpec (differentialSpecProps) where
 
-import Data.List (stripPrefix)
+import Data.List (isInfixOf, isPrefixOf, isSuffixOf, nub, sort, stripPrefix)
+import System.Directory (listDirectory)
 
 import Test.QuickCheck
+
+import Lara.AdmissionFixture (admissionOutcome)
 
 import Lara.AST
   ( AtomPat (..)
@@ -455,6 +458,129 @@ prop_stressAccept = once (ioProperty check)
               ]
 
 -- ---------------------------------------------------------------------------
+-- Source admission oracle (metatheory plan Task 3)
+-- ---------------------------------------------------------------------------
+
+-- | The manifest is the exact admission corpus and declares each outcome
+-- class. Its filename set must equal the directory's @*.sexp@ set, so a
+-- missing or unlisted fixture cannot silently change differential coverage.
+-- Every non-codec fixture is also verified against its committed @expected@
+-- section by the shared Haskell semantic adapter. The proved Lean evaluator
+-- is checked byte-exactly by @scripts/admission-differential.sh@; production
+-- source/checker behavior is covered separately in @AdmissionSpec@.
+prop_admissionOracle :: Property
+prop_admissionOracle = once (ioProperty runChecks)
+  where
+    manifestPath = "fixtures/admission/MANIFEST"
+
+    runChecks :: IO Property
+    runChecks = do
+      manifestText <- readFile manifestPath
+      directoryEntries <- listDirectory "fixtures/admission"
+      let emptyMarkerRows =
+            [ ("empty Haskell marker", "empty-hs.sexp\tcodec-reject\t\tlean marker")
+            , ("empty Lean marker", "empty-lean.sexp\tcodec-reject\thaskell marker\t")
+            ]
+          acceptedEmptyMarkers =
+            [ label
+            | (label, row) <- emptyMarkerRows
+            , Right _ <- [parseManifest row]
+            ]
+      if not (null acceptedEmptyMarkers)
+        then
+          pure
+            ( counterexample
+                ("manifest parser accepted " ++ show acceptedEmptyMarkers)
+                False
+            )
+        else
+          case parseManifest manifestText of
+            Left err -> pure (counterexample err False)
+            Right cases -> checkCases directoryEntries cases
+
+    checkCases directoryEntries cases = do
+      let names = map (\(name, _, _, _) -> name) cases
+          outcomeClasses = map (\(_, outcomeClass, _, _) -> outcomeClass) cases
+          requiredClasses = ["accepted", "rejected", "invalid", "codec-reject"]
+          missingClasses = filter (`notElem` outcomeClasses) requiredClasses
+          manifestFiles = sort (map ("fixtures/admission/" ++) names)
+          actualFiles =
+            sort
+              ( map ("fixtures/admission/" ++)
+                  (filter (".sexp" `isSuffixOf`) directoryEntries)
+              )
+          duplicateNames = length names /= length (nub names)
+      if not (null missingClasses)
+        then pure (counterexample (manifestPath ++ ": missing outcome classes " ++ show missingClasses) False)
+        else if duplicateNames
+        then pure (counterexample (manifestPath ++ ": duplicate fixture name") False)
+        else
+          if manifestFiles /= actualFiles
+            then
+              pure
+                ( counterexample
+                    ( manifestPath
+                        ++ " does not match fixtures/admission/*.sexp\nmanifest: "
+                        ++ show manifestFiles
+                        ++ "\nactual: "
+                        ++ show actualFiles
+                    )
+                    False
+                )
+            else conjoin <$> mapM checkOne cases
+
+    parseManifest :: String -> Either String [(FilePath, String, String, String)]
+    parseManifest input =
+      fmap foldRows (mapM parseRow (zip [1 :: Int ..] (lines input)))
+      where
+        foldRows = foldr (\row rows -> maybe rows (: rows) row) []
+        parseRow (lineNo, line)
+          | null line = Right Nothing
+          | "#" `isPrefixOf` line = Right Nothing
+          | otherwise =
+              case splitTabs line of
+                [name, outcomeClass, hsMarker, leanMarker]
+                  | not (".sexp" `isSuffixOf` name) ->
+                      Left (manifestPath ++ ":" ++ show lineNo ++ ": fixture must end in .sexp")
+                  | outcomeClass `notElem` ["accepted", "rejected", "invalid", "codec-reject"] ->
+                      Left (manifestPath ++ ":" ++ show lineNo ++ ": unknown outcome class " ++ outcomeClass)
+                  | null hsMarker || null leanMarker ->
+                      Left (manifestPath ++ ":" ++ show lineNo ++ ": empty stderr marker")
+                  | outcomeClass == "codec-reject" && (hsMarker == "-" || leanMarker == "-") ->
+                      Left (manifestPath ++ ":" ++ show lineNo ++ ": codec-reject lacks stderr markers")
+                  | outcomeClass /= "codec-reject" && (hsMarker /= "-" || leanMarker /= "-") ->
+                      Left (manifestPath ++ ":" ++ show lineNo ++ ": non-codec row carries stderr markers")
+                  | otherwise -> Right (Just (name, outcomeClass, hsMarker, leanMarker))
+                _ -> Left (manifestPath ++ ":" ++ show lineNo ++ ": expected four tab-separated fields")
+
+        splitTabs [] = [""]
+        splitTabs value =
+          case break (== '\t') value of
+            (field, []) -> [field]
+            (field, _ : rest) -> field : splitTabs rest
+
+    checkOne :: (FilePath, String, String, String) -> IO Property
+    checkOne (name, outcomeClass, hsMarker, _) = do
+      let path = "fixtures/admission/" ++ name
+      contents <- readFile path
+      pure $
+        case (outcomeClass, admissionOutcome contents) of
+          ("codec-reject", Left err) ->
+            let diagnostic = "check-admission: codec error at " ++ err
+             in counterexample (path ++ ": wrong codec diagnostic\n" ++ diagnostic) $
+                  property (hsMarker `isInfixOf` diagnostic)
+          ("codec-reject", Right _) ->
+            counterexample (path ++ ": expected a codec rejection") False
+          (_, Left err) -> counterexample (path ++ "\n" ++ err) False
+          (_, Right (computed, expected)) ->
+            conjoin
+              [ counterexample (path ++ "\ncomputed: " ++ computed ++ "\nexpected: " ++ expected) $
+                  computed === expected
+              , counterexample (path ++ ": expected outcome class " ++ outcomeClass ++ "\n" ++ computed) $
+                  property (("(" ++ outcomeClass ++ " ") `isPrefixOf` computed)
+              ]
+
+-- ---------------------------------------------------------------------------
 -- Index
 -- ---------------------------------------------------------------------------
 
@@ -465,4 +591,5 @@ differentialSpecProps =
   , ("differential corpus fixtures canonical", quickCheckResult prop_corpusCanonical)
   , ("differential numeric canonicalization anchor retains surface variants", quickCheckResult prop_numericCanonicalizationAnchor)
   , ("differential 120-arg stress accept", quickCheckResult prop_stressAccept)
+  , ("source admission fixtures match their committed oracles", quickCheckResult prop_admissionOracle)
   ]

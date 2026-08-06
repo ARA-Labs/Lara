@@ -488,3 +488,26 @@ entries:
     - "No new research node, claim, heuristic, or observation: this turn was publication and review follow-up after the user explicitly authorized commit/push/reply. Per the skip rule, git operations themselves are session-only actions."
     - "Updated the existing session rather than creating a second same-day session because this is the direct operational continuation of turn 1. The earlier external-authority open thread is now resolved; current state is PR awaiting re-review and issue #80 awaiting merge."
     - "Did not self-resolve reviewer threads. Individual evidence replies and a top-level summary were posted; reviewer resolution remains the independent review signal."
+
+- turn: "2026-08-05_003#5"
+  notes:
+    - "Routed N115 DIRECT as user-revised: the user repeatedly selected explicit engineering alternatives, including the plan split and the complete option for every behavior/proof/test boundary."
+    - "Crystallized O40 and O41 via verbal affirmation into calculus.md section 3. The reviewed runtime plan now commits to frozen-core preservation, structural quarantine, combined group/policy context construction, and conservative evidence-blocked reporting."
+    - "Revised the existing calculus policy paragraph instead of creating a second architecture file: admission is part of the source-to-core calculus boundary, and duplicate canonical descriptions would drift."
+    - "Did not promote O42: its abstract byte-level evidence-checker theorem remains gated outside both reviewed plans; no closure signal fired."
+    - "No claim status changed and no experiment was logged: this turn approved implementation architecture and produced plans, not implementation or proof evidence."
+
+- turn: "2026-08-06_001#1"
+  notes:
+    - "Routed N116-N118 DIRECT as implementation decisions and N119 DIRECT as an experiment: this turn produced committed code, theorem audits, exact differential results, paper artifacts, and published heads rather than a new interpretive claim."
+    - "Did not stage or crystallize a new observation. O42 remains unpromoted because no researcher affirmation or downstream abstract evidence-checker commitment occurred; it is only one session-day old, so no stale transition applies."
+    - "Made no Stage-4 logic revision: the strengthened theorems and corrected conformance wording implement the already-settled policy-admission architecture recorded by N115-N118."
+    - "Kept hosted CI and GitHub re-review as external open threads. GitHub status incident qcvjkzcs7j74 reports an Actions major outage, so the record distinguishes complete local gates from an undispatched hosted run at 5d661fb."
+- turn: "2026-08-06_001#2"
+  notes:
+    - "Routed N120 DIRECT as a decision and N121 DIRECT as an experiment, mirroring N117's treatment of the first review round: the turn produced code, proofs, and gate results, not a new research question."
+    - "Crystallized O45 -> H09 and O47 -> H10 via artifact-commitment: both are shipped structural changes with passing gates and forensic code refs, matching how O44 -> H08 was handled. Filed them as heuristics, not claims: they are engineering design rules about trusted boundaries, not falsifiable assertions about argumentation semantics."
+    - "Did NOT crystallize O46 or O48. For O46 the harness change IS the observation rather than something depending on it, so artifact-commitment does not cleanly fire; for O48 the same, plus one instance is thin ground for a general claim about mechanization prose. Both stay staged."
+    - "Kept H10 separate from H08 rather than editing H08: H08 is about aligning declarations with derived values, H10 about carrying the uniqueness that makes id-based alignment exact. Cross-referenced instead of merged."
+    - "Made no Stage-4 logic revision. Checked claims.md specifically for an all-admit verdict-identity assertion that finding 4 would have required narrowing -- there is none; the overstatement lived only in the Lean docstring, the metatheory plan, and the name map, all outside logic/."
+    - "Appended a new evidence result file rather than editing policy_admission_boundary.md: evidence/ is append-only, and the prior file's 15/15 + 5/5 codec figures remain correct for the run they record."

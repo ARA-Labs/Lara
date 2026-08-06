@@ -828,9 +828,9 @@ observations:
   bound_to:
   - N106
   - N93
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/calculus.md:3
+  crystallized_via: verbal-affirmation
   stale: false
 - id: O41
   timestamp: 2026-08-05T01:54
@@ -849,9 +849,9 @@ observations:
   bound_to:
   - N107
   - N106
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/calculus.md:3
+  crystallized_via: verbal-affirmation
   stale: false
 - id: O42
   timestamp: 2026-08-05T01:54
@@ -904,4 +904,82 @@ observations:
   promoted: true
   promoted_to: logic/solution/heuristics.md:H08
   crystallized_via: artifact-commitment
+  stale: false
+- id: O45
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    A trusted boundary is only as narrow as its module's export list. If the wrapper enforces a
+    policy on an input that some other public function also produces, that function is an equal
+    entry point and the policy is unenforced. Admission is a property of the presentation-to-Unit
+    path, so the bare lowering must leave the public API entirely, not merely be documented as the
+    unsafe option.
+  context: >
+    Second-round review found elaborate -> mkReplayId -> mkCheckInput -> runCheck still accepted a
+    source that prepareSource rejects as R8, despite prepareSource being documented as the front
+    door (N120).
+  potential_type: heuristic
+  bound_to:
+  - N120
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H09
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O46
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    A differential harness that captures each driver's stderr to a temp directory must print it on
+    every failure branch, not only on the branches with a tailored message. The branch that fires
+    on an unanticipated failure shape is exactly the one without a message, and the cleanup trap
+    deletes the capture, so an unprinted stderr is a permanently lost diagnostic.
+  context: >
+    A valid-but-wrong fixture oracle made both drivers exit 1 with explanatory stderr and empty
+    stdout; the harness fell through to the "wrong outcome class" branch and printed nothing (N120).
+  potential_type: heuristic
+  bound_to:
+  - N120
+  - N121
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O47
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    Well-formedness a decoder already decides should be exported as a proof on its output rather
+    than discarded as a boolean and re-assumed downstream. R14 argument-id uniqueness is the
+    example: the prune decides retention per argument row but filters attacks by endpoint id, so
+    without uniqueness a surviving duplicate keeps an id "present" after the resolved row was
+    removed, retaining an attack whose semantic source is gone.
+  context: >
+    A compiled duplicate-ArgId witness showed evaluateAdmission accepting and retaining exactly
+    that attack; the wire decoder rejected duplicates but AlignedAttacks carried no such
+    invariant (N120).
+  potential_type: heuristic
+  bound_to:
+  - N118
+  - N120
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H10
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O48
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    A mechanized result must be restated in prose at the granularity its statement actually proves.
+    An "identity" claim that names pipeline stages outside the model -- here the R13 preflight, the
+    R9 group boundary, and the emitted public verdict -- is an overstatement even when the informal
+    argument for it is sound, because a reader cites the theorem, not the argument.
+  context: >
+    The all-admit docstring and metatheory plan claimed verdict identity while the theorem proved
+    prune plus blocked-query equalities and a separate theorem proved the checkUnit outcome (N120).
+  potential_type: claim
+  bound_to:
+  - N120
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
   stale: false

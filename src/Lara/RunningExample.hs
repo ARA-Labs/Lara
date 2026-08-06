@@ -12,9 +12,8 @@
 -- end lowers to the undercut @d1@, and the claim flips to @defeated@.
 --
 -- The rendered document reproduces the @lara check@ CLI bytes exactly: the
--- CLI prints @printSExpr (encodeVerdict (runCheck input))@ plus one newline
--- ("app\/Main.hs"), and 'checkRun' builds the same 'Lara.Replay.CheckInput'
--- through the same parse → co-located policy → elaborate → validate path.
+-- CLI prints @printSExpr (encodeVerdict verdict)@ plus one newline
+-- ("app\/Main.hs"), and 'checkRun' uses the same opaque prepared source path.
 -- The freshness test ("test\/RunningExampleSpec.hs") re-renders and requires
 -- byte equality with the committed golden
 -- (@measurements\/frozen\/running-example.txt@), the house discipline for
@@ -28,9 +27,15 @@ module Lara.RunningExample
   ) where
 
 import Lara.AST (PolicyId (..), programPolicy)
-import Lara.Driver (runCheck)
-import Lara.Elaborate (defeasibleSuiteSigma, elabErrorMessage, elaborate, registryOf)
-import Lara.Replay (replayErrorMessage, sourceCheckInput)
+import Lara.Admission (renderAdmissionRejection)
+import Lara.Elaborate
+  ( PreparedSource (..)
+  , defeasibleSuiteSigma
+  , prepareSource
+  , renderSourceInvalid
+  , runSourceCheck
+  , sourceResultVerdict
+  )
 import qualified Lara.Syntax as Syntax
 import Lara.Wire (Outcome (..), Verdict (..), encodeVerdict, printSExpr)
 
@@ -66,11 +71,11 @@ checkRun :: String -> String -> Either String Verdict
 checkRun progText polText = do
   prog <- either (Left . ("parse error: " ++) . Syntax.peReason) Right (Syntax.parseProgram progText)
   pol <- either (Left . ("policy parse error: " ++) . Syntax.peReason) Right (Syntax.parsePolicy polText)
-  unit <- either (Left . ("elaboration error: " ++) . elabErrorMessage) Right
-    (elaborate defeasibleSuiteSigma (registryOf pol) prog pol)
-  input <- either (Left . ("replay identity error: " ++) . replayErrorMessage) Right
-    (sourceCheckInput prog pol unit)
-  pure (runCheck input)
+  prepared <- either (Left . ("source invalid: " ++) . renderSourceInvalid) Right
+    (prepareSource defeasibleSuiteSigma prog pol)
+  case prepared of
+    SourceRejected rejection -> Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    SourceAccepted input -> pure (sourceResultVerdict (runSourceCheck input))
 
 -- | Render the pinned document: for each run, the CLI command line, the
 -- exact verdict bytes the CLI prints, and the CLI exit code.

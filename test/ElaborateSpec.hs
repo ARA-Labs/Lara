@@ -2,8 +2,8 @@
 -- Policy → Unit@).
 --
 -- The crux is the frozen end-to-end slice: parse a committed @.lara@ file with
--- "Lara.Syntax", 'elaborate' it against the shared policy, construct its source
--- 'CheckInput' with 'sourceCheckInput', run it through "Lara.Driver".'runCheck',
+-- "Lara.Syntax", lower it against the shared policy with 'prepareSource', run
+-- the opaque carrier through 'runSourceCheck',
 -- and assert the frozen A0 verdict (@docs/m4a-checklist.md@ §1). IO lives here,
 -- never in the elaborator.
 --
@@ -22,9 +22,17 @@ import Data.List (isInfixOf)
 import Test.QuickCheck
 
 import Lara.AST hiding (Reject)
-import Lara.Driver (runCheck)
+import Lara.Admission
+  ( admissionAuditArgs
+  , admissionAuditAttacks
+  , admissionAuditLeaves
+  , renderAdmissionRejection
+  )
 import Lara.Elaborate
-import Lara.Replay (ReplayError, sourceCheckInput)
+-- The bare, admission-free lowering: the A/B differential properties below
+-- compare it against the frozen goldens, so this suite is one of the
+-- sanctioned escape-hatch callers ("Lara.Elaborate.Internal" header).
+import Lara.Elaborate.Internal (elaborate)
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 import Lara.Syntax (parseProgram, parsePolicy)
@@ -60,9 +68,12 @@ loadPolicy path = do
     Right p -> pure p
     Left e -> error (path ++ ": parse failed: " ++ show e)
 
-sourceVerdict :: Program -> Policy -> Unit -> Either ReplayError Verdict
-sourceVerdict program policy unit =
-  runCheck <$> sourceCheckInput program policy unit
+sourceVerdict :: Program -> Policy -> Unit -> Either String Verdict
+sourceVerdict program policy _ =
+  case prepareSource defeasibleSuiteSigma program policy of
+    Left invalid -> Left (renderSourceInvalid invalid)
+    Right (SourceRejected rejection) -> Left (renderAdmissionRejection rejection)
+    Right (SourceAccepted input) -> Right (sourceResultVerdict (runSourceCheck input))
 
 policyPath :: FilePath
 policyPath = "examples/A/empirical-v1.policy.lara"
@@ -172,7 +183,7 @@ prop_strictCertificateMissingTheoryRejectsR13 =
 -- Example B — the frozen end-to-end golden (byte-exact)
 -- ---------------------------------------------------------------------------
 
--- | @elaborate@ + @sourceCheckInput@ + @runCheck@ on B reproduces the frozen
+-- | The safe source path on B reproduces the frozen
 -- A0 verdict exactly: @pa → LUndec@, @pb → LUndec@ (the mutual 2-cycle),
 -- @c_pos → Contested@, @c_neg → Contested@ (m4a-checklist §1).
 prop_B_frozenGolden :: Property
@@ -194,7 +205,7 @@ prop_B_frozenGolden = once $ ioProperty $ do
 -- Example A — the frozen end-to-end golden (the vertical slice)
 -- ---------------------------------------------------------------------------
 
--- | @elaborate@ + @sourceCheckInput@ + @runCheck@ on A reproduces the frozen A0
+-- | The safe source path on A reproduces the frozen A0
 -- verdict: a1 (the self-defeating support) is driven @out@ by its three
 -- unattacked attackers (@d1@ undercut, @d2@ undermine, @d3@ rebut), and c1 is
 -- @Defeated@ (m4a-checklist §1). Arguments are indexed in declaration order
@@ -219,6 +230,35 @@ prop_A_frozenGolden = once $ ioProperty $ do
           , counterexample "claim c1 (improves(M,accuracy,D)) → Defeated" $
               verdictStatuses outcome === [(improvesMAD, Published Defeated)]
           ]
+
+-- | The new source carrier is a conservative wrapper for all-admit artifacts:
+-- Example A has no admission rows, produces no audit entries, and keeps its
+-- frozen verdict.  This catches accidental divergence between @elaborate +
+-- the former manual replay chain and the smart source constructor.
+prop_A_prepareSourceAllAdmit :: Property
+prop_A_prepareSourceAllAdmit = once $ ioProperty $ do
+  prog <- loadProgram "examples/A/example.lara"
+  pol <- loadPolicy policyPath
+  pure $ case prepareSource defeasibleSuiteSigma prog pol of
+    Left invalid -> counterexample ("A: unexpected source invalidity " ++ show invalid) False
+    Right (SourceRejected rejection) ->
+      counterexample ("A: unexpected R8 " ++ renderAdmissionRejection rejection) False
+    Right (SourceAccepted input) ->
+      let result = runSourceCheck input
+          audit = sourceResultAudit result
+       in conjoin
+            [ admissionAuditLeaves audit === []
+            , admissionAuditArgs audit === []
+            , admissionAuditAttacks audit === []
+            , case verdictOutcome (sourceResultVerdict result) of
+                Reject rejection -> counterexample ("A: unexpected reject " ++ show rejection) False
+                Accept labels edges statuses ->
+                  conjoin
+                    [ labels === [(0, LOut), (1, LIn), (2, LIn), (3, LIn)]
+                    , edges === [(0, 3), (1, 0), (2, 0), (3, 0)]
+                    , statuses === [(improvesMAD, Published Defeated)]
+                    ]
+            ]
 
 -- ---------------------------------------------------------------------------
 -- Negatives — each mutation yields the expected Left ElabError
@@ -386,6 +426,7 @@ elaborateSpecProps =
   [ ("elaborate strict nd@1 cert presentation path accepts", quickCheckResult prop_strictCertificatePresentationAccepts)
   , ("elaborate strict cert missing theory rejects R13", quickCheckResult prop_strictCertificateMissingTheoryRejectsR13)
   , ("elaborate A reproduces the frozen A0 golden (vertical slice)", quickCheckResult prop_A_frozenGolden)
+  , ("prepareSource A default-admit preserves frozen golden", quickCheckResult prop_A_prepareSourceAllAdmit)
   , ("elaborate B reproduces the frozen A0 golden (byte-exact)", quickCheckResult prop_B_frozenGolden)
   , ("elaborate negatives are located Left ElabError", quickCheckResult prop_negatives)
   ]

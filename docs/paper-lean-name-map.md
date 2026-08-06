@@ -244,3 +244,37 @@ Notes for the paper wording:
   (source-vs-compiled), not `status_preservation` (single-framework), and
   that `thm:rationality` is scoped to computed complete claims of an
   accepted unit.
+
+## 4. Policy admission (source boundary)
+
+Issue #77 follow-on family (metatheory plan Task 2, commit `014173e`).
+Every paper display in the source-boundary paragraph and
+`figures/admissionrules.tex` is transcribed from `lean/Lara/Admission.lean`;
+all rows are `lean/AxCheck.lean`-gated (sorry-free, standard trio).
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Total decision, default admit | `Admission.decisionFor` | `Lara/Admission.lean` |
+| Source validity | `firstDuplicateKey`, `firstDuplicateLeafId`, `metadataLeafAligned`, `accepted_metadata_aligned` | `Lara/Admission.lean` |
+| First rejected leaf (R8) | `firstAdmissionRejection` | `Lara/Admission.lean` |
+| Policy quarantine seed | `policyQuarantineSeed` | `Lara/Admission.lean` |
+| Γ_policy / Γ_checked | `policyAdmitted`, `checkedLeafTable`, `checkedAdmittedIds` | `Lara/Admission.lean` |
+| Combined prune / canonical audit | `buildPrune`, `buildAdmissionAudit` | `Lara/Admission.lean` |
+| Declarative judgment / evaluator | `AdmissionJudgment`, `evaluateAdmission` | `Lara/Admission.lean` |
+| Correspondence / determinism | `evaluateAdmission_iff_judgment`, `admission_deterministic` | `Lara/Admission.lean` |
+| Exact contexts | `policy_admitted_iff`, `checked_admitted_iff`, `checked_admitted_ids_eq_prune`, `policy_quarantined_absent`, `accepted_checked_context_exact` | `Lara/Admission.lean` |
+| Endpoint-safe pruning and validated alignment | `AlignedAttacks`, `accepted_resolved_aligned`, `retained_attacks_selectAligned`; `RawAttack.resolve_filter_commute`, `RawAttack.resolveAttacks_endpoints_mem`, `RawAttack.selectAligned_mono`; `retained_attack_endpoints` | `Lara/Admission.lean`, `Lara/RawAttack.lean` |
+| Unique argument ids (R14) as a carried invariant | `AlignedAttacks.ids_nodup`, `retained_attack_source_retained`; `RawAttack.lookupArg_of_mem_nodup`; `Driver.firstDup_none_nodup`, `Driver.Decoded.argIdsNodup` | `Lara/Admission.lean`, `Lara/RawAttack.lean`, `Lara/Driver.lean` |
+| Audit exactness | `admission_audit_exact`, `audit_leaves_nonempty` | `Lara/Admission.lean` |
+| All-admit identity | `policy_all_admit_group_identity` (prune + blocked queries); `policy_all_admit_checkUnit_identity` (exact checker accept/reject outcome), both over `AlignedAttacks`. Neither proves verdict identity — see the note below | `Lara/Admission.lean` |
+| Restrictiveness | `more_restrictive_cannot_add_structure` (leaves, arguments, raw keep predicate, and retained semantic attacks); `Groups.usesLeaf_mono` | `Lara/Admission.lean`, `Lara/Groups.lean` |
+| R8 carries no checked unit | `source_reject_no_checked_unit` | `Lara/Admission.lean` |
+| Source non-promotion | `source_justified_nonpromotion` (instantiates `BlockedProgram.checked_production_justified_nonpromotion_of_not_blocked`) | `Lara/Admission.lean`, `Lara/BlockedProgram.lean` |
+
+The paper must not claim the `.lara` parser, Haskell elaborator, or final
+public verdict are proved by the admission differential. Lean proves the
+semantic judgment. `scripts/admission-differential.sh` compares its evaluator
+with a test-only Haskell adapter over the production admission/prune
+primitives. `test/AdmissionSpec.hs` separately exercises the real
+`prepareSource` / `runSourceCheck` seam, including all-admit exact verdict
+bytes and quarantine-sensitive blocked status rendering.

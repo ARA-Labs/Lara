@@ -58,6 +58,8 @@ import Lara.Support
 import Lara.Groups
 import Lara.Blocked
 import Lara.BlockedProgram
+import Lara.RawAttack
+import Lara.Admission
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase

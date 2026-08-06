@@ -1,0 +1,86 @@
+session:
+  id: "2026-08-05_003"
+  date: "2026-08-05"
+  started: "2026-08-05T20:30"
+  last_turn: "2026-08-05T22:50"
+  turn_count: 5
+  summary: >
+    Reviewed and approved policy admission delivery. Issue #77 is now a self-contained runtime
+    source-conformance plan; raw/resolved Lean attack alignment, declarative relation/evaluator
+    correspondence, the dedicated admission differential, and paper edits are a linked dependent
+    plan. Both preserve lara-core@0.1, exact source precedence, canonical audits, and production
+    non-promotion.
+
+events_logged:
+  - turn: 4
+    type: decision
+    id: "N114"
+    routing: child-of-N106
+    provenance: user
+    summary: "Formalize policy admission context construction while repairing #77"
+  - turn: 5
+    type: decision
+    id: "N115"
+    routing: direct
+    provenance: user-revised
+    summary: "Split runtime issue #77 from dependent metatheory while retaining complete reviewed coverage"
+
+ai_actions:
+  - turn: 4
+    action: >
+      Inspected the current elaborator, source CLI, driver, pruning carrier, Lean
+      presentation/group/non-promotion modules, and paper statements, then drafted the
+      focused implementation and metatheory plan.
+    provenance: ai-executed
+    files_changed:
+      - plans/2026-08-05-policy-admission-calculus.md
+  - turn: 5
+    action: >
+      Ran the four-section engineering review plus an independent outside review, resolved
+      twenty-one findings, split the plan, wrote the companion metatheory plan, and produced
+      executable test and task artifacts.
+    provenance: ai-executed
+    files_changed:
+      - plans/2026-08-05-policy-admission-calculus.md
+      - plans/2026-08-05-policy-admission-metatheory.md
+      - ara/logic/solution/calculus.md
+
+claims_touched: []
+
+key_context:
+  - turn: 3
+    excerpt: >
+      The support calculus consumes Gamma but does not define its construction; #77 is
+      therefore an implementation conformance repair, while the already-landed #76/#80
+      non-promotion theorem carries the current quarantine metatheory.
+  - turn: 4
+    excerpt: >
+      The user chose the stronger scope: mechanize the policy-to-Gamma boundary and its
+      composition properties without activating byte-level evidence extractors or changing
+      the frozen core.
+  - turn: 5
+    excerpt: >
+      The user selected the complete option at every coverage-bearing review decision:
+      runtime R8 is stderr-only, source invalidity is typed separately, the source carrier
+      is hidden, audits have non-empty ordered causes, and Lean retains raw attack identity
+      beside resolved semantics.
+logic_revisions:
+  - turn: 5
+    entry: logic/solution/calculus.md
+    field: "Policies, schemes, obligations"
+    before: >
+      Leaf admission is a total policy map over (kind × provenance) applied before evaluation
+      and never creates an attack.
+    after: >
+      Admission defaults unmatched rows to admit; reject yields source R8 with no checked unit;
+      quarantine removes dependent structure and composes with group quarantine into the final
+      checked context without creating attacks or a fifth status.
+    signal: verbal-declaration
+    provenance: user-revised
+
+open_threads:
+  - "Implement the reviewed runtime plan for issue #77 on fix/77-policy-admission"
+  - "Start the metatheory/differential plan after the runtime API and fixtures stabilize"
+  - "Update the separate Overleaf paper only after AxCheck theorem names stabilize"
+
+ai_suggestions_pending: []

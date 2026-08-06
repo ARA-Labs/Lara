@@ -15,7 +15,7 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > **M0-frozen (2026-07-22, PR #9).** The following decisions are fixed by the semantic corpus
 > study (claims C13–C17, `m0/annotation-summary.md`) and are not to be re-litigated
 > without new corpus evidence triggering their recorded flip criteria: the §3 default leaf grain
-> (per-result-cell), the §4.3 duplicate-report-group quarantine-to-gap rule, the §4.5 nine-family
+> (per-result-cell), the §4.3 duplicate-report-group quarantine rule, the §4.5 nine-family
 > scheme vocabulary (partition frozen; spellings settled, revisitable with the ARA maintainer
 > until `empirical-v1` ships), the §5.2 adapter portfolio (arithmetic + code-inspection, LP
 > non-shipping), and the §7 defeat-layer conventions (whole-trace attack walk, dead-end → support
@@ -28,6 +28,12 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > compilation rules, the §8.1 strict-reachable `contrary` restriction (Path B), and the §10.1
 > rejection classes. Frozen definitions carry mechanization pointers into `lean/`; see
 > `m1-freeze-checklist.md` for the row-by-row record and the M2 backlog.
+
+> **Source-boundary lock (2026-08-05).** The `.lara` policy-admission runtime contract is frozen in
+> `policy-admission-calculus-decision.md`. It fixes total default-admit lookup, source invalidity,
+> R8/R13/R9/core precedence, one combined policy-plus-group prune, and its canonical audit without
+> changing `lara-core@0.1`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
+> semantics. Byte-level `lara-evidence@0.1` verification remains gated under issue #78.
 
 ## 1. Scope and guarantee
 
@@ -361,14 +367,19 @@ Admission turns declared leaves into the checking context `Gamma` before any ter
 admission (leaf-kind, provenance) = admit | quarantine | reject
 ```
 
-The table is a total map in `Pi` over kind × provenance pairs. A `certified` leaf is additionally
+The policy source contains a finite table over kind × provenance pairs; its semantic lookup is
+total because an omitted table, an empty table, and every unmatched key default to `admit`. Duplicate
+table keys are source invalidity rather than first- or last-row-wins. Duplicate `LeafId` declarations
+are likewise source invalidity. A `certified` leaf is additionally
 admitted only if it carries a checker witness `(name, version)` listed in `Pi` and a replayable
 reference. The outcomes:
 
 - `admit` — the leaf enters `Gamma` and is usable by the leaf rule.
 - `quarantine` — the leaf stays out of `Gamma`; its declaration is retained and reported for
-  audit. A term using it fails at that occurrence with a located diagnostic and, like a term with
-  an open mandatory obligation, is excluded from the AF and contributes a `gap` explanation.
+  audit. Before core checking, production removes every dependent argument (including a dependency
+  nested in premises or discharges) and every attack with a removed raw endpoint. The conditional
+  core result may be `gap` when no complete retained support remains; quarantine is not implemented
+  as a surviving term failing the leaf rule.
 - `reject` — the declaration itself violates policy; the checker rejects the certificate with a
   located diagnostic.
 
@@ -384,9 +395,9 @@ enforces agreement *within* each declared group by the existing `≡` relation (
 
 - if the members' propositions are pairwise `≡`, they are admitted normally;
 - otherwise the checker **quarantines every member of the group** and raises a located
-  data-integrity diagnostic. Per the quarantine semantics above, any argument using a conflicted
-  cell fails type check at that occurrence, is excluded from the AF, and the dependent claim
-  surfaces as `gap`.
+  data-integrity diagnostic. Group consistency reads the complete declared leaf set. When group
+  mode is `quarantine`, these leaves join the policy-quarantine seed and the one combined prune
+  removes every dependent argument and raw-endpoint attack before core checking.
 
 A data conflict is thus *absence of reliable evidence*, not a counter-argument: no attack is
 created, so a conflict never *directly* makes a claim `contested` or `defeated` — the same
@@ -454,8 +465,8 @@ retained-index embedding and obtains its AF lists from the successful `checkUnit
 non-promotion for the shipped accept path (issue #80). The cross-driver differential suite carries
 conformance evidence that Haskell mirrors these proved definitions.
 
-**Admission as context construction (v0.1-frozen).** Admission is the total function that builds
-the checking context of the §6.1 judgment:
+**Admission as source pruning (v0.1-frozen).** Policy lookup is a total function that supplies the
+policy seed for one source-level prune:
 
 ```text
 Gamma(P) = { (l : p_l) | leaf l : p_l declared in P,
@@ -463,15 +474,33 @@ Gamma(P) = { (l : p_l) | leaf l : p_l declared in P,
                          l's duplicate-report group (if any) is ≡-consistent }
 ```
 
-A `quarantine`d leaf (by table or by group conflict) simply has no `Gamma` entry: any term using
-it fails the §6.1 leaf rule at that occurrence with a located diagnostic and routes to `gap` —
-admission is enforced *by the typing judgment*, not by a separate check. A `reject`ed leaf aborts
-the program with rejection class R8/R9 (§10.1) before any term is checked.
+Duplicate-report consistency is computed from declared leaves before pruning. Policy-quarantine and
+group-quarantine seeds are then unioned once; one prune removes the seeded leaves, every argument
+whose complete support term contains one (including nested premises and discharges), and every
+attack with a removed raw endpoint. `Gamma(P)` above and the retained arguments and attacks are
+projections of that same prune. Production never sends a dependent term with a missing `Gamma`
+entry to the core, so R1 remains an undeclared-core-reference error rather than quarantine routing.
 
-Routing the *dependent* claim to `gap` is only half the story: the same prune also removes any
-attacker built on the leaf, which can move an *unrelated* claim's label. Public status is therefore
-computed by the conservative rule above — quarantine-affected claims report `evidence-blocked`
-rather than the pruned graph's label.
+A policy `reject` is source R8; an inconsistent group escalated by group policy is R9; neither is
+core R1. The fixed boundary precedence is source invalidity, then policy R8, replay R13, group R9,
+and finally core rejection. Source invalidity (including duplicate admission keys or duplicate
+`LeafId`s) is CLI exit 2 with empty stdout. R8 is the deliberate source-judgment exception: exit 1,
+empty stdout, and exactly one deterministic stderr line. It selects the first leaf in source
+declaration order whose exact `(LeafKind, Provenance)` key matches a `reject` row, and the line
+identifies its leaf id, kind, provenance, and matched admission row. Replay, group, accepted, and
+core rejection paths retain the core-verdict stdout contract.
+
+The hidden source carrier binds the unchanged replay identity, the full declared unit, the ordered
+policy seed, the one combined prune, and its canonical audit. Audit leaf rows follow leaf declaration
+order: `PolicyQuarantine` first, then every causing `GroupQuarantine` once in group declaration
+order. Removed arguments and attacks follow their declaration order, and there is exactly one leaf
+row with nonempty causes for each removed leaf. Blocked reporting is derived from that same prune.
+See `policy-admission-calculus-decision.md` for the complete source contract.
+
+Removing the dependent support can leave the *conditional* core query at `gap`; the same prune can
+also remove an attacker and move another query's label. Public status is therefore computed by the
+conservative rule above — quarantine-affected claims report `evidence-blocked` rather than the
+pruned graph's label.
 
 ### 4.4 Instantiation in programs
 
@@ -729,8 +758,10 @@ between `concl(w)` and `c.formal`.
 Sigma; Pi; Gamma; R |- leaf l : supports(p_l) ▷ {}
 ```
 
-Only admitted leaves occur in `Gamma` (Section 4.3); a quarantined or rejected leaf has no entry, so
-`leaf l` fails to type at that occurrence with a located diagnostic.
+At the abstract core judgment, only leaves supplied in `Gamma` can use this rule; a raw core caller
+that submits `leaf l` without a `Gamma` entry receives R1. The production `.lara` boundary instead
+prunes every argument dependent on a quarantined leaf before invoking this judgment (Section 4.3),
+so quarantine never reaches the core as a missing-leaf occurrence.
 
 **Instance.** Let `Pi` declare `rule r(X1..Xm)` with premise patterns `Ap_1..Ap_n`, conclusion
 pattern `Ap_c`, questions `q : A_q`, and mode `m`. For
@@ -1315,8 +1346,8 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R13** backend | certificate replay rejects; unknown backend or version; theory digest not allowlisted | the certified instance | §5 |
 | **R14** codec | wire program fails to decode to the abstract syntax: malformed JSON, unknown fields per `lara-core@0.1`, presentation parse error | the wire location | §1, §2.1 |
 
-Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — a quarantined leaf yields
-located typing failures at its occurrences and routes the dependent claim to `gap`; **attack
+Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
+the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack
 cycles** are not rejection — they evaluate to `undec`/`contested` (§8). The engineering-plan
 mutation list maps onto this spine: wrong formulas → R2/R4, undeclared leaves → R1, hidden policy
 extension → R1/R12, bad attack targets → R10/R11, mis-declared obligations → R5, codec

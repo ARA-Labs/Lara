@@ -20,15 +20,19 @@ common warnings
 library
     import:           warnings
     hs-source-dirs:   src
+    other-modules:    Lara.Admission.Internal
+                      Lara.Driver.Internal
     exposed-modules:  Lara.Prop
                       Lara.Strict
                       Lara.Strict.ND
                       Lara.Strict.ND.Internal
                       Lara.Strict.RA
                       Lara.AST
+                      Lara.Admission
                       Lara.Replay
                       Lara.Syntax
                       Lara.Elaborate
+                      Lara.Elaborate.Internal
                       Lara.Examples
                       Lara.Negatives
                       Lara.Term
@@ -78,6 +82,8 @@ test-suite lara-test
     hs-source-dirs:   test
     main-is:          Spec.hs
     other-modules:    CorpusUnitsSpec
+                      AdmissionSpec
+                      Lara.AdmissionFixture
                       ClaimSupportSpec
                       MechReviewSpec
                       RunningExampleSpec

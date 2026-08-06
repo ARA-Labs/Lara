@@ -17,9 +17,15 @@
 -- stderr and nothing on stdout.
 module Main (main) where
 
-import Lara.Elaborate (defeasibleSuiteSigma, elabErrorMessage, elaborate, registryOf)
-import Lara.ExpectedJson (JValue (..), expectedJsonValue, renderJson)
-import Lara.Replay (replayErrorMessage, sourceCheckInput)
+import Lara.Admission (renderAdmissionRejection)
+import Lara.Elaborate
+  ( PreparedSource (..)
+  , defeasibleSuiteSigma
+  , prepareSource
+  , renderSourceInvalid
+  , runSourceCheck
+  )
+import Lara.ExpectedJson (JValue (..), renderJson, sourceResultJsonValue)
 import Lara.Syntax (parsePolicy, parseProgram)
 import System.Environment (getArgs)
 import System.Exit (die, exitFailure)
@@ -37,12 +43,13 @@ main = do
   policy <- either (die . ((policyPath ++ ": parse: ") ++) . show) pure (parsePolicy policyText)
   progText <- readFile unitPath
   prog <- either (die . ((unitPath ++ ": parse: ") ++) . show) pure (parseProgram progText)
-  input <- case elaborate defeasibleSuiteSigma (registryOf policy) prog policy of
-    Left err -> die (unitPath ++ ": elaborate: " ++ elabErrorMessage err)
-    Right unit ->
-      either (die . ((unitPath ++ ": replay: ") ++) . replayErrorMessage) pure
-        (sourceCheckInput prog policy unit)
-  let value = expectedJsonValue input
+  result <- case prepareSource defeasibleSuiteSigma prog policy of
+    Left invalid -> die (unitPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
+    Right (SourceRejected rejection) ->
+      die (unitPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceAccepted source) ->
+      pure (runSourceCheck source)
+  let value = sourceResultJsonValue result
   putStrLn (renderJson value)
   case value of
     JObject top

@@ -39,13 +39,15 @@ Design decisions (documented, faithful to the mechanized development):
 import Lara.Consistency
 import Lara.Blocked
 import Lara.BlockedProgram
+import Lara.RawAttack
 import Lara.Groups
 import Lara.Strict
 import Lara.RA
 
 namespace Lara.Driver
 
-open Lara Lara.Support Lara.Attack Lara.Policy Lara.Check Lara.Check.Unit
+open Lara Lara.Support Lara.Attack Lara.RawAttack Lara.Policy
+open Lara.Check Lara.Check.Unit
 open Lara.Grounded Lara.Compile Lara.Consistency
 
 /-- The production driver's numeric-literal canonicalizer (see `Lara.Prop`). -/
@@ -414,16 +416,7 @@ def decodePosition (e : Sx) : Except String Pos := do
       else .error ("position: unknown step " ++ k)
     | _ => .error "position: malformed position step")
 
-/-- A wire attack with its endpoints still as declared argument ids. -/
-inductive RawAttack where
-  | rebut : String → String → RawAttack
-  | undercut : String → String → Pos → RawAttack
-  | undermine : String → String → Pos → RawAttack
-
-def RawAttack.endpoints : RawAttack → String × String
-  | .rebut w u => (w, u)
-  | .undercut w u _ => (w, u)
-  | .undermine w u _ => (w, u)
+/-! ### Attacks (endpoints resolved after decode) -/
 
 def decodeAttack (e : Sx) : Except String RawAttack :=
   match e with
@@ -628,24 +621,42 @@ def firstDup : List String → List String → Option String
   | [], _ => none
   | x :: rest, seen => if seen.contains x then some x else firstDup rest (x :: seen)
 
-def lookupArg (argsRaw : List (String × SupportTerm)) (id : String) :
-    Option SupportTerm :=
-  (argsRaw.find? (fun e => e.1 == id)).map (·.2)
+/-- A `none` scan saw no element that was already accumulated. -/
+private theorem firstDup_none_not_seen :
+    ∀ (xs seen : List String), firstDup xs seen = none → ∀ x ∈ xs, x ∉ seen := by
+  intro xs
+  induction xs with
+  | nil => intro _ _ x hx; simp at hx
+  | cons head tail ih =>
+      intro seen h x hx
+      by_cases hhead : head ∈ seen
+      · simp [firstDup, hhead] at h
+      · have htail : firstDup tail (head :: seen) = none := by
+          simpa [firstDup, hhead] using h
+        rcases List.mem_cons.mp hx with rfl | hx
+        · exact hhead
+        · have hnot := ih (head :: seen) htail x hx
+          exact fun hin => hnot (by simp [hin])
 
-def resolveAttacks (argsRaw : List (String × SupportTerm)) :
-    List RawAttack → Except String (List Attack)
-  | [] => .ok []
-  | ra :: rest => do
-      let (s, t) := ra.endpoints
-      match lookupArg argsRaw s, lookupArg argsRaw t with
-      | some sw, some tw => do
-          let k := (match ra with
-            | .rebut _ _ => Attack.rebut sw tw
-            | .undercut _ _ π => Attack.undercut sw tw π
-            | .undermine _ _ π => Attack.undermine sw tw π)
-          let rest' ← resolveAttacks argsRaw rest
-          .ok (k :: rest')
-      | _, _ => .error "attacks: attack endpoint is not a declared argument"
+/-- **`firstDup` decides R14 uniqueness.**  A `none` scan is a `Nodup` proof, so
+the wire decoder's duplicate-id rejection can hand its callers the invariant
+itself rather than a discarded boolean.  Consumers that resolve by id (raw
+attack endpoints, quarantine retention) need that proof: with duplicate ids a
+kept id no longer implies the kept row is the one the id resolves to. -/
+theorem firstDup_none_nodup :
+    ∀ (xs seen : List String), firstDup xs seen = none → xs.Nodup := by
+  intro xs
+  induction xs with
+  | nil => intro _ _; exact List.nodup_nil
+  | cons head tail ih =>
+      intro seen h
+      by_cases hhead : head ∈ seen
+      · simp [firstDup, hhead] at h
+      · have htail : firstDup tail (head :: seen) = none := by
+          simpa [firstDup, hhead] using h
+        refine List.nodup_cons.mpr ⟨?_, ih (head :: seen) htail⟩
+        intro hmem
+        exact (firstDup_none_not_seen tail (head :: seen) htail head hmem) (by simp)
 
 /-! ### Building the checker inputs -/
 
@@ -695,7 +706,12 @@ structure Decoded where
   -- checker (on the quarantine-filtered args).
   leaves : List (LeafId × Atom)
   argsRaw : List (String × SupportTerm)
+  -- R14 argument-id uniqueness, carried as a proof rather than re-decided:
+  -- every consumer that resolves an endpoint or a retention decision by id
+  -- depends on it (`Lara.RawAttack.lookupArg_of_mem_nodup`).
+  argIdsNodup : (argsRaw.map (·.1)).Nodup
   attacksRaw : List RawAttack
+  attacksAligned : resolveAttacks argsRaw attacksRaw = .ok atts
   groups : List Groups.DupGroup
   groupMode : Groups.GroupConflictMode
 
@@ -790,24 +806,30 @@ def decodeUnit (e : Sx) : Except String Decoded := do
   let attacksRaw ← decodeAttacks s4.1
   let queries ← decodeQueries s5.1
   let (groups, groupMode) ← decodeGroups s6.1
-  let _ ← (match firstDup (argsRaw.map (·.1)) [] with
-           | some dup => (.error ("args: duplicate argument id: " ++ dup) : Except String _root_.Unit)
-           | none => .ok ())
-  let _ ← checkGroupInvariants groups leaves
-  let atts ← resolveAttacks argsRaw attacksRaw
-  .ok
-    { policy := { rules := pol.1, defeat := ⟨pol.2.1, pol.2.2⟩ }
-    , args := argsRaw.map (·.2)
-    , argIds := argsRaw.map (·.1)
-    , atts := atts
-    , gamma := buildGamma leaves
-    , theories := theories
-    , queries := queries
-    , leaves := leaves
-    , argsRaw := argsRaw
-    , attacksRaw := attacksRaw
-    , groups := groups
-    , groupMode := groupMode }
+  -- Retain the scan's equation: R14 uniqueness leaves this decoder as a proof
+  -- on `Decoded`, not as a discarded boolean.
+  match hDup : firstDup (argsRaw.map (·.1)) [] with
+  | some dup => .error ("args: duplicate argument id: " ++ dup)
+  | none => do
+    let _ ← checkGroupInvariants groups leaves
+    match hAtts : resolveAttacks argsRaw attacksRaw with
+    | .error msg => .error msg
+    | .ok atts =>
+      .ok
+        { policy := { rules := pol.1, defeat := ⟨pol.2.1, pol.2.2⟩ }
+        , args := argsRaw.map (·.2)
+        , argIds := argsRaw.map (·.1)
+        , atts := atts
+        , gamma := buildGamma leaves
+        , theories := theories
+        , queries := queries
+        , leaves := leaves
+        , argsRaw := argsRaw
+        , argIdsNodup := firstDup_none_nodup _ _ hDup
+        , attacksRaw := attacksRaw
+        , attacksAligned := hAtts
+        , groups := groups
+        , groupMode := groupMode }
 
 def decodeReplayBackend (e : Sx) : Except String (String × String) :=
   match e with
@@ -1197,7 +1219,7 @@ def runOnContents (contents : String) : IO _root_.Unit := do
             let keepAttack := fun ra =>
               let (s, t) := ra.endpoints
               keptIds.contains s && keptIds.contains t
-            let atts := BlockedProgram.selectAligned keepAttack d.attacksRaw d.atts
+            let atts := selectAligned keepAttack d.attacksRaw d.atts
             let reg := buildRegistry d.theories
             let gamma := buildGamma (Groups.quarantineLeaves qs d.leaves)
             match checkUnit gamma reg
@@ -1216,8 +1238,6 @@ def runOnContents (contents : String) : IO _root_.Unit := do
                     (fun p => claimSupportFor accepted p) d.queries
                 IO.println (printSx (buildAccept rid accepted d.queries blocked))
 
-end Lara.Driver
-
 /-- Executable entry point: `lara-driver <file.sexp>`. -/
 def main (args : List String) : IO _root_.Unit := do
   match args with
@@ -1228,7 +1248,9 @@ def main (args : List String) : IO _root_.Unit := do
         catch _ =>
           IO.eprintln ("lara-driver: cannot read " ++ path)
           IO.Process.exit 2)
-      Lara.Driver.runOnContents contents
+      runOnContents contents
   | _ =>
       IO.eprintln "usage: lara-driver <file.sexp>"
       IO.Process.exit 2
+
+end Lara.Driver

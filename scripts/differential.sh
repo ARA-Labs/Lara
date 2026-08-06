@@ -101,8 +101,11 @@ for root in fixtures examples bundles corpus-units; do
   # negative half below, not byte-parity anchors. The whole generated mutant
   # suite (fixtures/mutants/) is excluded from globbing entirely: it is
   # discovered manifest-driven below, so an absent or half-written suite
-  # fails loudly instead of shrinking the anchor set (PR #49 review).
-  if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" -print >"$root_anchor_list"; then
+  # fails loudly instead of shrinking the anchor set (PR #49 review). The
+  # source admission fixtures (fixtures/admission/) are NOT wire check-input
+  # envelopes: they belong to scripts/admission-differential.sh alone.
+  if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" \
+      -not -path "$root/admission/*" -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"
     exit 2
   fi

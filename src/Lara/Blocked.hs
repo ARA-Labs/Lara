@@ -44,7 +44,8 @@
 -- mirrors those proved definitions.
 --
 -- __One carrier.__ Everything here reads a 'Prune' — a declared unit paired with
--- its /own/ §4.3 quarantine, mintable only by 'prune'. Two adjacent @Unit@
+-- its /own/ §4.3 quarantine, mintable only by 'prune' or
+-- 'pruneWithPolicySeed'. Two adjacent @Unit@
 -- parameters would be swappable with no type error, and the swap fails __open__:
 -- @retainedIndices checked declared@ retains everything, so the seed is empty and
 -- the promotion this module exists to suppress is published.
@@ -57,8 +58,14 @@ module Lara.Blocked
     -- * The prune carrier
   , Prune
   , prune
+  , pruneWithPolicySeed
   , pruneDeclared
   , pruneChecked
+  , prunePolicyLeaves
+  , pruneInconsistentGroups
+  , pruneRemovedLeaves
+  , pruneRemovedArgs
+  , pruneRemovedAttacks
     -- * The abstract closure (Lean @closureStep@ \/ @blockedSet@)
   , blockedSet
     -- * The two frameworks in one index space
@@ -70,7 +77,9 @@ module Lara.Blocked
   , blockedQueries
   ) where
 
-import Data.List (nub)
+import Data.List (nub, partition)
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 
@@ -103,8 +112,16 @@ import Lara.SupportTerm (CheckedNode)
 -- vacuously-consistent singleton and evade R9. The empty/singleton cases are
 -- vacuously consistent.
 groupConsistent :: Unit -> DupGroup -> Bool
-groupConsistent unit (DupGroup _ members) =
-  case mapM (`lookup` unitLeaves unit) members of
+groupConsistent unit = groupConsistentWith (leafIndexOf (unitLeaves unit))
+
+-- | First-declaration leaf lookup, matching the frozen raw checker's lookup
+-- semantics even for an unsanctioned duplicate-key 'Unit'.
+leafIndexOf :: [(LeafId, Prop)] -> Map LeafId Prop
+leafIndexOf = Map.fromListWith (\_new existing -> existing)
+
+groupConsistentWith :: Map LeafId Prop -> DupGroup -> Bool
+groupConsistentWith leafIndex (DupGroup _ members) =
+  case mapM (`Map.lookup` leafIndex) members of
     Nothing -> False -- a member with no Γ entry cannot be shown ≡-consistent
     Just [] -> True
     Just (p : ps) -> all (equiv p) ps
@@ -112,20 +129,18 @@ groupConsistent unit (DupGroup _ members) =
 -- | The leaf ids quarantined by a @≢@ duplicate-report group (spec §4.3): every
 -- member of every inconsistent group leaves @Gamma@.
 quarantinedLeaves :: Unit -> [LeafId]
-quarantinedLeaves unit =
-  [ l
-  | g <- unitGroups unit
-  , not (groupConsistent unit g)
-  , l <- dgMembers g
-  ]
+quarantinedLeaves = pruneRemovedLeaves . prune
 
 -- | Whether a support term uses any of the given leaves anywhere in its tree
 -- (spec §4.3 "any argument using a conflicted cell"): the principal leaf, or a
 -- premise\/discharge sub-term's leaf.
 supportUsesLeaf :: [LeafId] -> SupportTerm -> Bool
-supportUsesLeaf qs = go
+supportUsesLeaf = supportUsesLeafSet . Set.fromList
+
+supportUsesLeafSet :: Set LeafId -> SupportTerm -> Bool
+supportUsesLeafSet qs = go
   where
-    go (SLeaf l) = l `elem` qs
+    go (SLeaf l) = Set.member l qs
     go (SRule _ _ premises discharges _ _) =
       any go premises || any (go . snd) discharges
 
@@ -136,16 +151,7 @@ supportUsesLeaf qs = go
 -- quarantined leaves themselves leave the context. When no group conflicts,
 -- this is the identity.
 quarantineUnit :: Unit -> Unit
-quarantineUnit unit =
-  let quarantined = quarantinedLeaves unit
-      keptArgs = [pair | pair@(_, t) <- unitArgs unit, not (supportUsesLeaf quarantined t)]
-      keptIds = map fst keptArgs
-      keptAttacks = [k | k <- unitAttacks unit, all (`elem` keptIds) (attackEndpoints k)]
-   in unit
-        { unitArgs = keptArgs
-        , unitAttacks = keptAttacks
-        , unitLeaves = [entry | entry@(l, _) <- unitLeaves unit, l `notElem` quarantined]
-        }
+quarantineUnit = pruneChecked . prune
 
 attackEndpoints :: Attack -> [ArgId]
 attackEndpoints k = case k of
@@ -158,26 +164,97 @@ attackEndpoints k = case k of
 -- ---------------------------------------------------------------------------
 
 -- | A declared unit paired with its own §4.3 quarantine. The constructor is
--- hidden and 'prune' is the sole producer, so the two halves can never be
+-- hidden and the smart producers below keep the halves tied, so they can never be
 -- swapped or drawn from unrelated units — the invariant every function below
 -- depends on for its safety argument. The fields are positional with ordinary
 -- accessor functions: exported record selectors would keep the field labels in
 -- scope for record update, letting an importer rebuild the pair
 -- (@p { pruneChecked = pruneDeclared p }@) without ever seeing the constructor.
-data Prune = Prune Unit Unit
+data Prune = Prune
+  Unit
+  [LeafId]
+  [DupGroup]
+  [LeafId]
+  [ArgId]
+  (Set ArgId)
+  [Attack]
+  Unit
   deriving (Eq, Show)
 
 -- | The unit as submitted.
 pruneDeclared :: Prune -> Unit
-pruneDeclared (Prune declared _) = declared
+pruneDeclared (Prune declared _ _ _ _ _ _ _) = declared
 
--- | 'quarantineUnit' of the same unit — the program the checker sees.
+-- | The one-pass policy/group quarantine of the same unit — the program the
+-- checker sees.
 pruneChecked :: Prune -> Unit
-pruneChecked (Prune _ checked) = checked
+pruneChecked (Prune _ _ _ _ _ _ _ checked) = checked
 
--- | The sole producer of a 'Prune'.
+-- | Policy-quarantined leaves in declared source order.
+prunePolicyLeaves :: Prune -> [LeafId]
+prunePolicyLeaves (Prune _ leaves _ _ _ _ _ _) = leaves
+
+-- | Exact inconsistent group declarations in group declaration order.
+pruneInconsistentGroups :: Prune -> [DupGroup]
+pruneInconsistentGroups (Prune _ _ groups _ _ _ _ _) = groups
+
+-- | Removed leaves in leaf declaration order.
+pruneRemovedLeaves :: Prune -> [LeafId]
+pruneRemovedLeaves (Prune _ _ _ leaves _ _ _ _) = leaves
+
+-- | Removed argument identifiers in argument declaration order.
+pruneRemovedArgs :: Prune -> [ArgId]
+pruneRemovedArgs (Prune _ _ _ _ args _ _ _) = args
+
+-- | Removed raw attacks in attack declaration order, including multiplicity.
+pruneRemovedAttacks :: Prune -> [Attack]
+pruneRemovedAttacks (Prune _ _ _ _ _ _ attacks _) = attacks
+
+-- | The group-only producer used by the frozen raw checker path.
 prune :: Unit -> Prune
-prune declared = Prune declared (quarantineUnit declared)
+prune = pruneWithPolicySeed []
+
+-- | Build the one source-boundary prune.  Policy and inconsistent-group seeds
+-- are unioned before filtering, so no argument graph is ever elaborated or
+-- pruned in stages.
+pruneWithPolicySeed :: [LeafId] -> Unit -> Prune
+pruneWithPolicySeed policySeed declared =
+  let leafIndex = leafIndexOf (unitLeaves declared)
+      requestedPolicySet = Set.fromList policySeed
+      policyLeaves =
+        [leaf | (leaf, _) <- unitLeaves declared, Set.member leaf requestedPolicySet]
+      policySet = Set.fromList policyLeaves
+      inconsistentGroups =
+        [ (group, Set.fromList (dgMembers group))
+        | group <- unitGroups declared
+        , not (groupConsistentWith leafIndex group)
+        ]
+      removedLeafSet =
+        Set.unions (policySet : [members | (_, members) <- inconsistentGroups])
+      removedLeaves =
+        [leaf | (leaf, _) <- unitLeaves declared, Set.member leaf removedLeafSet]
+      (removedArgPairs, keptArgs) =
+        partition (supportUsesLeafSet removedLeafSet . snd) (unitArgs declared)
+      removedArgs = map fst removedArgPairs
+      keptArgSet = Set.fromList (map fst keptArgs)
+      keepsAttack attack = all (`Set.member` keptArgSet) (attackEndpoints attack)
+      (keptAttacks, removedAttacks) = partition keepsAttack (unitAttacks declared)
+      checked =
+        declared
+          { unitLeaves =
+              [entry | entry@(leaf, _) <- unitLeaves declared, Set.notMember leaf removedLeafSet]
+          , unitArgs = keptArgs
+          , unitAttacks = keptAttacks
+          }
+   in Prune
+        declared
+        policyLeaves
+        (map fst inconsistentGroups)
+        removedLeaves
+        removedArgs
+        keptArgSet
+        removedAttacks
+        checked
 
 -- ---------------------------------------------------------------------------
 -- The abstract closure
@@ -215,12 +292,16 @@ blockedSet args edge seed = go (Set.fromList [x | x <- seed, x `elem` args])
 retainedIndices :: Prune -> [Int]
 retainedIndices p =
   [ i
-  | (i, (_, support)) <- zip [0 ..] (unitArgs declared)
-  , not (supportUsesLeaf quarantined support)
+  | (i, (argumentId, _)) <- zip [0 ..] (unitArgs declared)
+  , Set.member argumentId keptArgSet
   ]
   where
     declared = pruneDeclared p
-    quarantined = quarantinedLeaves declared
+    keptArgSet = pruneKeptArgSet p
+
+-- | The checked argument-id index built by the smart constructor.
+pruneKeptArgSet :: Prune -> Set ArgId
+pruneKeptArgSet (Prune _ _ _ _ _ kept _ _) = kept
 
 -- | The edge relation of a unit in declared index space: the same structural
 -- subargument-closure rule the checker compiles with ('Lara.Compile.edgeB'),
@@ -249,19 +330,15 @@ declaredEdge p = edgeWith (map snd (unitArgs (pruneDeclared p))) (declaredAttack
 -- quarantined endpoint loses every edge it carried, including edges between two
 -- retained arguments.
 --
--- The retained attacks are obtained by filtering the declared /resolved/
--- attacks in lockstep with their raw declarations. This is exactly the raw-id
--- endpoint filter used by 'quarantineUnit', while making @retained ⊆ declared@
--- hold by construction — including when a removed declaration has the same
--- support term as a retained one.
+-- The retained attacks are resolved from the exact checked projection stored
+-- in 'Prune'; endpoint retention is decided only once by
+-- 'pruneWithPolicySeed'.  Resolution still uses declared argument terms so the
+-- relation remains in declared index space.
 retainedAttacks :: Prune -> [RAttack]
 retainedAttacks p =
-  [ resolved
-  | (raw, resolved) <- zip (unitAttacks (pruneDeclared p)) (declaredAttacks p)
-  , all (`elem` keptIds) (attackEndpoints raw)
-  ]
-  where
-    keptIds = map fst (unitArgs (pruneChecked p))
+  resolveAttacks
+    (unitArgs (pruneDeclared p))
+    (unitAttacks (pruneChecked p))
 
 retainedEdge :: Prune -> Int -> Int -> Bool
 retainedEdge p = edgeWith (map snd (unitArgs (pruneDeclared p))) (retainedAttacks p)

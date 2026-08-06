@@ -2,6 +2,16 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: use `subagent-driven-development` or `executing-plans` to execute this plan task by task. Work in an isolated worktree. Do not combine the calculus and protocol tracks into one implementation commit.
 
+> **2026-08-05 program split.** This document is the older evidence-admission sketch. Its
+> presentation-policy repair is now governed by
+> [`docs/policy-admission-calculus-decision.md`](../docs/policy-admission-calculus-decision.md),
+> implemented by
+> [`2026-08-05-policy-admission-calculus.md`](2026-08-05-policy-admission-calculus.md), and
+> mechanized by the companion
+> [`2026-08-05-policy-admission-metatheory.md`](2026-08-05-policy-admission-metatheory.md).
+> Those two programs preserve `lara-core@0.1`; they do not authorize the byte-level
+> `lara-evidence@0.1` work tracked by issue #78, which remains gated and out of scope.
+
 **Goal:** Borrow RIT's strongest reusable ideas without turning LARA into a second arithmetic verifier: add a small evidence-admission subcalculus that can justify how byte-addressed evidence becomes a LARA leaf, preserve LARA's argumentation semantics as the scientific contribution, and keep goal/attempt history outside the frozen support calculus.
 
 **Recommendation:** Keep the evidence-admission boundary, but do not treat graph pruning as ordinary successful verification and do not present the admission layer itself as the paper's novelty. First repair the demonstrated source conformance defect: `Lara.Elaborate` currently ignores `policyAdmission`. Then prototype a closed leaf-certificate seam whose public result is conservative under unavailable evidence. Treat the composition theorem and real-artifact evaluation as a promotion gate. Defer a custom goal/attempt service; use an external registration/checkpoint interface unless evidence shows that a LARA-specific validator is needed. Do not relabel the frozen `IncompleteArgument` gate as a bug; accepted partial alternatives would be a separate `lara-core@0.2` design.
@@ -64,7 +74,7 @@ This is not justification semantics and not a truth theorem. Possible-world/just
 1. `lara-core@0.1` retains its existing proposition, rule, support-term, typed-attack, grounded-labelling, four-status, and `IncompleteArgument` rejection behavior.
 2. A concrete leaf checker is selected from a closed registry. Artifact input never supplies executable checker code.
 3. Every admitted certified leaf has one exact checker identity, one canonical payload, at least one source reference, and a runner-generated dependency report containing every object the checker read.
-4. `quarantine` removes the leaf and every dependent argument/attack before core checking, but it is not evidence that the removed material is false. Every root in the quarantine-relevance component receives the outer result `evidence-blocked`; its core label is conditional and must not be presented as the final checked claim status.
+4. `quarantine` contributes a removal seed. After group consistency has read the full declared leaf set, policy and group seeds are unioned once; one prune removes the leaves, every dependent argument (including dependencies nested in premises and discharges), and every attack with a removed raw endpoint before core checking. It is not evidence that the removed material is false. Every root selected by blocked reporting from that same prune receives the outer result `evidence-blocked`; its core label is conditional and must not be presented as the final checked claim status.
 5. `reject` is reserved for malformed or integrity-violating input: digest mismatch, path escape, unknown checker, malformed payload, ambiguous row selection, or policy-mandated escalation.
 6. Under frozen v0.1, a submitted argument with an open mandatory obligation is rejected as `IncompleteArgument`; a source claim is a `gap` only when it has no complete submitted support argument. Accepting partial alternatives is explicitly outside this plan.
 7. A raw core `.sexp` verdict is relative to the supplied `Gamma`. It must not be reported as byte-evidence-checked. The full `.lara` artifact path reports both evidence and core identities.
@@ -76,6 +86,12 @@ This is not justification semantics and not a truth theorem. Possible-world/just
 ---
 
 ## Task 1: Freeze the boundary and paper claim
+
+> **GATED — do not execute from this sketch.** This task proposes the byte-level
+> `lara-evidence@0.1` layer under #78. Its composition pseudocode below is archival, not a runtime
+> API: if #78 is later ungated, it must be redesigned around the frozen opaque source carrier and
+> canonical multi-cause audit rather than passing `Q`, retained structures, or `affectedRoots`
+> independently.
 
 **Files**
 - Create: `docs/evidence-admission-decision.md`
@@ -184,6 +200,11 @@ git commit -m "docs: freeze evidence admission boundary"
 
 ## Task 2: Repair source admission conformance without changing `lara-core@0.1`
 
+> **SUPERSEDED — do not execute this task from this document.** Use the 2026-08-05 runtime plan and
+> companion metatheory plan linked at the top. They require the opaque source carrier and canonical
+> multi-cause audit; any conflicting file list, API sketch, test list, or commit recipe below is
+> historical only.
+
 **Files**
 - Create: `src/Lara/Admission.hs`
 - Modify: `lara.cabal`
@@ -214,28 +235,26 @@ The first five tests must fail against the current all-declared `gamma` construc
 
 **Step 2: Implement one source admission pass**
 
-Replace the unconditional presentation environment with a total pass over every declared leaf. Run it before duplicate-report group handling and support checking. Compute argument dependencies with the existing structural `leaves(w)` function; retain an argument iff every dependency is admitted. Retain an attack iff both endpoints are retained. Never remove only the `Gamma` entry: that produces a later `R1 MissingLeaf` rejection and is not quarantine.
+Replace the unconditional presentation environment with a total pass over every declared leaf. Exact
+`(LeafKind, Provenance)` lookup defaults omitted/unmatched rows to `admit`; duplicate admission keys
+and duplicate `LeafId` declarations are source invalidity. Evaluate duplicate-report consistency on
+the full declared leaf set, then union policy- and group-quarantine seeds once. Compute argument
+dependencies with the existing structural `leaves(w)` function (including premises and discharges);
+retain an argument iff every dependency is admitted, and retain an attack iff neither raw endpoint
+was removed. Never remove only the `Gamma` entry: that produces a later core R1 `MissingLeaf`
+rejection and is not quarantine or a route to gap. Source R8, group R9, and core R1 remain distinct;
+the complete precedence, CLI exception, hidden carrier, and canonical audit are fixed by the
+2026-08-05 decision linked above.
 
-Use one result type shared by elaboration and reporting:
-
-```haskell
-data AdmissionDiagnostic = AdmissionDiagnostic
-  { admissionLeaf       :: LeafId
-  , admissionKind       :: LeafKind
-  , admissionProvenance :: Provenance
-  , admissionOutcome    :: Admission
-  }
-
-data AdmissionResult = AdmissionResult
-  { admittedLeaves      :: Map LeafId Prop
-  , quarantinedLeaves   :: Map LeafId AdmissionDiagnostic
-  , retainedArguments   :: Set ArgId
-  , retainedAttacks     :: [Attack]
-  , affectedRoots       :: Set ClaimId
-  }
-```
-
-`Lara.Admission` is pure. It receives the policy table and parsed presentation program; it performs no filesystem access and does not know about concrete evidence checkers yet. Compute `affectedRoots` from the declared presentation graph before pruning; reporting overlays `evidence-blocked` on those roots and never replaces that result with the conditional core label.
+**Superseded API note (2026-08-05).** Do not implement the formerly proposed public
+`AdmissionResult` shared by elaboration and reporting. Independently exposed admitted-leaf maps,
+retained structures, and affected-root sets would let callers assemble inconsistent projections and
+bypass the canonical multi-cause audit. The runtime program instead requires an opaque source carrier
+whose sole smart constructor binds replay identity, the full declared unit, the policy seed, the one
+combined policy-plus-group prune, and the canonical audit. Reporting receives only projections from
+that carrier; it cannot construct or recompute retained leaves/arguments/attacks, affected roots, or
+audit rows. `Lara.Admission` may remain pure and perform no filesystem access, but purity does not
+relax the carrier invariant.
 
 **Step 3: Preserve and document the v0.1 hole contract**
 
@@ -250,7 +269,13 @@ Update the comparison and spec wording where they currently imply that accepted 
 
 **Step 4: Preserve source diagnostics**
 
-The combined source report records each quarantined leaf and every pruned argument/attack. A query in a quarantine-relevance component reports `evidence-blocked`; it may retain the pruned graph's `gap`, `justified`, `contested`, or `defeated` label only as a conditional diagnostic. `reject` reports the first deterministic admission error and never invokes the core checker.
+The carrier's canonical audit records one row per quarantined leaf with every policy/group cause,
+then every pruned argument and attack in declaration order. A query selected by blocked reporting
+from that same prune reports `evidence-blocked`; it may retain the pruned graph's `gap`, `justified`,
+`contested`, or `defeated` label only as a conditional diagnostic. Policy R8 selects the first leaf
+in source declaration order whose exact key matches a `reject` row, never invokes the core checker,
+and emits exactly one deterministic stderr line identifying the leaf id, kind, provenance, and
+matched admission row.
 
 **Verification**
 

@@ -37,6 +37,7 @@ module Lara.ExpectedJson
     -- * The @expected.json@ golden for a checked unit
   , expectedJsonValue
   , expectedJson
+  , sourceResultJsonValue
   ) where
 
 import Data.Char (ord)
@@ -64,6 +65,14 @@ import Lara.Driver
   , prune
   , pruneChecked
   , runCheck
+  )
+import Lara.Elaborate
+  ( SourceResult
+  , sourceResultCheckInput
+  , sourceResultCheckedArgIds
+  , sourceResultDiagnostics
+  , sourceResultLocatedRejection
+  , sourceResultVerdict
   )
 import Lara.Grounded (Claim (..))
 import Lara.Policy (lookupRule)
@@ -176,6 +185,101 @@ renderString s = '"' : concatMap esc s ++ "\""
 -- reproduces.
 expectedJson :: CheckInput -> String
 expectedJson = renderJson . expectedJsonValue
+
+-- | Render a source result without discarding its admission prune.  When the
+-- audit is empty, the legacy raw-core rendering remains byte-identical.  A
+-- policy-pruned result is rendered directly from its public verdict; rebuilding
+-- it through 'runCheck' would lose the policy seed and blocked-status overlay.
+sourceResultJsonValue :: SourceResult -> JValue
+sourceResultJsonValue result =
+  case sourceResultCheckInput result of
+    Right input -> expectedJsonValue input
+    Left _ ->
+      case sourceResultVerdict result of
+        Verdict replayId (Accept labels _edges statuses) ->
+          JObject
+            [ ("replay-id", replayIdValue replayId)
+            , ("verdict-class", JString (tagToString TAccept))
+            , ( "located-diagnostic"
+              , JObject
+                  [ ("kind", JString "accept")
+                  , ("statuses", JArray (map sourceStatusEntry statuses))
+                  , ("labels", JArray (map sourceLabelEntry labels))
+                  ]
+              )
+            ]
+        Verdict replayId (Reject rejection) ->
+          JObject
+            [ ("replay-id", replayIdValue replayId)
+            , ("verdict-class", JString ("reject " ++ rejectionClass rejection))
+            , ("located-diagnostic", sourceRejectDiagnostic result rejection)
+            ]
+  where
+    sourceStatusEntry (p, status) =
+      JObject $
+        [ ("claim", JString (prettyProp p))
+        , ("status", JString (publicStatusString status))
+        ]
+          ++ [ ("conditional-status", JString (statusString (conditionalStatus status)))
+             | not (isPublished status)
+             ]
+    sourceLabelEntry (i, label) =
+      JObject
+        [ ("index", JNumber i)
+        , ("label", JString (labelString label))
+        ]
+
+-- | The reject diagnostic of a policy-pruned source result.
+--
+-- The prune makes the declared 'CheckInput' unusable for re-deriving anything
+-- ('sourceResultCheckInput' fails closed), so this renders straight from the
+-- decision the source pipeline already made: the wire class, plus the failing
+-- stage and offending constituent carried by 'sourceResultLocatedRejection' —
+-- the /same/ decision path that produced the verdict. @messages@ retains the
+-- driver's @stderr@ precedence lines, which exist only for the two boundary
+-- rejections (R13, R9); every ordinary checker rejection reports itself through
+-- @stage@ + @constituent@ instead, so rendering @messages@ alone would publish
+-- an empty diagnostic for, say, a pruned R1.
+sourceRejectDiagnostic :: SourceResult -> Rejection -> JValue
+sourceRejectDiagnostic result rejection =
+  JObject
+    ( [ ("kind", JString "reject")
+      , ("class", JString (rejectionClass rejection))
+      ]
+        ++ locatedFields
+        ++ [("messages", JArray (map JString (sourceResultDiagnostics result)))]
+    )
+  where
+    -- 'Nothing' only on acceptance, which this branch is not; the empty case is
+    -- for totality.
+    locatedFields = case sourceResultLocatedRejection result of
+      Nothing -> []
+      Just (LocatedRejection _ stage constituent) ->
+        [ ("stage", JString (diagnosticStageString (CheckerStage stage)))
+        , ("constituent", sourceConstituentValue (sourceResultCheckedArgIds result) constituent)
+        ]
+
+-- | Render a located constituent against the __checked__ argument ids (the
+-- indices the checker used after the prune — see 'sourceResultCheckedArgIds').
+-- Attacks are named by index only: the source boundary deliberately does not
+-- export the checked unit, so there is no attack list to spell here.
+sourceConstituentValue :: [ArgId] -> Constituent -> JValue
+sourceConstituentValue argIds c = case c of
+  CPolicy -> JObject [("kind", JString "policy")]
+  CArgument i ->
+    JObject ([("kind", JString "argument")] ++ argIdField i ++ [("index", JNumber i)])
+  CAttack i -> JObject [("kind", JString "attack"), ("index", JNumber i)]
+  CConflictPair i j ->
+    JObject
+      [ ("kind", JString "conflict-pair")
+      , ("source", endpoint i)
+      , ("target", endpoint j)
+      ]
+  CReplayEnvelope -> JObject [("kind", JString "replay")]
+  CGroup (GroupId g) -> JObject [("kind", JString "group"), ("id", JString g)]
+  where
+    endpoint i = JObject (argIdField i ++ [("index", JNumber i)])
+    argIdField i = [("id", JString a) | Just (ArgId a) <- [safeIndex argIds i]]
 
 -- | The structured @expected.json@ value for a 'CheckInput' (pure).
 --

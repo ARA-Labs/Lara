@@ -35,9 +35,17 @@ import Test.QuickCheck
 import Data.List (group, sort)
 import System.Directory (doesFileExist, listDirectory)
 
-import Lara.Elaborate (defeasibleSuiteSigma, elabErrorMessage, elaborate, registryOf)
+import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
+import Lara.Elaborate
+  ( PreparedSource (..)
+  , defeasibleSuiteSigma
+  , prepareSource
+  , renderSourceInvalid
+  , runSourceCheck
+  , sourceResultCheckInput
+  )
 import Lara.ExpectedJson (JValue (..), expectedJson, expectedJsonValue)
-import Lara.Replay (CheckInput, replayErrorMessage, sourceCheckInput)
+import Lara.Replay (CheckInput)
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Wire (encodeCheckInput, printSExpr)
 
@@ -99,13 +107,19 @@ deriveInput dir = do
   progText <- readFile (dir ++ "/unit.lara")
   pure $ case (parseProgram progText, parsePolicy policyText) of
     (Right prog, Right pol) ->
-      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
-        Left e -> Left (dir ++ ": elaborate: " ++ elabErrorMessage e)
-        Right unit ->
-          either
-            (Left . ((dir ++ ": replay: ") ++) . replayErrorMessage)
-            Right
-            (sourceCheckInput prog pol unit)
+      case prepareSource defeasibleSuiteSigma prog pol of
+        Left invalid -> Left (dir ++ ": source invalid: " ++ renderSourceInvalid invalid)
+        Right (SourceRejected rejection) ->
+          Left (dir ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+        Right (SourceAccepted input) ->
+          case sourceResultCheckInput (runSourceCheck input) of
+            Left audit ->
+              Left
+                ( dir
+                    ++ ": legacy core artifacts cannot encode source admission: "
+                    ++ renderAdmissionAudit audit
+                )
+            Right legacyInput -> Right legacyInput
     (pr, pp) -> Left (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp)
 
 -- ---------------------------------------------------------------------------

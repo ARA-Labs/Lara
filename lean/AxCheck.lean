@@ -20,12 +20,15 @@ import Lara.Support
 import Lara.Groups
 import Lara.Blocked
 import Lara.BlockedProgram
+import Lara.RawAttack
+import Lara.Admission
 import Lara.Attack
 import Lara.Compile
 import Lara.Erase
 import Lara.EraseTransport
 import Lara.Policy
 import Lara.Check
+import Lara.Driver
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
 import Lara.Examples.PolicyAcceptance
@@ -36,6 +39,57 @@ open Lara
 -- Symbolic certificate wire equality (nested `List SExpr`, decided manually).
 #print axioms Lara.Support.SExpr.decEq
 #print axioms Lara.Support.SExpr.decEqList
+
+-- Shared raw attack identity and endpoint alignment (policy admission
+-- boundary, metatheory plan Task 1). The vocabulary moved out of Lara.Driver;
+-- `resolve_filter_commute` proves filtering by raw endpoint id commutes with
+-- resolution.
+#print axioms Lara.RawAttack.selectAligned
+#print axioms Lara.RawAttack.resolveAttacks
+#print axioms Lara.RawAttack.resolve_filter_commute
+#print axioms Lara.RawAttack.resolveAttacks_endpoints_mem
+#print axioms Lara.RawAttack.selectAligned_mono
+#print axioms Lara.RawAttack.lookupArg_of_mem_nodup
+
+-- R14 argument-id uniqueness as a carried invariant: the wire decoder proves
+-- it (`firstDup_none_nodup`) and `AlignedAttacks.ids_nodup` transports it into
+-- the admission model, where `retained_attack_source_retained` needs it.
+#print axioms Lara.Driver.firstDup_none_nodup
+
+-- Policy admission at the trusted source boundary (metatheory plan Task 2):
+-- the declarative judgment, its correspondence with the evaluator, the two
+-- context layers, the endpoint-safe prune, the canonical audit, the
+-- all-admit identity, restrictiveness, rejection, and source non-promotion.
+#print axioms Lara.Admission.evaluateAdmission_iff_judgment
+#print axioms Lara.Admission.admission_deterministic
+#print axioms Lara.Admission.policy_admitted_iff
+#print axioms Lara.Admission.checked_admitted_iff
+#print axioms Lara.Admission.checked_admitted_ids_eq_prune
+#print axioms Lara.Admission.nodup_ids_eq_of_mem
+#print axioms Lara.Admission.policy_quarantined_absent
+#print axioms Lara.Admission.policy_quarantined_arg_excluded
+#print axioms Lara.Admission.retained_attack_endpoints
+#print axioms Lara.Admission.retained_attack_source_retained
+#print axioms Lara.Admission.retained_attacks_selectAligned
+#print axioms Lara.Admission.admission_audit_exact
+#print axioms Lara.Admission.audit_leaves_nonempty
+#print axioms Lara.Admission.policy_all_admit_group_identity
+#print axioms Lara.Admission.mem_policyQuarantineSeed_iff
+#print axioms Lara.Admission.policy_all_admit_checkUnit_identity
+#print axioms Lara.Admission.policyQuarantineSeed_subset_of_restrictive
+#print axioms Lara.Admission.removedSeed_subset_of_restrictive
+#print axioms Lara.Admission.accepted_prune_eq
+#print axioms Lara.Admission.accepted_metadata_aligned
+#print axioms Lara.Admission.accepted_checked_context_exact
+#print axioms Lara.Admission.accepted_resolved_aligned
+#print axioms Lara.Admission.more_restrictive_cannot_add_structure
+#print axioms Lara.Admission.source_reject_no_checked_unit
+#print axioms Lara.Admission.source_justified_nonpromotion
+
+-- `usesLeaf` monotonicity (mutual `def`s in `Prop`, used as theorems).
+#print axioms Lara.Groups.usesLeaf_mono
+#print axioms Lara.Groups.usesLeafList_mono
+#print axioms Lara.Groups.usesLeafDisch_mono
 
 -- Result 11 / C01: nf/≡ carve-out.
 #print axioms equiv_iff_nf_eq

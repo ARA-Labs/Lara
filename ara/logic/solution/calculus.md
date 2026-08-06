@@ -50,8 +50,16 @@ Instances are always ground: the abstract syntax and JSON carry the substitution
 instance checking is substitution application plus syntactic identity (no unification in the trusted
 checker). Each declared critical question is either discharged by a support term or declared an
 explicit open hole; an open mandatory hole excludes the incomplete argument from the framework and
-yields a `gap`. Leaf admission is a total policy map over (kind × provenance) applied before evaluation
-and never creates an attack.
+yields a `gap`.
+The reviewed source contract applies leaf admission before core evaluation as a total policy map over
+`(kind × provenance)`, defaulting unmatched rows to `admit`. `reject` produces source rejection R8
+without a checked unit. `quarantine` removes the leaf, every argument whose transitive support uses it,
+and every attack with a removed endpoint. Duplicate-report groups are still evaluated against declared
+leaves; their quarantine seed is then unioned with the policy seed to construct the final checked
+context. Admission creates neither attacks nor a fifth core status; conservative source reporting may
+publish `evidence-blocked` for affected roots while retaining any conditional core diagnostic. The
+runtime contract and compatibility boundary are fixed in
+`plans/2026-08-05-policy-admission-calculus.md`.
 
 ## 4. Support terms and dependencies
 

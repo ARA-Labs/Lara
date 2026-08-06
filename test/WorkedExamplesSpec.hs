@@ -4,9 +4,8 @@
 -- the three D1 rebuttal-replay rounds (round0–round2) — fifteen examples in all.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
--- with "Lara.Syntax", 'elaborate's the pair to a 'Unit', validates the source
--- replay boundary with 'sourceCheckInput', runs the real six-stage pipeline
--- ("Lara.Driver".@runCheck@), and asserts the frozen identity-bearing verdict —
+-- with "Lara.Syntax", prepares the pair with 'prepareSource', runs the opaque
+-- carrier through 'runSourceCheck', and asserts the frozen identity-bearing verdict —
 -- exactly the in-process path @app\/Main.hs@ takes for a @.lara@ file, so these
 -- goldens pin the same bytes the CLI prints. IO lives in the test, never in the
 -- elaborator (mirrors "ElaborateSpec").
@@ -62,20 +61,29 @@ import Lara.AST
   , TheoryDigest (..)
   , Unit (..)
   )
-import Lara.Driver (runCheck)
+import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
 import Lara.Elaborate
-  ( defeasibleSuiteSigma
+  ( PreparedSource (..)
+  , SourceResult
+  , defeasibleSuiteSigma
   , elabErrorMessage
-  , elaborate
+  , prepareSource
+  , renderSourceInvalid
   , registryOf
+  , runSourceCheck
+  , sourceResultCheckInput
+  , sourceResultVerdict
   )
+-- The bare, admission-free lowering: this suite pins the elaborator's own
+-- output (the @.core.sexp@ anchors), so it is one of the sanctioned
+-- escape-hatch callers described in the "Lara.Elaborate.Internal" header.
+import Lara.Elaborate.Internal (elaborate)
 import Lara.ExpectedJson (JValue (..), expectedJson, expectedJsonValue)
 import Lara.Replay
   ( CoreVersion (..)
   , mkCheckInput
   , mkReplayId
   , replayErrorMessage
-  , sourceCheckInput
   )
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Syntax (parsePolicy, parseProgram)
@@ -169,11 +177,17 @@ runExample :: FilePath -> FilePath -> (Verdict -> Property) -> IO Property
 runExample dir policyBase k = do
   prog <- loadProgram (dir ++ "/example.lara")
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
-  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
-    Left e -> counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
-    Right unit -> case sourceCheckInput prog pol unit of
-      Left err -> counterexample (dir ++ ": replay identity error: " ++ replayErrorMessage err) False
-      Right input -> k (runCheck input)
+  pure $ case preparedResult prog pol of
+    Left err -> counterexample (dir ++ ": " ++ err) False
+    Right result -> k (sourceResultVerdict result)
+
+preparedResult :: Program -> Policy -> Either String SourceResult
+preparedResult prog pol =
+  case prepareSource defeasibleSuiteSigma prog pol of
+    Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
+    Right (SourceRejected rejection) ->
+      Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceAccepted input) -> Right (runSourceCheck input)
 
 -- ---------------------------------------------------------------------------
 -- E-series — accepted
@@ -558,13 +572,17 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
       committed <- readFile (dir ++ "/example.core.sexp")
       pure $ case (parseProgram progText, parsePolicy polText) of
         (Right prog, Right pol) ->
-          case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
-            Left e ->
-              counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
-            Right unit ->
-              case sourceCheckInput prog pol unit of
-                Left err ->
-                  counterexample (dir ++ ": replay identity error: " ++ replayErrorMessage err) False
+          case preparedResult prog pol of
+            Left err -> counterexample (dir ++ ": " ++ err) False
+            Right result ->
+              case sourceResultCheckInput result of
+                Left audit ->
+                  counterexample
+                    ( dir
+                        ++ ": legacy core artifacts cannot encode source admission: "
+                        ++ renderAdmissionAudit audit
+                    )
+                    False
                 Right input ->
                   counterexample (dir ++ ": .core.sexp is stale — regenerate with scripts/gen-worked-examples.hs") $
                     (printSExpr (encodeCheckInput input) ++ "\n") === committed
@@ -584,13 +602,17 @@ prop_expectedJsonFresh = once (ioProperty (conjoin <$> mapM checkOne examplePoli
       prog <- loadProgram (dir ++ "/example.lara")
       pol <- loadPolicy (dir ++ "/" ++ policyBase)
       committed <- readFile (dir ++ "/expected.json")
-      pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
-        Left e ->
-          counterexample (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e) False
-        Right unit ->
-          case sourceCheckInput prog pol unit of
-            Left err ->
-              counterexample (dir ++ ": replay identity error: " ++ replayErrorMessage err) False
+      pure $ case preparedResult prog pol of
+        Left err -> counterexample (dir ++ ": " ++ err) False
+        Right result ->
+          case sourceResultCheckInput result of
+            Left audit ->
+              counterexample
+                ( dir
+                    ++ ": legacy core artifacts cannot encode source admission: "
+                    ++ renderAdmissionAudit audit
+                )
+                False
             Right input ->
               counterexample
                 (dir ++ ": expected.json is stale — regenerate with scripts/gen-worked-examples.hs")
@@ -698,12 +720,7 @@ loadVerdict :: (FilePath, FilePath) -> IO (FilePath, Either String Verdict)
 loadVerdict (dir, policyBase) = do
   prog <- loadProgram (dir ++ "/example.lara")
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
-  pure $ (,) dir $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
-    Left e -> Left (elabErrorMessage e)
-    Right unit ->
-      case sourceCheckInput prog pol unit of
-        Left err -> Left (replayErrorMessage err)
-        Right input -> Right (runCheck input)
+  pure $ (,) dir $ sourceResultVerdict <$> preparedResult prog pol
 
 -- | Load + elaborate one example to its 'Unit'.
 loadUnit :: (FilePath, FilePath) -> IO (FilePath, Unit)
