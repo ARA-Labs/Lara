@@ -16,25 +16,22 @@ strict arg, and the seeded sweep grew the suite 358 → 360 — so per the
 post-freeze rule this file now records **`m5-freeze-v2`**. The v1 anchors
 remain addressable via the tag._
 
-_**Pending re-freeze (`m5-freeze-v3`), issue #76.** Conservative reporting for
-quarantine-affected claims added the `quarantine-attacker` accept-family
-operator, so the seeded sweep grew **360 → 369** mutants (9 new: one per
-justified corpus unit) and the measured input set **420 → 429**. Only additions:
-no existing mutant's bytes changed, and `corpus-units/`, `examples/`,
-`bundles/`, and `measurements/frozen/claim-support.*` are untouched — no frozen
-artifact declares a duplicate-report group, so nothing that was already frozen
-reports `evidence-blocked`._
-
-_Verified on the fix branch: `gen-mutants.hs` reproduces 369 mutants
-byte-identically, `differential.sh` is pass=436/436 positive and 54/54 negative,
-and a fresh `measure.hs` run is **429/429** on both `class_match` and
-`lean_agree`. The tables below still describe the **v2** snapshot committed under
-`measurements/frozen/`: re-running the post-freeze measurement is deliberately
-left to the merge commit, because the snapshot records the freeze commit SHA and
-the measuring environment, neither of which exists yet on a feature branch. At
-merge, run the two commands under "Post-freeze measurement run", commit the
-refreshed `measurements/frozen/{report,ablation}.{json,tsv}`, and record v3 in
-the history above with the new deterministic-projection hash._
+_**`m5-freeze-v3`, issues #76/#79 (snapshot commit `4d5c6ae`, 2026-08-06).**
+Conservative reporting for quarantine-affected claims added the
+`quarantine-attacker` accept-family operator, so the seeded sweep grew
+**360 → 369** mutants (9 new: one per justified corpus unit) and the measured
+input set **420 → 429**. Only additions: no existing mutant's bytes changed, no
+measured input changed (`unit.core.sexp` × 60 and the 11 worked-example goldens
+are byte-identical to v2), and `bundles/` and
+`measurements/frozen/claim-support.*` are untouched — no frozen artifact
+declares a duplicate-report group, so nothing that was already frozen reports
+`evidence-blocked`. The rows-2/3 tree SHAs below moved anyway because of
+non-measured content: docs (`LOWERING.md`, `examples/README.md`), the #79
+surface-policy repair (`corpus-v1.policy.lara`, `adaptive-pruning/C04/unit.lara`
+— the `.lara` surface path, not the measured core), and additive demo /
+running-example files (#65–#73). The v3 snapshot was produced at a clean
+`3108a5f` (`report.json` `environment`: `git-dirty: false`) and committed as
+`4d5c6ae`; the tables below describe **v3**._
 
 ## What T5 is (and is not)
 
@@ -58,9 +55,9 @@ the git tree object SHA is itself the content hash of the tree.
 
 | # | Frozen input | Path | Count | Content anchor (git tree SHA) |
 | --- | --- | --- | --- | --- |
-| 1 | Seeded mutation suite (verdict + specified-status anchors) | `fixtures/mutants/` | 360 mutants (315 verdict/status-anchored + 45 codec-reject malformed negatives) | `cb252cabbdc54058fb7d75627d9f86538d49647d` |
-| 2 | Corpus units (T2, hand-lowered M0 sample; C04 carries the #57 `ra@1` certificate) | `corpus-units/` | 60 units | `d8b8f0b1ff442975f035dc1c8aba22cce9e80d6f` |
-| 3 | Worked examples (golden verdicts, both drivers; unchanged from v1) | `examples/` | 11 examples | `95e978b1608ea31a37ef0107a172d0adb16e1957` |
+| 1 | Seeded mutation suite (verdict + specified-status anchors) | `fixtures/mutants/` | 369 mutants (324 verdict/status-anchored + 45 codec-reject malformed negatives) | `11160a8fdeb47a7e3772d26e6878e472a7a64dbe` |
+| 2 | Corpus units (T2, hand-lowered M0 sample; C04 carries the #57 `ra@1` certificate; every measured `unit.core.sexp` byte-identical to v2 — tree moved on docs + #79 surface-policy repair only) | `corpus-units/` | 60 units | `4f4c4ec7841b0a231771d5ba20bfe97302e3b4d4` |
+| 3 | Worked examples (golden verdicts, both drivers; the 11 measured examples byte-identical to v1 — tree moved on additive demos/running-example + README only) | `examples/` | 11 examples | `48edd2dc6bc883409bca00224e1e21c4ef7224a4` |
 
 **Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs:308`,
 SplitMix64, keyed per `(base, operator)`). Verified byte-identically
@@ -75,11 +72,14 @@ semantics. Pinned by the freeze commit SHA below.
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 360 mutants byte-identical (empty `git diff`) ✓ |
-| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=418 fail=0 ✓ |
+| Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 369 mutants byte-identical (empty `git diff`) ✓ |
+| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=436 fail=0 ✓ |
 | Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=54 fail=0 ✓ |
+| Admission differential (#81) | `bash scripts/admission-differential.sh` | pass=20 fail=0 (15 semantic byte-identical + 5 codec rejects) ✓ |
+| Replay-tamper detection | `bash scripts/test-replay-tamper.sh` | both tamper classes detected ✓ |
 | Lean axiom audit | `cd lean && lake env lean AxCheck.lean \| ../scripts/check-axioms.sh` | `sorry`-free, standard trio (incl. `Lara.RA`) ✓ |
 | Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`) ✓ |
+| Freeze-bundle tests | `python3 scripts/test_freeze_bundle.py` | 4/4 ✓ |
 
 ## Post-freeze measurement run
 
@@ -89,7 +89,7 @@ Command (one command, manifest-driven discovery):
 cabal exec -- runghc scripts/measure.hs
 ```
 
-Emits `measurements/{report,ablation}.{json,tsv}` over 420 inputs (360 mutants +
+Emits `measurements/{report,ablation}.{json,tsv}` over 429 inputs (369 mutants +
 60 corpus units); `scripts/claim-support.hs` emits the claim-support
 aggregation. The canonical snapshot is committed under `measurements/frozen/`
 (the working `measurements/` is gitignored as regenerable output).
@@ -98,10 +98,10 @@ aggregation. The canonical snapshot is committed under `measurements/frozen/`
 
 | Metric | Value |
 | --- | --- |
-| Measurement records | 420 (360 mutants + 60 corpus units) |
-| Class match (`actual` = `expected`) | 420 / 420 |
-| Cross-driver agreement (`lean_agree`) | 420 / 420 |
-| Location match (where applicable) | 266 / 266 (154 n/a: accepts, codec-fails, corpus units) |
+| Measurement records | 429 (369 mutants + 60 corpus units) |
+| Class match (`actual` = `expected`) | 429 / 429 |
+| Cross-driver agreement (`lean_agree`) | 429 / 429 |
+| Location match (where applicable) | 266 / 266 (163 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — codec-fails, corpus units) |
 | Replay success (corpus units) | 60 / 60 |
 | Claim-support (4): load-bearing strict steps carrying a checked certificate | 1 / 1 (#57, `adaptive-pruning/C04`) |
 | Ablation **no-cq** missed rejections | 18 — all `reject-IncompleteArgument` (surgical) |
@@ -119,8 +119,8 @@ reproducibility anchors below hash only the deterministic content.
 
 | Frozen output anchor | SHA-256 |
 | --- | --- |
-| `report.tsv` deterministic projection (`cut -f1-14`) | `08b90c684208f5886250231c5001b9627397bbe39d91fba4ee24edbdde927cd8` |
-| `ablation.tsv` (full, deterministic) | `a60fae503b68a7a22061fb849a72b4a32309d5e2b290ac720267f057b5a9d5f4` |
+| `report.tsv` deterministic projection (`cut -f1-14`) | `1152aba34e36535bea21511bebb950f79fc17681f1ddd9125067394ed5c07226` |
+| `ablation.tsv` (full, deterministic) | `76b89045cbf47ddfd0767efce81c82e339da35e436d3c35bf7efd496508e58c2` |
 
 Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 (recorded in `report.json` `environment`).
@@ -129,8 +129,12 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 
 - **v1 tag:** `m5-freeze-v1` (annotated), on `300b235` (merge commit of the T5
   freeze PR #55) — the M1 analogue is `spec-v0.1`.
-- **v2 freeze commit:** `<FILL-AFTER-MERGE>` (merge commit of the #57 PR).
-- **v2 tag:** `m5-freeze-v2` (annotated), on the v2 freeze commit.
+- **v2 freeze commit:** `68e7298` (merge commit of the #57 PR, #59). The tag
+  was not cut at merge time; it is cut retroactively alongside v3.
+- **v2 tag:** `m5-freeze-v2` (annotated), on `68e7298`.
+- **v3 snapshot commit:** `4d5c6ae` (measurement run at clean `3108a5f`).
+- **v3 tag:** `m5-freeze-v3` (annotated), on `<FILL-AFTER-MERGE>` (merge commit
+  of the v3 re-freeze PR).
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
   invalidates this freeze; re-run the gates and cut the next tag (e.g. the
   deferred wrong-fraction certificate mutation operator would cut
@@ -139,10 +143,10 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 ## Reproduce from scratch
 
 ```
-git checkout m5-freeze-v2
+git checkout m5-freeze-v3
 cabal build all
 cabal exec -- runghc scripts/gen-mutants.hs   # empty git diff = seed reproduces
-bash scripts/differential.sh                  # positive 418/0, negative 54/0
+bash scripts/differential.sh                  # positive 436/0, negative 54/0
 cabal exec -- runghc scripts/measure.hs       # regenerates measurements/
 cabal exec -- runghc scripts/claim-support.hs # claim-support aggregation
 cut -f1-14 measurements/report.tsv | shasum -a 256   # matches anchor above
