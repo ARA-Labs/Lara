@@ -1357,6 +1357,10 @@ mutation list maps onto this spine: wrong formulas → R2/R4, undeclared leaves 
 extension → R1/R12, bad attack targets → R10/R11, mis-declared obligations → R5, codec
 corruption → R14.
 
+`docs/rejection-surface.md` is this table's operational companion: a runnable anchor per class, the
+two-exit-code door story (source boundary vs. core checker), and the invalid/valid-but-unsupported
+boundary that the class list alone does not make explicit.
+
 ## 11. ARA lowering boundary
 
 The untrusted elaborator performs six logged tasks:

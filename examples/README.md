@@ -129,6 +129,11 @@ target that is `in`, `out`, and `undec` — E4/E5 close the `in`/`undec`-beyond-
 rebut cells), a gap claim in an attack-carrying unit, and the three rejection
 classes (R1 / R12 / R10).
 
+For the full rejection-class picture — all fourteen classes with a runnable anchor each, the
+source-boundary-vs-checker exit-code story, and why an unsupported claim (`gap`, as in `E2`) is not
+the same failure as a rejected one (`reject R1`, as in `R1`) — see
+[`docs/rejection-surface.md`](../docs/rejection-surface.md).
+
 ### Honesty note — what S1's certificate establishes
 
 The suite is no longer defeasible-only: S1 exercises certificate surface syntax
