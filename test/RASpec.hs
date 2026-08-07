@@ -19,6 +19,7 @@
 --     'strictCheck' on the opaque 'SExpr' wire form.
 module RASpec (raSpecProps) where
 
+import Data.List (isInfixOf)
 import Data.Ratio (denominator, numerator, (%))
 import qualified Data.Set as Set
 import Test.QuickCheck
@@ -34,15 +35,15 @@ import Lara.Strict
   , sjDependencies
   , strictCheck
   )
+import qualified Lara.Strict.Cell as Cell
+import Lara.Strict.Cell (parseDecimal, premiseCell)
 import Lara.Strict.RA
   ( RACert (..)
   , Tag (..)
   , checkDrop
   , decodeCert
   , mkRABackend
-  , parseDecimal
   , parseTag
-  , premiseCell
   , raBackendId
   , tagToString
   , RAGoal (..)
@@ -51,15 +52,16 @@ import Lara.Strict.RA
 -- ---------------------------------------------------------------------------
 -- Wire serialization (mirrors the adapter's grammar)
 --
--- Shares the adapter's 'Tag' table via 'tagToString' so the wire keywords are
--- defined in exactly one place ("StrictSpec" discipline).
+-- Shares the adapter's 'Tag' table via 'tagToString' — and the shared slot
+-- keyword via 'Cell.tagToString' — so the wire keywords are defined in
+-- exactly one place ("StrictSpec" discipline).
 -- ---------------------------------------------------------------------------
 
 tag :: Tag -> SExpr
 tag = SAtom . tagToString
 
 slotToSExpr :: Int -> SExpr
-slotToSExpr i = SList [tag TPrem, SAtom (show i)]
+slotToSExpr i = SList [SAtom (Cell.tagToString Cell.TPrem), SAtom (show i)]
 
 fracToSExpr :: Rational -> SExpr
 fracToSExpr r =
@@ -178,6 +180,15 @@ isLeft :: Either a b -> Bool
 isLeft (Left _) = True
 isLeft _ = False
 
+-- | Reject, /with/ this substring in the reason. The 'Lara.Strict.Cell'
+-- extraction's stated invariant is that @ra\@1@'s rejection strings stay
+-- byte-identical, which is the only reason 'Lara.Strict.Cell.decodeSlot'
+-- carries a backend-label parameter at all — so the invariant needs an
+-- assertion, not just a doc comment.
+rejectsWith :: String -> Either String a -> Bool
+rejectsWith needle (Left msg) = needle `isInfixOf` msg
+rejectsWith _ _ = False
+
 -- ---------------------------------------------------------------------------
 -- Properties: replay and dependencies
 -- ---------------------------------------------------------------------------
@@ -247,10 +258,51 @@ prop_raStrictCheckSeals ds =
 -- Properties: the closed wire grammar
 -- ---------------------------------------------------------------------------
 
--- | The wire keyword table is coherent and exhaustive over the closed set.
+-- | The @ra\@1@ rejection strings the "Lara.Strict.Cell" extraction promised to
+-- preserve byte-for-byte.
+--
+-- 'Lara.Strict.Cell.decodeSlot' takes a backend label solely so that @ra\@1@
+-- keeps saying @\"malformed RA premise reference\"@ rather than the shared
+-- module's own name; before this property, swapping the two backends' labels,
+-- passing @\"ord\"@ from "Lara.Strict.RA", or dropping the parameter outright
+-- left the whole suite and the differential harness green. The slot-range
+-- message is pinned alongside it because it is the other string the move put
+-- at risk (PR #83 review).
+prop_raRejectionMessages :: Bool
+prop_raRejectionMessages =
+  and
+    [ -- the label parameter: a non-slot sub-expression names RA, not Cell
+      rejectsWith
+        "malformed RA premise reference"
+        (decodeCert (SList [tag TRadrop, SAtom "0", slotToSExpr 1, fracToSExpr (1 % 2)]))
+    , -- the shared canonical-natural message inside a well-formed (prem N)
+      rejectsWith
+        "malformed premise slot"
+        (decodeCert
+           (SList
+              [ tag TRadrop
+              , SList [SAtom (Cell.tagToString Cell.TPrem), SAtom "01"]
+              , slotToSExpr 1
+              , fracToSExpr (1 % 2)
+              ]))
+    , -- RA indexes the FULL free context, so its range message differs from
+      -- ord@1's premise-only one; that distinction is the point.
+      rejectsWith
+        "free-context slot out of range"
+        (runBackend
+           (mkRABackend [(theoryDigest, [])])
+           theoryDigest
+           [cellPremise "full" "50", cellPremise "ablated" "38.1"]
+           (Prop (Pred "rel_drop_ge") [TNum "50", TNum "38.1", TNum "0.238", TNum "0.05"])
+           (certToSExpr (RACert 9 1 (119 % 500))))
+    ]
+
+-- | The wire keyword tables (the adapter's own and the shared slot table in
+-- "Lara.Strict.Cell") are coherent and exhaustive over their closed sets.
 prop_raTagRoundTrip :: Bool
 prop_raTagRoundTrip =
   all (\t -> parseTag (tagToString t) == Just t) [minBound .. maxBound]
+    && all (\t -> Cell.parseTag (Cell.tagToString t) == Just t) [minBound .. maxBound]
 
 -- | Literal wire vectors pin the certificate grammar independently of
 -- 'tagToString' (production-independent fixtures), including the corpus-v1
@@ -425,6 +477,7 @@ raSpecProps =
   , ("RA slot out of range rejected", quickCheckResult prop_raSlotOutOfRangeRejected)
   , ("RA unknown digest rejected", quickCheckResult prop_raUnknownDigestRejected)
   , ("RA strictCheck seals a judgment", quickCheckResult prop_raStrictCheckSeals)
+  , ("RA rejection strings preserved by the Cell extraction", quickCheckResult prop_raRejectionMessages)
   , ("RA wire tag round-trip", quickCheckResult prop_raTagRoundTrip)
   , ("RA literal wire golden vectors", quickCheckResult prop_raWireGoldenVectors)
   , ("RA closed decoder rejection matrix", quickCheckResult prop_raDecodeRejectionMatrix)

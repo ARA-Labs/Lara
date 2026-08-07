@@ -983,3 +983,136 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O49
+  timestamp: 2026-08-06T23:45
+  provenance: ai-suggested
+  content: >
+    On the raw .sexp door the strict-backend theory table is artifact-supplied:
+    buildCertOk builds it from the unit's own wire theories section and replay
+    preflight validates digest ordering/duplicates, never content. Any backend
+    design that claims premise-backing must therefore enforce it inside its own
+    decoder/replay; only the .lara policy door pins theory content (registryOf).
+  context: >
+    Outside-voice finding during the ord@1 plan review, verified against
+    src/Lara/Driver/Internal.hs:244-245 and src/Lara/Replay.hs; drove the N123
+    premise-only-slots decision. Seam-wide resolution (ra@1 parity) deferred to
+    a TODOS.md entry.
+  potential_type: constraint
+  bound_to:
+  - N123
+  promoted: true
+  promoted_to: logic/claims.md:C27
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O50
+  timestamp: 2026-08-06T23:45
+  provenance: ai-suggested
+  content: >
+    Canonical decimal encoding is injective on representable rationals, and
+    parseDecimal accepts only the canonical image; hence a strict-backend
+    equality goal over two canonical numerals can only accept syntactic
+    identity, degenerating num_eq(A,B) to num_eq(A,A).
+  context: >
+    Outside-voice finding during the ord@1 plan review; the N122 decision to
+    drop num_eq cites it as its rationale and the plan records it as the
+    rejection reason in section 2.1.
+  potential_type: claim
+  bound_to:
+  - N122
+  promoted: true
+  promoted_to: logic/claims.md:C26
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O51
+  timestamp: 2026-08-07T02:10
+  provenance: ai-suggested
+  content: >
+    When a backend seam deliberately hides a distinction from the checker (here
+    the premise/theory split, erased into one context Gamma = Delta ++ T), a
+    guard that depends on that distinction cannot live in the checker. It has
+    to be pushed into whatever the seam DOES parameterize -- for ord@1, theory
+    resolution, made to return the empty theory so the erased boundary and the
+    context boundary coincide. The guard then survives as an
+    acceptance-preserving refinement on the concrete side rather than as a
+    divergence between the two implementations.
+  context: >
+    Discovered while mechanizing the premise-only slot decision (N123) in
+    lean/Lara/Ord.lean; resolved as N125 and pinned by
+    fixtures/corpus/ord-premise-only-{reject,accept}.sexp.
+  potential_type: heuristic
+  bound_to:
+  - N125
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O52
+  timestamp: 2026-08-07T02:10
+  provenance: ai-executed
+  content: >
+    A strict backend's goal grammar does not accept the canonical numeral image;
+    it accepts the PREIMAGE of that image under nf. Because parseGoal runs after
+    normalization, surface literals outside the canonical image ("2.", ".5",
+    "+0.50", "-0.0") are accepted at their normalized value, and only literals
+    whose NORMAL FORM is still not a decimal ("1e3", "1.2.3", "NaN") reject.
+    Two OrdSpec properties asserted the narrower reading and failed; the tests
+    were wrong and the adapter was right.
+  context: >
+    First run of test/OrdSpec.hs against src/Lara/Strict/Ord.hs; corrected by
+    rewriting prop_ordGoalMatrix to assert normalization-then-parse, matching
+    what ra@1 already does. Same run also corrected an assumption that a
+    negative slot reaches slot resolution -- it is rejected earlier, at decode,
+    by the canonical-natural sub-grammar.
+  potential_type: concept
+  bound_to:
+  - N126
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O53
+  timestamp: 2026-08-07T04:30
+  provenance: ai-suggested
+  content: >
+    A cross-implementation differential proves AGREEMENT, never correctness, so
+    it is weakest exactly where the two implementations were deliberately
+    modelled differently to make them agree. Such inputs need an independent
+    expected-value pin, not just the differential; and when the pin list is
+    hand-maintained while the harness glob-discovers its inputs, the two drift
+    silently -- so the coverage relation itself has to be asserted.
+  context: >
+    PR #83 review: the four ord@1 fixtures were glob-discovered by
+    differential.sh but absent from corpusGoldens; auditing found two more
+    unpinned anchors. Closed by prop_goldensCoverAnchors in
+    test/DifferentialSpec.hs.
+  potential_type: heuristic
+  bound_to:
+  - N129
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O54
+  timestamp: 2026-08-07T04:30
+  provenance: ai-suggested
+  content: >
+    A pure-move refactor that introduces a parameter solely to PRESERVE
+    observable behaviour (here decodeSlot's backend label, keeping ra@1's
+    rejection strings byte-identical) creates a failure mode the pre-refactor
+    test suite cannot see: the old suite never asserted the strings, and the
+    new parameter can be mis-passed, swapped, or dropped with everything green.
+    The invariant a refactor claims to protect needs an assertion added in the
+    same change, and that assertion should be mutation-tested rather than
+    observed to pass.
+  context: >
+    PR #83 review finding on test/RASpec.hs; the added
+    prop_raRejectionMessages was verified to fail under the exact mutation
+    (decodeSlot "RA" -> "ord") before being kept.
+  potential_type: heuristic
+  bound_to:
+  - N129
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+

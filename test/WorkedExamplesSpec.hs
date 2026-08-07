@@ -1,7 +1,9 @@
 -- | Golden verdicts for E1–E5 / R1–R3 plus strict-certificate example S1;
 -- the teaching examples A and B join them in 'examplePolicies' for the
 -- freshness and coverage properties, together with the D3 agreement-map and
--- the three D1 rebuttal-replay rounds (round0–round2) — fifteen examples in all.
+-- the three D1 rebuttal-replay rounds (round0–round2), and the two running-example
+-- runs (run1–run2). 'examplePolicies' is the authoritative list; no count is
+-- repeated in prose, so it cannot drift again.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
 -- with "Lara.Syntax", prepares the pair with 'prepareSource', runs the opaque
@@ -24,14 +26,17 @@
 --   * __R2__ @strict-contrary@ — 'Reject' R12 (policy §8.1 Path-B well-formedness).
 --   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
 --   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
+--   * __S2__ @ord-cert@ — 'Accept'; ord@1 comparison cert replay plus the
+--     defeasible bridge rule consuming it; the comparative claim is justified.
 --   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
 --     a same-atom contrary pair contested via a rebut 2-cycle, and a
 --     setting-index-mismatch pair left justified (zero attacks).
 --
--- A final __freshness__ property re-derives all fifteen @example.core.sexp@
--- anchors (A, B, E1–E5, R1–R3, S1, agreement-map, and the D1 rebuttal-replay
--- rounds round0–round2) from their surface @.lara@ + policy and asserts the
--- committed bytes match, guarding against surface/anchor drift.
+-- A final __freshness__ property re-derives all eighteen @example.core.sexp@
+-- anchors (A, B, E1–E5, R1–R3, S1, S2, agreement-map, the D1 rebuttal-replay
+-- rounds round0–round2, and the running-example runs run1–run2) from their
+-- surface @.lara@ + policy and asserts the committed bytes match, guarding
+-- against surface/anchor drift.
 module WorkedExamplesSpec (workedExamplesSpecProps) where
 
 import Test.QuickCheck
@@ -157,6 +162,7 @@ examplePolicies =
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
   , ("examples/S1", "strict-v1.policy.lara")
+  , ("examples/S2", "ord-v1.policy.lara")
   , ("examples/agreement-map", "agreement-v1.policy.lara")
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
@@ -303,6 +309,28 @@ prop_S1 = once $ ioProperty $
               verdictLabels outcome === [(0, LIn)]
           , counterexample "S1 status: c1 → justified" $
               verdictStatuses outcome === [(holdsP "safety_invariant" "D", Published Justified)]
+          ]
+
+-- | S2: the strict @ord\@1@ comparison certificate replays, and the defeasible
+-- bridge rule consumes its conclusion. Both args are @in@ and the comparative
+-- claim — not the bare comparison — is the justified one, which is the whole
+-- point of the §3.6 layering: an accepted comparison atom is terminal until a
+-- policy rule binds it to the systems and measurand it is about.
+prop_S2 :: Property
+prop_S2 = once $ ioProperty $
+  runExample "examples/S2" "ord-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S2: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S2 labels: a1 (strict ord@1) and a2 (bridge) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S2 status: c1 → justified" $
+              verdictStatuses outcome
+                === [ ( betterP "sys_new" "sys_base" "accuracy" "imagenet_val"
+                      , Published Justified
+                      )
+                    ]
           ]
 
 -- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
@@ -747,6 +775,7 @@ workedExamplesSpecProps =
   , ("E4 reinstatement → accept, justified UNDER rebut/undermine/undercut", quickCheckResult prop_E4)
   , ("E5 contested via undermine+undercut cycles, gap amid attacks", quickCheckResult prop_E5)
   , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
+  , ("S2 strict ord@1 cert + defeasible bridge → accept, both args in, comparative claim justified", quickCheckResult prop_S2)
   , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)

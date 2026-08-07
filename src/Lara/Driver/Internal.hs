@@ -88,6 +88,7 @@ import Lara.Prop (Prop)
 import Lara.SupportTerm (CertOk)
 import qualified Lara.Strict as St
 import qualified Lara.Strict.ND as ND
+import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
 import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..))
 
@@ -228,9 +229,14 @@ rejectionDiagnosticsWithPrune input pruned =
       | otherwise -> []
 
 -- | The certificate oracle from the wire @theories@ section over the fixed
--- backend registry — @nd\@1@ and @ra\@1@ (Lean @buildRegistry@ \/
--- 'Lara.Examples' style). A unit referencing any other backend falls through
--- to certificate rejection.
+-- backend registry — @nd\@1@, @ra\@1@ and @ord\@1@ (Lean @buildRegistry@). A
+-- unit referencing any other backend falls through to certificate rejection.
+--
+-- Every backend is handed the same artifact-supplied table. @ord\@1@ is the
+-- one that refuses to /cite/ it: it rejects any certificate slot at or beyond
+-- the premise count, so its compared values always trace to a consulted
+-- premise (see "Lara.Strict.Ord"). On the Lean side the same acceptance set
+-- is reached by resolving a known @ord\@1@ digest to the empty theory.
 buildCertOk :: [(TheoryDigest, [Prop])] -> CertOk
 buildCertOk theories cert as c = case cert of
   Cert (BackendId name) v _ payload ->
@@ -241,7 +247,8 @@ buildCertOk theories cert as c = case cert of
           Right _ -> True
           Left _ -> False
   where
-    registry = St.mkRegistry [ND.mkNDBackend table, RA.mkRABackend table]
+    registry =
+      St.mkRegistry [ND.mkNDBackend table, RA.mkRABackend table, Ord.mkOrdBackend table]
     table = [(toStrictDigest d, ps) | (d, ps) <- theories]
 
 toStrictDigest :: TheoryDigest -> St.TheoryDigest

@@ -44,8 +44,6 @@ module Lara.Strict.RA
   , decodeCert
     -- * Parsing and evaluation (the replay)
   , raGoalPred
-  , parseDecimal
-  , premiseCell
   , parseGoal
   , checkDrop
     -- * The registered adapter
@@ -63,6 +61,13 @@ import Lara.Strict
   , Dependency (..)
   , SExpr (..)
   , TheoryDigest
+  )
+import Lara.Strict.Cell
+  ( decodeSlot
+  , parseCanonicalInt
+  , parseCanonicalNat
+  , parseDecimal
+  , premiseCell
   )
 
 -- ---------------------------------------------------------------------------
@@ -99,46 +104,25 @@ data RACert = RACert
 -- decodes it (closed registration). Wire grammar:
 --
 -- > cert := (radrop (prem N) (prem M) (frac P Q))
+--
+-- The @(prem N)@ slot-reference sub-grammar is shared with the other
+-- rational-arithmetic backends and lives in "Lara.Strict.Cell"
+-- ('decodeSlot'); this table keeps only the RA-specific keywords.
 
--- | The closed set of wire keywords ('Lara.Strict.ND.Tag' discipline: the
--- concrete spellings live in exactly one table).
-data Tag = TRadrop | TPrem | TFrac
+-- | The closed set of RA-specific wire keywords ('Lara.Strict.ND.Tag'
+-- discipline: the concrete spellings live in exactly one table). The shared
+-- slot keyword @prem@ lives in 'Lara.Strict.Cell.Tag'.
+data Tag = TRadrop | TFrac
   deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | The on-the-wire spelling of a keyword.
 tagToString :: Tag -> String
 tagToString TRadrop = "radrop"
-tagToString TPrem = "prem"
 tagToString TFrac = "frac"
 
 -- | Parse a wire keyword, inverse to 'tagToString'.
 parseTag :: String -> Maybe Tag
 parseTag s = lookup s [(tagToString t, t) | t <- [minBound .. maxBound]]
-
--- | A canonical natural: digits only, no sign, no leading zeros.
-parseCanonicalNat :: String -> Maybe Integer
-parseCanonicalNat s =
-  case reads s :: [(Integer, String)] of
-    [(n, "")]
-      | n >= 0
-      , show n == s -> Just n
-    _ -> Nothing
-
--- | A canonical integer: an optional @-@ on a nonzero canonical natural.
-parseCanonicalInt :: String -> Maybe Integer
-parseCanonicalInt ('-' : rest) = do
-  n <- parseCanonicalNat rest
-  if n == 0 then Nothing else Just (negate n)
-parseCanonicalInt s = parseCanonicalNat s
-
-decodeSlot :: SExpr -> Either String Int
-decodeSlot (SList [SAtom k, SAtom n])
-  | parseTag k == Just TPrem =
-      case parseCanonicalNat n of
-        Just i
-          | i <= toInteger (maxBound :: Int) -> Right (fromInteger i)
-        _ -> Left ("malformed premise slot: " ++ show n)
-decodeSlot e = Left ("malformed RA premise reference: " ++ show e)
 
 decodeFrac :: SExpr -> Either String Rational
 decodeFrac (SList [SAtom k, SAtom p, SAtom q])
@@ -159,7 +143,7 @@ decodeFrac e = Left ("malformed RA fraction: " ++ show e)
 decodeCert :: SExpr -> Either String RACert
 decodeCert (SList [SAtom k, slotF, slotA, frac])
   | parseTag k == Just TRadrop =
-      RACert <$> decodeSlot slotF <*> decodeSlot slotA <*> decodeFrac frac
+      RACert <$> decodeSlot "RA" slotF <*> decodeSlot "RA" slotA <*> decodeFrac frac
 decodeCert e = Left ("malformed RA certificate: " ++ show e)
 
 -- ---------------------------------------------------------------------------
@@ -169,53 +153,6 @@ decodeCert e = Left ("malformed RA certificate: " ++ show e)
 -- | The single spelling of the goal predicate this backend recognizes.
 raGoalPred :: Pred
 raGoalPred = Pred "rel_drop_ge"
-
--- | Parse a canonical decimal numeral (the 'Lara.Prop.canonNum' image:
--- optional @-@, no leading zeros, no trailing fraction zeros) into an exact
--- rational. Anything else — including empty fraction parts and scientific
--- notation — is rejected.
-parseDecimal :: String -> Maybe Rational
-parseDecimal ('-' : rest) = negate <$> parseUnsigned rest
-parseDecimal s = parseUnsigned s
-
-parseUnsigned :: String -> Maybe Rational
-parseUnsigned s =
-  case break (== '.') s of
-    (intPart, "") -> fromInteger <$> parseCanonicalNat intPart
-    (intPart, '.' : fracPart)
-      | not (null fracPart)
-      , all (`elem` ['0' .. '9']) fracPart
-      , last fracPart /= '0' -> do
-          n <- parseCanonicalNat intPart
-          let scale = 10 ^ length fracPart :: Integer
-              fracDigits = read fracPart :: Integer
-          Just (fromInteger n + fracDigits % scale)
-    _ -> Nothing
-
-collectNums :: Term -> [String]
-collectNums (TNum n) = [n]
-collectNums (TStr _) = []
-collectNums (TCon _ ts) = concatMap collectNums ts
-
--- | The premise-cell convention: the normalized premise proposition must
--- contain exactly one numeric literal anywhere in its argument terms.
-premiseCell :: Prop -> Either String Rational
-premiseCell p =
-  case nf p of
-    normalized@(Prop _ ts) ->
-      case concatMap collectNums ts of
-        [n] ->
-          maybe
-            (Left ("premise cell is not a canonical decimal: " ++ n))
-            Right
-            (parseDecimal n)
-        ns ->
-          Left
-            ( "premise must carry exactly one numeric literal, found "
-                ++ show (length ns)
-                ++ " in "
-                ++ show normalized
-            )
 
 -- | Parse the normalized goal into an 'RAGoal'.
 parseGoal :: Prop -> Either String RAGoal

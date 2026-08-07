@@ -2954,3 +2954,272 @@ tree:
   evidence:
   - ara/evidence/results/policy_admission_review_round2.md
   status: resolved
+
+- id: N122
+  type: decision
+  provenance: user-revised
+  timestamp: 2026-08-06T23:45
+  title: Narrow the ord@1 goal family to num_lt and num_le, dropping num_eq
+  choice: >
+    The ord@1 comparison backend certifies exactly two relations, num_lt and
+    num_le, over two canonical decimal numerals. num_eq is dropped: canonical
+    decimal encoding is injective on representable rationals and parseDecimal
+    accepts only the canonical image, so an equality goal could only ever
+    accept syntactically identical numerals (num_eq(A,A)) -- a shape no paper
+    claim takes; exact cross-report agreement is DupGroup territory, already a
+    plan non-goal.
+  alternatives:
+  - Keep the three-relation family {lt, le, eq} with the degeneracy documented
+  - Five-spelling family incl. num_gt/num_ge (rejected earlier in the plan draft)
+  evidence:
+  - plans/2026-08-06-ord1-comparison-backend.md
+  - src/Lara/Prop.hs
+  - src/Lara/Strict/RA.hs
+  status: resolved
+
+- id: N123
+  type: decision
+  provenance: user-revised
+  timestamp: 2026-08-06T23:45
+  parent: N122
+  title: ord@1 certificates name premise slots only, closing the raw-door theory back door
+  choice: >
+    Unlike ra@1's free-context indexing (premises then theory entries), ordcmp
+    rejects any slot >= nPrem. Rationale: on the raw .sexp door the strict
+    backend theory table is built from the unit's own wire theories section
+    (buildCertOk, src/Lara/Driver/Internal.hs:244-245) and replay preflight
+    validates digest ordering only, never content -- a theory-entry slot would
+    let an artifact cite a self-supplied, unattackable value, resurrecting the
+    plan's rejected (lit) alternative through a side door. The guard costs
+    nothing (theory is empty by design) and makes the both-sides-premise-backed
+    decision true by construction. The seam-wide question for ra@1 is recorded
+    as a TODOS.md item, not this plan's scope.
+  alternatives:
+  - Rely on the empty registered theory plus the policy-door registryOf pinning
+  - Pin theory content on the raw door seam-wide (deferred to TODO)
+  evidence:
+  - src/Lara/Driver/Internal.hs
+  - src/Lara/Replay.hs
+  - plans/2026-08-06-ord1-comparison-backend.md
+  - TODOS.md
+  status: resolved
+
+- id: N124
+  type: decision
+  provenance: user-revised
+  timestamp: 2026-08-06T23:45
+  parent: N122
+  title: ord@1 plan hardening bundle from the engineering review
+  choice: >
+    Ten further review resolutions folded into the plan: shared cell helpers
+    factored into Lara.Strict.Cell including decodeSlot and the "prem" spelling,
+    mirrored as lean/Lara/Cell.lean (no Ord->RA dependency); Lean-side
+    registration (lean/Lara/Driver.lean registry + Lara.Examples.registryEx)
+    added as an explicit deliverable; proof core stated on Dec cross-multiplied
+    Int form (core Lean, no Rat/Mathlib), soundFull a repackaging of checkB;
+    intra-family exclusivity lemmas mechanized in Ord.lean per the mechanization
+    discipline; obligations claim aligned to what RA.lean discharges (1-4
+    formal, 5 by construction, 6 doc-level); conformance pins expanded to the
+    full ~16-branch replay matrix incl. the num_lt(A,A)/num_le(A,A) boundary
+    and per-relation accepts; the deliverable-6 fixture gains a bridge rule
+    composing num_lt into a comparative claim; the goal-decidable/provenance-
+    anchoring content of an accepted step stated plainly; equal-numeral
+    proposition aliasing documented as by-design; replay funnel diagram added.
+  alternatives:
+  - Ship the plan as drafted (six pins, prose-only exclusivity, Haskell-only factoring)
+  evidence:
+  - plans/2026-08-06-ord1-comparison-backend.md
+  status: resolved
+
+- id: N125
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-07T02:10
+  parent: N123
+  title: ord@1 Lean registration resolves known digests to the empty theory
+  choice: >
+    Mechanizing the premise-only guard (N123) exposed that it is not
+    expressible where the plan assumed. The abstract Lean Backend core is
+    handed a single context Gamma = Delta ++ T and never learns Delta.length,
+    so "reject any slot >= nPrem" cannot be written in ord@1's checkB the way
+    it is written in the Haskell adapter's run. Resolved by moving the guard
+    into theory RESOLUTION instead of the checker: lean/Lara/Driver.lean
+    buildRegistry gives ord@1 a resolveTheory that returns the EMPTY theory for
+    any KNOWN digest (an unknown digest still fails to resolve, which stays a
+    rejection). Then Gamma = Delta ++ [] = Delta, so "names a premise" and "is
+    in range of Gamma" coincide and the two implementations accept exactly the
+    same certificates -- including on a unit that declares a non-empty wire
+    theory, where the Haskell side rejects those slots outright. The Haskell
+    guard is thereby an acceptance-preserving refinement, not a divergence.
+    Pinned differentially by fixtures/corpus/ord-premise-only-{reject,accept}.sexp,
+    whose theory entry deliberately carries the goal's left numeral so that
+    ra@1-style free-context indexing WOULD have accepted the theory-slot cert.
+  alternatives:
+  - Model ord@1 over the full context like ra@1 and accept a differential divergence on theory-slot certs
+  - Extend the abstract Backend structure with a premise count (touches framework metatheory, which the plan forbids)
+  evidence:
+  - lean/Lara/Driver.lean
+  - lean/Lara/Ord.lean
+  - src/Lara/Strict/Ord.hs
+  - fixtures/corpus/ord-premise-only-reject.sexp
+  - fixtures/corpus/ord-premise-only-accept.sexp
+  status: resolved
+
+- id: N126
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-07T02:10
+  parent: N125
+  title: ord@1 full conformance gate, and the divergence the N11 anchor caught
+  result: >
+    All gates green at the end: cabal test all PASS (OrdSpec's 17 properties
+    added), lake build clean, axiom audit passed over 13 new Lara.Ord theorems
+    and 8 new Lara.Cell lemmas (sorry-free, standard trio), differential.sh
+    441/441 positive and 54/54 negative with byte-exact stdout and exit code.
+    The run was NOT green first time, and the failure is the point: with
+    buildRegistry extended but Driver.supportedBackends not, the Lean driver
+    rejected examples/S2 at replay preflight ("unknown selected backend ord@1")
+    while Haskell accepted -- a single MISMATCH line at 436/1. The Lean side
+    keeps its selectable-backend preflight list SEPARATE from the registry
+    (mirroring Haskell's Replay.supportedBackends), so registering a backend
+    means editing two Lean sites, not one. Fixed and re-run to parity. Two
+    OrdSpec properties also failed on first run; in both cases the test
+    assumption was wrong and the code was right (see O52), so the tests were
+    corrected, not the adapter.
+  evidence:
+  - scripts/differential.sh
+  - lean/Lara/Driver.lean
+  - test/OrdSpec.hs
+  - examples/S2/example.core.sexp
+  status: resolved
+
+- id: N127
+  type: decision
+  provenance: ai-executed
+  timestamp: 2026-08-07T02:10
+  parent: N124
+  title: Deliverable-5 deviation -- registryEx not extended with ord@1
+  choice: >
+    The plan's deliverable 5 named both lean/Lara/Driver.lean buildRegistry and
+    Lara.Examples.registryEx. Only buildRegistry was extended. registryEx is
+    nd@1-only and ra@1 did not extend it when it landed; it carries nd-specific
+    example theorems, so an ord entry with no ord theorems would be dead weight.
+    The deliverable's stated purpose -- the differential driver exercising
+    accept paths on both sides -- is met by buildRegistry, which is what the
+    driver actually uses, and is evidenced by the S2 anchor passing the harness.
+  alternatives:
+  - Extend registryEx with an ord entry and no accompanying theorems
+  - Extend registryEx and author ord example theorems there (scope beyond the plan)
+  evidence:
+  - lean/Lara/Examples.lean
+  - lean/Lara/Driver.lean
+  status: resolved
+
+- id: N128
+  type: decision
+  provenance: user
+  timestamp: 2026-08-07T04:30
+  parent: N127
+  title: registryEx deviation reversed on user direction; ord@1 registered there
+  choice: >
+    The user directed "add the registryEx entry", closing the N127 deviation
+    that had been left un-adjudicated. Lara.Examples.registryEx now carries an
+    ord@1 entry on buildRegistry's terms (a known digest resolves to the EMPTY
+    theory, an unknown one does not resolve), with five accompanying theorems
+    so the entry is not the dead weight that motivated skipping it:
+    registry_ord_registered, ord_resolveTheory_known, ord_resolveTheory_unknown,
+    and the two invariant theorems ord_replay_context_is_premises /
+    ord_models_context_is_premises, which state that Gamma = Delta ++ [] =
+    Delta -- the reason "names a premise" and "is in range of Gamma" coincide.
+    The theorems are stated over the RESOLUTION rather than a worked numeric
+    example because String.toNat? and String.splitOn do not reduce in the Lean
+    kernel: a concrete 0.71 < 0.74 acceptance would need a per-literal string
+    lemma (the Lara.ND.decodeNat_repr treatment) and would pin one input
+    instead of the property. native_decide would have discharged them but adds
+    Lean.ofReduceBool and would fail the axiom audit, so it was used only to
+    confirm the statements are true, then removed.
+  alternatives:
+  - Leave registryEx nd@1-only per the ra@1 precedent (the N127 position)
+  - Add the entry with no theorems (the dead weight the reviewer warned about)
+  - Prove a concrete numeric acceptance via new String reduction lemmas (deferred)
+  evidence:
+  - lean/Lara/Examples.lean
+  - lean/AxCheck.lean
+  status: resolved
+
+- id: N129
+  type: experiment
+  provenance: ai-executed
+  timestamp: 2026-08-07T04:30
+  parent: N126
+  title: External review of PR #83, and the golden-coverage hole it exposed
+  result: >
+    Reviewer reproduced all four gates green and found no correctness defect;
+    the central design claim (Haskell premise-only guard and Lean empty-theory
+    registration accept the same certificates) survived 25 hand-built
+    adversarial units run through both drivers. One real gap: the four
+    fixtures/corpus/ord-*.sexp anchors were the only unpinned files in that
+    directory, so nothing in cabal test asserted either driver was RIGHT about
+    them -- differential.sh proves only that the two agree, which is the
+    weakest available evidence precisely where the Lean side is modelled
+    differently on purpose. Auditing that turned up two anchors the review had
+    not seen: examples/S2 (this PR's own) and, pre-existing,
+    examples/running-example/run1 and run2. Root cause: the golden list is
+    hand-maintained while the harness glob-discovers, so a new anchor stays
+    unpinned unless someone remembers -- now closed by
+    prop_goldensCoverAnchors, which walks both trees and names what is missing.
+    Second important finding: the Cell extraction's byte-exact-RA-messages
+    invariant, the whole reason decodeSlot carries a backend label, was pinned
+    by nothing; the new prop_raRejectionMessages was mutation-tested (flipping
+    decodeSlot "RA" to "ord" turns it red) rather than merely observed to pass.
+    Eight comment-accuracy defects, the sharpest being three places asserting
+    an ord@1 theory emptiness guarantee that does not exist on the raw door --
+    where this PR's own ARA claim C27 already said the opposite.
+  evidence:
+  - test/DifferentialSpec.hs
+  - test/RASpec.hs
+  - src/Lara/Strict/Ord.hs
+  - ara/logic/claims.md
+  status: resolved
+
+- id: N130
+  type: decision
+  provenance: user
+  timestamp: 2026-08-07T05:15
+  parent: N129
+  title: Disposition of the PR #83 review's three no-change notes
+  choice: >
+    Asked whether to fix the three notes the reviewer raised without requesting
+    changes; the user accepted the recommendation to defer two and answer one
+    in place.
+
+    Deferred as one scoped P2 TODO ("Make backend rejection reasons reach the
+    author"): (a) widening the certificate oracle so a backend's rejection
+    string survives to the diagnostic layer, and (b) putting the offending
+    values in the comparison backends' cell-mismatch messages. Bundled because
+    (b) is unobservable outside the property suites until (a) exists, and
+    because doing (b) properly needs a renderDecimal inverse to parseDecimal --
+    cells are Rational by the time the assert fires, so show yields "71 % 100",
+    not "0.71". Not a diagnostics patch: CertOk is Bool-valued in Haskell and
+    certOkBOf is Bool-valued in Lean, with the checker's soundness theorems
+    stated over that Bool, so widening touches the checked interface on both
+    sides. Recorded the shortcut to resist -- re-running the failing backend
+    solely to recover a string would create a second evaluation path able to
+    diverge from the checked one.
+
+    The third note is answered in place rather than acted on: the i >= 0
+    conjunct in Ord.resolve was characterised as a permanently-dead guard, but
+    it is what keeps the function total (drop it and i < nPrem holds for -1,
+    turning a rejection into a premises !! (-1) exception). A comment now
+    records that, and why slots stay Int -- the seam's Dependency is
+    PremiseSlot Int, so a narrower type would only move the conversion, and
+    RACert has the same shape.
+  alternatives:
+  - Fix all three in PR #83 (scope creep on a branch already carrying a backend, its metatheory, and a review round)
+  - Remove the i >= 0 guard as dead (converts an unreachable branch into a latent crash)
+  - Switch OrdCert slots to Natural (moves the conversion, and desynchronises ord@1 from RACert)
+  evidence:
+  - TODOS.md
+  - src/Lara/Strict/Ord.hs
+  status: resolved
+

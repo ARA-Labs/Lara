@@ -14,7 +14,9 @@ import Lara.Prop
 import Lara.Presentation
 import Lara.ND
 import Lara.Strict
+import Lara.Cell
 import Lara.RA
+import Lara.Ord
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
@@ -249,6 +251,37 @@ open Lara
 #print axioms Lara.RA.checkB_extract
 #print axioms Lara.RA.decodeCert_witness_den_pos
 
+-- The cell machinery shared by the rational-arithmetic backends
+-- (`Lara.Strict.Cell` mirror): the cross-multiplied comparison mirrors and
+-- the order facts the `ord@1` family rests on.
+#print axioms Lara.Cell.ratEqB_iff
+#print axioms Lara.Cell.ratGeB_iff
+#print axioms Lara.Cell.ratLtB_iff
+#print axioms Lara.Cell.ratLeB_iff
+#print axioms Lara.Cell.ratLe_iff_lt_or_eq
+#print axioms Lara.Cell.ratLt_irrefl
+#print axioms Lara.Cell.ratLe_refl
+#print axioms Lara.Cell.lt_of_getElem?_eq_some
+
+-- The ordered-comparison domain-checker backend `ord@1` — the full `Backend`
+-- instantiation (replay adequacy, certificate soundness, and the three
+-- obligation-4 laws), plus the intra-family exclusivity lemmas that make
+-- "num_lt/num_le declare no contrary pair" a theorem rather than a
+-- workaround (design §3.2).
+#print axioms Lara.Ord.ordBackend
+#print axioms Lara.Ord.ordReplay_iff
+#print axioms Lara.Ord.ordSound
+#print axioms Lara.Ord.ordUses_covers
+#print axioms Lara.Ord.ordUses_valid
+#print axioms Lara.Ord.ordUses_account
+#print axioms Lara.Ord.checkB_extract
+#print axioms Lara.Ord.relHoldsB_iff
+#print axioms Lara.Ord.lt_excl_lt
+#print axioms Lara.Ord.lt_excl_le
+#print axioms Lara.Ord.le_le_iff_eq
+#print axioms Lara.Ord.ordModels_relHolds
+#print axioms Lara.Ord.ordModels_excl_of_lt
+
 -- Result 3 (certificate half) / result 10 (dependency exactness), backend
 -- layer: the fixed-core `uses` report interface (coverage, validity,
 -- accounting over the full consulted context `Δ ++ T`), the derived closed
@@ -459,6 +492,15 @@ open Lara
 #print axioms Lara.Examples.registry_version_mismatch
 #print axioms Lara.Examples.registry_digest_unknown
 #print axioms Lara.Examples.registry_success_bridge
+
+-- The `ord@1` entry in the example registry: the empty-theory resolution
+-- discipline `Lara.Driver.buildRegistry` uses, and the invariant the
+-- premise-only slot guard rests on (the consulted context is the premises).
+#print axioms Lara.Examples.registry_ord_registered
+#print axioms Lara.Examples.ord_resolveTheory_known
+#print axioms Lara.Examples.ord_resolveTheory_unknown
+#print axioms Lara.Examples.ord_replay_context_is_premises
+#print axioms Lara.Examples.ord_models_context_is_premises
 #print axioms Lara.Examples.registry_missing_bridge
 #print axioms Lara.Examples.registry_premises_before_theory
 #print axioms Lara.Examples.registry_fixed_theory_order

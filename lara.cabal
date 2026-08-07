@@ -24,8 +24,10 @@ library
                       Lara.Driver.Internal
     exposed-modules:  Lara.Prop
                       Lara.Strict
+                      Lara.Strict.Cell
                       Lara.Strict.ND
                       Lara.Strict.ND.Internal
+                      Lara.Strict.Ord
                       Lara.Strict.RA
                       Lara.AST
                       Lara.Admission
@@ -92,6 +94,7 @@ test-suite lara-test
                       TestReplay
                       StrictSpec
                       RASpec
+                      OrdSpec
                       WireSpec
                       SyntaxSpec
                       ElaborateSpec

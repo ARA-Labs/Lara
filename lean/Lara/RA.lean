@@ -23,85 +23,20 @@ The `Backend` obligations are discharged the same way the ND adapter does it:
     from `checkB` touching the context only through those two lookups.
 -/
 
-import Lara.Strict
+import Lara.Cell
 
 namespace Lara.RA
 
 open Lara.Support (SExpr CertRef)
 open Lara.Strict (selectSlots)
 
-/-! ### Exact decimals -/
-
-/-- An exact rational as an integer numerator over a positive denominator.
-Parsed decimals always carry a power-of-ten denominator; certificate witness
-fractions carry an arbitrary positive denominator in lowest terms. -/
-structure Dec where
-  num : Int
-  den : Nat
-deriving DecidableEq, Repr
-
-/-- Canonical natural: digits only, no sign, no leading zeros (the Haskell
-`parseCanonicalNat`). -/
-def parseCanonNat (s : String) : Option Nat :=
-  match s.toNat? with
-  | some n => if s = Nat.repr n then some n else none
-  | none => none
-
-/-- Canonical integer: an optional `-` on a nonzero canonical natural. -/
-def parseCanonInt (s : String) : Option Int :=
-  if s.startsWith "-" then
-    match parseCanonNat (s.drop 1).toString with
-    | some n => if n = 0 then none else some (-(n : Int))
-    | none => none
-  else (parseCanonNat s).map (fun n => (n : Int))
-
-/-- Fraction digits: nonempty, digits only, no trailing zero (the value may
-carry leading zeros — `05` in `0.05`). -/
-def parseFracDigits (s : String) : Option Nat :=
-  match s.toNat? with
-  | some m => if s.endsWith "0" then none else some m
-  | none => none
-
-def parseUnsigned (s : String) : Option Dec :=
-  match s.splitOn "." with
-  | [intPart] => (parseCanonNat intPart).map (fun n => ⟨(n : Int), 1⟩)
-  | [intPart, fracPart] =>
-      match parseCanonNat intPart, parseFracDigits fracPart with
-      | some n, some m =>
-          let scale := 10 ^ fracPart.length
-          some ⟨((n * scale + m : Nat) : Int), scale⟩
-      | _, _ => none
-  | _ => none
-
-/-- Parse a canonical decimal numeral (the `canon` image: optional `-`, no
-leading zeros, no trailing fraction zeros) into an exact rational — the
-mirror of the Haskell adapter's `parseDecimal`. -/
-def parseDecimal (s : String) : Option Dec :=
-  if s.startsWith "-" then
-    (parseUnsigned (s.drop 1).toString).map (fun d => ⟨-d.num, d.den⟩)
-  else parseUnsigned s
-
-/-! ### Cross-multiplied rational comparisons
-
-Valid as rational equality/order exactly when the denominators are nonzero,
-which the parsers and the decoder guarantee. -/
-
-/-- `a = b` over ℚ, cross-multiplied. -/
-def RatEq (a b : Dec) : Prop := a.num * (b.den : Int) = b.num * (a.den : Int)
-
-/-- `a ≥ b` over ℚ, cross-multiplied (positive denominators). -/
-def RatGe (a b : Dec) : Prop := b.num * (a.den : Int) ≤ a.num * (b.den : Int)
-
-def ratEqB (a b : Dec) : Bool := a.num * (b.den : Int) == b.num * (a.den : Int)
-
-def ratGeB (a b : Dec) : Bool :=
-  decide (b.num * (a.den : Int) ≤ a.num * (b.den : Int))
-
-theorem ratEqB_iff (a b : Dec) : ratEqB a b = true ↔ RatEq a b := by
-  simp [ratEqB, RatEq]
-
-theorem ratGeB_iff (a b : Dec) : ratGeB a b = true ↔ RatGe a b := by
-  simp [ratGeB, RatGe]
+/- The cell machinery shared with `ord@1` lives in `Lara.Cell` (exact
+decimals, the canonical numeral parsers, the cross-multiplied comparisons, the
+consulted-cell convention, and the `(prem N)` slot sub-grammar).  `Lara.Cell.Tag`
+is deliberately *not* opened: this module keeps its own closed tag table. -/
+open Lara.Cell (Dec parseCanonNat parseCanonInt parseFracDigits parseUnsigned
+  parseDecimal RatEq RatGe ratEqB ratGeB ratEqB_iff ratGeB_iff premiseCell
+  termNums termsNums decodeSlot lt_of_getElem?_eq_some)
 
 /-! ### The goal shape -/
 
@@ -129,42 +64,21 @@ def parseGoal : Lara.Atom → Option Goal
         | _ => none
       else none
 
-/-! ### The consulted-cell convention -/
-
-mutual
-  def termNums : Lara.Term → List String
-    | .num n => [n]
-    | .str _ => []
-    | .con _ ts => termsNums ts
-
-  def termsNums : Lara.Terms → List String
-    | .nil => []
-    | .cons t ts => termNums t ++ termsNums ts
-end
-
-/-- A consulted context entry must carry exactly one numeric literal anywhere
-in its argument terms; that literal is the cell. -/
-def premiseCell : Lara.Atom → Option Dec
-  | .atom _ ts =>
-      match termsNums ts with
-      | [n] => parseDecimal n
-      | _ => none
-
 /-! ### The certificate wire grammar (the closed decoder)
 
 `cert := (radrop (prem N) (prem M) (frac P Q))` -/
 
-/-- The closed set of wire keywords (`Lara.ND.Tag` discipline). -/
+/-- The closed set of RA-specific wire keywords (`Lara.ND.Tag` discipline).
+The shared slot keyword `prem` lives in `Lara.Cell.Tag`. -/
 inductive Tag where
-  | radrop | prem | frac
+  | radrop | frac
 deriving DecidableEq, Repr
 
 def Tag.toString : Tag → String
   | .radrop => "radrop"
-  | .prem => "prem"
   | .frac => "frac"
 
-def Tag.all : List Tag := [.radrop, .prem, .frac]
+def Tag.all : List Tag := [.radrop, .frac]
 
 def Tag.parse (s : String) : Option Tag :=
   Tag.all.find? (fun t => t.toString = s)
@@ -176,13 +90,6 @@ structure Cert where
   ablatedSlot : Nat
   witness : Dec
 deriving DecidableEq, Repr
-
-def decodeSlot : SExpr → Option Nat
-  | .list [.atom k, .atom n] =>
-      match Tag.parse k with
-      | some .prem => parseCanonNat n
-      | _ => none
-  | _ => none
 
 def decodeFrac : SExpr → Option Dec
   | .list [.atom k, .atom p, .atom q] =>
@@ -404,13 +311,6 @@ theorem raUses_covers (κ : CertRef) (Γ Γ' : List Lara.Atom) (φ : Lara.Atom)
     have hA : Γ[c.ablatedSlot]? = Γ'[c.ablatedSlot]? :=
       hag c.ablatedSlot (by simp [raUses, hdec])
     simp only [raReplay, hdec, checkB, hF, hA]
-
-theorem lt_of_getElem?_eq_some {α : Type _} {l : List α} {i : Nat} {a : α}
-    (h : l[i]? = some a) : i < l.length := by
-  rcases Nat.lt_or_ge i l.length with hlt | hge
-  · exact hlt
-  · rw [List.getElem?_eq_none hge] at h
-    simp at h
 
 /-- Obligation 4, validity: on acceptance every reported slot names an entry
 of the consulted context. -/

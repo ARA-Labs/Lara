@@ -1,0 +1,38 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.1",
+    "policy": "ord-v1",
+    "backends": [
+      "ord@1"
+    ],
+    "theories": [
+      "sha256:ord-v1-theory-0"
+    ],
+    "artifact": "sha256:5252525252525252525252525252525252525252525252525252525252525252"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "better(sys_new, sys_base, accuracy, imagenet_val)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a2",
+        "index": 1,
+        "label": "in"
+      }
+    ]
+  }
+}

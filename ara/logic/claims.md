@@ -577,3 +577,25 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [ara/evidence/proofs/quarantine_nonpromotion.md, lean/Lara/BlockedProgram.lean `checked_production_justified_nonpromotion_of_not_blocked`, lean/AxCheck.lean, trace N108]
 - **Dependencies**: [C01, C21]
 - **Tags**: quarantine, non-promotion, production-bridge, mechanized, unblocked-query
+
+## C26: Canonical-numeral injectivity makes literal-equality goals degenerate to syntactic identity
+- **Statement**: When a wire format admits exactly one canonical spelling per representable rational and a strict backend's numeral parser accepts only that canonical image, an equality goal over two numeral literals can only ever be accepted with the two literals syntactically identical -- so a comparison-family equality relation adds no judgment beyond syntactic identity, and cross-report exact agreement must be certified elsewhere (duplicate-report grouping), not by a comparison backend.
+- **Conditions**: Holds for LARA's canonNum image and parseDecimal (optional sign, no leading zeros, no trailing fraction zeros): distinct canonical strings denote distinct rationals. Would not hold for a wire format admitting aliases (non-canonical zeros, scientific notation) or for goals whose arguments are computed expressions rather than literals.
+- **Sources**: []
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit two distinct strings both accepted by parseDecimal that denote the same rational, or a sound accepted num_eq instance over syntactically distinct canonical numerals.
+- **Proof**: [src/Lara/Prop.hs canonNum, src/Lara/Strict/Cell.hs parseDecimal (canonical-image acceptance), trace N122]
+- **Dependencies**: []
+- **Tags**: strict-backend, canonical-numerals, kernel-minimality, ord1
+
+## C27: A certificate's provenance guarantee must be enforced by the backend that claims it, not inherited from the seam
+- **Statement**: When a checker resolves a certificate's referenced data from a table the artifact itself supplies, and the preflight validates only that table's identity and ordering rather than its content, then any backend whose soundness story asserts that cited values trace to independently-admitted evidence must enforce that restriction inside its own decoder and replay. The guarantee cannot be inherited from the seam, because the seam's admission layer never inspected the self-supplied entries; and it cannot be assumed away by declaring the table empty, because emptiness of a registered theory is a convention of the registration site, not a property the artifact is prevented from violating.
+- **Conditions**: Holds for LARA's raw `.sexp` door, where `buildCertOk` builds the strict-backend theory table from the unit's own wire `theories` section and replay preflight checks digest canonical order and duplicates only. Does not apply to the `.lara` policy door, which pins theory content via the elaborator's `registryOf`. Scope is provenance/accountability, not deductive soundness: `ra@1` cites free-context slots without the restriction and remains sound, because it never claimed premise-backing. The seam-wide question of whether `ra@1` should adopt the same guard is open (TODOS.md).
+- **Sources**: []
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit a raw-door path on which an artifact-supplied theory entry is content-validated before a backend consults it, or an `ord@1` certificate accepted while citing a value that reaches the checker without passing the leaf/admission layer.
+- **Proof**: [src/Lara/Strict/Ord.hs (premise-only slot resolution), src/Lara/Driver/Internal.hs buildCertOk, src/Lara/Replay.hs preflight, fixtures/corpus/ord-premise-only-reject.sexp and ord-premise-only-accept.sexp (the theory entry carries the goal's left numeral, so free-context indexing would have accepted), lean/Lara/Driver.lean buildRegistry, trace N123 N125]
+- **Dependencies**: []
+- **Tags**: strict-backend, provenance, trusted-base, raw-door, ord1

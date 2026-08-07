@@ -43,6 +43,7 @@ import Lara.RawAttack
 import Lara.Groups
 import Lara.Strict
 import Lara.RA
+import Lara.Ord
 
 namespace Lara.Driver
 
@@ -669,10 +670,24 @@ def ndBackendId : BackendId := ⟨"nd", 1⟩
 /-- The rational-arithmetic backend identity, `ra@1`. -/
 def raBackendId : BackendId := ⟨"ra", 1⟩
 
+/-- The ordered-comparison backend identity, `ord@1`. -/
+def ordBackendId : BackendId := ⟨"ord", 1⟩
+
 /-- Backend registry built from the wire `theories` section over the fixed
-`nd@1` / `ra@1` pair, mirroring `Lara.Examples.registryEx` and the Haskell
-`buildCertOk`: each fixed core, with each declared digest resolving to that
-digest's core-encoded theory data. -/
+`nd@1` / `ra@1` / `ord@1` triple, mirroring the Haskell `buildCertOk`: each
+fixed core, with each declared digest resolving to that digest's core-encoded
+theory data.
+
+`ord@1` is the exception, and deliberately so: a *known* digest resolves to
+the **empty** theory rather than to the declared entries (an unknown digest
+still fails to resolve, which is a rejection).  Its theory is empty by design
+(`Lara.Ord`, §2.2), and this is what keeps the two sides in exact agreement:
+the Haskell adapter rejects any certificate slot at or beyond the premise
+count, while the abstract `Backend` core is handed only `Γ = Δ ++ T` and never
+learns `Δ.length`.  Resolving to `[]` makes `Γ = Δ`, so "names a premise" and
+"is in range of `Γ`" coincide and both sides accept exactly the same
+certificates — including on a unit that declares a non-empty wire theory,
+where the Haskell side rejects those slots outright. -/
 def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcanon :=
   fun β =>
     if β = ndBackendId then
@@ -686,6 +701,12 @@ def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcan
              resolveTheory := fun h =>
                match theories.find? (fun t => decide (t.1 = h)) with
                | some t => some (t.2.map (Lara.nf dcanon))
+               | none => none }
+    else if β = ordBackendId then
+      some { core := Lara.Ord.ordBackend dcanon
+             resolveTheory := fun h =>
+               match theories.find? (fun t => decide (t.1 = h)) with
+               | some _ => some []
                | none => none }
     else none
 
@@ -934,7 +955,7 @@ def firstDuplicateBackend : List (String × String) →
 
 /-- The supported backend selections, mirroring `Lara.Replay.supportedBackends`. -/
 def supportedBackends : List (String × String) :=
-  [backendPair ndBackendId, backendPair raBackendId]
+  [backendPair ndBackendId, backendPair raBackendId, backendPair ordBackendId]
 
 def firstUnknownBackend : List (String × String) → Option (String × String)
   | [] => none

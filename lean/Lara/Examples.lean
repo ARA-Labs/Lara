@@ -41,6 +41,7 @@ import Lara.Compile
 import Lara.Consistency
 import Lara.Check
 import Lara.Check.Unit
+import Lara.Ord
 
 namespace Lara.Examples
 
@@ -266,9 +267,32 @@ def ndRegistered : RegisteredBackend id where
     else if h = digestB then some (slotTheory id [pC])
     else none
 
-/-- Backend-first registry: only exact identity `nd@1` has an outer entry. -/
+/-! ### The `ord@1` entry
+
+`ord@1` is registered here on the same terms `Lara.Driver.buildRegistry` uses:
+a known digest resolves to the **empty** theory, an unknown one fails to
+resolve.  That is not a simplification of the fixture — it is the registration
+discipline the backend's premise-only slot guard depends on, and the theorems
+below are what make it observable at the registry layer rather than only
+inside the adapter. -/
+
+/-- Exact Haskell-conformant `ord@1` identity. -/
+def ordId : BackendId := ⟨"ord", 1⟩
+
+/-- The one fixed `ord@1` core.  A known digest resolves to the EMPTY theory,
+mirroring `Lara.Driver.buildRegistry`: the consulted context is then exactly
+the submitted premises, so "names a premise" and "is in range" coincide. -/
+def ordRegistered : RegisteredBackend id where
+  core := Lara.Ord.ordBackend id
+  resolveTheory := fun h => if h = digestA then some [] else none
+
+/-- Backend-first registry: exact identities `nd@1` and `ord@1` have outer
+entries.  (`ra@1` is deliberately absent — this fixture's ND theorems predate
+it and nothing here exercises relative-drop arithmetic.) -/
 def registryEx : BackendRegistry id := fun β =>
-  if β = ndId then some ndRegistered else none
+  if β = ndId then some ndRegistered
+  else if β = ordId then some ordRegistered
+  else none
 
 /-- Registered backend plus exact digest accepts.  Slot 1 is the first fixed
 theory entry because the source premise occupies slot 0. -/
@@ -321,6 +345,49 @@ theorem registry_success_bridge :
     certOkOf registryEx ndId digestA slot1Cert [pA] pB :=
   (certOkBOf_iff registryEx ndId digestA slot1Cert [pA] pB).mp
     registry_exact_digest_accepts
+
+/-! ### `ord@1` registry behaviour
+
+These pin, at the registry layer, the invariant the premise-only slot guard
+rests on.  They are stated over the *resolution* rather than over a worked
+numeric example on purpose: `String.toNat?` and `String.splitOn` do not reduce
+in the kernel, so a concrete `0.71 < 0.74` acceptance would need a
+per-literal string lemma (the `Lara.ND.decodeNat_repr` treatment) and would
+pin one input instead of the property.  `test/OrdSpec.hs` and the two
+`fixtures/corpus/ord-premise-only-*.sexp` anchors carry the worked cases. -/
+
+/-- `ord@1` has an outer registry entry, at exact identity. -/
+theorem registry_ord_registered : registryEx ordId = some ordRegistered := by
+  simp [registryEx, ordId, ndId]
+
+/-- A known digest resolves to the EMPTY theory. -/
+theorem ord_resolveTheory_known :
+    ordRegistered.resolveTheory digestA = some [] := by
+  simp [ordRegistered]
+
+/-- An unknown digest does not resolve at all, so it is still a rejection: the
+empty-theory resolution applies to *known* digests only. -/
+theorem ord_resolveTheory_unknown :
+    ordRegistered.resolveTheory digestUnknown = none := by
+  simp [ordRegistered, digestA, digestUnknown]
+
+/-- **The invariant.**  Because the resolved theory is empty, the consulted
+context is exactly the submitted premises — `Γ = Δ ++ [] = Δ`.  That is what
+makes "the certificate names a premise" and "the slot is in range of the
+consulted context" the same condition, and hence what lets the Lean model
+agree with the Haskell adapter's explicit `slot >= nPrem` guard without
+being able to see `Δ.length` itself. -/
+theorem ord_replay_context_is_premises
+    (κ : CertRef) (Δ : List Atom) (φ : Atom) :
+    (Lara.Ord.ordBackend id).replay [] κ Δ φ = Lara.Ord.ordReplay κ Δ φ :=
+  congrArg (fun Γ => Lara.Ord.ordReplay κ Γ φ) (List.append_nil Δ)
+
+/-- The same for the consequence relation: what an accepted `ord@1` step is
+accountable to is the premises alone. -/
+theorem ord_models_context_is_premises
+    (Δ : List Atom) (φ : Atom) :
+    (Lara.Ord.ordBackend id).models [] Δ φ ↔ Lara.Ord.ordModels Δ φ :=
+  Iff.of_eq (congrArg (fun Γ => Lara.Ord.ordModels Γ φ) (List.append_nil Δ))
 
 /-- Adequacy also rules out proposition-level acceptance on a missing outer
 lookup. -/

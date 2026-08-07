@@ -1,0 +1,68 @@
+# ord-v1 — ordered-comparison policy for worked example S2
+#
+# Exercises the ord@1 certificate path end-to-end, and shows the composition
+# story the backend needs to be useful: an accepted comparison atom is
+# TERMINAL unless a policy rule consumes it. Two rules, in the layering the
+# design calls for (plan §3.6):
+#
+#   * beats_recheck — STRICT. The bare ordered comparison over two reported
+#     score cells, re-checked exactly by the registered ord@1 backend
+#     (src/Lara/Strict/Ord.hs, lean/Lara/Ord.lean). The certificate names its
+#     two consulted premise slots; there is no witness value, because a
+#     comparison over ground literals has nothing to recompute.
+#
+#   * beats_baseline — DEFEASIBLE. The bridge rule. It consumes the strict
+#     num_lt conclusion together with a binding atom naming which systems and
+#     measurand those two numbers belong to, and concludes the comparative
+#     claim. This is what makes "this number beats that number" a SUPPORTED
+#     CLAIM rather than a free-floating ground fact.
+#
+# The split is the whole point. The arithmetic is strict and unarguable; the
+# inference from "0.71 < 0.74" to "sys_new is better" is defeasible, because
+# it depends on the binding being right and on the comparison being the
+# relevant one. You cannot argue with the arithmetic; you argue with the
+# measurements and with the bridge.
+
+policy ord-v1
+
+# --- The strict leg: the certificate-checked ordered comparison -----------------------------
+# Slot order is the premise list order, and the certificate cites it: (prem 0) is the baseline
+# cell, (prem 1) the system cell. The conclusion num_lt(Bv, Sv) says baseline < system, i.e.
+# the system scores higher on a measurand where higher is better.
+#
+# Both compared values trace to a consulted premise (design §2.4): a threshold or public
+# baseline is not a bare goal constant, it enters as a leaf feeding a premise slot.
+
+rule beats_recheck(S, B, Q, D, Exp, Sv, Bv)
+  mode       = strict
+  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),
+                 reports(Exp, score_cell(S, Q, D, Sv)) ]
+  conclusion = num_lt(Bv, Sv)
+  allow-trusted = false
+  certifiers = [ (ord@1, sha256:ord-v1-theory-0) ]
+
+# The empty theory the ord@1 certificates cite: the certified comparison is pure arithmetic, so
+# the theory contributes no entries — the digest is selection identity only (the S1 precedent).
+# Emptiness here is a property of THIS policy, which the .lara door pins; it is not something the
+# backend enforces. What ord@1 enforces is that theory entries are UNCITABLE (design §2.2): a unit
+# may declare entries and still be accepted, but no certificate can consult one.
+theory sha256:ord-v1-theory-0 = []
+
+# --- The bridge: from a bare comparison to a comparative claim ------------------------------
+# The strict conclusion num_lt(Bv, Sv) carries no measurand identity — as a proposition it is
+# the same atom whichever measurands produced the two numbers (design §2.1, D15). The binding
+# premise is what supplies that identity, and it is defeasible evidence like any other.
+
+rule beats_baseline(S, B, Q, D, Sv, Bv)
+  mode       = defeasible
+  premises   = [ num_lt(Bv, Sv),
+                 comparison_setup(S, B, Q, D, Sv, Bv) ]
+  conclusion = better(S, B, Q, D)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is beats_recheck, whose conclusion
+# pattern num_lt(Bv, Sv) heads no contrary pair, so no contrary side is strict-reachable and the
+# policy passes the R12 check. That is a theorem, not a convenience: comparison goals are
+# decidable against a shared ground truth, so a sound backend can never accept two conflicting
+# members of the {num_lt, num_le} family over the same literals — mechanized as the
+# intra-family exclusion lemmas in lean/Lara/Ord.lean (lt_excl_lt, lt_excl_le, lifted to
+# ordModels_excl_of_lt). Declared contraries would add nothing and would trip R12.

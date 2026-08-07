@@ -200,6 +200,117 @@ Tighten the parser or update the grammar.
 **Effort:** S
 **Priority:** P3
 
+### Make backend rejection reasons reach the author
+
+**What:** Surface the string a strict backend produced when it rejects, and
+give the comparison backends' cell-mismatch messages the offending values.
+Two halves of one change:
+
+1. Widen the certificate-oracle result so a backend's rejection reason
+   survives to the diagnostic layer. `CertOk` is
+   `Cert -> [Prop] -> Prop -> Bool` (`src/Lara/SupportTerm.hs`), and
+   `buildCertOk` discards the `Either String (Set Dependency)` the adapter
+   returned; `rejectionDiagnostics` is the existing stderr channel it would
+   feed.
+2. Once the channel exists, put values in the messages. `ord@1`'s three replay
+   `assert`s name the failing condition but not the numbers, unlike every
+   other stage of the same funnel, which shows the offending token. Cell drift
+   is the most likely real-world rejection and is the one case the message
+   cannot currently diagnose. Needs a `renderDecimal :: Rational -> String`
+   inverse to `Lara.Strict.Cell.parseDecimal` (cells are `Rational` by the
+   time the assert fires, so `show` yields `71 % 100`, not `0.71`), and a
+   decision about whether `ra@1` follows for sibling symmetry.
+
+**Why:** An author who trips the `ord@1` premise-only guard sees bare
+`reject R13` with empty stderr, though the adapter produced `"ord cites
+premise slots only; slot names theory entry 0"`. In a checker whose selling
+point is *located* rejections — `LocatedRejection`, the R13 > R9 precedence,
+the differential harness byte-comparing stderr where stdout cannot
+discriminate — this is the one rejection class that says nothing.
+
+**Pros:** The §2.2 guard's violation stops being silent; the careful message
+work in the adapters becomes observable outside the property suites.
+
+**Cons:** Not a diagnostics patch. `CertOk` is `Bool`-valued in Haskell and
+`certOkBOf` is `Bool`-valued in Lean, and the checker's soundness theorems are
+stated over that `Bool` — the collapse is deliberate (the `ord@1` plan §3.1:
+`deps` feeds the soundness statement and audit reports, not the checked
+graph). Widening it touches the checked interface on both sides and re-pins
+the differential. The tempting shortcut — re-running the failing backend
+purely to recover a string for stderr — should be resisted: a second
+evaluation path that can diverge from the checked one is the wrong shape for
+a system built around a single checked path.
+
+**Context:** PR #83 review (both halves recorded there as notes, no change
+requested). Pre-existing and shared by `nd@1` / `ra@1` / `ord@1`, so it is not
+a finding against that PR. Start at `buildCertOk`
+(`src/Lara/Driver/Internal.hs`), `Lara.SupportTerm.CertOk`, and
+`rejectionDiagnostics`; check what the Lean `certOkBOf` side would need before
+committing to a Haskell-only widening.
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** a decision on whether the Lean seam widens in step
+
+### Raw-door backend theory content: seam-wide decision (ra@1 parity with ord@1)
+
+**What:** Decide whether the raw `.sexp` door should pin backend theory
+*content* (not just digest identity/ordering), or whether `ra@1` should follow
+`ord@1` in refusing theory-entry slots outright.
+
+**Why:** `buildCertOk` (`src/Lara/Driver/Internal.hs`, the `registry =` binding) builds the
+backend theory table from the unit's own wire `theories` section; replay
+preflight checks digest canonical order and duplicates, never content. An
+artifact can therefore self-supply the theory entries its `ra@1` certificate
+cites — not a soundness bug (`ra@1` never claimed premise-backing), but a seam
+asymmetry once `ord@1` enforces premise-only slots (eng review 2026-08-06,
+outside-voice finding 1, verified).
+
+**Pros:** Uniform trusted-base story across backends; removes the one path by
+which certificate-consulted data bypasses the leaf/admission layer on the raw
+door.
+
+**Cons:** Touches the frozen replay/preflight contract; interacts with the #81
+source-boundary admission work; the `.lara` policy door already pins content
+via `registryOf` (`src/Lara/Elaborate/Internal.hs`).
+
+**Context:** Found during the `ord@1` plan review. Start at `buildCertOk`, the
+preflight in `src/Lara/Replay.hs`, and the elaborator-door `registryOf`
+pinning; first establish what #81 already guarantees at the source boundary.
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** understanding of #81's admission guarantees; replay-contract freeze policy
+
+### Corpus extension exercising ord@1 end-to-end
+
+**What:** Decide whether/how a corpus extension (post-v1) includes real
+measurement units flowing cells → `num_lt` → bridge rule → comparative claim
+through the `ord@1` backend.
+
+**Why:** The `ord@1` plan keeps corpus-v1 frozen and demonstrates composition
+only on a synthetic fixture (the beats-baseline `num_lt` rule plus bridge).
+The backend's motivation — "the most common claim shape in ML methodology
+papers" — is only measured evidence once a real paper's beats-claim goes
+through it.
+
+**Pros:** Turns the backend into evaluation-section evidence; validates the
+bridge-rule pattern against real claims.
+
+**Cons:** Corpus changes ripple into the m5-freeze bookkeeping (frozen suite
+hashes, measurement re-runs); genuinely separate scope from the backend PR.
+
+**Context:** Eng review 2026-08-06. Start from the worked example the backend
+landed with, `examples/S2/` (artifact `example.lara` + policy
+`ord-v1.policy.lara`): its `beats_recheck` strict rule and `beats_baseline`
+bridge rule are the template a corpus unit would instantiate, and its
+`comparison_setup` binding leaf is where a real unit's measurand identity
+would go.
+
+**Effort:** M
+**Priority:** P3
+**Depends on:** ord@1 landed; post-freeze corpus-extension policy
+
 ## Completed
 
 ### ra@1 rational-arithmetic certifier — the strict/certificate path (issue #57)

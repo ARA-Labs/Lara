@@ -52,7 +52,9 @@ import Lara.Presentation
 import Lara.ND
 import Lara.Certificate
 import Lara.Strict
+import Lara.Cell
 import Lara.RA
+import Lara.Ord
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
