@@ -215,6 +215,17 @@ corpusGoldens =
         ++ " (statuses (status (atom num_le (num 5) (num 5)) justified)))"
     )
   , ("fixtures/corpus/ord-lt-boundary-reject.sexp", "(verdict reject R13)")
+  , -- The @ra\@1@ half of the seam-wide premise-only decision, same shape as the
+    -- @ord\@1@ pair above: both units declare a one-entry theory carrying the
+    -- goal's full cell, and differ only in whether the certificate cites slot 2
+    -- (the theory entry — reject) or slots 0 and 1 (the premises — accept).
+    -- Before the decision, free-context indexing accepted both.
+    ( "fixtures/corpus/ra-premise-only-accept.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom rel_drop_ge (num 50) (num 38.1) (num 0.238)"
+        ++ " (num 0.05)) justified)))"
+    )
+  , ("fixtures/corpus/ra-premise-only-reject.sexp", "(verdict reject R13)")
   ]
     ++ workedExampleGoldens
 
@@ -287,6 +298,25 @@ workedExampleGoldens =
     , "(verdict accept (labels (0 in) (1 in)) (edges)"
         ++ " (statuses (status (atom better (con sys_new) (con sys_base) (con accuracy)"
         ++ " (con imagenet_val)) justified)))"
+    )
+  , -- S3: the same certificate shape at the tie. @num_le@ accepts where
+    -- @num_lt@ over the same two numerals is an R13 replay rejection
+    -- (fixtures/corpus/ord-lt-boundary-reject.sexp), so the bridge delivers
+    -- at_least_as_good and not better.
+    ( "examples/S3/example.core.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom at_least_as_good (con sys_new) (con sys_base)"
+        ++ " (con accuracy) (con imagenet_val)) justified)))"
+    )
+  , -- S4: an audit undermines the binding leaf at premise 1 of the bridge. The
+    -- bridge goes out and its comparative claim is DEFEATED; the strict ord@1
+    -- step is untouched and its bare comparison stays JUSTIFIED. The split is
+    -- the factivity firewall in the grounded semantics.
+    ( "examples/S4/example.core.sexp"
+    , "(verdict accept (labels (0 in) (1 out) (2 in)) (edges (2 1))"
+        ++ " (statuses (status (atom better (con sys_new) (con sys_base) (con accuracy)"
+        ++ " (con imagenet_val)) defeated)"
+        ++ " (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
     )
   , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;

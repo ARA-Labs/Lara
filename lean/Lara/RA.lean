@@ -83,8 +83,11 @@ def Tag.all : List Tag := [.radrop, .frac]
 def Tag.parse (s : String) : Option Tag :=
   Tag.all.find? (fun t => t.toString = s)
 
-/-- A decoded certificate: the two consulted free-context slots and the
-claimed drop as an exact fraction in lowest terms. -/
+/-- A decoded certificate: the two consulted premise slots and the claimed drop
+as an exact fraction in lowest terms.  (Slots index the consulted context
+`Γ = Δ ++ T`, but `Lara.Driver.buildRegistry` resolves a known `ra@1` digest to
+the empty theory, so `Γ = Δ` and every in-range slot is a premise — the same
+discipline `ord@1` uses; see `raBackend` below.) -/
 structure Cert where
   fullSlot : Nat
   ablatedSlot : Nat
@@ -345,8 +348,13 @@ theorem raUses_account (κ : CertRef) (Γ : List Lara.Atom) (φ : Lara.Atom)
 
 /-- The one fixed RA backend core.  `Form` is the normalized source atom
 itself — the identity encoding — so `enc_iff` is `equiv_iff_nf_eq`.  A
-registered digest resolves only to theory *data*; the RA replay consults it
-solely through certificate-named slots, like any other context entry. -/
+registered digest resolves to the **empty** theory (`Lara.Driver.buildRegistry`,
+the seam-wide premise-only decision that extends `ord@1`'s design §2.2 to
+`ra@1`), so the consulted context is exactly the submitted premises and every
+certificate-named slot resolves to one.  The Haskell adapter reaches the same
+acceptance set by rejecting any slot at or beyond the premise count; the
+abstract core never learns `Δ.length`, and the empty resolution is what makes
+"names a premise" and "is in range of `Γ`" the same condition. -/
 def raBackend (canon : String → String) : Lara.Strict.Backend canon where
   Form := Lara.Atom
   enc := Lara.nf canon

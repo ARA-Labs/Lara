@@ -28,15 +28,20 @@
 --   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
 --   * __S2__ @ord-cert@ — 'Accept'; ord@1 comparison cert replay plus the
 --     defeasible bridge rule consuming it; the comparative claim is justified.
+--   * __S3__ @ord-tie@ — 'Accept'; the num_le family member at the tie, where
+--     num_lt would be an R13 replay rejection on the same two numerals; the
+--     bridge delivers at_least_as_good rather than better.
+--   * __S4__ @ord-undermined-binding@ — 'Accept'; the binding leaf is
+--     undermined, so the bridge goes out and its comparative claim is
+--     defeated, while the strict ord@1 step stays in and its bare comparison
+--     stays justified (the factivity firewall, in the grounded semantics).
 --   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
 --     a same-atom contrary pair contested via a rebut 2-cycle, and a
 --     setting-index-mismatch pair left justified (zero attacks).
 --
--- A final __freshness__ property re-derives all eighteen @example.core.sexp@
--- anchors (A, B, E1–E5, R1–R3, S1, S2, agreement-map, the D1 rebuttal-replay
--- rounds round0–round2, and the running-example runs run1–run2) from their
--- surface @.lara@ + policy and asserts the committed bytes match, guarding
--- against surface/anchor drift.
+-- A final __freshness__ property re-derives every @example.core.sexp@ anchor in
+-- 'examplePolicies' from its surface @.lara@ + policy and asserts the committed
+-- bytes match, guarding against surface/anchor drift.
 module WorkedExamplesSpec (workedExamplesSpecProps) where
 
 import Test.QuickCheck
@@ -118,6 +123,18 @@ holdsP x d = Prop (Pred "holds") [con x, con d]
 betterP :: String -> String -> String -> String -> Prop
 betterP s b q d = Prop (Pred "better") [con s, con b, con q, con d]
 
+-- | @at_least_as_good(s, b, q, d)@ — the weaker comparative claim the @num_le@
+-- family member licenses (S3).
+atLeastAsGoodP :: String -> String -> String -> String -> Prop
+atLeastAsGoodP s b q d =
+  Prop (Pred "at_least_as_good") [con s, con b, con q, con d]
+
+-- | A bare comparison atom over two canonical numerals — the @ord\@1@ goal
+-- shape itself, which S4 queries directly to show it surviving an attack on
+-- the claim built from it.
+numRelP :: String -> String -> String -> Prop
+numRelP rel a b = Prop (Pred rel) [TNum a, TNum b]
+
 -- | @not_better(s, b, q, d)@ (agreement-map, D3).
 notBetterP :: String -> String -> String -> String -> Prop
 notBetterP s b q d = Prop (Pred "not_better") [con s, con b, con q, con d]
@@ -163,6 +180,8 @@ examplePolicies =
   , ("examples/R3", "empirical-v1.policy.lara")
   , ("examples/S1", "strict-v1.policy.lara")
   , ("examples/S2", "ord-v1.policy.lara")
+  , ("examples/S3", "ord-le-v1.policy.lara")
+  , ("examples/S4", "ord-setting-v1.policy.lara")
   , ("examples/agreement-map", "agreement-v1.policy.lara")
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
@@ -330,6 +349,56 @@ prop_S2 = once $ ioProperty $
                 === [ ( betterP "sys_new" "sys_base" "accuracy" "imagenet_val"
                       , Published Justified
                       )
+                    ]
+          ]
+
+-- | S3: the same certificate shape as S2 over two EQUAL cells. @num_le@
+-- accepts where @num_lt@ would be an R13 replay rejection, and the bridge
+-- delivers the weaker claim the arithmetic actually licenses — the family's two
+-- members separating on exactly this input is the point of the example.
+prop_S3 :: Property
+prop_S3 = once $ ioProperty $
+  runExample "examples/S3" "ord-le-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S3: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S3 labels: a1 (strict ord@1 num_le) and a2 (bridge) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S3 status: c1 → justified (at_least_as_good, NOT better)" $
+              verdictStatuses outcome
+                === [ ( atLeastAsGoodP "sys_new" "sys_base" "accuracy" "imagenet_val"
+                      , Published Justified
+                      )
+                    ]
+          ]
+
+-- | S4: the factivity firewall under attack. An audit undermines the binding
+-- leaf that says the two cells are comparable, so the defeasible bridge goes
+-- @out@ and its comparative claim is __defeated__ — while the strict @ord\@1@
+-- step stays @in@ and its bare comparison stays __justified__.
+--
+-- Both halves are asserted together on purpose. Either alone is consistent with
+-- a checker that simply propagated the attack everywhere, or with one that
+-- ignored it; only the split shows the attack landing on the layer that made
+-- the disputed assertion and stopping at the one that did not.
+prop_S4 :: Property
+prop_S4 = once $ ioProperty $
+  runExample "examples/S4" "ord-setting-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S4: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S4 labels: a1 → in, a2 (bridge) → out, x1 (audit) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LOut), (2, LIn)]
+          , counterexample "S4 edges: x1 undermines a2" $
+              verdictEdges outcome === [(2, 1)]
+          , counterexample "S4 status: better → defeated, num_lt → justified" $
+              verdictStatuses outcome
+                === [ ( betterP "sys_new" "sys_base" "accuracy" "imagenet_val"
+                      , Published Defeated
+                      )
+                    , (numRelP "num_lt" "0.71" "0.74", Published Justified)
                     ]
           ]
 
@@ -583,7 +652,7 @@ prop_groupConflictExpectedJson =
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
 -- ---------------------------------------------------------------------------
 
--- | For every example (all fifteen: A, B, E1–E5, R1–R3, S1, agreement-map, and
+-- | For every example in 'examplePolicies' (A, B, E1–E5, R1–R3, S1–S4, agreement-map, and
 -- the D1 rebuttal-replay rounds round0–round2), re-running the full
 -- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
 -- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
@@ -617,7 +686,7 @@ prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
         (pr, pp) ->
           counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
 
--- | For every example (all fifteen), re-render @expected.json@ from the elaborated
+-- | For every example in 'examplePolicies', re-render @expected.json@ from the elaborated
 -- 'Unit' ("Lara.ExpectedJson".@expectedJson@) and assert it equals the committed
 -- @examples\/\<NAME\>\/expected.json@ bytes exactly — the located-diagnostic
 -- freshness sibling of 'prop_freshness'. @expected.json@ is the __Haskell-only__
@@ -689,7 +758,7 @@ attackCells u outcome = case outcome of
 -- The suite is the §1 examples E1–E3 / R1–R3, the M5 worked cases E4/E5, the
 -- two teaching examples A and B, strict-certificate example S1, plus the D3
 -- agreement-map and the three D1 rebuttal-replay rounds round0–round2 — all
--- fifteen in 'examplePolicies'.
+-- every entry in 'examplePolicies'.
 prop_coverageMatrix :: Property
 prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
@@ -776,6 +845,8 @@ workedExamplesSpecProps =
   , ("E5 contested via undermine+undercut cycles, gap amid attacks", quickCheckResult prop_E5)
   , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
   , ("S2 strict ord@1 cert + defeasible bridge → accept, both args in, comparative claim justified", quickCheckResult prop_S2)
+  , ("S3 ord@1 num_le tie → accept, at_least_as_good justified (num_lt would reject)", quickCheckResult prop_S3)
+  , ("S4 undermined binding → bridge out, comparative claim defeated, comparison still justified", quickCheckResult prop_S4)
   , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)

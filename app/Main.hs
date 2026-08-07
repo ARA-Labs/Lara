@@ -13,10 +13,12 @@
 --   'Lara.Driver.runCheck' path. The CLI is a thin shell, so the @.lara@
 --   verdict bytes equal the in-process source construction + checker bytes.
 -- * Exit codes (shared by both paths): @0@ = accept, @1@ = checker rejection
---   (a boundary rejection additionally explains itself with one
---   'Lara.Driver.rejectionDiagnostics' line on @stderr@: a replay-preflight R13
---   'Lara.Replay.replayFailureMessage', or an escalated group-conflict R9
---   'Lara.Driver.groupConflictMessage'), @2@ =
+--   (a rejection whose class alone cannot say what went wrong additionally
+--   explains itself with one 'Lara.Driver.runCheckLocatedReported' line on @stderr@: a
+--   replay-preflight R13 'Lara.Replay.replayFailureMessage', an escalated
+--   group-conflict R9 'Lara.Driver.groupConflictMessage', or a checker-side R13
+--   'Lara.Driver.backendRejectionMessage' carrying the backend's own reason),
+--   @2@ =
 --   decode/elaborate-boundary or usage error (with a located message on
 --   @stderr@ and nothing on @stdout@). For @.lara@, a program\/policy parse
 --   error, a missing\/unreadable policy file, and an 'ElabError' are all
@@ -39,7 +41,8 @@ import Lara.Admission
   , renderAdmissionAudit
   , renderAdmissionRejection
   )
-import Lara.Driver (rejectionDiagnostics, runCheck)
+import Lara.Check (fullConfig)
+import Lara.Driver (runCheckLocatedReported)
 import Lara.Elaborate
   ( PreparedSource (..)
   , defeasibleSuiteSigma
@@ -95,8 +98,12 @@ checkSexp file = do
           hPutStrLn stderr ("lara: codec error at " ++ ctx ++ ": " ++ msg)
           exitWith (ExitFailure 2)
         Right input -> do
-          mapM_ (hPutStrLn stderr) (rejectionDiagnostics input)
-          emitVerdict (runCheck input)
+          -- One pass: the verdict and the lines explaining it come from the
+          -- same decision, so stderr can never describe a different rejection
+          -- than the one on stdout.
+          let (verdict, _, diagnostics) = runCheckLocatedReported fullConfig input
+          mapM_ (hPutStrLn stderr) diagnostics
+          emitVerdict verdict
 
 -- ---------------------------------------------------------------------------
 -- The @.lara@ presentation path (M4a Task A1)

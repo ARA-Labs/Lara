@@ -47,7 +47,8 @@ import Lara.Wire
   , parseSExpr
   , printSExpr
   )
-import Lara.Driver (groupConflictMessage, rejectionDiagnostics, runCheck)
+import Lara.Check (fullConfig)
+import Lara.Driver (groupConflictMessage, runCheck, runCheckLocatedReported)
 import TestReplay (testCheckInput, testReplayId)
 
 -- ---------------------------------------------------------------------------
@@ -656,7 +657,7 @@ prop_groupConflictMessage =
 -- R9, but wrapped in a check-input whose selected-backend set omits the arg's
 -- certificate backend the preflight fails first and the verdict is R13. Swapping
 -- the two guards in 'runCheck' flips the second assertion; the third pins the
--- same precedence on @stderr@ ('Lara.Driver.rejectionDiagnostics'): exactly the
+-- same precedence on @stderr@ ('Lara.Driver.runCheckLocatedReported'): exactly the
 -- R13 line, never the R9 'groupConflictMessage' line, when both fire.
 mixedR13AndR9 :: Unit
 mixedR13AndR9 =
@@ -665,6 +666,13 @@ mixedR13AndR9 =
     , unitGroups = [DupGroup (GroupId "g1") [LeafId "e_p", LeafId "e_conflict"]]
     , unitGroupMode = RejectOnConflict
     }
+
+-- | The stderr lines the production driver would print, from the same single
+-- pass that produces the verdict ('Lara.Driver.runCheckLocatedReported').
+reportedDiagnostics :: CheckInput -> [String]
+reportedDiagnostics input =
+  let (_, _, diagnostics) = runCheckLocatedReported fullConfig input
+   in diagnostics
 
 prop_groupPrecedenceR13BeatsR9 :: Property
 prop_groupPrecedenceR13BeatsR9 =
@@ -681,7 +689,7 @@ prop_groupPrecedenceR13BeatsR9 =
           ( case runtimeReplayFailure mixedInput of
               Nothing -> counterexample "expected a preflight failure" (property False)
               Just failure ->
-                rejectionDiagnostics mixedInput === [replayFailureMessage failure]
+                reportedDiagnostics mixedInput === [replayFailureMessage failure]
           )
       ]
   where

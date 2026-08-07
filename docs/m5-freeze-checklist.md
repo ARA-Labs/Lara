@@ -33,6 +33,23 @@ running-example files (#65–#73). The v3 snapshot was produced at a clean
 `3108a5f` (`report.json` `environment`: `git-dirty: false`) and committed as
 `4d5c6ae`; the tables below describe **v3**._
 
+_**Post-v3 movement, still `m5-freeze-v3` (the `ord@1` / premise-only branch).**
+The measured inputs are untouched: rows 1 and 2 hold their v3 SHAs exactly
+(`fixtures/mutants/` = `11160a8…`, `corpus-units/` = `4f4c4ec…`), so
+`measurements/frozen/` and every headline number below remain the numbers of
+record and no re-run is owed. Row 3's tree moved again, additively and outside
+the measured set: worked examples **S2** (`ord@1` comparison, landed with #83),
+**S3** (the `num_le` tie) and **S4** (an undermined binding) were added, and the
+11 measured examples are byte-identical. The differential gate row rose
+436 → 445; the last four of those are this branch's (+2 `ra@1` premise-only
+fixtures, +2 worked-example anchors), and the other five arrived with #83
+alone, which was measured at 441 on `main` before this branch. (#81 is an
+ancestor of the v3 commit, so its anchors were already counted in the 436
+baseline.) Making `ra@1` premise-only changed
+**zero** frozen bytes because `corpus-v1`'s `ra@1` theory is declared empty
+(`corpus-units/corpus-v1.policy.lara`), so no certificate in the frozen set
+could cite a theory entry in the first place._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,
@@ -57,7 +74,7 @@ the git tree object SHA is itself the content hash of the tree.
 | --- | --- | --- | --- | --- |
 | 1 | Seeded mutation suite (verdict + specified-status anchors) | `fixtures/mutants/` | 369 mutants (324 verdict/status-anchored + 45 codec-reject malformed negatives) | `11160a8fdeb47a7e3772d26e6878e472a7a64dbe` |
 | 2 | Corpus units (T2, hand-lowered M0 sample; C04 carries the #57 `ra@1` certificate; every measured `unit.core.sexp` byte-identical to v2 — tree moved on docs + #79 surface-policy repair only) | `corpus-units/` | 60 units | `4f4c4ec7841b0a231771d5ba20bfe97302e3b4d4` |
-| 3 | Worked examples (golden verdicts, both drivers; the 11 measured examples byte-identical to v1 — tree moved on additive demos/running-example + README only) | `examples/` | 11 examples | `48edd2dc6bc883409bca00224e1e21c4ef7224a4` |
+| 3 | Worked examples (golden verdicts, both drivers; the 11 measured examples byte-identical to v1 — tree moved on additive demos/running-example + README + the additive S2/S3/S4 `ord@1` examples only) | `examples/` | 11 measured examples (+ additive demonstrators) | `d985156f5be5134dba14bf0a28455fb697305837` |
 
 **Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs:308`,
 SplitMix64, keyed per `(base, operator)`). Verified byte-identically
@@ -73,7 +90,7 @@ semantics. Pinned by the freeze commit SHA below.
 | Gate | Command | Result |
 | --- | --- | --- |
 | Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 369 mutants byte-identical (empty `git diff`) ✓ |
-| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=436 fail=0 ✓ |
+| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=445 fail=0 ✓ (at branch HEAD; **436**/436 at the `m5-freeze-v3` tag — see the post-v3 note) |
 | Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=54 fail=0 ✓ |
 | Admission differential (#81) | `bash scripts/admission-differential.sh` | pass=20 fail=0 (15 semantic byte-identical + 5 codec rejects) ✓ |
 | Replay-tamper detection | `bash scripts/test-replay-tamper.sh` | both tamper classes detected ✓ |
@@ -130,17 +147,22 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 - **v1 tag:** `m5-freeze-v1` (annotated), on `300b235` (merge commit of the T5
   freeze PR #55) — the M1 analogue is `spec-v0.1`.
 - **v2 freeze commit:** `68e7298` (merge commit of the #57 PR, #59). The tag
-  was not cut at merge time; it is cut retroactively alongside v3.
+  was not cut at merge time; it was cut retroactively alongside v3.
 - **v2 tag:** `m5-freeze-v2` (annotated), on `68e7298`.
 - **v3 snapshot commit:** `4d5c6ae` (measurement run at clean `3108a5f`).
-- **v3 tag:** `m5-freeze-v3` (annotated), on `<FILL-AFTER-MERGE>` (merge commit
-  of the v3 re-freeze PR).
+- **v3 tag:** `m5-freeze-v3` (annotated), on `62eea92` (merge commit of the v3
+  re-freeze PR, #82).
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
   invalidates this freeze; re-run the gates and cut the next tag (e.g. the
   deferred wrong-fraction certificate mutation operator would cut
   `m5-freeze-v3`).
 
 ## Reproduce from scratch
+
+Every number in this block is **the tag's**, not the current branch's — the
+post-v3 note above records where they differ (the positive differential is
+436 at `m5-freeze-v3` and 445 at branch HEAD; the anchors and headline numbers
+are unchanged, since no frozen input moved).
 
 ```
 git checkout m5-freeze-v3

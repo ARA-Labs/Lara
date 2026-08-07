@@ -85,7 +85,7 @@ import Lara.Admission.Internal
 import Lara.Blocked (Prune, pruneChecked, pruneWithPolicySeed)
 import Lara.Check (fullConfig)
 import Lara.Diagnostics (LocatedRejection)
-import Lara.Driver.Internal (rejectionDiagnosticsWithPrune, runCheckWithPrune)
+import Lara.Driver.Internal (runCheckReported)
 import Lara.Elaborate.Internal
   ( ElabError (..)
   , Sigma (..)
@@ -166,18 +166,30 @@ sourceResultVerdict (SourceResult verdict _ _ _ _ _) = verdict
 sourceResultAudit :: SourceResult -> AdmissionAudit
 sourceResultAudit (SourceResult _ audit _ _ _ _) = audit
 
--- | Replay/group diagnostics in the raw driver's established precedence.
+-- | The @stderr@ lines this result's rejection warrants, in the raw driver's
+-- established precedence: a replay-preflight R13
+-- ('Lara.Replay.replayFailureMessage'), an escalated group-conflict R9
+-- ('Lara.Driver.groupConflictMessage'), or a checker-side R13
+-- ('Lara.Driver.backendRejectionMessage' — the registered backend replayed the
+-- certificate and refused it, and this carries the reason it gave).
+--
+-- Empty on acceptance, and empty for a rejection whose class already says what
+-- went wrong; those carry their location in 'sourceResultLocatedRejection'
+-- instead.  All of it comes from the same single pass that produced the
+-- verdict, so a line here can never explain a rejection this result did not
+-- make.
 sourceResultDiagnostics :: SourceResult -> [String]
 sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _) = diagnostics
 
 -- | The located rejection that produced this result's verdict, from the /same/
--- decision path ("Lara.Driver.Internal".@runCheckWithPrune@): its class, failing
+-- decision path ("Lara.Driver.Internal".@runCheckReported@): its class, failing
 -- stage, and offending constituent.  'Nothing' exactly on acceptance.
 --
 -- Without this projection a policy-pruned rejection would be renderable only
--- through 'sourceResultDiagnostics', which is empty for every ordinary checker
--- rejection (those carry their location here, not in a message line) — so an
--- R1 on a pruned source would print an empty diagnostic.
+-- through 'sourceResultDiagnostics', which stays empty for the ordinary checker
+-- rejections — every class but a backend-reason R13 carries its location here
+-- rather than in a message line — so an R1 on a pruned source would print an
+-- empty diagnostic.
 sourceResultLocatedRejection :: SourceResult -> Maybe LocatedRejection
 sourceResultLocatedRejection (SourceResult _ _ _ located _ _) = located
 
@@ -240,11 +252,12 @@ prepareSource sigma program policy = do
 
 runSourceCheck :: SourceCheckInput -> SourceResult
 runSourceCheck (SourceCheckInput _ _ _ _ finalPrune audit checkInput) =
-  let (verdict, located) = runCheckWithPrune fullConfig checkInput finalPrune
+  let (verdict, located, diagnostics) =
+        runCheckReported fullConfig checkInput finalPrune
    in SourceResult
         verdict
         audit
-        (rejectionDiagnosticsWithPrune checkInput finalPrune)
+        diagnostics
         located
         (map fst (unitArgs (pruneChecked finalPrune)))
         checkInput

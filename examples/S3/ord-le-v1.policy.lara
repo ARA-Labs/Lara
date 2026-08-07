@@ -1,0 +1,63 @@
+# ord-le-v1 — the second comparison family member, for worked example S3
+#
+# S2's ord-v1 exercises num_lt. This policy exercises num_le, and exists
+# because the two members are NOT interchangeable: they differ on exactly one
+# input, the tie, and that is the input a methodology paper most often gets
+# wrong. "Our method is at least as good" and "our method beats" are different
+# claims, and the checker should not let one stand in for the other.
+#
+# Two rules, in S2's layering (plan §3.6):
+#
+#   * tie_recheck — STRICT. The bare ordered comparison num_le(Bv, Sv) over two
+#     reported score cells, re-checked exactly by ord@1. Identical in shape to
+#     S2's beats_recheck; only the conclusion's family member differs.
+#
+#   * no_worse — DEFEASIBLE. The bridge, concluding at_least_as_good rather
+#     than better. The weaker arithmetic licenses only the weaker claim.
+#
+# What S3 pins that S2 cannot: on the SAME two numerals, this policy's rule
+# accepts and S2's rejects. fixtures/corpus/ord-le-boundary-accept.sexp and
+# ord-lt-boundary-reject.sexp are the differential twins of that boundary at
+# the wire level; S3 is the same fact at the source level, carried to a claim.
+
+policy ord-le-v1
+
+# --- The strict leg: the certificate-checked non-strict comparison --------------------------
+# Slot order is the premise list order: (prem 0) is the baseline cell, (prem 1) the system
+# cell. The conclusion num_le(Bv, Sv) says baseline <= system — the system is not worse.
+#
+# There is no num_ge: "Sv >= Bv" is authored by swapping the arguments, which is what this
+# conclusion does. The family is {num_lt, num_le} and the kernel stays minimal.
+
+rule tie_recheck(S, B, Q, D, Exp, Sv, Bv)
+  mode       = strict
+  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),
+                 reports(Exp, score_cell(S, Q, D, Sv)) ]
+  conclusion = num_le(Bv, Sv)
+  allow-trusted = false
+  certifiers = [ (ord@1, sha256:ord-le-v1-theory-0) ]
+
+# The empty theory the ord@1 certificates cite: the certified comparison is pure arithmetic, so
+# the theory contributes no entries — the digest is selection identity only (the S1 precedent).
+theory sha256:ord-le-v1-theory-0 = []
+
+# --- The bridge: from a bare comparison to a comparative claim ------------------------------
+# Same shape as S2's beats_baseline, and same reason for being defeasible: the strict
+# conclusion carries no measurand identity, so the binding enters as attackable evidence.
+#
+# The conclusion is at_least_as_good, not better. A reader who wants "better" needs num_lt,
+# and on this artifact's numbers no certificate can produce it.
+
+rule no_worse(S, B, Q, D, Sv, Bv)
+  mode       = defeasible
+  premises   = [ num_le(Bv, Sv),
+                 comparison_setup(S, B, Q, D, Sv, Bv) ]
+  conclusion = at_least_as_good(S, B, Q, D)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is tie_recheck, whose conclusion
+# pattern num_le(Bv, Sv) heads no contrary pair, so no contrary side is strict-reachable and the
+# policy passes the R12 check. As in ord-v1 this is a theorem rather than a convenience: the
+# intra-family exclusion lemmas in lean/Lara/Ord.lean (lt_excl_le and its companions) say a sound
+# backend can never accept two conflicting members over the same literals. le_le_iff_eq records
+# the complement that matters here — num_le(A, B) and num_le(B, A) CAN coexist, and when they do
+# they pin down A = B. A tie is a consequence, not a conflict, so there is nothing to declare.

@@ -25,11 +25,13 @@ Design decisions (documented, faithful to the mechanized development):
 * `canon := Lara.canonNum`. Numeric literals therefore use the same identity
   relation as the Haskell production driver; identifier canonicalization remains
   the separate `canonId = id` extension point.
-* The backend registry is built from the wire `theories` section over the one
-  implemented backend core, `nd@1` (`Lara.Strict.ndBackend`, with digests
-  resolving to ND-encoded theory data), mirroring
-  `Lara.Examples.registryEx`. Units that reference other backends fall through
-  to a certificate rejection, which is the honest behaviour given only ND is
+* The backend registry is built from the wire `theories` section over the three
+  implemented backend cores — `nd@1` (`Lara.Strict.ndBackend`, digests resolving
+  to ND-encoded theory data), `ra@1` and `ord@1` (`Lara.RA.raBackend` /
+  `Lara.Ord.ordBackend`, known digests resolving to the **empty** theory because
+  both are premise-only). See `buildRegistry` for why the two resolutions
+  differ. Units that reference any other backend fall through to a certificate
+  rejection, which is the honest behaviour given only these three are
   mechanized.
 * The verdict is printed followed by a single `\n`, matching the Haskell
   CLI's `putStrLn`: both drivers' stdout is `printSExpr (encodeVerdict v)`
@@ -678,16 +680,21 @@ def ordBackendId : BackendId := ⟨"ord", 1⟩
 fixed core, with each declared digest resolving to that digest's core-encoded
 theory data.
 
-`ord@1` is the exception, and deliberately so: a *known* digest resolves to
-the **empty** theory rather than to the declared entries (an unknown digest
-still fails to resolve, which is a rejection).  Its theory is empty by design
-(`Lara.Ord`, §2.2), and this is what keeps the two sides in exact agreement:
-the Haskell adapter rejects any certificate slot at or beyond the premise
-count, while the abstract `Backend` core is handed only `Γ = Δ ++ T` and never
-learns `Δ.length`.  Resolving to `[]` makes `Γ = Δ`, so "names a premise" and
-"is in range of `Γ`" coincide and both sides accept exactly the same
-certificates — including on a unit that declares a non-empty wire theory,
-where the Haskell side rejects those slots outright. -/
+The two rational-arithmetic backends are the exception, and deliberately so: a
+*known* `ra@1` or `ord@1` digest resolves to the **empty** theory rather than
+to the declared entries (an unknown digest still fails to resolve, which is a
+rejection).  Both are premise-only by design (`Lara.Ord` §2.2; the seam-wide
+decision extending it to `ra@1`), and this is what keeps the two sides in exact
+agreement: each Haskell adapter rejects any certificate slot at or beyond the
+premise count, while the abstract `Backend` core is handed only `Γ = Δ ++ T`
+and never learns `Δ.length`.  Resolving to `[]` makes `Γ = Δ`, so "names a
+premise" and "is in range of `Γ`" coincide and both sides accept exactly the
+same certificates — including on a unit that declares a non-empty wire theory,
+where the Haskell side rejects those slots outright.
+
+Only `nd@1` still resolves a digest to its declared entries, because its
+consulted context genuinely is `Δ ++ T`: an `nd@1` certificate's de Bruijn free
+variables are meant to reach theory axioms. -/
 def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcanon :=
   fun β =>
     if β = ndBackendId then
@@ -700,7 +707,7 @@ def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcan
       some { core := Lara.RA.raBackend dcanon
              resolveTheory := fun h =>
                match theories.find? (fun t => decide (t.1 = h)) with
-               | some t => some (t.2.map (Lara.nf dcanon))
+               | some _ => some []
                | none => none }
     else if β = ordBackendId then
       some { core := Lara.Ord.ordBackend dcanon

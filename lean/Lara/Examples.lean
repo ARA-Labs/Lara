@@ -42,6 +42,7 @@ import Lara.Consistency
 import Lara.Check
 import Lara.Check.Unit
 import Lara.Ord
+import Lara.RA
 
 namespace Lara.Examples
 
@@ -286,11 +287,29 @@ def ordRegistered : RegisteredBackend id where
   core := Lara.Ord.ordBackend id
   resolveTheory := fun h => if h = digestA then some [] else none
 
-/-- Backend-first registry: exact identities `nd@1` and `ord@1` have outer
-entries.  (`ra@1` is deliberately absent — this fixture's ND theorems predate
-it and nothing here exercises relative-drop arithmetic.) -/
+/-! ### The `ra@1` entry
+
+`ra@1` is registered on exactly the same terms as `ord@1`, because the
+seam-wide premise-only decision made the two rational-arithmetic backends share
+one trusted-base sentence: every certificate-consulted cell traces to a
+consulted premise, hence to a leaf.  Registering it here is what makes that
+discipline observable at the registry layer rather than only inside the Haskell
+adapter — the same reason the `ord@1` theorems below exist. -/
+
+/-- Exact Haskell-conformant `ra@1` identity. -/
+def raId : BackendId := ⟨"ra", 1⟩
+
+/-- The one fixed `ra@1` core.  A known digest resolves to the EMPTY theory,
+mirroring `Lara.Driver.buildRegistry`. -/
+def raRegistered : RegisteredBackend id where
+  core := Lara.RA.raBackend id
+  resolveTheory := fun h => if h = digestA then some [] else none
+
+/-- Backend-first registry: exact identities `nd@1`, `ra@1` and `ord@1` have
+outer entries — the same fixed triple `Lara.Driver.buildRegistry` builds. -/
 def registryEx : BackendRegistry id := fun β =>
   if β = ndId then some ndRegistered
+  else if β = raId then some raRegistered
   else if β = ordId then some ordRegistered
   else none
 
@@ -358,7 +377,7 @@ pin one input instead of the property.  `test/OrdSpec.hs` and the two
 
 /-- `ord@1` has an outer registry entry, at exact identity. -/
 theorem registry_ord_registered : registryEx ordId = some ordRegistered := by
-  simp [registryEx, ordId, ndId]
+  simp [registryEx, ordId, ndId, raId]
 
 /-- A known digest resolves to the EMPTY theory. -/
 theorem ord_resolveTheory_known :
@@ -388,6 +407,52 @@ theorem ord_models_context_is_premises
     (Δ : List Atom) (φ : Atom) :
     (Lara.Ord.ordBackend id).models [] Δ φ ↔ Lara.Ord.ordModels Δ φ :=
   Iff.of_eq (congrArg (fun Γ => Lara.Ord.ordModels Γ φ) (List.append_nil Δ))
+
+/-! ### `ra@1` registry behaviour
+
+The `ord@1` block above, transposed to `ra@1`.  These are not decoration: the
+premise-only guard is the whole content of the seam-wide parity decision, and
+the CLAUDE.md mechanization discipline puts a frozen, corpus-independent
+definition in Lean the moment it is frozen.  Like `ord@1`'s, they are stated
+over the *resolution* rather than a worked numeric example, because
+`String.toNat?` / `String.splitOn` do not reduce in the kernel;
+`test/RASpec.hs` and the two `fixtures/corpus/ra-premise-only-*.sexp` anchors
+carry the worked cases. -/
+
+/-- `ra@1` has an outer registry entry, at exact identity. -/
+theorem registry_ra_registered : registryEx raId = some raRegistered := by
+  simp [registryEx, raId, ndId]
+
+/-- A known digest resolves to the EMPTY theory. -/
+theorem ra_resolveTheory_known :
+    raRegistered.resolveTheory digestA = some [] := by
+  simp [raRegistered]
+
+/-- An unknown digest does not resolve at all, so it is still a rejection: the
+empty-theory resolution applies to *known* digests only. -/
+theorem ra_resolveTheory_unknown :
+    raRegistered.resolveTheory digestUnknown = none := by
+  simp [raRegistered, digestA, digestUnknown]
+
+/-- **The invariant**, `ra@1`'s copy of `ord_replay_context_is_premises`.
+Because the resolved theory is empty, the consulted context is exactly the
+submitted premises — `Γ = Δ ++ [] = Δ` — so "the certificate names a premise"
+and "the slot is in range of the consulted context" are the same condition, and
+the Lean model agrees with the Haskell adapter's explicit `slot >= nPrem` guard
+without being able to see `Δ.length`. -/
+theorem ra_replay_context_is_premises
+    (κ : CertRef) (Δ : List Atom) (φ : Atom) :
+    (Lara.RA.raBackend id).replay [] κ Δ φ = Lara.RA.raReplay κ Δ φ :=
+  congrArg (fun Γ => Lara.RA.raReplay κ Γ φ) (List.append_nil Δ)
+
+/-- The same for the consequence relation: what an accepted `ra@1` step is
+accountable to is the premises alone.  This is the statement that changed
+meaning under the parity decision — before it, an `ra@1` step could be
+accountable to artifact-supplied theory entries. -/
+theorem ra_models_context_is_premises
+    (Δ : List Atom) (φ : Atom) :
+    (Lara.RA.raBackend id).models [] Δ φ ↔ Lara.RA.raModels Δ φ :=
+  Iff.of_eq (congrArg (fun Γ => Lara.RA.raModels Γ φ) (List.append_nil Δ))
 
 /-- Adequacy also rules out proposition-level acceptance on a missing outer
 lookup. -/

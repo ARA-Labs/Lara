@@ -36,7 +36,7 @@ import Lara.Strict
   , strictCheck
   )
 import qualified Lara.Strict.Cell as Cell
-import Lara.Strict.Cell (parseDecimal, premiseCell)
+import Lara.Strict.Cell (parseDecimal, premiseCell, renderDecimal)
 import Lara.Strict.RA
   ( RACert (..)
   , Tag (..)
@@ -101,6 +101,9 @@ renderScaled m k =
 data DropScenario = DropScenario
   { dsPremises :: [Prop]
   , dsTheory :: [Prop]
+  -- ^ A decoy theory, sometimes non-empty. Since the seam-wide premise-only
+  -- decision its entries are __uncitable__, so a non-empty theory must not
+  -- change acceptance — and it keeps the guard's middle branch live.
   , dsGoal :: Prop
   , dsCert :: RACert
   , dsDeps :: Set.Set Dependency
@@ -126,7 +129,7 @@ genDropScenario = do
   c <- choose (0, 10 ^ k :: Integer)
   t <- choose (0, c)
   nPad <- choose (0, 3)
-  fromTheory <- arbitrary -- ablated cell from a theory entry?
+  decoyTheory <- arbitrary -- declare a non-empty (uncitable) theory?
   let denomScale = 10 ^ k :: Integer
       aNum = f * denomScale - f * c -- A * 10^k
       fullStr = show f
@@ -142,21 +145,18 @@ genDropScenario = do
       ablatedP = cellPremise "ablated" ablatedStr
       pads = map notePremise [0 .. nPad - 1]
   fullSlot <- choose (0, nPad)
-  let premises
-        | fromTheory = insertAt fullSlot fullP pads
-        | otherwise = insertAt fullSlot fullP pads ++ [ablatedP]
-      theory = [ablatedP | fromTheory]
-      ablatedSlot = length premises + (if fromTheory then 0 else -1)
-      ablatedDep
-        | fromTheory = TheoryEntry 0
-        | otherwise = PremiseSlot ablatedSlot
+  let premises = insertAt fullSlot fullP pads ++ [ablatedP]
+      ablatedSlot = length premises - 1
+      -- The decoy carries a cell, so a backend that still indexed the free
+      -- context would happily resolve it; the guard is what makes it uncitable.
+      theory = [ablatedP | decoyTheory]
   pure
     DropScenario
       { dsPremises = premises
       , dsTheory = theory
       , dsGoal = goal
       , dsCert = RACert fullSlot ablatedSlot claimedDrop
-      , dsDeps = Set.fromList [PremiseSlot fullSlot, ablatedDep]
+      , dsDeps = Set.fromList [PremiseSlot fullSlot, PremiseSlot ablatedSlot]
       , dsDistinctCells = c /= 0
       }
   where
@@ -230,6 +230,21 @@ prop_raSlotOutOfRangeRejected ds =
   where
     oob = (dsCert ds) {raFullSlot = length (dsPremises ds) + length (dsTheory ds)}
 
+-- | The seam-wide premise-only guard, @ra\@1@'s half: when the unit declares a
+-- non-empty theory, a certificate citing the first theory entry is rejected
+-- __even though that entry carries a well-formed cell__ — the free-context
+-- reading would have accepted it. Mirrors @prop_ordTheorySlotRejected@; the
+-- generator supplies the non-empty theory, so this pins the guard's live
+-- middle branch and its exact message.
+prop_raTheorySlotRejected :: DropScenario -> Property
+prop_raTheorySlotRejected ds =
+  not (null (dsTheory ds)) ==>
+    rejectsWith
+      "RA cites premise slots only; slot names theory entry 0"
+      (runScenario ds (certToSExpr cited))
+  where
+    cited = (dsCert ds) {raAblatedSlot = length (dsPremises ds)}
+
 -- | An unknown theory digest is rejected before any certificate work.
 prop_raUnknownDigestRejected :: DropScenario -> Bool
 prop_raUnknownDigestRejected ds =
@@ -285,10 +300,11 @@ prop_raRejectionMessages =
               , slotToSExpr 1
               , fracToSExpr (1 % 2)
               ]))
-    , -- RA indexes the FULL free context, so its range message differs from
-      -- ord@1's premise-only one; that distinction is the point.
+    , -- Both rational-arithmetic backends now cite premises only, so they share
+      -- this range message verbatim; the backend-specific half of the funnel is
+      -- the theory-entry branch pinned by 'prop_raTheorySlotRejected'.
       rejectsWith
-        "free-context slot out of range"
+        "premise slot out of range"
         (runBackend
            (mkRABackend [(theoryDigest, [])])
            theoryDigest
@@ -426,6 +442,38 @@ prop_parseDecimalRoundTrip =
   forAll ((,) <$> choose (0, 10 ^ (6 :: Int)) <*> choose (0, 6)) $ \(m, k) ->
     parseDecimal (renderScaled m k) == Just (m % (10 ^ k))
 
+-- | 'renderDecimal' is the inverse of 'parseDecimal' on the terminating-decimal
+-- subset — which is exactly 'parseDecimal'\'s image, so exactly where the
+-- backends' value-carrying rejection messages live. Without this the messages
+-- could print @71 % 100@ for the numeral the author wrote as @0.71@.
+prop_cellDecimalRoundTrip :: Property
+prop_cellDecimalRoundTrip =
+  forAll
+    ( (,)
+        <$> choose (-(10 ^ (6 :: Int)), 10 ^ (6 :: Int) :: Integer)
+        <*> choose (0, 6 :: Int)
+    )
+    $ \(m, k) ->
+      let r = m % (10 ^ k) :: Rational
+       in parseDecimal (renderDecimal r) == Just r
+
+-- | The spellings the messages actually show, including the sign and
+-- integral cases, plus the non-terminating fallback: a rational that no finite
+-- decimal denotes is shown exactly as @p\/q@ rather than silently rounded. It
+-- cannot arise from 'parseDecimal', so no message is affected — but the
+-- function stays total and never lies.
+prop_renderDecimalGoldenVectors :: Bool
+prop_renderDecimalGoldenVectors =
+  and
+    [ renderDecimal 0 == "0"
+    , renderDecimal 50 == "50"
+    , renderDecimal (381 % 10) == "38.1"
+    , renderDecimal (119 % 500) == "0.238"
+    , renderDecimal ((-1) % 2) == "-0.5"
+    , renderDecimal (-3) == "-3"
+    , renderDecimal (1 % 3) == "1/3" -- no finite decimal: exact, not rounded
+    ]
+
 -- ---------------------------------------------------------------------------
 -- Properties: the premise-cell convention
 -- ---------------------------------------------------------------------------
@@ -475,6 +523,7 @@ raSpecProps =
   , ("RA wrong witness rejected (R13)", quickCheckResult prop_raWrongWitnessRejected)
   , ("RA swapped cells rejected", quickCheckResult prop_raSwappedSlotsRejected)
   , ("RA slot out of range rejected", quickCheckResult prop_raSlotOutOfRangeRejected)
+  , ("RA theory-entry slot rejected", quickCheckResult prop_raTheorySlotRejected)
   , ("RA unknown digest rejected", quickCheckResult prop_raUnknownDigestRejected)
   , ("RA strictCheck seals a judgment", quickCheckResult prop_raStrictCheckSeals)
   , ("RA rejection strings preserved by the Cell extraction", quickCheckResult prop_raRejectionMessages)
@@ -485,6 +534,8 @@ raSpecProps =
   , ("RA decimal golden vectors", quickCheckResult prop_parseDecimalGoldenVectors)
   , ("RA non-canonical decimals rejected", quickCheckResult prop_parseDecimalRejectsNonCanonical)
   , ("RA rendered decimal round-trip", quickCheckResult prop_parseDecimalRoundTrip)
+  , ("Cell renderDecimal inverts parseDecimal", quickCheckResult prop_cellDecimalRoundTrip)
+  , ("Cell renderDecimal golden vectors", quickCheckResult prop_renderDecimalGoldenVectors)
   , ("RA premise-cell convention", quickCheckResult prop_premiseCellConvention)
   , ("RA checkDrop identity matrix", quickCheckResult prop_checkDropMatrix)
   ]

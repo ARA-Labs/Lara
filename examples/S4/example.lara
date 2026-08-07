@@ -1,0 +1,110 @@
+# S4 — the arithmetic survives, the claim does not (lara-syntax@0.2)
+#
+# S2's artifact, with one leaf added: an audit finding that the two accuracy
+# cells were produced under different evaluation settings. Everything else is
+# unchanged — the same two cells, the same certificate, the same bridge.
+#
+# What the added leaf does, and does not do:
+#
+#   * a1, the STRICT ord@1 step, is untouched. It stays `in`. Nothing in this
+#     artifact attacks it, and by construction nothing could: its conclusion
+#     num_lt(0.71, 0.74) heads no contrary pair, because a sound backend can
+#     never certify a conflicting member of the family over the same literals
+#     (lean/Lara/Ord.lean). 0.71 < 0.74 is not up for debate.
+#
+#   * a2, the DEFEASIBLE bridge, loses its binding premise. The audit's
+#     conclusion settings_differ(...) is declared contrary to the binding leaf
+#     e3, so x1 UNDERMINES a2 at premise 1. With no defender, x1 is `in` and a2
+#     is `out`.
+#
+#   * c1 — "sys_new outperforms sys_base" — is therefore DEFEATED, not gap: a
+#     complete argument for it exists and was beaten, which is a stronger and
+#     more useful reading than having no argument at all.
+#
+# This is the factivity firewall doing its job in the grounded semantics. The
+# certificate discharged the arithmetic and nothing else; the disputed content
+# — that these two numbers answer the same question — was never inside the
+# certificate, so the attack lands on the layer that actually asserted it. You
+# cannot argue with the arithmetic. You argue with the binding, and here the
+# argument succeeds.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact ord_setting_demo at sha256:5454545454545454545454545454545454545454545454545454545454545454
+policy ord-setting-v1
+use backends [ord@1]
+
+# --- The comparative claim under attack -------------------------------------------------------
+
+claim c1
+  nl      = "sys_new outperforms sys_base on ImageNet-val accuracy (0.74 vs 0.71)"
+  formal  = better(sys_new, sys_base, accuracy, imagenet_val)
+  binding = { author = alice, rationale = "Ordered comparison of two reported accuracy cells.", audit-status = disputed }
+
+# --- The certificate-checked comparison sub-claim ---------------------------------------------
+# Still justified after the attack: see the expected verdict.
+
+claim c2
+  nl      = "The reported baseline accuracy 0.71 is strictly below the reported system accuracy 0.74"
+  formal  = num_lt(0.71, 0.74)
+  binding = { author = alice, audit-status = reviewed }
+
+# --- The two measured cells the certificate consults ------------------------------------------
+# Neither cell is disputed. The audit does not claim either number is wrong.
+
+leaf e1 : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_base]
+
+leaf e2 : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.74))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_new]
+
+# The binding — the attack surface. This is the only place the artifact asserts that the two
+# numbers are comparable, and it is an attestation, not a measurement.
+
+leaf e3 : comparison_setup(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71)
+  kind       = attested
+  provenance = user
+  refs       = [evidence/tables/accuracy.md#caption]
+
+# The audit's own evidence.
+
+leaf e4 : audits_settings(aud1, sys_new, sys_base, accuracy, imagenet_val)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/audits/settings.md#sec=resolution]
+
+# --- The strict step: unchanged from S2, and unattacked ---------------------------------------
+
+arg a1 : supports(c2) by beats_recheck(sys_new, sys_base, accuracy, imagenet_val, exp1, 0.74, 0.71)
+  assurance = cert(ord@1, sha256:ord-setting-v1-theory-0, (ordcmp (prem 0) (prem 1)))
+
+# --- The bridge: unchanged from S2, and defeated ----------------------------------------------
+
+arg a2 : supports(c1) by beats_baseline(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71)
+
+# --- The critic -------------------------------------------------------------------------------
+
+arg x1 : challenges(e3) by setting_audit(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71, aud1)
+
+# The typed edge: premise 1 of a2 is the binding leaf, and x1's conclusion is its declared
+# contrary. Undermine, not rebut — the target is a leaf occurrence inside the support term,
+# not the bridge's conclusion.
+
+undermine x1 a2.1.leaf
+
+status c1
+status c2
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 (strict, unattacked), a2 (bridge, undermined at premise 1 by x1), x1
+# (unattacked).
+# Grounded labelling: a1 -> in, x1 -> in, a2 -> out.
+# Claim status:
+#   c1 -> defeated (a2 is a complete argument for c1 and every such argument is out)
+#   c2 -> justified (a1 is in; the arithmetic is untouched by the attack)

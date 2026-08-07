@@ -1,0 +1,77 @@
+# ord-setting-v1 — attacking a certified comparison, for worked example S4
+#
+# S2 shows the ord@1 layering with nothing attacked. S4 attacks it, and this
+# policy declares the vocabulary that makes the attack land where it should.
+#
+# The design claim under test is the factivity firewall: an accepted
+# certificate discharges the ARITHMETIC and nothing else. It never asserts that
+# a premise cell is true, and it never asserts that the two cells are
+# comparable. So a critic who disputes the comparison cannot touch the strict
+# step — there is nothing there to dispute, 0.71 < 0.74 either holds or it does
+# not — and must instead attack the defeasible layer. This policy gives that
+# critic exactly one place to stand: the binding.
+#
+# Rules:
+#
+#   * beats_recheck — STRICT, identical to ord-v1's. Certified by ord@1.
+#   * beats_baseline — DEFEASIBLE bridge, identical to ord-v1's.
+#   * setting_audit — DEFEASIBLE. An audit finding that the two cells were
+#     produced under different evaluation settings. Its conclusion is declared
+#     contrary to comparison_setup, so an instance UNDERMINES the binding leaf.
+
+policy ord-setting-v1
+
+# --- The strict leg (ord-v1's beats_recheck, unchanged) -------------------------------------
+
+rule beats_recheck(S, B, Q, D, Exp, Sv, Bv)
+  mode       = strict
+  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),
+                 reports(Exp, score_cell(S, Q, D, Sv)) ]
+  conclusion = num_lt(Bv, Sv)
+  allow-trusted = false
+  certifiers = [ (ord@1, sha256:ord-setting-v1-theory-0) ]
+
+theory sha256:ord-setting-v1-theory-0 = []
+
+# --- The bridge (ord-v1's beats_baseline, unchanged) ----------------------------------------
+
+rule beats_baseline(S, B, Q, D, Sv, Bv)
+  mode       = defeasible
+  premises   = [ num_lt(Bv, Sv),
+                 comparison_setup(S, B, Q, D, Sv, Bv) ]
+  conclusion = better(S, B, Q, D)
+
+# --- The critic: the two numbers are not comparable -----------------------------------------
+# An audit that finds the two cells were measured under different settings — different input
+# resolution, different decoding budget, different test split. The numbers are each perfectly
+# real; what fails is that they answer the same question.
+#
+# Sv and Bv appear in the conclusion but not in the premise. That is deliberate and it is legal:
+# a rule instance supplies its whole substitution explicitly, so the audit names the two values
+# whose pairing it is disputing. Without them the conclusion could not be contrary to a
+# comparison_setup atom, which carries the values.
+
+rule setting_audit(S, B, Q, D, Sv, Bv, Aud)
+  mode       = defeasible
+  premises   = [ audits_settings(Aud, S, B, Q, D) ]
+  conclusion = settings_differ(S, B, Q, D, Sv, Bv)
+
+# --- Conflict --------------------------------------------------------------------------------
+# ONE direction only: an audit finding defeats a binding, and nothing here licenses a binding to
+# attack the audit back. A binding is an author's attestation that two numbers are comparable;
+# restating it is not evidence against an audit that examined the settings. The asymmetry is the
+# modeling claim, and the grounded outcome below depends on it — a symmetric pair would make the
+# two contested instead, which is E5's shape, not this one.
+
+contrary settings_differ(S, B, Q, D, Sv, Bv) comparison_setup(S, B, Q, D, Sv, Bv)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is beats_recheck, whose conclusion
+# pattern num_lt(Bv, Sv) heads no contrary pair. The declared pair is on comparison_setup /
+# settings_differ, and neither is the conclusion of a strict rule, so no contrary side is
+# strict-reachable and the policy passes the R12 check.
+#
+# This is the structural reason the attack cannot reach the arithmetic. To rebut the strict step
+# a critic would need a contrary of num_lt — and by the intra-family exclusion lemmas in
+# lean/Lara/Ord.lean no sound backend can ever certify one over the same literals, so declaring
+# it would be both useless and an R12 violation. The comparison is settled; only its relevance
+# is arguable.

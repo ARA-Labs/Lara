@@ -29,14 +29,15 @@ module Lara.Driver.Internal
   , pruneChecked
   , groupConflictReject
   , groupConflictMessage
-  , rejectionDiagnostics
-  , rejectionDiagnosticsWithPrune
+  , backendRejectionMessage
   , buildCertOk
   , buildAccept
   , runCheck
   , runCheckLocated
   , runCheckLocatedWith
+  , runCheckLocatedReported
   , runCheckWithPrune
+  , runCheckReported
   ) where
 
 import Data.List (intercalate)
@@ -44,6 +45,7 @@ import Data.List (intercalate)
 import Lara.AST
   ( BackendId (..)
   , Cert (..)
+  , certRefVersion
   , DupGroup (..)
   , GroupConflictMode (..)
   , GroupId (..)
@@ -66,7 +68,16 @@ import Lara.Blocked
   , quarantinedLeaves
   , supportUsesLeaf
   )
-import Lara.Check (CheckConfig, CheckedUnit, checkUnitWith, cuNodes, cuProgram, fullConfig)
+import Lara.Check
+  ( CheckConfig
+  , CheckedUnit
+  , ProgramError (..)
+  , UnitError (..)
+  , checkUnitWith
+  , cuNodes
+  , cuProgram
+  , fullConfig
+  )
 import Lara.Replay
   ( CheckInput
   , ReplayFailure (..)
@@ -85,7 +96,12 @@ import Lara.Diagnostics
 import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
 import Lara.Runtime (runtimeAF)
 import Lara.Prop (Prop)
-import Lara.SupportTerm (CertOk)
+import Lara.SupportTerm
+  ( BackendReason (..)
+  , CertOk
+  , CertOutcome (..)
+  , CheckError (..)
+  )
 import qualified Lara.Strict as St
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
@@ -123,6 +139,22 @@ runCheckLocatedWith :: CheckConfig -> CheckInput -> (Verdict, Maybe LocatedRejec
 runCheckLocatedWith cfg input =
   runCheckWithPrune cfg input (prune (inputUnit input))
 
+-- | 'runCheckLocatedWith' plus the @stderr@ lines the rejection warrants — the
+-- raw @.sexp@ door's entry point, and the only reporting entry point
+-- "Lara.Driver" exposes publicly.
+--
+-- It exists so that a raw-door caller never has to build a 'Prune' itself: the
+-- ordinary group-only prune is this module's business, and pairing a raw
+-- 'CheckInput' with a 'Prune' stays package-internal (see the "Lara.Driver"
+-- header).  Source callers reach the same single pass through
+-- 'Lara.Elaborate.prepareSource', which supplies the source-boundary prune.
+runCheckLocatedReported
+  :: CheckConfig
+  -> CheckInput
+  -> (Verdict, Maybe LocatedRejection, [String])
+runCheckLocatedReported cfg input =
+  runCheckReported cfg input (prune (inputUnit input))
+
 -- | Execute the checker against a source-boundary prune while retaining replay
 -- preflight and group decisions over the original declared unit.  The source
 -- smart constructor is the production caller; raw @.sexp@ inputs continue to
@@ -133,23 +165,86 @@ runCheckLocatedWith cfg input =
 -- @
 runCheckWithPrune :: CheckConfig -> CheckInput -> Prune -> (Verdict, Maybe LocatedRejection)
 runCheckWithPrune cfg input pruned =
+  let (verdict, located, _) = runCheckReported cfg input pruned
+   in (verdict, located)
+
+-- | 'runCheckWithPrune' plus the @stderr@ lines the rejection warrants, all
+-- from __one__ pass: the verdict, its located rejection, and its diagnostics
+-- are three readings of the same decision, so a diagnostic can never explain a
+-- rejection the driver did not make.
+--
+-- That single-pass property is the whole reason this exists. The alternative —
+-- computing diagnostics from the input in a second traversal — either re-runs
+-- the checker (doubling the work the E1 bench measures) or reconstructs the
+-- decision independently and risks disagreeing with it.
+runCheckReported
+  :: CheckConfig
+  -> CheckInput
+  -> Prune
+  -> (Verdict, Maybe LocatedRejection, [String])
+runCheckReported cfg input pruned =
   let replayId = inputReplayId input
       verdict outcome = Verdict replayId outcome
    in case runtimeReplayFailure input of
         Just failure ->
           ( verdict (Reject (RejectClass R13))
           , Just (LocatedRejection (RejectClass R13) StageReplayPreflight (replayFailureConstituent failure))
+          , [replayFailureMessage failure]
           )
         Nothing
           | groupConflictRejectPrune pruned ->
               ( verdict (Reject (RejectClass R9))
               , Just (LocatedRejection (RejectClass R9) StageGroupBoundary (groupConflictConstituent pruned))
+              , maybe [] (: []) (groupConflictMessageWithPrune pruned)
               )
           | otherwise ->
               let checked = pruneChecked pruned
                in case checkUnitWith cfg (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
-                    Left err -> (verdict (Reject (rejectionOf err)), Just (locate err))
-                    Right accepted -> (verdict (buildAccept pruned accepted), Nothing)
+                    Left err ->
+                      ( verdict (Reject (rejectionOf err))
+                      , Just (locate err)
+                      , maybe [] (: []) (backendRejectionMessage err)
+                      )
+                    Right accepted -> (verdict (buildAccept pruned accepted), Nothing, [])
+
+-- | The one @stderr@ line explaining a __checker-side__ R13: the registered
+-- backend replayed the certificate and refused it, and this is the reason it
+-- gave. 'Nothing' for every other rejection class, and for the R13s raised by
+-- replay preflight before the checker runs ('replayFailureMessage' covers
+-- those).
+--
+-- Without this the only rejection produced by a registered backend was also the
+-- only one that said nothing: bare @(verdict … reject R13)@ on @stdout@ and an
+-- empty @stderr@, even though the adapter had a precise reason in hand. An
+-- author who trips @ord\@1@'s premise-only guard now reads @ord cites premise
+-- slots only; slot names theory entry 0@ instead of guessing.
+--
+-- __Why the Lean driver stays silent here.__ The two drivers reach the same
+-- acceptance set by different routes: the Haskell adapters enforce premise-only
+-- slots directly, while Lean's abstract @Backend@ core is handed a single
+-- context @Γ = Δ ++ T@ and cannot see @Δ.length@, so @buildRegistry@ gets the
+-- same effect by resolving a known digest to the empty theory. The two agree on
+-- every verdict, and would /not/ agree on the wording of a slot rejection.
+-- @scripts\/differential.sh@ byte-compares @stdout@ and the exit code on every
+-- anchor and leaves @stderr@ free except on the preflight and group-conflict
+-- anchors, whose templates are byte-identical by construction; this line is on
+-- neither. Making Lean reproduce these strings would mean widening the
+-- mechanized seam to carry prose, which buys nothing a proof depends on.
+backendRejectionMessage :: UnitError -> Maybe String
+backendRejectionMessage err = case err of
+  UEProgram (PERejection _ (CE_R13 _ (ReplayRejected (BackendId name) (TheoryDigest digest) ref reason)))
+    | not (null reason) ->
+        Just
+          ( "certificate replay: "
+              ++ name
+              ++ "@"
+              ++ show (certRefVersion ref)
+              ++ " (theory "
+              ++ digest
+              ++ ") rejected the certificate: "
+              ++ reason
+          )
+  _ -> Nothing
 
 -- | The located constituent of a replay-preflight (R13) failure: the
 -- backend-selection failures locate at the replay envelope (the ground truth
@@ -207,27 +302,6 @@ groupConflictMessageWithPrune pruned =
           ++ " report one cell with ≢ propositions and "
           ++ "the policy escalates conflicts to reject (§4.3)"
 
--- | The @stderr@ diagnostic lines a driver prints alongside the verdict, in
--- 'runCheck's precedence: a replay-preflight failure (R13) explains itself,
--- otherwise an escalated group conflict (R9) does. Empty for an accept or an
--- ordinary checker rejection (those carry their location in the verdict alone).
--- Centralizing the precedence here keeps both @.sexp@ and @.lara@ front doors
--- byte-identical on stderr.
-rejectionDiagnostics :: CheckInput -> [String]
-rejectionDiagnostics input =
-  rejectionDiagnosticsWithPrune input (prune (inputUnit input))
-
--- | The source-boundary diagnostic path over the exact prune already used by
--- 'runCheckWithPrune'. Keeping this internal prevents callers from pairing an
--- unrelated unit and prune while avoiding a second group-decision pass.
-rejectionDiagnosticsWithPrune :: CheckInput -> Prune -> [String]
-rejectionDiagnosticsWithPrune input pruned =
-  case runtimeReplayFailure input of
-    Just failure -> [replayFailureMessage failure]
-    Nothing
-      | groupConflictRejectPrune pruned -> maybe [] (: []) (groupConflictMessageWithPrune pruned)
-      | otherwise -> []
-
 -- | The certificate oracle from the wire @theories@ section over the fixed
 -- backend registry — @nd\@1@, @ra\@1@ and @ord\@1@ (Lean @buildRegistry@). A
 -- unit referencing any other backend falls through to certificate rejection.
@@ -241,11 +315,11 @@ buildCertOk :: [(TheoryDigest, [Prop])] -> CertOk
 buildCertOk theories cert as c = case cert of
   Cert (BackendId name) v _ payload ->
     case St.lookupBackend registry (St.BackendId name v) of
-      Nothing -> False
+      Nothing -> CertRejected ("no registered backend " ++ name ++ "@" ++ show v)
       Just backend ->
         case St.runBackend backend (toStrictDigest (certTheory cert)) as c payload of
-          Right _ -> True
-          Left _ -> False
+          Right _ -> CertAccepted
+          Left reason -> CertRejected reason
   where
     registry =
       St.mkRegistry [ND.mkNDBackend table, RA.mkRABackend table, Ord.mkOrdBackend table]

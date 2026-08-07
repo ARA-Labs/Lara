@@ -28,11 +28,16 @@
 --
 -- == Premise-only slots
 --
--- Unlike @ra\@1@'s free-context indexing (premises then theory entries), this
--- backend rejects any slot @>= nPrem@. On the raw @.sexp@ door the backend
+-- This backend rejects any slot @>= nPrem@. On the raw @.sexp@ door the backend
 -- theory table is built from the unit's own wire @theories@ section and replay
 -- preflight never validates its content, so a theory-entry slot would let an
 -- artifact cite a self-supplied, unattackable, non-leaf value.
+--
+-- @ra\@1@ originally indexed the whole free context (premises then theory
+-- entries) and has since been brought to the same rule, so the two
+-- rational-arithmetic backends share one trusted-base sentence. @nd\@1@ keeps
+-- free-context indexing, because its de Bruijn free variables are /meant/ to
+-- reach theory axioms.
 --
 -- That is precisely why the guard is load-bearing rather than free. A
 -- well-formed unit's @ord\@1@ theory is empty __by convention__ — the @.lara@
@@ -96,7 +101,7 @@ import Lara.Strict
   , SExpr (..)
   , TheoryDigest
   )
-import Lara.Strict.Cell (decodeSlot, parseDecimal, premiseCell)
+import Lara.Strict.Cell (decodeSlot, parseDecimal, premiseCell, renderDecimal)
 
 -- ---------------------------------------------------------------------------
 -- Backend formulas and certificates
@@ -196,6 +201,12 @@ holdsRel :: OrdRel -> Rational -> Rational -> Bool
 holdsRel OLt a b = a < b
 holdsRel OLe a b = a <= b
 
+-- | The mathematical symbol for a family member, for rejection messages only.
+-- The authored spelling stays 'ordPred'; this is prose, not wire syntax.
+relSymbol :: OrdRel -> String
+relSymbol OLt = "<"
+relSymbol OLe = "<="
+
 -- ---------------------------------------------------------------------------
 -- The registered adapter
 -- ---------------------------------------------------------------------------
@@ -229,13 +240,28 @@ mkOrdBackend theories =
           rightCell <- premiseCell rightP
           assert
             (leftCell == ordLeft goalO)
-            "left-cell premise does not match the goal's left numeral"
+            ( "left-cell premise does not match the goal's left numeral: premise "
+                ++ renderDecimal leftCell
+                ++ " vs goal "
+                ++ renderDecimal (ordLeft goalO)
+            )
           assert
             (rightCell == ordRight goalO)
-            "right-cell premise does not match the goal's right numeral"
+            ( "right-cell premise does not match the goal's right numeral: premise "
+                ++ renderDecimal rightCell
+                ++ " vs goal "
+                ++ renderDecimal (ordRight goalO)
+            )
           assert
             (holdsRel (ordRel goalO) (ordLeft goalO) (ordRight goalO))
-            "the claimed comparison does not hold"
+            ( "the claimed comparison does not hold: "
+                ++ renderDecimal (ordLeft goalO)
+                ++ " "
+                ++ relSymbol (ordRel goalO)
+                ++ " "
+                ++ renderDecimal (ordRight goalO)
+                ++ " is false"
+            )
           -- A same-slot certificate dedups to a single dependency.
           Right
             ( Set.fromList

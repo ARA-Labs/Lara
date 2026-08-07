@@ -15,12 +15,13 @@ module Lara.Driver
   , pruneChecked
   , groupConflictReject
   , groupConflictMessage
-  , rejectionDiagnostics
+  , backendRejectionMessage
   , buildCertOk
   , buildAccept
   , runCheck
   , runCheckLocated
   , runCheckLocatedWith
+  , runCheckLocatedReported
   ) where
 
 import Lara.Driver.Internal
@@ -37,9 +38,10 @@ import Lara.Driver.Internal
   , pruneWithPolicySeed
   , quarantineUnit
   , quarantinedLeaves
-  , rejectionDiagnostics
+  , backendRejectionMessage
   , runCheck
   , runCheckLocated
   , runCheckLocatedWith
+  , runCheckLocatedReported
   , supportUsesLeaf
   )

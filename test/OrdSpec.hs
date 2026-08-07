@@ -276,7 +276,9 @@ prop_ordSlotOutOfRangeRejected os =
 
 -- | §2.2, the premise-only guard: a slot naming a theory entry is rejected —
 -- even though this scenario's theory entry carries exactly the left cell, so
--- @ra\@1@-style free-context indexing would have resolved it and accepted.
+-- free-context indexing would have resolved it and accepted. @ra\@1@ now
+-- enforces the same rule (@prop_raTheorySlotRejected@); @nd\@1@ deliberately
+-- does not.
 prop_ordTheorySlotRejected :: OrdScenario -> Bool
 prop_ordTheorySlotRejected os =
   and

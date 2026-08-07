@@ -27,6 +27,8 @@ module Lara.SupportTerm
   , cnConclusion
     -- * The certificate oracle (Lean @certOkOf@)
   , CertOk
+  , CertOutcome (..)
+  , certAccepted
     -- * Located, symbolic diagnostics (Lean @Lara.Check.Error@)
   , CheckLoc (..)
   , ReferenceReason (..)
@@ -82,12 +84,43 @@ data SupportResult = SupportResult
   }
   deriving (Eq, Show)
 
+-- | The outcome of the certificate oracle: accepted, or rejected /with the
+-- backend's own reason/.
+--
+-- The oracle is 'Bool'-valued in the mechanization (Lean @certOkBOf@), and the
+-- checked graph still depends on nothing more than 'certAccepted' — every
+-- acceptance decision, and therefore every soundness statement, ranges over
+-- that projection alone. The reason rides alongside for one purpose: reaching
+-- the author. Before this, the one rejection class produced by a /registered/
+-- backend was also the only one that said nothing — bare @reject R13@ with
+-- empty @stderr@ — in a checker whose selling point is located rejections.
+data CertOutcome
+  = CertAccepted
+  | -- | The reason the backend adapter returned.
+    CertRejected String
+  deriving (Eq, Show)
+
+-- | The acceptance projection: the /only/ part of 'CertOutcome' the checked
+-- graph may consult, and exactly the old @Bool@ oracle.
+certAccepted :: CertOutcome -> Bool
+certAccepted CertAccepted = True
+certAccepted (CertRejected _) = False
+
 -- | The executable certificate-acceptance oracle (mirrors Lean @certOkBOf@ over
 -- a @BackendRegistry@): given the assurance's opaque certificate, the
 -- instantiated premise atoms @As@, and the conclusion @C@, decide replay. The
 -- checker never inspects the payload — it only calls this oracle (the factivity
 -- firewall). "Lara.Check.checkUnit" receives it as an input.
-type CertOk = Cert -> [Prop] -> Prop -> Bool
+--
+-- A 'CertOk' is a /pure function/, and that — not a call count — is what makes
+-- the reason trustworthy. 'assuranceOkB' branches on 'certAccepted'; on the
+-- error path 'assuranceError' applies the same oracle to the same @(cert, As,
+-- C)@ to recover the reason, so the two applications are the same value and a
+-- diagnostic cannot disagree with the decision it explains. That is why this is
+-- not a second evaluation /path/: there is one function, @Bool@ is its
+-- projection, and the diagnostic reads the other projection of the same result.
+-- (The cost is confined to the rejecting branch: an accepted step asks once.)
+type CertOk = Cert -> [Prop] -> Prop -> CertOutcome
 
 -- ---------------------------------------------------------------------------
 -- Located, symbolic diagnostics (Lean @lean/Lara/Check/Error.lean@)
@@ -149,10 +182,17 @@ data AssuranceReason
   deriving (Eq, Show)
 
 -- | R13 backend failures (Lean @BackendReason@).
+--
+-- 'ReplayRejected' carries the backend adapter's own reason string. It is a
+-- diagnostic payload only: 'Lara.Diagnostics.rejectionOf' maps every
+-- constructor here to the same wire class @R13@, so the string never reaches
+-- @stdout@ and the wire verdict is unchanged. The Lean @BackendReason@
+-- deliberately has no such field — see "Lara.Driver.Internal" for why the two
+-- drivers are allowed to differ here.
 data BackendReason
   = BackendMissing BackendId
   | DigestMissing BackendId TheoryDigest
-  | ReplayRejected BackendId TheoryDigest CertRef
+  | ReplayRejected BackendId TheoryDigest CertRef String
   deriving (Eq, Show)
 
 -- | The attack kinds, for R10\/R11 diagnostics (Lean @AttackKind@).
@@ -329,7 +369,7 @@ assuranceOkB certOk r as c a = case a of
   AssuranceNone -> ruleMode r == Defeasible
   AssuranceTrusted -> ruleMode r == Strict && ruleAllowTrusted r
   AssuranceCert cert@(Cert b v h _) ->
-    ruleMode r == Strict && certAllowed r b v h && certOk cert as c
+    ruleMode r == Strict && certAllowed r b v h && certAccepted (certOk cert as c)
 
 -- | Does a discharge conclusion answer its question's pattern? (Lean
 -- @answerOkB@). Unknown discharge keys are skipped here (Lean @knownAnswersOkB@):
@@ -407,24 +447,32 @@ answerError theta questions d results loc fallback =
         loc
         (AnswerInstantiation (headDefault (QuestionId "") (map fst d)) fallback)
 
-assuranceError :: CertOk -> Rule -> Assurance -> CheckLoc -> CheckError
-assuranceError _certOk r a loc = case a of
+assuranceError :: CertOk -> Rule -> [Prop] -> Prop -> Assurance -> CheckLoc -> CheckError
+assuranceError certOk r as c a loc = case a of
   AssuranceNone -> CE_R7 loc (WrongMode (ruleMode r) a)
   AssuranceTrusted ->
     if ruleMode r == Strict
       then CE_R7 loc TrustedDisallowed
       else CE_R7 loc (WrongMode (ruleMode r) a)
-  AssuranceCert (Cert b v h _) ->
+  AssuranceCert cert@(Cert b v h _) ->
     if ruleMode r /= Strict
       then CE_R7 loc (WrongMode (ruleMode r) a)
       else
         if not (certAllowed r b v h)
           then CE_R7 loc (CertifierUnallowlisted b h)
-          -- Backend resolution failures (R13) are only reachable through the
-          -- oracle, which erases its reason here; the checker reaches this
-          -- branch only when the oracle already rejected a certifier-allowed
-          -- certificate, i.e. a replay rejection.
-          else CE_R13 loc (ReplayRejected b h (CertRef b v h))
+          -- The checker reaches this branch only when the oracle already
+          -- rejected a certifier-allowed certificate, i.e. a replay rejection.
+          -- Re-asking the oracle on the identical arguments recovers the reason
+          -- it gave: 'CertOk' is a pure function and this is the same
+          -- application, so the reason cannot describe a different decision
+          -- than the one that sent us here — this is a second /application/,
+          -- never a second evaluation path. 'CertAccepted' is unreachable;
+          -- if it ever occurred, the honest thing is to say nothing rather than
+          -- invent a cause, so it maps to the empty reason.
+          else CE_R13 loc (ReplayRejected b h (CertRef b v h) (reasonOf (certOk cert as c)))
+  where
+    reasonOf CertAccepted = ""
+    reasonOf (CertRejected msg) = msg
 
 -- ---------------------------------------------------------------------------
 -- The executable checker (Lean @inferSupportRaw@ mutual block)
@@ -499,7 +547,7 @@ inferSupport pI gamma certOk = go
           (CE_R7 loc (QuestionsPresent dkeys hns))
         require
           (assuranceOkB certOk r as c a)
-          (assuranceError certOk r a loc)
+          (assuranceError certOk r as c a loc)
         pure
           ( SupportResult
               c

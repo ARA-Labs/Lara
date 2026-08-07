@@ -501,6 +501,15 @@ open Lara
 #print axioms Lara.Examples.ord_resolveTheory_unknown
 #print axioms Lara.Examples.ord_replay_context_is_premises
 #print axioms Lara.Examples.ord_models_context_is_premises
+
+-- The `ra@1` entry, on the same terms: the seam-wide premise-only parity
+-- decision means both rational-arithmetic backends resolve a known digest to
+-- the empty theory, so an accepted step is accountable to the premises alone.
+#print axioms Lara.Examples.registry_ra_registered
+#print axioms Lara.Examples.ra_resolveTheory_known
+#print axioms Lara.Examples.ra_resolveTheory_unknown
+#print axioms Lara.Examples.ra_replay_context_is_premises
+#print axioms Lara.Examples.ra_models_context_is_premises
 #print axioms Lara.Examples.registry_missing_bridge
 #print axioms Lara.Examples.registry_premises_before_theory
 #print axioms Lara.Examples.registry_fixed_theory_order

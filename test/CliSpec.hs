@@ -112,6 +112,113 @@ prop_cliReject = once $ ioProperty $ do
       , counterexample "stdout" (out === ("(verdict " ++ replayText ++ " reject missing-conflict)\n"))
       ]
 
+-- | A registered backend that replays and refuses says why, on stderr, while
+-- the wire verdict on stdout stays the bare class atom.
+--
+-- This is the rejection class that used to be silent: @reject R13@ with an
+-- empty stderr, in a checker built around located rejections. Both halves are
+-- pinned — the reason text (so the channel cannot regress to silence) and the
+-- stdout bytes (so the diagnostic cannot leak onto the wire).
+prop_cliBackendRejectionReason :: Property
+prop_cliBackendRejectionReason = once $ ioProperty $ do
+  let fixture = "fixtures/corpus/ord-premise-only-reject.sexp"
+  replayText <- fixtureReplayText fixture
+  (code, out, err) <- runLara ["check", fixture]
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitFailure 1)
+      , counterexample "stdout" (out === ("(verdict " ++ replayText ++ " reject R13)\n"))
+      , counterexample "stderr names the backend and its reason" $
+          err
+            === "certificate replay: ord@1 (theory t0) rejected the certificate: \
+                \ord cites premise slots only; slot names theory entry 0\n"
+      ]
+
+-- | The value-carrying half: a cell comparison that fails names the offending
+-- numerals in the author's own notation, not as @Rational@ 'show' output.
+prop_cliBackendRejectionValues :: Property
+prop_cliBackendRejectionValues = once $ ioProperty $ do
+  (_, _, err) <- runLara ["check", "fixtures/corpus/ord-lt-boundary-reject.sexp"]
+  pure $
+    counterexample "stderr carries the compared values" $
+      err
+        === "certificate replay: ord@1 (theory t0) rejected the certificate: \
+            \the claimed comparison does not hold: 5 < 5 is false\n"
+
+-- | The same stderr line on the __@.lara@ front door__.
+--
+-- The two doors reach 'Lara.Driver.runCheckLocatedReported' by different routes
+-- — the raw door with the ordinary group-only prune, the source door with
+-- 'Lara.Elaborate.prepareSource'\'s source-boundary prune — so the two fixtures
+-- above pin only the raw one. This is the author-facing door, and the diagnostic
+-- exists for authors.
+--
+-- The artifact is S3 with its conclusion strengthened from @num_le@ to
+-- @num_lt@, which is the boundary @examples\/S3\/example.lara@ names in prose:
+-- the same certificate over the same two equal cells now replays false. The
+-- @stdout@ verdict is again the bare class atom, so the reason cannot leak onto
+-- the wire on this door either.
+prop_cliLaraBackendRejectionReason :: Property
+prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
+  withTempLaraDir ltTieProgram [("p.policy.lara", ltTiePolicy)] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 1)
+        , counterexample "stdout carries the bare class, not the reason" $
+            out
+              === ( "(verdict (replay-id (core lara-core@0.1) (policy p)"
+                      ++ " (backends (backend ord 1)) (theories sha256:t0)"
+                      ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
+                      ++ " reject R13)\n"
+                  )
+        , counterexample "stderr carries the backend's own reason" $
+            err
+              === "certificate replay: ord@1 (theory sha256:t0) rejected the certificate: \
+                  \the claimed comparison does not hold: 0.71 < 0.71 is false\n"
+        ]
+
+-- | S3's artifact against a @num_lt@ rule: two equal reported cells, and a
+-- strict step asking @ord\@1@ to certify that one is strictly below the other.
+ltTieProgram :: String
+ltTieProgram =
+  unlines
+    [ "artifact ord_tie_demo at sha256:5353535353535353535353535353535353535353535353535353535353535353"
+    , "policy p"
+    , "use backends [ord@1]"
+    , "claim c2"
+    , "  nl      = \"The reported baseline accuracy is below the reported system accuracy\""
+    , "  formal  = num_lt(0.71, 0.71)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , "leaf e1 : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))"
+    , "  kind       = observed"
+    , "  provenance = ai-executed"
+    , "  refs       = [evidence/tables/accuracy.md#row=sys_base]"
+    , "leaf e2 : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.71))"
+    , "  kind       = observed"
+    , "  provenance = ai-executed"
+    , "  refs       = [evidence/tables/accuracy.md#row=sys_new]"
+    , "arg a1 : supports(c2) by beats_recheck(sys_new, sys_base, accuracy, imagenet_val, exp1, 0.71, 0.71)"
+    , "  assurance = cert(ord@1, sha256:t0, (ordcmp (prem 0) (prem 1)))"
+    , "status c2"
+    ]
+
+-- | S3's policy with @num_le@ replaced by @num_lt@ — the one edit that turns an
+-- accepting artifact into a rejecting one.
+ltTiePolicy :: String
+ltTiePolicy =
+  unlines
+    [ "policy p"
+    , "rule beats_recheck(S, B, Q, D, Exp, Sv, Bv)"
+    , "  mode       = strict"
+    , "  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),"
+    , "                 reports(Exp, score_cell(S, Q, D, Sv)) ]"
+    , "  conclusion = num_lt(Bv, Sv)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:t0) ]"
+    , "theory sha256:t0 = []"
+    ]
+
 -- | codec error (a well-formed file with malformed wire text): exit 2, nothing
 -- on stdout (the located message goes to stderr).
 prop_cliCodecError :: Property
@@ -476,6 +583,9 @@ cliSpecProps :: [(String, IO Result)]
 cliSpecProps =
   [ ("cli accept exit 0 + bytes", quickCheckResult prop_cliAccept)
   , ("cli reject exit 1 + bytes", quickCheckResult prop_cliReject)
+  , ("cli backend rejection reason on stderr", quickCheckResult prop_cliBackendRejectionReason)
+  , ("cli backend rejection names the values", quickCheckResult prop_cliBackendRejectionValues)
+  , ("cli .lara backend rejection reason on stderr", quickCheckResult prop_cliLaraBackendRejectionReason)
   , ("cli codec error exit 2", quickCheckResult prop_cliCodecError)
   , ("cli unreadable file exit 2", quickCheckResult prop_cliUnreadable)
   , ("cli usage exit 2", quickCheckResult prop_cliUsage)

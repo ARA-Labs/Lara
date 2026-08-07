@@ -37,7 +37,7 @@ import Lara.Grounded
 import Lara.Policy (lookupRule)
 import Lara.Prop (Prop (..))
 import Lara.Reporting
-import Lara.SupportTerm (CertOk, CheckedNode, cnConclusion)
+import Lara.SupportTerm (CertOk, CertOutcome (..), CheckedNode, cnConclusion)
 
 -- ---------------------------------------------------------------------------
 -- Shared vocabulary
@@ -101,7 +101,7 @@ gamma l = lookup l leavesGamma
 
 -- | No strict rule appears, so the certificate oracle is never consulted.
 noCert :: CertOk
-noCert _ _ _ = False
+noCert _ _ _ = CertRejected "no certificate oracle in this fixture"
 
 -- | Assemble a unit over @[r1, r2]@ with the shared leaf context, given
 -- arguments, attacks, and queries.

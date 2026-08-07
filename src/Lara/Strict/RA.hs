@@ -21,6 +21,17 @@
 -- payload carrying a different value is a replay rejection (R13), not a decode
 -- error.
 --
+-- == Premise-only slots
+--
+-- Slots name premises and nothing else: a slot at or beyond the premise count
+-- is rejected, exactly as in @ord\@1@. Both rational-arithmetic backends
+-- therefore share one trusted-base sentence — every certificate-consulted cell
+-- traces to a consulted premise, hence to a leaf, hence to the attack and
+-- admission layers. The Lean counterpart reaches the same acceptance set from
+-- the other side: @Lara.Driver.buildRegistry@ resolves any /known/ @ra\@1@ or
+-- @ord\@1@ digest to @[]@, so there the consulted context genuinely is the
+-- premises alone.
+--
 -- == The premise-cell convention
 --
 -- A consulted premise must contain __exactly one__ numeric literal anywhere in
@@ -68,6 +79,7 @@ import Lara.Strict.Cell
   , parseCanonicalNat
   , parseDecimal
   , premiseCell
+  , renderDecimal
   )
 
 -- ---------------------------------------------------------------------------
@@ -85,13 +97,11 @@ data RAGoal = RAGoal
   }
   deriving (Eq, Show)
 
--- | A rational-arithmetic certificate: which free-context slots carry the two
--- cells, and the claimed drop as an exact fraction in lowest terms. Slots
--- index the full consulted context — premises followed by theory entries —
--- exactly like @nd\@1@'s de Bruijn free variables.
+-- | A rational-arithmetic certificate: which __premise__ slots carry the two
+-- cells, and the claimed drop as an exact fraction in lowest terms.
 data RACert = RACert
-  { raFullSlot :: Int -- ^ free-context slot of the full cell
-  , raAblatedSlot :: Int -- ^ free-context slot of the ablated cell
+  { raFullSlot :: Int -- ^ premise slot of the full cell
+  , raAblatedSlot :: Int -- ^ premise slot of the ablated cell
   , raWitness :: Rational -- ^ the claimed drop, @P \/ Q@ in lowest terms
   }
   deriving (Eq, Show)
@@ -176,11 +186,26 @@ checkDrop :: RAGoal -> Rational -> Either String ()
 checkDrop goal witness
   | raFull goal == 0 = Left "full cell is zero: relative drop undefined"
   | recomputed /= witness =
-      Left "witness fraction does not equal the recomputed relative drop"
+      Left
+        ( "witness fraction does not equal the recomputed relative drop: witness "
+            ++ renderDecimal witness
+            ++ " vs recomputed "
+            ++ renderDecimal recomputed
+        )
   | witness /= raClaimed goal =
-      Left "witness fraction does not equal the claimed drop in the goal"
+      Left
+        ( "witness fraction does not equal the claimed drop in the goal: witness "
+            ++ renderDecimal witness
+            ++ " vs goal "
+            ++ renderDecimal (raClaimed goal)
+        )
   | raClaimed goal < raThreshold goal =
-      Left "claimed drop does not clear the threshold"
+      Left
+        ( "claimed drop does not clear the threshold: claimed "
+            ++ renderDecimal (raClaimed goal)
+            ++ " < threshold "
+            ++ renderDecimal (raThreshold goal)
+        )
   | otherwise = Right ()
   where
     recomputed = (raFull goal - raAblated goal) / raFull goal
@@ -195,9 +220,10 @@ raBackendId = BackendId {backendName = "ra", backendVersion = 1}
 
 -- | Build the adapter with a __fixed__ theory table ('Lara.Strict.ND.mkNDBackend'
 -- discipline: closed registration, digest selection only). The theory entries
--- are never consulted — the certified identity is pure arithmetic — so an
--- accepted certificate reports only 'PremiseSlot' dependencies; an unknown
--- digest is still a rejection, mirroring @nd\@1@.
+-- are never consulted — the certified identity is pure arithmetic, and since
+-- the premise-only guard below refuses to cite them they are not reachable as
+-- cells either — so an accepted certificate reports only 'PremiseSlot'
+-- dependencies; an unknown digest is still a rejection, mirroring @nd\@1@.
 mkRABackend :: [(TheoryDigest, [Prop])] -> Backend
 mkRABackend theories =
   Backend
@@ -212,33 +238,55 @@ mkRABackend theories =
         Just theoryProps -> do
           cert <- decodeCert certSExpr
           goalR <- parseGoal goal
-          let free = premises ++ theoryProps
-              nPrem = length premises
-              slot i =
-                if i >= 0 && i < length free
-                  then Right (free !! i)
-                  else Left ("free-context slot out of range: " ++ show i)
-          fullP <- slot (raFullSlot cert)
-          ablatedP <- slot (raAblatedSlot cert)
+          fullP <- resolve theoryProps (raFullSlot cert)
+          ablatedP <- resolve theoryProps (raAblatedSlot cert)
           fullCell <- premiseCell fullP
           ablatedCell <- premiseCell ablatedP
           assert
             (fullCell == raFull goalR)
-            "full-cell premise does not match the goal's full cell"
+            ( "full-cell premise does not match the goal's full cell: premise "
+                ++ renderDecimal fullCell
+                ++ " vs goal "
+                ++ renderDecimal (raFull goalR)
+            )
           assert
             (ablatedCell == raAblated goalR)
-            "ablated-cell premise does not match the goal's ablated cell"
+            ( "ablated-cell premise does not match the goal's ablated cell: premise "
+                ++ renderDecimal ablatedCell
+                ++ " vs goal "
+                ++ renderDecimal (raAblated goalR)
+            )
           checkDrop goalR (raWitness cert)
           Right
             ( Set.fromList
-                [ toDependency nPrem (raFullSlot cert)
-                , toDependency nPrem (raAblatedSlot cert)
+                [ PremiseSlot (raFullSlot cert)
+                , PremiseSlot (raAblatedSlot cert)
                 ]
             )
       where
-        assert cond msg = if cond then Right () else Left msg
+        nPrem = length premises
 
-    toDependency :: Int -> Int -> Dependency
-    toDependency nPrem i
-      | i < nPrem = PremiseSlot i
-      | otherwise = TheoryEntry (i - nPrem)
+        -- Premise-only slot resolution, identical in shape and message to
+        -- @ord\@1@'s (see "Lara.Strict.Ord" §"Premise-only slots"): a slot
+        -- naming a theory entry is rejected outright, so every compared cell
+        -- traces to a consulted premise.
+        --
+        -- Until the seam-wide decision this backend indexed the /free context/
+        -- @premises ++ theory@, so on the raw @.sexp@ door — where the wire
+        -- @theories@ section is passed straight through and preflight never
+        -- validates its content — an artifact could self-supply the cell it
+        -- then certified against. That was not a soundness bug (@ra\@1@ never
+        -- claimed premise-backing) but it was the one path by which a
+        -- certificate-consulted value bypassed the leaf\/admission layer, and
+        -- it made the trusted-base story differ between two sibling
+        -- rational-arithmetic backends. It is now uniform.
+        resolve theoryProps i
+          | i >= 0 && i < nPrem = Right (premises !! i)
+          | i >= nPrem && i < nPrem + length theoryProps =
+              Left
+                ( "RA cites premise slots only; slot names theory entry "
+                    ++ show (i - nPrem)
+                )
+          | otherwise = Left ("premise slot out of range: " ++ show i)
+
+        assert cond msg = if cond then Right () else Left msg

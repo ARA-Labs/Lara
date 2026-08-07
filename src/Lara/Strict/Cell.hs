@@ -50,11 +50,12 @@ module Lara.Strict.Cell
   , parseCanonicalNat
   , parseCanonicalInt
   , parseDecimal
+  , renderDecimal
     -- * The premise-cell convention
   , premiseCell
   ) where
 
-import Data.Ratio ((%))
+import Data.Ratio (denominator, numerator, (%))
 
 import Lara.Prop (Prop (..), Term (..), nf)
 import Lara.Strict (SExpr (..))
@@ -132,6 +133,51 @@ parseUnsigned s =
               fracDigits = read fracPart :: Integer
           Just (fromInteger n + fracDigits % scale)
     _ -> Nothing
+
+-- | Render an exact rational back into the canonical decimal grammar
+-- 'parseDecimal' accepts, so a rejection message can name the offending value.
+--
+-- By the time a backend's cell comparison fails, both sides are 'Rational';
+-- @show@ would print @71 % 100@, which is not the numeral the author wrote.
+-- On the terminating-decimal subset — which is exactly the image of
+-- 'parseDecimal', so exactly where these messages live — this is its inverse:
+-- @parseDecimal (renderDecimal r) == Just r@ (pinned by
+-- @prop_cellDecimalRoundTrip@).
+--
+-- A rational with any other prime in its denominator has no finite decimal
+-- expansion and cannot have come from 'parseDecimal'. Rather than lie by
+-- truncating, this falls back to the exact @p\/q@ form: the function stays
+-- total and no message ever displays a rounded number.
+renderDecimal :: Rational -> String
+renderDecimal r
+  | r < 0 = '-' : renderUnsigned (negate r)
+  | otherwise = renderUnsigned r
+
+renderUnsigned :: Rational -> String
+renderUnsigned r =
+  case decimalScale (denominator r) of
+    Nothing -> show (numerator r) ++ "/" ++ show (denominator r)
+    Just k ->
+      let pow = 10 ^ k :: Integer
+          -- Exact: decimalScale returned k only because the denominator
+          -- divides 10^k, so this division has no remainder.
+          scaled = numerator r * pow `div` denominator r
+          (whole, frac) = scaled `divMod` pow
+          padded = replicate (k - length (show frac)) '0' ++ show frac
+          fracPart = reverse (dropWhile (== '0') (reverse padded))
+       in if null fracPart then show whole else show whole ++ "." ++ fracPart
+
+-- | The smallest @k@ with @d@ dividing @10^k@, or 'Nothing' when no such @k@
+-- exists (the expansion does not terminate). @d@ is a lowest-terms
+-- denominator, hence positive.
+decimalScale :: Integer -> Maybe Int
+decimalScale = go 0 0
+  where
+    go twos fives d
+      | d == 1 = Just (max twos fives)
+      | d `mod` 2 == 0 = go (twos + 1) fives (d `div` 2)
+      | d `mod` 5 == 0 = go twos (fives + 1) (d `div` 5)
+      | otherwise = Nothing
 
 -- ---------------------------------------------------------------------------
 -- The premise-cell convention
