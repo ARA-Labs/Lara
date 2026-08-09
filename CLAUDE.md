@@ -32,9 +32,17 @@ depends on surface syntax. Concretely:
 
 ## ARA: agent-native research artifacts
 This project uses ARA (https://github.com/ARA-Labs/Agent-Native-Research-Artifact).
-Route research work to the matching ARA skill:
-- At the END of every research or coding session → run `/research-manager` to
-  capture decisions, experiments, dead ends, and claims into the `ara/` artifact.
+Update `ara/` and run `/research-manager` only when a session:
+- introduces a new feature or materially changes an existing feature, design, or theory; or
+- runs or interprets an experiment.
+
+Do not update `ara/` or run `/research-manager` for routine next-step guidance,
+PR reviews, or review/request-change resolution unless that work crosses one of
+the thresholds above.
+
+Route qualifying research work to the matching ARA skill:
+- At the END of a qualifying session → run `/research-manager` to capture the
+  feature/design/theory change or experiment in the `ara/` artifact.
 - When turning an existing paper, repo, or notes into a structured artifact →
   run `/compiler <path>`.
 - Before trusting, publishing, or submitting an artifact → run `/rigor-reviewer <dir>`.
