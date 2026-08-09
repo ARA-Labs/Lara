@@ -1185,3 +1185,28 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O58
+  timestamp: "2026-08-09T00:56"
+  provenance: user-revised
+  content: >
+    The paper should receive a focused presentation-layer synchronization after
+    PR #92: distinguish lara-syntax@0.3 elaboration from the frozen
+    lara-core@0.1 AST and checker anchor; state that cell interpolation removes
+    numeric transcription drift without verifying the prose-to-formal binding;
+    replace the S4 appendix's hand-written comparison expansion with the merged
+    comparison block and named binding-premise path; update the worked-example,
+    property, and positive-differential counts; and mention the unnumbered Lean
+    direction-of-goodness contract while preserving the verified-versus-
+    validated boundary. G1-G6, byte-level core behavior, frozen corpus outcomes,
+    and core performance do not change because S2/S3/S4 remain byte-identical
+    after elaboration.
+  context: >
+    Code-paper audit requested after PR #92 merged; user approved the sync
+    ('do these revisions?') and the eight-file paper edit was applied.
+  potential_type: constraint
+  bound_to: [N140, N141]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md (Surface/core boundary bullet)"
+  crystallized_via: verbal-affirmation + artifact-commitment
+  stale: false

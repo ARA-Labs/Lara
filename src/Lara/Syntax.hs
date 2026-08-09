@@ -83,6 +83,7 @@ module Lara.Syntax
   , printSource
   , printProgram
   , printPolicy
+  , printProp
     -- * Surface spellings of the @lara-syntax\@0.3@ closed vocabularies
     --
     -- | The @toString@ half of the single table each closed tag has here

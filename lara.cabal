@@ -64,6 +64,7 @@ library
                       Lara.Mutate.Accept
                       Lara.Measure
                       Lara.ClaimSupport
+                      Lara.AtomicWrite
                       Lara.ClaimSupport.Load
                       Lara.MechReview
                       Lara.MechReview.Load
@@ -71,6 +72,9 @@ library
                       Lara.WorkedExamples
     build-depends:    base >=4 && <5
                     , containers
+                    , directory
+                    , filepath
+                    , unix
     default-language: GHC2021
 
 executable lara
@@ -121,6 +125,7 @@ test-suite lara-test
                     , directory
                     , filepath
                     , process
+                    , unix
                     , QuickCheck
     build-tool-depends: lara:lara
     default-language: GHC2021

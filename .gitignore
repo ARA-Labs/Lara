@@ -26,3 +26,5 @@ __pycache__/
 .worktrees/
 measurements/*
 !measurements/frozen/
+!measurements/binding-audit/
+!measurements/binding-audit/**

@@ -3483,3 +3483,169 @@ tree:
   - scripts/admission-differential.sh
   also_depends_on: [N137, N138]
   status: resolved
+
+- id: N140
+  type: question
+  title: "Which paper sections must change after lara-syntax@0.3 merged?"
+  provenance: user
+  timestamp: "2026-08-09T00:56"
+  description: >
+    Assess merged PR #92 against the current Overleaf paper and distinguish
+    required paper-facing updates from frozen-core results that remain valid.
+  status: resolved
+  also_depends_on: [N139]
+
+- id: N141
+  type: experiment
+  title: "Post-merge PR #92 code-paper synchronization audit"
+  provenance: ai-executed
+  timestamp: "2026-08-09T00:56"
+  result: >
+    The merged checkout passes the full Haskell suite, Lean build and standard-
+    trio axiom audit, and the Haskell-Lean differential at 446/446 behavioral
+    and 54/54 codec-negative anchors. The committed measurement aggregate
+    remains 429/429 for class and Lean agreement. The suite now registers 278
+    Haskell properties and ships 21 worked-example programs. The paper still
+    said 260 properties, 20 worked examples, and 445 positive differential
+    anchors, and its S4 appendix listing showed the hand-written pre-@0.3
+    expansion rather than the merged comparison block and named binding path.
+  evidence:
+  - https://github.com/EYH0602/lara/pull/92
+  - test/Spec.hs
+  - scripts/differential.sh
+  - measurements/report.json
+  - examples/S4/example.lara
+  - examples/S5/example.lara
+  - lean/Lara/Comparison.lean
+  - lean/Lara/Presentation.lean
+  also_depends_on: [N140, N139]
+  status: resolved
+
+- id: N142
+  type: decision
+  title: "Approved the focused paper sync"
+  provenance: user
+  timestamp: "2026-08-09T01:05"
+  choice: >
+    Apply the surface-layer synchronization to the Overleaf paper: distinguish
+    lara-syntax@0.3 elaboration from the frozen lara-core@0.1 boundary, add
+    cell interpolation and the direction-of-goodness contract, replace the S4
+    listing, and update conformance counts.
+  alternatives:
+  - "Leave the paper unchanged (rejected: stale counts and pre-@0.3 listing)."
+  - "Rewrite core claims (rejected: byte-identity means core results are unaffected)."
+  status: resolved
+  also_depends_on: [N141]
+
+- id: N143
+  type: experiment
+  title: "Applied the approved paper sync and verified the build"
+  provenance: ai-executed
+  timestamp: "2026-08-09T01:20"
+  result: >
+    Eight files edited in the Overleaf checkout: language.tex (front-end
+    boundary, {cell} interpolation, lara-core@0.1 labels), metatheory.tex
+    (result-12 precision, transposed-operands polarity contract), evaluation.tex
+    (40-file/20k-line Lean tree wording, 278 properties, 446/446, 21 worked
+    examples, comparison-block and S5 sentences), appendix.tex (S4 listing
+    rewritten to the @0.3 comparison block with a2.binding.leaf), main.tex
+    (highlighting keywords), casestudy.tex (21), semantics.tex (version),
+    tables/mechanization.tex (result-12 row). latexmk builds 35 pages with no
+    new errors or overfull boxes; pdftotext confirms every edited string is in
+    the PDF; the S4 listing page's max word right-edge is 441 of 486 pt.
+  evidence:
+  - "src/language.tex"
+  - "src/metatheory.tex"
+  - "src/evaluation.tex"
+  - "src/appendix.tex"
+  - "main.tex"
+  - "build/main.pdf"
+  also_depends_on: [N142]
+  status: resolved
+
+- id: N144
+  type: decision
+  title: "Lock the binding-audit worklist engineering design"
+  provenance: user-revised
+  timestamp: "2026-08-09T11:43"
+  choice: >
+    Keep issue #87 Step 0 reporting-only. Derive the exact 38-row role-aware
+    worklist from the existing claim-support projection; use checked
+    unitAttacks endpoints for attack roles and parsed .lara declarations for
+    human-facing leaf/claim fields; retain one manifest-driven generator; force
+    all renderings before writes; atomically replace only the worklist; and pin
+    exact row order, every current attack context, reachable drift failures,
+    TSV edge cases, and the reviewed path allowlist.
+  alternatives:
+  - "Add a second local claim-formal validator (rejected: duplicates the byte-exact corpus freshness boundary)."
+  - "Add a worklist-only mode or separate generator (rejected: splits one manifest-driven reporting pass)."
+  - "Keep unconditional restore, lazy write ordering, representative-only negatives, and a directory blacklist (rejected: avoidable loss and drift risks)."
+  evidence:
+  - plans/2026-08-09-binding-audit-worklist.md
+  - https://github.com/EYH0602/lara/issues/87
+  status: resolved
+
+- id: N145
+  type: experiment
+  title: "Engineering review cleared the binding-audit worklist plan"
+  provenance: ai-executed
+  timestamp: "2026-08-09T11:43"
+  result: >
+    FULL_REVIEW found nine architecture, code-quality, test, and operational
+    issues; all accepted changes were folded into the plan. The independent
+    outside review found seven additional concerns: five were folded and two
+    were rejected with explicit rationale. The terminal report records zero
+    unresolved decisions and emits five implementation tasks. No production
+    code or behavioral test was run in this plan-only review.
+  evidence:
+  - plans/2026-08-09-binding-audit-worklist.md#GSTACK-REVIEW-REPORT
+  also_depends_on: [N144]
+  status: resolved
+
+
+- id: N146
+  type: decision
+  title: "Manifest order governs the binding-audit attack-context regression"
+  provenance: ai-executed
+  timestamp: "2026-08-09T19:29"
+  choice: >
+    Preserve the worklist's manifest order when the plan's illustrative
+    expectedAttackContexts list disagreed with the current corpus manifest. The
+    implemented regression therefore orders the three attack rows as fre.C04,
+    test-time-model-adaptation.C04, and rebench-triton_cumsum.C09. This follows
+    the plan's global ordering invariant and keeps the ordered audit projection
+    identical to urLoadBearing rather than sorting a special-case assertion.
+  alternatives:
+  - "Follow the illustrative list literally (rejected: it puts the rebench row before an earlier paperbench row and contradicts the approved global invariant)."
+  evidence:
+  - corpus-units/MANIFEST.tsv
+  - test/ClaimSupportSpec.hs
+  - plans/2026-08-09-binding-audit-worklist.md
+  also_depends_on: [N144, N145]
+  status: resolved
+
+- id: N147
+  type: experiment
+  title: "Implemented and verified the deterministic 38-row binding-audit worklist"
+  provenance: ai-executed
+  timestamp: "2026-08-09T19:29"
+  result: >
+    Three reviewed commits implemented the role-aware projection, canonical TSV
+    renderer, and safe generator. The committed worklist has 38 unique rows in
+    manifest/dependency order: 20 attested, 18 observed, 35 support, 3 attack,
+    and 38 ai-executed; every formal target, role, claim ID, and claim text cell
+    is populated. Each task passed independent specification and code-quality
+    review. cabal build all and cabal test all --test-show-details=direct passed;
+    the generator was rerun idempotently; exact worklist freshness and existing
+    frozen claim-support guards passed; and the branch scope/protected-directory
+    checks were empty. No checker, frozen corpus, fixture, Lean, wire, replay, or
+    paper input changed.
+  evidence:
+  - src/Lara/ClaimSupport.hs
+  - src/Lara/Syntax.hs
+  - scripts/claim-support.hs
+  - test/ClaimSupportSpec.hs
+  - measurements/binding-audit/worklist.tsv
+  - "commits: 54cf2a9, ef84af7, 3658b06"
+  also_depends_on: [N144, N145, N146]
+  status: resolved

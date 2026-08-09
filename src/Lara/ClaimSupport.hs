@@ -1,7 +1,7 @@
 -- | Corpus claim-support aggregation (#56): the pure metrics behind
 -- @scripts\/claim-support.hs@, a deterministic descriptive pass over the frozen
 -- 60 corpus units that emits the four numbers the paper's /Claim-support
--- outcomes/ paragraph cites.
+-- outcomes/ paragraph cites and derives a role-aware binding-audit projection.
 --
 -- This is a REPORTING projection of the T3 decode\/run core, not new metatheory
 -- (the checker theorems it rests on are already proven): each unit is decoded
@@ -38,13 +38,19 @@ module Lara.ClaimSupport
     isPaperAnchorRef
   , leafPaperAnchored
     -- * Per-unit record
+  , BindingAuditRole (..)
+  , BindingAuditRow (..)
   , LeafFact (..)
   , UnitRecord (..)
+  , urLoadBearing
   , computeUnit
     -- * Aggregate
   , ClaimSupportReport (..)
   , aggregate
     -- * Rendering
+  , bindingAuditTsv
+  , bindingAuditPath
+  , bindingAuditTsvHeader
   , claimSupportJson
   , claimSupportTsv
   , claimSupportTsvHeader
@@ -61,6 +67,7 @@ import Lara.AST
   , ArgId
   , Assurance (..)
   , Attack (..)
+  , Claim (..)
   , Decl (..)
   , Label (..)
   , Leaf (..)
@@ -68,6 +75,7 @@ import Lara.AST
   , LeafKind (..)
   , Mode (..)
   , Program (..)
+  , PropId (..)
   , Provenance (..)
   , RuleId
   , SourceRef (..)
@@ -78,6 +86,8 @@ import Lara.AST
 import Lara.ExpectedJson (JValue (..), renderJson)
 import Lara.Measure (EnvBlock (..))
 import Lara.Replay (CheckInput (..))
+import Lara.Prop (Prop)
+import Lara.Syntax (printProp)
 import Lara.SupportTerm (leaves)
 import Lara.Wire (Outcome (..), Verdict (..), conditionalStatus, isPublished)
 
@@ -140,21 +150,43 @@ isPrefixCI (a : as) (b : bs) = toLower a == toLower b && isPrefixCI as bs
 -- Per-unit record
 -- ---------------------------------------------------------------------------
 
--- | One leaf's reported attributes (number 2): its declared 'Provenance', its
--- 'LeafKind', and whether it is anchored to a direct paper-document locator.
+-- | One leaf's reported attributes (number 2): its declared 'Provenance',
+-- 'LeafKind', paper anchoring, and source refs.
 data LeafFact = LeafFact
   { lfId :: LeafId
   , lfProvenance :: Provenance
   , lfKind :: LeafKind
   , lfPaperAnchored :: Bool
+  , lfRefs :: [SourceRef]
   }
   deriving (Eq, Show)
 
--- | Everything one corpus unit contributes to the four numbers.
+-- | Whether a load-bearing leaf supports a claim or attacks one of its
+-- supporting arguments.
+data BindingAuditRole = AuditSupport | AuditAttack
+  deriving (Eq, Ord, Show)
+
+-- | One role-aware binding-audit row. The formal target is the checked core
+-- proposition, accepted only after exact comparison with the surface leaf;
+-- human-facing claim context and leaf metadata come from the surface program.
+data BindingAuditRow = BindingAuditRow
+  { barLeaf :: LeafFact
+  , barFormalTarget :: Prop
+  , barRole :: BindingAuditRole
+  , barClaimId :: PropId
+  , barClaimNl :: String
+  }
+  deriving (Eq, Show)
+
+data AuditContext = AuditContext BindingAuditRole Claim
+  deriving (Eq, Show)
+
+-- | Everything one corpus unit contributes to the four numbers and the
+-- role-aware binding-audit projection.
 data UnitRecord = UnitRecord
   { urName :: String
   , urStatuses :: [Status] -- ^ per requested claim (corpus units: one)
-  , urLoadBearing :: [LeafFact] -- ^ leaves of @in@-labelled support args (number 2)
+  , urBindingAuditRows :: [BindingAuditRow] -- ^ source of both load-bearing facts and audit rows
   , urAllLeaves :: [LeafFact] -- ^ every declared leaf (context)
   , urTypedAttacks :: Int -- ^ declared typed attacks, all valid on accept (number 3)
   , urDeadEndAttacks :: Int -- ^ subset sourced at an exploration dead end (number 3)
@@ -163,6 +195,11 @@ data UnitRecord = UnitRecord
   , urStrictFlavored :: Bool -- ^ documented @strict_certifier@ header (context; set by IO)
   }
   deriving (Eq, Show)
+
+-- | Load-bearing leaf facts, derived from the audit rows so aggregate and
+-- worklist deliverables cannot disagree in count, order, or leaf metadata.
+urLoadBearing :: UnitRecord -> [LeafFact]
+urLoadBearing = map barLeaf . urBindingAuditRows
 
 -- | Compute one unit's contribution. @ruleModeOf@ resolves a support term's
 -- 'RuleId' to its policy 'Mode' (built once from the shared policy); @flavored@
@@ -192,7 +229,7 @@ computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
       UnitRecord
         { urName = name
         , urStatuses = map (conditionalStatus . snd) statuses
-        , urLoadBearing = map leafFact loadBearingLeafIds
+        , urBindingAuditRows = map bindingAuditRow loadBearingLeafIds
         , urAllLeaves = map leafFactFromLeaf surfaceLeaves
         , urTypedAttacks = length attacks
         , urDeadEndAttacks = length (filter deadEndSourced attacks)
@@ -213,20 +250,140 @@ computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
 
         surfaceLeaves = [l | DeclLeaf l <- programDecls prog]
         surfaceArgs = [a | DeclArg a <- programDecls prog]
+        surfaceClaims = [c | DeclClaim c <- programDecls prog]
         leafById lid = lookup lid [(leafId l, l) | l <- surfaceLeaves]
+        corePropById lid = lookup lid (unitLeaves unit)
+
+        -- A load-bearing core leaf id with no matching surface declaration, or
+        -- with a different proposition, means the checked core and the @.lara@
+        -- surface have drifted apart. Fail instead of emitting an unaudited
+        -- formula.
+        requireLeaf lid =
+          case leafById lid of
+            Just leaf -> leaf
+            Nothing ->
+              error
+                ( "claim-support: core leaf " ++ show lid
+                    ++ " missing from surface decls in unit " ++ name
+                )
+
+        requireCoreProp lid =
+          case corePropById lid of
+            Just prop -> prop
+            Nothing ->
+              error
+                ( "claim-support: core leaf " ++ show lid
+                    ++ " missing from checked unit " ++ name
+                )
+
+        checkedFormalTarget lid leaf =
+          let coreProp = requireCoreProp lid
+           in if leafProp leaf == coreProp
+                then coreProp
+                else
+                  error
+                    ( "claim-support: leaf " ++ show lid
+                        ++ " formal target differs between surface and checked unit "
+                        ++ name
+                    )
 
         leafFactFromLeaf l =
-          LeafFact (leafId l) (leafProvenance l) (leafKind l) (leafPaperAnchored l)
-        -- A load-bearing core leaf id with no surface declaration means the core
-        -- and the @.lara@ surface have drifted apart; hard-error rather than
-        -- fabricate a leaf fact (mirrors the non-accept 'Reject' arm above).
-        leafFact lid = case leafById lid of
-          Just l -> leafFactFromLeaf l
-          Nothing ->
-            error
-              ( "claim-support: core leaf " ++ show lid
-                  ++ " missing from surface decls in unit " ++ name
-              )
+          LeafFact
+            (leafId l)
+            (leafProvenance l)
+            (leafKind l)
+            (leafPaperAnchored l)
+            (leafRefs l)
+
+        claimById cid =
+          case [c | c <- surfaceClaims, claimId c == cid] of
+            [claim] -> claim
+            [] -> error ("claim-support: claim " ++ show cid ++ " missing from " ++ name)
+            _ -> error ("claim-support: duplicate claim " ++ show cid ++ " in " ++ name)
+
+        surfaceArgById aid =
+          case [a | a <- surfaceArgs, argId a == aid] of
+            [arg] -> arg
+            [] ->
+              error
+                ( "claim-support: argument " ++ show aid
+                    ++ " missing from surface decls in unit " ++ name
+                )
+            _ -> error ("claim-support: duplicate argument " ++ show aid ++ " in unit " ++ name)
+
+        attackTargets aid =
+          nub
+            [ attackTarget attack
+            | attack <- attacks
+            , attackSrc attack == aid
+            ]
+
+        attackTarget attack = case attack of
+          Rebut _ target -> target
+          Undercut _ target _ -> target
+          Undermine _ target _ -> target
+
+        contextsForArg aid =
+          case supportContexts ++ attackContexts of
+            [] ->
+              error
+                ( "claim-support: load-bearing challenge " ++ show aid
+                    ++ " has no typed attack in " ++ name
+                )
+            contexts -> contexts
+          where
+            supportContexts =
+              case argConcl (surfaceArgById aid) of
+                SupportsClaim cid -> [AuditContext AuditSupport (claimById cid)]
+                SupportsDerived cid ->
+                  error
+                    ( "claim-support: load-bearing derived claim " ++ show cid
+                        ++ " has no nl context in " ++ name
+                    )
+                Challenges _ -> []
+            attackContexts =
+              [ AuditContext AuditAttack (targetClaim target)
+              | target <- attackTargets aid
+              ]
+
+        targetClaim target =
+          case argConcl (surfaceArgById target) of
+            SupportsClaim cid -> claimById cid
+            SupportsDerived cid ->
+              error
+                ( "claim-support: attacked derived claim " ++ show cid
+                    ++ " has no nl context in " ++ name
+                )
+            Challenges _ ->
+              error
+                ( "claim-support: attack target " ++ show target
+                    ++ " is not a claim support in " ++ name
+                )
+
+        bindingAuditRow lid =
+          let leaf = requireLeaf lid
+              contexts =
+                nub
+                  [ context
+                  | (aid, term) <- loadBearingArgs
+                  , lid `elem` leaves term
+                  , context <- contextsForArg aid
+                  ]
+              AuditContext role claim =
+                case contexts of
+                  [context] -> context
+                  _ ->
+                    error
+                      ( "claim-support: load-bearing leaf " ++ show lid
+                          ++ " has ambiguous claim context in " ++ name
+                      )
+           in BindingAuditRow
+                { barLeaf = leafFactFromLeaf leaf
+                , barFormalTarget = checkedFormalTarget lid leaf
+                , barRole = role
+                , barClaimId = claimId claim
+                , barClaimNl = claimNl claim
+                }
 
         attacks = unitAttacks unit
         argById aid = lookup aid [(argId a, a) | a <- surfaceArgs]
@@ -341,7 +498,85 @@ tally xs =
     nub' = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
 
 -- ---------------------------------------------------------------------------
--- Rendering (house JValue codec; and flat per-unit TSV)
+-- Rendering the role-aware binding-audit worklist
+-- ---------------------------------------------------------------------------
+
+-- | Repository path of the committed binding-audit worklist.
+bindingAuditPath :: FilePath
+bindingAuditPath = "measurements/binding-audit/worklist.tsv"
+
+-- | Fixed schema for 'bindingAuditTsv'.
+bindingAuditTsvHeader :: String
+bindingAuditTsvHeader =
+  intercalateTab
+    [ "unit"
+    , "leaf_id"
+    , "formal_target"
+    , "role"
+    , "claim_id"
+    , "claim_nl"
+    , "kind"
+    , "provenance"
+    , "refs"
+    ]
+
+-- | Render the committed binding-audit worklist. Every data cell backslash-
+-- escapes @\\@, tab, carriage return, and newline as @\\\\@, @\\t@, @\\r@,
+-- and @\\n@. The @refs@ cell comma-joins refs, uses @-@ for empty, and rejects
+-- a comma or literal @-@ in a ref so decoding remains unambiguous. Unlike this
+-- renderer, 'claimSupportTsv' does not escape its cells.
+bindingAuditTsv :: [UnitRecord] -> String
+bindingAuditTsv records =
+  unlines (bindingAuditTsvHeader : concatMap recordRows records)
+  where
+    recordRows record = map (row (urName record)) (urBindingAuditRows record)
+
+    row unitName r =
+      let leaf = barLeaf r
+          lid = lfId leaf
+       in intercalateTab
+            ( map
+                escapeTsvCell
+                [ unitName
+                , let LeafId rawLeafId = lid in rawLeafId
+                , printProp (barFormalTarget r)
+                , auditRoleStr (barRole r)
+                , let PropId cid = barClaimId r in cid
+                , barClaimNl r
+                , kindStr (lfKind leaf)
+                , provStr (lfProvenance leaf)
+                , refsCell unitName lid (lfRefs leaf)
+                ]
+            )
+
+refsCell :: String -> LeafId -> [SourceRef] -> String
+refsCell _ _ [] = "-"
+refsCell unitName lid refs =
+  case [ref | ref@(SourceRef raw) <- refs, ',' `elem` raw || raw == "-"] of
+    [] -> intercalateComma [ref | SourceRef ref <- refs]
+    bad : _ ->
+      error
+        ( "claim-support: binding-audit ref " ++ show bad
+            ++ " on leaf " ++ show lid
+            ++ " in unit " ++ unitName
+            ++ " collides with the refs-cell encoding (comma or reserved '-')"
+        )
+
+auditRoleStr :: BindingAuditRole -> String
+auditRoleStr AuditSupport = "support"
+auditRoleStr AuditAttack = "attack"
+
+escapeTsvCell :: String -> String
+escapeTsvCell = concatMap escape
+  where
+    escape '\\' = "\\\\"
+    escape '\t' = "\\t"
+    escape '\r' = "\\r"
+    escape '\n' = "\\n"
+    escape c = [c]
+
+-- ---------------------------------------------------------------------------
+-- Rendering the existing four-number report
 -- ---------------------------------------------------------------------------
 
 claimSupportJson :: EnvBlock -> ClaimSupportReport -> [UnitRecord] -> String
@@ -460,6 +695,11 @@ intercalateTab :: [String] -> String
 intercalateTab [] = ""
 intercalateTab [x] = x
 intercalateTab (x : xs) = x ++ "\t" ++ intercalateTab xs
+
+intercalateComma :: [String] -> String
+intercalateComma [] = ""
+intercalateComma [x] = x
+intercalateComma (x : xs) = x ++ "," ++ intercalateComma xs
 
 statusStr :: Status -> String
 statusStr Gap = "gap"

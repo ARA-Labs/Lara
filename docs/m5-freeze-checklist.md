@@ -108,8 +108,9 @@ cabal exec -- runghc scripts/measure.hs
 
 Emits `measurements/{report,ablation}.{json,tsv}` over 429 inputs (369 mutants +
 60 corpus units); `scripts/claim-support.hs` emits the claim-support
-aggregation. The canonical snapshot is committed under `measurements/frozen/`
-(the working `measurements/` is gitignored as regenerable output).
+aggregation and the committed `measurements/binding-audit/worklist.tsv`.
+The canonical aggregate snapshot is committed under `measurements/frozen/`;
+other working measurement outputs remain gitignored as regenerable output.
 
 ### Frozen headline numbers
 

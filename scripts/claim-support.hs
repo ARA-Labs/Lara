@@ -15,24 +15,34 @@
 -- differential run.
 --
 -- Output: @measurements\/claim-support.json@ (aggregate + per-unit records +
--- environment) and @measurements\/claim-support.tsv@ (flat per-unit rows). The
--- committed deliverable is the copy under @measurements\/frozen\/@.
+-- environment), @measurements\/claim-support.tsv@ (flat per-unit rows), and
+-- @measurements\/binding-audit\/worklist.tsv@ (the binding-audit review rows).
+-- The committed aggregate deliverable is the copy under @measurements\/frozen\/@.
 --
 -- Run with the built library on the path:
 --
 -- >  cabal exec -- runghc scripts/claim-support.hs
 module Main (main) where
 
+import Control.Exception (evaluate)
 import Control.Monad (when)
-import Data.List (dropWhileEnd)
 import Data.Char (isSpace)
+import Data.List (dropWhileEnd)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode (..), exitFailure)
+import System.FilePath (takeDirectory)
 import System.Info (arch, os)
 import System.IO (hPutStrLn, stderr)
 import System.Process (readProcessWithExitCode)
 
-import Lara.ClaimSupport (aggregate, claimSupportJson, claimSupportTsv)
+import Lara.AtomicWrite (atomicWriteFile)
+import Lara.ClaimSupport
+  ( aggregate
+  , bindingAuditPath
+  , bindingAuditTsv
+  , claimSupportJson
+  , claimSupportTsv
+  )
 import Lara.ClaimSupport.Load (loadRuleModes, loadUnitRecord)
 import Lara.Measure (EnvBlock (..), parseCorpusManifest)
 
@@ -51,13 +61,27 @@ main = do
   env <- gatherEnv
   records <- mapM (loadUnitRecord ruleModeOf) inputs
   let report = aggregate records
+      jsonBytes = claimSupportJson env report records
+      aggregateTsvBytes = claimSupportTsv records
+      worklistBytes = bindingAuditTsv records
+  -- Force every pure rendering before the first write. Context or encoding
+  -- drift is reported through lazy errors; forcing here prevents an earlier
+  -- output from being replaced before such an error aborts the command.
+  _ <- evaluate (length jsonBytes + length aggregateTsvBytes + length worklistBytes)
   createDirectoryIfMissing True "measurements"
-  writeFile "measurements/claim-support.json" (claimSupportJson env report records)
-  writeFile "measurements/claim-support.tsv" (claimSupportTsv records)
+  createDirectoryIfMissing True (takeDirectory bindingAuditPath)
+  -- The aggregate pair is ignored, regenerable output. The committed human
+  -- audit worklist is the only tracked destination and is replaced atomically.
+  writeFile "measurements/claim-support.json" jsonBytes
+  writeFile "measurements/claim-support.tsv" aggregateTsvBytes
+  atomicWriteFile bindingAuditPath worklistBytes
   putStrLn
-    ( "wrote claim-support aggregation over " ++ show (length records)
-        ++ " corpus units to measurements/claim-support.{json,tsv}"
+    ( "wrote claim-support aggregate pair and binding-audit worklist over "
+        ++ show (length records)
+        ++ " corpus units to measurements/claim-support.{json,tsv} and "
+        ++ bindingAuditPath
     )
+
 
 -- | The reproducibility environment block (git rev + dirty flag, GHC, OS, CPU);
 -- best-effort. @envLean@ is empty — this harness runs no Lean driver.

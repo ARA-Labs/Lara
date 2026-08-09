@@ -16,6 +16,11 @@ lesson from EG-VAR, `docs/prior-art-lessons.md`)._
 - **v0.1 fragment.** Support-level propositions are ground first-order atoms; grounded semantics only;
   Path B consistency (strict chains may only target uncontested claims); no AC/symmetric predicates, no
   binders in `nf`. Each is a documented flip criterion, not a permanent limit.
+- **Surface/core boundary (`lara-syntax@0.3`).** The presentation surface elaborates before the frozen
+  `lara-core@0.1` boundary: measurand polarity, `comparison` blocks, premise labels, `nl` interpolation,
+  and surface attack steps never enter `Unit`, and S2/S3/S4 elaborating to byte-identical Units is the
+  acceptance gate for any surface change. The paper states this boundary and keeps the elaborator
+  validated-not-verified, exactly like the parser.
 - **No tactic DSL, IDE, package manager, or standard library** for the initial contribution.
 
 ## Assumptions (the three-way conditional guarantee)

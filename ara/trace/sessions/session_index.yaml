@@ -325,3 +325,10 @@ sessions:
   events_count: 13
   claims_touched: []
   open_threads: 6
+- id: 2026-08-09_001
+  date: '2026-08-09'
+  summary: 'Audited and synced the merged @0.3 paper surface, engineering-cleared issue #87 Step 0, then implemented the reviewed 38-row role-aware worklist in three independently reviewed commits; full Haskell, idempotence, freshness, and exact-scope gates passed.'
+  turn_count: 4
+  events_count: 10
+  claims_touched: []
+  open_threads: 3
