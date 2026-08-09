@@ -34,7 +34,7 @@ module Lara.Examples
   ) where
 
 import Lara.AST
-import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
+import Lara.Prop (Prop (..), Term (..))
 
 -- ---------------------------------------------------------------------------
 -- Small construction helpers (presentation-syntax sugar in Haskell)

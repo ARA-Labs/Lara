@@ -43,7 +43,7 @@ module Lara.Negatives
   ) where
 
 import Lara.AST
-import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
+import Lara.Prop (Prop (..), Term (..))
 
 -- ---------------------------------------------------------------------------
 -- Taxonomy
