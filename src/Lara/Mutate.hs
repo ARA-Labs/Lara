@@ -577,7 +577,7 @@ hiddenContrarySites _ =
     mutP = AtomPat (Pred "mut_p") []
     mutQ = AtomPat (Pred "mut_q") []
     mutStrictRule =
-      Rule (RuleId "mut_strict") [] Strict [] mutP False [] []
+      Rule (RuleId "mut_strict") [] Strict [] [] mutP False [] []
     mutContrary = Contrary mutQ mutP
 
 -- R3: rename one substitution key off the rule's parameter list.
@@ -1030,7 +1030,7 @@ cycleBytes n = case checkInput of
     obs i = Prop (Pred "obs") [conTerm i]
     holdsPat = AtomPat (Pred "holds") [PVar (Param "X")]
     obsPat = AtomPat (Pred "obs") [PVar (Param "X")]
-    cyc = Rule (RuleId "cyc") [Param "X"] Defeasible [obsPat] holdsPat False [] []
+    cyc = Rule (RuleId "cyc") [Param "X"] Defeasible [obsPat] [] holdsPat False [] []
     groundPat i = AtomPat (Pred "holds") [PLit (conTerm i)]
     contraries = [Contrary (groundPat i) (groundPat (succIx i)) | i <- ixes]
     leaves = [(LeafId ("l" ++ show i), obs i) | i <- ixes]

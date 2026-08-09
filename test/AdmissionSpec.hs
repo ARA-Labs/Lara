@@ -87,6 +87,19 @@ program backends decls =
     , programDecls = decls
     }
 
+-- | The authored spelling of a resolved attack (grammar §7, App. B.5): each
+-- 'Step' has exactly one 'SurfaceStep' form, so this is the identity these
+-- fixtures need to state expectations in terms of the frozen 'Attack' while
+-- still building 'DeclAttack's.
+surfaceAttack :: Attack -> SurfaceAttack
+surfaceAttack k = case k of
+  Rebut w u -> SRebut w u
+  Undercut w u pos -> SUndercut w u (map surfaceStep pos)
+  Undermine w u pos -> SUndermine w u (map surfaceStep pos)
+  where
+    surfaceStep (StepPremise i) = StepIndex i
+    surfaceStep (StepQuestion (QuestionId q)) = StepName q
+
 policy :: [((LeafKind, Provenance), Admission)] -> GroupConflictMode -> Policy
 policy admission groupMode =
   Policy
@@ -97,6 +110,8 @@ policy admission groupMode =
     , policyAdmission = admission
     , policyTheories = []
     , policyGroupMode = groupMode
+    , policyMeasurands = []
+    , policyComparisonSchemes = []
     }
 
 accepted :: Program -> Policy -> (SourceCheckInput -> Property) -> Property
@@ -146,7 +161,7 @@ prop_explicitAdmitPreservesGraph =
         , leafD "e_not_p" "not_p" Attested User
         , argClaim "a_p" "c" "e_p"
         , argLeaf "a_not_p" "e_not_p"
-        , DeclAttack (Undermine (ArgId "a_not_p") (ArgId "a_p") [])
+        , DeclAttack (SUndermine (ArgId "a_not_p") (ArgId "a_p") [])
         , DeclStatus (PropId "c")
         ]
     pol =
@@ -297,12 +312,13 @@ prop_quarantinePrunesEveryDependency =
           ]
   where
     nested =
-      Rule (RuleId "nested") [] Defeasible [apat0 "p"] (apat0 "nested") False [] []
+      Rule (RuleId "nested") [] Defeasible [apat0 "p"] [] (apat0 "nested") False [] []
     discharge =
       Rule
         (RuleId "discharge")
         []
         Defeasible
+        []
         []
         (apat0 "discharged")
         False
@@ -368,7 +384,7 @@ prop_attackEndpointFiltering =
           , argLeaf "a_one" "e_one"
           , argLeaf "a_two" "e_two"
           ]
-            ++ map DeclAttack attacks
+            ++ map (DeclAttack . surfaceAttack) attacks
         )
     pol =
       (policy [((Observed, User), Quarantine)] QuarantineOnConflict)
@@ -420,7 +436,7 @@ prop_combinedAuditCanonical =
           , argLeaf "a4" "e4"
           , argLeaf "a2" "e2"
           ]
-            ++ map DeclAttack attacks
+            ++ map (DeclAttack . surfaceAttack) attacks
         )
     pol = policy [((Observed, User), Quarantine)] QuarantineOnConflict
 
@@ -479,7 +495,7 @@ prop_policyQuarantineBlockedOverlay =
         , argClaim "a_target" "target_claim" "e_target"
         , argLeaf "a_attacker" "e_attacker"
         , argClaim "a_other" "other_claim" "e_other"
-        , DeclAttack (Rebut (ArgId "a_attacker") (ArgId "a_target"))
+        , DeclAttack (SRebut (ArgId "a_attacker") (ArgId "a_target"))
         , DeclStatus (PropId "target_claim")
         , DeclStatus (PropId "other_claim")
         ]

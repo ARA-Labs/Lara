@@ -19,6 +19,17 @@
 -- pre-admission lowering itself as their object of study (the same role
 -- "Lara.Strict.ND.Internal" plays for 'Lara.Strict.ND.AtomId'). Production code
 -- must not import it.
+--
+-- == The three sibling modules
+--
+-- The elaborator is split so the @lara-syntax\@0.3@ surface work and the
+-- structural lowering can share a failure vocabulary:
+--
+--   * "Lara.Elaborate.Error" — 'ElabError' and its renderer (re-exported here);
+--   * "Lara.Elaborate.Subst" — pattern instantiation and one-way matching;
+--   * "Lara.Elaborate.Comparison" — the @comparison@ expansion and @nl@
+--     interpolation, a presentation-to-presentation pass this module runs
+--     first.
 module Lara.Elaborate.Internal
   ( -- * Caller-supplied environment inputs
     Sigma (..)
@@ -28,17 +39,27 @@ module Lara.Elaborate.Internal
   , emptyRegistry
   , registryOf
     -- * Elaboration errors (located-ish: they name the arg/rule/leaf/claim)
+    --
+    -- | Defined in "Lara.Elaborate.Error" and re-exported here, so that module
+    -- and "Lara.Elaborate.Comparison" can raise the same failures without an
+    -- import cycle; every existing importer of this module is unaffected.
   , ElabError (..)
   , elabErrorMessage
     -- * The elaborator (admission-free; see the module header)
   , elaborate
+  , elaborateWithProvenance
+  , GeneratedArg (..)
   ) where
 
 import Control.Monad (foldM, when)
 import Data.List (find)
 
 import Lara.AST
-import Lara.Prop (Prop (..), Term (..), equiv, prettyProp)
+import Lara.Elaborate.Comparison (GeneratedArg (..), expandSurfaceProvenance)
+import Lara.Elaborate.Error (ElabError (..), elabErrorMessage)
+import Lara.Elaborate.Subst (apatToProp)
+import Lara.Syntax (attackPathTerminalMarkers)
+import Lara.Prop (Prop, equiv)
 
 -- ---------------------------------------------------------------------------
 -- Caller-supplied environment inputs
@@ -80,95 +101,6 @@ registryOf :: Policy -> TheoryRegistry
 registryOf = TheoryRegistry . policyTheories
 
 -- ---------------------------------------------------------------------------
--- Elaboration errors
--- ---------------------------------------------------------------------------
-
--- | A located-ish elaboration failure. Each constructor names the offending
--- argument, rule, leaf, claim, or position so the caller can render a diagnostic
--- (see 'elabErrorMessage'). The elaborator is deterministic, so the /first/
--- error in declaration order is the one reported.
-data ElabError
-  = -- | @programPolicy prog@ ≠ @policyId policy@ (the header-match invariant).
-    PolicyIdMismatch PolicyId PolicyId
-  | -- | a @by r(…)@ names a rule absent from the policy: @arg@, @rule@.
-    UnknownRule ArgId RuleId
-  | -- | positional θ length ≠ the rule's parameter count: @arg@, @rule@,
-    -- expected, got.
-    ArityMismatch ArgId RuleId Int Int
-  | -- | no declared leaf\/prior-arg conclusion @≡@ the ground premise: @arg@,
-    -- @rule@, 1-based premise index, the ground premise proposition.
-    UnresolvedPremise ArgId RuleId Int Prop
-  | -- | ≥2 declared conclusions @≡@ the ground premise: @arg@, @rule@, premise
-    -- index, the ground premise, and the matching leaf\/arg ids.
-    AmbiguousPremise ArgId RuleId Int Prop [String]
-  | -- | a @discharge q with ref@ whose @ref@ is neither a declared leaf nor a
-    -- prior arg: @arg@, @question@, the ref name.
-    UnresolvedDischarge ArgId QuestionId String
-  | -- | a @supports(c)@ over a declared claim whose term conclusion ≠ the claim
-    -- formal: @arg@, @claim@, @concl(w)@, @claimFormal(c)@.
-    ConclusionMismatch ArgId PropId Prop Prop
-  | -- | a @status c@ whose @c@ is not a declared claim.
-    UnknownStatusClaim PropId
-  | -- | a @challenges(…)@ whose target arg\/leaf is not declared (diagnostic
-    -- only; never affects the 'Unit').
-    ChallengeTargetUndeclared ArgId
-  | -- | two surface @arg@ declarations share an id (R14 well-formedness).
-    DuplicateArgId ArgId
-  | -- | a surface attack names an argument id that is not declared (R14
-    -- well-formedness): the first undeclared endpoint in attack order.
-    AttackEndpointUndeclared ArgId
-  | -- | two @group@ declarations share an id (R14 well-formedness): the id.
-    DuplicateGroupId GroupId
-  | -- | a @group@ repeats a member (R14 well-formedness): @group@, the member.
-    GroupRepeatedMember GroupId LeafId
-  | -- | a @group@ has fewer than two members, so it cannot report a conflict
-    -- (R14 well-formedness): the group id.
-    GroupTooFewMembers GroupId
-  | -- | a @group@ member is not a declared leaf (R14 well-formedness): @group@,
-    -- the undeclared member.
-    GroupMemberUndeclared GroupId LeafId
-  deriving (Eq, Show)
-
--- | Render an 'ElabError' as a single human-readable line.
-elabErrorMessage :: ElabError -> String
-elabErrorMessage e = case e of
-  PolicyIdMismatch (PolicyId p) (PolicyId q) ->
-    "program declares policy '" ++ p ++ "' but the supplied policy is '" ++ q ++ "'"
-  UnknownRule (ArgId a) (RuleId r) ->
-    "arg '" ++ a ++ "': unknown rule '" ++ r ++ "' (not declared in the policy)"
-  ArityMismatch (ArgId a) (RuleId r) expd got ->
-    "arg '" ++ a ++ "': rule '" ++ r ++ "' expects " ++ show expd
-      ++ " argument(s) but " ++ show got ++ " were supplied"
-  UnresolvedPremise (ArgId a) (RuleId r) i g ->
-    "arg '" ++ a ++ "': rule '" ++ r ++ "' premise #" ++ show i
-      ++ " (" ++ prettyProp g ++ ") matches no declared leaf or prior argument"
-  AmbiguousPremise (ArgId a) (RuleId r) i g ms ->
-    "arg '" ++ a ++ "': rule '" ++ r ++ "' premise #" ++ show i
-      ++ " (" ++ prettyProp g ++ ") is ambiguous — matched " ++ show ms
-  UnresolvedDischarge (ArgId a) (QuestionId q) ref ->
-    "arg '" ++ a ++ "': discharge of '" ++ q ++ "' names '" ++ ref
-      ++ "', which is neither a declared leaf nor a prior argument"
-  ConclusionMismatch (ArgId a) (PropId c) w formal ->
-    "arg '" ++ a ++ "': supports(" ++ c ++ ") but its conclusion "
-      ++ prettyProp w ++ " ≢ the claim formal " ++ prettyProp formal
-  UnknownStatusClaim (PropId c) ->
-    "status '" ++ c ++ "': not a declared claim"
-  ChallengeTargetUndeclared (ArgId a) ->
-    "arg '" ++ a ++ "': challenges(…) target is not a declared argument or leaf"
-  DuplicateArgId (ArgId a) ->
-    "arg '" ++ a ++ "': duplicate argument id"
-  AttackEndpointUndeclared (ArgId a) ->
-    "attack endpoint is not a declared argument: " ++ show a
-  DuplicateGroupId (GroupId g) ->
-    "group '" ++ g ++ "': duplicate group id"
-  GroupRepeatedMember (GroupId g) (LeafId l) ->
-    "group '" ++ g ++ "': repeats member '" ++ l ++ "'"
-  GroupTooFewMembers (GroupId g) ->
-    "group '" ++ g ++ "': fewer than two members (cannot report a conflict)"
-  GroupMemberUndeclared (GroupId g) (LeafId l) ->
-    "group '" ++ g ++ "': member '" ++ l ++ "' is not a declared leaf"
-
--- ---------------------------------------------------------------------------
 -- Internal environment
 -- ---------------------------------------------------------------------------
 
@@ -202,24 +134,57 @@ data Env = Env
 --     distinct from the source-boundary R8 admission class);
 --   * @unitArgs@ in declaration order (order fixes AF node indices, hence labels);
 --     each shallow support term is rebuilt to the full 'SupportTerm';
---   * @unitAttacks@ pass through (the surface already lowered positions);
+--   * @unitAttacks@ resolved from the authored 'SurfaceAttack's — an integer
+--     path segment is a premise slot, a name is resolved against the /targeted
+--     rule/ (grammar App. B.5);
 --   * @unitQueries@ = the @status@-named claims' formals;
 --   * @unitGroups@ = the declared duplicate-report groups (spec §4.3), with
 --     @unitGroupMode@ baked from the policy's conflict escalation choice.
+--
+-- @lara-syntax\@0.3@ inserts one stage ahead of all of that: every
+-- @comparison@ block is expanded to the declarations it stands for
+-- ('Lara.Elaborate.Comparison.expandSurface') __before__ any id check, any
+-- argument is lowered, or any attack path resolves, so an attack on a generated
+-- argument resolves against the post-expansion set (App. B.5, eng review F5).
 elaborate :: Sigma -> TheoryRegistry -> Program -> Policy -> Either ElabError Unit
-elaborate _sigma reg prog pol0 = do
-  when (programPolicy prog /= policyId pol0) $
-    Left (PolicyIdMismatch (programPolicy prog) (policyId pol0))
+elaborate sigma reg prog0 pol0 = fst <$> elaborateWithProvenance sigma reg prog0 pol0
+
+-- | 'elaborate' paired with the @comparison@ expansion's 'GeneratedArg'
+-- breadcrumb (plan D5), from the /same/ pass — so a breadcrumb can never
+-- describe an argument this 'Unit' does not contain.
+--
+-- __The breadcrumb cannot reach 'Unit'.__ It is bound here and used nowhere in
+-- the 'Unit' record below, whose ten fields are each written from the policy,
+-- the registry, or the expanded declaration list. 'elaborate' — the type every
+-- pre-D5 caller uses — projects it away, so no existing path can observe it.
+-- The @examples\/*\/example.core.sexp@ byte-identity goldens stand as the
+-- regression test.
+elaborateWithProvenance
+  :: Sigma
+  -> TheoryRegistry
+  -> Program
+  -> Policy
+  -> Either ElabError (Unit, [GeneratedArg])
+elaborateWithProvenance _sigma reg prog0 pol0 = do
+  when (programPolicy prog0 /= policyId pol0) $
+    Left (PolicyIdMismatch (programPolicy prog0) (policyId pol0))
   -- Reclassify pattern identifiers (grammar §2): the shallow parser records
   -- every bare pattern ident as a 'PVar', but a non-parameter ident is a ground
   -- constant. The checker's premise instantiation ('instAPat') treats an unbound
   -- 'PVar' as failure (R3), so this resolution is mandatory elaborator work.
   let pol = reclassifyPolicy pol0
-      decls = programDecls prog
+  -- Policy well-formedness for premise labels (App. B.4), rejected at
+  -- declaration time rather than discovered at an attack site. The parser
+  -- enforces the same three rules, but a 'Program' built in memory never went
+  -- through it, and the disjointness is what makes B.5's name resolution
+  -- single-valued.
+  validatePremiseLabels (policyRules pol)
+  (prog, generated) <- expandSurfaceProvenance pol prog0
+  let decls = programDecls prog
       gamma = [(leafId l, leafProp l) | DeclLeaf l <- decls]
       claims = [c | DeclClaim c <- decls]
       argDecls = [a | DeclArg a <- decls]
-      attacks = [k | DeclAttack k <- decls]
+      surfaceAttacks = [k | DeclAttack k <- decls]
       statusIds = [pid | DeclStatus pid <- decls]
       groups = [g | DeclGroup g <- decls]
       env =
@@ -236,34 +201,158 @@ elaborate _sigma reg prog pol0 = do
   case firstDup (envArgIds env) of
     Just aid -> Left (DuplicateArgId aid)
     Nothing -> Right ()
-  case find (`notElem` envArgIds env) (concatMap attackEndpoints attacks) of
+  case find (`notElem` envArgIds env) (concatMap surfaceAttackEndpoints surfaceAttacks) of
     Just aid -> Left (AttackEndpointUndeclared aid)
     Nothing -> Right ()
   validateGroups (envLeafIds env) groups
   elaboratedRev <- foldM (elabOne env) [] argDecls
+  -- Attack paths resolve last: a 'StepName' is resolved against the rule at its
+  -- position in the *elaborated* target argument, which does not exist until
+  -- every argument is lowered.
+  attacks <- mapM (resolveSurfaceAttack pol (reverse elaboratedRev)) surfaceAttacks
   queries <- mapM (resolveStatus claims) statusIds
   pure
-    Unit
-      { unitRules = policyRules pol
-      , unitContraries = policyContraries pol
-      , unitExceptions = policyExceptions pol
-      , unitTheories = registryTheories reg
-      , unitLeaves = gamma
-      , unitArgs = reverse elaboratedRev
-      , unitAttacks = attacks
-      , unitQueries = queries
-      , unitGroups = groups
-      , unitGroupMode = policyGroupMode pol
-      }
+    ( Unit
+        { unitRules = map stripPremiseLabels (policyRules pol)
+        , unitContraries = policyContraries pol
+        , unitExceptions = policyExceptions pol
+        , unitTheories = registryTheories reg
+        , unitLeaves = gamma
+        , unitArgs = reverse elaboratedRev
+        , unitAttacks = attacks
+        , unitQueries = queries
+        , unitGroups = groups
+        , unitGroupMode = policyGroupMode pol
+        }
+    , generated
+    )
 
--- | Raw argument endpoints of a surface attack, in source order. The @.lara@
+-- | Drop a rule's presentation-only premise labels on the way into 'Unit'.
+--
+-- Grammar App. B.4 states the invariant directly: \"labels never enter @Unit@\"
+-- — @cmp@ and @0@ resolve to the same 'StepPremise' and the rule's compiled
+-- form is unchanged. 'unitRules' is otherwise a verbatim copy of
+-- 'policyRules', so this is the one place the invariant can be enforced.
+-- (Byte-identity does not depend on it: "Lara.Wire".@encodeRule@ names its
+-- eight encoded fields explicitly and labels are not among them. This keeps the
+-- /value/ honest as well as the bytes.)
+stripPremiseLabels :: Rule -> Rule
+stripPremiseLabels r = r {rulePremiseLabels = []}
+
+-- | Lower an authored attack to the frozen 'Attack' (grammar §7 AMENDMENT,
+-- App. B.5).
+--
+-- An integer segment is a 'StepPremise' directly, unchanged from
+-- @lara-syntax\@0.2@. A 'StepName' is resolved __against the targeted rule__ to
+-- either a premise label (App. B.4) or a critical-question id — at most one of
+-- the two, guaranteed by 'validatePremiseLabels'. Both spellings therefore
+-- lower to the same 'Position', which is why the compiled AF is byte-identical
+-- whichever the author wrote.
+resolveSurfaceAttack
+  :: Policy
+  -> [(ArgId, SupportTerm)]
+  -> SurfaceAttack
+  -> Either ElabError Attack
+resolveSurfaceAttack pol args k = case k of
+  SRebut w u -> Right (Rebut w u)
+  SUndercut w u steps -> Undercut w u <$> resolvePath pol args w u steps
+  SUndermine w u steps -> Undermine w u <$> resolvePath pol args w u steps
+
+-- | Resolve one position path against the elaborated target argument.
+--
+-- The walk descends the target's support term so that a /deeper/ segment
+-- resolves against the rule occurrence it actually names, not against the root.
+-- When no rule is in hand — the occurrence is a leaf, its rule is undeclared, or
+-- the path runs past the term — the remaining segments keep their
+-- @lara-syntax\@0.2@ reading (integer ⇒ premise, name ⇒ question) and no error
+-- is raised: those paths are @checkAttack@'s to reject as R10\/R11, and
+-- preserving the old reading is what keeps every existing example's 'Unit'
+-- unchanged.
+resolvePath
+  :: Policy
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> ArgId
+  -> [SurfaceStep]
+  -> Either ElabError [Step]
+resolvePath pol args source target = go (lookup target args)
+  where
+    go _ [] = Right []
+    go mterm (s : rest) = case mterm >>= occurrence of
+      Nothing -> Right (map legacyStep (s : rest))
+      Just (rule, prems, disch) -> do
+        (step, next) <- resolveStep rule prems disch s
+        (step :) <$> go next rest
+
+    -- The rule occurrence at the current position, with its sub-terms.
+    occurrence (SRule rid _ prems disch _ _) =
+      (\r -> (r, prems, disch)) <$> find ((== rid) . ruleId) (policyRules pol)
+    occurrence (SLeaf _) = Nothing
+
+    resolveStep rule prems disch s = case s of
+      StepIndex i -> Right (StepPremise i, prems `at` i)
+      StepName n
+        | Just i <- premiseLabelIndex rule n -> Right (StepPremise i, prems `at` i)
+        | Just q <- questionNamed rule n -> Right (StepQuestion q, lookup q disch)
+        | otherwise -> Left (AttackStepUnresolved source target n)
+
+    legacyStep (StepIndex i) = StepPremise i
+    legacyStep (StepName n) = StepQuestion (QuestionId n)
+
+    xs `at` i
+      | i >= 0, i < length xs = Just (xs !! i)
+      | otherwise = Nothing
+
+-- | The __0-based__ premise slot a rule's premise label names (App. B.4, eng
+-- review 6A). 'rulePremiseLabels' is positionally aligned with 'rulePremises',
+-- and is @[]@ when no premise is labelled.
+premiseLabelIndex :: Rule -> String -> Maybe Int
+premiseLabelIndex rule n =
+  lookup (PremiseLabel n) (zip [l | Just l <- rulePremiseLabels rule] indices)
+  where
+    indices = [i | (i, Just _) <- zip [0 ..] (rulePremiseLabels rule)]
+
+-- | The rule's critical question of that name, if it declares one.
+questionNamed :: Rule -> String -> Maybe QuestionId
+questionNamed rule n =
+  find (== QuestionId n) (map questionId (ruleQuestions rule))
+
+-- | Premise-label well-formedness for one policy (grammar App. B.4): labels are
+-- unique within a rule, disjoint from that rule's question ids, and may not
+-- spell §7's terminal markers @rule@\/@leaf@ (otherwise @a2.leaf.leaf@ parses
+-- two ways). Both namespaces are policy-declared, so a collision is statically
+-- detectable and is rejected here, not discovered at an attack site.
+validatePremiseLabels :: [Rule] -> Either ElabError ()
+validatePremiseLabels = mapM_ one
+  where
+    one rule = do
+      let labels = [l | Just l <- rulePremiseLabels rule]
+          questions = [q | QuestionId q <- map questionId (ruleQuestions rule)]
+          labelCount = length (rulePremiseLabels rule)
+          premiseCount = length (rulePremises rule)
+      when (labelCount /= 0 && labelCount /= premiseCount) $
+        Left (PremiseLabelCountMismatch (ruleId rule) labelCount premiseCount)
+      case firstDup labels of
+        Just l -> Left (PremiseLabelDuplicate (ruleId rule) l)
+        Nothing -> Right ()
+      case find (\(PremiseLabel l) -> l `elem` attackPathTerminalMarkers) labels of
+        Just l -> Left (PremiseLabelReserved (ruleId rule) l)
+        Nothing -> Right ()
+      case find (\(PremiseLabel l) -> l `elem` questions) labels of
+        Just l -> Left (PremiseLabelQuestionCollision (ruleId rule) l)
+        Nothing -> Right ()
+
+
+-- | Raw argument endpoints of an authored attack, in source order. The @.lara@
 -- front door validates these before constructing a 'Unit', matching the wire
--- decoder's R14 boundary and preserving raw/resolved attack alignment.
-attackEndpoints :: Attack -> [ArgId]
-attackEndpoints attack = case attack of
-  Rebut source target -> [source, target]
-  Undercut source target _ -> [source, target]
-  Undermine source target _ -> [source, target]
+-- decoder's R14 boundary and preserving raw/resolved attack alignment. Read off
+-- the /surface/ attack because the check runs before path resolution, which
+-- needs the elaborated arguments.
+surfaceAttackEndpoints :: SurfaceAttack -> [ArgId]
+surfaceAttackEndpoints attack = case attack of
+  SRebut source target -> [source, target]
+  SUndercut source target _ -> [source, target]
+  SUndermine source target _ -> [source, target]
 
 -- | Enforce duplicate-report-group well-formedness (R14) on the @.lara@ path,
 -- mirroring "Lara.Wire".@checkGroupInvariants@ so both front doors reject the
@@ -323,7 +412,7 @@ elabTerm
 elabTerm env priors aid term = case term of
   -- A leaf stays a leaf; an undeclared id is left for checkUnit (R1).
   SLeaf l -> pure (SLeaf l)
-  SRule r posTheta _shallowPrems shallowDisch holes assurance -> do
+  SRule r posTheta shallowPrems shallowDisch holes assurance -> do
     rule <-
       maybe (Left (UnknownRule aid r)) Right $
         find ((== r) . ruleId) (policyRules (envPolicy env))
@@ -333,7 +422,10 @@ elabTerm env priors aid term = case term of
     when (nGot /= nExp) $ Left (ArityMismatch aid r nExp nGot)
     -- Re-associate positional θ with the rule's declared parameter names.
     let theta = zip params (map snd posTheta)
-    prems <- resolvePremises env priors aid r rule theta
+    prems <-
+      if null shallowPrems
+        then resolvePremises env priors aid r rule theta
+        else mapM (elabTerm env priors aid) shallowPrems
     disch <- resolveDischarges env priors aid shallowDisch
     -- lara-syntax@0.2: lower assurance verbatim. Legality (strict mode,
     -- allow-trusted, certifier allowlist, replay) belongs to R7/R13.
@@ -422,7 +514,7 @@ resolveStatus claims pid = case find ((== pid) . claimId) claims of
   Nothing -> Left (UnknownStatusClaim pid)
 
 -- ---------------------------------------------------------------------------
--- Conclusion / substitution helpers
+-- Conclusion helper
 -- ---------------------------------------------------------------------------
 
 -- | @concl(w)@ (spec §6.1): a leaf's Γ proposition, or a rule instance's
@@ -433,21 +525,6 @@ conclOf _ gamma (SLeaf l) = lookup l gamma
 conclOf pol _ (SRule r theta _ _ _ _) = do
   rule <- find ((== r) . ruleId) (policyRules pol)
   Just (apatToProp theta (ruleConclusion rule))
-
--- | Instantiate an atom pattern to a ground proposition under θ.
-apatToProp :: Subst -> AtomPat -> Prop
-apatToProp theta (AtomPat p ps) = Prop p (map (patToTerm theta) ps)
-
--- | Instantiate a pattern to a ground term under θ, reclassifying a bare
--- identifier the parser recorded as a 'PVar': it is a parameter iff it is in θ's
--- domain (= the rule's declared parameters), otherwise a ground constant
--- (grammar §2).
-patToTerm :: Subst -> Pat -> Term
-patToTerm theta (PVar prm@(Param x)) = case lookup prm theta of
-  Just t -> t
-  Nothing -> TCon (FunSym x) []
-patToTerm _ (PLit t) = t
-patToTerm theta (PCon k ps) = TCon k (map (patToTerm theta) ps)
 
 -- ---------------------------------------------------------------------------
 -- Pattern reclassification (grammar §2)

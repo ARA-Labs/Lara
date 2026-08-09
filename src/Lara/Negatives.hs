@@ -144,6 +144,7 @@ defeasibleRule r ps prem concl qs =
     , ruleParams = map Param ps
     , ruleMode = Defeasible
     , rulePremises = prem
+    , rulePremiseLabels = []
     , ruleConclusion = concl
     , ruleAllowTrusted = False
     , ruleCertifiers = []
@@ -158,6 +159,7 @@ strictRule r ps prem concl allowTrusted certs =
     , ruleParams = map Param ps
     , ruleMode = Strict
     , rulePremises = prem
+    , rulePremiseLabels = []
     , ruleConclusion = concl
     , ruleAllowTrusted = allowTrusted
     , ruleCertifiers = certs
@@ -297,6 +299,8 @@ premiseMismatch =
             , policyAdmission = []
             , policyTheories = []
             , policyGroupMode = QuarantineOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "arg 'a', premise 0: concl(e1) = reports(exp_3, effect(m, accuracy, d_shift, 2.1)) "
@@ -360,6 +364,8 @@ unaccountedQuestion =
             , policyAdmission = []
             , policyTheories = []
             , policyGroupMode = QuarantineOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "arg 'a': question 'randomization' of rule 'controlled_experiment' is "
@@ -394,7 +400,7 @@ illTypedAttack =
                   (SRule (RuleId "deductive_step") [] [SLeaf (LeafId "e_p")] [] [] AssuranceTrusted)
               )
           , DeclArg (Arg (ArgId "d") (SupportsClaim (PropId "c_not")) (inst "presumption" [] [SLeaf (LeafId "e_nq")] [] []))
-          , DeclAttack (Rebut (ArgId "d") (ArgId "a_strict"))
+          , DeclAttack (SRebut (ArgId "d") (ArgId "a_strict"))
           , DeclStatus (PropId "c")
           ]
     , negPolicy =
@@ -410,6 +416,8 @@ illTypedAttack =
             , policyAdmission = []
             , policyTheories = []
             , policyGroupMode = QuarantineOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "attack 'rebut d a_strict': target's top rule 'deductive_step' is strict; "
@@ -453,6 +461,8 @@ strictReachableContrary =
             , policyAdmission = []
             , policyTheories = []
             , policyGroupMode = QuarantineOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "policy 'illformed-policy-v1': strict-reachable proposition 'derived(X)' "
@@ -493,6 +503,8 @@ admissionReject =
             , policyAdmission = [((Assumed, AiExecuted), Reject)]
             , policyTheories = []
             , policyGroupMode = QuarantineOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "leaf 'e_assumed': kind=assumed, provenance=ai-executed matched "
@@ -533,6 +545,8 @@ strictAssuranceViolation =
             , policyAdmission = []
             , policyTheories = []
             , policyGroupMode = QuarantineOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "arg 'a': assurance = trusted, but rule 'deductive_step' has "
@@ -590,6 +604,8 @@ duplicateReportGroupConflict =
             , policyAdmission = []
             , policyTheories = []
             , policyGroupMode = RejectOnConflict
+            , policyMeasurands = []
+            , policyComparisonSchemes = []
             }
     , negDiagnostic =
         "group 'g1': members e1, e2 report one cell with ≢ propositions and "

@@ -34,11 +34,20 @@ rule beats_recheck(S, B, Q, D, Exp, Sv, Bv)
 theory sha256:ord-setting-v1-theory-0 = []
 
 # --- The bridge (ord-v1's beats_baseline, unchanged) ----------------------------------------
+# The premise labels (lara-syntax@0.3, App. B.4) are what make S4's attack readable. Slot 1 is
+# the binding, and `binding` names it, so example.lara writes `undermine x1 a2.binding.leaf`.
+# The label is resolved here, against this rule, at elaboration time; `a2.1.leaf` remains legal
+# and means exactly the same thing. Labels never enter the Unit — both spellings compile to the
+# same Undermine at the same premise — and each round-trips in the spelling it was written in.
+#
+# The disambiguation is a policy property, not a parse heuristic: a label may not collide with
+# one of this rule's question ids and may not be spelled `rule` or `leaf`, both checked when the
+# policy is declared, so `a2.binding.leaf` can be read exactly one way.
 
 rule beats_baseline(S, B, Q, D, Sv, Bv)
   mode       = defeasible
-  premises   = [ num_lt(Bv, Sv),
-                 comparison_setup(S, B, Q, D, Sv, Bv) ]
+  premises   = [ cmp:     num_lt(Bv, Sv),
+                 binding: comparison_setup(S, B, Q, D, Sv, Bv) ]
   conclusion = better(S, B, Q, D)
 
 # --- The critic: the two numbers are not comparable -----------------------------------------
@@ -64,6 +73,19 @@ rule setting_audit(S, B, Q, D, Sv, Bv, Aud)
 # two contested instead, which is E5's shape, not this one.
 
 contrary settings_differ(S, B, Q, D, Sv, Bv) comparison_setup(S, B, Q, D, Sv, Bv)
+
+# --- The @0.3 comparison surface ------------------------------------------------------------
+# ord-v1's declarations, unchanged, so that S4's artifact can be S2's artifact plus an audit.
+# The scheme is what makes the generated bridge attackable in the first place: the elaborator
+# emits an argument by the named defeasible rule, so it has the same premise structure — and the
+# same attack surface — as the hand-written one it replaced. Sugar generates the argument; it
+# does not protect it.
+
+measurand accuracy : Num where higher-is-better
+
+comparison-scheme strictly-better higher-is-better
+  recheck = beats_recheck
+  bridge  = beats_baseline
 
 # WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is beats_recheck, whose conclusion
 # pattern num_lt(Bv, Sv) heads no contrary pair. The declared pair is on comparison_setup /

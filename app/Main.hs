@@ -17,7 +17,11 @@
 --   explains itself with one 'Lara.Driver.runCheckLocatedReported' line on @stderr@: a
 --   replay-preflight R13 'Lara.Replay.replayFailureMessage', an escalated
 --   group-conflict R9 'Lara.Driver.groupConflictMessage', or a checker-side R13
---   'Lara.Driver.backendRejectionMessage' carrying the backend's own reason),
+--   'Lara.Driver.backendRejectionMessage' carrying the backend's own reason;
+--   on the @.lara@ door only, a checker-side R13 against an argument a
+--   @comparison@ block generated additionally gets one surface-context line
+--   /above/ that kernel line, naming the block and its @result@\/@baseline@\/
+--   measurand — 'Lara.Elaborate.sourceResultAuthorDiagnostics'),
 --   @2@ =
 --   decode/elaborate-boundary or usage error (with a located message on
 --   @stderr@ and nothing on @stdout@). For @.lara@, a program\/policy parse
@@ -50,7 +54,7 @@ import Lara.Elaborate
   , renderSourceInvalid
   , runSourceCheck
   , sourceResultAudit
-  , sourceResultDiagnostics
+  , sourceResultAuthorDiagnostics
   , sourceResultVerdict
   )
 import qualified Lara.Syntax as Syntax
@@ -140,7 +144,14 @@ checkLara file = do
                       let result = runSourceCheck input
                           audit = sourceResultAudit result
                           verdict = sourceResultVerdict result
-                      mapM_ (hPutStrLn stderr) (sourceResultDiagnostics result)
+                      -- The author-facing layer (plan D5): the same kernel
+                      -- lines the raw door prints, with a surface-context line
+                      -- prepended when the rejected argument is one a
+                      -- @comparison@ block generated. Additive only — the
+                      -- kernel line, the verdict, and the exit code are
+                      -- unchanged, and the raw @.sexp@ door above does not go
+                      -- through here.
+                      mapM_ (hPutStrLn stderr) (sourceResultAuthorDiagnostics result)
                       case verdictOutcome verdict of
                         Accept{}
                           | not (admissionAuditIsEmpty audit) ->

@@ -1,4 +1,4 @@
-# S2 — ordered-comparison worked example (lara-syntax@0.2)
+# S2 — ordered-comparison worked example (lara-syntax@0.3)
 #
 # The second strict-certificate worked example, and the first exercising the
 # ord@1 backend: the most common claim shape in ML methodology papers — "this
@@ -18,6 +18,21 @@
 # true — that stays with the defeasible observed leaves. You cannot argue with
 # the arithmetic; you argue with the measurements and with the binding.
 #
+# WHAT CHANGED AT @0.3. Both arguments, and the sub-claim they turn on, are now
+# written as one `comparison` block. The layering above is unchanged — the block
+# still produces a strict a1 and a defeasible a2, and the elaborated Unit is
+# byte-identical to the hand-written @0.2 source this replaced. What is gone is
+# everything the author was previously required to write but was not claiming:
+# the num_lt argument order, the two certificate slot indices, and both θ
+# vectors. The author now states the two cells, the binding, and the direction;
+# the policy's measurand polarity and comparison scheme (ord-v1.policy.lara)
+# determine the rest.
+#
+# The sub-claim c2 did NOT vanish with its declaration. Its prose, its author
+# attestation, and its id all reach the Unit and none can be machine-invented,
+# so they are declared in the block's `claims` sub-block; only its `formal` —
+# the arithmetic — is generated.
+#
 # Expected verdict is at the bottom of this file (golden oracle).
 
 artifact ord_demo at sha256:5252525252525252525252525252525252525252525252525252525252525252
@@ -31,16 +46,10 @@ claim c1
   formal  = better(sys_new, sys_base, accuracy, imagenet_val)
   binding = { author = alice, rationale = "Ordered comparison of two reported accuracy cells.", audit-status = reviewed }
 
-# --- The certificate-checked comparison sub-claim ---------------------------------------------
-
-claim c2
-  nl      = "The reported baseline accuracy 0.71 is strictly below the reported system accuracy 0.74"
-  formal  = num_lt(0.71, 0.74)
-  binding = { author = alice, audit-status = reviewed }
-
 # --- The two measured cells the certificate consults ------------------------------------------
 # One leaf per reported cell. These carry the raw numbers; their truth is observed evidence,
-# never certified content.
+# never certified content. They are also the only place a number is written: the comparison
+# below names these leaves and reads the values out of them.
 
 leaf e1 : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))
   kind       = observed
@@ -55,23 +64,43 @@ leaf e2 : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.74))
 # The binding the bridge rule needs: which systems and measurand those two numbers belong to.
 # The bare comparison cannot say this — as a proposition num_lt(0.71, 0.74) is the same atom
 # whichever measurands produced the numbers — so the identity enters as attested evidence.
+#
+# This leaf is NEVER generated. It is an attestation with an author and a provenance tag; a
+# `comparison` block that synthesized it would manufacture evidence nobody signed, and the thing
+# examples/S4 attacks would be something the compiler invented.
 
 leaf e3 : comparison_setup(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71)
   kind       = attested
   provenance = user
   refs       = [evidence/tables/accuracy.md#caption]
 
-# --- The strict step: ord@1 replays the comparison --------------------------------------------
-# The certificate consults premise slots 0 (baseline cell 0.71) and 1 (system cell 0.74) and
-# carries no witness value — a comparison over ground literals has nothing to recompute, so
-# replay decides it directly. Slots name premises only (design §2.2).
+# --- The comparison: one block, two arguments -------------------------------------------------
+# `relation` plus the measurand's declared polarity select the scheme; the scheme names the
+# strict rule (beats_recheck) and the bridge (beats_baseline). From `result`/`baseline` the
+# elaborator reads the two cells out of the named leaves — the same premiseCell helper ord@1
+# itself uses — and generates:
+#
+#   * claim c2, whose formal is num_lt(0.71, 0.74) — the goal the (strictly-better,
+#     higher-is-better) cell of the lookup table calls for, in that argument order;
+#   * arg a1, the strict step, with the ord@1 certificate and its two 0-based (prem i) slots;
+#   * arg a2, the defeasible bridge, consuming the strict conclusion plus the binding leaf.
+#
+# Both argument ids are author-declared rather than derived, and that is load-bearing: S4
+# attacks this bridge by id and position. The sub-claim's prose interpolates the SAME leaves the
+# arithmetic reads, so a number quoted in prose is guaranteed to be the number the cited
+# evidence carries — it cannot go stale independently.
 
-arg a1 : supports(c2) by beats_recheck(sys_new, sys_base, accuracy, imagenet_val, exp1, 0.74, 0.71)
-  assurance = cert(ord@1, sha256:ord-v1-theory-0, (ordcmp (prem 0) (prem 1)))
-
-# --- The bridge: the comparison becomes a comparative claim ------------------------------------
-
-arg a2 : supports(c1) by beats_baseline(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71)
+comparison : better(sys_new, sys_base) on accuracy @ imagenet_val
+  relation = strictly-better
+  recheck  = a1
+  bridge   = a2
+  result   = e2
+  baseline = e1
+  binding  = e3
+  claims c2
+    nl      = "The reported baseline accuracy {cell e1} is strictly below the reported system accuracy {cell e2}"
+    binding = { author = alice, audit-status = reviewed }
+  supports c1
 
 status c1
 

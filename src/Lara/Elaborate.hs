@@ -63,13 +63,17 @@ module Lara.Elaborate
   , sourceResultVerdict
   , sourceResultAudit
   , sourceResultDiagnostics
+  , sourceResultAuthorDiagnostics
   , sourceResultLocatedRejection
   , sourceResultCheckedArgIds
   , sourceResultCheckInput
+    -- * Surface provenance (plan D5)
+  , GeneratedArg (..)
+  , sourceResultGeneratedArgs
   ) where
 
 import Data.Bifunctor (first)
-import Data.List (sort)
+import Data.List (find, sort)
 import qualified Data.Set as Set
 
 import Lara.AST
@@ -84,15 +88,20 @@ import Lara.Admission.Internal
   )
 import Lara.Blocked (Prune, pruneChecked, pruneWithPolicySeed)
 import Lara.Check (fullConfig)
-import Lara.Diagnostics (LocatedRejection)
+import Lara.Diagnostics
+  ( Constituent (..)
+  , LocatedRejection (..)
+  , Stage (..)
+  )
 import Lara.Driver.Internal (runCheckReported)
 import Lara.Elaborate.Internal
   ( ElabError (..)
+  , GeneratedArg (..)
   , Sigma (..)
   , TheoryRegistry (..)
   , defeasibleSuiteSigma
   , elabErrorMessage
-  , elaborate
+  , elaborateWithProvenance
   , emptyRegistry
   , emptySigma
   , registryOf
@@ -137,9 +146,14 @@ data PreparedSource
   | SourceAccepted SourceCheckInput
 
 -- | The constructor is hidden.  Program, policy, fully elaborated declared
--- unit, explicit policy seed, final one-pass prune, audit, and replay identity
--- travel together, so a presentation caller cannot forge independently paired
--- halves.
+-- unit, explicit policy seed, final one-pass prune, audit, replay identity, and
+-- the @comparison@ expansion's surface breadcrumb travel together, so a
+-- presentation caller cannot forge independently paired halves.
+--
+-- The breadcrumb rides __beside__ the 'Unit', in this carrier, exactly because
+-- it must not reach it (plan D5): the elaborated 'Unit' is byte-identical with
+-- and without it, and the @examples\/*\/example.core.sexp@ goldens are the
+-- standing check.
 data SourceCheckInput = SourceCheckInput
   Program
   Policy
@@ -148,6 +162,7 @@ data SourceCheckInput = SourceCheckInput
   Prune
   AdmissionAudit
   CheckInput
+  [GeneratedArg]
 
 -- | Public source result.  Diagnostics and the located rejection are produced by
 -- the same declared input and prune that produced the verdict; callers observe
@@ -159,12 +174,13 @@ data SourceResult = SourceResult
   (Maybe LocatedRejection)
   [ArgId]
   CheckInput
+  [GeneratedArg]
 
 sourceResultVerdict :: SourceResult -> Verdict
-sourceResultVerdict (SourceResult verdict _ _ _ _ _) = verdict
+sourceResultVerdict (SourceResult verdict _ _ _ _ _ _) = verdict
 
 sourceResultAudit :: SourceResult -> AdmissionAudit
-sourceResultAudit (SourceResult _ audit _ _ _ _) = audit
+sourceResultAudit (SourceResult _ audit _ _ _ _ _) = audit
 
 -- | The @stderr@ lines this result's rejection warrants, in the raw driver's
 -- established precedence: a replay-preflight R13
@@ -179,7 +195,7 @@ sourceResultAudit (SourceResult _ audit _ _ _ _) = audit
 -- verdict, so a line here can never explain a rejection this result did not
 -- make.
 sourceResultDiagnostics :: SourceResult -> [String]
-sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _) = diagnostics
+sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _) = diagnostics
 
 -- | The located rejection that produced this result's verdict, from the /same/
 -- decision path ("Lara.Driver.Internal".@runCheckReported@): its class, failing
@@ -191,7 +207,7 @@ sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _) = diagnostics
 -- rather than in a message line — so an R1 on a pruned source would print an
 -- empty diagnostic.
 sourceResultLocatedRejection :: SourceResult -> Maybe LocatedRejection
-sourceResultLocatedRejection (SourceResult _ _ _ located _ _) = located
+sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _) = located
 
 -- | The argument ids of the __checked__ (post-prune) program, in the order the
 -- checker indexed them.  A 'LocatedRejection' constituent names arguments by
@@ -201,7 +217,14 @@ sourceResultLocatedRejection (SourceResult _ _ _ located _ _) = located
 -- checked 'Unit' is deliberately not, so a caller still cannot rebuild a
 -- policy-pruned envelope and re-run it without the blocked-status overlay.
 sourceResultCheckedArgIds :: SourceResult -> [ArgId]
-sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _) = argIds
+sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _) = argIds
+
+-- | Every argument this source's @comparison@ blocks generated, tied back to
+-- the block that minted it (plan D5).  Empty for a program that authors no
+-- @comparison@ — which is every raw @.sexp@ input, and every @lara-syntax\@0.2@
+-- program.
+sourceResultGeneratedArgs :: SourceResult -> [GeneratedArg]
+sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated) = generated
 
 -- | The validated raw core envelope bound into this source result, unless
 -- policy admission removed source material. Duplicate-group quarantine is
@@ -211,7 +234,7 @@ sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _) = argIds
 -- fail closed rather than recompute the declared envelope through
 -- 'Lara.Driver.runCheck'.
 sourceResultCheckInput :: SourceResult -> Either AdmissionAudit CheckInput
-sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput)
+sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _)
   | admissionAuditHasPolicyQuarantine audit = Left audit
   | otherwise = Right checkInput
 
@@ -235,9 +258,9 @@ prepareSource sigma program policy = do
   case firstDuplicateLeafId leaves of
     Just leaf -> Left (DuplicateSourceLeafId leaf)
     Nothing -> Right ()
-  declared <-
+  (declared, generated) <-
     first SourceElaborationError
-      (elaborate sigma (registryOf policy) program policy)
+      (elaborateWithProvenance sigma (registryOf policy) program policy)
   checkInput <- first SourceReplayError (sourceReplayInput program policy declared)
   case firstAdmissionRejection (policyAdmission policy) leaves of
     Just rejection -> Right (SourceRejected rejection)
@@ -247,11 +270,20 @@ prepareSource sigma program policy = do
           audit = buildAdmissionAudit finalPrune
        in Right
             ( SourceAccepted
-                (SourceCheckInput program policy declared policySeed finalPrune audit checkInput)
+                ( SourceCheckInput
+                    program
+                    policy
+                    declared
+                    policySeed
+                    finalPrune
+                    audit
+                    checkInput
+                    generated
+                )
             )
 
 runSourceCheck :: SourceCheckInput -> SourceResult
-runSourceCheck (SourceCheckInput _ _ _ _ finalPrune audit checkInput) =
+runSourceCheck (SourceCheckInput _ _ _ _ finalPrune audit checkInput generated) =
   let (verdict, located, diagnostics) =
         runCheckReported fullConfig checkInput finalPrune
    in SourceResult
@@ -261,6 +293,82 @@ runSourceCheck (SourceCheckInput _ _ _ _ finalPrune audit checkInput) =
         located
         (map fst (unitArgs (pruneChecked finalPrune)))
         checkInput
+        generated
+
+-- ---------------------------------------------------------------------------
+-- The author-facing layer (plan D5, eng review 2A)
+-- ---------------------------------------------------------------------------
+
+-- | The @stderr@ lines the __@.lara@ door__ prints: 'sourceResultDiagnostics'
+-- with one surface-context line prepended when the rejected constituent is an
+-- argument a @comparison@ block generated.
+--
+-- __Why this exists.__ A kernel diagnostic is worded in the kernel's
+-- vocabulary. When @ord\@1@ refuses a certificate the @comparison@ form
+-- generated, the author reads about premise slots they never wrote — the whole
+-- point of the form is that slot indices are no longer authored (plan §1.1).
+-- The kernel line is right and is byte-pinned; what was missing is the sentence
+-- above it that says which authored block the machinery below came from, and
+-- which of its fields to look at.
+--
+-- __What it is not.__ It is strictly additive framing: the kernel line follows
+-- unchanged and in the same order, the verdict class, the exit code, and
+-- @stdout@ are untouched, and nothing is added when there is no kernel line to
+-- sit above. The raw @.sexp@ door does not call this — a wire program has no
+-- surface, no @comparison@, and no breadcrumb — so its bytes are unchanged by
+-- construction. 'sourceResultDiagnostics' also stays as it was, because
+-- "Lara.ExpectedJson" pins its @messages@ field in every @expected.json@.
+sourceResultAuthorDiagnostics :: SourceResult -> [String]
+sourceResultAuthorDiagnostics result = case sourceResultDiagnostics result of
+  [] -> []
+  diagnostics -> surfaceContextLines result ++ diagnostics
+
+-- | The surface-context line, or none.
+--
+-- Gated on 'StageSupport' + 'CArgument', which is exactly the checker-side
+-- backend rejection ("Lara.Driver".@backendRejectionMessage@): its
+-- 'Lara.Diagnostics.locate' arm is @PERejection (DLArgument i)@.  The other two
+-- message-bearing rejections are excluded deliberately — a replay-preflight R13
+-- indexes the /declared/ arguments rather than the checked ones, and an
+-- escalated group conflict locates at a 'Lara.Diagnostics.CGroup', so neither
+-- can be resolved against 'sourceResultCheckedArgIds'.
+surfaceContextLines :: SourceResult -> [String]
+surfaceContextLines result = case sourceResultLocatedRejection result of
+  Just (LocatedRejection _ StageSupport (CArgument i))
+    | Just aid <- nth i (sourceResultCheckedArgIds result)
+    , Just crumb <- find ((== aid) . gaArgId) (sourceResultGeneratedArgs result) ->
+        [renderGeneratedArg crumb]
+  _ -> []
+  where
+    nth i xs
+      | i < 0 = Nothing
+      | otherwise = case drop i xs of
+          x : _ -> Just x
+          [] -> Nothing
+
+-- | One line, in the vocabulary the author wrote: the block (named by its
+-- @claims@ id, as every other @comparison@ diagnostic names it —
+-- 'Lara.Elaborate.elabErrorMessage'), the argument it generated, and the three
+-- fields that decided the arithmetic below.
+renderGeneratedArg :: GeneratedArg -> String
+renderGeneratedArg crumb =
+  "lara: comparison claiming '"
+    ++ claimName
+    ++ "': argument '"
+    ++ argName
+    ++ "' was generated by that block from result = '"
+    ++ resultName
+    ++ "', baseline = '"
+    ++ baselineName
+    ++ "', on '"
+    ++ measurandName
+    ++ "'"
+  where
+    PropId claimName = gaClaimId crumb
+    ArgId argName = gaArgId crumb
+    LeafId resultName = gaResult crumb
+    LeafId baselineName = gaBaseline crumb
+    MeasurandId measurandName = gaMeasurand crumb
 
 sourceReplayInput :: Program -> Policy -> Unit -> Either ReplayError CheckInput
 sourceReplayInput program policy declared = do

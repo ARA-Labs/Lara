@@ -35,6 +35,8 @@ sourcePolicy =
         , (TheoryDigest "sha256:a", [])
         ]
     , policyGroupMode = QuarantineOnConflict
+    , policyMeasurands = []
+    , policyComparisonSchemes = []
     }
 
 sourceUnit :: Unit

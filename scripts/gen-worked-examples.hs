@@ -41,50 +41,33 @@ import Lara.ExpectedJson (expectedJson)
 import Lara.Replay (CheckInput)
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Wire (encodeCheckInput, printSExpr)
+import Lara.WorkedExamples
+  ( workedExampleArtifact
+  , workedExampleCore
+  , workedExampleExpected
+  , workedExamplePolicy
+  , workedExamples
+  )
 import System.Environment (getArgs)
 import System.FilePath ((</>), (<.>))
-
--- | (example directory, policy basename). The artifact is always
--- @<dir>/example.lara@; the policy is @<dir>/<basename>@ (co-located, matching the
--- @policy <name>@ header the artifact declares).
-examples :: [(FilePath, FilePath)]
-examples =
-  [ ("examples/A", "empirical-v1.policy.lara")
-  , ("examples/B", "empirical-v1.policy.lara")
-  , ("examples/E1", "empirical-v1.policy.lara")
-  , ("examples/E2", "empirical-v1.policy.lara")
-  , ("examples/E3", "empirical-v1.policy.lara")
-  , ("examples/E4", "empirical-v2.policy.lara")
-  , ("examples/E5", "empirical-v2.policy.lara")
-  , ("examples/R1", "empirical-v1.policy.lara")
-  , ("examples/R2", "strict-bad-v1.policy.lara")
-  , ("examples/R3", "empirical-v1.policy.lara")
-  , ("examples/S1", "strict-v1.policy.lara")
-  , ("examples/S2", "ord-v1.policy.lara")
-  , ("examples/S3", "ord-le-v1.policy.lara")
-  , ("examples/S4", "ord-setting-v1.policy.lara")
-  , ("examples/agreement-map", "agreement-v1.policy.lara")
-  , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
-  , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
-  , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
-  , ("examples/running-example/run1", "empirical-v1.policy.lara")
-  , ("examples/running-example/run2", "empirical-v1.policy.lara")
-  ]
 
 main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [] -> mapM_ genExample examples
+    [] -> mapM_ genExample workedExamples
     ["--bundle", dir] -> genBundle dir
     _ -> fail "usage: gen-worked-examples.hs [--bundle BUNDLE_DIR]"
 
+-- | Derive and write both generated files of one registry entry. The paths come
+-- from "Lara.WorkedExamples" so the generator and @test\/WorkedExamplesSpec.hs@
+-- cannot disagree about which bytes belong to which example.
 genExample :: (FilePath, FilePath) -> IO ()
-genExample (dir, policyBase) = do
-  let artifactPath = dir </> "example.lara"
-      policyPath = dir </> policyBase
-      corePath = dir </> "example.core.sexp"
-      expectedPath = dir </> "expected.json"
+genExample entry@(dir, _) = do
+  let artifactPath = workedExampleArtifact dir
+      policyPath = workedExamplePolicy entry
+      corePath = workedExampleCore dir
+      expectedPath = workedExampleExpected dir
   input <- loadCheckInput artifactPath policyPath
   writeCore corePath input
   writeFile expectedPath (expectedJson input)

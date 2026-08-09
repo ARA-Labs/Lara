@@ -35,6 +35,9 @@ library
                       Lara.Syntax
                       Lara.Elaborate
                       Lara.Elaborate.Internal
+                      Lara.Elaborate.Error
+                      Lara.Elaborate.Subst
+                      Lara.Elaborate.Comparison
                       Lara.Examples
                       Lara.Negatives
                       Lara.Term
@@ -65,6 +68,7 @@ library
                       Lara.MechReview
                       Lara.MechReview.Load
                       Lara.RunningExample
+                      Lara.WorkedExamples
     build-depends:    base >=4 && <5
                     , containers
     default-language: GHC2021
@@ -99,6 +103,7 @@ test-suite lara-test
                       SyntaxSpec
                       ElaborateSpec
                       WorkedExamplesSpec
+                      SurfaceRewriteSpec
                       CheckSpec
                       BlockedSpec
                       DifferentialSpec

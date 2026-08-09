@@ -46,9 +46,10 @@ asserts each stays in sync with its `.lara` source.
 | `A/example.lara` | one paper attacks its own headline claim | rebut + undercut + undermine (all three), all in-paper | **defeated** | "a paper can't rebut itself" is a category error; self-attacks = the paper's honesty about its limits |
 | `B/example.lara` | two papers, contrary conclusions | rebut (mutual, a 2-cycle) | **contested** ×2 | no new calculus for corpus scale; and the attack only forms because both claims hit the *same atoms* under `≡` |
 | `S1/example.lara` | strict rule with an `nd@1` certificate | — | **justified** | closes the frontend certificate path: surface assurance + policy theory → elaboration → replay |
-| `S2/example.lara` | `ord@1` comparison certificate + a defeasible bridge rule (policy `ord-v1`) | — | **justified** | the §3.6 layering: an accepted comparison atom is *terminal* until a rule binds it to systems and measurand. Strict arithmetic, defeasible bridge |
-| `S3/example.lara` | the same certificate shape at the **tie** (policy `ord-le-v1`) | — | **justified** (`at_least_as_good`) | the family's two members separate here: `num_le` accepts on two equal cells where `num_lt` is an R13 replay rejection, so no certificate can upgrade "at least as good" to "beats" |
-| `S4/example.lara` | S2's artifact plus a settings audit undermining the binding (policy `ord-setting-v1`) | undermine (on a premise leaf) | **defeated** (`better`) + **justified** (`num_lt`) | the factivity firewall in the grounded semantics: the attack lands on the layer that asserted comparability and stops at the certified arithmetic |
+| `S2/example.lara` | `ord@1` comparison certificate + a defeasible bridge rule, authored as one `comparison` block (policy `ord-v1`) | — | **justified** | the §3.6 layering: an accepted comparison atom is *terminal* until a rule binds it to systems and measurand. Strict arithmetic, defeasible bridge — and the author writes neither the `num_lt` argument order, the certificate slots, nor the θ vectors |
+| `S3/example.lara` | the same certificate shape at the **tie**, `relation = at-least-as-good` (policy `ord-le-v1`) | — | **justified** (`at_least_as_good`) | the family's two members separate here: `num_le` accepts on two equal cells where `num_lt` is an R13 replay rejection, so no certificate can upgrade "at least as good" to "beats". S3 is S2 with three lines changed, under a different policy — which is why the block names a *relation* and lets the policy name its own rules |
+| `S4/example.lara` | S2's artifact plus a settings audit undermining the binding, attacked by **label** (`a2.binding.leaf`) (policy `ord-setting-v1`) | undermine (on a premise leaf) | **defeated** (`better`) + **justified** (`num_lt`) | the factivity firewall in the grounded semantics: the attack lands on the layer that asserted comparability and stops at the certified arithmetic. Also that *generated* structure is ordinary structure — attackable at exactly the same point, by a name rather than a slot index |
+| `S5/example.lara` | the same `strictly-better` source shape over a **`lower-is-better`** measurand (perplexity, policy `ord-ppl-v1`) | — | **justified** (`better`) + **justified** (`num_lt`) | direction of goodness is *declared* domain knowledge, not inferable from use. The same authored relation generates the mirrored goal `num_lt(ours, theirs)`, which `ord@1` then accepts — polarity chooses which comparison to make, the backend still decides it |
 | `E4/example.lara` | reinstatement — three claims justified **while attacked** (policy `empirical-v2`) | rebut + undermine + undercut, each defended | **justified** ×3 (under attack) + **defeated** | defense is policy vocabulary (an exception, a one-directional contrary, a withheld edge), not a new mechanism |
 | `E5/example.lara` | contested beyond rebut + gap amid attacks (policy `empirical-v2`) | undermine 2-cycle + undercut 2-cycle | **contested** ×2 + **gap** | `contested` is any-kind undec, not a rebut artifact; `gap` is missing support, orthogonal to conflict |
 
@@ -71,9 +72,12 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
 - **S1** is the strict-backend demonstrator: its policy carries the trusted empty
   theory, its artifact carries `assurance = cert(…)`, and `nd@1` replays the
   certificate before the claim becomes justified.
-- **S2–S4** are the ordered-comparison trio, on `ord@1`. They share one artifact
+- **S2–S5** are the ordered-comparison set, on `ord@1`. They share one artifact
   shape — two reported score cells, a strict re-check, a defeasible bridge — and
-  vary one thing each, so the comparisons between them are the content:
+  vary one thing each, so the comparisons between them are the content. All four
+  author that shape as a single `comparison` block (`lara-syntax@0.3`); each
+  elaborates to the byte-identical unit its hand-written predecessor produced,
+  so what varies below is the research content and not the encoding:
   - **S2** is the base case: `num_lt` on two different cells, nothing attacked.
   - **S3** moves to the **tie**. The cells are equal, so `num_le` is the only
     family member a certificate can carry, and the bridge concludes
@@ -87,7 +91,16 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
     `num_lt(0.71, 0.74)` stays **justified**. This is the sharpest statement of
     what a certificate does and does not buy: it discharged the arithmetic, the
     disputed content was never inside it, and the grounded labelling separates
-    the two.
+    the two. It also attacks the bridge by the premise *label* its policy
+    declares (`a2.binding.leaf`) rather than by counting to `a2.1.leaf` — both
+    spellings resolve to the same premise, which is what makes the readable one
+    safe to prefer.
+  - **S5** changes the **direction of goodness**. Perplexity is declared
+    `lower-is-better`, so the same `relation = strictly-better` source generates
+    the mirrored goal `num_lt(28.4, 31.6)` — ours below theirs — and `ord@1`
+    accepts it. S2 and S5 are the two halves of the polarity contract: an author
+    states one research relation, and which arithmetic supports it follows from
+    a fact about the metric, declared once in the policy.
 - **E4/E5** are the M5 worked cases (tracker #48, T4). E1–E3/A/B leave three
   label cells structurally empty: an attacked argument that *survives* (E4 —
   grounded reinstatement, one context per attack kind), a `contested` produced

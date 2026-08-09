@@ -30,7 +30,7 @@ use backends [nd@1]
 # --- The headline claim, stated but not assemblable at corpus-v1's evidential bar ---------------
 
 claim c06
-  nl      = "Follower entropy regularization (sigma=0.005) improves SAPG on the harder exploration task Reorientation by up to 16.5 percent over sigma=0, while sigma=0 is optimal on the easier AllegroHand, Regrasping, and Throw; only sigma varies across {0, 0.003, 0.005} with a sigma=0 baseline on every task, but no per-seed variance is reported"
+  nl      = "Follower entropy regularization (sigma=0.005) improves SAPG on the harder exploration task Reorientation by up to 16.5 percent over sigma=0, while sigma=0 is optimal on the easier AllegroHand, Regrasping, and Throw; only sigma varies across {{0, 0.003, 0.005}} with a sigma=0 baseline on every task, but no per-seed variance is reported"
   formal  = contributes(follower_entropy_reg, sapg, reorientation_performance)
   binding = { author = m0-annotator, audit-status = unreviewed }
 

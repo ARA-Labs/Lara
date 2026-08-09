@@ -1,9 +1,10 @@
 /-
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
-This module ports the frozen presentation-syntax datatype of `src/Lara/AST.hs`
-(the `Program` / `Policy` shape the paper's surface syntax and the JSON wire both
-denote — see `Lara.AST`, "The one abstract syntax has two front ends") into Lean,
+This module ports the presentation-syntax datatype of `src/Lara/AST.hs` at
+`lara-syntax@0.3` (the `Program` / `Policy` shape the paper's surface syntax and
+the JSON wire both denote — see `Lara.AST`, "The one abstract syntax has two
+front ends") into Lean,
 defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
 and proves the round-trip
@@ -21,11 +22,11 @@ proof strength remains *test-only* — it is not a soundness theorem. The real
 conformance evidence for the concrete `.lara` surface syntax is the Haskell
 QuickCheck round-trip (`parse ∘ print == id`); a Lean re-implementation of a
 *different* codec cannot transfer to the Haskell parser (spec plan A3). So this
-theorem is a **metatheory anchor for the frozen AST shape**: it certifies that the
-presentation AST — every field of every `Decl` / `Claim` / `Leaf` / `Rule` /
-`Question` / `Attack` / `SupportTerm` / … — carries enough structure to be
-serialized and recovered by *a* total codec, with no information collapsed. It is
-NOT a proof that the concrete-syntax Haskell parser is correct.
+theorem is a **metatheory anchor for the AST shape**: it certifies that the
+presentation AST — over exactly the surface enumerated under `## Scope` below —
+carries enough structure to be serialized and recovered by *a* total codec, with
+no information collapsed. It is NOT a proof that the concrete-syntax Haskell
+parser is correct, and it says nothing about the concrete `.lara` spelling.
 
 Following the sanctioned design guidance (design for provability, not fidelity to
 the concrete whitespace/comment syntax), the codec targets a clean structured
@@ -36,24 +37,69 @@ value. This mirrors the existing verified structured codecs in the development:
 
 ## Scope
 
-FULL presentation `Program` and `Policy`, field-for-field with `Lara.AST`:
+Verified against `src/Lara/AST.hs` at `lara-syntax@0.3`. What is covered:
 
-* all identifier newtypes (kept as distinct one-field structures, so the codec
-  cannot silently swap namespaces — the symbolic-core discipline of CLAUDE.md);
-* every closed enum vocabulary (`LeafKind`, `Provenance`, `AuditStatus`, `Mode`,
-  `Necessity`, `Admission`, `Step`, plus `Bool` flags);
-* propositions reuse the frozen `Lara.Atom` / `Term` / `Terms` semantic core
-  (`Lara.Prop`), so the codec composes with the real proposition type;
-* the recursive spine — `Pat` / `AtomPat`, and the `SupportTerm` term algebra
+* **Both presentation top-levels, field-for-field**: every field of `Program`
+  (5) and of `Policy` (9 — including `policyTheories`, `policyGroupMode`,
+  `policyMeasurands`, `policyComparisonSchemes`), and every arm of `Decl` (7 —
+  including `DeclGroup` and `DeclComparison`).
+* **Every identifier newtype** of the `Names` and `@0.3` sections — `PropId`,
+  `QuestionId`, `LeafId`, `RuleId`, `ArgId`, `ObligationId`, `BackendId`,
+  `PolicyId`, `Param`, `SourceRef`, `TheoryDigest`, `Digest`, `GroupId`,
+  `MeasurandId`, `DatasetId`, `PremiseLabel` — kept as distinct one-field
+  structures, so the codec cannot silently swap namespaces (the symbolic-core
+  discipline of CLAUDE.md).
+* **Every closed enum vocabulary**: `LeafKind`, `Provenance`, `AuditStatus`,
+  `Mode`, `Necessity`, `Admission`, `Step`, `GroupConflictMode`, `Polarity`,
+  `Relation`, `MeasurandSort`, plus `Bool` flags and `Option` fields.
+* **The recursive spine** — `Pat` / `AtomPat`, and the `SupportTerm` term algebra
   (premises, ground substitution, critical-question discharge map, open holes,
   and assurance) — modeled with bespoke mutual list inductives so `deriving
   DecidableEq` and clean mutual structural recursion both work, exactly as
-  `Lara.Prop` does for `Term` / `Terms`;
-* the opaque strict-certificate payload is carried as an `Sx` verbatim — faithful
-  to `Lara.AST`'s "opaque payload, only the named backend decodes it";
-* the full record layer: `Leaf`, `Binding`, `Claim`, `Question`, `CertRef`,
-  `Rule`, `Contrary`, `Exception`, `Policy`, `Cert`, `Assurance`, `Attack`,
-  `ChallengeTarget`, `ArgConcl`, `Arg`, `Decl`, `Program`.
+  `Lara.Prop` does for `Term` / `Terms`.
+* **The full record layer**: `Leaf`, `Binding`, `Claim`, `Question`, `CertRef`,
+  `Rule` (with `@0.3`'s `rulePremiseLabels`), `Contrary`, `Exception`,
+  `DupGroup`, `Measurand`, `ComparisonScheme`, `Policy`, `Cert`, `Assurance`,
+  `Attack`, `SurfaceAttack`, `ChallengeTarget`, `ArgConcl`, `Arg`,
+  `ComparisonClaim`, `Comparison`, `Decl`, `Program`.
+* The opaque strict-certificate payload is carried as an `Sx` verbatim — faithful
+  to `Lara.AST`'s "opaque payload, only the named backend decodes it".
+* Both the frozen `Attack` / `Position` / `Step` **and** the `@0.3`
+  presentation-only `SurfaceAttack` / `SurfaceStep` (grammar §7 AMENDMENT,
+  App. B.5). `Decl.attack` carries the *surface* form, matching `DeclAttack`;
+  the frozen trio is kept, codec'd, and proved, but is now reachable only from
+  the elaborator's output, not from a `Program`.
+
+## What is deliberately NOT here, and the modeling deviations
+
+Not ported, because they are not part of the presentation `Program`/`Policy` and
+are mechanized elsewhere in this development:
+
+* `Unit` — the checker-boundary anchor; see `Lara/Unit.lean` and the wire codec
+  work, not this module.
+* `Status` / `Label` (spec §8) and `RejectClass` / `Rejection` (spec §10.1) —
+  checker *outputs*, mirrored by `Lara/Check/Error.lean`.
+* The `Assurance'` alias, which is `Assurance` under another name.
+
+Deviations a reader should not mistake for parity:
+
+* Haskell `Prop = Prop Pred [Term]` is this module's `Lara.Atom`, and `Pred` /
+  `FunSym` are bare `String`s inside `Atom` / `Pat` / `AtomPat` because that is
+  how the frozen Lean semantic core (`Lara.Prop`) already spells them. The
+  identifier-newtype discipline above therefore stops at the `Lara.Prop`
+  boundary; it is not weakened anywhere this module owns.
+* Wire NATs (`certVersion`, `certRefVersion`) and premise indices (`Step`,
+  `SurfaceStep`) are `Int`, following the Haskell `Int`.
+* `Rule.premiseLabels` round-trips *whatever list it is given*. `Lara.AST`
+  additionally declares a canonical form (`[]`, or exactly `premises.length`
+  entries with at least one `some`); a non-canonical all-`none` list is a real
+  inhabitant of this Lean type and round-trips fine here. Canonicalization is a
+  property of the Haskell concrete printer, not of this structured codec, and is
+  not claimed by result 12.
+* The codec targets the structured `Sx`, not `.lara` concrete syntax; so nothing
+  about whitespace, comments, `{cell l}` interpolation, or the `{{`/`}}` brace
+  contract is in scope. `ComparisonClaim.nlRaw` is carried as authored bytes
+  precisely so that stays true.
 -/
 import Lara.Prop
 
@@ -130,6 +176,25 @@ def unSxPair {α β : Type} (g : Sx → Option α) (j : Sx → Option β) : Sx �
     unSxPair g j (sxPair f k ab) = some ab := by
   simp [sxPair, unSxPair, hf, hk]
 
+/-- An optional field: `"no"`/`"so"`-tagged nodes. Used by `Rule.premiseLabels`
+(`List (Option PremiseLabel)`, grammar App. B.4) and `Comparison.supports`
+(`Maybe PropId`, App. B.3). -/
+def sxOpt (f : α → Sx) : Option α → Sx
+  | none   => .node "no" .nil
+  | some a => .node "so" (.cons (f a) .nil)
+
+def unOpt (g : Sx → Option α) : Sx → Option (Option α)
+  | .node "no" .nil          => some none
+  | .node "so" (.cons x .nil) => do
+      let a ← g x
+      some (some a)
+  | _ => none
+
+@[simp] theorem unOpt_sxOpt {f : α → Sx} {g : Sx → Option α}
+    (h : ∀ a, g (f a) = some a) (o : Option α) :
+    unOpt g (sxOpt f o) = some o := by
+  cases o <;> simp [sxOpt, unOpt, h]
+
 /-! ## Primitive leaves -/
 
 def sxStr (s : String) : Sx := .str s
@@ -173,6 +238,10 @@ structure Param        where mk :: (val : String) deriving DecidableEq
 structure SourceRef    where mk :: (val : String) deriving DecidableEq
 structure TheoryDigest where mk :: (val : String) deriving DecidableEq
 structure Digest       where mk :: (val : String) deriving DecidableEq
+structure GroupId      where mk :: (val : String) deriving DecidableEq
+structure MeasurandId  where mk :: (val : String) deriving DecidableEq
+structure DatasetId    where mk :: (val : String) deriving DecidableEq
+structure PremiseLabel where mk :: (val : String) deriving DecidableEq
 
 def PropId.sx       (i : PropId)       : Sx := .str i.val
 def QuestionId.sx   (i : QuestionId)   : Sx := .str i.val
@@ -186,6 +255,10 @@ def Param.sx        (i : Param)        : Sx := .str i.val
 def SourceRef.sx    (i : SourceRef)    : Sx := .str i.val
 def TheoryDigest.sx (i : TheoryDigest) : Sx := .str i.val
 def Digest.sx       (i : Digest)       : Sx := .str i.val
+def GroupId.sx      (i : GroupId)      : Sx := .str i.val
+def MeasurandId.sx  (i : MeasurandId)  : Sx := .str i.val
+def DatasetId.sx    (i : DatasetId)    : Sx := .str i.val
+def PremiseLabel.sx (i : PremiseLabel) : Sx := .str i.val
 
 def unPropId       : Sx → Option PropId       | .str s => some ⟨s⟩ | _ => none
 def unQuestionId   : Sx → Option QuestionId   | .str s => some ⟨s⟩ | _ => none
@@ -199,6 +272,10 @@ def unParam        : Sx → Option Param        | .str s => some ⟨s⟩ | _ => 
 def unSourceRef    : Sx → Option SourceRef    | .str s => some ⟨s⟩ | _ => none
 def unTheoryDigest : Sx → Option TheoryDigest | .str s => some ⟨s⟩ | _ => none
 def unDigest       : Sx → Option Digest       | .str s => some ⟨s⟩ | _ => none
+def unGroupId      : Sx → Option GroupId      | .str s => some ⟨s⟩ | _ => none
+def unMeasurandId  : Sx → Option MeasurandId  | .str s => some ⟨s⟩ | _ => none
+def unDatasetId    : Sx → Option DatasetId    | .str s => some ⟨s⟩ | _ => none
+def unPremiseLabel : Sx → Option PremiseLabel | .str s => some ⟨s⟩ | _ => none
 
 @[simp] theorem un_PropId       (i : PropId)       : unPropId       i.sx = some i := rfl
 @[simp] theorem un_QuestionId   (i : QuestionId)   : unQuestionId   i.sx = some i := rfl
@@ -212,6 +289,20 @@ def unDigest       : Sx → Option Digest       | .str s => some ⟨s⟩ | _ => 
 @[simp] theorem un_SourceRef    (i : SourceRef)    : unSourceRef    i.sx = some i := rfl
 @[simp] theorem un_TheoryDigest (i : TheoryDigest) : unTheoryDigest i.sx = some i := rfl
 @[simp] theorem un_Digest       (i : Digest)       : unDigest       i.sx = some i := rfl
+@[simp] theorem un_GroupId      (i : GroupId)      : unGroupId      i.sx = some i := rfl
+@[simp] theorem un_MeasurandId  (i : MeasurandId)  : unMeasurandId  i.sx = some i := rfl
+@[simp] theorem un_DatasetId    (i : DatasetId)    : unDatasetId    i.sx = some i := rfl
+@[simp] theorem un_PremiseLabel (i : PremiseLabel) : unPremiseLabel i.sx = some i := rfl
+
+@[simp] theorem un_sxList_LeafId (xs : List LeafId) :
+    unSxList unLeafId (sxList LeafId.sx xs) = some xs := unSxList_sxList un_LeafId xs
+@[simp] theorem un_sxOpt_PremiseLabel (o : Option PremiseLabel) :
+    unOpt unPremiseLabel (sxOpt PremiseLabel.sx o) = some o := unOpt_sxOpt un_PremiseLabel o
+@[simp] theorem un_sxList_optPremiseLabel (xs : List (Option PremiseLabel)) :
+    unSxList (unOpt unPremiseLabel) (sxList (sxOpt PremiseLabel.sx) xs) = some xs :=
+  unSxList_sxList un_sxOpt_PremiseLabel xs
+@[simp] theorem un_sxOpt_PropId (o : Option PropId) :
+    unOpt unPropId (sxOpt PropId.sx o) = some o := unOpt_sxOpt un_PropId o
 
 /-! ## Closed enum vocabularies (spec §3, §4, §7, §8)
 
@@ -225,6 +316,16 @@ inductive AuditStatus where | unreviewed | reviewed | disputed deriving Decidabl
 inductive Mode       where | strict | defeasible deriving DecidableEq
 inductive Necessity  where | mandatory | optional deriving DecidableEq
 inductive Admission  where | admit | quarantine | reject deriving DecidableEq
+/-- Policy outcome for a duplicate-report group whose members are not pairwise `≡`
+(spec §4.3). -/
+inductive GroupConflictMode where | quarantineOnConflict | rejectOnConflict deriving DecidableEq
+/-- Which direction of a measurand is the better result (grammar App. B.1). -/
+inductive Polarity   where | higherIsBetter | lowerIsBetter deriving DecidableEq
+/-- The comparative relation a `comparison` block asserts (grammar App. B.2, B.3). -/
+inductive Relation   where | strictlyBetter | atLeastAsGood deriving DecidableEq
+/-- The sort of a declared measurand (grammar App. B.1); one inhabitant today, but a
+sort *position*, not decoration. -/
+inductive MeasurandSort where | sortNum deriving DecidableEq
 
 def LeafKind.sx : LeafKind → Sx
   | .observed  => .node "observed"  .nil
@@ -290,6 +391,42 @@ def unAdmission : Sx → Option Admission
   | _ => none
 @[simp] theorem un_Admission (a : Admission) : unAdmission a.sx = some a := by cases a <;> rfl
 
+def GroupConflictMode.sx : GroupConflictMode → Sx
+  | .quarantineOnConflict => .node "gq" .nil
+  | .rejectOnConflict     => .node "gr" .nil
+def unGroupConflictMode : Sx → Option GroupConflictMode
+  | .node "gq" .nil => some .quarantineOnConflict
+  | .node "gr" .nil => some .rejectOnConflict
+  | _ => none
+@[simp] theorem un_GroupConflictMode (m : GroupConflictMode) :
+    unGroupConflictMode m.sx = some m := by cases m <;> rfl
+
+def Polarity.sx : Polarity → Sx
+  | .higherIsBetter => .node "hib" .nil
+  | .lowerIsBetter  => .node "lib" .nil
+def unPolarity : Sx → Option Polarity
+  | .node "hib" .nil => some .higherIsBetter
+  | .node "lib" .nil => some .lowerIsBetter
+  | _ => none
+@[simp] theorem un_Polarity (p : Polarity) : unPolarity p.sx = some p := by cases p <;> rfl
+
+def Relation.sx : Relation → Sx
+  | .strictlyBetter => .node "sb" .nil
+  | .atLeastAsGood  => .node "alag" .nil
+def unRelation : Sx → Option Relation
+  | .node "sb"   .nil => some .strictlyBetter
+  | .node "alag" .nil => some .atLeastAsGood
+  | _ => none
+@[simp] theorem un_Relation (r : Relation) : unRelation r.sx = some r := by cases r <;> rfl
+
+def MeasurandSort.sx : MeasurandSort → Sx
+  | .sortNum => .node "num" .nil
+def unMeasurandSort : Sx → Option MeasurandSort
+  | .node "num" .nil => some .sortNum
+  | _ => none
+@[simp] theorem un_MeasurandSort (s : MeasurandSort) : unMeasurandSort s.sx = some s := by
+  cases s <;> rfl
+
 /-! ## Propositions (spec §2, reused semantic core `Lara.Prop`)
 
 Ground terms, their argument lists, and atoms are the frozen `Lara.Term` /
@@ -345,6 +482,19 @@ def unAtom : Sx → Option Atom
 @[simp] theorem un_sxAtom (a : Atom) : unAtom (sxAtom a) = some a := by
   cases a with
   | atom p ts => simp [sxAtom, unAtom, un_sxTerms ts]
+
+@[simp] theorem un_sxList_Atom (xs : List Atom) :
+    unSxList unAtom (sxList sxAtom xs) = some xs := unSxList_sxList un_sxAtom xs
+
+/-- A trusted-theory table entry `(digest, [prop])` (grammar App. A.2). -/
+abbrev TheoryEntry := TheoryDigest × List Atom
+def sxTheoryEntry (e : TheoryEntry) : Sx := sxPair TheoryDigest.sx (sxList sxAtom) e
+def unTheoryEntry : Sx → Option TheoryEntry := unSxPair unTheoryDigest (unSxList unAtom)
+@[simp] theorem un_sxTheoryEntry (e : TheoryEntry) : unTheoryEntry (sxTheoryEntry e) = some e :=
+  unSxPair_sxPair un_TheoryDigest un_sxList_Atom e
+@[simp] theorem un_sxList_TheoryEntry (xs : List TheoryEntry) :
+    unSxList unTheoryEntry (sxList sxTheoryEntry xs) = some xs :=
+  unSxList_sxList un_sxTheoryEntry xs
 
 /-! ## Patterns (spec §4.1)
 
@@ -661,30 +811,42 @@ def unCertRef : Sx → Option CertRef
 @[simp] theorem un_sxList_CertRef (xs : List CertRef) :
     unSxList unCertRef (sxList sxCertRef xs) = some xs := unSxList_sxList un_sxCertRef xs
 
+/-- A named inference scheme (spec §4).
+
+`premiseLabels` is the `lara-syntax@0.3` presentation-only field of grammar
+App. B.4, positionally aligned with `premises`: either `[]` (no premise is
+labelled — the `@0.2` spelling) or exactly `premises.length` entries. It is a
+*parallel* field, never a change to `premises`, because `premises` is
+Unit-reachable and frozen. The codec below round-trips whatever list it is
+given; canonicalization (a non-empty all-`none` list prints as the unlabelled
+spelling) is a Haskell-printer concern outside this structured codec. -/
 structure Rule where
   mk ::
   (id : RuleId) (params : List Param) (mode : Mode) (premises : List AtomPat)
+  (premiseLabels : List (Option PremiseLabel))
   (conclusion : AtomPat) (allowTrusted : Bool) (certifiers : List CertRef) (questions : List Question)
   deriving DecidableEq
 def sxRule (r : Rule) : Sx :=
   .node "rule" (.cons r.id.sx (.cons (sxList Param.sx r.params) (.cons r.mode.sx
-    (.cons (sxList sxAtomPat r.premises) (.cons (sxAtomPat r.conclusion)
+    (.cons (sxList sxAtomPat r.premises) (.cons (sxList (sxOpt PremiseLabel.sx) r.premiseLabels)
+    (.cons (sxAtomPat r.conclusion)
     (.cons (sxBool r.allowTrusted) (.cons (sxList sxCertRef r.certifiers)
-    (.cons (sxList sxQuestion r.questions) .nil))))))))
+    (.cons (sxList sxQuestion r.questions) .nil)))))))))
 def unRule : Sx → Option Rule
-  | .node "rule" (.cons i (.cons ps (.cons md (.cons pr (.cons cn (.cons at' (.cons cf (.cons qs .nil)))))))) => do
+  | .node "rule" (.cons i (.cons ps (.cons md (.cons pr (.cons pls (.cons cn (.cons at' (.cons cf (.cons qs .nil))))))))) => do
       let ii ← unRuleId i
       let pp ← unSxList unParam ps
       let mm ← unMode md
       let rr ← unSxList unAtomPat pr
+      let ll ← unSxList (unOpt unPremiseLabel) pls
       let cc ← unAtomPat cn
       let aa ← unBool at'
       let ff ← unSxList unCertRef cf
       let qq ← unSxList unQuestion qs
-      some ⟨ii, pp, mm, rr, cc, aa, ff, qq⟩
+      some ⟨ii, pp, mm, rr, ll, cc, aa, ff, qq⟩
   | _ => none
 @[simp] theorem un_sxRule (r : Rule) : unRule (sxRule r) = some r := by
-  cases r with | mk i ps md pr cn a cf qs => simp [sxRule, unRule]
+  cases r with | mk i ps md pr pls cn a cf qs => simp [sxRule, unRule]
 @[simp] theorem un_sxList_Rule (xs : List Rule) :
     unSxList unRule (sxList sxRule xs) = some xs := unSxList_sxList un_sxRule xs
 
@@ -727,23 +889,95 @@ def unAdmEntry : Sx → Option AdmissionEntry :=
 @[simp] theorem un_sxList_AdmEntry (xs : List AdmissionEntry) :
     unSxList unAdmEntry (sxList sxAdmEntry xs) = some xs := unSxList_sxList un_sxAdmEntry xs
 
+/-! ## Duplicate-report groups (spec §4.3) -/
+
+/-- A declared duplicate-report group: one measurand cell reported more than once,
+each report a distinct leaf. -/
+structure DupGroup where mk :: (id : GroupId) (members : List LeafId) deriving DecidableEq
+def sxDupGroup (g : DupGroup) : Sx :=
+  .node "group" (.cons g.id.sx (.cons (sxList LeafId.sx g.members) .nil))
+def unDupGroup : Sx → Option DupGroup
+  | .node "group" (.cons i (.cons ms .nil)) => do
+      let ii ← unGroupId i
+      let mm ← unSxList unLeafId ms
+      some ⟨ii, mm⟩
+  | _ => none
+@[simp] theorem un_sxDupGroup (g : DupGroup) : unDupGroup (sxDupGroup g) = some g := by
+  cases g with | mk i ms => simp [sxDupGroup, unDupGroup]
+
+/-! ## Policy-level comparison surface (`lara-syntax@0.3`, grammar App. B.1, B.2)
+
+Presentation-only: the elaborator reads these to expand a `comparison` block, and
+nothing here reaches the checker-boundary `Unit`. -/
+
+/-- A policy-level measurand declaration (grammar App. B.1). -/
+structure Measurand where
+  mk :: (id : MeasurandId) (sort : MeasurandSort) (polarity : Polarity)
+  deriving DecidableEq
+def sxMeasurand (m : Measurand) : Sx :=
+  .node "meas" (.cons m.id.sx (.cons m.sort.sx (.cons m.polarity.sx .nil)))
+def unMeasurand : Sx → Option Measurand
+  | .node "meas" (.cons i (.cons s (.cons p .nil))) => do
+      let ii ← unMeasurandId i
+      let ss ← unMeasurandSort s
+      let pp ← unPolarity p
+      some ⟨ii, ss, pp⟩
+  | _ => none
+@[simp] theorem un_sxMeasurand (m : Measurand) : unMeasurand (sxMeasurand m) = some m := by
+  cases m with | mk i s p => simp [sxMeasurand, unMeasurand]
+@[simp] theorem un_sxList_Measurand (xs : List Measurand) :
+    unSxList unMeasurand (sxList sxMeasurand xs) = some xs := unSxList_sxList un_sxMeasurand xs
+
+/-- A policy-level comparison scheme (grammar App. B.2): the two rules a
+`comparison` block expands through, keyed by the pair `(relation, polarity)`. -/
+structure ComparisonScheme where
+  mk :: (relation : Relation) (polarity : Polarity) (recheck : RuleId) (bridge : RuleId)
+  deriving DecidableEq
+def sxComparisonScheme (c : ComparisonScheme) : Sx :=
+  .node "cscheme" (.cons c.relation.sx (.cons c.polarity.sx
+    (.cons c.recheck.sx (.cons c.bridge.sx .nil))))
+def unComparisonScheme : Sx → Option ComparisonScheme
+  | .node "cscheme" (.cons r (.cons p (.cons rc (.cons br .nil)))) => do
+      let rr ← unRelation r
+      let pp ← unPolarity p
+      let cc ← unRuleId rc
+      let bb ← unRuleId br
+      some ⟨rr, pp, cc, bb⟩
+  | _ => none
+@[simp] theorem un_sxComparisonScheme (c : ComparisonScheme) :
+    unComparisonScheme (sxComparisonScheme c) = some c := by
+  cases c with | mk r p rc br => simp [sxComparisonScheme, unComparisonScheme]
+@[simp] theorem un_sxList_ComparisonScheme (xs : List ComparisonScheme) :
+    unSxList unComparisonScheme (sxList sxComparisonScheme xs) = some xs :=
+  unSxList_sxList un_sxComparisonScheme xs
+
+/-! ## The policy (spec §4) -/
+
 structure Policy where
   mk ::
   (id : PolicyId) (rules : List Rule) (contraries : List Contrary)
   (exceptions : List Exception) (admission : List AdmissionEntry)
+  (theories : List TheoryEntry) (groupMode : GroupConflictMode)
+  (measurands : List Measurand) (comparisonSchemes : List ComparisonScheme)
   deriving DecidableEq
 def printPolicy (p : Policy) : Sx :=
   .node "policy" (.cons p.id.sx (.cons (sxList sxRule p.rules)
     (.cons (sxList sxContrary p.contraries) (.cons (sxList sxException p.exceptions)
-    (.cons (sxList sxAdmEntry p.admission) .nil)))))
+    (.cons (sxList sxAdmEntry p.admission) (.cons (sxList sxTheoryEntry p.theories)
+    (.cons p.groupMode.sx (.cons (sxList sxMeasurand p.measurands)
+    (.cons (sxList sxComparisonScheme p.comparisonSchemes) .nil)))))))))
 def parsePolicy : Sx → Option Policy
-  | .node "policy" (.cons i (.cons rs (.cons cs (.cons es (.cons am .nil))))) => do
+  | .node "policy" (.cons i (.cons rs (.cons cs (.cons es (.cons am (.cons th (.cons gm (.cons ms (.cons sch .nil))))))))) => do
       let ii ← unPolicyId i
       let rr ← unSxList unRule rs
       let cc ← unSxList unContrary cs
       let ee ← unSxList unException es
       let aa ← unSxList unAdmEntry am
-      some ⟨ii, rr, cc, ee, aa⟩
+      let tt ← unSxList unTheoryEntry th
+      let gg ← unGroupConflictMode gm
+      let mm ← unSxList unMeasurand ms
+      let ss ← unSxList unComparisonScheme sch
+      some ⟨ii, rr, cc, ee, aa, tt, gg, mm, ss⟩
   | _ => none
 
 /-! ## Positional attacks, argument conclusions, declarations (spec §7, §4.4, §2) -/
@@ -801,6 +1035,70 @@ def unAttack : Sx → Option Attack
   | rebut a b => simp [sxAttack, unAttack]
   | undercut a b π => simp [sxAttack, unAttack]
   | undermine a b π => simp [sxAttack, unAttack]
+
+/-! ## Presentation-only attack positions (`lara-syntax@0.3`; grammar §7 AMENDMENT, App. B.5)
+
+`Attack` / `Position` / `Step` above are the **frozen**, Unit-reachable types and
+are untouched. `SurfaceAttack` / `SurfaceStep` are the additional presentation
+types recording the position *as authored*: `@0.3` admits a dotted segment naming
+a rule's premise label (`a2.binding.leaf`) beside the integer spelling
+(`a2.1.leaf`), and the printer cannot choose between them because it never sees
+the `Policy` where the labels live. `Decl.attack` therefore carries a
+`SurfaceAttack`; the elaborator resolves it to the frozen `Attack`. -/
+
+/-- A dotted segment of an attack position exactly as authored. `name` is
+deliberately an untyped surface token (like `Sx.str`): which namespace it belongs
+to — premise label or question id — is not knowable until the policy is in hand. -/
+inductive SurfaceStep where
+  | index : Int → SurfaceStep
+  | name  : String → SurfaceStep
+  deriving DecidableEq
+def sxSurfaceStep : SurfaceStep → Sx
+  | .index n => .node "ssi" (.cons (.int n) .nil)
+  | .name s  => .node "ssn" (.cons (.str s) .nil)
+def unSurfaceStep : Sx → Option SurfaceStep
+  | .node "ssi" (.cons (.int n) .nil) => some (.index n)
+  | .node "ssn" (.cons (.str s) .nil) => some (.name s)
+  | _ => none
+@[simp] theorem un_sxSurfaceStep (s : SurfaceStep) : unSurfaceStep (sxSurfaceStep s) = some s := by
+  cases s <;> rfl
+@[simp] theorem un_sxList_SurfaceStep (xs : List SurfaceStep) :
+    unSxList unSurfaceStep (sxList sxSurfaceStep xs) = some xs :=
+  unSxList_sxList un_sxSurfaceStep xs
+
+/-- A typed positional attack as authored; the three arms mirror `Attack`
+one-for-one, with `SurfaceStep` paths in place of resolved `Position`s. -/
+inductive SurfaceAttack where
+  | rebut     : ArgId → ArgId → SurfaceAttack
+  | undercut  : ArgId → ArgId → List SurfaceStep → SurfaceAttack
+  | undermine : ArgId → ArgId → List SurfaceStep → SurfaceAttack
+  deriving DecidableEq
+def sxSurfaceAttack : SurfaceAttack → Sx
+  | .rebut a b       => .node "sreb" (.cons a.sx (.cons b.sx .nil))
+  | .undercut a b π  => .node "sunc" (.cons a.sx (.cons b.sx (.cons (sxList sxSurfaceStep π) .nil)))
+  | .undermine a b π => .node "sunm" (.cons a.sx (.cons b.sx (.cons (sxList sxSurfaceStep π) .nil)))
+def unSurfaceAttack : Sx → Option SurfaceAttack
+  | .node "sreb" (.cons a (.cons b .nil)) => do
+      let aa ← unArgId a
+      let bb ← unArgId b
+      some (.rebut aa bb)
+  | .node "sunc" (.cons a (.cons b (.cons π .nil))) => do
+      let aa ← unArgId a
+      let bb ← unArgId b
+      let pp ← unSxList unSurfaceStep π
+      some (.undercut aa bb pp)
+  | .node "sunm" (.cons a (.cons b (.cons π .nil))) => do
+      let aa ← unArgId a
+      let bb ← unArgId b
+      let pp ← unSxList unSurfaceStep π
+      some (.undermine aa bb pp)
+  | _ => none
+@[simp] theorem un_sxSurfaceAttack (k : SurfaceAttack) :
+    unSurfaceAttack (sxSurfaceAttack k) = some k := by
+  cases k with
+  | rebut a b => simp [sxSurfaceAttack, unSurfaceAttack]
+  | undercut a b π => simp [sxSurfaceAttack, unSurfaceAttack]
+  | undermine a b π => simp [sxSurfaceAttack, unSurfaceAttack]
 
 inductive ChallengeTarget where
   | question : QuestionId → ArgId → ChallengeTarget
@@ -863,25 +1161,93 @@ def unArg : Sx → Option Arg
 @[simp] theorem un_sxArg (a : Arg) : unArg (sxArg a) = some a := by
   cases a with | mk i c t => simp [sxArg, unArg]
 
+/-! ## Comparison blocks (`lara-syntax@0.3`, grammar App. B.3)
+
+Presentation-only: the elaborator expands a `comparison` into ordinary `claim` and
+`arg` declarations before the checker anchor exists, and a `comparison` round-trips
+as a `comparison`, never as its expansion. -/
+
+/-- The `claims` sub-block of a `comparison`: the parts of the generated sub-claim
+a machine cannot invent. `nlRaw` is the `nl` string **raw, exactly as authored** —
+`{cell l}` directives unexpanded and `{{`/`}}` escapes unconverted (App. B.6) — so
+the codec returns the authored bytes and the round-trip holds on the spelling. -/
+structure ComparisonClaim where
+  mk :: (id : PropId) (nlRaw : String) (binding : Binding)
+  deriving DecidableEq
+def sxComparisonClaim (c : ComparisonClaim) : Sx :=
+  .node "cclaim" (.cons c.id.sx (.cons (.str c.nlRaw) (.cons (sxBinding c.binding) .nil)))
+def unComparisonClaim : Sx → Option ComparisonClaim
+  | .node "cclaim" (.cons i (.cons (.str nl) (.cons bd .nil))) => do
+      let ii ← unPropId i
+      let bb ← unBinding bd
+      some ⟨ii, nl, bb⟩
+  | _ => none
+@[simp] theorem un_sxComparisonClaim (c : ComparisonClaim) :
+    unComparisonClaim (sxComparisonClaim c) = some c := by
+  cases c with | mk i nl b => simp [sxComparisonClaim, unComparisonClaim]
+
+/-- A `comparison` block (grammar App. B.3). `conclusion` is the authored 2-ary
+system pair `pred(S, B)`; the elaborator forms the scheme's 4-ary conclusion by
+adding `measurand` (Q) and `dataset` (D). -/
+structure Comparison where
+  mk ::
+  (conclusion : Atom) (measurand : MeasurandId) (dataset : DatasetId) (relation : Relation)
+  (recheckArg : ArgId) (bridgeArg : ArgId)
+  (result : LeafId) (baseline : LeafId) (binding : LeafId)
+  (claim : ComparisonClaim) (supports : Option PropId)
+  deriving DecidableEq
+def sxComparison (c : Comparison) : Sx :=
+  .node "cmp" (.cons (sxAtom c.conclusion) (.cons c.measurand.sx (.cons c.dataset.sx
+    (.cons c.relation.sx (.cons c.recheckArg.sx (.cons c.bridgeArg.sx
+    (.cons c.result.sx (.cons c.baseline.sx (.cons c.binding.sx
+    (.cons (sxComparisonClaim c.claim) (.cons (sxOpt PropId.sx c.supports) .nil)))))))))))
+def unComparison : Sx → Option Comparison
+  | .node "cmp" (.cons cn (.cons me (.cons da (.cons rl (.cons rc (.cons br
+      (.cons rs (.cons bl (.cons bd (.cons cl (.cons sp .nil))))))))))) => do
+      let cc ← unAtom cn
+      let mm ← unMeasurandId me
+      let dd ← unDatasetId da
+      let ll ← unRelation rl
+      let rr ← unArgId rc
+      let bb ← unArgId br
+      let ss ← unLeafId rs
+      let aa ← unLeafId bl
+      let gg ← unLeafId bd
+      let kk ← unComparisonClaim cl
+      let pp ← unOpt unPropId sp
+      some ⟨cc, mm, dd, ll, rr, bb, ss, aa, gg, kk, pp⟩
+  | _ => none
+@[simp] theorem un_sxComparison (c : Comparison) : unComparison (sxComparison c) = some c := by
+  cases c with
+  | mk cn me da rl rc br rs bl bd cl sp => simp [sxComparison, unComparison]
+
 inductive Decl where
-  | leaf   : Leaf → Decl
-  | claim  : Claim → Decl
-  | arg    : Arg → Decl
-  | attack : Attack → Decl
-  | status : PropId → Decl
+  | leaf       : Leaf → Decl
+  | claim      : Claim → Decl
+  | arg        : Arg → Decl
+  /-- An attack **as authored** (grammar §7 AMENDMENT): a `SurfaceAttack`, which
+  the elaborator resolves to the frozen `Attack` once the policy is in hand. -/
+  | attack     : SurfaceAttack → Decl
+  | status     : PropId → Decl
+  | group      : DupGroup → Decl
+  | comparison : Comparison → Decl
   deriving DecidableEq
 def sxDecl : Decl → Sx
-  | .leaf l   => .node "dl" (.cons (sxLeaf l) .nil)
-  | .claim c  => .node "dc" (.cons (sxClaim c) .nil)
-  | .arg a    => .node "da" (.cons (sxArg a) .nil)
-  | .attack k => .node "dk" (.cons (sxAttack k) .nil)
-  | .status p => .node "ds" (.cons p.sx .nil)
+  | .leaf l       => .node "dl" (.cons (sxLeaf l) .nil)
+  | .claim c      => .node "dc" (.cons (sxClaim c) .nil)
+  | .arg a        => .node "da" (.cons (sxArg a) .nil)
+  | .attack k     => .node "dk" (.cons (sxSurfaceAttack k) .nil)
+  | .status p     => .node "ds" (.cons p.sx .nil)
+  | .group g      => .node "dg" (.cons (sxDupGroup g) .nil)
+  | .comparison c => .node "dm" (.cons (sxComparison c) .nil)
 def unDecl : Sx → Option Decl
   | .node "dl" (.cons l .nil) => do let ll ← unLeaf l;   some (.leaf ll)
   | .node "dc" (.cons c .nil) => do let cc ← unClaim c;  some (.claim cc)
   | .node "da" (.cons a .nil) => do let aa ← unArg a;    some (.arg aa)
-  | .node "dk" (.cons k .nil) => do let kk ← unAttack k; some (.attack kk)
+  | .node "dk" (.cons k .nil) => do let kk ← unSurfaceAttack k; some (.attack kk)
   | .node "ds" (.cons p .nil) => do let pp ← unPropId p; some (.status pp)
+  | .node "dg" (.cons g .nil) => do let gg ← unDupGroup g; some (.group gg)
+  | .node "dm" (.cons c .nil) => do let cc ← unComparison c; some (.comparison cc)
   | _ => none
 @[simp] theorem un_sxDecl (d : Decl) : unDecl (sxDecl d) = some d := by
   cases d with
@@ -890,6 +1256,8 @@ def unDecl : Sx → Option Decl
   | arg a => simp [sxDecl, unDecl]
   | attack k => simp [sxDecl, unDecl]
   | status p => simp [sxDecl, unDecl]
+  | group g => simp [sxDecl, unDecl]
+  | comparison c => simp [sxDecl, unDecl]
 @[simp] theorem un_sxList_Decl (xs : List Decl) :
     unSxList unDecl (sxList sxDecl xs) = some xs := unSxList_sxList un_sxDecl xs
 

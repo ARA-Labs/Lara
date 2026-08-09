@@ -279,7 +279,7 @@ nanogptV12Quarantine =
         , -- undercut the record argument at its ROOT rule occurrence (position ε):
           -- the exception `record_from_crossing : forward_path_rewrite(C)` licenses
           -- defeating the inference, not the (genuinely observed) loss datum.
-          DeclAttack (Undercut (ArgId "d_comp") (ArgId "a_rec") [])
+          DeclAttack (SUndercut (ArgId "d_comp") (ArgId "a_rec") [])
         , DeclStatus (PropId "c05_record")
         ]
     }
@@ -393,7 +393,7 @@ ls20SwitchDispute =
                     []
               }
         , -- their conclusions are a policy-declared contrary pair; C09 rebuts C08
-          DeclAttack (Rebut (ArgId "a09") (ArgId "a08"))
+          DeclAttack (SRebut (ArgId "a09") (ArgId "a08"))
         , DeclStatus (PropId "c08_hidden")
         , DeclStatus (PropId "c09_single")
         ]

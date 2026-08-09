@@ -324,6 +324,7 @@ prop_handWrittenHole =
                 []
                 Defeasible
                 []
+                []
                 (AtomPat (Pred "c") [])
                 False
                 []

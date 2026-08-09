@@ -173,11 +173,11 @@ mkUnit rules contraries exceptions ls as ats qs =
 
 defRule :: String -> [String] -> [AtomPat] -> AtomPat -> [Question] -> Rule
 defRule rid ps prems concl qs =
-  Rule (RuleId rid) (map Param ps) Defeasible prems concl False [] qs
+  Rule (RuleId rid) (map Param ps) Defeasible prems [] concl False [] qs
 
 strRule :: String -> [String] -> [AtomPat] -> AtomPat -> Bool -> [CertRef] -> Rule
 strRule rid ps prems concl allowT certs =
-  Rule (RuleId rid) (map Param ps) Strict prems concl allowT certs []
+  Rule (RuleId rid) (map Param ps) Strict prems [] concl allowT certs []
 
 apat0 :: String -> [Pat] -> AtomPat
 apat0 name = AtomPat (Pred name)

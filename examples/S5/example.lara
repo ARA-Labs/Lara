@@ -1,0 +1,110 @@
+# S5 — lower is better (lara-syntax@0.3)
+#
+# The fourth strict-certificate worked example, and the third on ord@1. S2 and
+# S3 compare accuracy, where a larger number wins. S5 compares PERPLEXITY, where
+# a smaller one does — and it is written with the same `relation =
+# strictly-better` an author writes in S2.
+#
+# That is the point of the example. "sys_new outperforms sys_base" is one
+# research relation, and an author should state it once, the same way, whether
+# the metric runs up or down. What differs is not the claim but the arithmetic
+# that supports it, and the arithmetic is selected by a fact about the metric:
+# `measurand perplexity : Num where lower-is-better`, declared in
+# ord-ppl-v1.policy.lara. Under that polarity the (strictly-better,
+# lower-is-better) scheme selects rules whose strict conclusion is
+# num_lt(Sv, Bv) — ours below theirs — so the goal generated here is
+# num_lt(28.4, 31.6), the mirror image of S2's num_lt(0.71, 0.74).
+#
+# Why this cannot be inferred, and so must be declared. Given only this
+# artifact — two reported cells and an attestation that they are comparable —
+# nothing recovers the fact that lower perplexity is the better result. The
+# numbers do not say it, the predicate does not say it, and the way the numbers
+# are used does not say it. It is knowledge about perplexity, and the surface
+# asks for it in exactly one place.
+#
+# Why the elaborator cannot get it wrong. Direction is not a flag the elaborator
+# applies to an argument order; it lives in the policy's rules, welded to the
+# bridge's conclusion through shared variables. Selecting a scheme selects the
+# goal shape, the rules that consume it, and the comparative claim they license,
+# all at once. There is no state in which the generated goal says "ours is
+# lower" while the bridge concludes on the strength of "ours is higher" — the
+# two are the same variables.
+#
+# The strict step still refuses everything it refused in S2. ord@1 re-checks the
+# generated certificate in exact rational arithmetic against the generated goal:
+# had the two cells been the other way around, 31.6 < 28.4 is false and this
+# artifact would be an R13 replay rejection, polarity declaration or not.
+# Declaring a polarity chooses which comparison to make; it never decides one.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact ord_ppl_demo at sha256:5555555555555555555555555555555555555555555555555555555555555555
+policy ord-ppl-v1
+use backends [ord@1]
+
+# --- The comparative claim the bridge rule delivers -------------------------------------------
+# Same predicate as S2's: `better`. A reader comparing the two examples sees one claim shape and
+# two metrics, which is the reading the surface is for.
+
+claim c1
+  nl      = "sys_new outperforms sys_base on WikiText-103 perplexity (28.4 vs 31.6)"
+  formal  = better(sys_new, sys_base, perplexity, wikitext103)
+  binding = { author = alice, rationale = "Ordered comparison of two reported perplexity cells; lower is better.", audit-status = reviewed }
+
+# --- The two measured cells the certificate consults ------------------------------------------
+# Nothing here marks a direction. Both leaves are ordinary reported cells, and swapping which
+# system is which would produce an equally well-formed pair of leaves — which is precisely why
+# the policy has to declare the polarity.
+
+leaf e1 : reports(exp1, score_cell(sys_base, perplexity, wikitext103, 31.6))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/perplexity.md#row=sys_base]
+
+leaf e2 : reports(exp1, score_cell(sys_new, perplexity, wikitext103, 28.4))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/perplexity.md#row=sys_new]
+
+# The binding, exactly as in S2: which systems and measurand the two numbers belong to. Its
+# argument order does not mirror with the polarity — the system's value comes first here as it
+# does in S2 — so one attestation vocabulary serves both directions.
+
+leaf e3 : comparison_setup(sys_new, sys_base, perplexity, wikitext103, 28.4, 31.6)
+  kind       = attested
+  provenance = user
+  refs       = [evidence/tables/perplexity.md#caption]
+
+# --- The comparison: the same source shape as S2, mirrored by declaration ----------------------
+# Read this block beside examples/S2/example.lara. Every field means the same thing and
+# `relation` reads the same. `result = e2` still names the leaf carrying our system's number and
+# `baseline = e1` still names the baseline's; the author does not restate the direction, because
+# the author already declared it once, about the metric.
+#
+# What the elaborator generates from it is mirrored: the goal num_lt(28.4, 31.6) rather than
+# num_lt(31.6, 28.4), and the certificate slots to match — (prem 0) is the system cell here,
+# where in S2 it is the baseline cell. None of that is written by hand in either file.
+
+comparison : better(sys_new, sys_base) on perplexity @ wikitext103
+  relation = strictly-better
+  recheck  = a1
+  bridge   = a2
+  result   = e2
+  baseline = e1
+  binding  = e3
+  claims c2
+    nl      = "The reported system perplexity {cell e2} is strictly below the reported baseline perplexity {cell e1}"
+    binding = { author = alice, audit-status = reviewed }
+  supports c1
+
+status c1
+status c2
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 (the strict ord@1 comparison step, replaying num_lt(28.4, 31.6)) and a2 (the
+# defeasible bridge, with a1 as a sub-argument), both unattacked -> in (grounded).
+# Claim status:
+#   c1 -> justified (a2 is a complete argument for it, with no attackers)
+#   c2 -> justified (a1 is in; the mirrored arithmetic replays and accepts)

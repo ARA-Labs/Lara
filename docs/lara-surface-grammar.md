@@ -130,6 +130,14 @@ nl  formal  binding  kind  provenance  refs  author  rationale  audit-status
 by  supports  challenges  discharge  with  open  as
 rebut  undercut  undermine
 allow-trusted  certifiers  cert  trusted  none
+
+-- lara-syntax@0.2 (Appendix A)
+assurance  theory
+
+-- lara-syntax@0.3 (Appendix B)
+measurand  comparison  comparison-scheme  recheck  bridge  result  baseline
+relation  claims  on  where  cell
+higher-is-better  lower-is-better  strictly-better  at-least-as-good
 ```
 
 Closed tag enumerations (surface ↔ `Lara.AST` constructor):
@@ -194,7 +202,7 @@ program   ::= "artifact" ident "at" digest
 decl      ::= claimDecl | leafDecl | argDecl | attackDecl | statusDecl | groupDecl
 
 claimDecl ::= "claim" ident
-              "nl"      "=" string
+              "nl"      "=" nlString
               "formal"  "=" prop
               "binding" "=" binding
 
@@ -423,6 +431,37 @@ Worked from Example A:
   ⇒ `Undermine (ArgId "d2") (ArgId "a1") [StepQuestion (QuestionId "external_validity")]`.
 - `rebut d3 a1` ⇒ `Rebut (ArgId "d3") (ArgId "a1")`.
 
+> **AMENDMENT (`lara-syntax@0.3`, 2026-08-08).** §7's claim that A0.5 adds **no**
+> presentation attack type no longer holds as of `@0.3`. Appendix B.5 admits a
+> dotted segment that names a rule's premise *label* (`a2.binding.leaf`) beside the
+> existing integer spelling (`a2.1.leaf`), and the printer cannot choose between
+> them: `printProgram :: Program -> String` never receives the `Policy`, and
+> `Source` keeps the program and its policy as separate files, so the labels the
+> choice would depend on are not in scope where printing happens. If the authored
+> spelling is not recorded in the presentation AST, `parse ∘ print = id` fails for
+> whichever spelling the printer does not pick — and making a *program* file's
+> canonical form depend on a *different* file would be worse than the problem it
+> solves.
+>
+> **Resolution.** The presentation `Program` carries a shallow step,
+> `SurfaceStep = StepIndex Int | StepName String`, and `Lara.Elaborate` resolves
+> `StepName` against the target rule, where the policy *is* in hand
+> (`elaborate sigma registry program policy`). This is the same A1a → A1b contract
+> `Lara.Syntax`'s header already describes for support terms: the parser records
+> what the surface states and leaves the rest for the elaborator.
+>
+> **Scope.** The amendment is **strictly additive**. The integer spelling keeps
+> working, keeps its meaning, and stays canonical for any premise without a label;
+> the §7 table, the terminal-marker rule, and the printer clauses above are
+> unchanged for it. **No Unit-reachable type moves** — `Attack`, `Position`, and
+> `Step` are untouched. `SurfaceStep` is presentation-only and is resolved away
+> before the checker anchor exists, so the compiled AF is byte-identical either
+> way.
+>
+> **Sign-off.** Signed off 2026-08-08; this was the sole open item in
+> `plans/2026-08-08-lara-syntax-03-surface.md` §6.2, now resolved. Design rationale
+> is that plan's §3.5; the surface rules are Appendix B.4 and B.5 below.
+
 ---
 
 ## 8. Decisions & rationale (the five A0.5 items)
@@ -565,3 +604,380 @@ theoryLine ::= "theory" digest "=" "[" [ prop { "," prop } ] "]"
   are the ground propositions `p1, …` (empty list allowed: the empty theory).
 - Declaring the same digest twice in one policy is a **parse error** (the
   replay oracle's `lookup` would otherwise silently use the first entry).
+
+---
+
+## Appendix B — `lara-syntax@0.3` (one source-level migration, 2026-08-08)
+
+Additive over `lara-syntax@0.2` except for §3's ordinary `claim nl`: every
+claim-form `nl` now adopts B.6's brace contract. Existing `@0.2` prose with a
+literal `{` or `}` must spell it `{{` or `}}` under `@0.3`; the committed
+`corpus-units/lbcs/C05` and `corpus-units/sapg/C06` sources make exactly this
+spelling migration. `nl` does not enter `Unit`, so the migration changes no
+`.core.sexp` byte.
+
+Every form below is parsed into the **presentation AST** and **expanded in
+`Lara.Elaborate` before the checker anchor exists**; every form elaborates to a
+byte-identical `Unit`. Nothing here changes `Unit`, the `.core.sexp` door, the
+wire codec, `checkUnit`, or the strict backends. Motivation: the comparison
+worked examples (`examples/S2`, `S3`, `S4`) make the author write `num_lt`
+argument orders, premise slot indices, and two θ vectors by hand — none of
+which is the research claim being made. Design rationale is
+`plans/2026-08-08-lara-syntax-03-surface.md`.
+
+Expansion happens in the elaborator and not in `Lara.Syntax` on purpose: spec
+result 12 (`parse ∘ print == id`) is stated on the presentation AST, and
+macro-expanding at parse time would lose round-tripping for exactly these forms.
+A `comparison` round-trips as a `comparison`, never as its expansion.
+
+**`@0.3` is where #88 splits.** `#88a` — `nl` interpolation (B.6) — lands here.
+`#88b` — `let` value bindings and named premise-slot references `(prem e1)` —
+waits on #89 (the many-sorted Σ) and is **not** part of `@0.3`: a mistyped bare
+binding name is indistinguishable from a nullary constant until a declared
+signature can reject it, and App. A declares the `cert(…)` payload opaque, so a
+surface `(prem e1)` needs its own layering decision.
+
+Identifier aliases used below are all `ident` (§1.3), spelled distinctly for
+readability: `propId` (a `claim` id), `leafId`, `argId`, `ruleId`. `binding` is
+§3's `binding` block. `prop`, `apat`, and `param` are §2's.
+
+### B.1 Measurand table with declared polarity
+
+```
+measurandLine ::= "measurand" ident ":" sort "where" polarity
+polarity      ::= "higher-is-better" | "lower-is-better"
+sort          ::= "Num"
+```
+
+```
+measurand accuracy   : Num  where higher-is-better
+measurand perplexity : Num  where lower-is-better
+```
+
+- A **policy-level** declaration, partitioned like `rule`/`contrary`/`exception`/
+  `theory`; order-insensitive.
+- Polarity is **domain knowledge, not usage**: whether a larger accuracy or a
+  smaller perplexity is the better result cannot be recovered from how the number
+  is used in an artifact. So it is **declared and not inferrable**, which is why
+  it is written here rather than derived at a use site.
+- The elaborator reads it to select the comparison scheme (B.2) whose rules are
+  written in the measurand's direction. **It never enters `Unit`** — nothing
+  downstream consumes it. That is what keeps the declaration on the surface track
+  and out of the core.
+- Declaring the same measurand twice in one policy is a **parse error** (the same
+  rule, and the same reason, as A.2's duplicate digest: a silent first-wins lookup
+  would pick a polarity the author did not intend).
+- **Forward compatibility with #89.** The `: Num` slot is deliberately a **sort
+  position**, not decoration. When #89 puts a many-sorted Σ into the core, its
+  signature must extend *this* declaration — the surface #89 elaborates into —
+  rather than introduce a parallel one, so the two tracks cannot fork the
+  spelling. Cross-referenced from issue #89.
+
+### B.2 The `comparison-scheme` policy block
+
+```
+schemeBlock ::= "comparison-scheme" relation polarity
+                "recheck" "=" ruleId
+                "bridge"  "=" ruleId
+relation    ::= "strictly-better" | "at-least-as-good"
+```
+
+```
+comparison-scheme strictly-better higher-is-better
+  recheck = beats_recheck
+  bridge  = beats_baseline
+
+comparison-scheme at-least-as-good higher-is-better
+  recheck = tie_recheck
+  bridge  = no_worse
+```
+
+- A policy-level declaration, partitioned and order-insensitive like B.1.
+- It exists because **rule names are policy-specific**. `examples/S2` uses
+  `beats_recheck`/`beats_baseline`; `examples/S3` uses `tie_recheck`/`no_worse`
+  under a different policy entirely. A `comparison` form that hardcoded one
+  policy's rule names would be unusable in the other.
+- Schemes are keyed by the **pair (relation, polarity)**, not by relation alone.
+  Relation alone cannot express direction, because the *rules* carry it: which
+  argument order the strict rule's premises expect is fixed when the rule is
+  written. Binding the scheme to the pair is what makes a disagreement between
+  the declared direction and the rules' direction *nameable at all*; the
+  direction-of-goodness check in the well-formedness list below is what makes it
+  **rejected**. Neither half suffices alone: structural correspondence maps the
+  recheck conclusion into the bridge's comparison premise even when the two
+  rules use disjoint parameter names. It constrains the rules to each other, not
+  either rule to the declared `polarity`, so a policy with both flipped together
+  is internally consistent and externally backwards.
+- A policy declares only the pairs its rules actually support; there are at most
+  **four** entries. A policy with no matching scheme simply has no `comparison`
+  form available for that pair — a located error at the use site, never a silent
+  fallback. A duplicate (relation, polarity) pair is a **parse error**.
+- Well-formedness the elaborator checks at each `comparison` **use site**, after
+  selecting the scheme by the authored measurand's polarity. Each failure is a
+  located error naming that comparison:
+  - `recheck` is a **strict** rule listing an `ord@1` certifier;
+  - `bridge` is **defeasible**;
+  - `bridge` has **exactly two premise patterns**, in either order: one
+    structurally corresponds to `recheck`'s conclusion, and one is the six-role
+    binding pattern over system, baseline, measurand, dataset, result value, and
+    baseline value;
+  - the authored conclusion in the `comparison` line (B.3), **after the
+    elaborator forms its 4-ary version** from the 2-ary system pair plus the `on`
+    and `@` fields, matches `bridge`'s declared conclusion pattern. The check is
+    against the formed 4-ary atom, never against the 2-ary surface spelling;
+  - `bridge`'s conclusion pattern is **4-ary over S, B, Q, D with the favored
+    system first**. This positional convention is what
+    `better(sys_new, sys_base) on accuracy @ imagenet_val` elaborates against.
+    Richer bridge conclusions — e.g. one carrying an evaluation-setting
+    parameter — are an explicit **non-goal** for `@0.3`.
+  - **direction of goodness**: `recheck`'s conclusion, with each operand
+    attributed to `result` or `baseline` by *which match introduced it*, is
+    written in the order the measurand's `polarity` declares — `rel(base, ours)`
+    for `higher-is-better`, `rel(ours, base)` for `lower-is-better`, i.e. exactly
+    the lookup table in B.3. Without this check `polarity` would be inert after
+    scheme selection, and a policy whose `recheck` and `bridge` rules were
+    flipped *together* would certify a worse system as `better` — §1.2's hazard,
+    reachable through a mis-written policy rather than a mis-written artifact.
+    The error is located at the `comparison` use site, not at the scheme
+    declaration or a backend rejection downstream.
+- **The form inherits whatever the scheme's rules demand.** If `beats_recheck`'s
+  premise patterns share one `Exp` variable, both cells must come from the same
+  experiment, so a baseline number quoted from a *prior paper's* experiment is
+  unauthorable through that scheme and needs a rule (and a scheme) written with
+  two experiment variables. This is a domain fact expressed by the policy, not a
+  limitation of the sugar; the θ-consistency error names the conflicting binding
+  so it reads that way.
+
+### B.3 The `comparison` declaration
+
+A new program-level `decl` (§3), alongside `claimDecl`/`leafDecl`/`argDecl`/… .
+
+```
+comparisonBlock ::= "comparison" ":" prop "on" ident "@" ident
+                    "relation" "=" relation
+                    "recheck"  "=" argId
+                    "bridge"   "=" argId
+                    "result"   "=" leafId
+                    "baseline" "=" leafId
+                    "binding"  "=" leafId
+                    claimsBlock
+                    [ "supports" propId ]
+
+claimsBlock     ::= "claims" propId
+                    "nl"      "=" nlString
+                    "binding" "=" binding
+```
+
+The `prop` after `:` is the authored conclusion's **system pair** — a 2-ary atom
+`pred(S, B)` with the favored system first; the `on <measurand> @ <dataset>`
+fields supply Q and D, and the elaborator forms the 4-ary conclusion the scheme's
+bridge declares (B.2). `nlString` is B.6's interpolating string; `binding` is §3's
+attestation block.
+
+Worked, from `examples/S2`:
+
+```
+comparison : better(sys_new, sys_base) on accuracy @ imagenet_val
+  relation = strictly-better
+  recheck  = a1
+  bridge   = a2
+  result   = e2
+  baseline = e1
+  binding  = e3
+  claims c2
+    nl      = "The reported baseline accuracy 0.71 is strictly below the reported system accuracy 0.74"
+    binding = { author = alice, audit-status = reviewed }
+  supports c1
+```
+
+- The author never writes `num_lt`, never a slot index, never an argument order.
+  Switching the measurand to one declared `lower-is-better` generates the flipped
+  goal from the same source.
+- **The generated-goal lookup contract:**
+
+  | `relation` | `higher-is-better` | `lower-is-better` | research reading |
+  |---|---|---|---|
+  | `strictly-better` | `num_lt(base, ours)` | `num_lt(ours, base)` | "outperforms" |
+  | `at-least-as-good` | `num_le(base, ours)` | `num_le(ours, base)` | non-inferiority, ties |
+
+  This is a **lookup contract, not elaborator magic**: direction lives in the
+  policy's rules. Structural correspondence between the recheck conclusion and
+  the bridge comparison premise transfers the result/baseline roles across
+  independently named rule parameters; the bridge's six-role binding premise
+  then ties those roles to its system, baseline, measurand, dataset, and value
+  parameters. That correspondence constrains the *rules to each other*; it says
+  nothing about whether either rule matches the declared `polarity`. Each cell
+  is realized only if the policy declares a scheme for that (relation, polarity)
+  pair, written in that direction (B.2) — and B.2's direction-of-goodness check
+  is what enforces "written in that direction",
+  rejecting a scheme whose rules realize the *other* row of this table than the
+  one its `polarity` names. The table is therefore a specification of the
+  elaborator, not a parallel description of it: it is the same table
+  `Lara.Comparison.goalOf` computes in the Lean development (`lean/`), and the
+  Haskell now checks against it rather than merely being expected to agree.
+- **`relation` is required and closed**, and both members are needed.
+  Non-inferiority — "matches the baseline at a third the cost" — is a distinct and
+  common research argument, and `examples/S3` is exactly that case; without
+  `relation` this form could not express S3 at all.
+- **The sub-claim is declared, not vanished.** The comparison sub-claim carries
+  authored prose, an author attestation, and possibly a `status` line — all of
+  which reach `Unit` and none of which can be machine-invented. So the block
+  *declares* the sub-claim's id and human parts in the `claims` sub-block, and the
+  elaborator emits the claim with the **generated goal as its `formal`**. Only the
+  arithmetic is generated. Declaring the id also keeps `status c2`, and any future
+  attack on the sub-claim, resolvable by name.
+- **Both argument ids are author-declared** (`recheck = a1`, `bridge = a2`), and
+  this is not cosmetic: `examples/S4` attacks the generated structure by id and
+  position (`undermine x1 a2.binding.leaf`). Anonymous or derived ids would break
+  every existing attack and put byte-identity out of reach.
+- **No value bindings are needed to name the cells.**
+  `Lara.Strict.Cell.premiseCell` already extracts the unique numeric literal from
+  a premise — it is what `ord@1` itself uses — so `result = e2` suffices and the
+  elaborator reads the value out of the named leaf. The leaf's premise-cell
+  obligation (exactly one numeric literal anywhere in its argument terms) becomes
+  a **precondition of this form**: violating it is a **located source error naming
+  the leaf**, never a downstream backend rejection the author has to decode.
+- **The binding leaf is never generated.** `comparison_setup` is attested evidence
+  carrying an author, a provenance tag, and `refs`. `binding = e3` names an
+  *existing* leaf; that line stays a human claim. If the block synthesized it, the
+  sugar would manufacture evidence nobody attested, and the thing `examples/S4`
+  attacks would be something the compiler invented.
+- **Generating certificates adds no trust.** Replay re-checks the certificate
+  against the goal and the premises, so a wrongly generated certificate is an R13
+  rejection, never a false accept. The elaborator is a convenience whose output is
+  independently verified.
+- **Located errors** (all raised before the checker anchor exists):
+  - no matching `comparison-scheme` for the (relation, polarity) pair;
+  - the measurand named by `on` is undeclared;
+  - `binding` names something that is not a declared leaf;
+  - `result` or `baseline` names a leaf failing the premise-cell obligation;
+  - **`result` and `baseline` name the same leaf**;
+  - **generated id collisions** — the `recheck`, `bridge`, or `claims` id colliding
+    with a declared `decl` or with each other;
+  - **duplicate or overlapping `comparison` blocks**;
+  - **authored conclusion vs. the supported claim's `formal`** mismatch;
+  - measurand/`on`-field inconsistency (the measurand θ-matched out of the named
+    leaves disagreeing with the one written after `on`).
+
+### B.4 Labelled rule premises
+
+```
+premiseList     ::= "[" [ labelledPremise { "," labelledPremise } ] "]"
+labelledPremise ::= [ ident ":" ] apat
+```
+
+This supersedes the `"premises" "=" "[" [ apat { "," apat } ] "]"` fragment of §4's
+`ruleDecl`; everything else about `ruleDecl` is unchanged.
+
+```
+rule beats_baseline(S, B, Q, D, Sv, Bv)
+  mode     = defeasible
+  premises = [ cmp:     num_lt(Bv, Sv),
+               binding: comparison_setup(S, B, Q, D, Sv, Bv) ]
+  …
+```
+
+- Labels are **optional**, per premise. An unlabelled premise behaves exactly as
+  it does today.
+- **Policy well-formedness**, checked at declaration time: a rule's premise labels
+  must be **disjoint from that rule's question ids**, and `rule` and `leaf` are
+  **reserved from the premise-label namespace** (§1.3 already reserves them from
+  the question-id namespace) — otherwise `a2.leaf.leaf` parses two ways. Both
+  namespaces are policy-declared, so a collision is statically detectable and is
+  **rejected at declaration time**, not discovered at an attack site.
+- Duplicate labels within one rule are an error, for the same reason.
+- Labels **never enter `Unit`**: `cmp` and `0` resolve to the same
+  `StepPremise 0`, and the rule's compiled form is unchanged.
+
+### B.5 Attack-path name segments
+
+See the **AMENDMENT** note appended to §7, which this subsection is the surface
+half of.
+
+- A dotted segment of a position suffix (§7) that is a **decimal integer** is a
+  `StepIndex`; **otherwise** it is a `StepName`, which the elaborator resolves
+  against the target rule to **either** a premise label (B.4) **or** a question id
+  — at most one of the two, guaranteed by B.4's disjointness requirement.
+- Integers keep resolving directly to `StepPremise`, unchanged; question ids keep
+  resolving to `StepQuestion`, unchanged. The terminal `rule`/`leaf` marker rule
+  of §7 is untouched.
+- Both spellings elaborate to the **same `Position`**, and each **round-trips in
+  the spelling it was written in** — which is why the presentation AST carries
+  `SurfaceStep` rather than reconstructing a spelling at print time.
+- All `comparison` blocks expand before any attack path resolves, so an
+  `undermine` targeting a generated argument (or a label inside one) resolves
+  against the post-expansion argument set.
+- **Index basis.** Attack-path integers, `(prem i)` certificate slots, and
+  premise-label resolution are all **0-based**. 1-based indices appear only in
+  human-facing error text (`resolvePremises` zips `[1..]` today) and are converted
+  at the message boundary — never in a generated certificate or a resolved `Step`.
+
+### B.6 `nl` interpolation (#88a)
+
+```
+nlString  ::= '"' { nlChar | directive | "{{" | "}}" } '"'
+nlChar    ::= any-char-except '"', newline, "{", "}"
+directive ::= "{" "cell" leafId "}"
+```
+
+```
+claim c1
+  nl = "sys_new outperforms sys_base on ImageNet-val accuracy ({cell e2} vs {cell e1})"
+```
+
+- **The lexical contract for braces.** Every claim-form `nl` uses `nlString`:
+  both §3's ordinary `claim` and B.3's nested `claims` block. Inside `nl`, `{{`
+  and `}}` denote literal braces — the f-string / `format!` convention this
+  surface's Python-literate audience already knows — and **any other `{` must
+  open a recognized directive**, which in `@0.3` means `{cell <leafId>}`.
+  Anything else is a **located error naming the claim**.
+  This is strict rather than lenient on purpose: if `{cel e2}` (a typo) silently
+  stayed literal text, a number the author believed was auto-synced would be
+  frozen prose — the exact silent prose↔formal staleness this feature exists to
+  kill.
+- `{cell e2}` resolves via `premiseCell` on leaf `e2` — the same helper `ord@1`
+  and the `comparison` form use — and is rendered back through `renderDecimal`.
+  **No binding is required, so #88a stands alone** and does not wait on #88b.
+- Interpolating a **cell** is the *stronger* form for the prose↔formal binding
+  audit: a number quoted in prose is then guaranteed to equal the number the cited
+  evidence leaf actually carries, sourced from the leaf itself. Interpolating a
+  `let` would only guarantee agreement with a parallel declaration, which could
+  itself be wrong. When #88b lands, `{acc_new}` becomes an **additional**
+  interpolation source; it does not replace `{cell e2}`.
+- **Preconditions and errors:** the named leaf must exist and must satisfy the
+  premise-cell obligation (exactly one numeric literal); failure is a **located
+  source error naming the leaf**.
+- **Round-tripping.** Directives and `{{`/`}}` escapes round-trip **raw** through
+  the printer and are never expanded there. Interpolation happens in the
+  elaborator, so the resulting `nl` is a plain `String` before anything downstream
+  sees it.
+
+### B.7 Keyword vocabulary delta
+
+`@0.3` adds these reserved words to §1.4's vocabulary block, which stays the
+single `toString`/`parse` table:
+
+```
+measurand  comparison  comparison-scheme  recheck  bridge  result  baseline
+relation  claims  on  where  cell
+higher-is-better  lower-is-better  strictly-better  at-least-as-good
+```
+
+Closed tag enumerations added by `@0.3` (surface ↔ presentation AST):
+
+| Field | Surface spelling | Presentation AST |
+| --- | --- | --- |
+| measurand polarity | `higher-is-better` / `lower-is-better` | `Polarity` `HigherIsBetter` / `LowerIsBetter` |
+| comparison relation | `strictly-better` / `at-least-as-good` | `Relation` `StrictlyBetter` / `AtLeastAsGood` |
+
+Neither reaches `Unit`; both are resolved away during expansion.
+
+Two housekeeping notes:
+
+- **Appendix A's omission is corrected here.** `@0.2` added `assurance` (A.1) and
+  `theory` (A.2) without updating §1.4, leaving the vocabulary block stale. Both
+  are now listed there under a `lara-syntax@0.2` sub-block.
+- `test/SyntaxSpec.hs`'s `reservedWords` list **mirrors §1.4** and must be kept in
+  sync with it. If it is not, the round-trip generator will emit identifiers that
+  collide with the new keywords and the property will fail for a reason that has
+  nothing to do with the grammar.

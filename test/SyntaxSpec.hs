@@ -53,6 +53,14 @@ reservedWords =
   , "strict", "defeasible", "observed", "attested", "assumed", "certified"
   , "user", "ai-executed", "checker", "unreviewed", "reviewed", "disputed"
   , "mandatory", "optional", "admit", "quarantine", "reject", "true", "false"
+  , "duplicate-reports"
+    -- lara-syntax@0.3 (grammar App. B.7). This list MIRRORS §1.4 and must be
+    -- kept in sync with it: a keyword missing here lets the generator emit a
+    -- colliding identifier, and the round-trip property then fails for a reason
+    -- that has nothing to do with the grammar.
+  , "measurand", "comparison", "comparison-scheme", "recheck", "bridge"
+  , "result", "baseline", "relation", "claims", "on", "where", "cell", "Num"
+  , "higher-is-better", "lower-is-better", "strictly-better", "at-least-as-good"
   ]
 
 -- | An @ident@ (grammar §1.3): letter start, then letters\/digits\/@_@; kept
@@ -75,9 +83,29 @@ genNumStr = do
   frac <- oneof [pure "", ('.' :) <$> listOf1 (elements ['0' .. '9'])]
   pure (sign ++ ints ++ frac)
 
--- | A single-line string body with no @\"@ or newline (grammar §1.3).
+-- | A single-line string body with no @\"@ or newline (grammar §1.3). Braces
+-- are excluded: they are ordinary characters in a binding @rationale@ but
+-- carry the @nl@ contract of App. B.6, so 'genNlStr' builds those separately.
 genStr :: Gen String
 genStr = listOf (elements (['a' .. 'z'] ++ ['0' .. '9'] ++ " (),.:;=_-/#"))
+
+-- | An @nl@ string body honouring grammar App. B.6's brace contract: plain
+-- text, @{cell \<leafId\>}@ directives, and @{{@\/@}}@ literal-brace escapes.
+-- The presentation AST stores the body raw, so every piece here must be
+-- reproduced byte-for-byte by the printer.
+genNlStr :: Gen String
+genNlStr = concat <$> smallListOf piece
+  where
+    piece =
+      frequency
+        [ (5, genStr)
+        , (3, (\l -> "{cell " ++ l ++ "}") <$> genIdent)
+        , (2, elements ["{{", "}}"])
+        ]
+
+-- | Does an @nl@ body exercise B.6's brace forms at all?
+hasBraceForm :: String -> Bool
+hasBraceForm s = '{' `elem` s || '}' `elem` s
 
 -- | A digest\/theory-digest @ident \":\" body@ (grammar §1.3): the shape both a
 -- 'Digest' and a 'TheoryDigest' must have to survive their printers.
@@ -172,11 +200,12 @@ genBinding =
     <*> genStr
     <*> elements [Unreviewed, Reviewed, Disputed]
 
+-- | Every claim-form @nl@ uses App. B.6's brace contract.
 genClaim :: Gen Claim
 genClaim =
   Claim
     <$> (PropId <$> genIdent)
-    <*> genStr
+    <*> genNlStr
     <*> genProp
     <*> genBinding
 
@@ -258,24 +287,38 @@ genArg = Arg <$> (ArgId <$> genIdent) <*> genArgConcl <*> genSupportTerm
 -- Attacks
 -- ---------------------------------------------------------------------------
 
--- | A position path: each step is a premise index or a (non-numeric,
--- non-marker) question id (grammar §7).
-genPosition :: Gen Position
-genPosition =
+-- | An authored position path (grammar §7, App. B.5): each segment is either an
+-- integer ('StepIndex') or a name ('StepName' — a premise label or a question
+-- id, which only the elaborator can tell apart). Both spellings must be
+-- generated: each round-trips as written, and reconstructing one from the other
+-- is exactly what the presentation AST exists to avoid.
+genSurfacePath :: Gen [SurfaceStep]
+genSurfacePath =
   smallListOf
     ( oneof
-        [ StepPremise <$> choose (0, 20)
-        , StepQuestion . QuestionId <$> genIdent
+        [ StepIndex <$> choose (0, 20)
+        , StepName <$> genIdent
         ]
     )
 
-genAttack :: Gen Attack
+genAttack :: Gen SurfaceAttack
 genAttack =
   oneof
-    [ Rebut <$> (ArgId <$> genIdent) <*> (ArgId <$> genIdent)
-    , Undercut <$> (ArgId <$> genIdent) <*> (ArgId <$> genIdent) <*> genPosition
-    , Undermine <$> (ArgId <$> genIdent) <*> (ArgId <$> genIdent) <*> genPosition
+    [ SRebut <$> (ArgId <$> genIdent) <*> (ArgId <$> genIdent)
+    , SUndercut <$> (ArgId <$> genIdent) <*> (ArgId <$> genIdent) <*> genSurfacePath
+    , SUndermine <$> (ArgId <$> genIdent) <*> (ArgId <$> genIdent) <*> genSurfacePath
     ]
+
+-- | Does a declaration carry an attack path segment of the given spelling?
+declHasStep :: (SurfaceStep -> Bool) -> Decl -> Bool
+declHasStep p d = case d of
+  DeclAttack (SUndercut _ _ steps) -> any p steps
+  DeclAttack (SUndermine _ _ steps) -> any p steps
+  _ -> False
+
+isStepIndex :: SurfaceStep -> Bool
+isStepIndex (StepIndex _) = True
+isStepIndex _ = False
 
 -- ---------------------------------------------------------------------------
 -- Programs
@@ -291,6 +334,29 @@ genGroup =
     <$> (GroupId <$> genIdent)
     <*> smallListOf (LeafId <$> genIdent)
 
+-- | A @comparison@ block (grammar App. B.3). Round-trip is purely syntactic:
+-- the 2-arity of the authored conclusion, scheme availability, and every other
+-- B.3 precondition are elaborator checks, so any well-shaped surface value is a
+-- legal generator target here.
+genComparison :: Gen Comparison
+genComparison =
+  Comparison
+    <$> genProp
+    <*> (MeasurandId <$> genIdent)
+    <*> (DatasetId <$> genIdent)
+    <*> elements [StrictlyBetter, AtLeastAsGood]
+    <*> (ArgId <$> genIdent)
+    <*> (ArgId <$> genIdent)
+    <*> (LeafId <$> genIdent)
+    <*> (LeafId <$> genIdent)
+    <*> (LeafId <$> genIdent)
+    <*> genComparisonClaim
+    <*> oneof [pure Nothing, Just . PropId <$> genIdent]
+
+genComparisonClaim :: Gen ComparisonClaim
+genComparisonClaim =
+  ComparisonClaim <$> (PropId <$> genIdent) <*> genNlStr <*> genBinding
+
 genDecl :: Gen Decl
 genDecl =
   oneof
@@ -300,6 +366,7 @@ genDecl =
     , DeclAttack <$> genAttack
     , DeclStatus . PropId <$> genIdent
     , DeclGroup <$> genGroup
+    , DeclComparison <$> genComparison
     ]
 
 genBackendRef :: Gen (BackendId, String)
@@ -349,17 +416,52 @@ genRule = do
     Strict -> (,) <$> arbitrary <*> smallListOf genCertRef
     Defeasible -> pure (False, [])
   qs <- smallListOf genQuestion
+  labels <-
+    genPremiseLabels [q | Question (QuestionId q) _ _ <- qs] (length prems)
   pure
     Rule
       { ruleId = rid
       , ruleParams = params
       , ruleMode = mode
       , rulePremises = prems
+      , rulePremiseLabels = labels
       , ruleConclusion = concl
       , ruleAllowTrusted = at
       , ruleCertifiers = certs
       , ruleQuestions = qs
       }
+
+-- | Optional premise labels for a rule with @n@ premises (grammar App. B.4).
+--
+-- Two generator constraints, both mirroring what the parser accepts:
+--
+--   * the canonical unlabelled value is @[]@ — a non-empty all-'Nothing' list
+--     prints as the unlabelled spelling and so re-parses to @[]@, which would
+--     be a value the printer cannot faithfully render;
+--   * labels must be pairwise distinct, disjoint from the rule's question ids,
+--     and never @rule@\/@leaf@ — those are declaration-time parse errors,
+--     rejected because they would make an attack path ambiguous.
+--
+-- Both are enforced by construction rather than by @suchThat@, so the generator
+-- never discards.
+genPremiseLabels :: [String] -> Int -> Gen [Maybe PremiseLabel]
+genPremiseLabels questionIds n
+  | n <= 0 = pure []
+  | otherwise = do
+      keeps <- vectorOf n (elements [True, False])
+      if not (or keeps)
+        then pure []
+        else do
+          raws <- vectorOf n genIdent
+          pure (assign (questionIds ++ ["rule", "leaf"]) (zip keeps raws))
+  where
+    assign _ [] = []
+    assign used ((keep, raw) : rest)
+      | not keep = Nothing : assign used rest
+      | otherwise =
+          let l = freshen used raw
+           in Just (PremiseLabel l) : assign (l : used) rest
+    freshen used l = if l `elem` used then freshen used (l ++ "_") else l
 
 genContrary :: Gen Contrary
 genContrary = Contrary <$> genAtomPat <*> genAtomPat
@@ -387,6 +489,8 @@ genPolicy = do
         | (i, ps) <- zip [0 :: Int ..] theoryProps
         ]
   gm <- elements [QuarantineOnConflict, RejectOnConflict]
+  ms <- genMeasurands
+  schs <- genSchemes
   pure
     Policy
       { policyId = pid
@@ -396,7 +500,39 @@ genPolicy = do
       , policyAdmission = adm
       , policyTheories = ts
       , policyGroupMode = gm
+      , policyMeasurands = ms
+      , policyComparisonSchemes = schs
       }
+
+-- | The measurand table (grammar App. B.1). Ids are index-derived because a
+-- duplicate measurand is a parse error — the same construction the theory-digest
+-- generator above uses for the same reason.
+genMeasurands :: Gen [Measurand]
+genMeasurands = do
+  k <- choose (0, 3 :: Int)
+  pols <- vectorOf k (elements [HigherIsBetter, LowerIsBetter])
+  pure
+    [ Measurand (MeasurandId ("measurand_" ++ show i)) SortNum pol
+    | (i, pol) <- zip [0 :: Int ..] pols
+    ]
+
+-- | Comparison schemes (grammar App. B.2). Schemes are keyed by the
+-- @(relation, polarity)@ pair and a duplicate pair is a parse error, so this
+-- draws a sublist of the four possible pairs rather than sampling freely.
+genSchemes :: Gen [ComparisonScheme]
+genSchemes = do
+  pairs <-
+    sublistOf
+      [ (rel, pol)
+      | rel <- [StrictlyBetter, AtLeastAsGood]
+      , pol <- [HigherIsBetter, LowerIsBetter]
+      ]
+  mapM one pairs
+  where
+    one (rel, pol) =
+      ComparisonScheme rel pol
+        <$> (RuleId <$> genIdent)
+        <*> (RuleId <$> genIdent)
 
 -- ---------------------------------------------------------------------------
 -- Result 12 round-trip (the crux)
@@ -438,6 +574,46 @@ prop_argAssuranceRoundTrip =
 prop_policyRoundTrip :: Property
 prop_policyRoundTrip =
   forAll genPolicy $ \p -> parsePolicy (printPolicy p) === Right p
+
+-- ---------------------------------------------------------------------------
+-- Coverage: the @0.3 forms are actually generated (eng-review 9A)
+-- ---------------------------------------------------------------------------
+--
+-- Without these the extended round-trip property above passes /vacuously/ for
+-- any form the generators silently stopped emitting — a green suite that proves
+-- nothing about @lara-syntax\@0.3@. 'checkCoverage' makes each threshold an
+-- assertion rather than a printed note; the thresholds sit well under the
+-- generators' real rates so they measure presence, not tuning.
+
+-- | Every @0.3 /program/ form reaches the round-trip.
+prop_programFormCoverage :: Property
+prop_programFormCoverage =
+  checkCoverage $
+    forAll genProgram $ \p ->
+      let ds = programDecls p
+       in cover 5 (any isComparison ds) "comparison block"
+            . cover 2 (any (declHasStep isStepIndex) ds) "attack path: StepIndex"
+            . cover 2 (any (declHasStep (not . isStepIndex)) ds) "attack path: StepName"
+            . cover 5 (any claimNlHasBrace ds) "nl string with {cell …}/{{}}"
+            $ parseProgram (printProgram p) === Right p
+  where
+    isComparison (DeclComparison _) = True
+    isComparison _ = False
+    claimNlHasBrace d = case d of
+      DeclComparison c -> hasBraceForm (ccNlRaw (cmpClaim c))
+      _ -> False
+
+-- | Every @0.3 /policy/ form reaches the round-trip.
+prop_policyFormCoverage :: Property
+prop_policyFormCoverage =
+  checkCoverage $
+    forAll genPolicy $ \p ->
+      cover 20 (not (null (policyMeasurands p))) "measurand table"
+        . cover 20 (not (null (policyComparisonSchemes p))) "comparison-scheme"
+        . cover 20 (any hasLabel (policyRules p)) "labelled rule premises"
+        $ parsePolicy (printPolicy p) === Right p
+  where
+    hasLabel r = any (/= Nothing) (rulePremiseLabels r)
 
 prop_policyTheoriesRoundTrip :: Property
 prop_policyTheoriesRoundTrip =
@@ -634,10 +810,36 @@ programNegatives =
         ++ "  assurance = cert(nd@1, sha256:t, (hyp \"bad\\q\"))\n"
     , "malformed certificate payload"
     )
+    -- lara-syntax@0.3, grammar App. B.6: the nl brace contract is strict, so a
+    -- mistyped directive is a located error and never silent literal text.
+  , ( "unknown nl directive"
+    , claimProgram "\"the value is {cel e2}\""
+    , "unknown nl directive"
+    )
+  , ( "nl directive missing a leaf id"
+    , claimProgram "\"the value is {cell}\""
+    , "leaf id"
+    )
+  , ( "unterminated nl directive"
+    , claimProgram "\"the value is {cell e2\""
+    , "unterminated"
+    )
+  , ( "bare closing brace in nl"
+    , claimProgram "\"a } b\""
+    , "unmatched '}'"
+    )
   ]
   where
     assuranceProgram body =
       "artifact a at sha256:aa\npolicy p\nuse backends []\n" ++ body
+    -- App. B.6's brace contract applies to §3's ordinary claim form as well as
+    -- a comparison block's nested claims form.
+    claimProgram nl =
+      assuranceProgram $
+        "claim c\n"
+          ++ "  nl = " ++ nl ++ "\n"
+          ++ "  formal = p\n"
+          ++ "  binding = { author = alice, audit-status = reviewed }\n"
 
 policyNegatives :: [(String, String, String)]
 policyNegatives =
@@ -669,6 +871,45 @@ policyNegatives =
   , ( "bad duplicate-reports mode"
     , "policy p\nduplicate-reports = bogus\n"
     , "group conflict mode"
+    )
+    -- lara-syntax@0.3, grammar App. B.1/B.2/B.4.
+  , ( "duplicate measurand"
+    , "policy p\nmeasurand acc : Num where higher-is-better\n"
+        ++ "measurand acc : Num where lower-is-better\n"
+    , "duplicate measurand"
+    )
+  , ( "bad measurand polarity"
+    , "policy p\nmeasurand acc : Num where bigger\n"
+    , "polarity"
+    )
+  , ( "unknown measurand sort"
+    , "policy p\nmeasurand acc : Real where higher-is-better\n"
+    , "measurand sort"
+    )
+  , ( "duplicate comparison-scheme pair"
+    , "policy p\n"
+        ++ "comparison-scheme strictly-better higher-is-better\n  recheck = r1\n  bridge = r2\n"
+        ++ "comparison-scheme strictly-better higher-is-better\n  recheck = r3\n  bridge = r4\n"
+    , "duplicate comparison-scheme"
+    )
+  , ( "bad comparison-scheme relation"
+    , "policy p\ncomparison-scheme sort-of-better higher-is-better\n  recheck = r1\n  bridge = r2\n"
+    , "relation"
+    )
+  , ( "duplicate premise label"
+    , "policy p\nrule r()\n  mode = defeasible\n"
+        ++ "  premises = [ cmp: a, cmp: b ]\n  conclusion = c\n"
+    , "duplicate premise label"
+    )
+  , ( "premise label collides with a question id"
+    , "policy p\nrule r()\n  mode = defeasible\n"
+        ++ "  premises = [ q1: a ]\n  conclusion = c\n  question q1 : ans\n"
+    , "also names a critical question"
+    )
+  , ( "premise label spells a terminal marker"
+    , "policy p\nrule r()\n  mode = defeasible\n"
+        ++ "  premises = [ leaf: a ]\n  conclusion = c\n"
+    , "reserved"
     )
   ]
 
@@ -725,6 +966,8 @@ syntaxSpecProps =
   [ ("syntax program round-trip (result 12)", deepCheck prop_programRoundTrip)
   , ("syntax arg assurance round-trip", quickCheckResult prop_argAssuranceRoundTrip)
   , ("syntax policy round-trip (result 12)", deepCheck prop_policyRoundTrip)
+  , ("syntax @0.3 program forms are covered", quickCheckResult prop_programFormCoverage)
+  , ("syntax @0.3 policy forms are covered", quickCheckResult prop_policyFormCoverage)
   , ("syntax policy theory table round-trip", quickCheckResult prop_policyTheoriesRoundTrip)
   , ("syntax source round-trip", deepCheck prop_sourceRoundTrip)
   , ("syntax golden programs (A, B) parse + idempotent", quickCheckResult prop_goldenPrograms)

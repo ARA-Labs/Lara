@@ -318,6 +318,17 @@ workedExampleGoldens =
         ++ " (con imagenet_val)) defeated)"
         ++ " (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
     )
+  , -- S5: the same @strictly-better@ source shape as S2 over a measurand its
+    -- policy declares @lower-is-better@, so the generated goal is the MIRRORED
+    -- @num_lt(ours, theirs)@ — and the strict arg is @in@, i.e. @ord\@1@ replays
+    -- and accepts it. The cross-driver anchor for the polarity contract: both
+    -- drivers must agree on the flipped numerals, not merely on the outcome.
+    ( "examples/S5/example.core.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom better (con sys_new) (con sys_base) (con perplexity)"
+        ++ " (con wikitext103)) justified)"
+        ++ " (status (atom num_lt (num 28.4) (num 31.6)) justified)))"
+    )
   , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;
     -- the setting-mismatch pair (P2) differs only in the setting index ⇒ zero
@@ -567,8 +578,8 @@ prop_admissionOracle = once (ioProperty runChecks)
             , ("empty Lean marker", "empty-lean.sexp\tcodec-reject\thaskell marker\t")
             ]
           acceptedEmptyMarkers =
-            [ label
-            | (label, row) <- emptyMarkerRows
+            [ markerName
+            | (markerName, row) <- emptyMarkerRows
             , Right _ <- [parseManifest row]
             ]
       if not (null acceptedEmptyMarkers)

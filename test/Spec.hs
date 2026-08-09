@@ -42,6 +42,7 @@ import ReplaySpec (replaySpecProps)
 import RunningExampleSpec (runningExampleSpecProps)
 import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
+import SurfaceRewriteSpec (surfaceRewriteSpecProps)
 import SyntaxSpec (syntaxSpecProps)
 import WireSpec (wireSpecProps)
 import WorkedExamplesSpec (workedExamplesSpecProps)
@@ -199,6 +200,7 @@ main = do
         ++ [run name act | (name, act) <- syntaxSpecProps]
         ++ [run name act | (name, act) <- elaborateSpecProps]
         ++ [run name act | (name, act) <- workedExamplesSpecProps]
+        ++ [run name act | (name, act) <- surfaceRewriteSpecProps]
         ++ [run name act | (name, act) <- corpusUnitsSpecProps]
         ++ [run name act | (name, act) <- checkSpecProps]
         ++ [run name act | (name, act) <- blockedSpecProps]

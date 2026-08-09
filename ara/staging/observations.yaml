@@ -1116,3 +1116,72 @@ observations:
   crystallized_via: null
   stale: false
 
+- id: O55
+  timestamp: "2026-08-08T03:10"
+  provenance: ai-suggested
+  content: >
+    A theorem that discharges by rfl/Iff.rfl, or whose proof script binds fewer
+    fields than the type has, invites the reader to assume it is vacuous. Neither
+    reading is settled by argument. Settle it by PERTURBATION: break the
+    definition the theorem is about and confirm the proof stops compiling. Done
+    twice this turn -- swapping goalOf's higherIsBetter operands broke
+    goalOf_iff_better, goalOf_polarity_swap and goalOf_polarity_mismatch_excl at
+    typecheck; making parsePolicy return [] for measurands left parse_printPolicy
+    with unsolved goals. Both took ~2 minutes and converted "I believe this is
+    non-vacuous" into evidence.
+  context: >
+    Reviewing D8+ (goalOf_iff_better closes by `cases rel <;> cases pol <;> exact
+    Iff.rfl`) and D8 (parse_printPolicy destructures a 9-field Policy with 5
+    binders, which reads as though it covers 5 fields).
+  potential_type: heuristic
+  bound_to: [N133, N136]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O56
+  timestamp: "2026-08-08T03:12"
+  provenance: ai-suggested
+  content: >
+    The direction-of-goodness contract ended up carried three independent ways by
+    agents that never coordinated: a Lean proof (goalOf_iff_better,
+    goalOf_polarity_mismatch_excl), a Haskell worked example (S5, perplexity
+    declared lower-is-better, generating the mirrored goal), and a Haskell<->Lean
+    differential golden pinning the FLIPPED numerals num_lt(28.4, 31.6) rather
+    than merely the accept outcome. A polarity error would have to survive a
+    proof, a test, and cross-implementation disagreement simultaneously. Only the
+    first was planned; the differential entry was added unprompted.
+  context: >
+    Emerged across D8+ (ca78131) and D6 (2045ef9), implemented by separate
+    subagents with no shared context.
+  potential_type: claim
+  bound_to: [N133, N135]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O57
+  timestamp: "2026-08-08T03:14"
+  provenance: ai-suggested
+  content: >
+    A mechanization can drift from the implementation it mirrors while its own
+    documentation keeps asserting parity, and nothing in the proof pipeline
+    detects it: every theorem still holds, the axiom audit still passes, CI stays
+    green -- the theorems are simply about a smaller language than the one the
+    production parser accepts. Here result 12's scope header and the README row
+    both claimed field-for-field parity with Lara.AST from M4a onward while five
+    constructs were never ported. The detection cost is one diff of the two type
+    definitions; the failure is silent until someone reads both files side by
+    side. Candidate mitigation: a parity check that enumerates constructor/field
+    counts on both sides, so drift fails a build rather than waiting on a reader.
+  context: >
+    Found while implementing D8; closed in 3cb391f (Policy 5->9 fields, Decl 5->7
+    arms) and 954214b (README).
+  potential_type: heuristic
+  bound_to: [N136]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

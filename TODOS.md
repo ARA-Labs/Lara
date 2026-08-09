@@ -200,6 +200,46 @@ Tighten the parser or update the grammar.
 **Effort:** S
 **Priority:** P3
 
+### θ-matching for plain `arg` declarations (generalize the comparison form's mechanism)
+
+**What:** Let an ordinary `arg` name its premise leaves and derive θ by one-way
+matching against the rule's premise patterns, instead of transcribing the full
+positional θ vector.
+
+**Why:** The mechanism `lara-syntax@0.3` builds for the `comparison` expansion
+(match named leaves against premise patterns, consistency-checked) kills
+transcribed θ for *every* rule if exposed on plain `arg` — no new declaration
+form needed. Deferred from the 0.3 track (eng review 2026-08-08, outside-voice
+finding 3): the comparison form uniquely delivers goal generation and polarity
+checking, but the general θ relief is separable and cheaper.
+
+**Context:** The matcher lands in `src/Lara/Elaborate/Internal.hs` as part of
+plan `plans/2026-08-08-lara-syntax-03-surface.md` §5. Exposing it on `arg`
+needs only a surface form for "premises by name" plus the same consistency
+errors. Candidate rider for #88b.
+
+**Effort:** M
+**Priority:** P3
+**Depends on:** lara-syntax@0.3 (D4's matcher)
+
+### spec.md's presentation-version pointer
+
+**What:** Decide how `docs/spec.md` (≈lines 144-149) refers to presentation
+syntax versions as grammar appendices accumulate, and record it — e.g. one
+sentence: "presentation syntax versions live in `docs/lara-surface-grammar.md`;
+spec.md pins the core."
+
+**Why:** spec.md names `lara-syntax@0.1` as *the* presentation version; App. A
+(0.2) shipped without updating it and App. B (0.3) repeats the question. The
+current state is precedent-by-accident, not a decision.
+
+**Context:** Found during the 2026-08-08 eng review of the 0.3 surface plan
+while checking App. A as the App. B precedent. Purely editorial; deliberately
+kept out of the 0.3 diff to avoid pulling spec.md into a surface-track PR.
+
+**Effort:** S
+**Priority:** P4
+
 ## Completed
 
 ### Backend rejection reasons reach the author (PR #83 review)

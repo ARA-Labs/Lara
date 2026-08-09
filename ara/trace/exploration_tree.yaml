@@ -3223,3 +3223,263 @@ tree:
   - src/Lara/Strict/Ord.hs
   status: resolved
 
+- id: N131
+  type: decision
+  title: "Sign off the FROZEN grammar §7 amendment so §3.5 ships rather than detaching"
+  provenance: user
+  timestamp: "2026-08-08T01:20"
+  choice: >
+    The plan's sole open item (§6.2) was a sign-off on amending §7 of
+    docs/lara-surface-grammar.md, which is marked FROZEN and asserts that A0.5
+    "adds no presentation attack type". Appendix B.5 needs one: a dotted attack
+    segment may now name a rule's premise LABEL (a2.binding.leaf) beside the
+    integer spelling (a2.1.leaf), and printProgram :: Program -> String never
+    receives the Policy, so the printer cannot choose between the two spellings.
+    Recording the authored spelling in the presentation AST is the only option
+    that does not make a program file's canonical form depend on a different
+    file.
+
+    User signed off, and additionally chose to implement §3.5 in this track
+    rather than take the plan's detachable-tail option. The amendment text is
+    appended to §7 (not rewritten into it), records the SurfaceStep resolution,
+    and states the scope: strictly additive, integer spelling unchanged and
+    still canonical for unlabelled premises, and no Unit-reachable type moves.
+  alternatives:
+  - Detach §3.5 into its own PR and ship D1-D6 first (the plan's own sequencing; rejected as unnecessary once signed off)
+  - Have the printer consult the policy (rejected: makes a program file's canonical form depend on a separate file)
+  - Pick one spelling as canonical and lose the other's round-trip (rejected: breaks spec result 12 for whichever is not chosen)
+  evidence:
+  - docs/lara-surface-grammar.md
+  - plans/2026-08-08-lara-syntax-03-surface.md
+  status: resolved
+
+- id: N132
+  type: dead_end
+  title: "A determinism-of-elaboration theorem is not reachable in the Lean development"
+  provenance: ai-executed
+  timestamp: "2026-08-08T01:35"
+  hypothesis: >
+    The user asked to "mechanize the theory proofs" and selected, from an
+    explicit menu, "D8 plus an elaboration-invariant theorem" -- stated as:
+    comparison expansion is deterministic given (scheme, polarity, θ), so the
+    elaborator cannot flip an argument order without flipping which system the
+    bridge concludes is better.
+  failure_mode: >
+    Three structural obstacles, all verified before any code was written.
+    (1) lean/Lara/Presentation.lean is a closed island: its SupportTerm and
+    Policy are wholly distinct inductives from the checker's
+    Lara.Support.SupportTerm / Lara.Policy.Policy, and NOTHING maps
+    Presentation.Program -> Unit. Its only consumer anywhere imports three
+    enums for admission table keys. (2) There is no Lean Unit reachable from
+    Presentation: the Lean entry point is the wire decoder Lara.Driver.decodeUnit
+    on an ALREADY-ELABORATED .sexp, and Driver.lean calls itself "a THIN decode
+    -> call -> encode shim". (3) Lara/Admission.lean:16 explicitly excludes the
+    elaborator from what Lean proves ("the concrete .lara parser, the structural
+    elaborator, and the replay identity are validated by Haskell tests").
+    Reaching the literal statement would require defining a Lean elaborator and
+    validating it differentially against the Haskell one -- a project of its own,
+    outside what the plan authorises.
+  lesson: >
+    The Haskell<->Lean anchor in this development is the SERIALIZED
+    POST-ELABORATION Unit, not the surface program. Any proposed theorem about a
+    surface-to-Unit transformation has to cross that anchor and therefore needs a
+    Lean elaborator first. Check what the mechanization's entry point actually is
+    before promising a theorem about a stage that sits upstream of it.
+  status: resolved
+
+- id: N133
+  type: decision
+  title: "Mechanize the direction-of-goodness contract instead, and say plainly what it does not cover"
+  provenance: ai-suggested
+  timestamp: "2026-08-08T01:44"
+  choice: >
+    Substituted a reachable theorem for the unreachable one and disclosed the
+    narrowing to the user rather than delivering something that merely sounds
+    like what was asked. lean/Lara/Comparison.lean states Appendix B.3's 2x2
+    lookup table as goalOf and the intended research meaning as Better --
+    SEPARATELY, so their agreement is a real statement rather than a
+    restatement. goalOf_iff_better proves the generated ord@1 goal holds exactly
+    when "ours is better than base" under the measurand's declared polarity.
+    goalOf_polarity_swap and goalOf_polarity_mismatch_excl turn plan §1.2's
+    hazard into formal statements: the two polarities generate the SAME relation
+    on TRANSPOSED operands, and under a strict relation both can never hold, so
+    a mis-declared polarity certifies the OPPOSITE claim rather than a weaker
+    one. better_atLeastAsGood_antisymm covers the S3 tie.
+
+    The module docstring states what is NOT proved: nothing here says the
+    Haskell elaborator maps a comparison block to goalOf's output. The
+    elaborator stays validated-not-verified, exactly as the .lara parser already
+    was. This is the §1.2 correctness hazard the comparison form exists to
+    close, not a proof about the compiler.
+  alternatives:
+  - Attempt the full Lean elaborator port (out of scope; would need differential validation against Haskell)
+  - Silently deliver a weaker theorem under the requested name (rejected: misrepresents what was proved)
+  - Skip the Lean work and rely on Haskell tests alone (rejected: the user asked for mechanization)
+  evidence:
+  - lean/Lara/Comparison.lean
+  - lean/AxCheck.lean
+  also_depends_on: [N132]
+  status: resolved
+
+- id: N134
+  type: decision
+  title: "Premise labels ride beside the frozen Rule type, not inside rulePremises"
+  provenance: ai-suggested
+  timestamp: "2026-08-08T02:00"
+  choice: >
+    Plan §3.5 says rule premises "gain optional labels", but rulePremises ::
+    [AtomPat] lives on Rule, and Rule is copied VERBATIM into unitRules -- it is
+    Unit-reachable and frozen, so changing that field's type would break the
+    byte-identity invariant the whole plan rests on. The plan did not anticipate
+    this.
+
+    Labels landed instead as a parallel rulePremiseLabels :: [Maybe
+    PremiseLabel], positionally aligned with rulePremises. Byte-drift is
+    STRUCTURALLY impossible rather than incidentally absent: Wire.encodeRule
+    enumerates its eight encoded fields explicitly, so the new field is not
+    encoded and decodeRule fills []. Belt and braces, Elaborate.stripPremiseLabels
+    clears labels on the way into Unit, which makes App. B.4's claim "labels
+    never enter Unit" true of the VALUE and not only of the bytes.
+  alternatives:
+  - Change rulePremises to [(Maybe PremiseLabel, AtomPat)] (rejected: mutates a Unit-reachable frozen type)
+  - Keep labels in a side table keyed by RuleId (rejected: separates a rule from its own labels, and the WF check needs both)
+  evidence:
+  - src/Lara/AST.hs
+  - src/Lara/Wire.hs
+  - src/Lara/Elaborate/Internal.hs
+  status: resolved
+
+- id: N135
+  type: experiment
+  title: "Byte-identity acceptance: S2/S3/S4 rewritten onto the comparison form, goldens unmoved"
+  provenance: ai-executed
+  timestamp: "2026-08-08T02:54"
+  result: >
+    PASSED, and it is the acceptance criterion for the whole plan (§8).
+    examples/S{2,3,4}/example.core.sexp and expected.json are BYTE-IDENTICAL to
+    main while all three .lara sources were rewritten onto the comparison form
+    (+137/-62): no hand-written num_lt, no certificate slot indices, no
+    transcribed θ vectors. Regenerating with scripts/gen-worked-examples.hs is
+    idempotent. Three tests assert IDENTITY, not equivalence, one per example.
+    S4 additionally attacks by premise label (undermine x1 a2.binding.leaf), and
+    a2.binding.leaf == a2.1.leaf is pinned, which doubles as the 0-based index
+    regression test.
+
+    The mechanism that made this reachable rather than merely hoped for:
+    expandComparison lowers a block to the PRESENTATION Decls it stands for
+    ([DeclClaim, DeclArg, DeclArg]) and splices them in place, so generated
+    arguments go through the same resolvePremises and conclusion checks as
+    hand-written ones.
+  evidence:
+  - examples/S2/example.lara
+  - examples/S3/example.lara
+  - examples/S4/example.lara
+  - test/SurfaceRewriteSpec.hs
+  also_depends_on: [N131, N134]
+  status: resolved
+
+- id: N136
+  type: decision
+  title: "Result 12 had been proved over a smaller language than the parser accepts; docs asserted parity"
+  provenance: ai-executed
+  timestamp: "2026-08-08T02:42"
+  choice: >
+    Found while porting: lean/Lara/Presentation.lean's "## Scope" header claimed
+    "FULL presentation Program and Policy, field-for-field with Lara.AST", and
+    lean/README.md's result-12 row repeated it. Both were FALSE from M4a
+    onwards. policyTheories, policyGroupMode, GroupConflictMode, GroupId/DupGroup
+    and the DeclGroup arm were never ported, so spec result 12 was being proved
+    over a STRICTLY SMALLER language than the Haskell parser accepts while the
+    documentation asserted parity. lara-syntax@0.3 widened the gap further.
+
+    Closed the backlog alongside the @0.3 work: Policy 5 -> 9 fields, Decl 5 ->
+    7 arms, parse_printProgram/parse_printPolicy extended over all of it. The
+    scope header is rewritten to enumerate actual coverage and gains a "What is
+    deliberately NOT here" section. lean/README.md's stale "516 declaration
+    reports" corrected to 707, verified by running the audit rather than by
+    arithmetic.
+  alternatives:
+  - Port only the @0.3 additions and leave the M4a backlog (rejected: leaves the parity claim false)
+  - Weaken the header to a vague claim (rejected: an honest enumeration is the deliverable)
+  evidence:
+  - lean/Lara/Presentation.lean
+  - lean/README.md
+  status: resolved
+
+- id: N137
+  type: experiment
+  title: "Round-2 syntax review closure: eight findings repaired and full conformance gates passed"
+  provenance: ai-executed
+  timestamp: "2026-08-08T22:51"
+  result: >
+    PASSED. Three critical comparison defects and five important
+    parser/grammar/Lean defects were repaired in an isolated worktree. The
+    Haskell suite passed; Lean built 66 jobs; the standard-axiom gate passed;
+    elaborator and freezer unit tests passed 18/18 and 4/4; golden, authenticity,
+    replay, and tamper gates passed; Haskell/Lean differential passed 446
+    behavioral and 54 codec-negative anchors; admission differential passed
+    20/20. A final independent review initially reported two Important findings;
+    one documentation contradiction was fixed, and the reviewer retracted the
+    other after confirming the polarity test is mutation-effective. No
+    Critical/Important findings remain.
+  evidence:
+  - src/Lara/Elaborate/Comparison.hs
+  - src/Lara/Syntax.hs
+  - lean/Lara/Comparison.lean
+  - test/ElaborateSpec.hs
+  - test/SyntaxSpec.hs
+  - docs/lara-surface-grammar.md
+  - scripts/differential.sh
+  - scripts/admission-differential.sh
+  also_depends_on: [N131, N135, N136]
+  status: resolved
+
+- id: N138
+  type: experiment
+  title: "Post-review prose consistency check caught and repaired one stale source comment"
+  provenance: ai-executed
+  timestamp: "2026-08-08T22:51"
+  result: >
+    A final advisory found that Comparison.hs still located the
+    direction-of-goodness rejection at the scheme and described shared-variable
+    welding, contradicting both the actual comparison-use-site error and the
+    newly documented structural correspondence across disjoint parameter
+    namespaces. The source comment was corrected. This was documentation drift,
+    not executable behavior; the already-passing behavioral gates remain
+    applicable.
+  evidence:
+  - src/Lara/Elaborate/Comparison.hs
+  - docs/lara-surface-grammar.md
+  also_depends_on: [N137]
+  status: resolved
+
+- id: N139
+  type: experiment
+  title: "PR #92 re-review closure: four follow-ups repaired and mutation-pinned"
+  provenance: ai-executed
+  timestamp: "2026-08-08T23:38"
+  result: >
+    PASSED LOCALLY. The four follow-ups were verified against 7b34e20 before
+    editing. nlStringLit's Haddock block is attached again; Appendix B and the
+    design record disclose the ordinary-claim brace migration; a declared but
+    inadmissible binding now receives an authored-field diagnostic; and sparse
+    premise labels resolve by their true positional index. The binding
+    diagnostic test failed before the constructor split. Replacing the correct
+    sparse-label derivation with the naive filtered-label zip made the new test
+    fail at StepPremise 0 versus StepPremise 1. Full Haskell tests, Lean build
+    and axiom audit, 18 elaborator tests, 4 freezer tests, replay/authenticity/
+    tamper gates, 446 behavioral plus 54 codec-negative differential anchors,
+    20 admission-differential fixtures, three generators, and the S2/S3/S4
+    byte-identity check passed. Commit 8425c88 was pushed to PR #92; hosted Lean
+    passed and hosted Haskell/re-review remain pending.
+  evidence:
+  - src/Lara/Elaborate/Comparison.hs
+  - src/Lara/Elaborate/Error.hs
+  - src/Lara/Syntax.hs
+  - test/ElaborateSpec.hs
+  - docs/lara-surface-grammar.md
+  - plans/2026-08-08-lara-syntax-03-surface.md
+  - scripts/differential.sh
+  - scripts/admission-differential.sh
+  also_depends_on: [N137, N138]
+  status: resolved

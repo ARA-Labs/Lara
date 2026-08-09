@@ -33,7 +33,7 @@ use backends [nd@1]
 # --- The headline claim, not assemblable at corpus-v1's evidential bar --------------------------
 
 claim c05
-  nl      = "At ImageNet-1k, LBCS attains the highest Top-5 accuracy among {Uniform, EL2N, GraNd, Moderate, CCS, Probabilistic, LBCS} at each predefined ratio, and its optimized selection ratio falls below the predefined one (68.53 vs 70, 77.82 vs 80)"
+  nl      = "At ImageNet-1k, LBCS attains the highest Top-5 accuracy among {{Uniform, EL2N, GraNd, Moderate, CCS, Probabilistic, LBCS}} at each predefined ratio, and its optimized selection ratio falls below the predefined one (68.53 vs 70, 77.82 vs 80)"
   formal  = better(lbcs, probabilistic, top5_accuracy, imagenet1k)
   binding = { author = m0-annotator, audit-status = reviewed }
 

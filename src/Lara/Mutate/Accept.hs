@@ -301,7 +301,7 @@ opAttachRebutCycle base input =
     mutRuleId = RuleId "mut_rebut_rule"
     premLeaf = LeafId "mut_rebut_premise"
     premP = Prop (Pred "mut_rebut_premise") []
-    mutRule = Rule mutRuleId [] Defeasible [groundPat premP] (groundPat dualP) False [] []
+    mutRule = Rule mutRuleId [] Defeasible [groundPat premP] [] (groundPat dualP) False [] []
 
 -- | The contrary proposition of a claim plus any contraries that must be
 -- injected: a declared symmetric pair for the claim's predicate is reused (no
@@ -360,7 +360,7 @@ opAttachReinstate base input =
     defLeaf = LeafId "mut_reinstate_defender"
     premP = Prop (Pred "mut_reinstate_premise") []
     defP = Prop (Pred "mut_reinstate_defeated") []
-    mutRule = Rule mutRuleId [] Defeasible [groundPat premP] (groundPat excP) False [] []
+    mutRule = Rule mutRuleId [] Defeasible [groundPat premP] [] (groundPat excP) False [] []
 
 attackEndpoints :: Attack -> [ArgId]
 attackEndpoints k = case k of

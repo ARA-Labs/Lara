@@ -1,0 +1,213 @@
+session:
+  id: "2026-08-08_001"
+  date: "2026-08-08"
+  started: "2026-08-08T01:15"
+  last_turn: "2026-08-08T23:38"
+  turn_count: 3
+  summary: >
+    Implemented lara-syntax@0.3, closed the eight initial round-2 findings, then
+    addressed four re-review follow-ups on PR #92. The final follow-ups restore
+    nlStringLit's Haddock attachment, document the ordinary-claim brace
+    migration, split an authored binding mismatch from policy-shape errors, and
+    mutation-pin sparse premise-label indexing. Full Haskell, Lean, axiom,
+    replay, tamper, authenticity, freshness, differential, and admission gates
+    passed locally. Commit 8425c88 is pushed; hosted Lean passed, hosted Haskell
+    and reviewer re-review remain pending. The original scope disclosures and
+    open follow-ups remain.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N131"
+    routing: direct
+    provenance: user
+    summary: "User signed off the FROZEN grammar §7 amendment; §3.5 ships in-track rather than detaching"
+  - turn: 1
+    type: dead_end
+    id: "N132"
+    routing: direct
+    provenance: ai-executed
+    summary: "Determinism-of-elaboration theorem unreachable: Presentation is a closed island, Lean's entry point is the wire decoder"
+  - turn: 1
+    type: decision
+    id: "N133"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Mechanized the §1.2 direction-of-goodness contract instead, with the scope limit stated in the module docstring"
+  - turn: 1
+    type: decision
+    id: "N134"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Premise labels as a parallel rulePremiseLabels field; Wire.encodeRule's explicit 8 fields make byte-drift structurally impossible"
+  - turn: 1
+    type: experiment
+    id: "N135"
+    routing: direct
+    provenance: ai-executed
+    summary: "Byte-identity acceptance PASSED — S2/S3/S4 goldens unmoved while sources rewritten (+137/-62)"
+  - turn: 1
+    type: decision
+    id: "N136"
+    routing: direct
+    provenance: ai-executed
+    summary: "Result 12 was proved over a smaller language than the parser accepts since M4a; backlog closed, docs corrected"
+  - turn: 1
+    type: observation
+    id: "O55"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Settle theorem non-vacuity by perturbation, not by argument"
+  - turn: 1
+    type: observation
+    id: "O56"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Direction-of-goodness triangulated by proof + test + differential, from uncoordinated agents"
+  - turn: 1
+    type: observation
+    id: "O57"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A mechanization can drift from its implementation while its docs assert parity, invisibly to CI"
+  - turn: 1
+    type: heuristic
+    id: "H11"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Expand surface sugar into presentation Decls, not kernel structures — crystallized via artifact commitment"
+  - turn: 2
+    type: experiment
+    id: "N137"
+    routing: direct
+    provenance: ai-executed
+    summary: "Eight round-2 findings closed; full conformance gates and independent final review passed"
+  - turn: 2
+    type: experiment
+    id: "N138"
+    routing: direct
+    provenance: ai-executed
+    summary: "Post-review advisory caught and repaired a stale scheme-location/shared-variable source comment"
+
+  - turn: 3
+    type: experiment
+    id: "N139"
+    routing: direct
+    provenance: ai-executed
+    summary: "Four PR #92 re-review follow-ups closed with red-green and mutation-effective coverage; full conformance gates passed"
+ai_actions:
+  - turn: 1
+    action: "D1 — grammar Appendix B (six @0.3 forms) + the FROZEN §7 amendment text (637d769)"
+    provenance: ai-executed
+    files_changed: ["docs/lara-surface-grammar.md"]
+  - turn: 1
+    action: "D8+ — lean/Lara/Comparison.lean: goalOf_iff_better, goalOf_polarity_swap, goalOf_polarity_mismatch_excl, better_excl, better_atLeastAsGood_antisymm, better_strict_imp_atLeastAsGood, betterB_iff (ca78131)"
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Comparison.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 1
+    action: "D2/D3 — presentation AST + parser/printer; SurfaceStep/SurfaceAttack, DeclComparison, parallel rulePremiseLabels; 9A cover assertions (30773d1)"
+    provenance: ai-executed
+    files_changed: ["src/Lara/AST.hs", "src/Lara/Syntax.hs", "src/Lara/Wire.hs", "test/SyntaxSpec.hs"]
+  - turn: 1
+    action: "D4 — comparison expansion, one-way θ-matcher, {cell} interpolation, attack-name resolution; 46 ElabError constructors (d103987)"
+    provenance: ai-executed
+    files_changed: ["src/Lara/Elaborate/Comparison.hs", "src/Lara/Elaborate/Error.hs", "src/Lara/Elaborate/Subst.hs", "src/Lara/Elaborate/Internal.hs", "test/ElaborateSpec.hs"]
+  - turn: 1
+    action: "D8 — Lean presentation port to @0.3 parity + result 12 extension; Policy 5->9 fields, Decl 5->7 arms (3cb391f)"
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Presentation.lean", "lean/AxCheck.lean"]
+  - turn: 1
+    action: "D6 — S2/S3/S4 rewritten byte-identically, S5 lower-is-better example, shared example registry (2045ef9)"
+    provenance: ai-executed
+    files_changed: ["examples/S2/example.lara", "examples/S3/example.lara", "examples/S4/example.lara", "examples/S5/", "src/Lara/WorkedExamples.hs", "test/SurfaceRewriteSpec.hs", "test/DifferentialSpec.hs"]
+  - turn: 1
+    action: "D5 — author-facing surface context above the unchanged kernel rejection; breadcrumb rides beside the Unit (424a3a6)"
+    provenance: ai-executed
+    files_changed: ["src/Lara/Elaborate.hs", "src/Lara/Elaborate/Comparison.hs", "app/Main.hs", "test/CliSpec.hs", "docs/rejection-surface.md"]
+  - turn: 1
+    action: "Holistic review fixups: lean/README.md stale parity row + 516->707 report count (954214b); plan §6.2 closed and status recorded (585fdff)"
+    provenance: ai-executed
+    files_changed: ["lean/README.md", "plans/2026-08-08-lara-syntax-03-surface.md"]
+  - turn: 1
+    action: "Verification: cabal build all clean zero warnings; cabal test all PASS; lake build clean; axiom audit passed (707 reports, no sorryAx, standard trio only); non-vacuity by perturbation on goalOf_iff_better and parse_printPolicy"
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: "Closed round-2 findings across comparison elaboration, claim-nl parsing, grammar contracts, premise-label validation, mechanical-review loading, corpus escaping, and Lean presentation type identity"
+    provenance: ai-executed
+    files_changed: ["corpus-units/lbcs/C05/unit.lara", "corpus-units/sapg/C06/unit.lara", "docs/lara-surface-grammar.md", "lean/Lara/Comparison.lean", "src/Lara/Elaborate/Comparison.hs", "src/Lara/Elaborate/Error.hs", "src/Lara/Elaborate/Internal.hs", "src/Lara/MechReview/Load.hs", "src/Lara/Syntax.hs", "test/ElaborateSpec.hs", "test/SyntaxSpec.hs"]
+  - turn: 2
+    action: "Verification: Haskell suite PASS; Lean 66-job build PASS; axiom gate PASS; elaborator 18/18; freezer 4/4; golden/authenticity/replay/tamper PASS; differential 446+54; admission differential 20/20; final reviewer no Critical/Important findings"
+    provenance: ai-executed
+    files_changed: []
+
+  - turn: 3
+    action: "Closed four PR #92 follow-ups: nlStringLit Haddock attachment, @0.3 brace-migration documentation, authored binding mismatch diagnostic, and sparse premise-label indexing coverage (8425c88)"
+    provenance: ai-executed
+    files_changed: ["docs/lara-surface-grammar.md", "plans/2026-08-08-lara-syntax-03-surface.md", "src/Lara/Elaborate/Comparison.hs", "src/Lara/Elaborate/Error.hs", "src/Lara/Syntax.hs", "test/ElaborateSpec.hs"]
+  - turn: 3
+    action: "Verification: binding diagnostic red-green; sparse-label mutation failed at StepPremise 0 vs 1; Haskell/Lean/axiom/Python/replay/tamper/authenticity/freshness/differential/admission gates passed; PR body and four inline threads updated; re-review requested"
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: "ARA epilogue: ara check --strict exposed a pre-existing N131 YAML scalar error; the three edited YAML documents and appended N139 node parse independently"
+    provenance: ai-executed
+    files_changed: ["ara/trace/exploration_tree.yaml", "ara/trace/pm_reasoning_log.yaml", "ara/trace/sessions/2026-08-08_001.yaml", "ara/trace/sessions/session_index.yaml"]
+claims_touched: []
+
+logic_revisions:
+  - turn: 1
+    entry: H11
+    field: created
+    before: "(none — new heuristic)"
+    after: "H11: Expand surface sugar into the AST's own declaration forms, not into kernel structures"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Merged code depends on it (d103987, 2045ef9) and the byte-identity acceptance test passes over it."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User selected "Sign off now — implement everything including §3.5" and "D8
+      plus an elaboration-invariant theorem". The first was delivered as asked.
+      The second was NOT reachable as stated; the narrowing to the
+      direction-of-goodness contract was disclosed in the same turn it was
+      chosen, before any Lean code was written, and again on delivery. The user
+      has not yet responded to that disclosure.
+  - turn: 1
+    excerpt: >
+      Method note: every subagent deliverable was re-verified independently
+      rather than accepted on its report — goldens checked with git status,
+      encodeRule read directly to confirm the new Rule field is unencoded, the
+      full test stream re-captured after a `tail -30` truncation hid the 9A
+      coverage output, and two theorems perturbation-tested for non-vacuity.
+
+  - turn: 2
+    excerpt: >
+      The round-2 reviewer challenged whether the new polarity regression failed
+      against branch HEAD. The relevant criterion was mutation effectiveness,
+      because HEAD already contained the behavior without a guarding test.
+      Removing the polarity conjunct selects the prepended lower-is-better
+      scheme, reaches its internally valid rule, and fails the asserted
+      higher-is-better rule id. The final reviewer confirmed this and retracted
+      the finding.
+  - turn: 3
+    excerpt: >
+      External re-review was evaluated against branch 7b34e20 before editing.
+      All four findings reproduced in the source. The authored-binding
+      diagnostic test failed against the old policy-focused message before the
+      constructor split. The sparse-label regression was proved
+      mutation-effective by replacing the positional index derivation with the
+      reviewer's naive filtered-label zip and observing StepPremise 0 instead
+      of StepPremise 1.
+open_threads:
+  - "D7 / #88b (let value bindings, named premise-slot refs `(prem e1)`) remains deferred behind #89 — the many-sorted Σ that closes the mistyped-binding-becomes-nullary-constant hazard."
+  - "PR not yet opened for lara-syntax-03-design; branch is 8 commits ahead of main."
+  - "O57's candidate mitigation — an automated Haskell/Lean parity check on constructor and field counts — is unimplemented; result-12 drift would still be silent."
+  - "#89 tracker should gain the cross-reference App. B.1 promises: the `: Num` slot is a sort position that #89's signature must EXTEND rather than fork."
+  - "Supersedes the earlier PR-not-open thread: PR #92 is open at 8425c88; hosted Lean passed, hosted Haskell is pending, and fenfenai re-review was requested."
+  - "ARA strict validation is blocked by a pre-existing unquoted colon in N131's alternatives (exploration_tree.yaml line 3249); append-only trace policy prevents silently rewriting it. The three edited YAML files and appended N139 node parse independently."
+
+ai_suggestions_pending:
+  - "The D8+ substitution (direction-of-goodness contract in place of the requested determinism theorem) is disclosed but not user-adjudicated. If the full elaborator port is wanted, it is a project in its own right, not a follow-up commit."
+  - "O55 (perturbation as the standard for non-vacuity) and O57 (mechanization/implementation parity drift) are staged as candidate heuristics awaiting a closure signal."

@@ -48,11 +48,34 @@ theory sha256:ord-le-v1-theory-0 = []
 # The conclusion is at_least_as_good, not better. A reader who wants "better" needs num_lt,
 # and on this artifact's numbers no certificate can produce it.
 
+# The premise labels are S2's (lara-syntax@0.3, App. B.4): `cmp` for the arithmetic slot,
+# `binding` for the attestation slot. Labels never enter the Unit; they exist so an attack can
+# name the slot it disputes rather than count to it.
+
 rule no_worse(S, B, Q, D, Sv, Bv)
   mode       = defeasible
-  premises   = [ num_le(Bv, Sv),
-                 comparison_setup(S, B, Q, D, Sv, Bv) ]
+  premises   = [ cmp:     num_le(Bv, Sv),
+                 binding: comparison_setup(S, B, Q, D, Sv, Bv) ]
   conclusion = at_least_as_good(S, B, Q, D)
+
+# --- The @0.3 comparison surface ------------------------------------------------------------
+# Same measurand as S2 and the same polarity: accuracy is a higher-is-better quantity, which is a
+# fact about accuracy and not about this policy.
+
+measurand accuracy : Num where higher-is-better
+
+# THIS is why schemes are keyed by (relation, polarity) and named per policy. S2's ord-v1
+# declares the strictly-better cell of the same pair; this policy declares the at-least-as-good
+# cell, under different rule names, in a different file. One `comparison` form serves both
+# because it names a RELATION and lets the policy say which of its rules realize it — a form
+# that hardcoded beats_recheck/beats_baseline could not express S3 at all.
+#
+# The relation is not cosmetic either. "Matches the baseline at a third the cost" is a distinct
+# and common research argument, and it is the only one these two equal numbers support.
+
+comparison-scheme at-least-as-good higher-is-better
+  recheck = tie_recheck
+  bridge  = no_worse
 
 # WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is tie_recheck, whose conclusion
 # pattern num_le(Bv, Sv) heads no contrary pair, so no contrary side is strict-reachable and the

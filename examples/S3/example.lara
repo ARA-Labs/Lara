@@ -1,4 +1,4 @@
-# S3 — the tie boundary of the comparison family (lara-syntax@0.2)
+# S3 — the tie boundary of the comparison family (lara-syntax@0.3)
 #
 # The third strict-certificate worked example, and the second on ord@1. S2
 # carries num_lt from two DIFFERENT cells to "sys_new is better". S3 carries
@@ -21,6 +21,22 @@
 # DEFEASIBLE bridge, consuming that conclusion plus the binding leaf that says
 # which systems and measurand the two numbers belong to.
 #
+# WHAT CHANGED AT @0.3, and what S3 is now also a test of. This artifact is
+# S2's with THREE lines different: `relation = at-least-as-good`, the authored
+# conclusion is at_least_as_good rather than better, and both cells read 0.71.
+# That is the entire diff, and it is the argument for the surface. Under
+# ord-le-v1's at-least-as-good scheme those three lines select tie_recheck and
+# no_worse and generate num_le(0.71, 0.71); under S2's policy the same shape
+# selects beats_recheck/beats_baseline and generates num_lt. The author states
+# which comparative claim is being made and never writes the family member.
+#
+# The refusal above survives this intact. It is the STRICT step that decides,
+# and nothing on the surface can reach it: an author who wrote
+# `relation = strictly-better` here would need a (strictly-better,
+# higher-is-better) scheme this policy does not declare — and if one existed,
+# its generated num_lt(0.71, 0.71) would be an R13 replay rejection. Sugar
+# cannot upgrade the claim, because the sugar is not what checks it.
+#
 # Expected verdict is at the bottom of this file (golden oracle).
 
 artifact ord_tie_demo at sha256:5353535353535353535353535353535353535353535353535353535353535353
@@ -34,13 +50,6 @@ claim c1
   nl      = "sys_new is at least as good as sys_base on ImageNet-val accuracy (0.71 vs 0.71)"
   formal  = at_least_as_good(sys_new, sys_base, accuracy, imagenet_val)
   binding = { author = alice, rationale = "Ordered comparison of two equal reported accuracy cells.", audit-status = reviewed }
-
-# --- The certificate-checked comparison sub-claim ---------------------------------------------
-
-claim c2
-  nl      = "The reported baseline accuracy 0.71 is not above the reported system accuracy 0.71"
-  formal  = num_le(0.71, 0.71)
-  binding = { author = alice, audit-status = reviewed }
 
 # --- The two measured cells the certificate consults ------------------------------------------
 # Two distinct leaves reporting the same number: the tie is a fact about the measurements, and
@@ -60,23 +69,34 @@ leaf e2 : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.71))
 # numbers belong to. num_le(0.71, 0.71) is the same atom whichever measurands produced it — and
 # at a tie it is also the same atom in both directions, which is precisely why the binding must
 # say which system is S and which is B.
+#
+# The `comparison` block below names this leaf; it never generates one. At a tie that matters
+# more than anywhere else: the direction of the comparison is carried by the attestation alone.
 
 leaf e3 : comparison_setup(sys_new, sys_base, accuracy, imagenet_val, 0.71, 0.71)
   kind       = attested
   provenance = user
   refs       = [evidence/tables/accuracy.md#caption]
 
-# --- The strict step: ord@1 replays the comparison --------------------------------------------
-# The certificate consults premise slots 0 (baseline cell) and 1 (system cell). Both slots name
-# premises; theory entries are uncitable (design §2.2), so both compared values trace to a
-# consulted premise and from there to an observed leaf.
+# --- The comparison: the at-least-as-good relation ---------------------------------------------
+# One field apart from S2. `relation = at-least-as-good` with accuracy's declared
+# higher-is-better polarity selects this policy's at-least-as-good scheme, which names
+# tie_recheck and no_worse, and generates the goal num_le(0.71, 0.71) — baseline first, the
+# higher-is-better argument order. The certificate and its two 0-based slots are generated with
+# it, and ord@1 re-checks them independently; a wrongly generated certificate would be an R13
+# rejection, never a false accept.
 
-arg a1 : supports(c2) by tie_recheck(sys_new, sys_base, accuracy, imagenet_val, exp1, 0.71, 0.71)
-  assurance = cert(ord@1, sha256:ord-le-v1-theory-0, (ordcmp (prem 0) (prem 1)))
-
-# --- The bridge: the comparison becomes a comparative claim ------------------------------------
-
-arg a2 : supports(c1) by no_worse(sys_new, sys_base, accuracy, imagenet_val, 0.71, 0.71)
+comparison : at_least_as_good(sys_new, sys_base) on accuracy @ imagenet_val
+  relation = at-least-as-good
+  recheck  = a1
+  bridge   = a2
+  result   = e2
+  baseline = e1
+  binding  = e3
+  claims c2
+    nl      = "The reported baseline accuracy {cell e1} is not above the reported system accuracy {cell e2}"
+    binding = { author = alice, audit-status = reviewed }
+  supports c1
 
 status c1
 

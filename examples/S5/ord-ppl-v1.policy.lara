@@ -1,0 +1,89 @@
+# ord-ppl-v1 — the lower-is-better half of the comparison lookup table
+#
+# S2's ord-v1 and S3's ord-le-v1 both compare accuracy, where a larger number is
+# the better result. This policy compares PERPLEXITY, where a smaller number is.
+# It exists because that difference is invisible to everything except a
+# declaration: as propositions, num_lt(0.71, 0.74) and num_lt(28.4, 31.6) are
+# the same shape, and nothing in an artifact says which of the two systems the
+# smaller number flatters.
+#
+# The direction lives in the RULES, and this is the whole design:
+#
+#   * ppl_recheck — STRICT. Its conclusion is num_lt(Sv, Bv) — OURS below
+#     THEIRS — where ord-v1's beats_recheck concludes num_lt(Bv, Sv). Same
+#     backend, same certificate shape, opposite argument order, because on
+#     perplexity "we are lower" is the good news.
+#
+#   * ppl_bridge — DEFEASIBLE. Consumes that strict conclusion plus the binding,
+#     and concludes better(S, B, Q, D) — the SAME comparative predicate ord-v1's
+#     bridge concludes. The reader's claim is "sys_new is better on perplexity";
+#     it should not be spelled differently just because the metric runs the other
+#     way.
+#
+# What S5 pins that S2 and S3 cannot: the elaborator does not flip an argument
+# order on its own. `measurand perplexity : Num where lower-is-better` selects
+# the (strictly-better, lower-is-better) cell of the comparison lookup table,
+# and that cell resolves to THESE rules, whose premises and conclusion are
+# welded together by shared variables. So the generated goal's argument order,
+# the rule that consumes it, and the comparative claim it licenses cannot
+# disagree — flipping one without the others is not expressible.
+#
+# Polarity is declared, never inferred, and S5 is the reason. Given only this
+# artifact — two reported cells and an attestation — no analysis recovers the
+# fact that lower perplexity is better. That is knowledge about perplexity.
+
+policy ord-ppl-v1
+
+# --- The strict leg: the certificate-checked ordered comparison -----------------------------
+# Premise order fixes slot order, and the generated certificate cites it: (prem 0) is the SYSTEM
+# cell, (prem 1) the BASELINE cell — the mirror image of ord-v1, where slot 0 is the baseline.
+# The conclusion num_lt(Sv, Bv) says system < baseline, i.e. the system scores lower on a
+# measurand where lower is better.
+#
+# As in ord-v1, both compared values trace to a consulted premise (design §2.4): the baseline
+# perplexity is not a bare goal constant, it enters as a leaf feeding a premise slot.
+
+rule ppl_recheck(S, B, Q, D, Exp, Sv, Bv)
+  mode       = strict
+  premises   = [ reports(Exp, score_cell(S, Q, D, Sv)),
+                 reports(Exp, score_cell(B, Q, D, Bv)) ]
+  conclusion = num_lt(Sv, Bv)
+  allow-trusted = false
+  certifiers = [ (ord@1, sha256:ord-ppl-v1-theory-0) ]
+
+# The empty theory the ord@1 certificates cite, as in ord-v1: the certified comparison is pure
+# arithmetic, so the theory contributes no entries and the digest is selection identity only.
+
+theory sha256:ord-ppl-v1-theory-0 = []
+
+# --- The bridge: from a bare comparison to a comparative claim ------------------------------
+# Structurally ord-v1's beats_baseline with the arithmetic premise mirrored. The binding premise
+# is NOT mirrored: comparison_setup names the system's value first regardless of polarity, which
+# is what lets one attestation vocabulary serve both directions.
+
+rule ppl_bridge(S, B, Q, D, Sv, Bv)
+  mode       = defeasible
+  premises   = [ cmp:     num_lt(Sv, Bv),
+                 binding: comparison_setup(S, B, Q, D, Sv, Bv) ]
+  conclusion = better(S, B, Q, D)
+
+# --- The @0.3 comparison surface ------------------------------------------------------------
+# The one declaration that distinguishes this policy from ord-v1 at the surface. Everything
+# above could have been written at @0.2; this line is what makes the direction machine-readable.
+
+measurand perplexity : Num where lower-is-better
+
+# The same `relation = strictly-better` an author writes in S2 resolves HERE to ppl_recheck and
+# ppl_bridge, because the scheme key is the pair and this policy declares the lower-is-better
+# member of it. S2's source and S5's source state the same research relation; the generated
+# goals are mirror images. That is the polarity contract, executing.
+
+comparison-scheme strictly-better lower-is-better
+  recheck = ppl_recheck
+  bridge  = ppl_bridge
+
+# WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is ppl_recheck, whose conclusion
+# pattern num_lt(Sv, Bv) heads no contrary pair, so no contrary side is strict-reachable and the
+# policy passes the R12 check — ord-v1's argument, unchanged by the mirrored argument order. The
+# intra-family exclusion lemmas in lean/Lara/Ord.lean are stated over the literals, not over a
+# direction convention, so they cover this policy exactly as they cover ord-v1's.

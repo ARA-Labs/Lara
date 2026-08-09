@@ -582,6 +582,10 @@ decodeRule e = do
       , ruleParams = params'
       , ruleMode = mode'
       , rulePremises = prems'
+      , -- Presentation-only (grammar App. B.4) and deliberately not on the
+        -- wire: 'encodeRule' names its eight encoded fields explicitly, so a
+        -- decoded rule has no labels. See 'Lara.AST.rulePremiseLabels'.
+        rulePremiseLabels = []
       , ruleConclusion = concl'
       , ruleAllowTrusted = at'
       , ruleCertifiers = certs'

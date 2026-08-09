@@ -17,6 +17,7 @@ import Lara.Strict
 import Lara.Cell
 import Lara.RA
 import Lara.Ord
+import Lara.Comparison
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
@@ -113,6 +114,7 @@ open Lara
 #print axioms Lara.Presentation.listOfSx_sxOfList
 #print axioms Lara.Presentation.unSxList_sxList
 #print axioms Lara.Presentation.unSxPair_sxPair
+#print axioms Lara.Presentation.unOpt_sxOpt
 -- Primitive leaves.
 #print axioms Lara.Presentation.unStr_sxStr
 #print axioms Lara.Presentation.unInt_sxInt
@@ -130,6 +132,14 @@ open Lara
 #print axioms Lara.Presentation.un_SourceRef
 #print axioms Lara.Presentation.un_TheoryDigest
 #print axioms Lara.Presentation.un_Digest
+#print axioms Lara.Presentation.un_GroupId
+#print axioms Lara.Presentation.un_MeasurandId
+#print axioms Lara.Presentation.un_DatasetId
+#print axioms Lara.Presentation.un_PremiseLabel
+#print axioms Lara.Presentation.un_sxList_LeafId
+#print axioms Lara.Presentation.un_sxOpt_PremiseLabel
+#print axioms Lara.Presentation.un_sxList_optPremiseLabel
+#print axioms Lara.Presentation.un_sxOpt_PropId
 -- Closed enum vocabularies.
 #print axioms Lara.Presentation.un_LeafKind
 #print axioms Lara.Presentation.un_Provenance
@@ -138,10 +148,17 @@ open Lara
 #print axioms Lara.Presentation.un_Necessity
 #print axioms Lara.Presentation.un_Admission
 #print axioms Lara.Presentation.un_sxStep
+#print axioms Lara.Presentation.un_GroupConflictMode
+#print axioms Lara.Presentation.un_Polarity
+#print axioms Lara.Presentation.un_Relation
+#print axioms Lara.Presentation.un_MeasurandSort
 -- Propositions (reused semantic core).
 #print axioms Lara.Presentation.un_sxTerm
 #print axioms Lara.Presentation.un_sxTerms
 #print axioms Lara.Presentation.un_sxAtom
+#print axioms Lara.Presentation.un_sxList_Atom
+#print axioms Lara.Presentation.un_sxTheoryEntry
+#print axioms Lara.Presentation.un_sxList_TheoryEntry
 -- Patterns.
 #print axioms Lara.Presentation.un_sxPat
 #print axioms Lara.Presentation.un_sxPats
@@ -173,11 +190,24 @@ open Lara
 #print axioms Lara.Presentation.un_sxList_Exception
 #print axioms Lara.Presentation.un_sxAdmEntry
 #print axioms Lara.Presentation.un_sxList_AdmEntry
+-- Duplicate-report groups (spec §4.3) and the @0.3 policy-level comparison surface.
+#print axioms Lara.Presentation.un_sxDupGroup
+#print axioms Lara.Presentation.un_sxMeasurand
+#print axioms Lara.Presentation.un_sxList_Measurand
+#print axioms Lara.Presentation.un_sxComparisonScheme
+#print axioms Lara.Presentation.un_sxList_ComparisonScheme
 #print axioms Lara.Presentation.un_sxList_Step
 #print axioms Lara.Presentation.un_sxAttack
+-- Presentation-only attack positions (@0.3, grammar §7 AMENDMENT / App. B.5).
+#print axioms Lara.Presentation.un_sxSurfaceStep
+#print axioms Lara.Presentation.un_sxList_SurfaceStep
+#print axioms Lara.Presentation.un_sxSurfaceAttack
 #print axioms Lara.Presentation.un_sxChallengeTarget
 #print axioms Lara.Presentation.un_sxArgConcl
 #print axioms Lara.Presentation.un_sxArg
+-- Comparison blocks (@0.3, grammar App. B.3).
+#print axioms Lara.Presentation.un_sxComparisonClaim
+#print axioms Lara.Presentation.un_sxComparison
 #print axioms Lara.Presentation.un_sxDecl
 #print axioms Lara.Presentation.un_sxList_Decl
 #print axioms Lara.Presentation.un_sxBackend
@@ -281,6 +311,22 @@ open Lara
 #print axioms Lara.Ord.le_le_iff_eq
 #print axioms Lara.Ord.ordModels_relHolds
 #print axioms Lara.Ord.ordModels_excl_of_lt
+
+-- The `comparison` surface form's direction-of-goodness contract
+-- (lara-syntax@0.3 §1.2 / grammar Appendix B.3): the 2x2 lookup table
+-- generating the `ord@1` goal agrees with the intended research meaning on
+-- every cell, and the two polarities generate the same relation on transposed
+-- operands — so a mis-declared polarity certifies the opposite claim, not a
+-- weaker one.  Surface-level only: the Haskell elaborator stays
+-- validated-not-verified (Lara.Admission).
+#print axioms Lara.Comparison.goalOf_iff_better
+#print axioms Lara.Comparison.goalOf_polarity_swap
+#print axioms Lara.Comparison.better_polarity_swap
+#print axioms Lara.Comparison.goalOf_polarity_mismatch_excl
+#print axioms Lara.Comparison.better_excl
+#print axioms Lara.Comparison.better_atLeastAsGood_antisymm
+#print axioms Lara.Comparison.better_strict_imp_atLeastAsGood
+#print axioms Lara.Comparison.betterB_iff
 
 -- Result 3 (certificate half) / result 10 (dependency exactness), backend
 -- layer: the fixed-core `uses` report interface (coverage, validity,

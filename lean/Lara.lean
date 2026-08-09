@@ -46,6 +46,13 @@
 --     a declared-index framework pair and the drivers' seed discharge the three
 --     abstract Blocking obligations — Lara.BlockedProgram. The reindexing and
 --     support bridge to the compact production AF closes issue #80.
+--   * the `comparison` surface form's direction-of-goodness contract
+--     (lara-syntax@0.3 §1.2 / grammar Appendix B.3): the generated `ord@1` goal
+--     holds exactly when "ours is better than base" under the measurand's
+--     declared polarity, and a polarity swap transposes the operands of the
+--     same relation, so it certifies the opposite claim rather than a weaker
+--     one. This is the surface-level lookup table, NOT a theorem about the
+--     Haskell elaborator, which stays validated-not-verified — Lara.Comparison
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -55,6 +62,7 @@ import Lara.Strict
 import Lara.Cell
 import Lara.RA
 import Lara.Ord
+import Lara.Comparison
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups

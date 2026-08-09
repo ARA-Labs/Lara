@@ -31,6 +31,9 @@ module Lara.AST
   , BackendId (..)
   , PolicyId (..)
   , Param (..)
+  , MeasurandId (..)
+  , DatasetId (..)
+  , PremiseLabel (..)
     -- * Leaves (spec §3)
   , LeafKind (..)
   , Provenance (..)
@@ -58,6 +61,12 @@ module Lara.AST
   , Exception (..)
   , Admission (..)
   , Policy (..)
+    -- * Presentation-only comparison surface (grammar App. B.1, B.2)
+  , Polarity (..)
+  , Relation (..)
+  , MeasurandSort (..)
+  , Measurand (..)
+  , ComparisonScheme (..)
     -- * Backends (spec §5)
   , TheoryDigest (..)
   , Cert (..)
@@ -69,11 +78,16 @@ module Lara.AST
   , Step (..)
   , Position
   , Attack (..)
+    -- * Presentation-only attack positions (grammar §7 AMENDMENT, App. B.5)
+  , SurfaceStep (..)
+  , SurfaceAttack (..)
     -- * Programs (spec §2, §4.4)
   , Digest (..)
   , ChallengeTarget (..)
   , ArgConcl (..)
   , Arg (..)
+  , ComparisonClaim (..)
+  , Comparison (..)
   , Decl (..)
   , Program (..)
     -- * Checker-boundary units (the M3 wire anchor)
@@ -123,6 +137,30 @@ newtype PolicyId = PolicyId String deriving (Eq, Ord, Show)
 
 -- | A rule parameter (@X@) ranging over ground terms in an instance.
 newtype Param = Param String deriving (Eq, Ord, Show)
+
+-- | A measurand identifier (@accuracy@, @perplexity@) — the quantity a
+-- comparison is made /on/ (grammar App. B.1, B.3). __Presentation-only__: the
+-- measurand table is policy-level surface the elaborator reads to select a
+-- comparison scheme, and it never reaches 'Unit'. Its own newtype because the
+-- measurand namespace is disjoint from every other id namespace (a measurand is
+-- not a leaf, a rule, or a claim), so the two cannot be swapped silently.
+newtype MeasurandId = MeasurandId String deriving (Eq, Ord, Show)
+
+-- | A dataset identifier — the @\@ \<dataset\>@ field of a @comparison@ block
+-- (grammar App. B.3), i.e. the evaluation set the two reported numbers come
+-- from. __Presentation-only__; the elaborator turns it into the @D@ position of
+-- the bridge rule's 4-ary conclusion, so nothing of this type reaches 'Unit'.
+newtype DatasetId = DatasetId String deriving (Eq, Ord, Show)
+
+-- | A rule premise label (@cmp@, @binding@) — the optional @label:@ prefix of a
+-- premise pattern (grammar App. B.4). __Presentation-only__: a label is an
+-- author-facing name for a premise /slot/, resolved to the same 'StepPremise'
+-- the integer spelling produces, so labels never reach 'Unit'. Its own newtype
+-- because B.4 makes the label namespace a declared namespace with its own
+-- well-formedness rules (disjoint from the rule's question ids; @rule@ and
+-- @leaf@ reserved), which a bare 'String' would let the frontend confuse with a
+-- 'QuestionId'.
+newtype PremiseLabel = PremiseLabel String deriving (Eq, Ord, Show)
 
 -- ---------------------------------------------------------------------------
 -- Leaves (spec §3)
@@ -282,6 +320,24 @@ data Rule = Rule
   , ruleParams :: [Param]
   , ruleMode :: Mode
   , rulePremises :: [AtomPat]
+  , rulePremiseLabels :: [Maybe PremiseLabel]
+  -- ^ __Presentation-only, positionally aligned with 'rulePremises'__ (grammar
+  -- App. B.4, the @0.3 @[ label: apat ]@ premise form). It is a /parallel/
+  -- field and not a change to 'rulePremises' precisely because
+  -- 'rulePremises' is Unit-reachable and frozen: the compiled rule is
+  -- unchanged, and "Lara.Wire".@encodeRule@ names its eight encoded fields
+  -- explicitly, so this one is never on the wire and cannot perturb a
+  -- @.core.sexp@ byte. B.4's \"labels never enter @Unit@\" is enforced at the
+  -- one copy site ("Lara.Elaborate.Internal".@stripPremiseLabels@).
+  --
+  -- Canonical form, which the parser produces and the printer inverts:
+  --
+  --   * @[]@ — no premise carries a label (the @0.2 spelling, and the value
+  --     every non-@0.3 construction site should use);
+  --   * otherwise exactly @length 'rulePremises'@ entries, at least one 'Just'.
+  --
+  -- A non-empty all-'Nothing' list is /not/ canonical: it prints as the
+  -- unlabelled spelling and so re-parses to @[]@.
   , ruleConclusion :: AtomPat
   , ruleAllowTrusted :: Bool -- ^ strict only; @False@ for defeasible
   , ruleCertifiers :: [CertRef] -- ^ strict only; @[]@ for defeasible
@@ -307,6 +363,77 @@ data Exception = Exception
 data Admission = Admit | Quarantine | Reject
   deriving (Eq, Ord, Show)
 
+-- ---------------------------------------------------------------------------
+-- Presentation-only comparison surface (grammar App. B.1, B.2)
+-- ---------------------------------------------------------------------------
+--
+-- Everything in this section is @lara-syntax\@0.3@ /presentation/ syntax: it is
+-- parsed, printed, and then expanded by @Lara.Elaborate@ __before the checker
+-- anchor exists__. No value below reaches 'Unit', which is why adding them
+-- cannot move a single @.core.sexp@ byte.
+
+-- | Which direction of a measurand is the better result (grammar App. B.1).
+--
+-- > measurand accuracy   : Num where higher-is-better
+-- > measurand perplexity : Num where lower-is-better
+--
+-- This is __domain knowledge, not usage__: nothing in an artifact reveals
+-- whether a larger accuracy or a smaller perplexity is the better number, so it
+-- is declared rather than inferred. The elaborator reads it to pick the
+-- comparison scheme (B.2) whose rules are written in that direction.
+data Polarity = HigherIsBetter | LowerIsBetter
+  deriving (Eq, Ord, Show)
+
+-- | The comparative relation a @comparison@ block asserts (grammar App. B.2,
+-- B.3). Both members are needed: 'AtLeastAsGood' is the non-inferiority
+-- argument (\"matches the baseline at a third the cost\"), which
+-- 'StrictlyBetter' cannot express.
+data Relation = StrictlyBetter | AtLeastAsGood
+  deriving (Eq, Ord, Show)
+
+-- | The sort of a declared measurand (grammar App. B.1). A closed sum with one
+-- inhabitant today: the @: Num@ slot is deliberately a __sort position__, not
+-- decoration, so #89's many-sorted @Σ@ extends /this/ declaration instead of
+-- introducing a parallel one and forking the spelling.
+data MeasurandSort = SortNum
+  deriving (Eq, Ord, Show)
+
+-- | A policy-level measurand declaration (grammar App. B.1), partitioned and
+-- order-insensitive like @rule@\/@contrary@\/@exception@\/@theory@. Declaring
+-- the same id twice is a parse error (a silent first-wins lookup would pick a
+-- polarity the author did not intend).
+--
+-- > measurand accuracy : Num where higher-is-better
+data Measurand = Measurand
+  { measurandId :: MeasurandId
+  , measurandSort :: MeasurandSort
+  , measurandPolarity :: Polarity
+  }
+  deriving (Eq, Show)
+
+-- | A policy-level comparison scheme (grammar App. B.2): the two rules a
+-- @comparison@ block (B.3) expands through, keyed by the __pair__
+-- @(relation, polarity)@.
+--
+-- > comparison-scheme strictly-better higher-is-better
+-- >   recheck = beats_recheck
+-- >   bridge  = beats_baseline
+--
+-- It exists because rule names are policy-specific: @examples\/S2@ names its
+-- rules @beats_recheck@\/@beats_baseline@ and @examples\/S3@ names them
+-- @tie_recheck@\/@no_worse@, so a @comparison@ form that hardcoded either would
+-- be unusable under the other policy. Keying on the pair (never on the relation
+-- alone) is what keeps the generated goal's argument order, the bridge's
+-- conclusion, and the rules that consume them from disagreeing. A duplicate
+-- pair is a parse error; there are at most four entries.
+data ComparisonScheme = ComparisonScheme
+  { csRelation :: Relation
+  , csPolarity :: Polarity
+  , csRecheck :: RuleId -- ^ the __strict__ rule listing an @ord\@1@ certifier
+  , csBridge :: RuleId -- ^ the __defeasible__ rule carrying the 4-ary conclusion
+  }
+  deriving (Eq, Show)
+
 -- | A versioned claim-support policy (spec §4): the trusted input a program
 -- instantiates but may not modify. The admission map is a total function over
 -- @kind × provenance@; here it is given as an association list placeholder.
@@ -323,6 +450,15 @@ data Policy = Policy
     -- ^ How a duplicate-report group with @≢@ members is handled (spec §4.3):
     -- 'QuarantineOnConflict' (default) or 'RejectOnConflict' (R9). Lowered to
     -- 'unitGroupMode'.
+  , policyMeasurands :: [Measurand]
+    -- ^ Declared measurands with their polarity (@lara-syntax\@0.3@, grammar
+    -- App. B.1). __Presentation-only__: read by the elaborator to select a
+    -- 'ComparisonScheme'; nothing downstream consumes it, so it never reaches
+    -- 'Unit'. 'Policy' is a thin container, so widening it is safe — what is
+    -- frozen is the subset of its /contents/ that is copied into 'Unit'.
+  , policyComparisonSchemes :: [ComparisonScheme]
+    -- ^ Declared comparison schemes (@lara-syntax\@0.3@, grammar App. B.2),
+    -- keyed by @(relation, polarity)@. __Presentation-only__, as above.
   }
   deriving (Eq, Show)
 
@@ -421,6 +557,48 @@ data Attack
   deriving (Eq, Show)
 
 -- ---------------------------------------------------------------------------
+-- Presentation-only attack positions (grammar §7 AMENDMENT, App. B.5)
+-- ---------------------------------------------------------------------------
+
+-- | A dotted segment of an attack position __exactly as authored__ (grammar
+-- App. B.5). @lara-syntax\@0.3@ admits a segment that names a rule's premise
+-- /label/ (@a2.binding.leaf@) beside the integer spelling (@a2.1.leaf@), and
+-- both lower to the same 'Step'.
+--
+-- The presentation AST must record which spelling was written, because the
+-- printer cannot choose between them: @printProgram :: Program -> String@ never
+-- receives the 'Policy' where the labels live, and 'Source' keeps a program and
+-- its policy in separate files. Reconstructing a spelling at print time would
+-- either break @parse ∘ print = id@ for the spelling not picked, or make a
+-- program file's canonical form depend on a different file.
+--
+--   * 'StepIndex' — an all-digits segment; lowers to @'StepPremise' i@.
+--   * 'StepName' — anything else; the elaborator resolves it against the target
+--     rule to /either/ a premise label ('PremiseLabel') /or/ a question id
+--     ('QuestionId') — at most one of the two, guaranteed by B.4's disjointness
+--     requirement. Like 'Lara.Strict.SExpr'\'s atom this is deliberately an
+--     untyped surface token: which namespace it belongs to is not knowable
+--     until the policy is in hand.
+--
+-- The terminal @rule@\/@leaf@ marker of §7 is __not__ a step and never appears
+-- here. Index basis is 0-based, as for 'StepPremise'.
+data SurfaceStep = StepIndex Int | StepName String
+  deriving (Eq, Show)
+
+-- | A typed positional attack __as authored__ (grammar §7 AMENDMENT). The three
+-- arms mirror 'Attack' one-for-one; the only difference is that positions are
+-- 'SurfaceStep' paths rather than resolved 'Position's.
+--
+-- This is what @DeclAttack@ carries. The frozen 'Attack' is unchanged and is
+-- what the elaborator produces, so the compiled AF is byte-identical whichever
+-- spelling the author used.
+data SurfaceAttack
+  = SRebut ArgId ArgId
+  | SUndercut ArgId ArgId [SurfaceStep]
+  | SUndermine ArgId ArgId [SurfaceStep]
+  deriving (Eq, Show)
+
+-- ---------------------------------------------------------------------------
 -- Programs (spec §2, §4.4)
 -- ---------------------------------------------------------------------------
 
@@ -488,15 +666,94 @@ data Arg = Arg
   }
   deriving (Eq, Show)
 
+-- | The @claims@ sub-block of a @comparison@ (grammar App. B.3): the parts of
+-- the generated sub-claim a machine cannot invent.
+--
+-- > claims c2
+-- >   nl      = "The reported baseline accuracy 0.71 is strictly below …"
+-- >   binding = { author = alice, audit-status = reviewed }
+--
+-- The sub-claim is __declared, not vanished__: its prose and its author
+-- attestation reach 'Unit', and declaring its id keeps @status c2@ — and any
+-- attack on it — resolvable by name. Only the arithmetic is generated: the
+-- elaborator supplies the claim's 'claimFormal' from the scheme's lookup
+-- contract.
+data ComparisonClaim = ComparisonClaim
+  { ccId :: PropId
+  , ccNlRaw :: String
+  -- ^ The @nl@ string __raw, exactly as authored__: @{cell l}@ directives are
+  -- unexpanded and @{{@\/@}}@ escapes unconverted (grammar App. B.6). The
+  -- brace contract is validated at parse time, but interpolation happens in the
+  -- elaborator, so the printer can emit these bytes back unchanged and
+  -- @parse ∘ print = id@ holds on the authored spelling.
+  , ccBinding :: Binding
+  }
+  deriving (Eq, Show)
+
+-- | A @comparison@ block (grammar App. B.3): the @lara-syntax\@0.3@
+-- program-level declaration that lets an author state a comparative result
+-- without hand-writing the @num_lt@ argument order, the premise slot indices,
+-- and the two θ vectors that carry it.
+--
+-- > comparison : better(sys_new, sys_base) on accuracy @ imagenet_val
+-- >   relation = strictly-better
+-- >   recheck  = a1
+-- >   bridge   = a2
+-- >   result   = e2
+-- >   baseline = e1
+-- >   binding  = e3
+-- >   claims c2
+-- >     nl      = "…"
+-- >     binding = { author = alice, audit-status = reviewed }
+-- >   supports c1
+--
+-- __Presentation-only.__ The elaborator expands it into ordinary @claim@ and
+-- @arg@ declarations before the checker anchor exists, so a @comparison@ never
+-- reaches 'Unit' — and, per grammar App. B, a @comparison@ round-trips as a
+-- @comparison@ and never as its expansion.
+--
+-- Two things it deliberately does __not__ do: it never synthesizes the
+-- attestation leaf named by 'cmpBinding' (that line stays a human claim — a
+-- sugar that manufactured evidence nobody attested would leave @examples\/S4@
+-- attacking something the compiler invented), and it never invents argument
+-- ids: 'cmpRecheckArg' and 'cmpBridgeArg' are author-declared because existing
+-- attacks name the generated structure by id and position
+-- (@undermine x1 a2.binding.leaf@).
+data Comparison = Comparison
+  { cmpConclusion :: Prop
+  -- ^ The authored conclusion's __system pair__: a 2-ary atom @pred(S, B)@ with
+  -- the favored system first. The elaborator forms the 4-ary conclusion the
+  -- scheme's bridge declares by adding Q and D from 'cmpMeasurand' and
+  -- 'cmpDataset'; the scheme check is against that formed atom, never against
+  -- this 2-ary spelling.
+  , cmpMeasurand :: MeasurandId -- ^ the @on \<measurand\>@ field (Q)
+  , cmpDataset :: DatasetId -- ^ the @\@ \<dataset\>@ field (D)
+  , cmpRelation :: Relation -- ^ required and closed; selects the scheme with the measurand's polarity
+  , cmpRecheckArg :: ArgId -- ^ id for the generated strict re-check argument
+  , cmpBridgeArg :: ArgId -- ^ id for the generated defeasible bridge argument
+  , cmpResult :: LeafId -- ^ leaf carrying the system's number
+  , cmpBaseline :: LeafId -- ^ leaf carrying the baseline's number
+  , cmpBinding :: LeafId -- ^ __existing__ attested leaf for the comparison setup
+  , cmpClaim :: ComparisonClaim -- ^ the declared sub-claim (@claims@ sub-block)
+  , cmpSupports :: Maybe PropId -- ^ optional @supports \<propId\>@ tail
+  }
+  deriving (Eq, Show)
+
 -- | A top-level program declaration (spec §2). Leaves, claims, arguments, and
 -- attacks; @status c@ requests a claim's status.
 data Decl
   = DeclLeaf Leaf
   | DeclClaim Claim
   | DeclArg Arg
-  | DeclAttack Attack
+  | DeclAttack SurfaceAttack
+    -- ^ An attack __as authored__ (grammar §7 AMENDMENT): the position path is
+    -- a 'SurfaceStep' list, which the elaborator resolves to the frozen
+    -- 'Attack' once the policy is in hand.
   | DeclStatus PropId
   | DeclGroup DupGroup -- ^ a duplicate-report group (spec §4.3)
+  | DeclComparison Comparison
+    -- ^ a @comparison@ block (@lara-syntax\@0.3@, grammar App. B.3);
+    -- presentation-only, expanded by the elaborator
   deriving (Eq, Show)
 
 -- | A LARA program (spec §2):

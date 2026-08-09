@@ -22,6 +22,13 @@
 # it depends on the binding being right and on the comparison being the
 # relevant one. You cannot argue with the arithmetic; you argue with the
 # measurements and with the bridge.
+#
+# lara-syntax@0.3 adds three policy-level declarations at the bottom of this
+# file — a measurand polarity, a comparison scheme, and premise labels on the
+# bridge — so that examples/S2/example.lara can author the pair of arguments
+# above as one `comparison` block. None of the three reaches the checker Unit:
+# they select and name what the elaborator generates, and the generated unit is
+# byte-identical to the hand-written one they replaced.
 
 policy ord-v1
 
@@ -53,11 +60,42 @@ theory sha256:ord-v1-theory-0 = []
 # the same atom whichever measurands produced the two numbers (design §2.1, D15). The binding
 # premise is what supplies that identity, and it is defeasible evidence like any other.
 
+# The two premises carry LABELS (lara-syntax@0.3, App. B.4). A label is a name
+# for a premise slot, so an attack can address the binding premise as
+# `a2.binding.leaf` instead of counting to `a2.1.leaf` — see examples/S4, which
+# does exactly that. Labels never enter the Unit: `binding` and `1` resolve to
+# the same premise slot, and this rule's compiled form is unchanged by their
+# presence. They are also checked against this rule's question ids at
+# declaration time, so a label can never be read two ways at an attack site.
+
 rule beats_baseline(S, B, Q, D, Sv, Bv)
   mode       = defeasible
-  premises   = [ num_lt(Bv, Sv),
-                 comparison_setup(S, B, Q, D, Sv, Bv) ]
+  premises   = [ cmp:     num_lt(Bv, Sv),
+                 binding: comparison_setup(S, B, Q, D, Sv, Bv) ]
   conclusion = better(S, B, Q, D)
+
+# --- The @0.3 comparison surface ------------------------------------------------------------
+# Domain knowledge the artifact cannot supply and the elaborator cannot infer: on accuracy, a
+# larger number is the better result. Nothing about how a number is USED recovers this, which is
+# why it is declared here rather than derived at a use site. It selects which scheme below the
+# `comparison` form reads; it never reaches the Unit.
+
+measurand accuracy : Num where higher-is-better
+
+# The scheme is keyed by the PAIR (relation, polarity), not by relation alone, because direction
+# lives in the rules: beats_recheck's conclusion num_lt(Bv, Sv) is written baseline-first, which
+# is what makes it the higher-is-better reading of "strictly better". Binding the scheme to the
+# pair is what makes a mismatch between the declared polarity and the rules' direction nameable;
+# the elaborator's direction-of-goodness check (App. B.2) is what rejects it. Flipping this
+# conclusion to num_lt(Sv, Bv) AND the bridge's cmp premise to match — an internally consistent
+# edit that nothing else notices — is caught here rather than certifying the opposite claim.
+#
+# Rule names are policy-specific — examples/S3 spells the same two roles tie_recheck/no_worse —
+# so this indirection is what lets one `comparison` form serve both policies.
+
+comparison-scheme strictly-better higher-is-better
+  recheck = beats_recheck
+  bridge  = beats_baseline
 
 # WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is beats_recheck, whose conclusion
 # pattern num_lt(Bv, Sv) heads no contrary pair, so no contrary side is strict-reachable and the

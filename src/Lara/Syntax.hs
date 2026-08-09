@@ -1,6 +1,25 @@
 -- | The concrete @.lara@ surface syntax: parser and label-preserving printer
--- (@lara-syntax\@0.2@, additive over the frozen @0.1@ grammar in
+-- (@lara-syntax\@0.3@, additive over the frozen @0.1@ grammar in
 -- @docs/lara-surface-grammar.md@).
+--
+-- == What @\@0.3@ adds (grammar App. B)
+--
+-- Five additive surface forms, all __presentation-only__ — parsed and printed
+-- here, expanded by @Lara.Elaborate@ /before the checker anchor exists/, and
+-- none of them reaching 'Unit':
+--
+--   * B.1 @measurand m : Num where higher-is-better@ — a policy-level table;
+--   * B.2 @comparison-scheme@ blocks keyed by @(relation, polarity)@;
+--   * B.3 the program-level @comparison@ declaration;
+--   * B.4 optional @label:@ prefixes on rule premises;
+--   * B.5 attack-path segments that name a premise label, and
+--   * B.6 the @nl@ brace contract (@{cell l}@ directives, @{{@\/@}}@ escapes).
+--
+-- Expansion deliberately does __not__ happen here: spec result 12
+-- (@parse ∘ print = id@) is stated on the presentation AST, so a @comparison@
+-- must round-trip as a @comparison@ and never as its expansion. For the same
+-- reason B.5 positions and B.6 @nl@ bodies are recorded __in the spelling they
+-- were authored in__ ('SurfaceStep', and a raw unexpanded @nl@ string).
 --
 -- == Position in the pipeline
 --
@@ -64,6 +83,17 @@ module Lara.Syntax
   , printSource
   , printProgram
   , printPolicy
+    -- * Surface spellings of the @lara-syntax\@0.3@ closed vocabularies
+    --
+    -- | The @toString@ half of the single table each closed tag has here
+    -- (grammar App. B.7). Exported so a diagnostic elsewhere — notably
+    -- "Lara.Elaborate.Error" naming the (relation, polarity) pair a policy has
+    -- no @comparison-scheme@ for — spells the surface keyword from this table
+    -- and never from a second copy of the string literal.
+  , polarityStr
+  , relationStr
+  , nlCellDirective
+  , attackPathTerminalMarkers
   ) where
 
 import Data.Char (isAlpha, isDigit)
@@ -241,6 +271,84 @@ stringLit = do
         _ -> failP "unterminated string literal"
     _ -> failP "expected a string literal"
 
+-- | The closed directive vocabulary currently has one member.
+nlCellDirective :: String
+nlCellDirective = "cell"
+
+-- | §7 terminal position markers, reserved from premise-label namespaces.
+attackPathTerminalMarkers :: [String]
+attackPathTerminalMarkers = ["rule", "leaf"]
+
+-- | An @nl@ string with @lara-syntax\@0.3@'s brace contract (grammar App. B.6):
+--
+-- > nlString  ::= '"' { nlChar | directive | "{{" | "}}" } '"'
+-- > directive ::= "{" "cell" leafId "}"
+--
+-- Inside an @nl@ string @{{@ and @}}@ denote literal braces (the f-string
+-- convention this surface's audience already knows) and __any other @{@ must
+-- open a recognized directive__ — in @\@0.3@ that means @{cell \<leafId\>}@. An
+-- unknown directive, a bare @}@, or an unterminated brace is a /located/ parse
+-- error. This is strict rather than lenient on purpose: if @{cel e2}@ (a typo)
+-- silently stayed literal text, a number the author believed was auto-synced
+-- would be frozen prose — the exact prose↔formal staleness the feature exists
+-- to kill.
+--
+-- The result is the __raw__ body: directives are not expanded and @{{@\/@}}@
+-- are not converted, so the printer emits the authored bytes back and
+-- @parse ∘ print = id@ holds on the spelling. Interpolation is the elaborator's
+-- job (B.6), which is also where the named leaf's premise-cell obligation is
+-- checked.
+--
+-- Every claim-form @nl@ field uses this contract: both §3's ordinary
+-- @claim@ declaration and App. B.3's nested @claims@ block. Binding
+-- @rationale@ remains the escape-free 'stringLit' of grammar §1.3.
+nlStringLit :: P String
+nlStringLit = do
+  skipTrivia
+  s0 <- getInput
+  case s0 of
+    '"' : _ -> do
+      advanceP
+      go ""
+    _ -> failP "expected a string literal"
+  where
+    go acc = do
+      s <- getInput
+      case s of
+        [] -> failP "unterminated string literal"
+        '\n' : _ -> failP "unterminated string literal"
+        '"' : _ -> reverse acc <$ advanceP
+        '{' : '{' : _ -> do advanceP; advanceP; go ('{' : '{' : acc)
+        '}' : '}' : _ -> do advanceP; advanceP; go ('}' : '}' : acc)
+        '}' : _ ->
+          failP "unmatched '}' in nl string (write '}}' for a literal brace)"
+        '{' : _ -> do
+          raw <- directive
+          go (reverse raw ++ acc)
+        c : _ -> do advanceP; go (c : acc)
+    directive = do
+      advanceP -- the opening '{'
+      s <- getInput
+      name <- case s of
+        c : _ | isIdentStart c -> takeWhileP isIdentChar
+        _ ->
+          failP
+            "expected a directive after '{' in nl string (write '{{' for a literal brace)"
+      if name /= nlCellDirective
+        then failP ("unknown nl directive '" ++ name ++ "' (expected '{" ++ nlCellDirective ++ " <leaf>}')")
+        else do
+          gap <- takeWhileP isInlineSpace
+          s' <- getInput
+          arg <- case s' of
+            c : _ | isIdentStart c -> takeWhileP isIdentChar
+            _ -> failP "expected a leaf id in a '{cell …}' nl directive"
+          gap' <- takeWhileP isInlineSpace
+          s'' <- getInput
+          case s'' of
+            '}' : _ -> ("{" ++ name ++ gap ++ arg ++ gap' ++ "}") <$ advanceP
+            _ -> failP "unterminated '{cell …}' nl directive (expected '}')"
+    isInlineSpace c = c == ' ' || c == '\t'
+
 -- | A numeric literal @[+|-] digit+ [ . digit+ ]@ (grammar §1.3).
 numberLit :: P String
 numberLit = do
@@ -366,6 +474,22 @@ groupModeTable :: [(String, GroupConflictMode)]
 groupModeTable =
   [("quarantine", QuarantineOnConflict), ("reject", RejectOnConflict)]
 
+-- | Measurand polarity (grammar App. B.1, B.7).
+polarityTable :: [(String, Polarity)]
+polarityTable =
+  [("higher-is-better", HigherIsBetter), ("lower-is-better", LowerIsBetter)]
+
+-- | Comparison relation (grammar App. B.2, B.3, B.7).
+relationTable :: [(String, Relation)]
+relationTable =
+  [("strictly-better", StrictlyBetter), ("at-least-as-good", AtLeastAsGood)]
+
+-- | Measurand sort (grammar App. B.1). One entry today; the @: Num@ slot is a
+-- sort position #89 extends, so it is a table from the start rather than a
+-- string literal at the one use site.
+sortTable :: [(String, MeasurandSort)]
+sortTable = [("Num", SortNum)]
+
 -- | Reverse table lookup for canonical printing (constructors are unique).
 tableToString :: (Eq a) => [(String, a)] -> a -> String
 tableToString tbl a = case [s | (s, b) <- tbl, b == a] of
@@ -392,6 +516,15 @@ boolStr = tableToString boolTable
 
 groupModeStr :: GroupConflictMode -> String
 groupModeStr = tableToString groupModeTable
+
+polarityStr :: Polarity -> String
+polarityStr = tableToString polarityTable
+
+relationStr :: Relation -> String
+relationStr = tableToString relationTable
+
+sortStr :: MeasurandSort -> String
+sortStr = tableToString sortTable
 
 -- | Provenance is a small closed vocabulary with one compound form,
 -- @checker(name, version)@ (grammar §1.4).
@@ -521,7 +654,9 @@ versionToken = do
 -- | The leading keywords that open a top-level @decl@ (grammar §3).
 declKeywords :: [String]
 declKeywords =
-  ["claim", "leaf", "arg", "rebut", "undercut", "undermine", "status", "group"]
+  [ "claim", "leaf", "arg", "rebut", "undercut", "undermine", "status", "group"
+  , "comparison" -- lara-syntax@0.3, grammar App. B.3
+  ]
 
 -- | Zero-or-more @decl@s in declaration order, stopping at the first token that
 -- is not a declaration keyword. Once a keyword is seen the declaration is parsed
@@ -550,7 +685,8 @@ declP = do
       keyword "status"
       DeclStatus . PropId <$> identifier
     Just "group" -> DeclGroup <$> groupP
-    _ -> failP "expected a declaration (claim | leaf | arg | rebut | undercut | undermine | status | group)"
+    Just "comparison" -> DeclComparison <$> comparisonP
+    _ -> failP "expected a declaration (claim | leaf | arg | rebut | undercut | undermine | status | group | comparison)"
 
 claimP :: P Claim
 claimP = do
@@ -558,7 +694,7 @@ claimP = do
   cid <- identifier
   keyword "nl"
   symbol '='
-  nl <- stringLit
+  nl <- nlStringLit
   keyword "formal"
   symbol '='
   formal <- propP
@@ -649,6 +785,73 @@ groupP = do
   symbol '='
   members <- brackets (LeafId <$> identifier)
   pure (DupGroup (GroupId gid) members)
+
+-- | @comparisonBlock@ (grammar App. B.3), the @lara-syntax\@0.3@ comparative
+-- declaration:
+--
+-- > comparison ":" prop "on" ident "@" ident
+-- >   "relation" "=" relation
+-- >   "recheck"  "=" argId      "bridge"   "=" argId
+-- >   "result"   "=" leafId     "baseline" "=" leafId
+-- >   "binding"  "=" leafId
+-- >   "claims" propId  "nl" "=" nlString  "binding" "=" binding
+-- >   [ "supports" propId ]
+--
+-- Field order is fixed by the grammar, which is what keeps the two @binding@
+-- lines — the evidence leaf and the sub-claim's attestation block —
+-- unambiguous. This parser is /shallow/ in the same sense as the rest of the
+-- module: it records the surface and leaves scheme lookup, goal generation, and
+-- every B.3 well-formedness check to the elaborator.
+comparisonP :: P Comparison
+comparisonP = do
+  keyword "comparison"
+  symbol ':'
+  concl <- propP
+  keyword "on"
+  m <- identifier
+  symbol '@'
+  d <- identifier
+  keyword "relation"
+  symbol '='
+  rel <- enumFromTable "a relation (strictly-better | at-least-as-good)" relationTable
+  recheckArg <- field "recheck"
+  bridgeArg <- field "bridge"
+  result <- field "result"
+  baseline <- field "baseline"
+  bindingLeaf <- field "binding"
+  keyword "claims"
+  cid <- identifier
+  keyword "nl"
+  symbol '='
+  nl <- nlStringLit
+  keyword "binding"
+  symbol '='
+  b <- bindingP
+  sup <- optSupports
+  pure
+    Comparison
+      { cmpConclusion = concl
+      , cmpMeasurand = MeasurandId m
+      , cmpDataset = DatasetId d
+      , cmpRelation = rel
+      , cmpRecheckArg = ArgId recheckArg
+      , cmpBridgeArg = ArgId bridgeArg
+      , cmpResult = LeafId result
+      , cmpBaseline = LeafId baseline
+      , cmpBinding = LeafId bindingLeaf
+      , cmpClaim =
+          ComparisonClaim {ccId = PropId cid, ccNlRaw = nl, ccBinding = b}
+      , cmpSupports = sup
+      }
+  where
+    field kw = do keyword kw; symbol '='; identifier
+    optSupports = do
+      mw <- peekIdent
+      case mw of
+        Just "supports" -> do
+          keyword "supports"
+          Just . PropId <$> identifier
+        _ -> pure Nothing
 
 -- | @refs = [ sourceRef,… ]@, lexed in ref-list mode: @\'#\'@ is literal and
 -- comment recognition is suspended inside the brackets (grammar §1.2).
@@ -783,8 +986,12 @@ setAssurance :: SupportTerm -> Assurance -> SupportTerm
 setAssurance (SRule r th pr ds hs _) assurance = SRule r th pr ds hs assurance
 setAssurance t _ = t -- unreachable: 'argBody' rejects a non-rule base
 
--- | @attackDecl@ / @posTarget@ (grammar §3, §7).
-attackP :: P Attack
+-- | @attackDecl@ / @posTarget@ (grammar §3, §7), producing the /presentation/
+-- 'SurfaceAttack': positions keep the spelling they were authored in (grammar
+-- §7 AMENDMENT, App. B.5) and the elaborator resolves them to the frozen
+-- 'Attack' once the policy — and hence the target rule's premise labels — is in
+-- hand.
+attackP :: P SurfaceAttack
 attackP = do
   mw <- peekIdent
   case mw of
@@ -792,23 +999,30 @@ attackP = do
       keyword "rebut"
       w <- identifier
       u <- identifier
-      pure (Rebut (ArgId w) (ArgId u))
+      pure (SRebut (ArgId w) (ArgId u))
     Just "undercut" -> do
       keyword "undercut"
       w <- identifier
       (u, steps) <- posTargetP "rule"
-      pure (Undercut (ArgId w) u steps)
+      pure (SUndercut (ArgId w) u steps)
     Just "undermine" -> do
       keyword "undermine"
       w <- identifier
       (u, steps) <- posTargetP "leaf"
-      pure (Undermine (ArgId w) u steps)
+      pure (SUndermine (ArgId w) u steps)
     _ -> failP "expected an attack (rebut | undercut | undermine)"
 
 -- | @posTarget ::= ident { \".\" step } \".\" marker@ where @marker@ is the
 -- fixed terminal for the attack kind (@rule@ for undercut, @leaf@ for
--- undermine). Returns the base argument and the decoded @[Step]@ (grammar §7).
-posTargetP :: String -> P (ArgId, Position)
+-- undermine). Returns the base argument and the authored @['SurfaceStep']@
+-- (grammar §7, App. B.5).
+--
+-- Segment classification is purely lexical and unchanged from @\@0.2@ in
+-- effect: an all-digits segment is a 'StepIndex' (which lowers to
+-- 'StepPremise'), anything else a 'StepName' (which @\@0.2@ could only resolve
+-- to a 'QuestionId', and @\@0.3@ resolves to a premise label /or/ a question
+-- id). The terminal-marker rule is untouched.
+posTargetP :: String -> P (ArgId, [SurfaceStep])
 posTargetP marker = do
   u <- identifier
   segs <- dotSegments
@@ -820,8 +1034,8 @@ posTargetP marker = do
     [] -> failP ("expected a '." ++ marker ++ "' marker on the attack position")
   where
     toStep s
-      | not (null s) && all isDigit s = StepPremise (read s)
-      | otherwise = StepQuestion (QuestionId s)
+      | not (null s) && all isDigit s = StepIndex (read s)
+      | otherwise = StepName s
 
 -- | One-or-more @\".\" segment@ groups (each segment an integer or an ident).
 dotSegments :: P [String]
@@ -866,13 +1080,14 @@ parsePolicy = runComplete (policyP <* eof)
 data PolicyAcc
   = PolicyAcc [Rule] [Contrary] [Exception]
       [((LeafKind, Provenance), Admission)] [(TheoryDigest, [Prop])]
-      GroupConflictMode
+      GroupConflictMode [Measurand] [ComparisonScheme]
 
 policyP :: P Policy
 policyP = do
   keyword "policy"
   pid <- identifier
-  PolicyAcc rs cs es adm ts gm <- policyDecls (PolicyAcc [] [] [] [] [] QuarantineOnConflict)
+  PolicyAcc rs cs es adm ts gm ms schs <-
+    policyDecls (PolicyAcc [] [] [] [] [] QuarantineOnConflict [] [])
   pure
     Policy
       { policyId = PolicyId pid
@@ -882,27 +1097,86 @@ policyP = do
       , policyAdmission = adm
       , policyTheories = ts
       , policyGroupMode = gm
+      , policyMeasurands = ms
+      , policyComparisonSchemes = schs
       }
 
 policyDecls :: PolicyAcc -> P PolicyAcc
-policyDecls acc@(PolicyAcc rs cs es adm ts gm) = do
+policyDecls acc@(PolicyAcc rs cs es adm ts gm ms schs) = do
   mw <- peekIdent
   case mw of
-    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm ts gm)
-    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm ts gm)
-    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm ts gm)
-    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a) ts gm)
+    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm ts gm ms schs)
+    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm ts gm ms schs)
+    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm ts gm ms schs)
+    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a) ts gm ms schs)
     Just "duplicate-reports" -> do
       keyword "duplicate-reports"
       symbol '='
       gm' <- enumFromTable "a group conflict mode (quarantine | reject)" groupModeTable
-      policyDecls (PolicyAcc rs cs es adm ts gm')
+      policyDecls (PolicyAcc rs cs es adm ts gm' ms schs)
     Just "theory" -> do
       t@(TheoryDigest d, _) <- theoryLineP
       if any (\(TheoryDigest d', _) -> d' == d) ts
         then failP ("duplicate theory digest: " ++ d)
-        else policyDecls (PolicyAcc rs cs es adm (ts ++ [t]) gm)
+        else policyDecls (PolicyAcc rs cs es adm (ts ++ [t]) gm ms schs)
+    -- A duplicate measurand is rejected inline, like a duplicate theory digest
+    -- and for the same reason (grammar App. B.1): a silent first-wins lookup
+    -- would pick a polarity the author did not intend, flipping the generated
+    -- goal of every comparison on that measurand.
+    Just "measurand" -> do
+      m <- measurandLineP
+      if any ((== measurandId m) . measurandId) ms
+        then failP ("duplicate measurand: " ++ let MeasurandId n = measurandId m in n)
+        else policyDecls (PolicyAcc rs cs es adm ts gm (ms ++ [m]) schs)
+    -- Schemes are keyed by the (relation, polarity) __pair__, so that is the
+    -- duplicate key (grammar App. B.2); there are at most four entries.
+    Just "comparison-scheme" -> do
+      sch <- comparisonSchemeP
+      if any (\s -> (csRelation s, csPolarity s) == (csRelation sch, csPolarity sch)) schs
+        then
+          failP
+            ( "duplicate comparison-scheme for "
+                ++ relationStr (csRelation sch)
+                ++ " "
+                ++ polarityStr (csPolarity sch)
+            )
+        else policyDecls (PolicyAcc rs cs es adm ts gm ms (schs ++ [sch]))
     _ -> pure acc
+
+-- | @measurandLine ::= \"measurand\" ident \":\" sort \"where\" polarity@
+-- (grammar App. B.1).
+measurandLineP :: P Measurand
+measurandLineP = do
+  keyword "measurand"
+  m <- identifier
+  symbol ':'
+  srt <- enumFromTable "a measurand sort (Num)" sortTable
+  keyword "where"
+  pol <- enumFromTable "a polarity (higher-is-better | lower-is-better)" polarityTable
+  pure
+    Measurand
+      {measurandId = MeasurandId m, measurandSort = srt, measurandPolarity = pol}
+
+-- | @schemeBlock ::= \"comparison-scheme\" relation polarity \"recheck\" \"=\"
+-- ruleId \"bridge\" \"=\" ruleId@ (grammar App. B.2).
+comparisonSchemeP :: P ComparisonScheme
+comparisonSchemeP = do
+  keyword "comparison-scheme"
+  rel <- enumFromTable "a relation (strictly-better | at-least-as-good)" relationTable
+  pol <- enumFromTable "a polarity (higher-is-better | lower-is-better)" polarityTable
+  keyword "recheck"
+  symbol '='
+  rec' <- identifier
+  keyword "bridge"
+  symbol '='
+  br <- identifier
+  pure
+    ComparisonScheme
+      { csRelation = rel
+      , csPolarity = pol
+      , csRecheck = RuleId rec'
+      , csBridge = RuleId br
+      }
 
 -- | @theoryLine ::= "theory" digest "=" "[" [ prop { "," prop } ] "]"@
 -- (grammar App. A.2).
@@ -924,19 +1198,45 @@ ruleP = do
   mode <- enumFromTable "a mode (strict | defeasible)" modeTable
   keyword "premises"
   symbol '='
-  prems <- brackets apatP
+  labelled <- brackets labelledPremiseP
+  let prems = map snd labelled
+      rawLabels = map fst labelled
+      -- Canonical: @[]@ when no premise is labelled, else one entry per
+      -- premise (grammar App. B.4 — labels are optional /per premise/).
+      labels = if all (== Nothing) rawLabels then [] else rawLabels
+      names = [n | Just (PremiseLabel n) <- rawLabels]
+  case firstDupStr names of
+    Just n -> failP ("duplicate premise label '" ++ n ++ "' in rule '" ++ rid ++ "'")
+    Nothing -> pure ()
+  -- @rule@\/@leaf@ are the §7 terminal markers, so a premise label spelling
+  -- either of them would make @a2.leaf.leaf@ parse two ways (grammar App. B.4).
+  case filter (`elem` attackPathTerminalMarkers) names of
+    (n : _) ->
+      failP ("premise label '" ++ n ++ "' is reserved (the §7 terminal markers)")
+    [] -> pure ()
   keyword "conclusion"
   symbol '='
   concl <- apatP
   at <- optAllowTrusted
   certs <- optCertifiers
   qs <- questionLines
+  -- B.4 policy well-formedness, rejected at declaration time rather than
+  -- discovered at an attack site: both namespaces are declared right here, so a
+  -- label that also names a critical question makes an attack path ambiguous.
+  case filter (`elem` [q | Question (QuestionId q) _ _ <- qs]) names of
+    (n : _) ->
+      failP
+        ( "premise label '" ++ n ++ "' in rule '" ++ rid
+            ++ "' also names a critical question"
+        )
+    [] -> pure ()
   pure
     Rule
       { ruleId = RuleId rid
       , ruleParams = params
       , ruleMode = mode
       , rulePremises = prems
+      , rulePremiseLabels = labels
       , ruleConclusion = concl
       , ruleAllowTrusted = at
       , ruleCertifiers = certs
@@ -965,6 +1265,44 @@ ruleP = do
       case mw of
         Just "question" -> do q <- questionP; go (acc ++ [q])
         _ -> pure acc
+
+-- | @labelledPremise ::= [ ident \":\" ] apat@ (grammar App. B.4). The label is
+-- optional per premise; an unlabelled premise behaves exactly as it does in
+-- @\@0.2@.
+--
+-- Disambiguation is a bounded lookahead and cannot be ambiguous: an @apat@'s
+-- head ident is followed by @(@, @,@, or @]@ — never by @:@ — so a @:@ after
+-- the first ident marks a label. (Like 'peekNecessityParen' the scan skips only
+-- whitespace, not comments; a comment between a label and its colon is not
+-- accepted.)
+labelledPremiseP :: P (Maybe PremiseLabel, AtomPat)
+labelledPremiseP = do
+  lbl <- optLabel
+  a <- apatP
+  pure (lbl, a)
+  where
+    optLabel = do
+      skipTrivia
+      s <- getInput
+      case scanIdent s of
+        Just w
+          | colonFollows (drop (length w) s) -> do
+              _ <- identifier
+              symbol ':'
+              pure (Just (PremiseLabel w))
+        _ -> pure Nothing
+    colonFollows r = case dropWhile isWs r of
+      ':' : _ -> True
+      _ -> False
+    isWs c = c == ' ' || c == '\t' || c == '\n' || c == '\r'
+
+-- | The first value occurring twice, in first-duplicate order.
+firstDupStr :: [String] -> Maybe String
+firstDupStr = go []
+  where
+    go _ [] = Nothing
+    go seen (x : xs) | x `elem` seen = Just x
+                     | otherwise = go (x : seen) xs
 
 -- | @questionLine ::= \"question\" ident \":\" apat [ \"(\" necessity \")\" ]@
 -- (default @mandatory@; grammar §4).
@@ -1224,6 +1562,27 @@ printDecl d = case d of
   DeclAttack k -> [printAttack k]
   DeclStatus (PropId c) -> ["status " ++ c]
   DeclGroup g -> [printGroup g]
+  DeclComparison c -> printComparison c
+
+-- | @comparison@ in the fixed field order of grammar App. B.3. The @nl@ string
+-- is emitted __raw__ (directives unexpanded, @{{@\/@}}@ unconverted, B.6), which
+-- is what makes @parse ∘ print = id@ hold on the authored spelling.
+printComparison :: Comparison -> [String]
+printComparison c =
+  [ "comparison : " ++ printProp (cmpConclusion c)
+      ++ " on " ++ (let MeasurandId m = cmpMeasurand c in m)
+      ++ " @ " ++ (let DatasetId d = cmpDataset c in d)
+  , "  relation = " ++ relationStr (cmpRelation c)
+  , "  recheck = " ++ (let ArgId a = cmpRecheckArg c in a)
+  , "  bridge = " ++ (let ArgId a = cmpBridgeArg c in a)
+  , "  result = " ++ (let LeafId l = cmpResult c in l)
+  , "  baseline = " ++ (let LeafId l = cmpBaseline c in l)
+  , "  binding = " ++ (let LeafId l = cmpBinding c in l)
+  , "  claims " ++ (let PropId p = ccId (cmpClaim c) in p)
+  , "    nl = " ++ quote (ccNlRaw (cmpClaim c))
+  , "    binding = " ++ printBinding (ccBinding (cmpClaim c))
+  ]
+    ++ [ "  supports " ++ p | Just (PropId p) <- [cmpSupports c] ]
 
 -- | @group ident = [ leafId,… ]@ (grammar §3, spec §4.3).
 printGroup :: DupGroup -> String
@@ -1297,17 +1656,21 @@ assuranceLine assurance = case assurance of
         ++ printSExpr payload ++ ")"
     ]
 
-printAttack :: Attack -> String
+-- | Print an authored attack (grammar §7, App. B.5). Each 'SurfaceStep' is
+-- emitted in the spelling it was written in — 'StepIndex' as its integer,
+-- 'StepName' as its bare name — so both round-trip; the terminal
+-- @rule@\/@leaf@ marker is regenerated canonically from the attack kind.
+printAttack :: SurfaceAttack -> String
 printAttack k = case k of
-  Rebut (ArgId w) (ArgId u) -> "rebut " ++ w ++ " " ++ u
-  Undercut (ArgId w) (ArgId u) steps ->
+  SRebut (ArgId w) (ArgId u) -> "rebut " ++ w ++ " " ++ u
+  SUndercut (ArgId w) (ArgId u) steps ->
     "undercut " ++ w ++ " " ++ u ++ printPath steps ++ ".rule"
-  Undermine (ArgId w) (ArgId u) steps ->
+  SUndermine (ArgId w) (ArgId u) steps ->
     "undermine " ++ w ++ " " ++ u ++ printPath steps ++ ".leaf"
   where
     printPath = concatMap (\s -> "." ++ printStep s)
-    printStep (StepPremise i) = show i
-    printStep (StepQuestion (QuestionId q)) = q
+    printStep (StepIndex i) = show i
+    printStep (StepName s) = s
 
 -- ---------------------------------------------------------------------------
 -- Policy printer
@@ -1315,6 +1678,13 @@ printAttack k = case k of
 
 -- | Canonically print a @Policy@ (grammar §4). @parsePolicy (printPolicy p) ==
 -- Right p@ (spec result 12).
+--
+-- __Canonical section order__ (the grammar is order-insensitive, so the printer
+-- picks one): @policy@ header, @rule@s, @contrary@, @exception@, @admission@,
+-- @duplicate-reports@, @theory@ — the frozen @\@0.2@ block — then the
+-- @lara-syntax\@0.3@ additions @measurand@ and @comparison-scheme@, appended in
+-- that order. Every optional section is elided when empty, so a policy written
+-- before @\@0.3@ prints byte-identically to before.
 printPolicy :: Policy -> String
 printPolicy p =
   unlines $
@@ -1325,6 +1695,8 @@ printPolicy p =
       ++ printAdmission (policyAdmission p)
       ++ printGroupMode (policyGroupMode p)
       ++ printTheories (policyTheories p)
+      ++ printMeasurands (policyMeasurands p)
+      ++ printSchemes (policyComparisonSchemes p)
   where
     prependBlank [] = []
     prependBlank xs = "" : xs
@@ -1337,7 +1709,7 @@ printRule :: Rule -> [String]
 printRule r =
   [ "rule " ++ (let RuleId rid = ruleId r in rid) ++ "(" ++ intercalate ", " [x | Param x <- ruleParams r] ++ ")"
   , "  mode = " ++ modeStr (ruleMode r)
-  , "  premises = [" ++ intercalate ", " (map printAPat (rulePremises r)) ++ "]"
+  , "  premises = [" ++ intercalate ", " (zipWith printPremise labels (rulePremises r)) ++ "]"
   , "  conclusion = " ++ printAPat (ruleConclusion r)
   ]
     ++ strictFields
@@ -1345,6 +1717,12 @@ printRule r =
        | Question (QuestionId q) a n <- ruleQuestions r
        ]
   where
+    -- Premise labels are optional and positional (grammar App. B.4). A short or
+    -- absent label list pads with 'Nothing', so an unlabelled rule prints
+    -- byte-identically to @\@0.2@.
+    labels = rulePremiseLabels r ++ repeat Nothing
+    printPremise Nothing a = printAPat a
+    printPremise (Just (PremiseLabel l)) a = l ++ ": " ++ printAPat a
     -- allow-trusted / certifiers are a strict-rule surface (grammar §4).
     strictFields
       | ruleMode r == Strict =
@@ -1378,6 +1756,27 @@ printTheories ts =
     [ "theory " ++ d ++ " = [" ++ intercalate ", " (map printProp ps) ++ "]"
     | (TheoryDigest d, ps) <- ts
     ]
+
+-- | The measurand table (grammar App. B.1), one line each; elided when empty.
+printMeasurands :: [Measurand] -> [String]
+printMeasurands [] = []
+printMeasurands ms =
+  "" :
+    [ "measurand " ++ m ++ " : " ++ sortStr (measurandSort x)
+        ++ " where " ++ polarityStr (measurandPolarity x)
+    | x <- ms
+    , let MeasurandId m = measurandId x
+    ]
+
+-- | The comparison-scheme blocks (grammar App. B.2); elided when empty.
+printSchemes :: [ComparisonScheme] -> [String]
+printSchemes = concatMap (("" :) . one)
+  where
+    one s =
+      [ "comparison-scheme " ++ relationStr (csRelation s) ++ " " ++ polarityStr (csPolarity s)
+      , "  recheck = " ++ (let RuleId r = csRecheck s in r)
+      , "  bridge = " ++ (let RuleId r = csBridge s in r)
+      ]
 
 -- ---------------------------------------------------------------------------
 -- Shared value printers

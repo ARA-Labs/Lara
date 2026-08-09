@@ -35,6 +35,9 @@
 --     undermined, so the bridge goes out and its comparative claim is
 --     defeated, while the strict ord@1 step stays in and its bare comparison
 --     stays justified (the factivity firewall, in the grounded semantics).
+--   * __S5__ @ord-lower-is-better@ — 'Accept'; the same @strictly-better@
+--     source shape as S2 over a @lower-is-better@ measurand, so the generated
+--     goal is the flipped @num_lt(ours, theirs)@ — and ord@1 accepts it.
 --   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
 --     a same-atom contrary pair contested via a rebut 2-cycle, and a
 --     setting-index-mismatch pair left justified (zero attacks).
@@ -99,6 +102,7 @@ import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Strict (SExpr (..))
 import Lara.Wire (PublicStatus (..), conditionalStatus, Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
+import Lara.WorkedExamples (workedExamples)
 
 -- ---------------------------------------------------------------------------
 -- Fixtures
@@ -166,29 +170,14 @@ loadPolicy path = do
 -- basename (the @policy <name>@ header the artifact declares). Each directory is
 -- a self-contained paper artifact: @<dir>/example.lara@, @<dir>/<policy>@, and
 -- the derived @<dir>/example.core.sexp@ anchor.
+--
+-- The list itself lives in "Lara.WorkedExamples", shared verbatim with
+-- @scripts\/gen-worked-examples.hs@: the generator /writes/ the derived files
+-- this module's freshness properties /re-derive/, so a registry entry present in
+-- one and missing from the other would silently disable exactly the check that
+-- catches drift.
 examplePolicies :: [(FilePath, FilePath)]
-examplePolicies =
-  [ ("examples/A", "empirical-v1.policy.lara")
-  , ("examples/B", "empirical-v1.policy.lara")
-  , ("examples/E1", "empirical-v1.policy.lara")
-  , ("examples/E2", "empirical-v1.policy.lara")
-  , ("examples/E3", "empirical-v1.policy.lara")
-  , ("examples/E4", "empirical-v2.policy.lara")
-  , ("examples/E5", "empirical-v2.policy.lara")
-  , ("examples/R1", "empirical-v1.policy.lara")
-  , ("examples/R2", "strict-bad-v1.policy.lara")
-  , ("examples/R3", "empirical-v1.policy.lara")
-  , ("examples/S1", "strict-v1.policy.lara")
-  , ("examples/S2", "ord-v1.policy.lara")
-  , ("examples/S3", "ord-le-v1.policy.lara")
-  , ("examples/S4", "ord-setting-v1.policy.lara")
-  , ("examples/agreement-map", "agreement-v1.policy.lara")
-  , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
-  , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
-  , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
-  , ("examples/running-example/run1", "empirical-v1.policy.lara")
-  , ("examples/running-example/run2", "empirical-v1.policy.lara")
-  ]
+examplePolicies = workedExamples
 
 -- | The shared empirical-v1 policy basename (co-located in each example's dir).
 empiricalBase :: FilePath
@@ -399,6 +388,38 @@ prop_S4 = once $ ioProperty $
                       , Published Defeated
                       )
                     , (numRelP "num_lt" "0.71" "0.74", Published Justified)
+                    ]
+          ]
+
+-- | S5: the same @relation = strictly-better@ source shape as S2, over a
+-- measurand its policy declares @lower-is-better@ (perplexity).
+--
+-- Two things are asserted at once, and both matter. The generated goal is the
+-- __flipped__ one — @num_lt(28.4, 31.6)@, ours below theirs, where S2's is
+-- @num_lt(0.71, 0.74)@, theirs below ours — so the polarity declaration reached
+-- the goal. And that flipped goal is what @ord\@1@ __accepts__ on replay: the
+-- strict argument is @in@, which it could not be if the elaborator had emitted a
+-- goal the backend's exact rational check disagreed with. Polarity chooses which
+-- comparison to make; the backend still decides it.
+--
+-- The bridge concludes the same @better@ predicate S2's does, on a lower-is-better
+-- metric — the comparative claim does not change spelling with the direction of
+-- the number.
+prop_S5 :: Property
+prop_S5 = once $ ioProperty $
+  runExample "examples/S5" "ord-ppl-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S5: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S5 labels: a1 (strict ord@1, flipped goal) and a2 (bridge) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S5 status: better justified, and the SUB-claim is the flipped num_lt(ours, theirs)" $
+              verdictStatuses outcome
+                === [ ( betterP "sys_new" "sys_base" "perplexity" "wikitext103"
+                      , Published Justified
+                      )
+                    , (numRelP "num_lt" "28.4" "31.6", Published Justified)
                     ]
           ]
 
@@ -847,6 +868,7 @@ workedExamplesSpecProps =
   , ("S2 strict ord@1 cert + defeasible bridge → accept, both args in, comparative claim justified", quickCheckResult prop_S2)
   , ("S3 ord@1 num_le tie → accept, at_least_as_good justified (num_lt would reject)", quickCheckResult prop_S3)
   , ("S4 undermined binding → bridge out, comparative claim defeated, comparison still justified", quickCheckResult prop_S4)
+  , ("S5 lower-is-better → flipped goal num_lt(28.4, 31.6), accepted by ord@1, better justified", quickCheckResult prop_S5)
   , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)

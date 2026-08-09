@@ -103,3 +103,11 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: high
 - **Code ref**: ["lean/Lara/Driver.lean", "lean/Lara/RawAttack.lean", "lean/Lara/Admission.lean", "lean/AxCheck.lean"]
+
+## H11: Expand surface sugar into the AST's own declaration forms, not into kernel structures
+- **Rationale**: A derived surface form has to produce exactly what a hand-written source produces, or its "sugar" claim is false. Building the kernel structure directly re-implements the lowering — premise resolution, discharge resolution, conclusion checking — in a second place that can drift from the first, and the drift is invisible until a golden moves. Expanding instead into the *presentation* declarations the sugar stands for, spliced in place, and letting the existing pipeline lower them makes the equality **structural rather than coincidental**: `expandComparison` returns `[DeclClaim, DeclArg, DeclArg]`, so a generated argument reaches `Unit` through the same `resolvePremises`/`resolveDischarges`/conclusion checks as an authored one, and there is no second lowering to keep in sync. The complementary half is that anything the sugar must NOT invent stays authored — the `comparison_setup` binding leaf is named, never synthesized, so the evidence an attack targets is not something the compiler made up. Contrast [H09]: H09 narrows the public path so a policy cannot be bypassed; H11 narrows the *construction* path so a second lowering cannot diverge.
+- **Sources**: ["+137/-62 ← examples/S{2,3,4}/example.lara «git diff --stat main...HEAD» [result]", "0 ← examples/S{2,3,4}/example.core.sexp «git diff --stat main...HEAD -- examples/S2/example.core.sexp … (empty output)» [result]"]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["src/Lara/Elaborate/Comparison.hs", "src/Lara/Elaborate/Internal.hs", "test/SurfaceRewriteSpec.hs"]

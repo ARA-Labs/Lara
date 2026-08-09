@@ -16,6 +16,7 @@ module Lara.MechReview.Load
   ) where
 
 import Lara.AST (Program)
+import Lara.Elaborate.Comparison (expandClaimNls)
 import Lara.Measure (InputMeta (..), parseCorpusManifest)
 import Lara.Replay (CheckInput)
 import Lara.Syntax (parseProgram)
@@ -30,8 +31,11 @@ loadReviewUnit im = do
     Left err -> error ("render-reviews: wire decode failed (" ++ imPath im ++ "): " ++ show err)
     Right ok -> pure ok
   laraBytes <- readFile laraPath
-  prog <- case parseProgram laraBytes of
+  parsed <- case parseProgram laraBytes of
     Left err -> error ("render-reviews: surface parse failed (" ++ laraPath ++ "): " ++ show err)
+    Right ok -> pure ok
+  prog <- case expandClaimNls parsed of
+    Left err -> error ("render-reviews: nl expansion failed (" ++ laraPath ++ "): " ++ show err)
     Right ok -> pure ok
   pure (imBase im, ci, prog)
   where
