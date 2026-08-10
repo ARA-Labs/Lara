@@ -54,6 +54,8 @@ module Lara.ClaimSupport
   , claimSupportJson
   , claimSupportTsv
   , claimSupportTsvHeader
+  , statusStr
+  , kindStr
   ) where
 
 import Data.List (nub, sortBy)
@@ -64,7 +66,7 @@ import Data.Char (toLower)
 import Lara.AST
   ( Arg (..)
   , ArgConcl (..)
-  , ArgId
+  , ArgId (..)
   , Assurance (..)
   , Attack (..)
   , Claim (..)
@@ -83,11 +85,19 @@ import Lara.AST
   , SupportTerm (..)
   , Unit (..)
   )
-import Lara.ExpectedJson (JValue (..), renderJson)
+import Lara.BindingAudit.Types
+import Lara.BindingAudit.Tsv (refCellErrorMessage, renderRefsCell, renderTsvRow)
+import Lara.ExpectedJson
+  ( JValue (..)
+  , renderAttack
+  , renderAttackKind
+  , renderAttackTargetPath
+  , renderJson
+  )
 import Lara.Measure (EnvBlock (..))
 import Lara.Replay (CheckInput (..))
 import Lara.Prop (Prop)
-import Lara.Syntax (printProp)
+import Lara.Syntax (printArg, printArgConcl, printProp)
 import Lara.SupportTerm (leaves)
 import Lara.Wire (Outcome (..), Verdict (..), conditionalStatus, isPublished)
 
@@ -187,6 +197,7 @@ data UnitRecord = UnitRecord
   { urName :: String
   , urStatuses :: [Status] -- ^ per requested claim (corpus units: one)
   , urBindingAuditRows :: [BindingAuditRow] -- ^ source of both load-bearing facts and audit rows
+  , urBindingAuditSubjects :: [AuditSubject]
   , urAllLeaves :: [LeafFact] -- ^ every declared leaf (context)
   , urTypedAttacks :: Int -- ^ declared typed attacks, all valid on accept (number 3)
   , urDeadEndAttacks :: Int -- ^ subset sourced at an exploration dead end (number 3)
@@ -204,7 +215,9 @@ urLoadBearing = map barLeaf . urBindingAuditRows
 -- | Compute one unit's contribution. @ruleModeOf@ resolves a support term's
 -- 'RuleId' to its policy 'Mode' (built once from the shared policy); @flavored@
 -- is the documented @strict_certifier@ header flag; @ci@\/@verdict@ are the T3
--- decode + 'runCheck' outputs; @prog@ is the parsed @unit.lara@ surface.
+-- decode + 'runCheck' outputs; @surfaceDerivedArgs@ is the admission-free
+-- elaboration of @prog@ used for exact support-term parity; @prog@ remains the
+-- authored @unit.lara@ surface used for prose, refs, and canonical rendering.
 --
 -- A non-accept verdict is a hard error: every frozen corpus unit is
 -- accept-class, so a reject means the freeze or the decode path drifted.
@@ -213,10 +226,11 @@ computeUnit
   -> Bool
   -> String
   -> CheckInput
+  -> [(ArgId, SupportTerm)]
   -> Verdict
   -> Program
   -> UnitRecord
-computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
+computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) prog =
   case outcome of
     Reject _ -> error ("claim-support: non-accept corpus unit " ++ name)
     -- A conditional label is not a claim status (spec §4.3, issue #76). No
@@ -230,6 +244,7 @@ computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
         { urName = name
         , urStatuses = map (conditionalStatus . snd) statuses
         , urBindingAuditRows = map bindingAuditRow loadBearingLeafIds
+        , urBindingAuditSubjects = strictAuditSubjects ++ attackAuditSubjects
         , urAllLeaves = map leafFactFromLeaf surfaceLeaves
         , urTypedAttacks = length attacks
         , urDeadEndAttacks = length (filter deadEndSourced attacks)
@@ -253,6 +268,19 @@ computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
         surfaceClaims = [c | DeclClaim c <- programDecls prog]
         leafById lid = lookup lid [(leafId l, l) | l <- surfaceLeaves]
         corePropById lid = lookup lid (unitLeaves unit)
+        surfaceDerivedArgTermById aid =
+          case [term | (derivedAid, term) <- surfaceDerivedArgs, derivedAid == aid] of
+            [term] -> term
+            [] ->
+              error
+                ( "claim-support: argument " ++ show aid
+                    ++ " missing from elaborated surface in unit " ++ name
+                )
+            _ ->
+              error
+                ( "claim-support: duplicate argument " ++ show aid
+                    ++ " in elaborated surface for unit " ++ name
+                )
 
         -- A load-bearing core leaf id with no matching surface declaration, or
         -- with a different proposition, means the checked core and the @.lara@
@@ -294,6 +322,103 @@ computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
             (leafKind l)
             (leafPaperAnchored l)
             (leafRefs l)
+        rootedRefs term =
+          nub
+            [ ref
+            | lid <- leaves term
+            , ref <- leafRefs (requireLeaf lid)
+            ]
+
+        strictAuditSubjects =
+          [ strictAuditSubject aid term
+          | (aid, term) <- loadBearingArgs
+          , isStrict term
+          ]
+
+        strictAuditSubject aid checkedTerm =
+          let surfaceArg = surfaceArgById aid
+              surfaceDerivedTerm = surfaceDerivedArgTermById aid
+           in if surfaceDerivedTerm == checkedTerm
+                then
+                  let claim = strictClaim aid surfaceArg
+                   in claim `seq`
+                        AuditSubject
+                          { auditSubjectId = strictSubjectId name aid
+                          , auditSubjectType = AuditStrictStep
+                          , auditSubjectFormalObject = unlines (printArg surfaceArg)
+                          , auditSubjectProseContext = claimNl claim
+                          , auditSubjectRefs = rootedRefs checkedTerm
+                          }
+                else
+                  error
+                    ( "claim-support: argument " ++ show aid
+                        ++ " support term differs between surface and checked unit "
+                        ++ name
+                    )
+
+        strictClaim aid surfaceArg =
+          case argConcl surfaceArg of
+            SupportsClaim cid -> claimById cid
+            SupportsDerived cid ->
+              error
+                ( "claim-support: strict argument " ++ show aid
+                    ++ " supports derived claim " ++ show cid
+                    ++ " with no nl context in " ++ name
+                )
+            Challenges _ ->
+              error
+                ( "claim-support: strict argument " ++ show aid
+                    ++ " is a challenge in " ++ name
+                )
+
+        attackAuditSubjects = map attackAuditSubject attacks
+
+        attackAuditSubject attack =
+          let sourceId = attackSrc attack
+              targetId = attackTarget attack
+              sourceArg = surfaceArgById sourceId
+              targetArg = surfaceArgById targetId
+              challenge = sourceChallenge sourceId sourceArg
+              claim = attackClaim targetId targetArg
+           in challenge `seq`
+                claim `seq`
+                  AuditSubject
+                    { auditSubjectId = attackSubjectId name attack
+                    , auditSubjectType = AuditTypedAttack
+                    , auditSubjectFormalObject = renderAttack attack
+                    , auditSubjectProseContext = claimNl claim ++ "\n" ++ challenge
+                    , auditSubjectRefs = rootedRefs (argTerm sourceArg)
+                    }
+
+        sourceChallenge aid sourceArg =
+          case argConcl sourceArg of
+            Challenges _ -> printArgConcl (argConcl sourceArg)
+            SupportsClaim cid ->
+              error
+                ( "claim-support: attack source argument " ++ show aid
+                    ++ " supports claim " ++ show cid
+                    ++ " instead of a challenge in " ++ name
+                )
+            SupportsDerived cid ->
+              error
+                ( "claim-support: attack source argument " ++ show aid
+                    ++ " supports derived claim " ++ show cid
+                    ++ " instead of a challenge in " ++ name
+                )
+
+        attackClaim aid targetArg =
+          case argConcl targetArg of
+            SupportsClaim cid -> claimById cid
+            SupportsDerived cid ->
+              error
+                ( "claim-support: attacked derived claim " ++ show cid
+                    ++ " has no nl context in " ++ name
+                )
+            Challenges _ ->
+              error
+                ( "claim-support: attack target " ++ show aid
+                    ++ " is not a claim support in " ++ name
+                )
 
         claimById cid =
           case [c | c <- surfaceClaims, claimId c == cid] of
@@ -417,6 +542,32 @@ computeUnit ruleModeOf flavored name ci (Verdict _ outcome) prog =
           SRule {srAssurance = AssuranceCert _} -> True
           _ -> False
 
+strictSubjectId :: String -> ArgId -> AuditSubjectId
+strictSubjectId unitName (ArgId aid) =
+  AuditSubjectId (unitName ++ ":strict:" ++ aid)
+
+attackSubjectId :: String -> Attack -> AuditSubjectId
+attackSubjectId unitName attack =
+  AuditSubjectId
+    ( unitName ++ ":attack:" ++ renderAttackKind attack ++ ":"
+        ++ rawAttackSource attack ++ ":" ++ rawAttackTarget attack
+        ++ ":" ++ renderAttackTargetPath attack
+    )
+
+rawAttackSource :: Attack -> String
+rawAttackSource attack =
+  let ArgId aid = attackSrc attack
+   in aid
+
+rawAttackTarget :: Attack -> String
+rawAttackTarget attack =
+  let ArgId aid = case attack of
+        Rebut _ target -> target
+        Undercut _ target _ -> target
+        Undermine _ target _ -> target
+   in aid
+
+
 attackSrc :: Attack -> ArgId
 attackSrc (Rebut s _) = s
 attackSrc (Undercut s _ _) = s
@@ -508,7 +659,7 @@ bindingAuditPath = "measurements/binding-audit/worklist.tsv"
 -- | Fixed schema for 'bindingAuditTsv'.
 bindingAuditTsvHeader :: String
 bindingAuditTsvHeader =
-  intercalateTab
+  renderTsvRow
     [ "unit"
     , "leaf_id"
     , "formal_target"
@@ -534,46 +685,31 @@ bindingAuditTsv records =
     row unitName r =
       let leaf = barLeaf r
           lid = lfId leaf
-       in intercalateTab
-            ( map
-                escapeTsvCell
-                [ unitName
-                , let LeafId rawLeafId = lid in rawLeafId
-                , printProp (barFormalTarget r)
-                , auditRoleStr (barRole r)
-                , let PropId cid = barClaimId r in cid
-                , barClaimNl r
-                , kindStr (lfKind leaf)
-                , provStr (lfProvenance leaf)
-                , refsCell unitName lid (lfRefs leaf)
-                ]
-            )
+       in renderTsvRow
+            [ unitName
+            , let LeafId rawLeafId = lid in rawLeafId
+            , printProp (barFormalTarget r)
+            , auditRoleStr (barRole r)
+            , let PropId cid = barClaimId r in cid
+            , barClaimNl r
+            , kindStr (lfKind leaf)
+            , provStr (lfProvenance leaf)
+            , refsCell unitName lid (lfRefs leaf)
+            ]
 
 refsCell :: String -> LeafId -> [SourceRef] -> String
-refsCell _ _ [] = "-"
 refsCell unitName lid refs =
-  case [ref | ref@(SourceRef raw) <- refs, ',' `elem` raw || raw == "-"] of
-    [] -> intercalateComma [ref | SourceRef ref <- refs]
-    bad : _ ->
-      error
-        ( "claim-support: binding-audit ref " ++ show bad
-            ++ " on leaf " ++ show lid
-            ++ " in unit " ++ unitName
-            ++ " collides with the refs-cell encoding (comma or reserved '-')"
+  case renderRefsCell refs of
+    Right rendered -> rendered
+    Left refError ->
+      errorWithoutStackTrace
+        ( "claim-support: binding-audit refs on leaf " ++ show lid
+            ++ " in unit " ++ unitName ++ ": " ++ refCellErrorMessage refError
         )
 
 auditRoleStr :: BindingAuditRole -> String
 auditRoleStr AuditSupport = "support"
 auditRoleStr AuditAttack = "attack"
-
-escapeTsvCell :: String -> String
-escapeTsvCell = concatMap escape
-  where
-    escape '\\' = "\\\\"
-    escape '\t' = "\\t"
-    escape '\r' = "\\r"
-    escape '\n' = "\\n"
-    escape c = [c]
 
 -- ---------------------------------------------------------------------------
 -- Rendering the existing four-number report
@@ -696,10 +832,6 @@ intercalateTab [] = ""
 intercalateTab [x] = x
 intercalateTab (x : xs) = x ++ "\t" ++ intercalateTab xs
 
-intercalateComma :: [String] -> String
-intercalateComma [] = ""
-intercalateComma [x] = x
-intercalateComma (x : xs) = x ++ "," ++ intercalateComma xs
 
 statusStr :: Status -> String
 statusStr Gap = "gap"

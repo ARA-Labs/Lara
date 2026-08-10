@@ -83,6 +83,8 @@ module Lara.Syntax
   , printSource
   , printProgram
   , printPolicy
+  , printArg
+  , printArgConcl
   , printProp
     -- * Surface spellings of the @lara-syntax\@0.3@ closed vocabularies
     --

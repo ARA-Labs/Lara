@@ -609,3 +609,18 @@ entries:
     - "Did NOT stage an observation or revise logic claims. This turn implemented a repository-specific, already-crystallized audit-boundary decision and added no generalized scientific claim."
     - "Did NOT run Lean, AxCheck, differential, replay-tamper, or refreeze gates. The exact scope check proved their inputs and implementations unchanged; N147 records the Haskell/reporting gate appropriate to this reporting-only branch."
     - "Replaced the completed implementation open thread with issue #87's remaining human audit Steps 1-3. No classification or audit judgment entered the worklist."
+
+- turn: "2026-08-09_001#5"
+  notes:
+    - "Routed N148 as one user-revised decision: the user selected full issue #87 Steps 1-3, selected sealed judgments plus a deterministic analyzer, and approved the written design; the final implementation plan preserves those choices."
+    - "The planning pass found and closed two protocol ambiguities before implementation: exact attack subject IDs/order are now pinned from current corpus units, and completed packets pass a write-free, status-free validate command before the human sealing commit."
+    - "Did NOT stage an observation or revise logic claims. This turn designed an audit experiment and implementation protocol; it produced no human classification, analyzer result, paper number, or scientific claim."
+    - "The human handoff remains a hard checkpoint. Tooling and empty templates may be implemented next, but results, summary, and paper updates remain blocked until the second author returns all 42 judgments."
+
+- turn: "2026-08-09_001#6"
+  notes:
+    - "Routed N149 as one ai-executed experiment: the implementation commits and PR #96 review fixes jointly produce one status-free audit pipeline and one integrated Haskell verification result."
+    - "Updated the current session state from planned to implemented without altering N148: N148 remains the historical user-revised protocol decision; N149 records its implementation and hardening."
+    - "Did NOT stage or crystallize a scientific observation. No second-author classification, sealed result set, summary.json, paper count, or claim-status join was produced."
+    - "Kept the human checkpoint explicit: the detached 42-row packet must be completed, validated without checker statuses, and sealed before summarize can join statuses or emit paper-facing numbers."
+    - "Removed the handoff packet from the product branch after preserving exact bytes in a detached archive and commit-pinned history; the repository does not treat blank templates as scientific results."

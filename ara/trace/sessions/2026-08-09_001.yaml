@@ -2,15 +2,17 @@ session:
   id: "2026-08-09_001"
   date: "2026-08-09"
   started: "2026-08-09T00:56"
-  last_turn: "2026-08-09T19:29"
-  turn_count: 4
+  last_turn: "2026-08-10T07:28"
+  turn_count: 6
   summary: >
     Audited and synced the merged @0.3 paper surface, engineering-cleared issue
-    #87 Step 0, then implemented the reviewed binding-audit worklist in three
-    independently reviewed commits. The generated artifact pins 38 unique
-    role-aware rows (20 attested, 18 observed; 35 support, 3 attack) in manifest
-    order. Full Haskell build/tests, generator idempotence, frozen-report
-    freshness, and exact branch-scope checks passed.
+    #87 Step 0, and implemented the reviewed 38-row role-aware worklist. Then
+    locked and implemented the Steps 1-3 audit tooling: blinded packet
+    preparation, status-free pre-seal validation, sealed-result summarization,
+    exact input identities, and generated paper numbers. PR #96 review
+    hardening made the packet transactional, diagnostics contextual, generated
+    vocabularies canonical, and boundary tests mutation-effective. The detached
+    42-judgment human audit, summary generation, and paper update remain open.
 
 events_logged:
   - turn: 1
@@ -73,6 +75,18 @@ events_logged:
     routing: direct
     provenance: ai-executed
     summary: "Implemented, reviewed, and fully verified the deterministic 38-row binding-audit worklist."
+  - turn: 5
+    type: decision
+    id: "N148"
+    routing: direct
+    provenance: user-revised
+    summary: "Locked full issue #87 Steps 1-3 with status-free pre-seal validation and deterministic reporting."
+  - turn: 6
+    type: experiment
+    id: "N149"
+    routing: direct
+    provenance: ai-executed
+    summary: "Implemented and review-hardened the blinded binding-audit result pipeline in PR #96."
 
 ai_actions:
   - turn: 1
@@ -145,6 +159,37 @@ ai_actions:
       exact scope/protected-directory checks.
     provenance: ai-executed
     files_changed: []
+  - turn: 5
+    action: >
+      Wrote and self-reviewed the approved binding-audit result design and
+      implementation plan, then hardened the seal protocol with exact manifest-
+      ordered attack identities and a status-isolation validation test.
+    provenance: ai-executed
+    files_changed:
+      - "docs/superpowers/specs/2026-08-09-binding-audit-results-design.md"
+      - "docs/superpowers/plans/2026-08-09-binding-audit-results.md"
+  - turn: 6
+    action: >
+      Implemented issue #87's status-free packet preparation and validation,
+      sealed result summarization, canonical JSON/input identities, and CLI;
+      then addressed every PR #96 review finding with targeted red-green tests,
+      removed tracked handoff artifacts, and preserved the exact packet as a
+      detached archive.
+    provenance: ai-executed
+    files_changed:
+      - "scripts/binding-audit.hs"
+      - "src/Lara/BindingAudit.hs"
+      - "src/Lara/BindingAudit/Tsv.hs"
+      - "src/Lara/BindingAudit/Types.hs"
+      - "src/Lara/ClaimSupport.hs"
+      - "src/Lara/ClaimSupport/Load.hs"
+      - "src/Lara/ExpectedJson.hs"
+      - "test/BindingAuditSpec.hs"
+      - "test/ClaimSupportSpec.hs"
+      - "test/Spec.hs"
+      - "docs/superpowers/plans/2026-08-09-binding-audit-results.md (removed from branch)"
+      - "review/INSTRUCTIONS.md (removed from branch)"
+      - "review/binding-audit-review/ (removed from branch)"
 
 claims_touched: []
 logic_revisions:
@@ -172,11 +217,22 @@ key_context:
       The plan's illustrative attack list was stale relative to MANIFEST.tsv;
       the global manifest-order invariant governed, so worklist identity and
       role-context order remain one deterministic sequence.
+  - turn: 5
+    excerpt: >
+      Completed human files must pass write-free structural validation before
+      their sealing commit, and that validation must succeed when
+      `urStatuses` is bottom; only `summarize` may inspect checker statuses.
+  - turn: 6
+    excerpt: >
+      The audit tooling is implemented, but no human classification is a
+      repository result until a second author returns the detached 42-row packet,
+      status-free validation passes, and the input files are sealed before any
+      status join or summary generation.
 
 open_threads:
   - "Regenerate Lean/Haskell size metrics with the paper's original counting method before replacing LOC figures."
   - "The paper's '19 rejection fixtures / 13 rejection classes' sentence could not be grounded to a current count; left unchanged as pre-existing."
-  - "Issue #87 Steps 1–3 remain human audit work; no faithful/unfaithful/underdetermined judgment was added in Step 0."
+  - "Issue #87 human checkpoint remains: complete and seal 42 second-author judgments, generate the canonical summary, and update the paper from generated numbers."
 
 
 ai_suggestions_pending:

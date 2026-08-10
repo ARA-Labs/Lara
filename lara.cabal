@@ -64,6 +64,9 @@ library
                       Lara.Mutate.Accept
                       Lara.Measure
                       Lara.ClaimSupport
+                      Lara.BindingAudit
+                      Lara.BindingAudit.Tsv
+                      Lara.BindingAudit.Types
                       Lara.AtomicWrite
                       Lara.ClaimSupport.Load
                       Lara.MechReview
@@ -71,9 +74,12 @@ library
                       Lara.RunningExample
                       Lara.WorkedExamples
     build-depends:    base >=4 && <5
+                    , bytestring
                     , containers
                     , directory
                     , filepath
+                    , process
+                    , text
                     , unix
     default-language: GHC2021
 
@@ -93,6 +99,7 @@ test-suite lara-test
     main-is:          Spec.hs
     other-modules:    CorpusUnitsSpec
                       AdmissionSpec
+                      BindingAuditSpec
                       Lara.AdmissionFixture
                       ClaimSupportSpec
                       MechReviewSpec
@@ -125,6 +132,7 @@ test-suite lara-test
                     , directory
                     , filepath
                     , process
+                    , text
                     , unix
                     , QuickCheck
     build-tool-depends: lara:lara

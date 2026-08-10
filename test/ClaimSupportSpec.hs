@@ -32,6 +32,7 @@ import Lara.AST
   ( Arg (..)
   , ArgConcl (..)
   , ArgId (..)
+  , Assurance (AssuranceTrusted)
   , Attack (..)
   , AuditStatus (Reviewed)
   , Binding (..)
@@ -44,20 +45,27 @@ import Lara.AST
   , Leaf (..)
   , LeafId (..)
   , LeafKind (Attested, Observed)
-  , Mode (Defeasible)
+  , Mode (Defeasible, Strict)
+  , Policy (..)
   , PolicyId (..)
+  , RuleId (..)
   , PropId (..)
   , Program (..)
+  , QuestionId (..)
+  , Rule (..)
   , Provenance (AiExecuted)
   , SourceRef (..)
   , Status (Defeated, Gap, Justified)
+  , Step (..)
   , SupportTerm (..)
   , Unit (..)
   )
 import Lara.AtomicWrite (atomicWriteFile, atomicWriteWith)
 import Lara.ClaimSupport
-import Lara.ClaimSupport.Load (loadRecords)
-import Lara.Measure (EnvBlock (..))
+import Lara.ClaimSupport.Load (loadPolicy, loadRecords, loadUnitRecord)
+import Lara.BindingAudit.Types
+import Lara.Measure (EnvBlock (..), InputMeta (..), parseCorpusManifest)
+import Lara.ExpectedJson (renderAttackKind, renderAttackTargetPath)
 import Lara.Prop (Pred (..), Prop (..))
 import Lara.Replay (inputReplayId)
 import Lara.Wire (Outcome (..), Verdict (..))
@@ -74,9 +82,13 @@ claimSupportSpecProps =
   [ ("claim-support: paper-anchor ref classifier", quickCheckResult prop_paperAnchor)
   , ("claim-support: frozen corpus numbers (status/leaves/attacks/strict)", quickCheckResult prop_frozenNumbers)
   , ("claim-support: binding-audit rows preserve the frozen 38-leaf denominator", quickCheckResult prop_bindingAuditRows)
+  , ("claim-support: binding-audit non-leaf subjects are exactly 1 strict + 3 attacks", quickCheckResult prop_bindingAuditSubjects)
+  , ("claim-support: binding-audit attack subjects retain raw endpoints", quickCheckResult prop_bindingAuditSubjectEndpoints)
+  , ("claim-support: every attack constructor has an exact persisted subject id", quickCheckResult prop_bindingAuditAttackSubjectIds)
   , ("claim-support: binding-audit rows carry role-aware claim context", quickCheckResult prop_bindingAuditContexts)
   , ("claim-support: binding-audit context drift fails loudly", quickCheckResult prop_bindingAuditContextFailures)
   , ("claim-support: binding-audit attack projections cover every constructor", quickCheckResult prop_bindingAuditAttackProjections)
+  , ("claim-support: attack identifiers use canonical checked spellings", quickCheckResult prop_bindingAuditAttackSpellings)
   , ("claim-support: binding-audit TSV is canonical and rectangular", quickCheckResult prop_bindingAuditTsv)
   , ("claim-support: binding-audit worklist is fresh", quickCheckResult prop_bindingAuditFresh)
   , ("claim-support: atomic worklist writes preserve complete destinations", quickCheckResult prop_atomicWriteFile)
@@ -171,6 +183,7 @@ prop_bindingAuditTsv = once $ ioProperty $ do
         UnitRecord
           { urName = "unit\tone"
           , urStatuses = []
+          , urBindingAuditSubjects = []
           , urAllLeaves = []
           , urTypedAttacks = 0
           , urDeadEndAttacks = 0
@@ -192,10 +205,14 @@ prop_bindingAuditTsv = once $ ioProperty $ do
                   [syntheticRecord {urBindingAuditRows = [emptyRefsRow]}]
               )
           )
-      invalidRefs = [SourceRef "a,b", SourceRef "-"]
+      invalidRefs =
+        [ (SourceRef "a,b", "ref contains comma: SourceRef \"a,b\"")
+        , (SourceRef "-", "reserved '-' ref at position 1")
+        , (SourceRef "", "empty ref at position 1")
+        ]
   invalidRefChecks <-
     mapM
-      ( \ref -> do
+      ( \(ref, expectedReason) -> do
           result <-
             try
               ( evaluate
@@ -217,13 +234,10 @@ prop_bindingAuditTsv = once $ ioProperty $ do
             counterexample ("invalid ref " ++ show ref) $
               case result of
                 Left err ->
-                  counterexample (displayException err) $
-                    property
-                      ( ( "claim-support: binding-audit ref " ++ show ref
-                            ++ " on leaf LeafId \"e1\" in unit unit\tone"
+                  displayException err
+                    === ( "claim-support: binding-audit refs on leaf LeafId \"e1\""
+                            ++ " in unit unit\tone: " ++ expectedReason
                         )
-                          `isPrefixOf` displayException err
-                      )
                 Right _ ->
                   counterexample "expected binding-audit ref error" (property False)
       )
@@ -356,6 +370,215 @@ prop_bindingAuditRows = once $ ioProperty $ do
       , counterexample "observed rows" (countKind Observed === 18)
       , counterexample "provenance" (property (all ((== AiExecuted) . lfProvenance . barLeaf . snd) rows))
       ]
+prop_bindingAuditSubjects :: Property
+prop_bindingAuditSubjects = once $ ioProperty $ do
+  records <- loadRecords manifestPath policyPath
+  syntheticMismatch <-
+    try (evaluate (length (show (urBindingAuditSubjects strictMismatchRecord))))
+      :: IO (Either ErrorCall Int)
+  policy <- loadPolicy policyPath
+  manifest <- parseCorpusManifest <$> readFile manifestPath
+  let strictInput =
+        case [im | im <- manifest, imBase im == "adaptive-pruning.C04"] of
+          [im] -> im
+          matches ->
+            error
+              ( "claim-support test: expected one adaptive-pruning.C04 manifest row, got "
+                  ++ show (length matches)
+              )
+      driftedPolicy =
+        policy
+          { policyRules =
+              [ if ruleId rule == RuleId "rational_drop_recheck"
+                  then rule {rulePremises = reverse (rulePremises rule)}
+                  else rule
+              | rule <- policyRules policy
+              ]
+          }
+  productionMismatch <-
+    try
+      ( do
+          record <- loadUnitRecord driftedPolicy strictInput
+          evaluate (length (show (urBindingAuditSubjects record)))
+      )
+      :: IO (Either ErrorCall Int)
+  let subjects =
+        [ (sid, subjectType)
+        | record <- records
+        , AuditSubject
+            { auditSubjectId = AuditSubjectId sid
+            , auditSubjectType = subjectType
+            } <- urBindingAuditSubjects record
+        ]
+      expectedSubjects =
+        [ ("adaptive-pruning.C04:strict:a1", AuditStrictStep)
+        , ("fre.C04:attack:undercut:d1:a1:rule", AuditTypedAttack)
+        , ("test-time-model-adaptation.C04:attack:undercut:d1:a1:rule", AuditTypedAttack)
+        , ("rebench-triton_cumsum.C09:attack:undercut:d1:a1:rule", AuditTypedAttack)
+        ]
+      mismatchCheck caseLabel unitName mismatch =
+        counterexample caseLabel $
+          case mismatch of
+            Left err ->
+              counterexample (displayException err) $
+                property
+                  ( ("claim-support: argument ArgId \"a1\" support term differs between surface and checked unit " ++ unitName)
+                      `isPrefixOf` displayException err
+                  )
+            Right _ -> counterexample "expected strict subject support-term parity error" (property False)
+      subjectById sid =
+        case
+          [ subject
+          | record <- records
+          , subject@AuditSubject {auditSubjectId = subjectId} <- urBindingAuditSubjects record
+          , subjectId == AuditSubjectId sid
+          ] of
+          [subject] -> subject
+          matches ->
+            error
+              ( "claim-support test: expected one audit subject " ++ sid
+                  ++ ", got " ++ show (length matches)
+              )
+      strictRepresentative =
+        AuditSubject
+          { auditSubjectId = AuditSubjectId "adaptive-pruning.C04:strict:a1"
+          , auditSubjectType = AuditStrictStep
+          , auditSubjectFormalObject =
+              "arg a1 : supports(c04a) by rational_drop_recheck(kurtosis_salience, apt_llama2_7b, openllm_avg, e03, 50, 38.1, 0.238, 0.05)\n"
+                ++ "  assurance = cert(ra@1, sha256:corpus-v1-ra-theory-0, (radrop (prem 0) (prem 1) (frac 119 500)))\n"
+          , auditSubjectProseContext =
+              "The kurtosis ablation's OpenLLM-average drop from 50.0 to 38.1 is a 23.8% relative drop, exceeding the 5% falsification threshold"
+          , auditSubjectRefs =
+              [ SourceRef "logic/experiments.md#E03"
+              , SourceRef "Table-5"
+              ]
+          }
+      attackRepresentative =
+        AuditSubject
+          { auditSubjectId = AuditSubjectId "fre.C04:attack:undercut:d1:a1:rule"
+          , auditSubjectType = AuditTypedAttack
+          , auditSubjectFormalObject = "undercut d1 a1"
+          , auditSubjectProseContext =
+              "On AntMaze, performance scales smoothly with reward diversity and FRE-all dominates all reward-subset ablations — total score FRE-all 47.3 +- 7 is the argmax over the 7 variants\n"
+                ++ "challenges(variance_reported(a1))"
+          , auditSubjectRefs =
+              [ SourceRef "evidence/tables/table4_reward_subset_ablation.md"
+              , SourceRef "Table-4-row-total"
+              , SourceRef "evidence/figures/figure5_reward_diversity_scaling.md"
+              ]
+          }
+  pure $
+    conjoin
+      [ counterexample "ordered non-leaf subjects" (subjects === expectedSubjects)
+      , mismatchCheck "synthetic strict hidden-field parity" "synthetic" syntheticMismatch
+      , mismatchCheck "production load/elaborate/core strict parity" "adaptive-pruning.C04" productionMismatch
+      , counterexample "complete strict subject" $
+          subjectById "adaptive-pruning.C04:strict:a1" === strictRepresentative
+      , counterexample "complete attack subject" $
+          subjectById "fre.C04:attack:undercut:d1:a1:rule" === attackRepresentative
+      ]
+
+prop_bindingAuditSubjectEndpoints :: Property
+prop_bindingAuditSubjectEndpoints =
+  once $
+    counterexample "raw endpoint pairs" $
+      [ (sid, formalObject)
+      | AuditSubject
+          { auditSubjectId = AuditSubjectId sid
+          , auditSubjectFormalObject = formalObject
+          } <- urBindingAuditSubjects distinctEndpointRecord
+      ]
+        === [ ( "synthetic:attack:undercut:source-one:target-one:rule"
+              , "undercut source-one target-one"
+              )
+            , ( "synthetic:attack:undercut:source-two:target-two:rule"
+              , "undercut source-two target-two"
+              )
+            ]
+  where
+    sourceOne = ArgId "source-one"
+    sourceTwo = ArgId "source-two"
+    targetOne = ArgId "target-one"
+    targetTwo = ArgId "target-two"
+    distinctEndpointRecord =
+      auditRecord
+        [ (sourceOne, SLeaf primaryLeafId)
+        , (sourceTwo, SLeaf primaryLeafId)
+        , (targetOne, SLeaf secondaryLeafId)
+        , (targetTwo, SLeaf secondaryLeafId)
+        ]
+        [ Undercut sourceOne targetOne []
+        , Undercut sourceTwo targetTwo []
+        ]
+        [primaryClaim]
+        [ challengeArg sourceOne primaryLeafId
+        , challengeArg sourceTwo primaryLeafId
+        , supportArg targetOne primaryClaimId secondaryLeafId
+        , supportArg targetTwo primaryClaimId secondaryLeafId
+        ]
+        [(0, LIn), (1, LIn), (2, LOut), (3, LOut)]
+
+prop_bindingAuditAttackSubjectIds :: Property
+prop_bindingAuditAttackSubjectIds =
+  once $
+    conjoin
+      [ persistedId (Rebut attackerId targetId)
+          === "synthetic:attack:rebut:attacker:target:root"
+      , persistedId (Undermine attackerId targetId [StepPremise 0])
+          === "synthetic:attack:undermine:attacker:target:0.leaf"
+      , persistedId (Undercut attackerId targetId [StepQuestion (QuestionId "q1")])
+          === "synthetic:attack:undercut:attacker:target:q1.rule"
+      ]
+  where
+    persistedId attack =
+      case urBindingAuditSubjects (recordWith attack) of
+        [subject] ->
+          let AuditSubjectId rawSubjectId = auditSubjectId subject
+           in rawSubjectId
+        subjects ->
+          error
+            ( "claim-support test: expected one attack subject, got "
+                ++ show (length subjects)
+            )
+    recordWith attack =
+      auditRecord
+        [(attackerId, SLeaf primaryLeafId), (targetId, SLeaf secondaryLeafId)]
+        [attack]
+        [primaryClaim]
+        [ challengeArg attackerId primaryLeafId
+        , supportArg targetId primaryClaimId secondaryLeafId
+        ]
+        [(0, LIn), (1, LOut)]
+
+strictMismatchRecord :: UnitRecord
+strictMismatchRecord =
+  auditRecordWithMode
+    (const Strict)
+    [(leafId leaf, leafProp leaf) | leaf <- syntheticLeaves]
+    [(supportId, strictCoreTerm)]
+    []
+    [primaryClaim]
+    [Arg supportId (SupportsClaim primaryClaimId) strictSurfaceTerm]
+    [(0, LIn)]
+  where
+    strictCoreTerm =
+      SRule
+        { srRule = RuleId "strict-rule"
+        , srSubst = []
+        , srPremises = [SLeaf primaryLeafId]
+        , srDischarge = []
+        , srHoles = []
+        , srAssurance = AssuranceTrusted
+        }
+    strictSurfaceTerm =
+      SRule
+        { srRule = RuleId "strict-rule"
+        , srSubst = []
+        , srPremises = [SLeaf secondaryLeafId]
+        , srDischarge = []
+        , srHoles = []
+        , srAssurance = AssuranceTrusted
+        }
 
 prop_bindingAuditContexts :: Property
 prop_bindingAuditContexts = once $ ioProperty $ do
@@ -387,6 +610,20 @@ prop_bindingAuditContexts = once $ ioProperty $ do
       , counterexample "all attack contexts" (attackContexts === expectedAttackContexts)
       ]
 
+
+prop_bindingAuditAttackSpellings :: Property
+prop_bindingAuditAttackSpellings =
+  once $
+    conjoin
+      [ renderAttackKind (Rebut attackerId targetId) === "rebut"
+      , renderAttackKind (Undercut attackerId targetId []) === "undercut"
+      , renderAttackKind (Undermine attackerId targetId []) === "undermine"
+      , renderAttackTargetPath (Rebut attackerId targetId) === "root"
+      , renderAttackTargetPath (Undercut attackerId targetId position) === "2.q.rule"
+      , renderAttackTargetPath (Undermine attackerId targetId position) === "2.q.leaf"
+      ]
+  where
+    position = [StepPremise 2, StepQuestion (QuestionId "q")]
 -- | Every checked attack constructor selects its target argument's claim, and
 -- repeated targets for the same claim collapse to one audit context.
 prop_bindingAuditAttackProjections :: Property
@@ -582,9 +819,22 @@ auditRecordWithCoreLeaves
   -> [Arg]
   -> [(Int, Label)]
   -> UnitRecord
-auditRecordWithCoreLeaves coreLeaves coreArgs coreAttacks claims surfaceArgs labels =
-  computeUnit (const Defeasible) False "synthetic" input verdict program
+auditRecordWithCoreLeaves =
+  auditRecordWithMode (const Defeasible)
+
+auditRecordWithMode
+  :: (RuleId -> Mode)
+  -> [(LeafId, Prop)]
+  -> [(ArgId, SupportTerm)]
+  -> [Attack]
+  -> [Claim]
+  -> [Arg]
+  -> [(Int, Label)]
+  -> UnitRecord
+auditRecordWithMode ruleModeOf coreLeaves coreArgs coreAttacks claims surfaceArgs labels =
+  computeUnit ruleModeOf False "synthetic" input surfaceDerivedArgs verdict program
   where
+    surfaceDerivedArgs = [(argId arg, argTerm arg) | arg <- surfaceArgs]
     unit =
       Unit
         { unitRules = []

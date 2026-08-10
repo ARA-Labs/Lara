@@ -34,6 +34,9 @@ module Lara.ExpectedJson
   ( -- * The minimal JSON value + pretty-printer
     JValue (..)
   , renderJson
+  , renderAttack
+  , renderAttackKind
+  , renderAttackTargetPath
     -- * The @expected.json@ golden for a checked unit
   , expectedJsonValue
   , expectedJson
@@ -597,18 +600,36 @@ renderCheckLoc (LocQuestion l (QuestionId q)) = renderCheckLoc l ++ ".q " ++ q
 -- | Render a typed attack in the surface style @kind src tgt[\@position]@ (names
 -- the offending attack + its position for the located reject diagnostic).
 renderAttack :: Attack -> String
-renderAttack k = case k of
-  Rebut (ArgId w) (ArgId u) -> "rebut " ++ w ++ " " ++ u
-  Undercut (ArgId w) (ArgId u) pos -> "undercut " ++ w ++ " " ++ u ++ renderPosition pos
-  Undermine (ArgId w) (ArgId u) pos -> "undermine " ++ w ++ " " ++ u ++ renderPosition pos
+renderAttack attack =
+  renderAttackKind attack ++ case attack of
+    Rebut (ArgId w) (ArgId u) -> " " ++ w ++ " " ++ u
+    Undercut (ArgId w) (ArgId u) position ->
+      " " ++ w ++ " " ++ u ++ renderPosition position
+    Undermine (ArgId w) (ArgId u) position ->
+      " " ++ w ++ " " ++ u ++ renderPosition position
+
+renderAttackKind :: Attack -> String
+renderAttackKind Rebut {} = "rebut"
+renderAttackKind Undercut {} = "undercut"
+renderAttackKind Undermine {} = "undermine"
+
+renderAttackTargetPath :: Attack -> String
+renderAttackTargetPath Rebut {} = "root"
+renderAttackTargetPath (Undercut _ _ position) = renderPositionId position "rule"
+renderAttackTargetPath (Undermine _ _ position) = renderPositionId position "leaf"
+
+renderPositionId :: Position -> String -> String
+renderPositionId position terminal =
+  intercalate "." (map renderStep position ++ [terminal])
 
 -- | Render an attack position path @\@i.q.…@ (empty at the root).
 renderPosition :: Position -> String
 renderPosition [] = ""
 renderPosition steps = "@" ++ intercalate "." (map renderStep steps)
-  where
-    renderStep (StepPremise i) = show i
-    renderStep (StepQuestion (QuestionId q)) = q
+
+renderStep :: Step -> String
+renderStep (StepPremise i) = show i
+renderStep (StepQuestion (QuestionId q)) = q
 
 -- | Total list indexing.
 safeIndex :: [a] -> Int -> Maybe a

@@ -12,36 +12,41 @@
 -- frozen corpus unit is accept-class with a well-formed surface, so any failure
 -- here means the freeze or a decode path drifted.
 module Lara.ClaimSupport.Load
-  ( loadRuleModes
+  ( loadPolicy
   , loadUnitRecord
   , loadRecords
   ) where
 
 import Data.List (isInfixOf)
 
-import Lara.AST (Mode (Defeasible), Policy (..), Rule (..), RuleId)
+import Lara.AST (Mode (Defeasible), Policy (..), Rule (..), RuleId, Unit (..))
 import Lara.ClaimSupport (UnitRecord, computeUnit)
 import Lara.Driver (runCheck)
+import Lara.Elaborate.Internal (defeasibleSuiteSigma, elaborate, registryOf)
 import Lara.Measure (InputMeta (..), parseCorpusManifest)
 import Lara.Syntax (parseProgram, parsePolicy)
 import Lara.Wire (decodeCheckInputFile)
 
--- | Build the @RuleId -> Mode@ resolver from the shared policy (parsed once).
--- Rules absent from the policy default to 'Defeasible' (they cannot be strict).
-loadRuleModes :: FilePath -> IO (RuleId -> Mode)
-loadRuleModes policyPath = do
+-- | Parse the shared policy once for both elaboration and rule-mode lookup.
+loadPolicy :: FilePath -> IO Policy
+loadPolicy policyPath = do
   raw <- readFile policyPath
   case parsePolicy raw of
     Left err -> error ("claim-support: policy parse failed (" ++ policyPath ++ "): " ++ show err)
-    Right policy ->
-      let table = [(ruleId r, ruleMode r) | r <- policyRules policy]
-       in pure (\rid -> maybe Defeasible id (lookup rid table))
+    Right policy -> pure policy
 
--- | Decode + 'runCheck' one unit's core, parse its @.lara@ surface, and read the
--- documented @strict_certifier@\/@strict-flavored@ header flag (both spellings
--- occur in the M0 annotations; dropping either undercounts the flavored set).
-loadUnitRecord :: (RuleId -> Mode) -> InputMeta -> IO UnitRecord
-loadUnitRecord ruleModeOf im = do
+
+ruleModeOf :: Policy -> RuleId -> Mode
+ruleModeOf policy =
+  let table = [(ruleId r, ruleMode r) | r <- policyRules policy]
+   in \rid -> maybe Defeasible id (lookup rid table)
+
+-- | Decode + 'runCheck' one unit's core, parse and admission-free elaborate its
+-- @.lara@ surface for exact argument parity, and read the documented
+-- @strict_certifier@\/@strict-flavored@ header flag (both spellings occur in
+-- the M0 annotations; dropping either undercounts the flavored set).
+loadUnitRecord :: Policy -> InputMeta -> IO UnitRecord
+loadUnitRecord policy im = do
   coreBytes <- readFile (imPath im)
   ci <- case decodeCheckInputFile coreBytes of
     Left err -> error ("claim-support: wire decode failed (" ++ imPath im ++ "): " ++ show err)
@@ -50,8 +55,25 @@ loadUnitRecord ruleModeOf im = do
   prog <- case parseProgram laraBytes of
     Left err -> error ("claim-support: surface parse failed (" ++ laraPath ++ "): " ++ show err)
     Right ok -> pure ok
+  surfaceUnit <-
+    case elaborate defeasibleSuiteSigma (registryOf policy) prog policy of
+      Left err ->
+        error
+          ( "claim-support: surface elaboration failed (" ++ laraPath
+              ++ "): " ++ show err
+          )
+      Right ok -> pure ok
   let flavored = "strict_certifier" `isInfixOf` laraBytes || "strict-flavored" `isInfixOf` laraBytes
-  pure (computeUnit ruleModeOf flavored (imBase im) ci (runCheck ci) prog)
+  pure
+    ( computeUnit
+        (ruleModeOf policy)
+        flavored
+        (imBase im)
+        ci
+        (unitArgs surfaceUnit)
+        (runCheck ci)
+        prog
+    )
   where
     laraPath = replaceCoreSuffix (imPath im)
 
@@ -59,8 +81,8 @@ loadUnitRecord ruleModeOf im = do
 loadRecords :: FilePath -> FilePath -> IO [UnitRecord]
 loadRecords manifestPath policyPath = do
   manifest <- readFile manifestPath
-  ruleModeOf <- loadRuleModes policyPath
-  mapM (loadUnitRecord ruleModeOf) (parseCorpusManifest manifest)
+  policy <- loadPolicy policyPath
+  mapM (loadUnitRecord policy) (parseCorpusManifest manifest)
 
 -- | @…\/unit.core.sexp@ ⇒ @…\/unit.lara@ (the surface sibling of the core file).
 replaceCoreSuffix :: FilePath -> FilePath

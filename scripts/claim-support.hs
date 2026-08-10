@@ -43,7 +43,7 @@ import Lara.ClaimSupport
   , claimSupportJson
   , claimSupportTsv
   )
-import Lara.ClaimSupport.Load (loadRuleModes, loadUnitRecord)
+import Lara.ClaimSupport.Load (loadPolicy, loadUnitRecord)
 import Lara.Measure (EnvBlock (..), parseCorpusManifest)
 
 manifestPath :: FilePath
@@ -57,9 +57,9 @@ main = do
   corpusManifest <- readFile manifestPath
   let inputs = parseCorpusManifest corpusManifest
   when (null inputs) (die ("no corpus units discovered from " ++ manifestPath))
-  ruleModeOf <- loadRuleModes policyPath
+  policy <- loadPolicy policyPath
   env <- gatherEnv
-  records <- mapM (loadUnitRecord ruleModeOf) inputs
+  records <- mapM (loadUnitRecord policy) inputs
   let report = aggregate records
       jsonBytes = claimSupportJson env report records
       aggregateTsvBytes = claimSupportTsv records

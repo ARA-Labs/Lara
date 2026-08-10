@@ -25,6 +25,7 @@ import Lara.Term (Con (..), Term (..), Var (..))
 import AblationSpec (ablationSpecProps)
 import AdmissionSpec (admissionSpecProps)
 import BlockedSpec (blockedSpecProps)
+import BindingAuditSpec (bindingAuditSpecProps)
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
 import CorpusUnitsSpec (corpusUnitsSpecProps)
@@ -208,6 +209,7 @@ main = do
         ++ [run name act | (name, act) <- mutationSpecProps]
         ++ [run name act | (name, act) <- measureSpecProps]
         ++ [run name act | (name, act) <- claimSupportSpecProps]
+        ++ [run name act | (name, act) <- bindingAuditSpecProps]
         ++ [run name act | (name, act) <- mechReviewSpecProps]
         ++ [run name act | (name, act) <- runningExampleSpecProps]
         ++ [run name act | (name, act) <- ablationSpecProps]
