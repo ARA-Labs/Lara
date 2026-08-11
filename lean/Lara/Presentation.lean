@@ -1,11 +1,10 @@
 /-
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
-This module models the structured presentation-syntax datatype of
-`src/Lara/AST.hs` at `lara-syntax@0.3`, except for the `lara-core@0.2`
-`policySigma` field and the later optional-polarity refinement named under
-`## Scope` below,
-defines a **structured serializer** `printProgram`/`printPolicy` into an
+This module models the complete live presentation `Program`/`Policy` shape of
+`src/Lara/AST.hs` at `lara-syntax@0.3` — every field of both top-levels,
+including the `lara-core@0.2` `policySigma`, as enumerated under `## Scope`
+below — defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
 and proves the round-trip
 
@@ -22,7 +21,7 @@ evidence. Its proof strength remains *test-only* — it is not a soundness theor
 The real conformance evidence for the concrete `.lara` surface syntax is the
 Haskell QuickCheck round-trip (`parse ∘ print == id`); a Lean re-implementation
 of a *different* codec cannot transfer to the Haskell parser (spec plan A3).
-This theorem is therefore a **metatheory anchor for the modeled AST subset**:
+This theorem is therefore a **metatheory anchor for the modeled AST**:
 over exactly the surface enumerated under `## Scope` below, it certifies enough
 structure to serialize and recover values with no information collapsed.
 It is NOT a proof that the concrete-syntax Haskell parser is correct, and it
@@ -37,11 +36,14 @@ value. This mirrors the existing verified structured codecs in the development:
 
 ## Scope
 
-Verified against the structured subset of `src/Lara/AST.hs` described here:
+Verified against the complete live presentation `Program`/`Policy` shape of
+`src/Lara/AST.hs` at `lara-syntax@0.3`, described here:
 
 * **Both presentation top-levels**: every `Program` field and every `Policy`
-  field except `policySigma`; every arm of `Decl` (including `DeclGroup` and
-  `DeclComparison`).
+  field, `policySigma` included; every arm of `Decl` (including `DeclGroup` and
+  `DeclComparison`). `Lara/PresentationParity.lean` pins the `Policy` and
+  `Measurand` constructor shapes, so neither can be silently retyped or
+  reordered while these round-trip theorems keep passing.
 * **Every identifier newtype** of the `Names` and `@0.3` sections — `PropId`,
   `QuestionId`, `LeafId`, `RuleId`, `ArgId`, `ObligationId`, `BackendId`,
   `PolicyId`, `Param`, `SourceRef`, `TheoryDigest`, `Digest`, `GroupId`,
@@ -50,7 +52,13 @@ Verified against the structured subset of `src/Lara/AST.hs` described here:
   discipline of CLAUDE.md).
 * **Every closed enum vocabulary**: `LeafKind`, `Provenance`, `AuditStatus`,
   `Mode`, `Necessity`, `Admission`, `Step`, `GroupConflictMode`, `Polarity`,
-  `Relation`, `MeasurandSort`, plus `Bool` flags and `Option` fields.
+  `Relation`, plus `Bool` flags and `Option` fields.
+* **The declared signature Σ** — `Sort` (spelled `TermSort`, since `Sort` is a
+  Lean keyword), `ConSig`, `PredSig`, `Sigma` — reused verbatim from
+  `Lara/Sigma.lean`, the same objects the checker boundary carries. This module
+  contributes only their codecs; it defines no parallel presentation-only sort
+  or signature vocabulary. `ConSym` and `PredSym` stay distinct newtypes across
+  the codec.
 * **The recursive spine** — `Pat` / `AtomPat`, and the `SupportTerm` term algebra
   (premises, ground substitution, critical-question discharge map, open holes,
   and assurance) — modeled with bespoke mutual list inductives so `deriving
@@ -81,12 +89,13 @@ are mechanized elsewhere in this development:
 * The `Assurance'` alias, which is `Assurance` under another name.
 
 Deviations a reader should not mistake for parity:
-* Haskell `Policy.policySigma` and its `sort`/`con`/`pred` declarations are not
-  represented. They lower to the `lara-core@0.2` checker boundary and remain a
-  tracked result-12 gap.
-* Haskell measurands carry an arbitrary `Sort` plus `Maybe Polarity`; this model
-  retains the earlier `Num`-only, mandatory-polarity shape.
-
+* `Measurand` round-trips *whatever* `(sort, polarity)` pair it is given.
+  `Lara.AST` additionally `Num`-gates the polarity clause (a `where
+  higher-is-better` presupposes an ordered domain), so a non-`Num` measurand
+  carrying a polarity is a real inhabitant of this Lean type and round-trips
+  fine here. That gate is a surface well-formedness check, not a codec property,
+  and is not claimed by result 12. The same holds for Σ well-formedness, which
+  `Lara.Sigma.sigmaWellFormed` owns.
 * Haskell `Prop = Prop Pred [Term]` is this module's `Lara.Atom`, and `Pred` /
   `FunSym` are bare `String`s inside `Atom` / `Pat` / `AtomPat` because that is
   how the frozen Lean semantic core (`Lara.Prop`) already spells them. The
@@ -106,6 +115,7 @@ Deviations a reader should not mistake for parity:
   precisely so that stays true.
 -/
 import Lara.Prop
+import Lara.Sigma
 
 namespace Lara.Presentation
 
@@ -206,6 +216,8 @@ def unStr : Sx → Option String
   | .str s => some s
   | _      => none
 @[simp] theorem unStr_sxStr (s : String) : unStr (sxStr s) = some s := rfl
+@[simp] theorem un_sxList_String (xs : List String) :
+    unSxList unStr (sxList sxStr xs) = some xs := unSxList_sxList unStr_sxStr xs
 
 def sxInt (n : Int) : Sx := .int n
 def unInt : Sx → Option Int
@@ -327,9 +339,6 @@ inductive GroupConflictMode where | quarantineOnConflict | rejectOnConflict deri
 inductive Polarity   where | higherIsBetter | lowerIsBetter deriving DecidableEq
 /-- The comparative relation a `comparison` block asserts (grammar App. B.2, B.3). -/
 inductive Relation   where | strictlyBetter | atLeastAsGood deriving DecidableEq
-/-- The sort of a declared measurand (grammar App. B.1); one inhabitant today, but a
-sort *position*, not decoration. -/
-inductive MeasurandSort where | sortNum deriving DecidableEq
 
 def LeafKind.sx : LeafKind → Sx
   | .observed  => .node "observed"  .nil
@@ -414,6 +423,9 @@ def unPolarity : Sx → Option Polarity
   | _ => none
 @[simp] theorem un_Polarity (p : Polarity) : unPolarity p.sx = some p := by cases p <;> rfl
 
+@[simp] theorem un_sxOpt_Polarity (o : Option Polarity) :
+    unOpt unPolarity (sxOpt Polarity.sx o) = some o := unOpt_sxOpt un_Polarity o
+
 def Relation.sx : Relation → Sx
   | .strictlyBetter => .node "sb" .nil
   | .atLeastAsGood  => .node "alag" .nil
@@ -423,13 +435,81 @@ def unRelation : Sx → Option Relation
   | _ => none
 @[simp] theorem un_Relation (r : Relation) : unRelation r.sx = some r := by cases r <;> rfl
 
-def MeasurandSort.sx : MeasurandSort → Sx
-  | .sortNum => .node "num" .nil
-def unMeasurandSort : Sx → Option MeasurandSort
-  | .node "num" .nil => some .sortNum
+/-! ## The declared signature Σ (spec §2, §3.4, reused semantic core `Lara.Sigma`)
+
+`Policy.sigma` and `Measurand.sort` are the *same* Σ object the checker boundary
+carries, not a presentation-only echo of it: the types below are literally
+`Lara.Sigma`'s, aliased here only so this module reads in one vocabulary. A
+parallel presentation sort/signature vocabulary would be exactly the silent
+namespace split the symbolic-core discipline forbids.
+
+`Sort` is a Lean keyword, so the sort of a term is spelled `TermSort` — the same
+collision `Lara.Sigma` already handles. `ConSym` / `PredSym` stay distinct
+newtypes across the codec: each is encoded through its `name` and rebuilt at its
+own type, never collapsed into one string namespace. -/
+
+abbrev TermSort := Lara.Sigma.TermSort
+abbrev ConSig   := Lara.Sigma.ConSig
+abbrev PredSig  := Lara.Sigma.PredSig
+abbrev Sigma    := Lara.Sigma.Sigma
+
+def sxTermSort : TermSort → Sx
+  | .num    => .node "sort-num" .nil
+  | .str    => .node "sort-str" .nil
+  | .decl n => .node "sort-decl" (.cons (.str n) .nil)
+def unTermSort : Sx → Option TermSort
+  | .node "sort-num"  .nil                  => some .num
+  | .node "sort-str"  .nil                  => some .str
+  | .node "sort-decl" (.cons (.str n) .nil) => some (.decl n)
   | _ => none
-@[simp] theorem un_MeasurandSort (s : MeasurandSort) : unMeasurandSort s.sx = some s := by
+@[simp] theorem un_TermSort (s : TermSort) : unTermSort (sxTermSort s) = some s := by
   cases s <;> rfl
+@[simp] theorem un_sxList_TermSort (xs : List TermSort) :
+    unSxList unTermSort (sxList sxTermSort xs) = some xs := unSxList_sxList un_TermSort xs
+
+/-- `con k(s₁,…,sₙ) : s`. -/
+def sxConSig (c : ConSig) : Sx :=
+  .node "con-sig" (.cons (.str c.sym.name)
+    (.cons (sxList sxTermSort c.args) (.cons (sxTermSort c.result) .nil)))
+def unConSig : Sx → Option ConSig
+  | .node "con-sig" (.cons (.str k) (.cons ar (.cons rs .nil))) => do
+      let aa ← unSxList unTermSort ar
+      let rr ← unTermSort rs
+      some ⟨⟨k⟩, aa, rr⟩
+  | _ => none
+@[simp] theorem un_sxConSig (c : ConSig) : unConSig (sxConSig c) = some c := by
+  cases c with | mk sym args result => simp [sxConSig, unConSig]
+@[simp] theorem un_sxList_ConSig (xs : List ConSig) :
+    unSxList unConSig (sxList sxConSig xs) = some xs := unSxList_sxList un_sxConSig xs
+
+/-- `pred p(s₁,…,sₙ)`. Predicates have no result sort, which is why they are a
+separate table from the constructors. -/
+def sxPredSig (p : PredSig) : Sx :=
+  .node "pred-sig" (.cons (.str p.sym.name) (.cons (sxList sxTermSort p.args) .nil))
+def unPredSig : Sx → Option PredSig
+  | .node "pred-sig" (.cons (.str q) (.cons ar .nil)) => do
+      let aa ← unSxList unTermSort ar
+      some ⟨⟨q⟩, aa⟩
+  | _ => none
+@[simp] theorem un_sxPredSig (p : PredSig) : unPredSig (sxPredSig p) = some p := by
+  cases p with | mk sym args => simp [sxPredSig, unPredSig]
+@[simp] theorem un_sxList_PredSig (xs : List PredSig) :
+    unSxList unPredSig (sxList sxPredSig xs) = some xs := unSxList_sxList un_sxPredSig xs
+
+/-- The whole signature: declared sorts, then the constructor and predicate
+tables. Declaration order is retained, so the encoding is canonical. -/
+def sxSigma (sg : Sigma) : Sx :=
+  .node "sigma" (.cons (sxList sxStr sg.sorts)
+    (.cons (sxList sxConSig sg.cons) (.cons (sxList sxPredSig sg.preds) .nil)))
+def unSigma : Sx → Option Sigma
+  | .node "sigma" (.cons ss (.cons cs (.cons ps .nil))) => do
+      let sorts ← unSxList unStr ss
+      let cons  ← unSxList unConSig cs
+      let preds ← unSxList unPredSig ps
+      some ⟨sorts, cons, preds⟩
+  | _ => none
+@[simp] theorem un_sxSigma (sg : Sigma) : unSigma (sxSigma sg) = some sg := by
+  cases sg with | mk sorts cons preds => simp [sxSigma, unSigma]
 
 /-! ## Propositions (spec §2, reused semantic core `Lara.Prop`)
 
@@ -914,17 +994,23 @@ def unDupGroup : Sx → Option DupGroup
 Presentation-only: the elaborator reads these to expand a `comparison` block, and
 nothing here reaches the checker-boundary `Unit`. -/
 
-/-- A policy-level measurand declaration (grammar App. B.1). -/
+/-- A policy-level measurand declaration (grammar App. B.1): an arbitrary
+declared `TermSort` from the policy's own Σ, and an *optional* polarity — the
+`where higher-is-better` clause is `Num`-gated, so a `Num` measurand without one
+is legal (it simply cannot key a `ComparisonScheme`). This codec round-trips the
+value; the `Num`-gate itself is a well-formedness check, not a codec property,
+and is not claimed here. -/
 structure Measurand where
-  mk :: (id : MeasurandId) (sort : MeasurandSort) (polarity : Polarity)
+  mk :: (id : MeasurandId) (sort : TermSort) (polarity : Option Polarity)
   deriving DecidableEq
 def sxMeasurand (m : Measurand) : Sx :=
-  .node "meas" (.cons m.id.sx (.cons m.sort.sx (.cons m.polarity.sx .nil)))
+  .node "meas" (.cons m.id.sx (.cons (sxTermSort m.sort)
+    (.cons (sxOpt Polarity.sx m.polarity) .nil)))
 def unMeasurand : Sx → Option Measurand
   | .node "meas" (.cons i (.cons s (.cons p .nil))) => do
       let ii ← unMeasurandId i
-      let ss ← unMeasurandSort s
-      let pp ← unPolarity p
+      let ss ← unTermSort s
+      let pp ← unOpt unPolarity p
       some ⟨ii, ss, pp⟩
   | _ => none
 @[simp] theorem un_sxMeasurand (m : Measurand) : unMeasurand (sxMeasurand m) = some m := by
@@ -957,22 +1043,28 @@ def unComparisonScheme : Sx → Option ComparisonScheme
 
 /-! ## The policy (spec §4) -/
 
+/-- The ten fields of `Lara.AST.Policy`, in order. `sigma` is second, matching
+`policySigma`; unlike `measurands` it is *not* presentation-only — the
+elaborator copies it verbatim to `unitSigma`, where checker stage 2 enforces it
+(rejection class R2). This codec only round-trips it. -/
 structure Policy where
   mk ::
-  (id : PolicyId) (rules : List Rule) (contraries : List Contrary)
+  (id : PolicyId) (sigma : Sigma)
+  (rules : List Rule) (contraries : List Contrary)
   (exceptions : List Exception) (admission : List AdmissionEntry)
   (theories : List TheoryEntry) (groupMode : GroupConflictMode)
   (measurands : List Measurand) (comparisonSchemes : List ComparisonScheme)
   deriving DecidableEq
 def printPolicy (p : Policy) : Sx :=
-  .node "policy" (.cons p.id.sx (.cons (sxList sxRule p.rules)
+  .node "policy" (.cons p.id.sx (.cons (sxSigma p.sigma) (.cons (sxList sxRule p.rules)
     (.cons (sxList sxContrary p.contraries) (.cons (sxList sxException p.exceptions)
     (.cons (sxList sxAdmEntry p.admission) (.cons (sxList sxTheoryEntry p.theories)
     (.cons p.groupMode.sx (.cons (sxList sxMeasurand p.measurands)
-    (.cons (sxList sxComparisonScheme p.comparisonSchemes) .nil)))))))))
+    (.cons (sxList sxComparisonScheme p.comparisonSchemes) .nil))))))))))
 def parsePolicy : Sx → Option Policy
-  | .node "policy" (.cons i (.cons rs (.cons cs (.cons es (.cons am (.cons th (.cons gm (.cons ms (.cons sch .nil))))))))) => do
+  | .node "policy" (.cons i (.cons sg (.cons rs (.cons cs (.cons es (.cons am (.cons th (.cons gm (.cons ms (.cons sch .nil)))))))))) => do
       let ii ← unPolicyId i
+      let gs ← unSigma sg
       let rr ← unSxList unRule rs
       let cc ← unSxList unContrary cs
       let ee ← unSxList unException es
@@ -981,7 +1073,7 @@ def parsePolicy : Sx → Option Policy
       let gg ← unGroupConflictMode gm
       let mm ← unSxList unMeasurand ms
       let ss ← unSxList unComparisonScheme sch
-      some ⟨ii, rr, cc, ee, aa, tt, gg, mm, ss⟩
+      some ⟨ii, gs, rr, cc, ee, aa, tt, gg, mm, ss⟩
   | _ => none
 
 /-! ## Positional attacks, argument conclusions, declarations (spec §7, §4.4, §2) -/
@@ -1302,6 +1394,6 @@ theorem parse_printProgram (p : Program) : parseProgram (printProgram p) = some 
   cases p with | mk ar dg pl bk ds => simp [printProgram, parseProgram]
 
 theorem parse_printPolicy (q : Policy) : parsePolicy (printPolicy q) = some q := by
-  cases q with | mk i rs cs es am => simp [printPolicy, parsePolicy]
+  cases q with | mk i sg rs cs es am th gm ms sch => simp [printPolicy, parsePolicy]
 
 end Lara.Presentation

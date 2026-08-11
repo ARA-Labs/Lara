@@ -1336,6 +1336,73 @@ observations:
     Haskell AST.
   potential_type: constraint
   bound_to: [N159]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H13"
+  crystallized_via: verbal-affirmation
+  stale: false
+
+- id: O65
+  timestamp: "2026-08-11T10:15"
+  provenance: ai-suggested
+  content: >
+    A cross-language AST shape guard that pairs per-language compiler
+    witnesses (exact constructor signatures plus exhaustive full-arity
+    eliminators) with per-language arity tripwires and an exact ordered
+    inventory diff fails closed on every observed drift class; the tripwire
+    specifically closes the update-the-witness-forget-the-row loophole that
+    witnesses alone leave open. Observed once, on the 68-row result-12 guard
+    across seven mutation classes plus one production-AST mutation.
+  context: >
+    Result-12 guard implementation and mutation matrix (N167). The plan
+    directed that this general drift-prevention claim stay staged unless the
+    researcher explicitly affirms it or a later artifact depends on it.
+  potential_type: claim
+  bound_to: [N167]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O66
+  timestamp: "2026-08-11T10:16"
+  provenance: ai-suggested
+  content: >
+    A desired-shape compile witness in Lean guards nothing unless autoImplicit
+    is disabled: an unknown type identifier in the witness signature is
+    otherwise auto-bound as an implicit and unifies with whatever the model
+    actually has, so the red test can pass vacuously. The result-12 witness
+    reported the true MeasurandSort-vs-TermSort mismatch only after
+    set_option autoImplicit false was pinned in the witness file.
+  context: >
+    Task 1 red run (N166): the first compilation auto-bound TermSort and would
+    have let the sort half of the pin pass vacuously had polarity already been
+    optional.
+  potential_type: heuristic
+  bound_to: [N166]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O67
+  timestamp: "2026-08-11T10:06"
+  provenance: ai-suggested
+  content: >
+    A hand-maintained cross-language shape inventory can still false-pass when
+    literal alias rows are only counted, sum arms are checked only for arity, or
+    exceptional field-name normalization is applied without declaration
+    context. A fail-closed guard must anchor aliases definitionally, ascribe
+    every payload-carrying constructor's exact type, compare real named
+    selectors in order, and scope non-mechanical normalizations to the specific
+    declarations that need them; positional semantic labels and swaps among
+    same-typed positions remain explicit assertions when constructors expose no
+    selector metadata.
+  context: >
+    PR #102 external review plus independent re-review of the implemented fixes
+    (N169). The final guard code embodies the rule, but the researcher has not
+    explicitly affirmed it as a durable project heuristic.
+  potential_type: heuristic
+  bound_to: [N169]
   promoted: false
   promoted_to: null
   crystallized_via: null

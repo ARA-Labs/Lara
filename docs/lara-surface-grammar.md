@@ -22,10 +22,18 @@ Versioning: the presentation surface is versioned **separately** from the core
 (`docs/spec.md` §2.1). This document defines `lara-syntax@0.3`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`, while the other
 additive `@0.3` forms remain presentation-layer data until elaboration. The Haskell
-`parse ∘ print == id` property covers this current surface. The structured Lean
-round-trip in `lean/Lara/Presentation.lean` does not yet model `policySigma` or
-optional measurand polarity; that gap is tracked in
-`plans/2026-08-10-sorts-in-checker.md` §13.
+`parse ∘ print == id` property covers this current concrete surface. The structured
+Lean round-trip in `lean/Lara/Presentation.lean` covers the complete live
+`Program`/`Policy` AST for this surface, including `policySigma` and optional
+measurand polarity — an AST-shape anchor, not a correctness proof for the Haskell
+concrete parser. `scripts/check-presentation-parity.sh` compares the two models'
+normalized shape inventories so the surface cannot grow on one side only. Exact
+compiler witnesses pin record fields, sum payloads, aliases, and anonymous entry
+types; named record selectors are compared in order. Positional constructors have
+no source selector names: exact signatures pin their arity and positional type
+sequence, but semantic labels and swaps among same-typed positions remain
+assertions. The guard documents two representation exemptions (`SortName` erasure;
+`Cert`'s native payload).
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
 constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.

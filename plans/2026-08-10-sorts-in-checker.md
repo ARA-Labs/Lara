@@ -532,6 +532,8 @@ move off `defeasibleSuiteSigma`.
 **D9 — Lean.** `lean/Lara/Sigma.lean`; `Unit` / `CheckedUnit` / `checkUnit` /
 `checkUnit_sound` extended; result 13's theorem suite; `AxCheck.lean` extended;
 `Presentation.lean` carries an explicit scope caveat for the two deferred fields (§6).
+*(Superseded 2026-08-11: the caveat is gone — the mirror now carries both fields. See §13's
+post-closeout paragraph.)*
 
 **D10 — suite.** The six shipped sort mutation operators, the unit-level Σ-WF fault matrix,
 and the wire-decoder malformed-Σ matrix. Generated Σ-WF fixtures and `OpCodecSigma` remain
@@ -709,3 +711,13 @@ and an account of why "empty" was not free.
 - **The curated sort-naming pass for `corpus-v1`**, which §7 already gated on the
   possible-worlds design. The corpus ships the finest partition under opaque `S1 … S27`; the
   `examples/` policies, which the paper displays, are named.
+
+**Post-closeout (2026-08-11).** The deferred D9 `Presentation.lean` re-sync above is
+resolved by `plans/2026-08-10-result-12-presentation-parity.md` and is no longer an open gap.
+The Lean mirror now covers the complete live structured `Program`/`Policy` AST — `policySigma` as a
+second `Policy` field, measurands as `Sort × Option Polarity` — with the round-trip proofs
+audited in `AxCheck.lean` (commit `ce00fbe`), and a cross-language shape guard
+(`scripts/presentation-shape.hs`, `lean/Lara/PresentationParity.lean`, compared by
+`scripts/check-presentation-parity.sh` in CI) prevents the narrowing from recurring silently
+(commit `376b6dc`). The bullet above is retained as the historical record of the deferral;
+the other three deferred items are unaffected.

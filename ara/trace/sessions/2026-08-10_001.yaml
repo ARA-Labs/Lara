@@ -2,16 +2,15 @@ session:
   id: "2026-08-10_001"
   date: "2026-08-10"
   started: "2026-08-10T10:00"
-  last_turn: "2026-08-10T23:13"
-  turn_count: 6
+  last_turn: "2026-08-11T00:13"
+  turn_count: 7
   summary: >
     Implemented and review-hardened lara-core@0.2, closed its v4 fixture and
-    measurement debt, and repaired the benchmark harness for the live
-    564-record suite. PR #100 is merged and main push CI passed both Lean and
-    Haskell differential gates. The annotated m5-freeze-v4 tag is published on
-    f4327b4; branch chore/m5-freeze-v4-housekeeping records the completed state
-    in PR #101. The next code-side choice remains the bounded Lean Presentation
-    parity closure and mechanical drift guard.
+    measurement debt, repaired the benchmark harness, and published the
+    annotated m5-freeze-v4 tag on f4327b4. PRs #100 and #101 are merged and
+    main CI is green. The researcher has now approved the bounded result-12
+    Lean Presentation parity closure; branch plan/result-12-presentation-parity
+    carries the source-grounded implementation plan and mechanical guard design.
 
 events_logged:
   - turn: 1
@@ -141,6 +140,12 @@ events_logged:
     routing: direct
     provenance: ai-executed
     summary: "Published m5-freeze-v4 on f4327b4 and opened housekeeping PR #101 from an isolated branch."
+  - turn: 7
+    type: decision
+    id: "N165"
+    routing: direct
+    provenance: user
+    summary: "Approved the bounded result-12 parity closure and requested a dedicated plan branch."
 ai_actions:
   - turn: 1
     action: "Wrote the Sigma inference bootstrap and ran the corpus census (D0)."
@@ -267,6 +272,17 @@ ai_actions:
       - "TODOS.md"
       - "docs/m5-freeze-checklist.md"
       - "ara/**"
+  - turn: 7
+    action: >
+      Created isolated branch plan/result-12-presentation-parity from the
+      post-PR #101 main commit, audited the live Haskell and Lean presentation
+      shapes, and wrote a source-grounded three-commit implementation plan with
+      Lean round-trip, compiler-witness, mutation-negative, CI, documentation,
+      ARA, and frozen-byte gates.
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-10-result-12-presentation-parity.md"
+      - "ara/**"
 claims_touched:
   - id: C28
     action: crystallized
@@ -281,6 +297,9 @@ claims_touched:
   - id: C30
     action: revised
     turn: 2
+  - id: H13
+    action: crystallized
+    turn: 7
 logic_revisions:
   - turn: 2
     entry: C30
@@ -336,6 +355,17 @@ logic_revisions:
       checkUnit_wellSorted); docs/mechanization-plan.md result 13;
       fixtures/mutants/*--wrong-theta-sort-*.sexp
     signal: artifact-commitment
+    provenance: ai-suggested
+  - turn: 7
+    entry: H13
+    field: new
+    before: null
+    after: >
+      Close a cross-language AST mirror before extending its source surface:
+      first port every live field and reachable datatype, then require both
+      compilers to witness constructor shape and compare one normalized
+      inventory in CI.
+    signal: verbal-affirmation
     provenance: ai-suggested
 
 key_context:
@@ -394,6 +424,12 @@ key_context:
       Remote m5-freeze-v4 now dereferences to f4327b4, and PR #101 records the
       tag and tag-based reproduction path. This closes release housekeeping
       without deciding O64's result-12 recommendation.
+  - turn: 7
+    excerpt: >
+      The researcher approved the bounded result-12 closure before #88b.
+      plans/2026-08-10-result-12-presentation-parity.md reuses Lara.Sigma in
+      Lean Presentation, ports policySigma and optional polarity, and specifies
+      compiler-checked exact inventories plus mutation-negative and full gates.
 open_threads:
   - "The class-boundary rules (§2.3) have no fixture that exercises them adversarially — negR3OffDomainIllSorted now pins one of the four, the other three are covered only incidentally by mutants that happen to respect them."
 
@@ -408,7 +444,9 @@ open_threads:
   - "Update: PR #100 merged at d43e6a1 and main push CI 31463095876 passed; issue #98 is closed."
   - "Update: m5-freeze-v4 is now unblocked but remains uncut on the required v4 re-freeze merge commit f4327b4."
   - "Update: annotated tag m5-freeze-v4 is published on f4327b4; housekeeping PR #101 is open."
+  - "Update: the researcher approved the bounded result-12 parity closure; implementation remains pending on feature/result-12-presentation-parity after this plan is reviewed."
 
 ai_suggestions_pending:
   - "O62 (nullary constants dominate a first-order corpus's ground vocabulary, 187/196) — staged; the corpus policy depends on the census output, not on the generalization, so no artifact-commitment signal fired."
-  - "O64 (close or narrow result 12 before claiming complete mechanization) — staged pending researcher choice."
+ai_suggestions_resolved:
+  - "O64 (close or narrow result 12 before claiming complete mechanization) — user-affirmed in turn 7 and crystallized as H13; the implementation plan is now the committed execution path."

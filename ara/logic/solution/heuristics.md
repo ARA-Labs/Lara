@@ -122,3 +122,18 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium
 - **Code ref**: [`src/Lara/Sigma/WellSorted.hs` (`ruleParamSorts`), `lean/Lara/Sigma.lean` (`ruleParamSorts`, `RuleSortRespecting`), `scripts/infer-sigma.hs`, `docs/spec.md` §3.4]
+
+## H13: Close a cross-language AST mirror before extending its source surface
+- **Rationale**: A round-trip theorem over a hand-maintained mirror can stay green
+  while the production AST grows, because the theorem proves only the smaller
+  model it was given. Before adding another surface feature, first port every live
+  top-level field and reachable datatype into the mirror, then make both
+  compilers witness their own constructor shape and compare one normalized
+  inventory in CI. This turns an otherwise silent claim-width regression into a
+  review-visible build failure without pretending the mirror proves the concrete
+  source parser correct.
+- **Status**: active
+- **Provenance**: ai-suggested, user-affirmed
+- **Sensitivity**: high
+- **Code ref**: ["scripts/check-presentation-parity.sh", "scripts/presentation-shape.hs", "lean/Lara/PresentationParity.lean", "lean/Lara/Presentation.lean", "src/Lara/AST.hs", "plans/2026-08-10-result-12-presentation-parity.md"]
+- **Last revised**: 2026-08-11 (2026-08-11_001#1)

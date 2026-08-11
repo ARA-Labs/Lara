@@ -1,0 +1,143 @@
+session:
+  id: "2026-08-11_001"
+  date: "2026-08-11"
+  started: "2026-08-11T08:30"
+  last_turn: "2026-08-11T10:06"
+  turn_count: 2
+  summary: >
+    Executed and review-hardened the result-12 presentation-parity closure.
+    Lean Presentation matches the complete live Program/Policy shape with
+    audited round-trip proofs; the 68-row cross-language guard now anchors
+    aliases, every sum payload, and named selector order, scopes exceptional
+    normalization by declaration, and keeps Lean.Meta out of the proof-library
+    root. Final parity, Lean build, axiom audit, and Haskell suite passed;
+    review-fix commit/push and hosted CI remain open.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N166"
+    routing: direct
+    provenance: ai-executed
+    summary: "Task 1 red-green: witness failed on old shape (autoImplicit pinned off), then full Lean parity port; axiom audit clean; commit ce00fbe."
+  - turn: 1
+    type: experiment
+    id: "N167"
+    routing: direct
+    provenance: ai-executed
+    summary: "68-row cross-language guard installed; 7/7 mutation classes observed incl. both tripwires and a production-AST mutation; commit 376b6dc."
+  - turn: 1
+    type: experiment
+    id: "N168"
+    routing: direct
+    provenance: ai-executed
+    summary: "Docs recalibrated; full acceptance gate green (580+56 differential, 20/20 admission, empty frozen diff); boundary intact."
+  - turn: 1
+    type: observation
+    id: "O65"
+    routing: staged
+    provenance: ai-suggested
+    summary: "General claim: witness+tripwire+inventory-diff guard fails closed on cross-language AST drift. Staged per plan directive."
+  - turn: 1
+    type: observation
+    id: "O66"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Lean desired-shape witnesses are vacuous unless autoImplicit is disabled."
+  - turn: 2
+    type: experiment
+    id: "N169"
+    routing: direct
+    provenance: ai-executed
+    summary: "PR #102 review gaps closed: alias and sum-payload anchors, selector-order checks, scoped normalization, meta-root isolation; final gates and re-review clean."
+  - turn: 2
+    type: observation
+    id: "O67"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Guard-design heuristic: anchor aliases and payload types, compare selectors, and scope non-mechanical label normalization."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Implemented the three plan tasks via a subagent pipeline (implementer,
+      spec reviewer, quality reviewer per task); committed ce00fbe
+      (feat(lean): close presentation AST parity) and 376b6dc (test(parity):
+      guard presentation AST shape); applied review fixes; docs closure edits
+      staged for the docs(mechanization) commit alongside this ara/ update.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Presentation.lean
+      - lean/Lara/Sigma.lean
+      - lean/Lara/PresentationParity.lean
+      - lean/PresentationParityMain.lean
+      - lean/Lara.lean
+      - lean/AxCheck.lean
+      - lean/lakefile.toml
+      - scripts/presentation-shape.hs
+      - scripts/check-presentation-parity.sh
+      - Makefile
+      - .github/workflows/ci.yml
+      - docs/mechanization-plan.md
+      - docs/spec.md
+      - docs/lara-surface-grammar.md
+      - lean/README.md
+      - TODOS.md
+      - plans/2026-08-10-sorts-in-checker.md
+  - turn: 2
+    action: >
+      Verified every PR #102 review comment against the implementation; added
+      exact alias and sum-payload witnesses, declaration-derived selector
+      checks, type-scoped Lean label normalization with a red/green regression,
+      calibrated active prose, moved the parity executable under Lara, removed
+      the meta guard from the proof-library root, and ran final gates plus an
+      independent code re-review.
+    provenance: ai-executed
+    files_changed:
+      - scripts/presentation-shape.hs
+      - lean/Lara/PresentationParity.lean
+      - lean/Lara/PresentationParityMain.lean
+      - lean/Lara.lean
+      - lean/lakefile.toml
+      - scripts/check-presentation-parity.sh
+      - Makefile
+      - TODOS.md
+      - docs/spec.md
+      - docs/mechanization-plan.md
+      - docs/lara-surface-grammar.md
+      - lean/README.md
+      - plans/2026-08-10-result-12-presentation-parity.md
+
+claims_touched:
+  - id: H13
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: H13
+    field: Code ref
+    before: '["plans/2026-08-10-result-12-presentation-parity.md", "src/Lara/AST.hs", "lean/Lara/Presentation.lean", "TODOS.md"]'
+    after: '["scripts/check-presentation-parity.sh", "scripts/presentation-shape.hs", "lean/Lara/PresentationParity.lean", "lean/Lara/Presentation.lean", "src/Lara/AST.hs", "plans/2026-08-10-result-12-presentation-parity.md"]'
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The guard H13 prescribes now exists as code and CI gate; ref moved from plan-only to the implementation."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Plan Task 3 Step 4 directive honored: the general compiler-witness
+      drift-prevention claim stays staged (O65) pending researcher affirmation.
+      The red-run finding that Lean autoImplicit auto-binding can make a
+      desired-shape witness vacuously green (O66) is the turn's one genuinely
+      new methodological observation.
+  - turn: 2
+    excerpt: >
+      PR review demonstrated that count-only literal rows, arity-only sum
+      checks, and globally exceptional selector normalization can all preserve
+      a false PASS. The final guard closes those paths but explicitly does not
+      claim semantic verification for positional labels or same-typed swaps.
+
+open_threads:
+  - "Commit and push the PR #102 review fixes; confirm the hosted CI run."
+  - "O65 (guard drift claim), O66 (autoImplicit witness), and O67 (guard anchoring/scoped normalization) await closure signals."

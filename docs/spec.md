@@ -143,10 +143,18 @@ The language surface is itself versioned: **`lara-core@0.2`** names the abstract
 static judgments (§6.1, §7.1, §8, §8.1), and the JSON wire schema, as frozen by M1. The
 presentation syntax is versioned separately (**`lara-syntax@0.3`**) because it may evolve against
 a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
-The codec round-trip obligation (§9 result 12) is stated against `lara-core@0.2`. The Haskell
-`parse ∘ print = id` property covers the current signature blocks and optional measurand polarity;
-the mechanized structured round-trip in `lean/Lara/Presentation.lean` does not yet model those two
-fields and is tracked in `plans/2026-08-10-sorts-in-checker.md` §13.
+The codec round-trip obligation (§9 result 12) is stated against `lara-core@0.2`. Lean mechanizes
+`parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at `lara-syntax@0.3`,
+including `policySigma` and optional measurand polarity (`lean/Lara/Presentation.lean`); the Haskell
+`parse ∘ print = id` property separately covers the concrete `.lara` parser/printer. The Lean
+theorem is an AST-shape anchor, not a correctness proof for the Haskell concrete parser.
+`scripts/check-presentation-parity.sh` keeps the two models from drifting by comparing their
+normalized shape inventories. Exact compiler witnesses pin record fields, sum payloads, aliases,
+and anonymous entry types per language; the tripwires also compare named record selectors in order.
+Positional constructors have no source selector names: exact signatures pin their arity and
+positional type sequence, but semantic labels and swaps among same-typed positions remain
+assertions. Two representation exemptions are documented in the guard (`SortName` erasure;
+`Cert`'s native payload).
 
 **Replay identity.** A checker verdict is reproducible only relative to the full trusted-input
 tuple; v0.1 freezes it as

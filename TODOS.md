@@ -225,34 +225,6 @@ errors. Candidate rider for #88b.
 **Priority:** P3
 **Depends on:** lara-syntax@0.3 (D4's matcher)
 
-### AST ↔ Presentation.lean parity guard
-
-**What:** A mechanical drift detector between `Lara.AST`'s surface-reachable
-types and `lean/Lara/Presentation.lean` — e.g. a generated field/constructor
-inventory compared in CI, or a differential fixture exercising every
-constructor arm — that fails when the Haskell surface grows and the Lean
-presentation mirror does not.
-
-**Why:** Result 12 (surface round-trip) is paper-cited, and its silent
-narrowing is undetectable today. This is the third recurrence: theories and
-groupMode (recorded 2026-08-09), now Σ + signature blocks (sorts-in-checker
-plan, eng review 2026-08-10). Each instance was patched (`syntax-03` D8, the
-sorts plan's D9); nothing prevents instance four.
-
-**Pros:** Kills a three-time-recurring failure class; cheap once the
-inventory extraction is designed.
-
-**Cons:** Cross-language inventory extraction needs a design; false positives
-during deliberate divergence windows.
-
-**Context:** Learning `lara_presentation_lean_parity_stale` documents the gap.
-Start from the synced state the sorts plan's D9 re-sync produces.
-
-**Effort:** S-M
-**Priority:** P2
-**Depends on:** sorts-in-checker D9 (Presentation re-sync) landed.
-
-
 ### Σ sort-naming refinement pass (possible-worlds trigger)
 
 **What:** A curated naming/merge pass over the frozen opaque-sort corpus Σ
@@ -298,6 +270,42 @@ kept out of the 0.3 diff to avoid pulling spec.md into a surface-track PR.
 **Priority:** P4
 
 ## Completed
+
+### AST ↔ Presentation.lean parity guard
+
+The recurring silent narrowing of result 12 is now mechanically detected. It had
+happened three times: theories, then `groupMode` (both recorded 2026-08-09 and
+patched by `syntax-03` D8), then Σ + signature blocks (recorded 2026-08-10 and
+patched by the sorts-in-checker plan's D9). Nothing prevented a fourth. The
+Lean mirror first caught up with the live Haskell surface: `lean/Lara/Presentation.lean`
+carries `policySigma` as a second `Policy` field and models measurands as
+`Sort × Option Polarity`, reusing `Lara.Sigma`'s types, with the round-trip proofs
+audited in `AxCheck.lean`. On top of that synced state, `scripts/presentation-shape.hs`
+and `lean/Lara/PresentationParity.lean` each emit a normalized name-and-arity
+inventory of the surface-reachable types, and `scripts/check-presentation-parity.sh`
+diffs the two — 68 rows, byte-identical — exposed as `make presentation-parity` and
+run as a CI step.
+
+The guard never parses source text. Each side's inventory is protected by its own
+compiler. Exact constructor signatures pin every record field type and every
+payload-carrying sum arm, including same-arity retypes. Alias and anonymous-entry
+rows have explicit local type anchors instead of relying on the cross-language
+diff. The shape tripwires re-derive every row's real part count and every named
+record's normalized selector sequence — `GHC.Generics` metadata in Haskell and
+`Lean.Meta` at elaboration time in Lean — so named field renames and reorders also
+fail the build. Positional constructors have no source selector names: exact
+signatures pin their arity and positional type sequence, but semantic labels and
+swaps among same-typed positions remain assertions. Both runtimes are rebuilt
+inside the script, so a stale artifact cannot produce a false PASS.
+Two representation exemptions are stated in full in both witness files:
+`SortName` is witnessed but row-erased (Lean's `Sigma` carries `List String`),
+and `Cert`'s payload is each language's native S-expression type and is exempt
+from shape comparison.
+
+Consequence for future work: divergence is no longer silent. Growing the
+surface on one side only fails CI; a genuinely intended asymmetry must update both
+inventories — and, where it is a representation choice rather than a missing field,
+the documented exemption list — in one reviewed change.
 
 ### Cut the `lara-core@0.2` freeze tag
 

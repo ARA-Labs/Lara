@@ -4083,3 +4083,155 @@ tree:
     - "GitHub Actions run 31463095876"
   also_depends_on: [N162, N163]
   status: resolved
+
+- id: N165
+  type: decision
+  title: "Approve the bounded result-12 presentation parity closure"
+  provenance: user
+  timestamp: "2026-08-11T00:13"
+  description: >
+    After PR #101 merged and main CI passed, the researcher directed the
+    previously recommended result-12 closure to proceed by checking out a
+    dedicated branch and drafting the implementation plan.
+  choice: >
+    Re-sync Lean Presentation to the live Haskell Program and Policy shape,
+    including policySigma and optional measurand polarity, then install a
+    compiler-checked cross-language AST inventory guard before extending the
+    surface again.
+  alternatives:
+    - "Narrow the paper claim and leave the Lean mirror intentionally partial."
+    - "Implement #88b first and accept another deliberate mirror-divergence window."
+  evidence:
+    - "User directive: do that; checkout the branch, draft a plan"
+    - "plans/2026-08-10-result-12-presentation-parity.md"
+    - "PR #101 merge commit 378837e"
+  also_depends_on: [N159, N164]
+  status: resolved
+
+- id: N166
+  type: experiment
+  title: "Task 1 red-green: Lean Presentation ported to the complete live Policy shape"
+  provenance: ai-executed
+  timestamp: "2026-08-11T08:47"
+  description: >
+    Created desired-shape constructor witnesses (measurandCtor, policyCtor)
+    against the pre-fix Lean model, then reused Lara.Sigma types in
+    Lara.Presentation via abbrevs, added Sigma codecs with tags
+    sort-num/sort-str/sort-decl/con-sig/pred-sig/sigma, replaced MeasurandSort
+    with TermSort plus Option Polarity, and inserted policySigma as the second
+    Policy field through printPolicy/parsePolicy and the round-trip proof.
+  result: >
+    Red half confirmed the gap: with autoImplicit disabled the witness fails on
+    unknown TermSort/Sigma identifiers; the pre-pin run reported the informative
+    mismatch (Measurand.mk : MeasurandId -> MeasurandSort -> Polarity vs the
+    expected MeasurandId -> TermSort -> Option Polarity, Sigma missing). Green
+    half: lake build clean (69 jobs), witness compiles, axiom audit passed with
+    741 declaration reports, no sorryAx, standard trio only; nine new
+    round-trip theorems audited in AxCheck.lean. Spec and quality reviews
+    passed. Commit ce00fbe.
+  evidence:
+    - "commit ce00fbe"
+    - lean/Lara/Presentation.lean
+    - lean/Lara/PresentationParity.lean
+    - lean/AxCheck.lean
+    - lean/Lara/Sigma.lean
+  also_depends_on: [N165]
+  status: resolved
+
+- id: N167
+  type: experiment
+  title: "Cross-language presentation-shape guard installed; all seven mutation classes observed"
+  provenance: ai-executed
+  timestamp: "2026-08-11T09:45"
+  description: >
+    Built witness executables in both languages (identifier, record, and
+    eliminator witnesses at full positional arity), one 68-row normalized
+    ordered inventory each, a GHC.Generics runtime arity tripwire on the
+    Haskell side and a Lean.Meta elaboration-time tripwire on the Lean side,
+    and a gate script that rebuilds both runtimes, rejects empty output, and
+    diffs the inventories byte-exactly; wired as make presentation-parity and
+    a CI step immediately after Test.
+  result: >
+    Positive path PASS (68 rows). All seven planned failure classes observed:
+    field drift and row-order drift (caught at Lean elaboration by the
+    tripwire; count-consistent variants separately exercised the diff path),
+    Haskell incomplete-patterns witness break, Lean exhaustiveness break,
+    empty-inventory rejection, and both arity tripwires naming the offending
+    Measurand row. Independent spec review additionally mutated the production
+    src/Lara/AST.hs (new SurfaceStep constructor, restored byte-exact,
+    SHA-verified): the eliminator failed compilation under runghc, proving the
+    -Werror defenses are live, not decorative. Commit 376b6dc.
+  evidence:
+    - "commit 376b6dc"
+    - scripts/presentation-shape.hs
+    - scripts/check-presentation-parity.sh
+    - lean/Lara/PresentationParity.lean
+    - lean/PresentationParityMain.lean
+    - Makefile
+    - .github/workflows/ci.yml
+  also_depends_on: [N166]
+  status: resolved
+
+- id: N168
+  type: experiment
+  title: "Result-12 closure: docs recalibrated and the full acceptance gate passed with frozen bytes intact"
+  provenance: ai-executed
+  timestamp: "2026-08-11T10:10"
+  description: >
+    Recalibrated the result-12 claims (docs/mechanization-plan.md, docs/spec.md
+    section 2.1, docs/lara-surface-grammar.md, lean/README.md row 12 to
+    complete, TODOS.md backlog block moved to Completed, dated post-closeout
+    note appended to plans/2026-08-10-sorts-in-checker.md section 13), always
+    retaining the AST-shape-anchor caveat and the two representation
+    exemptions (SortName erasure; Cert native payload), then ran the full
+    acceptance gate from the repository root.
+  result: >
+    make presentation-parity PASS (68 rows); cabal test all 1 of 1 suites
+    passed; lake build clean; axiom audit passed with no sorryAx and only
+    propext, Classical.choice, Quot.sound; differential suite 580 positive and
+    56 negative cases with zero failures; admission differential 20 of 20
+    byte-identical; git diff against origin/main over corpus-units, fixtures,
+    measurements/frozen, bundles, examples is empty. Boundary review: no
+    forbidden path changed; lean/Lara/Sigma.lean carries exactly three
+    additive deriving DecidableEq clauses and lean/lakefile.toml exactly the
+    presentation-shape lean_exe stanza.
+  evidence:
+    - docs/mechanization-plan.md
+    - docs/spec.md
+    - docs/lara-surface-grammar.md
+    - lean/README.md
+    - TODOS.md
+    - plans/2026-08-10-sorts-in-checker.md
+  also_depends_on: [N166, N167]
+  status: resolved
+
+- id: N169
+  type: experiment
+  title: "PR #102 review closed unanchored parity-guard drift paths"
+  provenance: ai-executed
+  timestamp: "2026-08-11T10:06"
+  description: >
+    External review identified three false-pass classes in the result-12 guard:
+    six literal inventory rows lacked real type anchors, sum eliminators pinned
+    arity but not payload types, and record labels were counted but not compared
+    with declarations. The review fix added exact Haskell/Lean alias and payload
+    witnesses, declaration-derived selector checks, calibrated positional-field
+    limits, and isolated the Lean.Meta guard from the proof-library root. A
+    final independent review found one additional false-pass: Lean's exceptional
+    name normalization was global rather than declaration-scoped.
+  result: >
+    All four review gaps were closed. A compile-time regression first reproduced
+    the global name-normalization false-pass, then passed after scoping name→val
+    to ConSym/PredSym and concl→conclusion to Arg. The rebuilt cross-language
+    gate reported PASS (68 rows); all default Lean targets built; the axiom audit
+    passed; and the complete Haskell test suite passed. Independent re-review
+    reported no remaining Critical/Important finding.
+  evidence:
+    - "PR #102 review comments"
+    - scripts/presentation-shape.hs
+    - lean/Lara/PresentationParity.lean
+    - lean/Lara/PresentationParityMain.lean
+    - lean/lakefile.toml
+    - scripts/check-presentation-parity.sh
+  also_depends_on: [N167, N168]
+  status: resolved

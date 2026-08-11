@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver"]
+defaultTargets = ["Lara", "lara-driver", "presentation-shape"]
 
 # Mechanized reference semantics for the LARA claim-support calculus.
 # No Mathlib dependency yet: the frozen nf/≡ carve-out (spec §9 result 11) is
@@ -23,3 +23,11 @@ root = "Lara.DriverMain"
 [[lean_exe]]
 name = "admission-driver"
 root = "Lara.AdmissionDriverMain"
+
+# The presentation-shape parity driver (result-12 plan Task 2 — the Lean side of
+# scripts/check-presentation-parity.sh). Prints the normalized ordered TSV
+# inventory of the presentation AST's surface-reachable shape, which the gate
+# diffs against the Haskell inventory emitted by scripts/presentation-shape.hs.
+[[lean_exe]]
+name = "presentation-shape"
+root = "Lara.PresentationParityMain"

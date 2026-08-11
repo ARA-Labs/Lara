@@ -153,6 +153,7 @@ open Lara
 #print axioms Lara.Presentation.unOpt_sxOpt
 -- Primitive leaves.
 #print axioms Lara.Presentation.unStr_sxStr
+#print axioms Lara.Presentation.un_sxList_String
 #print axioms Lara.Presentation.unInt_sxInt
 #print axioms Lara.Presentation.unBool_sxBool
 -- Identifier newtypes.
@@ -186,8 +187,16 @@ open Lara
 #print axioms Lara.Presentation.un_sxStep
 #print axioms Lara.Presentation.un_GroupConflictMode
 #print axioms Lara.Presentation.un_Polarity
+#print axioms Lara.Presentation.un_sxOpt_Polarity
 #print axioms Lara.Presentation.un_Relation
-#print axioms Lara.Presentation.un_MeasurandSort
+-- The declared signature Σ, reused from `Lara.Sigma` (spec §2, §3.4).
+#print axioms Lara.Presentation.un_TermSort
+#print axioms Lara.Presentation.un_sxList_TermSort
+#print axioms Lara.Presentation.un_sxConSig
+#print axioms Lara.Presentation.un_sxList_ConSig
+#print axioms Lara.Presentation.un_sxPredSig
+#print axioms Lara.Presentation.un_sxList_PredSig
+#print axioms Lara.Presentation.un_sxSigma
 -- Propositions (reused semantic core).
 #print axioms Lara.Presentation.un_sxTerm
 #print axioms Lara.Presentation.un_sxTerms

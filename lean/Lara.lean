@@ -1,10 +1,19 @@
 -- LARA mechanized reference semantics — library root.
 -- Currently mechanized:
 --   * the frozen nf/≡ carve-out (spec §9 result 11 / claim C01)  — Lara.Prop
---   * the presentation-AST codec round-trip (spec §9 result 12): the frozen
---     Program/Policy shape serializes to a structured S-expression and parses
---     back exactly (parse ∘ print = id) — a metatheory anchor for the AST shape,
---     NOT a proof of the concrete-syntax Haskell parser — Lara.Presentation
+--   * the presentation-AST codec round-trip (spec §9 result 12): the complete
+--     live presentation Program/Policy shape at lara-syntax@0.3 — every field of
+--     both top-levels, policySigma included — serializes to a structured
+--     S-expression and parses back exactly (parse ∘ print = id) — a metatheory
+--     anchor for the AST shape, NOT a proof of the concrete-syntax Haskell
+--     parser — Lara.Presentation
+--   * the standalone presentation-parity guard: exact record and sum-payload
+--     constructor signatures, explicit alias/entry anchors, exhaustive
+--     eliminators, the 68-row normalized shape inventory both runtimes emit,
+--     and an elaboration-time tripwire for row counts and named field order —
+--     the Lean half of the CI cross-language parity gate
+--     (scripts/check-presentation-parity.sh) — Lara.PresentationParity. This
+--     meta module is intentionally not imported by the proof-library root.
 --   * the ND reference adapter: soundness + dependency exactness (results 10, 8) — Lara.ND
 --   * the abstract strict-backend seam: Theorem 1 + ND instantiation (result 8) — Lara.Strict
 --   * the whole-status layer: direct vs compiled grounded semantics agreement

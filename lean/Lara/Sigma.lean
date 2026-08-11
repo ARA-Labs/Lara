@@ -74,12 +74,14 @@ structure ConSig where
   sym    : ConSym
   args   : List TermSort
   result : TermSort
+deriving DecidableEq
 
 /-- A predicate signature `pred p(s₁, …, sₙ)`. Predicates have no result sort —
 an `Atom` is not a `Term` — which is why they are a separate table. -/
 structure PredSig where
   sym  : PredSym
   args : List TermSort
+deriving DecidableEq
 
 /-- A first-order many-sorted signature: declared sorts plus separate
 constructor and predicate tables (spec §2). Declaration order is retained so the
@@ -88,6 +90,7 @@ structure Sigma where
   sorts : List String
   cons  : List ConSig
   preds : List PredSig
+deriving DecidableEq
 
 /-- The signature declaring nothing. Under strict mode every symbol is
 undeclared against it, so it accepts only symbol-free units: it is the unit of

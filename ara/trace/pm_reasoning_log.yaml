@@ -676,3 +676,26 @@ entries:
     - "Did NOT crystallize O64. Publishing the freeze tag removes release debt but does not affirm the separate result-12 parity recommendation."
     - "Kept the tag anchored to f4327b4 rather than PR #100's d43e6a1 because the checklist had already designated the v4 re-freeze merge commit; PR #100 only supplied the final hosted-green gate."
     - "No logic-layer entry changed: this turn records release state and process, not a new scientific claim."
+
+- turn: "2026-08-10_001#7"
+  notes:
+    - "Routed N165 as a user decision: 'do that; checkout the branch, draft a plan' explicitly affirms the previously staged bounded result-12 parity closure rather than the alternative of narrowing the paper claim."
+    - "Promoted O64 to H13 through verbal affirmation. The durable constraint is to close a claimed cross-language AST mirror and install a mechanical shape guard before adding another source-surface feature."
+    - "Did NOT record an implementation experiment: this turn produced a source-grounded executable plan, not the Lean port or a passing parity guard. Those empirical results remain pending."
+    - "Kept the plan out of core/wire/freeze scope. It explicitly reuses Lara.Sigma in the presentation codec and requires frozen corpus, example, replay, and measurement bytes to remain unchanged."
+    - "The normalized inventory is paired with compiler witnesses rather than source regexes: compiler witnesses detect local constructor drift, while exact Haskell/Lean output comparison detects cross-language drift."
+
+- turn: "2026-08-11_001#1"
+  notes:
+    - "Routed N166-N168 as three experiments mirroring the plan's three tasks; each has its own observable red/green or gate result, so one merged node would have hidden the red-run evidence."
+    - "Staged O65 rather than crystallizing despite the CI gate now depending on the guard: plan Task 3 Step 4 explicitly directs the general drift-prevention claim to stay staged unless the researcher affirms it; near-miss logged (artifact-commitment arguably fired)."
+    - "Staged O66 as heuristic, not claim: it is a how-to-make-witnesses-honest rule, observed once."
+    - "Stage 4: updated only H13's Code ref via artifact-commitment; status stays active, no Statement change. C28-C30 untouched — no signal this turn."
+    - "Did NOT record the review pipeline's per-task PASS verdicts as separate events: they are process, not research results; the acceptance-gate numbers live in N168."
+
+- turn: "2026-08-11_001#2"
+  notes:
+    - "Routed N169 as one experiment: the review findings, red/green normalization regression, final gates, and independent re-review jointly establish one guard-hardening outcome."
+    - "Staged O67 as a heuristic because it generalizes the four false-pass mechanisms into a reusable guard-design rule; no explicit researcher affirmation occurred this turn."
+    - "Did NOT promote O65. This turn revisited its topic and showed that the N167 guard needed additional anchoring before broader drift-prevention language was safe; the final positional-label limit remains explicit."
+    - "No logic-layer entry changed. H13 remains accurate at its current abstraction, and the new implementation detail stays staged pending a closure signal."
