@@ -70,6 +70,7 @@ import Lara.Prop (Pred (..), Prop (..))
 import Lara.Replay (inputReplayId)
 import Lara.Wire (Outcome (..), Verdict (..))
 import TestReplay (testCheckInput)
+import SigmaFixture (sigmaOf)
 
 manifestPath, policyPath, frozenJsonPath, frozenTsvPath :: FilePath
 manifestPath = "corpus-units/MANIFEST.tsv"
@@ -837,7 +838,8 @@ auditRecordWithMode ruleModeOf coreLeaves coreArgs coreAttacks claims surfaceArg
     surfaceDerivedArgs = [(argId arg, argTerm arg) | arg <- surfaceArgs]
     unit =
       Unit
-        { unitRules = []
+        { unitSigma = sigmaOf [] [] [("p", []), ("primary", []), ("secondary", [])]
+        , unitRules = []
         , unitContraries = []
         , unitExceptions = []
         , unitTheories = []

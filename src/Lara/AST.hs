@@ -64,7 +64,6 @@ module Lara.AST
     -- * Presentation-only comparison surface (grammar App. B.1, B.2)
   , Polarity (..)
   , Relation (..)
-  , MeasurandSort (..)
   , Measurand (..)
   , ComparisonScheme (..)
     -- * Backends (spec §5)
@@ -101,6 +100,7 @@ module Lara.AST
   ) where
 
 import Lara.Prop (FunSym (..), Pred (..), Prop, Term)
+import Lara.Sigma (Sigma, Sort)
 import Lara.Strict (SExpr)
 
 -- ---------------------------------------------------------------------------
@@ -391,23 +391,28 @@ data Polarity = HigherIsBetter | LowerIsBetter
 data Relation = StrictlyBetter | AtLeastAsGood
   deriving (Eq, Ord, Show)
 
--- | The sort of a declared measurand (grammar App. B.1). A closed sum with one
--- inhabitant today: the @: Num@ slot is deliberately a __sort position__, not
--- decoration, so #89's many-sorted @Σ@ extends /this/ declaration instead of
--- introducing a parallel one and forking the spelling.
-data MeasurandSort = SortNum
-  deriving (Eq, Ord, Show)
-
 -- | A policy-level measurand declaration (grammar App. B.1), partitioned and
 -- order-insensitive like @rule@\/@contrary@\/@exception@\/@theory@. Declaring
 -- the same id twice is a parse error (a silent first-wins lookup would pick a
 -- polarity the author did not intend).
 --
 -- > measurand accuracy : Num where higher-is-better
+-- > measurand imagenet_val : Dataset
+--
+-- The @:@ slot is a __sort position__ over the /same/ 'Lara.Sigma.Sort'
+-- vocabulary the policy's signature declares, never a parallel spelling (#89
+-- D-1): one declaration surface, two consumers — the elaborator reads polarity
+-- and drops it, the wire codec reads sorts and carries them into 'Unit'.
+--
+-- __Polarity is @Num@-gated.__ A @where higher-is-better@ \/ @lower-is-better@
+-- clause presupposes an ordered domain and only 'Lara.Sigma.SortNum' is
+-- ordered, so the clause is optional and well-formed only on @Num@-sorted
+-- measurands; the surface elaborator rejects it elsewhere. A @Num@ measurand
+-- with no clause is legal and simply cannot key a 'ComparisonScheme'.
 data Measurand = Measurand
   { measurandId :: MeasurandId
-  , measurandSort :: MeasurandSort
-  , measurandPolarity :: Polarity
+  , measurandSort :: Sort
+  , measurandPolarity :: Maybe Polarity
   }
   deriving (Eq, Show)
 
@@ -439,6 +444,12 @@ data ComparisonScheme = ComparisonScheme
 -- @kind × provenance@; here it is given as an association list placeholder.
 data Policy = Policy
   { policyId :: PolicyId
+  , policySigma :: Sigma
+    -- ^ The declared many-sorted proposition signature @Σ@ (spec §2, §3.4),
+    -- from the policy header's @sort@ \/ @con@ \/ @pred@ blocks. Unlike
+    -- 'policyMeasurands' this is __not__ presentation-only: the elaborator
+    -- copies it verbatim to 'unitSigma', where "Lara.Check" stage 2 enforces it
+    -- as rejection class R2.
   , policyRules :: [Rule]
   , policyContraries :: [Contrary]
   , policyExceptions :: [Exception]
@@ -792,7 +803,11 @@ data Program = Program
 -- endpoint must be declared. Those two invariants are wire well-formedness
 -- (R14), not checker rejection classes.
 data Unit = Unit
-  { unitRules :: [Rule] -- ^ policy rules, declaration order (ids inline)
+  { unitSigma :: Sigma
+    -- ^ the declared proposition signature @Σ@ (spec §2, §3.4), enforced by
+    -- "Lara.Check" stage 2 as R2 and carried by the @sigma@ wire section
+    -- (@lara-core\@0.2@)
+  , unitRules :: [Rule] -- ^ policy rules, declaration order (ids inline)
   , unitContraries :: [Contrary] -- ^ the policy's @contrary@ pairs
   , unitExceptions :: [Exception] -- ^ the policy's @exception@ declarations
   , unitTheories :: [(TheoryDigest, [Prop])] -- ^ theory table for @nd\@1@ (closed registry)
@@ -834,9 +849,13 @@ data Label = LIn | LOut | LUndec
 -- §10.1; mirrors @lean/Lara/Check/Error.lean@ 'RejectClass'). R9
 -- (data-integrity) is decided at the driver boundary before @checkUnit@ — an
 -- escalated duplicate-report-group conflict (spec §4.3), like R13's replay
--- preflight. R2 (signature) and R8 (admission) remain outside the executable
--- core; R14 (codec) is reported at the decode boundary, never as a verdict.
-data RejectClass = R1 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13
+-- preflight. R8 (admission) remains outside the executable core; R14 (codec) is
+-- reported at the decode boundary, never as a verdict.
+--
+-- __R2 entered the executable core at @lara-core\@0.2@__ (#89): the declared
+-- signature is now a 'Unit' field and 'Lara.Check.checkUnit' stage 2 decides
+-- well-sortedness against it ("Lara.Sigma.WellSorted").
+data RejectClass = R1 | R2 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13
   deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | A unit-level rejection outcome (mirrors @lean/Lara/Check/Unit.lean@

@@ -1,10 +1,10 @@
 /-
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
-This module ports the presentation-syntax datatype of `src/Lara/AST.hs` at
-`lara-syntax@0.3` (the `Program` / `Policy` shape the paper's surface syntax and
-the JSON wire both denote — see `Lara.AST`, "The one abstract syntax has two
-front ends") into Lean,
+This module models the structured presentation-syntax datatype of
+`src/Lara/AST.hs` at `lara-syntax@0.3`, except for the `lara-core@0.2`
+`policySigma` field and the later optional-polarity refinement named under
+`## Scope` below,
 defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
 and proves the round-trip
@@ -16,17 +16,17 @@ by structural induction, `sorry`-free within the standard axiom trio.
 
 ## What this is, and what it is NOT
 
-`docs/mechanization-plan.md` records spec §9 **result 12** as a mechanized
-presentation-codec round trip with separate Haskell conformance evidence. Its
-proof strength remains *test-only* — it is not a soundness theorem. The real
-conformance evidence for the concrete `.lara` surface syntax is the Haskell
-QuickCheck round-trip (`parse ∘ print == id`); a Lean re-implementation of a
-*different* codec cannot transfer to the Haskell parser (spec plan A3). So this
-theorem is a **metatheory anchor for the AST shape**: it certifies that the
-presentation AST — over exactly the surface enumerated under `## Scope` below —
-carries enough structure to be serialized and recovered by *a* total codec, with
-no information collapsed. It is NOT a proof that the concrete-syntax Haskell
-parser is correct, and it says nothing about the concrete `.lara` spelling.
+`docs/mechanization-plan.md` records spec §9 **result 12** as a partially
+mechanized presentation-codec round trip with current Haskell conformance
+evidence. Its proof strength remains *test-only* — it is not a soundness theorem.
+The real conformance evidence for the concrete `.lara` surface syntax is the
+Haskell QuickCheck round-trip (`parse ∘ print == id`); a Lean re-implementation
+of a *different* codec cannot transfer to the Haskell parser (spec plan A3).
+This theorem is therefore a **metatheory anchor for the modeled AST subset**:
+over exactly the surface enumerated under `## Scope` below, it certifies enough
+structure to serialize and recover values with no information collapsed.
+It is NOT a proof that the concrete-syntax Haskell parser is correct, and it
+says nothing about the concrete `.lara` spelling.
 
 Following the sanctioned design guidance (design for provability, not fidelity to
 the concrete whitespace/comment syntax), the codec targets a clean structured
@@ -37,12 +37,11 @@ value. This mirrors the existing verified structured codecs in the development:
 
 ## Scope
 
-Verified against `src/Lara/AST.hs` at `lara-syntax@0.3`. What is covered:
+Verified against the structured subset of `src/Lara/AST.hs` described here:
 
-* **Both presentation top-levels, field-for-field**: every field of `Program`
-  (5) and of `Policy` (9 — including `policyTheories`, `policyGroupMode`,
-  `policyMeasurands`, `policyComparisonSchemes`), and every arm of `Decl` (7 —
-  including `DeclGroup` and `DeclComparison`).
+* **Both presentation top-levels**: every `Program` field and every `Policy`
+  field except `policySigma`; every arm of `Decl` (including `DeclGroup` and
+  `DeclComparison`).
 * **Every identifier newtype** of the `Names` and `@0.3` sections — `PropId`,
   `QuestionId`, `LeafId`, `RuleId`, `ArgId`, `ObligationId`, `BackendId`,
   `PolicyId`, `Param`, `SourceRef`, `TheoryDigest`, `Digest`, `GroupId`,
@@ -82,6 +81,11 @@ are mechanized elsewhere in this development:
 * The `Assurance'` alias, which is `Assurance` under another name.
 
 Deviations a reader should not mistake for parity:
+* Haskell `Policy.policySigma` and its `sort`/`con`/`pred` declarations are not
+  represented. They lower to the `lara-core@0.2` checker boundary and remain a
+  tracked result-12 gap.
+* Haskell measurands carry an arbitrary `Sort` plus `Maybe Polarity`; this model
+  retains the earlier `Num`-only, mandatory-polarity shape.
 
 * Haskell `Prop = Prop Pred [Term]` is this module's `Lara.Atom`, and `Pred` /
   `FunSym` are bare `String`s inside `Atom` / `Pat` / `AtomPat` because that is

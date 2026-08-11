@@ -200,6 +200,11 @@ class Policy:
     rules: list[Rule]
     contraries: list[tuple[tuple, tuple]]
     exceptions: list[tuple[str, tuple]]  # (rule name, pattern)
+    # The `lara-core@0.2` signature blocks (`sort` / `con` / `pred`), retained
+    # verbatim. This seed elaborator does not sort-check — that is the trusted
+    # checker's stage 2 — but it must not be *silently* lenient about lines it
+    # does not understand, so they are recorded rather than skipped.
+    signature: list[str] = field(default_factory=list)
 
 
 def parse_policy(text: str, path: str) -> Policy:
@@ -207,6 +212,7 @@ def parse_policy(text: str, path: str) -> Policy:
     rules: list[Rule] = []
     contraries: list[tuple[tuple, tuple]] = []
     exceptions: list[tuple[str, tuple]] = []
+    signature: list[str] = []
     cur: Rule | None = None
     for lineno, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
@@ -215,6 +221,10 @@ def parse_policy(text: str, path: str) -> Policy:
             continue
         if line.startswith("policy "):
             pid = line.split()[1]
+            cur = None
+            continue
+        if re.match(r"(sort|con|pred)\s", line):
+            signature.append(line)
             cur = None
             continue
         m = re.fullmatch(r"rule\s+([a-z][a-z0-9_]*)\(([^)]*)\)", line)
@@ -259,7 +269,7 @@ def parse_policy(text: str, path: str) -> Policy:
         raise ElabError(f"{loc}: unrecognized policy line: {line!r}")
     if pid is None:
         raise ElabError(f"{path}: policy id line missing")
-    return Policy(pid, rules, contraries, exceptions)
+    return Policy(pid, rules, contraries, exceptions, signature)
 
 
 # --------------------------------------------------------------------------

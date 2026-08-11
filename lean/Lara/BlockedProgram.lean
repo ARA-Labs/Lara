@@ -584,9 +584,11 @@ theorem checked_production_justified_nonpromotion_of_not_blocked
     (keep : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm)) (declAtts : List Attack)
     (keepAttack : RawAttack → Bool) (rawAtts : List RawAttack)
-    (queries : List Atom) (p : Atom)
-    (hcheck : Lara.Check.Unit.checkUnit Gamma reg
-      ({ policy := policy
+    (queries : List Atom) (p : Atom) (sigma : Lara.Sigma.Sigma)
+    (ground : List Atom)
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
+      ({ sigma := sigma
+       , policy := policy
        , args := (retainedArguments keep declared).map (·.2)
        , atts := selectAligned keepAttack rawAtts declAtts } : Lara.Unit) =
         .ok accepted)
@@ -600,7 +602,7 @@ theorem checked_production_justified_nonpromotion_of_not_blocked
     Grounded.statusC (declaredAF declared declAtts)
       (liftClaim (retainedIndices keep declared) (completeClaimFor accepted p)) =
         .justified := by
-  obtain ⟨_, _, _, hargs, hatts, _, _⟩ :=
+  obtain ⟨_, _, _, _, _, _, _, _, hargs, hatts, _, _⟩ :=
     Lara.Check.Unit.checkUnit_sound hcheck
   exact production_justified_nonpromotion_of_not_blocked
     accepted keep declared declAtts (selectAligned keepAttack rawAtts declAtts)

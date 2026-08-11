@@ -38,7 +38,6 @@ import System.Directory (doesFileExist, listDirectory)
 import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -107,7 +106,7 @@ deriveInput dir = do
   progText <- readFile (dir ++ "/unit.lara")
   pure $ case (parseProgram progText, parsePolicy policyText) of
     (Right prog, Right pol) ->
-      case prepareSource defeasibleSuiteSigma prog pol of
+      case prepareSource prog pol of
         Left invalid -> Left (dir ++ ": source invalid: " ++ renderSourceInvalid invalid)
         Right (SourceRejected rejection) ->
           Left (dir ++ ": admission rejection: " ++ renderAdmissionRejection rejection)

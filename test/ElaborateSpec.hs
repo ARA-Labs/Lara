@@ -52,6 +52,7 @@ import Lara.Elaborate.Internal (elaborate)
 -- interpolated @nl@ of a generated sub-claim never reaches 'Unit', so the
 -- presentation-to-presentation pass is where B.6 is observable.
 import Lara.Elaborate.Comparison (expandSurface)
+import Lara.Sigma (Sort (..))
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 import Lara.Syntax (parseProgram, parsePolicy)
@@ -89,7 +90,7 @@ loadPolicy path = do
 
 sourceVerdict :: Program -> Policy -> Unit -> Either String Verdict
 sourceVerdict program policy _ =
-  case prepareSource defeasibleSuiteSigma program policy of
+  case prepareSource program policy of
     Left invalid -> Left (renderSourceInvalid invalid)
     Right (SourceRejected rejection) -> Left (renderAdmissionRejection rejection)
     Right (SourceAccepted input) -> Right (sourceResultVerdict (runSourceCheck input))
@@ -124,6 +125,10 @@ strictPolicySource :: Bool -> String
 strictPolicySource declareTheory =
   unlines $
     [ "policy strict-v1"
+    , "sort Property, Scope"
+    , "con safety_invariant : Property"
+    , "con D : Scope"
+    , "pred holds(Property, Scope)"
     , "rule certified_citation(X, D)"
     , "  mode = strict"
     , "  premises = [ holds(X, D) ]"
@@ -141,7 +146,7 @@ prop_strictCertificatePresentationAccepts =
     (Left e, _) -> counterexample ("program parse failed: " ++ show e) False
     (_, Left e) -> counterexample ("policy parse failed: " ++ show e) False
     (Right prog, Right pol) ->
-      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+      case elaborate (registryOf pol) prog pol of
         Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
         Right unit ->
           conjoin
@@ -191,7 +196,7 @@ prop_strictCertificateMissingTheoryRejectsR13 =
     (Left e, _) -> counterexample ("program parse failed: " ++ show e) False
     (_, Left e) -> counterexample ("policy parse failed: " ++ show e) False
     (Right prog, Right pol) ->
-      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+      case elaborate (registryOf pol) prog pol of
         Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
         Right unit ->
           counterexample ("expected R13, got " ++ show (sourceVerdict prog pol unit)) $
@@ -216,7 +221,7 @@ prop_B_frozenGolden = once $ ioProperty $ do
           , verdictStatuses =
               [(improvesMAD, Published Contested), (notImprovesMAD, Published Contested)]
           }
-  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+  pure $ case elaborate (registryOf pol) prog pol of
     Left e -> counterexample ("B: unexpected ElabError: " ++ elabErrorMessage e) False
     Right unit -> fmap verdictOutcome (sourceVerdict prog pol unit) === Right expected
 
@@ -236,7 +241,7 @@ prop_A_frozenGolden :: Property
 prop_A_frozenGolden = once $ ioProperty $ do
   prog <- loadProgram "examples/A/example.lara"
   pol <- loadPolicy policyPath
-  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+  pure $ case elaborate (registryOf pol) prog pol of
     Left e -> counterexample ("A: unexpected ElabError: " ++ elabErrorMessage e) False
     Right unit -> case sourceVerdict prog pol unit of
       Left err -> counterexample ("A: replay identity error " ++ show err) False
@@ -258,7 +263,7 @@ prop_A_prepareSourceAllAdmit :: Property
 prop_A_prepareSourceAllAdmit = once $ ioProperty $ do
   prog <- loadProgram "examples/A/example.lara"
   pol <- loadPolicy policyPath
-  pure $ case prepareSource defeasibleSuiteSigma prog pol of
+  pure $ case prepareSource prog pol of
     Left invalid -> counterexample ("A: unexpected source invalidity " ++ show invalid) False
     Right (SourceRejected rejection) ->
       counterexample ("A: unexpected R8 " ++ renderAdmissionRejection rejection) False
@@ -355,8 +360,8 @@ prop_comparisonReproducesS2 = once $ ioProperty $ do
   handProg <- loadProgram "examples/S2/example.lara"
   handPol <- loadPolicy "examples/S2/ord-v1.policy.lara"
   (sugarProg, sugarPol) <- loadComparisonFixture
-  pure $ case ( elaborate defeasibleSuiteSigma (registryOf handPol) handProg handPol
-              , elaborate defeasibleSuiteSigma (registryOf sugarPol) sugarProg sugarPol
+  pure $ case ( elaborate (registryOf handPol) handProg handPol
+              , elaborate (registryOf sugarPol) sugarProg sugarPol
               ) of
     (Left e, _) -> counterexample ("S2 hand-written: " ++ elabErrorMessage e) False
     (_, Left e) -> counterexample ("S2 comparison: " ++ elabErrorMessage e) False
@@ -374,7 +379,7 @@ prop_comparisonReproducesS2 = once $ ioProperty $ do
 prop_comparisonReplaysToAccept :: Property
 prop_comparisonReplaysToAccept = once $ ioProperty $ do
   (prog, pol) <- loadComparisonFixture
-  pure $ case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+  pure $ case elaborate (registryOf pol) prog pol of
     Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
     Right unit ->
       fmap verdictOutcome (sourceVerdict prog pol unit)
@@ -402,7 +407,7 @@ prop_comparisonBindsNamedLeaves = once $ ioProperty $ do
     [bindingLeaf] ->
       let duplicate = bindingLeaf {leafId = LeafId "e3_equiv"}
           withDuplicate = prog {programDecls = DeclLeaf duplicate : programDecls prog}
-       in case elaborate defeasibleSuiteSigma (registryOf pol) withDuplicate pol of
+       in case elaborate (registryOf pol) withDuplicate pol of
             Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
             Right unit ->
               case lookup (ArgId "a2") (unitArgs unit) of
@@ -426,7 +431,7 @@ prop_comparisonRenamedRecheckParams = once $ ioProperty $ do
   (prog, pol) <- loadComparisonFixture
   let renamed = mapRule (RuleId "beats_recheck") renameRecheckParams pol
   pure $
-    case ( elaborate defeasibleSuiteSigma (registryOf renamed) prog renamed
+    case ( elaborate (registryOf renamed) prog renamed
          , expandSurface renamed prog
          ) of
       (Left e, _) -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
@@ -474,7 +479,7 @@ prop_comparisonSchemeLookupUsesPolarity = once $ ioProperty $ do
           { policyRules = policyRules pol ++ lowerRecheck ++ lowerBridge
           , policyComparisonSchemes = lowerScheme : policyComparisonSchemes pol
           }
-  pure $ case elaborate defeasibleSuiteSigma (registryOf both) prog both of
+  pure $ case elaborate (registryOf both) prog both of
     Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
     Right unit ->
       case lookup (ArgId "a1") (unitArgs unit) of
@@ -546,6 +551,18 @@ perplexityPolicySource :: String
 perplexityPolicySource =
   unlines
     [ "policy perp-v1"
+    , ""
+    , "sort System, Measurand, Dataset, Experiment, Cell"
+    , "con sys_new : System"
+    , "con sys_base : System"
+    , "con perplexity : Measurand"
+    , "con wikitext : Dataset"
+    , "con exp1 : Experiment"
+    , "con score_cell(System, Measurand, Dataset, Num) : Cell"
+    , "pred reports(Experiment, Cell)"
+    , "pred num_lt(Num, Num)"
+    , "pred better(System, System, Measurand, Dataset)"
+    , "pred comparison_setup(System, System, Measurand, Dataset, Num, Num)"
     , ""
     , "rule ppl_recheck(S, B, Q, D, Exp, Sv, Bv)"
     , "  mode       = strict"
@@ -626,7 +643,7 @@ prop_comparisonLowerIsBetter = once $ ioProperty $
     (Left e, _) -> pure (counterexample ("program parse failed: " ++ show e) False)
     (_, Left e) -> pure (counterexample ("policy parse failed: " ++ show e) False)
     (Right prog, Right pol) -> pure $
-      case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+      case elaborate (registryOf pol) prog pol of
         Left e -> counterexample ("unexpected ElabError: " ++ elabErrorMessage e) False
         Right unit ->
           conjoin
@@ -704,7 +721,7 @@ prop_attackPathSpellingsAgree = once $ ioProperty $ do
           (\r -> r {rulePremiseLabels = [Nothing, Just (PremiseLabel "binding")]})
           pol0
       byName = withUnderminePath [StepName "binding"] prog
-      elab p = elaborate defeasibleSuiteSigma (registryOf pol) p pol
+      elab p = elaborate (registryOf pol) p pol
   pure $ case (elab prog, elab byName) of
     (Left e, _) -> counterexample ("S4 by index: " ++ elabErrorMessage e) False
     (_, Left e) -> counterexample ("S4 by label: " ++ elabErrorMessage e) False
@@ -770,7 +787,7 @@ prop_comparisonNegatives = once $ ioProperty $ do
   s4prog <- loadProgram "examples/S4/example.lara"
   s4pol <- loadPolicy "examples/S4/ord-setting-v1.policy.lara"
   polNoScheme <- loadPolicy "examples/S2/ord-v1.policy.lara"
-  let elab p q = elaborate defeasibleSuiteSigma (registryOf q) p q
+  let elab p q = elaborate (registryOf q) p q
       -- Extra leaves the θ negatives point at.
       wrongPred = cellLeaf "e4" (reportsCell "reports" "exp1" "sys_new" "accuracy" "imagenet_val" "0.74")
       otherExp = cellLeaf "e5" (reportsCell "reports" "exp2" "sys_new" "accuracy" "imagenet_val" "0.74")
@@ -933,7 +950,7 @@ prop_comparisonNegatives = once $ ioProperty $ do
     -- both, so the scheme table is cleared explicitly rather than assumed empty.
     withMeasurandOnly p =
       p
-        { policyMeasurands = [Measurand (MeasurandId "accuracy") SortNum HigherIsBetter]
+        { policyMeasurands = [Measurand (MeasurandId "accuracy") SortNum (Just HigherIsBetter)]
         , policyComparisonSchemes = []
         }
     threeAry = AtomPat (Pred "better") [PVar (Param "S"), PVar (Param "B"), PVar (Param "Q")]
@@ -957,7 +974,7 @@ prop_comparisonNegatives = once $ ioProperty $ do
     flipDeclaredPolarity p =
       p
         { policyMeasurands =
-            [m {measurandPolarity = LowerIsBetter} | m <- policyMeasurands p]
+            [m {measurandPolarity = Just LowerIsBetter} | m <- policyMeasurands p]
         , policyComparisonSchemes =
             [s {csPolarity = LowerIsBetter} | s <- policyComparisonSchemes p]
         }
@@ -1039,7 +1056,7 @@ prop_negatives = once $ ioProperty $ do
   progA <- loadProgram "examples/A/example.lara"
   pol <- loadPolicy policyPath
   let decls = programDecls progA
-      elab p q = elaborate defeasibleSuiteSigma (registryOf q) p q
+      elab p q = elaborate (registryOf q) p q
 
       -- 1. policy-id mismatch: hand a policy whose id differs from the header.
       polMismatch = pol {policyId = PolicyId "not-empirical-v1"}

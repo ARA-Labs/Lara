@@ -111,3 +111,14 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: high
 - **Code ref**: ["src/Lara/Elaborate/Comparison.hs", "src/Lara/Elaborate/Internal.hs", "test/SurfaceRewriteSpec.hs"]
+
+## H12: Declare what cannot be inferred; derive what a declaration would only let the frontend contradict
+- **Rationale**: A signature has two kinds of content. Sorts themselves must be *declared*: inferring them presumes an answer the corpus has not settled (whether `imagenet_val` is a `Dataset` or an `EvalSetting` is exactly the open possible-worlds question), and a tool that guesses would freeze that guess into the artifact. Rule *parameter* sorts must be *derived*: under a validated signature every parameter already occupies sorted positions in its own rule's patterns, so a declaration adds a wire field, a rule-grammar change, and a second place the same fact can be written — creating a way for the declaration to disagree with the patterns beside it, and buying nothing. The test is not "can this be inferred" but "does declaring it create a disagreement the checker would then have to adjudicate".
+- **Sources**: [
+  `no ninth wire field` ← `src/Lara/Sigma/WellSorted.hs` «This is why there is no ninth wire field in the @rules@ section and no stored 'Rule' field.» [input];
+  `opaque names shipped` ← `corpus-units/corpus-v1.policy.lara` «# Sort names are deliberately OPAQUE (S1, S2, …). Naming them is a separate, tracked pass: whether» [input]
+  ]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: medium
+- **Code ref**: [`src/Lara/Sigma/WellSorted.hs` (`ruleParamSorts`), `lean/Lara/Sigma.lean` (`ruleParamSorts`, `RuleSortRespecting`), `scripts/infer-sigma.hs`, `docs/spec.md` §3.4]

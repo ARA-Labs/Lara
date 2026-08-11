@@ -103,6 +103,16 @@ import Data.Char (isAlpha, isDigit)
 import Data.List (intercalate)
 
 import Lara.AST
+import Lara.Sigma
+  ( ConSig (..)
+  , PredSig (..)
+  , Sigma (..)
+  , Sort (..)
+  , SortName (..)
+  , emptySigma
+  , sortFromText
+  , sortText
+  )
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Strict (SExpr)
 import Lara.Wire (parseSExpr, printSExpr)
@@ -487,11 +497,6 @@ relationTable :: [(String, Relation)]
 relationTable =
   [("strictly-better", StrictlyBetter), ("at-least-as-good", AtLeastAsGood)]
 
--- | Measurand sort (grammar App. B.1). One entry today; the @: Num@ slot is a
--- sort position #89 extends, so it is a table from the start rather than a
--- string literal at the one use site.
-sortTable :: [(String, MeasurandSort)]
-sortTable = [("Num", SortNum)]
 
 -- | Reverse table lookup for canonical printing (constructors are unique).
 tableToString :: (Eq a) => [(String, a)] -> a -> String
@@ -526,8 +531,11 @@ polarityStr = tableToString polarityTable
 relationStr :: Relation -> String
 relationStr = tableToString relationTable
 
-sortStr :: MeasurandSort -> String
-sortStr = tableToString sortTable
+-- | @sort ::= \"Num\" | \"Str\" | ident@ (grammar §4.0). An identifier that is
+-- not a base-sort spelling is a declared sort; whether it was declared is
+-- Σ-well-formedness, decided by the checker, not by the parser.
+sortP :: P Sort
+sortP = sortFromText <$> identifier
 
 -- | Provenance is a small closed vocabulary with one compound form,
 -- @checker(name, version)@ (grammar §1.4).
@@ -1081,7 +1089,7 @@ parsePolicy = runComplete (policyP <* eof)
 -- | Accumulator for policy declarations, which the grammar allows in any order
 -- but which the AST partitions by kind (grammar §4).
 data PolicyAcc
-  = PolicyAcc [Rule] [Contrary] [Exception]
+  = PolicyAcc Sigma [Rule] [Contrary] [Exception]
       [((LeafKind, Provenance), Admission)] [(TheoryDigest, [Prop])]
       GroupConflictMode [Measurand] [ComparisonScheme]
 
@@ -1089,11 +1097,12 @@ policyP :: P Policy
 policyP = do
   keyword "policy"
   pid <- identifier
-  PolicyAcc rs cs es adm ts gm ms schs <-
-    policyDecls (PolicyAcc [] [] [] [] [] QuarantineOnConflict [] [])
+  PolicyAcc sg rs cs es adm ts gm ms schs <-
+    policyDecls (PolicyAcc emptySigma [] [] [] [] [] QuarantineOnConflict [] [])
   pure
     Policy
       { policyId = PolicyId pid
+      , policySigma = sg
       , policyRules = rs
       , policyContraries = cs
       , policyExceptions = es
@@ -1105,23 +1114,36 @@ policyP = do
       }
 
 policyDecls :: PolicyAcc -> P PolicyAcc
-policyDecls acc@(PolicyAcc rs cs es adm ts gm ms schs) = do
+policyDecls acc@(PolicyAcc sg rs cs es adm ts gm ms schs) = do
   mw <- peekIdent
   case mw of
-    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc (rs ++ [r]) cs es adm ts gm ms schs)
-    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc rs (cs ++ [c]) es adm ts gm ms schs)
-    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc rs cs (es ++ [e]) adm ts gm ms schs)
-    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc rs cs es (adm ++ a) ts gm ms schs)
+    -- The signature blocks (grammar §4.0). Duplicate detection is Σ
+    -- well-formedness, decided by the checker as R2 — the parser is a decode
+    -- boundary and records what was written, exactly as it does for a rule id
+    -- declared twice.
+    Just "sort" -> do
+      ns <- sortLineP
+      policyDecls (PolicyAcc sg{sigmaSorts = sigmaSorts sg ++ ns} rs cs es adm ts gm ms schs)
+    Just "con" -> do
+      c <- conLineP
+      policyDecls (PolicyAcc sg{sigmaCons = sigmaCons sg ++ [c]} rs cs es adm ts gm ms schs)
+    Just "pred" -> do
+      pr <- predLineP
+      policyDecls (PolicyAcc sg{sigmaPreds = sigmaPreds sg ++ [pr]} rs cs es adm ts gm ms schs)
+    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc sg (rs ++ [r]) cs es adm ts gm ms schs)
+    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc sg rs (cs ++ [c]) es adm ts gm ms schs)
+    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc sg rs cs (es ++ [e]) adm ts gm ms schs)
+    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc sg rs cs es (adm ++ a) ts gm ms schs)
     Just "duplicate-reports" -> do
       keyword "duplicate-reports"
       symbol '='
       gm' <- enumFromTable "a group conflict mode (quarantine | reject)" groupModeTable
-      policyDecls (PolicyAcc rs cs es adm ts gm' ms schs)
+      policyDecls (PolicyAcc sg rs cs es adm ts gm' ms schs)
     Just "theory" -> do
       t@(TheoryDigest d, _) <- theoryLineP
       if any (\(TheoryDigest d', _) -> d' == d) ts
         then failP ("duplicate theory digest: " ++ d)
-        else policyDecls (PolicyAcc rs cs es adm (ts ++ [t]) gm ms schs)
+        else policyDecls (PolicyAcc sg rs cs es adm (ts ++ [t]) gm ms schs)
     -- A duplicate measurand is rejected inline, like a duplicate theory digest
     -- and for the same reason (grammar App. B.1): a silent first-wins lookup
     -- would pick a polarity the author did not intend, flipping the generated
@@ -1130,7 +1152,7 @@ policyDecls acc@(PolicyAcc rs cs es adm ts gm ms schs) = do
       m <- measurandLineP
       if any ((== measurandId m) . measurandId) ms
         then failP ("duplicate measurand: " ++ let MeasurandId n = measurandId m in n)
-        else policyDecls (PolicyAcc rs cs es adm ts gm (ms ++ [m]) schs)
+        else policyDecls (PolicyAcc sg rs cs es adm ts gm (ms ++ [m]) schs)
     -- Schemes are keyed by the (relation, polarity) __pair__, so that is the
     -- duplicate key (grammar App. B.2); there are at most four entries.
     Just "comparison-scheme" -> do
@@ -1143,19 +1165,72 @@ policyDecls acc@(PolicyAcc rs cs es adm ts gm ms schs) = do
                 ++ " "
                 ++ polarityStr (csPolarity sch)
             )
-        else policyDecls (PolicyAcc rs cs es adm ts gm ms (schs ++ [sch]))
+        else policyDecls (PolicyAcc sg rs cs es adm ts gm ms (schs ++ [sch]))
     _ -> pure acc
 
--- | @measurandLine ::= \"measurand\" ident \":\" sort \"where\" polarity@
+-- | @sortLine ::= \"sort\" ident { \",\" ident }@ (grammar §4.0).
+sortLineP :: P [SortName]
+sortLineP = do
+  keyword "sort"
+  commaSep1 (SortName <$> identifier)
+
+-- | @conLine ::= \"con\" ident [ \"(\" sort { \",\" sort } \")\" ] \":\" sort@
+-- (grammar §4.0). A nullary constant is spelled without parentheses — the one
+-- canonical spelling, so @parse ∘ print = id@ holds.
+conLineP :: P ConSig
+conLineP = do
+  keyword "con"
+  k <- identifier
+  args <- optionalSortArgs
+  symbol ':'
+  res <- sortP
+  pure (ConSig (FunSym k) args res)
+
+-- | @predLine ::= \"pred\" ident [ \"(\" sort { \",\" sort } \")\" ]@
+-- (grammar §4.0).
+predLineP :: P PredSig
+predLineP = do
+  keyword "pred"
+  p <- identifier
+  args <- optionalSortArgs
+  pure (PredSig (Pred p) args)
+
+-- | An argument-sort vector, absent for a nullary symbol. @()@ parses (the
+-- parser is the permissive half) but never prints: the canonical nullary
+-- spelling omits the parentheses.
+optionalSortArgs :: P [Sort]
+optionalSortArgs = do
+  c <- peekChar
+  if c == Just '(' then parenList sortP else pure []
+
+-- | @measurandLine ::= \"measurand\" ident \":\" sort [ \"where\" polarity ]@
 -- (grammar App. B.1).
+--
+-- The sort slot is open (#89 D-1) — it is a sort position over the same
+-- vocabulary the policy's signature declares. The @where@ clause is optional
+-- and __@Num@-gated__: it presupposes an ordered domain, and only @Num@ is
+-- ordered, so a polarity on a non-@Num@ measurand is rejected here.
 measurandLineP :: P Measurand
 measurandLineP = do
   keyword "measurand"
   m <- identifier
   symbol ':'
-  srt <- enumFromTable "a measurand sort (Num)" sortTable
-  keyword "where"
-  pol <- enumFromTable "a polarity (higher-is-better | lower-is-better)" polarityTable
+  srt <- sortP
+  mw <- peekIdent
+  pol <- case mw of
+    Just "where" -> do
+      keyword "where"
+      p <- enumFromTable "a polarity (higher-is-better | lower-is-better)" polarityTable
+      pure (Just p)
+    _ -> pure Nothing
+  case pol of
+    Just _
+      | srt /= SortNum ->
+          failP
+            ( "measurand " ++ m ++ " : " ++ sortText srt
+                ++ " cannot carry a polarity clause (only Num is ordered)"
+            )
+    _ -> pure ()
   pure
     Measurand
       {measurandId = MeasurandId m, measurandSort = srt, measurandPolarity = pol}
@@ -1692,6 +1767,7 @@ printPolicy :: Policy -> String
 printPolicy p =
   unlines $
     ["policy " ++ let PolicyId pid = policyId p in pid]
+      ++ printSigma (policySigma p)
       ++ concatMap (("" :) . printRule) (policyRules p)
       ++ prependBlank (map printContrary (policyContraries p))
       ++ prependBlank (map printException (policyExceptions p))
@@ -1707,6 +1783,29 @@ printPolicy p =
     -- group-free policies print byte-identically to the pre-groups grammar.
     printGroupMode QuarantineOnConflict = []
     printGroupMode m = ["", "duplicate-reports = " ++ groupModeStr m]
+
+-- | The policy signature blocks (grammar §4.0), immediately after the @policy@
+-- header: one @sort@ line carrying every declared sort in declaration order,
+-- then one @con@ line per constructor and one @pred@ line per predicate. Each
+-- block is elided when empty, so a signature-free policy prints byte-identically
+-- to the pre-@0.2@ grammar.
+printSigma :: Sigma -> [String]
+printSigma sg = sortsBlock ++ block (map printCon (sigmaCons sg)) ++ block (map printPred (sigmaPreds sg))
+  where
+    sortsBlock
+      | null (sigmaSorts sg) = []
+      | otherwise = ["", "sort " ++ intercalate ", " [n | SortName n <- sigmaSorts sg]]
+    block [] = []
+    block ls = "" : ls
+    printCon c =
+      "con " ++ (let FunSym k = conSym c in k)
+        ++ argVector (conArgs c)
+        ++ " : "
+        ++ sortText (conResult c)
+    printPred s =
+      "pred " ++ (let Pred h = predSym s in h) ++ argVector (predArgs s)
+    argVector [] = ""
+    argVector ss = "(" ++ intercalate ", " (map sortText ss) ++ ")"
 
 printRule :: Rule -> [String]
 printRule r =
@@ -1765,8 +1864,8 @@ printMeasurands :: [Measurand] -> [String]
 printMeasurands [] = []
 printMeasurands ms =
   "" :
-    [ "measurand " ++ m ++ " : " ++ sortStr (measurandSort x)
-        ++ " where " ++ polarityStr (measurandPolarity x)
+    [ "measurand " ++ m ++ " : " ++ sortText (measurandSort x)
+        ++ maybe "" ((" where " ++) . polarityStr) (measurandPolarity x)
     | x <- ms
     , let MeasurandId m = measurandId x
     ]

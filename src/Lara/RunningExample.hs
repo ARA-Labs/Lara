@@ -30,7 +30,6 @@ import Lara.AST (PolicyId (..), programPolicy)
 import Lara.Admission (renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -72,7 +71,7 @@ checkRun progText polText = do
   prog <- either (Left . ("parse error: " ++) . Syntax.peReason) Right (Syntax.parseProgram progText)
   pol <- either (Left . ("policy parse error: " ++) . Syntax.peReason) Right (Syntax.parsePolicy polText)
   prepared <- either (Left . ("source invalid: " ++) . renderSourceInvalid) Right
-    (prepareSource defeasibleSuiteSigma prog pol)
+    (prepareSource prog pol)
   case prepared of
     SourceRejected rejection -> Left ("admission rejection: " ++ renderAdmissionRejection rejection)
     SourceAccepted input -> pure (sourceResultVerdict (runSourceCheck input))

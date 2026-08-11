@@ -121,7 +121,7 @@ fi
 # substitution of verdict.txt + manifest from blessing a change.
 semantic_oracle="$tmp_root/semantic-oracle.txt"
 cat >"$semantic_oracle" <<'EOF'
-(verdict (replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd 1)) (theories) (artifact sha256:5ca1e...)) accept (labels (0 in) (1 out) (2 in) (3 in)) (edges (2 1) (3 1)) (statuses (status (atom improves (con kv_quant) (con latency) (con openweb)) justified) (status (atom improves (con kv_quant) (con latency) (con python_code)) defeated) (status (atom improves (con kv_quant) (con latency) (con mobile_edge)) gap)))
+(verdict (replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd 1)) (theories) (artifact sha256:5ca1e...)) accept (labels (0 in) (1 out) (2 in) (3 in)) (edges (2 1) (3 1)) (statuses (status (atom improves (con kv_quant) (con latency) (con openweb)) justified) (status (atom improves (con kv_quant) (con latency) (con python_code)) defeated) (status (atom improves (con kv_quant) (con latency) (con mobile_edge)) gap)))
 EOF
 if ! cmp -s "$semantic_oracle" "$checker_stdout"; then
   echo "ERROR: checker stdout does not match the independent B0 section 9 oracle" >&2

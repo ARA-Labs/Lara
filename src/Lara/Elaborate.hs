@@ -43,10 +43,7 @@
 -- check — R7/R13 at @checkUnit@ are the single enforcement point.
 module Lara.Elaborate
   ( -- * Caller-supplied environment inputs
-    Sigma (..)
-  , emptySigma
-  , defeasibleSuiteSigma
-  , TheoryRegistry (..)
+    TheoryRegistry (..)
   , emptyRegistry
   , registryOf
     -- * Elaboration errors (located-ish: they name the arg/rule/leaf/claim)
@@ -97,13 +94,10 @@ import Lara.Driver.Internal (runCheckReported)
 import Lara.Elaborate.Internal
   ( ElabError (..)
   , GeneratedArg (..)
-  , Sigma (..)
   , TheoryRegistry (..)
-  , defeasibleSuiteSigma
   , elabErrorMessage
   , elaborateWithProvenance
   , emptyRegistry
-  , emptySigma
   , registryOf
   )
 import Lara.Replay
@@ -246,8 +240,8 @@ sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _)
 -- identity/keys/leaf ids -> elaborate(all leaves) -> replay identity -> R8
 --                         -> seed union -> one prune -> opaque source input
 -- @
-prepareSource :: Sigma -> Program -> Policy -> Either SourceInvalid PreparedSource
-prepareSource sigma program policy = do
+prepareSource :: Program -> Policy -> Either SourceInvalid PreparedSource
+prepareSource program policy = do
   if programPolicy program /= policyId policy
     then Left (SourceElaborationError (PolicyIdMismatch (programPolicy program) (policyId policy)))
     else Right ()
@@ -260,7 +254,7 @@ prepareSource sigma program policy = do
     Nothing -> Right ()
   (declared, generated) <-
     first SourceElaborationError
-      (elaborateWithProvenance sigma (registryOf policy) program policy)
+      (elaborateWithProvenance (registryOf policy) program policy)
   checkInput <- first SourceReplayError (sourceReplayInput program policy declared)
   case firstAdmissionRejection (policyAdmission policy) leaves of
     Just rejection -> Right (SourceRejected rejection)
@@ -374,7 +368,7 @@ sourceReplayInput :: Program -> Policy -> Unit -> Either ReplayError CheckInput
 sourceReplayInput program policy declared = do
   replayId <-
     mkReplayId
-      LaraCoreV01
+      LaraCoreV02
       (policyId policy)
       (programBackends program)
       (sort (map fst (policyTheories policy)))

@@ -31,7 +31,6 @@ import Lara.AST (PolicyId (..), Program (..))
 import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -94,7 +93,7 @@ loadPolicyAndElaborate :: FilePath -> FilePath -> Program -> IO CheckInput
 loadPolicyAndElaborate artifactPath policyPath prog = do
   policyText <- readFile policyPath
   policy <- either (fail . ((policyPath ++ ": parse: ") ++) . show) pure (parsePolicy policyText)
-  case prepareSource defeasibleSuiteSigma prog policy of
+  case prepareSource prog policy of
     Left invalid -> fail (artifactPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       fail (artifactPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)

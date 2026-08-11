@@ -624,3 +624,23 @@ entries:
     - "Did NOT stage or crystallize a scientific observation. No second-author classification, sealed result set, summary.json, paper count, or claim-status join was produced."
     - "Kept the human checkpoint explicit: the detached 42-row packet must be completed, validated without checker statuses, and sealed before summarize can join statuses or emit paper-facing numbers."
     - "Removed the handoff packet from the product branch after preserving exact bytes in a detached archive and commit-pinned history; the repository does not treat blank templates as scientific results."
+
+- turn: "2026-08-10_001#1"
+- turn: "2026-08-10_001#1"
+  notes:
+    - "Crystallized O59/O60/O61 on artifact-commitment, not on affirmation: the spec's R2 row and the surface doc's note were EDITED this turn because of O59, the generators were changed and the diff committed as a deliverable for O60, and O61 is cited by mechanization-plan result 13. All three are depended on by merged artifacts, which is the signal."
+    - "Did NOT crystallize O62 (nullary constants dominate the corpus vocabulary, 187/196) despite the same turn's commitment: what corpus-v1.policy.lara depends on is the census OUTPUT, not the generalization about first-order corpora. No downstream artifact cites the general form, so no artifact-commitment signal fired for it. Left staged."
+    - "Routed O63 as potential_type: heuristic (not claim) — it is a design rule for where to put a fact, a how rather than a what."
+    - "N150 typed as pivot, not decision: it opens the first branch that moves the core rather than the surface, which is a boundary the surface track (#90/#88a/#91) had held for three prior sessions."
+    - "Recorded the Lean/Haskell divergence on §3.3 (separate UnitError arm vs widened Violation) in N153's result and in the plan's new §13 rather than as a contradiction: the two drivers agree on class and stage order, which the differential checks, so there is nothing for the researcher to adjudicate."
+    - "Appended N154 as a dead_end, not an experiment: the hypothesis (a green 574-fixture differential proves the two definitions agree) was falsified, and the lesson generalizes beyond the fix. Recorded after the fact within the same turn because it was found by re-reading, not by a gate."
+    - "C28's Falsification is deliberately about the artifact's own history (find an unenforced class whose docs stayed true), not a re-run of the R2 gate — a gate re-run would be a tautology."
+
+- turn: "2026-08-10_001#2"
+  notes:
+    - "Routed N155 as a dead_end: the prior result-13 closure claim was falsified by source inspection because RuleSortRespecting was an assumption, not a derived consequence of executable acceptance."
+    - "Routed N156 as one experiment rather than one node per command or review thread: the nine fixes form one review-repair intervention with one integrated local/hosted verification result."
+    - "Routed N157 as an ai-executed decision, not user provenance: the user directed 'address all' but did not choose between proving exception/attack closure now and narrowing the theorem to its actual conclusion."
+    - "Revised C30 rather than staging a new observation. The general substitution-lemma claim remains supported, but its Conditions, Falsification, and Proof now distinguish accepted support-rule closure from the unproved exception/attack boundary."
+    - "Did NOT alter append-only N153 even though its historical description overstates whole-unit closure. N155 records the correction and N157 records the current scope; logic/C30 is the mutable present-state view."
+    - "Did NOT crystallize O62. This review reconfirmed the census values but added no user affirmation or artifact dependency on the generalization about first-order corpora."

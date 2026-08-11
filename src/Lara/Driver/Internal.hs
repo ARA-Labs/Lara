@@ -1,7 +1,7 @@
 -- | The whole-unit pipeline: decode → check → verdict (the Haskell side of the
 -- N11 differential anchor, mirroring @lean/Lara/Driver.lean@).
 --
--- 'runCheck' runs replay preflight and the real six-stage checker
+-- 'runCheck' runs replay preflight and the real seven-stage checker
 -- ("Lara.Check.checkUnit") on a validated 'CheckInput', producing the wire
 -- 'Verdict' both drivers print. On acceptance it reads the grounded labels
 -- ('Lara.Runtime.runtimeAF' — the cached-adjacency production backend, whose
@@ -123,7 +123,7 @@ runCheck = fst . runCheckLocated
 -- the code that also picked its class, across all three reject paths: the
 -- replay preflight (R13) and the §4.3 group check (R9), which both reject here
 -- before 'checkUnit' and never become a 'Lara.Check.UnitError' that 'locate'
--- could reach, plus the ordinary six-stage 'checkUnit' rejection ('locate').
+-- could reach, plus the ordinary seven-stage 'checkUnit' rejection ('locate').
 -- 'Nothing' on acceptance. The iron invariant @runCheck ≡ fst . runCheckLocated@
 -- holds by construction (the measurement harness re-asserts it over every
 -- manifest-discovered input).

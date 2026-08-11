@@ -285,6 +285,9 @@ workedExampleGoldens =
     )
   , ("examples/R1/example.core.sexp", "(verdict reject R1)")
   , ("examples/R2/example.core.sexp", "(verdict reject R12)")
+    -- The signature negative (#89 D10). The directory is R2-sort, not R2: the
+    -- latter is the R12 Path-B demonstration and predates R2-the-class.
+  , ("examples/R2-sort/example.core.sexp", "(verdict reject R2)")
   , ("examples/R3/example.core.sexp", "(verdict reject R10)")
   , ( "examples/S1/example.core.sexp"
     , "(verdict accept (labels (0 in)) (edges)"

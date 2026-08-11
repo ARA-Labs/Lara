@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 369
+Total mutants: 496
 
 | expected outcome | mutants |
 | --- | --- |
@@ -33,8 +33,9 @@ Total mutants: 369
 | `reject-R1` | 44 |
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
-| `reject-R12` | 20 |
+| `reject-R12` | 40 |
 | `reject-R13` | 42 |
+| `reject-R2` | 107 |
 | `reject-R3` | 19 |
 | `reject-R4` | 18 |
 | `reject-R5` | 18 |
@@ -50,8 +51,9 @@ Total mutants: 369
 | `codec-corruption` | 45 |
 | `cycles` | 4 |
 | `data-integrity` | 19 |
-| `hidden-policy-extension` | 39 |
+| `hidden-policy-extension` | 59 |
 | `open-obligations` | 54 |
+| `signature` | 107 |
 | `undeclared-leaves` | 25 |
 | `wrong-formulas` | 37 |
 
@@ -78,5 +80,11 @@ site (corpus units carry no strict certificates), recorded as 0/0.
 | `bad-attack-position` | 3 | 3 |
 | `unlicensed-attack` | 13 | 12 |
 | `group-conflict` | 55 | 12 |
+| `undeclared-pred` | 60 | 12 |
+| `wrong-pred-arity` | 60 | 12 |
+| `wrong-arg-sort` | 60 | 12 |
+| `undeclared-con` | 60 | 12 |
+| `wrong-theta-sort` | 13 | 12 |
+| `out-of-scope-var` | 60 | 12 |
 | `duplicate-backend` | 60 | 12 |
 | `unknown-backend` | 60 | 12 |

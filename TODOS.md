@@ -109,7 +109,10 @@ enough to factor cleanly.
 **Context:** Deferred from the M5 T1-corpus + T3 PR to keep that change reviewable
 (the accept family already split off the largest new block). T6 added another
 operator (`OpHoleObligation` + its site enumerator), making the split marginally
-more pressing.
+more pressing. `lara-core@0.2` added `Lara.Mutate.Sorts` (the six signature-family
+operators) as a second split module rather than growing `Lara.Mutate` further, so
+the pattern is now established twice — what remains is factoring the *existing*
+bulk out.
 
 **Effort:** S
 **Priority:** P3
@@ -221,6 +224,98 @@ errors. Candidate rider for #88b.
 **Effort:** M
 **Priority:** P3
 **Depends on:** lara-syntax@0.3 (D4's matcher)
+
+### AST ↔ Presentation.lean parity guard
+
+**What:** A mechanical drift detector between `Lara.AST`'s surface-reachable
+types and `lean/Lara/Presentation.lean` — e.g. a generated field/constructor
+inventory compared in CI, or a differential fixture exercising every
+constructor arm — that fails when the Haskell surface grows and the Lean
+presentation mirror does not.
+
+**Why:** Result 12 (surface round-trip) is paper-cited, and its silent
+narrowing is undetectable today. This is the third recurrence: theories and
+groupMode (recorded 2026-08-09), now Σ + signature blocks (sorts-in-checker
+plan, eng review 2026-08-10). Each instance was patched (`syntax-03` D8, the
+sorts plan's D9); nothing prevents instance four.
+
+**Pros:** Kills a three-time-recurring failure class; cheap once the
+inventory extraction is designed.
+
+**Cons:** Cross-language inventory extraction needs a design; false positives
+during deliberate divergence windows.
+
+**Context:** Learning `lara_presentation_lean_parity_stale` documents the gap.
+Start from the synced state the sorts plan's D9 re-sync produces.
+
+**Effort:** S-M
+**Priority:** P2
+**Depends on:** sorts-in-checker D9 (Presentation re-sync) landed.
+
+### Σ-WF negatives and `OpCodecSigma` rows (the suite additions #89 §8 deferred)
+
+**What:** Commit one dedicated negative per Σ-well-formedness clause —
+duplicate `sort` / `pred` / `con` declarations, a signature naming an
+undeclared sort, and `sort Num` base-shadowing — plus `OpCodecSigma` rows in
+the malformed family (junk inside the `sigma` section, `sigma` out of the fixed
+section order → R14, exit 2).
+
+**Why:** The *checks* landed with `lara-core@0.2` and are exercised by
+unit-level tests; what is missing is the committed fixture per clause. Every
+other wire section has corruption coverage and this one does not, and R2's own
+history is the argument for not leaving an enforced clause fixture-free — a
+class nothing can contradict accumulates undetectable falsehoods (claim C28).
+
+**Context:** Plan `plans/2026-08-10-sorts-in-checker.md` §8 ("suite additions
+beyond the operators") and its §13 deferral list.
+
+**Effort:** S
+**Priority:** P2
+**Depends on:** nothing (the operators and the codec both exist).
+
+### Cut the `lara-core@0.2` freeze tag
+
+**What:** Re-run the `docs/m5-freeze-checklist.md` gates and cut the next
+annotated tag for the post-#89 tree.
+
+**Why:** `lara-core@0.2` changed a frozen input (the wire, the rejection
+surface, every generated artifact), which by the checklist's own post-freeze
+rule invalidates the v3 freeze. The headline numbers and reproducibility
+hashes are already updated in the checklist; the tag is not cut.
+
+**Context:** PR #97. Two bundled operators (drop-covering-attack, wrong-fraction
+`ra@1`) were meant to ride this regeneration cycle and did not, so they still
+cost a *further* tag — consider landing them before cutting, not after.
+
+**Effort:** S
+**Priority:** P2
+**Depends on:** #89 merged.
+
+### Σ sort-naming refinement pass (possible-worlds trigger)
+
+**What:** A curated naming/merge pass over the frozen opaque-sort corpus Σ
+(`S1, S2, …` from `infer-sigma`'s inferred partition), replacing generated
+names with the deliberate ontology once the possible-worlds design resolves.
+
+**Why:** The sorts-in-checker eng review (2026-08-10, OV-2C) shipped the Σ
+with machine names precisely because Dataset-vs-EvalSetting is the
+possible-worlds question; the deferral needs a tracked trigger. Renaming
+edits frozen policy text, so this pass is a full regeneration cycle with a
+new freeze tag — budget it, don't discover it.
+
+**Pros:** The ontology commitment is made deliberately, with the follow-up
+paper's design in hand; regeneration cost scheduled.
+
+**Cons:** May never fire if opaque names prove fine; costs a regeneration +
+freeze tag when it does.
+
+**Context:** Plan `plans/2026-08-10-sorts-in-checker.md` §7; memory note
+"possible-worlds future direction" marks the trigger.
+
+**Effort:** M
+**Priority:** P3
+**Depends on:** sorts-in-checker D8/D11 landed; blocked by the
+possible-worlds design decision.
 
 ### spec.md's presentation-version pointer
 

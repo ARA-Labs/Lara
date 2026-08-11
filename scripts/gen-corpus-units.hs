@@ -31,7 +31,6 @@ import Data.List (isPrefixOf)
 import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -71,7 +70,7 @@ main = do
           expectedPath = dir </> "expected.json"
       progText <- readFile unitPath
       prog <- either (fail . ((unitPath ++ ": parse: ") ++) . show) pure (parseProgram progText)
-      input <- case prepareSource defeasibleSuiteSigma prog policy of
+      input <- case prepareSource prog policy of
         Left invalid -> fail (unitPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
         Right (SourceRejected rejection) ->
           fail (unitPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)

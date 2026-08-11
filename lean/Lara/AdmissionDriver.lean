@@ -11,7 +11,7 @@ mismatch is an error (exit 1), a malformed fixture is a codec error (exit 2,
 empty stdout), matching the Haskell twin `scripts/check-admission.hs`.
 
 The fixture schema is test-only: it is NOT a production wire format and never
-enters `lara-core@0.1` or replay identity.
+enters `lara-core@0.2` or replay identity.
 -/
 import Lara.Driver
 import Lara.Admission

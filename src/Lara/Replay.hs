@@ -27,7 +27,16 @@ import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
 
-data CoreVersion = LaraCoreV01
+-- | The core-format version embedded in every replay identity. __Hard
+-- cutover__: @lara-core\@0.1@ is retired, not carried alongside (#91 decision
+-- 5). Nothing is released, so there is no external compatibility burden, and a
+-- dual-version decoder would have to answer what a @0.1@ unit's absent
+-- signature means under strict mode — the answer being "nothing legal", since
+-- the empty Σ accepts only symbol-free units.
+--
+-- The replay-id grammar embeds this string, so __every__ @.sexp@ carrying a
+-- replay section changes bytes at the bump, not only those with a signature.
+data CoreVersion = LaraCoreV02
   deriving (Eq, Show)
 
 data ReplayId = ReplayId

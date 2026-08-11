@@ -33,9 +33,11 @@ module Lara.Policy
   , patMayOverlap
   , patsMayOverlap
   , aPatMayOverlap
-    -- * The §8.1 validator
+    -- * The §8.1 validator and the §4.1 rule-scope validator
+  , RuleSite (..)
   , Violation (..)
   , touchingPair
+  , firstOutOfScope
   , firstViolation
   , wfB
   ) where
@@ -135,13 +137,65 @@ aPatMayOverlap (AtomPat p ps) (AtomPat q qs) =
 -- The §8.1 validator
 -- ---------------------------------------------------------------------------
 
--- | Located R12 payload (mirrors Lean @Policy.Violation@).
-data Violation = Violation
-  { vRuleId :: RuleId
-  , vConsequent :: AtomPat
-  , vContrary :: Contrary
-  }
+-- | Which pattern of a rule a §4.1 scope violation sits in. Exceptions are
+-- indexed into the policy's own @exception@ list, since they are declared
+-- outside the @rule@ block.
+data RuleSite
+  = SitePremise Int
+  | SiteConclusion
+  | SiteAnswer QuestionId
+  | SiteException Int
   deriving (Eq, Show)
+
+-- | Located R12 payload (mirrors Lean @Policy.Violation@).
+--
+-- Two arms, one class. Spec §8.1 Path B and spec §4.1 rule well-formedness are
+-- both /policy/ well-formedness — a policy the checker may not read as patterns
+-- — so they share R12 and this stage rather than splitting a frozen class. R2
+-- stays purely about sorts (#89 D-2): an out-of-scope pattern variable is
+-- perfectly well-sorted, it is simply not in scope.
+data Violation
+  = -- | §8.1 Path B: a strict rule's conclusion pattern may overlap a declared
+    -- contrary side at the instance level
+    StrictContraryOverlap RuleId AtomPat Contrary
+  | -- | §4.1: a pattern variable outside the rule's declared parameters
+    OutOfScopeParam RuleId RuleSite Param
+  deriving (Eq, Show)
+
+-- | The first §4.1 scope violation in declaration order: rules in list order,
+-- and within a rule its premises, conclusion, and question answers; then the
+-- policy's exceptions in list order, each against its own rule's parameters.
+--
+-- An exception naming an undeclared rule is __not__ a scope violation here: its
+-- rule id is R1's business at the support stage, and every variable is
+-- vacuously out of an empty parameter list, which would turn one missing
+-- declaration into a misleading R12.
+firstOutOfScope :: [Rule] -> [Exception] -> Maybe Violation
+firstOutOfScope rules exceptions =
+  firstJust (map ruleScan rules ++ map exceptionScan (zip [0 ..] exceptions))
+  where
+    ruleScan r =
+      firstJust $
+        [ OutOfScopeParam (ruleId r) (SitePremise i) <$> escapee r a
+        | (i, a) <- zip [0 ..] (rulePremises r)
+        ]
+          ++ [OutOfScopeParam (ruleId r) SiteConclusion <$> escapee r (ruleConclusion r)]
+          ++ [ OutOfScopeParam (ruleId r) (SiteAnswer (questionId q)) <$> escapee r (questionAnswer q)
+             | q <- ruleQuestions r
+             ]
+    exceptionScan (i, e) = case lookupRule rules (exceptionRule e) of
+      Nothing -> Nothing
+      Just r -> OutOfScopeParam (exceptionRule e) (SiteException i) <$> escapee r (exceptionAtom e)
+    escapee r (AtomPat _ ps) = firstJust (map (patEscapee (ruleParams r)) ps)
+    patEscapee params p = case p of
+      PVar x
+        | x `elem` params -> Nothing
+        | otherwise -> Just x
+      PLit _ -> Nothing
+      PCon _ ps -> firstJust (map (patEscapee params) ps)
+
+firstJust :: [Maybe a] -> Maybe a
+firstJust = foldr (\m acc -> maybe acc Just m) Nothing
 
 -- | The first declared contrary pair either of whose sides may overlap the
 -- given strict conclusion (mirrors Lean @touchingPair?@).
@@ -151,23 +205,30 @@ touchingPair p (c@(Contrary a b) : rest)
   | aPatMayOverlap p a || aPatMayOverlap p b = Just c
   | otherwise = touchingPair p rest
 
--- | The single declaration-order diagnostic scan: visit strict rules and their
--- contrary pairs in list order and return the first overlap encountered
--- (mirrors Lean @firstViolation?@ via @firstViolationIn?@).
-firstViolation :: [Rule] -> [Contrary] -> Maybe Violation
-firstViolation rules contraries = go rules
+-- | The single declaration-order diagnostic scan (mirrors Lean
+-- @firstViolation?@): spec §4.1 rule scope first, then spec §8.1 Path B over
+-- strict rules and their contrary pairs.
+--
+-- Scope runs first because Path B reads a rule's conclusion /as a pattern over
+-- its parameters/; a conclusion mentioning a variable the rule never declared
+-- is not a pattern the overlap test is entitled to interpret.
+firstViolation :: [Rule] -> [Contrary] -> [Exception] -> Maybe Violation
+firstViolation rules contraries exceptions =
+  case firstOutOfScope rules exceptions of
+    Just v -> Just v
+    Nothing -> go rules
   where
     go [] = Nothing
     go (r : rest)
       | ruleMode r == Strict =
           case touchingPair (ruleConclusion r) contraries of
-            Just c -> Just (Violation (ruleId r) (ruleConclusion r) c)
+            Just c -> Just (StrictContraryOverlap (ruleId r) (ruleConclusion r) c)
             Nothing -> go rest
       | otherwise = go rest
 
--- | Executable @wf(Pi)@ (spec §8.1), derived from the same located scan used
--- for diagnostics (mirrors Lean @wfB@ \/ @wfB_iff@).
-wfB :: [Rule] -> [Contrary] -> Bool
-wfB rules contraries = case firstViolation rules contraries of
+-- | Executable @wf(Pi)@ (spec §4.1 + §8.1), derived from the same located scan
+-- used for diagnostics (mirrors Lean @wfB@ \/ @wfB_iff@).
+wfB :: [Rule] -> [Contrary] -> [Exception] -> Bool
+wfB rules contraries exceptions = case firstViolation rules contraries exceptions of
   Nothing -> True
   Just _ -> False

@@ -52,7 +52,8 @@ it; "test-only" = conformance evidence, no theorem.
 | 9 | Backend replacement | **mechanized (Model A)** | `Erase.backend_replacement` proves status invariance under a uniform injective assurance relabel; `EraseTransport.backend_replacement_transport` constructs the relabeled well-checked program under acceptance preservation. |
 | 10 | Reference natural-deduction adapter soundness + exact dependencies | **mechanized and executable** | `nd_sound`, `nd_relevance`, `fv_in_range`, the sound/complete `infer` bridge, and the concrete `ndBackend` replay boundary. |
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** | `nf`/`≡` frozen (`spec.md` §3.2); property-tested in Haskell AND machine-checked in Lean 4 (`../lean/Lara/Prop.lean`: equivalence laws, decidability, idempotence, no-reorder; no `sorry`, axioms `propext` only). The completed warm-up. |
-| 12 | Codec round-trip to α-equivalent AST | **mechanized presentation codec** (+ Haskell conformance) | Lean proves round-trip over the full frozen `Program`/`Policy` AST; Haskell QuickCheck covers the concrete `.lara` parser/printer separately. |
+| 12 | Codec round-trip to α-equivalent AST | **partially mechanized presentation codec** (+ current Haskell conformance) | Haskell QuickCheck covers the current concrete `.lara` parser/printer, including signature blocks and optional measurand polarity. Lean's structured presentation codec round-trips its modeled fields but does not yet include `policySigma` or optional measurand polarity; see `../plans/2026-08-10-sorts-in-checker.md` §13. |
+| 13 | Well-sortedness is decidable and preserved by rule instantiation (`lara-core@0.2`, issue #89) | **mechanized** | `../lean/Lara/Sigma.lean`. (a) `wellSorted_decidable` — the executable check *is* the relation, so decidability is definitional and needs no classical input. (b) `wellSorted_subst` (+ `_list`, `_mem`, `_rule`) — the substitution lemma: a rule whose premises, conclusion, and answers are well-sorted under Σ extended with its derived parameter sorts, instantiated by a sort-respecting θ, yields well-sorted atoms; the same lemma applies to checked exception patterns. (c) `thetaWellSorted_ruleSortRespecting` combines stage 2's θ-range check with accepted support's R3 exact-domain invariant. (d) `checkUnit_wellSorted` (`../lean/Lara/Check/Unit.lean`) closes over every actual rule instance recursively reachable through an accepted support term, plus the environment's ground atoms (Γ, the theory table, and queries). |
 
 Optional LP-adapter conservativity/realization (`spec.md` §5.2) is adapter-specific and mechanized
 only if the LP adapter ships (gated by corpus open question §8 #1).
@@ -204,8 +205,9 @@ right precedent:
   canonicalizes whole-unit acceptance. Its fixed order is:
 
   ```text
-  duplicate rule IDs → R12 policy violation → duplicate arguments
-                     → support → typed attacks → missing conflict
+  duplicate rule IDs → R2 signature → R12 policy violation
+                     → duplicate arguments → support
+                     → typed attacks → missing conflict
   ```
 
   The support stage builds the exact retained checked-node cache; the typed-attack

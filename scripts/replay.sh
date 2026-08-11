@@ -30,7 +30,7 @@ from pathlib import Path
 
 FORMAT = "lara-replay-bundle@1"
 EXPECTED_SKELETON = "walking-skeleton"
-CORE_VERSION = "0.1"
+CORE_VERSION = "0.2"
 CHECKER_PATHS = ("src/", "app/", "lean/", "lara.cabal", "cabal.project")
 EXPECTED_ARTIFACTS = {
     "core-sexp": "emitted.core.sexp",

@@ -78,7 +78,6 @@ import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , SourceResult
-  , defeasibleSuiteSigma
   , elabErrorMessage
   , prepareSource
   , renderSourceInvalid
@@ -103,6 +102,7 @@ import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Strict (SExpr (..))
 import Lara.Wire (PublicStatus (..), conditionalStatus, Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
 import Lara.WorkedExamples (workedExamples)
+import SigmaFixture (sigmaOf)
 
 -- ---------------------------------------------------------------------------
 -- Fixtures
@@ -197,7 +197,7 @@ runExample dir policyBase k = do
 
 preparedResult :: Program -> Policy -> Either String SourceResult
 preparedResult prog pol =
-  case prepareSource defeasibleSuiteSigma prog pol of
+  case prepareSource prog pol of
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
@@ -583,7 +583,7 @@ prop_replayPreflightExpectedJson =
             ]
       ]
   where
-    empty = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+    empty = Unit (sigmaOf [] [] [("p", [])]) [] [] [] [] [] [] [] [] [] QuarantineOnConflict
     duplicateInput = preflightInput [(BackendId "nd", "1"), (BackendId "nd", "1")] empty
     unknownInput = preflightInput [(BackendId "nd", "1"), (BackendId "other", "2")] empty
     certificate =
@@ -601,7 +601,7 @@ prop_replayPreflightExpectedJson =
       let replayId =
             either (error . replayErrorMessage) id $
               mkReplayId
-                LaraCoreV01
+                LaraCoreV02
                 (PolicyId "conformance-v1")
                 backends
                 []
@@ -641,7 +641,10 @@ prop_groupConflictExpectedJson =
         ]
   where
     effect c = Prop (Pred "effect") [TCon (FunSym c) []]
-    empty = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+    empty =
+      Unit
+        (sigmaOf ["Direction"] [("up", [], "Direction"), ("down", [], "Direction")] [("effect", ["Direction"])])
+        [] [] [] [] [] [] [] [] [] QuarantineOnConflict
     groupConflictUnit =
       empty
         { unitLeaves = [(LeafId "e1", effect "up"), (LeafId "e2", effect "down")]
@@ -654,7 +657,7 @@ prop_groupConflictExpectedJson =
       let replayId =
             either (error . replayErrorMessage) id $
               mkReplayId
-                LaraCoreV01
+                LaraCoreV02
                 (PolicyId "conformance-v1")
                 [(BackendId "nd", "1")]
                 []
@@ -845,7 +848,7 @@ loadUnit :: (FilePath, FilePath) -> IO (FilePath, Unit)
 loadUnit (dir, policyBase) = do
   prog <- loadProgram (dir ++ "/example.lara")
   pol <- loadPolicy (dir ++ "/" ++ policyBase)
-  case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+  case elaborate (registryOf pol) prog pol of
     Left e -> error (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e)
     Right u -> pure (dir, u)
 

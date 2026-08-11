@@ -3703,3 +3703,223 @@ tree:
     - "/Users/yfhe/repos/ara/lara-binding-audit-review-74f4737.zip"
   also_depends_on: [N147, N148]
   status: resolved
+- id: N150
+  type: pivot
+  title: "Opened lara-core@0.2: the first change that moves the core, not the surface"
+  provenance: user
+  timestamp: "2026-08-10T10:00"
+  from: "Surface track (#90/#88a/#91): every addition additive over a frozen lara-core@0.1"
+  to: >
+    Core change: Sigma enters Unit, the wire bumps to lara-core@0.2, checkUnit
+    becomes seven stages in both languages, spec 10.1 amends a frozen class, and
+    every generated artifact regenerates.
+  trigger: >
+    User directive to implement plans/2026-08-10-sorts-in-checker.md. This also
+    settles D-4, the plan's one open sign-off — the scheduling question of
+    whether the pass lands inside the #60 submission window. Decided in favour
+    of now; the regeneration's two measurement diffs came back empty, so the
+    evaluation table the decision was protecting did not move.
+  also_depends_on: [N140, N141]
+  status: resolved
+
+- id: N151
+  type: experiment
+  title: "Sigma inference bootstrap (D0): the corpus symbol census"
+  provenance: ai-executed
+  timestamp: "2026-08-10T10:40"
+  description: >
+    scripts/infer-sigma.hs: union-find over predicate and constructor argument
+    occurrences across corpus-v1's policy and all 60 elaborated corpus units.
+    Run over elaborated Units rather than raw declarations, because elaboration
+    is what reclassifies a non-parameter pattern identifier into the nullary
+    constant it actually is and what expands comparison blocks into the
+    arguments whose theta ties constants to parameter classes. Emits the finest
+    consistent partition with opaque sort names.
+  result: >
+    "# census: 27 inferred sorts, 196 constructors (187 nullary), 54 predicates".
+    The nullary constants dominate 187/196, and none is discoverable by grepping
+    for `name(` — which is why the plan's own head-token estimate was low by
+    roughly 3x exactly there. Ran before D1 so the census could size D8.
+  evidence:
+    - scripts/infer-sigma.hs
+    - corpus-units/corpus-v1.policy.lara
+  also_depends_on: [N150]
+  status: resolved
+
+- id: N152
+  type: experiment
+  title: "Implemented D0-D11 end to end and regenerated every artifact"
+  provenance: ai-executed
+  timestamp: "2026-08-10T16:00"
+  description: >
+    Haskell: Lara.Sigma (object, sortOf, Sigma-WF) + Lara.Sigma.WellSorted
+    (derived rule-parameter sorts, the static half, the per-instance theta-range
+    half, located R2); Unit.unitSigma, Policy.policySigma, RejectClass.R2;
+    surface sort/con/pred blocks; the wire sigma section with a hard cutover to
+    lara-core@0.2; checkUnit stage 2; Lara.Policy.firstViolation absorbing spec
+    4.1 rule scope as R12's second arm. Sigma left the elaborator's parameter
+    list entirely — it now comes from the policy, so no caller can hand the
+    elaborator a signature the policy does not declare. Signatures authored for
+    corpus-v1, all 8 examples/ policies, Lara.Negatives, and a shared
+    test-fixture helper. Six new mutation operators in a new Lara.Mutate.Sorts
+    split module, all swept over the corpus; examples/R2-sort/ built on the
+    SHIPPED ord-v1 signature.
+  result: >
+    Two committed measurement diffs, both EMPTY: the MANIFEST.tsv expected-column
+    diff over the 369 pre-existing mutants, and the verdict+status diff over all
+    60 corpus expected.json across the regeneration boundary. Suite 369 -> 496
+    mutants; reject-R2 0 -> 107. measurements/frozen re-taken over 556 inputs:
+    556/556 class match, 556/556 cross-driver agreement, 393/393 location match,
+    60/60 replay. differential.sh green (574 fixtures byte-identical, 54
+    negatives agreeing). cabal test all green. binding-audit worklist.tsv
+    re-derived byte-identically before regenerating, which is decision D-5's
+    verification rather than its assumption.
+  evidence:
+    - src/Lara/Sigma.hs
+    - src/Lara/Sigma/WellSorted.hs
+    - src/Lara/Mutate/Sorts.hs
+    - examples/R2-sort/example.lara
+    - measurements/frozen/lara-core-0.2-regeneration-diffs.md
+    - measurements/frozen/report.json
+    - "commits: dfa9811, 235e0a6, 2f8e664"
+  also_depends_on: [N150, N151]
+  status: resolved
+
+- id: N153
+  type: experiment
+  title: "Mechanized result 13: decidability and the substitution lemma"
+  provenance: ai-executed
+  timestamp: "2026-08-10T18:30"
+  description: >
+    lean/Lara/Sigma.lean. (a) wellSorted_decidable — the executable check IS the
+    relation, so decidability is definitional and consumes no classical input.
+    (b) wellSorted_subst (+ _list, _mem, _rule) — the substitution lemma.
+    (c) checkUnit_wellSorted — every atom an accepted unit reaches is well-sorted
+    under that unit's own Sigma. Lara.Unit gains sigma; CheckedUnit gains
+    sigma_wf, policy_well_sorted, scopes_wf, args_well_sorted; checkUnit gains
+    stage 2 and an explicit `ground` argument, because Lean's Unit carries Gamma
+    as a function and storing the finite atom list would have meant threading a
+    field through several proved unit equalities in the quarantine/prune layer.
+  result: >
+    Full Lean build clean; AxCheck gains 24 #print axioms lines and the gate
+    passes — no sorryAx, nothing outside propext / Classical.choice / Quot.sound.
+    Mechanization forced one design correction that the Haskell had not needed:
+    Lean's Policy.Violation / WellFormed / firstViolation_none_iff are a proved
+    correspondence other results cite, so spec 4.1's scope check was added as a
+    separate UnitError arm rather than a widened Violation. Both drivers still
+    reject the same units with the same class in the same stage order, which the
+    differential checks byte-for-byte.
+  evidence:
+    - lean/Lara/Sigma.lean
+    - lean/Lara/Check/Unit.lean
+    - lean/AxCheck.lean
+    - docs/mechanization-plan.md
+    - "commits: 48c0c3f, 16fa55f"
+  also_depends_on: [N152]
+  status: resolved
+
+- id: N154
+  type: dead_end
+  title: "Lean's theta-range check inspected terms at non-parameter keys"
+  provenance: ai-executed
+  timestamp: "2026-08-10T20:40"
+  hypothesis: >
+    That mirroring the Haskell theta-range check clause-for-clause was enough,
+    and that the differential over 574 fixtures would surface any divergence.
+  failure_mode: >
+    Lean's thetaWellSorted resolved sortOf at EVERY theta key and consulted the
+    rule's parameter list only afterwards, so an ill-sorted term at a
+    NON-parameter key was R2 in Lean and R3 in Haskell. The differential stayed
+    green because it is unreachable on the committed corpus: wrong-subst-domain
+    renames a key but keeps the well-sorted term it was already bound to, so no
+    fixture puts an ill-sorted value at an off-domain key.
+  lesson: >
+    A cross-driver differential proves agreement on the corpus, not agreement of
+    the definitions — a class-boundary rule with no fixture that exercises it is
+    unprotected by exactly the gate that looks like it protects it. Found by
+    re-reading the two definitions side by side, not by any gate. Fixed and
+    pinned with a dedicated CheckSpec negative (negR3OffDomainIllSorted) rather
+    than left for the next mutation operator to discover, which is when it would
+    have moved the 19 wrong-subst-domain mutants.
+  evidence:
+    - lean/Lara/Unit.lean
+    - test/CheckSpec.hs
+    - "commit: 8f49ffb"
+  also_depends_on: [N152, N153]
+  status: resolved
+
+- id: N155
+  type: dead_end
+  title: "Assumed sort-respecting substitutions did not close result 13 over the checker"
+  provenance: ai-executed
+  timestamp: "2026-08-10T20:05"
+  hypothesis: >
+    That checkUnit_wellSorted established its advertised accepted-unit closure by
+    quantifying over RuleSortRespecting substitutions inside the theorem.
+  failure_mode: >
+    The theorem assumed RuleSortRespecting for arbitrary substitutions and did
+    not derive it from the executable thetaWellSorted check or from accepted
+    support's exact-domain invariant. Its prose also named exception atoms even
+    though the theorem's conjunction covered only premises, conclusions, and
+    critical-question answers.
+  lesson: >
+    A checker soundness theorem must derive its semantic premise from executable
+    checks and acceptance invariants. Its public claim must enumerate exactly the
+    constructors present in the conclusion; a reusable per-pattern lemma is not
+    itself whole-checker closure.
+  evidence:
+    - "PR #97 review comment 3754845825"
+    - lean/Lara/Check/Unit.lean
+    - lean/Lara/Sigma.lean
+  also_depends_on: [N153]
+  status: resolved
+
+- id: N156
+  type: experiment
+  title: "PR #97 review repair closed all nine threads and passed local plus hosted gates"
+  provenance: ai-executed
+  timestamp: "2026-08-10T20:24"
+  description: >
+    Verified each external review finding against the live branch, repaired the
+    Lean bridge and claim scope, corrected R2/R12/result-12 documentation,
+    centralized the Haskell base-sort vocabulary and Sigma fixture builder,
+    removed new Haskell warnings, added Sigma fault and malformed-wire matrices,
+    and made both regeneration-diff commands executable.
+  result: >
+    Independent re-review found no Critical or Important issue. Local cabal
+    build/test, full Lean build, axiom audit, elaborator/freezer tests,
+    walking-skeleton freshness, clean replay, tamper gates, 574-row
+    Haskell/Lean differential, 54 malformed negatives, and 20-row admission
+    differential passed. Hosted PR CI passed both Haskell and Lean jobs. All
+    nine inline review threads were replied to and resolved.
+  evidence:
+    - "commits: 7d064de, dd7560f"
+    - "GitHub Actions run 31454957058"
+    - "PR #97 review threads"
+    - scripts/differential.sh
+    - scripts/admission-differential.sh
+    - lean/AxCheck.lean
+  also_depends_on: [N152, N153, N154, N155]
+  status: resolved
+
+- id: N157
+  type: decision
+  title: "Calibrate result 13 to the closure actually mechanized"
+  provenance: ai-executed
+  timestamp: "2026-08-10T20:25"
+  choice: >
+    State checkUnit_wellSorted over the finite ground environment and the
+    instantiated premises, conclusions, and answers of actual rule instances
+    recursively reachable through accepted support terms. Keep exception-pattern
+    and attack/undercut closure explicit as a separate, unproved boundary.
+  alternatives:
+    - "Retain the whole-accepted-unit wording despite the missing derivation."
+    - "Expand this review repair into a new attack/exception closure theorem."
+  evidence:
+    - lean/Lara/Check/Unit.lean
+    - lean/Lara/Sigma.lean
+    - docs/spec.md
+    - docs/mechanization-plan.md
+    - ara/logic/claims.md
+  also_depends_on: [N155, N156]
+  status: resolved

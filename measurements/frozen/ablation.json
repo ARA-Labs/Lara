@@ -1,7 +1,7 @@
 {
   "environment": {
-    "git-rev": "3108a5f3fb576d84ed2b858c0762d20cedd4495a",
-    "git-dirty": false,
+    "git-rev": "16fa55fa4d5ec246accdfb72a955fa0bf02dd2ef",
+    "git-dirty": true,
     "ghc": "9.14.1",
     "lean": "Lean (version 4.32.0, arm64-apple-darwin24.6.0, commit 8c9756b28d64dab099da31a4c09229a9e6a2ef35, Release)",
     "os": "darwin",
@@ -11,9 +11,9 @@
     {
       "ablation": "no-cq",
       "aggregate": {
-        "count": 429,
+        "count": 556,
         "missed-rejects": 18,
-        "unchanged": 411,
+        "unchanged": 538,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -87,16 +87,22 @@
             "unchanged": 19
           },
           "reject-R12": {
-            "total": 20,
+            "total": 40,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 20
+            "unchanged": 40
           },
           "reject-R13": {
             "total": 42,
             "missed-rejects": 0,
             "missed-accept-classes": {},
             "unchanged": 42
+          },
+          "reject-R2": {
+            "total": 107,
+            "missed-rejects": 0,
+            "missed-accept-classes": {},
+            "unchanged": 107
           },
           "reject-R3": {
             "total": 19,
@@ -275,6 +281,76 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--undeclared-pred-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-pred-arity-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-arg-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-arg-sort-1.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--undeclared-con-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-theta-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--out-of-scope-var-0.sexp",
+          "base": "A",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -478,6 +554,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/B--undeclared-pred-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-pred-arity-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-arg-sort-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-arg-sort-1.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--undeclared-con-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-theta-sort-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--out-of-scope-var-0.sexp",
+          "base": "B",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/B--duplicate-backend-0.sexp",
           "base": "B",
           "family": "certificate-tampering",
@@ -678,6 +824,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/E1--undeclared-pred-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-pred-arity-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-arg-sort-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-arg-sort-1.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--undeclared-con-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-theta-sort-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--out-of-scope-var-0.sexp",
+          "base": "E1",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/E1--duplicate-backend-0.sexp",
           "base": "E1",
           "family": "certificate-tampering",
@@ -765,6 +981,66 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--undeclared-pred-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--wrong-pred-arity-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--wrong-arg-sort-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--wrong-arg-sort-1.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--undeclared-con-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--out-of-scope-var-0.sexp",
+          "base": "E2",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -975,6 +1251,76 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--undeclared-pred-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-pred-arity-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-arg-sort-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-arg-sort-1.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--undeclared-con-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-theta-sort-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--out-of-scope-var-0.sexp",
+          "base": "E3",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -1198,6 +1544,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/E4--undeclared-pred-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-pred-arity-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-arg-sort-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-arg-sort-1.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--undeclared-con-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-theta-sort-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--out-of-scope-var-0.sexp",
+          "base": "E4",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/E4--duplicate-backend-0.sexp",
           "base": "E4",
           "family": "certificate-tampering",
@@ -1418,6 +1834,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/E5--undeclared-pred-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-pred-arity-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-arg-sort-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-arg-sort-1.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--undeclared-con-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-theta-sort-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--out-of-scope-var-0.sexp",
+          "base": "E5",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/E5--duplicate-backend-0.sexp",
           "base": "E5",
           "family": "certificate-tampering",
@@ -1565,6 +2051,76 @@
           "expected": "reject-R11",
           "full-actual": "reject-R11",
           "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--undeclared-pred-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-pred-arity-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-arg-sort-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-arg-sort-1.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--undeclared-con-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-theta-sort-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--out-of-scope-var-0.sexp",
+          "base": "S1",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -3045,6 +3601,726 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/semantic-self-consistency.C03--undeclared-pred-0.sexp",
+          "base": "semantic-self-consistency.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C07--undeclared-pred-0.sexp",
+          "base": "robust-clip.C07",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C03--undeclared-pred-0.sexp",
+          "base": "adaptive-pruning.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stochastic-interpolants.C03--undeclared-pred-0.sexp",
+          "base": "stochastic-interpolants.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C02--undeclared-pred-0.sexp",
+          "base": "robust-clip.C02",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C02--undeclared-pred-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C02",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--undeclared-pred-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/mechanistic-understanding.C04--undeclared-pred-0.sexp",
+          "base": "mechanistic-understanding.C04",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sapg.C01--undeclared-pred-0.sexp",
+          "base": "sapg.C01",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C05--undeclared-pred-0.sexp",
+          "base": "bbox.C05",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-expansion.C03--undeclared-pred-0.sexp",
+          "base": "self-expansion.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/mechanistic-understanding.C02--undeclared-pred-0.sexp",
+          "base": "mechanistic-understanding.C02",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C05--wrong-pred-arity-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bridging-data-gaps.C05--wrong-pred-arity-0.sexp",
+          "base": "bridging-data-gaps.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-pred-arity-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C06--wrong-pred-arity-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C06",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C03--wrong-pred-arity-0.sexp",
+          "base": "adaptive-pruning.C03",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/semantic-self-consistency.C06--wrong-pred-arity-0.sexp",
+          "base": "semantic-self-consistency.C06",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-fix_embedding.C12--wrong-pred-arity-0.sexp",
+          "base": "rebench-fix_embedding.C12",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C05--wrong-pred-arity-0.sexp",
+          "base": "all-in-one.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C05--wrong-pred-arity-0.sexp",
+          "base": "bbox.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C03--wrong-pred-arity-0.sexp",
+          "base": "all-in-one.C03",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C03--wrong-pred-arity-0.sexp",
+          "base": "pinn.C03",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C05--wrong-pred-arity-0.sexp",
+          "base": "test-time-model-adaptation.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C06--wrong-arg-sort-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C06",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sapg.C06--wrong-arg-sort-0.sexp",
+          "base": "sapg.C06",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C02--wrong-arg-sort-0.sexp",
+          "base": "robust-clip.C02",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/semantic-self-consistency.C03--wrong-arg-sort-0.sexp",
+          "base": "semantic-self-consistency.C03",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C02--wrong-arg-sort-0.sexp",
+          "base": "bbox.C02",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C04--wrong-arg-sort-0.sexp",
+          "base": "self-composing-policies.C04",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C04--wrong-arg-sort-0.sexp",
+          "base": "bbox.C04",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C06--wrong-arg-sort-0.sexp",
+          "base": "bam.C06",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bridging-data-gaps.C03--wrong-arg-sort-0.sexp",
+          "base": "bridging-data-gaps.C03",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-arg-sort-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C01--wrong-arg-sort-0.sexp",
+          "base": "all-in-one.C01",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C05--wrong-arg-sort-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C05",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--undeclared-con-0.sexp",
+          "base": "sample-specific-masks.C06",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--undeclared-con-0.sexp",
+          "base": "rice.C01",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sequential-neural-score-estimation.C04--undeclared-con-0.sexp",
+          "base": "sequential-neural-score-estimation.C04",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bridging-data-gaps.C03--undeclared-con-0.sexp",
+          "base": "bridging-data-gaps.C03",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C03--undeclared-con-0.sexp",
+          "base": "fre.C03",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C05--undeclared-con-0.sexp",
+          "base": "pinn.C05",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--undeclared-con-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--undeclared-con-0.sexp",
+          "base": "fre.C04",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C06--undeclared-con-0.sexp",
+          "base": "bbox.C06",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--undeclared-con-0.sexp",
+          "base": "bam.C05",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C06--undeclared-con-0.sexp",
+          "base": "all-in-one.C06",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C04--undeclared-con-0.sexp",
+          "base": "self-composing-policies.C04",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-triton_cumsum.C09--wrong-theta-sort-0.sexp",
+          "base": "rebench-triton_cumsum.C09",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C01--wrong-theta-sort-0.sexp",
+          "base": "pinn.C01",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-theta-sort-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--wrong-theta-sort-0.sexp",
+          "base": "fre.C01",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--wrong-theta-sort-0.sexp",
+          "base": "rice.C01",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--wrong-theta-sort-0.sexp",
+          "base": "sample-specific-masks.C06",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-theta-sort-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-theta-sort-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-theta-sort-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--wrong-theta-sort-0.sexp",
+          "base": "bam.C05",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--wrong-theta-sort-0.sexp",
+          "base": "fre.C04",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-theta-sort-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp",
+          "base": "self-expansion.C04",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C03--out-of-scope-var-0.sexp",
+          "base": "robust-clip.C03",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C07--out-of-scope-var-0.sexp",
+          "base": "robust-clip.C07",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sapg.C06--out-of-scope-var-0.sexp",
+          "base": "sapg.C06",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C01--out-of-scope-var-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/mechanistic-understanding.C02--out-of-scope-var-0.sexp",
+          "base": "mechanistic-understanding.C02",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--out-of-scope-var-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C05--out-of-scope-var-0.sexp",
+          "base": "test-time-model-adaptation.C05",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/lbcs.C03--out-of-scope-var-0.sexp",
+          "base": "lbcs.C03",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C06--out-of-scope-var-0.sexp",
+          "base": "bam.C06",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C04--out-of-scope-var-0.sexp",
+          "base": "self-composing-policies.C04",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C06--out-of-scope-var-0.sexp",
+          "base": "all-in-one.C06",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -4432,9 +5708,9 @@
     {
       "ablation": "no-typed",
       "aggregate": {
-        "count": 429,
+        "count": 556,
         "missed-rejects": 30,
-        "unchanged": 399,
+        "unchanged": 526,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -4512,16 +5788,22 @@
             "unchanged": 0
           },
           "reject-R12": {
-            "total": 20,
+            "total": 40,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 20
+            "unchanged": 40
           },
           "reject-R13": {
             "total": 42,
             "missed-rejects": 0,
             "missed-accept-classes": {},
             "unchanged": 42
+          },
+          "reject-R2": {
+            "total": 107,
+            "missed-rejects": 0,
+            "missed-accept-classes": {},
+            "unchanged": 107
           },
           "reject-R3": {
             "total": 19,
@@ -4700,6 +5982,76 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--undeclared-pred-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-pred-arity-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-arg-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-arg-sort-1.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--undeclared-con-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--wrong-theta-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--out-of-scope-var-0.sexp",
+          "base": "A",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -4903,6 +6255,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/B--undeclared-pred-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-pred-arity-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-arg-sort-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-arg-sort-1.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--undeclared-con-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--wrong-theta-sort-0.sexp",
+          "base": "B",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/B--out-of-scope-var-0.sexp",
+          "base": "B",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/B--duplicate-backend-0.sexp",
           "base": "B",
           "family": "certificate-tampering",
@@ -5103,6 +6525,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/E1--undeclared-pred-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-pred-arity-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-arg-sort-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-arg-sort-1.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--undeclared-con-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--wrong-theta-sort-0.sexp",
+          "base": "E1",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E1--out-of-scope-var-0.sexp",
+          "base": "E1",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/E1--duplicate-backend-0.sexp",
           "base": "E1",
           "family": "certificate-tampering",
@@ -5190,6 +6682,66 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--undeclared-pred-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--wrong-pred-arity-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--wrong-arg-sort-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--wrong-arg-sort-1.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--undeclared-con-0.sexp",
+          "base": "E2",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E2--out-of-scope-var-0.sexp",
+          "base": "E2",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -5400,6 +6952,76 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--undeclared-pred-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-pred-arity-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-arg-sort-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-arg-sort-1.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--undeclared-con-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--wrong-theta-sort-0.sexp",
+          "base": "E3",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E3--out-of-scope-var-0.sexp",
+          "base": "E3",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {
@@ -5623,6 +7245,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/E4--undeclared-pred-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-pred-arity-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-arg-sort-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-arg-sort-1.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--undeclared-con-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--wrong-theta-sort-0.sexp",
+          "base": "E4",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E4--out-of-scope-var-0.sexp",
+          "base": "E4",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/E4--duplicate-backend-0.sexp",
           "base": "E4",
           "family": "certificate-tampering",
@@ -5843,6 +7535,76 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/E5--undeclared-pred-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-pred-arity-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-arg-sort-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-arg-sort-1.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--undeclared-con-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--wrong-theta-sort-0.sexp",
+          "base": "E5",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/E5--out-of-scope-var-0.sexp",
+          "base": "E5",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/E5--duplicate-backend-0.sexp",
           "base": "E5",
           "family": "certificate-tampering",
@@ -5991,6 +7753,76 @@
           "full-actual": "reject-R11",
           "ablation-actual": "accept-all-contested",
           "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/S1--undeclared-pred-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-pred-arity-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-arg-sort-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-arg-sort-1.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--undeclared-con-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--wrong-theta-sort-0.sexp",
+          "base": "S1",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S1--out-of-scope-var-0.sexp",
+          "base": "S1",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
         },
         {
           "input": "fixtures/mutants/S1--duplicate-backend-0.sexp",
@@ -7470,6 +9302,726 @@
           "expected": "reject-R9",
           "full-actual": "reject-R9",
           "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/semantic-self-consistency.C03--undeclared-pred-0.sexp",
+          "base": "semantic-self-consistency.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C07--undeclared-pred-0.sexp",
+          "base": "robust-clip.C07",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C03--undeclared-pred-0.sexp",
+          "base": "adaptive-pruning.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stochastic-interpolants.C03--undeclared-pred-0.sexp",
+          "base": "stochastic-interpolants.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C02--undeclared-pred-0.sexp",
+          "base": "robust-clip.C02",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C02--undeclared-pred-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C02",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--undeclared-pred-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/mechanistic-understanding.C04--undeclared-pred-0.sexp",
+          "base": "mechanistic-understanding.C04",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sapg.C01--undeclared-pred-0.sexp",
+          "base": "sapg.C01",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C05--undeclared-pred-0.sexp",
+          "base": "bbox.C05",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-expansion.C03--undeclared-pred-0.sexp",
+          "base": "self-expansion.C03",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/mechanistic-understanding.C02--undeclared-pred-0.sexp",
+          "base": "mechanistic-understanding.C02",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C05--wrong-pred-arity-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bridging-data-gaps.C05--wrong-pred-arity-0.sexp",
+          "base": "bridging-data-gaps.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-pred-arity-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C06--wrong-pred-arity-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C06",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C03--wrong-pred-arity-0.sexp",
+          "base": "adaptive-pruning.C03",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/semantic-self-consistency.C06--wrong-pred-arity-0.sexp",
+          "base": "semantic-self-consistency.C06",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-fix_embedding.C12--wrong-pred-arity-0.sexp",
+          "base": "rebench-fix_embedding.C12",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C05--wrong-pred-arity-0.sexp",
+          "base": "all-in-one.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C05--wrong-pred-arity-0.sexp",
+          "base": "bbox.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C03--wrong-pred-arity-0.sexp",
+          "base": "all-in-one.C03",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C03--wrong-pred-arity-0.sexp",
+          "base": "pinn.C03",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C05--wrong-pred-arity-0.sexp",
+          "base": "test-time-model-adaptation.C05",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C06--wrong-arg-sort-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C06",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sapg.C06--wrong-arg-sort-0.sexp",
+          "base": "sapg.C06",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C02--wrong-arg-sort-0.sexp",
+          "base": "robust-clip.C02",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/semantic-self-consistency.C03--wrong-arg-sort-0.sexp",
+          "base": "semantic-self-consistency.C03",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C02--wrong-arg-sort-0.sexp",
+          "base": "bbox.C02",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C04--wrong-arg-sort-0.sexp",
+          "base": "self-composing-policies.C04",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C04--wrong-arg-sort-0.sexp",
+          "base": "bbox.C04",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C06--wrong-arg-sort-0.sexp",
+          "base": "bam.C06",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bridging-data-gaps.C03--wrong-arg-sort-0.sexp",
+          "base": "bridging-data-gaps.C03",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-arg-sort-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C01--wrong-arg-sort-0.sexp",
+          "base": "all-in-one.C01",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/stay-on-topic-with-classifier-free-guidance.C05--wrong-arg-sort-0.sexp",
+          "base": "stay-on-topic-with-classifier-free-guidance.C05",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--undeclared-con-0.sexp",
+          "base": "sample-specific-masks.C06",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--undeclared-con-0.sexp",
+          "base": "rice.C01",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sequential-neural-score-estimation.C04--undeclared-con-0.sexp",
+          "base": "sequential-neural-score-estimation.C04",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bridging-data-gaps.C03--undeclared-con-0.sexp",
+          "base": "bridging-data-gaps.C03",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C03--undeclared-con-0.sexp",
+          "base": "fre.C03",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C05--undeclared-con-0.sexp",
+          "base": "pinn.C05",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--undeclared-con-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--undeclared-con-0.sexp",
+          "base": "fre.C04",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bbox.C06--undeclared-con-0.sexp",
+          "base": "bbox.C06",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--undeclared-con-0.sexp",
+          "base": "bam.C05",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C06--undeclared-con-0.sexp",
+          "base": "all-in-one.C06",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C04--undeclared-con-0.sexp",
+          "base": "self-composing-policies.C04",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-triton_cumsum.C09--wrong-theta-sort-0.sexp",
+          "base": "rebench-triton_cumsum.C09",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/pinn.C01--wrong-theta-sort-0.sexp",
+          "base": "pinn.C01",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-restricted_mlm.C14--wrong-theta-sort-0.sexp",
+          "base": "rebench-restricted_mlm.C14",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C01--wrong-theta-sort-0.sexp",
+          "base": "fre.C01",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rice.C01--wrong-theta-sort-0.sexp",
+          "base": "rice.C01",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C06--wrong-theta-sort-0.sexp",
+          "base": "sample-specific-masks.C06",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sample-specific-masks.C05--wrong-theta-sort-0.sexp",
+          "base": "sample-specific-masks.C05",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C04--wrong-theta-sort-0.sexp",
+          "base": "test-time-model-adaptation.C04",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/adaptive-pruning.C04--wrong-theta-sort-0.sexp",
+          "base": "adaptive-pruning.C04",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C05--wrong-theta-sort-0.sexp",
+          "base": "bam.C05",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/fre.C04--wrong-theta-sort-0.sexp",
+          "base": "fre.C04",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--wrong-theta-sort-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp",
+          "base": "self-expansion.C04",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C03--out-of-scope-var-0.sexp",
+          "base": "robust-clip.C03",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/robust-clip.C07--out-of-scope-var-0.sexp",
+          "base": "robust-clip.C07",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/sapg.C06--out-of-scope-var-0.sexp",
+          "base": "sapg.C06",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C01--out-of-scope-var-0.sexp",
+          "base": "self-composing-policies.C01",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/mechanistic-understanding.C02--out-of-scope-var-0.sexp",
+          "base": "mechanistic-understanding.C02",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/rebench-rust_codecontests.C02--out-of-scope-var-0.sexp",
+          "base": "rebench-rust_codecontests.C02",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/test-time-model-adaptation.C05--out-of-scope-var-0.sexp",
+          "base": "test-time-model-adaptation.C05",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/lbcs.C03--out-of-scope-var-0.sexp",
+          "base": "lbcs.C03",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/bam.C06--out-of-scope-var-0.sexp",
+          "base": "bam.C06",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/self-composing-policies.C04--out-of-scope-var-0.sexp",
+          "base": "self-composing-policies.C04",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/all-in-one.C06--out-of-scope-var-0.sexp",
+          "base": "all-in-one.C06",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
           "missed-reject": false
         },
         {

@@ -49,7 +49,6 @@ import Lara.Check (fullConfig)
 import Lara.Driver (runCheckLocatedReported)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -135,7 +134,7 @@ checkLara file = do
               case Syntax.parsePolicy polText of
                 Left pe -> die2 (locatedParseError policyPath pe)
                 Right pol ->
-                  case prepareSource defeasibleSuiteSigma prog pol of
+                  case prepareSource prog pol of
                     Left invalid -> die2 ("lara: source invalid: " ++ renderSourceInvalid invalid)
                     Right (SourceRejected rejection) -> do
                       hPutStrLn stderr ("lara: " ++ renderAdmissionRejection rejection)

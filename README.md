@@ -241,9 +241,13 @@ checker, never a substitute for the theorems (spec §9).
 
 The implementation is complete through the M4 walking-skeleton milestone:
 
-- **M1 — frozen core language.** `lara-core@0.1` is specified in
-  [`docs/spec.md`](docs/spec.md); the additive `.lara` presentation frontend is
-  `lara-syntax@0.2`.
+- **M1 — frozen core language.** The core is specified in
+  [`docs/spec.md`](docs/spec.md); the `.lara` presentation frontend is
+  `lara-syntax@0.3`. M1 froze `lara-core@0.1`; the current core is
+  **`lara-core@0.2`**, which added the declared many-sorted proposition
+  signature and made rejection class R2 executable (issue #89). That is the one
+  amendment to the frozen surface so far, and it widened a class no
+  implementation had ever enforced.
 - **M2 — mechanized reference core.** Lean proves the checker, compilation,
   grounded evaluation, strict-backend soundness/isolation, result-7 consistency,
   backend replacement (including constructive well-checkedness transport), the

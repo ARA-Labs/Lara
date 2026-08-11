@@ -32,10 +32,7 @@
 --     first.
 module Lara.Elaborate.Internal
   ( -- * Caller-supplied environment inputs
-    Sigma (..)
-  , emptySigma
-  , defeasibleSuiteSigma
-  , TheoryRegistry (..)
+    TheoryRegistry (..)
   , emptyRegistry
   , registryOf
     -- * Elaboration errors (located-ish: they name the arg/rule/leaf/claim)
@@ -65,24 +62,11 @@ import Lara.Prop (Prop, equiv)
 -- Caller-supplied environment inputs
 -- ---------------------------------------------------------------------------
 
--- | The proposition signature @Σ@ (spec §2): predicate arities. In v0.1 Σ-arity
--- checking (rejection class R2) is __outside the executable core__ (plan A1,
--- "Before You Begin"), so the elaborator carries Σ for shape only and performs
--- __no__ arity check against it. The field exists so a future signature pass has
--- one place to read from without changing this function's type.
-newtype Sigma = Sigma {sigmaArities :: [(Pred, Int)]}
-  deriving (Eq, Show)
-
--- | The empty signature (no declared arities). Identical to
--- 'defeasibleSuiteSigma' in v0.1 since Σ is not consulted.
-emptySigma :: Sigma
-emptySigma = Sigma []
-
--- | The signature for the defeasible worked-examples suite. No arity is checked
--- (R2 is outside the executable core), so this is the empty signature; it exists
--- as the sanctioned default the A/B tests pass.
-defeasibleSuiteSigma :: Sigma
-defeasibleSuiteSigma = emptySigma
+-- The proposition signature @Σ@ is __no longer a caller-supplied input__
+-- (@lara-core\@0.2@, #89). It is declared by the policy ('policySigma') and
+-- copied verbatim into 'unitSigma' below, so there is exactly one place it can
+-- come from and no caller can hand the elaborator a signature the policy does
+-- not declare. The object itself lives in "Lara.Sigma".
 
 -- | The closed backend-registry theory table (the @nd\@1@ theories, spec §5).
 -- For the defeasible-only suite this is empty (@nd\@1@ is inert).
@@ -146,8 +130,8 @@ data Env = Env
 -- ('Lara.Elaborate.Comparison.expandSurface') __before__ any id check, any
 -- argument is lowered, or any attack path resolves, so an attack on a generated
 -- argument resolves against the post-expansion set (App. B.5, eng review F5).
-elaborate :: Sigma -> TheoryRegistry -> Program -> Policy -> Either ElabError Unit
-elaborate sigma reg prog0 pol0 = fst <$> elaborateWithProvenance sigma reg prog0 pol0
+elaborate :: TheoryRegistry -> Program -> Policy -> Either ElabError Unit
+elaborate reg prog0 pol0 = fst <$> elaborateWithProvenance reg prog0 pol0
 
 -- | 'elaborate' paired with the @comparison@ expansion's 'GeneratedArg'
 -- breadcrumb (plan D5), from the /same/ pass — so a breadcrumb can never
@@ -160,12 +144,11 @@ elaborate sigma reg prog0 pol0 = fst <$> elaborateWithProvenance sigma reg prog0
 -- The @examples\/*\/example.core.sexp@ byte-identity goldens stand as the
 -- regression test.
 elaborateWithProvenance
-  :: Sigma
-  -> TheoryRegistry
+  :: TheoryRegistry
   -> Program
   -> Policy
   -> Either ElabError (Unit, [GeneratedArg])
-elaborateWithProvenance _sigma reg prog0 pol0 = do
+elaborateWithProvenance reg prog0 pol0 = do
   when (programPolicy prog0 /= policyId pol0) $
     Left (PolicyIdMismatch (programPolicy prog0) (policyId pol0))
   -- Reclassify pattern identifiers (grammar §2): the shallow parser records
@@ -213,7 +196,8 @@ elaborateWithProvenance _sigma reg prog0 pol0 = do
   queries <- mapM (resolveStatus claims) statusIds
   pure
     ( Unit
-        { unitRules = map stripPremiseLabels (policyRules pol)
+        { unitSigma = policySigma pol
+        , unitRules = map stripPremiseLabels (policyRules pol)
         , unitContraries = policyContraries pol
         , unitExceptions = policyExceptions pol
         , unitTheories = registryTheories reg

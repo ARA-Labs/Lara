@@ -27,6 +27,7 @@ module ReportingSpec (reportingSpecProps) where
 import Test.QuickCheck (Result, quickCheckResult)
 
 import Lara.AST
+import SigmaFixture (sigmaOf)
 import Lara.Grounded
   ( Claim (..)
   , claimSupportFor
@@ -110,7 +111,8 @@ noCert _ _ _ = CertRejected "no certificate oracle in this fixture"
 mkUnit :: [(ArgId, SupportTerm)] -> [Attack] -> [Prop] -> Unit
 mkUnit args attacks queries =
   Unit
-    { unitRules = [ruleR1, ruleR2]
+    { unitSigma = sigmaOf [] [] [("a", []), ("p", []), ("not_p", [])]
+    , unitRules = [ruleR1, ruleR2]
     , unitContraries =
         [ Contrary (AtomPat (Pred "p") []) (AtomPat (Pred "p") [])
         , Contrary (AtomPat (Pred "not_p") []) (AtomPat (Pred "p") [])

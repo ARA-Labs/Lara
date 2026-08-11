@@ -32,7 +32,7 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > **Source-boundary lock (2026-08-05).** The `.lara` policy-admission runtime contract is frozen in
 > `policy-admission-calculus-decision.md`. It fixes total default-admit lookup, source invalidity,
 > R8/R13/R9/core precedence, one combined policy-plus-group prune, and its canonical audit without
-> changing `lara-core@0.1`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
+> changing `lara-core@0.2`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
 > semantics. Byte-level `lara-evidence@0.1` verification remains gated under issue #78.
 
 ## 1. Scope and guarantee
@@ -139,20 +139,20 @@ and policy-allowlisted theory digests are part of replay identity.
 
 ### 2.1 Versioning and replay identity (v0.1-frozen)
 
-The language surface is itself versioned: **`lara-core@0.1`** names the abstract syntax, the
+The language surface is itself versioned: **`lara-core@0.2`** names the abstract syntax, the
 static judgments (§6.1, §7.1, §8, §8.1), and the JSON wire schema, as frozen by M1. The
-presentation syntax is versioned separately (**`lara-syntax@0.1`**) because it may evolve against
-a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax, and the
-codec round-trip obligation (§9 result 12) is stated against `lara-core@0.1`. The complete
-presentation grammar lands with `Lara.Syntax` (M3) under this version id; the constructs shown in
-this spec are normative for it, and any grammar change that survives decode is invisible to the
-core by result 12.
+presentation syntax is versioned separately (**`lara-syntax@0.3`**) because it may evolve against
+a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
+The codec round-trip obligation (§9 result 12) is stated against `lara-core@0.2`. The Haskell
+`parse ∘ print = id` property covers the current signature blocks and optional measurand polarity;
+the mechanized structured round-trip in `lean/Lara/Presentation.lean` does not yet model those two
+fields and is tracked in `plans/2026-08-10-sorts-in-checker.md` §13.
 
 **Replay identity.** A checker verdict is reproducible only relative to the full trusted-input
 tuple; v0.1 freezes it as
 
 ```text
-replayId(P) = ( lara-core@0.1,
+replayId(P) = ( lara-core@0.2,
                 policy id @ version,       -- e.g. empirical-v1
                 [beta@version*],           -- selected backends, e.g. nd@1
                 { h* },                    -- policy-allowlisted theory digests
@@ -269,6 +269,76 @@ extension, not a change to the `p ≡ q iff nf(p) = nf(q)` shape.
 Confidence values and thresholds are metadata unless the selected policy gives them formal
 admission semantics. Provenance can admit, quarantine, or reject a leaf before argument evaluation;
 it does not itself create an attack.
+
+### 3.4 The proposition signature `Sigma` and well-sortedness (`lara-core@0.2`)
+
+`Sigma` is a **declared, many-sorted, first-order signature**. Until `lara-core@0.2` it was an
+arity table the implementation carried and never read; it is now a field of the checker unit and a
+checked precondition of reading the policy as patterns.
+
+```text
+sort S1, ..., Sk                       -- declared, opaque sort names
+con  k(s1, ..., sn) : s                -- constructor signature; n = 0 for a constant
+pred p(s1, ..., sn)                    -- predicate signature; no result sort
+```
+
+**Two base sorts are built in.** `Num` and `Str` are the sorts of the two `Term` literal forms.
+They are not declarable and not shadowable: a `sort Num` declaration is a well-formedness reject
+rather than a silent redefinition, because a signature able to redefine them could make `sortOf`
+non-total on ground data the frontend never declared.
+
+**Sort equality is name equality.** There is no subtyping, no sort variables, and no sort
+constructors. This is a first-order signature and nothing more.
+
+**Arity is subsumed, not replaced.** An arity is the length of an argument-sort vector, so the
+older `pred -> arity` table is `map (\s -> (sym s, length (args s)))` of the new one, and the new
+object is strictly stronger on every axis.
+
+**`sortOf` is a simple recursion**, total except on undeclared symbols:
+
+```text
+sortOf(num _)    = Num
+sortOf(str _)    = Str
+sortOf(con k ts) = k's declared result sort,
+                   provided |ts| equals k's arity and each sortOf(t_i) equals
+                   k's declared i-th argument sort
+```
+
+An atom `p(t1, ..., tn)` is **well-sorted** when `p` is declared, `n` is `p`'s arity, and each
+`sortOf(t_i)` is `p`'s declared i-th argument sort.
+
+**Rule parameter sorts are derived, not declared.** Under a well-formed `Sigma` every parameter
+occupies sorted positions in its own rule's patterns, so its sort is the unique sort of all its
+occurrences; two occurrences demanding different sorts are a reject. A parameter with no pattern
+occurrence is *unconstrained* — its θ bindings are checked for well-sortedness but against no
+expected sort, because no instantiated atom can mention it. This is why a rule declaration gains
+no sort annotations and the wire `rules` section gains no field.
+
+**What this deliberately does not give.** `num_lt(0.71, 0.74)` is well-sorted whether those numbers
+are accuracies, BLEU scores, or learning rates. Measurand identity stays in the binding leaf and
+stays *attackable*; making it a sort error would convert something the calculus currently lets an
+author dispute into something the checker silently refuses, which is a change to what the calculus
+claims rather than an enforcement improvement.
+
+**Where it is checked.** `checkUnit` stage 2 (§10.1 R2), in two halves. The *static* half checks
+`Sigma` itself (no duplicate declaration, no base-sort shadowing, no signature naming an undeclared
+sort), then every rule's premise, conclusion, and answer patterns under its derived parameter
+sorts, then every exception and contrary pattern, then every leaf conclusion, theory proposition,
+and query. The *per-instance* half checks each rule instance's θ range, at keys that are declared
+parameters of a rule that resolves.
+
+The per-instance half is required, not thorough: θ's range terms are **authored**, not drawn from
+Γ, and a rule instance's conclusion is θ-instantiated and need not match any leaf — so an
+ill-sorted range value produces an ill-sorted argument conclusion that no other stage sees.
+Premises escape only incidentally, through R4's `≡`-match against a leaf the static half already
+sorted.
+
+For every actual rule instance recursively reachable through an accepted support term, stage 2's
+θ-range check and the accepted support judgment's exact-domain invariant (R3) derive
+`RuleSortRespecting`; the substitution lemma then proves the instantiated premises, conclusion,
+and answers well-sorted. This closure is mechanized as result 13
+(`thetaWellSorted_ruleSortRespecting`, `wellSorted_rule`, and `checkUnit_wellSorted`) and licenses the
+per-instance half being as thin as it is.
 
 ## 4. Claim-support policies and obligations
 
@@ -425,7 +495,7 @@ retained in the verdict's `conditional` section as a `CORE-STATUS` diagnostic an
 Claims with no support argument in `B` keep their ordinary four-state status.
 
 The rule is directed, not "block the whole component": grounded labelling reads only a node's
-transitive attackers, so forward reachability is both sound and tight. `lara-core@0.1`'s labelling
+transitive attackers, so forward reachability is both sound and tight. `lara-core@0.2`'s labelling
 function, its input wire schema, and its rejection classes are unchanged — this is an outer
 reporting layer over the same core verdict. The *verdict* grammar does gain the `evidence-blocked`
 status and the optional `conditional` section (the verdict grammar below), so a consumer that has never heard of
@@ -1184,11 +1254,12 @@ The development is `sorry`-free within the standard axiom trio.
 **Accepted-unit flow (Lean reference PL).** `checkUnit` has the fixed diagnostic order
 
 ```text
-duplicate rule IDs → R12 policy violation → duplicate arguments
-                   → support → typed attacks → missing conflict
+duplicate rule IDs → R2 signature → R12 policy violation
+                   → duplicate arguments → support
+                   → typed attacks → missing conflict
 ```
 
-The first two checks precede program checking. Within program checking, duplicate detection precedes
+The first three checks precede program checking. Within program checking, duplicate detection precedes
 cache construction; the support stage then builds one retained checked-node cache. Typed-attack
 sources, the deterministic source-major/target-major completeness scan, and downstream claim
 aggregation reuse that cache and do not re-infer support. Legacy `checkProgram`/`CheckedProgram` remains the
@@ -1222,7 +1293,7 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    `checkAttack`, and `checkProgram` execute and have exact relational
    soundness/completeness theorems. Legacy `checkProgram`/`CheckedProgram` remains generic and
    unchanged. The canonical `checkUnit` flow adds the accepted-unit policy and completeness
-   invariants in the fixed six-stage order stated in §8.2.)*
+   invariants in the fixed seven-stage order stated in §8.2.)*
 2. Strict-backend isolation: programs cannot extend `R`, backend theories are digest-addressed, and
    no support term, attack, or backend proof term crosses the strict-certificate interface.
 3. Dependency accountability: the reported leaf set equals `leaves(w)` and every member is declared
@@ -1329,6 +1400,34 @@ artifacts built against this frozen spec (`engineering-plan.md` §5).
 
 ### 10.1 Rejection classes (v0.1-frozen)
 
+**AMENDMENT (`lara-core@0.2`, issue #89): R2 is widened, not replaced.** The class is frozen, and
+this is the one change to it. Three things moved:
+
+1. **Sorts entered the class.** `Sigma` is now a declared, many-sorted signature (§3.4) carried by
+   `Unit` and enforced by `checkUnit` stage 2, so a sort mismatch is an R2 trigger alongside the
+   arity and symbol mismatches the row already listed. Widening R2 is preferred to adding an R15
+   or splitting the class because **no implementation had ever enforced R2**: the class was
+   documented, reserved, and dead, so widening it changes no existing behavior and moves no other
+   class.
+2. **The groundness clause is dropped as vacuous, not as unimplemented.** "Non-ground term where
+   ground required" has never been violable: `Term ::= num | str | con(...)` has no variable
+   constructor, so every `Prop` is ground *structurally*, and pattern variables exist only in
+   `Pat`. It is removed rather than left looking unenforced — a reader who found it in the table
+   with no implementation behind it would reasonably conclude a check went missing.
+3. **What R2 still does not answer.** It answers exactly one question — is this term well-sorted
+   under `Sigma` — and never "does this identifier resolve" (R1), "is this substitution total"
+   (R3), or "does this conclusion match that pattern" (R4). In particular an undeclared *symbol*
+   (predicate head or constructor) is R2 and not R1, because R1 is about declaration identifiers
+   (leaf, argument, rule, question, backend, policy) and symbols have never been in its list; and
+   a substitution whose *domain* is wrong stays R3, because stage 2 checks the sorts of θ's range
+   terms at keys that *are* declared parameters and says nothing about coverage.
+
+Spec §4.1 rule well-formedness — every pattern variable among `ruleParams` — is now *enforced*,
+as a second arm of **R12** rather than as part of R2. An out-of-scope pattern variable is perfectly
+well-sorted; it is simply not in scope, which is policy well-formedness. One class per stage, and
+R2 stays purely about sorts.
+
+
 Every ill-formed construct fails in exactly one located class. The enumeration is frozen so the
 diagnostics surface (`Lara.Diagnostics`), the golden negative examples, and the M5 mutation suite
 share one spine: every class must be exercised by at least one rejected example and one mutation.
@@ -1336,7 +1435,7 @@ share one spine: every class must be exercised by at least one rejected example 
 | Class | Trigger | Located at | Spec |
 | --- | --- | --- | --- |
 | **R1** reference | undeclared proposition, leaf, argument, rule, question, backend, or policy id | the referencing occurrence | §2, §4 |
-| **R2** signature | arity or symbol mismatch against `Sigma`; non-ground term where ground required | the offending term | §3, §4.1 |
+| **R2** signature | undeclared predicate or constructor symbol; arity mismatch against `Sigma`; argument-sort or result-sort mismatch against `Sigma`; a rule-parameter binding whose term's sort differs from the parameter's derived sort (§3.4) | the policy | §3, §3.4, §4.1 |
 | **R3** substitution | `dom(theta)` misses a rule parameter — pattern instantiation fails | the instance | §4.1, §6.1 |
 | **R4** premise | premise term's conclusion `≢` instantiated premise pattern | premise position `π.i` | §6.1 |
 | **R5** question-accounting | a declared question in neither discharge map nor hole set, or a discharge/hole naming an undeclared question (`D ⊎ H` violation) | the instance | §4.2, §6.1 |
@@ -1346,9 +1445,9 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R9** data-integrity | duplicate-report group with `≢` members, escalated to `reject` by policy | the group declaration | §4.3 |
 | **R10** attack-position | attack position undefined (`u@π` lookup fails) or wrong occurrence kind for the attack kind | the attack declaration | §7.1 |
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |
-| **R12** policy-wf | a `contrary` side may overlap a strict-reachable pattern at the instance level (Path B validator) | the policy, naming rule + pair | §8.1 |
+| **R12** policy-wf | a rule pattern variable occurs outside the rule's declared parameters (§4.1); or a `contrary` side may overlap a strict-reachable pattern at the instance level (Path B validator) | the policy, naming the scope violation or rule + pair | §4.1, §8.1 |
 | **R13** backend | certificate replay rejects; unknown backend or version; theory digest not allowlisted | the certified instance | §5 |
-| **R14** codec | wire program fails to decode to the abstract syntax: malformed JSON, unknown fields per `lara-core@0.1`, presentation parse error | the wire location | §1, §2.1 |
+| **R14** codec | wire program fails to decode to the abstract syntax: malformed JSON, unknown fields per `lara-core@0.2`, presentation parse error | the wire location | §1, §2.1 |
 
 Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
 the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack

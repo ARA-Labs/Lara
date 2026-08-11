@@ -27,10 +27,17 @@
 --     constructively discharged by Compile.edgeB_faithful, exposed through the
 --     oracle-free wrappers checkedAF / srcStatus_checked / srcStatus_iff_checked
 --     — Lara.Compile
+--   * the many-sorted proposition signature and well-sortedness (result 13,
+--     lara-core@0.2 / issue #89): the object, sortOf, Sigma-WF, derived rule
+--     parameter sorts, decidability without classical input, and the
+--     substitution lemma that carries pattern well-sortedness through
+--     instantiation — Lara.Sigma
 --   * the §8.1 Path-B policy validator: strict-reachable patterns, executable
---     wf(Pi), and located R12 violations — Lara.Policy
---   * the public checkUnit boundary, in fixed order: duplicate rule IDs → R12
---     → duplicate arguments → support → typed attacks → missing conflict.
+--     wf(Pi), and located R12 violations, now with spec §4.1 rule scope as the
+--     class's second arm — Lara.Policy
+--   * the public checkUnit boundary, in fixed order: duplicate rule IDs → R2
+--     signature → R12 → duplicate arguments → support → typed attacks →
+--     missing conflict.
 --     CheckedUnit carries detailed attack completeness and exact retained
 --     checker nodes; support is not re-inferred — Lara.Unit / Lara.Check.Unit
 --   * downstream-only accepted-unit consistency (result 7 / C09): Path-B

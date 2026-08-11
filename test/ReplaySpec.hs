@@ -4,13 +4,16 @@ import Test.QuickCheck
 import Data.List (sort)
 
 import Lara.AST
-import Lara.Elaborate (ElabError (..), SourceInvalid (..), defeasibleSuiteSigma, prepareSource)
+import Lara.Elaborate (ElabError (..), SourceInvalid (..), prepareSource)
 import Lara.Replay
 import Lara.Strict (SExpr (..))
 import Lara.Wire (decodeReplayId, encodeReplayId, parseSExpr, printSExpr)
+import SigmaFixture (structuralSigma)
 
+-- | A unit with nothing in it: no symbols, so the empty signature is the
+-- correct one (@lara-core\@0.2@) rather than a placeholder.
 emptyUnit :: Unit
-emptyUnit = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+emptyUnit = Unit structuralSigma [] [] [] [] [] [] [] [] [] QuarantineOnConflict
 
 sourceProgram :: Program
 sourceProgram =
@@ -26,6 +29,7 @@ sourcePolicy :: Policy
 sourcePolicy =
   Policy
     { policyId = PolicyId "empirical-v1"
+    , policySigma = structuralSigma
     , policyRules = []
     , policyContraries = []
     , policyExceptions = []
@@ -44,7 +48,7 @@ sourceUnit = emptyUnit {unitTheories = policyTheories sourcePolicy}
 
 mkIdentity :: [(BackendId, String)] -> [TheoryDigest] -> ReplayId
 mkIdentity backends theories =
-  case mkReplayId LaraCoreV01 (PolicyId "empirical-v1") backends theories (Digest "sha256:artifact-0") of
+  case mkReplayId LaraCoreV02 (PolicyId "empirical-v1") backends theories (Digest "sha256:artifact-0") of
     Right replayId -> replayId
     Left err -> error (replayErrorMessage err)
 
@@ -66,7 +70,7 @@ rawInputFor :: Program -> Policy -> Unit -> Either ReplayError CheckInput
 rawInputFor program policy unit = do
   replayId <-
     mkReplayId
-      LaraCoreV01
+      LaraCoreV02
       (policyId policy)
       (programBackends program)
       (sort (map fst (policyTheories policy)))
@@ -85,7 +89,7 @@ prop_sourceConstruction =
       ))
     (rawInputFor sourceProgram sourcePolicy sourceUnit)
     === Right
-      ( LaraCoreV01
+      ( LaraCoreV02
       , PolicyId "empirical-v1"
       , [(BackendId "nd", "1")]
       , [TheoryDigest "sha256:a", TheoryDigest "sha256:z"]
@@ -99,9 +103,9 @@ prop_checkInputPreservesUnitTheoryTable =
 prop_replayConstructionRequiresCanonicalTheories :: Property
 prop_replayConstructionRequiresCanonicalTheories =
   conjoin
-    [ mkReplayId LaraCoreV01 (PolicyId "p") [] [z, a] artifact
+    [ mkReplayId LaraCoreV02 (PolicyId "p") [] [z, a] artifact
         === Left (NonCanonicalTheoryDigests [z, a])
-    , mkReplayId LaraCoreV01 (PolicyId "p") [] [a, a] artifact
+    , mkReplayId LaraCoreV02 (PolicyId "p") [] [a, a] artifact
         === Left (NonCanonicalTheoryDigests [a, a])
     ]
   where
@@ -111,7 +115,7 @@ prop_replayConstructionRequiresCanonicalTheories =
 
 prop_sourcePolicyMismatch :: Property
 prop_sourcePolicyMismatch =
-  case prepareSource defeasibleSuiteSigma sourceProgram mismatched of
+  case prepareSource sourceProgram mismatched of
     Left (SourceElaborationError (PolicyIdMismatch expected actual)) ->
       (expected, actual) === (PolicyId "empirical-v1", PolicyId "other-v1")
     result -> counterexample ("expected source policy mismatch, got " ++ showResult result) False
@@ -143,7 +147,7 @@ prop_theoriesUseUnicodeScalarOrder :: Property
 prop_theoriesUseUnicodeScalarOrder =
   conjoin
     [ fmap (replayTheories . inputReplayId) sourceResult === Right [bmp, supplementary]
-    , mkReplayId LaraCoreV01 (PolicyId "p") [] [supplementary, bmp] artifact
+    , mkReplayId LaraCoreV02 (PolicyId "p") [] [supplementary, bmp] artifact
         === Left (NonCanonicalTheoryDigests [supplementary, bmp])
     ]
   where
@@ -172,12 +176,12 @@ prop_quotedNonAsciiTheoriesWireGolden =
     ]
   where
     canonicalText =
-      "(replay-id (core lara-core@0.1) (policy empirical-v1) "
+      "(replay-id (core lara-core@0.2) (policy empirical-v1) "
         ++ "(backends (backend nd 1)) "
         ++ "(theories \"sha256:é\" \"sha256:λ\") "
         ++ "(artifact sha256:artifact-0))"
     reversedText =
-      "(replay-id (core lara-core@0.1) (policy empirical-v1) "
+      "(replay-id (core lara-core@0.2) (policy empirical-v1) "
         ++ "(backends (backend nd 1)) "
         ++ "(theories \"sha256:λ\" \"sha256:é\") "
         ++ "(artifact sha256:artifact-0))"

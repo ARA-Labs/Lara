@@ -215,7 +215,9 @@ expandComparison
 expandComparison pol gamma cmp = do
   -- (1) polarity — declared domain knowledge, never inferred (App. B.1).
   polarity <- case find ((== cmpMeasurand cmp) . measurandId) (policyMeasurands pol) of
-    Just m -> Right (measurandPolarity m)
+    Just m -> case measurandPolarity m of
+      Just p -> Right p
+      Nothing -> Left (ComparisonMeasurandNoPolarity cid (cmpMeasurand cmp))
     Nothing -> Left (ComparisonUndeclaredMeasurand cid (cmpMeasurand cmp))
   -- (2) the scheme for the *pair*; relation alone cannot express direction.
   let matchesPair s = csRelation s == cmpRelation cmp && csPolarity s == polarity

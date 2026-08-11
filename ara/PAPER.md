@@ -60,7 +60,7 @@ experimental, non-conforming adapter seed.
 | File | Description |
 |------|-------------|
 | [problem.md](logic/problem.md) | Observations (the trust gap in LLM-produced research claims) → gaps → key insight → assumptions |
-| [claims.md](logic/claims.md) | 12 falsifiable claims (C01–C12): the calculus's design/metatheory claims, each grounded in mechanization/test status |
+| [claims.md](logic/claims.md) | 30 falsifiable claims (C01–C30): the calculus's design/metatheory claims, each grounded in mechanization/test status |
 | [concepts.md](logic/concepts.md) | 12 core technical terms (claim-support term, positional attack, backend-parametric strict interface, grounded four-state status, …) |
 | [experiments.md](logic/experiments.md) | 8 verification plans (E01–E08): mechanization obligations + checker conformance tests, directional only |
 | [related_work.md](logic/related_work.md) | Typed dependency graph: Dung, ASPIC+, Pandžić, Micropublications, AIF, EG-VAR, PCC/FPC, DSP/Baldur/LeanDojo/Clover, Csmith/JEST |

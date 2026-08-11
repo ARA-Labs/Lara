@@ -10,7 +10,7 @@ The production-checker spine and the N11 differential anchor, each Haskell modul
 the executable mirror of the frozen Lean development:
 
 - **Checker spine (layers 3–8).** `Lara.{Policy,SupportTerm,Attack,Compile,
-  Grounded,Diagnostics}` with the six-stage whole-unit boundary
+  Grounded,Diagnostics}` with the seven-stage whole-unit boundary
   `Lara.Check.checkUnit` (duplicate rule ids → R12 → duplicate arguments →
   support → typed attacks → missing conflict).
 - **Runtime.** `Lara.Runtime` — cached-adjacency production evaluator; verdict

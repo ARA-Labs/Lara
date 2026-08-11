@@ -599,3 +599,49 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [src/Lara/Strict/Ord.hs and src/Lara/Strict/RA.hs (premise-only slot resolution in both), src/Lara/Driver/Internal.hs buildCertOk, src/Lara/Replay.hs preflight, fixtures/corpus/ord-premise-only-{reject,accept}.sexp and ra-premise-only-{reject,accept}.sexp (each reject twin's theory entry carries the value the goal needs, so free-context indexing would have accepted), lean/Lara/Driver.lean buildRegistry, lean/Lara/Examples.lean ord_/ra_ replay_context_is_premises and models_context_is_premises (AxCheck-covered), trace N123 N125]
 - **Dependencies**: []
 - **Tags**: strict-backend, provenance, trusted-base, raw-door, ord1, ra1
+
+## C28: An unenforced rejection class does not stay merely unexercised — its documented content drifts undetectably
+- **Statement**: A specification class with no executable enforcement accumulates falsehoods that survive review, because nothing can contradict them. The failure is not the absence of coverage; it is that the *description* of the class becomes unfalsifiable and then wrong — including triggers that are unsatisfiable by construction, and coverage prose that asserts exercise where there is none.
+- **Conditions**: Holds for a frozen, enumerated rejection surface whose classes are documented ahead of implementation and whose test suite is generated from the implemented classes. Observed on one class (R2) in one system; the untested boundary is whether a class enforced *partially* drifts the same way, and whether a hand-written (rather than generated) suite would have caught it.
+- **Sources**: [
+  `R2 documented trigger, unsatisfiable` ← `git dfa9811~1:docs/spec.md:1339` «| **R2** signature | arity or symbol mismatch against `Sigma`; non-ground term where ground required | the offending term | §3, §4.1 |» [input];
+  `coverage prose asserting exercise` ← `git dfa9811~1:docs/rejection-surface.md:93` «Two classes are not individually anchored above because they are exercised only inside larger» [input];
+  `0` ← `git dfa9811~1:fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 0 over 369 rows» [result];
+  `107` ← `fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 107 over 496 rows, after enforcement landed» [result]
+  ]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Find a rejection class in this surface that has been documented-but-unenforced across at least one freeze cycle and whose documented triggers and coverage prose are nonetheless all true when enforcement lands. Conversely, if R2's two documented errors turn out to have been detectable from the artifact alone — e.g. a static check that could have flagged the unsatisfiable groundness trigger from `Term`'s constructors — the mechanism is weaker than stated.
+- **Proof**: [`measurements/frozen/lara-core-0.2-regeneration-diffs.md`, `docs/rejection-surface.md` (corrected note), `docs/spec.md` §10.1 amendment, `examples/R2-sort/`]
+- **Dependencies**: []
+- **Tags**: specification-drift, rejection-surface, coverage, lara-core@0.2
+
+## C29: A zero reclassification delta across a new checker stage is a property of the mutation generators, not of the checker
+- **Statement**: Adding an early stage to a checker silently migrates a seeded-defect suite into the new class wherever the operators synthesize their own vocabulary — the injected symbols are, by construction, exactly what the new stage rejects. "The suite's expected outcomes did not move" is therefore a claim about the generators having been made aware of the new stage, and is only meaningful if it is measured after that change rather than assumed from the stage's intent.
+- **Conditions**: Holds where the new stage rejects *undeclared* material and the suite's operators create material rather than only permuting existing declarations. The complementary half is class-boundary discipline: the delta also depends on the new stage declining jurisdiction it could plausibly claim (here, substitution-domain totality and rule-id resolution, which stay R3 and R1). Observed once, over one suite; the untested boundary is a stage that rejects *relational* rather than *declarational* facts.
+- **Sources**: [
+  `369` ← `git dfa9811~1:fixtures/mutants/MANIFEST.tsv` «369 data rows (`wc -l` minus header)» [input];
+  `empty` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:23` «(empty)» [result];
+  `three operator groups` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:26` «**Why it is empty, and why that was not free.** Three operator groups synthesize» [result]
+  ]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Revert the Σ-awareness of the symbol-injecting operators, regenerate, and observe an empty expected-column diff anyway — that would show the migration this claim asserts does not occur. Equally, a new early stage whose addition leaves a symbol-synthesizing suite's expected column unchanged *without* any generator change refutes the mechanism.
+- **Proof**: [`measurements/frozen/lara-core-0.2-regeneration-diffs.md`, `src/Lara/Mutate/Sorts.hs`, `src/Lara/Mutate/Accept.hs`, `src/Lara/Sigma.hs` (`declarePred`/`declarePredFor`/`declareCon`)]
+- **Dependencies**: [C28]
+- **Tags**: mutation-testing, evaluation-validity, seeded-defects, lara-core@0.2
+
+## C30: A substitution lemma is what licenses a thin per-instance check; the thinness is a result, not a scoping judgement
+- **Statement**: A checker that validates a rule's patterns once, statically, and each instance's substitution range separately can leave the instantiated atoms unvalidated only if a substitution lemma carries pattern well-formedness through instantiation. Without the lemma the per-instance check's scope is an unjustified guess that happens to work on the corpus; with it, the minimality of that check is derived rather than chosen.
+- **Conditions**: Holds for ground, first-order instantiation with an explicit substitution (no unification in the trusted core) and a property compositional over term structure. Mechanized here for the finite ground environment and for premises, conclusions, and answers of actual rule instances recursively reachable through accepted support terms. Exception-pattern and attack/undercut closure is not included in `checkUnit_wellSorted`; those remain separate per-pattern applications of `wellSorted_subst`.
+- **Sources**: [
+  `result 13` ← `docs/mechanization-plan.md` «| 13 | Well-sortedness is decidable and preserved by rule instantiation (`lara-core@0.2`, issue #89) |» [result];
+  `axiom set` ← `lean/AxCheck.lean` via `scripts/check-axioms.sh` «Axiom audit passed.» [result]
+  ]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit an accepted unit whose ground environment or actual recursively reachable support-rule premise, conclusion, or answer is ill-sorted while stage 2 accepts it. That would contradict `checkUnit_wellSorted` directly. An ill-sorted instantiated exception would expose the explicitly unproved boundary rather than directly contradict this theorem.
+- **Proof**: [`lean/Lara/Sigma.lean` (`wellSorted_subst`, `wellSorted_rule`), `lean/Lara/Check/Unit.lean` (`thetaWellSorted_ruleSortRespecting`, `checkUnit_wellSorted`), `docs/mechanization-plan.md` result 13, `fixtures/mutants/*--wrong-theta-sort-*.sexp`]
+- **Dependencies**: []
+- **Tags**: mechanization, substitution-lemma, checker-design, lara-core@0.2
+- **Last revised**: 2026-08-10 (2026-08-10_001#2)

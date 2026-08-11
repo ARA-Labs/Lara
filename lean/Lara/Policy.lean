@@ -434,6 +434,80 @@ def firstViolationIn? (canon : String → String)
       else
         firstViolationIn? canon contraries rest
 
+/-! ### Spec §4.1 rule scope — R12's second arm
+
+Every variable in a rule's premises, conclusion, question answers, and
+exception atoms must be among its declared parameters. The spec has always
+required this and no checker enforced it; `lara-core@0.2` folds it in here
+rather than into R2, because an out-of-scope pattern variable is perfectly
+*well-sorted* — it is simply not in scope, which is policy well-formedness.
+One class per stage, and R2 stays purely about sorts. -/
+
+/-- Located §4.1 payload: the rule whose scope is violated and the offending
+variable. -/
+structure ScopeViolation where
+  ruleId : RuleId
+  param  : VarId
+deriving DecidableEq
+
+mutual
+  def patEscapee? (params : List VarId) : Pat → Option VarId
+    | .var x => if params.contains x then none else some x
+    | .num _ => none
+    | .str _ => none
+    | .con _ ps => patsEscapee? params ps
+
+  def patsEscapee? (params : List VarId) : Pats → Option VarId
+    | .nil => none
+    | .cons p ps =>
+        match patEscapee? params p with
+        | some x => some x
+        | none => patsEscapee? params ps
+end
+
+def aPatEscapee? (params : List VarId) (ap : APat) : Option VarId :=
+  patsEscapee? params ap.args
+
+def aPatsEscapee? (params : List VarId) : List APat → Option VarId
+  | [] => none
+  | ap :: rest =>
+      match aPatEscapee? params ap with
+      | some x => some x
+      | none => aPatsEscapee? params rest
+
+/-- The first out-of-scope variable of one rule, in the fixed order premises,
+conclusion, question answers. -/
+def ruleEscapee? (r : Rule) : Option VarId :=
+  match aPatsEscapee? r.params r.premises with
+  | some x => some x
+  | none =>
+      match aPatEscapee? r.params r.concl with
+      | some x => some x
+      | none => aPatsEscapee? r.params (r.questions.map (·.answer))
+
+/-- The first §4.1 scope violation in declaration order: rules first, then the
+policy's exceptions against their own rule's parameters.
+
+An exception naming an *undeclared* rule is not a scope violation: its rule id
+is R1's business at the support stage, and every variable is vacuously outside
+an empty parameter list, which would turn one missing declaration into a
+misleading R12. -/
+def firstOutOfScope? (P : Policy) : Option ScopeViolation :=
+  match P.rules.findSome? (fun d => (ruleEscapee? d.rule).map (fun x => (⟨d.id, x⟩ : ScopeViolation))) with
+  | some v => some v
+  | none =>
+      P.defeat.exceptions.findSome? (fun e =>
+        match P.rules.find? (fun d => decide (d.id = e.1)) with
+        | none => none
+        | some d => (aPatEscapee? d.rule.params e.2).map (fun x => (⟨e.1, x⟩ : ScopeViolation)))
+
+/-- The declarative §4.1 judgment decided by `firstOutOfScope?`. -/
+def ScopesWellFormed (P : Policy) : Prop := firstOutOfScope? P = none
+
+/-- Decidable by construction: the judgment *is* the scan. -/
+instance (P : Policy) : Decidable (ScopesWellFormed P) :=
+  inferInstanceAs (Decidable (_ = _))
+
 /-- The first located offending rule/contrary pair, if any. -/
 def firstViolation? (canon : String → String) (P : Policy) :
     Option Violation :=

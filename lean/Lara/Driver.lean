@@ -87,7 +87,9 @@ inductive Tag where
   | inL | outL | undecL | gap | justified | contested | defeated | evidenceBlocked
   | dupRule | dupArgument | incompleteArgument | missingConflict
   | groups | group | quarantine
-  | r1 | r3 | r4 | r5 | r6 | r7 | r9 | r10 | r11 | r12 | r13
+  -- the many-sorted signature Sigma (spec §2, §3.4; lara-core@0.2)
+  | sigma | sorts | cons | preds | «pred»
+  | r1 | r2 | r3 | r4 | r5 | r6 | r7 | r9 | r10 | r11 | r12 | r13
 
 /-- The on-the-wire spelling of a keyword — the single source of truth. -/
 def tagToString : Tag → String
@@ -122,7 +124,9 @@ def tagToString : Tag → String
   | .incompleteArgument => "incomplete-argument"
   | .missingConflict => "missing-conflict"
   | .groups => "groups" | .group => "group" | .quarantine => "quarantine"
-  | .r1 => "R1" | .r3 => "R3" | .r4 => "R4" | .r5 => "R5" | .r6 => "R6"
+  | .sigma => "sigma" | .sorts => "sorts" | .cons => "cons"
+  | .preds => "preds" | .pred => "pred"
+  | .r1 => "R1" | .r2 => "R2" | .r3 => "R3" | .r4 => "R4" | .r5 => "R5" | .r6 => "R6"
   | .r7 => "R7" | .r9 => "R9" | .r10 => "R10" | .r11 => "R11" | .r12 => "R12"
   | .r13 => "R13"
 
@@ -514,6 +518,54 @@ def decodeException (e : Sx) : Except String (RuleId × APat) := do
       .ok ((⟨rs⟩ : RuleId), ap')
   | _ => .error "exception: arity"
 
+/-! ### The signature section (`lara-core@0.2`)
+
+A sort *reference* is an atom: the two reserved base names, or a declared sort
+name. A sort *declaration* is a bare name, so `(sort Num)` is representable and
+rejected by the checker as base-sort shadowing rather than being unspellable. -/
+
+def decodeSort (e : Sx) : Except String Lara.Sigma.TermSort :=
+  match e with
+  | .atom "Num" => .ok .num
+  | .atom "Str" => .ok .str
+  | .atom n => .ok (.decl n)
+  | _ => .error "sigma sort: expected an atom"
+
+def decodeConSig (e : Sx) : Except String Lara.Sigma.ConSig :=
+  match e with
+  | .list [.atom k, .atom nm, argsE, resE] =>
+      if k == tagToString .conApp then do
+        let args ← (sectionFields "sigma con args" .args argsE) >>= (·.mapM decodeSort)
+        let res ← decodeSort resE
+        .ok ⟨⟨nm⟩, args, res⟩
+      else .error "sigma con: expected con tag"
+  | _ => .error "sigma con: malformed constructor signature"
+
+def decodePredSig (e : Sx) : Except String Lara.Sigma.PredSig :=
+  match e with
+  | .list [.atom k, .atom nm, argsE] =>
+      if k == tagToString .pred then do
+        let args ← (sectionFields "sigma pred args" .args argsE) >>= (·.mapM decodeSort)
+        .ok ⟨⟨nm⟩, args⟩
+      else .error "sigma pred: expected pred tag"
+  | _ => .error "sigma pred: malformed predicate signature"
+
+/-- Decode the optional `sigma` section. An absent section is the empty
+signature, which under strict mode accepts only symbol-free units. -/
+def decodeSigmaSection : Option Sx → Except String Lara.Sigma.Sigma
+  | none => .ok Lara.Sigma.Sigma.empty
+  | some s => do
+      match ← sectionFields "sigma" .sigma s with
+      | [sortsE, consE, predsE] => do
+          let sorts ← (sectionFields "sigma sorts" .sorts sortsE) >>= (·.mapM
+            (fun x => match x with
+                      | .atom n => .ok n
+                      | _ => .error "sigma sorts: expected an atom"))
+          let cons ← (sectionFields "sigma cons" .cons consE) >>= (·.mapM decodeConSig)
+          let preds ← (sectionFields "sigma preds" .preds predsE) >>= (·.mapM decodePredSig)
+          .ok ⟨sorts, cons, preds⟩
+      | _ => .error "sigma: arity"
+
 def decodePolicy :
     Option Sx →
     Except String (List RuleDecl × List (APat × APat) × List (RuleId × APat))
@@ -722,6 +774,7 @@ is stored here — the backend registry (which lives in `Type 1`, since a
 `Backend` carries a `Form : Type` field) is built from `theories` outside the
 decode monad. -/
 structure Decoded where
+  sigma : Lara.Sigma.Sigma
   policy : Policy
   args : List SupportTerm
   argIds : List String
@@ -747,7 +800,7 @@ structure Decoded where
 
 /-- The one supported core-version spelling — the single source of truth,
 mirroring `Lara.Wire.coreVersionText`. -/
-def coreVersionText : String := "lara-core@0.1"
+def coreVersionText : String := "lara-core@0.2"
 
 structure ReplayId where
   core : String
@@ -818,7 +871,8 @@ def checkGroupInvariants (groups : List Groups.DupGroup)
 
 def decodeUnit (e : Sx) : Except String Decoded := do
   let sections ← sectionFields "unit" .unit e
-  let s0 := takeSection .policy sections
+  let sSigma := takeSection .sigma sections
+  let s0 := takeSection .policy sSigma.2
   let s1 := takeSection .theories s0.2
   let s2 := takeSection .leaves s1.2
   let s3 := takeSection .args s2.2
@@ -827,6 +881,7 @@ def decodeUnit (e : Sx) : Except String Decoded := do
   let s6 := takeSection .groups s5.2
   let _ ← (if s6.2.isEmpty then (.ok () : Except String _root_.Unit)
            else .error "unit: unexpected section")
+  let sigma ← decodeSigmaSection sSigma.1
   let pol ← decodePolicy s0.1
   let theories ← decodeTheories s1.1
   let leaves ← decodeLeaves s2.1
@@ -844,7 +899,8 @@ def decodeUnit (e : Sx) : Except String Decoded := do
     | .error msg => .error msg
     | .ok atts =>
       .ok
-        { policy := { rules := pol.1, defeat := ⟨pol.2.1, pol.2.2⟩ }
+        { sigma := sigma
+        , policy := { rules := pol.1, defeat := ⟨pol.2.1, pol.2.2⟩ }
         , args := argsRaw.map (·.2)
         , argIds := argsRaw.map (·.1)
         , atts := atts
@@ -1072,7 +1128,8 @@ def statusStr : Status → String
   | .defeated => tagToString .defeated
 
 def checkClassStr : RejectClass → String
-  | .R1 => tagToString .r1 | .R3 => tagToString .r3 | .R4 => tagToString .r4
+  | .R1 => tagToString .r1 | .R2 => tagToString .r2
+  | .R3 => tagToString .r3 | .R4 => tagToString .r4
   | .R5 => tagToString .r5 | .R6 => tagToString .r6 | .R7 => tagToString .r7
   | .R9 => tagToString .r9
   | .R10 => tagToString .r10 | .R11 => tagToString .r11
@@ -1101,6 +1158,8 @@ def wireRejectionString : WireRejection → String
 vocabulary of `Lara.Wire`. -/
 def rejectWire : UnitError → WireRejection
   | .duplicateRule _ => .duplicateRule
+  | .signature _ => .rejectClass .R2
+  | .scopeViolation _ => .rejectClass .R12
   | .policyViolation _ => .rejectClass .R12
   | .program e =>
     match e with
@@ -1250,8 +1309,19 @@ def runOnContents (contents : String) : IO _root_.Unit := do
             let atts := selectAligned keepAttack d.attacksRaw d.atts
             let reg := buildRegistry d.theories
             let gamma := buildGamma (Groups.quarantineLeaves qs d.leaves)
-            match checkUnit gamma reg
-                ({ policy := d.policy, args := keptArgsRaw.map (·.2), atts := atts } : Lara.Unit) with
+            -- The finite ground atoms stage 2 sorts: Γ's surviving leaf
+            -- conclusions, the backend theory table, and the queried claim
+            -- atoms. They are passed explicitly because `Unit` carries Γ as a
+            -- function; the Haskell mirror reads the same three lists off its
+            -- own `Unit`, in the same stage.
+            let ground :=
+              (Groups.quarantineLeaves qs d.leaves).map (·.2)
+                ++ d.theories.flatMap (·.2)
+                ++ d.queries
+            match checkUnit gamma reg ground
+                ({ sigma := d.sigma
+                 , policy := d.policy
+                 , args := keptArgsRaw.map (·.2), atts := atts } : Lara.Unit) with
             | .error err =>
                 IO.println (printSx (encodeReject rid (rejectWire err)))
                 IO.Process.exit 1

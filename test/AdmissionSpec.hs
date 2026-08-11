@@ -31,7 +31,6 @@ import Lara.Elaborate
   ( PreparedSource (..)
   , SourceCheckInput
   , SourceInvalid (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -44,6 +43,7 @@ import Lara.ExpectedJson (JValue (..), sourceResultJsonValue)
 import Lara.Negatives (Negative (..), admissionReject)
 import Lara.Prop (Prop (..))
 import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..), encodeVerdict, printSExpr)
+import SigmaFixture (sigmaOf)
 
 -- ---------------------------------------------------------------------------
 -- Compact source fixtures
@@ -104,6 +104,19 @@ policy :: [((LeafKind, Provenance), Admission)] -> GroupConflictMode -> Policy
 policy admission groupMode =
   Policy
     { policyId = PolicyId "p"
+    , policySigma =
+        -- One authored fixture signature over this file's whole nullary-atom
+        -- vocabulary (@lara-core\@0.2@, #89 D8): every admission fixture is
+        -- propositional, so no sort or constructor is needed.
+        sigmaOf
+          []
+          []
+          [ (h, [])
+          | h <-
+              [ "attacker", "discharged", "nested", "not_p", "one", "other"
+              , "p", "q", "r", "removed", "s", "target", "two"
+              ]
+          ]
     , policyRules = []
     , policyContraries = []
     , policyExceptions = []
@@ -116,7 +129,7 @@ policy admission groupMode =
 
 accepted :: Program -> Policy -> (SourceCheckInput -> Property) -> Property
 accepted prog pol k =
-  case prepareSource defeasibleSuiteSigma prog pol of
+  case prepareSource prog pol of
     Left invalid -> counterexample ("unexpected source invalidity: " ++ show invalid) False
     Right (SourceRejected rejection) ->
       counterexample ("unexpected R8: " ++ renderAdmissionRejection rejection) False
@@ -249,7 +262,7 @@ prop_allAdmitGroupOnlyCoreExportIdentity =
 -- either the first @reject@ or the later @admit@ row.
 prop_duplicateAdmissionBeforeDecision :: Property
 prop_duplicateAdmissionBeforeDecision =
-  case prepareSource defeasibleSuiteSigma prog pol of
+  case prepareSource prog pol of
     Left invalid@(DuplicateAdmissionKey Observed User) ->
       conjoin
         [ renderSourceInvalid invalid === "duplicate admission key (observed, user)"
@@ -267,7 +280,7 @@ prop_duplicateAdmissionBeforeDecision =
 -- invalid if the duplicate-leaf guard were deleted.
 prop_duplicateLeafBeforeReplayAlignment :: Property
 prop_duplicateLeafBeforeReplayAlignment =
-  case prepareSource defeasibleSuiteSigma prog pol of
+  case prepareSource prog pol of
     Left invalid@(DuplicateSourceLeafId (LeafId "e")) ->
       renderSourceInvalid invalid === "duplicate leaf id 'e'"
     _ -> counterexample "expected duplicate LeafId" False
@@ -287,7 +300,7 @@ prop_admissionRejectGolden :: Property
 prop_admissionRejectGolden =
   case negPolicy admissionReject of
     Nothing -> counterexample "admissionReject has no policy" False
-    Just pol -> case prepareSource defeasibleSuiteSigma (negProgram admissionReject) pol of
+    Just pol -> case prepareSource (negProgram admissionReject) pol of
       Left invalid -> counterexample ("R8 misclassified as invalid: " ++ show invalid) False
       Right (SourceAccepted _) -> counterexample "R8 unexpectedly accepted" False
       Right (SourceRejected rejection) ->

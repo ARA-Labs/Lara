@@ -167,7 +167,7 @@ prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
         [ counterexample "exit code" (code === ExitFailure 1)
         , counterexample "stdout carries the bare class, not the reason" $
             out
-              === ( "(verdict (replay-id (core lara-core@0.1) (policy p)"
+              === ( "(verdict (replay-id (core lara-core@0.2) (policy p)"
                       ++ " (backends (backend ord 1)) (theories sha256:t0)"
                       ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
                       ++ " reject R13)\n"
@@ -217,7 +217,7 @@ prop_cliLaraComparisonRejectionContext = once $ ioProperty $ do
         [ counterexample "exit code" (code === ExitFailure 1)
         , counterexample "stdout carries the bare class, not the context" $
             out
-              === ( "(verdict (replay-id (core lara-core@0.1) (policy p)"
+              === ( "(verdict (replay-id (core lara-core@0.2) (policy p)"
                       ++ " (backends (backend ord 1)) (theories sha256:t0)"
                       ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
                       ++ " reject R13)\n"
@@ -301,6 +301,17 @@ cmpTiePolicy :: String
 cmpTiePolicy =
   unlines
     [ "policy p"
+    , "sort System, Measurand, Dataset, Experiment, Cell"
+    , "con sys_new : System"
+    , "con sys_base : System"
+    , "con accuracy : Measurand"
+    , "con imagenet_val : Dataset"
+    , "con exp1 : Experiment"
+    , "con score_cell(System, Measurand, Dataset, Num) : Cell"
+    , "pred reports(Experiment, Cell)"
+    , "pred num_lt(Num, Num)"
+    , "pred at_least_as_good(System, System, Measurand, Dataset)"
+    , "pred comparison_setup(System, System, Measurand, Dataset, Num, Num)"
     , "rule tie_recheck(S, B, Q, D, Exp, Sv, Bv)"
     , "  mode       = strict"
     , "  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),"
@@ -351,6 +362,15 @@ ltTiePolicy :: String
 ltTiePolicy =
   unlines
     [ "policy p"
+    , "sort System, Measurand, Dataset, Experiment, Cell"
+    , "con sys_new : System"
+    , "con sys_base : System"
+    , "con accuracy : Measurand"
+    , "con imagenet_val : Dataset"
+    , "con exp1 : Experiment"
+    , "con score_cell(System, Measurand, Dataset, Num) : Cell"
+    , "pred reports(Experiment, Cell)"
+    , "pred num_lt(Num, Num)"
     , "rule beats_recheck(S, B, Q, D, Exp, Sv, Bv)"
     , "  mode       = strict"
     , "  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),"
@@ -551,7 +571,7 @@ prop_cliAcceptedQuarantineAudit = once $ ioProperty $
         [ counterexample "exit code" (code === ExitSuccess)
         , counterexample "verdict stdout" $
             out
-              === ( "(verdict (replay-id (core lara-core@0.1) (policy p) (backends)"
+              === ( "(verdict (replay-id (core lara-core@0.2) (policy p) (backends)"
                       ++ " (theories) (artifact sha256:admission-cli)) accept"
                       ++ " (labels) (edges) (statuses))\n"
                   )
@@ -626,6 +646,11 @@ precedencePolicy :: Bool -> Bool -> Bool -> String
 precedencePolicy duplicateKey hasR8 rejectGroup =
   unlines $
     [ "policy p"
+    , "pred r8"
+    , "pred group_one"
+    , "pred group_two"
+    , "pred core"
+    , "pred core_claim"
     , "contrary core core"
     ]
       ++ ["admission { " ++ rows ++ " }" | not (null rows)]

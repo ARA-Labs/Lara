@@ -27,7 +27,7 @@ import tempfile
 from pathlib import Path
 
 FORMAT = "lara-replay-bundle@1"
-CORE_VERSION = "0.1"
+CORE_VERSION = "0.2"
 ARTIFACTS = {
     "core-sexp": "emitted.core.sexp",
     "emitted-lara": "emitted.lara",

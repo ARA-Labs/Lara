@@ -42,6 +42,7 @@ import Lara.AST hiding (Reject)
 import Lara.Driver (prune, pruneChecked, runCheck)
 import Lara.Mutate (Expected (..), Mutant (..), MutationOp (..), mutantFileName)
 import Lara.Prop (Prop (..), Term)
+import Lara.Sigma (declarePred, declarePredFor)
 import Lara.Replay
   ( CheckInput
   , inputReplayId
@@ -186,6 +187,9 @@ groundPat (Prop p ts) = AtomPat p (map PLit ts)
 propArgs :: Prop -> [Term]
 propArgs (Prop _ ts) = ts
 
+propPred :: Prop -> Pred
+propPred (Prop p _) = p
+
 -- | @drop-support@: remove the claim's support argument (and any attack that
 -- referenced it), leaving the claim + leaves. The claim then has no complete
 -- support and surfaces as @gap@.
@@ -241,6 +245,7 @@ opQuarantineAttacker base input =
       , unitAttacks = unitAttacks u ++ [Undercut attackerArg aidS []]
       , unitGroups = unitGroups u ++ [DupGroup (GroupId "mut_quarantine_g") [leaf, conflictLeaf]]
       , unitGroupMode = QuarantineOnConflict
+      , unitSigma = declarePredFor (propArgs conflictP) (propPred conflictP) (unitSigma u)
       }
   where
     u = inputUnit input
@@ -264,6 +269,7 @@ opAttachUndermine base input =
       , unitContraries = unitContraries u ++ [Contrary (groundPat attP) (groundPat premP)]
       , unitArgs = unitArgs u ++ [(attackerArg, SLeaf leaf)]
       , unitAttacks = unitAttacks u ++ [Undermine attackerArg aidS pos]
+      , unitSigma = declarePredFor (propArgs attP) (propPred attP) (unitSigma u)
       }
   where
     u = inputUnit input
@@ -292,6 +298,9 @@ opAttachRebutCycle base input =
           unitArgs u
             ++ [(attackerArg, SRule mutRuleId [] [SLeaf premLeaf] [] [] AssuranceNone)]
       , unitAttacks = unitAttacks u ++ [Rebut attackerArg aidS, Rebut aidS attackerArg]
+      , unitSigma =
+          declarePred (propPred premP) []
+            (declarePredFor (propArgs dualP) (propPred dualP) (unitSigma u))
       }
   where
     u = inputUnit input
@@ -350,6 +359,9 @@ opAttachReinstate base input =
       , unitAttacks =
           unitAttacks u
             ++ [Undercut attackerArg aidS [], Undercut defenderArg attackerArg []]
+      , unitSigma =
+          declarePred (propPred premP) []
+            (declarePred (propPred defP) [] (unitSigma u))
       }
   where
     u = inputUnit input

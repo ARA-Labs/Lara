@@ -534,10 +534,11 @@ diagnosticStageString ds = case ds of
   ReplayPreflightStage -> "backend"
   GroupBoundaryStage -> "group-boundary"
 
--- | Which of the six 'checkUnit' stages produced a rejection.
+-- | Which of the seven 'checkUnit' stages produced a rejection.
 stageString :: Stage -> String
 stageString s = case s of
   StageDuplicateRule -> "duplicate-rule"
+  StageSignature -> "signature"
   StagePolicyWellFormedness -> "policy-well-formedness"
   StageDuplicateArgument -> "duplicate-argument"
   StageSupport -> "support"

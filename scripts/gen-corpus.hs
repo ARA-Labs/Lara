@@ -30,8 +30,15 @@ import Data.Char (ord)
 import Data.List (sortBy)
 
 import Lara.AST
-import Lara.Prop (FunSym (..), Prop (..), Term (..))
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Replay
+import Lara.Sigma
+  ( ConSig (..)
+  , PredSig (..)
+  , Sigma (..)
+  , Sort (..)
+  , SortName (..)
+  )
 import Lara.Strict (SExpr (..))
 import Lara.Wire (encodeCheckInput, printSExpr)
 
@@ -44,7 +51,8 @@ mkUnit
   -> [(LeafId, Prop)] -> [(ArgId, SupportTerm)] -> [Attack] -> [Prop] -> Unit
 mkUnit rules contraries exceptions ls as ats qs =
   Unit
-    { unitRules = rules
+    { unitSigma = corpusSigma
+    , unitRules = rules
     , unitContraries = contraries
     , unitExceptions = exceptions
     , unitTheories = []
@@ -56,13 +64,47 @@ mkUnit rules contraries exceptions ls as ats qs =
     , unitGroupMode = QuarantineOnConflict
     }
 
+-- | The one authored signature every fixture in this file is built against
+-- (@lara-core\@0.2@, #89). It is a single shared Σ rather than one per fixture
+-- because the fixtures share one small vocabulary, and because a per-fixture Σ
+-- derived from the fixture would make stage 2 vacuous exactly where these
+-- anchors are supposed to keep it honest.
+--
+-- @p0 … p119@ cover 'stressUnit', whose predicate names are index-derived.
+corpusSigma :: Sigma
+corpusSigma =
+  Sigma
+    [SortName "Item", SortName "Direction"]
+    [ ConSig (FunSym "a") [] item
+    , ConSig (FunSym "up") [] direction
+    , ConSig (FunSym "down") [] direction
+    ]
+    ( [ PredSig (Pred "basis") [item]
+      , PredSig (Pred "derived") [item]
+      , PredSig (Pred "refuted") [item]
+      , PredSig (Pred "effect") [direction]
+      , PredSig (Pred "score1") [SortNum]
+      , PredSig (Pred "score2") [SortNum]
+      ]
+        ++ [ PredSig (Pred h) []
+           | h <-
+               [ "ans", "att", "base", "c", "concl", "conflict", "conflictq"
+               , "cw", "k", "not_q", "notk", "other", "p", "pp", "q", "rr"
+               ]
+                 ++ ["p" ++ show i | i <- [0 .. 119 :: Int]]
+           ]
+    )
+  where
+    item = SortDecl (SortName "Item")
+    direction = SortDecl (SortName "Direction")
+
 defRule :: String -> [String] -> [AtomPat] -> AtomPat -> [Question] -> Rule
 defRule rid ps prems concl qs =
-  Rule (RuleId rid) (map Param ps) Defeasible prems concl False [] qs
+  Rule (RuleId rid) (map Param ps) Defeasible prems [] concl False [] qs
 
 strRule :: String -> [String] -> [AtomPat] -> AtomPat -> Bool -> [CertRef] -> Rule
 strRule rid ps prems concl allowT certs =
-  Rule (RuleId rid) (map Param ps) Strict prems concl allowT certs []
+  Rule (RuleId rid) (map Param ps) Strict prems [] concl allowT certs []
 
 apat0 :: String -> [Pat] -> AtomPat
 apat0 name = AtomPat (Pred name)
@@ -502,7 +544,8 @@ strictTrustedAccept =
 strictCertAccept :: Unit
 strictCertAccept =
   Unit
-    { unitRules =
+    { unitSigma = corpusSigma
+    , unitRules =
         [strRule "s" [] [apat0 "pp" []] (apat0 "pp" []) False
           [CertRef (BackendId "nd") 1 (TheoryDigest "t0")]]
     , unitContraries = []
@@ -527,7 +570,8 @@ strictCertAccept =
 strictCertUnicodeTheory :: Unit
 strictCertUnicodeTheory =
   Unit
-    { unitRules =
+    { unitSigma = corpusSigma
+    , unitRules =
         [strRule "s" [] [apat0 "pp" []] (apat0 "pp" []) False
           [CertRef (BackendId "nd") 1 (TheoryDigest "sha256:é")]]
     , unitContraries = []
@@ -554,7 +598,8 @@ strictCertUnicodeTheory =
 preflightCertUnit :: Unit
 preflightCertUnit =
   Unit
-    { unitRules =
+    { unitSigma = corpusSigma
+    , unitRules =
         [strRule "s" [] [apat0 "pp" []] (apat0 "pp" []) False
           [CertRef (BackendId "nd") 2 (TheoryDigest "t0")]]
     , unitContraries = []
@@ -662,7 +707,7 @@ checkInput backends unit = do
   replayId <-
     either (fail . replayErrorMessage) pure $
       mkReplayId
-        LaraCoreV01
+        LaraCoreV02
         (PolicyId "conformance-v1")
         backends
         (sortBy compareTheoryDigest (map fst (unitTheories unit)))

@@ -1210,3 +1210,112 @@ observations:
   promoted_to: "logic/solution/constraints.md (Surface/core boundary bullet)"
   crystallized_via: verbal-affirmation + artifact-commitment
   stale: false
+
+- id: O59
+  timestamp: "2026-08-10T18:40"
+  provenance: ai-suggested
+  content: >
+    A rejection class that no implementation enforces does not stay merely
+    under-exercised: its documented content drifts from reality undetectably.
+    R2 sat in the frozen spec table with zero mutants and zero examples;
+    docs/rejection-surface.md described it as "exercised only inside larger
+    worked cases", which was false; and one of its two documented triggers
+    ("non-ground term where ground required") was unsatisfiable by construction,
+    because Term has no variable constructor. Both errors survived every review
+    because nothing executable could contradict them.
+  context: >
+    Found while implementing #89 D7/D1: the surface doc's note and the spec's
+    R2 row both had to be corrected, not merely extended.
+  potential_type: claim
+  bound_to: [N150, N152]
+  promoted: true
+  promoted_to: "logic/claims.md:C28"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O60
+  timestamp: "2026-08-10T18:42"
+  provenance: ai-suggested
+  content: >
+    When a checker gains a new EARLY stage, a seeded-defect suite silently
+    migrates to the new class wherever its operators synthesize fresh
+    vocabulary — so "the reclassification delta is zero" is a property of the
+    generators, not of the checker. Three operator groups here inject symbols
+    (hidden-contrary's mut_p/mut_q, the accept family's injected contraries and
+    premises, rebut-cycle's whole synthetic vocabulary); each had to be made
+    signature-aware before the delta could be zero. Two class-boundary
+    decisions carry the rest: a theta key off the parameter list stays R3, and
+    an instance whose rule id does not resolve stays R1.
+  context: >
+    #89 §8 predicted the zero delta and required it be measured, not assumed.
+    Measured: the expected-column diff over the 369 pre-existing mutants is
+    empty, after the generators were changed.
+  potential_type: claim
+  bound_to: [N152]
+  promoted: true
+  promoted_to: "logic/claims.md:C29"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O61
+  timestamp: "2026-08-10T18:44"
+  provenance: ai-suggested
+  content: >
+    A per-instance check can be made thin by a substitution lemma rather than by
+    a judgement call: stage 2 validates a rule's patterns once, statically, and
+    each instance's theta range separately, and NOTHING validates the
+    instantiated atoms. wellSorted_subst is what licenses that gap. Without the
+    lemma the theta-range check looks arbitrarily scoped; with it, the thinness
+    is a result.
+  context: >
+    Mechanized as result 13(b)/(c) in lean/Lara/Sigma.lean and
+    lean/Lara/Check/Unit.lean; the plan called this the load-bearing metatheory
+    of the pass rather than a lemma-shaped afterthought.
+  potential_type: claim
+  bound_to: [N153]
+  promoted: true
+  promoted_to: "logic/claims.md:C30"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O62
+  timestamp: "2026-08-10T18:46"
+  provenance: ai-suggested
+  content: >
+    The ground vocabulary of a first-order corpus is dominated by nullary
+    constants, which surface grepping cannot see: inference over corpus-v1 found
+    196 constructors of which 187 are nullary. A nullary constant has no
+    argument positions, so its sort is only recoverable from the predicate and
+    constructor positions it occupies — which makes union-find over occurrences
+    the minimum viable census tool, not an optimisation over a sweep.
+  context: >
+    D0's first output. The plan's own head-token estimate was low by roughly 3x
+    exactly at the nullary term, which the plan itself flagged (OV-1A).
+  potential_type: claim
+  bound_to: [N151]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O63
+  timestamp: "2026-08-10T18:48"
+  provenance: ai-suggested
+  content: >
+    Declare what cannot be inferred; derive what the declaration would only let
+    the frontend get wrong. Sorts are declared because inferring them presumes
+    answers the corpus has not settled (whether imagenet_val is a Dataset or an
+    EvalSetting is the possible-worlds question). Rule PARAMETER sorts are
+    derived from the rule's own patterns, because under a validated signature
+    every parameter already occupies sorted positions — so declaring them adds a
+    wire field, a rule-grammar change, and a way for a declaration to disagree
+    with the patterns beside it, and buys nothing.
+  context: >
+    #89 §2.1 (eng review OV-3) and its implementation: no ninth wire field, no
+    stored Rule field, no sort annotations in the rule grammar.
+  potential_type: heuristic
+  bound_to: [N150, N152]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H12"
+  crystallized_via: artifact-commitment
+  stale: false

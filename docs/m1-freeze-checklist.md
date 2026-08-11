@@ -138,7 +138,7 @@ negative-tested multiline CI axiom parser.
 The deferrals the #18 note lists above are now implemented in Haskell, each the
 executable mirror of the frozen Lean development:
 
-- **Production Haskell checker** — `Lara.Check.checkUnit` decides the six-stage
+- **Production Haskell checker** — `Lara.Check.checkUnit` decides the seven-stage
   whole-unit boundary (duplicate rule ids → R12 → duplicate arguments → support
   → typed attacks → missing conflict), the exact order of the Lean `checkUnit`.
   Layers 3–8 landed as `Lara.{Policy,SupportTerm,Attack,Compile,Grounded,
@@ -156,15 +156,16 @@ executable mirror of the frozen Lean development:
   `scripts/differential.sh` runs every `fixtures/**/*.sexp` through both drivers
   and asserts byte-exact stdout + exit-code agreement (Lean is the oracle);
   `test/DifferentialSpec.hs` pins the agreed verdict bytes for `cabal test`.
-- **R1–R14 mutation coverage** (row 14) — the executable checker decides R1, R3,
-  R4, R5, R6, R7, R10, R11, R12, R13, each with a rejected golden in `CheckSpec`
-  and a `fixtures/corpus/` fixture, plus the four structural outcomes
-  (duplicate-rule, duplicate-argument, incomplete-argument, missing-conflict).
-  R2 (signature), R8 (admission), R9 (data-integrity) stay outside the
-  executable core; R14 (codec) is the decode-boundary class, covered by
-  `WireSpec`'s malformed-input matrix. This lands the "M5 mutation-suite spine"
-  the row-14 mechanization pointer anticipated, at the executable `checkUnit`
-  boundary.
+- **R1–R14 mutation coverage** (row 14) — `checkUnit` decides R1, R2, R3,
+  R4, R5, R6, R7, R10, R11, R12, and R13 (certificate replay at the support
+  stage), plus the four structural outcomes (duplicate-rule, duplicate-argument,
+  incomplete-argument, missing-conflict); `CheckSpec` pins each with a rejected
+  golden. The production driver decides replay-preflight R13 and escalated
+  data-integrity R9. R8 is the
+  source-admission boundary. R14 is the wire-decode boundary, covered by
+  `WireSpec`'s malformed-input matrix. The mutation and differential corpora
+  exercise these boundaries. This lands the "M5 mutation-suite spine" the
+  row-14 mechanization pointer anticipated.
 
 These Haskell tests are conformance evidence; soundness stays in the Lean
 proofs. The former numeric caveat is resolved: both production drivers use

@@ -19,6 +19,7 @@ import Data.List (find, isPrefixOf)
 import Test.QuickCheck
 
 import Lara.AST hiding (Reject)
+import SigmaFixture (sigmaOf)
 import Lara.Check (CheckConfig, fullConfig, noCQConfig, noTypedConfig)
 import Lara.Diagnostics (LocatedRejection (..))
 import Lara.Driver (runCheckLocated, runCheckLocatedWith)
@@ -318,7 +319,8 @@ prop_handWrittenHole =
     input = testCheckInput holeUnit
     holeUnit =
       Unit
-        { unitRules =
+        { unitSigma = sigmaOf [] [] [("c", []), ("ans", [])]
+        , unitRules =
             [ Rule
                 (RuleId "d")
                 []

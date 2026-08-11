@@ -126,7 +126,8 @@ prop_adjConsistent =
 -- edge 0→1, exercising a non-self, non-trivial AF through the differential.
 rebutProgram :: String
 rebutProgram =
-  "(unit (policy"
+  "(unit (sigma (sorts) (cons) (preds (pred q (args)) (pred not_q (args))))"
+    ++ " (policy"
     ++ " (rules"
     ++ " (rule r1 (mode defeasible) (params) (premises) (conclusion (apat q))"
     ++ " (questions) (allow-trusted false) (certifiers))"

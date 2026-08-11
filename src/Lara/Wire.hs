@@ -30,11 +30,15 @@
 --
 -- @
 -- \<check-input\> ::= (check-input \<replay-id\> \<unit\>)
--- \<replay-id\>   ::= (replay-id (core lara-core\@0.1) (policy ID)
+-- \<replay-id\>   ::= (replay-id (core lara-core\@0.2) (policy ID)
 --                       (backends (backend ID STRING)*) (theories STRING*)
 --                       (artifact STRING))
--- \<unit\>     ::= (unit \<policy-sec\>? \<theories-sec\>? \<leaves-sec\>?
+-- \<unit\>     ::= (unit \<sigma-sec\>? \<policy-sec\>? \<theories-sec\>? \<leaves-sec\>?
 --                        \<args-sec\>? \<attacks-sec\>? \<queries-sec\>?)
+-- \<sigma-sec\>    ::= (sigma (sorts ID*) (cons \<con-sig\>*) (preds \<pred-sig\>*))
+-- \<con-sig\>      ::= (con ID (args SORT*) SORT)
+-- \<pred-sig\>     ::= (pred ID (args SORT*))
+-- SORT           ::= Num | Str | ID
 -- \<policy-sec\>   ::= (policy (rules \<rule\>*) (contraries \<contrary\>*)
 --                             (exceptions \<exception\>*))
 -- \<rule\>         ::= (rule ID (mode strict | defeasible) (params ID*)
@@ -91,7 +95,7 @@
 -- STATUS    ::= CORE-STATUS | evidence-blocked
 -- CORE-STATUS ::= gap | justified | contested | defeated
 -- REJECTION ::= duplicate-rule | duplicate-argument | incomplete-argument
---             | missing-conflict | R1 | R3 | R4 | R5 | R6 | R7
+--             | missing-conflict | R1 | R2 | R3 | R4 | R5 | R6 | R7
 --             | R9 | R10 | R11 | R12 | R13
 -- @
 --
@@ -142,6 +146,16 @@ import Data.List (intercalate)
 
 import Lara.AST hiding (Reject)
 import Lara.Replay
+import Lara.Sigma
+  ( ConSig (..)
+  , PredSig (..)
+  , Sigma (..)
+  , Sort (..)
+  , SortName (..)
+  , emptySigma
+  , sortFromText
+  , sortText
+  )
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Strict (SExpr (..))
 
@@ -284,6 +298,8 @@ data Tag
   | TPos | TPrem | TQues | TInst
     -- duplicate-report groups (spec §4.3)
   | TGroups | TGroup | TQuarantine
+    -- the many-sorted signature Sigma (spec §2, §3.4; lara-core@0.2)
+  | TSigma | TSorts | TCons | TPreds | TPred
     -- modes, necessity, booleans, assurance
   | TStrict | TDefeasible | TMandatory | TOptional | TTrue | TFalse
   | TNone | TTrusted
@@ -298,7 +314,7 @@ data Tag
   | TEvidenceBlocked
     -- rejection outcomes
   | TDupRule | TDupArgument | TIncompleteArgument | TMissingConflict
-  | TR1 | TR3 | TR4 | TR5 | TR6 | TR7 | TR9 | TR10 | TR11 | TR12 | TR13
+  | TR1 | TR2 | TR3 | TR4 | TR5 | TR6 | TR7 | TR9 | TR10 | TR11 | TR12 | TR13
   deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | The on-the-wire spelling of a keyword.
@@ -320,6 +336,8 @@ tagToString t = case t of
   THoles -> "holes"; TAssurance -> "assurance"; TCert -> "cert"
   TPos -> "pos"; TPrem -> "prem"; TQues -> "ques"; TInst -> "inst"
   TGroups -> "groups"; TGroup -> "group"; TQuarantine -> "quarantine"
+  TSigma -> "sigma"; TSorts -> "sorts"; TCons -> "cons"; TPreds -> "preds"
+  TPred -> "pred"
   TStrict -> "strict"; TDefeasible -> "defeasible"
   TMandatory -> "mandatory"; TOptional -> "optional"
   TTrue -> "true"; TFalse -> "false"; TNone -> "none"; TTrusted -> "trusted"
@@ -335,7 +353,7 @@ tagToString t = case t of
   TDupRule -> "duplicate-rule"; TDupArgument -> "duplicate-argument"
   TIncompleteArgument -> "incomplete-argument"
   TMissingConflict -> "missing-conflict"
-  TR1 -> "R1"; TR3 -> "R3"; TR4 -> "R4"; TR5 -> "R5"; TR6 -> "R6"
+  TR1 -> "R1"; TR2 -> "R2"; TR3 -> "R3"; TR4 -> "R4"; TR5 -> "R5"; TR6 -> "R6"
   TR7 -> "R7"; TR9 -> "R9"; TR10 -> "R10"; TR11 -> "R11"; TR12 -> "R12"
   TR13 -> "R13"
 
@@ -755,10 +773,70 @@ decodeAttack e = case e of
 -- Units
 -- ---------------------------------------------------------------------------
 
+-- | The wire spelling of a sort __reference__: the two base sorts print as
+-- their reserved names, a declared sort as its name. Sort /declarations/ are
+-- bare 'SortName' atoms, so @(sort Num)@ is representable and rejected by the
+-- checker as base-sort shadowing rather than being unspellable.
+encodeSort :: Sort -> SExpr
+encodeSort = SAtom . sortText
+
+decodeSort :: SExpr -> Decode Sort
+decodeSort e = sortFromText <$> atomText "sort" e
+
+encodeSigma :: Sigma -> SExpr
+encodeSigma sg =
+  tagged
+    TSigma
+    [ tagged TSorts [SAtom n | SortName n <- sigmaSorts sg]
+    , tagged
+        TCons
+        [ tagged
+            TConApp
+            [ SAtom k
+            , tagged TArgs (map encodeSort (conArgs c))
+            , encodeSort (conResult c)
+            ]
+        | c <- sigmaCons sg
+        , let FunSym k = conSym c
+        ]
+    , tagged
+        TPreds
+        [ tagged TPred [SAtom h, tagged TArgs (map encodeSort (predArgs p))]
+        | p <- sigmaPreds sg
+        , let Pred h = predSym p
+        ]
+    ]
+
+decodeSigma :: SExpr -> Decode Sigma
+decodeSigma e = do
+  [sortsS, consS, predsS] <- matchTagged "sigma" TSigma 3 e
+  sorts <-
+    sectionFields "sigma sorts" TSorts sortsS
+      >>= mapM (fmap SortName . atomText "sigma sorts")
+  cons <- sectionFields "sigma cons" TCons consS >>= mapM decodeConSig
+  preds <- sectionFields "sigma preds" TPreds predsS >>= mapM decodePredSig
+  ok (Sigma sorts cons preds)
+  where
+    decodeConSig c = do
+      [nameV, argsV, resV] <- matchTagged "sigma con" TConApp 3 c
+      k <- FunSym <$> atomText "sigma con" nameV
+      args <- sectionFields "sigma con args" TArgs argsV >>= mapM decodeSort
+      res <- decodeSort resV
+      ok (ConSig k args res)
+    decodePredSig p = do
+      [nameV, argsV] <- matchTagged "sigma pred" TPred 2 p
+      h <- Pred <$> atomText "sigma pred" nameV
+      args <- sectionFields "sigma pred args" TArgs argsV >>= mapM decodeSort
+      ok (PredSig h args)
+
 encodeUnit :: Unit -> SExpr
 encodeUnit u =
   tagged TUnit . concat $
-    [ [ tagged
+    [ -- The signature (lara-core@0.2). Emitted only when non-empty, so a
+      -- symbol-free unit is unaffected; a real unit always carries one, since
+      -- strict mode makes an empty Σ accept nothing that mentions a symbol.
+      [encodeSigma (unitSigma u) | unitSigma u /= emptySigma]
+    , [ tagged
           TPolicy
           [ tagged TRules (map encodeRule (unitRules u))
           , tagged TContraries (map encodeContrary (unitContraries u))
@@ -813,7 +891,8 @@ groupModeTag m = case m of
 decodeUnitM :: SExpr -> Decode Unit
 decodeUnitM e = do
   sections <- sectionFields "unit" TUnit e
-  (policyS, rest1) <- takeSection TPolicy sections
+  (sigmaS, rest0) <- takeSection TSigma sections
+  (policyS, rest1) <- takeSection TPolicy rest0
   (theoriesS, rest2) <- takeSection TTheories rest1
   (leavesS, rest3) <- takeSection TLeaves rest2
   (argsS, rest4) <- takeSection TArgs rest3
@@ -823,6 +902,7 @@ decodeUnitM e = do
   case rest7 of
     s : _ -> werr "unit" ("unexpected section: " ++ show s)
     [] -> ok ()
+  sigma <- maybe (ok emptySigma) decodeSigma sigmaS
   (rules, contraries, exceptions) <- decodePolicy policyS
   theories <- decodeTheories theoriesS
   leaves <- decodeLeaves leavesS
@@ -834,7 +914,8 @@ decodeUnitM e = do
   checkGroupInvariants groups leaves
   ok
     Unit
-      { unitRules = rules
+      { unitSigma = sigma
+      , unitRules = rules
       , unitContraries = contraries
       , unitExceptions = exceptions
       , unitTheories = theories
@@ -1027,8 +1108,8 @@ decodeReplayIdM value = do
   [coreValue] <- matchTagged "replay-id core" TCore 1 coreSection
   coreText <- atomText "replay-id core" coreValue
   core <-
-    if coreText == coreVersionText LaraCoreV01
-      then ok LaraCoreV01
+    if coreText == coreVersionText LaraCoreV02
+      then ok LaraCoreV02
       else werr "replay-id" ("unsupported core version: " ++ show coreText)
   [policyValue] <- matchTagged "replay-id policy" TPolicy 1 policySection
   policy <- PolicyId <$> atomText "replay-id policy" policyValue
@@ -1079,7 +1160,7 @@ replayResult :: String -> Either ReplayError a -> Decode a
 replayResult context = either (werr context . replayErrorMessage) ok
 
 coreVersionText :: CoreVersion -> String
-coreVersionText LaraCoreV01 = "lara-core@0.1"
+coreVersionText LaraCoreV02 = "lara-core@0.2"
 
 -- ---------------------------------------------------------------------------
 -- Verdicts
@@ -1210,7 +1291,7 @@ encodeRejection r =
 
 rejectClassTag :: RejectClass -> Tag
 rejectClassTag c = case c of
-  R1 -> TR1; R3 -> TR3; R4 -> TR4; R5 -> TR5; R6 -> TR6; R7 -> TR7
+  R1 -> TR1; R2 -> TR2; R3 -> TR3; R4 -> TR4; R5 -> TR5; R6 -> TR6; R7 -> TR7
   R9 -> TR9; R10 -> TR10; R11 -> TR11; R12 -> TR12; R13 -> TR13
 
 -- | Decode a verdict (the dual of 'encodeVerdict'; used by the conformance

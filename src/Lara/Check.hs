@@ -1,19 +1,30 @@
--- | The six-stage whole-unit checker (spec §10) — the Haskell mirror of
+-- | The seven-stage whole-unit checker (spec §10) — the Haskell mirror of
 -- @lean/Lara/Check/Unit.lean@ (@checkUnit@) and
 -- @lean/Lara/Check/Program.lean@ (@checkProgramDetailed@).
 --
 -- 'checkUnit' is the canonical executable acceptance boundary. Its public
--- six-stage order is exactly the Lean one:
+-- seven-stage order is exactly the Lean one:
 --
 --   1. duplicate rule identifiers ('Lara.Policy.firstDuplicateRuleId')
---   2. R12 policy well-formedness ('Lara.Policy.firstViolation')
---   3. duplicate arguments ('firstDuplicate')
---   4. support ('Lara.SupportTerm.inferSupport')
---   5. typed attacks ('Lara.Attack.checkAttack')
---   6. missing conflict ('firstMissingConflictInfo')
+--   2. R2 signature well-formedness and well-sortedness
+--      ('Lara.Sigma.WellSorted.unitSortError')
+--   3. R12 policy well-formedness ('Lara.Policy.firstViolation')
+--   4. duplicate arguments ('firstDuplicate')
+--   5. support ('Lara.SupportTerm.inferSupport')
+--   6. typed attacks ('Lara.Attack.checkAttack')
+--   7. missing conflict ('firstMissingConflictInfo')
 --
--- The first two stages run before program checking; the remaining four are the
--- detailed program checker's fixed order. A successful check retains the
+-- The first three stages run before program checking; the remaining four are
+-- the detailed program checker's fixed order.
+--
+-- __Why the sort stage is at position 2__ (@lara-core\@0.2@, #89). Σ conformance
+-- is a precondition for reading the policy as patterns at all: both the R12
+-- Path-B validator and support inference instantiate patterns, and both should
+-- be entitled to assume well-sortedness rather than re-derive it. Running it
+-- after duplicate-rule detection means the stage never has to reason about
+-- which of two same-named rules it is checking.
+--
+-- A successful check retains the
 -- checked-node cache ('cuNodes') and the compiled program ('cuProgram'), so
 -- "Lara.Compile" and "Lara.Grounded" consume them without re-inferring support
 -- (the Lean @CheckedUnit@ / @ProgramAcceptance@ carry @nodes@ and
@@ -79,6 +90,7 @@ import Lara.Policy
   , lookupRule
   )
 import Lara.Prop (Prop)
+import Lara.Sigma.WellSorted (SortError, unitSortError)
 import Lara.SupportTerm
 import Lara.SupportTerm.Internal (CheckedNode (..))
 
@@ -126,6 +138,7 @@ programErrorClass e = case e of
 -- | Closed diagnostics for whole-unit acceptance (Lean @UnitError@).
 data UnitError
   = UEDuplicateRule DuplicateRuleId
+  | UESignature SortError
   | UEPolicyViolation Violation
   | UEProgram ProgramError
   deriving (Eq, Show)
@@ -136,6 +149,7 @@ data UnitError
 unitErrorClass :: UnitError -> Maybe RejectClass
 unitErrorClass e = case e of
   UEDuplicateRule _ -> Nothing
+  UESignature _ -> Just R2
   UEPolicyViolation _ -> Just R12
   UEProgram pe -> programErrorClass pe
 
@@ -316,7 +330,7 @@ data ProgramAcceptance = ProgramAcceptance
   }
   deriving (Eq, Show)
 
--- | Stages 3–6: duplicate arguments, support, typed attacks, missing conflict
+-- | Stages 4–7: duplicate arguments, support, typed attacks, missing conflict
 -- (Lean @checkProgramDetailed@ = @checkProgramBase@ then the conflict scan).
 -- The conflict scan is part of the typed-attack bundle and is skipped when
 -- 'ccTypedAttacks' is off.
@@ -373,7 +387,7 @@ resolveAttacks argMap = mapMaybe resolve
       Undercut w u pos -> (\s t -> RUndercut s t pos) <$> lookup w argMap <*> lookup u argMap
       Undermine w u pos -> (\s t -> RUndermine s t pos) <$> lookup w argMap <*> lookup u argMap
 
--- | The canonical executable acceptance boundary (Lean @checkUnit@): the six
+-- | The canonical executable acceptance boundary (Lean @checkUnit@): the seven
 -- stages in fixed order. @Gamma@ is the leaf context, @certOk@ the certificate
 -- oracle (both built at the program boundary from the unit's leaves and
 -- theories).
@@ -406,14 +420,16 @@ checkUnitWith
 checkUnitWith cfg gamma certOk unit =
   case firstDuplicateRuleId (unitRules unit) of
     Just dup -> Left (UEDuplicateRule dup)
-    Nothing ->
-      case firstViolation (unitRules unit) (unitContraries unit) of
-        Just v -> Left (UEPolicyViolation v)
-        Nothing ->
-          let pI = lookupRule (unitRules unit)
-              dp = DefeatPolicy (unitContraries unit) (unitExceptions unit)
-              args = map snd (unitArgs unit)
-              atts = resolveAttacks (unitArgs unit) (unitAttacks unit)
-           in case checkProgramDetailed cfg pI gamma certOk dp args atts of
-                Left e -> Left (UEProgram e)
-                Right acc -> Right (CheckedUnit (paProgram acc) (paNodes acc))
+    Nothing -> case unitSortError unit of
+      Just se -> Left (UESignature se)
+      Nothing ->
+        case firstViolation (unitRules unit) (unitContraries unit) (unitExceptions unit) of
+          Just v -> Left (UEPolicyViolation v)
+          Nothing ->
+            let pI = lookupRule (unitRules unit)
+                dp = DefeatPolicy (unitContraries unit) (unitExceptions unit)
+                args = map snd (unitArgs unit)
+                atts = resolveAttacks (unitArgs unit) (unitAttacks unit)
+             in case checkProgramDetailed cfg pI gamma certOk dp args atts of
+                  Left e -> Left (UEProgram e)
+                  Right acc -> Right (CheckedUnit (paProgram acc) (paNodes acc))

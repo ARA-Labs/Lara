@@ -106,7 +106,7 @@ Command (one command, manifest-driven discovery):
 cabal exec -- runghc scripts/measure.hs
 ```
 
-Emits `measurements/{report,ablation}.{json,tsv}` over 429 inputs (369 mutants +
+Emits `measurements/{report,ablation}.{json,tsv}` over 556 inputs (496 mutants +
 60 corpus units); `scripts/claim-support.hs` emits the claim-support
 aggregation and the committed `measurements/binding-audit/worklist.tsv`.
 The canonical aggregate snapshot is committed under `measurements/frozen/`;
@@ -116,14 +116,31 @@ other working measurement outputs remain gitignored as regenerable output.
 
 | Metric | Value |
 | --- | --- |
-| Measurement records | 429 (369 mutants + 60 corpus units) |
-| Class match (`actual` = `expected`) | 429 / 429 |
-| Cross-driver agreement (`lean_agree`) | 429 / 429 |
-| Location match (where applicable) | 266 / 266 (163 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — codec-fails, corpus units) |
+| Measurement records | 556 (496 mutants + 60 corpus units) |
+| Class match (`actual` = `expected`) | 556 / 556 |
+| Cross-driver agreement (`lean_agree`) | 556 / 556 |
+| Location match (where applicable) | 393 / 393 (163 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — codec-fails, corpus units) |
 | Replay success (corpus units) | 60 / 60 |
 | Claim-support (4): load-bearing strict steps carrying a checked certificate | 1 / 1 (#57, `adaptive-pruning/C04`) |
 | Ablation **no-cq** missed rejections | 18 — all `reject-IncompleteArgument` (surgical) |
 | Ablation **no-typed** missed rejections | 30 — 11 `reject-R10` + 19 `reject-R11` (surgical) |
+
+**`lara-core@0.2` (#89) re-freeze.** The suite grew from 369 to 496 mutants: the
+signature family adds 107 `reject-R2` rows (five operators, one per clause of
+the amended class) and 12 `reject-R12` rows from `out-of-scope-var`, the witness
+for R12's new spec-§4.1 arm. Two diffs were taken across the regeneration
+boundary and **both are empty**, which is the measurement this pass claims:
+
+- the `MANIFEST.tsv` `expected`-column diff over the 369 pre-existing rows, and
+- the verdict-and-status diff over all 60 corpus `expected.json` files.
+
+The empty first diff is the design commitment of #89 §8 paying off: every
+symbol-injecting operator now extends its mutant's carried Σ, so a mutant tests
+the class it seeds rather than incidental signature noise.
+`measurements/binding-audit/**` is **frozen input, excluded from regeneration**
+(#89 §8, decision D-5); the pre-regeneration byte-compare of the recomputed
+`worklist.tsv` against the committed one was empty, confirming the wire bump
+cannot reach the 38-leaf denominator.
 
 Corpus-unit status diversity (T2): 48 gap, 9 justified, 3 defeated (contested is
 carried by worked example E5).
@@ -137,8 +154,8 @@ reproducibility anchors below hash only the deterministic content.
 
 | Frozen output anchor | SHA-256 |
 | --- | --- |
-| `report.tsv` deterministic projection (`cut -f1-14`) | `1152aba34e36535bea21511bebb950f79fc17681f1ddd9125067394ed5c07226` |
-| `ablation.tsv` (full, deterministic) | `76b89045cbf47ddfd0767efce81c82e339da35e436d3c35bf7efd496508e58c2` |
+| `report.tsv` deterministic projection (`cut -f1-14`) | `a5a530a9c7237d4dc96c1044035a558fa0a6c84152400fcd0a3d688347655da5` |
+| `ablation.tsv` (full, deterministic) | `36c75e3c0c97ff30a88c532967a9fb9f557fe3596ab61a995542e6995efb9b78` |
 
 Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 (recorded in `report.json` `environment`).

@@ -1,7 +1,7 @@
 -- | Internal, __unstable__ surface exposing the 'CheckedUnit' constructor.
 --
 -- 'CheckedUnit' is the checker's acceptance certificate: it exists only when
--- 'Lara.Check.checkUnit' has run all six stages successfully (the Lean
+-- 'Lara.Check.checkUnit' has run all seven stages successfully (the Lean
 -- @Unit.CheckedUnit@ it erases carries the acceptance proof). The public
 -- "Lara.Check" keeps the constructor hidden so a client cannot fabricate an
 -- accepted unit; 'Lara.Check.checkUnit' is its sole sanctioned producer. Tests

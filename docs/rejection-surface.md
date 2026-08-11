@@ -34,7 +34,7 @@ statement).
 
 So "exit 2" is not exclusively a `.lara`-vs-`.sexp` distinction — it means *decode/elaborate-boundary
 failure* on either path (parse error, `ElabError`, or wire codec error). "Exit 1 with a class on
-stdout" means the input was well-formed enough to reach the six-stage checker (`Lara.Check`), which
+stdout" means the input was well-formed enough to reach the seven-stage checker (`Lara.Check`), which
 then refused it for a specific, named reason.
 
 There is a third, narrower case worth knowing about: an `R8`-admission-`reject`-classed leaf (a
@@ -78,6 +78,7 @@ reproduce the class shown.
 | Class | Trigger | Anchor | Verified output |
 | --- | --- | --- | --- |
 | R1 reference | leaf/argument/rule/… id named by a support term is not in Γ | `examples/R1` | `lara check examples/R1/example.lara` → `reject R1` |
+| R2 signature | undeclared predicate or constructor symbol; arity mismatch against `Sigma`; argument- or result-sort mismatch; a rule-parameter binding whose term has the wrong sort | `examples/R2-sort` (**not** `examples/R2`, which is the R12 demonstration) | `lara check examples/R2-sort/example.lara` → `reject R2` |
 | R3 substitution | `dom(theta)` misses a rule parameter | `fixtures/mutants/A--wrong-subst-domain-0.sexp` | `reject R3` |
 | R4 premise | cited term's conclusion `≢` the rule's instantiated premise pattern | `fixtures/mutants/A--wrong-premise-0.sexp` | `reject R4` |
 | R5 question-accounting | a declared question is in neither the discharge map nor the hole set (or vice versa) | `fixtures/mutants/A--open-obligation-0.sexp` | `reject R5` |
@@ -86,21 +87,38 @@ reproduce the class shown.
 | R9 data-integrity | duplicate-report group with `≢` members, escalated to `reject` by policy | `fixtures/corpus/reject-r9.sexp` | `reject R9` |
 | R10 attack-position | attack position undefined, or wrong occurrence kind for the attack kind | `examples/R3` | `lara check examples/R3/example.lara` → `reject R10` |
 | R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut | `fixtures/mutants/A--unlicensed-attack-0.sexp` | `reject R11` |
-| R12 policy-wf | a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `examples/R2` (spec class R12, despite the directory name — see its header comment) | `lara check examples/R2/example.lara` → `reject R12` |
+| R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
 | R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` |
-| R14 codec | wire program fails to decode: malformed JSON/S-expression, unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.2"`, **nothing on stdout** |
+| R14 codec | wire program fails to decode: malformed JSON/S-expression, unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
-Two classes are not individually anchored above because they are exercised only inside larger
-worked cases rather than by one dedicated file:
+One class is not individually anchored above, because it is a source-boundary rejection rather
+than a checker verdict:
 
-- **R2 signature** (arity/symbol mismatch against `Sigma`, or a non-ground term where ground is
-  required) — the spec's own class R2, not to be confused with the `examples/R2` directory, which
-  demonstrates R12 (see its header comment and the m4a-checklist §3 note on the naming collision).
 - **R8 admission** (a `reject`-classed leaf, or a `certified` leaf missing its checker witness) — see
-  §1's third case above; it is a source-boundary rejection distinct from both the R1–R14 checker
-  classes above it in the table and from quarantine below it.
+  §1's third case above; it is distinct from both the R1–R14 checker classes above it in the table
+  and from quarantine below it.
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 369 mutants) exercises every class at
+**R2 was unexercised, not under-anchored — corrected at `lara-core@0.2`.** Until #89 this section
+said R2 and R8 were both "exercised only inside larger worked cases". For R8 that is true. For R2
+it was not: `fixtures/mutants/MANIFEST.tsv` carried **zero** `reject-R2` rows across all 369
+mutants and no `examples/` directory produced one, because R2 was outside the executable core —
+documented, reserved, and dead. It is now a real stage (`checkUnit` stage 2), with:
+
+- a dedicated negative, `examples/R2-sort/`, whose leaf is the motivating example itself,
+  `num_lt(sys_new, accuracy)`, under the **shipped** `ord-v1` signature rather than a bespoke one;
+- five mutation operators, one per clause of the amended class — `undeclared-pred`,
+  `wrong-pred-arity`, `wrong-arg-sort`, `undeclared-con`, `wrong-theta-sort` — swept over both the
+  worked examples and the corpus, so `wrong-arg-sort` in particular has to find real sites in
+  `corpus-v1`'s own vocabulary;
+- a sixth operator, `out-of-scope-var`, witnessing R12's new spec-§4.1 arm, which must not land
+  witness-free the way R2 once did.
+
+**The dropped groundness clause.** The old R2 row also read "non-ground term where ground
+required". That clause was never violable — `Term ::= num | str | con(…)` has no variable
+constructor, so every `Prop` is ground *structurally* and pattern variables exist only in `Pat` —
+and spec §10.1 now records it as vacuous rather than leaving it looking unenforced.
+
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 496 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
@@ -141,7 +159,7 @@ land in the "valid but unsupported" bucket by design
 counter-argument"). The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
-The seeded mutation suite quantifies the split. Of 369 mutants, 311 reject across the R1–R14/codec
+The seeded mutation suite quantifies the split. Of 496 mutants, 438 reject across the R1–R14/codec
 classes and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
 (`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,
 `accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker

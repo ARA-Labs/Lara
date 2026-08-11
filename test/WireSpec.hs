@@ -33,6 +33,14 @@ import Test.QuickCheck
 import Lara.AST hiding (Reject)
 import Lara.Replay
 import Lara.Prop (Prop (..), Term (..))
+import Lara.Sigma
+  ( ConSig (..)
+  , PredSig (..)
+  , Sigma (..)
+  , Sort (..)
+  , SortName (..)
+  , emptySigma
+  )
 import Lara.Strict (SExpr (..))
 import Lara.Wire
 
@@ -224,8 +232,28 @@ genAttackFrom aids =
     , Undermine <$> elements aids <*> elements aids <*> genPosition
     ]
 
+-- | A signature over the same identifier pool as the rest of the generator.
+-- Round-tripping does __not__ require well-sortedness (the codec never checks
+-- it), so this deliberately generates arbitrary — often ill-sorted — signatures:
+-- the property under test is @decode ∘ encode = id@, and restricting the
+-- generator to well-sorted signatures would leave the interesting decode paths
+-- unexercised.
+genSigma :: Gen Sigma
+genSigma = do
+  sorts <- nub <$> smallListOf (SortName <$> genIdent)
+  let genSort =
+        if null sorts
+          then elements [SortNum, SortStr]
+          else oneof [elements [SortNum, SortStr], SortDecl <$> elements sorts]
+  cons <-
+    smallListOf
+      (ConSig <$> (FunSym <$> genIdent) <*> smallListOf genSort <*> genSort)
+  preds <- smallListOf (PredSig <$> (Pred <$> genIdent) <*> smallListOf genSort)
+  pure (Sigma sorts cons preds)
+
 genUnit :: Gen Unit
 genUnit = do
+  sigma <- genSigma
   rules <- smallListOf genRule
   contraries <- smallListOf (Contrary <$> genAtomPat <*> genAtomPat)
   exceptions <-
@@ -259,7 +287,8 @@ genUnit = do
       else elements [QuarantineOnConflict, RejectOnConflict]
   pure
     Unit
-      { unitRules = rules
+      { unitSigma = sigma
+      , unitRules = rules
       , unitContraries = contraries
       , unitExceptions = exceptions
       , unitTheories = theories
@@ -312,7 +341,7 @@ genReplayId = do
   backends <- genBackendSelection
   theories <- genCanonicalTheories
   artifact <- Digest <$> genAtomString
-  case mkReplayId LaraCoreV01 policy backends theories artifact of
+  case mkReplayId LaraCoreV02 policy backends theories artifact of
     Right replayId -> pure replayId
     Left _ -> discard -- unreachable: the theories are canonical by construction
 
@@ -460,6 +489,8 @@ prop_printParsePrintIdempotent =
 goldenUnitText :: String
 goldenUnitText =
   "(unit \
+  \(sigma (sorts Item) (cons (con k (args Item) Item) (con c0 (args) Item)) \
+  \(preds (pred p (args)) (pred q (args)))) \
   \(policy \
   \(rules \
   \(rule rmix (mode defeasible) (params) (premises) \
@@ -483,7 +514,14 @@ goldenUnitText =
 goldenUnit :: Unit
 goldenUnit =
   Unit
-    { unitRules =
+    { unitSigma =
+        Sigma
+          [SortName "Item"]
+          [ ConSig (FunSym "k") [SortDecl (SortName "Item")] (SortDecl (SortName "Item"))
+          , ConSig (FunSym "c0") [] (SortDecl (SortName "Item"))
+          ]
+          [PredSig (Pred "p") [], PredSig (Pred "q") []]
+    , unitRules =
         [ Rule
             { ruleId = RuleId "rmix"
             , ruleParams = []
@@ -552,7 +590,7 @@ goldenUnit =
 
 goldenReplayText :: String
 goldenReplayText =
-  "(replay-id (core lara-core@0.1) (policy empirical-v1) "
+  "(replay-id (core lara-core@0.2) (policy empirical-v1) "
     ++ "(backends (backend nd 1)) "
     ++ "(theories sha256:theory-a) "
     ++ "(artifact sha256:artifact-0))"
@@ -561,7 +599,7 @@ goldenReplayId :: ReplayId
 goldenReplayId =
   either (error . replayErrorMessage) id $
     mkReplayId
-      LaraCoreV01
+      LaraCoreV02
       (PolicyId "empirical-v1")
       [(BackendId "nd", "1")]
       [TheoryDigest "sha256:theory-a"]
@@ -613,27 +651,29 @@ prop_replayEnvelopeMalformedMatrix =
     && isLeft (decodeText decodeVerdict "(verdict reject R1)")
   where
     malformedReplay =
-      [ "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a) extra)"
+      [ "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a) extra)"
       , "(replay-id (core) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1 extra) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1 extra) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd)) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd 1 extra)) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories (x)) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a extra))"
-      , "(replay-id (policy empirical-v1) (core lara-core@0.1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core (lara-core@0.1)) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy (empirical-v1)) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend (nd) 1)) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends (backend nd (1))) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories (sha256:a)) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact (sha256:a)))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories sha256:z sha256:a) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories sha256:a sha256:a) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2 extra) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1 extra) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd 1 extra)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories (x)) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a extra))"
+      , "(replay-id (policy empirical-v1) (core lara-core@0.2) (backends) (theories) (artifact sha256:a))"
+        -- The retired version (hard cutover, #91 decision 5): a @0.1 envelope is
+        -- an unsupported core version, not a compatibility path.
+      , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core (lara-core@0.2)) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy (empirical-v1)) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend (nd) 1)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd (1))) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories (sha256:a)) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact (sha256:a)))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories sha256:z sha256:a) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories sha256:a sha256:a) (artifact sha256:a))"
       ]
     malformedInput =
       [ "(check-input " ++ goldenReplayText ++ ")"
@@ -673,7 +713,7 @@ prop_unitGoldenLayoutVariants =
     spelled =
       "(unit (policy (rules) (contraries) (exceptions)) (theories) \
       \(leaves) (args) (attacks) (queries))"
-    minimalUnit = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+    minimalUnit = Unit emptySigma [] [] [] [] [] [] [] [] [] QuarantineOnConflict
 
 -- | The unit round trip: decode ∘ encode = Right id, through the text layer.
 prop_unitRoundTrip :: Property
@@ -819,6 +859,16 @@ prop_unitMalformedMatrix = all isLeft (map decodeUnit malformed)
       , SList [SAtom "unit", SList [SAtom "bogus"]] -- unknown section
       , SList [SAtom "unit", leavesSec, leavesSec] -- duplicate section
       , SList [SAtom "unit", leavesSec, policySec] -- out-of-order section
+      -- sigma section
+      , SList [SAtom "unit", SList [SAtom "sigma", sigmaSortsSec, sigmaConsSec]] -- sigma short
+      , SList [SAtom "unit", SList [SAtom "sigma", sigmaSortsSec, sigmaConsSec, sigmaPredsSec, SList []]] -- sigma long
+      , sigmaWith (SList [SAtom "sorts", SList []]) sigmaConsSec sigmaPredsSec -- sort not an atom
+      , sigmaWith sigmaSortsSec (SList [SAtom "cons", SList [SAtom "bogus", SAtom "k", SList [SAtom "args"], SAtom "Num"]]) sigmaPredsSec -- constructor tag
+      , sigmaWith sigmaSortsSec (SList [SAtom "cons", SList [SAtom "con", SAtom "k", SList [SAtom "args"]]]) sigmaPredsSec -- constructor short
+      , sigmaWith sigmaSortsSec (SList [SAtom "cons", SList [SAtom "con", SAtom "k", SList [SAtom "bogus"], SAtom "Num"]]) sigmaPredsSec -- constructor args tag
+      , sigmaWith sigmaSortsSec sigmaConsSec (SList [SAtom "preds", SList [SAtom "bogus", SAtom "p", SList [SAtom "args"]]]) -- predicate tag
+      , sigmaWith sigmaSortsSec sigmaConsSec (SList [SAtom "preds", SList [SAtom "pred", SAtom "p"]]) -- predicate short
+      , sigmaWith sigmaSortsSec sigmaConsSec (SList [SAtom "preds", SList [SAtom "pred", SAtom "p", SList [SAtom "bogus"]]]) -- predicate args tag
       , SList [SAtom "unit", SList [SAtom "policy", rulesSec]] -- policy short
       , SList
           [ SAtom "unit"
@@ -886,6 +936,10 @@ prop_unitMalformedMatrix = all isLeft (map decodeUnit malformed)
     rulesSec = SList [SAtom "rules"]
     contrariesSec = SList [SAtom "contraries"]
     exceptionsSec = SList [SAtom "exceptions"]
+    sigmaSortsSec = SList [SAtom "sorts"]
+    sigmaConsSec = SList [SAtom "cons"]
+    sigmaPredsSec = SList [SAtom "preds"]
+    sigmaWith ss cs ps = SList [SAtom "unit", SList [SAtom "sigma", ss, cs, ps]]
     policyWith rule = SList [SAtom "policy", SList [SAtom "rules", rule], contrariesSec, exceptionsSec]
     policyParts cs es = SList [SAtom "policy", rulesSec, cs, es]
     ruleBody =

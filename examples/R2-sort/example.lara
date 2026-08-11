@@ -1,0 +1,59 @@
+# R2-sort — the signature negative (rejection class R2, lara-core@0.2, issue #89)
+#
+# THE MOTIVATING EXAMPLE, LITERALLY. Before @0.2, `num_lt(sys_new, accuracy)`
+# was a perfectly well-formed `Prop`: nothing in the core knew that `num_lt`
+# compares numbers, that `sys_new` is a system, or that `accuracy` is a
+# measurand. On a strict step `ord@1` caught it late, as an R13 replay
+# rejection — a type error surfacing as an evidence failure. On a defeasible
+# step nothing caught it at all.
+#
+# The declared signature in `ord-v1.policy.lara` says
+#
+#     pred num_lt(Num, Num)
+#     con sys_new : System
+#     con accuracy : Measurand
+#
+# so the leaf below is ill-sorted at argument 0 (`System` supplied where `Num`
+# is declared) and again at argument 1 (`Measurand` for `Num`). `checkUnit`
+# stage 2 rejects it as R2 at the earliest honest point, before any support
+# term is read and before any backend is consulted.
+#
+# The example is deliberately built on the SHIPPED `ord-v1` signature rather
+# than a bespoke one (#89 §7's merge gate): the point is that the corpus's own
+# frozen vocabulary rejects this, not that a signature written for the occasion
+# can be made to.
+#
+# Contrast:
+#   * examples/R2 is the R12 (§8.1 Path-B) demonstration and is NOT this class.
+#     The two names collide only because R2-the-directory predates
+#     R2-the-executable-class; docs/rejection-surface.md carries the note.
+#   * examples/S2 is the same artifact WELL-SORTED, and accepts.
+#
+# Expected verdict: reject R2.
+
+artifact sort_demo at sha256:5252525252525252525252525252525252525252525252525252525252525252
+policy ord-v1
+use backends [ord@1]
+
+# The claim states the ill-sorted atom directly, so the artifact is otherwise
+# structurally impeccable: the support term concludes exactly the claim's
+# formal target, so nothing upstream of stage 2 has anything to object to and
+# the rejection is unambiguously about the signature.
+
+claim c1
+  nl      = "sys_new is numerically below accuracy"
+  formal  = num_lt(sys_new, accuracy)
+  binding = { author = alice, rationale = "A comparison written against the wrong two things.", audit-status = reviewed }
+
+# The ill-sorted leaf: `num_lt` is declared over two `Num`s, and this applies it
+# to a System and a Measurand. Every other declaration in this file is
+# well-sorted, so the mutant is single-defect.
+
+leaf e1 : num_lt(sys_new, accuracy)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_new]
+
+arg a1 : supports(c1) by leaf(e1)
+
+status c1

@@ -15,7 +15,7 @@ build-type:         Simple
 extra-doc-files:    README.md
 
 common warnings
-    ghc-options: -Wall
+    ghc-options: -Wall -Werror=missing-fields
 
 library
     import:           warnings
@@ -30,6 +30,8 @@ library
                       Lara.Strict.Ord
                       Lara.Strict.RA
                       Lara.AST
+                      Lara.Sigma
+                      Lara.Sigma.WellSorted
                       Lara.Admission
                       Lara.Replay
                       Lara.Syntax
@@ -62,6 +64,7 @@ library
                       Lara.ExpectedJson
                       Lara.Mutate
                       Lara.Mutate.Accept
+                      Lara.Mutate.Sorts
                       Lara.Measure
                       Lara.ClaimSupport
                       Lara.BindingAudit
@@ -97,7 +100,8 @@ test-suite lara-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Spec.hs
-    other-modules:    CorpusUnitsSpec
+    other-modules:    SigmaFixture
+                      CorpusUnitsSpec
                       AdmissionSpec
                       BindingAuditSpec
                       Lara.AdmissionFixture

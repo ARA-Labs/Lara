@@ -65,13 +65,27 @@ def numericΓ : LeafId → Option Atom := fun leaf =>
   else if leaf = l3 then some numericCanonical
   else none
 
+/-- The numeric fixtures' own signature: one unary numeric predicate plus the
+nullary atoms of the shared example vocabulary. -/
+def numericSigma : Lara.Sigma.Sigma :=
+  { sorts := []
+  , cons := []
+  , preds :=
+      [ ⟨⟨"p"⟩, []⟩
+      , ⟨⟨"q"⟩, []⟩
+      , ⟨⟨"s"⟩, []⟩
+      , ⟨⟨"n"⟩, [.num]⟩ ] }
+
+def numericGround : List Atom := [numericNoisy, pB, numericCanonical]
+
 def numericUnit : Lara.Unit :=
-  { policy := { rules := [], defeat := ⟨[], []⟩ }
+  { sigma := numericSigma
+  , policy := { rules := [], defeat := ⟨[], []⟩ }
   , args := [.leaf l1, .leaf l2, .leaf l3]
   , atts := [] }
 
 def numericUnitCheck :=
-  checkUnit numericΓ numericRegistry numericUnit
+  checkUnit numericΓ numericRegistry numericGround numericUnit
 
 theorem numeric_unit_accepted :
     numericUnitCheck.isOk = true := by decide
@@ -106,12 +120,13 @@ def selfConflictPolicy : Policy.Policy :=
   , defeat := ⟨[(apA, apA)], []⟩ }
 
 def missingSelfEdgeUnit : Lara.Unit :=
-  { policy := selfConflictPolicy
+  { sigma := sigmaEx
+  , policy := selfConflictPolicy
   , args := [.leaf l1]
   , atts := [] }
 
 theorem missing_self_edge_rejected :
-    checkUnit ΓEx registryEx missingSelfEdgeUnit =
+    checkUnit ΓEx registryEx groundEx missingSelfEdgeUnit =
       .error (.program
         (.missingConflict ⟨0, 0, pA, pA⟩)) := by rfl
 
@@ -119,12 +134,13 @@ def selfAttack : Attack.Attack :=
   .undermine (.leaf l1) (.leaf l1) []
 
 def coveredSelfEdgeUnit : Lara.Unit :=
-  { policy := selfConflictPolicy
+  { sigma := sigmaEx
+  , policy := selfConflictPolicy
   , args := [.leaf l1]
   , atts := [selfAttack] }
 
 def coveredSelfEdgeCheck :=
-  checkUnit ΓEx registryEx coveredSelfEdgeUnit
+  checkUnit ΓEx registryEx groundEx coveredSelfEdgeUnit
 
 theorem typed_self_edge_accepted :
     coveredSelfEdgeCheck.isOk = true := by decide
@@ -170,7 +186,7 @@ theorem computed_self_claim_result7 :
             Grounded.Status.justified) := by
   apply Lara.Consistency.contrary_claims_not_both_justified
   have hpolicy :=
-    (checkUnit_sound covered_self_edge_check_ok).1
+    (checkUnit_sound covered_self_edge_check_ok).2.2.2.2.2.1
   change acceptedSelfEdgeUnit.policy = selfConflictPolicy at hpolicy
   rw [hpolicy]
   exact ⟨(apA, apA), by simp [selfConflictPolicy], [], pA, pA,

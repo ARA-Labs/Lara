@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.1`)
+# LARA surface grammar — frozen (`lara-syntax@0.3`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -19,15 +19,17 @@ Status of the artifacts this task touches:
   (undeclared) had no representable conclusion until `ArgConcl` landed.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.1`; it decodes to
-`lara-core@0.1`. A grammar change that still decodes to the same abstract syntax is
-invisible to the checker by spec result 12 (`parse ∘ print == id`, mechanized in
-A3).
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.3`; it decodes to
+`lara-core@0.2`. Signature declarations lower to `unitSigma`, while the other
+additive `@0.3` forms remain presentation-layer data until elaboration. The Haskell
+`parse ∘ print == id` property covers this current surface. The structured Lean
+round-trip in `lean/Lara/Presentation.lean` does not yet model `policySigma` or
+optional measurand polarity; that gap is tracked in
+`plans/2026-08-10-sorts-in-checker.md` §13.
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
 constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
-That source layer does not change this grammar or `lara-core@0.1`. Byte-level
-`lara-evidence@0.1` syntax and verification remain gated under issue #78.
+Byte-level `lara-evidence@0.1` syntax and verification remain gated under issue #78.
 
 ---
 
@@ -270,7 +272,16 @@ Notes:
 ```
 policyTop  ::= "policy" ident { policyDecl }
 
-policyDecl ::= ruleDecl | contraryDecl | exceptionDecl | admissionDecl | groupModeDecl
+policyDecl ::= sortDecl | conDecl | predDecl
+             | ruleDecl | contraryDecl | exceptionDecl | admissionDecl | groupModeDecl
+
+-- The signature blocks (spec §2, §3.4; lara-core@0.2). Unlike everything else
+-- in this grammar these are NOT presentation-only: they lower to `unitSigma`
+-- and the checker enforces them as rejection class R2.
+sortDecl   ::= "sort" ident { "," ident }
+conDecl    ::= "con"  ident [ "(" [ sort { "," sort } ] ")" ] ":" sort
+predDecl   ::= "pred" ident [ "(" [ sort { "," sort } ] ")" ]
+sort       ::= "Num" | "Str" | ident       -- two reserved base sorts, then declared names
 
 ruleDecl   ::= "rule" ident "(" [ param { "," param } ] ")"
                "mode"       "=" mode
@@ -296,6 +307,17 @@ groupMode     ::= "quarantine" | "reject"             -- §4.3 conflict outcome 
 
 Notes:
 
+- The signature blocks are printed immediately after the `policy` header, in the
+  canonical order `sort` (one line carrying every declared sort), then one `con`
+  line per constructor, then one `pred` line per predicate. Each block is elided
+  when empty, so a signature-free policy prints byte-identically to the pre-`@0.2`
+  grammar. A nullary symbol is spelled **without** parentheses (`con alice : Sys`,
+  `pred blinded`); `()` parses but never prints, the usual permissive-parser /
+  canonical-printer split.
+- `Num` and `Str` are reserved: they are the sorts of the two term literal forms
+  and are not declarable. `sort Num` **parses** — the parser is a decode boundary
+  and records what was written — and is rejected by the checker as base-sort
+  shadowing (R2), exactly as a duplicate rule id parses and is rejected later.
 - `allow-trusted` / `certifiers` are **absent** on defeasible rules and present
   only on strict rules (spec §4). The reference policy `empirical-v1` is
   defeasible-only, so neither appears there.
@@ -644,9 +666,9 @@ readability: `propId` (a `claim` id), `leafId`, `argId`, `ruleId`. `binding` is
 ### B.1 Measurand table with declared polarity
 
 ```
-measurandLine ::= "measurand" ident ":" sort "where" polarity
+measurandLine ::= "measurand" ident ":" sort [ "where" polarity ]
 polarity      ::= "higher-is-better" | "lower-is-better"
-sort          ::= "Num"
+sort          ::= §4's sort           -- "Num" | "Str" | a declared sort name
 ```
 
 ```
@@ -667,11 +689,17 @@ measurand perplexity : Num  where lower-is-better
 - Declaring the same measurand twice in one policy is a **parse error** (the same
   rule, and the same reason, as A.2's duplicate digest: a silent first-wins lookup
   would pick a polarity the author did not intend).
-- **Forward compatibility with #89.** The `: Num` slot is deliberately a **sort
-  position**, not decoration. When #89 puts a many-sorted Σ into the core, its
-  signature must extend *this* declaration — the surface #89 elaborates into —
-  rather than introduce a parallel one, so the two tracks cannot fork the
-  spelling. Cross-referenced from issue #89.
+- **#89 landed here, as designed.** The `: Num` slot was always a **sort
+  position**, not decoration, so `lara-core@0.2`'s many-sorted Σ extends *this*
+  declaration rather than introducing a parallel one: the slot now admits any
+  sort §4 declares, over the same vocabulary the `sort` block names. The two
+  tracks never forked the spelling.
+- **The `where` clause is optional and `Num`-gated.** A polarity presupposes an
+  *ordered* domain and only `Num` is ordered, so a polarity clause on a
+  non-`Num` measurand is a parse error. A `Num` measurand with no clause is
+  well-formed; it simply cannot key a `comparison-scheme`, and a `comparison`
+  block naming it is a located elaboration error
+  (`ComparisonMeasurandNoPolarity`) rather than a silent default direction.
 
 ### B.2 The `comparison-scheme` policy block
 

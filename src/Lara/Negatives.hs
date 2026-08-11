@@ -44,6 +44,7 @@ module Lara.Negatives
 
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..))
+import Lara.Sigma (Sigma, sigmaOf)
 
 -- ---------------------------------------------------------------------------
 -- Taxonomy
@@ -166,6 +167,25 @@ strictRule r ps prem concl allowTrusted certs =
     , ruleQuestions = []
     }
 
+
+-- | The expanded signature used by the authored empirical negatives. It adds
+-- the shift dataset and randomized predicate those negative programs mention.
+empiricalNegativesSigma :: Sigma
+empiricalNegativesSigma =
+  sigmaOf
+    ["Sys", "Measurand", "Dataset", "Experiment", "Report"]
+    [ ("m", [], "Sys")
+    , ("accuracy", [], "Measurand")
+    , ("d", [], "Dataset")
+    , ("d_shift", [], "Dataset")
+    , ("exp_3", [], "Experiment")
+    , ("effect", ["Sys", "Measurand", "Dataset", "Num"], "Report")
+    ]
+    [ ("improves", ["Sys", "Measurand", "Dataset"])
+    , ("reports", ["Experiment", "Report"])
+    , ("randomized", ["Sys"])
+    ]
+
 -- | A program shell with a fixed policy id and no backends unless overridden.
 prog :: String -> [Decl] -> Program
 prog pol decls =
@@ -286,6 +306,7 @@ premiseMismatch =
         Just $
           Policy
             { policyId = PolicyId "empirical-v1"
+            , policySigma = empiricalNegativesSigma
             , policyRules =
                 [ defeasibleRule
                     "controlled_experiment"
@@ -351,6 +372,7 @@ unaccountedQuestion =
         Just $
           Policy
             { policyId = PolicyId "empirical-v1"
+            , policySigma = empiricalNegativesSigma
             , policyRules =
                 [ defeasibleRule
                     "controlled_experiment"
@@ -407,6 +429,7 @@ illTypedAttack =
         Just $
           Policy
             { policyId = PolicyId "mixed-v1"
+            , policySigma = sigmaOf [] [] [("p", []), ("q", []), ("not_q", []), ("grounds_not_q", [])]
             , policyRules =
                 [ strictRule "deductive_step" [] [AtomPat (Pred "p") []] (AtomPat (Pred "q") []) True []
                 , defeasibleRule "presumption" [] [AtomPat (Pred "grounds_not_q") []] (AtomPat (Pred "not_q") []) []
@@ -452,6 +475,7 @@ strictReachableContrary =
         Just $
           Policy
             { policyId = PolicyId "illformed-policy-v1"
+            , policySigma = sigmaOf ["Item"] [("x", [], "Item")] [("basis", ["Item"]), ("derived", ["Item"]), ("refuted", ["Item"])]
             , policyRules =
                 [ strictRule "deductive_step" ["X"] [AtomPat (Pred "basis") [PVar (Param "X")]] (AtomPat (Pred "derived") [PVar (Param "X")]) True []
                 ]
@@ -497,6 +521,7 @@ admissionReject =
         Just $
           Policy
             { policyId = PolicyId "strict-admission-v1"
+            , policySigma = sigmaOf [] [] [("a", [])]
             , policyRules = []
             , policyContraries = []
             , policyExceptions = []
@@ -531,6 +556,7 @@ strictAssuranceViolation =
         Just $
           Policy
             { policyId = PolicyId "strict-cert-v1"
+            , policySigma = sigmaOf [] [] [("p", []), ("q", [])]
             , policyRules =
                 [ strictRule
                     "deductive_step"
@@ -598,6 +624,7 @@ duplicateReportGroupConflict =
         Just $
           Policy
             { policyId = PolicyId "dup-report-v1"
+            , policySigma = sigmaOf ["Direction"] [("up", [], "Direction"), ("down", [], "Direction")] [("effect", ["Direction"])]
             , policyRules = []
             , policyContraries = []
             , policyExceptions = []

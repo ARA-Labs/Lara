@@ -26,6 +26,13 @@ import Test.QuickCheck
 
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..))
+import Lara.Sigma
+  ( ConSig (..)
+  , PredSig (..)
+  , Sigma (..)
+  , Sort (..)
+  , SortName (..)
+  )
 import Lara.Strict (SExpr (..))
 import Lara.Syntax
 
@@ -59,7 +66,8 @@ reservedWords =
     -- colliding identifier, and the round-trip property then fails for a reason
     -- that has nothing to do with the grammar.
   , "measurand", "comparison", "comparison-scheme", "recheck", "bridge"
-  , "result", "baseline", "relation", "claims", "on", "where", "cell", "Num"
+  , "result", "baseline", "relation", "claims", "on", "where", "cell"
+  , "sort", "con", "pred", "Num", "Str"
   , "higher-is-better", "lower-is-better", "strictly-better", "at-least-as-good"
   ]
 
@@ -491,9 +499,11 @@ genPolicy = do
   gm <- elements [QuarantineOnConflict, RejectOnConflict]
   ms <- genMeasurands
   schs <- genSchemes
+  sg <- genSigma
   pure
     Policy
       { policyId = pid
+      , policySigma = sg
       , policyRules = rs
       , policyContraries = cs
       , policyExceptions = es
@@ -512,9 +522,43 @@ genMeasurands = do
   k <- choose (0, 3 :: Int)
   pols <- vectorOf k (elements [HigherIsBetter, LowerIsBetter])
   pure
-    [ Measurand (MeasurandId ("measurand_" ++ show i)) SortNum pol
+    [ Measurand (MeasurandId ("measurand_" ++ show i)) SortNum (Just pol)
     | (i, pol) <- zip [0 :: Int ..] pols
     ]
+
+-- | The policy signature blocks (grammar §4.0, @lara-core\@0.2@). Sort,
+-- constructor, and predicate names are index-derived so a generated policy is
+-- duplicate-free — duplicates are Σ-well-formedness (checker R2), not a parse
+-- error, but a generator that produced them would still be printing something
+-- no author would write.
+--
+-- Sorts include the two base spellings so a signature that mentions @Num@ and
+-- one that mentions a declared name both round-trip.
+genSigma :: Gen Sigma
+genSigma = do
+  nSorts <- choose (0, 3 :: Int)
+  let sorts = [SortName ("Sort" ++ show i) | i <- [0 .. nSorts - 1]]
+      genSort =
+        if null sorts
+          then elements [SortNum, SortStr]
+          else oneof [elements [SortNum, SortStr], SortDecl <$> elements sorts]
+      resultSort = if null sorts then elements [SortNum, SortStr] else genSort
+  nCons <- choose (0, 3 :: Int)
+  cons <-
+    sequence
+      [ ConSig (FunSym ("con_" ++ show i))
+          <$> (choose (0, 2 :: Int) >>= \k -> vectorOf k genSort)
+          <*> resultSort
+      | i <- [0 .. nCons - 1]
+      ]
+  nPreds <- choose (0, 3 :: Int)
+  preds <-
+    sequence
+      [ PredSig (Pred ("pred_" ++ show i))
+          <$> (choose (0, 2 :: Int) >>= \k -> vectorOf k genSort)
+      | i <- [0 .. nPreds - 1]
+      ]
+  pure (Sigma sorts cons preds)
 
 -- | Comparison schemes (grammar App. B.2). Schemes are keyed by the
 -- @(relation, polarity)@ pair and a duplicate pair is a parse error, so this
@@ -611,9 +655,27 @@ prop_policyFormCoverage =
       cover 20 (not (null (policyMeasurands p))) "measurand table"
         . cover 20 (not (null (policyComparisonSchemes p))) "comparison-scheme"
         . cover 20 (any hasLabel (policyRules p)) "labelled rule premises"
+        -- The @lara-core\@0.2@ signature blocks (#89 §10). Without these three
+        -- the round-trip above would pass vacuously the moment the generator
+        -- stopped emitting a signature — the trap the @0.3 surface hit and the
+        -- reason this coverage block exists at all. `declared sort in a
+        -- signature` is separate from `sort block` because a signature over the
+        -- base sorts alone would never exercise the declared-name path.
+        . cover 20 (not (null (sigmaSorts (policySigma p)))) "sort block"
+        . cover 20 (not (null (sigmaCons (policySigma p)))) "con declarations"
+        . cover 20 (not (null (sigmaPreds (policySigma p)))) "pred declarations"
+        . cover 10 (usesDeclaredSort p) "declared sort in a signature"
+        . cover 5 (any nullarySymbol (sigmaCons (policySigma p))) "nullary constructor"
         $ parsePolicy (printPolicy p) === Right p
   where
     hasLabel r = any (/= Nothing) (rulePremiseLabels r)
+    nullarySymbol c = null (conArgs c)
+    usesDeclaredSort p =
+      any isDeclared (concatMap conArgs (sigmaCons (policySigma p)))
+        || any (isDeclared . conResult) (sigmaCons (policySigma p))
+        || any isDeclared (concatMap predArgs (sigmaPreds (policySigma p)))
+    isDeclared (SortDecl _) = True
+    isDeclared _ = False
 
 prop_policyTheoriesRoundTrip :: Property
 prop_policyTheoriesRoundTrip =
@@ -882,9 +944,12 @@ policyNegatives =
     , "policy p\nmeasurand acc : Num where bigger\n"
     , "polarity"
     )
-  , ( "unknown measurand sort"
-    , "policy p\nmeasurand acc : Real where higher-is-better\n"
-    , "measurand sort"
+    -- The sort slot is open since lara-core@0.2 (#89 D-1): `Real` parses as a
+    -- declared sort name. What is NOT open is a polarity clause on a non-Num
+    -- measurand, because only Num is ordered.
+  , ( "polarity clause on a non-Num measurand"
+    , "policy p\nmeasurand acc : Dataset where higher-is-better\n"
+    , "polarity clause"
     )
   , ( "duplicate comparison-scheme pair"
     , "policy p\n"

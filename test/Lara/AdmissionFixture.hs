@@ -63,6 +63,7 @@ import Lara.Blocked (pruneWithPolicySeed)
 import Lara.Prop (Prop)
 import Lara.Strict (SExpr (..))
 import Lara.Wire (WireError (..), decodeUnit, parseSExpr, printSExpr)
+import SigmaFixture (structuralSigma)
 
 -- ---------------------------------------------------------------------------
 -- Identifier unwrappers (the AST newtypes carry no accessors)
@@ -370,7 +371,8 @@ emptyAudit =
   where
     emptyUnit =
       Unit
-        { unitRules = []
+        { unitSigma = structuralSigma
+        , unitRules = []
         , unitContraries = []
         , unitExceptions = []
         , unitTheories = []

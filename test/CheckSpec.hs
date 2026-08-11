@@ -1,4 +1,4 @@
--- | Conformance tests for the six-stage checker ("Lara.Check") and the whole
+-- | Conformance tests for the seven-stage checker ("Lara.Check") and the whole
 -- pipeline ("Lara.Driver"), per @docs/engineering-plan.md@ §5.
 --
 -- Three kinds of test:
@@ -31,8 +31,9 @@ import Test.QuickCheck
 
 import Lara.AST hiding (Reject)
 import Lara.Grounded (AF (..), grounded, iter)
-import Lara.Prop (Pred (..), Prop (..), Term (..))
+import Lara.Prop (Prop (..), Term (..))
 import Lara.Replay
+import Lara.Sigma (ConSig (..), PredSig (..), Sigma (..), SigmaFault (..), Sort (..), SortName (..))
 import Lara.Strict (SExpr (..))
 import Lara.Wire
   ( Outcome (..)
@@ -47,8 +48,16 @@ import Lara.Wire
   , parseSExpr
   , printSExpr
   )
-import Lara.Check (fullConfig)
-import Lara.Driver (groupConflictMessage, runCheck, runCheckLocatedReported)
+import Lara.Check (UnitError (..), checkUnit, fullConfig, unitErrorClass)
+import Lara.Driver
+  ( buildCertOk
+  , buildGamma
+  , groupConflictMessage
+  , runCheck
+  , runCheckLocatedReported
+  )
+import Lara.Sigma.WellSorted (SortError (..))
+import SigmaFixture (sigmaOf)
 import TestReplay (testCheckInput, testReplayId)
 
 -- ---------------------------------------------------------------------------
@@ -66,20 +75,30 @@ verdictString text =
       Right unit -> printSExpr (encodeVerdict (runCheck (testCheckInput unit)))
 
 emptyUnit :: Unit
-emptyUnit = Unit [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+emptyUnit = mkUnit [] [] [] [] [] [] []
 
 testReplayText :: String
 testReplayText = printSExpr (encodeReplayId (testReplayId emptyUnit))
 
+-- | The @sigma@ section for a wire literal over nullary predicates only: no
+-- declared sorts, no constructors, one @pred@ per atom.
+sigmaText :: [String] -> String
+sigmaText preds =
+  "(sigma (sorts) (cons) (preds"
+    ++ concat [" (pred " ++ h ++ " (args))" | h <- preds]
+    ++ "))"
+
 coveredSelfEdge :: String
 coveredSelfEdge =
-  "(unit (policy (rules) (contraries (contrary (apat p) (apat p))) (exceptions))"
+  "(unit " ++ sigmaText ["p"]
+    ++ " (policy (rules) (contraries (contrary (apat p) (apat p))) (exceptions))"
     ++ " (leaves (leaf l1 (atom p))) (args (arg a0 (leaf l1)))"
     ++ " (attacks (undermine a0 a0 (pos))) (queries (atom p)))"
 
 missingSelfEdge :: String
 missingSelfEdge =
-  "(unit (policy (rules) (contraries (contrary (apat p) (apat p))) (exceptions))"
+  "(unit " ++ sigmaText ["p"]
+    ++ " (policy (rules) (contraries (contrary (apat p) (apat p))) (exceptions))"
     ++ " (leaves (leaf l1 (atom p))) (args (arg a0 (leaf l1))) (queries (atom p)))"
 
 -- | A two-argument rebut program (the ls20 shape): @a1@ concludes @q@, @a2@
@@ -88,7 +107,8 @@ missingSelfEdge =
 -- (defeated).
 rebutProgram :: String
 rebutProgram =
-  "(unit (policy"
+  "(unit " ++ sigmaText ["q", "not_q"]
+    ++ " (policy"
     ++ " (rules"
     ++ " (rule r1 (mode defeasible) (params) (premises) (conclusion (apat q))"
     ++ " (questions) (allow-trusted false) (certifiers))"
@@ -159,7 +179,8 @@ mkUnit
   -> Unit
 mkUnit rules contraries exceptions ls as ats qs =
   Unit
-    { unitRules = rules
+    { unitSigma = checkSigma
+    , unitRules = rules
     , unitContraries = contraries
     , unitExceptions = exceptions
     , unitTheories = []
@@ -170,6 +191,26 @@ mkUnit rules contraries exceptions ls as ats qs =
     , unitGroups = []
     , unitGroupMode = QuarantineOnConflict
     }
+
+-- | The one signature every fixture in this file is built against
+-- (@lara-core\@0.2@, #89 D8). Authored rather than derived: a fixture that
+-- accidentally goes ill-sorted must fail stage 2, which is the whole point of
+-- the stage.
+checkSigma :: Sigma
+checkSigma =
+  sigmaOf
+    ["Item"]
+    [("a", [], "Item")]
+    ( [("basis", ["Item"]), ("derived", ["Item"]), ("refuted", ["Item"])]
+        ++ [("score1", ["Num"]), ("score2", ["Num"])]
+        ++ [ (nullary, [])
+           | nullary <-
+               [ "ans", "att", "base", "c", "concl", "conflictq", "cw", "k"
+               , "notk", "other", "p", "pp", "q", "r", "rr", "s", "zz"
+               , "not_q"
+               ]
+           ]
+    )
 
 defRule :: String -> [String] -> [AtomPat] -> AtomPat -> [Question] -> Rule
 defRule rid ps prems concl qs =
@@ -246,6 +287,119 @@ negR3 =
     []
     []
     [(ArgId "a", instD "d" [(Param "Y", TCon (FunSym "a") [])] [] [] [])]
+    []
+    [atom0 "q" []]
+
+-- R2, the per-instance half's own witness (#89 §3.2, §10). The rule's patterns
+-- are all well-sorted and Gamma is well-sorted, so the STATIC half of stage 2
+-- accepts this unit outright; only the theta-range check sees the defect. The
+-- rule binds X at `score1(Num)`, so X's derived sort is Num, and the instance
+-- binds it to a term of the declared sort Item. The conclusion `derived(X)` is
+-- theta-instantiated and matches no leaf, so nothing downstream would catch it
+-- either.
+--
+-- Under a static-only stage 2 this unit would be ACCEPTED. That is the whole
+-- argument for the per-instance half existing, and it is pinned here as a test
+-- rather than only as a mutant.
+negR2Theta :: Unit
+negR2Theta =
+  mkUnit
+    [defRule "d" ["X"] [apat0 "score1" [PVar (Param "X")]] (apat0 "derived" [PVar (Param "X")]) []]
+    []
+    []
+    [(LeafId "l1", atom0 "score1" [TNum "1"])]
+    [ ( ArgId "a"
+      , instD "d" [(Param "X", TCon (FunSym "a") [])] [SLeaf (LeafId "l1")] [] []
+      )
+    ]
+    []
+    []
+
+-- R2: an undeclared predicate head in Gamma. The class boundary (#89 §2.3
+-- rule 1) puts an undeclared SYMBOL in R2, not R1: R1 is about declaration
+-- identifiers and symbols have never been in its list.
+negR2Undeclared :: Unit
+negR2Undeclared =
+  mkUnit [] [] [] [(LeafId "l1", atom0 "mut_not_declared" [])] [] [] []
+
+-- Σ well-formedness is the first arm of R2. Each constructor below pins one
+-- located fault, plus the declaration-order precedence between sort and
+-- constructor faults.
+sigmaFaultCases :: [(String, Sigma, SigmaFault)]
+sigmaFaultCases =
+  [ ( "duplicate sort"
+    , Sigma [SortName "S", SortName "S"] [] []
+    , SFDuplicateSort (SortName "S")
+    )
+  , ( "base-sort shadow"
+    , Sigma [SortName "Num"] [] []
+    , SFShadowsBase (SortName "Num")
+    )
+  , ( "duplicate constructor"
+    , Sigma
+        [SortName "S"]
+        [ ConSig (FunSym "k") [] (SortDecl (SortName "S"))
+        , ConSig (FunSym "k") [] (SortDecl (SortName "S"))
+        ]
+        []
+    , SFDuplicateCon (FunSym "k")
+    )
+  , ( "duplicate predicate"
+    , Sigma
+        [SortName "S"]
+        []
+        [ PredSig (Pred "p") []
+        , PredSig (Pred "p") []
+        ]
+    , SFDuplicatePred (Pred "p")
+    )
+  , ( "constructor names undeclared sort"
+    , Sigma [] [ConSig (FunSym "k") [] (SortDecl (SortName "Missing"))] []
+    , SFConUndeclaredSort (FunSym "k") (SortName "Missing")
+    )
+  , ( "predicate names undeclared sort"
+    , Sigma [] [] [PredSig (Pred "p") [SortDecl (SortName "Missing")]]
+    , SFPredUndeclaredSort (Pred "p") (SortName "Missing")
+    )
+  , ( "sort fault precedes constructor fault"
+    , Sigma
+        [SortName "S", SortName "S"]
+        [ConSig (FunSym "k") [] (SortDecl (SortName "Missing"))]
+        []
+    , SFDuplicateSort (SortName "S")
+    )
+  ]
+
+prop_sigmaWellFormedFaults :: Property
+prop_sigmaWellFormedFaults =
+  once . conjoin $
+    [ counterexample name $
+        case checkUnit (buildGamma []) (buildCertOk []) emptyUnit{unitSigma = sg} of
+          Left err@(UESignature (SEMalformedSigma actual)) ->
+            unitErrorClass err === Just R2
+              .&&. actual === expected
+          result ->
+            counterexample ("expected malformed Σ rejection, got " ++ show result) False
+    | (name, sg, expected) <- sigmaFaultCases
+    ]
+
+-- R3, NOT R2: a theta key off the rule's parameter list, bound to a term that
+-- is itself ill-sorted (an undeclared constructor). Stage 2 must not look at a
+-- binding whose key is not a declared parameter — theta's DOMAIN is R3's
+-- business (#89 §2.3 rule 3). If stage 2 inspected it, the 19 committed
+-- `wrong-subst-domain` mutants would silently become R2 and the paper's
+-- per-class table would move.
+negR3OffDomainIllSorted :: Unit
+negR3OffDomainIllSorted =
+  mkUnit
+    [defRule "d" ["X"] [] (apat0 "q" []) []]
+    []
+    []
+    []
+    [ ( ArgId "a"
+      , instD "d" [(Param "Y", TCon (FunSym "not_declared_anywhere") [])] [] [] []
+      )
+    ]
     []
     [atom0 "q" []]
 
@@ -455,7 +609,7 @@ negUndercutBadPosition =
 
 -- Multi-violation units (M3 review item 6): each carries two independent
 -- violations at different stages; the checker must report the earlier stage's
--- class, pinning the six-stage priority order of 'checkUnit'. A stage-order swap
+-- class, pinning the staged priority order of 'checkUnit'. A stage-order swap
 -- flips exactly one of these.
 
 r12Rule :: Rule
@@ -529,16 +683,15 @@ mvAttackR11AndMissingConflict =
 -- 'RejectClass' haddock):
 --
 --   * __Executable classes__ (decided by 'checkUnit', one golden here each):
---     R1, R3, R4, R5, R6, R7, R10, R11, R12 — plus the four structural
+--     R1, R2, R3, R4, R5, R6, R7, R10, R11, R12 — plus the four structural
 --     program-boundary outcomes duplicate-rule, duplicate-argument,
 --     incomplete-argument, missing-conflict.
 --   * __Driver-boundary classes__ (decided by 'runCheck' before 'checkUnit',
 --     one golden here each): R13 (replay preflight) and R9 (an escalated
 --     duplicate-report-group conflict, spec §4.3).
---   * __Out of the executable core__ (no golden by design): R2 (signature
---     well-formedness) and R8 (leaf admission); and R14 (codec), reported at
---     the wire decode boundary, never as a checker verdict — its rejection
---     matrix lives in "WireSpec" (the malformed-input matrix), not here.
+--   * __Outside the executable core__: R8 (leaf admission) and R14 (codec).
+--     R14 is reported at the wire decode boundary rather than as a checker
+--     verdict; its malformed-input matrix lives in "WireSpec".
 negatives :: [(String, Unit, Rejection)]
 negatives =
   [ ("duplicate-rule", negDuplicateRule, DuplicateRule)
@@ -546,7 +699,10 @@ negatives =
   , ("duplicate-argument", negDuplicateArgument, DuplicateArgument)
   , ("incomplete-argument", negIncompleteArgument, IncompleteArgument)
   , ("R1 dangling leaf", negR1, RejectClass R1)
+  , ("R2 undeclared predicate symbol (not R1)", negR2Undeclared, RejectClass R2)
+  , ("R2 theta-range sort (static half alone accepts)", negR2Theta, RejectClass R2)
   , ("R3 domain mismatch", negR3, RejectClass R3)
+  , ("R3 off-domain key with an ill-sorted term stays R3", negR3OffDomainIllSorted, RejectClass R3)
   , ("R4 premise mismatch", negR4, RejectClass R4)
   , ("R5 unaccounted question", negR5, RejectClass R5)
   , ("R6 discharge conclusion mismatch", negR6, RejectClass R6)
@@ -696,7 +852,7 @@ prop_groupPrecedenceR13BeatsR9 =
     mixedReplayId =
       either (error . replayErrorMessage) id $
         mkReplayId
-          LaraCoreV01
+          LaraCoreV02
           (PolicyId "conformance-v1")
           []
           []
@@ -1024,7 +1180,7 @@ prop_mutationBaseAccepts =
 
 -- | Multi-violation priority (M3 review item 6): a unit carrying two violations
 -- at different stages must report the earlier stage's class. Together these pin
--- the full six-stage order of 'checkUnit'; any stage-order swap flips one.
+-- the established stage boundaries of 'checkUnit'; any covered swap flips one.
 multiViolationNegatives :: [(String, Unit, Rejection)]
 multiViolationNegatives =
   [ ("stage 1<2: duplicate-rule beats R12", mvDupRuleAndR12, DuplicateRule)
@@ -1057,7 +1213,7 @@ prop_verdictsCarryExactlyOneReplayId =
     preflightReplayId =
       either (error . replayErrorMessage) id $
         mkReplayId
-          LaraCoreV01
+          LaraCoreV02
           (PolicyId "conformance-v1")
           []
           []
@@ -1115,6 +1271,7 @@ checkSpecProps =
   , ("check golden missing-self-edge", quickCheckResult prop_goldenMissing)
   , ("check golden rebut program", quickCheckResult prop_goldenRebut)
   , ("check rejection-class negatives", quickCheckResult prop_negatives)
+  , ("check Sigma well-formedness fault matrix", quickCheckResult prop_sigmaWellFormedFaults)
   , ("check duplicate-report-group quarantine/gap", quickCheckResult prop_groupQuarantine)
   , ("check duplicate-report-group R9 stderr message", quickCheckResult prop_groupConflictMessage)
   , ("check duplicate-report-group R13-over-R9 precedence", quickCheckResult prop_groupPrecedenceR13BeatsR9)

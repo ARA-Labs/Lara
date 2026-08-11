@@ -10,8 +10,12 @@ namespace Lara.Check
 
 open Lara Lara.Support
 
+/-- The frozen rejection classes decidable by the executable checker (spec
+§10.1). R2 entered the executable core at `lara-core@0.2` (#89): the declared
+signature is now a `Unit` field and `checkUnit` stage 2 decides well-sortedness
+against it. -/
 inductive RejectClass where
-  | R1 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13
+  | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13
 deriving DecidableEq
 
 inductive CheckLoc where

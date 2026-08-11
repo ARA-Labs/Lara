@@ -19,7 +19,7 @@ testCheckInput unit =
     build = do
       replayId <-
         mkReplayId
-          LaraCoreV01
+          LaraCoreV02
           (PolicyId "conformance-v1")
           [(BackendId "nd", "1")]
           (sort (map fst (unitTheories unit)))

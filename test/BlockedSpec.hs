@@ -51,6 +51,7 @@ import Lara.Grounded (AF (..), claimSupportFor, labelC)
 import Lara.Prop (Pred (..), Prop (..))
 
 import CheckSpec (quarantineFixtures, unquarantinedFixtures)
+import SigmaFixture (sigmaOf)
 
 -- ---------------------------------------------------------------------------
 -- Random frameworks: the safety property, executably
@@ -307,7 +308,8 @@ prop_explicitPolicySeed =
 policySeedUnit :: Unit
 policySeedUnit =
   Unit
-    { unitRules = []
+    { unitSigma = sigmaOf [] [] [("policy", []), ("kept", [])]
+    , unitRules = []
     , unitContraries = []
     , unitExceptions = []
     , unitTheories = []

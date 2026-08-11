@@ -68,6 +68,15 @@ import Lara.Replay
   , replayPolicy
   , replayTheories
   )
+import qualified Lara.Mutate.Sorts as Sorts
+import Lara.Sigma
+  ( ConSig (..)
+  , PredSig (..)
+  , Sigma (..)
+  , Sort (..)
+  , SortName (..)
+  , declarePred
+  )
 import Lara.Strict (SExpr (..))
 import Lara.SupportTerm (instAPat, instAPats)
 import Lara.Wire (encodeCheckInput, parseSExpr, printSExpr)
@@ -100,6 +109,12 @@ data MutationOp
   | OpDuplicateBackend -- ^ replay selects one backend twice → R13
   | OpUnknownBackend -- ^ replay selects an unknown backend → R13
   | OpGroupConflict -- ^ escalated ≢ duplicate-report group → R9
+  | OpUndeclaredPred -- ^ atom head with no @pred@ declaration → R2
+  | OpWrongPredArity -- ^ drop an atom argument → R2
+  | OpWrongArgSort -- ^ swap in a differently-sorted term from the unit → R2
+  | OpUndeclaredCon -- ^ constructor head with no @con@ declaration → R2
+  | OpWrongThetaSort -- ^ θ range term of the wrong sort at a declared param → R2
+  | OpOutOfScopeVar -- ^ rule pattern variable off @ruleParams@ → R12
   | OpRebutCycle -- ^ constructed rebut N-cycle → accept, all contested
   | OpDropSupport -- ^ remove the claim's support → accept, gap
   | OpAttachUndercut -- ^ undercut via the rule's exception → accept, defeated
@@ -134,6 +149,12 @@ opName op = case op of
   OpDuplicateBackend -> "duplicate-backend"
   OpUnknownBackend -> "unknown-backend"
   OpGroupConflict -> "group-conflict"
+  OpUndeclaredPred -> "undeclared-pred"
+  OpWrongPredArity -> "wrong-pred-arity"
+  OpWrongArgSort -> "wrong-arg-sort"
+  OpUndeclaredCon -> "undeclared-con"
+  OpWrongThetaSort -> "wrong-theta-sort"
+  OpOutOfScopeVar -> "out-of-scope-var"
   OpRebutCycle -> "rebut-cycle"
   OpDropSupport -> "drop-support"
   OpAttachUndercut -> "attach-undercut"
@@ -167,6 +188,12 @@ opFamily op = case op of
   OpDuplicateBackend -> "certificate-tampering"
   OpUnknownBackend -> "certificate-tampering"
   OpGroupConflict -> "data-integrity"
+  OpUndeclaredPred -> "signature"
+  OpWrongPredArity -> "signature"
+  OpWrongArgSort -> "signature"
+  OpUndeclaredCon -> "signature"
+  OpWrongThetaSort -> "signature"
+  OpOutOfScopeVar -> "hidden-policy-extension"
   OpRebutCycle -> "cycles"
   OpDropSupport -> "accept-verdict"
   OpAttachUndercut -> "accept-verdict"
@@ -510,8 +537,21 @@ mutantsForBase base input =
     , unitMutants base input OpBadAttackPosition 2 badAttackPositionSites
     , unitMutants base input OpUnlicensedAttack 1 unlicensedAttackSites
     , unitMutants base input OpGroupConflict 1 groupConflictSites
+    , -- The signature family (@lara-core\@0.2@, #89 D10): R2 had zero mutants
+      -- before this pass, and spec §10.1 requires every class to be exercised.
+      unitMutants base input OpUndeclaredPred 1 (classed Sorts.undeclaredPredSites)
+    , unitMutants base input OpWrongPredArity 1 (classed Sorts.wrongPredAritySites)
+    , unitMutants base input OpWrongArgSort 2 (classed Sorts.wrongArgSortSites)
+    , unitMutants base input OpUndeclaredCon 1 (classed Sorts.undeclaredConSites)
+    , unitMutants base input OpWrongThetaSort 1 (classed Sorts.wrongThetaSortSites)
+    , unitMutants base input OpOutOfScopeVar 1 (classed Sorts.outOfScopeVarSites)
     , replayMutants base input
     ]
+  where
+    -- "Lara.Mutate.Sorts" sits below the operator vocabulary and yields bare
+    -- rejection classes; wrapping them here keeps 'Expected' owned by exactly
+    -- one module.
+    classed sites u = [(ExpectClass c, loc, f) | (c, loc, f) <- sites u]
 
 -- | Assemble the picked unit-mutation sites of one operator into mutants. Each
 -- site carries its seeded ground-truth 'Constituent', threaded into
@@ -570,6 +610,7 @@ hiddenContrarySites _ =
         u
           { unitRules = unitRules u ++ [mutStrictRule]
           , unitContraries = unitContraries u ++ [mutContrary]
+          , unitSigma = declareMut (unitSigma u)
           }
     )
   ]
@@ -579,6 +620,10 @@ hiddenContrarySites _ =
     mutStrictRule =
       Rule (RuleId "mut_strict") [] Strict [] [] mutP False [] []
     mutContrary = Contrary mutQ mutP
+    -- Σ-aware injection (#89 §8): the operator that invents `mut_p`/`mut_q`
+    -- declares them, so the mutant tests R12 — the class it seeds — instead of
+    -- flipping to R2 on incidental signature noise.
+    declareMut sg = declarePred (Pred "mut_p") [] (declarePred (Pred "mut_q") [] sg)
 
 -- R3: rename one substitution key off the rule's parameter list.
 wrongSubstSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
@@ -855,10 +900,20 @@ sweepOps =
   , unitSweep OpBadAttackPosition badAttackPositionSites
   , unitSweep OpUnlicensedAttack unlicensedAttackSites
   , unitSweep OpGroupConflict groupConflictSites
+  , -- The signature family. Sweeping it over the corpus is what makes the
+    -- applicability assertion meaningful: `wrong-arg-sort` must find real sites
+    -- in corpus-v1's own vocabulary, not only in hand-built examples (#89 §8).
+    unitSweep OpUndeclaredPred (classedSites Sorts.undeclaredPredSites)
+  , unitSweep OpWrongPredArity (classedSites Sorts.wrongPredAritySites)
+  , unitSweep OpWrongArgSort (classedSites Sorts.wrongArgSortSites)
+  , unitSweep OpUndeclaredCon (classedSites Sorts.undeclaredConSites)
+  , unitSweep OpWrongThetaSort (classedSites Sorts.wrongThetaSortSites)
+  , unitSweep OpOutOfScopeVar (classedSites Sorts.outOfScopeVarSites)
   , replaySweep OpDuplicateBackend
   , replaySweep OpUnknownBackend
   ]
   where
+    classedSites sites u = [(ExpectClass c, loc, f) | (c, loc, f) <- sites u]
     unitSweep op sites =
       SweepOp
         op
@@ -944,7 +999,10 @@ codecMutantsForBase base bytes = case parseSExpr bytes of
       ]
     junkSection (SList kids) = Just (SList (kids ++ [SList [SAtom "mut_junk"]]))
     junkSection _ = Nothing
-    coreVersion = mapAtom (\a -> if a == "lara-core@0.1" then "lara-core@0.2" else a)
+    -- The fixture text moves with the core-version bump; the expectation does
+    -- not. `lara-core@0.1` is retired (#91 decision 5), so it is exactly the
+    -- kind of unsupported version this operator must present.
+    coreVersion = mapAtom (\a -> if a == "lara-core@0.2" then "lara-core@0.1" else a)
     replayOrder (SList [ci, SList (ridTag : core : policy : rest), unit]) =
       Just (SList [ci, SList (ridTag : policy : core : rest), unit])
     replayOrder _ = Nothing
@@ -1018,7 +1076,7 @@ cycleBytes n = case checkInput of
     checkInput = do
       rid <-
         mkReplayId
-          LaraCoreV01
+          LaraCoreV02
           (PolicyId "mutation-cycles-v1")
           [(BackendId "nd", "1")]
           []
@@ -1050,8 +1108,23 @@ cycleBytes n = case checkInput of
     queries = map holds ixes
     ixes = [0 .. n - 1]
     succIx i = (i + 1) `mod` n
+    -- The synthetic unit's own generated Σ (#89 §8): the operator that invents
+    -- a vocabulary is the site that knows its sorts, so `mutation-cycles-v1`
+    -- declares one opaque sort for its cycle nodes rather than tripping the new
+    -- stage-2 check on incidental Σ noise.
+    nodeSort = SortDecl (SortName "Node")
+    sigma =
+      Sigma
+        { sigmaSorts = [SortName "Node"]
+        , sigmaCons = [ConSig (FunSym (conName i)) [] nodeSort | i <- ixes]
+        , sigmaPreds =
+            [ PredSig (Pred "holds") [nodeSort]
+            , PredSig (Pred "obs") [nodeSort]
+            ]
+        }
     unit =
       Unit
+        sigma
         [cyc]
         contraries
         []

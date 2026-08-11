@@ -332,3 +332,10 @@ sessions:
   events_count: 12
   claims_touched: []
   open_threads: 3
+- id: 2026-08-10_001
+  date: '2026-08-10'
+  summary: 'Implemented lara-core@0.2''s many-sorted checker and review-hardened PR #97. Result 13 now derives RuleSortRespecting from the executable theta check plus accepted support''s exact-domain invariant and is calibrated to ground atoms plus actual recursively reachable support-rule premises, conclusions, and answers; exception/attack closure remains explicit scope. Result 12''s structured-subset boundary is documented, shared Haskell vocabulary/builders are consolidated, all nine inline threads are resolved, and full local plus hosted Haskell/Lean gates passed. C30 was narrowed to the proved scope.'
+  turn_count: 2
+  events_count: 12
+  claims_touched: [C28, C29, C30]
+  open_threads: 7

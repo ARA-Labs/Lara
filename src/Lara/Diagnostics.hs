@@ -1,7 +1,7 @@
 -- | Located rejection diagnostics — the bridge from the checker's internal
 -- result types ("Lara.Check", "Lara.SupportTerm") to the wire-level
 -- 'Lara.AST.Rejection' the @lara@ driver prints, and to a located description
--- (which unit constituent, which of the six stages).
+-- (which unit constituent, which of the seven stages).
 --
 -- 'rejectionOf' is the exact wire mapping the Lean driver performs
 -- (@lean/Lara/Driver.lean@ @rejectString@): a 'UnitError' becomes the single
@@ -21,7 +21,7 @@ module Lara.Diagnostics
   , parseConstituent
   ) where
 
-import Lara.AST (GroupId (..), Rejection (..), RejectClass (R12))
+import Lara.AST (GroupId (..), Rejection (..), RejectClass (R2, R12))
 import Lara.Check
   ( DeclLoc (..)
   , ProgramError (..)
@@ -41,6 +41,7 @@ import Lara.SupportTerm (checkErrorClass)
 rejectionOf :: UnitError -> Rejection
 rejectionOf e = case e of
   UEDuplicateRule _ -> DuplicateRule
+  UESignature _ -> RejectClass R2
   UEPolicyViolation _ -> RejectClass R12
   UEProgram pe -> case pe of
     PERejection _ ce -> RejectClass (checkErrorClass ce)
@@ -52,14 +53,15 @@ rejectionOf e = case e of
 -- Located description
 -- ---------------------------------------------------------------------------
 
--- | Which stage produced the rejection: one of the six 'checkUnit' stages, or
+-- | Which stage produced the rejection: one of the seven 'checkUnit' stages, or
 -- one of the two whole-unit boundary rejections that reject in
 -- "Lara.Driver".'Lara.Driver.runCheck' /before/ 'checkUnit' and so never become
 -- a 'Lara.Check.UnitError' — the replay preflight (R13) and the §4.3 group
 -- check (R9). Only "Lara.Driver".'Lara.Driver.runCheckLocated' produces the two
--- boundary stages; 'locate' produces only the six checker stages.
+-- boundary stages; 'locate' produces only the seven checker stages.
 data Stage
   = StageDuplicateRule
+  | StageSignature
   | StagePolicyWellFormedness
   | StageDuplicateArgument
   | StageSupport
@@ -135,6 +137,10 @@ locate e = LocatedRejection (rejectionOf e) stage constituent
   where
     (stage, constituent) = case e of
       UEDuplicateRule _ -> (StageDuplicateRule, CPolicy)
+      -- A sort failure is always a fact about the policy's declared signature
+      -- or about material read under it, so it locates at the policy — the same
+      -- constituent R12 uses, and for the same reason.
+      UESignature _ -> (StageSignature, CPolicy)
       UEPolicyViolation _ -> (StagePolicyWellFormedness, CPolicy)
       UEProgram pe -> case pe of
         PEDuplicateArgument i _ -> (StageDuplicateArgument, CArgument i)

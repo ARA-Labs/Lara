@@ -30,6 +30,7 @@ import Lara.Compile
 import Lara.Erase
 import Lara.EraseTransport
 import Lara.Policy
+import Lara.Sigma
 import Lara.Check
 import Lara.Driver
 import Lara.Examples
@@ -38,6 +39,41 @@ import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 
 open Lara
+
+-- Result 13 (the many-sorted signature, `lara-core@0.2` / issue #89).
+-- (a) decidability without classical input: the executable check IS the
+--     relation, so the instance below reports the empty axiom set.
+#print axioms Lara.Sigma.wellSorted_decidable
+#print axioms Lara.Sigma.sigmaWellFormed_decidable
+#print axioms Lara.Sigma.wellSorted_iff
+#print axioms Lara.Sigma.sigmaFault
+#print axioms Lara.Sigma.sortOf
+#print axioms Lara.Sigma.ruleParamSorts
+-- (b) the substitution lemma, at every level the checker uses it. This is the
+--     load-bearing metatheory: stage 2 checks patterns once and each θ range
+--     separately, and NOTHING checks the instantiated atoms directly.
+#print axioms Lara.Sigma.lookupParam_append_of_none
+#print axioms Lara.Sigma.lookupParam_append_mono
+#print axioms Lara.Sigma.checkPat_mono
+#print axioms Lara.Sigma.checkPats_mono
+#print axioms Lara.Sigma.checkAPat_mono
+#print axioms Lara.Sigma.checkAPats_mono
+#print axioms Lara.Sigma.instPat_sortOf
+#print axioms Lara.Sigma.instPats_expectTerms
+#print axioms Lara.Sigma.wellSorted_subst
+#print axioms Lara.Sigma.wellSorted_subst_list
+#print axioms Lara.Sigma.wellSorted_subst_mem
+#print axioms Lara.Sigma.wellSorted_rule
+-- (c) the statement the paper cites: accepted support instances and the unit's
+--     ground environment are well-sorted under that unit's own Σ.
+#print axioms Lara.Check.Unit.signatureStage
+#print axioms Lara.Check.Unit.signatureStage_sigma_wf
+#print axioms Lara.Check.Unit.signatureStage_policy
+#print axioms Lara.Check.Unit.signatureStage_ground
+#print axioms Lara.Check.Unit.signatureStage_args
+#print axioms Lara.Check.Unit.thetaWellSorted_sortRespecting
+#print axioms Lara.Check.Unit.thetaWellSorted_ruleSortRespecting
+#print axioms Lara.Check.Unit.checkUnit_wellSorted
 
 -- Symbolic certificate wire equality (nested `List SExpr`, decided manually).
 #print axioms Lara.Support.SExpr.decEq

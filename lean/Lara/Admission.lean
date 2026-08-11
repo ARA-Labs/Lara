@@ -797,9 +797,10 @@ successful acceptance. The proof-bearing accepted carrier remains inside the
 checker; this projection permits equality across propositionally equal
 contexts. -/
 def checkUnitOutcome {canon : String → String} (Gamma : LeafId → Option Atom)
-    (reg : Lara.Support.BackendRegistry canon) (unit : Lara.Unit) :
+    (reg : Lara.Support.BackendRegistry canon) (ground : List Atom)
+    (unit : Lara.Unit) :
     Except Lara.Check.Unit.UnitError _root_.Unit :=
-  match Lara.Check.Unit.checkUnit Gamma reg unit with
+  match Lara.Check.Unit.checkUnit Gamma reg ground unit with
   | .error err => .error err
   | .ok _ => .ok ()
 
@@ -813,13 +814,15 @@ theorem policy_all_admit_checkUnit_identity (canon : String → String)
     (rawAtts : List RawAttack) (groups : List Groups.DupGroup)
     (declared : AlignedAttacks argsRaw rawAtts)
     (hall : ∀ m ∈ metas, decisionFor table m.kind m.provenance = .admit)
-    (reg : Lara.Support.BackendRegistry canon) (policy : Lara.Policy.Policy) :
+    (reg : Lara.Support.BackendRegistry canon) (policy : Lara.Policy.Policy)
+    (sigma : Lara.Sigma.Sigma) (ground : List Atom) :
     let p := buildPrune canon table metas leaves argsRaw rawAtts groups declared.resolved
     let qs := Groups.quarantined canon leaves groups
-    checkUnitOutcome (buildGamma p.checkedLeaves) reg
-        ({ policy := policy, args := p.keptArgs.map (·.2), atts := p.keptAttacks } : Lara.Unit) =
-      checkUnitOutcome (buildGamma (Groups.quarantineLeaves qs leaves)) reg
-        ({ policy := policy
+    checkUnitOutcome (buildGamma p.checkedLeaves) reg ground
+        ({ sigma := sigma, policy := policy, args := p.keptArgs.map (·.2), atts := p.keptAttacks } : Lara.Unit) =
+      checkUnitOutcome (buildGamma (Groups.quarantineLeaves qs leaves)) reg ground
+        ({ sigma := sigma
+         , policy := policy
          , args := (Groups.quarantineArgs qs argsRaw).map (·.2)
          , atts := selectAligned (fun ra : RawAttack =>
              decide (ra.endpoints.1 ∈ (Groups.quarantineArgs qs argsRaw).map (·.1)) &&
@@ -1365,11 +1368,12 @@ theorem source_justified_nonpromotion
     (rawAtts : List RawAttack) (groups : List Groups.DupGroup)
     (declared : AlignedAttacks argsRaw rawAtts)
     (queries : List Atom) (p : Atom)
+    (sigma : Lara.Sigma.Sigma) (ground : List Atom)
     (hacc : evaluateAdmission canon table metas leaves argsRaw rawAtts groups declared = .accepted r)
     (accepted : Lara.Unit.CheckedUnit canon (buildGamma r.prune.checkedLeaves)
       (Lara.Support.certOkOf reg))
-    (hcheck : Lara.Check.Unit.checkUnit (buildGamma r.prune.checkedLeaves) reg
-      ({ policy := policy, args := r.prune.keptArgs.map (·.2), atts := r.prune.keptAttacks } : Lara.Unit) =
+    (hcheck : Lara.Check.Unit.checkUnit (buildGamma r.prune.checkedLeaves) reg ground
+      ({ sigma := sigma, policy := policy, args := r.prune.keptArgs.map (·.2), atts := r.prune.keptAttacks } : Lara.Unit) =
         .ok accepted)
     (hp : p ∈ queries)
     (hnot : p ∉ BlockedProgram.blockedQueries r.prune.keep argsRaw declared.resolved
@@ -1424,7 +1428,7 @@ theorem source_justified_nonpromotion
       exact heq.symm
     have hpruneAtts : r.prune.keptAttacks = declared.resolved :=
       hatts.trans hselected
-    obtain ⟨_, _, _, hprogramArgs, hprogramAtts, _, _⟩ :=
+    obtain ⟨_, _, _, _, _, _, _, _, hprogramArgs, hprogramAtts, _, _⟩ :=
       Lara.Check.Unit.checkUnit_sound hcheck
     rw [hpruneArgs] at hprogramArgs
     rw [hpruneAtts] at hprogramAtts
@@ -1452,6 +1456,6 @@ theorem source_justified_nonpromotion
     exact checked_production_justified_nonpromotion_of_not_blocked
       (RawAttack := Lara.RawAttack.RawAttack)
       reg policy accepted r.prune.keep argsRaw declared.resolved r.prune.keepAttack rawAtts queries p
-      hcheck hpruned hp hnot hstatus
+      sigma ground hcheck hpruned hp hnot hstatus
 
 end Lara.Admission

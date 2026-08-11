@@ -61,7 +61,6 @@ import Lara.AST
 import Lara.Admission (renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , elabErrorMessage
   , prepareSource
   , renderSourceInvalid
@@ -100,14 +99,14 @@ parseFixture name src = case parseProgram src of
   Left e -> error (name ++ ": fixture parse failed: " ++ show e)
 
 elab :: Policy -> Program -> Either String Unit
-elab pol prog = case elaborate defeasibleSuiteSigma (registryOf pol) prog pol of
+elab pol prog = case elaborate (registryOf pol) prog pol of
   Left e -> Left (elabErrorMessage e)
   Right u -> Right u
 
 -- | Run one prepared source all the way to its 'Verdict', as @app\/Main.hs@
 -- does for a @.lara@ file.
 runToVerdict :: Policy -> Program -> Either String Verdict
-runToVerdict pol prog = case prepareSource defeasibleSuiteSigma prog pol of
+runToVerdict pol prog = case prepareSource prog pol of
   Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
   Right (SourceRejected r) -> Left ("admission rejection: " ++ renderAdmissionRejection r)
   Right (SourceAccepted input) -> Right (sourceResultVerdict (runSourceCheck input))

@@ -1,7 +1,7 @@
 {
   "environment": {
-    "git-rev": "6ee4f79050abbc7f54bda8b15d33c951c492ea56",
-    "git-dirty": false,
+    "git-rev": "16fa55fa4d5ec246accdfb72a955fa0bf02dd2ef",
+    "git-dirty": true,
     "ghc": "9.14.1",
     "lean": "",
     "os": "darwin",

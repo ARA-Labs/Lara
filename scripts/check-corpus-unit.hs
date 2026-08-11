@@ -20,7 +20,6 @@ module Main (main) where
 import Lara.Admission (renderAdmissionRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , defeasibleSuiteSigma
   , prepareSource
   , renderSourceInvalid
   , runSourceCheck
@@ -43,7 +42,7 @@ main = do
   policy <- either (die . ((policyPath ++ ": parse: ") ++) . show) pure (parsePolicy policyText)
   progText <- readFile unitPath
   prog <- either (die . ((unitPath ++ ": parse: ") ++) . show) pure (parseProgram progText)
-  result <- case prepareSource defeasibleSuiteSigma prog policy of
+  result <- case prepareSource prog policy of
     Left invalid -> die (unitPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       die (unitPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)

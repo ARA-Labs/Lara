@@ -97,6 +97,11 @@ data ElabError
     -- declared sub-claim id
   | -- | the measurand after @on@ is not declared by the policy (App. B.1).
     ComparisonUndeclaredMeasurand PropId MeasurandId
+  | -- | the measurand after @on@ is declared but carries no polarity clause
+    -- (App. B.1). Polarity is @Num@-gated and optional since @lara-core\@0.2@
+    -- opened the sort slot (#89 D-1), so a measurand can be well-formed and
+    -- still be unusable as a comparison key.
+    ComparisonMeasurandNoPolarity PropId MeasurandId
   | -- | the policy declares no @comparison-scheme@ for the block's
     -- (relation, polarity) pair (App. B.2).
     ComparisonNoScheme PropId Relation Polarity
@@ -243,6 +248,10 @@ elabErrorMessage e = case e of
       ++ "exactly one numeric literal (the premise-cell obligation)"
   ComparisonUndeclaredMeasurand c (MeasurandId m) ->
     cmpPrefix c ++ "measurand '" ++ m ++ "' is not declared by the policy"
+  ComparisonMeasurandNoPolarity c (MeasurandId m) ->
+    cmpPrefix c ++ "measurand '" ++ m ++ "' declares no polarity, so it cannot "
+      ++ "key a comparison-scheme (a polarity clause is well-formed only on a "
+      ++ "Num-sorted measurand)"
   ComparisonNoScheme c rel pol ->
     cmpPrefix c ++ "the policy declares no comparison-scheme for ("
       ++ relationStr rel ++ ", " ++ polarityStr pol ++ ")"
