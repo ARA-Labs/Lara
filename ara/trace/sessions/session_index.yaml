@@ -334,8 +334,8 @@ sessions:
   open_threads: 3
 - id: 2026-08-10_001
   date: '2026-08-10'
-  summary: 'Implemented and review-hardened lara-core@0.2, audited merged PR #99, then repaired the paper benchmark on commit 9a3aab3. The benchmark now derives and validates the 564-record manifest census and regenerates the performance table; full Haskell tests, make bench, and focused review pass. m5-freeze-v4 and the bounded result-12 choice remain open.'
-  turn_count: 4
-  events_count: 17
+  summary: 'Implemented and review-hardened lara-core@0.2, closed the v4 fixture and measurement debt, merged the benchmark repair as PR #100, and published m5-freeze-v4 on f4327b4. Housekeeping PR #101 is open; the bounded result-12 parity closure remains.'
+  turn_count: 6
+  events_count: 20
   claims_touched: [C28, C29, C30]
-  open_threads: 8
+  open_threads: 4

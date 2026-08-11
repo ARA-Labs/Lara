@@ -4016,3 +4016,70 @@ tree:
     - issue://98
   also_depends_on: [N159, N160]
   status: resolved
+
+- id: N162
+  type: experiment
+  title: "PR 100 merge passed the main-branch release gate"
+  provenance: ai-executed
+  timestamp: "2026-08-10T23:02"
+  description: >
+    Inspected the live repository after PR #100 merged, confirmed main and
+    origin/main at d43e6a1 with a clean tree, and waited for the push-triggered
+    hosted workflow rather than relying only on the pull-request checks.
+  result: >
+    GitHub Actions run 31463095876 completed successfully: Lean (lake build)
+    passed in 1m32s and Haskell (cabal build + test), including both
+    Haskell-Lean differential gates, passed in 7m26s. The benchmark repair is
+    therefore merged and hosted-green. The annotated m5-freeze-v4 tag remains
+    uncut; docs/m5-freeze-checklist.md assigns it to the v4 re-freeze merge
+    commit f4327b4.
+  evidence:
+    - "PR #100 merge commit d43e6a1"
+    - "GitHub Actions run 31463095876"
+    - "docs/m5-freeze-checklist.md:182-195"
+  also_depends_on: [N160, N161]
+  status: resolved
+
+- id: N163
+  type: decision
+  title: "Complete m5-freeze-v4 housekeeping on an isolated branch"
+  provenance: user
+  timestamp: "2026-08-10T23:13"
+  description: >
+    The researcher directed the post-PR #100 release housekeeping to be
+    completed on a new branch.
+  choice: >
+    Create an isolated release branch, publish the annotated m5-freeze-v4 tag
+    on the already-designated PR #99 merge commit, update the checklist and
+    backlog, and deliver the documentation through a pull request.
+  alternatives:
+    - "Cut the tag without recording the completed state in the repository."
+    - "Make the bookkeeping edits directly on main."
+  evidence:
+    - "User directive: do the housekeeping on a new branch"
+    - "docs/m5-freeze-checklist.md:182-200"
+  also_depends_on: [N162]
+  status: resolved
+
+- id: N164
+  type: experiment
+  title: "Published m5-freeze-v4 and opened housekeeping PR 101"
+  provenance: ai-executed
+  timestamp: "2026-08-10T23:13"
+  description: >
+    Created branch chore/m5-freeze-v4-housekeeping in an isolated worktree,
+    published the annotated tag, changed reproduction instructions to use the
+    tag, and moved the tag task into the completed backlog.
+  result: >
+    Remote annotated tag object db13d66cfa185f97de52e3fec1a3167ca532a1ca
+    dereferences to f4327b4d10056bc1f4f5e4d24a05fcd515a2895e, the PR #99
+    re-freeze merge commit. Commit 816cdf7 records the housekeeping, and PR
+    #101 is open against main. git diff --check passed and all changed ARA YAML
+    parsed successfully.
+  evidence:
+    - "refs/tags/m5-freeze-v4"
+    - "commit 816cdf7"
+    - "PR #101"
+    - "GitHub Actions run 31463095876"
+  also_depends_on: [N162, N163]
+  status: resolved

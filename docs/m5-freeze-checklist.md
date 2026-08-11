@@ -191,8 +191,9 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
   re-freeze PR, #82).
 - **v4 snapshot commit:** `ced19fe` (clean measurement input and environment
   recorded in `report.json`).
-- **v4 tag:** `m5-freeze-v4` (annotated), to be cut on the v4 re-freeze merge
-  commit after hosted CI is green.
+- **v4 tag:** `m5-freeze-v4` (annotated), on `f4327b4` (merge commit of the v4
+  re-freeze PR #99). Cut after main CI run `31463095876` passed on PR #100's
+  benchmark-harness repair.
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
   invalidates this freeze; re-run the gates and cut the next tag. The deferred
   `drop-covering-attack` / `wrong-fraction` operators would therefore require
@@ -200,10 +201,10 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 
 ## Reproduce from scratch
 
-Until the annotated tag is cut, reproduce v4 from its clean input snapshot:
+Reproduce v4 from the annotated tag:
 
 ```
-git checkout ced19fe
+git checkout m5-freeze-v4
 cabal build all
 cabal exec -- runghc scripts/gen-mutants.hs   # empty generated-suite diff
 bash scripts/differential.sh                  # positive 580/0, negative 56/0

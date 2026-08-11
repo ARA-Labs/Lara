@@ -252,23 +252,6 @@ Start from the synced state the sorts plan's D9 re-sync produces.
 **Priority:** P2
 **Depends on:** sorts-in-checker D9 (Presentation re-sync) landed.
 
-### Cut the `lara-core@0.2` freeze tag
-
-**What:** After the v4 re-freeze PR merges and hosted CI is green, cut the
-annotated `m5-freeze-v4` tag on its merge commit.
-
-**Why:** `lara-core@0.2` changed a frozen input (the wire, the rejection
-surface, every generated artifact), invalidating v3 under the checklist's
-post-freeze rule. The v4 inputs, headline numbers, reproducibility hashes, and
-local gates are now updated; only merge, hosted CI, and tagging remain.
-
-**Context:** PR #97 plus the Σ fixture closeout. The deferred
-`drop-covering-attack` / `wrong-fraction` operators are intentionally outside
-v4; adding either later requires a new regeneration and `m5-freeze-v5`.
-
-**Effort:** S
-**Priority:** P2
-**Depends on:** #89 merged.
 
 ### Σ sort-naming refinement pass (possible-worlds trigger)
 
@@ -315,6 +298,14 @@ kept out of the 0.3 diff to avoid pulling spec.md into a surface-track PR.
 **Priority:** P4
 
 ## Completed
+
+### Cut the `lara-core@0.2` freeze tag
+
+The annotated `m5-freeze-v4` tag now points to `f4327b4`, the merge commit of
+the v4 re-freeze PR #99. It was cut after PR #100's benchmark-harness repair
+merged and main CI run `31463095876` passed both Lean and Haskell jobs. The
+freeze records 504 mutants plus 60 corpus units: 564/564 class matches,
+564/564 Lean agreement, and 60/60 replay.
 
 ### Backend rejection reasons reach the author (PR #83 review)
 

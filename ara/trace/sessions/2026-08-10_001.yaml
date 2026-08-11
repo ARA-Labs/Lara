@@ -2,19 +2,16 @@ session:
   id: "2026-08-10_001"
   date: "2026-08-10"
   started: "2026-08-10T10:00"
-  last_turn: "2026-08-10T22:10"
-  turn_count: 3
+  last_turn: "2026-08-10T23:13"
+  turn_count: 6
   summary: >
-    Implemented and review-hardened lara-core@0.2, then audited the path after
-    merged PR #99. The semantic theorem gate remains AxCheck-clean within the
-    standard trio. Hosted Lean CI is green and hosted Haskell CI was still
-    running, so m5-freeze-v4 remains pending. The immediate paper blocker is
-    reproducible: make bench expects 429 manifest inputs but v4 has 564.
-    Broad new metatheory is not indicated; result 12 remains a bounded
-    presentation-round-trip gap because Lean Presentation omits policySigma and
-    the live measurand representation. C30 remains calibrated to ground atoms
-    plus actual recursively reachable support-rule premises, conclusions, and
-    answers.
+    Implemented and review-hardened lara-core@0.2, closed its v4 fixture and
+    measurement debt, and repaired the benchmark harness for the live
+    564-record suite. PR #100 is merged and main push CI passed both Lean and
+    Haskell differential gates. The annotated m5-freeze-v4 tag is published on
+    f4327b4; branch chore/m5-freeze-v4-housekeeping records the completed state
+    in PR #101. The next code-side choice remains the bounded Lean Presentation
+    parity closure and mechanical drift guard.
 
 events_logged:
   - turn: 1
@@ -114,6 +111,36 @@ events_logged:
     routing: staged
     provenance: ai-suggested
     summary: "Prefer bounded result-12 parity closure over broad new metatheory before M7 claims complete mechanization."
+  - turn: 4
+    type: decision
+    id: "N160"
+    routing: direct
+    provenance: user
+    summary: "Selected issue #98's manifest-derived benchmark repair as the immediate post-freeze task."
+  - turn: 4
+    type: experiment
+    id: "N161"
+    routing: direct
+    provenance: ai-executed
+    summary: "Implemented and review-hardened the benchmark repair; tests and make bench passed over 564 records."
+  - turn: 5
+    type: experiment
+    id: "N162"
+    routing: direct
+    provenance: ai-executed
+    summary: "PR #100 merged at d43e6a1; main push CI 31463095876 passed Lean and Haskell differential gates."
+  - turn: 6
+    type: decision
+    id: "N163"
+    routing: direct
+    provenance: user
+    summary: "Directed m5-freeze-v4 housekeeping to be completed on a new branch."
+  - turn: 6
+    type: experiment
+    id: "N164"
+    routing: direct
+    provenance: ai-executed
+    summary: "Published m5-freeze-v4 on f4327b4 and opened housekeeping PR #101 from an isolated branch."
 ai_actions:
   - turn: 1
     action: "Wrote the Sigma inference bootstrap and ran the corpus census (D0)."
@@ -210,6 +237,36 @@ ai_actions:
       mechanization claim gap in Lean Presentation.
     provenance: ai-executed
     files_changed: ["ara/**"]
+  - turn: 4
+    action: >
+      Implemented issue #98, added the independent manifest raw-row census and
+      parser-totality coverage, regenerated the 564-record paper performance
+      table, completed focused re-review, and opened PR #100.
+    provenance: ai-executed
+    files_changed:
+      - "scripts/bench.hs"
+      - "test/MeasureSpec.hs"
+      - "Makefile"
+      - "tables/performance.tex"
+      - "measurements/bench.json"
+      - "ara/**"
+  - turn: 5
+    action: >
+      Inspected the live post-merge repository and roadmap, confirmed the
+      explicit Lean Presentation parity gap, and waited for main push CI
+      31463095876 to pass both hosted jobs.
+    provenance: ai-executed
+    files_changed: ["ara/**"]
+  - turn: 6
+    action: >
+      Created the isolated chore/m5-freeze-v4-housekeeping branch, published
+      the annotated m5-freeze-v4 tag on f4327b4, updated the freeze checklist
+      and backlog, verified the patch, committed 816cdf7, and opened PR #101.
+    provenance: ai-executed
+    files_changed:
+      - "TODOS.md"
+      - "docs/m5-freeze-checklist.md"
+      - "ara/**"
 claims_touched:
   - id: C28
     action: crystallized
@@ -324,6 +381,19 @@ key_context:
       field to sweep_ns, and regenerates the paper table for 564 records. Full
       Haskell tests and make bench passed; focused re-review cleared the initial
       manifest-integrity finding.
+  - turn: 5
+    excerpt: >
+      PR #100 is merged at d43e6a1 and main push CI is green. The immediate
+      release action is now the annotated m5-freeze-v4 tag on f4327b4. The
+      pending code recommendation remains O64: close the explicit
+      policySigma/optional-polarity gap in Lean Presentation and add the parity
+      guard before implementing #88b's new surface AST.
+  - turn: 6
+    excerpt: >
+      The researcher directed the release housekeeping onto a new branch.
+      Remote m5-freeze-v4 now dereferences to f4327b4, and PR #101 records the
+      tag and tag-based reproduction path. This closes release housekeeping
+      without deciding O64's result-12 recommendation.
 open_threads:
   - "The class-boundary rules (§2.3) have no fixture that exercises them adversarially — negR3OffDomainIllSorted now pins one of the four, the other three are covered only incidentally by mutants that happen to respect them."
 
@@ -335,6 +405,9 @@ open_threads:
   - "PR for #89 not yet opened at the time this record was written."
   - "Update: PR #97 is open at dd7560f; all nine inline threads are resolved and hosted CI is green. Formal reviewer reapproval remains external."
   - "Update: issue #98 is repaired on branch bugfix/98-bench-manifest-size at commit 9a3aab3; the delivery PR is pending."
+  - "Update: PR #100 merged at d43e6a1 and main push CI 31463095876 passed; issue #98 is closed."
+  - "Update: m5-freeze-v4 is now unblocked but remains uncut on the required v4 re-freeze merge commit f4327b4."
+  - "Update: annotated tag m5-freeze-v4 is published on f4327b4; housekeeping PR #101 is open."
 
 ai_suggestions_pending:
   - "O62 (nullary constants dominate a first-order corpus's ground vocabulary, 187/196) — staged; the corpus policy depends on the census output, not on the generalization, so no artifact-commitment signal fired."

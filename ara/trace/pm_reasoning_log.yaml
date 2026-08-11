@@ -660,3 +660,19 @@ entries:
     - "The first implementation derived counts from permissive parsers and therefore removed the old accidental manifest-integrity guard. Independent review identified the silent-drop failure mode; the final code compares parsed counts against an independent raw-row census and rejects empty manifests before timing."
     - "Did NOT crystallize O64. The user chose the benchmark repair but did not affirm either closing result 12 or narrowing the paper's mechanization claim."
     - "Did NOT treat regenerated timing values as a stable scientific claim. They remain generated measurement evidence tied to the recorded machine, protocol, and commit."
+
+- turn: "2026-08-10_001#5"
+  notes:
+    - "Routed N162 as one integrated post-merge experiment: the live commit, clean branch, and push-triggered Lean/Haskell workflow jointly establish that PR #100 is merged and hosted-green."
+    - "Did NOT add a second staged recommendation. O64 already states the bounded result-12 parity closure and mechanical-guard recommendation; this turn revisited rather than changed it."
+    - "Did NOT crystallize O64. The researcher asked for the next step but did not affirm the proposed result-12 closure or the ordering against #88b."
+    - "Distinguished release housekeeping from code work: the green main workflow unblocks m5-freeze-v4 on f4327b4, while the next code PR should address the explicit Lean Presentation parity gap."
+    - "Repaired the current session ledger by appending its previously omitted turn-4 N160/N161 events and AI action; append-only exploration nodes were not altered."
+
+- turn: "2026-08-10_001#6"
+  notes:
+    - "Routed N163 as a user decision: the directive explicitly selected a new branch rather than direct-main bookkeeping or an unrecorded tag-only action."
+    - "Routed N164 as one integrated release experiment: isolated branch creation, remote annotated-tag publication, documentation update, verification, commit, and PR jointly close one housekeeping task."
+    - "Did NOT crystallize O64. Publishing the freeze tag removes release debt but does not affirm the separate result-12 parity recommendation."
+    - "Kept the tag anchored to f4327b4 rather than PR #100's d43e6a1 because the checklist had already designated the v4 re-freeze merge commit; PR #100 only supplied the final hosted-green gate."
+    - "No logic-layer entry changed: this turn records release state and process, not a new scientific claim."
