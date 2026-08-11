@@ -1,8 +1,8 @@
 -- | The checker-performance bench (E1, issue #69).
 --
 -- One command that measures the production checker on the frozen corpus
--- units and the 429-record harness and emits the paper's performance table
--- (@tables\/performance.tex@) plus a raw JSON record
+-- units and the manifest-discovered harness and emits the paper's performance
+-- table (@tables\/performance.tex@) plus a raw JSON record
 -- (@measurements\/bench.json@) — the table is generated, never hand-typed.
 --
 -- Protocols (deliberately aligned with @scripts\/measure.hs@):
@@ -23,9 +23,8 @@
 --   decode included) — a DIFFERENT protocol, reported only to justify why
 --   the Lean driver stays a test oracle; no cross-driver ratio may be
 --   derived.
--- * The 429-record harness sweep pre-reads all inputs, then times one full
---   in-memory pass (decode + check + render, or the codec failure path) over
---   all 429 records.
+-- * The harness sweep pre-reads every manifest input, then times one full
+--   in-memory pass (decode + check + render, or the codec failure path).
 --
 -- Timing numbers are reproducible-but-unfrozen (the @measure.hs@
 -- discipline): @measurements\/@ is gitignored, and the committed
@@ -37,7 +36,7 @@
 module Main (main) where
 
 import Control.Exception (evaluate)
-import Control.Monad (forM, forM_, replicateM, unless)
+import Control.Monad (forM, forM_, replicateM, unless, when)
 import Data.List (intercalate, maximumBy, nub, sortOn)
 import Data.Ord (comparing)
 import GHC.Clock (getMonotonicTimeNSec)
@@ -81,7 +80,7 @@ reps = 100
 samples :: Int
 samples = 5
 
--- | Full 429-sweep passes; the median is reported.
+-- | Full harness-sweep passes; the median is reported.
 sweepSamples :: Int
 sweepSamples = 3
 
@@ -93,18 +92,20 @@ main = do
   let mutants = parseMutantManifest mutantManifest
       corpus = parseCorpusManifest corpusManifest
       inputs = mutants ++ corpus
-  unless (length inputs == 429) $
-    die ("expected 429 manifest inputs, found " ++ show (length inputs))
+      inputCount = length inputs
+  validateManifest "mutant" (mutantManifestRowCount mutantManifest) mutants
+  validateManifest "corpus" (corpusManifestRowCount corpusManifest) corpus
   env <- gatherEnv
   units <- mapM benchUnit corpus
   sweepNs <- benchSweep inputs
   createDirectoryIfMissing True "measurements"
   createDirectoryIfMissing True "tables"
-  writeFile "measurements/bench.json" (benchJson env units sweepNs)
-  writeFile "tables/performance.tex" (performanceTex env units sweepNs)
+  writeFile "measurements/bench.json" (benchJson env inputCount units sweepNs)
+  writeFile "tables/performance.tex" (performanceTex env inputCount units sweepNs)
   putStrLn
     ( "wrote " ++ show (length units)
-        ++ " unit benches to measurements/bench.json and tables/performance.tex"
+        ++ " unit benches and one " ++ show inputCount
+        ++ "-record harness sweep to measurements/bench.json and tables/performance.tex"
     )
 
 preflightLean :: IO ()
@@ -118,6 +119,32 @@ preflightLean = do
 
 die :: String -> IO a
 die msg = hPutStrLn stderr ("bench: " ++ msg) >> exitFailure
+
+-- | Reject silent parser drops without pinning the suite to one frozen count.
+-- The shared manifest parsers deliberately return lists, so the benchmark
+-- cross-checks their output against the independently visible data-row count
+-- before publishing timings.
+validateManifest :: String -> Int -> [a] -> IO ()
+validateManifest label rowCount parsed = do
+  when (rowCount == 0) (die (label ++ " manifest contains no data rows"))
+  unless (length parsed == rowCount) $
+    die
+      ( label ++ " manifest parsed " ++ show (length parsed)
+          ++ " of " ++ show rowCount ++ " data rows"
+      )
+
+mutantManifestRowCount :: String -> Int
+mutantManifestRowCount raw =
+  length
+    [ ()
+    | ln <- lines raw
+    , not (null ln)
+    , take 1 ln /= "#"
+    ]
+
+corpusManifestRowCount :: String -> Int
+corpusManifestRowCount =
+  length . filter (not . null) . drop 1 . lines
 
 -- | One corpus unit's measurements. All times in nanoseconds (already
 -- divided by 'reps' where batched).
@@ -230,7 +257,7 @@ timeLean path = do
   t1 <- getMonotonicTimeNSec
   pure (toInteger (t1 - t0))
 
--- | One full pass over all 429 harness records, in memory: decode + check +
+-- | One full pass over every harness record, in memory: decode + check +
 -- render (or the codec-failure path, its own protocol, as in measure.hs).
 benchSweep :: [InputMeta] -> IO Integer
 benchSweep inputs = do
@@ -316,8 +343,8 @@ showFixed1 x =
 
 -- Rendering ------------------------------------------------------------------
 
-benchJson :: Env -> [UnitBench] -> Integer -> String
-benchJson env units sweepNs =
+benchJson :: Env -> Int -> [UnitBench] -> Integer -> String
+benchJson env inputCount units sweepNs =
   unlines $
     [ "{"
     , "  \"environment\": {"
@@ -330,7 +357,8 @@ benchJson env units sweepNs =
     , "    \"reps\": " ++ show reps ++ ","
     , "    \"samples\": " ++ show samples
     , "  },"
-    , "  \"sweep_429_ns\": " ++ show sweepNs ++ ","
+    , "  \"sweep_records\": " ++ show inputCount ++ ","
+    , "  \"sweep_ns\": " ++ show sweepNs ++ ","
     , "  \"units\": ["
     ]
       ++ [ "    {\"base\": " ++ jstr (ubBase u)
@@ -354,13 +382,13 @@ benchJson env units sweepNs =
     esc '\\' = "\\\\"
     esc c = [c]
 
-performanceTex :: Env -> [UnitBench] -> Integer -> String
-performanceTex env units sweepNs =
+performanceTex :: Env -> Int -> [UnitBench] -> Integer -> String
+performanceTex env inputCount units sweepNs =
   unlines
     [ "% Generated by scripts/bench.hs (make bench) at " ++ envGitRev env ++ " -- do not edit."
     , "\\begin{table}"
     , "\\caption{Production-checker performance over the 60 frozen corpus"
-    , "units and the 429-record harness, on one machine:"
+    , "units and the " ++ show inputCount ++ "-record harness, on one machine:"
     , texEsc (envCpuModel env) ++ ", \\qty{" ++ ramGb ++ "}{\\giga\\byte} RAM,"
     , texEsc (envOsArch env) ++ ", GHC~" ++ texEsc (envGhc env) ++ ","
     , texEsc (envLean env) ++ "."
@@ -404,7 +432,7 @@ performanceTex env units sweepNs =
     , "Lean reference driver, subprocess (\\si{\\milli\\second}) & "
         ++ num (ms1 (medianOf (map ubLeanNs units))) ++ " & " ++ num (ms1 (maximum (map ubLeanNs units))) ++ " \\\\"
     , "\\midrule"
-    , "429-record harness, one full pass (\\si{\\milli\\second}) & \\multicolumn{2}{r}{"
+    , show inputCount ++ "-record harness, one full pass (\\si{\\milli\\second}) & \\multicolumn{2}{r}{"
         ++ num (ms1 sweepNs) ++ "} \\\\"
     , "\\bottomrule"
     , "\\end{tabular}"

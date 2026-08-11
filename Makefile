@@ -11,7 +11,7 @@ test:
 	cabal test all --test-show-details=direct
 
 # E1 checker-performance bench (issue #69): measures the production checker
-# on the 60 frozen corpus units and the 420-record harness and regenerates
+# on the frozen corpus units and the manifest-discovered harness, then regenerates
 # tables/performance.tex (generated, never hand-typed) plus the raw
 # measurements/bench.json.
 bench:

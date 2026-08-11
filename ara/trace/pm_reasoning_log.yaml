@@ -644,3 +644,19 @@ entries:
     - "Revised C30 rather than staging a new observation. The general substitution-lemma claim remains supported, but its Conditions, Falsification, and Proof now distinguish accepted support-rule closure from the unproved exception/attack boundary."
     - "Did NOT alter append-only N153 even though its historical description overstates whole-unit closure. N155 records the correction and N157 records the current scope; logic/C30 is the mutable present-state view."
     - "Did NOT crystallize O62. This review reconfirmed the census values but added no user affirmation or artifact dependency on the generalization about first-order corpora."
+
+- turn: "2026-08-10_001#3"
+  notes:
+    - "Routed N158 as the user's open research-direction question; no user decision was made this turn."
+    - "Routed N159 as one integrated readiness experiment: live merge/CI state, AxCheck, benchmark reproduction, and the result-12 inventory jointly answer what is actually unfinished."
+    - "Staged O64 as a constraint rather than crystallizing it. The recommendation is AI-suggested and the user has not yet affirmed either closing result 12 or narrowing the paper claim."
+    - "Did NOT treat PR #99 merge as permission to cut m5-freeze-v4: hosted Haskell CI remained in progress at observation time."
+    - "Did NOT modify logic claims. The turn produced roadmap evidence and a pending recommendation, not a closure signal for an existing claim."
+
+- turn: "2026-08-10_001#4"
+  notes:
+    - "Routed N160 as a user decision because 'do it, commit, record ara, and pr' followed the explicit branch proposal for issue #98. This selects the immediate task, not the unresolved result-12 close-versus-narrow choice."
+    - "Routed N161 as one experiment: reproduction, implementation, generated outputs, full Haskell verification, and independent review all establish one benchmark-repair result."
+    - "The first implementation derived counts from permissive parsers and therefore removed the old accidental manifest-integrity guard. Independent review identified the silent-drop failure mode; the final code compares parsed counts against an independent raw-row census and rejects empty manifests before timing."
+    - "Did NOT crystallize O64. The user chose the benchmark repair but did not affirm either closing result 12 or narrowing the paper's mechanization claim."
+    - "Did NOT treat regenerated timing values as a stable scientific claim. They remain generated measurement evidence tied to the recorded machine, protocol, and commit."

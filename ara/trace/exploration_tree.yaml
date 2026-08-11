@@ -3923,3 +3923,96 @@ tree:
     - ara/logic/claims.md
   also_depends_on: [N155, N156]
   status: resolved
+
+- id: N158
+  type: question
+  title: "Choose the post-freeze path after lara-core 0.2"
+  provenance: user
+  timestamp: "2026-08-10T22:10"
+  description: >
+    After PR #99 merged and closed the lara-core@0.2 fixture/freeze debt, decide
+    whether the next milestone should be further proof mechanization or a
+    different paper-readiness task.
+  also_depends_on: [N156, N157]
+  status: open
+
+- id: N159
+  type: experiment
+  title: "Post-PR 99 readiness audit found a green theorem gate and a broken paper benchmark"
+  provenance: ai-executed
+  timestamp: "2026-08-10T22:10"
+  description: >
+    Inspected merged PR #99, the live issue queue, the M7 tracker, the
+    mechanization inventory, and the current main checkout; then ran the Lean
+    axiom audit and the paper benchmark entry point.
+  result: >
+    PR #99 is merged at f4327b4. Lean hosted CI is green while Haskell hosted CI
+    was still running at observation time, so m5-freeze-v4 is not yet eligible
+    to be cut. The local AxCheck audit passed within the standard axiom trio.
+    make bench reproduced issue #98 and stopped because scripts/bench.hs expects
+    429 manifest inputs but the v4 suite has 564. The semantic headline
+    theorems are already mechanized; the bounded mechanization debt is result
+    12, because Presentation.lean still omits policySigma and the current
+    optional/general measurand representation.
+  evidence:
+    - "PR #99 merge commit f4327b4"
+    - "GitHub Actions run 31460541455"
+    - "local: lake env lean AxCheck.lean | ../scripts/check-axioms.sh"
+    - "local: make bench -> expected 429 manifest inputs, found 564"
+    - issue://98
+    - docs/mechanization-plan.md
+    - lean/Lara/Presentation.lean
+  also_depends_on: [N158]
+  status: resolved
+
+- id: N160
+  type: decision
+  title: "Repair the paper benchmark before revisiting result 12"
+  provenance: user
+  timestamp: "2026-08-10T22:36"
+  description: >
+    After the post-PR 99 readiness audit identified issue #98 as the immediate
+    paper blocker, the researcher directed implementation, commit, ARA
+    recording, and a pull request for that repair. This chooses the benchmark
+    repair as the next concrete action without yet deciding whether result 12
+    should be closed or the paper claim narrowed.
+  rationale: >
+    The generated performance table and its prose could not be refreshed while
+    make bench rejected the live 564-record suite as different from its
+    hard-coded 429-record assumption.
+  alternatives:
+    - "Mechanize result 12 first."
+    - "Move directly to the M7 draft with the benchmark still stale."
+  also_depends_on: [N158, N159]
+  status: resolved
+
+- id: N161
+  type: experiment
+  title: "Manifest-derived benchmark repair regenerated the 564-record paper table"
+  provenance: ai-executed
+  timestamp: "2026-08-10T22:36"
+  description: >
+    Replaced scripts/bench.hs's hard-coded 429-record identity with a
+    manifest-derived input count, renamed the timing field to the neutral
+    sweep_ns, generated the LaTeX row and prose from the observed count, and
+    added an independent raw-row census so malformed manifest rows cannot be
+    silently dropped. Added a committed-manifest totality property and updated
+    the Makefile description.
+  result: >
+    Commit 9a3aab3 repairs issue #98. cabal test all passed, including the new
+    manifest-parser totality property. make bench completed over 60 corpus units
+    and 564 harness records, regenerated tables/performance.tex, and wrote
+    measurements/bench.json with sweep_records 564 and sweep_ns 713544000.
+    The generated table reports a 713.5 ms full harness pass and no longer
+    contains 429-specific prose or JSON keys. Independent review first found
+    the silent-drop risk; the strict census repair was then re-reviewed with no
+    remaining Critical or Important issue.
+  evidence:
+    - "commit 9a3aab3"
+    - scripts/bench.hs
+    - test/MeasureSpec.hs
+    - tables/performance.tex
+    - measurements/bench.json
+    - issue://98
+  also_depends_on: [N159, N160]
+  status: resolved

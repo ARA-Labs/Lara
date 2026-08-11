@@ -1319,3 +1319,24 @@ observations:
   promoted_to: "logic/solution/heuristics.md:H12"
   crystallized_via: artifact-commitment
   stale: false
+
+- id: O64
+  timestamp: "2026-08-10T22:10"
+  provenance: ai-suggested
+  content: >
+    Broad new proof mechanization is not the next paper-critical milestone: the
+    semantic headline theorems already pass AxCheck. Before the M7 draft claims
+    complete mechanization, close or explicitly narrow the one current
+    result-12 gap by bringing Lean Presentation parity to policySigma and the
+    current measurand representation, then add a mechanical AST-parity guard.
+  context: >
+    Post-PR #99 roadmap audit. Issue #60 says all 12 results are mechanized,
+    while docs/mechanization-plan.md and lean/Lara/Presentation.lean explicitly
+    record that the presentation round-trip models only a subset of the live
+    Haskell AST.
+  potential_type: constraint
+  bound_to: [N159]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

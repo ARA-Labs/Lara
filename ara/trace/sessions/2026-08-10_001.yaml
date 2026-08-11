@@ -2,18 +2,19 @@ session:
   id: "2026-08-10_001"
   date: "2026-08-10"
   started: "2026-08-10T10:00"
-  last_turn: "2026-08-10T20:27"
-  turn_count: 2
+  last_turn: "2026-08-10T22:10"
+  turn_count: 3
   summary: >
-    Implemented lara-core@0.2's many-sorted checker pass and then review-hardened
-    PR #97. The checker now has a seventh R2 stage; rule scope is R12's second
-    arm; result 13 derives RuleSortRespecting from the executable theta check
-    plus accepted support's exact-domain invariant and is calibrated to ground
-    atoms plus actual recursively reachable support-rule premises, conclusions,
-    and answers. Result 12's structured-subset boundary is explicit. Base-sort
-    spellings and authored Sigma construction each have one implementation.
-    Local full gates and hosted Haskell/Lean CI passed; all nine inline review
-    threads were replied to and resolved. C30 was narrowed to the proved scope.
+    Implemented and review-hardened lara-core@0.2, then audited the path after
+    merged PR #99. The semantic theorem gate remains AxCheck-clean within the
+    standard trio. Hosted Lean CI is green and hosted Haskell CI was still
+    running, so m5-freeze-v4 remains pending. The immediate paper blocker is
+    reproducible: make bench expects 429 manifest inputs but v4 has 564.
+    Broad new metatheory is not indicated; result 12 remains a bounded
+    presentation-round-trip gap because Lean Presentation omits policySigma and
+    the live measurand representation. C30 remains calibrated to ground atoms
+    plus actual recursively reachable support-rule premises, conclusions, and
+    answers.
 
 events_logged:
   - turn: 1
@@ -95,6 +96,24 @@ events_logged:
     routing: direct
     provenance: ai-executed
     summary: "Result 13 calibrated to ground plus accepted support-rule atoms; exception/attack closure remains explicit scope."
+  - turn: 3
+    type: question
+    id: "N158"
+    routing: direct
+    provenance: user
+    summary: "Asked whether proof mechanization should follow merged PR #99."
+  - turn: 3
+    type: experiment
+    id: "N159"
+    routing: direct
+    provenance: ai-executed
+    summary: "Post-merge audit: AxCheck passed; hosted Haskell CI pending; make bench failed at 429 vs 564; result 12 remains partial."
+  - turn: 3
+    type: observation
+    id: "O64"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Prefer bounded result-12 parity closure over broad new metatheory before M7 claims complete mechanization."
 ai_actions:
   - turn: 1
     action: "Wrote the Sigma inference bootstrap and ran the corpus census (D0)."
@@ -184,6 +203,13 @@ ai_actions:
       observed both hosted CI jobs pass.
     provenance: ai-executed
     files_changed: []
+  - turn: 3
+    action: >
+      Audited merged PR #99 and the live roadmap, ran the current AxCheck gate,
+      reproduced issue #98 through make bench, and isolated the remaining
+      mechanization claim gap in Lean Presentation.
+    provenance: ai-executed
+    files_changed: ["ara/**"]
 claims_touched:
   - id: C28
     action: crystallized
@@ -284,6 +310,20 @@ key_context:
       exception atoms absent from the theorem conclusion. The repair derives
       the predicate from thetaWellSorted plus accepted support's exact-domain
       invariant and narrows every public claim to the resulting scope.
+  - turn: 3
+    excerpt: >
+      PR #99 merged the lara-core@0.2 freeze closeout, but hosted Haskell CI was
+      still in progress. Local AxCheck passed; make bench failed because the
+      script still pins 429 rows while v4 contains 564. The core semantic proofs
+      are already mechanized; result 12 remains explicitly partial.
+  - turn: 4
+    excerpt: >
+      The researcher chose issue #98 as the immediate post-freeze task. Commit
+      9a3aab3 derives the harness size from both manifests, rejects silent
+      parser drops through an independent raw-row census, renames the timing
+      field to sweep_ns, and regenerates the paper table for 564 records. Full
+      Haskell tests and make bench passed; focused re-review cleared the initial
+      manifest-integrity finding.
 open_threads:
   - "The class-boundary rules (§2.3) have no fixture that exercises them adversarially — negR3OffDomainIllSorted now pins one of the four, the other three are covered only incidentally by mutants that happen to respect them."
 
@@ -294,6 +334,8 @@ open_threads:
   - "A new m5 freeze tag has not been cut for lara-core@0.2."
   - "PR for #89 not yet opened at the time this record was written."
   - "Update: PR #97 is open at dd7560f; all nine inline threads are resolved and hosted CI is green. Formal reviewer reapproval remains external."
+  - "Update: issue #98 is repaired on branch bugfix/98-bench-manifest-size at commit 9a3aab3; the delivery PR is pending."
 
 ai_suggestions_pending:
   - "O62 (nullary constants dominate a first-order corpus's ground vocabulary, 187/196) — staged; the corpus policy depends on the census output, not on the generalization, so no artifact-commitment signal fired."
+  - "O64 (close or narrow result 12 before claiming complete mechanization) — staged pending researcher choice."

@@ -30,6 +30,30 @@ allInputs = do
   corpus <- readFile "corpus-units/MANIFEST.tsv"
   pure (parseMutantManifest mutants ++ parseCorpusManifest corpus)
 
+-- | Manifest discovery must account for every visible data row. The parsers
+-- return lists, so this independent row census prevents a malformed row from
+-- being silently omitted by measurement or benchmark consumers.
+prop_manifestParsersTotal :: Property
+prop_manifestParsersTotal = once $ ioProperty $ do
+  mutantRaw <- readFile "fixtures/mutants/MANIFEST.tsv"
+  corpusRaw <- readFile "corpus-units/MANIFEST.tsv"
+  let mutantRows =
+        [ ln
+        | ln <- lines mutantRaw
+        , not (null ln)
+        , take 1 ln /= "#"
+        ]
+      corpusRows = filter (not . null) (drop 1 (lines corpusRaw))
+      mutants = parseMutantManifest mutantRaw
+      corpus = parseCorpusManifest corpusRaw
+  pure $
+    conjoin
+      [ counterexample "mutant manifest parser dropped a data row" (length mutants === length mutantRows)
+      , counterexample "corpus manifest parser dropped a data row" (length corpus === length corpusRows)
+      , counterexample "mutant manifest has no data rows" (not (null mutants))
+      , counterexample "corpus manifest has no data rows" (not (null corpus))
+      ]
+
 -- ---------------------------------------------------------------------------
 -- Deterministic-column properties
 -- ---------------------------------------------------------------------------
@@ -184,7 +208,8 @@ splitOn sep s = case break (== sep) s of
 
 measureSpecProps :: [(String, IO Result)]
 measureSpecProps =
-  [ ("measure: runCheck == fst . runCheckLocated over both manifests", quickCheckResult prop_runCheckLocated)
+  [ ("measure: manifest parsers account for every data row", quickCheckResult prop_manifestParsersTotal)
+  , ("measure: runCheck == fst . runCheckLocated over both manifests", quickCheckResult prop_runCheckLocated)
   , ("measure: class_match holds for every mutant and corpus unit", quickCheckResult prop_classMatch)
   , ("measure: replay_ok on corpus units, - on mutants", quickCheckResult prop_replayOk)
   , ("measure: report.json parses (aeson) and report.tsv is well-formed", quickCheckResult prop_reportRoundTrips)
