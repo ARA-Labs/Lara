@@ -252,40 +252,19 @@ Start from the synced state the sorts plan's D9 re-sync produces.
 **Priority:** P2
 **Depends on:** sorts-in-checker D9 (Presentation re-sync) landed.
 
-### Σ-WF negatives and `OpCodecSigma` rows (the suite additions #89 §8 deferred)
-
-**What:** Commit one dedicated negative per Σ-well-formedness clause —
-duplicate `sort` / `pred` / `con` declarations, a signature naming an
-undeclared sort, and `sort Num` base-shadowing — plus `OpCodecSigma` rows in
-the malformed family (junk inside the `sigma` section, `sigma` out of the fixed
-section order → R14, exit 2).
-
-**Why:** The *checks* landed with `lara-core@0.2` and are exercised by
-unit-level tests; what is missing is the committed fixture per clause. Every
-other wire section has corruption coverage and this one does not, and R2's own
-history is the argument for not leaving an enforced clause fixture-free — a
-class nothing can contradict accumulates undetectable falsehoods (claim C28).
-
-**Context:** Plan `plans/2026-08-10-sorts-in-checker.md` §8 ("suite additions
-beyond the operators") and its §13 deferral list.
-
-**Effort:** S
-**Priority:** P2
-**Depends on:** nothing (the operators and the codec both exist).
-
 ### Cut the `lara-core@0.2` freeze tag
 
-**What:** Re-run the `docs/m5-freeze-checklist.md` gates and cut the next
-annotated tag for the post-#89 tree.
+**What:** After the v4 re-freeze PR merges and hosted CI is green, cut the
+annotated `m5-freeze-v4` tag on its merge commit.
 
 **Why:** `lara-core@0.2` changed a frozen input (the wire, the rejection
-surface, every generated artifact), which by the checklist's own post-freeze
-rule invalidates the v3 freeze. The headline numbers and reproducibility
-hashes are already updated in the checklist; the tag is not cut.
+surface, every generated artifact), invalidating v3 under the checklist's
+post-freeze rule. The v4 inputs, headline numbers, reproducibility hashes, and
+local gates are now updated; only merge, hosted CI, and tagging remain.
 
-**Context:** PR #97. Two bundled operators (drop-covering-attack, wrong-fraction
-`ra@1`) were meant to ride this regeneration cycle and did not, so they still
-cost a *further* tag — consider landing them before cutting, not after.
+**Context:** PR #97 plus the Σ fixture closeout. The deferred
+`drop-covering-attack` / `wrong-fraction` operators are intentionally outside
+v4; adding either later requires a new regeneration and `m5-freeze-v5`.
 
 **Effort:** S
 **Priority:** P2

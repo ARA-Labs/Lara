@@ -20,8 +20,16 @@ A--wrong-arg-sort-1.sexp	A	signature	wrong-arg-sort	reject-R2			policy
 A--undeclared-con-0.sexp	A	signature	undeclared-con	reject-R2			policy
 A--wrong-theta-sort-0.sexp	A	signature	wrong-theta-sort	reject-R2			policy
 A--out-of-scope-var-0.sexp	A	hidden-policy-extension	out-of-scope-var	reject-R12			policy
+A--sigma-duplicate-sort-0.sexp	A	signature	sigma-duplicate-sort	reject-R2			policy
+A--sigma-shadow-base-0.sexp	A	signature	sigma-shadow-base	reject-R2			policy
+A--sigma-duplicate-con-0.sexp	A	signature	sigma-duplicate-con	reject-R2			policy
+A--sigma-duplicate-pred-0.sexp	A	signature	sigma-duplicate-pred	reject-R2			policy
+A--sigma-con-undeclared-sort-0.sexp	A	signature	sigma-con-undeclared-sort	reject-R2			policy
+A--sigma-pred-undeclared-sort-0.sexp	A	signature	sigma-pred-undeclared-sort	reject-R2			policy
 A--duplicate-backend-0.sexp	A	certificate-tampering	duplicate-backend	reject-R13			replay
 A--unknown-backend-0.sexp	A	certificate-tampering	unknown-backend	reject-R13			replay
+malformed/A--codec-sigma-junk-0.sexp	A	codec-corruption	codec-sigma-junk	codec-reject	wrong number of fields for sigma	sigma: arity	-
+malformed/A--codec-sigma-order-0.sexp	A	codec-corruption	codec-sigma-order	codec-reject	unit: unexpected section	unit: unexpected section	-
 malformed/A--codec-junk-section-0.sexp	A	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input	-
 malformed/A--codec-core-version-0.sexp	A	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version	-
 malformed/A--codec-replay-order-0.sexp	A	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order	-

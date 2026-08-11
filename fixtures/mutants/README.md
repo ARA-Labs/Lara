@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 496
+Total mutants: 504
 
 | expected outcome | mutants |
 | --- | --- |
@@ -28,14 +28,14 @@ Total mutants: 496
 | `accept-evidence-blocked` | 9 |
 | `accept-gap` | 9 |
 | `accept-justified` | 9 |
-| `codec-reject` | 45 |
+| `codec-reject` | 47 |
 | `reject-IncompleteArgument` | 18 |
 | `reject-R1` | 44 |
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
 | `reject-R12` | 40 |
 | `reject-R13` | 42 |
-| `reject-R2` | 107 |
+| `reject-R2` | 113 |
 | `reject-R3` | 19 |
 | `reject-R4` | 18 |
 | `reject-R5` | 18 |
@@ -48,12 +48,12 @@ Total mutants: 496
 | `accept-verdict` | 54 |
 | `bad-attack-targets` | 30 |
 | `certificate-tampering` | 62 |
-| `codec-corruption` | 45 |
+| `codec-corruption` | 47 |
 | `cycles` | 4 |
 | `data-integrity` | 19 |
 | `hidden-policy-extension` | 59 |
 | `open-obligations` | 54 |
-| `signature` | 107 |
+| `signature` | 113 |
 | `undeclared-leaves` | 25 |
 | `wrong-formulas` | 37 |
 

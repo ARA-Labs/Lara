@@ -251,6 +251,38 @@ prop_mutationCoverage = once $ ioProperty $ do
           ("quarantine-attacker" `elem` map rowOp rows)
       ]
 
+-- | The @lara-core\@0.2@ signature closeout keeps one integrated stage-2
+-- fixture for every Sigma well-formedness clause, plus both codec-boundary
+-- corruptions of the new @sigma@ section. Exact one-row coverage prevents a
+-- generator change from silently dropping a clause or multiplying the
+-- dedicated negatives across every mutation base.
+prop_sigmaFixtureCoverage :: Property
+prop_sigmaFixtureCoverage = once $ ioProperty $ do
+  rows <- readManifest
+  let sigmaWfOps =
+        [ OpSigmaDuplicateSort
+        , OpSigmaShadowBase
+        , OpSigmaDuplicateCon
+        , OpSigmaDuplicatePred
+        , OpSigmaConUndeclaredSort
+        , OpSigmaPredUndeclaredSort
+        ]
+      codecSigmaOps = [OpCodecSigmaJunk, OpCodecSigmaOrder]
+      rowsFor op = [r | r <- rows, rowOp r == opName op]
+      oneR2 op =
+        counterexample
+          (opName op ++ ": expected exactly one reject-R2 fixture")
+          (map rowExpected (rowsFor op) === [ExpectClass R2])
+      oneCodec op =
+        counterexample
+          (opName op ++ ": expected exactly one diagnostic-pinned codec fixture")
+          ( case rowsFor op of
+              [r] -> rowExpected r == ExpectCodecReject && not (null (rowHsDiag r))
+              _ -> False
+          )
+  pure $ conjoin (map oneR2 sigmaWfOps ++ map oneCodec codecSigmaOps)
+
+
 -- | The located driver's contract, over every verdict-bearing mutant (the codec
 -- rows do not decode): (1) the iron invariant @runCheck ≡ fst . runCheckLocated@
 -- — a future-proofing guard should @runCheck@ ever be re-derived independently;
@@ -436,6 +468,7 @@ mutationSpecProps =
   [ ("mutation suite: every mutant produces its specified outcome", quickCheckResult prop_specifiedOutcomes)
   , ("mutation suite: seeded regeneration reproduces committed bytes", quickCheckResult prop_seededReproducibility)
   , ("mutation suite: every rejection class, codec negatives, and cycles witnessed", quickCheckResult prop_mutationCoverage)
+  , ("mutation suite: Sigma well-formedness and codec clauses have dedicated fixtures", quickCheckResult prop_sigmaFixtureCoverage)
   , ("mutation suite: every rejection class witnessed by a corpus-based mutant", quickCheckResult prop_corpusCoverage)
   , ("mutation suite: corpus sweep budget honoured with no silent caps", quickCheckResult prop_corpusBudget)
   , ("mutation suite: every status and attack kind witnessed by a corpus mutant", quickCheckResult prop_statusAttackCoverage)

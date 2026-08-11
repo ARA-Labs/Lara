@@ -115,6 +115,12 @@ data MutationOp
   | OpUndeclaredCon -- ^ constructor head with no @con@ declaration → R2
   | OpWrongThetaSort -- ^ θ range term of the wrong sort at a declared param → R2
   | OpOutOfScopeVar -- ^ rule pattern variable off @ruleParams@ → R12
+  | OpSigmaDuplicateSort -- ^ duplicate declared sort → R2
+  | OpSigmaShadowBase -- ^ declared @Num@ shadows a base sort → R2
+  | OpSigmaDuplicateCon -- ^ duplicate constructor declaration → R2
+  | OpSigmaDuplicatePred -- ^ duplicate predicate declaration → R2
+  | OpSigmaConUndeclaredSort -- ^ constructor signature names undeclared sort → R2
+  | OpSigmaPredUndeclaredSort -- ^ predicate signature names undeclared sort → R2
   | OpRebutCycle -- ^ constructed rebut N-cycle → accept, all contested
   | OpDropSupport -- ^ remove the claim's support → accept, gap
   | OpAttachUndercut -- ^ undercut via the rule's exception → accept, defeated
@@ -122,6 +128,8 @@ data MutationOp
   | OpAttachUndermine -- ^ undermine a premise leaf (1-dir contrary) → accept, defeated
   | OpAttachReinstate -- ^ undercut + counter-undercut → accept, justified under attack
   | OpQuarantineAttacker -- ^ quarantine the sole attacker → accept, evidence-blocked
+  | OpCodecSigmaJunk -- ^ extra field inside the @sigma@ section
+  | OpCodecSigmaOrder -- ^ @sigma@ appears after @policy@
   | OpCodecJunkSection -- ^ trailing junk form in the envelope
   | OpCodecCoreVersion -- ^ unsupported core version
   | OpCodecReplayOrder -- ^ replay-id sections out of order
@@ -155,6 +163,12 @@ opName op = case op of
   OpUndeclaredCon -> "undeclared-con"
   OpWrongThetaSort -> "wrong-theta-sort"
   OpOutOfScopeVar -> "out-of-scope-var"
+  OpSigmaDuplicateSort -> "sigma-duplicate-sort"
+  OpSigmaShadowBase -> "sigma-shadow-base"
+  OpSigmaDuplicateCon -> "sigma-duplicate-con"
+  OpSigmaDuplicatePred -> "sigma-duplicate-pred"
+  OpSigmaConUndeclaredSort -> "sigma-con-undeclared-sort"
+  OpSigmaPredUndeclaredSort -> "sigma-pred-undeclared-sort"
   OpRebutCycle -> "rebut-cycle"
   OpDropSupport -> "drop-support"
   OpAttachUndercut -> "attach-undercut"
@@ -162,6 +176,8 @@ opName op = case op of
   OpAttachUndermine -> "attach-undermine"
   OpAttachReinstate -> "attach-reinstate"
   OpQuarantineAttacker -> "quarantine-attacker"
+  OpCodecSigmaJunk -> "codec-sigma-junk"
+  OpCodecSigmaOrder -> "codec-sigma-order"
   OpCodecJunkSection -> "codec-junk-section"
   OpCodecCoreVersion -> "codec-core-version"
   OpCodecReplayOrder -> "codec-replay-order"
@@ -194,6 +210,12 @@ opFamily op = case op of
   OpUndeclaredCon -> "signature"
   OpWrongThetaSort -> "signature"
   OpOutOfScopeVar -> "hidden-policy-extension"
+  OpSigmaDuplicateSort -> "signature"
+  OpSigmaShadowBase -> "signature"
+  OpSigmaDuplicateCon -> "signature"
+  OpSigmaDuplicatePred -> "signature"
+  OpSigmaConUndeclaredSort -> "signature"
+  OpSigmaPredUndeclaredSort -> "signature"
   OpRebutCycle -> "cycles"
   OpDropSupport -> "accept-verdict"
   OpAttachUndercut -> "accept-verdict"
@@ -201,6 +223,8 @@ opFamily op = case op of
   OpAttachUndermine -> "accept-verdict"
   OpAttachReinstate -> "accept-verdict"
   OpQuarantineAttacker -> "accept-verdict"
+  OpCodecSigmaJunk -> "codec-corruption"
+  OpCodecSigmaOrder -> "codec-corruption"
   OpCodecJunkSection -> "codec-corruption"
   OpCodecCoreVersion -> "codec-corruption"
   OpCodecReplayOrder -> "codec-corruption"
@@ -288,6 +312,16 @@ parseExpected s =
 -- manifest columns). 'Nothing' for every non-codec operator.
 codecDiagnostics :: MutationOp -> Maybe (String, String)
 codecDiagnostics op = case op of
+  OpCodecSigmaJunk ->
+    Just
+      ( "wrong number of fields for sigma"
+      , "sigma: arity"
+      )
+  OpCodecSigmaOrder ->
+    Just
+      ( "unit: unexpected section"
+      , "unit: unexpected section"
+      )
   OpCodecJunkSection ->
     Just
       ( "wrong number of fields for check-input"
@@ -545,6 +579,14 @@ mutantsForBase base input =
     , unitMutants base input OpUndeclaredCon 1 (classed Sorts.undeclaredConSites)
     , unitMutants base input OpWrongThetaSort 1 (classed Sorts.wrongThetaSortSites)
     , unitMutants base input OpOutOfScopeVar 1 (classed Sorts.outOfScopeVarSites)
+    , -- Integrated Σ well-formedness fixtures are dedicated negatives, not a
+      -- sweep: one row per clause, anchored once at the first worked example.
+      dedicatedSigma OpSigmaDuplicateSort Sorts.duplicateSortSites
+    , dedicatedSigma OpSigmaShadowBase Sorts.shadowBaseSortSites
+    , dedicatedSigma OpSigmaDuplicateCon Sorts.duplicateConSites
+    , dedicatedSigma OpSigmaDuplicatePred Sorts.duplicatePredSites
+    , dedicatedSigma OpSigmaConUndeclaredSort Sorts.conUndeclaredSortSites
+    , dedicatedSigma OpSigmaPredUndeclaredSort Sorts.predUndeclaredSortSites
     , replayMutants base input
     ]
   where
@@ -552,6 +594,9 @@ mutantsForBase base input =
     -- rejection classes; wrapping them here keeps 'Expected' owned by exactly
     -- one module.
     classed sites u = [(ExpectClass c, loc, f) | (c, loc, f) <- sites u]
+    dedicatedSigma op sites
+      | base == "A" = unitMutants base input op 1 (classed sites)
+      | otherwise = []
 
 -- | Assemble the picked unit-mutation sites of one operator into mutants. Each
 -- site carries its seeded ground-truth 'Constituent', threaded into
@@ -991,12 +1036,39 @@ codecMutantsForBase base bytes = case parseSExpr bytes of
          ]
   where
     ops =
-      [ (OpCodecJunkSection, junkSection)
-      , (OpCodecCoreVersion, coreVersion)
-      , (OpCodecReplayOrder, replayOrder)
-      , (OpCodecTheoryMismatch, theoryMismatch)
-      , (OpCodecDanglingAttack, danglingAttack)
-      ]
+      sigmaOps
+        ++ [ (OpCodecJunkSection, junkSection)
+           , (OpCodecCoreVersion, coreVersion)
+           , (OpCodecReplayOrder, replayOrder)
+           , (OpCodecTheoryMismatch, theoryMismatch)
+           , (OpCodecDanglingAttack, danglingAttack)
+           ]
+    -- The two Sigma decoder corruptions are dedicated fixtures rather than a
+    -- per-base sweep: their failure is independent of the unit payload.
+    sigmaOps
+      | base == "A" =
+          [ (OpCodecSigmaJunk, sigmaJunk)
+          , (OpCodecSigmaOrder, sigmaOrder)
+          ]
+      | otherwise = []
+    sigmaJunk = mapSection "sigma" (\kids -> Just (kids ++ [SList [SAtom "mut_junk"]]))
+    sigmaOrder (SList kids) = SList <$> swapUnit kids
+    sigmaOrder _ = Nothing
+    swapUnit
+      ( SList
+          ( SAtom "unit"
+              : sigma@(SList (SAtom "sigma" : _))
+              : policy@(SList (SAtom "policy" : _))
+              : rest
+            )
+          : siblings
+        ) =
+        Just
+          ( SList (SAtom "unit" : policy : sigma : rest)
+              : siblings
+          )
+    swapUnit (kid : siblings) = (kid :) <$> swapUnit siblings
+    swapUnit [] = Nothing
     junkSection (SList kids) = Just (SList (kids ++ [SList [SAtom "mut_junk"]]))
     junkSection _ = Nothing
     -- The fixture text moves with the core-version bump; the expectation does

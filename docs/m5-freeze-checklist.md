@@ -50,6 +50,18 @@ baseline.) Making `ra@1` premise-only changed
 (`corpus-units/corpus-v1.policy.lara`), so no certificate in the frozen set
 could cite a theory entry in the first place._
 
+_**`m5-freeze-v4`, `lara-core@0.2` / issue #89 closeout (snapshot commit
+`ced19fe`, 2026-08-10).** The many-sorted signature is now checked core state,
+so every measured core input was regenerated for `lara-core@0.2`. PR #97 grew
+the mutation suite **369 → 496**; the closeout adds one dedicated integrated
+stage-2 fixture for each of the six Σ well-formedness clauses and two pinned
+codec-boundary fixtures for the new `sigma` section, growing it **496 → 504**.
+The measured input set is therefore **429 → 564** (504 mutants + 60 corpus
+units). The seed remains `20260801`. The #89 boundary diffs over the 369
+pre-existing manifest outcomes and all 60 corpus verdict/status goldens were
+empty; the eight closeout rows are additive. The current input anchors,
+measurements, and gates below describe **v4**.
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,
@@ -72,14 +84,14 @@ the git tree object SHA is itself the content hash of the tree.
 
 | # | Frozen input | Path | Count | Content anchor (git tree SHA) |
 | --- | --- | --- | --- | --- |
-| 1 | Seeded mutation suite (verdict + specified-status anchors) | `fixtures/mutants/` | 369 mutants (324 verdict/status-anchored + 45 codec-reject malformed negatives) | `11160a8fdeb47a7e3772d26e6878e472a7a64dbe` |
-| 2 | Corpus units (T2, hand-lowered M0 sample; C04 carries the #57 `ra@1` certificate; every measured `unit.core.sexp` byte-identical to v2 — tree moved on docs + #79 surface-policy repair only) | `corpus-units/` | 60 units | `4f4c4ec7841b0a231771d5ba20bfe97302e3b4d4` |
-| 3 | Worked examples (golden verdicts, both drivers; the 11 measured examples byte-identical to v1 — tree moved on additive demos/running-example + README + the additive S2/S3/S4 `ord@1` examples only) | `examples/` | 11 measured examples (+ additive demonstrators) | `d985156f5be5134dba14bf0a28455fb697305837` |
+| 1 | Seeded mutation suite (verdict + specified-status anchors; includes dedicated Σ-WF and `sigma` codec closeout fixtures) | `fixtures/mutants/` | 504 mutants (457 verdict/status-anchored + 47 codec-reject malformed negatives) | `fd7142072d58da4d35642cbad6f144c970627afa` |
+| 2 | Corpus units (T2, hand-lowered M0 sample; `lara-core@0.2` signatures; C04 carries the #57 `ra@1` certificate) | `corpus-units/` | 60 units | `1dc20ea9d79adb2690731a66216dae828a100cf3` |
+| 3 | Worked examples (golden verdicts, both drivers; 11 measured examples plus additive demonstrators including S2–S5) | `examples/` | 11 measured examples (+ additive demonstrators) | `2f7fa9adf45fefe649f9a9ed59def3f3d2257fc0` |
 
-**Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs:308`,
+**Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs:380`,
 SplitMix64, keyed per `(base, operator)`). Verified byte-identically
 reproducible: `cabal exec -- runghc scripts/gen-mutants.hs` over the committed
-tree leaves an empty `git diff` (360 mutants regenerated identically).
+tree leaves the generated suite unchanged (504 mutants).
 
 **Ablation configs.** `noCQConfig` / `noTypedConfig` from
 `Lara.Check.CheckConfig` (`src/Lara/Check.hs`); `fullConfig` is the frozen
@@ -89,13 +101,14 @@ semantics. Pinned by the freeze commit SHA below.
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 369 mutants byte-identical (empty `git diff`) ✓ |
-| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=445 fail=0 ✓ (at branch HEAD; **436**/436 at the `m5-freeze-v3` tag — see the post-v3 note) |
-| Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=54 fail=0 ✓ |
+| Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 504 mutants byte-identical (empty generated-suite diff) ✓ |
+| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=580 fail=0 ✓ |
+| Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=56 fail=0 ✓ |
 | Admission differential (#81) | `bash scripts/admission-differential.sh` | pass=20 fail=0 (15 semantic byte-identical + 5 codec rejects) ✓ |
 | Replay-tamper detection | `bash scripts/test-replay-tamper.sh` | both tamper classes detected ✓ |
+| Lean build | `cd lean && lake build` | green ✓ |
 | Lean axiom audit | `cd lean && lake env lean AxCheck.lean \| ../scripts/check-axioms.sh` | `sorry`-free, standard trio (incl. `Lara.RA`) ✓ |
-| Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`) ✓ |
+| Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`, Σ closeout coverage) ✓ |
 | Freeze-bundle tests | `python3 scripts/test_freeze_bundle.py` | 4/4 ✓ |
 
 ## Post-freeze measurement run
@@ -106,7 +119,7 @@ Command (one command, manifest-driven discovery):
 cabal exec -- runghc scripts/measure.hs
 ```
 
-Emits `measurements/{report,ablation}.{json,tsv}` over 556 inputs (496 mutants +
+Emits `measurements/{report,ablation}.{json,tsv}` over 564 inputs (504 mutants +
 60 corpus units); `scripts/claim-support.hs` emits the claim-support
 aggregation and the committed `measurements/binding-audit/worklist.tsv`.
 The canonical aggregate snapshot is committed under `measurements/frozen/`;
@@ -116,10 +129,10 @@ other working measurement outputs remain gitignored as regenerable output.
 
 | Metric | Value |
 | --- | --- |
-| Measurement records | 556 (496 mutants + 60 corpus units) |
-| Class match (`actual` = `expected`) | 556 / 556 |
-| Cross-driver agreement (`lean_agree`) | 556 / 556 |
-| Location match (where applicable) | 393 / 393 (163 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — codec-fails, corpus units) |
+| Measurement records | 564 (504 mutants + 60 corpus units) |
+| Class match (`actual` = `expected`) | 564 / 564 |
+| Cross-driver agreement (`lean_agree`) | 564 / 564 |
+| Location match (where applicable) | 399 / 399 (165 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — and codec failures) |
 | Replay success (corpus units) | 60 / 60 |
 | Claim-support (4): load-bearing strict steps carrying a checked certificate | 1 / 1 (#57, `adaptive-pruning/C04`) |
 | Ablation **no-cq** missed rejections | 18 — all `reject-IncompleteArgument` (surgical) |
@@ -127,7 +140,7 @@ other working measurement outputs remain gitignored as regenerable output.
 
 **`lara-core@0.2` (#89) re-freeze.** The suite grew from 369 to 496 mutants: the
 signature family adds 107 `reject-R2` rows (five operators, one per clause of
-the amended class) and 12 `reject-R12` rows from `out-of-scope-var`, the witness
+the amended class) and 20 `reject-R12` rows from `out-of-scope-var`, the witness
 for R12's new spec-§4.1 arm. Two diffs were taken across the regeneration
 boundary and **both are empty**, which is the measurement this pass claims:
 
@@ -142,6 +155,12 @@ the class it seeds rather than incidental signature noise.
 `worklist.tsv` against the committed one was empty, confirming the wire bump
 cannot reach the 38-leaf denominator.
 
+The v4 closeout adds six `reject-R2` rows (one for each `SigmaFault`
+constructor) and two codec-reject rows (`codec-sigma-junk`,
+`codec-sigma-order`). It changes no pre-existing expected outcome and raises
+the measured totals **556 → 564**, `reject-R2` **107 → 113**, and codec rejects
+**45 → 47**.
+
 Corpus-unit status diversity (T2): 48 gap, 9 justified, 3 defeated (contested is
 carried by worked example E5).
 
@@ -154,8 +173,8 @@ reproducibility anchors below hash only the deterministic content.
 
 | Frozen output anchor | SHA-256 |
 | --- | --- |
-| `report.tsv` deterministic projection (`cut -f1-14`) | `a5a530a9c7237d4dc96c1044035a558fa0a6c84152400fcd0a3d688347655da5` |
-| `ablation.tsv` (full, deterministic) | `36c75e3c0c97ff30a88c532967a9fb9f557fe3596ab61a995542e6995efb9b78` |
+| `report.tsv` deterministic projection (`cut -f1-14`) | `eae0c82e8c1607a4daf74b8dfb8ecab333996f0e213bcbf22f9b81533add3d7a` |
+| `ablation.tsv` (full, deterministic) | `23112189212d4e6e154fafa4a7a2d9425e9d77de2b228702f3bf52b29859cdc3` |
 
 Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 (recorded in `report.json` `environment`).
@@ -170,23 +189,24 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 - **v3 snapshot commit:** `4d5c6ae` (measurement run at clean `3108a5f`).
 - **v3 tag:** `m5-freeze-v3` (annotated), on `62eea92` (merge commit of the v3
   re-freeze PR, #82).
+- **v4 snapshot commit:** `ced19fe` (clean measurement input and environment
+  recorded in `report.json`).
+- **v4 tag:** `m5-freeze-v4` (annotated), to be cut on the v4 re-freeze merge
+  commit after hosted CI is green.
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
-  invalidates this freeze; re-run the gates and cut the next tag (e.g. the
-  deferred wrong-fraction certificate mutation operator would cut
-  `m5-freeze-v3`).
+  invalidates this freeze; re-run the gates and cut the next tag. The deferred
+  `drop-covering-attack` / `wrong-fraction` operators would therefore require
+  `m5-freeze-v5`.
 
 ## Reproduce from scratch
 
-Every number in this block is **the tag's**, not the current branch's — the
-post-v3 note above records where they differ (the positive differential is
-436 at `m5-freeze-v3` and 445 at branch HEAD; the anchors and headline numbers
-are unchanged, since no frozen input moved).
+Until the annotated tag is cut, reproduce v4 from its clean input snapshot:
 
 ```
-git checkout m5-freeze-v3
+git checkout ced19fe
 cabal build all
-cabal exec -- runghc scripts/gen-mutants.hs   # empty git diff = seed reproduces
-bash scripts/differential.sh                  # positive 436/0, negative 54/0
+cabal exec -- runghc scripts/gen-mutants.hs   # empty generated-suite diff
+bash scripts/differential.sh                  # positive 580/0, negative 56/0
 cabal exec -- runghc scripts/measure.hs       # regenerates measurements/
 cabal exec -- runghc scripts/claim-support.hs # claim-support aggregation
 cut -f1-14 measurements/report.tsv | shasum -a 256   # matches anchor above

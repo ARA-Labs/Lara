@@ -30,9 +30,11 @@
 --     that "Lara.Policy" now enforces as R12's second arm. That enforcement is
 --     new, and it must not land witness-free the way R2 once did.
 --
--- Every operator mutates the /static/ material (Γ, the policy patterns) or a θ,
--- never the signature — a mutation that edited Σ instead would be testing the
--- generator, not the checker.
+-- The Γ/θ operators (@undeclaredPredSites@ through @outOfScopeVarSites@)
+-- mutate static material or a θ and leave Σ intact. The dedicated closeout
+-- fixtures (@duplicateSortSites@ through @predUndeclaredSortSites@) mutate Σ
+-- itself, one per well-formedness clause, to exercise the integrated stage-2
+-- boundary.
 module Lara.Mutate.Sorts
   ( undeclaredPredSites
   , wrongPredAritySites
@@ -40,12 +42,18 @@ module Lara.Mutate.Sorts
   , undeclaredConSites
   , wrongThetaSortSites
   , outOfScopeVarSites
+  , duplicateSortSites
+  , shadowBaseSortSites
+  , duplicateConSites
+  , duplicatePredSites
+  , conUndeclaredSortSites
+  , predUndeclaredSortSites
   ) where
 
 import Lara.AST
 import Lara.Diagnostics (Constituent (..))
 import Lara.Prop (Prop (..), Term (..))
-import Lara.Sigma (Sort, sortOf)
+import Lara.Sigma (ConSig (..), PredSig (..), Sigma (..), Sort (..), SortName (..), sortOf)
 import Lara.Sigma.WellSorted (ruleParamSorts)
 
 -- | The seeded ground-truth constituent of every signature-family mutant.
@@ -62,6 +70,80 @@ sigmaLoc = CPolicy
 -- that this module sits /below/ the operator vocabulary in the module graph:
 -- "Lara.Mutate" owns the operator names and wraps these sites.
 type Site = (RejectClass, Constituent, Unit -> Unit)
+
+-- ---------------------------------------------------------------------------
+-- Sigma well-formedness fixtures
+-- ---------------------------------------------------------------------------
+
+-- | R2: the same declared sort appears twice.
+duplicateSortSites :: Unit -> [Site]
+duplicateSortSites _ =
+  [ (R2, sigmaLoc, mapSigma (\sg -> sg{sigmaSorts = duplicate : duplicate : sigmaSorts sg}))
+  ]
+  where
+    duplicate = SortName "mut_dup_sort"
+
+-- | R2: a declaration shadows the reserved base sort @Num@.
+shadowBaseSortSites :: Unit -> [Site]
+shadowBaseSortSites _ =
+  [ (R2, sigmaLoc, mapSigma (\sg -> sg{sigmaSorts = SortName "Num" : sigmaSorts sg}))
+  ]
+
+-- | R2: the same constructor symbol is declared twice.
+duplicateConSites :: Unit -> [Site]
+duplicateConSites _ =
+  [ (R2, sigmaLoc, mapSigma (\sg -> sg{sigmaCons = duplicate : duplicate : sigmaCons sg}))
+  ]
+  where
+    duplicate = ConSig (FunSym "mut_dup_con") [] SortNum
+
+-- | R2: the same predicate symbol is declared twice.
+duplicatePredSites :: Unit -> [Site]
+duplicatePredSites _ =
+  [ (R2, sigmaLoc, mapSigma (\sg -> sg{sigmaPreds = duplicate : duplicate : sigmaPreds sg}))
+  ]
+  where
+    duplicate = PredSig (Pred "mut_dup_pred") []
+
+-- | R2: a constructor signature names an undeclared result sort.
+conUndeclaredSortSites :: Unit -> [Site]
+conUndeclaredSortSites _ =
+  [ ( R2
+    , sigmaLoc
+    , mapSigma
+        ( \sg ->
+            sg
+              { sigmaCons =
+                  ConSig
+                    (FunSym "mut_bad_con_sort")
+                    []
+                    (SortDecl (SortName "mut_missing_sort"))
+                    : sigmaCons sg
+              }
+        )
+    )
+  ]
+
+-- | R2: a predicate signature names an undeclared argument sort.
+predUndeclaredSortSites :: Unit -> [Site]
+predUndeclaredSortSites _ =
+  [ ( R2
+    , sigmaLoc
+    , mapSigma
+        ( \sg ->
+            sg
+              { sigmaPreds =
+                  PredSig
+                    (Pred "mut_bad_pred_sort")
+                    [SortDecl (SortName "mut_missing_sort")]
+                    : sigmaPreds sg
+              }
+        )
+    )
+  ]
+
+mapSigma :: (Sigma -> Sigma) -> Unit -> Unit
+mapSigma f u = u{unitSigma = f (unitSigma u)}
 
 -- ---------------------------------------------------------------------------
 -- Ground-term inventory

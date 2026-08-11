@@ -1,7 +1,7 @@
 {
   "environment": {
-    "git-rev": "16fa55fa4d5ec246accdfb72a955fa0bf02dd2ef",
-    "git-dirty": true,
+    "git-rev": "ced19fe7866e8d90968c3da664f68664ff1902f8",
+    "git-dirty": false,
     "ghc": "9.14.1",
     "lean": "Lean (version 4.32.0, arm64-apple-darwin24.6.0, commit 8c9756b28d64dab099da31a4c09229a9e6a2ef35, Release)",
     "os": "darwin",
@@ -11,9 +11,9 @@
     {
       "ablation": "no-cq",
       "aggregate": {
-        "count": 556,
+        "count": 564,
         "missed-rejects": 18,
-        "unchanged": 538,
+        "unchanged": 546,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -52,10 +52,10 @@
             "unchanged": 18
           },
           "codec-reject": {
-            "total": 45,
+            "total": 47,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 45
+            "unchanged": 47
           },
           "reject-IncompleteArgument": {
             "total": 18,
@@ -99,10 +99,10 @@
             "unchanged": 42
           },
           "reject-R2": {
-            "total": 107,
+            "total": 113,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 107
+            "unchanged": 113
           },
           "reject-R3": {
             "total": 19,
@@ -354,6 +354,66 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/A--sigma-duplicate-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-duplicate-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-shadow-base-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-shadow-base",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-duplicate-con-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-duplicate-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-duplicate-pred-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-duplicate-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-con-undeclared-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-con-undeclared-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-pred-undeclared-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-pred-undeclared-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/A--duplicate-backend-0.sexp",
           "base": "A",
           "family": "certificate-tampering",
@@ -371,6 +431,26 @@
           "expected": "reject-R13",
           "full-actual": "reject-R13",
           "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/A--codec-sigma-junk-0.sexp",
+          "base": "A",
+          "family": "codec-corruption",
+          "operator": "codec-sigma-junk",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/A--codec-sigma-order-0.sexp",
+          "base": "A",
+          "family": "codec-corruption",
+          "operator": "codec-sigma-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
           "missed-reject": false
         },
         {
@@ -5708,9 +5788,9 @@
     {
       "ablation": "no-typed",
       "aggregate": {
-        "count": 556,
+        "count": 564,
         "missed-rejects": 30,
-        "unchanged": 526,
+        "unchanged": 534,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -5749,10 +5829,10 @@
             "unchanged": 18
           },
           "codec-reject": {
-            "total": 45,
+            "total": 47,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 45
+            "unchanged": 47
           },
           "reject-IncompleteArgument": {
             "total": 18,
@@ -5800,10 +5880,10 @@
             "unchanged": 42
           },
           "reject-R2": {
-            "total": 107,
+            "total": 113,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 107
+            "unchanged": 113
           },
           "reject-R3": {
             "total": 19,
@@ -6055,6 +6135,66 @@
           "missed-reject": false
         },
         {
+          "input": "fixtures/mutants/A--sigma-duplicate-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-duplicate-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-shadow-base-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-shadow-base",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-duplicate-con-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-duplicate-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-duplicate-pred-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-duplicate-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-con-undeclared-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-con-undeclared-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/A--sigma-pred-undeclared-sort-0.sexp",
+          "base": "A",
+          "family": "signature",
+          "operator": "sigma-pred-undeclared-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
           "input": "fixtures/mutants/A--duplicate-backend-0.sexp",
           "base": "A",
           "family": "certificate-tampering",
@@ -6072,6 +6212,26 @@
           "expected": "reject-R13",
           "full-actual": "reject-R13",
           "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/A--codec-sigma-junk-0.sexp",
+          "base": "A",
+          "family": "codec-corruption",
+          "operator": "codec-sigma-junk",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/A--codec-sigma-order-0.sexp",
+          "base": "A",
+          "family": "codec-corruption",
+          "operator": "codec-sigma-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
           "missed-reject": false
         },
         {
