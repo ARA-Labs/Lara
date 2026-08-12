@@ -63,12 +63,16 @@ import Lara.AST
 import Lara.AtomicWrite (atomicWriteFile, atomicWriteWith)
 import Lara.ClaimSupport
 import Lara.ClaimSupport.Load (loadPolicy, loadRecords, loadUnitRecord)
+import Lara.Driver (runCheck)
+import Lara.Elaborate.Internal (elaborateWithSemanticProgram, registryOf)
 import Lara.BindingAudit.Types
 import Lara.Measure (EnvBlock (..), InputMeta (..), parseCorpusManifest)
 import Lara.ExpectedJson (renderAttackKind, renderAttackTargetPath)
 import Lara.Prop (Pred (..), Prop (..))
 import Lara.Replay (inputReplayId)
-import Lara.Wire (Outcome (..), Verdict (..))
+import Lara.Wire (Outcome (..), Verdict (..), decodeUnit, encodeUnit)
+import Lara.Syntax (parsePolicy, parseProgram)
+import ValueBindingsSpec (boundSource, strictPolicySource, unboundSource)
 import TestReplay (testCheckInput)
 import SigmaFixture (sigmaOf)
 
@@ -81,6 +85,7 @@ frozenTsvPath = "measurements/frozen/claim-support.tsv"
 claimSupportSpecProps :: [(String, IO Result)]
 claimSupportSpecProps =
   [ ("claim-support: paper-anchor ref classifier", quickCheckResult prop_paperAnchor)
+  , ("claim-support: value bindings preserve semantic consumer parity", quickCheckResult prop_valueBindingConsumerParity)
   , ("claim-support: frozen corpus numbers (status/leaves/attacks/strict)", quickCheckResult prop_frozenNumbers)
   , ("claim-support: binding-audit rows preserve the frozen 38-leaf denominator", quickCheckResult prop_bindingAuditRows)
   , ("claim-support: binding-audit non-leaf subjects are exactly 1 strict + 3 attacks", quickCheckResult prop_bindingAuditSubjects)
@@ -95,6 +100,34 @@ claimSupportSpecProps =
   , ("claim-support: atomic worklist writes preserve complete destinations", quickCheckResult prop_atomicWriteFile)
   , ("claim-support: recomputed json/tsv re-diff the committed frozen deliverable", quickCheckResult prop_frozenDeliverable)
   ]
+
+prop_valueBindingConsumerParity :: Property
+prop_valueBindingConsumerParity =
+  once $
+    case (parsePolicy strictPolicySource, parseProgram boundSource, parseProgram unboundSource) of
+      (Right policy, Right bound, Right unbound) ->
+        case
+          ( elaborateWithSemanticProgram (registryOf policy) bound policy
+          , elaborateWithSemanticProgram (registryOf policy) unbound policy
+          ) of
+          (Right (boundUnit, _, boundProgram), Right (unboundUnit, _, unboundProgram)) ->
+            case decodeUnit (encodeUnit unboundUnit) of
+              Left err -> counterexample ("core codec failed: " ++ show err) False
+              Right coreUnit ->
+                let coreInput = testCheckInput coreUnit
+                    consume unit program =
+                      computeUnit
+                        (const Strict)
+                        False
+                        "value-bindings"
+                        coreInput
+                        (unitArgs unit)
+                        (runCheck coreInput)
+                        program
+                 in consume boundUnit boundProgram
+                      === consume unboundUnit unboundProgram
+          values -> counterexample ("elaboration failed: " ++ show values) False
+      values -> counterexample ("fixture parse failed: " ++ show values) False
 
 -- | Direct paper-document locators are recognised; agent-artifact paths are not.
 prop_paperAnchor :: Property
@@ -858,6 +891,7 @@ auditRecordWithMode ruleModeOf coreLeaves coreArgs coreAttacks claims surfaceArg
         , programDigest = Digest "sha256:synthetic"
         , programPolicy = PolicyId "synthetic"
         , programBackends = []
+        , programValueBindings = []
         , programDecls =
             map DeclLeaf syntheticLeaves
               ++ map DeclClaim claims

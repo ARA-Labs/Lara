@@ -1,9 +1,10 @@
 -- | The elaborator's located-ish failure type and its renderer.
 --
--- Split out of "Lara.Elaborate.Internal" so the @lara-syntax\@0.3@ surface
--- expansion ("Lara.Elaborate.Comparison") and the structural lowering can both
--- raise the same errors without an import cycle. 'Lara.Elaborate.Internal'
--- re-exports both names, so every existing importer is unaffected.
+-- Split out of "Lara.Elaborate.Internal" so the @lara-syntax\@0.4@ surface
+-- passes ("Lara.Elaborate.ValueBinding" and "Lara.Elaborate.Comparison") and
+-- the structural lowering can share errors without an import cycle.
+-- 'Lara.Elaborate.Internal' re-exports both names, so every existing importer
+-- is unaffected.
 --
 -- __Every__ author-facing failure of the elaborator is a constructor here.
 -- That is deliberate (plan §6.1.1, decision 7A): a backend helper such as
@@ -17,8 +18,9 @@ module Lara.Elaborate.Error
   ) where
 
 import Lara.AST
-import Lara.Prop (Prop, Term, prettyProp, prettyTerm)
+import Lara.Prop (FunSym (..), Pred (..), Prop, Term, prettyProp, prettyTerm)
 import Lara.Syntax (polarityStr, relationStr)
+import Lara.Sigma (SortFault (..), sortText)
 
 -- | A located-ish elaboration failure. Each constructor names the offending
 -- argument, rule, leaf, claim, comparison, or position so the caller can render
@@ -80,6 +82,19 @@ data ElabError
   | -- | a non-integer attack-path segment matches neither a premise label nor a
     -- question id of the targeted rule: source arg, target arg, the segment.
     AttackStepUnresolved ArgId ArgId String
+    -- * @let@ value-binding elaboration (grammar App. C.2)
+  | -- | two bindings share a name (defensive for hand-built ASTs).
+    DuplicateValueBinding ValueName
+  | -- | a hand-built binding uses the reserved interpolation head @cell@.
+    ReservedValueName ValueName
+  | -- | a binding name collides with a constructor already declared by Σ.
+    ValueNameConstructorCollision ValueName
+  | -- | a binding RHS is not a well-sorted ground term under Σ.
+    ValueBindingSortError ValueName SortFault
+  | -- | substitution makes an ordinary claim formal ill-sorted.
+    ValueBindingClaimSortError PropId SortFault
+  | -- | a one-token @nl@ interpolation names no declared value.
+    NlValueBindingMissing PropId ValueName
     -- * @nl@ interpolation (grammar App. B.6)
   | -- | an @nl@ string opens @{@ without a closing @}@: the claim.
     NlUnterminatedBrace PropId
@@ -234,12 +249,26 @@ elabErrorMessage e = case e of
   AttackStepUnresolved (ArgId w) (ArgId u) seg ->
     "attack from '" ++ w ++ "' on '" ++ u ++ "': path segment '" ++ seg
       ++ "' names neither a premise label nor a critical question of the targeted rule"
+  DuplicateValueBinding (ValueName n) ->
+    valuePrefix n ++ "duplicate declaration"
+  ReservedValueName (ValueName n) ->
+    valuePrefix n ++ "reserved name (the 'cell' interpolation head)"
+  ValueNameConstructorCollision (ValueName n) ->
+    valuePrefix n ++ "collides with declared constructor '" ++ n ++ "'"
+  ValueBindingSortError (ValueName n) fault ->
+    valuePrefix n ++ "ill-sorted right-hand side: " ++ sortFaultText fault
+  ValueBindingClaimSortError (PropId c) fault ->
+    "claim '" ++ c ++ "': ill-sorted formal after value substitution: "
+      ++ sortFaultText fault
+  NlValueBindingMissing (PropId c) (ValueName n) ->
+    "claim '" ++ c ++ "': nl references undeclared value '" ++ n ++ "'"
   NlUnterminatedBrace c ->
     nlPrefix c ++ "has an unterminated '{' directive"
   NlStrayBrace c ->
     nlPrefix c ++ "has an unescaped '}' (write '}}' for a literal brace)"
   NlUnknownDirective c body ->
-    nlPrefix c ++ "has an unknown directive '{" ++ body ++ "}' (expected '{cell <leaf>}')"
+    nlPrefix c ++ "has an unknown directive '{" ++ body
+      ++ "}' (expected '{<value>}' or '{cell <leaf>}')"
   NlCellLeafUndeclared c (LeafId l) ->
     nlPrefix c ++ "directive '{cell " ++ l ++ "}' names '" ++ l
       ++ "', which is not a declared leaf"
@@ -342,9 +371,28 @@ directionWording pol = case pol of
   HigherIsBetter -> "the baseline cell first and the result cell second"
   LowerIsBetter -> "the result cell first and the baseline cell second"
 
--- | Location prefix for an @nl@ interpolation failure (App. B.6).
+-- | Location prefix for an @nl@ interpolation failure (App. B.6, extended by
+-- App. C.5).
 nlPrefix :: PropId -> String
 nlPrefix (PropId c) = "claim '" ++ c ++ "': nl "
+
+valuePrefix :: String -> String
+valuePrefix n = "value binding '" ++ n ++ "': "
+
+sortFaultText :: SortFault -> String
+sortFaultText fault = case fault of
+  FaultUndeclaredPred (Pred p) ->
+    "undeclared predicate '" ++ p ++ "'"
+  FaultUndeclaredCon (FunSym k) ->
+    "undeclared constructor '" ++ k ++ "'"
+  FaultPredArity (Pred p) expected actual ->
+    "predicate '" ++ p ++ "' expects " ++ show expected
+      ++ " argument(s) but got " ++ show actual
+  FaultConArity (FunSym k) expected actual ->
+    "constructor '" ++ k ++ "' expects " ++ show expected
+      ++ " argument(s) but got " ++ show actual
+  FaultArgSort expected actual ->
+    "expected sort " ++ sortText expected ++ " but got " ++ sortText actual
 
 -- | Location prefix for a policy well-formedness failure on a rule.
 rulePrefix :: RuleId -> String

@@ -1,31 +1,23 @@
--- | The shared IO loader for the mechanical-reviewer renderer (#63, D2): the one
--- place that, per corpus unit, decodes its @unit.core.sexp@ wire anchor and
--- parses its @unit.lara@ surface, returning exactly the triple
--- "Lara.MechReview".'Lara.MechReview.renderReviews' consumes.
+-- | Shared IO loader for the mechanical-review renderer.
 --
--- Both the renderer (@scripts\/render-reviews.hs@) and the freshness guard
--- (@test\/MechReviewSpec.hs@) call THIS module, so the per-unit IO cannot drift
--- between them — the same discipline "Lara.ClaimSupport.Load" applies to the
--- claim-support pass.
---
--- A decode\/parse failure is a hard 'error': every frozen corpus unit decodes
--- and parses, so any failure here means the freeze or a decode path drifted.
+-- Each surface is elaborated once against the supplied policy. The decoded core
+-- must equal that elaboration's 'Unit', and the renderer receives the exact
+-- semantic 'Program' returned by the same pass.
 module Lara.MechReview.Load
   ( loadReviewUnit
   , loadReviewUnits
   ) where
 
-import Lara.AST (Program)
-import Lara.Elaborate.Comparison (expandClaimNls)
+import Lara.AST (Policy, Program)
+import Lara.Elaborate.Internal (elaborateWithSemanticProgram, registryOf)
 import Lara.Measure (InputMeta (..), parseCorpusManifest)
-import Lara.Replay (CheckInput)
-import Lara.Syntax (parseProgram)
+import Lara.Replay (CheckInput, inputUnit)
+import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Wire (decodeCheckInputFile)
 
--- | Decode one unit's core and parse its @.lara@ surface, tagged with the
--- manifest unit name (@artifact.claim@).
-loadReviewUnit :: InputMeta -> IO (String, CheckInput, Program)
-loadReviewUnit im = do
+-- | Decode one unit's core and elaborate its surface against the shared policy.
+loadReviewUnit :: Policy -> InputMeta -> IO (String, CheckInput, Program)
+loadReviewUnit policy im = do
   coreBytes <- readFile (imPath im)
   ci <- case decodeCheckInputFile coreBytes of
     Left err -> error ("render-reviews: wire decode failed (" ++ imPath im ++ "): " ++ show err)
@@ -34,20 +26,27 @@ loadReviewUnit im = do
   parsed <- case parseProgram laraBytes of
     Left err -> error ("render-reviews: surface parse failed (" ++ laraPath ++ "): " ++ show err)
     Right ok -> pure ok
-  prog <- case expandClaimNls parsed of
-    Left err -> error ("render-reviews: nl expansion failed (" ++ laraPath ++ "): " ++ show err)
-    Right ok -> pure ok
-  pure (imBase im, ci, prog)
+  (surfaceUnit, _, semanticProgram) <-
+    case elaborateWithSemanticProgram (registryOf policy) parsed policy of
+      Left err -> error ("render-reviews: surface elaboration failed (" ++ laraPath ++ "): " ++ show err)
+      Right ok -> pure ok
+  if surfaceUnit /= inputUnit ci
+    then error ("render-reviews: surface/core mismatch (" ++ laraPath ++ ")")
+    else pure (imBase im, ci, semanticProgram)
   where
     laraPath = replaceCoreSuffix (imPath im)
 
--- | Load every unit named by a corpus manifest, in manifest order.
-loadReviewUnits :: FilePath -> IO [(String, CheckInput, Program)]
-loadReviewUnits manifestPath = do
+-- | Load every manifest unit in order, parsing the policy only once.
+loadReviewUnits :: FilePath -> FilePath -> IO [(String, CheckInput, Program)]
+loadReviewUnits manifestPath policyPath = do
   manifest <- readFile manifestPath
-  mapM loadReviewUnit (parseCorpusManifest manifest)
+  policyBytes <- readFile policyPath
+  policy <- case parsePolicy policyBytes of
+    Left err -> error ("render-reviews: policy parse failed (" ++ policyPath ++ "): " ++ show err)
+    Right ok -> pure ok
+  mapM (loadReviewUnit policy) (parseCorpusManifest manifest)
 
--- | @…\/unit.core.sexp@ ⇒ @…\/unit.lara@ (the surface sibling of the core file).
+-- | @…/unit.core.sexp@ ⇒ @…/unit.lara@.
 replaceCoreSuffix :: FilePath -> FilePath
 replaceCoreSuffix path
   | core `isSuffixOf'` path = take (length path - length core) path ++ "unit.lara"

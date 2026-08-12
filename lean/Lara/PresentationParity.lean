@@ -106,6 +106,7 @@ def groupIdCtor      : String → GroupId      := GroupId.mk
 def measurandIdCtor  : String → MeasurandId  := MeasurandId.mk
 def datasetIdCtor    : String → DatasetId    := DatasetId.mk
 def premiseLabelCtor : String → PremiseLabel := PremiseLabel.mk
+def valueNameCtor    : String → ValueName    := ValueName.mk
 
 /-- The `FunSym` row: the frozen semantic core's constructor-symbol wrapper,
 which `ConSig` carries. -/
@@ -196,9 +197,11 @@ def comparisonCtor :
     Atom → MeasurandId → DatasetId → Relation → ArgId → ArgId →
     LeafId → LeafId → LeafId → ComparisonClaim → Option PropId → Comparison :=
   Comparison.mk
+def valueBindingCtor : ValueName → Term → ValueBinding := ValueBinding.mk
 
 def programCtor :
-    String → Digest → PolicyId → List ExpectedBackendEntry → List Decl → Program := Program.mk
+    String → Digest → PolicyId → List ExpectedBackendEntry →
+    List ValueBinding → List Decl → Program := Program.mk
 
 /-! ## Sum-constructor payload witnesses
 
@@ -384,6 +387,7 @@ def shapeRows : List (String × List String) :=
   , ("MeasurandId", ["val"])
   , ("DatasetId", ["val"])
   , ("PremiseLabel", ["val"])
+  , ("ValueName", ["val"])
   , ("FunSym", ["val"])
   , ("Pred", ["val"])
   , ("Term", ["num", "str", "con"])
@@ -435,7 +439,8 @@ def shapeRows : List (String × List String) :=
   , ("Comparison",
       [ "conclusion", "measurand", "dataset", "relation", "recheck-arg"
       , "bridge-arg", "result", "baseline", "binding", "claim", "supports" ])
-  , ("Program", ["artifact", "digest", "policy", "backends", "decls"])
+  , ("ValueBinding", ["name", "term"])
+  , ("Program", ["artifact", "digest", "policy", "backends", "value-bindings", "decls"])
   , ("AdmissionEntry", ["key:(LeafKind,Provenance)", "value:Admission"])
   , ("TheoryEntry", ["digest:TheoryDigest", "atoms:List Prop"])
   , ("BackendEntry", ["backend:BackendId", "version:String"])
@@ -512,14 +517,16 @@ def normalizeFieldName : String → String
   | field => field
 
 /-- Type-scoped normalization for intentional cross-model identifier
-differences. Scoping prevents an unrelated field rename to `name` or `concl`
-from normalizing back to an old inventory label. -/
+differences. Scoping prevents an unrelated field rename to `name`, `concl`, or
+`valueBindings` from normalizing back to an old inventory label. -/
 def normalizeFieldNameFor (owner : Lean.Name) (field : String) : String :=
   if (owner == ``Lara.Support.ConSym || owner == ``Lara.Support.PredSym) &&
       field == "name" then
     "val"
   else if owner == ``Lara.Presentation.Arg && field == "concl" then
     "conclusion"
+  else if owner == ``Lara.Presentation.Program && field == "valueBindings" then
+    "value-bindings"
   else
     normalizeFieldName field
 
@@ -528,6 +535,12 @@ example : normalizeFieldNameFor ``Lara.Support.ConSym "name" = "val" := by rfl
 example : normalizeFieldNameFor ``Lara.Support.PredSym "name" = "val" := by rfl
 example : normalizeFieldNameFor ``Lara.Presentation.Arg "concl" = "conclusion" := by rfl
 example : normalizeFieldNameFor ``Lara.Presentation.PropId "name" = "name" := by rfl
+example : normalizeFieldNameFor ``Lara.Presentation.ValueBinding "name" = "name" := by rfl
+example : normalizeFieldNameFor ``Lara.Presentation.ValueBinding "term" = "term" := by rfl
+example : normalizeFieldNameFor ``Lara.Presentation.Program "valueBindings" =
+    "value-bindings" := by rfl
+example : normalizeFieldNameFor ``Lara.Presentation.Comparison "valueBindings" =
+    "valueBindings" := by rfl
 example : normalizeFieldNameFor ``Lara.Presentation.Comparison "concl" = "concl" := by rfl
 
 open Lean Meta in
@@ -562,6 +575,7 @@ def shapeChecks : List (String × ShapeCheck) :=
   , ("MeasurandId", .fields ``Lara.Presentation.MeasurandId)
   , ("DatasetId", .fields ``Lara.Presentation.DatasetId)
   , ("PremiseLabel", .fields ``Lara.Presentation.PremiseLabel)
+  , ("ValueName", .fields ``Lara.Presentation.ValueName)
   , ("FunSym", .fields ``Lara.Support.ConSym)
   , ("Pred", .fields ``Lara.Support.PredSym)
   , ("Term", .ctors ``Lara.Term)
@@ -607,6 +621,7 @@ def shapeChecks : List (String × ShapeCheck) :=
   , ("Arg", .fields ``Lara.Presentation.Arg)
   , ("ComparisonClaim", .fields ``Lara.Presentation.ComparisonClaim)
   , ("Comparison", .fields ``Lara.Presentation.Comparison)
+  , ("ValueBinding", .fields ``Lara.Presentation.ValueBinding)
   , ("Program", .fields ``Lara.Presentation.Program)
   , ("AdmissionEntry", .aliasDefEq ``Lara.Presentation.AdmissionEntry
       ``Lara.PresentationParity.ExpectedAdmissionEntry 2)

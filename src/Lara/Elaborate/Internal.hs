@@ -20,16 +20,16 @@
 -- "Lara.Strict.ND.Internal" plays for 'Lara.Strict.ND.AtomId'). Production code
 -- must not import it.
 --
--- == The three sibling modules
+-- == The four sibling modules
 --
--- The elaborator is split so the @lara-syntax\@0.3@ surface work and the
+-- The elaborator is split so the @lara-syntax\@0.4@ consuming surface pass and
 -- structural lowering can share a failure vocabulary:
 --
 --   * "Lara.Elaborate.Error" — 'ElabError' and its renderer (re-exported here);
 --   * "Lara.Elaborate.Subst" — pattern instantiation and one-way matching;
---   * "Lara.Elaborate.Comparison" — the @comparison@ expansion and @nl@
---     interpolation, a presentation-to-presentation pass this module runs
---     first.
+--   * "Lara.Elaborate.ValueBinding" — the consuming @let@ substitution and
+--     @nl@ interpolation pass; and
+--   * "Lara.Elaborate.Comparison" — the later @comparison@ expansion.
 module Lara.Elaborate.Internal
   ( -- * Caller-supplied environment inputs
     TheoryRegistry (..)
@@ -37,14 +37,15 @@ module Lara.Elaborate.Internal
   , registryOf
     -- * Elaboration errors (located-ish: they name the arg/rule/leaf/claim)
     --
-    -- | Defined in "Lara.Elaborate.Error" and re-exported here, so that module
-    -- and "Lara.Elaborate.Comparison" can raise the same failures without an
-    -- import cycle; every existing importer of this module is unaffected.
+    -- | Defined in "Lara.Elaborate.Error" and re-exported here, so that module,
+    -- "Lara.Elaborate.ValueBinding", and "Lara.Elaborate.Comparison" can raise
+    -- the same failures without an import cycle; existing importers are unaffected.
   , ElabError (..)
   , elabErrorMessage
     -- * The elaborator (admission-free; see the module header)
   , elaborate
   , elaborateWithProvenance
+  , elaborateWithSemanticProgram
   , GeneratedArg (..)
   ) where
 
@@ -125,30 +126,38 @@ data Env = Env
 --   * @unitGroups@ = the declared duplicate-report groups (spec §4.3), with
 --     @unitGroupMode@ baked from the policy's conflict escalation choice.
 --
--- @lara-syntax\@0.3@ inserts one stage ahead of all of that: every
--- @comparison@ block is expanded to the declarations it stands for
--- ('Lara.Elaborate.Comparison.expandSurface') __before__ any id check, any
--- argument is lowered, or any attack path resolves, so an attack on a generated
--- argument resolves against the post-expansion set (App. B.5, eng review F5).
+-- @lara-syntax\@0.4@ inserts the consuming value-binding pass first. The
+-- @lara-syntax\@0.3@ comparison stage then expands every @comparison@ block to
+-- the declarations it stands for ('Lara.Elaborate.Comparison.expandSurface')
+-- __before__ any id check, any argument is lowered, or any attack path resolves,
+-- so an attack on a generated argument resolves against the post-expansion set
+-- (App. B.5, eng review F5).
 elaborate :: TheoryRegistry -> Program -> Policy -> Either ElabError Unit
-elaborate reg prog0 pol0 = fst <$> elaborateWithProvenance reg prog0 pol0
+elaborate reg prog pol = projectUnit <$> elaborateWithSemanticProgram reg prog pol
+  where
+    projectUnit (unit, _, _) = unit
 
--- | 'elaborate' paired with the @comparison@ expansion's 'GeneratedArg'
--- breadcrumb (plan D5), from the /same/ pass — so a breadcrumb can never
--- describe an argument this 'Unit' does not contain.
---
--- __The breadcrumb cannot reach 'Unit'.__ It is bound here and used nowhere in
--- the 'Unit' record below, whose ten fields are each written from the policy,
--- the registry, or the expanded declaration list. 'elaborate' — the type every
--- pre-D5 caller uses — projects it away, so no existing path can observe it.
--- The @examples\/*\/example.core.sexp@ byte-identity goldens stand as the
--- regression test.
+-- | 'elaborate' paired with comparison-generation provenance. This public
+-- projection preserves the pre-0.4 result shape.
 elaborateWithProvenance
   :: TheoryRegistry
   -> Program
   -> Policy
   -> Either ElabError (Unit, [GeneratedArg])
-elaborateWithProvenance reg prog0 pol0 = do
+elaborateWithProvenance reg prog pol =
+  project <$> elaborateWithSemanticProgram reg prog pol
+  where
+    project (unit, generated, _) = (unit, generated)
+
+-- | Package-internal complete elaboration result. The 'Program' is the exact
+-- post-binding, post-comparison semantic presentation used to construct the
+-- returned 'Unit'; secondary consumers must use it rather than re-expanding.
+elaborateWithSemanticProgram
+  :: TheoryRegistry
+  -> Program
+  -> Policy
+  -> Either ElabError (Unit, [GeneratedArg], Program)
+elaborateWithSemanticProgram reg prog0 pol0 = do
   when (programPolicy prog0 /= policyId pol0) $
     Left (PolicyIdMismatch (programPolicy prog0) (policyId pol0))
   -- Reclassify pattern identifiers (grammar §2): the shallow parser records
@@ -209,6 +218,7 @@ elaborateWithProvenance reg prog0 pol0 = do
         , unitGroupMode = policyGroupMode pol
         }
     , generated
+    , prog
     )
 
 -- | Drop a rule's presentation-only premise labels on the way into 'Unit'.

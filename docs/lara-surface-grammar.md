@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.3`)
+# LARA surface grammar — frozen (`lara-syntax@0.4`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -19,18 +19,20 @@ Status of the artifacts this task touches:
   (undeclared) had no representable conclusion until `ArgConcl` landed.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.3`; it decodes to
-`lara-core@0.2`. Signature declarations lower to `unitSigma`, while the other
-additive `@0.3` forms remain presentation-layer data until elaboration. The Haskell
-`parse ∘ print == id` property covers this current concrete surface. The structured
-Lean round-trip in `lean/Lara/Presentation.lean` covers the complete live
-`Program`/`Policy` AST for this surface, including `policySigma` and optional
-measurand polarity — an AST-shape anchor, not a correctness proof for the Haskell
-concrete parser. `scripts/check-presentation-parity.sh` compares the two models'
-normalized shape inventories so the surface cannot grow on one side only. Exact
-compiler witnesses pin record fields, sum payloads, aliases, and anonymous entry
-types; named record selectors are compared in order. Positional constructors have
-no source selector names: exact signatures pin their arity and positional type
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.4`; it decodes to
+`lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
+`@0.3` forms and `@0.4` value bindings remain presentation-layer data until
+elaboration. The Haskell `parse ∘ print == id` property covers this current
+concrete surface. The structured Lean round-trip in
+`lean/Lara/Presentation.lean` covers the complete live `Program`/`Policy` AST
+for this surface, including value bindings, `policySigma`, and optional
+measurand polarity — an AST-shape anchor, not a correctness proof for the
+Haskell concrete parser. `scripts/check-presentation-parity.sh` compares the two
+models' normalized shape inventories so the surface cannot grow on one side
+only. Exact compiler witnesses pin record fields, sum payloads, aliases, and
+anonymous entry types; named record selectors are compared in order. Positional
+constructors have no source selector names: exact signatures pin their arity
+and positional type
 sequence, but semantic labels and swaps among same-typed positions remain
 assertions. The guard documents two representation exemptions (`SortName` erasure;
 `Cert`'s native payload).
@@ -148,6 +150,9 @@ assurance  theory
 measurand  comparison  comparison-scheme  recheck  bridge  result  baseline
 relation  claims  on  where  cell
 higher-is-better  lower-is-better  strictly-better  at-least-as-good
+
+-- lara-syntax@0.4 (Appendix C)
+let
 ```
 
 Closed tag enumerations (surface ↔ `Lara.AST` constructor):
@@ -956,6 +961,11 @@ nlChar    ::= any-char-except '"', newline, "{", "}"
 directive ::= "{" "cell" leafId "}"
 ```
 
+This block records the exact `@0.3` spelling. The live `@0.4` grammar in
+Appendix C.5 additionally permits inline spaces or tabs around directive tokens
+and retains those authored gaps for round-tripping; the cell lookup and
+`renderDecimal` semantics below are unchanged.
+
 ```
 claim c1
   nl = "sys_new outperforms sys_base on ImageNet-val accuracy ({cell e2} vs {cell e1})"
@@ -1017,3 +1027,245 @@ Two housekeeping notes:
   sync with it. If it is not, the round-trip generator will emit identifiers that
   collide with the new keywords and the property will fail for a reason that has
   nothing to do with the grammar.
+
+
+---
+
+## Appendix C — `lara-syntax@0.4` (value bindings, 2026-08-11)
+
+Additive over `lara-syntax@0.3`. This appendix adds a presentation-only table of
+named ground terms and a one-token `nl` interpolation form. It does not change
+`lara-core@0.2`, `Unit`, the `.core.sexp` door, the JSON/wire codecs, checker
+judgments, strict backends, scientific claims, or verdicts.
+
+### C.1 Grammar position and canonical form (D1)
+
+```text
+program      ::= artifactHeader valueBinding* declaration*
+valueBinding ::= "let" valueName "=" term
+valueName    ::= ident
+```
+
+The binding table appears after the complete fixed program header (`artifact`,
+`policy`, and `use backends`) and before the first declaration. A `let` after
+the first declaration is rejected. `cell` is reserved from `valueName` because
+`{cell leafId}` already owns that directive head; every other `valueName` uses
+the existing `ident` lexical class. The parser rejects a duplicate at its second
+`let`.
+
+The canonical printer preserves source order, prints one binding per line, and
+prints one blank line before declarations when the table is non-empty. A legacy
+program has an empty table and retains its previous canonical bytes. `@0.4`
+adds the single keyword `let` to §1.4.
+
+For example:
+
+```lara
+artifact ord_demo at sha256:5252525252525252525252525252525252525252525252525252525252525252
+policy ord-v1
+use backends [ord@1]
+
+let candidate = sys_new
+let baseline = sys_base
+let metric = accuracy
+let dataset = imagenet_val
+let candidate_score = 0.74
+let baseline_score = 0.71
+
+claim c1
+  nl      = "{candidate} outperforms {baseline} on ImageNet-val accuracy ({candidate_score} vs {baseline_score})"
+  formal  = better(candidate, baseline, metric, dataset)
+  binding = { author = alice, rationale = "Ordered comparison of two reported accuracy cells.", audit-status = reviewed }
+```
+
+In a `comparison`, bindings may occur in the ground terms of its conclusion,
+but the typed selector fields remain identifiers:
+
+```lara
+comparison : better(candidate, baseline) on accuracy @ imagenet_val
+```
+
+Here `candidate` and `baseline` are term occurrences and are substituted.
+`accuracy` after `on` is a `MeasurandId`, and `imagenet_val` after `@` is a
+`DatasetId`; neither selector is a value-binding site.
+
+### C.2 Typed presentation table and fail-closed names (D2, D4)
+
+The presentation AST carries a distinct namespace and retains authored order:
+
+```haskell
+newtype ValueName = ValueName String
+
+data ValueBinding = ValueBinding
+  { valueName :: ValueName
+  , valueTerm :: Term
+  }
+
+programValueBindings :: [ValueBinding]
+```
+
+Before substitution, the elaborator validates in this order:
+
+1. reject duplicate names, including hand-built ASTs that bypass the parser;
+2. reject the reserved name `cell`, including hand-built ASTs;
+3. reject a name colliding with any constructor declared by `Σ`, regardless of
+   that constructor's arity;
+4. run `sortOf Σ` on every right-hand side and retain the exact `SortFault`.
+
+There is no guessed or permissive fallback. An unbound bare term remains a
+nullary constructor occurrence, so the existing strict `Σ` check rejects an
+undeclared spelling.
+
+Source-parser errors are located and use these exact messages:
+
+```text
+duplicate value binding: <name>
+'cell' is reserved and cannot be used as a value binding name
+expected a term
+value binding declarations must precede all program declarations
+```
+
+The elaboration renderer uses these exact templates:
+
+```text
+value binding '<name>': duplicate declaration
+value binding '<name>': reserved name (the 'cell' interpolation head)
+value binding '<name>': collides with declared constructor '<name>'
+value binding '<name>': ill-sorted right-hand side: <sort fault>
+claim '<claim>': ill-sorted formal after value substitution: <sort fault>
+```
+
+`<sort fault>` is rendered by the existing `Σ` vocabulary:
+
+```text
+undeclared predicate '<predicate>'
+undeclared constructor '<constructor>'
+predicate '<predicate>' expects <expected> argument(s) but got <actual>
+constructor '<constructor>' expects <expected> argument(s) but got <actual>
+expected sort <expected> but got <actual>
+```
+
+Every ordinary claim formal is sort-checked after substitution, before an
+unsupported or unqueried claim could disappear during lowering. Surviving leaf,
+argument, and generated comparison terms still reach the checker-boundary R2
+pass.
+
+### C.3 Flat, simultaneous, non-recursive bindings (D3)
+
+The elaborator builds one flat `ValueName → Term` environment. Every right-hand
+side is validated exactly as authored and is never rewritten through that
+environment. Substitution is therefore simultaneous and order-independent even
+though printing and diagnostics preserve declaration order.
+
+```lara
+let x = y
+let y = 0.74
+```
+
+This is not a chain. The `y` in `x`'s right-hand side is an ordinary constructor
+occurrence and must itself be declared by `Σ`; the second binding does not turn
+`x` into `0.74`.
+
+### C.4 Substitution surface and consuming order (D5)
+
+Only a nullary term `TCon (FunSym name) []` whose `name` is in the environment
+is replaced. Traversal recurses into the arguments of applied constructors but
+never replaces a constructor head. The pass visits every program-side
+term-bearing field:
+
+- `Leaf.leafProp`;
+- `Claim.claimFormal`;
+- `Arg.argTerm`, including each `SRule.srSubst` term and nested
+  premise/discharge support term;
+- `Comparison.cmpConclusion`.
+
+The pass is consuming and runs exactly once:
+
+```text
+parsed Program
+  -> validate binding names and RHS terms against Policy.policySigma
+  -> substitute every authored term position
+  -> validate every substituted ordinary claim formal
+  -> expand claim prose ({name}, {cell leaf}, {{, }})
+  -> clear programValueBindings
+  -> expand comparison blocks
+  -> resolve labels/attacks and lower to Unit
+```
+
+Comparison expansion therefore derives generated claims, θ vectors, and
+certificates from already-substituted values. The post-expansion semantic
+`Program` has an empty binding table and can be compared directly with an
+equivalent hand-written unbound program. This is deliberately one-way: a brace
+escape has already become semantic prose and must not be interpreted a second
+time.
+
+### C.5 Natural-language interpolation (D6)
+
+The live brace grammar is:
+
+```text
+igap      ::= { " " | "\t" }
+hgap      ::= ( " " | "\t" ) igap
+directive ::= "{" igap "cell" hgap leafId igap "}"
+            | "{" igap valueName igap "}"
+            | "{{"
+            | "}}"
+```
+
+`{cell e2}` retains Appendix B.6's premise-cell validation and canonical decimal
+rendering. `{candidate_score}` looks up that binding and renders its authored
+right-hand side with `prettyTerm`. The distinction is intentional: a numeric
+binding preserves authored digits (`0.710` remains `0.710`), whereas a cell
+renders the evidence-derived rational canonically (`0.710` becomes `0.71`).
+A `TStr` binding can occur only in a hand-built presentation AST because the
+concrete `.lara` term grammar has no string-literal term; if present, it retains
+`prettyTerm`'s quoted and escaped spelling. Inline spaces or tabs around either
+directive form are ignored during resolution but retained in the raw
+presentation AST for `parse ∘ print = id`.
+
+The same one-pass grammar applies to `Claim.claimNl` and
+`ComparisonClaim.ccNlRaw`. Thus the C.1 example expands to the exact previous
+prose:
+
+```text
+sys_new outperforms sys_base on ImageNet-val accuracy (0.74 vs 0.71)
+```
+
+A one-token directive is a value reference, so a missing binding fails closed.
+A multi-token unknown head such as `{cel e2}` remains an unknown directive.
+The concrete parser uses these exact messages:
+
+```text
+unmatched '}' in nl string (write '}}' for a literal brace)
+expected a directive after '{' in nl string (write '{{' for a literal brace)
+expected a leaf id in a '{cell …}' nl directive
+unterminated '{cell …}' nl directive (expected '}')
+unknown nl directive '<head>' (expected a one-token value reference or '{cell <leaf>}')
+```
+
+A parsed one-token reference is resolved during elaboration. The renderer also
+covers hand-built presentation ASTs that bypassed the concrete parser, using
+these exact templates:
+
+```text
+claim '<claim>': nl references undeclared value '<name>'
+claim '<claim>': nl has an unterminated '{' directive
+claim '<claim>': nl has an unescaped '}' (write '}}' for a literal brace)
+claim '<claim>': nl has an unknown directive '{<body>}' (expected '{<value>}' or '{cell <leaf>}')
+claim '<claim>': nl directive '{cell <leaf>}' names '<leaf>', which is not a declared leaf
+claim '<claim>': nl directive '{cell <leaf>}' names a leaf that does not carry exactly one numeric literal (the premise-cell obligation)
+```
+
+### C.6 Opaque certificate boundary and explicit deferrals
+
+Value substitution operates on `Term` fields in the presentation AST. It never
+enters `Cert`: the certificate payload remains the native opaque S-expression
+owned and decoded only by its named backend (Appendix A.1). Consequently,
+`@0.4` does not add symbolic certificate slots such as `(prem e1)`; authored
+certificates keep numeric premise slots. A future named-slot design must define
+an explicit layer above the opaque payload rather than making the general value
+pass inspect backend syntax.
+
+Likewise, value bindings do not add named premise references or infer θ for an
+ordinary `arg`. The existing explicit positional θ contract remains unchanged;
+the separate plain-argument θ-matching rider is still deferred.

@@ -30,15 +30,16 @@ import System.IO (hPutStrLn, stderr)
 import Lara.MechReview (renderReviews)
 import Lara.MechReview.Load (loadReviewUnits)
 
-manifestPath :: FilePath
+manifestPath, policyPath :: FilePath
 manifestPath = "corpus-units/MANIFEST.tsv"
+policyPath = "corpus-units/corpus-v1.policy.lara"
 
 outputPath :: FilePath
 outputPath = "measurements/frozen/mechanical-reviews.md"
 
 main :: IO ()
 main = do
-  units <- loadReviewUnits manifestPath
+  units <- loadReviewUnits manifestPath policyPath
   when (null units) (die ("no corpus units discovered from " ++ manifestPath))
   createDirectoryIfMissing True "measurements/frozen"
   writeFile outputPath (renderReviews units)

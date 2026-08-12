@@ -194,6 +194,7 @@ prog pol decls =
     , programDigest = Digest "sha256:neg…"
     , programPolicy = PolicyId pol
     , programBackends = []
+    , programValueBindings = []
     , programDecls = decls
     }
 

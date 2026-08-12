@@ -84,6 +84,7 @@ program backends decls =
     , programDigest = Digest "sha256:admission-test"
     , programPolicy = PolicyId "p"
     , programBackends = backends
+    , programValueBindings = []
     , programDecls = decls
     }
 

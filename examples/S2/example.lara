@@ -1,4 +1,4 @@
-# S2 — ordered-comparison worked example (lara-syntax@0.3)
+# S2 — ordered-comparison worked example (lara-syntax@0.4)
 #
 # The second strict-certificate worked example, and the first exercising the
 # ord@1 backend: the most common claim shape in ML methodology papers — "this
@@ -18,15 +18,17 @@
 # true — that stays with the defeasible observed leaves. You cannot argue with
 # the arithmetic; you argue with the measurements and with the binding.
 #
-# WHAT CHANGED AT @0.3. Both arguments, and the sub-claim they turn on, are now
-# written as one `comparison` block. The layering above is unchanged — the block
-# still produces a strict a1 and a defeasible a2, and the elaborated Unit is
-# byte-identical to the hand-written @0.2 source this replaced. What is gone is
-# everything the author was previously required to write but was not claiming:
-# the num_lt argument order, the two certificate slot indices, and both θ
-# vectors. The author now states the two cells, the binding, and the direction;
-# the policy's measurand polarity and comparison scheme (ord-v1.policy.lara)
-# determine the rest.
+# WHAT CHANGED AT @0.4. Six `let` bindings now name the two systems, metric,
+# dataset, and reported scores once. Every ground-term use below refers to those
+# names, and c1's prose interpolates the same four system/score values, so the
+# expanded text is byte-for-byte unchanged. The typed `on accuracy @
+# imagenet_val` selector remains explicit and unchanged: it selects the @0.3
+# comparison scheme rather than acting as a term-substitution site.
+#
+# The @0.3 `comparison` block and its layering are otherwise unchanged: it still
+# produces strict a1 and defeasible a2, and the elaborated Unit remains
+# byte-identical. @0.4 removes repeated authored ground terms without changing
+# the scientific claim, certificate, or expected verdict.
 #
 # The sub-claim c2 did NOT vanish with its declaration. Its prose, its author
 # attestation, and its id all reach the Unit and none can be machine-invented,
@@ -39,24 +41,31 @@ artifact ord_demo at sha256:5252525252525252525252525252525252525252525252525252
 policy ord-v1
 use backends [ord@1]
 
+let candidate = sys_new
+let baseline = sys_base
+let metric = accuracy
+let dataset = imagenet_val
+let candidate_score = 0.74
+let baseline_score = 0.71
+
 # --- The comparative claim the bridge rule delivers -------------------------------------------
 
 claim c1
-  nl      = "sys_new outperforms sys_base on ImageNet-val accuracy (0.74 vs 0.71)"
-  formal  = better(sys_new, sys_base, accuracy, imagenet_val)
+  nl      = "{candidate} outperforms {baseline} on ImageNet-val accuracy ({candidate_score} vs {baseline_score})"
+  formal  = better(candidate, baseline, metric, dataset)
   binding = { author = alice, rationale = "Ordered comparison of two reported accuracy cells.", audit-status = reviewed }
 
 # --- The two measured cells the certificate consults ------------------------------------------
 # One leaf per reported cell. These carry the raw numbers; their truth is observed evidence,
-# never certified content. They are also the only place a number is written: the comparison
-# below names these leaves and reads the values out of them.
+# never certified content. The bindings are the only place either number is written; the leaves
+# reuse those values, and the comparison below names the leaves and reads their values out.
 
-leaf e1 : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))
+leaf e1 : reports(exp1, score_cell(baseline, metric, dataset, baseline_score))
   kind       = observed
   provenance = ai-executed
   refs       = [evidence/tables/accuracy.md#row=sys_base]
 
-leaf e2 : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.74))
+leaf e2 : reports(exp1, score_cell(candidate, metric, dataset, candidate_score))
   kind       = observed
   provenance = ai-executed
   refs       = [evidence/tables/accuracy.md#row=sys_new]
@@ -69,7 +78,7 @@ leaf e2 : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.74))
 # `comparison` block that synthesized it would manufacture evidence nobody signed, and the thing
 # examples/S4 attacks would be something the compiler invented.
 
-leaf e3 : comparison_setup(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71)
+leaf e3 : comparison_setup(candidate, baseline, metric, dataset, candidate_score, baseline_score)
   kind       = attested
   provenance = user
   refs       = [evidence/tables/accuracy.md#caption]
@@ -86,11 +95,10 @@ leaf e3 : comparison_setup(sys_new, sys_base, accuracy, imagenet_val, 0.74, 0.71
 #   * arg a2, the defeasible bridge, consuming the strict conclusion plus the binding leaf.
 #
 # Both argument ids are author-declared rather than derived, and that is load-bearing: S4
-# attacks this bridge by id and position. The sub-claim's prose interpolates the SAME leaves the
-# arithmetic reads, so a number quoted in prose is guaranteed to be the number the cited
-# evidence carries — it cannot go stale independently.
+# attacks this bridge by id and position. The sub-claim derives each quoted score from the
+# exact evidence leaf that the arithmetic reads, so prose and evidence cannot drift.
 
-comparison : better(sys_new, sys_base) on accuracy @ imagenet_val
+comparison : better(candidate, baseline) on accuracy @ imagenet_val
   relation = strictly-better
   recheck  = a1
   bridge   = a2

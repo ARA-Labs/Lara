@@ -2,14 +2,15 @@
 -- Currently mechanized:
 --   * the frozen nf/≡ carve-out (spec §9 result 11 / claim C01)  — Lara.Prop
 --   * the presentation-AST codec round-trip (spec §9 result 12): the complete
---     live presentation Program/Policy shape at lara-syntax@0.3 — every field of
---     both top-levels, policySigma included — serializes to a structured
+--     live presentation Program/Policy shape at lara-syntax@0.4 — every field of
+--     both top-levels, value bindings and policySigma included — serializes to
+--     a structured
 --     S-expression and parses back exactly (parse ∘ print = id) — a metatheory
 --     anchor for the AST shape, NOT a proof of the concrete-syntax Haskell
 --     parser — Lara.Presentation
 --   * the standalone presentation-parity guard: exact record and sum-payload
 --     constructor signatures, explicit alias/entry anchors, exhaustive
---     eliminators, the 68-row normalized shape inventory both runtimes emit,
+--     eliminators, the 70-row normalized shape inventory both runtimes emit,
 --     and an elaboration-time tripwire for row counts and named field order —
 --     the Lean half of the CI cross-language parity gate
 --     (scripts/check-presentation-parity.sh) — Lara.PresentationParity. This

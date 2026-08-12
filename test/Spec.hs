@@ -45,6 +45,7 @@ import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
 import SurfaceRewriteSpec (surfaceRewriteSpecProps)
 import SyntaxSpec (syntaxSpecProps)
+import ValueBindingsSpec (valueBindingSpecProps)
 import WireSpec (wireSpecProps)
 import WorkedExamplesSpec (workedExamplesSpecProps)
 
@@ -198,6 +199,7 @@ main = do
         ++ [run name act | (name, act) <- ordSpecProps]
         ++ [run name act | (name, act) <- replaySpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
+        ++ [run name act | (name, act) <- valueBindingSpecProps]
         ++ [run name act | (name, act) <- syntaxSpecProps]
         ++ [run name act | (name, act) <- elaborateSpecProps]
         ++ [run name act | (name, act) <- workedExamplesSpecProps]

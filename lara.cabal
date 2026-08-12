@@ -40,6 +40,7 @@ library
                       Lara.Elaborate.Error
                       Lara.Elaborate.Subst
                       Lara.Elaborate.Comparison
+                      Lara.Elaborate.ValueBinding
                       Lara.Examples
                       Lara.Negatives
                       Lara.Term
@@ -116,6 +117,7 @@ test-suite lara-test
                       OrdSpec
                       WireSpec
                       SyntaxSpec
+                      ValueBindingsSpec
                       ElaborateSpec
                       WorkedExamplesSpec
                       SurfaceRewriteSpec

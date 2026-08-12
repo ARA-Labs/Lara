@@ -4235,3 +4235,153 @@ tree:
     - scripts/check-presentation-parity.sh
   also_depends_on: [N167, N168]
   status: resolved
+
+- id: N170
+  type: experiment
+  title: "Post-PR #102 handoff audit found #88b unblocked but under-specified"
+  provenance: ai-executed
+  timestamp: "2026-08-11T10:29"
+  description: >
+    Inspected the live merged PR, hosted checks, synchronized main branch,
+    recent commits, open issues, the #91 surface tracker, the implemented
+    lara-syntax@0.3 plan, the closed #89 sort issue, the current Program/Policy
+    AST, and the active grammar contract to identify the next bounded code
+    milestone.
+  result: >
+    PR #102 is merged at main commit 56decad; both hosted Haskell and Lean jobs
+    pass; the local main branch is clean and synchronized with origin/main.
+    #90 and #88a were implemented by PR #92, #89's strict Sigma prerequisite is
+    closed, and D7/#88b is the only explicitly deferred surface deliverable.
+    The existing D7 scope is not directly executable: named certificate-slot
+    references still require a layering decision because Cert payloads remain
+    opaque, and PR #102 now requires any Program-shape change to update both
+    presentation models and the parity guard.
+  evidence:
+    - "PR #102 and hosted checks"
+    - "commit 56decad"
+    - issue://89
+    - issue://88
+    - plans/2026-08-08-lara-syntax-03-surface.md
+    - docs/lara-surface-grammar.md
+    - src/Lara/AST.hs
+  also_depends_on: [N169]
+  status: resolved
+
+- id: N171
+  type: decision
+  title: "Open #88b surface-bindings work on an isolated feature branch"
+  provenance: user
+  timestamp: "2026-08-11T10:32"
+  choice: >
+    Proceed with the recommended #88b/D7 direction on
+    feature/88b-surface-bindings: design and implement value bindings plus
+    binding interpolation first, while keeping named certificate-slot
+    references behind their explicit opaque-payload layering decision.
+  alternatives:
+    - "Implement the full historical D7 bundle in one PR."
+    - "Pause surface work and move directly to M7 artifact packaging."
+  evidence:
+    - N170
+    - "git switch -c feature/88b-surface-bindings"
+    - O68
+  also_depends_on: [N170]
+  status: resolved
+
+
+- id: N172
+  type: experiment
+  title: "Value-binding implementation plan fixed the lara-syntax@0.4 boundary"
+  provenance: ai-executed
+  timestamp: "2026-08-11T10:53"
+  description: >
+    Mapped the live Program constructor callsites, parser/printer layout,
+    comparison and natural-language expansion order, strict Sigma API,
+    Haskell test runner, Lean presentation codec, cross-language parity
+    witnesses, active version documentation, worked-example regeneration, and
+    authoritative CI workflow. Drafted and self-reviewed the focused #88b
+    implementation plan requested by the researcher.
+  result: >
+    plans/2026-08-11-lara-syntax-04-value-bindings.md now fixes the additive
+    lara-syntax@0.4 contract: flat non-recursive typed value bindings, strict
+    Sigma validation and constructor-collision rejection, bare nullary-term
+    substitution, value plus cell prose interpolation in one pass, binding
+    erasure before comparison expansion, complete Haskell/Lean presentation
+    parity, byte-identical bound/unbound Unit evidence, S2/S5 migration, and
+    full replay/differential/tamper evaluation. Named certificate slots and
+    theta inference remain out of scope. Implementation awaits plan approval.
+  evidence:
+    - plans/2026-08-11-lara-syntax-04-value-bindings.md
+    - src/Lara/AST.hs
+    - src/Lara/Syntax.hs
+    - src/Lara/Elaborate/Comparison.hs
+    - src/Lara/Sigma.hs
+    - lean/Lara/Presentation.lean
+    - scripts/presentation-shape.hs
+    - .github/workflows/ci.yml
+  also_depends_on: [N171]
+  status: resolved
+
+- id: N173
+  type: experiment
+  title: "lara-syntax@0.4 value bindings implemented with byte-exact secondary-consumer parity"
+  provenance: ai-executed
+  timestamp: "2026-08-11T21:50"
+  description: >
+    Executed the approved value-binding plan through task-isolated implementation
+    and review. Added ordered ValueName/ValueBinding presentation data, strict
+    binding validation, simultaneous non-recursive term substitution, one-pass
+    natural-language interpolation, exact semantic-Program reuse by claim-support
+    and mechanical review, the widened Lean presentation codec, and the updated
+    compiler-derived cross-language shape guard. Migrated S2/S5 and active
+    documentation while retaining opaque certificate slots and theta inference
+    as explicit non-goals.
+  result: >
+    Full local Haskell build/test passed after a holistic review exposed and a
+    focused fix isolated the escaped-brace consumer fixture from the no-binding
+    legacy identity fixture. The Haskell and Lean inventories compare as 70
+    byte-identical rows; Lean build and axiom audit pass; replay, tamper,
+    differential, admission-differential, Python, generator-idempotence, and
+    protected-artifact checks pass. S2/S5 generated core and expected-verdict
+    bytes are unchanged. PR #103 opened at commit 8b42de8; hosted Haskell and
+    Lean jobs both pass on that head.
+  evidence:
+    - plans/2026-08-11-lara-syntax-04-value-bindings.md
+    - src/Lara/Elaborate/ValueBinding.hs
+    - test/ValueBindingsSpec.hs
+    - lean/Lara/Presentation.lean
+    - scripts/check-presentation-parity.sh
+    - examples/S2/example.lara
+    - examples/S5/example.lara
+    - "PR #103 and Actions run 31564023177"
+  also_depends_on: [N171, N172]
+  status: resolved
+
+- id: N174
+  type: experiment
+  title: "PR #103 external review resolved without weakening evidence-derived prose"
+  provenance: ai-executed
+  timestamp: "2026-08-12T00:10"
+  description: >
+    Verified all four inline comments against the implemented lara-syntax@0.4
+    boundary. Added a red-green parser regression for inline directive gaps,
+    pinned the distinct authored-value and canonical-cell renderings including
+    hand-built string terms, restored S2/S5 comparison prose to evidence-leaf
+    interpolation, and reconciled the live and historical grammar text.
+  result: >
+    Commit 942e9ef accepts and byte-round-trips spaced value/cell directives.
+    Value references retain prettyTerm spelling while cell references retain
+    evidence-derived renderDecimal spelling. S2/S5 core and expected-JSON
+    hashes remained unchanged across two generator runs. Full local gates and
+    hosted Haskell/Lean CI pass; all four inline threads are replied to and
+    resolved. PR #103 is merge-clean and awaits reviewer re-approval.
+  evidence:
+    - src/Lara/Syntax.hs
+    - test/SyntaxSpec.hs
+    - test/ValueBindingsSpec.hs
+    - docs/lara-surface-grammar.md
+    - examples/S2/example.lara
+    - examples/S5/example.lara
+    - "commit 942e9ef"
+    - "PR #103 and Actions run 31572212188"
+  also_depends_on: [N173]
+  status: resolved

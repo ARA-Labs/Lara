@@ -173,6 +173,7 @@ open Lara
 #print axioms Lara.Presentation.un_MeasurandId
 #print axioms Lara.Presentation.un_DatasetId
 #print axioms Lara.Presentation.un_PremiseLabel
+#print axioms Lara.Presentation.un_ValueName
 #print axioms Lara.Presentation.un_sxList_LeafId
 #print axioms Lara.Presentation.un_sxOpt_PremiseLabel
 #print axioms Lara.Presentation.un_sxList_optPremiseLabel
@@ -257,6 +258,8 @@ open Lara
 #print axioms Lara.Presentation.un_sxList_Decl
 #print axioms Lara.Presentation.un_sxBackend
 #print axioms Lara.Presentation.un_sxList_Backend
+#print axioms Lara.Presentation.un_sxValueBinding
+#print axioms Lara.Presentation.un_sxList_ValueBinding
 
 -- Result 10 / C05: ND reference-adapter soundness + dependency exactness.
 #print axioms Lara.ND.nd_relevance

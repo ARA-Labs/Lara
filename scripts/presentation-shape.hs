@@ -139,6 +139,13 @@ datasetIdCtor = DatasetId
 premiseLabelCtor :: String -> PremiseLabel
 premiseLabelCtor = PremiseLabel
 
+valueNameCtor :: String -> ValueName
+valueNameCtor = ValueName
+
+valueNameText :: ValueName -> String
+valueNameText value = case value of
+  ValueName text -> text
+
 -- | Exemption 1: witnessed, but row-erased (Lean's @Sigma.sorts@ is
 -- @List String@).
 sortNameCtor :: String -> SortName
@@ -250,7 +257,12 @@ comparisonCtor ::
   LeafId -> LeafId -> LeafId -> ComparisonClaim -> Maybe PropId -> Comparison
 comparisonCtor = Comparison
 
-programCtor :: String -> Digest -> PolicyId -> [ExpectedBackendEntry] -> [Decl] -> Program
+valueBindingCtor :: ValueName -> P.Term -> ValueBinding
+valueBindingCtor = ValueBinding
+
+programCtor ::
+  String -> Digest -> PolicyId -> [ExpectedBackendEntry] ->
+  [ValueBinding] -> [Decl] -> Program
 programCtor = Program
 
 -- ---------------------------------------------------------------------------
@@ -494,15 +506,16 @@ witnesses =
   , used argIdCtor, used obligationIdCtor, used backendIdCtor, used policyIdCtor
   , used paramCtor, used sourceRefCtor, used theoryDigestCtor, used digestCtor
   , used groupIdCtor, used measurandIdCtor, used datasetIdCtor
-  , used premiseLabelCtor, used sortNameCtor, used funSymCtor, used predCtor
+  , used premiseLabelCtor, used valueNameCtor, used valueNameText
+  , used sortNameCtor, used funSymCtor, used predCtor
   , used propCtor, used substWitness, used positionWitness
   , used atomPatCtor, used leafCtor, used bindingCtor, used claimCtor
   , used questionCtor, used certRefCtor, used ruleCtor, used contraryCtor
   , used exceptionCtor, used dupGroupCtor, used conSigCtor, used predSigCtor
   , used sigmaCtor, used measurandCtor, used comparisonSchemeCtor
   , used policyCtor, used certCtor, used sruleCtor, used argCtor
-  , used comparisonClaimCtor, used comparisonCtor, used programCtor
-  , used termNumCtor, used termStrCtor, used termConCtor
+  , used comparisonClaimCtor, used comparisonCtor, used valueBindingCtor
+  , used programCtor, used termNumCtor, used termStrCtor, used termConCtor
   , used provenanceCheckerCtor, used sortDeclCtor
   , used patVarCtor, used patLitCtor, used patConCtor
   , used assuranceCertCtor, used supportLeafCtor
@@ -551,6 +564,7 @@ shapeRows =
   , ("MeasurandId", ["val"])
   , ("DatasetId", ["val"])
   , ("PremiseLabel", ["val"])
+  , ("ValueName", ["val"])
   , ("FunSym", ["val"])
   , ("Pred", ["val"])
   , ("Term", ["num", "str", "con"])
@@ -608,7 +622,8 @@ shapeRows =
       , "bridge-arg", "result", "baseline", "binding", "claim", "supports"
       ]
     )
-  , ("Program", ["artifact", "digest", "policy", "backends", "decls"])
+  , ("ValueBinding", ["name", "term"])
+  , ("Program", ["artifact", "digest", "policy", "backends", "value-bindings", "decls"])
   , ("AdmissionEntry", ["key:(LeafKind,Provenance)", "value:Admission"])
   , ("TheoryEntry", ["digest:TheoryDigest", "atoms:List Prop"])
   , ("BackendEntry", ["backend:BackendId", "version:String"])
@@ -772,12 +787,15 @@ normalizeSelectors prefix = traverse normalize
               )
           Just field -> Right (semanticField prefix field)
 
--- The two models use different source identifiers for Arg's semantic
--- "conclusion" field (`argConcl` vs Lean's `conclusion`). Keep that intentional
--- spelling normalization explicit; every other named selector is prefix-stripped
--- and camel-to-kebab converted mechanically.
+-- The models intentionally use different source identifiers for a few semantic
+-- fields. Keep each spelling normalization scoped to its owning record prefix;
+-- every other named selector is prefix-stripped and camel-to-kebab converted
+-- mechanically.
 semanticField :: String -> String -> String
 semanticField "arg" "Concl" = "conclusion"
+semanticField "value" "Name" = "name"
+semanticField "value" "Term" = "term"
+semanticField "program" "ValueBindings" = "value-bindings"
 semanticField _ field = camelToKebab field
 camelToKebab :: String -> String
 camelToKebab [] = []
@@ -803,6 +821,7 @@ deriving instance Generic GroupId
 deriving instance Generic MeasurandId
 deriving instance Generic DatasetId
 deriving instance Generic PremiseLabel
+deriving instance Generic ValueName
 deriving instance Generic FunSym
 deriving instance Generic Pred
 deriving instance Generic P.Term
@@ -847,6 +866,7 @@ deriving instance Generic Cert
 deriving instance Generic Arg
 deriving instance Generic ComparisonClaim
 deriving instance Generic Comparison
+deriving instance Generic ValueBinding
 deriving instance Generic Program
 
 -- | One entry per 'shapeRows' entry, same order and same row name.
@@ -874,6 +894,7 @@ shapeChecks =
   , ("MeasurandId", RecordOf (ctorsOf @MeasurandId))
   , ("DatasetId", RecordOf (ctorsOf @DatasetId))
   , ("PremiseLabel", RecordOf (ctorsOf @PremiseLabel))
+  , ("ValueName", RecordOf (ctorsOf @ValueName))
   , ("FunSym", RecordOf (ctorsOf @FunSym))
   , ("Pred", RecordOf (ctorsOf @Pred))
   , ("Term", SumOf (ctorsOf @P.Term))
@@ -919,6 +940,7 @@ shapeChecks =
   , ("Arg", namedRecordOf @Arg "arg")
   , ("ComparisonClaim", namedRecordOf @ComparisonClaim "cc")
   , ("Comparison", namedRecordOf @Comparison "cmp")
+  , ("ValueBinding", namedRecordOf @ValueBinding "value")
   , ("Program", namedRecordOf @Program "program")
   , ("AdmissionEntry", RecordOf (ctorsOf @ExpectedAdmissionEntry))
   , ("TheoryEntry", RecordOf (ctorsOf @ExpectedTheoryEntry))

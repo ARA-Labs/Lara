@@ -1,7 +1,7 @@
--- | The @lara-syntax\@0.3@ surface expansion: a presentation-to-presentation
--- pass that replaces every @comparison@ block (grammar App. B.3) with the
--- ordinary @claim@ and @arg@ declarations it stands for, and interpolates the
--- @nl@ directives of B.6 on the way.
+-- | Comparison-block expansion in the ordered surface pipeline.
+--
+-- Value substitution and all @nl@ interpolation have already been consumed by
+-- "Lara.Elaborate.ValueBinding" before this module generates declarations.
 --
 -- == Why presentation → presentation
 --
@@ -57,9 +57,7 @@
 module Lara.Elaborate.Comparison
   ( expandSurface
   , expandSurfaceProvenance
-  , expandClaimNls
   , GeneratedArg (..)
-  , expandNl
   ) where
 
 import Control.Monad (foldM, when)
@@ -67,9 +65,9 @@ import Data.List (find, nub)
 
 import Lara.AST
 import Lara.Elaborate.Error (ElabError (..))
+import Lara.Elaborate.ValueBinding (expandValueBindings)
 import Lara.Elaborate.Subst (apatToProp, matchAPat, patToTerm, sameTerm)
 import Lara.Prop (Prop (..), Term (..))
-import Lara.Syntax (nlCellDirective)
 import Lara.Strict (SExpr (..))
 import qualified Lara.Strict as Strict
 import qualified Lara.Strict.Cell as Cell
@@ -106,24 +104,6 @@ data GeneratedArg = GeneratedArg
 -- The pass
 -- ---------------------------------------------------------------------------
 
--- | Resolve every ordinary claim's @nl@ body against the program's complete
--- declared-leaf table. The result is semantic prose, not the raw brace spelling
--- consumed by 'Lara.Syntax.printProgram'; callers must not send the
--- post-expansion value back through the surface printer.
-expandClaimNls :: Program -> Either ElabError Program
-expandClaimNls prog = do
-  decls <- mapM one (programDecls prog)
-  pure prog {programDecls = decls}
-  where
-    gamma = [(leafId l, leafProp l) | DeclLeaf l <- programDecls prog]
-    one d = case d of
-      DeclClaim c -> DeclClaim <$> expandClaimNl gamma c
-      _ -> Right d
-
-expandClaimNl :: [(LeafId, Prop)] -> Claim -> Either ElabError Claim
-expandClaimNl gamma c = do
-  nl <- expandNl (claimId c) gamma (claimNl c)
-  pure c {claimNl = nl}
 
 -- | Expand every @comparison@ block of a program in place (grammar App. B.3).
 --
@@ -142,24 +122,20 @@ expandSurface pol prog = fst <$> expandSurfaceProvenance pol prog
 -- argument this expansion did not emit. Callers that only need the program keep
 -- using 'expandSurface'.
 expandSurfaceProvenance :: Policy -> Program -> Either ElabError (Program, [GeneratedArg])
-expandSurfaceProvenance pol prog = do
+expandSurfaceProvenance pol authored = do
+  prog <- expandValueBindings (policySigma pol) authored
+  let decls = programDecls prog
+      blocks = [c | DeclComparison c <- decls]
+      -- Γ for comparison expansion: leaves are never generated.
+      gamma = [(leafId l, leafProp l) | DeclLeaf l <- decls]
   checkGeneratedIds decls blocks
   checkDuplicateBlocks blocks
-  expanded <- mapM one decls
+  expanded <- mapM (one gamma) decls
   pure (prog {programDecls = concatMap fst expanded}, concatMap snd expanded)
   where
-    decls = programDecls prog
-    blocks = [c | DeclComparison c <- decls]
-    -- Γ for the expansion: leaves are never generated (App. B.3 — the
-    -- attestation leaf stays a human claim), so the declared table is complete
-    -- before any block expands.
-    gamma = [(leafId l, leafProp l) | DeclLeaf l <- decls]
-    one d = case d of
-      DeclClaim c -> do
-        expandedClaim <- expandClaimNl gamma c
-        Right ([DeclClaim expandedClaim], [])
-      DeclComparison c -> expandComparison pol gamma c
-      _ -> Right ([d], [])
+    one gamma decl = case decl of
+      DeclComparison comparison -> expandComparison pol gamma comparison
+      _ -> Right ([decl], [])
 
 -- | The generated @recheck@\/@bridge@\/@claims@ ids must collide with nothing:
 -- not with a declared declaration, and not with another block's (App. B.3).
@@ -400,12 +376,11 @@ expandComparison pol gamma cmp = do
           payload
   -- (6) the three declarations. Each θ is emitted positionally under its own
   -- rule's parameter order; no parameter identity crosses the rule boundary.
-  nl <- expandNl cid gamma (ccNlRaw (cmpClaim cmp))
   let thetaFor theta r = [(p, t) | p <- ruleParams r, Just t <- [lookup p theta]]
       subClaim =
         Claim
           { claimId = cid
-          , claimNl = nl
+          , claimNl = ccNlRaw (cmpClaim cmp)
           , claimFormal = goal
           , claimBinding = ccBinding (cmpClaim cmp)
           }
@@ -555,48 +530,4 @@ expandComparison pol gamma cmp = do
         [x] -> Right x
         [] -> Left (ComparisonNoPremiseSlot cid (ruleId rule) lid)
         xs -> Left (ComparisonAmbiguousPremiseSlot cid (ruleId rule) lid (map fst xs))
-
--- ---------------------------------------------------------------------------
--- nl interpolation (grammar App. B.6)
--- ---------------------------------------------------------------------------
-
--- | Expand a raw @nl@ body: @{{@\/@}}@ become literal braces and @{cell l}@
--- becomes the numeric cell of leaf @l@, rendered through
--- 'Lara.Strict.Cell.renderDecimal'.
---
--- Applied to every claim-form @nl@: both §3's ordinary @claim@ declaration
--- and the @claims … nl@ nested in an App. B.3 @comparison@ block. The parser
--- gives both forms the same strict brace contract, and this pass resolves
--- directives only after the complete declared-leaf table is available.
---
--- Strict, not lenient (App. B.6): a mistyped @{cel e2}@ is an error rather than
--- frozen prose, which is the prose↔formal staleness this feature exists to
--- kill.
-expandNl :: PropId -> [(LeafId, Prop)] -> String -> Either ElabError String
-expandNl cid gamma = go
-  where
-    go s = case s of
-      [] -> Right ""
-      '{' : '{' : rest -> ('{' :) <$> go rest
-      '}' : '}' : rest -> ('}' :) <$> go rest
-      '}' : _ -> Left (NlStrayBrace cid)
-      '{' : rest -> do
-        (body, after) <- splitDirective rest
-        value <- directive body
-        (value ++) <$> go after
-      c : rest -> (c :) <$> go rest
-
-    splitDirective r = case break (== '}') r of
-      (body, '}' : after) -> Right (body, after)
-      _ -> Left (NlUnterminatedBrace cid)
-
-    directive body = case words body of
-      [name, arg] | name == nlCellDirective -> cellValue (LeafId arg)
-      _ -> Left (NlUnknownDirective cid body)
-
-    cellValue lid = case lookup lid gamma of
-      Nothing -> Left (NlCellLeafUndeclared cid lid)
-      Just p -> case Cell.premiseCell p of
-        Left _ -> Left (NlCellObligation cid lid)
-        Right r -> Right (Cell.renderDecimal r)
 

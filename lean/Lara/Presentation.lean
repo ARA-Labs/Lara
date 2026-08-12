@@ -2,7 +2,7 @@
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
 This module models the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.3` — every field of both top-levels,
+`src/Lara/AST.hs` at `lara-syntax@0.4` — every field of both top-levels,
 including the `lara-core@0.2` `policySigma`, as enumerated under `## Scope`
 below — defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
@@ -37,19 +37,19 @@ value. This mirrors the existing verified structured codecs in the development:
 ## Scope
 
 Verified against the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.3`, described here:
+`src/Lara/AST.hs` at `lara-syntax@0.4`, described here:
 
 * **Both presentation top-levels**: every `Program` field and every `Policy`
   field, `policySigma` included; every arm of `Decl` (including `DeclGroup` and
   `DeclComparison`). `Lara/PresentationParity.lean` pins the `Policy` and
   `Measurand` constructor shapes, so neither can be silently retyped or
   reordered while these round-trip theorems keep passing.
-* **Every identifier newtype** of the `Names` and `@0.3` sections — `PropId`,
+* **Every identifier newtype** of the `Names` and `@0.4` sections — `PropId`,
   `QuestionId`, `LeafId`, `RuleId`, `ArgId`, `ObligationId`, `BackendId`,
   `PolicyId`, `Param`, `SourceRef`, `TheoryDigest`, `Digest`, `GroupId`,
-  `MeasurandId`, `DatasetId`, `PremiseLabel` — kept as distinct one-field
-  structures, so the codec cannot silently swap namespaces (the symbolic-core
-  discipline of CLAUDE.md).
+  `MeasurandId`, `DatasetId`, `PremiseLabel`, `ValueName` — kept as distinct
+  one-field structures, so the codec cannot silently swap namespaces (the
+  symbolic-core discipline of CLAUDE.md).
 * **Every closed enum vocabulary**: `LeafKind`, `Provenance`, `AuditStatus`,
   `Mode`, `Necessity`, `Admission`, `Step`, `GroupConflictMode`, `Polarity`,
   `Relation`, plus `Bool` flags and `Option` fields.
@@ -68,7 +68,7 @@ Verified against the complete live presentation `Program`/`Policy` shape of
   `Rule` (with `@0.3`'s `rulePremiseLabels`), `Contrary`, `Exception`,
   `DupGroup`, `Measurand`, `ComparisonScheme`, `Policy`, `Cert`, `Assurance`,
   `Attack`, `SurfaceAttack`, `ChallengeTarget`, `ArgConcl`, `Arg`,
-  `ComparisonClaim`, `Comparison`, `Decl`, `Program`.
+  `ComparisonClaim`, `Comparison`, `Decl`, `ValueBinding`, `Program`.
 * The opaque strict-certificate payload is carried as an `Sx` verbatim — faithful
   to `Lara.AST`'s "opaque payload, only the named backend decodes it".
 * Both the frozen `Attack` / `Position` / `Step` **and** the `@0.3`
@@ -258,6 +258,7 @@ structure GroupId      where mk :: (val : String) deriving DecidableEq
 structure MeasurandId  where mk :: (val : String) deriving DecidableEq
 structure DatasetId    where mk :: (val : String) deriving DecidableEq
 structure PremiseLabel where mk :: (val : String) deriving DecidableEq
+structure ValueName    where mk :: (val : String) deriving DecidableEq
 
 def PropId.sx       (i : PropId)       : Sx := .str i.val
 def QuestionId.sx   (i : QuestionId)   : Sx := .str i.val
@@ -275,6 +276,7 @@ def GroupId.sx      (i : GroupId)      : Sx := .str i.val
 def MeasurandId.sx  (i : MeasurandId)  : Sx := .str i.val
 def DatasetId.sx    (i : DatasetId)    : Sx := .str i.val
 def PremiseLabel.sx (i : PremiseLabel) : Sx := .str i.val
+def ValueName.sx    (i : ValueName)    : Sx := .str i.val
 
 def unPropId       : Sx → Option PropId       | .str s => some ⟨s⟩ | _ => none
 def unQuestionId   : Sx → Option QuestionId   | .str s => some ⟨s⟩ | _ => none
@@ -292,6 +294,7 @@ def unGroupId      : Sx → Option GroupId      | .str s => some ⟨s⟩ | _ => 
 def unMeasurandId  : Sx → Option MeasurandId  | .str s => some ⟨s⟩ | _ => none
 def unDatasetId    : Sx → Option DatasetId    | .str s => some ⟨s⟩ | _ => none
 def unPremiseLabel : Sx → Option PremiseLabel | .str s => some ⟨s⟩ | _ => none
+def unValueName    : Sx → Option ValueName    | .str s => some ⟨s⟩ | _ => none
 
 @[simp] theorem un_PropId       (i : PropId)       : unPropId       i.sx = some i := rfl
 @[simp] theorem un_QuestionId   (i : QuestionId)   : unQuestionId   i.sx = some i := rfl
@@ -309,6 +312,7 @@ def unPremiseLabel : Sx → Option PremiseLabel | .str s => some ⟨s⟩ | _ => 
 @[simp] theorem un_MeasurandId  (i : MeasurandId)  : unMeasurandId  i.sx = some i := rfl
 @[simp] theorem un_DatasetId    (i : DatasetId)    : unDatasetId    i.sx = some i := rfl
 @[simp] theorem un_PremiseLabel (i : PremiseLabel) : unPremiseLabel i.sx = some i := rfl
+@[simp] theorem un_ValueName    (i : ValueName)    : unValueName    i.sx = some i := rfl
 
 @[simp] theorem un_sxList_LeafId (xs : List LeafId) :
     unSxList unLeafId (sxList LeafId.sx xs) = some xs := unSxList_sxList un_LeafId xs
@@ -1368,21 +1372,45 @@ def unBackend : Sx → Option BackendEntry := unSxPair unBackendId unStr
 @[simp] theorem un_sxList_Backend (xs : List BackendEntry) :
     unSxList unBackend (sxList sxBackend xs) = some xs := unSxList_sxList un_sxBackend xs
 
+/-! `lara-syntax@0.4` value bindings (grammar Appendix C) are a
+presentation-only ordered table. The elaborator consumes them before comparison
+expansion; the structured codec preserves their authored shape. -/
+structure ValueBinding where
+  mk :: (name : ValueName) (term : Term)
+  deriving DecidableEq
+def sxValueBinding (b : ValueBinding) : Sx :=
+  .node "value-binding" (.cons b.name.sx (.cons (sxTerm b.term) .nil))
+def unValueBinding : Sx → Option ValueBinding
+  | .node "value-binding" (.cons nm (.cons tm .nil)) => do
+      let nn ← unValueName nm
+      let tt ← unTerm tm
+      some ⟨nn, tt⟩
+  | _ => none
+@[simp] theorem un_sxValueBinding (b : ValueBinding) :
+    unValueBinding (sxValueBinding b) = some b := by
+  cases b with | mk n t => simp [sxValueBinding, unValueBinding]
+@[simp] theorem un_sxList_ValueBinding (xs : List ValueBinding) :
+    unSxList unValueBinding (sxList sxValueBinding xs) = some xs :=
+  unSxList_sxList un_sxValueBinding xs
+
 structure Program where
   mk ::
   (artifact : String) (digest : Digest) (policy : PolicyId)
-  (backends : List BackendEntry) (decls : List Decl)
+  (backends : List BackendEntry) (valueBindings : List ValueBinding) (decls : List Decl)
   deriving DecidableEq
 def printProgram (p : Program) : Sx :=
   .node "program" (.cons (.str p.artifact) (.cons p.digest.sx (.cons p.policy.sx
-    (.cons (sxList sxBackend p.backends) (.cons (sxList sxDecl p.decls) .nil)))))
+    (.cons (sxList sxBackend p.backends) (.cons (sxList sxValueBinding p.valueBindings)
+    (.cons (sxList sxDecl p.decls) .nil))))))
 def parseProgram : Sx → Option Program
-  | .node "program" (.cons (.str ar) (.cons dg (.cons pl (.cons bk (.cons ds .nil))))) => do
+  | .node "program" (.cons (.str ar) (.cons dg (.cons pl
+      (.cons bk (.cons vb (.cons ds .nil)))))) => do
       let dd ← unDigest dg
       let pp ← unPolicyId pl
       let bb ← unSxList unBackend bk
+      let vv ← unSxList unValueBinding vb
       let dcs ← unSxList unDecl ds
-      some ⟨ar, dd, pp, bb, dcs⟩
+      some ⟨ar, dd, pp, bb, vv, dcs⟩
   | _ => none
 
 /-! ## The round-trip theorems (spec §9 result 12)
@@ -1391,7 +1419,7 @@ def parseProgram : Sx → Option Program
 `simp` because every field codec's round-trip is an `@[simp]` lemma. -/
 
 theorem parse_printProgram (p : Program) : parseProgram (printProgram p) = some p := by
-  cases p with | mk ar dg pl bk ds => simp [printProgram, parseProgram]
+  cases p with | mk ar dg pl bk vb ds => simp [printProgram, parseProgram]
 
 theorem parse_printPolicy (q : Policy) : parsePolicy (printPolicy q) = some q := by
   cases q with | mk i sg rs cs es am th gm ms sch => simp [printPolicy, parsePolicy]

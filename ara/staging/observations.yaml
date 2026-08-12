@@ -1407,3 +1407,27 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O68
+  timestamp: "2026-08-11T10:29"
+  provenance: user-revised
+  content: >
+    After result-12 parity and strict Sigma have landed, the next bounded code
+    milestone should resume #88b as a new presentation-syntax version. Stage
+    value bindings plus binding interpolation before named certificate-slot
+    references: the former is now safe under strict Sigma, while the latter
+    still needs an explicit layering decision because Cert payloads are opaque.
+    Any Program-shape extension must update the Haskell and Lean presentation
+    codecs, compiler witnesses, and the 68-row parity inventory together.
+  context: >
+    Post-merge roadmap audit after PR #102. The live main branch and hosted
+    checks are green; #89 is closed; plans/2026-08-08-lara-syntax-03-surface.md
+    leaves only D7 deferred, while docs/lara-surface-grammar.md explicitly says
+    named premise-slot references still cross an unresolved opaque-payload
+    boundary.
+  potential_type: architecture
+  bound_to: [N170]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N171"
+  crystallized_via: verbal-affirmation
+  stale: false

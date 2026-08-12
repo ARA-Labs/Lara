@@ -1,4 +1,4 @@
-# S5 — lower is better (lara-syntax@0.3)
+# S5 — lower is better (lara-syntax@0.4)
 #
 # The fourth strict-certificate worked example, and the third on ord@1. S2 and
 # S3 compare accuracy, where a larger number wins. S5 compares PERPLEXITY, where
@@ -36,19 +36,36 @@
 # artifact would be an R13 replay rejection, polarity declaration or not.
 # Declaring a polarity chooses which comparison to make; it never decides one.
 #
+# WHAT CHANGED AT @0.4. Six `let` bindings now name the two systems, metric,
+# dataset, and reported scores once. Every ground-term use below refers to those
+# names, and c1's prose interpolates the same four system/score values, so the
+# expanded text is byte-for-byte unchanged. The typed `on perplexity @
+# wikitext103` selector remains explicit and unchanged: it selects the @0.3
+# comparison scheme rather than acting as a term-substitution site.
+#
+# The @0.3 comparison expansion, lower-is-better policy choice, strict
+# certificate, scientific claim, and expected verdict are unchanged.
+#
 # Expected verdict is at the bottom of this file (golden oracle).
 
 artifact ord_ppl_demo at sha256:5555555555555555555555555555555555555555555555555555555555555555
 policy ord-ppl-v1
 use backends [ord@1]
 
+let candidate = sys_new
+let baseline = sys_base
+let metric = perplexity
+let dataset = wikitext103
+let candidate_score = 28.4
+let baseline_score = 31.6
+
 # --- The comparative claim the bridge rule delivers -------------------------------------------
 # Same predicate as S2's: `better`. A reader comparing the two examples sees one claim shape and
 # two metrics, which is the reading the surface is for.
 
 claim c1
-  nl      = "sys_new outperforms sys_base on WikiText-103 perplexity (28.4 vs 31.6)"
-  formal  = better(sys_new, sys_base, perplexity, wikitext103)
+  nl      = "{candidate} outperforms {baseline} on WikiText-103 perplexity ({candidate_score} vs {baseline_score})"
+  formal  = better(candidate, baseline, metric, dataset)
   binding = { author = alice, rationale = "Ordered comparison of two reported perplexity cells; lower is better.", audit-status = reviewed }
 
 # --- The two measured cells the certificate consults ------------------------------------------
@@ -56,12 +73,12 @@ claim c1
 # system is which would produce an equally well-formed pair of leaves — which is precisely why
 # the policy has to declare the polarity.
 
-leaf e1 : reports(exp1, score_cell(sys_base, perplexity, wikitext103, 31.6))
+leaf e1 : reports(exp1, score_cell(baseline, metric, dataset, baseline_score))
   kind       = observed
   provenance = ai-executed
   refs       = [evidence/tables/perplexity.md#row=sys_base]
 
-leaf e2 : reports(exp1, score_cell(sys_new, perplexity, wikitext103, 28.4))
+leaf e2 : reports(exp1, score_cell(candidate, metric, dataset, candidate_score))
   kind       = observed
   provenance = ai-executed
   refs       = [evidence/tables/perplexity.md#row=sys_new]
@@ -70,7 +87,7 @@ leaf e2 : reports(exp1, score_cell(sys_new, perplexity, wikitext103, 28.4))
 # argument order does not mirror with the polarity — the system's value comes first here as it
 # does in S2 — so one attestation vocabulary serves both directions.
 
-leaf e3 : comparison_setup(sys_new, sys_base, perplexity, wikitext103, 28.4, 31.6)
+leaf e3 : comparison_setup(candidate, baseline, metric, dataset, candidate_score, baseline_score)
   kind       = attested
   provenance = user
   refs       = [evidence/tables/perplexity.md#caption]
@@ -84,8 +101,10 @@ leaf e3 : comparison_setup(sys_new, sys_base, perplexity, wikitext103, 28.4, 31.
 # What the elaborator generates from it is mirrored: the goal num_lt(28.4, 31.6) rather than
 # num_lt(31.6, 28.4), and the certificate slots to match — (prem 0) is the system cell here,
 # where in S2 it is the baseline cell. None of that is written by hand in either file.
+# The sub-claim likewise derives both quoted scores from the exact evidence leaves consumed by
+# the generated arithmetic rather than from parallel prose constants.
 
-comparison : better(sys_new, sys_base) on perplexity @ wikitext103
+comparison : better(candidate, baseline) on perplexity @ wikitext103
   relation = strictly-better
   recheck  = a1
   bridge   = a2

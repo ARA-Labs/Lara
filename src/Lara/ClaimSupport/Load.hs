@@ -22,7 +22,7 @@ import Data.List (isInfixOf)
 import Lara.AST (Mode (Defeasible), Policy (..), Rule (..), RuleId, Unit (..))
 import Lara.ClaimSupport (UnitRecord, computeUnit)
 import Lara.Driver (runCheck)
-import Lara.Elaborate.Internal (elaborate, registryOf)
+import Lara.Elaborate.Internal (elaborateWithSemanticProgram, registryOf)
 import Lara.Measure (InputMeta (..), parseCorpusManifest)
 import Lara.Syntax (parseProgram, parsePolicy)
 import Lara.Wire (decodeCheckInputFile)
@@ -55,8 +55,8 @@ loadUnitRecord policy im = do
   prog <- case parseProgram laraBytes of
     Left err -> error ("claim-support: surface parse failed (" ++ laraPath ++ "): " ++ show err)
     Right ok -> pure ok
-  surfaceUnit <-
-    case elaborate (registryOf policy) prog policy of
+  (surfaceUnit, _, semanticProgram) <-
+    case elaborateWithSemanticProgram (registryOf policy) prog policy of
       Left err ->
         error
           ( "claim-support: surface elaboration failed (" ++ laraPath
@@ -72,7 +72,7 @@ loadUnitRecord policy im = do
         ci
         (unitArgs surfaceUnit)
         (runCheck ci)
-        prog
+        semanticProgram
     )
   where
     laraPath = replaceCoreSuffix (imPath im)

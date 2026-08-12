@@ -699,3 +699,41 @@ entries:
     - "Staged O67 as a heuristic because it generalizes the four false-pass mechanisms into a reusable guard-design rule; no explicit researcher affirmation occurred this turn."
     - "Did NOT promote O65. This turn revisited its topic and showed that the N167 guard needed additional anchoring before broader drift-prevention language was safe; the final positional-label limit remains explicit."
     - "No logic-layer entry changed. H13 remains accurate at its current abstraction, and the new implementation detail stays staged pending a closure signal."
+
+- turn: "2026-08-11_001#3"
+  notes:
+    - "Routed N170 as one post-merge audit experiment: live PR state, hosted checks, synchronized main, issue closure, and plan dependencies jointly establish the current handoff."
+    - "Staged O68 as architecture rather than a decision: the #88b recommendation is AI-suggested and awaits researcher confirmation."
+    - "Did NOT treat the PR #102 reviewer's normalization-table cleanup as the next standalone milestone; it is fail-closed maintenance suitable to fold into the next parity-file touch."
+    - "Separated value bindings from named certificate slots because strict Sigma resolves the former's bare-name hazard, while AST.hs and the grammar still define Cert payloads as opaque."
+    - "No logic-layer entry changed. The user reported a merge and asked for a recommendation but did not affirm a new code direction."
+
+- turn: "2026-08-11_001#4"
+  notes:
+    - "Routed N171 as a user decision: 'checkout a new branch for it' explicitly acts on the immediately preceding #88b sequencing recommendation."
+    - "Promoted O68 through verbal affirmation and upgraded provenance to user-revised; its destination is the trace decision N171 rather than a logic claim."
+    - "Created feature/88b-surface-bindings from synchronized main and preserved the current ARA edits; no source implementation began."
+    - "No logic-layer entry changed. The next gate remains a focused design for value bindings and interpolation before implementation."
+
+- turn: "2026-08-11_001#5"
+  notes:
+    - "Routed N172 as an AI-executed planning experiment: source inspection, design synthesis, plan creation, and ambiguity review produced one concrete implementation artifact."
+    - "Did NOT create a new staged observation. O68 already captures and has crystallized the selected architecture; this turn made that direction executable rather than introducing a new research claim."
+    - "Corrected a false idempotence claim during plan review: decoding doubled braces is a one-way semantic transition, so value/cell interpolation must run exactly once before comparison expansion."
+    - "Did NOT treat the plan draft as researcher approval. Implementation remains gated on approval or requested revisions; no source code changed."
+    - "No logic-layer entry changed; O65-O67 still lack closure signals."
+- turn: "2026-08-11_001#6"
+  notes:
+    - "Routed N173 as a direct AI-executed implementation experiment: committed code, independent review, local gates, PR #103, and hosted CI are journey facts."
+    - "Did NOT stage a new observation. The implementation realizes the already crystallized O68/N171 direction and introduces no separately asserted research claim."
+    - "Recorded the review-found escaped-brace/no-binding fixture interaction inside N173 rather than as a dead end because the production design was unchanged and the focused test repair passed."
+    - "Did NOT revise H13: this turn supplies another instance of its existing compiler-witness rule, while its statement and forensic code bindings remain current."
+    - "O65-O67 still lack closure signals. Named certificate slots and theta inference remain explicit open work."
+- turn: "2026-08-11_001#7"
+  notes:
+    - "Routed N174 as one AI-executed review-resolution experiment: feedback adjudication, red-green parser repair, documented rendering choices, example invariant restoration, and final gates form one outcome."
+    - "Did NOT stage a new claim. The authored-value versus evidence-cell distinction is a committed presentation contract specific to the already selected O68/N171 architecture, not a newly generalized research assertion."
+    - "Kept TStr quoting rather than introducing a hand-built-AST-only special case; concrete .lara value RHS syntax still cannot express TStr."
+    - "Restored S2/S5 comparison sub-claims to {cell ...}; this preserves N171's stronger evidence-derived anti-staleness guarantee while bindings continue to reduce repeated term positions."
+    - "No logic-layer entry changed. O65-O67 still lack closure signals; PR #103 now awaits reviewer re-approval rather than implementation work."
+

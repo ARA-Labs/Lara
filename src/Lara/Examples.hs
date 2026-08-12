@@ -123,6 +123,7 @@ nanogptTailEma =
     , programDigest = Digest "sha256:c02aab…"
     , programPolicy = PolicyId "empirical-ablation-v1"
     , programBackends = [(BackendId "nd", "1")]
+    , programValueBindings = []
     , programDecls =
         [ DeclClaim
             Claim
@@ -221,6 +222,7 @@ nanogptV12Quarantine =
     , programDigest = Digest "sha256:c05dd…"
     , programPolicy = PolicyId "empirical-ablation-v1"
     , programBackends = [(BackendId "nd", "1")]
+    , programValueBindings = []
     , programDecls =
         [ DeclClaim
             Claim
@@ -329,6 +331,7 @@ ls20SwitchDispute =
     , programDigest = Digest "sha256:ls20c09…"
     , programPolicy = PolicyId "puzzle-inference-v1"
     , programBackends = []
+    , programValueBindings = []
     , programDecls =
         [ DeclClaim
             Claim

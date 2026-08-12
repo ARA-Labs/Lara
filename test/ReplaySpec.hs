@@ -22,6 +22,7 @@ sourceProgram =
     , programDigest = Digest "sha256:artifact-0"
     , programPolicy = PolicyId "empirical-v1"
     , programBackends = [(BackendId "nd", "1")]
+    , programValueBindings = []
     , programDecls = []
     }
 

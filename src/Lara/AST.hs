@@ -81,6 +81,8 @@ module Lara.AST
   , SurfaceStep (..)
   , SurfaceAttack (..)
     -- * Programs (spec §2, §4.4)
+  , ValueName (..)
+  , ValueBinding (..)
   , Digest (..)
   , ChallengeTarget (..)
   , ArgConcl (..)
@@ -767,11 +769,26 @@ data Decl
     -- presentation-only, expanded by the elaborator
   deriving (Eq, Show)
 
+-- | A source-level name for a program-header value binding
+-- (@lara-syntax\@0.4@). This namespace is distinct from constructors and rule
+-- parameters; semantic collision checks belong to elaboration.
+newtype ValueName = ValueName String
+  deriving (Eq, Ord, Show)
+
+-- | An authored program-header value binding. Bindings are retained in source
+-- order by 'programValueBindings'.
+data ValueBinding = ValueBinding
+  { valueName :: ValueName
+  , valueTerm :: Term
+  }
+  deriving (Eq, Show)
+
 -- | A LARA program (spec §2):
 --
 -- > P ::= artifact A at digest
 -- >       policy Pi
 -- >       use backends [beta@version*]
+-- >       valueBinding*
 -- >       declaration*
 --
 -- Checked against a fixed proposition signature @Sigma@, the versioned policy
@@ -782,6 +799,7 @@ data Program = Program
   , programDigest :: Digest
   , programPolicy :: PolicyId
   , programBackends :: [(BackendId, String)] -- ^ @[beta@version]@
+  , programValueBindings :: [ValueBinding] -- ^ authored order
   , programDecls :: [Decl]
   }
   deriving (Eq, Show)

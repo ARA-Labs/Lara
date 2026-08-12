@@ -30,6 +30,7 @@ import Lara.AST
   , SupportTerm (..)
   )
 import qualified Lara.AST as AST
+import Lara.Elaborate.Internal (elaborateWithSemanticProgram, registryOf)
 import Lara.Grounded (Claim (..))
 import Lara.MechReview
   ( ReviewComment (..)
@@ -43,15 +44,20 @@ import Lara.MechReview
 import Lara.MechReview.Load (loadReviewUnits)
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Reporting (ClaimReport (..), IncompleteAlternative (..))
-import Lara.Wire (PublicStatus (..), decodeCheckInputFile)
+import Lara.Syntax (parsePolicy, parseProgram)
+import TestReplay (testCheckInput)
+import ValueBindingsSpec (boundSource, strictPolicySource, unboundSource)
+import Lara.Wire (PublicStatus (..), decodeCheckInputFile, decodeUnit, encodeUnit)
 
-manifestPath, frozenPath :: FilePath
+manifestPath, policyPath, frozenPath :: FilePath
 manifestPath = "corpus-units/MANIFEST.tsv"
+policyPath = "corpus-units/corpus-v1.policy.lara"
 frozenPath = "measurements/frozen/mechanical-reviews.md"
 
 mechReviewSpecProps :: [(String, IO Result)]
 mechReviewSpecProps =
   [ ("mech-review: rendered corpus reviews re-diff the committed frozen golden", quickCheckResult prop_frozenGolden)
+  , ("mech-review: value bindings preserve semantic consumer parity", quickCheckResult prop_valueBindingConsumerParity)
   , ("mech-review: one comment per non-justified claim, each naming its diagnostic", quickCheckResult prop_shape)
   , ("mech-review: gap obligation-naming and contested arms render their diagnostic", quickCheckResult prop_uncoveredArms)
   , ("mech-review: evidence-blocked renders as a nonempty quarantine finding", quickCheckResult prop_evidenceBlocked)
@@ -59,13 +65,33 @@ mechReviewSpecProps =
   , ("mech-review: summary merges hidden conditional labels", quickCheckResult prop_blockedSummary)
   ]
 
+prop_valueBindingConsumerParity :: Property
+prop_valueBindingConsumerParity =
+  once $
+    case (parsePolicy strictPolicySource, parseProgram boundSource, parseProgram unboundSource) of
+      (Right policy, Right bound, Right unbound) ->
+        case
+          ( elaborateWithSemanticProgram (registryOf policy) bound policy
+          , elaborateWithSemanticProgram (registryOf policy) unbound policy
+          ) of
+          (Right (_, _, boundProgram), Right (unboundUnit, _, unboundProgram)) ->
+            case decodeUnit (encodeUnit unboundUnit) of
+              Left err -> counterexample ("core codec failed: " ++ show err) False
+              Right coreUnit ->
+                let coreInput = testCheckInput coreUnit
+                 in unitReviewComments "value-bindings" coreInput boundProgram
+                      === unitReviewComments "value-bindings" coreInput unboundProgram
+          values -> counterexample ("elaboration failed: " ++ show values) False
+      values -> counterexample ("fixture parse failed: " ++ show values) False
+
+
 -- | Re-render the whole corpus document from the freshly loaded units and require
 -- it to reproduce the COMMITTED @mechanical-reviews.md@ byte-for-byte. This pins
 -- every review sentence, the summary counts, and the preamble — the byte-identical
 -- re-diff the house freeze discipline applies to generated deliverables.
 prop_frozenGolden :: Property
 prop_frozenGolden = once $ ioProperty $ do
-  units <- loadReviewUnits manifestPath
+  units <- loadReviewUnits manifestPath policyPath
   frozen <- readFile frozenPath
   pure $ counterexample "frozen mechanical-reviews.md" (renderReviews units === frozen)
 
@@ -76,7 +102,7 @@ prop_frozenGolden = once $ ioProperty $ do
 -- claim as unsupported or names an unmet obligation.
 prop_shape :: Property
 prop_shape = once $ ioProperty $ do
-  units <- loadReviewUnits manifestPath
+  units <- loadReviewUnits manifestPath policyPath
   let comments = concatMap (\(n, ci, prog) -> unitReviewComments n ci prog) units
       statuses = map (publicStatusWord . rcStatus) comments
       count w = length (filter (== w) statuses)
@@ -169,14 +195,14 @@ prop_evidenceBlocked = once $ ioProperty $ do
                 ]
             other -> counterexample ("review comments: " ++ show other) False
   where
-    -- The wire fixture has no surface sibling, so provide the minimal matching
-    -- presentation declarations that 'unitReviewComments' uses for claim ids
-    -- and natural-language bindings.
+    -- Keep this construction positional as an intentional arity witness for the
+    -- exported presentation constructor.
     reviewProgram =
       Program
         "demo"
         (Digest "sha256:demo")
         (PolicyId "conformance-v1")
+        []
         []
         [AST.DeclClaim (surfaceClaim "concl" "blocked claim"), AST.DeclClaim (surfaceClaim "other" "ordinary claim")]
     surfaceClaim name nl =

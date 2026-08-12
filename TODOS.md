@@ -216,14 +216,34 @@ form needed. Deferred from the 0.3 track (eng review 2026-08-08, outside-voice
 finding 3): the comparison form uniquely delivers goal generation and polarity
 checking, but the general θ relief is separable and cheaper.
 
-**Context:** The matcher lands in `src/Lara/Elaborate/Internal.hs` as part of
+**Context:** The matcher landed in `src/Lara/Elaborate/Internal.hs` as part of
 plan `plans/2026-08-08-lara-syntax-03-surface.md` §5. Exposing it on `arg`
-needs only a surface form for "premises by name" plus the same consistency
-errors. Candidate rider for #88b.
+needs a surface form for "premises by name" plus the same consistency errors.
+This remains a separate post-#88b rider: `lara-syntax@0.4` closes value bindings
+without adding named premise references or θ inference.
 
 **Effort:** M
 **Priority:** P3
-**Depends on:** lara-syntax@0.3 (D4's matcher)
+**Depends on:** `lara-syntax@0.4`; reuses the matcher introduced by the
+`lara-syntax@0.3` comparison form.
+
+### Named certificate premise slots
+
+**What:** Let an authored opaque certificate refer to a premise by source name
+(for example `(prem e1)`) instead of a numeric slot.
+
+**Why:** `lara-syntax@0.4` value substitution is deliberately restricted to
+typed `Term` fields. `Cert` remains the backend-owned opaque S-expression
+boundary, so making a general value pass inspect its payload would violate the
+existing layer contract.
+
+**Context:** Explicitly split from the completed #88b/D7 value-binding work.
+This needs a separate design for a surface layer above `Cert`; hand-authored
+certificates retain numeric 0-based slots until then.
+
+**Effort:** M
+**Priority:** P3
+**Depends on:** an explicit opaque-certificate layering decision.
 
 ### Σ sort-naming refinement pass (possible-worlds trigger)
 
@@ -251,25 +271,26 @@ freeze tag when it does.
 **Depends on:** sorts-in-checker D8/D11 landed; blocked by the
 possible-worlds design decision.
 
-### spec.md's presentation-version pointer
-
-**What:** Decide how `docs/spec.md` (≈lines 144-149) refers to presentation
-syntax versions as grammar appendices accumulate, and record it — e.g. one
-sentence: "presentation syntax versions live in `docs/lara-surface-grammar.md`;
-spec.md pins the core."
-
-**Why:** spec.md names `lara-syntax@0.1` as *the* presentation version; App. A
-(0.2) shipped without updating it and App. B (0.3) repeats the question. The
-current state is precedent-by-accident, not a decision.
-
-**Context:** Found during the 2026-08-08 eng review of the 0.3 surface plan
-while checking App. A as the App. B precedent. Purely editorial; deliberately
-kept out of the 0.3 diff to avoid pulling spec.md into a surface-track PR.
-
-**Effort:** S
-**Priority:** P4
-
 ## Completed
+
+### #88b / D7 value bindings (`lara-syntax@0.4`)
+
+The value-binding deliverable is complete. Programs carry an ordered
+`ValueBinding` table after the fixed header; elaboration validates it against
+strict `Σ`, substitutes every program-side term field simultaneously and
+non-recursively, expands `{name}` and the existing `{cell leaf}` grammar once,
+clears the table, and only then runs the `@0.3` comparison expansion. The
+Haskell/Lean presentation models and live documentation now describe the same
+`@0.4` shape, while `lara-core@0.2` remains fixed.
+
+Named certificate premise slots and plain-`arg` θ matching are intentionally
+not folded into this completion; both remain explicit deferred items above.
+
+### spec.md presentation-version pointer
+
+Completed with `lara-syntax@0.4`: `docs/spec.md` now states that presentation
+versions live in `docs/lara-surface-grammar.md` while the specification pins
+`lara-core@0.2`.
 
 ### AST ↔ Presentation.lean parity guard
 
@@ -283,7 +304,7 @@ carries `policySigma` as a second `Policy` field and models measurands as
 audited in `AxCheck.lean`. On top of that synced state, `scripts/presentation-shape.hs`
 and `lean/Lara/PresentationParity.lean` each emit a normalized name-and-arity
 inventory of the surface-reachable types, and `scripts/check-presentation-parity.sh`
-diffs the two — 68 rows, byte-identical — exposed as `make presentation-parity` and
+diffs the two — 70 rows, byte-identical — exposed as `make presentation-parity` and
 run as a CI step.
 
 The guard never parses source text. Each side's inventory is protected by its own

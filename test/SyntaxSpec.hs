@@ -21,7 +21,7 @@
 --     required field each yield @Left@ a located error.
 module SyntaxSpec (syntaxSpecProps) where
 
-import Data.List (isInfixOf)
+import Data.List (isInfixOf, nub)
 import Test.QuickCheck
 
 import Lara.AST
@@ -51,7 +51,7 @@ smallListOf g = do
 -- identifiers so a generated id never collides with a keyword position.
 reservedWords :: [String]
 reservedWords =
-  [ "artifact", "policy", "at", "use", "backends", "claim", "leaf", "arg"
+  [ "artifact", "policy", "at", "use", "backends", "let", "claim", "leaf", "arg"
   , "status", "rule", "mode", "premises", "conclusion", "question", "contrary"
   , "exception", "admission", "theory", "nl", "formal", "binding", "kind", "provenance"
   , "refs", "author", "rationale", "audit-status", "by", "supports"
@@ -61,10 +61,10 @@ reservedWords =
   , "user", "ai-executed", "checker", "unreviewed", "reviewed", "disputed"
   , "mandatory", "optional", "admit", "quarantine", "reject", "true", "false"
   , "duplicate-reports"
-    -- lara-syntax@0.3 (grammar App. B.7). This list MIRRORS §1.4 and must be
-    -- kept in sync with it: a keyword missing here lets the generator emit a
-    -- colliding identifier, and the round-trip property then fails for a reason
-    -- that has nothing to do with the grammar.
+    -- lara-syntax@0.4 (grammar §1.4; Apps. B.7 and C.1). This list MIRRORS
+    -- §1.4 and must be kept in sync with it: a keyword missing here lets the
+    -- generator emit a colliding identifier, and the round-trip property then
+    -- fails for a reason that has nothing to do with the grammar.
   , "measurand", "comparison", "comparison-scheme", "recheck", "bridge"
   , "result", "baseline", "relation", "claims", "on", "where", "cell"
   , "sort", "con", "pred", "Num", "Str"
@@ -98,9 +98,9 @@ genStr :: Gen String
 genStr = listOf (elements (['a' .. 'z'] ++ ['0' .. '9'] ++ " (),.:;=_-/#"))
 
 -- | An @nl@ string body honouring grammar App. B.6's brace contract: plain
--- text, @{cell \<leafId\>}@ directives, and @{{@\/@}}@ literal-brace escapes.
--- The presentation AST stores the body raw, so every piece here must be
--- reproduced byte-for-byte by the printer.
+-- text, @{cell \<leafId\>}@ directives, one-token @{valueName}@ references,
+-- and @{{@\/@}}@ literal-brace escapes. The presentation AST stores the body
+-- raw, so every piece here must be reproduced byte-for-byte by the printer.
 genNlStr :: Gen String
 genNlStr = concat <$> smallListOf piece
   where
@@ -108,6 +108,7 @@ genNlStr = concat <$> smallListOf piece
       frequency
         [ (5, genStr)
         , (3, (\l -> "{cell " ++ l ++ "}") <$> genIdent)
+        , (2, (\v -> "{" ++ v ++ "}") <$> genIdent)
         , (2, elements ["{{", "}}"])
         ]
 
@@ -383,14 +384,29 @@ genBackendRef = do
   v <- oneof [show <$> (choose (0, 99) :: Gen Int), genIdent]
   pure (BackendId b, v)
 
+genValueBindings :: Gen [ValueBinding]
+genValueBindings = do
+  names <- nub <$> smallListOf genIdent
+  terms <- vectorOf (length names) genTerm
+  pure (zipWith (\name term -> ValueBinding (ValueName name) term) names terms)
+
 genProgram :: Gen Program
-genProgram =
-  Program
-    <$> genIdent
-    <*> (Digest <$> genDigestStr)
-    <*> (PolicyId <$> genIdent)
-    <*> smallListOf genBackendRef
-    <*> smallListOf genDecl
+genProgram = do
+  artifact <- genIdent
+  digest <- Digest <$> genDigestStr
+  policy <- PolicyId <$> genIdent
+  backends <- smallListOf genBackendRef
+  bindings <- genValueBindings
+  decls <- smallListOf genDecl
+  pure
+    Program
+      { programArtifact = artifact
+      , programDigest = digest
+      , programPolicy = policy
+      , programBackends = backends
+      , programValueBindings = bindings
+      , programDecls = decls
+      }
 
 -- ---------------------------------------------------------------------------
 -- Policy
@@ -586,6 +602,92 @@ prop_programRoundTrip :: Property
 prop_programRoundTrip =
   forAll genProgram $ \p -> parseProgram (printProgram p) === Right p
 
+-- | Empty binding tables retain the exact legacy bytes.
+prop_emptyValueBindingsRoundTrip :: Property
+prop_emptyValueBindingsRoundTrip =
+  once $
+    let program = valueBindingFixture []
+        source =
+          unlines
+            [ "artifact binding_fixture at sha256:binding-fixture"
+            , "policy binding-policy"
+            , "use backends []"
+            , ""
+            , "status c"
+            ]
+     in conjoin
+          [ printProgram program === source
+          , parseProgram source === Right program
+          ]
+
+-- | Non-empty tables print in authored order with one blank line before decls.
+prop_nonEmptyValueBindingsRoundTrip :: Property
+prop_nonEmptyValueBindingsRoundTrip =
+  once $
+    let bindings =
+          [ ValueBinding (ValueName "candidate") (TCon (FunSym "sys_new") [])
+          , ValueBinding (ValueName "candidate_score") (TCon (FunSym "box") [TNum "0.74"])
+          ]
+        program = valueBindingFixture bindings
+        source =
+          unlines
+            [ "artifact binding_fixture at sha256:binding-fixture"
+            , "policy binding-policy"
+            , "use backends []"
+            , "let candidate = sys_new"
+            , "let candidate_score = box(0.74)"
+            , ""
+            , "status c"
+            ]
+        noDeclProgram = program {programDecls = []}
+        noDeclSource =
+          unlines
+            [ "artifact binding_fixture at sha256:binding-fixture"
+            , "policy binding-policy"
+            , "use backends []"
+            , "let candidate = sys_new"
+            , "let candidate_score = box(0.74)"
+            ]
+     in conjoin
+          [ printProgram program === source
+          , parseProgram source === Right program
+          , printProgram noDeclProgram === noDeclSource
+          , parseProgram noDeclSource === Right noDeclProgram
+          ]
+
+
+-- | Inline spaces around a value name are authored bytes, just like the gaps
+-- retained by the @{cell …}@ form.
+prop_spacedValueReferenceRoundTrip :: Property
+prop_spacedValueReferenceRoundTrip =
+  once $
+    let source =
+          unlines
+            [ "artifact binding_fixture at sha256:binding-fixture"
+            , "policy binding-policy"
+            , "use backends []"
+            , "let candidate = sys_new"
+            , ""
+            , "claim c"
+            , "  nl = \"selected { \tcandidate \t} from { \tcell\te1 \t}\""
+            , "  formal = selected(sys_new)"
+            , "  binding = { author = alice, rationale = \"\", audit-status = reviewed }"
+            ]
+     in case parseProgram source of
+          Left err -> counterexample (show err) False
+          Right program -> printProgram program === source
+
+valueBindingFixture :: [ValueBinding] -> Program
+valueBindingFixture bindings =
+  Program
+    { programArtifact = "binding_fixture"
+    , programDigest = Digest "sha256:binding-fixture"
+    , programPolicy = PolicyId "binding-policy"
+    , programBackends = []
+    , programValueBindings = bindings
+    , programDecls = [DeclStatus (PropId "c")]
+    }
+
 prop_argAssuranceRoundTrip :: Property
 prop_argAssuranceRoundTrip =
   let src =
@@ -629,16 +731,17 @@ prop_policyRoundTrip =
 -- assertion rather than a printed note; the thresholds sit well under the
 -- generators' real rates so they measure presence, not tuning.
 
--- | Every @0.3 /program/ form reaches the round-trip.
+-- | Every @0.3 / @0.4 /program/ form reaches the round-trip.
 prop_programFormCoverage :: Property
 prop_programFormCoverage =
   checkCoverage $
     forAll genProgram $ \p ->
       let ds = programDecls p
-       in cover 5 (any isComparison ds) "comparison block"
+       in cover 20 (not (null (programValueBindings p))) "value binding table"
+            . cover 5 (any isComparison ds) "comparison block"
             . cover 2 (any (declHasStep isStepIndex) ds) "attack path: StepIndex"
             . cover 2 (any (declHasStep (not . isStepIndex)) ds) "attack path: StepName"
-            . cover 5 (any claimNlHasBrace ds) "nl string with {cell …}/{{}}"
+            . cover 5 (any claimNlHasBrace ds) "nl string with value/{cell …}/{{}}"
             $ parseProgram (printProgram p) === Right p
   where
     isComparison (DeclComparison _) = True
@@ -1029,9 +1132,12 @@ deepCheck = quickCheckWithResult stdArgs {maxSuccess = 2000}
 syntaxSpecProps :: [(String, IO Result)]
 syntaxSpecProps =
   [ ("syntax program round-trip (result 12)", deepCheck prop_programRoundTrip)
+  , ("syntax empty value-binding table preserves legacy bytes", quickCheckResult prop_emptyValueBindingsRoundTrip)
+  , ("syntax non-empty value-binding table round-trip", quickCheckResult prop_nonEmptyValueBindingsRoundTrip)
+  , ("syntax spaced value reference round-trip", quickCheckResult prop_spacedValueReferenceRoundTrip)
   , ("syntax arg assurance round-trip", quickCheckResult prop_argAssuranceRoundTrip)
   , ("syntax policy round-trip (result 12)", deepCheck prop_policyRoundTrip)
-  , ("syntax @0.3 program forms are covered", quickCheckResult prop_programFormCoverage)
+  , ("syntax @0.3/@0.4 program forms are covered", quickCheckResult prop_programFormCoverage)
   , ("syntax @0.3 policy forms are covered", quickCheckResult prop_policyFormCoverage)
   , ("syntax policy theory table round-trip", quickCheckResult prop_policyTheoriesRoundTrip)
   , ("syntax source round-trip", deepCheck prop_sourceRoundTrip)

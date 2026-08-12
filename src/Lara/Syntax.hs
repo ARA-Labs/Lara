@@ -1,12 +1,12 @@
 -- | The concrete @.lara@ surface syntax: parser and label-preserving printer
--- (@lara-syntax\@0.3@, additive over the frozen @0.1@ grammar in
+-- (@lara-syntax\@0.4@, additive over the frozen @0.1@ grammar in
 -- @docs/lara-surface-grammar.md@).
 --
--- == What @\@0.3@ adds (grammar App. B)
+-- == Live surface versions
 --
--- Five additive surface forms, all __presentation-only__ — parsed and printed
--- here, expanded by @Lara.Elaborate@ /before the checker anchor exists/, and
--- none of them reaching 'Unit':
+-- @\@0.3@ introduced the six Appendix B forms below. They remain
+-- presentation-only, are parsed and printed here, and are expanded by
+-- @Lara.Elaborate@ /before the checker anchor exists/:
 --
 --   * B.1 @measurand m : Num where higher-is-better@ — a policy-level table;
 --   * B.2 @comparison-scheme@ blocks keyed by @(relation, polarity)@;
@@ -15,11 +15,16 @@
 --   * B.5 attack-path segments that name a premise label, and
 --   * B.6 the @nl@ brace contract (@{cell l}@ directives, @{{@\/@}}@ escapes).
 --
+-- @\@0.4@ adds Appendix C's ordered @let name = term@ table and @{name}@
+-- interpolation. Bindings round-trip as authored and are consumed once, before
+-- the @\@0.3@ comparison pass; neither surface reaches 'Unit'.
+--
 -- Expansion deliberately does __not__ happen here: spec result 12
--- (@parse ∘ print = id@) is stated on the presentation AST, so a @comparison@
--- must round-trip as a @comparison@ and never as its expansion. For the same
--- reason B.5 positions and B.6 @nl@ bodies are recorded __in the spelling they
--- were authored in__ ('SurfaceStep', and a raw unexpanded @nl@ string).
+-- (@parse ∘ print = id@) is stated on the presentation AST, so bindings and a
+-- @comparison@ must round-trip as authored and never as their expansions. For
+-- the same reason B.5 positions and brace-bearing @nl@ bodies are recorded
+-- __in the spelling they were authored in__ ('SurfaceStep', and a raw
+-- unexpanded @nl@ string).
 --
 -- == Position in the pipeline
 --
@@ -101,6 +106,7 @@ module Lara.Syntax
 
 import Data.Char (isAlpha, isDigit)
 import Data.List (intercalate)
+import qualified Data.Set as Set
 
 import Lara.AST
 import Lara.Sigma
@@ -165,6 +171,14 @@ instance Monad P where
 -- | Fail at the current cursor.
 failP :: String -> P a
 failP msg = P $ \s -> Left (ParseError (psLine s) (psCol s) msg)
+
+-- | Read the current 1-based source position without consuming input.
+getPosition :: P (Int, Int)
+getPosition = P $ \s -> Right ((psLine s, psCol s), s)
+
+-- | Fail at a previously captured source position.
+failAtP :: (Int, Int) -> String -> P a
+failAtP (line, col) msg = P $ \_ -> Left (ParseError line col msg)
 
 getInput :: P String
 getInput = P $ \s -> Right (psInput s, s)
@@ -284,7 +298,7 @@ stringLit = do
         _ -> failP "unterminated string literal"
     _ -> failP "expected a string literal"
 
--- | The closed directive vocabulary currently has one member.
+-- | The directive head reserved for premise-cell interpolation.
 nlCellDirective :: String
 nlCellDirective = "cell"
 
@@ -292,25 +306,27 @@ nlCellDirective = "cell"
 attackPathTerminalMarkers :: [String]
 attackPathTerminalMarkers = ["rule", "leaf"]
 
--- | An @nl@ string with @lara-syntax\@0.3@'s brace contract (grammar App. B.6):
+-- | An @nl@ string with @lara-syntax\@0.4@'s brace contract (grammar Apps. B.6 and C.5):
 --
--- > nlString  ::= '"' { nlChar | directive | "{{" | "}}" } '"'
--- > directive ::= "{" "cell" leafId "}"
+-- > igap      ::= { " " | "\t" }
+-- > hgap      ::= ( " " | "\t" ) igap
+-- > directive ::= "{" igap "cell" hgap leafId igap "}"
+-- >             | "{" igap valueName igap "}"
 --
 -- Inside an @nl@ string @{{@ and @}}@ denote literal braces (the f-string
 -- convention this surface's audience already knows) and __any other @{@ must
--- open a recognized directive__ — in @\@0.3@ that means @{cell \<leafId\>}@. An
--- unknown directive, a bare @}@, or an unterminated brace is a /located/ parse
--- error. This is strict rather than lenient on purpose: if @{cel e2}@ (a typo)
--- silently stayed literal text, a number the author believed was auto-synced
--- would be frozen prose — the exact prose↔formal staleness the feature exists
--- to kill.
+-- open a recognized directive__: either @{cell \<leafId\>}@ or a one-token
+-- value reference. Inline spaces and tabs around either form are retained in
+-- the raw body. An unknown multi-token directive, a bare @}@, or an
+-- unterminated brace is a /located/ parse error. This is strict rather than
+-- lenient on purpose: if @{cel e2}@ (a typo) silently stayed literal text, a
+-- number the author believed was auto-synced would be frozen prose — the exact
+-- prose↔formal staleness the feature exists to kill.
 --
 -- The result is the __raw__ body: directives are not expanded and @{{@\/@}}@
 -- are not converted, so the printer emits the authored bytes back and
 -- @parse ∘ print = id@ holds on the spelling. Interpolation is the elaborator's
--- job (B.6), which is also where the named leaf's premise-cell obligation is
--- checked.
+-- job, which is also where names are resolved and premise cells are checked.
 --
 -- Every claim-form @nl@ field uses this contract: both §3's ordinary
 -- @claim@ declaration and App. B.3's nested @claims@ block. Binding
@@ -341,25 +357,30 @@ nlStringLit = do
         c : _ -> do advanceP; go (c : acc)
     directive = do
       advanceP -- the opening '{'
+      leadingGap <- takeWhileP isInlineSpace
       s <- getInput
       name <- case s of
         c : _ | isIdentStart c -> takeWhileP isIdentChar
         _ ->
           failP
             "expected a directive after '{' in nl string (write '{{' for a literal brace)"
-      if name /= nlCellDirective
-        then failP ("unknown nl directive '" ++ name ++ "' (expected '{" ++ nlCellDirective ++ " <leaf>}')")
-        else do
-          gap <- takeWhileP isInlineSpace
+      gap <- takeWhileP isInlineSpace
+      if name == nlCellDirective
+        then do
           s' <- getInput
           arg <- case s' of
             c : _ | isIdentStart c -> takeWhileP isIdentChar
             _ -> failP "expected a leaf id in a '{cell …}' nl directive"
-          gap' <- takeWhileP isInlineSpace
+          trailingGap <- takeWhileP isInlineSpace
           s'' <- getInput
           case s'' of
-            '}' : _ -> ("{" ++ name ++ gap ++ arg ++ gap' ++ "}") <$ advanceP
+            '}' : _ -> ("{" ++ leadingGap ++ name ++ gap ++ arg ++ trailingGap ++ "}") <$ advanceP
             _ -> failP "unterminated '{cell …}' nl directive (expected '}')"
+        else do
+          s' <- getInput
+          case s' of
+            '}' : _ -> ("{" ++ leadingGap ++ name ++ gap ++ "}") <$ advanceP
+            _ -> failP ("unknown nl directive '" ++ name ++ "' (expected a one-token value reference or '{" ++ nlCellDirective ++ " <leaf>}')")
     isInlineSpace c = c == ' ' || c == '\t'
 
 -- | A numeric literal @[+|-] digit+ [ . digit+ ]@ (grammar §1.3).
@@ -633,6 +654,7 @@ programP = do
   keyword "use"
   keyword "backends"
   bes <- brackets backendRefP
+  vbs <- valueBindingsP
   ds <- declsP
   pure
     Program
@@ -640,8 +662,41 @@ programP = do
       , programDigest = dig
       , programPolicy = PolicyId pid
       , programBackends = bes
+      , programValueBindings = vbs
       , programDecls = ds
       }
+
+-- | Parse the ordered @let@ table between the fixed header and declarations
+-- (grammar App. C.1). Duplicate names are rejected at their second declaration.
+valueBindingsP :: P [ValueBinding]
+valueBindingsP = go Set.empty []
+  where
+    go seen acc = do
+      mw <- peekIdent
+      case mw of
+        Just "let" -> do
+          bindingPos <- getPosition
+          binding <- valueBindingP
+          let name = valueName binding
+          if name `Set.member` seen
+            then
+              failAtP bindingPos
+                ( "duplicate value binding: "
+                    ++ let ValueName raw = name in raw
+                )
+            else go (Set.insert name seen) (binding : acc)
+        _ -> pure (reverse acc)
+
+-- | @valueBinding ::= "let" valueName "=" term@ (grammar App. C.1).
+valueBindingP :: P ValueBinding
+valueBindingP = do
+  keyword "let"
+  rawName <- identifier
+  if rawName == nlCellDirective
+    then failP "'cell' is reserved and cannot be used as a value binding name"
+    else do
+      symbol '='
+      ValueBinding (ValueName rawName) <$> termP
 
 -- | @backendRef ::= ident \"@\" (number | ident)@ → @(BackendId, version)@,
 -- version kept as a surface string (grammar §1.3).
@@ -680,6 +735,8 @@ declsP = go []
       mw <- peekIdent
       case mw of
         Just k | k `elem` declKeywords -> do d <- declP; go (acc ++ [d])
+        Just "let" ->
+          failP "value binding declarations must precede all program declarations"
         _ -> pure acc
 
 declP :: P Decl
@@ -1624,7 +1681,12 @@ printProgram p =
     , "policy " ++ let PolicyId pid = programPolicy p in pid
     , "use backends [" ++ intercalate ", " (map backendRefStr (programBackends p)) ++ "]"
     ]
+      ++ map printValueBinding (programValueBindings p)
       ++ concatMap (("" :) . printDecl) (programDecls p)
+
+printValueBinding :: ValueBinding -> String
+printValueBinding (ValueBinding (ValueName name) term) =
+  "let " ++ name ++ " = " ++ printTerm term
 
 digestStr :: Digest -> String
 digestStr (Digest d) = d
