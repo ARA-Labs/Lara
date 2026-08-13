@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make LARA and `examples/the-ara-of-ara` pass the updated `ara check --strict` with zero errors and zero warnings while preserving canonical provenance, narrative metadata, evidence bodies, and LARA's 177-node research DAG.
+**Goal:** Make `examples/the-ara-of-ara` pass the updated `ara check --strict` with zero errors and zero warnings, make LARA pass non-strict `ara check` with zero errors, and preserve canonical provenance, narrative metadata, evidence bodies, and LARA's 177-node research DAG.
 
-**Architecture:** The work is an ordered three-repository cutover. First widen `ara-core`'s explicit schema and manifest and expose the new fields in `ara-viewer`; then publish release `v0.1.14`, document that contract, and repair the canonical example; finally migrate LARA with a baseline-vs-current invariant checker. Downstream repositories pin the immutable `v0.1.14` runtime; no permissive allowlist or metadata-dropping compatibility path is allowed.
+**Architecture:** The work is an ordered three-repository cutover. First widen `ara-core`'s explicit schema and manifest and expose the new fields in `ara-viewer`; then publish release `v0.1.14`, document that contract, and repair the canonical example; finally migrate LARA with a baseline-vs-current invariant checker. The canonical example uses strict validation. LARA uses non-strict zero-error validation and treats warnings as advisory because the invariant checker is its blocking artifact-integrity gate. Downstream repositories pin the immutable `v0.1.14` runtime; no permissive allowlist or metadata-dropping compatibility path is allowed.
 
 **Tech Stack:** Rust 2024, Serde/serde-saphyr, Leptos/WASM, Rust integration and browser tests, YAML/Markdown, Python 3.12 + PyYAML 6.0.2 for the permanent LARA migration verifier, GitHub Actions.
 
@@ -21,6 +21,7 @@
 - LARA migration preserves all 177 node IDs; every ID/type/title/provenance/timestamp/status value; all authored narrative text and alternatives; every evidence body and cross-layer claim reference; and old DAG reachability.
 - The permanent LARA invariant verifier compares the pre-migration tree at `7718b1df27916159b8df706876579e781f8c03dc` with the final working tree and requires PyYAML 6.0.2.
 - No Haskell or Lean suite is required unless an implementation diff touches checker or mechanization files. Verification must prove those paths remain untouched.
+- LARA's runtime gate is non-strict: `ara check ara` must report zero errors, while warnings remain advisory and are recorded. The permanent migration verifier is the blocking LARA artifact-integrity gate.
 
 ---
 
@@ -681,10 +682,10 @@ Expected: both pass; summary reports 177 nodes and equal reachability.
 Run the pinned local binary:
 
 ```bash
-../ara-cli/target/debug/ara check ara --strict --json | jq '.summary'
+../ara-cli/target/debug/ara check ara --json | jq '.summary'
 ```
 
-Expected: only missing-body warnings tied to the two still-unmoved status ledgers may remain; no unknown-field, parent, legacy-field, grounding, cycle, or redundant-edge warning remains.
+Expected: zero errors and `passed: true`. Record the warning and fixable counts; warnings from unfinished evidence moves remain advisory. Inspect the diagnostics to ensure this task introduces no unexpected new warning category.
 
 - [ ] **Step 6: Commit grounding metadata**
 
@@ -727,19 +728,15 @@ Preserve each file's surrounding prose. In `ara/evidence/README.md`, rename `Sta
 
 Search the entire tracked repository for `evidence/status/` and `status/mechanization_status.md` / `status/test_status.md`; expected zero matches. Run the migration verifier; expected evidence inventory and README row checks pass.
 
-- [ ] **Step 5: Run strict ARA validation**
+- [ ] **Step 5: Run non-strict ARA validation**
 
 Run:
 
 ```bash
-../ara-cli/target/debug/ara check ara --strict --json | jq '.summary'
+../ara-cli/target/debug/ara check ara --json | jq '.summary'
 ```
 
-Expected:
-
-```json
-{"errors":0,"warnings":0,"fixable":0,"strict":true,"write_errors":false,"passed":true}
-```
+Expected: `errors` is `0`, `strict` is `false`, `write_errors` is `false`, and `passed` is `true`. Record the warning and fixable counts without requiring either to be zero.
 
 - [ ] **Step 6: Commit the path migration**
 
@@ -756,7 +753,7 @@ git commit -m "refactor(ara): move status ledgers into results"
 
 **Interfaces:**
 - Consumes: the immutable runtime SHA/tag and format PR SHA from Phases A/B.
-- Produces: hosted migration-invariant and strict-validation gates independent of any globally installed `ara`.
+- Produces: hosted migration-invariant and non-strict zero-error validation gates independent of any globally installed `ara`.
 
 - [ ] **Step 1: Add the migration invariant gate**
 
@@ -772,13 +769,13 @@ After uv setup, run:
 
 The checkout must have enough Git history/object access for `git show <baseline>:...`; set `fetch-depth: 0` on `actions/checkout` if needed.
 
-- [ ] **Step 2: Add strict validation using release `v0.1.14`**
+- [ ] **Step 2: Add non-strict validation using release `v0.1.14`**
 
 ```yaml
 - uses: ARA-Labs/ara-cli/.github/actions/check@v0.1.14
   with:
     path: ara
-    strict: true
+    strict: false
     version: v0.1.14
 ```
 
@@ -786,7 +783,7 @@ The tag is the immutable released contract from Task 4. Do not use `latest`, `v0
 
 - [ ] **Step 3: Run local CI-equivalent ARA gates**
 
-Run the unittest, migration verifier, and pinned strict checker exactly as CI will. Expected: all exit 0.
+Run the unittest, migration verifier, and pinned non-strict checker exactly as CI will. Expected: all exit 0; the checker reports zero errors, while warnings are advisory and recorded.
 
 - [ ] **Step 4: Prove checker/mechanization artifacts are untouched**
 
@@ -796,12 +793,12 @@ Compare the migration branch to `7718b1d` and fail the review if any path under 
 
 ```bash
 git add .github/workflows/ci.yml
-git commit -m "ci: enforce strict ARA migration checks"
+git commit -m "ci: enforce ARA migration checks"
 ```
 
 - [ ] **Step 6: Publish the LARA PR with pinned dependencies**
 
-Link the runtime and format PRs/commits in the body. Report the exact strict JSON summary, migration verifier summary, body hashes, node count, and hosted CI result. Do not merge until the pinned runtime contract is available.
+Link the runtime and format PRs/commits in the body. Report the exact non-strict JSON summary, migration verifier summary, body hashes, node count, and hosted CI result. Do not merge until the pinned runtime contract is available.
 
 ---
 
@@ -832,7 +829,7 @@ Expected: all exit 0.
 
 - [ ] **Step 2: Build the exact runtime once**
 
-Run `cargo build -p ara-cli --locked` and record the binary path, version, and source commit SHA. Use this same binary for both downstream strict checks.
+Run `cargo build -p ara-cli --locked` and record the binary path, version, and source commit SHA. Use this same binary for the canonical example's strict check and LARA's non-strict check.
 
 - [ ] **Step 3: Verify the published canonical example**
 
@@ -844,7 +841,7 @@ $PINNED_ARA check /path/to/Agent-Native-Research-Artifact/examples/the-ara-of-ar
 
 Expected: 0 errors, 0 warnings, 0 fixable issues, `passed: true`.
 
-- [ ] **Step 4: Verify LARA migration and strict conformance**
+- [ ] **Step 4: Verify LARA migration and zero-error conformance**
 
 Run:
 
@@ -852,10 +849,10 @@ Run:
 uv run --no-project python -m unittest scripts/test_verify_ara_migration.py -v
 uv run --no-project scripts/verify-ara-migration.py \
   --baseline 7718b1df27916159b8df706876579e781f8c03dc --artifact ara
-$PINNED_ARA check ara --strict --json
+$PINNED_ARA check ara --json
 ```
 
-Expected: all pass; strict summary is zero/zero/zero.
+Expected: all commands pass. The checker reports zero errors and `passed: true`; record warnings without making them blocking.
 
 - [ ] **Step 5: Verify repository boundaries**
 
@@ -867,4 +864,4 @@ Require green hosted CI for the runtime PR first, then the format PR against its
 
 - [ ] **Step 7: Merge in dependency order**
 
-Merge `ara-cli`, publish/pin its release if required by downstream CI, merge `Agent-Native-Research-Artifact`, then merge LARA. If any upstream SHA/tag changes during review, rerun both downstream strict checks before merging.
+Merge `ara-cli`, publish/pin its release if required by downstream CI, merge `Agent-Native-Research-Artifact`, then merge LARA. If any upstream SHA/tag changes during review, rerun both downstream checks before merging.

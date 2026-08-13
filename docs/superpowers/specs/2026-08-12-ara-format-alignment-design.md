@@ -1,14 +1,16 @@
-# ARA Format Alignment and Strict Validation
+# ARA Format Alignment and Validation
 
-Status: approved in conversation on 2026-08-12.
+Status: approved and revised in conversation on 2026-08-12.
 
 ## Goal
 
 Align LARA's research artifact, the published Agent-Native Research Artifact
 format, and the official `ara` runtime without deleting research provenance or
-hiding valid evidence. The completed work must make both LARA and the canonical
+hiding valid evidence. The completed work must make the canonical
 `the-ara-of-ara` example pass `ara check --strict` with zero errors and zero
-warnings using the updated runtime.
+warnings. LARA must pass non-strict `ara check` with zero errors; warnings
+remain advisory because its migration invariant verifier is the blocking
+artifact-integrity gate.
 
 The migration spans three repositories:
 
@@ -277,9 +279,10 @@ and again against the final artifact.
 
 LARA:
 
-- the migration invariant verifier passes;
-- the locally built `ara check --strict ara` reports zero errors and zero
-  warnings;
+- the migration invariant verifier passes as the blocking artifact-integrity
+  gate;
+- the locally built non-strict `ara check ara` reports zero errors; warnings
+  are allowed and recorded;
 - all modified Markdown links and evidence paths resolve;
 - the LARA source tree, generated corpus, replay bundles, and frozen artifacts
   are unchanged.
@@ -292,7 +295,7 @@ mechanization files, which this design prohibits.
 1. Implement and test the runtime field/evidence support in `ara-cli`.
 2. Update the published schema and canonical example against that runtime.
 3. Migrate LARA using the locally built runtime and invariant verifier.
-4. Run strict validation across both artifacts.
+4. Run strict validation on the canonical example and non-strict zero-error validation on LARA.
 5. Publish separate, reviewable commits and pull requests per repository.
 
 The LARA migration must not land before the corresponding runtime contract is
