@@ -1,6 +1,6 @@
 -- | The elaborator's located-ish failure type and its renderer.
 --
--- Split out of "Lara.Elaborate.Internal" so the @lara-syntax\@0.4@ surface
+-- Split out of "Lara.Elaborate.Internal" so the @lara-syntax\@0.5@ surface
 -- passes ("Lara.Elaborate.ValueBinding" and "Lara.Elaborate.Comparison") and
 -- the structural lowering can share errors without an import cycle.
 -- 'Lara.Elaborate.Internal' re-exports both names, so every existing importer
@@ -31,6 +31,20 @@ data ElabError
     PolicyIdMismatch PolicyId PolicyId
   | -- | a @by r(…)@ names a rule absent from the policy: @arg@, @rule@.
     UnknownRule ArgId RuleId
+  | -- | the number of inferred references differs from the rule's premise count.
+    ThetaReferenceCountMismatch ArgId RuleId Int Int
+  | -- | an inferred reference names neither a declared leaf nor a prior argument.
+    ThetaReferenceUnresolved ArgId RuleId Int ArgRef
+  | -- | an inferred reference names both a declared leaf and prior argument.
+    ThetaReferenceAmbiguous ArgId RuleId Int ArgRef
+  | -- | the selected reference proposition does not match the premise pattern.
+    ThetaReferenceShapeMismatch ArgId RuleId Int ArgRef Prop
+  | -- | a repeated inferred parameter receives incompatible terms.
+    ThetaReferenceConflict ArgId RuleId Int ArgRef Param Term Term
+  | -- | a prior argument reference has no derivable conclusion.
+    ThetaReferenceConclUnderivable ArgId RuleId Int ArgRef
+  | -- | a rule parameter is absent from every inferred premise binding.
+    ThetaParameterUnbound ArgId RuleId Param
   | -- | positional θ length ≠ the rule's parameter count: @arg@, @rule@,
     -- expected, got.
     ArityMismatch ArgId RuleId Int Int
@@ -204,6 +218,32 @@ elabErrorMessage e = case e of
     "program declares policy '" ++ p ++ "' but the supplied policy is '" ++ q ++ "'"
   UnknownRule (ArgId a) (RuleId r) ->
     "arg '" ++ a ++ "': unknown rule '" ++ r ++ "' (not declared in the policy)"
+  ThetaReferenceCountMismatch (ArgId a) (RuleId r) expected got ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' inference expects "
+      ++ show expected ++ " reference(s) but " ++ show got ++ " were supplied"
+  ThetaReferenceUnresolved (ArgId a) (RuleId r) i (ArgRef ref) ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' inference premise #" ++ show i
+      ++ " reference '" ++ ref
+      ++ "' names neither a declared leaf nor prior argument"
+  ThetaReferenceAmbiguous (ArgId a) (RuleId r) i (ArgRef ref) ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' inference premise #" ++ show i
+      ++ " reference '" ++ ref
+      ++ "' is ambiguous between a declared leaf and a prior argument"
+  ThetaReferenceShapeMismatch (ArgId a) (RuleId r) i (ArgRef ref) p ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' inference premise #" ++ show i
+      ++ " reference '" ++ ref ++ "' selected proposition " ++ prettyProp p
+      ++ " but it does not match the premise pattern"
+  ThetaReferenceConflict (ArgId a) (RuleId r) i (ArgRef ref) (Param x) old new ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' inference premise #" ++ show i
+      ++ " reference '" ++ ref ++ "' binds parameter '" ++ x
+      ++ "' inconsistently: " ++ prettyTerm old ++ " vs " ++ prettyTerm new
+  ThetaReferenceConclUnderivable (ArgId a) (RuleId r) i (ArgRef ref) ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' inference premise #" ++ show i
+      ++ " reference '" ++ ref
+      ++ "' resolves to a prior argument whose conclusion is underivable"
+  ThetaParameterUnbound (ArgId a) (RuleId r) (Param x) ->
+    "arg '" ++ a ++ "': rule '" ++ r ++ "' parameter '" ++ x
+      ++ "' is not bound by inferred theta"
   ArityMismatch (ArgId a) (RuleId r) expd got ->
     "arg '" ++ a ++ "': rule '" ++ r ++ "' expects " ++ show expd
       ++ " argument(s) but " ++ show got ++ " were supplied"

@@ -162,6 +162,9 @@ open Lara
 #print axioms Lara.Presentation.un_LeafId
 #print axioms Lara.Presentation.un_RuleId
 #print axioms Lara.Presentation.un_ArgId
+#print axioms Lara.Presentation.un_ArgRef
+#print axioms Lara.Presentation.un_sxList_ArgRef
+#print axioms Lara.Presentation.un_sxArgDischarge
 #print axioms Lara.Presentation.un_ObligationId
 #print axioms Lara.Presentation.un_BackendId
 #print axioms Lara.Presentation.un_PolicyId
@@ -250,6 +253,7 @@ open Lara
 #print axioms Lara.Presentation.un_sxSurfaceAttack
 #print axioms Lara.Presentation.un_sxChallengeTarget
 #print axioms Lara.Presentation.un_sxArgConcl
+#print axioms Lara.Presentation.un_sxArgInstantiation
 #print axioms Lara.Presentation.un_sxArg
 -- Comparison blocks (@0.3, grammar App. B.3).
 #print axioms Lara.Presentation.un_sxComparisonClaim

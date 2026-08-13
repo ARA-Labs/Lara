@@ -1,5 +1,5 @@
 -- | The concrete @.lara@ surface syntax: parser and label-preserving printer
--- (@lara-syntax\@0.4@, additive over the frozen @0.1@ grammar in
+-- (@lara-syntax\@0.5@, additive over the frozen @0.1@ grammar in
 -- @docs/lara-surface-grammar.md@).
 --
 -- == Live surface versions
@@ -59,23 +59,24 @@
 -- 'SupportTerm' (spec §5): premises are implicit, θ is positional with the
 -- parameter /names/ living in the policy, and a discharge target is a bare
 -- identifier whose leaf-vs-argument nature is a scoping question. The parser
--- records what the surface states, using these conventions, and leaves the rest
--- for the elaborator:
+-- records one complete 'ArgInstantiation' and leaves the rest for the
+-- elaborator:
 --
---   * @leaf(l)@                         ↦ @'SLeaf' (LeafId l)@.
---   * @r(g1,…,gn)@                      ↦ @'SRule'@ with @srSubst =
---     [(Param \"1\", g1), …, (Param \"n\", gn)]@ (positional, 1-based — §5's
---     \"i-th parameter ↦ gi\"), @srPremises = []@, with optional assurance
---     supplied by the arg block (default 'AssuranceNone').
---   * @discharge q with ref@            ↦ appends @(QuestionId q, 'SLeaf'
---     (LeafId ref))@ to @srDischarge@ (the elaborator re-points a target that is
---     actually a prior argument).
+--   * @leaf(l)@                         ↦ @'ExplicitTheta' ('SLeaf' (LeafId l))@.
+--   * @r(g1,…,gn)@                      ↦ @'ExplicitTheta' ('SRule'@ with
+--     @srSubst = [(Param \"1\", g1), …, (Param \"n\", gn)]@ (positional,
+--     1-based — §5's \"i-th parameter ↦ gi\"), empty premises, and the
+--     optional assurance supplied by the arg block.
+--   * @r from [ref1,…,refn]@             ↦ @'InferTheta'@ carrying the rule,
+--     source references, shallow discharges, holes, and assurance.
+--   * @discharge q with ref@            ↦ a shallow leaf target in an explicit
+--     rule or an 'ArgRef' target in an inferred rule.
 --
--- @open@ lines and non-'SLeaf' discharge subterms are __not emitted__ by the
--- printer and are excluded from the round-trip generators: 'SupportTerm' has no
--- field for an @open@ line's critical-question id, so that surface form is not
--- losslessly representable here and belongs to the elaborator's hole accounting
--- (spec §4.2). The printer is nonetheless __total__ on every 'SupportTerm'.
+-- @open@ lines are retained as obligation ids but are not emitted by the
+-- printer: 'SupportTerm' has no field for an @open@ line's critical-question
+-- id, so that surface form is not losslessly representable here and belongs to
+-- the elaborator's hole accounting (spec §4.2). The printer is total on every
+-- 'ArgInstantiation'.
 module Lara.Syntax
   ( -- * Located parse errors (spec §10.1 R14)
     ParseError (..)
@@ -306,7 +307,7 @@ nlCellDirective = "cell"
 attackPathTerminalMarkers :: [String]
 attackPathTerminalMarkers = ["rule", "leaf"]
 
--- | An @nl@ string with @lara-syntax\@0.4@'s brace contract (grammar Apps. B.6 and C.5):
+-- | An @nl@ string with @lara-syntax\@0.5@'s brace contract (grammar Apps. B.6 and C.5):
 --
 -- > igap      ::= { " " | "\t" }
 -- > hgap      ::= ( " " | "\t" ) igap
@@ -943,8 +944,10 @@ refsListP = do
             else go (SourceRef ref : acc)
 
 -- | @arg ::= \"arg\" ident \":\" argConcl \"by\" supportTerm { dischargeLine |
--- openLine }@ (grammar §3, §5). Discharge\/open lines fold into the support
--- term; see the module header for the surface-support-term contract.
+-- openLine }@ (grammar §3, §5), where
+-- @supportTerm ::= \"leaf\" \"(\" leafId \")\" | ruleId \"(\" termList? \")\" |
+-- ruleId \"from\" \"[\" argRefList? \"]\"@. Discharges\/open lines fold into the
+-- complete 'ArgInstantiation'.
 argP :: P Arg
 argP = do
   keyword "arg"
@@ -952,9 +955,14 @@ argP = do
   symbol ':'
   concl <- argConclP
   keyword "by"
-  base <- supportTermP
-  term <- argBody base
-  pure Arg {argId = ArgId aid, argConcl = concl, argTerm = term}
+  instantiation <- supportTermP
+  instantiation' <- argBody instantiation
+  pure
+    Arg
+      { argId = ArgId aid
+      , argConcl = concl
+      , argInstantiation = instantiation'
+      }
 
 argConclP :: P ArgConcl
 argConclP = do
@@ -989,9 +997,11 @@ challengeTargetP = do
       pure (ChallengesQuestion (QuestionId x) (ArgId u))
     _ -> pure (ChallengesLeaf (LeafId x))
 
--- | The bare support term of a @by@ clause (grammar §3): @leaf(l)@ or a rule
--- instance @r(g1,…,gn)@. Discharges\/holes are attached by 'argBody'.
-supportTermP :: P SupportTerm
+-- | The support payload of a @by@ clause (grammar §3, §5):
+-- @leaf(l)@, @ruleId (termList?)@, or
+-- @ruleId \"from\" \"[\" argRefList? \"]\"@. Discharges\/holes are folded into
+-- the complete 'ArgInstantiation'.
+supportTermP :: P ArgInstantiation
 supportTermP = do
   h <- identifier
   if h == "leaf"
@@ -999,22 +1009,37 @@ supportTermP = do
       symbol '('
       l <- identifier
       symbol ')'
-      pure (SLeaf (LeafId l))
+      pure (ExplicitTheta (SLeaf (LeafId l)))
     else do
-      terms <- parenList termP
-      let theta = zipWith (\i t -> (Param (show i), t)) [1 :: Int ..] terms
-      pure
+      next <- peekIdent
+      case next of
+        Just "from" -> inferredRuleP (RuleId h)
+        _ -> explicitRuleP (RuleId h)
+
+explicitRuleP :: RuleId -> P ArgInstantiation
+explicitRuleP rid = do
+  terms <- parenList termP
+  let theta = zipWith (\i t -> (Param (show i), t)) [1 :: Int ..] terms
+  pure
+    ( ExplicitTheta
         SRule
-          { srRule = RuleId h
+          { srRule = rid
           , srSubst = theta
           , srPremises = []
           , srDischarge = []
           , srHoles = []
           , srAssurance = AssuranceNone
           }
+    )
 
--- | Fold @discharge@\/@open@\/@assurance@ lines into the base support term.
-argBody :: SupportTerm -> P SupportTerm
+inferredRuleP :: RuleId -> P ArgInstantiation
+inferredRuleP rid = do
+  keyword "from"
+  refs <- brackets (ArgRef <$> identifier)
+  pure (InferTheta rid refs [] [] AssuranceNone)
+
+-- | Fold @discharge@\/@open@\/@assurance@ lines into the support payload.
+argBody :: ArgInstantiation -> P ArgInstantiation
 argBody base = go base False
   where
     go acc seenAssurance = do
@@ -1025,34 +1050,46 @@ argBody base = go base False
           q <- identifier
           keyword "with"
           ref <- identifier
-          go (addDischarge acc (QuestionId q) (SLeaf (LeafId ref))) seenAssurance
+          go (addArgDischarge acc (QuestionId q) (ArgRef ref)) seenAssurance
         Just "open" -> do
           keyword "open"
           _q <- identifier
           keyword "as"
           o <- identifier
-          go (addHole acc (ObligationId o)) seenAssurance
+          go (addArgHole acc (ObligationId o)) seenAssurance
         Just "assurance" ->
           if seenAssurance
             then failP "duplicate assurance line in arg block"
             else case acc of
-              SRule {} -> do
+              ExplicitTheta (SRule {}) -> do
                 assurance <- assuranceP
-                go (setAssurance acc assurance) True
+                go (setArgAssurance acc assurance) True
+              InferTheta _ _ _ _ _ -> do
+                assurance <- assuranceP
+                go (setArgAssurance acc assurance) True
               _ -> failP "assurance requires a rule application, not a bare leaf"
         _ -> pure acc
 
-addDischarge :: SupportTerm -> QuestionId -> SupportTerm -> SupportTerm
-addDischarge (SRule r th pr ds hs as) q w = SRule r th pr (ds ++ [(q, w)]) hs as
-addDischarge t _ _ = t -- a discharge on a bare leaf is elaborator-rejected
+addArgDischarge :: ArgInstantiation -> QuestionId -> ArgRef -> ArgInstantiation
+addArgDischarge (ExplicitTheta (SRule r th pr ds hs as)) q (ArgRef ref) =
+  ExplicitTheta (SRule r th pr (ds ++ [(q, SLeaf (LeafId ref))]) hs as)
+addArgDischarge (InferTheta r refs ds hs as) q ref =
+  InferTheta r refs (ds ++ [(q, ref)]) hs as
+addArgDischarge inst _ _ = inst
 
-addHole :: SupportTerm -> ObligationId -> SupportTerm
-addHole (SRule r th pr ds hs as) o = SRule r th pr ds (hs ++ [o]) as
-addHole t _ = t
+addArgHole :: ArgInstantiation -> ObligationId -> ArgInstantiation
+addArgHole (ExplicitTheta (SRule r th pr ds hs as)) o =
+  ExplicitTheta (SRule r th pr ds (hs ++ [o]) as)
+addArgHole (InferTheta r refs ds hs as) o =
+  InferTheta r refs ds (hs ++ [o]) as
+addArgHole inst _ = inst
 
-setAssurance :: SupportTerm -> Assurance -> SupportTerm
-setAssurance (SRule r th pr ds hs _) assurance = SRule r th pr ds hs assurance
-setAssurance t _ = t -- unreachable: 'argBody' rejects a non-rule base
+setArgAssurance :: ArgInstantiation -> Assurance -> ArgInstantiation
+setArgAssurance (ExplicitTheta (SRule r th pr ds hs _)) assurance =
+  ExplicitTheta (SRule r th pr ds hs assurance)
+setArgAssurance (InferTheta r refs ds hs _) assurance =
+  InferTheta r refs ds hs assurance
+setArgAssurance inst _ = inst
 
 -- | @attackDecl@ / @posTarget@ (grammar §3, §7), producing the /presentation/
 -- 'SurfaceAttack': positions keep the spelling they were authored in (grammar
@@ -1760,7 +1797,24 @@ printArg a =
   ("arg " ++ (let ArgId aid = argId a in aid) ++ " : " ++ printArgConcl (argConcl a) ++ " by " ++ headTerm)
     : dischargeLines
   where
-    (headTerm, dischargeLines) = printSupportTerm (argTerm a)
+    (headTerm, dischargeLines) =
+      case argInstantiation a of
+        ExplicitTheta term -> printSupportTerm term
+        InferTheta rule refs disch _holes assurance ->
+          printInferredSupportTerm rule refs disch assurance
+
+-- Inferred payloads retain obligation ids for elaboration, but not the
+-- critical-question id discarded by the surface parser. Keep the established
+-- canonical printer contract and omit open lines rather than inventing a
+-- misleading question name.
+printInferredSupportTerm :: RuleId -> [ArgRef] -> ArgDischarge -> Assurance -> (String, [String])
+printInferredSupportTerm (RuleId r) refs disch assurance =
+  ( r ++ " from [" ++ intercalate ", " [name | ArgRef name <- refs] ++ "]"
+  , [ "  discharge " ++ q ++ " with " ++ ref
+    | (QuestionId q, ArgRef ref) <- disch
+    ]
+      ++ assuranceLine assurance
+  )
 
 printArgConcl :: ArgConcl -> String
 printArgConcl ac = case ac of
@@ -1778,14 +1832,19 @@ printSupportTerm t = case t of
   SLeaf (LeafId l) -> ("leaf(" ++ l ++ ")", [])
   SRule (RuleId r) theta _prems disch _holes assurance ->
     ( r ++ "(" ++ intercalate ", " (map printTerm (map snd theta)) ++ ")"
-    , [ "  discharge " ++ q ++ " with " ++ dischargeRef w
-      | (QuestionId q, w) <- disch
-      ]
-        ++ assuranceLine assurance
+    , printRuleBody disch assurance
     )
-  where
-    dischargeRef (SLeaf (LeafId l)) = l
-    dischargeRef (SRule (RuleId r) _ _ _ _ _) = r -- totality fallback only
+
+printRuleBody :: [(QuestionId, SupportTerm)] -> Assurance -> [String]
+printRuleBody disch assurance =
+  [ "  discharge " ++ q ++ " with " ++ dischargeRef w
+  | (QuestionId q, w) <- disch
+  ]
+    ++ assuranceLine assurance
+
+dischargeRef :: SupportTerm -> String
+dischargeRef (SLeaf (LeafId l)) = l
+dischargeRef (SRule (RuleId r) _ _ _ _ _) = r -- totality fallback only
 
 assuranceLine :: Assurance -> [String]
 assuranceLine assurance = case assurance of

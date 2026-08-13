@@ -1431,3 +1431,65 @@ observations:
   promoted_to: "trace/exploration_tree.yaml:N171"
   crystallized_via: verbal-affirmation
   stale: false
+
+- id: O69
+  timestamp: "2026-08-12T21:19"
+  provenance: ai-suggested
+  content: >
+    Task 7 locally verified #104 plain-argument theta inference through the
+    exact surface form `by rule from [refs]` (including stable D6 diagnostics),
+    `presentation parity: PASS (72 rows)`, and unchanged A/S1 source/core and
+    replay/tamper behavior. Hosted Haskell and Lean CI remain pending until the
+    implementation PR head runs them, so the completion claim is conditional on
+    that hosted verification.
+  context: >
+    Task 7 report for plans/2026-08-12-plain-arg-theta-inference.md; no
+    generated or frozen artifact bytes changed, and the Task 8 TODO/backlog
+    record must not imply that #105 named certificate slots were implemented.
+  potential_type: claim
+  bound_to: [N175]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O70
+  timestamp: "2026-08-12T22:02"
+  provenance: ai-executed
+  content: >
+    Hosted Haskell and Lean CI passed on implementation PR #106 after the
+    local plain-argument theta inference matrix was complete. The final
+    verification state is clean: the PR merge state is CLEAN, presentation
+    parity remains 72 rows, and the local Haskell/Lean/AxCheck gates pass.
+  context: >
+    PR #106 for plans/2026-08-12-plain-arg-theta-inference; the hosted jobs
+    were intentionally deferred until the implementation PR head existed.
+    Issue #105 remains separate and open for opaque certificate layering.
+  potential_type: claim
+  bound_to: [N176]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N176"
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false
+
+- id: O71
+  timestamp: "2026-08-12T17:02"
+  provenance: ai-executed
+  content: >
+    Final-head verification corrected the earlier intermediate #104 record:
+    presentation parity is `PASS (73 rows)`, and the complete local
+    Haskell/Lean/AxCheck, differential, admission, replay, and tamper gates
+    pass on commit 2de1bcde. Hosted Actions run 31653193555 passed both
+    Haskell and Lean jobs on ARA-append head c9c59a6 before this metadata
+    correction commit was created.
+  context: >
+    The implementation PR #106 remains open with merge state CLEAN. Its GitHub
+    review decision is still CHANGES_REQUESTED after the requested fixes were
+    pushed and re-review was requested. The repository-wide strict ARA check
+    remains blocked by the pre-existing N131 scalar at
+    ara/trace/exploration_tree.yaml:3249.
+  potential_type: claim
+  bound_to: [N177]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N177"
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false

@@ -2,8 +2,8 @@
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
 This module models the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.4` — every field of both top-levels,
-including the `lara-core@0.2` `policySigma`, as enumerated under `## Scope`
+`src/Lara/AST.hs` at `lara-syntax@0.5` — every field of both top-levels,
+including inferred argument instantiations and the `lara-core@0.2` `policySigma`,
 below — defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
 and proves the round-trip
@@ -37,16 +37,16 @@ value. This mirrors the existing verified structured codecs in the development:
 ## Scope
 
 Verified against the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.4`, described here:
+`src/Lara/AST.hs` at `lara-syntax@0.5`, described here:
 
 * **Both presentation top-levels**: every `Program` field and every `Policy`
   field, `policySigma` included; every arm of `Decl` (including `DeclGroup` and
   `DeclComparison`). `Lara/PresentationParity.lean` pins the `Policy` and
   `Measurand` constructor shapes, so neither can be silently retyped or
   reordered while these round-trip theorems keep passing.
-* **Every identifier newtype** of the `Names` and `@0.4` sections — `PropId`,
-  `QuestionId`, `LeafId`, `RuleId`, `ArgId`, `ObligationId`, `BackendId`,
-  `PolicyId`, `Param`, `SourceRef`, `TheoryDigest`, `Digest`, `GroupId`,
+* **Every identifier newtype** of the `Names`, `@0.4`, and `@0.5` sections —
+  `PropId`, `QuestionId`, `LeafId`, `RuleId`, `ArgId`, `ArgRef`, `ObligationId`,
+  `BackendId`, `PolicyId`, `Param`, `SourceRef`, `TheoryDigest`, `Digest`, `GroupId`,
   `MeasurandId`, `DatasetId`, `PremiseLabel`, `ValueName` — kept as distinct
   one-field structures, so the codec cannot silently swap namespaces (the
   symbolic-core discipline of CLAUDE.md).
@@ -247,6 +247,7 @@ structure QuestionId   where mk :: (val : String) deriving DecidableEq
 structure LeafId       where mk :: (val : String) deriving DecidableEq
 structure RuleId       where mk :: (val : String) deriving DecidableEq
 structure ArgId        where mk :: (val : String) deriving DecidableEq
+structure ArgRef       where mk :: (val : String) deriving DecidableEq
 structure ObligationId where mk :: (val : String) deriving DecidableEq
 structure BackendId    where mk :: (val : String) deriving DecidableEq
 structure PolicyId     where mk :: (val : String) deriving DecidableEq
@@ -265,6 +266,7 @@ def QuestionId.sx   (i : QuestionId)   : Sx := .str i.val
 def LeafId.sx       (i : LeafId)       : Sx := .str i.val
 def RuleId.sx       (i : RuleId)       : Sx := .str i.val
 def ArgId.sx        (i : ArgId)        : Sx := .str i.val
+def ArgRef.sx       (i : ArgRef)       : Sx := .str i.val
 def ObligationId.sx (i : ObligationId) : Sx := .str i.val
 def BackendId.sx    (i : BackendId)    : Sx := .str i.val
 def PolicyId.sx     (i : PolicyId)     : Sx := .str i.val
@@ -283,6 +285,7 @@ def unQuestionId   : Sx → Option QuestionId   | .str s => some ⟨s⟩ | _ => 
 def unLeafId       : Sx → Option LeafId       | .str s => some ⟨s⟩ | _ => none
 def unRuleId       : Sx → Option RuleId       | .str s => some ⟨s⟩ | _ => none
 def unArgId        : Sx → Option ArgId        | .str s => some ⟨s⟩ | _ => none
+def unArgRef       : Sx → Option ArgRef       | .str s => some ⟨s⟩ | _ => none
 def unObligationId : Sx → Option ObligationId | .str s => some ⟨s⟩ | _ => none
 def unBackendId    : Sx → Option BackendId    | .str s => some ⟨s⟩ | _ => none
 def unPolicyId     : Sx → Option PolicyId     | .str s => some ⟨s⟩ | _ => none
@@ -301,6 +304,7 @@ def unValueName    : Sx → Option ValueName    | .str s => some ⟨s⟩ | _ => 
 @[simp] theorem un_LeafId       (i : LeafId)       : unLeafId       i.sx = some i := rfl
 @[simp] theorem un_RuleId       (i : RuleId)       : unRuleId       i.sx = some i := rfl
 @[simp] theorem un_ArgId        (i : ArgId)        : unArgId        i.sx = some i := rfl
+@[simp] theorem un_ArgRef       (i : ArgRef)       : unArgRef       i.sx = some i := rfl
 @[simp] theorem un_ObligationId (i : ObligationId) : unObligationId i.sx = some i := rfl
 @[simp] theorem un_BackendId    (i : BackendId)    : unBackendId    i.sx = some i := rfl
 @[simp] theorem un_PolicyId     (i : PolicyId)     : unPolicyId     i.sx = some i := rfl
@@ -316,11 +320,22 @@ def unValueName    : Sx → Option ValueName    | .str s => some ⟨s⟩ | _ => 
 
 @[simp] theorem un_sxList_LeafId (xs : List LeafId) :
     unSxList unLeafId (sxList LeafId.sx xs) = some xs := unSxList_sxList un_LeafId xs
+@[simp] theorem un_sxList_ArgRef (xs : List ArgRef) :
+    unSxList unArgRef (sxList ArgRef.sx xs) = some xs := unSxList_sxList un_ArgRef xs
 @[simp] theorem un_sxOpt_PremiseLabel (o : Option PremiseLabel) :
     unOpt unPremiseLabel (sxOpt PremiseLabel.sx o) = some o := unOpt_sxOpt un_PremiseLabel o
 @[simp] theorem un_sxList_optPremiseLabel (xs : List (Option PremiseLabel)) :
     unSxList (unOpt unPremiseLabel) (sxList (sxOpt PremiseLabel.sx) xs) = some xs :=
   unSxList_sxList un_sxOpt_PremiseLabel xs
+abbrev ArgDischarge := List (QuestionId × ArgRef)
+def sxArgDischarge (ds : ArgDischarge) : Sx :=
+  sxList (sxPair QuestionId.sx ArgRef.sx) ds
+def unArgDischarge : Sx → Option ArgDischarge :=
+  unSxList (unSxPair unQuestionId unArgRef)
+@[simp] theorem un_sxArgDischarge (ds : ArgDischarge) :
+    unArgDischarge (sxArgDischarge ds) = some ds :=
+  unSxList_sxList (unSxPair_sxPair un_QuestionId un_ArgRef) ds
+
 @[simp] theorem un_sxOpt_PropId (o : Option PropId) :
     unOpt unPropId (sxOpt PropId.sx o) = some o := unOpt_sxOpt un_PropId o
 
@@ -1248,18 +1263,56 @@ def unArgConcl : Sx → Option ArgConcl
   | supportsDerived c => simp [sxArgConcl, unArgConcl]
   | challenges t => simp [sxArgConcl, unArgConcl]
 
-structure Arg where mk :: (id : ArgId) (concl : ArgConcl) (term : SupportTerm) deriving DecidableEq
+inductive ArgInstantiation where
+  | explicitTheta (term : SupportTerm)
+  | inferTheta (rule : RuleId) (refs : List ArgRef) (discharge : ArgDischarge)
+      (obligations : List ObligationId) (assurance : Assurance)
+  deriving DecidableEq
+def sxArgInstantiation : ArgInstantiation → Sx
+  | .explicitTheta term =>
+      .node "et" (.cons (sxST term) .nil)
+  | .inferTheta rule refs discharge obligations assurance =>
+      .node "it" (.cons rule.sx
+        (.cons (sxList ArgRef.sx refs)
+          (.cons (sxArgDischarge discharge)
+            (.cons (sxList ObligationId.sx obligations)
+              (.cons (sxAssurance assurance) .nil)))))
+def unArgInstantiation : Sx → Option ArgInstantiation
+  | .node "et" (.cons term .nil) => do
+      let tt ← unST term
+      some (.explicitTheta tt)
+  | .node "it" (.cons rule (.cons refs (.cons discharge
+      (.cons obligations (.cons assurance .nil))))) => do
+      let rr ← unRuleId rule
+      let rf ← unSxList unArgRef refs
+      let dd ← unArgDischarge discharge
+      let oo ← unSxList unObligationId obligations
+      let aa ← unAssurance assurance
+      some (.inferTheta rr rf dd oo aa)
+  | _ => none
+@[simp] theorem un_sxArgInstantiation (i : ArgInstantiation) :
+    unArgInstantiation (sxArgInstantiation i) = some i := by
+  cases i with
+  | explicitTheta term => simp [sxArgInstantiation, unArgInstantiation]
+  | inferTheta rule refs discharge obligations assurance =>
+      simp [sxArgInstantiation, unArgInstantiation]
+
+structure Arg where mk ::
+  (id : ArgId) (concl : ArgConcl) (instantiation : ArgInstantiation)
+  deriving DecidableEq
 def sxArg (a : Arg) : Sx :=
-  .node "arg" (.cons a.id.sx (.cons (sxArgConcl a.concl) (.cons (sxST a.term) .nil)))
+  .node "arg" (.cons a.id.sx
+    (.cons (sxArgConcl a.concl)
+      (.cons (sxArgInstantiation a.instantiation) .nil)))
 def unArg : Sx → Option Arg
-  | .node "arg" (.cons i (.cons cn (.cons tm .nil))) => do
+  | .node "arg" (.cons i (.cons cn (.cons ins .nil))) => do
       let ii ← unArgId i
       let cc ← unArgConcl cn
-      let tt ← unST tm
-      some ⟨ii, cc, tt⟩
+      let it ← unArgInstantiation ins
+      some ⟨ii, cc, it⟩
   | _ => none
 @[simp] theorem un_sxArg (a : Arg) : unArg (sxArg a) = some a := by
-  cases a with | mk i c t => simp [sxArg, unArg]
+  cases a with | mk i c ins => simp [sxArg, unArg]
 
 /-! ## Comparison blocks (`lara-syntax@0.3`, grammar App. B.3)
 

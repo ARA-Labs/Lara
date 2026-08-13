@@ -4385,3 +4385,110 @@ tree:
     - "PR #103 and Actions run 31572212188"
   also_depends_on: [N173]
   status: resolved
+
+- id: N175
+  type: experiment
+  title: "Task 7 locally verified #104 plain-argument theta inference; hosted CI remains pending"
+  provenance: ai-executed
+  timestamp: "2026-08-12T21:19"
+  description: >
+    Evaluated the complete #104 contract after the inferred-theta
+    implementation and Task 7 integration correction. The verified surface
+    spelling is `by rule from [refs]`, with `from []` legal for zero-premise
+    rules; the explicit positional form remains available and the semantic
+    `lara-core@0.2` boundary is unchanged.
+  result: >
+    The local matrix passed: stable D6 diagnostics cover
+    ThetaInferenceRequiresRule, ThetaInferenceMalformed,
+    ThetaReferenceCountMismatch, ThetaReferenceUnresolved,
+    ThetaReferenceAmbiguous, ThetaReferenceShapeMismatch,
+    ThetaReferenceConflict, ThetaReferenceConclUnderivable, and
+    ThetaParameterUnbound; the corrected unresolved-reference rendering is
+    `arg 'a1': rule 'controlled_experiment' inference premise #1 reference
+    'e1' names neither a declared leaf or prior argument`; `make
+    presentation-parity` reported `presentation parity: PASS (72 rows)`;
+    Haskell build/test and Lean build passed;
+    axiom checks, differential (`pass=580 fail=0`, `negative pass=56 fail=0`),
+    admission differential (`pass=20 fail=0 expected=20`), replay/tamper, and
+    deterministic-generation/freshness checks passed. Example A and S1
+    source/core stdout and exit codes matched, replay matched its committed
+    verdict byte-for-byte, and no generated or frozen artifact bytes changed.
+    For sameTerm-equal spellings, explicit and inferred bytes are identical
+    only when the authored spellings also match; spelling differences remain
+    checker-equivalent with identical verdicts but may differ in bytes. Hosted
+    Haskell and Lean CI are pending until the implementation PR head
+    runs them, so #104 remains open pending that verification; #105 named
+    certificate premise slots were not implemented and remain a separate open
+    opaque-certificate-layering design problem.
+  evidence:
+    - plans/2026-08-12-plain-arg-theta-inference.md
+    - .superpowers/sdd/2026-08-12-plain-arg-theta-inference/task-7-report.md
+    - src/Lara/Elaborate/Error.hs
+    - examples/A/example.lara
+    - examples/S1/example.lara
+  also_depends_on: [N174]
+  status: resolved
+- id: N176
+  type: experiment
+  title: "Hosted CI verified #104 plain-argument theta inference on PR #106"
+  provenance: ai-executed
+  timestamp: "2026-08-12T22:02"
+  description: >
+    Opened implementation PR #106 after the reviewed local implementation,
+    final documentation correction, and clean branch verification, then
+    monitored the hosted Haskell and Lean jobs on the PR head.
+  result: >
+    Both hosted jobs passed: Haskell (cabal build + test) and Lean (lake build).
+    The PR merge state is CLEAN. Fresh final-head local gates also passed:
+    the full Haskell suite, 72-row presentation parity, Lean build,
+    check-axioms tests, and the complete AxCheck audit. The implementation
+    remains intentionally separate from #105's unresolved opaque-certificate
+    layering design.
+    Modified ARA YAML files parse and targeted N176/O70/session/index
+    assertions pass. Repository-wide `ara check --strict ara` remains blocked
+    by the pre-existing N131 scalar at `exploration_tree.yaml:3249`; this
+    blocker is outside the #104 implementation record.
+  evidence:
+    - "PR #106"
+    - "Actions run 31644485072"
+    - plans/2026-08-12-plain-arg-theta-inference.md
+    - TODOS.md
+  also_depends_on: [N175]
+  status: resolved
+
+- id: N177
+  type: experiment
+  title: "Verification and review handoff for #104 plain-argument theta inference"
+  provenance: ai-executed
+  timestamp: "2026-08-12T17:02"
+  description: >
+    Re-ran the implementation contract at commit 2de1bcde after the
+    review-requested fixes, then checked the hosted PR head and recorded the
+    verification state. Hosted run 31653193555 passed on ARA-append head
+    c9c59a6 before this metadata correction commit was created.
+  result: >
+    The full Haskell build and test suite passed. Presentation parity passed
+    with 73 rows. Lean lake build completed 74 jobs, the check-axioms suite
+    passed, and the AxCheck audit ended with `Axiom audit passed`. Differential
+    gates passed with `pass=580 fail=0` and `negative pass=56 fail=0`;
+    admission differential passed with `pass=20 fail=0 expected=20`; replay
+    matched the committed verdict byte-for-byte; and trusted-input,
+    manifest-identity, and artifact-digest tamper checks passed. Hosted
+    Actions run 31653193555 passed both Haskell and Lean jobs on ARA-append
+    head c9c59a6 before this metadata correction commit was created. PR #106
+    is open with merge state CLEAN; its GitHub review decision remains
+    CHANGES_REQUESTED pending reviewer re-review.
+
+  evidence:
+    - plans/2026-08-12-plain-arg-theta-inference.md
+    - "local verification commit 2de1bcde"
+    - "PR #106 ARA-append head c9c59a6 before metadata correction"
+    - "Actions run 31653193555"
+    - scripts/differential.sh
+    - scripts/admission-differential.sh
+    - scripts/replay.sh
+    - scripts/test-replay-tamper.sh
+    - lean/AxCheck.lean
+    - scripts/check-presentation-parity.sh
+  also_depends_on: [N176]
+  status: resolved

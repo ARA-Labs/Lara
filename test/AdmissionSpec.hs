@@ -71,11 +71,23 @@ claimD cid p =
 
 argLeaf :: String -> String -> Decl
 argLeaf aid lid =
-  DeclArg (Arg (ArgId aid) (SupportsDerived (PropId ("derived_" ++ aid))) (SLeaf (LeafId lid)))
+  DeclArg
+    ( Arg
+        { argId = ArgId aid
+        , argConcl = SupportsDerived (PropId ("derived_" ++ aid))
+        , argInstantiation = ExplicitTheta (SLeaf (LeafId lid))
+        }
+    )
 
 argClaim :: String -> String -> String -> Decl
 argClaim aid cid lid =
-  DeclArg (Arg (ArgId aid) (SupportsClaim (PropId cid)) (SLeaf (LeafId lid)))
+  DeclArg
+    ( Arg
+        { argId = ArgId aid
+        , argConcl = SupportsClaim (PropId cid)
+        , argInstantiation = ExplicitTheta (SLeaf (LeafId lid))
+        }
+    )
 
 program :: [(BackendId, String)] -> [Decl] -> Program
 program backends decls =
@@ -344,23 +356,35 @@ prop_quarantinePrunesEveryDependency =
         [ leafD "e_q" "p" Observed User
         , DeclArg
             ( Arg
-                (ArgId "a_nested")
-                (SupportsDerived (PropId "n"))
-                (SRule (RuleId "nested") [] [] [] [] AssuranceNone)
+                { argId = ArgId "a_nested"
+                , argConcl = SupportsDerived (PropId "n")
+                , argInstantiation =
+                    ExplicitTheta
+                      (SRule (RuleId "nested") [] [] [] [] AssuranceNone)
+                }
             )
-        , DeclArg (Arg (ArgId "a_direct") (SupportsDerived (PropId "d")) (SLeaf (LeafId "e_q")))
         , DeclArg
             ( Arg
-                (ArgId "a_discharge")
-                (SupportsDerived (PropId "x"))
-                ( SRule
-                    (RuleId "discharge")
-                    []
-                    []
-                    [(QuestionId "q", SLeaf (LeafId "e_q"))]
-                    []
-                    AssuranceNone
-                )
+                { argId = ArgId "a_direct"
+                , argConcl = SupportsDerived (PropId "d")
+                , argInstantiation = ExplicitTheta (SLeaf (LeafId "e_q"))
+                }
+            )
+        , DeclArg
+            ( Arg
+                { argId = ArgId "a_discharge"
+                , argConcl = SupportsDerived (PropId "x")
+                , argInstantiation =
+                    ExplicitTheta
+                      ( SRule
+                          (RuleId "discharge")
+                          []
+                          []
+                          [(QuestionId "q", SLeaf (LeafId "e_q"))]
+                          []
+                          AssuranceNone
+                      )
+                }
             )
         ]
     pol =

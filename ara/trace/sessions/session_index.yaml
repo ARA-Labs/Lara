@@ -346,3 +346,24 @@ sessions:
   events_count: 14
   claims_touched: [H13]
   open_threads: 3
+- id: 2026-08-12_001
+  date: '2026-08-12'
+  summary: 'Recorded #104 local verification: exact inferred syntax and stable D6 diagnostics, 72-row presentation parity, unchanged source/core and replay artifacts, and passing local differential/admission/freshness gates; hosted Haskell/Lean CI remains pending, and #105 stays open as a separate opaque-certificate-layer design problem.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-12_002
+  date: '2026-08-12'
+  summary: 'Opened PR #106 for plain-argument theta inference and confirmed clean hosted Haskell/Lean CI; #104 verification is complete pending merge, while #105 remains a separate open certificate-layer design problem.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 2
+- id: 2026-08-12_003
+  date: '2026-08-12'
+  summary: 'Re-verified the implementation contract, corrected the intermediate 72-row ARA record with final 73-row parity, and recorded hosted run 31653193555 on ARA-append head c9c59a6 before this metadata correction commit; review handoff remains open.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 4

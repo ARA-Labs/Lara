@@ -92,11 +92,19 @@ substSupportTerm env rule@SRule {} =
         ]
     }
 
+substArgInstantiation :: Map ValueName Term -> ArgInstantiation -> ArgInstantiation
+substArgInstantiation env (ExplicitTheta term) =
+  ExplicitTheta (substSupportTerm env term)
+substArgInstantiation _ inferred@InferTheta {} = inferred
+
 substDecl :: Map ValueName Term -> Decl -> Decl
 substDecl env decl = case decl of
   DeclLeaf leaf -> DeclLeaf leaf {leafProp = substProp env (leafProp leaf)}
   DeclClaim claim -> DeclClaim claim {claimFormal = substProp env (claimFormal claim)}
-  DeclArg arg -> DeclArg arg {argTerm = substSupportTerm env (argTerm arg)}
+  -- Value bindings rewrite explicit support terms. Inferred references name
+  -- authored leaves/arguments, not value-bearing terms.
+  DeclArg arg ->
+    DeclArg arg {argInstantiation = substArgInstantiation env (argInstantiation arg)}
   DeclComparison comparison ->
     DeclComparison
       comparison

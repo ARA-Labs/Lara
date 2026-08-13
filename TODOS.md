@@ -203,11 +203,13 @@ Tighten the parser or update the grammar.
 **Effort:** S
 **Priority:** P3
 
-### θ-matching for plain `arg` declarations (generalize the comparison form's mechanism)
+### #104 / Plain-arg θ inference (`lara-syntax@0.5`) — verification complete; PR #106 open
 
-**What:** Let an ordinary `arg` name its premise leaves and derive θ by one-way
-matching against the rule's premise patterns, instead of transcribing the full
-positional θ vector.
+**What:** Let an ordinary `arg` name its premise leaves or prior arguments and
+derive the rule's complete ground substitution theta by one-way matching
+against the rule's premise patterns. The verified surface spelling is
+`by ruleId from [argRef, ...]`, for example `by controlled_experiment from
+[e1]`; `from []` is also legal for zero-premise rules.
 
 **Why:** The mechanism `lara-syntax@0.3` builds for the `comparison` expansion
 (match named leaves against premise patterns, consistency-checked) kills
@@ -216,18 +218,40 @@ form needed. Deferred from the 0.3 track (eng review 2026-08-08, outside-voice
 finding 3): the comparison form uniquely delivers goal generation and polarity
 checking, but the general θ relief is separable and cheaper.
 
-**Context:** The matcher landed in `src/Lara/Elaborate/Internal.hs` as part of
-plan `plans/2026-08-08-lara-syntax-03-surface.md` §5. Exposing it on `arg`
-needs a surface form for "premises by name" plus the same consistency errors.
-This remains a separate post-#88b rider: `lara-syntax@0.4` closes value bindings
-without adding named premise references or θ inference.
+**Context:** This remained a separate post-#88b rider: `lara-syntax@0.4`
+closed value bindings without adding named premise references or θ inference.
+The #104 implementation adds the `@0.5` plain-`arg` form while retaining the
+explicit positional form and the frozen `lara-core@0.2` boundary.
+
+**Task 7/8 evidence (local + prior hosted):** `by rule from [refs]` parses,
+prints, and lowers through the inferred-reference path. The state-safe inferred
+payload keeps its rule references, discharges, holes, and assurance together
+in `ArgInstantiation`, making invalid leaf, substitution, or pre-populated
+premise pairings unrepresentable. The stable D6 families now cover
+`ThetaReferenceCountMismatch`, `ThetaReferenceUnresolved`,
+`ThetaReferenceAmbiguous`, `ThetaReferenceShapeMismatch`,
+`ThetaReferenceConflict`, `ThetaReferenceConclUnderivable`, and
+`ThetaParameterUnbound`; the full Haskell suite passed. The corrected stable
+unresolved-reference rendering is `arg 'a1': rule 'controlled_experiment'
+inference premise #1 reference 'e1' names neither a declared leaf or prior
+argument`. `make presentation-parity` reports `presentation parity: PASS (73
+rows)`.
+Example A and S1 source/core stdout and exit codes are identical, replay
+matches the committed verdict byte-for-byte, and tamper checks reject before
+checker execution. When explicit and inferred sources use the sameTerm-equal
+values with identical authored spellings, their lowered bytes are identical;
+sameTerm-equal spelling differences remain checker-equivalent with identical
+verdicts but may differ in bytes. No generated or frozen artifact bytes changed.
+Hosted Haskell and Lean CI both passed on PR #106's earlier head (Actions run
+`31644485072`). This review-refactor commit has not yet had a hosted run, so
+hosted verification for this commit remains pending.
 
 **Effort:** M
 **Priority:** P3
 **Depends on:** `lara-syntax@0.4`; reuses the matcher introduced by the
 `lara-syntax@0.3` comparison form.
 
-### Named certificate premise slots
+### #105 / Named certificate premise slots (open)
 
 **What:** Let an authored opaque certificate refer to a premise by source name
 (for example `(prem e1)`) instead of a numeric slot.
@@ -238,12 +262,42 @@ boundary, so making a general value pass inspect its payload would violate the
 existing layer contract.
 
 **Context:** Explicitly split from the completed #88b/D7 value-binding work.
-This needs a separate design for a surface layer above `Cert`; hand-authored
-certificates retain numeric 0-based slots until then.
+No named certificate slots were implemented by #104. This remains an open,
+separate certificate-layer design problem requiring a surface layer above
+`Cert`; hand-authored certificates retain numeric 0-based slots until then.
 
 **Effort:** M
 **Priority:** P3
 **Depends on:** an explicit opaque-certificate layering decision.
+
+### Discharge-witness namespace shadowing vs. reference ambiguity
+
+**What:** `discharge q with x` silently prefers the declared leaf when `x`
+names both a leaf and a prior argument (`resolveDischarges`,
+`src/Lara/Elaborate/Internal.hs:471-473`), while premise reconstruction and
+the `@0.5` `from [...]` resolver reject the same spelling collision as
+ambiguous. Give discharge resolution a dedicated ambiguity diagnostic so all
+three reference positions share one namespace-collision policy.
+
+**Why:** After `lara-syntax@0.5`, the identical identifier collision is a
+hard error in a `from [...]` list and a silent preference on the discharge
+line below it — confusing for authors and a spec-consistency wart.
+
+**Pros:** One uniform collision policy across every argument-body reference
+position; removes a silent-behavior trap.
+
+**Cons:** A breaking surface change: any program relying on leaf shadowing
+changes meaning or starts erroring, so it needs its own presentation-version
+treatment and a corpus sweep for affected discharge lines.
+
+**Context:** Surfaced by the plain-arg θ-inference eng review (2026-08-12,
+issue 2 discussion). Must not ride along in #104 — that plan's byte-neutrality
+gates assume discharge behavior is frozen.
+
+**Effort:** S
+**Priority:** P3
+**Depends on:** `lara-syntax@0.5` (#104) landing first, so the collision
+policies it introduces are the fixed reference point.
 
 ### Σ sort-naming refinement pass (possible-worlds trigger)
 
@@ -280,11 +334,13 @@ The value-binding deliverable is complete. Programs carry an ordered
 strict `Σ`, substitutes every program-side term field simultaneously and
 non-recursively, expands `{name}` and the existing `{cell leaf}` grammar once,
 clears the table, and only then runs the `@0.3` comparison expansion. The
-Haskell/Lean presentation models and live documentation now describe the same
-`@0.4` shape, while `lara-core@0.2` remains fixed.
+Haskell/Lean presentation models and the historical `@0.4` value-binding
+appendix describe the same `@0.4` shape; the active `@0.5` surface adds
+inferred-theta references, while `lara-core@0.2` remains fixed.
 
 Named certificate premise slots and plain-`arg` θ matching are intentionally
-not folded into this completion; both remain explicit deferred items above.
+not folded into this completion; #105 remains an explicit open certificate
+layering problem, and #104 is locally verified but awaits hosted CI.
 
 ### spec.md presentation-version pointer
 
@@ -299,13 +355,14 @@ happened three times: theories, then `groupMode` (both recorded 2026-08-09 and
 patched by `syntax-03` D8), then Σ + signature blocks (recorded 2026-08-10 and
 patched by the sorts-in-checker plan's D9). Nothing prevented a fourth. The
 Lean mirror first caught up with the live Haskell surface: `lean/Lara/Presentation.lean`
-carries `policySigma` as a second `Policy` field and models measurands as
-`Sort × Option Polarity`, reusing `Lara.Sigma`'s types, with the round-trip proofs
-audited in `AxCheck.lean`. On top of that synced state, `scripts/presentation-shape.hs`
-and `lean/Lara/PresentationParity.lean` each emit a normalized name-and-arity
-inventory of the surface-reachable types, and `scripts/check-presentation-parity.sh`
-diffs the two — 70 rows, byte-identical — exposed as `make presentation-parity` and
-run as a CI step.
+carries `policySigma` as a second `Policy` field, models measurands as
+`Sort × Option Polarity`, and carries the `ArgRef`/`ArgInstantiation` fields
+for the `@0.5` inferred-theta form, reusing `Lara.Sigma`'s types, with the
+round-trip proofs audited in `AxCheck.lean`. On top of that synced state,
+`scripts/presentation-shape.hs` and `lean/Lara/PresentationParity.lean` each
+emit a normalized name-and-arity inventory of the surface-reachable types, and
+`scripts/check-presentation-parity.sh` diffs the two — 72 rows,
+byte-identical — exposed as `make presentation-parity` and run as a CI step.
 
 The guard never parses source text. Each side's inventory is protected by its own
 compiler. Exact constructor signatures pin every record field type and every

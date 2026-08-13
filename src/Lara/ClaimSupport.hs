@@ -67,6 +67,7 @@ import Lara.AST
   ( Arg (..)
   , ArgConcl (..)
   , ArgId (..)
+  , ArgInstantiation (..)
   , Assurance (..)
   , Attack (..)
   , Claim (..)
@@ -377,6 +378,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
           let sourceId = attackSrc attack
               targetId = attackTarget attack
               sourceArg = surfaceArgById sourceId
+              sourceTerm = surfaceDerivedArgTermById sourceId
               targetArg = surfaceArgById targetId
               challenge = sourceChallenge sourceId sourceArg
               claim = attackClaim targetId targetArg
@@ -385,10 +387,15 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
                   AuditSubject
                     { auditSubjectId = attackSubjectId name attack
                     , auditSubjectType = AuditTypedAttack
-                    , auditSubjectFormalObject = renderAttack attack
+                    , auditSubjectFormalObject = authoredAttackObject sourceArg attack
                     , auditSubjectProseContext = claimNl claim ++ "\n" ++ challenge
-                    , auditSubjectRefs = rootedRefs (argTerm sourceArg)
+                    , auditSubjectRefs = rootedRefs sourceTerm
                     }
+
+        authoredAttackObject surfaceArg attack =
+          case argInstantiation surfaceArg of
+            InferTheta _ _ _ _ _ -> unlines (printArg surfaceArg)
+            ExplicitTheta _ -> renderAttack attack
 
         sourceChallenge aid sourceArg =
           case argConcl sourceArg of
@@ -520,7 +527,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
         -- non-dead-end: hard-error rather than silently drop the attack.
         deadEndSourced atk = case argById (attackSrc atk) of
           Just a | isChallenge (argConcl a) ->
-            any leafHasTraceRef (leaves (argTerm a))
+            any leafHasTraceRef (leaves (surfaceDerivedArgTermById (attackSrc atk)))
           Just _ -> False
           Nothing ->
             error

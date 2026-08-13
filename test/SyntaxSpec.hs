@@ -7,8 +7,9 @@
 --   * __Result 12 round-trip (the crux)__ — @parse ∘ print = id@ as a
 --     QuickCheck property over generated 'Program' /and/ 'Policy' values. The
 --     generators are constrained to the /surface-representable/ subset of the
---     presentation AST (grammar-legal identifiers\/numbers, positional θ,
---     'SLeaf' discharge targets, no @open@ holes — see "Lara.Syntax"'s header):
+--     presentation AST (grammar-legal identifiers\/numbers, both 'ExplicitTheta'
+--     and 'InferTheta' argument forms, 'SLeaf' discharge targets, no @open@
+--     holes — see "Lara.Syntax"'s current @0.5@ header):
 --     the property is exact @parse (print x) == Right x@, so a value the printer
 --     cannot faithfully render must not be generated.
 --   * __golden parse tests__ — the three committed example files parse to
@@ -54,14 +55,14 @@ reservedWords =
   [ "artifact", "policy", "at", "use", "backends", "let", "claim", "leaf", "arg"
   , "status", "rule", "mode", "premises", "conclusion", "question", "contrary"
   , "exception", "admission", "theory", "nl", "formal", "binding", "kind", "provenance"
-  , "refs", "author", "rationale", "audit-status", "by", "supports"
+  , "refs", "author", "rationale", "audit-status", "by", "from", "supports"
   , "challenges", "discharge", "with", "open", "as", "assurance", "rebut", "undercut"
   , "undermine", "allow-trusted", "certifiers", "cert", "trusted", "none"
   , "strict", "defeasible", "observed", "attested", "assumed", "certified"
   , "user", "ai-executed", "checker", "unreviewed", "reviewed", "disputed"
   , "mandatory", "optional", "admit", "quarantine", "reject", "true", "false"
   , "duplicate-reports"
-    -- lara-syntax@0.4 (grammar §1.4; Apps. B.7 and C.1). This list MIRRORS
+    -- lara-syntax@0.5 (grammar §1.4; Apps. B.7 and C.1). This list MIRRORS
     -- §1.4 and must be kept in sync with it: a keyword missing here lets the
     -- generator emit a colliding identifier, and the round-trip property then
     -- fails for a reason that has nothing to do with the grammar.
@@ -239,9 +240,9 @@ genChallengeTarget =
     , ChallengesLeaf . LeafId <$> genIdent
     ]
 
--- | A surface support term: either @leaf(l)@, or a rule instance with positional
--- θ (parameter names @\"1\"..\"n\"@), no premises, 'SLeaf' discharge targets,
--- no holes, and a surface-representable assurance (see "Lara.Syntax"'s header).
+-- | An explicit surface support term: either @leaf(l)@, or a rule instance
+-- with positional θ (parameter names @\"1\"..\"n\"@), no premises, 'SLeaf'
+-- discharge targets, no holes, and a surface-representable assurance.
 genSupportTerm :: Gen SupportTerm
 genSupportTerm =
   oneof
@@ -290,7 +291,27 @@ genAssurance =
               ]
 
 genArg :: Gen Arg
-genArg = Arg <$> (ArgId <$> genIdent) <*> genArgConcl <*> genSupportTerm
+genArg = do
+  aid <- ArgId <$> genIdent
+  concl <- genArgConcl
+  instantiation <-
+    oneof
+      [ ExplicitTheta <$> genSupportTerm
+      , do
+          rule <- RuleId <$> genIdent
+          refs <- smallListOf (ArgRef <$> genIdent)
+          disch <-
+            smallListOf
+              ((,) <$> (QuestionId <$> genIdent) <*> (ArgRef <$> genIdent))
+          assurance <- genAssurance
+          pure (InferTheta rule refs disch [] assurance)
+      ]
+  pure
+    Arg
+      { argId = aid
+      , argConcl = concl
+      , argInstantiation = instantiation
+      }
 
 -- ---------------------------------------------------------------------------
 -- Attacks

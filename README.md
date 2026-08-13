@@ -69,7 +69,7 @@ leaf e1 : reports(exp_3, effect(M, accuracy, D, +2.1))
   provenance = ai-executed
   refs       = [evidence/table_2.csv#row=mean]
 
-arg a1 : supports(c1) by controlled_comparison(e1)
+arg a1 : supports(c1) by controlled_comparison from [e1]
   discharge randomization with e2
   discharge adequate_power with e3
   open external_validity as o1
@@ -243,7 +243,7 @@ The implementation is complete through the M4 walking-skeleton milestone:
 
 - **M1 — frozen core language.** The core is specified in
   [`docs/spec.md`](docs/spec.md); the `.lara` presentation frontend is
-  `lara-syntax@0.4`. M1 froze `lara-core@0.1`; the current core is
+  `lara-syntax@0.5`. M1 froze `lara-core@0.1`; the current core is
   **`lara-core@0.2`**, which added the declared many-sorted proposition
   signature and made rejection class R2 executable (issue #89). That is the one
   amendment to the frozen core so far, and it widened a class no implementation

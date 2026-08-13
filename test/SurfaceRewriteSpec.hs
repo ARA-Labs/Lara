@@ -43,6 +43,7 @@ import Test.QuickCheck
 import Lara.AST
   ( Arg (..)
   , ArgId (..)
+  , ArgInstantiation (..)
   , Attack (..)
   , Claim (..)
   , Comparison (..)
@@ -126,7 +127,7 @@ generatedGoal pol prog = case expandSurface pol prog of
 generatedRules :: Policy -> Program -> Either String [RuleId]
 generatedRules pol prog = case expandSurface pol prog of
   Left e -> Left (elabErrorMessage e)
-  Right p' -> Right [r | DeclArg a <- programDecls p', SRule {srRule = r} <- [argTerm a]]
+  Right p' -> Right [r | DeclArg a <- programDecls p', ExplicitTheta (SRule {srRule = r}) <- [argInstantiation a]]
 
 -- | Rewrite every @comparison@ block's relation, for the negative half of the
 -- relation test.

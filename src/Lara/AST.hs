@@ -86,6 +86,9 @@ module Lara.AST
   , Digest (..)
   , ChallengeTarget (..)
   , ArgConcl (..)
+  , ArgRef (..)
+  , ArgDischarge
+  , ArgInstantiation (..)
   , Arg (..)
   , ComparisonClaim (..)
   , Comparison (..)
@@ -665,17 +668,36 @@ data ArgConcl
     Challenges ChallengeTarget
   deriving (Eq, Show)
 
--- | An @arg@ declaration naming a support term and the conclusion it announces
--- (spec §4.4).
+-- | A presentation-only argument reference. Resolution to a declared leaf or
+-- prior argument is an elaboration concern, so the concrete spelling remains
+-- a distinct token here.
+newtype ArgRef = ArgRef String
+  deriving (Eq, Ord, Show)
+
+-- | A shallow discharge target as authored on an inferred argument. The
+-- elaborator resolves the reference to a declared leaf or prior argument.
+type ArgDischarge = [(QuestionId, ArgRef)]
+
+-- | The complete presentation support payload for an argument. Keeping the
+-- support carrier inside the sum prevents an inferred argument from being
+-- paired with a leaf, substitutions, or pre-populated premises.
+data ArgInstantiation
+  = ExplicitTheta SupportTerm
+  | InferTheta RuleId [ArgRef] ArgDischarge [ObligationId] Assurance
+  deriving (Eq, Show)
+
+-- | An @arg@ declaration naming a support payload and the conclusion it
+-- announces (spec §4.4).
 --
 -- > arg a : <arg-conclusion> by <support term>
 --
--- Multiple independent supports for the same claim are separate 'Arg's — never
--- merged into one term — so defeat can eliminate one while another survives.
+-- Multiple independent supports for the same claim are separate 'Arg's —
+-- never merged into one term — so defeat can eliminate one while another
+-- survives.
 data Arg = Arg
   { argId :: ArgId
   , argConcl :: ArgConcl
-  , argTerm :: SupportTerm
+  , argInstantiation :: ArgInstantiation
   }
   deriving (Eq, Show)
 

@@ -214,7 +214,13 @@ danglingReference =
         prog
           "empirical-v1"
           [ DeclClaim (claimD "c" "M improves accuracy on D" (atom "improves" [con "m", con "accuracy", con "d"]))
-          , DeclArg (Arg (ArgId "a") (SupportsClaim (PropId "c")) (SLeaf (LeafId "e_missing")))
+          , DeclArg
+              ( Arg
+                  { argId = ArgId "a"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation = ExplicitTheta (SLeaf (LeafId "e_missing"))
+                  }
+              )
           , DeclStatus (PropId "c")
           ]
     , negPolicy = Nothing
@@ -248,7 +254,13 @@ supportMismatch =
                   Observed
                   AiExecuted
               )
-          , DeclArg (Arg (ArgId "a") (SupportsClaim (PropId "c")) (SLeaf (LeafId "e1")))
+          , DeclArg
+              ( Arg
+                  { argId = ArgId "a"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation = ExplicitTheta (SLeaf (LeafId "e1"))
+                  }
+              )
           , DeclStatus (PropId "c")
           ]
     , negPolicy = Nothing
@@ -287,19 +299,22 @@ premiseMismatch =
               )
           , DeclArg
               ( Arg
-                  (ArgId "a")
-                  (SupportsClaim (PropId "c"))
-                  ( inst
-                      "controlled_experiment"
-                      [ (Param "M", con "m")
-                      , (Param "Acc", con "accuracy")
-                      , (Param "D", con "d")
-                      , (Param "Delta", TNum "+2.1")
-                      ]
-                      [SLeaf (LeafId "e1")]
-                      []
-                      []
-                  )
+                  { argId = ArgId "a"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation =
+                      ExplicitTheta
+                        ( inst
+                            "controlled_experiment"
+                            [ (Param "M", con "m")
+                            , (Param "Acc", con "accuracy")
+                            , (Param "D", con "d")
+                            , (Param "Delta", TNum "+2.1")
+                            ]
+                            [SLeaf (LeafId "e1")]
+                            []
+                            []
+                        )
+                  }
               )
           , DeclStatus (PropId "c")
           ]
@@ -357,15 +372,18 @@ unaccountedQuestion =
               )
           , DeclArg
               ( Arg
-                  (ArgId "a")
-                  (SupportsClaim (PropId "c"))
-                  ( inst
-                      "controlled_experiment"
-                      [(Param "M", con "m"), (Param "Acc", con "accuracy"), (Param "D", con "d"), (Param "Delta", TNum "+2.1")]
-                      [SLeaf (LeafId "e1")]
-                      [] -- no discharge
-                      [] -- and no open hole for 'randomization'
-                  )
+                  { argId = ArgId "a"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation =
+                      ExplicitTheta
+                        ( inst
+                            "controlled_experiment"
+                            [(Param "M", con "m"), (Param "Acc", con "accuracy"), (Param "D", con "d"), (Param "Delta", TNum "+2.1")]
+                            [SLeaf (LeafId "e1")]
+                            [] -- no discharge
+                            [] -- and no open hole for 'randomization'
+                        )
+                  }
               )
           , DeclStatus (PropId "c")
           ]
@@ -418,11 +436,22 @@ illTypedAttack =
           , DeclLeaf (leafD "e_nq" (atom "grounds_not_q" []) Observed AiExecuted)
           , DeclArg
               ( Arg
-                  (ArgId "a_strict")
-                  (SupportsClaim (PropId "c"))
-                  (SRule (RuleId "deductive_step") [] [SLeaf (LeafId "e_p")] [] [] AssuranceTrusted)
+                  { argId = ArgId "a_strict"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation =
+                      ExplicitTheta
+                        (SRule (RuleId "deductive_step") [] [SLeaf (LeafId "e_p")] [] [] AssuranceTrusted)
+                  }
               )
-          , DeclArg (Arg (ArgId "d") (SupportsClaim (PropId "c_not")) (inst "presumption" [] [SLeaf (LeafId "e_nq")] [] []))
+          , DeclArg
+              ( Arg
+                  { argId = ArgId "d"
+                  , argConcl = SupportsClaim (PropId "c_not")
+                  , argInstantiation =
+                      ExplicitTheta
+                        (inst "presumption" [] [SLeaf (LeafId "e_nq")] [] [])
+                  }
+              )
           , DeclAttack (SRebut (ArgId "d") (ArgId "a_strict"))
           , DeclStatus (PropId "c")
           ]
@@ -515,7 +544,13 @@ admissionReject =
           "strict-admission-v1"
           [ DeclClaim (claimD "c" "assumption A" (atom "a" []))
           , DeclLeaf (leafD "e_assumed" (atom "a" []) Assumed AiExecuted)
-          , DeclArg (Arg (ArgId "a") (SupportsClaim (PropId "c")) (SLeaf (LeafId "e_assumed")))
+          , DeclArg
+              ( Arg
+                  { argId = ArgId "a"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation = ExplicitTheta (SLeaf (LeafId "e_assumed"))
+                  }
+              )
           , DeclStatus (PropId "c")
           ]
     , negPolicy =
@@ -585,10 +620,13 @@ strictAssuranceViolation =
       , DeclLeaf (leafD "e_p" (atom "p" []) Assumed AiExecuted)
       , DeclArg
           ( Arg
-              (ArgId "a")
-              (SupportsClaim (PropId "c"))
-              -- illegal: trusted assurance on an allow-trusted=false rule
-              (SRule (RuleId "deductive_step") [] [SLeaf (LeafId "e_p")] [] [] AssuranceTrusted)
+              { argId = ArgId "a"
+              , argConcl = SupportsClaim (PropId "c")
+              , -- illegal: trusted assurance on an allow-trusted=false rule
+                argInstantiation =
+                  ExplicitTheta
+                    (SRule (RuleId "deductive_step") [] [SLeaf (LeafId "e_p")] [] [] AssuranceTrusted)
+              }
           )
       , DeclStatus (PropId "c")
       ]
@@ -618,7 +656,13 @@ duplicateReportGroupConflict =
           , DeclLeaf (leafD "e1" (atom "effect" [con "up"]) Observed AiExecuted)
           , DeclLeaf (leafD "e2" (atom "effect" [con "down"]) Observed AiExecuted)
           , DeclGroup (DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"])
-          , DeclArg (Arg (ArgId "a") (SupportsClaim (PropId "c")) (SLeaf (LeafId "e1")))
+          , DeclArg
+              ( Arg
+                  { argId = ArgId "a"
+                  , argConcl = SupportsClaim (PropId "c")
+                  , argInstantiation = ExplicitTheta (SLeaf (LeafId "e1"))
+                  }
+              )
           , DeclStatus (PropId "c")
           ]
     , negPolicy =

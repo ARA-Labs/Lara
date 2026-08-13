@@ -60,7 +60,7 @@ leaf e6 : generalizes(M, accuracy, D)
 
 # --- The support argument for the headline claim -----------------------------------------------
 
-arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_3)
+arg a1 : supports(c1) by controlled_experiment from [e1]
   discharge randomization     with e2
   discharge adequate_power    with e3
   discharge external_validity with e6   # e6 : generalizes(...), answers the CQ pattern
@@ -99,7 +99,7 @@ leaf e9 : powered(exp_9)
   provenance = user
   refs       = [paper_17.pdf#sec=6-ablations]
 
-arg d3 : supports(c1_neg) by null_result(M, accuracy, D, exp_9)
+arg d3 : supports(c1_neg) by null_result from [e7]
   discharge randomization  with e8
   discharge adequate_power with e9
 rebut d3 a1

@@ -1044,13 +1044,13 @@ leafPropOf l ds =
     p : _ -> p
     [] -> error ("leafPropOf: no declared leaf " ++ show l)
 
--- | All fifteen negatives share the parsed A + policy; run them in one IO
--- property. Case 10 pins unique surface argument ids before quarantine
--- retention\/attack alignment; case 11 pins declared attack endpoints before
--- resolution; cases 12–15 pin the four
--- 'Lara.Elaborate'.@validateGroups@ error
--- paths (R14 on the @.lara@ door), asserting the same checks in the same order
--- as the wire decoder's @checkGroupInvariants@.
+-- | The negative cases share the parsed A + policy; run them (and the
+-- duplicate-unrelated-leaf positive control) in one IO property. Cases 10 and
+-- 11 pin unique surface argument ids and declared attack endpoints before
+-- resolution; the final four cases pin the four
+-- 'Lara.Elaborate'.@validateGroups@ error paths (R14 on the @.lara@ door),
+-- asserting the same checks in the same order as the wire decoder's
+-- @checkGroupInvariants@.
 prop_negatives :: Property
 prop_negatives = once $ ioProperty $ do
   progA <- loadProgram "examples/A/example.lara"
@@ -1061,23 +1061,54 @@ prop_negatives = once $ ioProperty $ do
       -- 1. policy-id mismatch: hand a policy whose id differs from the header.
       polMismatch = pol {policyId = PolicyId "not-empirical-v1"}
 
-      -- 2. unresolved premise: drop leaf e1, so a1's implicit premise
-      --    reports(exp_3, effect(M,accuracy,D,positive)) matches nothing.
+      -- 2. unresolved inferred premise: drop leaf e1; named resolution must
+      --    fail at the source-reference boundary.
       progNoE1 = withDecls (filter (not . isLeaf "e1") decls) progA
 
-      -- 3. ambiguous premise: add a second leaf with e1's exact proposition.
+      -- 3. A duplicate proposition under a different leaf id is not ambiguous:
+      --    inferred syntax selects the authored reference by exact id. The
+      --    leaf/prior-argument collision remains covered by ThetaInferenceSpec.
       dupE1 =
         DeclLeaf
           (Leaf (LeafId "e1_dup") (leafPropOf "e1" decls) Observed AiExecuted [])
       progDupE1 = withDecls (decls ++ [dupE1]) progA
 
-      -- 4. arity mismatch: drop one positional θ argument from a1's term.
+      -- Explicit syntax retains the legacy premise resolver. Keep both
+      -- failure paths covered independently of inferred reference resolution.
+      progExplicitNoE1 = withDecls (map explicitA1 (filter (not . isLeaf "e1") decls)) progA
+      progExplicitDupE1 = withDecls (map explicitA1 (decls ++ [dupE1])) progA
+      explicitA1 (DeclArg a)
+        | argId a == ArgId "a1" =
+            DeclArg a {argInstantiation = ExplicitTheta explicitA1Term}
+      explicitA1 d = d
+      explicitA1Term =
+        SRule
+          (RuleId "controlled_experiment")
+          [ (Param "1", con "M")
+          , (Param "2", con "accuracy")
+          , (Param "3", con "D")
+          , (Param "4", con "exp_3")
+          ]
+          []
+          [ (QuestionId "randomization", SLeaf (LeafId "e2"))
+          , (QuestionId "adequate_power", SLeaf (LeafId "e3"))
+          , (QuestionId "external_validity", SLeaf (LeafId "e6"))
+          ]
+          []
+          AssuranceNone
+
+      -- 4. arity mismatch: an explicit rule application with no positional
+      --    terms is shorter than controlled_experiment's four parameters.
       progBadArity = withDecls (map dropArgArity decls) progA
       dropArgArity (DeclArg a)
-        | argId a == ArgId "a1" = DeclArg a {argTerm = shrinkSubst (argTerm a)}
+        | argId a == ArgId "a1" =
+            DeclArg
+              a
+                { argInstantiation =
+                    ExplicitTheta
+                      (SRule (RuleId "controlled_experiment") [] [] [] [] AssuranceNone)
+                }
       dropArgArity d = d
-      shrinkSubst (SRule r th pr ds hs as) = SRule r (init th) pr ds hs as
-      shrinkSubst t = t
 
       -- 5. undeclared status id.
       progBadStatus = withDecls (decls ++ [DeclStatus (PropId "no_such_claim")]) progA
@@ -1089,24 +1120,35 @@ prop_negatives = once $ ioProperty $ do
             DeclClaim c {claimFormal = Prop (Pred "unrelated") []}
       breakClaim d = d
 
-      -- 7. unknown rule: retarget a1's support term at a rule the policy
-      --    never declares.
+      -- 7. unknown rule: retarget a1's inferred source rule.
       progUnknownRule = withDecls (map bogusRule decls) progA
       bogusRule (DeclArg a)
-        | argId a == ArgId "a1" = DeclArg a {argTerm = renameRule (argTerm a)}
+        | argId a == ArgId "a1" =
+            DeclArg a {argInstantiation = renameRule (argInstantiation a)}
       bogusRule d = d
-      renameRule (SRule _ th pr ds hs as) = SRule (RuleId "no_such_rule") th pr ds hs as
-      renameRule t = t
+      renameRule (InferTheta _ refs disch holes assurance) =
+        InferTheta (RuleId "no_such_rule") refs disch holes assurance
+      renameRule (ExplicitTheta term) =
+        ExplicitTheta (renameTerm term)
+      renameRule inst = inst
+      renameTerm (SRule _ th pr ds hs as) = SRule (RuleId "no_such_rule") th pr ds hs as
+      renameTerm term = term
 
-      -- 8. unresolved discharge: repoint a1's discharge targets at an id that
-      --    is neither a declared leaf nor a prior argument.
+      -- 8. unresolved discharge: repoint a1's inferred discharge targets at
+      --    an id that is neither a declared leaf nor a prior argument.
       progBadDischarge = withDecls (map breakDischarge decls) progA
       breakDischarge (DeclArg a)
-        | argId a == ArgId "a1" = DeclArg a {argTerm = danglingDisch (argTerm a)}
+        | argId a == ArgId "a1" =
+            DeclArg a {argInstantiation = danglingDisch (argInstantiation a)}
       breakDischarge d = d
-      danglingDisch (SRule r th pr ds hs as) = SRule r th pr (map bustDisch ds) hs as
-      danglingDisch t = t
-      bustDisch (q, _) = (q, SLeaf (LeafId "no_such_ref"))
+      danglingDisch (InferTheta r refs ds hs as) =
+        InferTheta r refs [(q, ArgRef "no_such_ref") | (q, _) <- ds] hs as
+      danglingDisch (ExplicitTheta term) =
+        ExplicitTheta (danglingTerm term)
+      danglingDisch inst = inst
+      danglingTerm (SRule r th pr ds hs as) =
+        SRule r th pr [(q, SLeaf (LeafId "no_such_ref")) | (q, _) <- ds] hs as
+      danglingTerm term = term
 
       -- 9. challenge target undeclared: repoint d2's challenges(…) at an
       --    undeclared leaf.
@@ -1145,10 +1187,22 @@ prop_negatives = once $ ioProperty $ do
     conjoin
       [ counterexample "policy-id mismatch" $
           isErr "policy" (elab progA polMismatch)
-      , counterexample "unresolved premise" $
-          isErr "matches no declared leaf" (elab progNoE1 pol)
-      , counterexample "ambiguous premise" $
-          isErr "ambiguous" (elab progDupE1 pol)
+      , counterexample "explicit unresolved premise" $
+          isErr "matches no declared leaf or prior argument" (elab progExplicitNoE1 pol)
+      , counterexample "explicit ambiguous premise" $
+          isErr "is ambiguous" (elab progExplicitDupE1 pol)
+      , counterexample "unresolved inferred premise" $
+          isErr "neither a declared leaf nor prior argument" (elab progNoE1 pol)
+      , counterexample "duplicate unrelated leaf remains unambiguous" $
+          case elab progDupE1 pol of
+            Right unit ->
+              case [term | (ArgId "a1", term) <- unitArgs unit] of
+                [SRule _ _ [SLeaf (LeafId "e1")] _ _ _] -> property True
+                terms ->
+                  counterexample
+                    ("authored e1 was not retained in a1 premises: " ++ show terms)
+                    (property False)
+            Left e -> counterexample ("unexpected error: " ++ elabErrorMessage e) (property False)
       , counterexample "arity mismatch" $
           isErr "argument(s)" (elab progBadArity pol)
       , counterexample "undeclared status id" $

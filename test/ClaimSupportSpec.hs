@@ -32,7 +32,9 @@ import Lara.AST
   ( Arg (..)
   , ArgConcl (..)
   , ArgId (..)
-  , Assurance (AssuranceTrusted)
+  , ArgInstantiation (ExplicitTheta, InferTheta)
+  , ArgRef (..)
+  , Assurance (..)
   , Attack (..)
   , AuditStatus (Reviewed)
   , Binding (..)
@@ -88,7 +90,9 @@ claimSupportSpecProps =
   , ("claim-support: value bindings preserve semantic consumer parity", quickCheckResult prop_valueBindingConsumerParity)
   , ("claim-support: frozen corpus numbers (status/leaves/attacks/strict)", quickCheckResult prop_frozenNumbers)
   , ("claim-support: binding-audit rows preserve the frozen 38-leaf denominator", quickCheckResult prop_bindingAuditRows)
-  , ("claim-support: binding-audit non-leaf subjects are exactly 1 strict + 3 attacks", quickCheckResult prop_bindingAuditSubjects)
+  , ("claim-support: inferred attack audit uses complete term and authored refs", quickCheckResult prop_inferredAttackAudit)
+  , ("claim-support: dead-end detection uses complete attack term", quickCheckResult prop_deadEndAudit)
+  , ("claim-support: explicit attack audit widens refs but keeps positional rendering", quickCheckResult prop_explicitAttackAudit)
   , ("claim-support: binding-audit attack subjects retain raw endpoints", quickCheckResult prop_bindingAuditSubjectEndpoints)
   , ("claim-support: every attack constructor has an exact persisted subject id", quickCheckResult prop_bindingAuditAttackSubjectIds)
   , ("claim-support: binding-audit rows carry role-aware claim context", quickCheckResult prop_bindingAuditContexts)
@@ -511,6 +515,128 @@ prop_bindingAuditSubjects = once $ ioProperty $ do
       , counterexample "complete attack subject" $
           subjectById "fre.C04:attack:undercut:d1:a1:rule" === attackRepresentative
       ]
+prop_inferredAttackAudit :: Property
+prop_inferredAttackAudit =
+  once $
+    case urBindingAuditSubjects (attackAuditRecord inferredAttackInstantiation) of
+      [subject] ->
+        conjoin
+          [ counterexample "inferred attack kept authored rendering" $
+              auditSubjectFormalObject subject
+                === "arg attack-source : challenges(l1) by attack-rule from [e1]\n  discharge q with l2\n  assurance = trusted\n"
+          , counterexample "inferred attack refs did not use the complete premise tree" $
+              auditSubjectRefs subject === attackSourceRefs
+          ]
+      subjects ->
+        counterexample ("expected one inferred attack subject, got " ++ show subjects) False
+
+prop_deadEndAudit :: Property
+prop_deadEndAudit =
+  once $
+    counterexample "complete premise trace ref was not classified as a dead end" $
+      urDeadEndAttacks deadEndRecord === 1
+  where
+    traceLeaves =
+      [ Leaf primaryLeafId primaryProp Observed AiExecuted [SourceRef "trace/exploration_tree.yaml#N1"]
+      , Leaf secondaryLeafId secondaryProp Attested AiExecuted [SourceRef "synthetic#l2"]
+      ]
+    traceCoreLeaves = [(leafId leaf, leafProp leaf) | leaf <- traceLeaves]
+    traceSource =
+      Arg
+        { argId = attackSourceId
+        , argConcl = Challenges (ChallengesLeaf primaryLeafId)
+        , argInstantiation = inferredAttackInstantiation
+        }
+    deadEndRecord =
+      auditRecordWithModeAndDerivedAndSurfaceLeaves
+        (const Defeasible)
+        traceCoreLeaves
+        traceLeaves
+        [ (attackSourceId, completeAttackTerm)
+        , (attackTargetId, SLeaf secondaryLeafId)
+        , (nonChallengeSourceId, SLeaf secondaryLeafId)
+        ]
+        [ Undercut attackSourceId attackTargetId []
+        , Undercut nonChallengeSourceId attackTargetId []
+        ]
+        [primaryClaim]
+        [ traceSource
+        , supportArg attackTargetId primaryClaimId secondaryLeafId
+        , supportArg nonChallengeSourceId primaryClaimId secondaryLeafId
+        ]
+        [(0, LIn), (1, LOut), (2, LOut)]
+        [ (attackSourceId, completeAttackTerm)
+        , (attackTargetId, SLeaf secondaryLeafId)
+        , (nonChallengeSourceId, SLeaf secondaryLeafId)
+        ]
+    nonChallengeSourceId = ArgId "non-challenge-source"
+
+prop_explicitAttackAudit :: Property
+prop_explicitAttackAudit =
+  once $
+    case urBindingAuditSubjects (attackAuditRecord (ExplicitTheta shallowAttackTerm)) of
+      [subject] ->
+        conjoin
+          [ counterexample "explicit attack formal object lost positional rendering" $
+              auditSubjectFormalObject subject === "undercut attack-source attack-target"
+          , counterexample "explicit attack refs did not widen to premise and discharge leaves" $
+              auditSubjectRefs subject === attackSourceRefs
+          ]
+      subjects ->
+        counterexample ("expected one explicit attack subject, got " ++ show subjects) False
+
+attackAuditRecord :: ArgInstantiation -> UnitRecord
+attackAuditRecord inst =
+  auditRecordWithDerivedArgs
+    [(attackSourceId, completeAttackTerm), (attackTargetId, SLeaf secondaryLeafId)]
+    [Undercut attackSourceId attackTargetId []]
+    [primaryClaim]
+    [attackSourceArg, supportArg attackTargetId primaryClaimId secondaryLeafId]
+    [(0, LIn), (1, LOut)]
+    [(attackSourceId, completeAttackTerm), (attackTargetId, SLeaf secondaryLeafId)]
+  where
+    attackSourceArg =
+      Arg
+        { argId = attackSourceId
+        , argConcl = Challenges (ChallengesLeaf primaryLeafId)
+        , argInstantiation = inst
+        }
+
+attackSourceId, attackTargetId :: ArgId
+attackSourceId = ArgId "attack-source"
+attackTargetId = ArgId "attack-target"
+
+shallowAttackTerm, completeAttackTerm :: SupportTerm
+shallowAttackTerm =
+  SRule
+    { srRule = RuleId "attack-rule"
+    , srSubst = []
+    , srPremises = []
+    , srDischarge = [(QuestionId "q", SLeaf secondaryLeafId)]
+    , srHoles = []
+    , srAssurance = AssuranceTrusted
+    }
+
+inferredAttackInstantiation :: ArgInstantiation
+inferredAttackInstantiation =
+  InferTheta
+    (RuleId "attack-rule")
+    [ArgRef "e1"]
+    [(QuestionId "q", ArgRef "l2")]
+    []
+    AssuranceTrusted
+completeAttackTerm =
+  case shallowAttackTerm of
+    SRule rid subst _ disch holes assurance ->
+      SRule rid subst [SLeaf primaryLeafId] disch holes assurance
+    SLeaf _ -> error "attack fixture requires a rule-backed source"
+
+attackSourceRefs :: [SourceRef]
+attackSourceRefs =
+  [ SourceRef "synthetic#l1"
+  , SourceRef "synthetic#l2"
+  ]
+
 
 prop_bindingAuditSubjectEndpoints :: Property
 prop_bindingAuditSubjectEndpoints =
@@ -592,7 +718,12 @@ strictMismatchRecord =
     [(supportId, strictCoreTerm)]
     []
     [primaryClaim]
-    [Arg supportId (SupportsClaim primaryClaimId) strictSurfaceTerm]
+    [ Arg
+        { argId = supportId
+        , argConcl = SupportsClaim primaryClaimId
+        , argInstantiation = ExplicitTheta strictSurfaceTerm
+        }
+    ]
     [(0, LIn)]
   where
     strictCoreTerm =
@@ -866,9 +997,77 @@ auditRecordWithMode
   -> [(Int, Label)]
   -> UnitRecord
 auditRecordWithMode ruleModeOf coreLeaves coreArgs coreAttacks claims surfaceArgs labels =
+  auditRecordWithModeAndDerived
+    ruleModeOf
+    coreLeaves
+    coreArgs
+    coreAttacks
+    claims
+    surfaceArgs
+    labels
+    [(argId arg, surfaceArgTerm arg) | arg <- surfaceArgs]
+surfaceArgTerm :: Arg -> SupportTerm
+surfaceArgTerm arg =
+  case argInstantiation arg of
+    ExplicitTheta term -> term
+    InferTheta _ _ _ _ _ ->
+      error "claim-support test: inferred surface arg needs an explicit derived term"
+
+auditRecordWithDerivedArgs
+  :: [(ArgId, SupportTerm)]
+  -> [Attack]
+  -> [Claim]
+  -> [Arg]
+  -> [(Int, Label)]
+  -> [(ArgId, SupportTerm)]
+  -> UnitRecord
+auditRecordWithDerivedArgs coreArgs coreAttacks claims surfaceArgs labels surfaceDerivedArgs =
+  auditRecordWithModeAndDerived
+    (const Defeasible)
+    [(leafId leaf, leafProp leaf) | leaf <- syntheticLeaves]
+    coreArgs
+    coreAttacks
+    claims
+    surfaceArgs
+    labels
+    surfaceDerivedArgs
+
+auditRecordWithModeAndDerived
+  :: (RuleId -> Mode)
+  -> [(LeafId, Prop)]
+  -> [(ArgId, SupportTerm)]
+  -> [Attack]
+  -> [Claim]
+  -> [Arg]
+  -> [(Int, Label)]
+  -> [(ArgId, SupportTerm)]
+  -> UnitRecord
+auditRecordWithModeAndDerived ruleModeOf coreLeaves coreArgs coreAttacks claims surfaceArgs labels surfaceDerivedArgs =
+  auditRecordWithModeAndDerivedAndSurfaceLeaves
+    ruleModeOf
+    coreLeaves
+    syntheticLeaves
+    coreArgs
+    coreAttacks
+    claims
+    surfaceArgs
+    labels
+    surfaceDerivedArgs
+
+auditRecordWithModeAndDerivedAndSurfaceLeaves
+  :: (RuleId -> Mode)
+  -> [(LeafId, Prop)]
+  -> [Leaf]
+  -> [(ArgId, SupportTerm)]
+  -> [Attack]
+  -> [Claim]
+  -> [Arg]
+  -> [(Int, Label)]
+  -> [(ArgId, SupportTerm)]
+  -> UnitRecord
+auditRecordWithModeAndDerivedAndSurfaceLeaves ruleModeOf coreLeaves surfaceLeaves coreArgs coreAttacks claims surfaceArgs labels surfaceDerivedArgs =
   computeUnit ruleModeOf False "synthetic" input surfaceDerivedArgs verdict program
   where
-    surfaceDerivedArgs = [(argId arg, argTerm arg) | arg <- surfaceArgs]
     unit =
       Unit
         { unitSigma = sigmaOf [] [] [("p", []), ("primary", []), ("secondary", [])]
@@ -893,7 +1092,7 @@ auditRecordWithMode ruleModeOf coreLeaves coreArgs coreAttacks claims surfaceArg
         , programBackends = []
         , programValueBindings = []
         , programDecls =
-            map DeclLeaf syntheticLeaves
+            map DeclLeaf surfaceLeaves
               ++ map DeclClaim claims
               ++ map DeclArg surfaceArgs
         }
@@ -912,13 +1111,28 @@ syntheticBinding :: Binding
 syntheticBinding = Binding "test" "binding-audit fixture" Reviewed
 
 supportArg :: ArgId -> PropId -> LeafId -> Arg
-supportArg aid cid lid = Arg aid (SupportsClaim cid) (SLeaf lid)
+supportArg aid cid lid =
+  Arg
+    { argId = aid
+    , argConcl = SupportsClaim cid
+    , argInstantiation = ExplicitTheta (SLeaf lid)
+    }
 
 derivedArg :: ArgId -> LeafId -> Arg
-derivedArg aid lid = Arg aid (SupportsDerived (PropId "derived")) (SLeaf lid)
+derivedArg aid lid =
+  Arg
+    { argId = aid
+    , argConcl = SupportsDerived (PropId "derived")
+    , argInstantiation = ExplicitTheta (SLeaf lid)
+    }
 
 challengeArg :: ArgId -> LeafId -> Arg
-challengeArg aid lid = Arg aid (Challenges (ChallengesLeaf lid)) (SLeaf lid)
+challengeArg aid lid =
+  Arg
+    { argId = aid
+    , argConcl = Challenges (ChallengesLeaf lid)
+    , argInstantiation = ExplicitTheta (SLeaf lid)
+    }
 
 primaryProp, secondaryProp :: Prop
 primaryProp = Prop (Pred "primary") []

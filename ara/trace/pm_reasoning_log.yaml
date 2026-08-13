@@ -737,3 +737,24 @@ entries:
     - "Restored S2/S5 comparison sub-claims to {cell ...}; this preserves N171's stronger evidence-derived anti-staleness guarantee while bindings continue to reduce repeated term positions."
     - "No logic-layer entry changed. O65-O67 still lack closure signals; PR #103 now awaits reviewer re-approval rather than implementation work."
 
+- turn: "2026-08-12_001#1"
+  notes:
+    - "Routed N175 as one AI-executed verification experiment: Task 7's local matrix, exact syntax and D6 diagnostics, 72-row parity, source/core identity, replay/tamper, differential, admission, determinism, and protected-artifact evidence jointly establish local completion."
+    - "Staged O69 rather than crystallizing a stronger completion claim: hosted Haskell and Lean CI remain pending until the implementation PR head runs them, so #104 stays open pending hosted verification."
+    - "Kept #105 explicitly open and separate: named certificate premise slots were not implemented, and the opaque Cert layering decision remains unresolved."
+    - "Updated only the TODO and ARA bookkeeping surfaces; no production, generated, frozen, checker, wire, backend, replay, or measurement artifact was changed."
+
+- turn: "2026-08-12_002#1"
+  notes:
+    - "Routed N176 as an AI-executed hosted-verification experiment: PR #106 was opened after the reviewed implementation and both hosted Haskell and Lean jobs passed on Actions run 31644485072."
+    - "The hosted result closes the conditional #104 verification thread; updated TODOS.md to state verification complete while keeping the GitHub issue attached to the open PR until merge."
+    - "Recorded O70 as crystallized by empirical resolution plus the PR artifact; no generalized logic-layer claim was added."
+    - "Kept #105 explicitly open and separate because named certificate premise slots and opaque Cert layering were not implemented."
+    - "Targeted YAML parsing and N176/O70/session-index assertions passed; repository-wide ara check --strict remains blocked by the pre-existing N131 scalar at exploration_tree.yaml:3249, so no unrelated ARA schema cleanup was folded into #104."
+- turn: "2026-08-12_003#1"
+  notes:
+    - "Routed N177 as a verification AI-executed experiment: the full Haskell suite, 73-row presentation parity, Lean build and axiom gates, differential/admission, replay, and tamper checks passed locally after commit 2de1bcde; hosted CI then passed on ARA-append head c9c59a6 before this metadata correction commit was created, in Actions run 31653193555."
+    - "Appended a correction rather than rewriting N176/O70: the earlier 72-row result and Actions run 31644485072 describe an intermediate hosted-verification state; N177 records the 73-row local result and the hosted result on its then-current ARA-append head."
+    - "Recorded O71 as crystallized by empirical resolution plus the implementation PR artifact; no generalized logic-layer claim was added."
+    - "Kept PR #106 open with its merge state CLEAN but review decision CHANGES_REQUESTED pending reviewer re-review; kept #105 separate because opaque certificate layering was not implemented."
+    - "The repository-wide ara check --strict remains blocked by the pre-existing N131 scalar at exploration_tree.yaml:3249; targeted ARA validation is recorded after this append."

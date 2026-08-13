@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.4`)
+# LARA surface grammar — frozen (`lara-syntax@0.5`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -8,34 +8,44 @@ in what `examples/A/example.lara`, `examples/B/example.lara`,
 and `examples/A/empirical-v1.policy.lara` actually write, and in the abstract syntax
 of `src/Lara/AST.hs`._
 
-Status of the artifacts this task touches:
+Historical A0.5 baseline (the status below predates later additive surface
+versions):
 
-- **AST** — `src/Lara/AST.hs` gained two presentation-only types (`ChallengeTarget`,
-  `ArgConcl`) and `Arg.argClaim :: PropId` became `Arg.argConcl :: ArgConcl`. No
-  frozen (Unit-reachable) type changed. See §7 and §9.1.
-- **A / B** — already conform to the grammar below; **no reconciliation edits were
-  required** (see §10). The gap that A0.5 existed to close was in the *AST*, not the
-  example text: the surface forms `challenges(…)` and `supports(c1_neg)`
-  (undeclared) had no representable conclusion until `ArgConcl` landed.
+- **AST** — `src/Lara/AST.hs` gained two presentation-only types
+  (`ChallengeTarget`, `ArgConcl`) and `Arg.argClaim :: PropId` became
+  `Arg.argConcl :: ArgConcl`. No frozen (Unit-reachable) type changed. See §7
+  and §9.1.
+- **A / B** — at the original A0.5 baseline, both already conformed to the
+  grammar below; **no reconciliation edits were required at that stage** (see
+  §10). The later `lara-syntax@0.5` implementation intentionally migrates the
+  A and S1 witness spellings to inferred arguments as a separate additive
+  surface change; that migration does not revise this historical baseline.
+  The gap that A0.5 existed to close was in the *AST*, not the example text:
+  the surface forms `challenges(…)` and `supports(c1_neg)` (undeclared) had no
+  representable conclusion until `ArgConcl` landed.
+
+The active `@0.5` additions are specified in Appendix D: `Arg` carries
+`ArgInstantiation` with `ArgRef` references for inferred theta, and the
+migrated A/S1 witnesses exercise that form while `lara-core@0.2` remains
+unchanged.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.4`; it decodes to
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.5`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
-`@0.3` forms and `@0.4` value bindings remain presentation-layer data until
-elaboration. The Haskell `parse ∘ print == id` property covers this current
-concrete surface. The structured Lean round-trip in
+`@0.3` forms, `@0.4` value bindings, and `@0.5` inferred-theta form remain
+presentation-layer data until elaboration. The Haskell `parse ∘ print == id`
+property covers this current concrete surface. The structured Lean round-trip in
 `lean/Lara/Presentation.lean` covers the complete live `Program`/`Policy` AST
-for this surface, including value bindings, `policySigma`, and optional
-measurand polarity — an AST-shape anchor, not a correctness proof for the
-Haskell concrete parser. `scripts/check-presentation-parity.sh` compares the two
-models' normalized shape inventories so the surface cannot grow on one side
-only. Exact compiler witnesses pin record fields, sum payloads, aliases, and
-anonymous entry types; named record selectors are compared in order. Positional
-constructors have no source selector names: exact signatures pin their arity
-and positional type
-sequence, but semantic labels and swaps among same-typed positions remain
-assertions. The guard documents two representation exemptions (`SortName` erasure;
-`Cert`'s native payload).
+for this surface, including value bindings, inferred argument instantiations,
+`policySigma`, and optional measurand polarity — an AST-shape anchor, not a
+correctness proof for the Haskell concrete parser. `scripts/check-presentation-parity.sh`
+compares the two models' normalized shape inventories so the surface cannot grow
+on one side only. Exact compiler witnesses pin record fields, sum payloads,
+aliases, and anonymous entry types; named record selectors are compared in order.
+Positional constructors have no source selector names: exact signatures pin their
+arity and positional type sequence, but semantic labels and swaps among same-typed
+positions remain assertions. The guard documents two representation exemptions
+(`SortName` erasure; `Cert`'s native payload).
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
 constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
@@ -153,7 +163,12 @@ higher-is-better  lower-is-better  strictly-better  at-least-as-good
 
 -- lara-syntax@0.4 (Appendix C)
 let
+
+-- lara-syntax@0.5 (Appendix D)
+from
 ```
+The @0.5 entry `from` is contextual after a rule identifier; it is listed
+under the version delta without becoming a lexer-reserved identifier.
 
 Closed tag enumerations (surface ↔ `Lara.AST` constructor):
 
@@ -245,12 +260,13 @@ argConcl  ::= "supports"   "(" ident ")"                 -- SupportsClaim / Supp
 challengeTarget ::= ident "(" ident ")"                  -- ChallengesQuestion  q(u)
                   | ident                                -- ChallengesLeaf      l
 
-supportTerm ::= "leaf" "(" ident ")"                     -- SLeaf
-              | ident "(" [ term { "," term } ] ")"      -- rule instance: id + ground θ (§5)
+supportTerm ::= "leaf" "(" ident ")"                           -- explicit leaf support
+              | ident "(" [ term { "," term } ] ")"      -- explicit rule θ
+              | ident "from" "[" [ argRef { "," argRef } ] "]" -- inferred θ
 
+argRef        ::= ident                                  -- a leaf id or a prior arg id
 dischargeLine ::= "discharge" ident "with" argRef        -- discharge q with <support>
 openLine      ::= "open" ident "as" ident                -- open q as o   (explicit hole)
-argRef        ::= ident                                  -- a leaf id or a prior arg id
 
 attackDecl ::= "rebut"     ident ident
              | "undercut"  ident posTarget               -- terminal marker ".rule"
@@ -357,47 +373,48 @@ Notes:
 
 ---
 
-## 5. Support terms: premises IMPLICIT, discharges EXPLICIT (FROZEN)
+## 5. Support terms: premises implicit, discharges explicit (versioned contract)
 
-The `by r(g1, …, gn)` application supplies the **full ground substitution `θ`** over
-`r`'s declared parameters, positionally (`r`'s i-th parameter ↦ `gi`). Example A's
-`controlled_experiment(M, accuracy, D, exp_3)` binds all four parameters of
-`rule controlled_experiment(M, Q, D, Exp)` — `{M↦M, Q↦accuracy, D↦D, Exp↦exp_3}` —
-so every premise pattern is fully ground under `θ`.
+For the legacy explicit form, `by r(g1, …, gn)` supplies the **full ground
+substitution `θ`** over `r`'s declared parameters, positionally (`r`'s i-th
+parameter ↦ `gi`). The parenthesized terms are θ bindings, not premise
+sub-argument references. The elaborator reconstructs each implicit premise by
+computing `Apᵢ · θ` and resolving the unique declared leaf or prior `arg` whose
+conclusion is `≡ Apᵢ · θ` (spec §3.2 `nf`-equality).
 
-**Premise sub-terms are NOT written in the surface.** The elaborator reconstructs
-each premise `i` by:
+This explicit positional reading is the historical v0.1 contract reflected by
+the original A/B sources. It explains the older notation's divergence from
+`docs/spec.md` §4.4's `by r(a1,…,an)` premise-reference notation. The current
+`lara-syntax@0.5` form may instead write `by r from [ref1,…,refn]`; Appendix D
+defines that form. Inferred references select the support terms directly in
+policy-premise order, including the principal leaf such as `e1` or `e7`, and
+the elaborator derives θ by ordered matching.
 
-1. computing the ground premise proposition `Apᵢ · θ`;
-2. resolving it to the **unique** declared leaf or prior `arg` whose conclusion is
-   `≡ Apᵢ · θ` (spec §3.2 `nf`-equality).
+Both forms reach the checker as a fully explicit support term. Explicit
+premise reconstruction is untrusted elaborator work, as stated in spec §4.1;
+inferred reconstruction is deterministic and source-selected, as specified in
+Appendix D. Discharges and open holes remain explicit in both forms.
 
-This is the reading `by r(…)` takes in v0.1: the parenthesized arguments are the
-**θ binding**, not sub-argument references. (This diverges from `docs/spec.md` §4.4's
-`by r(a1,…,an)` notation, where `a1..an` are premise sub-arguments; the divergence
-is deliberate and grounded in what A/B write — every A/B `by`-application lists the
-rule's *parameters/terms*, and omits the principal premise leaf `e1`/`e7`. The
-checker still receives the fully explicit support term; premise reconstruction is
-untrusted elaborator work, spec §4.1 "reconstructing an elided `theta` is elaborator
-work.")
+**Explicit-form determinism (plan D3).** For positional θ, premise resolution is
+a total function on well-formed input:
 
-**Determinism (plan D3).** Premise resolution is a total function on well-formed
-input:
-
-- `nf`/`≡` is decidable and the declared leaf+arg set is finite, so "the set of
-  declared conclusions `≡ Apᵢ·θ`" is computable;
+- `nf`/`≡` is decidable and the declared leaf+arg set is finite, so the set of
+  declared conclusions matching `Apᵢ·θ` is computable;
 - **exactly one** match ⇒ that sub-term (deterministic);
 - **zero** matches ⇒ a located elaborate error (unresolved premise);
 - **≥ 2** matches ⇒ a located elaborate error (ambiguous premise).
 
-No search, no backtracking, no preference — the elaborator is deterministic and
-total-on-well-formed-input as D3 requires.
+No search, no backtracking, no preference — explicit premise reconstruction is
+deterministic and total on well-formed input. Inferred matching has its separate
+left-to-right scope and precedence contract in Appendix D.
 
 **Discharges stay EXPLICIT.** Each critical question is discharged by name:
 `discharge q with <argRef>` (A/B use bare leaf ids: `discharge randomization with
 e2`). Open holes are explicit too: `open q as o`. The `D ⊎ H = questions(r)`
 accounting invariant (spec §4.2) is checked by the elaborator against the resolved
-discharge/open sets. A/B need no premise edits under this rule.
+discharge/open sets. No premise edits are needed for the historical explicit
+A/B sources under this positional rule; current inferred sources are specified
+in Appendix D.
 
 ---
 
@@ -520,10 +537,11 @@ Worked from Example A:
    whose value is fixed by the attack constructor — one canonical spelling per
    (kind, position) for the round-trip.
 
-3. **Premises implicit, discharges explicit (§5).** `by r(…)` supplies the full
-   ground `θ`; premise sub-terms are elaborator-reconstructed by unique `≡`-match
-   (deterministic: 0 ⇒ error, 1 ⇒ resolved, ≥2 ⇒ error). Discharges/holes are named
-   explicitly. Matches A/B verbatim; no premise edits needed.
+3. **Premises implicit, discharges explicit (§5).** Legacy positional `by r(…)`
+   supplies full ground `θ`; premise sub-terms are reconstructed by unique
+   `≡`-match (0 ⇒ error, 1 ⇒ resolved, ≥2 ⇒ error). Current `@0.5` sources may
+   use `by r from […]`, whose ordered source references and matching contract
+   are defined in Appendix D. Discharges and holes remain explicit.
 
 4. **`#` lexing (§1.2).** `#` is a to-EOL comment everywhere **except** inside a
    `refs = […]` list, where it is a literal source-ref character. Two lexer modes,
@@ -552,16 +570,28 @@ data ArgConcl
   | Challenges ChallengeTarget
   deriving (Eq, Show)
 
+-- NEW
+newtype ArgRef = ArgRef String
+  deriving (Eq, Ord, Show)
+
+type ArgDischarge = [(QuestionId, ArgRef)]
+
+data ArgInstantiation
+  = ExplicitTheta SupportTerm
+  | InferTheta RuleId [ArgRef] ArgDischarge [ObligationId] Assurance
+  deriving (Eq, Show)
+
 -- CHANGED: argClaim :: PropId  →  argConcl :: ArgConcl
 data Arg = Arg
-  { argId    :: ArgId
-  , argConcl :: ArgConcl
-  , argTerm  :: SupportTerm
+  { argId             :: ArgId
+  , argConcl          :: ArgConcl
+  , argInstantiation  :: ArgInstantiation
   }
   deriving (Eq, Show)
 ```
 
-Exports gained `ChallengeTarget (..)`, `ArgConcl (..)`. No Unit-reachable type
+Exports gained `ChallengeTarget (..)`, `ArgConcl (..)`, `ArgRef (..)`,
+`ArgDischarge`, and `ArgInstantiation (..)`. No Unit-reachable type
 (`Unit`, `SupportTerm`, `Attack`, `Step`, `Position`, `Rule`, `Contrary`,
 `Exception`, `Prop`, `Term`, the `*Id` newtypes, …) was touched.
 
@@ -961,10 +991,11 @@ nlChar    ::= any-char-except '"', newline, "{", "}"
 directive ::= "{" "cell" leafId "}"
 ```
 
-This block records the exact `@0.3` spelling. The live `@0.4` grammar in
-Appendix C.5 additionally permits inline spaces or tabs around directive tokens
-and retains those authored gaps for round-tripping; the cell lookup and
-`renderDecimal` semantics below are unchanged.
+This block records the historical `@0.3` spelling. The active `@0.5` surface
+retains the historical `@0.4` value-binding grammar introduced in Appendix
+C.5: it permits inline spaces or tabs around directive tokens and retains those
+authored gaps for round-tripping; the cell lookup and `renderDecimal` semantics
+below are unchanged.
 
 ```
 claim c1
@@ -1175,8 +1206,9 @@ term-bearing field:
 
 - `Leaf.leafProp`;
 - `Claim.claimFormal`;
-- `Arg.argTerm`, including each `SRule.srSubst` term and nested
-  premise/discharge support term;
+- `Arg.argInstantiation`: substitute inside each `ExplicitTheta` payload,
+  including each `SRule.srSubst` term and nested premise/discharge support term;
+  `InferTheta` keeps its named `ArgRef` values unchanged;
 - `Comparison.cmpConclusion`.
 
 The pass is consuming and runs exactly once:
@@ -1266,6 +1298,87 @@ certificates keep numeric premise slots. A future named-slot design must define
 an explicit layer above the opaque payload rather than making the general value
 pass inspect backend syntax.
 
-Likewise, value bindings do not add named premise references or infer θ for an
-ordinary `arg`. The existing explicit positional θ contract remains unchanged;
-the separate plain-argument θ-matching rider is still deferred.
+Likewise, value bindings do not rename named premise references. The plain-argument
+theta-matching form is defined in Appendix D (`lara-syntax@0.5`).
+
+## Appendix D — `lara-syntax@0.5` (plain-argument theta inference, 2026-08-12)
+
+### D.1 Syntax and presentation scope
+
+The inferred form records references instead of positional terms:
+
+```text
+supportTerm ::= "leaf" "(" ident ")"                          -- explicit leaf
+              | ident "(" [ term { "," term } ] ")"           -- ExplicitTheta
+              | ident "from" "[" [ argRefList ] "]"          -- InferTheta
+argRef      ::= ident
+argRefList  ::= argRef ("," argRef)*
+```
+
+`ExplicitTheta` owns the complete surface `SupportTerm` for an explicit leaf or
+rule application. `InferTheta` owns the complete inferred payload: the rule id,
+named premise references, shallow discharge references, obligation ids, and
+assurance.
+
+The `ident` and `term` nonterminals are those defined in §§1.3 and 2. The
+`from` alternative is contextual after the rule identifier; it does not change
+the lexical identifier class. The lexer still accepts `from` as an identifier
+in positions where a rule, predicate, leaf, or argument name is expected.
+`InferTheta` carries these fields as one presentation payload; the parser folds
+`discharge`, `open`, and `assurance` lines into that payload. For either
+instantiation, the parser drops the critical-question token in
+`open q as obligation` and retains only the `ObligationId`. The canonical
+printer therefore intentionally omits `open` lines, because it cannot
+reconstruct the discarded question token; for inferred arguments it prints the
+rule, named references, discharges, and assurance.
+
+At argument `a`, each reference is resolved in this fixed scope. A name that
+matches both namespaces is ambiguous; a name that matches neither is unresolved.
+Only declared leaves and arguments already elaborated earlier in declaration order
+are in scope. A later argument is never a valid prior-argument reference. A prior
+argument contributes its complete support term and its derived conclusion.
+
+### D.2 Matching order and derived support
+
+The elaborator first checks the reference count against the rule premise count.
+It then resolves references from left to right, matching reference `i` against
+premise `i` in policy order. Matching uses the existing one-way `matchAPat`
+operation and its normalized term equality. Shape mismatches and repeated
+parameter conflicts are reported at the reference and one-based premise
+position. After all premises match, every declared rule parameter must be bound;
+the resulting substitution is reordered by `ruleParams`. The selected complete
+support terms become the semantic premise list in the same authored order.
+
+Inference is therefore deterministic: it performs no global premise search,
+backtracking, or preference selection. Explicit positional arguments retain their
+existing elaboration path, including unique premise reconstruction. The two paths
+meet only at the complete `SRule` consumed by the checker.
+
+### D.3 Diagnostics and precedence
+
+Inference failures are checked in this order: unknown rule; reference-count
+mismatch; left-to-right scope resolution (including an underivable prior
+conclusion); left-to-right premise matching; unbound parameters in `ruleParams`
+order; then inferred discharge and announced-conclusion validation. The complete
+`InferTheta` payload makes malformed explicit/inferred pairings unrepresentable
+by the AST, so they have no diagnostics. Diagnostics identify the argument and
+rule, and reference failures also identify the one-based premise number and exact
+source spelling. Shape mismatches include the selected proposition; conflicts
+include the parameter and both terms.
+
+The stable diagnostic families are `UnknownRule`,
+`ThetaReferenceCountMismatch`, `ThetaReferenceUnresolved`,
+`ThetaReferenceAmbiguous`, `ThetaReferenceShapeMismatch`,
+`ThetaReferenceConflict`, `ThetaReferenceConclUnderivable`, and
+`ThetaParameterUnbound`.
+
+### D.4 Explicit/inferred equality contract
+
+When an explicit argument spells each parameter exactly as the cited premise
+terms spell it, explicit and inferred elaboration produce byte-identical
+semantic units, core S-expressions, verdict JSON, and exit classifications.
+The inferred substitution adopts terms from cited propositions; explicit theta
+retains the author's spelling. If spellings differ but are normalized-equal,
+such as `0.710` and `0.71`, the semantic units can differ in bytes while their
+verdict JSON and exit classifications remain equal. This spelling condition is
+part of the contract; byte identity is not unconditional.

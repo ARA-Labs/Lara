@@ -384,11 +384,19 @@ expandComparison pol gamma cmp = do
           , claimFormal = goal
           , claimBinding = ccBinding (cmpClaim cmp)
           }
+      recheckTerm =
+        SRule
+          (ruleId recheck)
+          (thetaFor thetaRecheck recheck)
+          []
+          []
+          []
+          (AssuranceCert cert)
       recheckArg =
         Arg
           { argId = cmpRecheckArg cmp
           , argConcl = SupportsClaim cid
-          , argTerm = SRule (ruleId recheck) (thetaFor thetaRecheck recheck) [] [] [] (AssuranceCert cert)
+          , argInstantiation = ExplicitTheta recheckTerm
           }
       ArgId bridgeName = cmpBridgeArg cmp
       bridgeArg =
@@ -400,21 +408,23 @@ expandComparison pol gamma cmp = do
             -- value never reaches 'Unit' (it records the author's stated role),
             -- so the choice is diagnostic-only.
             argConcl = maybe (SupportsDerived (PropId bridgeName)) SupportsClaim (cmpSupports cmp)
-          , argTerm =
-              SRule
-                (ruleId bridge)
-                (thetaFor thetaBridge bridge)
-                [ if i == bridgeComparisonSlot
-                    then argTerm recheckArg
-                    else
-                      if i == bridgeBindingSlot
-                        then SLeaf (cmpBinding cmp)
-                        else error "unreachable bridge premise slot"
-                | i <- [0 .. length (rulePremises bridge) - 1]
-                ]
-                []
-                []
-                AssuranceNone
+          , argInstantiation =
+              ExplicitTheta
+                ( SRule
+                    (ruleId bridge)
+                    (thetaFor thetaBridge bridge)
+                    [ if i == bridgeComparisonSlot
+                        then recheckTerm
+                        else
+                          if i == bridgeBindingSlot
+                            then SLeaf (cmpBinding cmp)
+                            else error "unreachable bridge premise slot"
+                    | i <- [0 .. length (rulePremises bridge) - 1]
+                    ]
+                    []
+                    []
+                    AssuranceNone
+                )
           }
       crumb aid =
         GeneratedArg

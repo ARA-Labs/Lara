@@ -106,6 +106,9 @@ ruleIdCtor = RuleId
 argIdCtor :: String -> ArgId
 argIdCtor = ArgId
 
+argRefCtor :: String -> ArgRef
+argRefCtor = ArgRef
+
 obligationIdCtor :: String -> ObligationId
 obligationIdCtor = ObligationId
 
@@ -172,6 +175,7 @@ type ExpectedTheoryEntry = (TheoryDigest, [P.Prop])
 type ExpectedBackendEntry = (BackendId, String)
 type ExpectedSubst = [(Param, P.Term)]
 type ExpectedDischargeEntry = (QuestionId, SupportTerm)
+type ExpectedArgDischarge = [(QuestionId, ArgRef)]
 type ExpectedPosition = [Step]
 
 substWitness :: Subst -> ExpectedSubst
@@ -179,6 +183,9 @@ substWitness = id
 
 positionWitness :: Position -> ExpectedPosition
 positionWitness = id
+
+argDischargeWitness :: ArgDischarge -> ExpectedArgDischarge
+argDischargeWitness = id
 
 -- ---------------------------------------------------------------------------
 -- Record constructor witnesses
@@ -246,7 +253,7 @@ sruleCtor ::
   [ObligationId] -> Assurance -> SupportTerm
 sruleCtor = SRule
 
-argCtor :: ArgId -> ArgConcl -> SupportTerm -> Arg
+argCtor :: ArgId -> ArgConcl -> ArgInstantiation -> Arg
 argCtor = Arg
 
 comparisonClaimCtor :: PropId -> String -> Binding -> ComparisonClaim
@@ -346,6 +353,14 @@ supportsDerivedCtor = SupportsDerived
 
 challengesCtor :: ChallengeTarget -> ArgConcl
 challengesCtor = Challenges
+
+explicitThetaCtor :: SupportTerm -> ArgInstantiation
+explicitThetaCtor = ExplicitTheta
+
+inferThetaCtor ::
+  RuleId -> [ArgRef] -> ExpectedArgDischarge -> [ObligationId] -> Assurance ->
+  ArgInstantiation
+inferThetaCtor = InferTheta
 
 declLeafCtor :: Leaf -> Decl
 declLeafCtor = DeclLeaf
@@ -488,6 +503,11 @@ argConclTag c = case c of
   SupportsDerived _ -> "supports-derived"
   Challenges _ -> "challenges"
 
+argInstantiationTag :: ArgInstantiation -> String
+argInstantiationTag inst = case inst of
+  ExplicitTheta _ -> "explicit-theta"
+  InferTheta _ _ _ _ _ -> "infer-theta"
+
 declTag :: Decl -> String
 declTag decl = case decl of
   DeclLeaf _ -> "leaf"
@@ -508,12 +528,14 @@ witnesses =
   , used groupIdCtor, used measurandIdCtor, used datasetIdCtor
   , used premiseLabelCtor, used valueNameCtor, used valueNameText
   , used sortNameCtor, used funSymCtor, used predCtor
+  , used argRefCtor, used argDischargeWitness
   , used propCtor, used substWitness, used positionWitness
   , used atomPatCtor, used leafCtor, used bindingCtor, used claimCtor
   , used questionCtor, used certRefCtor, used ruleCtor, used contraryCtor
   , used exceptionCtor, used dupGroupCtor, used conSigCtor, used predSigCtor
   , used sigmaCtor, used measurandCtor, used comparisonSchemeCtor
   , used policyCtor, used certCtor, used sruleCtor, used argCtor
+  , used explicitThetaCtor, used inferThetaCtor
   , used comparisonClaimCtor, used comparisonCtor, used valueBindingCtor
   , used programCtor, used termNumCtor, used termStrCtor, used termConCtor
   , used provenanceCheckerCtor, used sortDeclCtor
@@ -532,7 +554,7 @@ witnesses =
   , used polarityTag, used relationTag, used sortTag, used patTag
   , used assuranceTag, used supportTermTag, used stepTag, used attackTag
   , used surfaceStepTag, used surfaceAttackTag, used challengeTargetTag
-  , used argConclTag, used declTag
+  , used argConclTag, used argInstantiationTag, used declTag
   ]
   where
     used :: a -> ()
@@ -615,7 +637,10 @@ shapeRows =
     )
   , ("Cert", ["backend", "version", "theory", "payload"])
   , ("SRule", ["rule", "subst", "premises", "discharge", "holes", "assurance"])
-  , ("Arg", ["id", "conclusion", "term"])
+  , ("ArgRef", ["val"])
+  , ("ArgDischarge", ["entries:List (QuestionId,ArgRef)"])
+  , ("ArgInstantiation", ["explicit-theta", "infer-theta"])
+  , ("Arg", ["id", "conclusion", "instantiation"])
   , ("ComparisonClaim", ["id", "nl-raw", "binding"])
   , ( "Comparison"
     , [ "conclusion", "measurand", "dataset", "relation", "recheck-arg"
@@ -844,6 +869,8 @@ deriving instance Generic Attack
 deriving instance Generic SurfaceStep
 deriving instance Generic SurfaceAttack
 deriving instance Generic ChallengeTarget
+deriving instance Generic ArgRef
+deriving instance Generic ArgInstantiation
 deriving instance Generic ArgConcl
 deriving instance Generic Decl
 deriving instance Generic AtomPat
@@ -937,6 +964,9 @@ shapeChecks =
   , ("Policy", namedRecordOf @Policy "policy")
   , ("Cert", namedRecordOf @Cert "cert")
   , ("SRule", namedCtorOf @SupportTerm "SRule" "sr")
+  , ("ArgRef", RecordOf (ctorsOf @ArgRef))
+  , ("ArgDischarge", AliasOf 1)
+  , ("ArgInstantiation", SumOf (ctorsOf @ArgInstantiation))
   , ("Arg", namedRecordOf @Arg "arg")
   , ("ComparisonClaim", namedRecordOf @ComparisonClaim "cc")
   , ("Comparison", namedRecordOf @Comparison "cmp")

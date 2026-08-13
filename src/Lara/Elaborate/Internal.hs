@@ -22,7 +22,7 @@
 --
 -- == The four sibling modules
 --
--- The elaborator is split so the @lara-syntax\@0.4@ consuming surface pass and
+-- The elaborator is split so the @lara-syntax\@0.5@ consuming surface pass and
 -- structural lowering can share a failure vocabulary:
 --
 --   * "Lara.Elaborate.Error" — 'ElabError' and its renderer (re-exported here);
@@ -55,7 +55,11 @@ import Data.List (find)
 import Lara.AST
 import Lara.Elaborate.Comparison (GeneratedArg (..), expandSurfaceProvenance)
 import Lara.Elaborate.Error (ElabError (..), elabErrorMessage)
-import Lara.Elaborate.Subst (apatToProp)
+import Lara.Elaborate.Subst
+  ( MatchFailure (..)
+  , apatToProp
+  , matchAPat
+  )
 import Lara.Syntax (attackPathTerminalMarkers)
 import Lara.Prop (Prop, equiv)
 
@@ -99,6 +103,13 @@ data Env = Env
   , envArgIds :: [ArgId]
   }
 
+-- | A reference selected by inferred theta, keeping its exact semantic term
+-- paired with the proposition used for matching.
+data ResolvedArgRef = ResolvedArgRef
+  { resolvedRefTerm :: SupportTerm
+  , resolvedRefProp :: Prop
+  }
+
 -- ---------------------------------------------------------------------------
 -- The elaborator
 -- ---------------------------------------------------------------------------
@@ -128,10 +139,11 @@ data Env = Env
 --
 -- @lara-syntax\@0.4@ inserts the consuming value-binding pass first. The
 -- @lara-syntax\@0.3@ comparison stage then expands every @comparison@ block to
--- the declarations it stands for ('Lara.Elaborate.Comparison.expandSurface')
--- __before__ any id check, any argument is lowered, or any attack path resolves,
--- so an attack on a generated argument resolves against the post-expansion set
--- (App. B.5, eng review F5).
+-- the declarations it stands for ('Lara.Elaborate.Comparison.expandSurface').
+-- Those two presentation passes run before id checks, argument lowering, or
+-- attack-path resolution. The @lara-syntax\@0.5 theta inference step runs
+-- per-argument inside the lowering fold, after those passes and before the
+-- corresponding conclusion and later attack validation.
 elaborate :: TheoryRegistry -> Program -> Policy -> Either ElabError Unit
 elaborate reg prog pol = projectUnit <$> elaborateWithSemanticProgram reg prog pol
   where
@@ -392,11 +404,31 @@ elabOne
 elabOne env acc arg = do
   let aid = argId arg
       priors = reverse acc -- declaration order (lookup is order-insensitive)
-  term <- elabTerm env priors aid (argTerm arg)
+  term <- elabInstantiation env priors aid (argInstantiation arg)
   validateConcl env aid (argConcl arg) term
   pure ((aid, term) : acc)
 
--- | Rebuild the full 'SupportTerm' from the shallow surface term.
+-- | Lower the complete presentation support payload to a semantic term.
+elabInstantiation
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> ArgInstantiation
+  -> Either ElabError SupportTerm
+elabInstantiation env priors aid inst = case inst of
+  ExplicitTheta term -> elabTerm env priors aid term
+  InferTheta r refs shallowDisch holes assurance -> do
+    rule <- lookupRule env aid r
+    (theta, prems) <- inferTheta env priors aid rule refs
+    disch <- resolveArgDischarges env priors aid shallowDisch
+    pure (SRule r theta prems disch holes assurance)
+
+lookupRule :: Env -> ArgId -> RuleId -> Either ElabError Rule
+lookupRule env aid r =
+  maybe (Left (UnknownRule aid r)) Right $
+    find ((== r) . ruleId) (policyRules (envPolicy env))
+
+-- | Rebuild the full 'SupportTerm' for an explicit presentation payload.
 elabTerm
   :: Env
   -> [(ArgId, SupportTerm)]
@@ -404,26 +436,109 @@ elabTerm
   -> SupportTerm
   -> Either ElabError SupportTerm
 elabTerm env priors aid term = case term of
-  -- A leaf stays a leaf; an undeclared id is left for checkUnit (R1).
   SLeaf l -> pure (SLeaf l)
   SRule r posTheta shallowPrems shallowDisch holes assurance -> do
-    rule <-
-      maybe (Left (UnknownRule aid r)) Right $
-        find ((== r) . ruleId) (policyRules (envPolicy env))
-    let params = ruleParams rule
-        nGot = length posTheta
-        nExp = length params
-    when (nGot /= nExp) $ Left (ArityMismatch aid r nExp nGot)
-    -- Re-associate positional θ with the rule's declared parameter names.
-    let theta = zip params (map snd posTheta)
-    prems <-
-      if null shallowPrems
-        then resolvePremises env priors aid r rule theta
-        else mapM (elabTerm env priors aid) shallowPrems
+    rule <- lookupRule env aid r
+    (theta, prems) <- do
+      let params = ruleParams rule
+          nGot = length posTheta
+          nExp = length params
+      when (nGot /= nExp) $ Left (ArityMismatch aid r nExp nGot)
+      -- Re-associate positional θ with the rule's declared parameter names.
+      let theta' = zip params (map snd posTheta)
+      prems' <-
+        if null shallowPrems
+          then resolvePremises env priors aid r rule theta'
+          else mapM (elabTerm env priors aid) shallowPrems
+      pure (theta', prems')
     disch <- resolveDischarges env priors aid shallowDisch
     -- lara-syntax@0.2: lower assurance verbatim. Legality (strict mode,
     -- allow-trusted, certifier allowlist, replay) belongs to R7/R13.
     pure (SRule r theta prems disch holes assurance)
+
+-- | Resolve one inferred reference in leaf/prior-argument scope order.
+resolveArgRef
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> RuleId
+  -> Int
+  -> ArgRef
+  -> Either ElabError ResolvedArgRef
+resolveArgRef env priors aid rid i ref@(ArgRef name) =
+  case (leafMatches, argMatches) of
+    ([(leafId, prop)], []) ->
+      Right (ResolvedArgRef (SLeaf leafId) prop)
+    ([], [(argId, term)]) ->
+      case conclOf (envPolicy env) (envGamma env) term of
+        Just prop -> Right (ResolvedArgRef term prop)
+        Nothing -> Left (ThetaReferenceConclUnderivable aid rid i ref)
+    ([], []) -> Left (ThetaReferenceUnresolved aid rid i ref)
+    _ -> Left (ThetaReferenceAmbiguous aid rid i ref)
+  where
+    leafMatches =
+      [ (leafId, prop)
+      | (leafId@(LeafId leafName), prop) <- envGamma env
+      , leafName == name
+      ]
+    argMatches =
+      [ (argId, term)
+      | (argId@(ArgId argName), term) <- priors
+      , argName == name
+      ]
+
+-- | Derive an inferred rule theta and retain the references' selected terms.
+inferTheta
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> Rule
+  -> [ArgRef]
+  -> Either ElabError (Subst, [SupportTerm])
+inferTheta env priors aid rule refs = do
+  let expected = length (rulePremises rule)
+      got = length refs
+      rid = ruleId rule
+  when (got /= expected) $
+    Left (ThetaReferenceCountMismatch aid rid expected got)
+  resolved <- mapM (uncurry (resolveArgRef env priors aid rid)) (zip [1 ..] refs)
+  theta0 <- foldM matchOne [] $
+    zip3 [1 :: Int ..] refs (zip (rulePremises rule) resolved)
+  mapM_ (requireThetaParameter aid rid theta0) (ruleParams rule)
+  let theta =
+        [ (param, term)
+        | param <- ruleParams rule
+        , Just term <- [lookup param theta0]
+        ]
+  pure (theta, map resolvedRefTerm resolved)
+  where
+    matchOne sub (i, ref, (apat, resolved)) =
+      case matchAPat sub apat (resolvedRefProp resolved) of
+        Right next -> Right next
+        Left MatchShape ->
+          Left
+            ( ThetaReferenceShapeMismatch
+                aid
+                (ruleId rule)
+                i
+                ref
+                (resolvedRefProp resolved)
+            )
+        Left (MatchConflict param old new) ->
+          Left
+            ( ThetaReferenceConflict
+                aid
+                (ruleId rule)
+                i
+                ref
+                param
+                old
+                new
+            )
+
+    requireThetaParameter arg ruleId' theta0 param
+      | param `elem` map fst theta0 = Right ()
+      | otherwise = Left (ThetaParameterUnbound arg ruleId' param)
 
 -- | Reconstruct each implicit premise by unique @≡@-match (spec §5). Preserves
 -- premise order.
@@ -475,6 +590,24 @@ resolveDischarges env priors aid = mapM one
     -- The parser only ever produces 'SLeaf' discharge targets; a non-leaf
     -- sub-term is passed through unchanged (totality).
     one (q, t) = Right (q, t)
+
+-- | Resolve the identifier-only discharge map carried by an inferred payload.
+resolveArgDischarges
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> ArgDischarge
+  -> Either ElabError [(QuestionId, SupportTerm)]
+resolveArgDischarges env priors aid = mapM one
+  where
+    one (q, ArgRef ref) = do
+      target <- resolveDischargeRef q ref
+      pure (q, target)
+
+    resolveDischargeRef q ref
+      | LeafId ref `elem` envLeafIds env = Right (SLeaf (LeafId ref))
+      | Just t <- lookup (ArgId ref) priors = Right t
+      | otherwise = Left (UnresolvedDischarge aid q ref)
 
 -- | Validate (and reclassify) the announced argument conclusion. The checker
 -- consumes only the support term's own @concl(w)@, so this never changes the

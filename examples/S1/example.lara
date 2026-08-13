@@ -1,4 +1,4 @@
-# S1 — strict-certificate worked example (lara-syntax@0.2)
+# S1 — strict-certificate worked example (lara-syntax@0.5)
 #
 # The first worked example exercising the frontend certificate path:
 # assurance = cert(…) parses, elaborates to AssuranceCert, and replays through
@@ -19,7 +19,7 @@ leaf e1 : holds(safety_invariant, D)
   provenance = user
   refs       = [evidence/safety_audit.txt#section=invariants]
 
-arg a1 : supports(c1) by certified_citation(safety_invariant, D)
+arg a1 : supports(c1) by certified_citation from [e1]
   assurance = cert(nd@1, sha256:strict-v1-theory-0, (hyp 0))
 
 status c1

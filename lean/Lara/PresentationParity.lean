@@ -95,6 +95,8 @@ def questionIdCtor   : String → QuestionId   := QuestionId.mk
 def leafIdCtor       : String → LeafId       := LeafId.mk
 def ruleIdCtor       : String → RuleId       := RuleId.mk
 def argIdCtor        : String → ArgId        := ArgId.mk
+
+def argRefCtor       : String → ArgRef       := ArgRef.mk
 def obligationIdCtor : String → ObligationId := ObligationId.mk
 def backendIdCtor    : String → BackendId    := BackendId.mk
 def policyIdCtor     : String → PolicyId     := PolicyId.mk
@@ -107,6 +109,8 @@ def measurandIdCtor  : String → MeasurandId  := MeasurandId.mk
 def datasetIdCtor    : String → DatasetId    := DatasetId.mk
 def premiseLabelCtor : String → PremiseLabel := PremiseLabel.mk
 def valueNameCtor    : String → ValueName    := ValueName.mk
+
+
 
 /-- The `FunSym` row: the frozen semantic core's constructor-symbol wrapper,
 which `ConSig` carries. -/
@@ -127,8 +131,11 @@ presentation type instead of relying on the cross-language diff alone. -/
 abbrev ExpectedAdmissionEntry := (LeafKind × Provenance) × Admission
 abbrev ExpectedTheoryEntry := TheoryDigest × List Atom
 abbrev ExpectedBackendEntry := BackendId × String
+abbrev ExpectedArgDischarge := List (QuestionId × ArgRef)
 abbrev ExpectedSubst := List (Param × Term)
 abbrev ExpectedPosition := List Step
+
+def argDischargeWitness : ArgDischarge → ExpectedArgDischarge := id
 
 def substWitness : Subst → ExpectedSubst := id
 def positionWitness : Position → ExpectedPosition := id
@@ -189,7 +196,7 @@ def sruleCtor :
     RuleId → Subst → SupportTerms → Discharges → List ObligationId → Assurance →
     SupportTerm := SupportTerm.rule
 
-def argCtor : ArgId → ArgConcl → SupportTerm → Arg := Arg.mk
+def argCtor : ArgId → ArgConcl → ArgInstantiation → Arg := Arg.mk
 
 def comparisonClaimCtor : PropId → String → Binding → ComparisonClaim := ComparisonClaim.mk
 
@@ -247,6 +254,11 @@ def challengeLeafCtor : LeafId → ChallengeTarget := ChallengeTarget.leaf
 def supportsClaimCtor : PropId → ArgConcl := ArgConcl.supportsClaim
 def supportsDerivedCtor : PropId → ArgConcl := ArgConcl.supportsDerived
 def challengesCtor : ChallengeTarget → ArgConcl := ArgConcl.challenges
+
+def explicitThetaCtor : SupportTerm → ArgInstantiation := ArgInstantiation.explicitTheta
+def inferThetaCtor :
+    RuleId → List ArgRef → ArgDischarge → List ObligationId → Assurance →
+    ArgInstantiation := ArgInstantiation.inferTheta
 
 def declLeafCtor : Leaf → Decl := Decl.leaf
 def declClaimCtor : Claim → Decl := Decl.claim
@@ -355,6 +367,10 @@ def argConclTag : ArgConcl → String
   | .supportsDerived _ => "supports-derived"
   | .challenges _      => "challenges"
 
+def argInstantiationTag : ArgInstantiation → String
+  | .explicitTheta _ => "explicit-theta"
+  | .inferTheta _ _ _ _ _ => "infer-theta"
+
 def declTag : Decl → String
   | .leaf _       => "leaf"
   | .claim _      => "claim"
@@ -434,7 +450,10 @@ def shapeRows : List (String × List String) :=
       , "theories", "group-mode", "measurands", "comparison-schemes" ])
   , ("Cert", ["backend", "version", "theory", "payload"])
   , ("SRule", ["rule", "subst", "premises", "discharge", "holes", "assurance"])
-  , ("Arg", ["id", "conclusion", "term"])
+  , ("ArgRef", ["val"])
+  , ("ArgDischarge", ["entries:List (QuestionId,ArgRef)"])
+  , ("ArgInstantiation", ["explicit-theta", "infer-theta"])
+  , ("Arg", ["id", "conclusion", "instantiation"])
   , ("ComparisonClaim", ["id", "nl-raw", "binding"])
   , ("Comparison",
       [ "conclusion", "measurand", "dataset", "relation", "recheck-arg"
@@ -618,6 +637,10 @@ def shapeChecks : List (String × ShapeCheck) :=
   , ("Policy", .fields ``Lara.Presentation.Policy)
   , ("Cert", .fields ``Lara.Presentation.Cert)
   , ("SRule", .ctorArity ``Lara.Presentation.SupportTerm.rule)
+  , ("ArgRef", .fields ``Lara.Presentation.ArgRef)
+  , ("ArgDischarge", .aliasDefEq ``Lara.Presentation.ArgDischarge
+      ``Lara.PresentationParity.ExpectedArgDischarge 1)
+  , ("ArgInstantiation", .ctors ``Lara.Presentation.ArgInstantiation)
   , ("Arg", .fields ``Lara.Presentation.Arg)
   , ("ComparisonClaim", .fields ``Lara.Presentation.ComparisonClaim)
   , ("Comparison", .fields ``Lara.Presentation.Comparison)

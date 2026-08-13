@@ -157,15 +157,17 @@ nanogptTailEma =
             Arg
               { argId = ArgId "a02"
               , argConcl = SupportsClaim (PropId "c02")
-              , argTerm =
-                  inst
-                    "leave_one_out_ranking"
-                    [(Param "Component", con "tailEMA"), (Param "Stack", con "v1_stack")]
-                    [SLeaf (LeafId "e_prune")]
-                    -- discharge: it beats the next-largest lever (noMuon2f)
-                    [(QuestionId "beats_next_lever", SLeaf (LeafId "e_next"))]
-                    -- open mandatory hole: seed stability is unshown (C02 caveat)
-                    [ObligationId "o_seed"]
+              , argInstantiation =
+                  ExplicitTheta
+                    ( inst
+                        "leave_one_out_ranking"
+                        [(Param "Component", con "tailEMA"), (Param "Stack", con "v1_stack")]
+                        [SLeaf (LeafId "e_prune")]
+                        -- discharge: it beats the next-largest lever (noMuon2f)
+                        [(QuestionId "beats_next_lever", SLeaf (LeafId "e_next"))]
+                        -- open mandatory hole: seed stability is unshown (C02 caveat)
+                        [ObligationId "o_seed"]
+                    )
               }
         , DeclStatus (PropId "c02")
         ]
@@ -256,27 +258,32 @@ nanogptV12Quarantine =
             Arg
               { argId = ArgId "a_rec"
               , argConcl = SupportsClaim (PropId "c05_record")
-              , argTerm =
-                  inst
-                    "record_from_crossing"
-                    [(Param "Stack", con "v12_stack"), (Param "Bin", con "bin_2962")]
-                    [SLeaf (LeafId "e_loss")]
-                    []
-                    []
+              , argInstantiation =
+                  ExplicitTheta
+                    ( inst
+                        "record_from_crossing"
+                        [(Param "Stack", con "v12_stack"), (Param "Bin", con "bin_2962")]
+                        [SLeaf (LeafId "e_loss")]
+                        []
+                        []
+                    )
               }
         , DeclArg
             Arg
               { argId = ArgId "d_comp"
               , -- c05_compliance is not a declared claim; its proposition
                 -- (forward_path_rewrite(rmsnorm)) is derived from the term's conclusion.
+                -- The generated comparison argument has an explicit theta.
                 argConcl = SupportsDerived (PropId "c05_compliance")
-              , argTerm =
-                  inst
-                    "forward_path_violation"
-                    [(Param "Component", con "rmsnorm")]
-                    [SLeaf (LeafId "e_audit")]
-                    []
-                    []
+              , argInstantiation =
+                  ExplicitTheta
+                    ( inst
+                        "forward_path_violation"
+                        [(Param "Component", con "rmsnorm")]
+                        [SLeaf (LeafId "e_audit")]
+                        []
+                        []
+                    )
               }
         , -- undercut the record argument at its ROOT rule occurrence (position ε):
           -- the exception `record_from_crossing : forward_path_rewrite(C)` licenses
@@ -375,25 +382,29 @@ ls20SwitchDispute =
             Arg
               { argId = ArgId "a08"
               , argConcl = SupportsClaim (PropId "c08_hidden")
-              , argTerm =
-                  inst
-                    "undersampled_inference"
-                    [(Param "Level", con "ls20_L2")]
-                    [SLeaf (LeafId "e_flip")]
-                    []
-                    []
+              , argInstantiation =
+                  ExplicitTheta
+                    ( inst
+                        "undersampled_inference"
+                        [(Param "Level", con "ls20_L2")]
+                        [SLeaf (LeafId "e_flip")]
+                        []
+                        []
+                    )
               }
         , DeclArg
             Arg
               { argId = ArgId "a09"
               , argConcl = SupportsClaim (PropId "c09_single")
-              , argTerm =
-                  inst
-                    "repeated_sampling"
-                    [(Param "Level", con "ls20_L2")]
-                    [SLeaf (LeafId "e_cycle")]
-                    []
-                    []
+              , argInstantiation =
+                  ExplicitTheta
+                    ( inst
+                        "repeated_sampling"
+                        [(Param "Level", con "ls20_L2")]
+                        [SLeaf (LeafId "e_cycle")]
+                        []
+                        []
+                    )
               }
         , -- their conclusions are a policy-declared contrary pair; C09 rebuts C08
           DeclAttack (SRebut (ArgId "a09") (ArgId "a08"))

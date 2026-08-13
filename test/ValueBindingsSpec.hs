@@ -65,6 +65,27 @@ unboundSource =
 
 semanticProgramSource :: [String] -> String -> String -> String -> String
 semanticProgramSource bindings candidate score claimNl =
+  semanticProgramSourceWithArg
+    bindings
+    candidate
+    score
+    claimNl
+    ("select(" ++ candidate ++ ", box(" ++ score ++ "))")
+
+boundInferredSource :: String
+boundInferredSource =
+  semanticProgramSourceWithArg
+    [ "let candidate = sys_new"
+    , "let baseline = sys_base"
+    , "let candidate_score = 0.74"
+    ]
+    "candidate"
+    "candidate_score"
+    "{{{candidate}}} scored {candidate_score}"
+    "select from [e1]"
+
+semanticProgramSourceWithArg :: [String] -> String -> String -> String -> String -> String
+semanticProgramSourceWithArg bindings candidate score claimNl argBody =
   unlines $
     [ "artifact value_fixture at sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     , "policy value-bindings-v1"
@@ -82,7 +103,7 @@ semanticProgramSource bindings candidate score claimNl =
          , "  provenance = user"
          , "  refs = [evidence/value.txt]"
          , ""
-         , "arg a1 : supports(c1) by select(" ++ candidate ++ ", box(" ++ score ++ "))"
+         , "arg a1 : supports(c1) by " ++ argBody
          , "  assurance = trusted"
          , ""
          , "status c1"
@@ -218,6 +239,7 @@ prop_dedicatedDiagnostics =
           "value binding 'sys_new': collides with declared constructor"
       , diagnostic
           (ValueBindingSortError (ValueName "x") (FaultUndeclaredCon (FunSym "missing")))
+
           "value binding 'x': ill-sorted right-hand side: undeclared constructor 'missing'"
       , diagnostic
           (ValueBindingClaimSortError (PropId "c1") (FaultArgSort sortNum sortSystem))
@@ -231,6 +253,29 @@ prop_dedicatedDiagnostics =
       counterexample (elabErrorMessage err) (expected `isInfixOf` elabErrorMessage err)
     sortNum = SortNum
     sortSystem = SortDecl (SortName "System")
+prop_boundLeafInferenceAfterExpansion :: Property
+prop_boundLeafInferenceAfterExpansion =
+  once $
+    case (parsePolicy strictPolicySource, parseProgram boundInferredSource, parseProgram unboundSource) of
+      (Right policy, Right bound, Right unbound) ->
+        case
+            ( expandValueBindings (policySigma policy) bound
+            , elaborateWithSemanticProgram (registryOf policy) bound policy
+            , elaborateWithSemanticProgram (registryOf policy) unbound policy
+            ) of
+          (Right expanded, Right (boundUnit, _, _), Right (unboundUnit, _, _)) ->
+            case [arg | DeclArg arg <- programDecls expanded] of
+              [expandedArg] ->
+                conjoin
+                  [ counterexample "value expansion changed inferred argument references" $
+                      argInstantiation expandedArg
+                        === InferTheta (RuleId "select") [ArgRef "e1"] [] [] AssuranceTrusted
+                  , counterexample "bound selected leaf did not elaborate to explicit semantics" $
+                      boundUnit === unboundUnit
+                  ]
+              args -> counterexample ("unexpected expanded args: " ++ show args) False
+          values -> counterexample ("bound-leaf elaboration failed: " ++ show values) False
+      values -> counterexample ("fixture parse failed: " ++ show values) False
 
 readSort :: String -> Sort
 readSort name
@@ -303,7 +348,7 @@ prop_totalSubstitutionAndCertOpacity =
          in case expandValueBindings (policySigma policy) authored of
               Left err -> counterexample (elabErrorMessage err) False
               Right expanded ->
-                case [argTerm a | DeclArg a <- programDecls expanded] of
+                case [term | DeclArg a <- programDecls expanded, ExplicitTheta term <- [argInstantiation a]] of
                   [actual] ->
                     conjoin
                       [ counterexample "nested premise substitution" $
@@ -486,7 +531,11 @@ prop_noBindingLegacyBytes =
 mapArgTerm :: (SupportTerm -> SupportTerm) -> [Decl] -> [Decl]
 mapArgTerm f = map one
   where
-    one (DeclArg a) = DeclArg a {argTerm = f (argTerm a)}
+    one (DeclArg a) =
+      DeclArg $
+        case argInstantiation a of
+          ExplicitTheta term -> a {argInstantiation = ExplicitTheta (f term)}
+          _ -> a
     one d = d
 
 mapClaimNl :: (String -> String) -> Program -> Program
@@ -523,6 +572,7 @@ valueBindingSpecProps =
   [ ("value bindings: parser contract", quickCheckResult prop_parserContract)
   , ("value bindings: six dedicated diagnostics", quickCheckResult prop_dedicatedDiagnostics)
   , ("value bindings: semantic Program, Unit, and byte parity", quickCheckResult prop_semanticParity)
+  , ("value bindings: bound selected leaf inference matches explicit source", quickCheckResult prop_boundLeafInferenceAfterExpansion)
   , ("value bindings: nested support substitution and Cert opacity", quickCheckResult prop_totalSubstitutionAndCertOpacity)
   , ("value bindings: comparison fields and one-pass NL", quickCheckResult prop_comparisonAndNlSinglePass)
   , ("value bindings: authored and canonical NL renderings", quickCheckResult prop_bindingInterpolationRendering)
