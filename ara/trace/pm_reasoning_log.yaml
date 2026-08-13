@@ -758,3 +758,9 @@ entries:
     - "Recorded O71 as crystallized by empirical resolution plus the implementation PR artifact; no generalized logic-layer claim was added."
     - "Kept PR #106 open with its merge state CLEAN but review decision CHANGES_REQUESTED pending reviewer re-review; kept #105 separate because opaque certificate layering was not implemented."
     - "The repository-wide ara check --strict remains blocked by the pre-existing N131 scalar at exploration_tree.yaml:3249; targeted ARA validation is recorded after this append."
+- turn: "2026-08-12_004#1"
+  notes:
+    - "Routed N178 as a user-revised decision: the user approved the coordinated runtime-first ARA format cutover after reviewing the design specification."
+    - "Committed implementation plan d793635 divides the work into 12 tasks across ara-cli, Agent-Native-Research-Artifact, and LARA; downstream checks pin the exact reviewed runtime release rather than latest, v0, a global binary, or a moving branch."
+    - "The permanent LARA verifier compares commit 7718b1df27916159b8df706876579e781f8c03dc with the migrated tree and requires all 177 IDs, authored metadata/narrative, evidence, source references, semantic reachability, and protected checker/mechanization paths to remain unchanged."
+    - "No logic-layer claim changed and no new interpretive observation was staged; this turn committed a migration decision and executable implementation plan."

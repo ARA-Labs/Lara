@@ -367,3 +367,10 @@ sessions:
   events_count: 2
   claims_touched: []
   open_threads: 4
+- id: 2026-08-12_004
+  date: '2026-08-12'
+  summary: 'Approved the coordinated ARA format alignment design and committed a 12-task, three-repository implementation plan that preserves LARA provenance, evidence, narrative, and 177-node DAG semantics behind immutable strict runtime gates.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 3

@@ -203,7 +203,7 @@ Tighten the parser or update the grammar.
 **Effort:** S
 **Priority:** P3
 
-### #104 / Plain-arg θ inference (`lara-syntax@0.5`) — verification complete; PR #106 open
+### #104 / Plain-arg θ inference (`lara-syntax@0.5`) — complete; PR #106 merged
 
 **What:** Let an ordinary `arg` name its premise leaves or prior arguments and
 derive the rule's complete ground substitution theta by one-way matching
@@ -233,7 +233,7 @@ premise pairings unrepresentable. The stable D6 families now cover
 `ThetaReferenceConflict`, `ThetaReferenceConclUnderivable`, and
 `ThetaParameterUnbound`; the full Haskell suite passed. The corrected stable
 unresolved-reference rendering is `arg 'a1': rule 'controlled_experiment'
-inference premise #1 reference 'e1' names neither a declared leaf or prior
+inference premise #1 reference 'e1' names neither a declared leaf nor prior
 argument`. `make presentation-parity` reports `presentation parity: PASS (73
 rows)`.
 Example A and S1 source/core stdout and exit codes are identical, replay
@@ -242,9 +242,8 @@ checker execution. When explicit and inferred sources use the sameTerm-equal
 values with identical authored spellings, their lowered bytes are identical;
 sameTerm-equal spelling differences remain checker-equivalent with identical
 verdicts but may differ in bytes. No generated or frozen artifact bytes changed.
-Hosted Haskell and Lean CI both passed on PR #106's earlier head (Actions run
-`31644485072`). This review-refactor commit has not yet had a hosted run, so
-hosted verification for this commit remains pending.
+Hosted Haskell and Lean CI both passed on the final PR head `d5b04bf`
+(Actions run `31654232375`). PR #106 merged into `main` as `7718b1d`.
 
 **Effort:** M
 **Priority:** P3
@@ -338,9 +337,9 @@ Haskell/Lean presentation models and the historical `@0.4` value-binding
 appendix describe the same `@0.4` shape; the active `@0.5` surface adds
 inferred-theta references, while `lara-core@0.2` remains fixed.
 
-Named certificate premise slots and plain-`arg` θ matching are intentionally
-not folded into this completion; #105 remains an explicit open certificate
-layering problem, and #104 is locally verified but awaits hosted CI.
+Named certificate premise slots were intentionally excluded from this
+completion; #105 remains an explicit open certificate-layering problem.
+Plain-`arg` θ matching landed separately in PR #106.
 
 ### spec.md presentation-version pointer
 

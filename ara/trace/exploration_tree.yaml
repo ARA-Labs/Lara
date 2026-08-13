@@ -3246,8 +3246,8 @@ tree:
     still canonical for unlabelled premises, and no Unit-reachable type moves.
   alternatives:
   - Detach §3.5 into its own PR and ship D1-D6 first (the plan's own sequencing; rejected as unnecessary once signed off)
-  - Have the printer consult the policy (rejected: makes a program file's canonical form depend on a separate file)
-  - Pick one spelling as canonical and lose the other's round-trip (rejected: breaks spec result 12 for whichever is not chosen)
+  - "Have the printer consult the policy (rejected: makes a program file's canonical form depend on a separate file)"
+  - "Pick one spelling as canonical and lose the other's round-trip (rejected: breaks spec result 12 for whichever is not chosen)"
   evidence:
   - docs/lara-surface-grammar.md
   - plans/2026-08-08-lara-syntax-03-surface.md
@@ -3313,8 +3313,8 @@ tree:
     close, not a proof about the compiler.
   alternatives:
   - Attempt the full Lean elaborator port (out of scope; would need differential validation against Haskell)
-  - Silently deliver a weaker theorem under the requested name (rejected: misrepresents what was proved)
-  - Skip the Lean work and rely on Haskell tests alone (rejected: the user asked for mechanization)
+  - "Silently deliver a weaker theorem under the requested name (rejected: misrepresents what was proved)"
+  - "Skip the Lean work and rely on Haskell tests alone (rejected: the user asked for mechanization)"
   evidence:
   - lean/Lara/Comparison.lean
   - lean/AxCheck.lean
@@ -3341,8 +3341,8 @@ tree:
     clears labels on the way into Unit, which makes App. B.4's claim "labels
     never enter Unit" true of the VALUE and not only of the bytes.
   alternatives:
-  - Change rulePremises to [(Maybe PremiseLabel, AtomPat)] (rejected: mutates a Unit-reachable frozen type)
-  - Keep labels in a side table keyed by RuleId (rejected: separates a rule from its own labels, and the WF check needs both)
+  - "Change rulePremises to [(Maybe PremiseLabel, AtomPat)] (rejected: mutates a Unit-reachable frozen type)"
+  - "Keep labels in a side table keyed by RuleId (rejected: separates a rule from its own labels, and the WF check needs both)"
   evidence:
   - src/Lara/AST.hs
   - src/Lara/Wire.hs
@@ -3399,8 +3399,8 @@ tree:
     reports" corrected to 707, verified by running the audit rather than by
     arithmetic.
   alternatives:
-  - Port only the @0.3 additions and leave the M4a backlog (rejected: leaves the parity claim false)
-  - Weaken the header to a vague claim (rejected: an honest enumeration is the deliverable)
+  - "Port only the @0.3 additions and leave the M4a backlog (rejected: leaves the parity claim false)"
+  - "Weaken the header to a vague claim (rejected: an honest enumeration is the deliverable)"
   evidence:
   - lean/Lara/Presentation.lean
   - lean/README.md
@@ -4492,3 +4492,32 @@ tree:
     - scripts/check-presentation-parity.sh
   also_depends_on: [N176]
   status: resolved
+
+- id: N178
+  type: decision
+  title: "Approve coordinated ARA format alignment cutover"
+  provenance: user-revised
+  timestamp: "2026-08-12T20:39"
+  description: >
+    Compared LARA's 177-node research artifact, the published
+    Agent-Native-Research-Artifact format, and ara-cli 0.1.11 diagnostics.
+    The user approved a three-repository migration that fixes the runtime
+    contract before migrating the canonical example and LARA.
+  choice: >
+    Preserve published provenance, timestamps, statuses, narrative fields,
+    evidence bodies, source references, and DAG reachability. Extend ara-cli
+    to accept and render those fields, publish an immutable runtime release,
+    then normalize the canonical example and LARA with strict zero-warning
+    gates. Use a permanent baseline-vs-current verifier to prove LARA retains
+    all 177 node IDs, authored content, evidence, and semantic reachability.
+  alternatives:
+    - "Drop published metadata to fit ara-cli 0.1.11 (rejected: destroys canonical research provenance)"
+    - "Add permissive unknown-field handling (rejected: hides format drift rather than defining a contract)"
+    - "Migrate LARA before the runtime (rejected: downstream CI would depend on an unpublished contract)"
+  evidence:
+    - docs/superpowers/specs/2026-08-12-ara-format-alignment-design.md
+    - docs/superpowers/plans/2026-08-12-ara-format-alignment.md
+    - "commit d793635"
+    - "user approval 2026-08-12"
+  also_depends_on: [N177]
+  status: planned
