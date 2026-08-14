@@ -20,7 +20,7 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 | **1** (checking decidability) | `Lara/Check/` | ✅ **checker portion mechanized** — the legacy `inferSupport`, `checkAttack`, and `checkProgram` behavior remains generic and unchanged. The public `checkUnit` path additionally constructs `Unit.CheckedUnit` in the fixed order rule-ID duplicates → R2 signature → R12 policy well-formedness → argument duplicates → support → typed attacks → missing conflict. |
 | **7** (Path-B consistency; C09) | `Lara/Policy.lean`, `Lara/Unit.lean`, `Lara/Check/Unit.lean`, `Lara/Consistency.lean` | ✅ **mechanized for the Lean reference PL; issue #18 closes this scope** — `checkUnit` canonically constructs the accepted-program abstraction with unique rule IDs, Path B enforced before program checking, exact attack completeness, and retained checker nodes. `claimSupportFor` exactly aggregates complete checked nodes and `contrary_claims_not_both_justified` applies only to computed `completeClaimFor` claims. Ordered self-pairs cover self-conflict. |
 | **9** (backend replacement) | `Lara/Erase.lean`, `Lara/EraseTransport.lean` | ✅ **mechanized (Model A: uniform injective relabel)** — `backend_replacement`: two `CheckedProgram`s related by a uniform assurance relabel `mapAssur f` (`f` injective) compile to a definitionally equal AF (`checkedAF_relabel`), so every grounded label and claim status agrees. Nodes are list positions, so the bijection is the identity; `containsB_mapAssur`/`mapAssur_injective` carry edge-relation payload-independence. The doc's non-injective erase-to-`certified` marker is *not* an isomorphism (it can merge subterms and add closure edges); injectivity-on-used-certs is the faithful backend-swap condition. **Non-vacuous by construction** (`EraseTransport.lean`): `hasSupport_mapAssur`/`hasAttack_mapAssur`/`mapCertProg` transport well-checkedness under any acceptance-preserving relabel (`hpres`), so `backend_replacement_transport` exhibits the second program rather than assuming it. |
-| **12** (presentation-codec round trip) | `Lara/Presentation.lean`, `Lara/PresentationParity.lean` | ✅ **mechanized structured codec; concrete surface separately covered in Haskell** — Lean proves `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at `lara-syntax@0.5`, including value bindings, inferred argument instantiations, `policySigma`, and `Sort × Option Polarity` measurands. Haskell QuickCheck separately covers the concrete `.lara` parser/printer. This is an AST-shape anchor, **not** a correctness proof for the Haskell concrete parser. `../scripts/check-presentation-parity.sh` compares normalized shape inventories; exact compiler witnesses pin constructor signatures, aliases, exhaustive eliminators, and anonymous entry shapes, and it fails on row-count or label drift.
+| **12** (presentation-codec round trip) | `Lara/Presentation.lean`, `Lara/PresentationParity.lean` | ✅ **mechanized structured codec; concrete surface separately covered in Haskell** — Lean proves `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at `lara-syntax@0.6`, including value bindings, inferred argument instantiations, `policySigma`, and `Sort × Option Polarity` measurands. Haskell QuickCheck separately covers the concrete `.lara` parser/printer. This is an AST-shape anchor, **not** a correctness proof for the Haskell concrete parser. `../scripts/check-presentation-parity.sh` compares normalized shape inventories; exact compiler witnesses pin constructor signatures, aliases, exhaustive eliminators, and anonymous entry shapes, and it fails on row-count or label drift.
 
 `Unit.CheckedUnit` is the accepted-program abstraction. `checkUnit` is its
 canonical executable constructor; manual proof-level construction remains
@@ -57,8 +57,8 @@ Every main theorem stays within the standard trio (`propext`,
 the `lean` job fails if any theorem's transitive axiom set contains `sorryAx` or
 anything outside that trio.
 
-The latest verification snapshot is: `lake build` completes 66 jobs;
-AxCheck emits 707 declaration reports with no `sorryAx` and no axiom outside
+The latest verification snapshot is: `lake build` completes 75 jobs;
+AxCheck emits 752 declaration reports with no `sorryAx` and no axiom outside
 `propext`, `Classical.choice`, and `Quot.sound`. The transport declarations use
 only `propext` and `Quot.sound`. Exact commands and per-result evidence are
 recorded in `../ara/evidence/status/mechanization_status.md`.
@@ -74,6 +74,14 @@ recorded in `../ara/evidence/status/mechanization_status.md`.
   (`goalOf_polarity_swap`, `goalOf_polarity_mismatch_excl`). It is a statement
   about the surface lookup table only — **not** about the Haskell elaborator,
   which stays validated-not-verified like the `.lara` parser.
+- `Lara/CertSlots.lean` is likewise not a numbered spec result. It mechanizes
+  the `lara-syntax@0.6` named-certificate-slot lowering (#105) over an abstract
+  name resolver: byte-identity on payloads with no symbolic reference in scope
+  (`lower_id_of_no_symbolic`, dead-wire arm included) and agreement with the
+  declarative positional substitution (`lower_eq_numeric_subst`), pinned to the
+  Haskell implementation by ten `#guard` conformance vectors twinned with
+  `test/CertSlotsSpec.hs`. The Haskell elaborator's name resolution and
+  `CertSlot*` error taxonomy stay validated-not-verified.
 - The proposition type is `Atom` (Lean reserves `Prop` for its sort of props).
 - A constructor's argument list is a bespoke `Terms` type mutual with `Term`
   (Lean's `deriving DecidableEq` doesn't recurse through `List`, but handles
