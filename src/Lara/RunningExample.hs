@@ -1,15 +1,20 @@
 -- | The paper's running example (fig:example) as two checked programs, with
 -- their checker reports rendered for pasting into the paper (P6, issue #70).
 --
--- Run 1 (@examples\/running-example\/run1@) declares the claim and its
--- evidence leaves, including the recorded dead end @e4@, but the mandatory
--- @external_validity@ critical question has no discharging leaf, so no
--- complete support argument can be declared: the claim is @gap@. (Declaring
--- @a1@ with the mandatory question as an explicit hole is not the gap path:
--- the checker rejects that program as an incomplete argument — the
--- open-obligation gate the no-CQ ablation removes.) Run 2
--- (@…\/run2@) adds the discharging leaf @e6@, so @a1@ completes, the dead
--- end lowers to the undercut @d1@, and the claim flips to @defeated@.
+-- Run 1 (@examples\/running-example\/run1@) declares the empirical claim and
+-- its evidence leaves, including the recorded dead end @e4@, but the
+-- mandatory @external_validity@ critical question has no discharging leaf,
+-- so no complete support argument can be declared: the claim is @gap@.
+-- (Declaring @a1@ with the mandatory question as an explicit hole is not the
+-- gap path: the checker rejects that program as an incomplete argument — the
+-- open-obligation gate the no-CQ ablation removes.) Both runs also carry the
+-- artifact's one deductive step @s1@: a strict ord\@1 comparison of the two
+-- reported accuracy cells, authored in the current surface (value bindings,
+-- an inferred instantiation, and a certificate citing its premise slots by
+-- leaf name), unattacked in both runs, so the certified comparison @c2@
+-- stays @justified@. Run 2 (@…\/run2@) adds the discharging leaf @e6@, so
+-- @a1@ completes, the dead end lowers to the undercut @d1@, and the
+-- empirical claim flips to @defeated@.
 --
 -- The rendered document reproduces the @lara check@ CLI bytes exactly: the
 -- CLI prints @printSExpr (encodeVerdict verdict)@ plus one newline

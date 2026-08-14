@@ -23,7 +23,7 @@ policy empirical-v1
 # only one:
 #
 #   cabal exec -- runghc --ghc-arg=-package --ghc-arg=lara scripts/infer-sigma.hs \
-#     examples/A/empirical-v1.policy.lara examples/{A,B,E1,E2,E3,R1,R3}/example.lara examples/running-example/run{1,2}/example.lara bundles/walking-skeleton/emitted.lara
+#     examples/A/empirical-v1.policy.lara examples/{A,B,E1,E2,E3,R1,R3}/example.lara bundles/walking-skeleton/emitted.lara
 
 sort Experiment, Report, System, Measurand, Dataset, Direction
 

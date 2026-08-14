@@ -62,6 +62,24 @@ pre-existing manifest outcomes and all 60 corpus verdict/status goldens were
 empty; the eight closeout rows are additive. The current input anchors,
 measurements, and gates below describe **v4**.
 
+_**Post-v4 movement, still `m5-freeze-v4` (S6 and the running-example @0.6
+refresh).** The measured inputs are untouched: rows 1 and 2 hold their v4 SHAs
+exactly (`fixtures/mutants/` = `fd71420…`, `corpus-units/` = `1dc20ea…`), the
+11 measured worked-example goldens are byte-identical, and
+`measurements/frozen/` axis-(c) numbers remain the numbers of record — no
+re-run is owed. Row 3's tree moved twice, both outside the measured set:
+worked example **S6** (the `lara-syntax@0.6` named-slot byte-identity witness,
+#105/#110) was added, and the paper's **running-example** run1/run2 — demo
+content this file has classified as non-measured since the v3 note — was
+refreshed to the current surface (@0.4 value bindings, @0.5 inferred
+instantiation, a strict `ord@1` step with an @0.6 named-slot certificate, on a
+run-local `empirical-v3` policy). Unlike prior row-3 movement the refresh
+*modifies* existing demo bytes, so its derived goldens
+(`example.core.sexp`, `expected.json`) and the pinned report
+`measurements/frozen/running-example.txt` were regenerated together and are
+re-pinned by `RunningExampleSpec` / `DifferentialSpec`. The differential gate
+row rose 580 → 581 (+1 S6 anchor; the refresh changes bytes, not counts)._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,

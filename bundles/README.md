@@ -155,7 +155,9 @@ Everything below is pinned; B1 has no design latitude.
 
 Copy `examples/E1/empirical-v1.policy.lara` (the canonical copy; all seven
 `examples/*/empirical-v1.policy.lara` are byte-identical, md5
-`d1aabd0c202d71451576bba997311a6a`) to `bundles/walking-skeleton/empirical-v1.policy.lara`.
+`ff2b17952d85756bec75da4811788724` — the E1↔bundle pair of that identity is
+enforced by `test/walking-skeleton-golden.sh`, so this citation is
+informative, not the check) to `bundles/walking-skeleton/empirical-v1.policy.lara`.
 The name is forced by the checker's co-located policy resolution
 (`policy empirical-v1` in `emitted.lara` resolves to
 `empirical-v1.policy.lara` in the same directory — app/Main.hs D-Arch-2),

@@ -372,18 +372,20 @@ workedExampleGoldens =
         ++ " (status (atom contributes (con kurtosis_salience) (con apt_llama2_7b) (con openllm_avg)) justified)))"
     )
   , -- The paper's running example. 'RunningExampleSpec' already pins its
-    -- /shape/ (run 1 gap over an empty framework, run 2 defeated via the
-    -- undercut) and byte-diffs the rendered report against
+    -- /shape/ (run 1 gap beside the justified strict comparison, run 2
+    -- defeated via the undercut) and byte-diffs the rendered report against
     -- @measurements/frozen/running-example.txt@; these two entries add the
     -- exact verdict bytes, which nothing pinned before
     -- 'prop_goldensCoverAnchors' surfaced them.
     ( "examples/running-example/run1/example.core.sexp"
-    , "(verdict accept (labels) (edges)"
-        ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) gap)))"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) gap)"
+        ++ " (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
     )
   , ( "examples/running-example/run2/example.core.sexp"
-    , "(verdict accept (labels (0 out) (1 in)) (edges (1 0))"
-        ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)))"
+    , "(verdict accept (labels (0 in) (1 out) (2 in)) (edges (2 1))"
+        ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)"
+        ++ " (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
     )
   ]
 

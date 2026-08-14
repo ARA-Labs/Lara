@@ -27,7 +27,7 @@
     "policy": {
       "copied-from": "examples/E1/empirical-v1.policy.lara",
       "id": "empirical-v1",
-      "sha256": "6a52bf9fa77108e71fcba0e87d9abd02d68c21abb8e6ac5bcbf702908b2e2009"
+      "sha256": "8f1422f62e96778c251beed270dbda67cf0be693048edd772c8519eba55c0239"
     },
     "theories": []
   }

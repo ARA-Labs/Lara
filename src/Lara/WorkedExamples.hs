@@ -53,8 +53,8 @@ workedExamples =
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
-  , ("examples/running-example/run1", "empirical-v1.policy.lara")
-  , ("examples/running-example/run2", "empirical-v1.policy.lara")
+  , ("examples/running-example/run1", "empirical-v3.policy.lara")
+  , ("examples/running-example/run2", "empirical-v3.policy.lara")
   ]
 
 -- | The artifact source of a worked-example directory.

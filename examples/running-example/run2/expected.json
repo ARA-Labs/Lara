@@ -1,11 +1,14 @@
 {
   "replay-id": {
     "core": "lara-core@0.2",
-    "policy": "empirical-v1",
+    "policy": "empirical-v3",
     "backends": [
-      "nd@1"
+      "nd@1",
+      "ord@1"
     ],
-    "theories": [],
+    "theories": [
+      "sha256:empv3-t0"
+    ],
     "artifact": "sha256:aaaa..."
   },
   "verdict-class": "accept",
@@ -18,17 +21,29 @@
         "complete-support": 1,
         "holes": 0,
         "incomplete-alternative": false
+      },
+      {
+        "claim": "num_lt(0.71, 0.74)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
       }
     ],
     "labels": [
       {
-        "arg": "a1",
+        "arg": "s1",
         "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a1",
+        "index": 1,
         "label": "out"
       },
       {
         "arg": "d1",
-        "index": 1,
+        "index": 2,
         "label": "in"
       }
     ]

@@ -37,24 +37,37 @@ knowledge compounds.
 
 The paper's running example, abridged from
 [`examples/running-example/run2/example.lara`](examples/running-example/run2/example.lara)
-(CI checks the full version byte-for-byte against its committed verdict). A
-paper's headline claim is supported by a controlled experiment — and attacked
-by the paper's own limitations section:
+(CI checks the full version byte-for-byte against its committed verdict). One
+artifact carries an empirical headline claim, an independently certified
+arithmetic sub-result, and a limitations note that attacks its own headline:
 
 ```text
 artifact paper_17 at sha256:aaaa...
-policy empirical-v1
-use backends [nd@1]
+policy empirical-v3
+use backends [nd@1, ord@1]
+
+let base_score = 0.71
+let ours_score = 0.74
 
 claim c1
   nl      = "Method M improves accuracy on distribution D"
   formal  = improves(M, accuracy, D)
   binding = { author = alice, audit-status = reviewed }
 
-leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+claim c2
+  nl      = "The baseline accuracy {base_score} is strictly below {ours_score}"
+  formal  = num_lt(base_score, ours_score)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf base : reports(exp_3, score_cell(M0, accuracy, D, base_score))
   kind       = observed
   provenance = ai-executed
-  refs       = [evidence/table_2.csv#row=mean]
+  refs       = [evidence/table_2.csv#row=base]
+
+leaf ours : reports(exp_3, score_cell(M, accuracy, D, ours_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=ours]
 
 # The paper's own limitations section, recorded as evidence.
 leaf e4 : distribution_shift(M, accuracy, D)
@@ -62,11 +75,19 @@ leaf e4 : distribution_shift(M, accuracy, D)
   provenance = user
   refs       = [paper_17.pdf#sec=7-limitations]
 
-# (leaves e2, e3, e6 — the critical-question discharges — elided)
+# (leaves e1, e2, e3, e6 — the effect observation and the three
+#  critical-question discharges — elided; see the full file.)
+
+# A strict step: the ord@1 backend re-checks 0.71 < 0.74 exactly. The
+# certificate cites its premise slots by leaf NAME — `(prem base)`, not
+# `(prem 0)` — and elaboration lowers the names to the byte-identical
+# numeric payload (lara-syntax@0.6).
+arg s1 : supports(c2) by lt_recheck from [base, ours]
+  assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
 
 # A defeasible step: the scheme's critical questions must each be
 # discharged by a declared leaf, or reported as located holes.
-arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_3)
+arg a1 : supports(c1) by controlled_experiment from [e1]
   discharge randomization     with e2
   discharge adequate_power    with e3
   discharge external_validity with e6
@@ -76,6 +97,7 @@ arg d1 : challenges(external_validity(a1)) by leaf(e4)
 undercut d1 a1.rule
 
 status c1
+status c2
 ```
 
 Check it:
@@ -88,42 +110,30 @@ The verdict is one S-expression carrying the replay identity, the grounded
 labelling, and each requested status (wrapped here):
 
 ```text
-(verdict (replay-id (core lara-core@0.2) (policy empirical-v1)
-                    (backends (backend nd 1)) (theories) (artifact sha256:aaaa...))
-  accept (labels (0 out) (1 in)) (edges (1 0))
-  (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)))
+(verdict (replay-id (core lara-core@0.2) (policy empirical-v3)
+                    (backends (backend nd 1) (backend ord 1))
+                    (theories sha256:empv3-t0) (artifact sha256:aaaa...))
+  accept (labels (0 in) (1 out) (2 in)) (edges (2 1))
+  (statuses (status (atom improves (con M) (con accuracy) (con D)) defeated)
+            (status (atom num_lt (num 0.71) (num 0.74)) justified)))
 ```
 
-`c1` is **defeated**: the undercut `d1` is *in* and puts `a1` *out* in the
-grounded labelling. Run 1 of the same example
-([`run1/`](examples/running-example/run1/)) omits the leaf that discharges
-external validity: no complete support argument for `c1` can be declared, and
-the verdict reports **gap** — honest incompleteness is a located, first-class
-outcome, not a rejection.
+The certified arithmetic stands on its own (`c2` **justified**: `s1` is strict
+and unattacked) while the empirical claim is defeated (`c1`: the undercut `d1`
+is *in* and puts `a1` *out* in the grounded labelling). Run 1
+of the same example ([`run1/`](examples/running-example/run1/)) omits the leaf
+that discharges external validity: no complete support argument for `c1` can
+be declared, and the verdict reports **gap** — honest incompleteness is a
+located, first-class outcome, not a rejection.
 
-### Strict steps and named certificate slots (`lara-syntax@0.6`)
-
-Deductive sub-results — arithmetic re-checks, code inspections — enter as
-*strict* steps carrying an opaque certificate that a registered backend
-replays. From [`examples/S6/example.lara`](examples/S6/example.lara): the
-`ord@1` backend re-checks `0.71 < 0.74` in exact arithmetic, and the
-certificate cites its premise slots by the *leaf names* that fill them —
-`(prem base_cell)`, not `(prem 0)` — the `lara-syntax@0.6` spelling, lowered
-at elaboration to the byte-identical numeric payload:
-
-```text
-arg a1 : supports(c1) by lt_recheck from [base_cell, new_cell]
-  assurance = cert(ord@1, sha256:ord-named-v1-theory-0, (ordcmp (prem base_cell) (prem new_cell)))
-```
-
-A name that resolves to no premise, or ambiguously, is a located elaboration
-error — never a guess. `examples/S6/` is the standing byte-identity witness
-for this lowering (its committed wire bytes are re-proved equal to the numeric
-spelling's on every CI run); the feature is specified in
-[grammar Appendix E](docs/lara-surface-grammar.md). For the interplay of
-certified arithmetic with defeasible claims, see
-[`examples/S4/`](examples/S4/) — the arithmetic survives while the claim it
-serves is defeated.
+A symbolic premise name that resolves to no premise, or ambiguously, is a
+located elaboration error — never a guess. The `lara-syntax@0.6` named-slot
+spelling is specified in [grammar Appendix E](docs/lara-surface-grammar.md);
+[`examples/S6/`](examples/S6/) is its standing byte-identity witness (the
+committed wire bytes are re-proved equal to the numeric spelling's on every CI
+run). For a program where certified arithmetic genuinely feeds a defeasible
+claim — and survives while the claim it serves is defeated — see
+[`examples/S4/`](examples/S4/).
 
 More worked examples, each a self-contained directory with its surface
 artifact, co-located policy, derived wire anchor, and expected verdict, are
