@@ -645,3 +645,14 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: []
 - **Tags**: mechanization, substitution-lemma, checker-design, lara-core@0.2
 - **Last revised**: 2026-08-10 (2026-08-10_001#2)
+
+## C31: Citation lowering is representation-total over the authorable surface
+- **Statement**: A presentation-layer name resolver stays spelling-invariant only if its locate step matches every representation the elaboration paths can place in the resolved sequence, not just the one the designer expects. For `lara-syntax@0.6` certificate citations this means locating a prior-argument name against both the argument's elaborated term (what inferred-theta resolution stores) and its bare-leaf spelling (what a hand-built premise list stores, passed through unre-pointed); term-equality locate over that candidate set makes the explicit and inferred spellings of the same argument lower to identical slots.
+- **Conditions**: Holds for the current surface, where premise lists are not authorable (`explicitRuleP` stores none) and nested assurances are not surface-expressible — so every parsed premise is constructed by `resolvePremises`/`inferTheta` — plus hand-built ASTs accepted by the elaborator, which the second locate candidate covers. No false ambiguity: a leaf sharing the cited name already fails upstream as `SlotNameAmbiguous` in `refMatches` scope resolution. Untested boundary: a future grammar extension making premise lists authorable would add new reachable representations and must extend the candidate set.
+- **Sources**: []
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit a program or elaborator-accepted AST whose certificate citation lowers under `by r from [...]` but fails with `CertSlotNotAPremise` under the explicit spelling of the same argument (or vice versa), or one where the two spellings lower to different slots.
+- **Proof**: [`test/CertSlotsSpec.hs` (`prop_priorArgumentCitationBothSpellings`, `prop_priorArgumentPremiseSpellingsAgree`, nested-certificate D8 fixtures), `src/Lara/Elaborate/Internal.hs` (`certSlotResolver` two-candidate locate), adversarial spec-review verification (trace N180, session 2026-08-13_001)]
+- **Dependencies**: []
+- **Tags**: elaboration, presentation-layer, name-resolution, lara-syntax@0.6

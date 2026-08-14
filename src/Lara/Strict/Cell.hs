@@ -1,6 +1,7 @@
 -- | Shared cell helpers for the rational-arithmetic strict backends: the
--- canonical numeral grammars, the premise-cell convention, and the premise
--- slot-reference wire sub-grammar @(prem N)@.
+-- canonical numeral grammars, the premise-cell convention, the premise
+-- slot-reference wire sub-grammar @(prem N)@, and the flat premise-reference
+-- schemas the presentation layer consumes.
 --
 -- @ra\@1@ ("Lara.Strict.RA") and the ordered-comparison backend @ord\@1@
 -- certify goals over measured cells and share the same three sub-problems:
@@ -46,6 +47,8 @@ module Lara.Strict.Cell
   , tagToString
   , parseTag
   , decodeSlot
+    -- * Flat premise-reference schemas
+  , SlotSchema (..)
     -- * Canonical numeral grammars
   , parseCanonicalNat
   , parseCanonicalInt
@@ -58,7 +61,7 @@ module Lara.Strict.Cell
 import Data.Ratio (denominator, numerator, (%))
 
 import Lara.Prop (Prop (..), Term (..), nf)
-import Lara.Strict (SExpr (..))
+import Lara.Strict (BackendId, SExpr (..))
 
 -- ---------------------------------------------------------------------------
 -- Wire sub-grammar: premise slot references
@@ -91,6 +94,25 @@ decodeSlot _ (SList [SAtom k, SAtom n])
         _ -> Left ("malformed premise slot: " ++ show n)
 decodeSlot backend e =
   Left ("malformed " ++ backend ++ " premise reference: " ++ show e)
+
+-- ---------------------------------------------------------------------------
+-- Flat premise-reference schemas
+-- ---------------------------------------------------------------------------
+
+-- | Where premise slot references sit in one backend's certificate payload:
+-- presentation-layer data about a __flat__ wire grammar (a single head-keyword
+-- application of fixed arity with references at fixed argument positions).
+-- A backend whose payload is not of this shape — nd\@1's recursive de Bruijn
+-- proof terms, whose @hyp@ indices shift under binders and conflate premise
+-- and theory slots by offset — simply exports no schema, and its payloads
+-- pass through the presentation lowering byte-identical.
+data SlotSchema = SlotSchema
+  { ssBackend :: BackendId -- ^ which registered backend this schema presents
+  , ssHead :: String -- ^ payload head keyword, from the backend's tag table
+  , ssArity :: Int -- ^ argument count after the head
+  , ssRefSlots :: [Int] -- ^ 0-based argument positions that are premise refs
+  }
+  deriving (Eq, Show)
 
 -- ---------------------------------------------------------------------------
 -- Canonical numeral grammars

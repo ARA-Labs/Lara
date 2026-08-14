@@ -18,6 +18,7 @@ import Lara.Cell
 import Lara.RA
 import Lara.Ord
 import Lara.Comparison
+import Lara.CertSlots
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups
@@ -363,6 +364,19 @@ open Lara
 #print axioms Lara.Ord.le_le_iff_eq
 #print axioms Lara.Ord.ordModels_relHolds
 #print axioms Lara.Ord.ordModels_excl_of_lt
+
+-- Named certificate premise slots (lara-syntax@0.6, #105): the presentation
+-- pass's payload-rewrite math over an abstract resolver.  The identity
+-- theorem (no symbolic reference in scope → byte-identical pass-through,
+-- dead-wire arm included) and the substitution theorem (a successful
+-- lowering IS the declarative positional substitution SymNumericSubst),
+-- plus the shape and position-wise engine lemmas they rest on.  Elaborator
+-- name resolution and the error taxonomy stay validated-not-verified
+-- (test/CertSlotsSpec.hs); these carry the rewrite metatheory.
+#print axioms Lara.CertSlots.lower_id_of_no_symbolic
+#print axioms Lara.CertSlots.lower_eq_numeric_subst
+#print axioms Lara.CertSlots.matchSchema_shape
+#print axioms Lara.CertSlots.lowerArgs_pointwise
 
 -- The `comparison` surface form's direction-of-goodness contract
 -- (lara-syntax@0.3 §1.2 / grammar Appendix B.3): the 2x2 lookup table

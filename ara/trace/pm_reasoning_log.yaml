@@ -764,3 +764,26 @@ entries:
     - "Committed implementation plan d793635 divides the work into 12 tasks across ara-cli, Agent-Native-Research-Artifact, and LARA; downstream checks pin the exact reviewed runtime release rather than latest, v0, a global binary, or a moving branch."
     - "The permanent LARA verifier compares commit 7718b1df27916159b8df706876579e781f8c03dc with the migrated tree and requires all 177 IDs, authored metadata/narrative, evidence, source references, semantic reachability, and protected checker/mechanization paths to remain unchanged."
     - "No logic-layer claim changed and no new interpretive observation was staged; this turn committed a migration decision and executable implementation plan."
+- turn: "2026-08-13_001#1"
+  notes:
+    - "Routed N179 as a user decision: invoking /implement on the DESIGN PROPOSED plan is the researcher approval its header requires (D1/D9 explicitly), so provenance user, not user-revised."
+    - "Crystallized O72 -> C31 same-turn: both artifact commitment (the two-candidate locate and its twin props are merged, PR #110 depends on them) and empirical resolution (props green, adversarially verified) fired; provenance stays ai-suggested - no user affirmation of the finding itself."
+    - "Set C31 Status supported at birth: the one-step conservatism rule governs Stage 4 transitions of existing entries; this claim's evidence (passing twin props + independent review) existed before crystallization. Logged for revisit if the researcher disagrees."
+    - "Kept O73 staged despite the committed V9b fix: the commitment is to the specific numeralTypo fix, not to the generalized mirroring heuristic - promoting would over-generalize from one instance (near-miss on artifact commitment)."
+    - "Routed N181 as dead_end rather than folding into N180: the uniform-collapse cut was a real implemented-then-refuted design choice with a reusable lesson, exactly the record a dead_end exists for."
+    - "No Stage 4 edits: no existing claim/heuristic touched by this turn's evidence; C26-C30 concern checker/mechanization areas this PR left alone."
+
+- turn: "2026-08-13_001#2"
+  notes:
+    - "Routed N182 as one AI-executed review-resolution experiment: eight findings were verified against live code, fixed with mutation-sensitive regressions, committed and pushed, then re-proved by local gates and hosted Actions run 31769934475."
+    - "Crystallized O73 -> H14 via artifact commitment. The signed-numeral V9c repair is a second concrete instance of N181's mechanism: a lexical refusal moved behind resolver consultation can flip failure to success, so production and prover now explicitly depend on refusal order."
+    - "Did NOT revise C31: the two-candidate representation-total lookup remained intact; this review changed diagnostic classification, type structure, regression strength, and documentation scope rather than the claim's mechanism."
+    - "Kept reviewDecision CHANGES_REQUESTED as an open human-approval state even though all eight inline threads are replied to and resolved; technical completion is not reviewer approval."
+- turn: "2026-08-13_001#3"
+  notes:
+    - "Routed N183 as a dead end because the attempted Lean-local identifier classifier was concretely implemented and refuted twice: Char.isAlpha rejected legal Unicode é, while the numeric-looking-only fallback left illegal #x/.x resolver-reachable."
+    - "Routed N184 as an AI-executed decision: the user delegated the design choice without selecting a preference; exporting the production lexer predicate and parameterizing the Lean mirror is the smallest semantics-preserving option."
+    - "Routed N185 as one verification experiment covering the red-green Unicode regression, illegal-start adversarial guards, complete local gate matrix, and hosted Actions run 31772295184."
+    - "Revised H14 rather than creating a sibling heuristic. The new evidence narrows the same mechanism: refusal order is preserved only if the refusal predicate is also shared or explicitly parameterized. Recorded the exact before/after in logic_revisions."
+    - "Did NOT change H14 provenance or status: its generalized wording remains AI-suggested and active; the turn refines its implementation discipline rather than refuting the core heuristic."
+    - "No new staged observation: the reusable lesson is already mature through empirical resolution and artifact commitment, and is represented by the H14 revision plus N183-N185."

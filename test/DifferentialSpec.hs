@@ -332,6 +332,15 @@ workedExampleGoldens =
         ++ " (con wikitext103)) justified)"
         ++ " (status (atom num_lt (num 28.4) (num 31.6)) justified)))"
     )
+  , -- S6: the named-certificate-slot worked example (lara-syntax@0.6, #105).
+    -- Its artifact authors the ord@1 certificate as (prem base_cell)/(prem
+    -- new_cell); the anchor carries only the LOWERED (prem 0)/(prem 1)
+    -- payload, byte-identical to the numeric twin's, so this golden is the
+    -- committed half of the #105 byte-identity witness at the verdict level.
+    ( "examples/S6/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
+    )
   , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;
     -- the setting-mismatch pair (P2) differs only in the setting index ⇒ zero

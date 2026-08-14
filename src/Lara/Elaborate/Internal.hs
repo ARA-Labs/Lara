@@ -53,6 +53,7 @@ import Control.Monad (foldM, when)
 import Data.List (find)
 
 import Lara.AST
+import Lara.Elaborate.CertSlots (SlotRefError (..), lowerCertPayload)
 import Lara.Elaborate.Comparison (GeneratedArg (..), expandSurfaceProvenance)
 import Lara.Elaborate.Error (ElabError (..), elabErrorMessage)
 import Lara.Elaborate.Subst
@@ -421,7 +422,10 @@ elabInstantiation env priors aid inst = case inst of
     rule <- lookupRule env aid r
     (theta, prems) <- inferTheta env priors aid rule refs
     disch <- resolveArgDischarges env priors aid shallowDisch
-    pure (SRule r theta prems disch holes assurance)
+    -- lara-syntax@0.6 (#105): named certificate premise slots lower here,
+    -- after premise resolution, because a slot is an index into @prems@.
+    assurance' <- lowerArgCert env priors aid prems assurance
+    pure (SRule r theta prems disch holes assurance')
 
 lookupRule :: Env -> ArgId -> RuleId -> Either ElabError Rule
 lookupRule env aid r =
@@ -454,7 +458,113 @@ elabTerm env priors aid term = case term of
     disch <- resolveDischarges env priors aid shallowDisch
     -- lara-syntax@0.2: lower assurance verbatim. Legality (strict mode,
     -- allow-trusted, certifier allowlist, replay) belongs to R7/R13.
-    pure (SRule r theta prems disch holes assurance)
+    -- lara-syntax@0.6 (#105) adds exactly one rewrite above that: symbolic
+    -- premise references become the numeric slots the backend already decodes.
+    -- 'elabTerm' recurses, so a nested instance's certificate lowers against
+    -- its own premise list, not the enclosing one (D8).
+    assurance' <- lowerArgCert env priors aid prems assurance
+    pure (SRule r theta prems disch holes assurance')
+
+-- | The one namespace lookup shared by the @lara-syntax\@0.5@ θ references
+-- ('resolveArgRef') and the @lara-syntax\@0.6@ certificate premise-slot
+-- references (#105): which declared leaves and which prior arguments carry
+-- this source name.
+--
+-- Callers own their own collision policy and error family — this helper only
+-- answers the lookup — so the namespace rule (declared leaves and prior
+-- arguments, matched on the bare source name, in declaration order) has
+-- exactly one home for when the discharge-shadowing TODO later unifies that
+-- collision policy.
+refMatches
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> String
+  -> ([(LeafId, Prop)], [(ArgId, SupportTerm)])
+refMatches env priors name =
+  ( [ (leafId, prop)
+    | (leafId@(LeafId leafName), prop) <- envGamma env
+    , leafName == name
+    ]
+  , [ (argId, term)
+    | (argId@(ArgId argName), term) <- priors
+    , argName == name
+    ]
+  )
+
+-- | Resolve one symbolic certificate premise reference (#105) to the 0-based
+-- slot it occupies in @prems@, the citing instance's __already resolved__
+-- premise list.
+--
+-- The name scope is 'refMatches' — exactly the one a θ reference sees — and
+-- the collision policy is the same: a name that is both a declared leaf and a
+-- prior argument is ambiguous, never silently one of them. What differs is the
+-- second step, which a θ reference does not have: the resolved source must
+-- also /be a premise of this instance/, at exactly one slot.
+--
+-- Locating is by term equality against the premise list, because that is what
+-- premise resolution stores: a leaf premise is @'SLeaf' l@ ('resolvePremises',
+-- 'resolveArgRef'), and a prior-argument premise is that argument's own
+-- elaborated term. An authored premise list — which the @\@0.6@ surface
+-- grammar cannot yet write, but 'elabTerm' accepts — spells a prior argument
+-- the way the parser spells every identifier, as @'SLeaf' ('LeafId' a)@, so
+-- both representations count as a hit for the prior-argument case. Otherwise a
+-- citation would lower under @from […]@ and then fail with a spurious
+-- 'CertSlotNotAPremise' once the same instance is written out.
+certSlotResolver
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> [SupportTerm] -- ^ this instance's resolved premises, in slot order
+  -> String
+  -> Either SlotRefError Int
+certSlotResolver env priors prems name =
+  case refMatches env priors name of
+    ([(leafId, _)], []) -> locate [SLeaf leafId]
+    ([], [(_, term)]) -> locate [term, SLeaf (LeafId name)]
+    ([], []) -> Left SlotNameUnresolved
+    _ -> Left SlotNameAmbiguous
+  where
+    locate candidates =
+      case [i | (i, p) <- zip [0 ..] prems, p `elem` candidates] of
+        [i] -> Right i
+        [] -> Left SlotNameNotAPremise
+        (i : j : _) -> Left (SlotNameMultiSlot i j)
+
+-- | Lower the symbolic premise references of one rule instance's assurance
+-- (#105), against that instance's own resolved premises. Every other assurance
+-- passes through: only 'AssuranceCert' has a payload, and even then only a
+-- backend with a declared 'Lara.Strict.Cell.SlotSchema' is touched.
+--
+-- This is where the pass's failures become author-facing: the resolver's
+-- 'SlotRefError' vocabulary is backend-shaped, so it is translated here into
+-- the located 'ElabError' family, attributed to the enclosing @arg@ (the unit
+-- an author reads and edits) and naming the backend as @beta\@version@.
+lowerArgCert
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> [SupportTerm]
+  -> Assurance
+  -> Either ElabError Assurance
+lowerArgCert env priors aid prems assurance = case assurance of
+  AssuranceCert cert ->
+    case lowerCertPayload (certSlotResolver env priors prems) cert of
+      Right cert' -> Right (AssuranceCert cert')
+      Left (name, err) -> Left (certSlotError aid cert name err)
+  _ -> Right assurance
+
+-- | Translate one resolver\/lowering verdict into its located 'ElabError'.
+certSlotError :: ArgId -> Cert -> String -> SlotRefError -> ElabError
+certSlotError aid cert name err = case err of
+  SlotNameUnresolved -> CertSlotUnresolved aid backend version ref
+  SlotNameAmbiguous -> CertSlotAmbiguous aid backend version ref
+  SlotNameNotAPremise -> CertSlotNotAPremise aid backend version ref
+  SlotNameMultiSlot i j -> CertSlotMultiSlot aid backend version ref i j
+  SlotNonCanonicalNumeral -> CertSlotNonCanonicalNumeral aid backend version ref
+  SlotSchemaMismatch -> CertSlotSchemaMismatch aid backend version ref
+  where
+    backend = certBackend cert
+    version = certVersion cert
+    ref = ArgRef name
 
 -- | Resolve one inferred reference in leaf/prior-argument scope order.
 resolveArgRef
@@ -466,26 +576,15 @@ resolveArgRef
   -> ArgRef
   -> Either ElabError ResolvedArgRef
 resolveArgRef env priors aid rid i ref@(ArgRef name) =
-  case (leafMatches, argMatches) of
+  case refMatches env priors name of
     ([(leafId, prop)], []) ->
       Right (ResolvedArgRef (SLeaf leafId) prop)
-    ([], [(argId, term)]) ->
+    ([], [(_, term)]) ->
       case conclOf (envPolicy env) (envGamma env) term of
         Just prop -> Right (ResolvedArgRef term prop)
         Nothing -> Left (ThetaReferenceConclUnderivable aid rid i ref)
     ([], []) -> Left (ThetaReferenceUnresolved aid rid i ref)
     _ -> Left (ThetaReferenceAmbiguous aid rid i ref)
-  where
-    leafMatches =
-      [ (leafId, prop)
-      | (leafId@(LeafId leafName), prop) <- envGamma env
-      , leafName == name
-      ]
-    argMatches =
-      [ (argId, term)
-      | (argId@(ArgId argName), term) <- priors
-      , argName == name
-      ]
 
 -- | Derive an inferred rule theta and retain the references' selected terms.
 inferTheta

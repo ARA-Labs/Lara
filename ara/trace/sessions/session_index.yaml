@@ -374,3 +374,10 @@ sessions:
   events_count: 1
   claims_touched: []
   open_threads: 3
+- id: 2026-08-13_001
+  date: '2026-08-13'
+  summary: 'Implemented #105 named certificate premise slots, review-hardened PR #110, then repaired a Unicode Haskell/Lean classifier divergence by parameterizing the mirror over the production lexer; all local and hosted gates green, reviewer re-approval remains.'
+  turn_count: 3
+  events_count: 10
+  claims_touched: [C31, H14]
+  open_threads: 3

@@ -85,6 +85,7 @@ module Lara.Syntax
   , parseSource
   , parseProgram
   , parsePolicy
+  , isIdentStart
     -- * Canonical printing
   , printSource
   , printProgram
@@ -206,6 +207,9 @@ takeWhileP p = P $ \s -> Right (go s)
 -- Lexical layer (two modes: normal, and ref-list — grammar §1.2)
 -- ---------------------------------------------------------------------------
 
+-- | Whether a character may begin a source identifier. Exported so
+-- presentation lowering uses the lexer’s exact Unicode-aware boundary rather
+-- than maintaining a second classifier.
 isIdentStart :: Char -> Bool
 isIdentStart c = isAlpha c || c == '_'
 

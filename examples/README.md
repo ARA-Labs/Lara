@@ -50,6 +50,7 @@ asserts each stays in sync with its `.lara` source.
 | `S3/example.lara` | the same certificate shape at the **tie**, `relation = at-least-as-good` (policy `ord-le-v1`) | — | **justified** (`at_least_as_good`) | the family's two members separate here: `num_le` accepts on two equal cells where `num_lt` is an R13 replay rejection, so no certificate can upgrade "at least as good" to "beats". S3 is S2 with three lines changed, under a different policy — which is why the block names a *relation* and lets the policy name its own rules |
 | `S4/example.lara` | S2's artifact plus a settings audit undermining the binding, attacked by **label** (`a2.binding.leaf`) (policy `ord-setting-v1`) | undermine (on a premise leaf) | **defeated** (`better`) + **justified** (`num_lt`) | the factivity firewall in the grounded semantics: the attack lands on the layer that asserted comparability and stops at the certified arithmetic. Also that *generated* structure is ordinary structure — attackable at exactly the same point, by a name rather than a slot index |
 | `S5/example.lara` | the same `strictly-better` source shape over a **`lower-is-better`** measurand (perplexity, policy `ord-ppl-v1`) | — | **justified** (`better`) + **justified** (`num_lt`) | direction of goodness is *declared* domain knowledge, not inferable from use. The same authored relation generates the mirrored goal `num_lt(ours, theirs)`, which `ord@1` then accepts — polarity chooses which comparison to make, the backend still decides it |
+| `S6/example.lara` | S2's strict leg with the certificate premises cited **by source name** — `(ordcmp (prem base_cell) (prem new_cell))` (policy `ord-named-v1`, `lara-syntax@0.6`) | — | **justified** (`num_lt`) | the committed golden is the standing byte-identity witness for #105: the symbolic spelling elaborates to the numeric spelling's exact `.core.sexp` bytes, so the freshness check re-proves the lowering on every run |
 | `E4/example.lara` | reinstatement — three claims justified **while attacked** (policy `empirical-v2`) | rebut + undermine + undercut, each defended | **justified** ×3 (under attack) + **defeated** | defense is policy vocabulary (an exception, a one-directional contrary, a withheld edge), not a new mechanism |
 | `E5/example.lara` | contested beyond rebut + gap amid attacks (policy `empirical-v2`) | undermine 2-cycle + undercut 2-cycle | **contested** ×2 + **gap** | `contested` is any-kind undec, not a rebut artifact; `gap` is missing support, orthogonal to conflict |
 
@@ -101,6 +102,13 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
     accepts it. S2 and S5 are the two halves of the polarity contract: an author
     states one research relation, and which arithmetic supports it follows from
     a fact about the metric, declared once in the policy.
+- **S6** is the named-certificate-slot demonstrator (`lara-syntax@0.6`, #105):
+  S2's strict leg alone, with the hand-authored certificate citing its premises
+  by source name — `(ordcmp (prem base_cell) (prem new_cell))` — instead of
+  0-based slots. Elaboration lowers the names against the argument's own
+  premise list, so the committed `.core.sexp` carries only the numeric
+  spelling; the golden is the standing byte-identity witness that the symbolic
+  and numeric authors produce the same wire bytes.
 - **E4/E5** are the M5 worked cases (tracker #48, T4). E1–E3/A/B leave three
   label cells structurally empty: an attacked argument that *survives* (E4 —
   grounded reinstatement, one context per attack kind), a `contested` produced

@@ -45,6 +45,33 @@ data ElabError
     ThetaReferenceConclUnderivable ArgId RuleId Int ArgRef
   | -- | a rule parameter is absent from every inferred premise binding.
     ThetaParameterUnbound ArgId RuleId Param
+    -- * Named certificate premise slots (@lara-syntax\@0.6@, #105)
+    --
+    -- | Each names the citing @arg@, the certificate backend and version,
+    -- and the offending reference as structured identifiers. The renderer
+    -- alone constructs the author's @beta\@version@ spelling. The scope is the
+    -- same one 'ThetaReferenceUnresolved' and 'ThetaReferenceAmbiguous' police
+    -- — declared leaves and prior arguments — but the failures are their own
+    -- family because a certificate cites a /premise slot of one instance/,
+    -- not a θ position, and the author's fix differs.
+  | -- | the reference names neither a declared leaf nor a prior argument.
+    CertSlotUnresolved ArgId BackendId Int ArgRef
+  | -- | the reference names both a declared leaf and a prior argument.
+    CertSlotAmbiguous ArgId BackendId Int ArgRef
+  | -- | the reference resolves, but to nothing this instance takes as a premise.
+    CertSlotNotAPremise ArgId BackendId Int ArgRef
+  | -- | the named premise fills two slots, so the name cannot say which: the
+    -- two witnesses, 0-based — the same numbering the author writes back into
+    -- @(prem N)@, so these are /not/ converted at the message boundary.
+    CertSlotMultiSlot ArgId BackendId Int ArgRef Int Int
+  | -- | a reference atom that is neither a canonical numeral nor a source
+    -- identifier, such as @007@ or @-1@.
+    CertSlotNonCanonicalNumeral ArgId BackendId Int ArgRef
+  | -- | the payload does not match the backend's declared premise-reference
+    -- schema yet carries a symbolic reference. A symbolic name is never valid
+    -- wire there, so the certificate is rejected here rather than handed to a
+    -- backend that must refuse it (the dead-wire rule).
+    CertSlotSchemaMismatch ArgId BackendId Int ArgRef
   | -- | positional θ length ≠ the rule's parameter count: @arg@, @rule@,
     -- expected, got.
     ArityMismatch ArgId RuleId Int Int
@@ -244,6 +271,22 @@ elabErrorMessage e = case e of
   ThetaParameterUnbound (ArgId a) (RuleId r) (Param x) ->
     "arg '" ++ a ++ "': rule '" ++ r ++ "' parameter '" ++ x
       ++ "' is not bound by inferred theta"
+  CertSlotUnresolved a b v n ->
+    certSlotPrefix a b v n ++ "names neither a declared leaf nor prior argument"
+  CertSlotAmbiguous a b v n ->
+    certSlotPrefix a b v n ++ "is ambiguous between a declared leaf and a prior argument"
+  CertSlotNotAPremise a b v n ->
+    certSlotPrefix a b v n ++ "does not resolve to any of this argument's premise slots"
+  CertSlotMultiSlot a b v n i j ->
+    certSlotPrefix a b v n ++ "occupies premise slots " ++ show i ++ " and " ++ show j
+      ++ "; cite a numeric slot"
+  CertSlotNonCanonicalNumeral a b v n ->
+    certSlotPrefix a b v n ++ "is not a canonical slot numeral "
+      ++ "(use unsigned decimal with no leading zeros); write the canonical numeral or a source name"
+  CertSlotSchemaMismatch (ArgId a) b v (ArgRef n) ->
+    "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling b v
+      ++ "' payload does not match the backend's premise-reference schema but "
+      ++ "contains symbolic premise reference '" ++ n ++ "'"
   ArityMismatch (ArgId a) (RuleId r) expd got ->
     "arg '" ++ a ++ "': rule '" ++ r ++ "' expects " ++ show expd
       ++ " argument(s) but " ++ show got ++ " were supplied"
@@ -396,6 +439,19 @@ elabErrorMessage e = case e of
     cmpPrefix c ++ "generated id '" ++ name ++ "' collides with another declaration"
   ComparisonDuplicateBlock c (PropId other) ->
     cmpPrefix c ++ "duplicates the comparison claiming '" ++ other ++ "'"
+
+-- | Location prefix for a certificate premise reference (#105): the citing
+-- @arg@, the certificate's @beta\@version@, and the reference as written.
+-- 'CertSlotSchemaMismatch' is the one member of the family that does not use
+-- it — that failure is about the payload, and only mentions the reference to
+-- say why the payload could not be passed through.
+certSlotPrefix :: ArgId -> BackendId -> Int -> ArgRef -> String
+certSlotPrefix (ArgId a) backend version (ArgRef name) =
+  "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling backend version
+    ++ "' premise reference '" ++ name ++ "' "
+
+certBackendSpelling :: BackendId -> Int -> String
+certBackendSpelling (BackendId backend) version = backend ++ "@" ++ show version
 
 -- | Location prefix for a @comparison@ block, named by the sub-claim it
 -- declares (App. B.3's @claims@ id — the one id every block must carry).

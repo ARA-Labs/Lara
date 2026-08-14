@@ -492,7 +492,20 @@ newtype TheoryDigest = TheoryDigest String deriving (Eq, Ord, Show)
 -- backend, a digest-addressed theory, and the opaque certificate as an
 -- 'SExpr' wire value (the N11 anchor; only the named backend decodes it). The
 -- natural-deduction reference adapter (spec §5.1) and the optional LP adapter
--- (spec §5.2, "Lara.Kernel") decode and check it; this type never inspects it.
+-- (spec §5.2, "Lara.Kernel") decode and check it; nothing at this layer reads
+-- it as a proof.
+--
+-- The one sanctioned exception is /presentation lowering/. @lara-syntax\@0.6@
+-- (#105) lets an author cite a premise by its source name — @(prem e4)@ for
+-- @(prem 0)@ — and "Lara.Elaborate.CertSlots" rewrites exactly those
+-- references before the payload reaches the wire. That pass consults only a
+-- backend's declared flat 'Lara.Strict.Cell.SlotSchema' (head keyword, arity,
+-- reference positions) and learns no other backend grammar: a payload whose
+-- backend declares no schema passes through byte-identical, and in one that
+-- does, only declared reference positions are interpreted. Every lowered
+-- reference is the canonical numeral the author could have written by hand;
+-- nodes outside those positions remain backend-owned and may still reject at
+-- replay. Thus 'certPayload' stays wire-opaque.
 data Cert = Cert
   { certBackend :: BackendId
   , certVersion :: Int -- ^ backend version (a wire NAT)

@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.5`)
+# LARA surface grammar — frozen (`lara-syntax@0.6`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -24,17 +24,21 @@ versions):
   the surface forms `challenges(…)` and `supports(c1_neg)` (undeclared) had no
   representable conclusion until `ArgConcl` landed.
 
-The active `@0.5` additions are specified in Appendix D: `Arg` carries
-`ArgInstantiation` with `ArgRef` references for inferred theta, and the
-migrated A/S1 witnesses exercise that form while `lara-core@0.2` remains
-unchanged.
+The active `@0.6` additions are specified in Appendix E: an `ord@1` or `ra@1`
+certificate payload may cite a premise slot by source name (`(prem e4)`
+instead of `(prem 0)`), and elaboration lowers the name to the canonical
+numeric slot after premise resolution, so the wire `Unit` and `lara-core@0.2`
+remain unchanged. The `@0.5` inferred-theta form (`Arg` carrying
+`ArgInstantiation` with `ArgRef` references, exercised by the migrated A/S1
+witnesses) remains specified in Appendix D.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.5`; it decodes to
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.6`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
-`@0.3` forms, `@0.4` value bindings, and `@0.5` inferred-theta form remain
-presentation-layer data until elaboration. The Haskell `parse ∘ print == id`
-property covers this current concrete surface. The structured Lean round-trip in
+`@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and `@0.6`
+symbolic certificate premise references remain presentation-layer data until
+elaboration. The Haskell `parse ∘ print == id` property covers this current
+concrete surface. The structured Lean round-trip in
 `lean/Lara/Presentation.lean` covers the complete live `Program`/`Policy` AST
 for this surface, including value bindings, inferred argument instantiations,
 `policySigma`, and optional measurand polarity — an AST-shape anchor, not a
@@ -169,6 +173,9 @@ from
 ```
 The @0.5 entry `from` is contextual after a rule identifier; it is listed
 under the version delta without becoming a lexer-reserved identifier.
+`@0.6` adds no keywords and no lexer or parser change at all: the symbolic
+`(prem name)` spelling lives inside the opaque `sexp` payload of `cert(…)`,
+whose atom grammar already admits identifiers (Appendix E).
 
 Closed tag enumerations (surface ↔ `Lara.AST` constructor):
 
@@ -384,7 +391,7 @@ conclusion is `≡ Apᵢ · θ` (spec §3.2 `nf`-equality).
 
 This explicit positional reading is the historical v0.1 contract reflected by
 the original A/B sources. It explains the older notation's divergence from
-`docs/spec.md` §4.4's `by r(a1,…,an)` premise-reference notation. The current
+`docs/spec.md` §4.4's `by r(a1,…,an)` premise-reference notation. The additive
 `lara-syntax@0.5` form may instead write `by r from [ref1,…,refn]`; Appendix D
 defines that form. Inferred references select the support terms directly in
 policy-premise order, including the principal leaf such as `e1` or `e7`, and
@@ -700,7 +707,8 @@ A `comparison` round-trips as a `comparison`, never as its expansion.
 waits on #89 (the many-sorted Σ) and is **not** part of `@0.3`: a mistyped bare
 binding name is indistinguishable from a nullary constant until a declared
 signature can reject it, and App. A declares the `cert(…)` payload opaque, so a
-surface `(prem e1)` needs its own layering decision.
+surface `(prem e1)` needs its own layering decision (made at `lara-syntax@0.6`;
+Appendix E).
 
 Identifier aliases used below are all `ident` (§1.3), spelled distinctly for
 readability: `propId` (a `claim` id), `leafId`, `argId`, `ruleId`. `binding` is
@@ -1296,7 +1304,8 @@ owned and decoded only by its named backend (Appendix A.1). Consequently,
 `@0.4` does not add symbolic certificate slots such as `(prem e1)`; authored
 certificates keep numeric premise slots. A future named-slot design must define
 an explicit layer above the opaque payload rather than making the general value
-pass inspect backend syntax.
+pass inspect backend syntax. Appendix E (`lara-syntax@0.6`) defines exactly
+that layer; value substitution still never enters `Cert`.
 
 Likewise, value bindings do not rename named premise references. The plain-argument
 theta-matching form is defined in Appendix D (`lara-syntax@0.5`).
@@ -1382,3 +1391,182 @@ retains the author's spelling. If spellings differ but are normalized-equal,
 such as `0.710` and `0.71`, the semantic units can differ in bytes while their
 verdict JSON and exit classifications remain equal. This spelling condition is
 part of the contract; byte identity is not unconditional.
+
+## Appendix E — `lara-syntax@0.6` (named certificate premise slots, 2026-08-12)
+
+Additive over `lara-syntax@0.5`. This appendix adds a symbolic spelling for the
+premise-slot references inside `ord@1` and `ra@1` certificate payloads, lowered
+to the canonical numeric slots at elaboration. It does not change
+`lara-core@0.2`, `Unit`, the `.core.sexp` door, the JSON/wire codecs, checker
+judgments, strict backends, or replay identity — and, uniquely among the
+additive versions, it changes no lexer or parser rule either.
+
+### E.1 Symbolic form, supported backends, and grammar position (D2, D7)
+
+Inside the opaque `sexp` payload of `cert(…)` (Appendix A.1), a premise-slot
+node may spell its slot by source name:
+
+```text
+slotRef     ::= "(" "prem" slotNumeral ")"   -- canonical numeric slot (unchanged)
+              | "(" "prem" ident ")"         -- symbolic: a declared leaf or prior argument
+slotNumeral ::= "0" | nonZeroDigit digit*    -- a canonical natural (no leading zeros)
+```
+
+A `(prem s)` node is *symbolic* iff `s` is not a canonical natural. If
+`s` cannot begin a source identifier, such as `007`, `-1`, `+1`, `1.0`, or
+`0x10`, it is a malformed numeral rather than a name. The dedicated
+non-canonical-numeral error fires before name resolution.
+
+Only the declared *reference positions* of a schema'd backend payload are
+lowered. Each supported backend exports one flat schema — head keyword, arity,
+0-based reference positions — and the closed aggregate table lives in
+`Lara.Elaborate.CertSlots`; the elaborator learns no other backend grammar:
+
+| backend | head | arity | reference positions | untouched positions |
+| --- | --- | --- | --- | --- |
+| `ord@1` | `ordcmp` | 2 | 0, 1 | — |
+| `ra@1` | `radrop` | 3 | 0, 1 | 2 (the `frac` witness) |
+
+There is zero concrete-syntax change: the wire S-expression sub-grammar already
+admits an identifier atom, and the printer prints the stored payload verbatim,
+so the surface AST keeps the authored spelling and `parse ∘ print = id` holds
+unchanged. Lowering happens only at elaboration, *after* premise resolution, at
+both instantiation sites: the explicit rule application and the inferred
+`by r from […]` form (Appendix D). Every declared premise-reference position in
+the wire `Unit` therefore carries a numeric slot.
+
+Symbolic and numeric authoring of the same argument produce byte-identical
+`Cert` payloads and byte-identical encoded `Unit`s; `examples/S6/` authors the
+symbolic spelling and its committed `.core.sexp` golden is the standing
+byte-identity witness. `lean/Lara/CertSlots.lean` mechanizes the lowering:
+`lower_id_of_no_symbolic` (byte preservation on every payload the frozen
+corpus can contain) and `lower_eq_numeric_subst` (lowering equals substituting
+every resolved name first).
+
+### E.2 Name resolution: namespace and collision policy (D3)
+
+A symbolic name resolves in the `lara-syntax@0.5` reference namespace —
+declared leaves ∪ prior arguments, exactly the scope an inferred θ reference
+sees (Appendix D.1): "prior" means already elaborated earlier in declaration
+order, and a later argument is never a valid reference. A name that matches both namespaces is a **hard error**,
+never silently one of them — deliberately aligned with the inferred-reference
+resolver, not with the discharge resolver's silent leaf preference (that
+inconsistency is the separate TODOS item "Discharge-witness namespace
+shadowing", untouched here).
+
+### E.3 Slot mapping and mixed forms (D4, D5)
+
+The resolved referent — a leaf's `SLeaf` or a prior argument's elaborated term
+— is located in the argument's **resolved premise sequence** by term equality.
+That sequence is exactly the one replay hands the backend, so a name denotes
+"the slot this source occupies in the premises the certificate is checked
+against", never a positional convention of the surface text.
+
+- Exactly one occupied slot → that 0-based index.
+- Zero slots → error: the referent is real but is not among this argument's
+  premises.
+- Two or more slots (the same leaf feeding two premises) → error; the author
+  must cite numeric slots there.
+
+*Representation rule:* locating matches whatever representation the author's
+spelling actually put in the resolved premise sequence. A prior-argument
+citation locates both the argument's elaborated term (what `by r from […]`
+premise resolution stores) and the bare `SLeaf` spelling of its identifier
+(what an authored premise list would store); the explicit/inferred twins
+therefore lower identically, with no spurious not-a-premise error on one side.
+
+Mixed symbolic and numeric references are legal: each reference position
+lowers independently, so `(radrop (prem e4) (prem 1) (frac 119 500))` is
+well-formed if `e4` resolves to slot 0's premise.
+
+### E.4 Pass-through, the dead-wire rule, and the moved rejection site (D6)
+
+Payloads stay backend-owned. Unknown backend/version payloads, non-`(prem …)`
+nodes at reference positions, canonical numeric slots, and every
+non-reference position are left untouched and reach the backend exactly as
+today. This includes symbolic-looking `(prem s)` nodes at a matched schema's
+non-reference positions, whether direct or nested: the schema does not declare
+them as premise references, so the backend owns their meaning and rejection.
+A backend with no declared schema (`nd@1`, E.7) always passes through
+byte-identical. A head-keyword or arity mismatch under a *schema'd* backend
+also passes through unless the payload contains a symbolic `(prem s)`
+anywhere. No declared positions exist under a mismatch, so such a spelling
+cannot be lowered; it fails at elaboration as a schema mismatch. Detection is
+a generic sub-tree scan, and the elaborator still learns no backend grammar.
+
+Consequences: every existing accepted artifact lowers to itself — frozen
+payloads contain no symbolic names, and byte preservation is the E.1 Lean
+theorem — and every existing rejection path is preserved. The intended
+exception: spelling-level mistakes at a matched schema's reference positions
+now die **earlier**, at elaboration instead of at certificate replay (R13):
+malformed numerals (`(prem 007)`, `(prem -1)`), name typos (`(prem e44)`), and
+symbolic names inside schema-mismatched payloads (`(ordcmp (prem e4))`, one
+argument short) fail before the checker (`docs/rejection-surface.md` §1.2 and
+the R13 row). Acceptance is unchanged.
+
+### E.5 Stable error messages
+
+The six diagnostic families are `CertSlotUnresolved`, `CertSlotAmbiguous`,
+`CertSlotNotAPremise`, `CertSlotMultiSlot`, `CertSlotNonCanonicalNumeral`, and
+`CertSlotSchemaMismatch` — located `ElabError`s in the `ThetaReference*` style
+(D.3), attributed to the enclosing `arg` block. This list is their normative
+home. The renderer uses these exact templates, where `A` is the enclosing
+argument, `B` is the backend spelling `name@version` from the `assurance`
+line, `N` is the authored reference spelling, and `I`/`J` are 0-based slots:
+
+```text
+arg 'A': certificate 'B' premise reference 'N' names neither a declared leaf nor prior argument
+arg 'A': certificate 'B' premise reference 'N' is ambiguous between a declared leaf and a prior argument
+arg 'A': certificate 'B' premise reference 'N' does not resolve to any of this argument's premise slots
+arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot
+arg 'A': certificate 'B' premise reference 'N' is not a canonical slot numeral (use unsigned decimal with no leading zeros); write the canonical numeral or a source name
+arg 'A': certificate 'B' payload does not match the backend's premise-reference schema but contains symbolic premise reference 'N'
+```
+
+### E.6 Recursion semantics (D8)
+
+Lowering applies at **every** rule-application depth, resolving each declared
+reference position against that node's own resolved premise list, with
+diagnostics attributed to the enclosing argument's id. A nested certificate
+on a premise instance therefore lowers against the nested instance's premises,
+not the enclosing argument's. Symbolic-looking nodes outside a matched
+schema's declared reference positions remain backend-owned as specified in
+E.4.
+The `@0.6` surface grammar
+cannot yet author a nested assurance — a parsed rule application carries no
+authored premise list, and `assurance` attaches only to the `arg` block's own
+rule application — so the recursive case is reachable only from a hand-built
+AST today, but it is on the path the moment premises become authorable.
+`test/CertSlotsSpec.hs` records the reachability note and pins the recursive
+behavior at the AST level through the real elaborator entry point.
+
+### E.7 The nd@1 exclusion and future work (D1, D3)
+
+`nd@1` admits no named slots and is deliberately schema-less: its payloads
+pass through byte-identical and keep numeric `hyp` indices. `ord@1` and `ra@1`
+payloads are single flat head applications with premise references at fixed
+argument positions — a name is a stable notion there. `nd@1` payloads are
+recursive de Bruijn proof terms: `hyp i` shifts under `lam` binders and
+conflates premise slots with theory entries by offset, so "the premise named
+`e4`" is not well-defined at a fixed payload position without teaching the
+presentation layer the full ND grammar and binder discipline.
+
+Two future-work notes, recorded here so the next design starts from them:
+
+- *A named `nd@1` form* should start from Lean 4's kernel/surface split rather
+  than inventing new machinery: the kernel term stays de Bruijn (`hyp i`), the
+  presentation writes named binders (`(lam h FORMULA CERT)` with `h` bound in
+  `CERT`, and premise/theory slots cited by source name), and the elaborator
+  owns the index shifting, exactly as Lean's elaborator lowers
+  `fun h => … h …` to bound-variable indices. The locally-nameless literature
+  covers the metatheory of that lowering.
+- *Rule premise labels as a second symbolic class (considered and deferred).*
+  `premiseLabelIndex` already maps a rule's declared premise labels to slot
+  indices, and a label names the backend slot directly — it would even cover
+  the E.3 multi-slot case, where this design falls back to numerals. Deferred
+  at `@0.6` because labels are optional (`rulePremiseLabels ::
+  [Maybe PremiseLabel]`), so they cannot be the universal namespace, and a
+  second symbolic class would need its own collision policy against leaves and
+  priors, growing exactly the resolution surface this feature is supposed to
+  keep predictable. Premise-label citation remains a natural future
+  `lara-syntax@0.x` extension.

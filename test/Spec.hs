@@ -26,6 +26,7 @@ import AblationSpec (ablationSpecProps)
 import AdmissionSpec (admissionSpecProps)
 import BlockedSpec (blockedSpecProps)
 import BindingAuditSpec (bindingAuditSpecProps)
+import CertSlotsSpec (certSlotsSpecProps)
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
 import CorpusUnitsSpec (corpusUnitsSpecProps)
@@ -220,6 +221,7 @@ main = do
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- thetaInferenceSpecProps]
+        ++ [run name act | (name, act) <- certSlotsSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]
   unless (and results) exitFailure
   where

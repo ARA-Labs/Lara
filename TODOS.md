@@ -250,24 +250,6 @@ Hosted Haskell and Lean CI both passed on the final PR head `d5b04bf`
 **Depends on:** `lara-syntax@0.4`; reuses the matcher introduced by the
 `lara-syntax@0.3` comparison form.
 
-### #105 / Named certificate premise slots (open)
-
-**What:** Let an authored opaque certificate refer to a premise by source name
-(for example `(prem e1)`) instead of a numeric slot.
-
-**Why:** `lara-syntax@0.4` value substitution is deliberately restricted to
-typed `Term` fields. `Cert` remains the backend-owned opaque S-expression
-boundary, so making a general value pass inspect its payload would violate the
-existing layer contract.
-
-**Context:** Explicitly split from the completed #88b/D7 value-binding work.
-No named certificate slots were implemented by #104. This remains an open,
-separate certificate-layer design problem requiring a surface layer above
-`Cert`; hand-authored certificates retain numeric 0-based slots until then.
-
-**Effort:** M
-**Priority:** P3
-**Depends on:** an explicit opaque-certificate layering decision.
 
 ### Discharge-witness namespace shadowing vs. reference ambiguity
 
@@ -324,7 +306,119 @@ freeze tag when it does.
 **Depends on:** sorts-in-checker D8/D11 landed; blocked by the
 possible-worlds design decision.
 
+### R13 replay rejections render the slot → source-premise mapping
+
+**What:** When a certificate replay rejects (R13), render alongside the
+backend's reason which source premise (leaf or argument id) occupies each
+premise slot the certificate cites — e.g. `slot 0 = e03 (full cell), slot 1 =
+a1`.
+
+**Why:** Named authoring (#105, `lara-syntax@0.6`) fixes slot mistakes for
+`ord@1`/`ra@1` *authors*, but numeric certificates, `nd@1` proof terms, and
+third-party artifacts still die as positional rejections the reader must
+decode against policy declarations. The mapping is diagnosis-side, backend-
+agnostic, and helps every certificate forever.
+
+**Pros:** Cheap; complements rather than overlaps #105; serves the backends
+named slots will never reach.
+
+**Cons:** Touches `Lara.Strict`/driver rendering, which the #105 plan
+deliberately leaves alone — must respect the differential gate's stderr
+constraints (see the PR #83 completed entry: stderr is byte-compared only on
+preflight and group-conflict anchors, so an added line needs the same care).
+
+**Context:** Surfaced as the outside voice's alternative-design argument in
+the #105 eng review (2026-08-13, OV-2); kept as a complementary follow-up
+rather than a rival. Builds on the completed "Backend rejection reasons reach
+the author" (PR #83) machinery — the premise list handed to `strictCheck`
+fixes the slot indices, so the mapping is available at the rejection site.
+
+**Effort:** S
+**Priority:** P3
+**Depends on:** #105 (`lara-syntax@0.6`) landing, so the two rejection
+surfaces are designed against each other rather than interleaved.
+
+### `(prem <label>)` certificate citation via rule premise labels
+
+**What:** Let a certificate premise reference resolve a rule's declared
+premise *label* (`rulePremiseLabels` / `premiseLabelIndex`,
+`src/Lara/Elaborate/Internal.hs:315`) directly to its slot index, alongside
+the `@0.6` leaf/prior-argument namespace.
+
+**Why:** A label names the backend slot itself, so it dodges the slot-order
+trap at the source and keeps working in the multi-slot case (the same leaf
+feeding two premises), where `@0.6` names hard-error and force numerals
+(`CertSlotMultiSlot`).
+
+**Pros:** Most direct spelling of "which slot"; rescues the one case named
+slots cannot express; reuses an existing, tested name→index mechanism.
+
+**Cons:** A third symbolic name class needs its own collision policy against
+leaves and prior arguments (labels are optional — `[Maybe PremiseLabel]` — so
+they cannot replace the leaf/prior namespace); grows the resolution surface
+`@0.6` deliberately kept minimal; its own presentation-version bump.
+
+**Context:** Considered and deferred in the #105 eng review (2026-08-13,
+Issue 1); recorded in the plan's D3 alternative-considered paragraph and
+Appendix E future-work note (`plans/2026-08-12-named-cert-premise-slots.md`).
+
+**Effort:** S-M
+**Priority:** P3
+**Depends on:** `lara-syntax@0.6` (#105) landing; a label↔leaf/prior
+collision-policy decision.
+
+### Named binders and premise references in nd@1 proof terms
+
+**What:** A named presentation form for `nd@1` certificates: named `lam`
+binders (`(lam h FORMULA CERT)` with `h` bound in `CERT`) and premise/theory
+slots cited by source name, elaborator-lowered to the frozen de Bruijn kernel
+grammar (`hyp i`).
+
+**Why:** `nd@1` is excluded from `lara-syntax@0.6` named slots (D1): `hyp i`
+counts locally bound `lam` assumptions first (innermost), then premises, then
+theory entries by offset (`src/Lara/Strict/ND.hs:264-290`, `:396`), so no
+fixed payload position names a premise. Hand-authoring shifted indices under
+binders is the most author-hostile spelling left on the surface. When #105's
+TODOS entry moves to Completed, this entry keeps the open half visible.
+
+**Pros:** Completes named authoring across all three backends; the design
+direction is already worked out (Lean 4's kernel/surface split — kernel stays
+de Bruijn, elaborator owns the shifting; locally-nameless literature covers
+the metatheory).
+
+**Cons:** A genuinely binder-aware design: capture-avoidance, shadowing
+policy, and its own mechanization; far larger than the flat-schema `@0.6`
+pass.
+
+**Context:** D1 of `plans/2026-08-12-named-cert-premise-slots.md` and its
+future-work pointer; Appendix E records the exclusion rationale.
+
+**Effort:** L
+**Priority:** P3
+**Depends on:** `lara-syntax@0.6` (#105) landing; independent binder-aware
+design decision.
+
 ## Completed
+
+### #105 / Named certificate premise slots (`lara-syntax@0.6`)
+
+A hand-authored `ord@1` or `ra@1` certificate may cite a premise by source
+name — `(prem e4)` instead of `(prem 0)` — lowered at elaboration to the
+byte-identical numeric payload. `Cert` stays opaque: each flat backend exports
+one `SlotSchema` (head, arity, reference positions) from its own tag table,
+and the closed registry in `Lara.Elaborate.CertSlots` rewrites exactly those
+positions, resolving names in the `@0.5` reference namespace against the
+argument's resolved premise sequence at both elaboration sites. Six stable
+`CertSlot*` diagnostics fail unknown, ambiguous, duplicate, non-premise,
+non-canonical-numeral, and dead-wire references before the checker; `nd@1`
+passes through byte-identical (its de Bruijn payload has no fixed premise
+positions — future work follows Lean's named-binder elaboration). Evidence:
+end-to-end byte-identity twins for both backends (wire bytes and verdicts),
+replay/tamper R13 preservation, the `examples/S6` standing golden witness,
+`lean/Lara/CertSlots.lean`'s `lower_id_of_no_symbolic` +
+`lower_eq_numeric_subst` (sorry-free, standard trio, ten `#guard` conformance
+vectors twinned with `CertSlotsSpec`), and the parity guard unchanged at
+73 rows. Documented as grammar Appendix E.
 
 ### #88b / D7 value bindings (`lara-syntax@0.4`)
 
@@ -360,7 +454,7 @@ for the `@0.5` inferred-theta form, reusing `Lara.Sigma`'s types, with the
 round-trip proofs audited in `AxCheck.lean`. On top of that synced state,
 `scripts/presentation-shape.hs` and `lean/Lara/PresentationParity.lean` each
 emit a normalized name-and-arity inventory of the surface-reachable types, and
-`scripts/check-presentation-parity.sh` diffs the two — 72 rows,
+`scripts/check-presentation-parity.sh` diffs the two — 73 rows,
 byte-identical — exposed as `make presentation-parity` and run as a CI step.
 
 The guard never parses source text. Each side's inventory is protected by its own

@@ -4521,3 +4521,212 @@ tree:
     - "user approval 2026-08-12"
   also_depends_on: [N177]
   status: planned
+
+- id: N179
+  type: decision
+  title: "Approve the #105 named-cert-slots design (D1-D10) and execute plan-to-PR"
+  provenance: user
+  timestamp: "2026-08-13T20:41"
+  description: >
+    The user invoked /implement on the eng-cleared design plan
+    plans/2026-08-12-named-cert-premise-slots.md, resolving the plan header's
+    pending researcher approval of D1 (ord@1/ra@1 only, nd@1 excluded) and D9
+    (lara-syntax@0.6 version bump), and directing commit-per-task execution,
+    ARA recording of extended decisions, and a PR.
+  choice: >
+    Implement lara-syntax@0.6 named certificate premise slots exactly per the
+    approved design: SlotSchema exported by each flat backend, a closed
+    presentation-side registry lowering symbolic (prem name) references to
+    numeric slots at both elaboration sites, six CertSlot* diagnostics, the
+    D6 dead-wire rule, Lean mechanization with two theorems, and the S6
+    worked-example byte-identity witness.
+  alternatives:
+    - "Rule premise labels as the citation namespace (deferred in D3: labels are optional, cannot be the universal namespace)"
+    - "Named nd@1 de Bruijn form (deferred in D1: needs a binder-aware design following Lean's kernel/surface split)"
+  evidence:
+    - plans/2026-08-12-named-cert-premise-slots.md
+    - "user /implement invocation 2026-08-13"
+  also_depends_on: [N175, N176]
+  status: resolved
+
+- id: N180
+  type: experiment
+  title: "#105 implemented plan-to-PR: 10 commits, all gates green, PR #110"
+  provenance: ai-executed
+  timestamp: "2026-08-13T20:41"
+  description: >
+    Executed the eight-task plan via per-task implementer subagents with
+    two-stage (spec + quality) review each, committing task-by-task on
+    feat/105-extended-name-resolution: schemas, the pure lowering pass, a
+    standalone refMatches refactor, elaborator wiring with the six
+    diagnostics, end-to-end gates, the examples/S6 witness, the Lean
+    mechanization, docs Appendix E, and TODOS close-out.
+  result: >
+    All close-out gates green from a clean tree: full Haskell suite, Lean
+    build sorry-free, axiom audit within the standard trio, presentation
+    parity PASS (73 rows), differential negative pass=56 fail=0,
+    replay/tamper both PASS, frozen dirs byte-clean. The S6 numeric twin
+    reproduced the committed golden byte-for-byte (SHA-256 9d656b20...).
+    Two implementation discoveries extended the approved design: the surface
+    grammar cannot author premise lists (explicitRuleP stores none) and
+    nested assurances are not surface-expressible, so the D4 locate matches
+    both premise representations and the D8 recursion is pinned at AST level;
+    and prop_S6 plus examples/README.md S6 coverage were added for S-series
+    consistency beyond the plan's file map. PR #110 opened; merge gated on
+    hosted Haskell + Lean CI.
+  evidence:
+    - "https://github.com/EYH0602/lara/pull/110"
+    - plans/2026-08-12-named-cert-premise-slots.md
+    - test/CertSlotsSpec.hs
+    - examples/S6/example.core.sexp
+    - lean/Lara/CertSlots.lean
+    - docs/lara-surface-grammar.md
+  also_depends_on: [N179]
+  status: resolved
+
+- id: N181
+  type: dead_end
+  title: "Uniform failure-to-none collapse is not a faithful mirror cut"
+  provenance: ai-executed
+  timestamp: "2026-08-13T20:41"
+  hypothesis: >
+    The Lean mirror of lowerCertPayload could collapse the entire Haskell
+    error taxonomy to Option none uniformly, leaving name resolution and
+    error kinds to Haskell conformance tests (the plan's D10 cut as first
+    implemented).
+  failure_mode: >
+    Haskell rejects a non-empty all-digit symbolic name (prem 007) with
+    SlotNonCanonicalNumeral BEFORE consulting the resolver, for every
+    resolver; the first Lean mirror routed such names through the abstract
+    resolver, so a resolver mapping "007" to a slot made Lean lower a payload
+    Haskell rejects - a failure-to-success flip that lower_eq_numeric_subst
+    positively certified. Caught by the adversarial spec review, not by the
+    nine passing conformance vectors.
+  lesson: >
+    A coarser error model licenses collapsing failure KINDS, never
+    success-versus-failure: the mirror must reproduce the failure structure
+    (which refusals fire before which inputs are consulted). Fixed by adding
+    the numeralTypo early-out to Lean's lowerAt, strengthening
+    SymNumericSubst's symbolic arm, and pinning the exact drift scenario as
+    guard V9b under an all-resolving resolver.
+  evidence:
+    - lean/Lara/CertSlots.lean
+    - src/Lara/Elaborate/CertSlots.hs
+  also_depends_on: [N180]
+  status: resolved
+
+- id: N182
+  type: experiment
+  title: "PR #110 review findings resolved and hosted gates re-proved"
+  provenance: ai-executed
+  timestamp: "2026-08-13T21:36"
+  description: >
+    Verified the external review against the live branch, then addressed every
+    confirmed finding: corrected the dead-wire documentation scope, classified
+    all non-identifier-starting reference atoms as non-canonical numerals,
+    replaced bare certificate diagnostic strings with BackendId/Int/ArgRef,
+    repaired the unresolved-name haddock, removed the duplicate OV-2 TODO, and
+    added mutation-sensitive regressions for reference-position filtering,
+    backend-version discrimination, and the prem head guard. Mirrored the
+    signed-numeral early refusal in Lean as guard V9c.
+  result: >
+    The full Haskell suite, Lean build, standard-axiom audit, 73-row
+    presentation parity, differential gate (pass=581 fail=0; negative pass=56
+    fail=0), replay/tamper gate, and frozen-directory check passed locally.
+    Commit 56f7c2b was pushed to PR #110. Hosted Actions run 31769934475 passed
+    both Haskell and Lean jobs. All eight inline review threads received
+    finding-specific replies and are resolved; GitHub still reports
+    CHANGES_REQUESTED pending reviewer re-approval.
+  evidence:
+    - "https://github.com/EYH0602/lara/pull/110"
+    - "commit 56f7c2b"
+    - "Actions run 31769934475"
+    - test/CertSlotsSpec.hs
+    - lean/Lara/CertSlots.lean
+    - docs/lara-surface-grammar.md
+  also_depends_on: [N180, N181]
+  status: resolved
+
+- id: N183
+  type: dead_end
+  title: "A prover-local source-identifier classifier cannot faithfully mirror the Haskell lexer"
+  provenance: ai-executed
+  timestamp: "2026-08-13T22:16"
+  hypothesis: >
+    Extend Lean's numeralTypo predicate so every reference that cannot start a
+    source identifier is rejected before resolver consultation, using Lean's
+    local character predicates to recognize valid names.
+  failure_mode: >
+    The concrete attempt exposed two independent drifts. First, Lean's
+    Char.isAlpha is ASCII-only while Haskell Data.Char.isAlpha accepts legal
+    Unicode letters such as é, so a prover-local classifier rejected a source
+    identifier that Haskell resolved. Second, a numeric-looking-only guard left
+    punctuation starts such as #x resolver-reachable, again allowing a
+    failure-to-success flip under an all-resolving resolver.
+  lesson: >
+    Refusal order is not enough when the refusal predicate itself is duplicated
+    across runtimes. The executable mirror must receive the production lexical
+    decision as data unless both character libraries are proved extensionally
+    equal on the supported input domain.
+  evidence:
+    - src/Lara/Syntax.hs
+    - src/Lara/Elaborate/CertSlots.hs
+    - lean/Lara/CertSlots.lean
+    - test/CertSlotsSpec.hs
+  also_depends_on: [N181, N182]
+  status: resolved
+
+- id: N184
+  type: decision
+  title: "Parameterize the Lean certificate-slot mirror by the production identifier-start decision"
+  provenance: ai-executed
+  timestamp: "2026-08-13T22:16"
+  description: >
+    The reviewer reported a reachable Haskell-success/Lean-failure pair for a
+    legal non-ASCII identifier. The production parser's isIdentStart predicate
+    is already the normative source boundary, while Lean has no equivalent
+    Unicode-aware predicate in this model.
+  choice: >
+    Export isIdentStart from Lara.Syntax, reuse it in Haskell certificate-slot
+    lowering, and replace Lean's independent approximation with an explicit
+    startsSourceIdentifier parameter. This preserves the existing abstract
+    resolver theorem boundary without hard-coding Haskell's Unicode tables into
+    the mechanization.
+  alternatives:
+    - "Restrict source identifiers to ASCII (rejected: breaks the existing grammar and accepted programs)"
+    - "Reimplement Unicode alphabetic classification in Lean (rejected: duplicates a large, version-sensitive runtime table)"
+    - "Model only malformed numerals (rejected: leaves illegal punctuation starts resolver-reachable)"
+  evidence:
+    - src/Lara/Syntax.hs
+    - src/Lara/Elaborate/CertSlots.hs
+    - lean/Lara/CertSlots.lean
+  also_depends_on: [N183]
+  status: resolved
+
+- id: N185
+  type: experiment
+  title: "Unicode and invalid-start classifier parity restored with resolver-sensitive guards"
+  provenance: ai-executed
+  timestamp: "2026-08-13T22:16"
+  description: >
+    Added Haskell QuickCheck coverage for a legal non-ASCII source identifier
+    and extended Lean's classifier-parameterized conformance guards to cover
+    that success case plus illegal #x and .x starts under an all-resolving
+    resolver. Updated the Lean pointwise and substitution theorems to quantify
+    over the classifier.
+  result: >
+    The new Unicode guard failed before the fix and passes after it. cabal test
+    passed; lake build completed all 75 jobs; the standard axiom audit passed;
+    presentation parity passed 73 rows; differential passed with negative
+    pass=56 fail=0; replay/tamper passed; frozen artifact directories remained
+    byte-clean. A focused Lara.CertSlots build also passed. Commit 708fa7e was
+    pushed to PR #110; hosted Actions run 31772295184 passed both Haskell and
+    Lean jobs.
+  evidence:
+    - test/CertSlotsSpec.hs
+    - lean/Lara/CertSlots.lean
+    - src/Lara/Elaborate/CertSlots.hs
+    - src/Lara/Syntax.hs
+    - "https://github.com/EYH0602/lara/actions/runs/31772295184"
+  also_depends_on: [N184]
+  status: resolved

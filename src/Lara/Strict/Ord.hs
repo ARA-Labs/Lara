@@ -88,6 +88,7 @@ module Lara.Strict.Ord
   , holdsRel
     -- * The registered adapter
   , ordBackendId
+  , slotSchema
   , mkOrdBackend
   ) where
 
@@ -101,7 +102,13 @@ import Lara.Strict
   , SExpr (..)
   , TheoryDigest
   )
-import Lara.Strict.Cell (decodeSlot, parseDecimal, premiseCell, renderDecimal)
+import Lara.Strict.Cell
+  ( SlotSchema (..)
+  , decodeSlot
+  , parseDecimal
+  , premiseCell
+  , renderDecimal
+  )
 
 -- ---------------------------------------------------------------------------
 -- Backend formulas and certificates
@@ -214,6 +221,18 @@ relSymbol OLe = "<="
 -- | The ordered-comparison backend identifier: @ord\@1@.
 ordBackendId :: BackendId
 ordBackendId = BackendId {backendName = "ord", backendVersion = 1}
+
+-- | The @ord\@1@ premise-reference schema: @(ordcmp (prem N) (prem M))@,
+-- both positions premise references. Spellings come from this module's own
+-- tag table and identity — the schema introduces no new strings.
+slotSchema :: SlotSchema
+slotSchema =
+  SlotSchema
+    { ssBackend = ordBackendId
+    , ssHead = tagToString TOrdcmp
+    , ssArity = 2
+    , ssRefSlots = [0, 1]
+    }
 
 -- | Build the adapter with a __fixed__ theory table ('Lara.Strict.RA.mkRABackend'
 -- discipline: closed registration, digest selection only). The theory is empty

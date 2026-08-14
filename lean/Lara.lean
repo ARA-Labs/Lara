@@ -10,7 +10,7 @@
 --     parser — Lara.Presentation
 --   * the standalone presentation-parity guard: exact record and sum-payload
 --     constructor signatures, explicit alias/entry anchors, exhaustive
---     eliminators, the 72-row normalized shape inventory both runtimes emit,
+--     eliminators, the 73-row normalized shape inventory both runtimes emit,
 --     the Lean half of the CI cross-language parity gate
 --     (scripts/check-presentation-parity.sh) — Lara.PresentationParity. This
 --     meta module is intentionally not imported by the proof-library root.
@@ -69,6 +69,12 @@
 --     same relation, so it certifies the opposite claim rather than a weaker
 --     one. This is the surface-level lookup table, NOT a theorem about the
 --     Haskell elaborator, which stays validated-not-verified — Lara.Comparison
+--   * named certificate premise slots (lara-syntax@0.6, #105): the
+--     presentation-layer payload lowering over an abstract name resolver —
+--     byte-identity on payloads with no symbolic reference in scope
+--     (dead-wire arm included) and agreement with the declarative positional
+--     substitution SymNumericSubst; the Haskell elaborator's name resolution
+--     and error taxonomy stay validated-not-verified — Lara.CertSlots
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -79,6 +85,7 @@ import Lara.Cell
 import Lara.RA
 import Lara.Ord
 import Lara.Comparison
+import Lara.CertSlots
 import Lara.Grounded
 import Lara.Support
 import Lara.Groups

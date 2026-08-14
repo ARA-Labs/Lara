@@ -1493,3 +1493,49 @@ observations:
   promoted_to: "trace/exploration_tree.yaml:N177"
   crystallized_via: empirical-resolution + artifact-commitment
   stale: false
+
+- id: O72
+  timestamp: "2026-08-13T20:41"
+  provenance: ai-suggested
+  content: >
+    The lara-syntax surface cannot author premise lists (explicitRuleP
+    unconditionally stores none) and cannot attach an assurance to a nested
+    premise term, so every reachable resolved premise is constructed by
+    resolvePremises/inferTheta; a prior-argument premise is that argument's
+    elaborated term, while hand-built ASTs can carry the bare-SLeaf spelling
+    that elabTerm passes through unre-pointed. Locating citations against
+    both representations makes explicit and inferred spellings lower
+    identically, with no false ambiguity (a same-named leaf already errors
+    upstream in refMatches).
+  context: >
+    Discovered during Task 3 of the #105 implementation when verifying the
+    D4 representation rule; drove the two-candidate locate in
+    certSlotResolver, pinned by prop_priorArgumentCitationBothSpellings and
+    prop_priorArgumentPremiseSpellingsAgree; accepted by adversarial spec
+    review.
+  potential_type: claim
+  bound_to: [N180]
+  promoted: true
+  promoted_to: "logic/claims.md:C31"
+  crystallized_via: artifact-commitment + empirical-resolution
+  stale: false
+
+- id: O73
+  timestamp: "2026-08-13T20:41"
+  provenance: ai-suggested
+  content: >
+    When mirroring an implementation in a prover under a coarser error model,
+    mirror the failure STRUCTURE - which refusals fire before which inputs
+    are consulted - not merely the failure/success partition; conformance
+    vectors over well-behaved resolvers cannot catch a refusal that was
+    reordered behind an input consultation, only an adversarial input
+    (all-resolving resolver) can.
+  context: >
+    Generalization of the N181 dead end (the Lean numeralTypo early-out fix
+    and guard V9b); candidate heuristic for the mechanization discipline.
+  potential_type: heuristic
+  bound_to: [N181]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H14"
+  crystallized_via: artifact-commitment
+  stale: false

@@ -137,3 +137,20 @@
 - **Sensitivity**: high
 - **Code ref**: ["scripts/check-presentation-parity.sh", "scripts/presentation-shape.hs", "lean/Lara/PresentationParity.lean", "lean/Lara/Presentation.lean", "src/Lara/AST.hs", "plans/2026-08-10-result-12-presentation-parity.md"]
 - **Last revised**: 2026-08-11 (2026-08-11_001#1)
+
+## H14: Mirror lexical refusal order through an explicit classifier
+- **Rationale**: A prover mirror with a coarser error type may collapse distinct
+  failure kinds, but it must preserve which refusals happen before which inputs
+  are consulted. Agreement under ordinary resolvers does not pin that order:
+  an adversarial resolver can turn a misplaced lexical refusal into success.
+  When the production lexer and prover have different character libraries,
+  pass the production source-identifier classifier into the abstract mirror
+  rather than reconstructing it independently. Test both resolver-independent
+  refusal and resolver-reachable success with leading-zero, signed, legal
+  non-ASCII, and illegal-start references. The certificate-slot mirror applies
+  this rule while still representing every Lean failure as `none`.
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["src/Lara/Syntax.hs", "src/Lara/Elaborate/CertSlots.hs", "lean/Lara/CertSlots.lean", "test/CertSlotsSpec.hs"]
+- **Last revised**: 2026-08-13 (2026-08-13_001#3)

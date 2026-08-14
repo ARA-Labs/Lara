@@ -423,6 +423,30 @@ prop_S5 = once $ ioProperty $
                     ]
           ]
 
+-- | S6 (#105, @lara-syntax\@0.6@): the named-certificate-slot demonstrator. The
+-- authored assurance cites its premises by source name — @(ordcmp (prem
+-- base_cell) (prem new_cell))@, the same identifiers the @from […]@ list
+-- resolves — and elaboration lowers them to the numeric slots before the wire.
+-- The committed golden is the standing byte-identity witness for #105: it
+-- carries only @(ordcmp (prem 0) (prem 1))@, so 'prop_freshness' re-proves on
+-- every run that the symbolic spelling produces the numeric spelling's bytes.
+-- Here the typed pin is the verdict: the lowered certificate must still be a
+-- certificate — @ord\@1@ replays it and the strict step is @in@, exactly as if
+-- the author had counted slots by hand.
+prop_S6 :: Property
+prop_S6 = once $ ioProperty $
+  runExample "examples/S6" "ord-named-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S6: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S6 labels: a1 (strict ord@1, named slots) → in" $
+              verdictLabels outcome === [(0, LIn)]
+          , counterexample "S6 status: the certified num_lt(0.71, 0.74) justified" $
+              verdictStatuses outcome
+                === [(numRelP "num_lt" "0.71" "0.74", Published Justified)]
+          ]
+
 -- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
 -- grain. The genuine-disagreement pair (P1) shares the SAME (S,B,Q,D) atoms, so
 -- @better@/@not_better@ form a contrary instance ⇒ a rebut 2-cycle ⇒ both
@@ -872,6 +896,7 @@ workedExamplesSpecProps =
   , ("S3 ord@1 num_le tie → accept, at_least_as_good justified (num_lt would reject)", quickCheckResult prop_S3)
   , ("S4 undermined binding → bridge out, comparative claim defeated, comparison still justified", quickCheckResult prop_S4)
   , ("S5 lower-is-better → flipped goal num_lt(28.4, 31.6), accepted by ord@1, better justified", quickCheckResult prop_S5)
+  , ("S6 named cert slots → lowered (prem 0)/(prem 1) replayed by ord@1, num_lt justified", quickCheckResult prop_S6)
   , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)

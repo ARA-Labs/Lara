@@ -38,6 +38,7 @@ library
                       Lara.Elaborate
                       Lara.Elaborate.Internal
                       Lara.Elaborate.Error
+                      Lara.Elaborate.CertSlots
                       Lara.Elaborate.Subst
                       Lara.Elaborate.Comparison
                       Lara.Elaborate.ValueBinding
@@ -118,6 +119,7 @@ test-suite lara-test
                       WireSpec
                       SyntaxSpec
                       ThetaInferenceSpec
+                      CertSlotsSpec
                       ValueBindingsSpec
                       ElaborateSpec
                       WorkedExamplesSpec

@@ -59,6 +59,7 @@ module Lara.Strict.RA
   , checkDrop
     -- * The registered adapter
   , raBackendId
+  , slotSchema
   , mkRABackend
   ) where
 
@@ -74,7 +75,8 @@ import Lara.Strict
   , TheoryDigest
   )
 import Lara.Strict.Cell
-  ( decodeSlot
+  ( SlotSchema (..)
+  , decodeSlot
   , parseCanonicalInt
   , parseCanonicalNat
   , parseDecimal
@@ -217,6 +219,19 @@ checkDrop goal witness
 -- | The rational-arithmetic backend identifier: @ra\@1@.
 raBackendId :: BackendId
 raBackendId = BackendId {backendName = "ra", backendVersion = 1}
+
+-- | The @ra\@1@ premise-reference schema:
+-- @(radrop (prem N) (prem M) (frac P Q))@ — the first two positions premise
+-- references, the witness fraction untouched. Spellings come from this
+-- module's own tag table and identity — the schema introduces no new strings.
+slotSchema :: SlotSchema
+slotSchema =
+  SlotSchema
+    { ssBackend = raBackendId
+    , ssHead = tagToString TRadrop
+    , ssArity = 3
+    , ssRefSlots = [0, 1]
+    }
 
 -- | Build the adapter with a __fixed__ theory table ('Lara.Strict.ND.mkNDBackend'
 -- discipline: closed registration, digest selection only). The theory entries
