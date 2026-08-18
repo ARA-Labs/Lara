@@ -787,3 +787,10 @@ entries:
     - "Revised H14 rather than creating a sibling heuristic. The new evidence narrows the same mechanism: refusal order is preserved only if the refusal predicate is also shared or explicitly parameterized. Recorded the exact before/after in logic_revisions."
     - "Did NOT change H14 provenance or status: its generalized wording remains AI-suggested and active; the turn refines its implementation discipline rather than refuting the core heuristic."
     - "No new staged observation: the reusable lesson is already mature through empirical resolution and artifact commitment, and is represented by the H14 revision plus N183-N185."
+- turn: "2026-08-18_001#1"
+  notes:
+    - "Routed N189 as a user decision: address all five PR #117 findings while skipping behavioral suites and the performance experiment because the follow-up changes no wire behavior."
+    - "Revised C32's protocol cardinality from 99 to independently verified 97; recorded the full before/after in the session record and left the measured timings unchanged."
+    - "Added tagToString_injective and its AxCheck entry rather than deferring mechanization; lake build Lara.Driver passed and the theorem audit reported no axioms."
+    - "Did NOT stage a new observation: the turn corrected a protocol constant and discharged an existing injectivity condition rather than establishing a new general claim."
+    - "Technical remediation is complete and all five threads are resolved; PR #117 remains CHANGES_REQUESTED pending reviewer re-approval, with hosted checks running on the review-fix head."

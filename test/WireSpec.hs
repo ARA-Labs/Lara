@@ -739,6 +739,24 @@ prop_tagRoundTrip =
   forAll (elements [minBound .. maxBound]) $ \t ->
     parseTag (tagToString t) == Just t
 
+-- | The complete wire tag table round-trips and has unique spellings.
+prop_tagTableTotal :: Property
+prop_tagTableTotal =
+  conjoin
+    [ counterexample "some bounded tag does not round-trip" $
+        property (all (\t -> parseTag (tagToString t) == Just t) tags)
+    , counterexample ("colliding tag spelling(s): " ++ show collisions) $
+        length spellings == length (nub spellings)
+    ]
+  where
+    tags = [minBound .. maxBound]
+    spellings = map tagToString tags
+    collisions =
+      [ spelling
+      | spelling <- nub spellings
+      , length (filter (== spelling) spellings) > 1
+      ]
+
 -- ---------------------------------------------------------------------------
 -- Verdict golden vectors (hand-verified)
 -- ---------------------------------------------------------------------------
@@ -1114,6 +1132,7 @@ wireSpecProps =
   , ("wire unit round-trip", quickCheckResult prop_unitRoundTrip)
   , ("wire check-input round-trip", quickCheckResult prop_checkInputRoundTrip)
   , ("wire tag round-trip", quickCheckResult prop_tagRoundTrip)
+  , ("wire tag table total", quickCheckResult prop_tagTableTotal)
   , ("wire replay/envelope golden vectors", quickCheckResult prop_replayEnvelopeGoldenVectors)
   , ("wire replay/envelope malformed matrix", quickCheckResult prop_replayEnvelopeMalformedMatrix)
   , ("wire verdict golden vectors", quickCheckResult prop_verdictGoldenVectors)

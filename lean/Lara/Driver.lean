@@ -90,6 +90,7 @@ inductive Tag where
   -- the many-sorted signature Sigma (spec §2, §3.4; lara-core@0.2)
   | sigma | sorts | cons | preds | «pred»
   | r1 | r2 | r3 | r4 | r5 | r6 | r7 | r9 | r10 | r11 | r12 | r13
+deriving DecidableEq
 
 /-- The on-the-wire spelling of a keyword — the single source of truth. -/
 def tagToString : Tag → String
@@ -129,6 +130,12 @@ def tagToString : Tag → String
   | .r1 => "R1" | .r2 => "R2" | .r3 => "R3" | .r4 => "R4" | .r5 => "R5" | .r6 => "R6"
   | .r7 => "R7" | .r9 => "R9" | .r10 => "R10" | .r11 => "R11" | .r12 => "R12"
   | .r13 => "R13"
+
+/-- No two wire tags share a spelling. The Haskell reverse table relies on this
+invariant. -/
+theorem tagToString_injective : Function.Injective tagToString := by
+  intro a b
+  cases a <;> cases b <;> decide
 
 /-! ### Canonical printer (byte-identical to `Lara.Wire.printSExpr`) -/
 

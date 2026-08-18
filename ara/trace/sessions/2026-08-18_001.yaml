@@ -1,0 +1,60 @@
+session:
+  id: "2026-08-18_001"
+  date: "2026-08-18"
+  started: "2026-08-18T00:13"
+  last_turn: "2026-08-18T00:13"
+  turn_count: 1
+  summary: "Resolved all five PR #117 findings: corrected the Tag cardinality to 97, clarified the Haskell/Lean table relationship, mechanized injectivity, pushed the fix, and resolved every review thread."
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N189"
+    routing: direct
+    provenance: user
+    summary: "Address all five PR #117 findings while skipping behavioral suites and the performance experiment because the review follow-up changes no wire behavior."
+
+ai_actions:
+  - turn: 1
+    action: "Verified each review finding against the current branch; corrected four live cardinality records and two Haddocks; added the Lean injectivity theorem and AxCheck entry; validated the bounded count, Lean build, axiom audit, ARA, and patch hygiene; committed and pushed 722aad3"
+    provenance: ai-executed
+    files_changed:
+      - ara/evidence/results/parsetag_map_lookup.md
+      - ara/logic/claims.md
+      - ara/staging/observations.yaml
+      - ara/trace/exploration_tree.yaml
+      - ara/trace/pm_reasoning_log.yaml
+      - ara/trace/sessions/2026-08-18_001.yaml
+      - ara/trace/sessions/session_index.yaml
+      - lean/AxCheck.lean
+      - lean/Lara/Driver.lean
+      - src/Lara/Wire.hs
+  - turn: 1
+    action: "Replied in all five inline review threads and resolved them"
+    provenance: ai-executed
+
+claims_touched:
+  - id: C32
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C32
+    field: Statement
+    before: "On the fixed Apple M5 Pro, GHC 9.14.1, Lean 4.32.0, 60-unit, 564-record protocol used for issue #114, replacing `Lara.Wire.parseTag`'s 99-entry association-list scan with one top-level `Data.Map.Strict` table reduced median parse time from 1264.0 to 581.2 microseconds (54.02%) and median end-to-end time from 1459.8 to 784.8 microseconds (46.24%), without an observed Haskell-Lean verdict, exit-code, codec-boundary, replay, or frozen-byte divergence."
+    after: "On the fixed Apple M5 Pro, GHC 9.14.1, Lean 4.32.0, 60-unit, 564-record protocol used for issue #114, replacing `Lara.Wire.parseTag`'s 97-entry association-list scan with one top-level `Data.Map.Strict` table reduced median parse time from 1264.0 to 581.2 microseconds (54.02%) and median end-to-end time from 1459.8 to 784.8 microseconds (46.24%), without an observed Haskell-Lean verdict, exit-code, codec-boundary, replay, or frozen-byte divergence."
+    signal: user-directive
+    provenance: user-revised
+    note: "Review identified the exact bounded Tag count; the current Haskell module independently evaluated to 97."
+
+key_context:
+  - turn: 1
+    excerpt: "The researcher directed: address all review findings, push, reply, and do not repeat the behavioral tests or performance experiment."
+  - turn: 1
+    excerpt: "The bounded Haskell Tag count evaluated to 97; lake build Lara.Driver passed; AxCheck reported tagToString_injective depends on no axioms; ara check reported 0 errors and 497 existing non-strict warnings."
+
+open_threads:
+  - "PR #117 remains CHANGES_REQUESTED pending reviewer re-approval; hosted checks must complete on the final ARA-append head."
+
+ai_suggestions_pending: []

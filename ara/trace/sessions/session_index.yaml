@@ -381,3 +381,17 @@ sessions:
   events_count: 10
   claims_touched: [C31, H14]
   open_threads: 3
+- id: 2026-08-17_001
+  date: '2026-08-17'
+  summary: 'Implemented issue #114 Map-backed parseTag lookup, proved full semantic parity, measured a 54.02% median parse reduction, and opened green PR #117.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: [C32]
+  open_threads: 1
+- id: 2026-08-18_001
+  date: '2026-08-18'
+  summary: 'Resolved all five PR #117 findings: corrected the Tag cardinality to 97, clarified the Haskell/Lean table relationship, mechanized injectivity, pushed the fix, and resolved every review thread.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: [C32]
+  open_threads: 1

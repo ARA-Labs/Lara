@@ -41,6 +41,10 @@ import Lara.Examples.GroundedConsistency
 
 open Lara
 
+-- The closed wire keyword vocabulary is injective, as required by the Haskell
+-- Map-backed reverse lookup.
+#print axioms Lara.Driver.tagToString_injective
+
 -- Result 13 (the many-sorted signature, `lara-core@0.2` / issue #89).
 -- (a) decidability without classical input: the executable check IS the
 --     relation, so the instance below reports the empty axiom set.

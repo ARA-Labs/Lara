@@ -143,6 +143,7 @@ module Lara.Wire
 
 import Data.Char (ord)
 import Data.List (intercalate)
+import qualified Data.Map.Strict as Map
 
 import Lara.AST hiding (Reject)
 import Lara.Replay
@@ -282,10 +283,11 @@ printAtom s
 -- ---------------------------------------------------------------------------
 
 -- | Every keyword of the wire grammar, as a closed sum type. The concrete
--- spellings live in exactly one place ('tagToString' \/ 'parseTag'), textually
--- mirrored by the Lean driver's table. (The conformance tests intentionally
--- spell raw string literals as independent ground truth — do not \"fix\" them
--- to consume this table.)
+-- spellings live in exactly one place ('tagToString'); @tagTable@ derives the
+-- reverse lookup from that function. The Lean driver textually mirrors the
+-- 'tagToString' table.
+-- (The conformance tests intentionally spell raw string literals as independent
+-- ground truth — do not \"fix\" them to consume this table.)
 data Tag
   = -- checker input and replay identity
     TCheckInput | TReplayId | TCore | TBackends | TBackend | TArtifact
@@ -357,10 +359,17 @@ tagToString t = case t of
   TR7 -> "R7"; TR9 -> "R9"; TR10 -> "R10"; TR11 -> "R11"; TR12 -> "R12"
   TR13 -> "R13"
 
--- | Parse a wire keyword, inverse to 'tagToString'. Derived from the same
--- table by enumerating 'Tag', so it cannot drift out of sync.
+{-# NOINLINE tagTable #-}
+tagTable :: Map.Map String Tag
+tagTable = Map.fromList [(tagToString t, t) | t <- [minBound .. maxBound]]
+
+-- | Parse a wire keyword, inverse to 'tagToString'. @tagTable@ is derived from
+-- 'tagToString' by enumerating 'Tag'. A spelling collision would break that
+-- inverse because 'Map.fromList' keeps one value per key. @prop_tagTableTotal@
+-- (WireSpec) rejects collisions, and @Lara.Driver.tagToString_injective@ proves
+-- the same invariant for the mirrored Lean vocabulary.
 parseTag :: String -> Maybe Tag
-parseTag s = lookup s [(tagToString t, t) | t <- [minBound .. maxBound]]
+parseTag s = Map.lookup s tagTable
 
 -- ---------------------------------------------------------------------------
 -- Decode helpers

@@ -4730,3 +4730,104 @@ tree:
     - "https://github.com/EYH0602/lara/actions/runs/31772295184"
   also_depends_on: [N184]
   status: resolved
+
+- id: N186
+  type: decision
+  title: "Execute the bounded #114 Map-backed tag lookup"
+  provenance: user
+  timestamp: "2026-08-17T23:27"
+  description: >
+    The researcher invoked the eng-cleared implementation plan and requested
+    commit, ARA recording, integration and differential verification, an
+    old/new comparison if needed, and pull-request delivery.
+  choice: >
+    Replace only Lara.Wire.parseTag's 97-entry association-list scan with a
+    top-level NOINLINE Data.Map.Strict table derived from tagToString. Preserve
+    the public API, every call site, all tag spellings, the Lean driver, frozen
+    artifacts, and the separate scope of issues #115 and #116.
+  alternatives:
+    - "Rewrite more than 40 tag-membership guards as direct string equality."
+    - "Combine the change with issue #115's ByteString parser work."
+    - "Keep the linear scan and qualify the paper's performance discussion."
+  evidence:
+    - issue://114
+  status: resolved
+
+- id: N187
+  type: experiment
+  title: "Map-backed parseTag cut median parse time by 54 percent with semantic parity"
+  provenance: ai-executed
+  timestamp: "2026-08-17T23:27"
+  description: >
+    Added the Map CAF and exhaustive injectivity regression, then ran the full
+    Haskell/Lean build, property, differential, replay, presentation-parity,
+    frozen-boundary, benchmark, and focused old/new lookup checks.
+  result: >
+    Commit a7b498a passed make build and make test. The two-driver differential
+    passed 581 positive and 56 negative cases with zero failures; replay matched
+    frozen verdict bytes and exit code; presentation parity passed 73 rows.
+    Against the same-session association-list baseline, median parse fell from
+    1264.0 to 581.2 microseconds (-54.02%) and end-to-end fell from 1459.8 to
+    784.8 microseconds (-46.24%). A focused 1052-key old/new benchmark measured
+    233.56 versus 38.733 microseconds (-83.42%). The repeated check + render
+    median moved from 192.8 to 203.5 microseconds (+5.55%); its path was
+    untouched, so the evidence record retains it as observed noise rather than
+    a causal claim.
+  evidence:
+    - C32
+    - "commit a7b498a"
+    - tables/performance.tex
+    - ara/evidence/results/parsetag_map_lookup.md
+    - scripts/differential.sh
+    - scripts/replay.sh
+  also_depends_on: [N161, N186]
+  status: resolved
+
+- id: N188
+  type: experiment
+  title: "PR #117 hosted CI confirms integration"
+  provenance: ai-executed
+  timestamp: "2026-08-17T23:42"
+  description: >
+    Pushed perf/114-parsetag-map, opened ARA-Labs/lara PR #117, and waited for
+    the complete hosted CI workflow rather than treating local gates as the
+    final integration result.
+  result: >
+    GitHub Actions run 32107434809 passed both jobs. The Haskell job rebuilt,
+    tested, checked presentation parity, replay and tamper gates, policy-copy
+    authenticity, the full Haskell-Lean differential, and semantic admission
+    differential. The Lean job built and passed the no-sorry standard-axiom
+    audit. PR #117 is open and mergeable at commit ea450c5.
+  evidence:
+    - "PR #117"
+    - "GitHub Actions run 32107434809"
+    - "commit ea450c5"
+  supports:
+    - C32
+  also_depends_on: [N187]
+  status: resolved
+
+- id: N189
+  type: decision
+  title: "Resolve PR #117 review with exact cardinality and mechanized injectivity"
+  provenance: user
+  timestamp: "2026-08-18T00:13"
+  description: >
+    Review found that the closed Haskell Tag vocabulary has 97 constructors,
+    identified ambiguous Haddock wording around the Lean mirror, and requested
+    a Lean proof of the injectivity obligation introduced by Map.fromList.
+  choice: >
+    Correct every live 99-entry claim to 97, distinguish the Haskell reverse
+    table from the Lean forward spelling table, state the collision precondition,
+    and add an AxCheck-audited Lean injectivity theorem. Do not repeat the
+    behavioral suites or performance experiment because the review follow-up
+    changes no wire behavior.
+  alternatives:
+    - "Leave the Lean theorem to a separate follow-up."
+    - "Repeat the full behavioral and performance matrix despite no behavioral change."
+  evidence:
+    - "PR #117 review comments 3801741495 through 3801741522"
+    - "commit 722aad3"
+    - ara/evidence/results/parsetag_map_lookup.md
+  also_depends_on: [N186, N187, N188]
+  status: resolved

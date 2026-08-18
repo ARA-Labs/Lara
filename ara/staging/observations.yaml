@@ -1539,3 +1539,24 @@ observations:
   promoted_to: "logic/solution/heuristics.md:H14"
   crystallized_via: artifact-commitment
   stale: false
+
+- id: O74
+  timestamp: "2026-08-17T23:27"
+  provenance: ai-suggested
+  content: >
+    A closed 97-key String vocabulary on the hot decode path paid enough linear
+    equality cost that a derived Data.Map.Strict CAF reduced the 60-unit median
+    parse row by 54.02% and end-to-end by 46.24%. An exhaustive inverse and
+    injectivity property, the corresponding Lean injectivity theorem, and the
+    independent Lean differential preserved the observable wire contract.
+  context: >
+    Issue #114 implementation and same-session evaluation. A focused benchmark
+    over all 1052 head keywords measured the old association list at 233.56
+    microseconds and the Map at 38.733 microseconds. Full differential results
+    were 581 positive and 56 negative cases with zero failures.
+  potential_type: claim
+  bound_to: [N187]
+  promoted: true
+  promoted_to: "logic/claims.md:C32"
+  crystallized_via: artifact-commitment + empirical-resolution
+  stale: false
