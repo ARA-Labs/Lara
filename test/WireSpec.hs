@@ -25,9 +25,14 @@
 -- output against them.
 module WireSpec (wireSpecProps) where
 
+import Control.Monad (forM)
+import qualified Data.ByteString as B
 import Data.Char (ord)
-import Data.List (isPrefixOf, nub, sortBy)
+import Data.List (isPrefixOf, isSuffixOf, nub, sortBy)
 import Data.Ord (comparing)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
+import System.Directory (doesDirectoryExist, listDirectory)
 import Test.QuickCheck
 
 import Lara.AST hiding (Reject)
@@ -480,6 +485,253 @@ prop_printParsePrintIdempotent =
   forAll genSExpr $ \s ->
     let text = printSExpr s
      in fmap printSExpr (parseSExpr text) == Right text
+
+-- ---------------------------------------------------------------------------
+-- The reference-parser differential (#115)
+-- ---------------------------------------------------------------------------
+--
+-- 'parseSExprBS' replaced a @String@ ([Char]) reader with one over strict
+-- 'B.ByteString'. Comparing it against 'parseSExpr' would prove nothing —
+-- 'parseSExpr' is now a thin wrapper over 'parseSExprBS', so the two agree by
+-- construction. The oracle is therefore the /previous/ implementation, copied
+-- verbatim below (only the top-level names are prefixed @ref@) from
+-- @src\/Lara\/Wire.hs@ at @f7b043e@. Every accepted input, every rejected
+-- input, and every error line\/column\/message must be identical.
+--
+-- Columns count code points in both, which is the point: the Lean reference
+-- driver (@lean\/Lara\/Driver.lean@) parses a @List Char@, so a byte-counting
+-- parser would silently relocate any error that follows a multi-byte character
+-- on the same line.
+
+refIsBareChar :: Char -> Bool
+refIsBareChar c =
+  ord c >= 0x21 && ord c <= 0x7e && c `notElem` "();\"\\"
+
+data RefP = RefP
+  { refInput :: String
+  , refLine :: !Int
+  , refCol :: !Int
+  }
+
+refPerr :: RefP -> String -> Either ParseError a
+refPerr p msg = Left (ParseError (refLine p) (refCol p) msg)
+
+refStep :: RefP -> RefP
+refStep p = case refInput p of
+  '\n' : rest -> p {refInput = rest, refLine = refLine p + 1, refCol = 1}
+  _ : rest -> p {refInput = rest, refCol = refCol p + 1}
+  "" -> p
+
+refSkipSpace :: RefP -> RefP
+refSkipSpace p = case refInput p of
+  c : rest
+    | c `elem` " \t\n\r" -> refSkipSpace (refStep p)
+    | c == ';' -> refSkipSpace (refSkipComment p {refInput = rest})
+  _ -> p
+  where
+    refSkipComment q = case refInput q of
+      '\n' : _ -> q
+      "" -> q
+      _ -> refSkipComment (refStep q)
+
+-- | The bound the reader enforces; kept as a literal here so the copy is
+-- self-contained and a silent change to 'Lara.Wire' shows up as a divergence.
+refMaxDepth :: Int
+refMaxDepth = 10000
+
+referenceParseSExpr :: String -> Either ParseError SExpr
+referenceParseSExpr input = do
+  let start = refSkipSpace (RefP input 1 1)
+  (e, rest) <- refParseForm 0 start
+  let rest' = refSkipSpace rest
+  if null (refInput rest')
+    then Right e
+    else refPerr rest' "expected a single S-expression, found more input"
+
+refParseForm :: Int -> RefP -> Either ParseError (SExpr, RefP)
+refParseForm depth p
+  | depth > refMaxDepth =
+      refPerr p ("maximum S-expression nesting depth exceeded (" ++ show refMaxDepth ++ ")")
+  | otherwise = case refInput p of
+      '(' : _ -> parseList (refStep p) []
+      '"' : _ -> parseQuoted (refStep p) []
+      c : _
+        | refIsBareChar c ->
+            let (tok, rest) = span refIsBareChar (refInput p)
+                p' = p {refInput = rest, refCol = refCol p + length tok}
+             in Right (SAtom tok, p')
+        | otherwise -> refPerr p ("unexpected character " ++ show c)
+      "" -> refPerr p "unexpected end of input"
+  where
+    parseList q acc =
+      let q' = refSkipSpace q
+       in case refInput q' of
+            ')' : _ -> Right (SList (reverse acc), refStep q')
+            "" -> refPerr q' "unclosed list"
+            _ -> do
+              (e, q'') <- refParseForm (depth + 1) q'
+              parseList q'' (e : acc)
+    parseQuoted q acc = case refInput q of
+      '"' : _ -> Right (SAtom (reverse acc), refStep q)
+      '\\' : "" -> refPerr q "unterminated escape sequence"
+      '\\' : c : rest
+        | c == '"' -> parseQuoted (drop2 q rest) ('"' : acc)
+        | c == '\\' -> parseQuoted (drop2 q rest) ('\\' : acc)
+        | c == 'n' -> parseQuoted (drop2 q rest) ('\n' : acc)
+        | otherwise -> refPerr q ("invalid escape sequence \\" ++ [c])
+        where
+          drop2 r s = (refStep (refStep r)){refInput = s}
+      "" -> refPerr q "unterminated string literal"
+      c : _ -> parseQuoted (refStep q) (c : acc)
+
+-- | One differential comparison, on the @Right@ tree and — when it fails — on
+-- the exact 'ParseError' line, column, and message.
+agreesWithReference :: String -> String -> Property
+agreesWithReference what txt =
+  counterexample (what ++ ": input " ++ show txt) $
+    parseSExprBS (TE.encodeUtf8 (T.pack txt)) === referenceParseSExpr txt
+
+-- | (a) Every committed @.sexp@ input, read as bytes and parsed both ways.
+-- This is the set the differential harness and the corpus freeze actually
+-- depend on, malformed envelopes and generated codec mutants included.
+prop_referenceParserCommittedInputs :: Property
+prop_referenceParserCommittedInputs = once (ioProperty check)
+  where
+    check = do
+      paths <- concat <$> mapM sexpFilesUnder ["fixtures", "corpus-units", "bundles", "examples"]
+      comparisons <- forM paths $ \path -> do
+        bytes <- B.readFile path
+        pure $ counterexample path $ case TE.decodeUtf8' bytes of
+          Left e -> counterexample ("not UTF-8: " ++ show e) (property False)
+          Right txt -> parseSExprBS bytes === referenceParseSExpr (T.unpack txt)
+      pure $
+        counterexample
+          "no committed .sexp inputs discovered"
+          (length paths > 100)
+          .&&. conjoin comparisons
+
+sexpFilesUnder :: FilePath -> IO [FilePath]
+sexpFilesUnder dir = do
+  entries <- listDirectory dir
+  fmap concat $ forM entries $ \entry -> do
+    let path = dir ++ "/" ++ entry
+    isDir <- doesDirectoryExist path
+    if isDir
+      then sexpFilesUnder path
+      else pure [path | ".sexp" `isSuffixOf` path]
+
+-- | (b) Canonical printer output for arbitrary trees.
+prop_referenceParserPrinted :: Property
+prop_referenceParserPrinted =
+  forAll genSExpr $ \s -> agreesWithReference "printed" (printSExpr s)
+
+-- | Corruptions of canonical wire text, so the /error/ paths are differentially
+-- covered too — not just the happy path. Injected characters include the
+-- delimiters, the escape character, and multi-byte code points, which is where
+-- a byte-counting column would drift.
+genMutatedWire :: Gen String
+genMutatedWire = do
+  text <- printSExpr <$> genSExpr
+  let n = length text
+  oneof
+    [ do
+        k <- choose (0, n)
+        pure (take k text) -- truncation
+    , do
+        k <- choose (0, n)
+        c <- elements "()\";\\ \n\t\rπé雪\0abc"
+        pure (take k text ++ [c] ++ drop k text) -- injection
+    , do
+        k <- choose (0, max 0 (n - 1))
+        pure (take k text ++ drop (k + 1) text) -- deletion
+    , pure (text ++ " " ++ text) -- a second top-level form
+    , pure ("; é\n" ++ text) -- a multi-byte comment before the form
+    , do
+        k <- choose (refMaxDepth - 2, refMaxDepth + 3)
+        pure (replicate k '(' ++ replicate k ')') -- the depth bound, both sides
+    ]
+
+-- | (c) The mutated-input differential.
+prop_referenceParserMutated :: Property
+prop_referenceParserMutated =
+  forAll genMutatedWire (agreesWithReference "mutated")
+
+-- ---------------------------------------------------------------------------
+-- Targeted error positions (#115 T5)
+-- ---------------------------------------------------------------------------
+
+-- | Exact @(line, column, message)@ pins. The generic differential above only
+-- covers well-formed committed inputs and randomly corrupted trees; these
+-- fix the cases the 'B.ByteString' rewrite could plausibly get wrong, above
+-- all the multi-byte ones — a byte-counting column is off by one per
+-- continuation byte, which no round-trip property would notice.
+prop_parserErrorPositions :: Property
+prop_parserErrorPositions =
+  conjoin
+    [ -- After a multi-byte character on the same line: byte columns would say 9.
+      located "(a \"\233\" \\)" 1 8 ("unexpected character " ++ show '\\')
+    , -- Inside a quoted atom that carries a multi-byte character.
+      located "(a \"\233\\q\")" 1 6 "invalid escape sequence \\q"
+    , -- End of input inside a comment carrying a multi-byte character; the
+      -- ';' itself is not counted, matching the reader this replaced.
+      located "; \233" 1 3 "unexpected end of input"
+    , -- A raw newline inside a quoted atom advances the line and resets the
+      -- column, exactly as the character-at-a-time reader did.
+      located "(\"a\nb\" \\)" 2 4 ("unexpected character " ++ show '\\')
+    , -- A non-ASCII code point in bare position renders as a code point, not
+      -- as its leading byte (D3).
+      located "\233" 1 1 ("unexpected character " ++ show '\233')
+    , located "(a b" 1 5 "unclosed list"
+    , located "(\"ab" 1 5 "unterminated string literal"
+    , located "(\"ab\\" 1 5 "unterminated escape sequence"
+    , located "(\"a\\q\")" 1 4 "invalid escape sequence \\q"
+    , located "(a) (b)" 1 5 "expected a single S-expression, found more input"
+    , -- The depth bound fires as a located codec error, not a stack overflow.
+      located
+        (replicate (refMaxDepth + 2) '(')
+        1
+        (refMaxDepth + 2)
+        ("maximum S-expression nesting depth exceeded (" ++ show refMaxDepth ++ ")")
+    ]
+  where
+    located txt line col msg =
+      counterexample (show txt) $
+        parseSExprBS (TE.encodeUtf8 (T.pack txt)) === Left (ParseError line col msg)
+
+-- | The over-deep input reaches the R14 codec channel as a located error
+-- (CLI exit 2), which is the contract @scripts\/differential.sh@ relies on to
+-- tell a codec fault apart from a checker rejection.
+prop_depthBoundIsCodecError :: Property
+prop_depthBoundIsCodecError =
+  once $
+    decodeCheckInputFileBS (TE.encodeUtf8 (T.pack (replicate (refMaxDepth + 2) '(')))
+      === Left
+        ( WireError
+            ("line 1, column " ++ show (refMaxDepth + 2))
+            ("maximum S-expression nesting depth exceeded (" ++ show refMaxDepth ++ ")")
+        )
+
+-- | Invalid UTF-8 now reaches the parser (the @.sexp@ reader is
+-- 'B.readFile'-based) and becomes a located codec error rather than an
+-- IO-level read failure. Both drivers already exited 2 with empty stdout on
+-- such input; this pins the Haskell side's new, better-located route to the
+-- same outcome class, and pins that it fails /closed/ — no U+FFFD
+-- substitution, which would accept malformed input with mangled content.
+prop_invalidUtf8Rejected :: Property
+prop_invalidUtf8Rejected =
+  conjoin
+    [ counterexample "in a quoted atom" $
+        parseSExprBS (B.pack [0x28, 0x22, 0xff, 0x22, 0x29])
+          === Left (ParseError 1 4 "invalid UTF-8 in string literal")
+    , counterexample "in bare position" $
+        parseSExprBS (B.pack [0xff])
+          === Left (ParseError 1 1 "invalid UTF-8 byte sequence")
+    , -- Located at the offending byte (column 3), not at the backslash that
+      -- precedes it: the escape marker itself is well formed.
+      counterexample "after an escape" $
+        parseSExprBS (B.pack [0x22, 0x5c, 0xff])
+          === Left (ParseError 1 3 "invalid UTF-8 in string literal")
+    ]
 
 -- ---------------------------------------------------------------------------
 -- Unit golden vectors (hand-verified)
@@ -1127,6 +1379,12 @@ wireSpecProps =
   , ("wire text malformed rejected", quickCheckResult prop_textMalformedRejected)
   , ("wire S-expr text round-trip", quickCheckResult prop_sexprTextRoundTrip)
   , ("wire print∘parse∘print idempotent", quickCheckResult prop_printParsePrintIdempotent)
+  , ("wire ByteString parser matches the reference reader on committed inputs", quickCheckResult prop_referenceParserCommittedInputs)
+  , ("wire ByteString parser matches the reference reader on printed trees", quickCheckResult prop_referenceParserPrinted)
+  , ("wire ByteString parser matches the reference reader on corrupted input", quickCheckResult prop_referenceParserMutated)
+  , ("wire parse error positions", quickCheckResult prop_parserErrorPositions)
+  , ("wire depth bound is a located codec error", quickCheckResult prop_depthBoundIsCodecError)
+  , ("wire invalid UTF-8 rejected closed", quickCheckResult prop_invalidUtf8Rejected)
   , ("wire unit golden vector", quickCheckResult prop_unitGoldenVector)
   , ("wire unit golden layout variants", quickCheckResult prop_unitGoldenLayoutVariants)
   , ("wire unit round-trip", quickCheckResult prop_unitRoundTrip)

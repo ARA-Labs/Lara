@@ -115,6 +115,7 @@ module Lara.Wire
   ( -- * Textual S-expression codec
     ParseError (..)
   , parseSExpr
+  , parseSExprBS
   , printSExpr
     -- * The closed tag vocabulary
   , Tag (..)
@@ -131,6 +132,7 @@ module Lara.Wire
   , decodeCheckInput
   , encodeCheckInput
   , decodeCheckInputFile
+  , decodeCheckInputFileBS
     -- * Verdict codec
   , PublicStatus (..)
   , conditionalStatus
@@ -141,9 +143,16 @@ module Lara.Wire
   , encodeVerdict
   ) where
 
+import Data.Bits ((.&.))
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as BC
 import Data.Char (ord)
 import Data.List (intercalate)
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
+import Data.Word (Word8)
 
 import Lara.AST hiding (Reject)
 import Lara.Replay
@@ -180,9 +189,57 @@ isBareChar :: Char -> Bool
 isBareChar c =
   ord c >= 0x21 && ord c <= 0x7e && c `notElem` "();\"\\"
 
+-- | Bytes allowed in a bare (unquoted) atom. This mirrors 'isBareChar'
+-- exactly: the bare set is a subset of printable ASCII, so a byte is bare iff
+-- the 'Char' it denotes is, and every byte @>= 0x80@ is non-bare just as every
+-- non-ASCII 'Char' is.
+isBareByte :: Word8 -> Bool
+isBareByte b =
+  b >= 0x21
+    && b <= 0x7e
+    && b /= 0x28 -- '('
+    && b /= 0x29 -- ')'
+    && b /= 0x3b -- ';'
+    && b /= 0x22 -- '"'
+    && b /= 0x5c -- '\\'
+
+-- | Bytes the reader skips between forms.
+isSpaceByte :: Word8 -> Bool
+isSpaceByte b = b == 0x20 || b == 0x09 || b == 0x0a || b == 0x0d
+
+-- | Number of code points in a UTF-8 span: bytes @b@ with
+-- @b .&. 0xC0 /= 0x80@ start a code point, continuation bytes do not.
+cpLen :: ByteString -> Int
+cpLen = B.foldl' (\n b -> if b .&. 0xC0 /= 0x80 then n + 1 else n) 0
+
+-- | Decode the single UTF-8 code point at the cursor, for the error messages
+-- that render the offending character ('show' of a 'Char'). Off the hot path,
+-- so it may be as slow as it likes. 'Nothing' means the bytes at the cursor
+-- are not valid UTF-8.
+peekCodePoint :: ByteString -> Maybe Char
+peekCodePoint bs = case B.uncons bs of
+  Nothing -> Nothing
+  Just (b0, _) ->
+    let width
+          | b0 >= 0xf0 = 4
+          | b0 >= 0xe0 = 3
+          | b0 >= 0xc0 = 2
+          | otherwise = 1
+     in case TE.decodeUtf8' (B.take width bs) of
+          Right t | [c] <- T.unpack t -> Just c
+          _ -> Nothing
+
 -- | Parser state: remaining input and the 1-based cursor.
+--
+-- __Column invariant.__ @pCol@ counts /code points/, not bytes, because the
+-- Lean reference driver (@lean\/Lara\/Driver.lean@) parses a @List Char@ and
+-- both drivers must locate the same codec error. The input is UTF-8; bare
+-- atoms are ASCII by construction ('isBareByte'), so there byte length and
+-- code-point length coincide and 'B.length' is used directly. Only quoted-atom
+-- payloads and @;@ comments can carry multi-byte sequences, and those spans go
+-- through 'bump'.
 data P = P
-  { pInput :: String
+  { pInput :: !ByteString
   , pLine :: !Int
   , pCol :: !Int
   }
@@ -190,24 +247,35 @@ data P = P
 perr :: P -> String -> Either ParseError a
 perr p msg = Left (ParseError (pLine p) (pCol p) msg)
 
-step :: P -> P
-step p = case pInput p of
-  '\n' : rest -> p {pInput = rest, pLine = pLine p + 1, pCol = 1}
-  _ : rest -> p {pInput = rest, pCol = pCol p + 1}
-  "" -> p
+-- | Advance the cursor over a consumed span, counting lines and code points.
+-- Does not touch 'pInput' — the caller sets the remaining slice.
+bump :: ByteString -> P -> P
+bump span_ p = case B.elemIndexEnd 0x0a span_ of
+  Nothing -> p {pCol = pCol p + cpLen span_}
+  Just i ->
+    p
+      { pLine = pLine p + B.count 0x0a span_
+      , pCol = 1 + cpLen (B.drop (i + 1) span_)
+      }
+
+-- | Advance the cursor over one ASCII byte that is not a newline.
+step1 :: ByteString -> P -> P
+step1 rest p = p {pInput = rest, pCol = pCol p + 1}
 
 -- | Skip whitespace and @;@ comments.
 skipSpace :: P -> P
-skipSpace p = case pInput p of
-  c : rest
-    | c `elem` " \t\n\r" -> skipSpace (step p)
-    | c == ';' -> skipSpace (skipComment p {pInput = rest})
-  _ -> p
+skipSpace p =
+  let (ws, rest) = B.span isSpaceByte (pInput p)
+      p' = if B.null ws then p else (bump ws p) {pInput = rest}
+   in case B.uncons (pInput p') of
+        -- The @;@ itself is dropped without a column bump, matching the reader
+        -- this replaced (and the Lean driver) character for character.
+        Just (0x3b, afterSemi) -> skipSpace (skipComment p' {pInput = afterSemi})
+        _ -> p'
   where
-    skipComment q = case pInput q of
-      '\n' : _ -> q
-      "" -> q
-      _ -> skipComment (step q)
+    skipComment q =
+      let (cmt, rest) = B.break (== 0x0a) (pInput q)
+       in (bump cmt q) {pInput = rest}
 
 -- | Maximum S-expression nesting depth. Bounds parser recursion so a
 -- pathologically nested input (@(((… )))@) is a located R14 codec error (CLI
@@ -217,51 +285,97 @@ skipSpace p = case pInput p of
 maxDepth :: Int
 maxDepth = 10000
 
--- | Parse exactly one top-level form; a second form is an error.
-parseSExpr :: String -> Either ParseError SExpr
-parseSExpr input = do
+-- | Parse exactly one top-level form from UTF-8 bytes; a second form is an
+-- error. This is the primitive; 'parseSExpr' is the 'String' wrapper.
+parseSExprBS :: ByteString -> Either ParseError SExpr
+parseSExprBS input = do
   let start = skipSpace (P input 1 1)
   (e, rest) <- parseForm 0 start
   let rest' = skipSpace rest
-  if null (pInput rest')
+  if B.null (pInput rest')
     then Right e
     else perr rest' "expected a single S-expression, found more input"
+
+-- | Parse exactly one top-level form; a second form is an error.
+--
+-- A thin wrapper over 'parseSExprBS'. The round trip through UTF-8 is exact,
+-- and the code-point column discipline of 'P' makes the two agree on error
+-- positions as well as on results.
+parseSExpr :: String -> Either ParseError SExpr
+parseSExpr = parseSExprBS . TE.encodeUtf8 . T.pack
 
 parseForm :: Int -> P -> Either ParseError (SExpr, P)
 parseForm depth p
   | depth > maxDepth =
       perr p ("maximum S-expression nesting depth exceeded (" ++ show maxDepth ++ ")")
-  | otherwise = case pInput p of
-      '(' : _ -> parseList (step p) []
-      '"' : _ -> parseQuoted (step p) []
-      c : _
-        | isBareChar c ->
-            let (tok, rest) = span isBareChar (pInput p)
-                p' = p {pInput = rest, pCol = pCol p + length tok}
-             in Right (SAtom tok, p')
-        | otherwise -> perr p ("unexpected character " ++ show c)
-      "" -> perr p "unexpected end of input"
+  | otherwise = case B.uncons (pInput p) of
+      Just (0x28, rest) -> parseList (step1 rest p) []
+      Just (0x22, rest) -> parseQuoted (step1 rest p) []
+      Just (b, _)
+        | isBareByte b ->
+            let (tok, rest) = B.span isBareByte (pInput p)
+                -- Bare atoms are ASCII, so the byte length is the column delta
+                -- and 'BC.unpack' is an exact decode.
+                p' = p {pInput = rest, pCol = pCol p + B.length tok}
+             in Right (SAtom (BC.unpack tok), p')
+        | otherwise -> case peekCodePoint (pInput p) of
+            Just c -> perr p ("unexpected character " ++ show c)
+            Nothing -> perr p "invalid UTF-8 byte sequence"
+      Nothing -> perr p "unexpected end of input"
   where
     parseList q acc =
       let q' = skipSpace q
-       in case pInput q' of
-            ')' : _ -> Right (SList (reverse acc), step q')
-            "" -> perr q' "unclosed list"
+       in case B.uncons (pInput q') of
+            Just (0x29, rest) -> Right (SList (reverse acc), step1 rest q')
+            Nothing -> perr q' "unclosed list"
             _ -> do
               (e, q'') <- parseForm (depth + 1) q'
               parseList q'' (e : acc)
-    parseQuoted q acc = case pInput q of
-      '"' : _ -> Right (SAtom (reverse acc), step q)
-      '\\' : "" -> perr q "unterminated escape sequence"
-      '\\' : c : rest
-        | c == '"' -> parseQuoted (drop2 q rest) ('"' : acc)
-        | c == '\\' -> parseQuoted (drop2 q rest) ('\\' : acc)
-        | c == 'n' -> parseQuoted (drop2 q rest) ('\n' : acc)
-        | otherwise -> perr q ("invalid escape sequence \\" ++ [c])
+    -- Quoted payloads accumulate raw byte slices and are UTF-8 decoded once at
+    -- the closing quote. Escape scanning on bytes is safe because @"@, @\\@ and
+    -- @n@ are ASCII and UTF-8 is self-synchronizing, so none of them can occur
+    -- inside a multi-byte sequence.
+    parseQuoted q acc =
+      let (chunk, rest) = B.break isQuoteStop (pInput q)
+          q' = (bump chunk q) {pInput = rest}
+       in case B.uncons rest of
+            Nothing -> perr q' "unterminated string literal"
+            Just (0x22, rest') -> case decodeQuotedPayload (chunk : acc) of
+              Just s -> Right (SAtom s, step1 rest' q')
+              Nothing -> perr q' "invalid UTF-8 in string literal"
+            Just (_, rest') -> escape (chunk : acc) q' rest'
+    -- @q@ is positioned at the backslash; @rest@ is what follows it.
+    escape acc q rest = case B.uncons rest of
+      Nothing -> perr q "unterminated escape sequence"
+      Just (c, rest')
+        | c == 0x22 -> parseQuoted (adv2 rest') (B.singleton 0x22 : acc)
+        | c == 0x5c -> parseQuoted (adv2 rest') (B.singleton 0x5c : acc)
+        | c == 0x6e -> parseQuoted (adv2 rest') (B.singleton 0x0a : acc)
+        | otherwise -> case peekCodePoint rest of
+            Just ch -> perr q ("invalid escape sequence \\" ++ [ch])
+            -- The escape marker is well formed and the bad byte is exactly the
+            -- one after it, so locate the codec fault there rather than at the
+            -- backslash. (A payload that only fails to decode at the closing
+            -- quote is still reported there: 'decodeQuotedPayload' decodes the
+            -- accumulated chunks in one batch and has no source offset to
+            -- report.)
+            Nothing -> perr q {pCol = pCol q + 1} "invalid UTF-8 in string literal"
         where
-          drop2 r s = (step (step r)){pInput = s}
-      "" -> perr q "unterminated string literal"
-      c : _ -> parseQuoted (step q) (c : acc)
+          adv2 s = q {pInput = s, pCol = pCol q + 2}
+    isQuoteStop b = b == 0x22 || b == 0x5c
+
+-- | Decode an accumulated quoted payload (chunks in reverse order).
+-- 'Nothing' is invalid UTF-8. The common case is one all-ASCII slice.
+decodeQuotedPayload :: [ByteString] -> Maybe String
+decodeQuotedPayload chunks
+  | B.all (< 0x80) bs = Just (BC.unpack bs)
+  | otherwise = case TE.decodeUtf8' bs of
+      Right t -> Just (T.unpack t)
+      Left _ -> Nothing
+  where
+    bs = case chunks of
+      [one] -> one
+      _ -> B.concat (reverse chunks)
 
 -- | Canonical printing of one S-expression (single line; see module docs).
 printSExpr :: SExpr -> String
@@ -1153,12 +1267,19 @@ decodeCheckInputM value = do
     Left err@(DuplicateUnitTheory _) -> replayResult "unit theories" (Left err)
     result -> replayResult "check-input" result
 
-decodeCheckInputFile :: String -> Either WireError CheckInput
-decodeCheckInputFile = runDecode . decodeCheckInputFileM
+-- | Decode a whole check-input file from its UTF-8 bytes. This is the
+-- primitive; 'decodeCheckInputFile' is the 'String' wrapper.
+decodeCheckInputFileBS :: ByteString -> Either WireError CheckInput
+decodeCheckInputFileBS = runDecode . decodeCheckInputFileM
 
-decodeCheckInputFileM :: String -> Decode CheckInput
+-- | Decode a whole check-input file. A thin wrapper over
+-- 'decodeCheckInputFileBS'.
+decodeCheckInputFile :: String -> Either WireError CheckInput
+decodeCheckInputFile = decodeCheckInputFileBS . TE.encodeUtf8 . T.pack
+
+decodeCheckInputFileM :: ByteString -> Decode CheckInput
 decodeCheckInputFileM input =
-  case parseSExpr input of
+  case parseSExprBS input of
     Left (ParseError line column message) ->
       werr
         ("line " ++ show line ++ ", column " ++ show column)

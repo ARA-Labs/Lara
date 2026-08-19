@@ -1,0 +1,129 @@
+session:
+  id: "2026-08-18_002"
+  date: "2026-08-18"
+  started: "2026-08-18T23:40"
+  last_turn: "2026-08-19T01:05"
+  turn_count: 2
+  summary: "Implemented issue #115's ByteString wire parser with code-point columns, probed the invalid-UTF-8 boundary on main first, measured a 45.5% same-session median parse reduction with every correctness gate green, withheld the regenerated table because the machine was loaded, and opened PR #118; a follow-up turn measured a same-code noise floor and confirmed the untouched check + render movement is ambient drift, not codegen."
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N190"
+    routing: direct
+    provenance: user
+    summary: "The researcher invoked the review-revised #115 plan end to end: probe, implement, gate, commit, record in ARA, and open the PR."
+  - turn: 1
+    type: experiment
+    id: "N191"
+    routing: direct
+    provenance: ai-executed
+    summary: "The invalid-UTF-8 probe on main showed both drivers already exit 2 with empty stdout and neither substitutes U+FFFD, freezing D4 as designed."
+  - turn: 1
+    type: experiment
+    id: "N192"
+    routing: direct
+    provenance: ai-executed
+    summary: "The ByteString reader passed every correctness gate and cut same-session median parse from 813.0 to 442.8 microseconds; parse to check+render fell 2.71x to 1.43x."
+  - turn: 1
+    type: decision
+    id: "N193"
+    routing: direct
+    provenance: ai-executed
+    summary: "Withheld the regenerated tables/performance.tex because ambient load would have moved the untouched check + render row by 52%."
+  - turn: 1
+    type: experiment
+    id: "N194"
+    routing: direct
+    provenance: ai-executed
+    summary: "PR #118 hosted CI run 32226016340 passed both the Haskell and Lean jobs at head commit 37781e9."
+  - turn: 2
+    type: experiment
+    id: "N195"
+    routing: direct
+    provenance: user
+    summary: "The researcher challenged the noise label on the untouched check + render row; a fourth run established a 2.5-2.6% same-code noise floor and confirmed the movement is ambient drift, not codegen."
+  - turn: 1
+    type: claim
+    id: "C33"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Cursor representation was what remained of the decoder's cost, and a byte-sliced cursor carrying code-point semantics preserves the observable contract."
+
+ai_actions:
+  - turn: 1
+    action: "Ran the T0 invalid-UTF-8 probe against both drivers on main before writing any code, and recorded the outcome in the plan's execution record"
+    provenance: ai-executed
+    files_changed:
+      - plans/2026-08-18-115-bytestring-wire-parser.md
+  - turn: 1
+    action: "Rewrote the wire reader over strict ByteString with code-point columns, added parseSExprBS and decodeCheckInputFileBS as primitives with the String versions retained as wrappers, moved only app/Main.hs and scripts/bench.hs to B.readFile, and copied the previous String reader verbatim into WireSpec as the differential oracle"
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Wire.hs
+      - app/Main.hs
+      - scripts/bench.hs
+      - test/WireSpec.hs
+      - lara.cabal
+  - turn: 1
+    action: "Ran the full correctness matrix before any timing (test suite, two-driver differential, replay, presentation parity, both frozen measurement hashes), then a settled same-session baseline/after benchmark pair, and committed a2904d7"
+    provenance: ai-executed
+  - turn: 1
+    action: "Pushed perf/115-bytestring-wire-parser and opened ARA-Labs/lara PR #118, stating the withheld table as an explicit deviation from the plan's T8"
+    provenance: ai-executed
+    files_changed:
+      - ara/evidence/results/bytestring_wire_parser.md
+      - ara/logic/claims.md
+      - ara/staging/observations.yaml
+      - ara/trace/exploration_tree.yaml
+      - ara/trace/sessions/2026-08-18_002.yaml
+      - ara/trace/sessions/session_index.yaml
+      - ara/trace/pm_reasoning_log.yaml
+      - ara/evidence/README.md
+
+claims_touched:
+  - id: C33
+    action: created
+    turn: 1
+
+logic_revisions:
+  - turn: 2
+    entry: C33
+    field: Conditions
+    before: "The benchmark machine was under a load average of 3.0 to 4.4, so only the same-session baseline/after pair is comparable; the previously published table is not a valid comparator. The claim does not estimate other machines, other grammars, or the untaken byte-atom variant."
+    after: "The benchmark machine was under a load average of 3.0 to 4.4, so only the same-session baseline/after pair is comparable; the previously published table is not a valid comparator. The decode-latency reduction is separated from run-to-run drift by roughly a factor of eighteen: repeats of an identical binary move the pre-decoded check-and-render row by 2.5% to 2.6%, while the parse row moves by 46% with no unit slower. The concurrent movement on the pre-decoded row is ambient drift, not an effect of the change - it tracks a sub-path containing none of the edited module's code, and it grows with wall-clock time instead of staying fixed. The claim does not estimate other machines, other grammars, or the untaken byte-atom variant."
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "The researcher's challenge prompted measuring the noise floor rather than asserting it; the effect size separation now lives in Conditions instead of being implicit."
+  - turn: 2
+    entry: C33
+    field: Sources
+    before: "+3.2% <- bytestring_wire_parser.md «| Check + render, pre-decoded | 300.0 us | 309.6 us | +3.2% |» [result]"
+    after: "+2.96% <- bytestring_wire_parser.md «| `String` -> `ByteString` | +2.96% | +3.07% | -46.13% |» [result]; 2.51%..2.63% <- «| Same `String` binary, run 1 -> run 2 | -2.63% | -2.66% | -1.73% |» [result]; -46.13% (range -52.10%..-39.81%, 0/60 slower) <- «and **0 of 60 units slower**, and it still measures -44.24% against the slowest» [result]"
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Re-grounded on per-unit medians from the four-run comparison rather than the single table row."
+
+key_context:
+  - turn: 1
+    excerpt: "The column-semantics question was forced, not chosen: lean/Lara/Driver.lean holds PState.input as a List Char, and fixtures/corpus/strict-cert-unicode-theory.sexp carries an e-acute inside quoted atoms, so byte columns would have silently relocated any error after a multi-byte character on the same line."
+  - turn: 1
+    excerpt: "Comparing parseSExprBS against parseSExpr would have been tautological once parseSExpr became a wrapper over it, so the previous String reader was copied verbatim into WireSpec as referenceParseSExpr and asserted equal on tree, line, column, and message."
+  - turn: 1
+    excerpt: "Same-session settled pair: parse 813.0 to 442.8 microseconds (-45.5%), end-to-end 1115.5 to 747.2 (-33.0%), check + render 300.0 to 309.6 (+3.2%, untouched path, retained as noise)."
+  - turn: 1
+    excerpt: "Load average 3.0 to 4.4 all session; every row ran about 1.4 times the committed table, and two independent baselines agreed within 3%, so the inflation is ambient load rather than a rebuild artifact."
+  - turn: 2
+    excerpt: "The user asked whether the check + render movement is really noise given that path was not touched. The label was correct but had been asserted rather than measured, and the challenge was sharper than the original framing: printSExpr and encodeVerdict both live in the rewritten module, so an untouched source path does not by itself rule out a codegen shift."
+  - turn: 2
+    excerpt: "Same-code repeats move the kernel row 2.51-2.63%, the same magnitude as the +2.96% attributed to the change; the Lara.Wire-free check row tracks it to within tenths of a percent; and the movement grows with wall-clock time rather than staying fixed. Parse: -46.13% median, 0/60 units slower."
+  - turn: 1
+    excerpt: "Both frozen hashes matched unchanged, by construction rather than coincidence: retaining the String wrappers kept Lara.Measure's detTotalBytes counting code points, which is report.tsv column 12 inside the hashed projection."
+
+open_threads:
+  - "Regenerate tables/performance.tex with one make bench on an idle machine; the committed table is now stale in the conservative direction and the PR states the deviation."
+  - "Issue #116 closes as option A: rewrite the src/evaluation.tex decoding-dominates paragraph around measured numbers rather than qualifying it. Gated on the idle-machine table, not on PR #118."
+  - "PR #118 is green on hosted CI (run 32226016340) and awaits reviewer response; the noise-floor analysis was posted as a PR comment."
+
+ai_suggestions_pending:
+  - "The prototype's byte-backed SExpr atom variant (a further ~85 microseconds on the isolated measurement) remains untaken and out of scope; revisit only if #116 still does not close after the table is regenerated."

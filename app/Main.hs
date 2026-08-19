@@ -34,6 +34,8 @@
 module Main (main) where
 
 import Control.Exception (IOException, evaluate, try)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as B
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitWith)
 import System.FilePath (takeDirectory, takeExtension, (</>), (<.>))
@@ -61,7 +63,7 @@ import Lara.Wire
   ( Outcome (..)
   , Verdict (..)
   , WireError (..)
-  , decodeCheckInputFile
+  , decodeCheckInputFileBS
   , encodeVerdict
   , printSExpr
   )
@@ -90,13 +92,13 @@ check file
 
 checkSexp :: FilePath -> IO ()
 checkSexp file = do
-  contentsOrError <- readFileEither file
+  contentsOrError <- readFileBytesEither file
   case contentsOrError of
     Left err -> do
       hPutStrLn stderr ("lara: cannot read " ++ file ++ ": " ++ show err)
       exitWith (ExitFailure 2)
     Right contents ->
-      case decodeCheckInputFile contents of
+      case decodeCheckInputFileBS contents of
         Left (WireError ctx msg) -> do
           hPutStrLn stderr ("lara: codec error at " ++ ctx ++ ": " ++ msg)
           exitWith (ExitFailure 2)
@@ -195,6 +197,16 @@ readFileEither :: FilePath -> IO (Either IOException String)
 readFileEither file = try $ do
   contents <- readFile file
   _ <- evaluate (length contents)
+  pure contents
+
+-- | Read a file as raw bytes, for the @.sexp@ codec path. Unlike
+-- 'readFileEither' this does no locale decoding, so invalid UTF-8 reaches the
+-- wire parser and becomes a located R14 codec error (exit @2@) instead of an
+-- IO-level read failure — the same outcome class, through the codec channel.
+readFileBytesEither :: FilePath -> IO (Either IOException ByteString)
+readFileBytesEither file = try $ do
+  contents <- B.readFile file
+  _ <- evaluate (B.length contents)
   pure contents
 
 -- | Emit a located message on @stderr@ and exit @2@ (the decode\/boundary code).

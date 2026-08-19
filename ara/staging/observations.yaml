@@ -1560,3 +1560,29 @@ observations:
   promoted_to: "logic/claims.md:C32"
   crystallized_via: artifact-commitment + empirical-resolution
   stale: false
+
+- id: O75
+  timestamp: "2026-08-19T00:05"
+  provenance: ai-suggested
+  content: >
+    Replacing the wire reader's lazy String cursor with strict ByteString
+    slicing reduced the 60-unit median parse row by 45.5% and end-to-end by
+    33.0%, without a Haskell-Lean verdict, exit-code, replay, or frozen-byte
+    divergence. The observable contract survived because the cursor was made to
+    count code points rather than bytes, matching the Lean driver's List Char
+    semantics, and because both String entry points were retained as wrappers
+    so the frozen measurement projection kept its code-point byte count by
+    construction.
+  context: >
+    Issue #115 implementation and same-session evaluation. The machine carried
+    a load average of 3.0 to 4.4 throughout, so every row ran about 1.4 times
+    the committed table and only the same-session pair is comparable. The
+    verbatim previous reader in test/WireSpec.hs asserted equal trees and exact
+    error positions over 581 committed inputs, printed generated trees, and
+    corrupted wire text.
+  potential_type: claim
+  bound_to: [N191, N192, N193]
+  promoted: true
+  promoted_to: "logic/claims.md:C33"
+  crystallized_via: artifact-commitment + empirical-resolution
+  stale: false

@@ -4831,3 +4831,187 @@ tree:
     - ara/evidence/results/parsetag_map_lookup.md
   also_depends_on: [N186, N187, N188]
   status: resolved
+
+- id: N190
+  type: decision
+  title: "Execute the reviewed #115 plan: ByteString wire parser, then evaluate and deliver"
+  provenance: user
+  timestamp: "2026-08-18T23:40"
+  description: >
+    Issue #115 asks whether the wire reader should move from String to strict
+    ByteString, and requires the column-semantics question (bytes versus code
+    points) to be answered explicitly rather than discovered at review. The
+    plan had already been written and review-revised at 1b2d245.
+  choice: >
+    Run the reviewed plan end to end: probe invalid UTF-8 on main before
+    writing code, rewrite the reader over ByteString with code-point columns,
+    keep both String signatures as wrappers so only the CLI and the benchmark
+    harness move to B.readFile, gate the performance run behind the full
+    correctness matrix, then commit, record in ARA, and open the PR.
+  alternatives:
+    - "Change decodeCheckInputFile's signature to ByteString across all ~30 call sites in 15 files."
+    - "Move SExpr to ByteString atoms for the prototype's 174 microsecond ceiling."
+    - "Write a Rust frontend, which would measure nothing and put an FFI boundary inside the trusted base."
+  evidence:
+    - plans/2026-08-18-115-bytestring-wire-parser.md
+    - "issue #115"
+    - "issue #116"
+  also_depends_on: [N186, N187, N189]
+  status: resolved
+
+- id: N191
+  type: experiment
+  title: "Invalid-UTF-8 probe on main freezes the D4 boundary decision"
+  provenance: ai-executed
+  timestamp: "2026-08-18T23:45"
+  description: >
+    Moving the .sexp reader to B.readFile lets invalid bytes reach the parser
+    instead of raising an IOException at read time. The plan required probing
+    both drivers on main first, because Lean's IO.FS.readFile has its own
+    answer for invalid UTF-8 and the two drivers must agree on outcome class.
+    The probe fed fixtures/corpus/strict-cert-unicode-theory.sexp with its
+    e-acute replaced by a lone 0xFF byte to both drivers.
+  result: >
+    Both drivers exited 2 with empty stdout. The Haskell CLI reported
+    "hGetContents: invalid argument (cannot decode byte sequence starting from
+    255)" and the Lean driver reported "cannot read". Neither substituted
+    U+FFFD or accepted. D4 was therefore frozen as designed: after the switch
+    the Haskell side still exits 2 with empty stdout, but the fault arrives as
+    a located R14 codec error through the codec channel rather than as an
+    IO-level read failure. No byte that scripts/differential.sh compares moves.
+  evidence:
+    - "plans/2026-08-18-115-bytestring-wire-parser.md section 5b"
+    - ara/evidence/results/bytestring_wire_parser.md
+  also_depends_on: [N190]
+  status: resolved
+
+- id: N192
+  type: experiment
+  title: "ByteString reader cut median parse time 45.5 percent with no observable behavior change"
+  provenance: ai-executed
+  timestamp: "2026-08-19T00:00"
+  description: >
+    Rewrote the reader over strict ByteString with code-point columns, added
+    parseSExprBS and decodeCheckInputFileBS as primitives with the String
+    versions retained as wrappers, moved only app/Main.hs and scripts/bench.hs
+    to B.readFile, then ran the full correctness matrix before any timing. The
+    old String reader was copied verbatim into test/WireSpec.hs as
+    referenceParseSExpr, because comparing the new parser against parseSExpr
+    would be tautological once parseSExpr became a wrapper over it.
+  result: >
+    Commit a2904d7 passed make test, including the reference-parser
+    differential over 581 committed .sexp inputs, over printed generated trees,
+    and over QuickCheck-corrupted wire text, asserting equal trees and exact
+    error line, column and message. The two-driver differential passed 581
+    positive and 56 negative cases with zero failures, with the code-point
+    witness fixture byte-identical. Replay matched frozen verdict bytes;
+    presentation parity passed 73 rows; both frozen measurement hashes matched
+    unchanged. Against the settled same-session String baseline, median parse
+    fell from 813.0 to 442.8 microseconds (-45.5%), end-to-end from 1115.5 to
+    747.2 microseconds (-33.0%), and the 564-record sweep from 545.6 to 278.4
+    milliseconds (-49.0%). Check + render moved from 300.0 to 309.6
+    microseconds (+3.2%) on an untouched path, retained as observed noise. The
+    parse to check + render ratio fell from 2.71x to 1.43x.
+  evidence:
+    - C33
+    - "commit a2904d7"
+    - ara/evidence/results/bytestring_wire_parser.md
+    - src/Lara/Wire.hs
+    - test/WireSpec.hs
+    - scripts/differential.sh
+    - scripts/replay.sh
+  also_depends_on: [N190, N191]
+  status: resolved
+
+- id: N193
+  type: decision
+  title: "Withhold the regenerated performance table because the machine was not idle"
+  provenance: ai-executed
+  timestamp: "2026-08-19T00:10"
+  description: >
+    Load average sat between 3.0 and 4.4 for the whole session and every
+    benchmark row, including rows this change cannot touch, ran approximately
+    1.4 times the committed 0aa97ef table. Two independent baselines agreed
+    within 3%, so the inflation is ambient load rather than a rebuild artifact.
+    Regenerating tables/performance.tex under that load would move the
+    untouched check + render row from 203.5 to 309.6 microseconds, a 52%
+    apparent regression caused entirely by machine state.
+  choice: >
+    Commit the code and the same-session before/after pair, and deliberately do
+    not commit the regenerated table. The plan's own guard says a check +
+    render movement beyond a few percent means the run is noisy. The table
+    needs one make bench on an idle machine; the code change does not depend on
+    it. PR #118 states the deviation explicitly for the reviewer.
+  alternatives:
+    - "Commit the regenerated table anyway and let an untouched evaluation row regress 52% for reasons unrelated to the change."
+    - "Block the whole change until an idle machine is available."
+  evidence:
+    - ara/evidence/results/bytestring_wire_parser.md
+    - "PR #118"
+    - docs/m5-freeze-checklist.md
+  also_depends_on: [N192]
+  status: resolved
+
+- id: N194
+  type: experiment
+  title: "PR #118 hosted CI confirms integration"
+  provenance: ai-executed
+  timestamp: "2026-08-19T00:35"
+  description: >
+    Pushed perf/115-bytestring-wire-parser, opened ARA-Labs/lara PR #118, and
+    waited for the complete hosted workflow rather than treating the local gate
+    matrix as the final integration result. The hosted run is the independent
+    check that the ByteString reader behaves identically on a clean machine
+    with no local build state.
+  result: >
+    GitHub Actions run 32226016340 passed both jobs at head commit 37781e9.
+    The Haskell job rebuilt, tested, checked presentation parity, replay and
+    tamper gates, policy-copy authenticity, the full Haskell-Lean differential,
+    and the semantic admission differential. The Lean job built and passed the
+    no-sorry standard-axiom audit.
+  evidence:
+    - "PR #118"
+    - "GitHub Actions run 32226016340"
+    - "commit 37781e9"
+  supports:
+    - C33
+  also_depends_on: [N192, N193]
+  status: resolved
+
+- id: N195
+  type: experiment
+  title: "Four-run noise floor separates the parse win from concurrent drift on the untouched kernel row"
+  provenance: user
+  timestamp: "2026-08-19T01:05"
+  description: >
+    The researcher challenged the "noise" label on the +3.2% movement of the
+    pre-decoded check-and-render row, on the ground that the change does not
+    touch that path. The challenge is sharper than the original label allowed:
+    printSExpr and encodeVerdict both live in Lara.Wire, the rewritten module,
+    so an untouched source path does not by itself rule out a codegen shift
+    from recompiling a larger module. A fourth make bench run was added to
+    measure a same-code noise floor instead of asserting one, giving two runs
+    of each binary over the same 60 corpus units.
+  result: >
+    Repeats of an identical binary move the kernel row by 2.51% to 2.63%, the
+    same magnitude as the +2.96% attributed to the change. The check row, which
+    times checkUnitWith and a derived Show and runs no Lara.Wire code at all,
+    tracks the kernel row to within a few tenths of a percent in every
+    comparison (-2.66 vs -2.63, +1.48 vs +2.51, +3.07 vs +2.96, +5.69 vs
+    +5.40); a codegen shift would move the kernel row and leave check flat. The
+    kernel median also climbs monotonically with wall-clock time across the
+    session (299.7, 309.4, 314.1 microseconds) regardless of binary, and the
+    attributed effect inflates to +5.40% against the later repeat, which is
+    self-refuting as a code attribution. The parse reduction is separated from
+    that drift by roughly a factor of eighteen: per-unit median -46.13%, range
+    -52.10% to -39.81%, zero of sixty units slower, and still -44.24% against
+    the slowest of the four runs. No causal performance claim is made for the
+    check-and-render path.
+  evidence:
+    - C33
+    - ara/evidence/results/bytestring_wire_parser.md
+    - "PR #118"
+  supports:
+    - C33
+  also_depends_on: [N192, N193]
+  status: resolved

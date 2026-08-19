@@ -395,3 +395,10 @@ sessions:
   events_count: 1
   claims_touched: [C32]
   open_threads: 1
+- id: 2026-08-18_002
+  date: '2026-08-18'
+  summary: 'Implemented issue #115 ByteString wire parser with code-point columns, probed the invalid-UTF-8 boundary on main first, measured a 45.5% same-session median parse reduction with every gate green, withheld the regenerated table under machine load, and opened PR #118 (hosted CI green).'
+  turn_count: 2
+  events_count: 7
+  claims_touched: [C33]
+  open_threads: 3

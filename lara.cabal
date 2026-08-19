@@ -93,6 +93,7 @@ executable lara
     hs-source-dirs:   app
     main-is:          Main.hs
     build-depends:    base >=4 && <5
+                    , bytestring
                     , filepath
                     , lara
     default-language: GHC2021

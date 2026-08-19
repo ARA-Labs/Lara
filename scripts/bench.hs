@@ -37,6 +37,7 @@ module Main (main) where
 
 import Control.Exception (evaluate)
 import Control.Monad (forM, forM_, replicateM, unless, when)
+import qualified Data.ByteString as B
 import Data.List (intercalate, maximumBy, nub, sortOn)
 import Data.Ord (comparing)
 import GHC.Clock (getMonotonicTimeNSec)
@@ -62,7 +63,7 @@ import Lara.Runtime (runtimeAF)
 import Lara.Wire
   ( Outcome (..)
   , Verdict (..)
-  , decodeCheckInputFile
+  , decodeCheckInputFileBS
   , encodeCheckInput
   , encodeVerdict
   , printSExpr
@@ -165,9 +166,9 @@ data UnitBench = UnitBench
 
 benchUnit :: InputMeta -> IO UnitBench
 benchUnit im = do
-  bytes <- readFile (imPath im)
-  _ <- evaluate (length bytes)
-  input <- case decodeCheckInputFile bytes of
+  bytes <- B.readFile (imPath im)
+  _ <- evaluate (B.length bytes)
+  input <- case decodeCheckInputFileBS bytes of
     Left err -> die (imPath im ++ ": decode failed: " ++ show err)
     Right i -> pure i
   _ <- evaluate (length (printSExpr (encodeCheckInput input))) -- pre-force decode
@@ -178,7 +179,7 @@ benchUnit im = do
   -- End-to-end section: what the CLI does minus file IO — decode, check,
   -- render the verdict.
   totalNs <- medianSection
-    (\b -> case decodeCheckInputFile b of
+    (\b -> case decodeCheckInputFileBS b of
       Left err -> evaluate (length (show err))
       Right i -> evaluate (length (printSExpr (encodeVerdict (runCheck i)))))
     bytes
@@ -262,21 +263,21 @@ timeLean path = do
 benchSweep :: [InputMeta] -> IO Integer
 benchSweep inputs = do
   loaded <- forM inputs $ \im -> do
-    bytes <- readFile (imPath im)
-    _ <- evaluate (length bytes)
+    bytes <- B.readFile (imPath im)
+    _ <- evaluate (B.length bytes)
     pure (imExpected im, bytes)
   ns <- replicateM sweepSamples $ do
     t0 <- getMonotonicTimeNSec
     forM_ loaded $ \(expected, bytes) -> case expected of
       ExpectCodecReject -> evaluate (codecLen bytes)
-      _ -> case decodeCheckInputFile bytes of
+      _ -> case decodeCheckInputFileBS bytes of
         Left _ -> evaluate (codecLen bytes)
         Right input -> evaluate (length (printSExpr (encodeVerdict (runCheck input))))
     t1 <- getMonotonicTimeNSec
     pure (toInteger (t1 - t0))
   maybe (die "no sweep samples") pure (median ns)
   where
-    codecLen b = case decodeCheckInputFile b of
+    codecLen b = case decodeCheckInputFileBS b of
       Left err -> length (show err)
       Right _ -> 0
 
