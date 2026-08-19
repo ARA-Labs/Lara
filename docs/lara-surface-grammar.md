@@ -1335,12 +1335,29 @@ The `ident` and `term` nonterminals are those defined in §§1.3 and 2. The
 the lexical identifier class. The lexer still accepts `from` as an identifier
 in positions where a rule, predicate, leaf, or argument name is expected.
 `InferTheta` carries these fields as one presentation payload; the parser folds
-`discharge`, `open`, and `assurance` lines into that payload. For either
-instantiation, the parser drops the critical-question token in
-`open q as obligation` and retains only the `ObligationId`. The canonical
-printer therefore intentionally omits `open` lines, because it cannot
-reconstruct the discarded question token; for inferred arguments it prints the
-rule, named references, discharges, and assurance.
+`discharge`, `open`, and `assurance` lines into that payload. For either rule
+instantiation — explicit `r(g1,…,gn)` or inferred `r from [...]` — the parser
+drops the critical-question token in `open q as obligation` and retains only the
+`ObligationId`. The canonical printer re-emits each retained hole as
+`open obligation as obligation`. §3 leaves `dischargeLine`/`openLine` order free
+and A.1 lets `assurance` fold in anywhere; the canonical printer picks one order
+— discharges, then opens, then assurance. For inferred arguments it prints the
+rule, named references, discharges, opens, and assurance.
+
+On a bare `leaf(…)` support term there is nothing to retain: the parser accepts
+`discharge` and `open` lines there and then drops them entirely, id and all
+(issue #135). That is the opposite of A.1's ruling for `assurance`, which is a
+parse error in the same position precisely so the author is not misled.
+
+Re-emitting the obligation id in both slots is exact, not a guess at the
+discarded token: §6.1 reads a hole's `ObligationId` *as* the question it leaves
+open (`holeNames` in `Lara.SupportTerm`, Lean `H : List QuestionId`), so
+`obligation` names the question actually in force and the dropped `q` is never
+consulted after parsing. Printing therefore normalizes a divergent `q` to the
+obligation id. Every committed `open` line already spells the two identically.
+An earlier revision of this paragraph said the printer "intentionally omits
+`open` lines"; that omission was issue #127 — it broke result 12
+(`parse ∘ print = id`) on any term with a non-empty hole set.
 
 At argument `a`, each reference is resolved in this fixed scope. A name that
 matches both namespaces is ambiguous; a name that matches neither is unresolved.

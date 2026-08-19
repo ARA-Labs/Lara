@@ -8,10 +8,12 @@
 --     QuickCheck property over generated 'Program' /and/ 'Policy' values. The
 --     generators are constrained to the /surface-representable/ subset of the
 --     presentation AST (grammar-legal identifiers\/numbers, both 'ExplicitTheta'
---     and 'InferTheta' argument forms, 'SLeaf' discharge targets, no @open@
+--     and 'InferTheta' argument forms, 'SLeaf' discharge targets, and @open@
 --     holes — see "Lara.Syntax"'s current @0.5@ header):
 --     the property is exact @parse (print x) == Right x@, so a value the printer
---     cannot faithfully render must not be generated.
+--     cannot faithfully render must not be generated. Holes were excluded until
+--     issue #127; they are generated now, and 'prop_programFormCoverage' pins
+--     that they keep occurring.
 --   * __golden parse tests__ — the three committed example files parse to
 --     @Right@, and re-printing then re-parsing is fixed (@parse (print (parse
 --     f)) == parse f@): parse is idempotent through the printer on real files.
@@ -242,7 +244,7 @@ genChallengeTarget =
 
 -- | An explicit surface support term: either @leaf(l)@, or a rule instance
 -- with positional θ (parameter names @\"1\"..\"n\"@), no premises, 'SLeaf'
--- discharge targets, no holes, and a surface-representable assurance.
+-- discharge targets, open holes, and a surface-representable assurance.
 genSupportTerm :: Gen SupportTerm
 genSupportTerm =
   oneof
@@ -254,6 +256,7 @@ genSupportTerm =
         disch <-
           smallListOf
             ((,) <$> (QuestionId <$> genIdent) <*> (SLeaf . LeafId <$> genIdent))
+        holes <- genHoles
         assurance <- genAssurance
         pure
           SRule
@@ -261,9 +264,19 @@ genSupportTerm =
             , srSubst = theta
             , srPremises = []
             , srDischarge = disch
-            , srHoles = []
+            , srHoles = holes
             , srAssurance = assurance
             }
+    ]
+
+-- | Open obligations for an @open o as o@ line. Weighted so hole-bearing rule
+-- instances are common enough for 'prop_programRoundTrip' to exercise the
+-- printer's @open@ path, which issue #127 showed it had been skipping.
+genHoles :: Gen [ObligationId]
+genHoles =
+  frequency
+    [ (2, pure [])
+    , (3, smallListOf (ObligationId <$> genIdent))
     ]
 
 genAssurance :: Gen Assurance
@@ -303,8 +316,9 @@ genArg = do
           disch <-
             smallListOf
               ((,) <$> (QuestionId <$> genIdent) <*> (ArgRef <$> genIdent))
+          holes <- genHoles
           assurance <- genAssurance
-          pure (InferTheta rule refs disch [] assurance)
+          pure (InferTheta rule refs disch holes assurance)
       ]
   pure
     Arg
@@ -698,6 +712,102 @@ prop_spacedValueReferenceRoundTrip =
           Left err -> counterexample (show err) False
           Right program -> printProgram program === source
 
+-- | Issue #127: @open@ lines survive the printer, on both the 'ExplicitTheta'
+-- and 'InferTheta' argument paths, in the canonical printer's fixed body order
+-- — discharges, then opens, then the optional assurance. §3's
+-- @{ dischargeLine | openLine }@ repetition and App. A.1's assurance line both
+-- leave the source order free; this asserts the normalization, not a grammar
+-- constraint.
+--
+-- Anchored rather than generated: the property above proves @parse ∘ print =
+-- id@ on the AST, which a printer emitting some /other/ hole spelling would
+-- also satisfy, since the parser discards an @open@ line's first identifier.
+-- Only a byte assertion pins @open o as o@ — the spelling every committed
+-- hole-bearing unit already uses (e.g. @corpus-units\/bam\/C05\/unit.lara@).
+prop_openHoleLinesRoundTrip :: Property
+prop_openHoleLinesRoundTrip =
+  once $
+    let source =
+          unlines
+            [ "artifact hole_fixture at sha256:hole-fixture"
+            , "policy hole-policy"
+            , "use backends []"
+            , ""
+            , "arg a1 : supports(c) by controlled_comparison(bam, advi)"
+            , "  discharge baseline_parity with e2"
+            , "  open scope_match as scope_match"
+            , "  assurance = trusted"
+            , ""
+            , "arg a2 : supports(c) by controlled_comparison from [a1]"
+            , "  open confound_control as confound_control"
+            , "  open environment_match as environment_match"
+            , ""
+            , "status c"
+            ]
+     in case parseProgram source of
+          Left err -> counterexample (show err) False
+          Right program ->
+            conjoin
+              [ counterexample "printer must re-emit the authored open lines" $
+                  printProgram program === source
+              , counterexample "holes must survive a print/parse round-trip" $
+                  parseProgram (printProgram program) === Right program
+              , counterexample "the parsed hole ids must be the authored ones" $
+                  concatMap argHoleIds (programDecls program)
+                    === map ObligationId ["scope_match", "confound_control", "environment_match"]
+              ]
+  where
+    argHoleIds d = case d of
+      DeclArg a -> case argInstantiation a of
+        ExplicitTheta (SRule {srHoles = hs}) -> hs
+        ExplicitTheta (SLeaf _) -> []
+        InferTheta _ _ _ hs _ -> hs
+      _ -> []
+
+-- | The parser drops an @open@ line's critical-question id, so a divergent
+-- @q@ normalizes to the obligation id on print. That is the deliberate
+-- consequence of §6.1 reading a hole's 'ObligationId' /as/ the question name
+-- (@holeNames@); pinning it here keeps the choice visible if anyone revisits
+-- it.
+--
+-- Note the separate wart this exposes but does not fix: the surface accepts
+-- @q \/= o@ and silently checks @o@, so a divergent spelling means something
+-- other than it reads. Narrowing that is a surface restriction needing its own
+-- presentation-version treatment — issue #133, out of scope for #127.
+prop_openHoleQuestionNormalizes :: Property
+prop_openHoleQuestionNormalizes =
+  once $
+    let divergent =
+          unlines
+            [ "artifact hole_fixture at sha256:hole-fixture"
+            , "policy hole-policy"
+            , "use backends []"
+            , ""
+            , "arg a1 : supports(c) by r(x)"
+            , "  open some_question as some_obligation"
+            , ""
+            , "status c"
+            ]
+        normalized =
+          unlines
+            [ "artifact hole_fixture at sha256:hole-fixture"
+            , "policy hole-policy"
+            , "use backends []"
+            , ""
+            , "arg a1 : supports(c) by r(x)"
+            , "  open some_obligation as some_obligation"
+            , ""
+            , "status c"
+            ]
+     in case (parseProgram divergent, parseProgram normalized) of
+          (Right p, Right q) ->
+            conjoin
+              [ counterexample "both spellings parse to the same AST" $ p === q
+              , counterexample "print normalizes q to the obligation id" $
+                  printProgram p === normalized
+              ]
+          (l, r) -> counterexample (show (l, r)) False
+
 valueBindingFixture :: [ValueBinding] -> Program
 valueBindingFixture bindings =
   Program
@@ -763,6 +873,15 @@ prop_programFormCoverage =
             . cover 2 (any (declHasStep isStepIndex) ds) "attack path: StepIndex"
             . cover 2 (any (declHasStep (not . isStepIndex)) ds) "attack path: StepName"
             . cover 5 (any claimNlHasBrace ds) "nl string with value/{cell …}/{{}}"
+            -- Issue #127: the printer dropped `open` lines and the property
+            -- passed only because the generators never made a hole. This
+            -- threshold is what stops that from reopening silently. Set at 2
+            -- like the attack-path thresholds, not just under the generator's
+            -- real rate (7.1% over 20k tests): presence is what is asserted,
+            -- and a threshold hugging the rate costs thousands of extra tests
+            -- to resolve — and would stop resolving at all if a later generator
+            -- change drifted the rate into the threshold's confidence band.
+            . cover 2 (any declHasHole ds) "argument with an open hole"
             $ parseProgram (printProgram p) === Right p
   where
     isComparison (DeclComparison _) = True
@@ -770,6 +889,13 @@ prop_programFormCoverage =
     claimNlHasBrace d = case d of
       DeclComparison c -> hasBraceForm (ccNlRaw (cmpClaim c))
       _ -> False
+    declHasHole d = case d of
+      DeclArg a -> not (null (instHoles (argInstantiation a)))
+      _ -> False
+    instHoles inst = case inst of
+      ExplicitTheta (SRule {srHoles = hs}) -> hs
+      ExplicitTheta (SLeaf _) -> []
+      InferTheta _ _ _ hs _ -> hs
 
 -- | Every @0.3 /policy/ form reaches the round-trip.
 prop_policyFormCoverage :: Property
@@ -1156,6 +1282,8 @@ syntaxSpecProps =
   , ("syntax empty value-binding table preserves legacy bytes", quickCheckResult prop_emptyValueBindingsRoundTrip)
   , ("syntax non-empty value-binding table round-trip", quickCheckResult prop_nonEmptyValueBindingsRoundTrip)
   , ("syntax spaced value reference round-trip", quickCheckResult prop_spacedValueReferenceRoundTrip)
+  , ("syntax open hole lines round-trip (#127)", quickCheckResult prop_openHoleLinesRoundTrip)
+  , ("syntax open hole question normalizes (#127)", quickCheckResult prop_openHoleQuestionNormalizes)
   , ("syntax arg assurance round-trip", quickCheckResult prop_argAssuranceRoundTrip)
   , ("syntax policy round-trip (result 12)", deepCheck prop_policyRoundTrip)
   , ("syntax @0.3/@0.4 program forms are covered", quickCheckResult prop_programFormCoverage)

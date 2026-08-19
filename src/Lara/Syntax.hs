@@ -72,11 +72,23 @@
 --   * @discharge q with ref@            ↦ a shallow leaf target in an explicit
 --     rule or an 'ArgRef' target in an inferred rule.
 --
--- @open@ lines are retained as obligation ids but are not emitted by the
--- printer: 'SupportTerm' has no field for an @open@ line's critical-question
--- id, so that surface form is not losslessly representable here and belongs to
--- the elaborator's hole accounting (spec §4.2). The printer is total on every
--- 'ArgInstantiation'.
+-- On a rule application — explicit or inferred — @open q as o@ lines are
+-- retained as obligation ids alone: the parser discards @q@, and the printer
+-- re-emits each hole as @open o as o@. That is exact rather than lossy, because
+-- §6.1 reads a hole's 'ObligationId' /as/ the question it leaves open
+-- (@holeNames@ in "Lara.SupportTerm"), so @o@ names the question actually in
+-- force and @q@ is never consulted after parsing. Printing normalizes a
+-- divergent @q@ to @o@; see the hole accounting in spec §4.2. The printer is
+-- total on every 'ArgInstantiation'.
+--
+-- On a bare @leaf(…)@ support term nothing is retained to print: @argBody@
+-- accepts @discharge@ and @open@ lines under any instantiation, but
+-- 'addArgDischarge' and 'addArgHole' fall through on 'SLeaf' and drop the line
+-- entirely, id and all. @parse ∘ print = id@ still holds — the line never
+-- reaches the AST — but the author's text is silently discarded, which is the
+-- opposite of App. A.1's ruling on the sibling case: @assurance@ on a bare
+-- @leaf(…)@ is a /parse error/, because "silently dropping it would mislead the
+-- author". Pre-existing (#106), tracked as #135.
 module Lara.Syntax
   ( -- * Located parse errors (spec §10.1 R14)
     ParseError (..)
@@ -1804,19 +1816,21 @@ printArg a =
     (headTerm, dischargeLines) =
       case argInstantiation a of
         ExplicitTheta term -> printSupportTerm term
-        InferTheta rule refs disch _holes assurance ->
-          printInferredSupportTerm rule refs disch assurance
+        InferTheta rule refs disch holes assurance ->
+          printInferredSupportTerm rule refs disch holes assurance
 
 -- Inferred payloads retain obligation ids for elaboration, but not the
--- critical-question id discarded by the surface parser. Keep the established
--- canonical printer contract and omit open lines rather than inventing a
--- misleading question name.
-printInferredSupportTerm :: RuleId -> [ArgRef] -> ArgDischarge -> Assurance -> (String, [String])
-printInferredSupportTerm (RuleId r) refs disch assurance =
+-- critical-question id discarded by the surface parser. Re-emitting the
+-- obligation id in both slots is exact, not invented: §6.1 reads a hole's
+-- 'ObligationId' as the question name (module header).
+printInferredSupportTerm
+  :: RuleId -> [ArgRef] -> ArgDischarge -> [ObligationId] -> Assurance -> (String, [String])
+printInferredSupportTerm (RuleId r) refs disch holes assurance =
   ( r ++ " from [" ++ intercalate ", " [name | ArgRef name <- refs] ++ "]"
   , [ "  discharge " ++ q ++ " with " ++ ref
     | (QuestionId q, ArgRef ref) <- disch
     ]
+      ++ openLines holes
       ++ assuranceLine assurance
   )
 
@@ -1828,23 +1842,34 @@ printArgConcl ac = case ac of
     "challenges(" ++ q ++ "(" ++ u ++ "))"
   Challenges (ChallengesLeaf (LeafId l)) -> "challenges(" ++ l ++ ")"
 
--- | Print a support term's head form and its indented discharge lines. Total on
--- every 'SupportTerm'; faithful (round-tripping) on the surface subset the
--- parser produces (module header).
+-- | Print a support term's head form and its indented discharge, @open@, and
+-- assurance lines. Total on every 'SupportTerm'; faithful (round-tripping) on
+-- the surface subset the parser produces (module header).
 printSupportTerm :: SupportTerm -> (String, [String])
 printSupportTerm t = case t of
   SLeaf (LeafId l) -> ("leaf(" ++ l ++ ")", [])
-  SRule (RuleId r) theta _prems disch _holes assurance ->
+  SRule (RuleId r) theta _prems disch holes assurance ->
     ( r ++ "(" ++ intercalate ", " (map printTerm (map snd theta)) ++ ")"
-    , printRuleBody disch assurance
+    , printRuleBody disch holes assurance
     )
 
-printRuleBody :: [(QuestionId, SupportTerm)] -> Assurance -> [String]
-printRuleBody disch assurance =
+-- | Body lines in the canonical printer's fixed order: the §3
+-- @{ dischargeLine | openLine }@ repetition emitted as discharges then opens,
+-- then the optional App. A.1 assurance line. §3 and A.1 both leave the source
+-- order free; this is the normalization, not a grammar constraint.
+printRuleBody :: [(QuestionId, SupportTerm)] -> [ObligationId] -> Assurance -> [String]
+printRuleBody disch holes assurance =
   [ "  discharge " ++ q ++ " with " ++ dischargeRef w
   | (QuestionId q, w) <- disch
   ]
+    ++ openLines holes
     ++ assuranceLine assurance
+
+-- | @open o as o@ per hole. The parser discards an @open@ line's
+-- critical-question id and §6.1 reads the obligation id as that question
+-- (module header), so both slots are the obligation id.
+openLines :: [ObligationId] -> [String]
+openLines holes = ["  open " ++ o ++ " as " ++ o | ObligationId o <- holes]
 
 dischargeRef :: SupportTerm -> String
 dischargeRef (SLeaf (LeafId l)) = l
