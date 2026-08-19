@@ -143,7 +143,10 @@ mechanized metatheory. It does not change:
 - replay identity or the frozen corpus; or
 - byte-level evidence verification, which remains gated under #78.
 
-The executable program is specified by
-[`plans/2026-08-05-policy-admission-calculus.md`](../plans/2026-08-05-policy-admission-calculus.md);
-the proofs are specified by
-[`plans/2026-08-05-policy-admission-metatheory.md`](../plans/2026-08-05-policy-admission-metatheory.md).
+This contract landed with PR #81 (issue #77). The runtime lives in
+`src/Lara/Admission.hs` and `src/Lara/Admission/`, threaded through
+`src/Lara/Driver.hs`; the mechanized side is `lean/Lara/Admission.lean` with the
+executable reference driver `lean/Lara/AdmissionDriver.lean`, and the two are
+compared byte-for-byte by `scripts/admission-differential.sh` (20 files: 15
+semantic, 5 codec rejects). The implementation plans that specified this work
+were retired once it landed; their content is this decision record plus the code.

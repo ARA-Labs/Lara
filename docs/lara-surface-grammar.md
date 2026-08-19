@@ -517,9 +517,9 @@ Worked from Example A:
 > before the checker anchor exists, so the compiled AF is byte-identical either
 > way.
 >
-> **Sign-off.** Signed off 2026-08-08; this was the sole open item in
-> `plans/2026-08-08-lara-syntax-03-surface.md` §6.2, now resolved. Design rationale
-> is that plan's §3.5; the surface rules are Appendix B.4 and B.5 below.
+> **Sign-off.** Signed off 2026-08-08; this was the sole open item of the
+> `lara-syntax@0.3` design pass (PR #92), now resolved. The surface rules are
+> Appendix B.4 and B.5 below.
 
 ---
 
@@ -694,8 +694,9 @@ byte-identical `Unit`. Nothing here changes `Unit`, the `.core.sexp` door, the
 wire codec, `checkUnit`, or the strict backends. Motivation: the comparison
 worked examples (`examples/S2`, `S3`, `S4`) make the author write `num_lt`
 argument orders, premise slot indices, and two θ vectors by hand — none of
-which is the research claim being made. Design rationale is
-`plans/2026-08-08-lara-syntax-03-surface.md`.
+which is the research claim being made. The direction-of-goodness contract
+behind the form is written up in `lean/Lara/Comparison.lean`; the surface rules
+are Appendix B.1–B.3 below.
 
 Expansion happens in the elaborator and not in `Lara.Syntax` on purpose: spec
 result 12 (`parse ∘ print == id`) is stated on the presentation AST, and
@@ -1451,8 +1452,7 @@ sees (Appendix D.1): "prior" means already elaborated earlier in declaration
 order, and a later argument is never a valid reference. A name that matches both namespaces is a **hard error**,
 never silently one of them — deliberately aligned with the inferred-reference
 resolver, not with the discharge resolver's silent leaf preference (that
-inconsistency is the separate TODOS item "Discharge-witness namespace
-shadowing", untouched here).
+inconsistency is tracked separately as issue #129, untouched here).
 
 ### E.3 Slot mapping and mixed forms (D4, D5)
 

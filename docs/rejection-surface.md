@@ -5,7 +5,9 @@ how does the checker detect it?" — a question spread across `docs/spec.md` §1
 and the mutant manifest but not previously answered in one place. Every anchor below was re-verified
 live against the `lara` binary while writing this note (`cabal build exe:lara`); rerun the commands to
 recheck them after a change. Updated 2026-08-08 for `lara-syntax@0.3`'s surface-context line (§1.1);
-every anchor below was re-run against the binary at that point and reproduced unchanged._
+every anchor below was re-run against the binary at that point and reproduced unchanged. Updated
+2026-08-19: mutation-suite counts refreshed to the `m5-freeze-v4` suite (504 mutants) and the R14
+row gained the codec-boundary note from #115 (code-point columns, invalid UTF-8)._
 
 ## 1. Two doors, two failure modes
 
@@ -132,7 +134,17 @@ required". That clause was never violable — `Term ::= num | str | con(…)` ha
 constructor, so every `Prop` is ground *structurally* and pattern variables exist only in `Pat` —
 and spec §10.1 now records it as vacuous rather than leaving it looking unenforced.
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 496 mutants) exercises every class at
+**Where a codec error is located (#115).** R14 positions are part of the differential contract, so
+the Haskell wire reader and the Lean reference driver must agree on them character-for-character.
+Both count **code points**, not bytes: Lean's `PState` advances per `Char`, and the Haskell reader —
+now over strict `ByteString` — advances by UTF-8 non-continuation bytes, so an error located after a
+multi-byte character on the same line reports the same column in both drivers
+(`fixtures/corpus/strict-cert-unicode-theory.sexp` is the live anchor). Since #115 a file that is not
+valid UTF-8 also fails *inside* the codec as a located R14 rather than as an IO-level read error;
+decoding uses `decodeUtf8'`, never the lenient form, so malformed bytes are never accepted with
+substituted content.
+
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 504 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
@@ -173,7 +185,7 @@ land in the "valid but unsupported" bucket by design
 counter-argument"). The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
-The seeded mutation suite quantifies the split. Of 496 mutants, 438 reject across the R1–R14/codec
+The seeded mutation suite quantifies the split. Of 504 mutants, 446 reject across the R1–R14/codec
 classes and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
 (`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,
 `accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker
@@ -232,7 +244,8 @@ document should not be read as implying it does.
 ## See also
 
 - `docs/spec.md` §10.1 — the frozen class table this document adds anchors and prose to.
-- `examples/README.md` — the worked-example suite (`A`, `B`, `E1`–`E5`, `R1`–`R3`, `S1`–`S4`), several
+- `examples/README.md` — the worked-example suite (`A`, `B`, `E1`–`E5`, `R1`–`R3`, `R2-sort`,
+  `S1`–`S6`, plus the demo directories), several
   of which are the anchors above.
 - `fixtures/mutants/README.md` and `MANIFEST.tsv` — the generated mutation suite that exercises every
   class at scale, differentially checked between the Haskell and Lean drivers.

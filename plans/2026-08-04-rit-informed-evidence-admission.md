@@ -1,5 +1,12 @@
 # RIT-Informed Evidence Admission and Research-History Plan
 
+> **Status (2026-08-19): gated — kept for its unexecuted tasks.** The approved
+> subset is done and its durable output is
+> `docs/evidence-admission-decision.md` (which supersedes this plan's Task 1
+> pseudocode on composition) and `docs/registration-receipt-contract.md`.
+> Tasks 3–5 and 7 remain unexecuted and gated behind the inventory gate in
+> issue #78; this file is the only place their design is written down.
+
 > **Approved scope (see roadmap tracker #78):** Task 1 (reduced to
 > `docs/evidence-admission-decision.md` + one spec pointer), Task 2 (landed as
 > issues #76/#77), and Task 6 (reduced to
@@ -12,11 +19,10 @@
 > **2026-08-05 program split.** This document is the older evidence-admission sketch. Its
 > presentation-policy repair is now governed by
 > [`docs/policy-admission-calculus-decision.md`](../docs/policy-admission-calculus-decision.md),
-> implemented by
-> [`2026-08-05-policy-admission-calculus.md`](2026-08-05-policy-admission-calculus.md), and
-> mechanized by the companion
-> [`2026-08-05-policy-admission-metatheory.md`](2026-08-05-policy-admission-metatheory.md).
-> Those two programs preserve `lara-core@0.1`; they do not authorize the byte-level
+> which landed in PR #81 (runtime `src/Lara/Admission*`, mechanization
+> `lean/Lara/Admission.lean`, differential `scripts/admission-differential.sh`);
+> the two implementation plans behind it were retired at close-out.
+> That work preserves `lara-core@0.1`; it does not authorize the byte-level
 > `lara-evidence@0.1` work tracked by issue #78, which remains gated and out of scope.
 
 **Goal:** Borrow RIT's strongest reusable ideas without turning LARA into a second arithmetic verifier: add a small evidence-admission subcalculus that can justify how byte-addressed evidence becomes a LARA leaf, preserve LARA's argumentation semantics as the scientific contribution, and keep goal/attempt history outside the frozen support calculus.

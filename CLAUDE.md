@@ -1,4 +1,21 @@
 
+## Task tracking: issues, not a file
+Open follow-up work lives in GitHub issues. There is no `TODOS.md` and no other
+in-repo backlog file; do not create one.
+- When a change defers something actionable, open an issue (`gh issue create`)
+  and reference it from the PR. A deferral recorded only in a commit message or
+  a code comment is not tracked.
+- An issue states the work, why it matters, and what it costs — especially when
+  the cost is a corpus regeneration or a freeze-tag bump, which must be budgeted
+  rather than discovered.
+- Issues track *work*; `docs/` records *decisions*. A frozen contract, a settled
+  design, or a rejected alternative belongs in a `docs/` record even when the
+  issue that produced it closes.
+- `plans/` holds only living research documents and implementation plans whose
+  work has **not** landed; a plan that is executed gets deleted, with anything
+  durable moved into `docs/` first. A partially executed plan stays, carrying a
+  status banner saying which tasks remain.
+
 ## Mechanization discipline
 After each stage of work, mechanize everything that is provable now. As soon as a
 definition is frozen and corpus-independent, port it to the Lean development

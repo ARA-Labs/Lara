@@ -349,8 +349,8 @@ theorem raUses_account (κ : CertRef) (Γ : List Lara.Atom) (φ : Lara.Atom)
 /-- The one fixed RA backend core.  `Form` is the normalized source atom
 itself — the identity encoding — so `enc_iff` is `equiv_iff_nf_eq`.  A
 registered digest resolves to the **empty** theory (`Lara.Driver.buildRegistry`,
-the seam-wide premise-only decision that extends `ord@1`'s design §2.2 to
-`ra@1`), so the consulted context is exactly the submitted premises and every
+the seam-wide premise-only decision that extends `ord@1`'s premise-only slot
+rule to `ra@1`), so the consulted context is exactly the submitted premises and every
 certificate-named slot resolves to one.  The Haskell adapter reaches the same
 acceptance set by rejecting any slot at or beyond the premise count; the
 abstract core never learns `Δ.length`, and the empty resolution is what makes

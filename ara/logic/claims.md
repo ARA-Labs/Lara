@@ -547,12 +547,12 @@ the result is stated but not yet proved or mechanized._
 
 ## C23: Single-seeded-defect localization accuracy is verification-style, not a discriminating benchmark
 - **Statement**: When every mutant seeds exactly one defect at a known constituent and the checker reports its first failure in a deterministic order, measured localization accuracy sits at ceiling by construction — the number verifies diagnostic ordering rather than discriminating localization ability. Localization becomes a real signal only over inputs whose defect manifests off the seeded site or that carry multiple defects.
-- **Conditions**: Single-defect seeded mutation suites checked by a deterministic first-failure checker (the LARA T3 harness regime). Untested boundary: multi-defect and off-site-manifesting suites (the recorded T6 localization follow-up in TODOS.md) — the claim predicts accuracy detaches from 100% there for reasons other than diagnostic ordering.
+- **Conditions**: Single-defect seeded mutation suites checked by a deterministic first-failure checker (the LARA T3 harness regime). Untested boundary: multi-defect and off-site-manifesting suites (the recorded T6 localization follow-up, issue #123) — the claim predicts accuracy detaches from 100% there for reasons other than diagnostic ordering.
 - **Sources**: [246/246 ← trace/exploration_tree.yaml:N96.result «drivers via subprocess), location-accuracy 246/246, replay 60/60. Certificate» [result]]
 - **Status**: testing
 - **Provenance**: ai-suggested
 - **Falsification**: A single-defect seeded run in this harness whose localization accuracy lands significantly below 100% without any change to the checker's diagnostic ordering — i.e., the number moving as a detection signal in the very regime where the claim says it cannot.
-- **Proof**: [trace N96 (T3 smoke: location-accuracy 246/246 over the single-defect manifest), docs/m5-freeze-checklist.md (T6 scoped confirmatory-by-construction on this ground), TODOS.md "Discriminating localization benchmark" entry]
+- **Proof**: [trace N96 (T3 smoke: location-accuracy 246/246 over the single-defect manifest), docs/m5-freeze-checklist.md (T6 scoped confirmatory-by-construction on this ground), issue #123 "Discriminating localization benchmark"]
 - **Dependencies**: []
 - **Tags**: evaluation, mutation-testing, localization, methodology, benchmark-design
 

@@ -1,6 +1,11 @@
 # Blinded Binding-Audit Results and Deterministic Reporting
 
-Status: approved in conversation on 2026-08-09.
+Status: approved in conversation on 2026-08-09. **Implementation state
+(2026-08-19): the pipeline landed in PR #96; the audit itself has not run.**
+Every artifact this document specifies under `measurements/binding-audit/`
+other than `worklist.tsv` — `results.tsv`, `object-results.tsv`,
+`summary.json`, `README.md` — is still unwritten, because no second-author
+judgments have been collected. Tracked as issue #121.
 
 ## Goal
 

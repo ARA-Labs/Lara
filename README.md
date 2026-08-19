@@ -175,7 +175,7 @@ CI runs both, including the `AxCheck.lean` axiom audit, on every push.
 | [`docs/strict-backend-decision.md`](docs/strict-backend-decision.md) | The backend-parametric strict-certificate interface and its proof obligations |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
-| [`docs/engineering-plan.md`](docs/engineering-plan.md), [`TODOS.md`](TODOS.md) | Milestone roadmap and the tracked follow-up items |
+| [`docs/engineering-plan.md`](docs/engineering-plan.md) | Milestone roadmap and the module dependency graph (open follow-ups are tracked as GitHub issues) |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The M0 semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example) |
 
@@ -209,8 +209,8 @@ walking-skeleton replay pipeline, and the deterministic evaluation corpus
 (frozen at tag `m5-freeze-v4`: 504 generated mutants + 60 corpus units,
 564/564 rejection-class matches, 564/564 cross-driver agreement, 60/60
 replay). Current work is the paper package
-([#60](https://github.com/EYH0602/lara/issues/60)); see
-[`TODOS.md`](TODOS.md) for the tracked follow-ups.
+([#60](https://github.com/EYH0602/lara/issues/60)); open follow-ups are tracked
+as [GitHub issues](https://github.com/ARA-Labs/lara/issues).
 
 ## License
 

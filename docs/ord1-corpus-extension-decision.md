@@ -1,8 +1,32 @@
 # Decision: how `ord@1` earns corpus evidence (and why not yet)
 
-_Resolves the `TODOS.md` item "Corpus extension exercising `ord@1` end-to-end"
-(eng review 2026-08-06, PR #83). Companion to
-`docs/strict-backend-decision.md` and `plans/2026-08-06-ord1-comparison-backend.md`._
+_Resolves the tracked follow-up "Corpus extension exercising `ord@1` end-to-end"
+(eng review 2026-08-06, PR #83). Companion to `docs/strict-backend-decision.md`
+(the backend seam) and `lean/Lara/Ord.lean` (the adapter's own design
+docstring). Updated 2026-08-19: absorbed the factivity paragraph from the
+retired `ord@1` implementation plan and refreshed the freeze-tag reference._
+
+## What an accepted `ord@1` step certifies (the factivity firewall)
+
+An accepted certificate discharges the comparison **relative to the premise
+conclusions** — never the truth of any cell. The measurement leaves stay
+defeasible: attackable, quarantinable, admission-governed. You cannot argue with
+the arithmetic; you argue with the measurements.
+
+Stated exactly: both numerals appear in the goal, so the relation is decidable
+from the goal alone. What the premises add is **provenance anchoring** — an
+accepted step certifies that each cited premise's unique numeric literal equals
+the corresponding goal numeral, and that the goal's relation holds of those
+numerals. Neither the plan nor the paper should let "certifies the comparison"
+suggest more. The dependency set is a metatheory-level obligation: the runtime
+seam (`buildCertOk`) collapses acceptance to a `Bool`, so `deps` feeds the
+soundness statement and audit reports, not the checked graph.
+
+Two consequences are mechanized rather than asserted, in `lean/Lara/Ord.lean`:
+the premise-only slot guard (a certificate cannot cite a self-supplied theory
+entry as measured evidence) and intra-family exclusivity
+(`ordModels_excl_of_lt`), which is why `num_lt`/`num_le` head no declared
+contrary pair and so never trip R12.
 
 ## The question
 
@@ -35,8 +59,9 @@ thing each, which is what makes them readable as a set.
 1. **Cost is a refreeze, not an edit.** `corpus-units/` is row 2 of
    `docs/m5-freeze-checklist.md`. Touching it regenerates the seeded mutant
    suite (the sweep derives mutants per corpus unit), invalidates
-   `measurements/frozen/`, and forces a re-run of `scripts/measure.hs` plus a new
-   `m5-freeze-v4` tag. That is M5-scale work, and #60/#78 already ruled an
+   `measurements/frozen/`, and forces a re-run of `scripts/measure.hs` plus the
+   next freeze tag (v4 has since been cut for `lara-core@0.2`, so this would be
+   `m5-freeze-v5`). That is M5-scale work, and #60/#78 already ruled an
    M5-scale refreeze out inside the PLDI window.
 
 2. **The paper's claim does not rest on it.** The evaluation section reports

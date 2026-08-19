@@ -231,3 +231,43 @@ cabal exec -- runghc scripts/claim-support.hs # claim-support aggregation
 cut -f1-14 measurements/report.tsv | shasum -a 256   # matches anchor above
 shasum -a 256 measurements/ablation.tsv               # matches anchor above
 ```
+
+## Clean-tree verification (M7 task T7, tracker #60)
+
+T7 is the exit criterion that the artifact reproduces the frozen numbers **from a
+fresh clone**, not from a working tree. The re-freeze half of T7 is done (PR #82
+produced v3; v4 followed with #99); the written clean-clone record is
+**deferred to the artifact/release stage** by researcher decision on #60 —
+artifact evaluation runs post-submission, so the record is produced with artifact
+packaging rather than now.
+
+When it is produced, the protocol is:
+
+```
+git clone --branch <tag-or-branch> <this-repo> "$SCRATCH/lara-t7"
+cd "$SCRATCH/lara-t7" && git submodule update --init
+cabal build all && (cd lean && lake build)
+cabal exec -- runghc scripts/gen-mutants.hs   # empty generated-suite diff
+bash scripts/differential.sh                  # positive/negative counts above
+bash scripts/admission-differential.sh        # 20 files: 15 semantic + 5 codec-reject
+bash scripts/test-replay-tamper.sh            # both tamper classes detected
+(cd lean && lake env lean AxCheck.lean) | scripts/check-axioms.sh
+cabal test all --test-show-details=direct
+python3 scripts/test_freeze_bundle.py -v      # 4/4
+cabal exec -- runghc scripts/measure.hs
+cut -f1-14 measurements/report.tsv | shasum -a 256   # must equal the anchor above
+shasum -a 256 measurements/ablation.tsv              # must equal the anchor above
+```
+
+Two notes carried over from the T7 execution pass, both easy to get wrong:
+
+- `scripts/replay.sh` takes a `BUNDLE_DIR` argument (see its usage header), so a
+  bare `bash scripts/replay.sh` is not a gate. Replay coverage comes from
+  `scripts/test-replay-tamper.sh` plus the harness `replay_ok` column (60/60
+  corpus units) — iterate over `bundles/` only if a per-bundle record is wanted.
+- The record must state the environment (GHC, Lean, OS/arch) and note that the
+  wall-clock columns (`hs_check_ns`, `lean_wall_ns`) are excluded from the
+  deterministic projection being hashed.
+
+If any gate is red, stop and diagnose — never adjust an anchor to match observed
+output.

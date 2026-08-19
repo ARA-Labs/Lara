@@ -6,7 +6,22 @@ milestone spine (`../plans/research-proposal.md` §7, M0–M7) and the phased wo
 describes the *module dependency graph* and the *build discipline*. The spec (`spec.md`) is the
 contract every module implements._
 
-## 0. Current state (2026-07-21; M1 update 2026-07-22)
+## 0. Current state (2026-07-21; M1 update 2026-07-22; M5 update 2026-08-19)
+
+**M5 update (2026-08-19): M1–M5 are closed and the build order below is fully
+implemented.** Since the M3 note, the core moved to **`lara-core@0.2`** (a
+declared many-sorted signature carried in `Unit` and enforced in `checkUnit`
+stage 2, making R2 a real rejection class — `spec.md` §3.4), the authoring
+surface reached **`lara-syntax@0.6`** (`docs/lara-surface-grammar.md`
+Appendices A–E), and the deterministic evaluation corpus froze at tag
+`m5-freeze-v4` (`m5-freeze-checklist.md`). Layers added beyond the M3 spine:
+`Lara.Admission` (the `.lara` source-boundary admission judgment,
+`policy-admission-calculus-decision.md`), the `ord@1` and `ra@1` strict backends
+beside `nd@1`, `Lara.Mutate` + `Lara.Measure` (the seeded mutation suite and the
+axis-(c) harness), `Lara.ClaimSupport` + `Lara.BindingAudit` (reporting and the
+blinded audit pipeline), and the cross-language presentation-parity guard
+(`scripts/check-presentation-parity.sh`). Remaining engineering work is the M7
+paper package (tracker #60) plus the open GitHub issues.
 
 **M1 update (2026-07-22):** M0 exited (PR #8/#9) and the v0.1 language froze — `spec.md` is now
 "v0.1 — frozen at M1" with the row-by-row record in `m1-freeze-checklist.md`. The Lean

@@ -59,7 +59,7 @@ leaves; their quarantine seed is then unioned with the policy seed to construct 
 context. Admission creates neither attacks nor a fifth core status; conservative source reporting may
 publish `evidence-blocked` for affected roots while retaining any conditional core diagnostic. The
 runtime contract and compatibility boundary are fixed in
-`plans/2026-08-05-policy-admission-calculus.md`.
+`docs/policy-admission-calculus-decision.md`.
 
 ## 4. Support terms and dependencies
 

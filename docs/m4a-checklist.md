@@ -7,6 +7,11 @@ coverage design) and `docs/spec.md` (the frozen contract). Mirrors `docs/m1-free
 verdicts that already have oracles, and lists what stays provisional until the parser + elaborator exist.
 This is **Task A0** — a scope-lock/freeze doc, not a re-plan._
 
+_**Historical note (2026-08-19).** The deferrals below that read "→ `TODOS.md`"
+were routed to an in-repo backlog file that has since been retired; open
+follow-up work is now tracked as GitHub issues. The sentences are left as
+written because they record what M4a decided at the time._
+
 ## What M4a is (and is not)
 
 **M4a definition of done** (plan §"M4a Definition of Done"): the compiler works end to end on the

@@ -1,5 +1,16 @@
 # Blinded Binding-Audit Results Implementation Plan
 
+> **Status (2026-08-19): half-executed — kept for the unexecuted half.**
+> Tasks 1–4 landed in PR #96: the subject projection, the strict TSV codec and
+> sealed-judgment validators, the blinded packet (`scripts/binding-audit.hs
+> prepare|validate|summarize`), and the canonical summary renderer are all in
+> the tree with tests. Tasks 5–8 have **not** run: no second-author judgments
+> have been collected, so `measurements/binding-audit/` holds only
+> `worklist.tsv` — there is no `results.tsv`, `object-results.tsv`,
+> `summary.json`, or method `README.md`, and no paper text cites the audit.
+> Issue #87 was closed on the pipeline, not on the audit. Execute Tasks 5–8 to
+> finish it; nothing else in this plan is outstanding.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Complete issue #87 Steps 1–3 with a status-blind second-author audit, mechanically validated human judgments, deterministic post-seal cross-tabs, committed results, and paper text sourced from generated numbers.
@@ -1019,11 +1030,13 @@ then verifies both repositories. Splitting earlier worktrees would create
 conflicts in `Lara.BindingAudit` and `BindingAuditSpec` without shortening the
 dependency chain.
 
-## TODOS.md Disposition
+## Deferred-work disposition
 
-No new deferred TODO is warranted. Every review finding is required for this
-branch's evidence, determinism, or failure contract and is integrated below;
-the existing `TODOS.md` items are unrelated to issue #87.
+No new deferred follow-up is warranted. Every review finding is required for
+this branch's evidence, determinism, or failure contract and is integrated
+below; no other tracked follow-up bears on issue #87. (This section originally
+named `TODOS.md`, the in-repo backlog file retired on 2026-08-19 in favour of
+GitHub issues.)
 
 ## Implementation Tasks
 
