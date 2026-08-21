@@ -76,7 +76,7 @@ leaf u1 : measurement_artifact(bandwidth_bound_floor, pytorch_two_cumsum)
 arg a1 : supports(c09) by measurement(bandwidth_bound_floor, pytorch_two_cumsum, malt_runs)
   discharge instrument_validity with e2
   discharge coverage            with e3
-  open      confound_control    as confound_control
+  open      confound_control
 
 # --- The artifact's own filtered-out counterexample undercuts the universal leg -----------------
 

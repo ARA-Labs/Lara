@@ -2,7 +2,7 @@
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
 This module models the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.6` — every field of both top-levels,
+`src/Lara/AST.hs` at `lara-syntax@0.7` — every field of both top-levels,
 including inferred argument instantiations and the `lara-core@0.2` `policySigma`,
 below — defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
@@ -37,7 +37,9 @@ value. This mirrors the existing verified structured codecs in the development:
 ## Scope
 
 Verified against the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.6`, described here:
+`src/Lara/AST.hs` at `lara-syntax@0.7`, described here (the model was written
+against the `@0.6` AST and still holds verbatim: `@0.7` restricts the concrete
+`.lara` surface only — grammar Appendix F — and changes no `Lara.AST` type):
 
 * **Both presentation top-levels**: every `Program` field and every `Policy`
   field, `policySigma` included; every arm of `Decl` (including `DeclGroup` and

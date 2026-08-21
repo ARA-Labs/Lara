@@ -614,7 +614,7 @@ prop_inferencePayloadCarriesState = once $
       thetaProgramSource
         [ "arg a1 : supports(c_selected) by select from [e1]"
         , "  discharge q with e1"
-        , "  open q as hole"
+        , "  open hole"
         , "  assurance = trusted"
         ]
 

@@ -141,14 +141,16 @@ and policy-allowlisted theory digests are part of replay identity.
 
 The language surface is itself versioned: **`lara-core@0.2`** names the abstract syntax, the
 static judgments (§6.1, §7.1, §8, §8.1), and the JSON wire schema, as frozen by M1. The
-presentation syntax is versioned separately (**`lara-syntax@0.6`**) because it may evolve against
+presentation syntax is versioned separately (**`lara-syntax@0.7`**) because it may evolve against
 a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
 Presentation syntax versions live in `docs/lara-surface-grammar.md`; this specification pins the
 core. The codec round-trip obligation (§9 result 12) is stated against `lara-core@0.2`. Lean
 mechanizes `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at
-`lara-syntax@0.6`, including value bindings, inferred argument instantiations, `policySigma`,
-and optional measurand polarity (`lean/Lara/Presentation.lean`); the Haskell `parse ∘ print = id`
-property separately covers the concrete `.lara` parser/printer. The Lean theorem is an AST-shape
+`lara-syntax@0.7`, including value bindings, inferred argument instantiations, `policySigma`,
+and optional measurand polarity (`lean/Lara/Presentation.lean`) — `lara-syntax@0.7` restricts the
+concrete `.lara` surface without changing the AST, so the theorem proved for `@0.6` still holds
+verbatim. The Haskell `parse ∘ print = id` property separately covers the concrete `.lara`
+parser/printer. The Lean theorem is an AST-shape
 anchor, not a correctness proof for the Haskell concrete parser.
 `scripts/check-presentation-parity.sh` keeps the two models from drifting by comparing their
 normalized shape inventories. Exact compiler witnesses pin record fields, sum payloads, aliases,
@@ -591,7 +593,7 @@ checker over pinned artifact bytes — is **not** part of v0.1; leaves on every 
 ```text
 arg a : prop by r(a1, ..., an) [where X = g, ...]
   discharge question with argument
-  open question as o
+  open question
 ```
 
 An `arg` declaration names a support term (Section 6). Multiple independent supports for the same
@@ -1396,7 +1398,7 @@ leaf e1 : reports(exp_3, effect(M, accuracy, D, +2.1))
 arg a1 : supports(c1) by controlled_comparison from [e1]
   discharge randomization with e2
   discharge adequate_power with e3
-  open external_validity as o1
+  open external_validity
 
 arg d1 : challenges(external_validity(a1)) by distribution_shift(e4)
 undercut d1 a1.rule
@@ -1404,7 +1406,7 @@ undercut d1 a1.rule
 status c1
 ```
 
-This example is intentionally incomplete and should report the located obligation `o1`. The worked
+This example is intentionally incomplete and should report the located obligation `external_validity`. The worked
 examples (three complete + three rejected, with matching JSON encodings) are M3/M5 golden-test
 artifacts built against this frozen spec (`engineering-plan.md` §5).
 

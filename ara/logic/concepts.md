@@ -63,14 +63,16 @@
 - **Related concepts**: Critical-question obligation, Contrary relation, Assurance, Policy
 
 ## Critical-question obligation and hole
-- **Notation**: `discharge q with w_q` | `open q as o`
+- **Notation**: `discharge q with w_q` | `open q`
 - **Definition**: Each scheme question is discharged by a support term (checked against the question's
   answer pattern) or declared an explicit open hole. An open *mandatory* question contributes a located
   obligation that excludes the incomplete argument from the framework and yields a `gap`; an open
   *optional* question is a diagnostic only. Every declared question must be accounted for.
 - **Boundary conditions**: "Complete" means policy-relative: all premises and critical questions of an
   instantiated scheme are discharged or reported as holes. Not mechanical completeness of a scientific
-  argument.
+  argument. A hole carries exactly one identifier: §6.1 reads its obligation name *as* the question it
+  leaves open, so `open q` names that question once (`lara-syntax@0.7`, grammar Appendix F.3; the
+  retired `open q as o` form let an author write a second name nothing downstream read).
 - **Related concepts**: Inference scheme, `gap` status, Exception
 
 ## Backend-parametric strict-certificate interface

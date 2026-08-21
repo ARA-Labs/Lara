@@ -1586,3 +1586,49 @@ observations:
   promoted_to: "logic/claims.md:C33"
   crystallized_via: artifact-commitment + empirical-resolution
   stale: false
+
+- id: O76
+  timestamp: "2026-08-20T05:00"
+  provenance: ai-suggested
+  content: >
+    When a fix removes a silent no-op fall-through from a parser helper so the
+    rule cannot be bypassed, the same treatment has to reach every sibling
+    helper that shares the rejection condition - including siblings whose
+    rejection already worked, because those rely on the caller remembering to
+    check. In the @0.7 arg-body fold, #135 named only addArgDischarge and
+    addArgHole; setArgAssurance kept `inst _ = inst` and left Appendix A.1's
+    already-correct ruling resting on a parser-side convention. Making the
+    helper total-with-error costs one equation and removes the whole class.
+  context: >
+    Independent spec review of commit 62e23f9 flagged it as a borderline D1
+    reading. Closed in commit 20a5bb8 in the same release, keeping the
+    diagnostic and its position unchanged by leaving argBody's bare-leaf check
+    ahead of assuranceP.
+  potential_type: heuristic
+  bound_to: [N196, N198]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H15"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O77
+  timestamp: "2026-08-20T04:30"
+  provenance: ai-executed
+  content: >
+    A presentation-layer restriction can be proven acceptance-preserving
+    without re-running any measurement, by pairing a namespace scan of the
+    authored sources with an explicit frozen-artifact pathspec diff. The scan
+    answers whether the new rejection can fire at all (here: zero of 120
+    discharge references name both a leaf and an argument id); the pathspec
+    diff answers whether anything derived moved. Source trees re-pin because
+    authored .lara bytes moved, which is a different fact from semantic
+    movement and needs recording separately or it reads as drift.
+  context: >
+    lara-syntax@0.7 corpus sweep across 109 tracked .lara files. Recorded in
+    grammar Appendix F.5 and the m5 freeze checklist.
+  potential_type: heuristic
+  bound_to: [N196, N197]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

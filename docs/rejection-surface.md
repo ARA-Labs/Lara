@@ -85,6 +85,47 @@ arriving there is still the backend's to refuse at replay.
 Acceptance is unchanged — every payload the frozen corpus can contain lowers to
 itself byte-identically.
 
+### 1.3 Three rejections the `.lara` door gains (`lara-syntax@0.7`)
+
+`lara-syntax@0.7` (grammar Appendix F) is a surface-strictness release: it
+removes three spellings the surface used to accept and then not mean. Each
+removal is a rejection the **`.lara` door gains** — a source that used to be
+accepted (with a token silently dropped, or a collision silently resolved) is
+now refused at the boundary. None of them is a new checker verdict class: two
+are located parse errors (R14) and one is an `ElabError`, all exit 2.
+
+Two additions at the **parse** door (`Lara.Syntax`, spec §10.1 R14, exit 2):
+
+- **`discharge`/`open` on a bare `leaf(…)` support term** (#135; grammar
+  Appendix F.2) — previously accepted and dropped entirely, id and all. Now
+  `discharge requires a rule application, not a bare leaf` and
+  `open requires a rule application, not a bare leaf`, located at the keyword.
+  This extends to both siblings the ruling Appendix A.1 already made for
+  `assurance` in the same position.
+- **The retired two-identifier hole spelling `open q as o`** (#133; grammar
+  Appendix F.3) — a hole is now spelled `open q`. Both legacy shapes, equal
+  (`open q as q`) and divergent (`open q as o`), are the same located error:
+  `lara-syntax@0.7 uses 'open q'; remove 'as …'`.
+
+One addition at the **elaborator** door (`ElabError`, exit 2):
+
+- **A shadowed discharge target** (#129; grammar Appendix F.4) — when
+  `discharge q with x` names both a declared leaf and a prior argument, the
+  resolver used to silently prefer the leaf. It is now `AmbiguousDischarge`:
+  `arg 'A': discharge of 'q' names 'x', which is ambiguous between a declared leaf and a prior argument`.
+  This is the same collision policy the `@0.5` inferred-θ references and the
+  `@0.6` certificate premise slots already enforced (§1.2; grammar Appendix
+  E.2), so all three argument-body reference positions now agree.
+
+All three apply **only on the `.lara` door**: a raw `.sexp` carries no
+presentation layer — it has no `open` line, no `discharge` line, and no source
+namespace to collide in — so the `.sexp` door's rejection surface is untouched,
+and so is the wire codec. Acceptance is unchanged on the frozen corpus: the ten
+migrated hole spellings were textual only (grammar Appendix F.5), no committed
+source attaches a body line to a bare leaf, and no tracked `.lara` file has a
+name that is both a declared leaf id and an argument id, so the ambiguity error
+cannot fire on any committed source.
+
 ## 2. The class table, with a runnable anchor per class
 
 `docs/spec.md` §10.1 freezes fourteen rejection classes (R1–R14); the table below adds one runnable

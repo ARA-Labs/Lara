@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.6`)
+# LARA surface grammar — frozen (`lara-syntax@0.7`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -24,20 +24,27 @@ versions):
   the surface forms `challenges(…)` and `supports(c1_neg)` (undeclared) had no
   representable conclusion until `ArgConcl` landed.
 
-The active `@0.6` additions are specified in Appendix E: an `ord@1` or `ra@1`
+The `@0.6` additions are specified in Appendix E: an `ord@1` or `ra@1`
 certificate payload may cite a premise slot by source name (`(prem e4)`
 instead of `(prem 0)`), and elaboration lowers the name to the canonical
 numeric slot after premise resolution, so the wire `Unit` and `lara-core@0.2`
 remain unchanged. The `@0.5` inferred-theta form (`Arg` carrying
 `ArgInstantiation` with `ArgRef` references, exercised by the migrated A/S1
-witnesses) remains specified in Appendix D.
+witnesses) remains specified in Appendix D. The current surface is `@0.7`,
+whose three *restrictions* — `discharge`/`open` on a bare leaf are parse
+errors, a hole is spelled `open q`, and a shadowed discharge target is a hard
+error — are specified in Appendix F; they remove surface and add none, so the
+AST, the wire, and `lara-core@0.2` are again unchanged.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.6`; it decodes to
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.7`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
 `@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and `@0.6`
 symbolic certificate premise references remain presentation-layer data until
-elaboration. The Haskell `parse ∘ print == id` property covers this current
+elaboration, and `@0.7`'s restrictions (bare-leaf body lines, the sole `open q`
+hole spelling, and the unified discharge collision policy) remove
+presentation-layer forms without adding any, so the decoded `lara-core@0.2`
+object is unchanged. The Haskell `parse ∘ print == id` property covers this current
 concrete surface. The structured Lean round-trip in
 `lean/Lara/Presentation.lean` covers the complete live `Program`/`Policy` AST
 for this surface, including value bindings, inferred argument instantiations,
@@ -153,7 +160,7 @@ artifact  policy  at  use  backends  claim  leaf  arg  status  group
 rule  mode  premises  conclusion  question  contrary  exception  admission
 duplicate-reports  quarantine
 nl  formal  binding  kind  provenance  refs  author  rationale  audit-status
-by  supports  challenges  discharge  with  open  as
+by  supports  challenges  discharge  with  open
 rebut  undercut  undermine
 allow-trusted  certifiers  cert  trusted  none
 
@@ -170,6 +177,10 @@ let
 
 -- lara-syntax@0.5 (Appendix D)
 from
+
+-- lara-syntax@0.7 (Appendix F)
+-- removed: `as`. A hole is spelled `open q`, so the keyword has no remaining
+-- syntactic role and `as` is once again an ordinary identifier.
 ```
 The @0.5 entry `from` is contextual after a rule identifier; it is listed
 under the version delta without becoming a lexer-reserved identifier.
@@ -273,7 +284,7 @@ supportTerm ::= "leaf" "(" ident ")"                           -- explicit leaf 
 
 argRef        ::= ident                                  -- a leaf id or a prior arg id
 dischargeLine ::= "discharge" ident "with" argRef        -- discharge q with <support>
-openLine      ::= "open" ident "as" ident                -- open q as o   (explicit hole)
+openLine      ::= "open" ident                           -- open q        (explicit hole; @0.7, App. F.3)
 
 attackDecl ::= "rebut"     ident ident
              | "undercut"  ident posTarget               -- terminal marker ".rule"
@@ -417,7 +428,7 @@ left-to-right scope and precedence contract in Appendix D.
 
 **Discharges stay EXPLICIT.** Each critical question is discharged by name:
 `discharge q with <argRef>` (A/B use bare leaf ids: `discharge randomization with
-e2`). Open holes are explicit too: `open q as o`. The `D ⊎ H = questions(r)`
+e2`). Open holes are explicit too: `open q` (`@0.7`, Appendix F.3). The `D ⊎ H = questions(r)`
 accounting invariant (spec §4.2) is checked by the elaborator against the resolved
 discharge/open sets. No premise edits are needed for the historical explicit
 A/B sources under this positional rule; current inferred sources are specified
@@ -1336,25 +1347,30 @@ the lexical identifier class. The lexer still accepts `from` as an identifier
 in positions where a rule, predicate, leaf, or argument name is expected.
 `InferTheta` carries these fields as one presentation payload; the parser folds
 `discharge`, `open`, and `assurance` lines into that payload. For either rule
-instantiation — explicit `r(g1,…,gn)` or inferred `r from [...]` — the parser
-drops the critical-question token in `open q as obligation` and retains only the
-`ObligationId`. The canonical printer re-emits each retained hole as
-`open obligation as obligation`. §3 leaves `dischargeLine`/`openLine` order free
+instantiation — explicit `r(g1,…,gn)` or inferred `r from [...]` — a hole is
+authored and printed as `open q`, stored as `ObligationId q`. (At `@0.5` and
+`@0.6` the production was `open q as o`: the parser read `q`, discarded it, and
+retained only the `ObligationId o`, and the canonical printer re-emitted
+`open o as o`. `@0.7` retired that two-identifier form — a hole has one identity
+— and both legacy shapes are now located parse errors carrying the repair; see
+Appendix F.3.) §3 leaves `dischargeLine`/`openLine` order free
 and A.1 lets `assurance` fold in anywhere; the canonical printer picks one order
 — discharges, then opens, then assurance. For inferred arguments it prints the
 rule, named references, discharges, opens, and assurance.
 
-On a bare `leaf(…)` support term there is nothing to retain: the parser accepts
-`discharge` and `open` lines there and then drops them entirely, id and all
-(issue #135). That is the opposite of A.1's ruling for `assurance`, which is a
-parse error in the same position precisely so the author is not misled.
+On a bare `leaf(…)` support term there is nothing to retain. At `@0.5` and
+`@0.6` the parser accepted `discharge` and `open` lines there and then dropped
+them entirely, id and all (issue #135) — the opposite of A.1's ruling for
+`assurance`, which is a parse error in the same position precisely so the author
+is not misled. `@0.7` extends A.1's ruling to both siblings: all three lines are
+located parse errors on a bare leaf (Appendix F.2).
 
-Re-emitting the obligation id in both slots is exact, not a guess at the
-discarded token: §6.1 reads a hole's `ObligationId` *as* the question it leaves
-open (`holeNames` in `Lara.SupportTerm`, Lean `H : List QuestionId`), so
-`obligation` names the question actually in force and the dropped `q` is never
-consulted after parsing. Printing therefore normalizes a divergent `q` to the
-obligation id. Every committed `open` line already spells the two identically.
+That the discarded token was never consulted is exactly why one name suffices:
+§6.1 reads a hole's `ObligationId` *as* the question it leaves open
+(`holeNames` in `Lara.SupportTerm`, Lean `H : List QuestionId`), so the stored
+id names the question actually in force. Under the retired `@0.5`/`@0.6`
+spelling every committed `open` line already spelled the two identically, which
+is why `@0.7`'s migration is textual only (Appendix F.5).
 An earlier revision of this paragraph said the printer "intentionally omits
 `open` lines"; that omission was issue #127 — it broke result 12
 (`parse ∘ print = id`) on any term with a non-empty hole set.
@@ -1470,6 +1486,9 @@ order, and a later argument is never a valid reference. A name that matches both
 never silently one of them — deliberately aligned with the inferred-reference
 resolver, not with the discharge resolver's silent leaf preference (that
 inconsistency is tracked separately as issue #129, untouched here).
+*Resolved at `@0.7`:* Appendix F.4 gives the discharge resolver this same
+collision policy, so the carve-out named in this paragraph no longer exists —
+all three argument-body reference positions now agree.
 
 ### E.3 Slot mapping and mixed forms (D4, D5)
 
@@ -1587,3 +1606,254 @@ Two future-work notes, recorded here so the next design starts from them:
   priors, growing exactly the resolution surface this feature is supposed to
   keep predictable. Premise-label citation remains a natural future
   `lara-syntax@0.x` extension.
+
+## Appendix F — `lara-syntax@0.7` (surface strictness, 2026-08-20)
+
+### F.1 Scope
+
+Three restrictions over `lara-syntax@0.6`, all enforcing one invariant: **every
+authored surface token must affect the semantic object or trigger an explicit
+error.** A token the parser reads and then discards is a lie to the author, who
+reasonably concludes the checker saw what they wrote.
+
+- **F.2 (#135)** — `discharge` and `open` under a bare `leaf(…)` support term
+  are parse errors, not silently dropped lines.
+- **F.3 (#133)** — a hole is spelled `open q`. The two-identifier
+  `open q as o` form is a located parse error carrying its repair, and `as`
+  leaves the §1.4 vocabulary.
+- **F.4 (#129)** — a `discharge q with x` whose `x` names both a declared leaf
+  and a prior argument is a hard elaboration error, not a silent preference for
+  the leaf.
+
+This appendix adds **no productions**. `@0.7` is the first surface version that
+only *removes* surface: `@0.2`–`@0.6` were additive (`@0.3` carried one source
+migration; `@0.6` changed no lexer or parser rule at all), while every clause
+below narrows what the parser or elaborator accepts.
+
+Nothing here reaches the kernel. There is no `lara-core@0.2` change, no
+`Lara.AST` change, no wire or `.core.sexp` change, no checker-judgment change,
+and no strict-backend or replay change. The surface version never reaches the
+wire, so every derived `.core.sexp`, `expected.json`, verdict, mutant fixture,
+and frozen measurement byte is unchanged (F.5). Because the AST is unchanged,
+`lean/Lara/Presentation.lean`'s structured model still holds at `@0.7` and
+`scripts/check-presentation-parity.sh` stayed green throughout; no Lean work was
+owed. The `@0.7` elaborator addition (F.4) sits in the validated-not-verified
+elaborator (`ara/logic/solution/constraints.md`), which the mechanization plan
+does not cover.
+
+**Why removal is the right instrument here, and why no compatibility alias.**
+Every one of these three warts has the same shape — the surface accepts an
+author's token and then does not mean it — and an alias that keeps accepting the
+old spelling would preserve exactly the misreading each fix exists to remove.
+The usual argument against a breaking surface change is the installed base;
+LARA has none. There is no public release of `lara-syntax`, and every `.lara`
+source that exists is in this repository, so the migration cost is bounded,
+mechanical, and paid in the same commit as the restriction (F.5: ten spellings
+in seven of 109 tracked files). Under those conditions a compatibility alias
+buys nothing and permanently doubles the spellings a reader must know. The
+window for this trade closes when the surface is published; that is an argument
+for making the surface strict *now*, not for deferring.
+
+### F.2 `discharge`/`open` on a bare leaf are parse errors (#135)
+
+Appendix A.1 already rules that `assurance` on a bare `leaf(…)` support term is
+a parse error, "the checker has no rule to check it against, and silently
+dropping it would mislead the author". That reasoning is not specific to
+`assurance`. A `discharge` or an `open` line answers or defers a *critical
+question of a rule*; a bare leaf instantiates no rule, so it declares no
+questions, and there is nothing for either line to attach to. Before `@0.7` the
+parser accepted both there and dropped them entirely, id and all — a strictly
+worse outcome than the sibling it sat next to, since the author who writes
+`discharge q with e2` under `leaf(e1)` is told nothing and believes `q` was
+answered.
+
+`@0.7` extends A.1's ruling to both siblings, with the same wording shape:
+
+```text
+discharge requires a rule application, not a bare leaf
+open requires a rule application, not a bare leaf
+assurance requires a rule application, not a bare leaf   -- A.1, unchanged
+```
+
+Each is a located `ParseError` (spec §10.1 R14) positioned at the offending
+keyword, so the diagnostic points at the line the author must delete or move.
+
+**The ruling does not rest on a parser-side convention.** `addArgDischarge`,
+`addArgHole` and `setArgAssurance` in `Lara.Syntax` each return
+`Either String ArgInstantiation`, with **one equation per `ArgInstantiation`
+shape and no catch-all**; `argBody` turns a `Left` into the located error above.
+Previously the bare-leaf case was a silent identity fall-through —
+`addArgDischarge inst _ _ = inst`, `addArgHole inst _ = inst`,
+`setArgAssurance inst _ = inst` — which meant the rejection lived only in the
+parser's decision to check first, and a future caller reaching the helper by another path (a bundle
+lowerer, a test builder, a refactor that reorders `argBody`) would silently
+resurrect the drop. Making the helpers total-with-error moves the guarantee
+into the type: the impossible case has no equation that can quietly succeed.
+`setArgAssurance` was brought to the same shape in a follow-up commit for
+exactly this reason, even though A.1's diagnostic and its position were already
+correct — the consistency is structural, not cosmetic.
+
+*Rejected alternative:* keep accepting the lines and make the elaborator reject
+them. That would move an unambiguously syntactic error (a line in a position
+the grammar gives no meaning) past the decode boundary, contradicting §1's
+placement of surface well-formedness in `Lara.Syntax`, and would leave the
+presentation AST able to represent a state the surface cannot mean.
+
+### F.3 The sole hole spelling is `open q` (#133)
+
+```text
+openLine ::= "open" ident                 -- open q   (explicit hole)
+```
+
+Before `@0.7` the production was `open ident "as" ident`. The parser read the
+first identifier, **discarded it**, and stored the second as the hole's
+`ObligationId`; the canonical printer then re-emitted `open o as o`, normalizing
+away any divergence the author had written. So `open external_validity as o1`
+was checked as a hole on the *question* `o1` — a question that in general does
+not exist — and printed back as `open o1 as o1`.
+
+**A hole has one identity.** Spec §6.1 question-accounting reads a hole *as the
+question it leaves open*: `holeNames` in `Lara.SupportTerm` maps each stored
+`ObligationId` to the `QuestionId` of the same text (Lean `H : List QuestionId`;
+the Lean driver decodes `holes` straight to `QuestionId`), and `D ⊎ H =
+questions(r)` is then checked against the rule's declared questions. No
+reporting path — verdict JSON, `Lara.Reporting`, the located-obligation output
+of an E2-style gap — ever consumed an obligation name independent of that
+question name. The second identifier was therefore never *read* as a separate
+thing; it could only be redundant (when equal) or actively misleading (when
+divergent). `@0.7` stores `ObligationId q` from the single authored identifier,
+which is exactly the name §6.1 goes on to use.
+
+Both legacy shapes are rejected identically — there is no "equal spelling is
+harmless" carve-out, because a spelling that is currently harmless is still a
+second way to say one thing:
+
+```text
+lara-syntax@0.7 uses 'open q'; remove 'as …'
+```
+
+located at the `as` token, on `open q as q` and `open q as o` alike, and the
+message carries the repair rather than only the complaint.
+
+**`as` leaves the grammar.** It had no other syntactic role, so §1.4 records it
+as *removed* at `@0.7` and it is once again an ordinary identifier: a leaf,
+argument, rule, question, or predicate may be named `as`, and
+`test/SyntaxSpec.hs` (`unit_asIsAnOrdinaryIdentifier`) pins that. This is the
+narrow reason the §1.4 table is a single `toString`/`parse` vocabulary — the
+keyword's disappearance from the surface is one table edit, and the reserved-word
+list the round-trip generator consults (`test/SyntaxSpec.hs`) mirrors it.
+
+The retained `ObligationId` newtype is **not** collapsed into `QuestionId`. It
+is the spec §2 obligation name class, and the symbolic-core discipline keeps
+distinct namespaces in distinct types (CLAUDE.md); what `@0.7` removes is the
+claim that the *surface* can name the two independently. The single sanctioned
+bridge is now exactly `open q → ObligationId q → QuestionId q`, confined to
+`holeNames`, and `src/Lara/SupportTerm.hs` documents it there.
+
+*Rejected alternative:* keep `open q as o` and make the elaborator check that
+`q` is a declared question of the rule (using both names for real). That adds a
+second name class to the surface and a new diagnostic family in exchange for an
+identifier no downstream consumer reads. Appendix D's inferred-θ payload,
+Appendix E's premise-slot names, and F.4's discharge targets all shrink the
+number of independently-authorable names in an argument body; this moves the
+same way.
+
+### F.4 Discharge collision policy unified with D and E.2 (#129)
+
+`discharge q with x` resolves `x` in the `lara-syntax@0.5` reference namespace:
+declared leaves ∪ prior arguments (Appendix D.1). Before `@0.7`, when `x` named
+**both**, the resolver silently preferred the declared leaf. The identical
+collision was already a hard error in the two neighbouring positions — Appendix
+D's inferred-θ references (`ThetaReferenceAmbiguous`) and Appendix E.2's
+certificate premise slots (`CertSlotAmbiguous`) — so one argument body carried
+two opposite answers to the same question, and which one an author got depended
+on which line they were writing.
+
+`@0.7` gives all three positions one policy. One `refMatches`-based
+`resolveDischargeRef` serves **both** discharge payload forms — the explicit one
+(where the parser spells the target `SLeaf (LeafId ref)`) and the inferred one
+(where it arrives as `ArgRef ref`) — so the two surfaces cannot drift apart:
+
+| declared leaf named `x` | prior argument named `x` | result |
+| --- | --- | --- |
+| yes | no | the leaf's `SLeaf` |
+| no | yes | that argument's elaborated support term |
+| yes | yes | **`AmbiguousDischarge`** (new at `@0.7`) |
+| no | no | `UnresolvedDischarge` |
+
+"Prior" keeps D.1's meaning: strictly earlier in declaration order, i.e.
+whatever `elabOne` has accumulated when this argument is elaborated. A discharge
+naming a *later* argument is therefore `UnresolvedDischarge`, not a forward
+reference — the same scope rule the θ references and the E.2 premise-slot names
+already obey. The two non-error rows are unchanged behavior: the previous
+implementation tested `elem` against `envLeafIds env = map fst envGamma`, which
+is exactly the leaf half of `refMatches`, so the **only** new rejection is the
+ambiguity itself.
+
+Diagnostics (`Lara.Elaborate.Error`, the D.3 `ThetaReference*` style, attributed
+to the enclosing `arg`):
+
+```text
+arg 'A': discharge of 'q' names 'x', which is neither a declared leaf nor a prior argument
+arg 'A': discharge of 'q' names 'x', which is ambiguous between a declared leaf and a prior argument
+```
+
+`AmbiguousDischarge ArgId QuestionId ArgRef` is the new family.
+`UnresolvedDischarge`'s final field is retyped `String → ArgRef` in the same
+change, so the source identifier is carried in the type the namespace is defined
+over and is unwrapped in exactly one place — the renderer — matching how every
+other reference diagnostic in this family already works.
+
+**This closes E.2's carve-out.** Appendix E.2 records the `@0.6` decision to
+align the certificate premise-slot resolver "with the inferred-reference
+resolver, not with the discharge resolver's silent leaf preference (that
+inconsistency is tracked separately as issue #129, untouched here)". At `@0.7`
+there is no discharge exception left to name: all three argument-body reference
+positions resolve in one namespace under one collision policy, each keeping only
+its own error *family* because each names a different surface position.
+
+*Rejected alternative:* make the leaf preference explicit and documented instead
+of an error. Shadowing rules are exactly the kind of surface knowledge a reader
+must hold in their head to read a program correctly, and a program whose meaning
+turns on one is not readable at the Python-literate baseline this surface
+targets. The author who hit the collision can rename in one edit; the reader who
+does not know the rule silently misreads the argument.
+
+### F.5 Migration
+
+Every `.lara` source in the repository was migrated in the same commit as the
+restriction that required it, so the suite never went red.
+
+- **10 spellings across 7 of 109 tracked `.lara` files** — all of them F.3's
+  hole spelling, and all of them the *equal* form `open X as X`:
+  `corpus-units/bam/C05`, `corpus-units/fre/C01`,
+  `corpus-units/rebench-restricted_mlm/C14`,
+  `corpus-units/rebench-triton_cumsum/C09` (one line each), and the three
+  rebuttal-replay examples `examples/rebuttal-replay/round0`, `round1`,
+  `round2` (two lines each).
+- **F.2 required no source migration**: no committed source attaches a
+  `discharge` or `open` line to a bare `leaf(…)` support term.
+- **F.4 required no source migration and cannot fire on the corpus**: no
+  tracked `.lara` file has a name that is both a declared leaf id and an
+  argument id. Acceptance is unchanged corpus-wide.
+
+**Zero derived semantic artifacts changed.** Verified by explicit pathspec diff
+over `corpus-units/**/*.core.sexp`, `corpus-units/**/expected.json`,
+`examples/**/*.core.sexp`, `examples/**/expected.json`, `fixtures/mutants` and
+`measurements/frozen` — empty. The authored `.lara` sources moved, so their
+containing trees re-pin (intentional, and recorded in
+`docs/m5-freeze-checklist.md` as provenance):
+
+| tree | `@0.6` | `@0.7` |
+| --- | --- | --- |
+| `corpus-units/` | `1dc20ea9d79adb2690731a66216dae828a100cf3` | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` |
+| `examples/` | `4ab6b5f480d9e3bddd94b17908d1c6a910b7944f` | `9e6291fbf1a53703092123a4550ab2099cbed52c` |
+
+The two frozen trees that hold no `.lara` source are byte-identical and did not
+move: `fixtures/mutants/` = `fd7142072d58da4d35642cbad6f144c970627afa`,
+`measurements/frozen/` = `a067c921e0142eae69b34ed500ff18c7efea1bed`.
+
+**No measurement re-run is owed.** The measurement harness consumes
+`.core.sexp` bytes, every one of which is unchanged, so the headline numbers of
+record stand as measured: **564/564** class match, **564/564** `lean_agree`,
+**60/60** replay.

@@ -812,3 +812,12 @@ entries:
     - "Did NOT flag a contradiction against C33: the new evidence confirms the existing wording's intent and sharpens its Conditions. Routed as a Stage 4 content revision with full before/after, not as an unresolved decision node."
     - "Did NOT change C33's Status. Empirical resolution reinforced an already-supported claim; there is no transition to make."
     - "Left the effect/noise separation in Conditions rather than the Statement, per the schema: the Statement stays a mechanism claim and carries no run numbers."
+- turn: "2026-08-20_001#1"
+  notes:
+    - "Routed N196 with provenance: user. The three restrictions and their design decisions came from the researcher's eng-reviewed plan; only the implementation was ai-executed."
+    - "Crystallized O76 -> H15 on artifact-commitment (commit 20a5bb8 exists solely because of the observation), not on affirmation. Provenance stays ai-suggested; the researcher never spoke to it."
+    - "Did NOT crystallize O77. The sweep procedure worked once here, on one release; 'generalizes into a standing procedure' is exactly the unearned generalization staging exists to hold. No closure signal fired."
+    - "Recorded N197 as an experiment rather than folding it into N196's evidence. The acceptance-preservation result is falsifiable and was measured, not assumed - the zero-collision scan could have come back non-zero and forced a corpus migration."
+    - "Touched no claim. @0.7 restricts the surface and changes no judgment, no AST, and no wire byte, so nothing in claims.md bears on it; recording a claim here would manufacture research content out of an engineering release."
+    - "Revised concepts.md notation as terminology drift rather than flagging a contradiction: the concept's definition was still correct, only the notation named a spelling the parser now rejects."
+    - "Left the H15 sensitivity at medium rather than high. It cost one equation and changed no diagnostic, but the class it closes is the same one #135 was filed for."

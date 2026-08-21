@@ -465,16 +465,19 @@ elabTerm env priors aid term = case term of
     assurance' <- lowerArgCert env priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
 
--- | The one namespace lookup shared by the @lara-syntax\@0.5@ θ references
--- ('resolveArgRef') and the @lara-syntax\@0.6@ certificate premise-slot
--- references (#105): which declared leaves and which prior arguments carry
--- this source name.
+-- | The one namespace lookup shared by every argument-body source reference:
+-- the @lara-syntax\@0.5@ θ references ('resolveArgRef'), the @\@0.6@
+-- certificate premise-slot references ('certSlotResolver', #105), and the
+-- @\@0.7@ discharge targets ('resolveDischargeRef', #129). It answers which
+-- declared leaves and which prior arguments carry this source name, matched on
+-- the bare source name, in declaration order.
 --
--- Callers own their own collision policy and error family — this helper only
--- answers the lookup — so the namespace rule (declared leaves and prior
--- arguments, matched on the bare source name, in declaration order) has
--- exactly one home for when the discharge-shadowing TODO later unifies that
--- collision policy.
+-- All three callers now share one collision policy on top of that lookup: a
+-- name carried by both a declared leaf and a prior argument is ambiguous and
+-- is rejected, never silently resolved to either. #129 closed the last
+-- carve-out (discharge targets used to prefer the leaf); grammar Appendix F.4
+-- records the unified rule. Callers still keep their own error /family/, since
+-- each names a different surface position.
 refMatches
   :: Env
   -> [(ArgId, SupportTerm)]
@@ -682,10 +685,9 @@ resolveDischarges
   -> Either ElabError [(QuestionId, SupportTerm)]
 resolveDischarges env priors aid = mapM one
   where
-    one (q, SLeaf (LeafId ref))
-      | LeafId ref `elem` envLeafIds env = Right (q, SLeaf (LeafId ref))
-      | Just t <- lookup (ArgId ref) priors = Right (q, t)
-      | otherwise = Left (UnresolvedDischarge aid q ref)
+    one (q, SLeaf (LeafId ref)) = do
+      target <- resolveDischargeRef env priors aid q ref
+      pure (q, target)
     -- The parser only ever produces 'SLeaf' discharge targets; a non-leaf
     -- sub-term is passed through unchanged (totality).
     one (q, t) = Right (q, t)
@@ -700,13 +702,35 @@ resolveArgDischarges
 resolveArgDischarges env priors aid = mapM one
   where
     one (q, ArgRef ref) = do
-      target <- resolveDischargeRef q ref
+      target <- resolveDischargeRef env priors aid q ref
       pure (q, target)
 
-    resolveDischargeRef q ref
-      | LeafId ref `elem` envLeafIds env = Right (SLeaf (LeafId ref))
-      | Just t <- lookup (ArgId ref) priors = Right t
-      | otherwise = Left (UnresolvedDischarge aid q ref)
+-- | Resolve one @discharge q with ref@ target, for both payload forms: the
+-- explicit one ('resolveDischarges', where the parser spells the target
+-- @'SLeaf' ('LeafId' ref)@) and the inferred one ('resolveArgDischarges',
+-- where it arrives as @'ArgRef' ref@). One function so the two surfaces cannot
+-- drift apart.
+--
+-- The name scope and the collision policy both come from 'refMatches' — the
+-- same ones a θ reference ('resolveArgRef') and a certificate premise slot
+-- ('certSlotResolver') see. Before #129 this position silently preferred the
+-- declared leaf when a name carried both; it is now an 'AmbiguousDischarge'.
+-- "Prior" is whatever 'elabOne' has accumulated, i.e. strictly earlier in
+-- declaration order, so a discharge naming a /later/ argument is unresolved,
+-- not a forward reference.
+resolveDischargeRef
+  :: Env
+  -> [(ArgId, SupportTerm)]
+  -> ArgId
+  -> QuestionId
+  -> String
+  -> Either ElabError SupportTerm
+resolveDischargeRef env priors aid q ref =
+  case refMatches env priors ref of
+    ([(leafId, _)], []) -> Right (SLeaf leafId)
+    ([], [(_, term)]) -> Right term
+    ([], []) -> Left (UnresolvedDischarge aid q (ArgRef ref))
+    _ -> Left (AmbiguousDischarge aid q (ArgRef ref))
 
 -- | Validate (and reclassify) the announced argument conclusion. The checker
 -- consumes only the support term's own @concl(w)@, so this never changes the

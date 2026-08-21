@@ -12,8 +12,9 @@ contract every module implements._
 implemented.** Since the M3 note, the core moved to **`lara-core@0.2`** (a
 declared many-sorted signature carried in `Unit` and enforced in `checkUnit`
 stage 2, making R2 a real rejection class — `spec.md` §3.4), the authoring
-surface reached **`lara-syntax@0.6`** (`docs/lara-surface-grammar.md`
-Appendices A–E), and the deterministic evaluation corpus froze at tag
+surface reached **`lara-syntax@0.7`** (`docs/lara-surface-grammar.md`
+Appendices A–F; `@0.7` is the surface-strictness release — it removes three
+spellings and adds none, so the core and the wire are untouched), and the deterministic evaluation corpus froze at tag
 `m5-freeze-v4` (`m5-freeze-checklist.md`). Layers added beyond the M3 spine:
 `Lara.Admission` (the `.lara` source-boundary admission judgment,
 `policy-admission-calculus-decision.md`), the `ord@1` and `ra@1` strict backends

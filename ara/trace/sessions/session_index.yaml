@@ -402,3 +402,10 @@ sessions:
   events_count: 7
   claims_touched: [C33]
   open_threads: 3
+- id: 2026-08-20_001
+  date: '2026-08-20'
+  summary: 'Executed the lara-syntax@0.7 surface-strictness batch (#135, #133, #129): migrated the ten affected corpus spellings alongside the restrictions, proved acceptance-preservation with an empty frozen-artifact diff across ten green gates, wrote grammar Appendix F, and closed a fall-through the issue had not named.'
+  turn_count: 1
+  events_count: 5
+  claims_touched: []
+  open_threads: 2

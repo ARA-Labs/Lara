@@ -1,5 +1,5 @@
 -- | The concrete @.lara@ surface syntax: parser and label-preserving printer
--- (@lara-syntax\@0.5@, additive over the frozen @0.1@ grammar in
+-- (@lara-syntax\@0.7@, over the frozen @0.1@ grammar in
 -- @docs/lara-surface-grammar.md@).
 --
 -- == Live surface versions
@@ -18,6 +18,24 @@
 -- @\@0.4@ adds Appendix C's ordered @let name = term@ table and @{name}@
 -- interpolation. Bindings round-trip as authored and are consumed once, before
 -- the @\@0.3@ comparison pass; neither surface reaches 'Unit'.
+--
+-- @\@0.7@ is a /surface strictness/ release: it removes surface, it does not
+-- add any. Its one invariant is that every authored token must change the
+-- semantic object or be rejected with a located error. Two parser-side
+-- consequences live in this module:
+--
+--   * #135 — @discharge@ and @open@ under a bare @leaf(…)@ are parse errors,
+--     not silently dropped lines. This extends App. A.1's existing ruling on
+--     @assurance@ to its two siblings, for the same reason: the checker has no
+--     rule to attach them to, and dropping them would mislead the author.
+--   * #133 — a hole is spelled @open q@. The retired @open q as o@ form named
+--     the same thing twice (§6.1 reads a hole's 'ObligationId' /as/ the
+--     question it leaves open), so the second slot could only ever be
+--     redundant or misleading; a trailing @as …@ is now a located error
+--     carrying its repair.
+--
+-- Nothing here touches @lara-core@, 'Lara.AST', or the wire: the surface
+-- version never reaches the kernel, so every derived byte is unchanged.
 --
 -- Expansion deliberately does __not__ happen here: spec result 12
 -- (@parse ∘ print = id@) is stated on the presentation AST, so bindings and a
@@ -72,23 +90,21 @@
 --   * @discharge q with ref@            ↦ a shallow leaf target in an explicit
 --     rule or an 'ArgRef' target in an inferred rule.
 --
--- On a rule application — explicit or inferred — @open q as o@ lines are
--- retained as obligation ids alone: the parser discards @q@, and the printer
--- re-emits each hole as @open o as o@. That is exact rather than lossy, because
--- §6.1 reads a hole's 'ObligationId' /as/ the question it leaves open
--- (@holeNames@ in "Lara.SupportTerm"), so @o@ names the question actually in
--- force and @q@ is never consulted after parsing. Printing normalizes a
--- divergent @q@ to @o@; see the hole accounting in spec §4.2. The printer is
--- total on every 'ArgInstantiation'.
+-- On a rule application — explicit or inferred — a hole is authored and
+-- printed as @open q@ (@\@0.7@, #133): one identifier, stored as its
+-- 'ObligationId'. §6.1 reads that id /as/ the question the hole leaves open
+-- (@holeNames@ in "Lara.SupportTerm"), so the single name is the whole
+-- content of the line and there is no second identity to record. The retired
+-- @open q as o@ form is rejected with the repair, whether or not @q@ and @o@
+-- agree. The printer is total on every 'ArgInstantiation'.
 --
--- On a bare @leaf(…)@ support term nothing is retained to print: @argBody@
--- accepts @discharge@ and @open@ lines under any instantiation, but
--- 'addArgDischarge' and 'addArgHole' fall through on 'SLeaf' and drop the line
--- entirely, id and all. @parse ∘ print = id@ still holds — the line never
--- reaches the AST — but the author's text is silently discarded, which is the
--- opposite of App. A.1's ruling on the sibling case: @assurance@ on a bare
--- @leaf(…)@ is a /parse error/, because "silently dropping it would mislead the
--- author". Pre-existing (#106), tracked as #135.
+-- On a bare @leaf(…)@ support term there is nowhere to attach a body line, so
+-- @argBody@ rejects all three (@\@0.7@, #135): 'addArgDischarge', 'addArgHole'
+-- and 'setArgAssurance' return a @Left@ that @argBody@ turns into a located
+-- 'ParseError' at the keyword — extending to the first two what App. A.1
+-- already required for @assurance@. None of the three has a silent
+-- fall-through equation, so the wart cannot be re-created by a caller that
+-- skips the parser's check.
 module Lara.Syntax
   ( -- * Located parse errors (spec §10.1 R14)
     ParseError (..)
@@ -1055,57 +1071,93 @@ inferredRuleP rid = do
   pure (InferTheta rid refs [] [] AssuranceNone)
 
 -- | Fold @discharge@\/@open@\/@assurance@ lines into the support payload.
+--
+-- @\@0.7@ (#135): every body line must reach the AST or be rejected. A
+-- @discharge@ or @open@ line under a bare @leaf(…)@ has nothing to attach to,
+-- so it is a /located/ parse error at the keyword — the same ruling App. A.1
+-- already makes for @assurance@. 'peekIdent' has consumed the preceding
+-- trivia, so 'getPosition' here is the keyword's own line\/column.
+--
+-- @\@0.7@ (#133): a hole is spelled @open q@ and nothing else. A trailing
+-- @as …@ is the retired @\@0.6@ spelling and is reported with its repair.
 argBody :: ArgInstantiation -> P ArgInstantiation
 argBody base = go base False
   where
     go acc seenAssurance = do
       mw <- peekIdent
+      pos <- getPosition
       case mw of
         Just "discharge" -> do
           keyword "discharge"
           q <- identifier
           keyword "with"
           ref <- identifier
-          go (addArgDischarge acc (QuestionId q) (ArgRef ref)) seenAssurance
+          case addArgDischarge acc (QuestionId q) (ArgRef ref) of
+            Left msg -> failAtP pos msg
+            Right acc' -> go acc' seenAssurance
         Just "open" -> do
           keyword "open"
-          _q <- identifier
-          keyword "as"
           o <- identifier
-          go (addArgHole acc (ObligationId o)) seenAssurance
+          suffix <- peekIdent
+          case suffix of
+            Just "as" -> failP "lara-syntax@0.7 uses 'open q'; remove 'as …'"
+            _ -> case addArgHole acc (ObligationId o) of
+              Left msg -> failAtP pos msg
+              Right acc' -> go acc' seenAssurance
         Just "assurance" ->
           if seenAssurance
             then failP "duplicate assurance line in arg block"
             else case acc of
-              ExplicitTheta (SRule {}) -> do
+              -- Rejected before 'assuranceP' runs, so a bare leaf reports its
+              -- own ruling rather than a malformed-value error underneath it.
+              ExplicitTheta (SLeaf _) ->
+                failAtP pos "assurance requires a rule application, not a bare leaf"
+              _ -> do
                 assurance <- assuranceP
-                go (setArgAssurance acc assurance) True
-              InferTheta _ _ _ _ _ -> do
-                assurance <- assuranceP
-                go (setArgAssurance acc assurance) True
-              _ -> failP "assurance requires a rule application, not a bare leaf"
+                case setArgAssurance acc assurance of
+                  Left msg -> failAtP pos msg
+                  Right acc' -> go acc' True
         _ -> pure acc
 
-addArgDischarge :: ArgInstantiation -> QuestionId -> ArgRef -> ArgInstantiation
+-- | Attach a @discharge@ line, or say why it cannot attach. The three
+-- equations are the three 'ArgInstantiation' shapes, so the function is total
+-- without a catch-all: a caller cannot re-create #135 by falling through.
+addArgDischarge
+  :: ArgInstantiation -> QuestionId -> ArgRef -> Either String ArgInstantiation
 addArgDischarge (ExplicitTheta (SRule r th pr ds hs as)) q (ArgRef ref) =
-  ExplicitTheta (SRule r th pr (ds ++ [(q, SLeaf (LeafId ref))]) hs as)
+  Right (ExplicitTheta (SRule r th pr (ds ++ [(q, SLeaf (LeafId ref))]) hs as))
 addArgDischarge (InferTheta r refs ds hs as) q ref =
-  InferTheta r refs (ds ++ [(q, ref)]) hs as
-addArgDischarge inst _ _ = inst
+  Right (InferTheta r refs (ds ++ [(q, ref)]) hs as)
+addArgDischarge (ExplicitTheta (SLeaf _)) _ _ =
+  Left "discharge requires a rule application, not a bare leaf"
 
-addArgHole :: ArgInstantiation -> ObligationId -> ArgInstantiation
+-- | Attach an @open@ hole, or say why it cannot attach (see 'addArgDischarge'
+-- for why there is no catch-all equation).
+addArgHole :: ArgInstantiation -> ObligationId -> Either String ArgInstantiation
 addArgHole (ExplicitTheta (SRule r th pr ds hs as)) o =
-  ExplicitTheta (SRule r th pr ds (hs ++ [o]) as)
+  Right (ExplicitTheta (SRule r th pr ds (hs ++ [o]) as))
 addArgHole (InferTheta r refs ds hs as) o =
-  InferTheta r refs ds (hs ++ [o]) as
-addArgHole inst _ = inst
+  Right (InferTheta r refs ds (hs ++ [o]) as)
+addArgHole (ExplicitTheta (SLeaf _)) _ =
+  Left "open requires a rule application, not a bare leaf"
 
-setArgAssurance :: ArgInstantiation -> Assurance -> ArgInstantiation
+-- | Attach an @assurance@ value, or say why it cannot attach (see
+-- 'addArgDischarge' for why there is no catch-all equation).
+--
+-- @argBody@ rejects the bare-leaf shape before parsing the value, so this
+-- @Left@ is not the reporting path in practice. It is here because App. A.1's
+-- ruling must not depend on a parser-side convention any more than #135's
+-- does: with a silent @inst@ fall-through, a future caller reaching this
+-- helper directly would drop the author's @assurance@ exactly the way
+-- 'addArgDischarge' used to drop a @discharge@.
+setArgAssurance
+  :: ArgInstantiation -> Assurance -> Either String ArgInstantiation
 setArgAssurance (ExplicitTheta (SRule r th pr ds hs _)) assurance =
-  ExplicitTheta (SRule r th pr ds hs assurance)
+  Right (ExplicitTheta (SRule r th pr ds hs assurance))
 setArgAssurance (InferTheta r refs ds hs _) assurance =
-  InferTheta r refs ds hs assurance
-setArgAssurance inst _ = inst
+  Right (InferTheta r refs ds hs assurance)
+setArgAssurance (ExplicitTheta (SLeaf _)) _ =
+  Left "assurance requires a rule application, not a bare leaf"
 
 -- | @attackDecl@ / @posTarget@ (grammar §3, §7), producing the /presentation/
 -- 'SurfaceAttack': positions keep the spelling they were authored in (grammar
@@ -1865,11 +1917,12 @@ printRuleBody disch holes assurance =
     ++ openLines holes
     ++ assuranceLine assurance
 
--- | @open o as o@ per hole. The parser discards an @open@ line's
--- critical-question id and §6.1 reads the obligation id as that question
--- (module header), so both slots are the obligation id.
+-- | @open q@ per hole (@lara-syntax\@0.7@, #133). A hole has exactly one
+-- identity: §6.1 reads its 'ObligationId' /as/ the question it leaves open
+-- (@holeNames@ in "Lara.SupportTerm"), so one identifier is the whole content
+-- of the line and the retired @as o@ slot had nothing left to say.
 openLines :: [ObligationId] -> [String]
-openLines holes = ["  open " ++ o ++ " as " ++ o | ObligationId o <- holes]
+openLines holes = ["  open " ++ o | ObligationId o <- holes]
 
 dischargeRef :: SupportTerm -> String
 dischargeRef (SLeaf (LeafId l)) = l

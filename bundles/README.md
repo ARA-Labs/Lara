@@ -42,7 +42,7 @@ bundle today is `bundles/walking-skeleton/` (§2).
   `statusC` reports `gap`. The hole decision (which questions, why, from which
   source node) is recorded in the provenance log (§7). This is the only
   acceptance-compatible reading of "explicit hole creation" on the frozen
-  frontend; the alternative (emit `open … as …`) yields a reject verdict and
+  frontend; the alternative (emit an `open` line) yields a reject verdict and
   fails the B1 gate.
 
 ## 2. Directory layout
@@ -230,7 +230,7 @@ question's answer pattern (`randomization` → `randomized(Exp)`, `power` →
 hole**, lowered per §1 (hole lowering): the incomplete argument is **not
 emitted**, the claim's complete-support set stays empty (→ `gap`), and the
 hole is logged in provenance with question ids, the responsible source node,
-and rationale. (Surface `open … as …` is a checker rejection on the frozen
+and rationale. (A surface `open` line is a checker rejection on the frozen
 frontend — verified §1 — so it is never emitted.)
 
 **Task 5 — strict-backend / theory / certificate selection.** N/A (T1): no

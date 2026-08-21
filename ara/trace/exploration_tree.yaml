@@ -5015,3 +5015,88 @@ tree:
     - C33
   also_depends_on: [N192, N193]
   status: resolved
+
+- id: N196
+  type: decision
+  title: "lara-syntax@0.7: remove three silently-discarding surface forms rather than alias them"
+  provenance: user
+  timestamp: "2026-08-20T04:00"
+  choice: >
+    Ship #135, #133 and #129 as one surface release enforcing a single
+    invariant: every authored surface token must affect the semantic object or
+    trigger an explicit error. All three warts have the same shape - the parser
+    or elaborator accepts a token and then does not mean it. Bare-leaf
+    discharge/open lines become located parse errors (#135); the two-identifier
+    hole spelling `open q as o` collapses to `open q`, retiring the `as`
+    keyword (#133); and a discharge target naming both a declared leaf and a
+    prior argument becomes a hard AmbiguousDischarge instead of a silent
+    preference for the leaf (#129). No compatibility aliases: every .lara
+    source is in-repo, so the ten affected spellings migrated in the same
+    commit as the restriction that required them.
+  alternatives:
+    - "Carry compatibility aliases for the retired spellings - rejected: an alias keeps accepting the exact spelling whose misreading each fix exists to remove, and permanently doubles the spellings a reader must know."
+    - "Ship the three restrictions separately - rejected: they enforce one invariant and share one grammar appendix, one corpus sweep, and one freeze-record update."
+    - "Keep `open q as o` and have the elaborator check q == o - rejected in Appendix F.3: it preserves a second name that nothing downstream reads."
+  evidence:
+    - "docs/lara-surface-grammar.md Appendix F"
+    - "commit 62e23f9 (#135, #133 parser)"
+    - "commit d4da098 (#129 elaborator)"
+    - "commit 6992889 (Appendix F)"
+  also_depends_on: [N113]
+  status: resolved
+
+- id: N197
+  type: experiment
+  title: "@0.7 is acceptance-preserving on the frozen corpus"
+  provenance: ai-executed
+  timestamp: "2026-08-20T04:30"
+  result: >
+    All three restrictions narrow the accepted surface, so the risk was that a
+    committed source stops elaborating. It does not. Across 109 tracked .lara
+    files: 10 hole spellings in 7 files needed migration, all of them the equal
+    form `open X as X`; no source attaches a discharge or open line to a bare
+    leaf; and of 120 `discharge ... with ...` lines, zero name a reference that
+    is both a declared leaf and an argument id - so #129's new error cannot
+    fire on the corpus even ignoring declaration order. The frozen-artifact
+    pathspec diff against origin/main is empty: every corpus and example
+    .core.sexp and expected.json, the walking-skeleton emitted core and
+    verdict, fixtures/mutants and measurements/frozen are byte-identical.
+    fixtures/mutants stays fd7142072d58da4d35642cbad6f144c970627afa and
+    measurements/frozen stays a067c921e0142eae69b34ed500ff18c7efea1bed; only
+    corpus-units/ (1dc20ea -> cadb5fa) and examples/ (4ab6b5f -> 9e6291f)
+    re-pin, and only because authored sources moved. Ten gates green: 428
+    property tests, presentation parity 73 rows, differential 581 pass / 56
+    negatives, admission 20/20, walking-skeleton golden, byte-identical replay,
+    tamper, lake build, and the axiom audit with zero sorry. Headline numbers
+    of record are unchanged (564/564 class match, 564/564 lean_agree, 60/60
+    replay) and no measurement re-run is owed.
+  evidence:
+    - "docs/lara-surface-grammar.md Appendix F.5"
+    - "docs/m5-freeze-checklist.md post-@0.7 note"
+  also_depends_on: [N196]
+  status: resolved
+
+- id: N198
+  type: decision
+  title: "Totality-with-error must cover every sibling helper, not only the ones the issue names"
+  provenance: ai-suggested
+  timestamp: "2026-08-20T05:00"
+  choice: >
+    #135's design decision D1 required addArgDischarge and addArgHole to return
+    Either String ArgInstantiation with no catch-all equation, so that a caller
+    reaching the helper directly cannot re-create the silent drop by bypassing
+    the parser's check. Independent spec review found the third sibling,
+    setArgAssurance, still carried `setArgAssurance inst _ = inst` - the same
+    bypassable shape, for the rule Appendix A.1 had already settled. Closed it
+    in the same release: all three arg-body helpers are now total-with-error
+    with one equation per ArgInstantiation shape. argBody still rejects the
+    bare-leaf case before assuranceP runs, so the diagnostic and its position
+    are unchanged; the helper's Left is the structural guarantee, not the
+    reporting path.
+  alternatives:
+    - "Leave setArgAssurance alone as out of scope - rejected: it makes A.1's ruling depend on a parser-side convention, which is exactly the dependency D1 removes for the other two."
+    - "Move the bare-leaf check out of argBody into the helper - rejected: it would report a malformed-value error underneath the bare-leaf rejection when both are wrong."
+  evidence:
+    - "commit 20a5bb8"
+  also_depends_on: [N196]
+  status: resolved

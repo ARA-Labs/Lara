@@ -58,16 +58,19 @@ reservedWords =
   , "status", "rule", "mode", "premises", "conclusion", "question", "contrary"
   , "exception", "admission", "theory", "nl", "formal", "binding", "kind", "provenance"
   , "refs", "author", "rationale", "audit-status", "by", "from", "supports"
-  , "challenges", "discharge", "with", "open", "as", "assurance", "rebut", "undercut"
+  , "challenges", "discharge", "with", "open", "assurance", "rebut", "undercut"
   , "undermine", "allow-trusted", "certifiers", "cert", "trusted", "none"
   , "strict", "defeasible", "observed", "attested", "assumed", "certified"
   , "user", "ai-executed", "checker", "unreviewed", "reviewed", "disputed"
   , "mandatory", "optional", "admit", "quarantine", "reject", "true", "false"
   , "duplicate-reports"
-    -- lara-syntax@0.5 (grammar §1.4; Apps. B.7 and C.1). This list MIRRORS
+    -- lara-syntax@0.7 (grammar §1.4; Apps. B.7, C.1 and F.3). This list MIRRORS
     -- §1.4 and must be kept in sync with it: a keyword missing here lets the
     -- generator emit a colliding identifier, and the round-trip property then
-    -- fails for a reason that has nothing to do with the grammar.
+    -- fails for a reason that has nothing to do with the grammar. @0.7
+    -- (App. F.3) deletes `as` from §1.4 — `open q` is the sole hole spelling —
+    -- so it is deliberately absent above and 'unit_asIsAnOrdinaryIdentifier'
+    -- pins that it is spellable again.
   , "measurand", "comparison", "comparison-scheme", "recheck", "bridge"
   , "result", "baseline", "relation", "claims", "on", "where", "cell"
   , "sort", "con", "pred", "Num", "Str"
@@ -269,7 +272,7 @@ genSupportTerm =
             }
     ]
 
--- | Open obligations for an @open o as o@ line. Weighted so hole-bearing rule
+-- | Open obligations for an @open q@ line. Weighted so hole-bearing rule
 -- instances are common enough for 'prop_programRoundTrip' to exercise the
 -- printer's @open@ path, which issue #127 showed it had been skipping.
 genHoles :: Gen [ObligationId]
@@ -721,9 +724,10 @@ prop_spacedValueReferenceRoundTrip =
 --
 -- Anchored rather than generated: the property above proves @parse ∘ print =
 -- id@ on the AST, which a printer emitting some /other/ hole spelling would
--- also satisfy, since the parser discards an @open@ line's first identifier.
--- Only a byte assertion pins @open o as o@ — the spelling every committed
--- hole-bearing unit already uses (e.g. @corpus-units\/bam\/C05\/unit.lara@).
+-- also satisfy, since @parse ∘ print = id@ constrains the pair, not the
+-- spelling. Only a byte assertion pins @open q@ — the @lara-syntax\@0.7@
+-- spelling (App. F.3) every committed hole-bearing unit now uses (e.g.
+-- @corpus-units\/bam\/C05\/unit.lara@).
 prop_openHoleLinesRoundTrip :: Property
 prop_openHoleLinesRoundTrip =
   once $
@@ -735,12 +739,12 @@ prop_openHoleLinesRoundTrip =
             , ""
             , "arg a1 : supports(c) by controlled_comparison(bam, advi)"
             , "  discharge baseline_parity with e2"
-            , "  open scope_match as scope_match"
+            , "  open scope_match"
             , "  assurance = trusted"
             , ""
             , "arg a2 : supports(c) by controlled_comparison from [a1]"
-            , "  open confound_control as confound_control"
-            , "  open environment_match as environment_match"
+            , "  open confound_control"
+            , "  open environment_match"
             , ""
             , "status c"
             ]
@@ -756,57 +760,95 @@ prop_openHoleLinesRoundTrip =
                   concatMap argHoleIds (programDecls program)
                     === map ObligationId ["scope_match", "confound_control", "environment_match"]
               ]
-  where
-    argHoleIds d = case d of
-      DeclArg a -> case argInstantiation a of
-        ExplicitTheta (SRule {srHoles = hs}) -> hs
-        ExplicitTheta (SLeaf _) -> []
-        InferTheta _ _ _ hs _ -> hs
-      _ -> []
 
--- | The parser drops an @open@ line's critical-question id, so a divergent
--- @q@ normalizes to the obligation id on print. That is the deliberate
--- consequence of §6.1 reading a hole's 'ObligationId' /as/ the question name
--- (@holeNames@); pinning it here keeps the choice visible if anyone revisits
--- it.
+-- | @lara-syntax\@0.7@ (App. F.3, #133): @open q@ is the sole hole spelling.
 --
--- Note the separate wart this exposes but does not fix: the surface accepts
--- @q \/= o@ and silently checks @o@, so a divergent spelling means something
--- other than it reads. Narrowing that is a surface restriction needing its own
--- presentation-version treatment — issue #133, out of scope for #127.
-prop_openHoleQuestionNormalizes :: Property
-prop_openHoleQuestionNormalizes =
+-- The retired @open q as o@ form named one thing twice — §6.1 reads a hole's
+-- 'ObligationId' /as/ the question it leaves open (@holeNames@ in
+-- "Lara.SupportTerm"), and no reporting path ever consulted an independent
+-- obligation name — so the second slot could only be redundant (@q == o@) or
+-- actively misleading (@q \/= o@). @0.7 deletes it and reports the repair.
+--
+-- This replaces @0.6's @prop_openHoleQuestionNormalizes@, which pinned the
+-- printer normalizing a divergent @q@ to @o@; that normalization no longer has
+-- an input to perform. Two things are asserted: @open q@ parses to the hole
+-- it names and round-trips, and /both/ legacy suffix shapes — equal and
+-- divergent — are rejected at the exact position of the @as@ token with the
+-- exact repair message. The position matters: a bare @Left@ assertion would
+-- also pass for an error raised anywhere else in the block.
+prop_openHoleSingleSpelling :: Property
+prop_openHoleSingleSpelling =
   once $
-    let divergent =
+    let accepted = holeSource "  open some_question"
+        legacyEqual = holeSource "  open some_question as some_question"
+        legacyDivergent = holeSource "  open some_question as some_obligation"
+        -- The @as@ token starts at column 22 of line 6:
+        -- 2 spaces + "open" + 1 + "some_question" (13) + 1 = 21 columns before it.
+        expectedSuffixError =
+          Left (ParseError 6 22 "lara-syntax@0.7 uses 'open q'; remove 'as …'")
+     in conjoin
+          [ counterexample "open q parses to the hole it names" $
+              case parseProgram accepted of
+                Left err -> counterexample (show err) False
+                Right program ->
+                  concatMap argHoleIds (programDecls program)
+                    === [ObligationId "some_question"]
+          , counterexample "open q round-trips byte-identically" $
+              case parseProgram accepted of
+                Left err -> counterexample (show err) False
+                Right program -> printProgram program === accepted
+          , counterexample "open q as q is a located @0.7 rejection" $
+              (parseProgram legacyEqual >> pure ()) === expectedSuffixError
+          , counterexample "open q as o is the same located rejection" $
+              (parseProgram legacyDivergent >> pure ()) === expectedSuffixError
+          ]
+  where
+    holeSource openLine =
+      unlines
+        [ "artifact hole_fixture at sha256:hole-fixture"
+        , "policy hole-policy"
+        , "use backends []"
+        , ""
+        , "arg a1 : supports(c) by r(x)"
+        , openLine
+        , ""
+        , "status c"
+        ]
+
+-- | @lara-syntax\@0.7@ (App. F.3): deleting @as@ from the §1.4 vocabulary hands
+-- the spelling back to authors. Deterministic rather than generated —
+-- 'reservedWords' excludes @as@ from 'genIdent', so the round-trip property
+-- can never reach this case on its own.
+unit_asIsAnOrdinaryIdentifier :: Property
+unit_asIsAnOrdinaryIdentifier =
+  once $
+    let source =
           unlines
-            [ "artifact hole_fixture at sha256:hole-fixture"
-            , "policy hole-policy"
+            [ "artifact as at sha256:as-fixture"
+            , "policy as"
             , "use backends []"
+            , "let as = as"
             , ""
-            , "arg a1 : supports(c) by r(x)"
-            , "  open some_question as some_obligation"
+            , "leaf as : as(as)"
+            , "  kind = observed"
+            , "  provenance = user"
+            , "  refs = []"
             , ""
-            , "status c"
+            , "arg as : supports(as) by as(as)"
+            , "  discharge as with as"
+            , "  open as"
+            , ""
+            , "status as"
             ]
-        normalized =
-          unlines
-            [ "artifact hole_fixture at sha256:hole-fixture"
-            , "policy hole-policy"
-            , "use backends []"
-            , ""
-            , "arg a1 : supports(c) by r(x)"
-            , "  open some_obligation as some_obligation"
-            , ""
-            , "status c"
-            ]
-     in case (parseProgram divergent, parseProgram normalized) of
-          (Right p, Right q) ->
+     in case parseProgram source of
+          Left err -> counterexample (show err) False
+          Right program ->
             conjoin
-              [ counterexample "both spellings parse to the same AST" $ p === q
-              , counterexample "print normalizes q to the obligation id" $
-                  printProgram p === normalized
+              [ counterexample "as parses in every identifier position" $
+                  printProgram program === source
+              , counterexample "the hole is the identifier as" $
+                  concatMap argHoleIds (programDecls program) === [ObligationId "as"]
               ]
-          (l, r) -> counterexample (show (l, r)) False
 
 valueBindingFixture :: [ValueBinding] -> Program
 valueBindingFixture bindings =
@@ -1098,6 +1140,29 @@ programNegatives =
         ++ "  assurance = trusted\n"
     , "bare leaf"
     )
+    -- lara-syntax@0.7 (#135): App. A.1's ruling for @assurance@ now covers its
+    -- two siblings. A bare @leaf(…)@ has no rule to attach a discharge or a
+    -- hole to, so the parser rejects the line instead of dropping it.
+  , ( "discharge on bare leaf"
+    , assuranceProgram
+        "arg a : supports(c) by leaf(e)\n"
+        ++ "  discharge q with e2\n"
+    , "discharge requires a rule application, not a bare leaf"
+    )
+  , ( "open on bare leaf"
+    , assuranceProgram
+        "arg a : supports(c) by leaf(e)\n"
+        ++ "  open q\n"
+    , "open requires a rule application, not a bare leaf"
+    )
+    -- lara-syntax@0.7 (#133): the retired two-name hole spelling is reported
+    -- with its repair rather than silently accepted.
+  , ( "legacy open-as suffix"
+    , assuranceProgram
+        "arg a : supports(c) by r()\n"
+        ++ "  open q as q\n"
+    , "lara-syntax@0.7 uses 'open q'; remove 'as …'"
+    )
   , ( "unknown assurance"
     , assuranceProgram
         "arg a : supports(c) by r()\n"
@@ -1261,6 +1326,15 @@ isRight :: Either a b -> Bool
 isRight (Right _) = True
 isRight _ = False
 
+-- | Every 'ObligationId' an @arg@ declaration left open, in source order.
+argHoleIds :: Decl -> [ObligationId]
+argHoleIds d = case d of
+  DeclArg a -> case argInstantiation a of
+    ExplicitTheta (SRule {srHoles = hs}) -> hs
+    ExplicitTheta (SLeaf _) -> []
+    InferTheta _ _ _ hs _ -> hs
+  _ -> []
+
 -- | Assert a parse failed with a reason mentioning the given substring.
 leftWith :: String -> Either ParseError a -> Bool
 leftWith needle e = case e of
@@ -1283,7 +1357,8 @@ syntaxSpecProps =
   , ("syntax non-empty value-binding table round-trip", quickCheckResult prop_nonEmptyValueBindingsRoundTrip)
   , ("syntax spaced value reference round-trip", quickCheckResult prop_spacedValueReferenceRoundTrip)
   , ("syntax open hole lines round-trip (#127)", quickCheckResult prop_openHoleLinesRoundTrip)
-  , ("syntax open hole question normalizes (#127)", quickCheckResult prop_openHoleQuestionNormalizes)
+  , ("syntax open hole single spelling (#133)", quickCheckResult prop_openHoleSingleSpelling)
+  , ("syntax 'as' is an ordinary identifier (#133)", quickCheckResult unit_asIsAnOrdinaryIdentifier)
   , ("syntax arg assurance round-trip", quickCheckResult prop_argAssuranceRoundTrip)
   , ("syntax policy round-trip (result 12)", deepCheck prop_policyRoundTrip)
   , ("syntax @0.3/@0.4 program forms are covered", quickCheckResult prop_programFormCoverage)

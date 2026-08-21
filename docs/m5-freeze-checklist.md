@@ -80,6 +80,47 @@ run-local `empirical-v3` policy). Unlike prior row-3 movement the refresh
 re-pinned by `RunningExampleSpec` / `DifferentialSpec`. The differential gate
 row rose 580 → 581 (+1 S6 anchor; the refresh changes bytes, not counts)._
 
+_**Post-`lara-syntax@0.7` movement, still `m5-freeze-v4` (surface strictness,
+2026-08-20).** `lara-syntax@0.7` (grammar Appendix F) is a surface-only release:
+three restrictions on the `.lara` presentation surface, no `lara-core` change,
+no AST change, and no wire change. Migrating the controlled sources to the new
+`open q` hole spelling moved **10 lines in 7 of 109 tracked `.lara` files** —
+`corpus-units/bam/C05`, `corpus-units/fre/C01`,
+`corpus-units/rebench-restricted_mlm/C14`,
+`corpus-units/rebench-triton_cumsum/C09` (one line each), and
+`examples/rebuttal-replay/round0`, `round1`, `round2` (two lines each). All ten
+were the equal form `open X as X`, so the migration is textual.
+
+**No derived byte changed.** Verified by explicit pathspec diff over
+`corpus-units/**/*.core.sexp`, `corpus-units/**/expected.json`,
+`examples/**/*.core.sexp`, `examples/**/expected.json`, `fixtures/mutants` and
+`measurements/frozen` — empty. Rows 1 and 3's measured content is therefore
+unchanged, and `fixtures/mutants/` holds its v4 SHA exactly
+(`fd7142072d58da4d35642cbad6f144c970627afa`), as does `measurements/frozen/`
+(`a067c921e0142eae69b34ed500ff18c7efea1bed`).
+
+**Two source trees re-pin, intentionally**, because authored `.lara` sources
+live inside them. Both prior hashes are retained here as provenance:
+
+| tree | through `@0.6` | at `@0.7` |
+| --- | --- | --- |
+| `corpus-units/` | `1dc20ea9d79adb2690731a66216dae828a100cf3` | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` |
+| `examples/` | `4ab6b5f480d9e3bddd94b17908d1c6a910b7944f` | `9e6291fbf1a53703092123a4550ab2099cbed52c` |
+
+Record each anchor only after the final commit that touches its tree. The
+commit that records an anchor must not also modify that anchored tree; if it
+does, recompute the anchor from the resulting tree.
+
+(Row 3's table cell still carries the v4 anchor `2f7fa9ad…`; `examples/` has
+been classified as moved-since-v4 in the note above since S6 landed, and its
+measured goldens are the 11 worked-example files, all byte-identical.)
+
+**No measurement re-run is owed.** The harness consumes `.core.sexp` bytes,
+every one of which is unchanged, so the numbers of record stand as measured:
+564/564 class match, 564/564 `lean_agree`, 60/60 replay. The gate counts are
+also unchanged (differential 581 pass / 0 fail, admission 20/20,
+presentation-parity 73 rows)._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,
@@ -103,7 +144,7 @@ the git tree object SHA is itself the content hash of the tree.
 | # | Frozen input | Path | Count | Content anchor (git tree SHA) |
 | --- | --- | --- | --- | --- |
 | 1 | Seeded mutation suite (verdict + specified-status anchors; includes dedicated Σ-WF and `sigma` codec closeout fixtures) | `fixtures/mutants/` | 504 mutants (457 verdict/status-anchored + 47 codec-reject malformed negatives) | `fd7142072d58da4d35642cbad6f144c970627afa` |
-| 2 | Corpus units (T2, hand-lowered M0 sample; `lara-core@0.2` signatures; C04 carries the #57 `ra@1` certificate) | `corpus-units/` | 60 units | `1dc20ea9d79adb2690731a66216dae828a100cf3` |
+| 2 | Corpus units (T2, hand-lowered M0 sample; `lara-core@0.2` signatures; C04 carries the #57 `ra@1` certificate) | `corpus-units/` | 60 units | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` (was `1dc20ea9d79adb2690731a66216dae828a100cf3` through `@0.6`; the `@0.7` re-pin is source-only — see the note below) |
 | 3 | Worked examples (golden verdicts, both drivers; 11 measured examples plus additive demonstrators including S2–S5) | `examples/` | 11 measured examples (+ additive demonstrators) | `2f7fa9adf45fefe649f9a9ed59def3f3d2257fc0` |
 
 **Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs:380`,

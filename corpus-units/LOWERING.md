@@ -110,7 +110,8 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
   of magnitude beyond run noise), recording the judgment in the header;
   otherwise the unit is E2-style gap.
 - optional policy CQs: discharge when the annotation supports it; when unmet,
-  declare the hole explicitly with `open <question> as <question>` — the
+  declare the hole explicitly with `open <question>` (`lara-syntax@0.7`; the
+  hole carries the question's own name — grammar Appendix F.3) — the
   checker's question accounting (R5) requires EVERY rule question to be
   either discharged or opened, and an open OPTIONAL question is excluded from
   the obligation set (the arg stays complete, the claim's status is

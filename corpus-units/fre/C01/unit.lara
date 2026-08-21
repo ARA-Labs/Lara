@@ -68,7 +68,7 @@ arg a1 : supports(c01) by controlled_comparison(fre_all, sf, zero_shot_return, e
   discharge baseline_parity      with e2
   discharge measurement_validity with e3
   discharge variance_reported    with e4
-  open      scope_match          as scope_match
+  open      scope_match
 
 status c01
 

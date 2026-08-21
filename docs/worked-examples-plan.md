@@ -107,9 +107,10 @@ end-to-end pipeline test (leaf → scheme → support term → compile → groun
 
 ### E2 — `open-gap` (status: gap)
 
-E1 with `external_validity` left as an **open mandatory obligation** (`open external_validity as o1`).
+E1 with `external_validity` left as an **open mandatory obligation** (`open external_validity`;
+`lara-syntax@0.7`, grammar Appendix F.3 — a hole carries one name, the question it leaves open).
 Expected: the incomplete argument is excluded from the AF (`spec.md` §4.4, §8), no complete
-alternative exists, so `status C01 = gap` with located obligation `o1`. This is the corrected
+alternative exists, so `status C01 = gap` with located obligation `external_validity`. This is the corrected
 definition of `gap` as an explicit hole, *not* underivability (`popl-research-review.md` §2 #4).
 
 **Note — resolve the open definitional point first.** `spec.md` §8 leaves open what happens when a

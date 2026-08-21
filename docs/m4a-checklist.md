@@ -200,7 +200,8 @@ A0 records these; it does not resolve them. Resolution owners are noted.
    suite does not author a strict support term.
 
 3. **E2's gap mechanism is re-worded between §3 and A2.** `worked-examples-plan.md` §1/§3 describe E2's
-   gap as arising from an **open mandatory CQ** (`open external_validity as o1`). The M4a plan
+   gap as arising from an **open mandatory CQ** (`open external_validity`; spelled
+   `open external_validity as o1` at the time, retired at `lara-syntax@0.7` — grammar Appendix F.3). The M4a plan
    (decision #8 / Task A2) re-words this: a declared argument with an open mandatory CQ is an
    `IncompleteArgument` **rejection** (`Check.hs:179`), *not* a gap; the intended `gap` must instead come
    from a claim with **empty complete support** (`statusC = Gap iff null claimSupport`,

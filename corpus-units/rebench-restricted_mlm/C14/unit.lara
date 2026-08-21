@@ -71,7 +71,7 @@ leaf e3 : covers_scope(em05, restricted_primitive_mlm)
 arg a1 : supports(c14) by measurement(hand_rolled_reciprocal_nan, restricted_primitive_mlm, em05)
   discharge instrument_validity with e2
   discharge coverage            with e3
-  open      confound_control    as confound_control
+  open      confound_control
 
 status c14
 

@@ -2,7 +2,7 @@
 -- Currently mechanized:
 --   * the frozen nf/≡ carve-out (spec §9 result 11 / claim C01)  — Lara.Prop
 --   * the presentation-AST codec round-trip (spec §9 result 12): the complete
---     live presentation Program/Policy shape at lara-syntax@0.6 — every field of
+--     live presentation Program/Policy shape at lara-syntax@0.7 — every field of
 --     both top-levels, value bindings, inferred argument instantiations, and
 --     policySigma included — serializes to a structured
 --     S-expression and parses back exactly (parse ∘ print = id) — a metatheory

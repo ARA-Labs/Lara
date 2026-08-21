@@ -1238,6 +1238,242 @@ prop_negatives = once $ ioProperty $ do
       Right _ -> counterexample "expected Left, got Right" (property False)
 
 -- ---------------------------------------------------------------------------
+-- lara-syntax@0.7 (#129) — the discharge-target collision matrix
+-- ---------------------------------------------------------------------------
+
+-- | The two surfaces a @discharge q with x@ target can arrive on. An explicit
+-- rule application carries it as @'SLeaf' ('LeafId' x)@ (@resolveDischarges@);
+-- an inferred one carries it as @'ArgRef' x@ (@resolveArgDischarges@). #129
+-- put both on one resolver, so every row below is asserted on both.
+data DischargePayload = ExplicitPayload | InferredPayload
+  deriving (Eq, Show)
+
+-- | The citing argument's @by …@ spelling. Both reach @cited(safety_invariant,
+-- D)@ with @e1@ as the single premise; only the payload constructor differs.
+payloadSpelling :: DischargePayload -> String
+payloadSpelling ExplicitPayload = "cited(safety_invariant, D)"
+payloadSpelling InferredPayload = "cited from [e1]"
+
+-- | A one-rule policy with two same-shaped critical questions, so a row can
+-- author two discharge lines and observe which error is reported first.
+dischargePolicySource :: String
+dischargePolicySource =
+  unlines
+    [ "policy discharge-v1"
+    , "sort Property, Scope"
+    , "con safety_invariant : Property"
+    , "con other_invariant : Property"
+    , "con D : Scope"
+    , "pred holds(Property, Scope)"
+    , "pred audited(Property)"
+    , "rule cited(X, S)"
+    , "  mode       = defeasible"
+    , "  premises   = [ holds(X, S) ]"
+    , "  conclusion = holds(X, S)"
+    , "  question audit  : audited(X) (optional)"
+    , "  question audit2 : audited(X) (optional)"
+    ]
+
+-- | @leaf x@ — the declared-leaf half of the collision.
+dischargeLeafX :: [String]
+dischargeLeafX =
+  [ "leaf x : audited(safety_invariant)"
+  , "  kind       = attested"
+  , "  provenance = user"
+  , "  refs       = [evidence/audit.txt]"
+  , ""
+  ]
+
+-- | @arg x@ — the argument half of the collision. Placed before the citing
+-- argument it is a /prior/ argument; placed after it, it is not.
+dischargeArgX :: [String]
+dischargeArgX =
+  [ "arg x : supports(c_other) by cited(other_invariant, D)"
+  , "  assurance = trusted"
+  , ""
+  ]
+
+-- | The term @arg x@ elaborates to — what a prior-argument discharge target
+-- must resolve to, exactly.
+dischargeArgXTerm :: SupportTerm
+dischargeArgXTerm =
+  SRule
+    (RuleId "cited")
+    [(Param "X", con "other_invariant"), (Param "S", con "D")]
+    [SLeaf (LeafId "e2")]
+    []
+    []
+    AssuranceTrusted
+
+-- | Assemble one matrix row's program: a fixed spine, the declarations the row
+-- wants /before/ the citing argument, the citing argument with the row's
+-- @discharge@ lines, then the declarations it wants /after/ (the later-argument
+-- row is the only user of that slot).
+dischargeProgramSource :: DischargePayload -> [String] -> [String] -> [String] -> String
+dischargeProgramSource payload before dischargeLines after =
+  unlines $
+    [ "artifact paper_129 at sha256:" ++ replicate 64 'c'
+    , "policy discharge-v1"
+    , "use backends [nd@1]"
+    , ""
+    , "claim c1"
+    , "  nl      = \"The safety invariant holds for D\""
+    , "  formal  = holds(safety_invariant, D)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , ""
+    , "claim c_other"
+    , "  nl      = \"The other invariant holds for D\""
+    , "  formal  = holds(other_invariant, D)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , ""
+    , "leaf e1 : holds(safety_invariant, D)"
+    , "  kind       = attested"
+    , "  provenance = user"
+    , "  refs       = [evidence/safety.txt]"
+    , ""
+    , "leaf e2 : holds(other_invariant, D)"
+    , "  kind       = attested"
+    , "  provenance = user"
+    , "  refs       = [evidence/other.txt]"
+    , ""
+    ]
+      ++ before
+      ++ ["arg a_cite : supports(c1) by " ++ payloadSpelling payload]
+      ++ dischargeLines
+      ++ ["  assurance = trusted", ""]
+      ++ after
+      ++ ["status c1"]
+
+-- | Elaborate one assembled @#129@ program against 'dischargePolicySource'.
+elabDischarge :: String -> Either ElabError Unit
+elabDischarge src =
+  case (parseProgram src, parsePolicy dischargePolicySource) of
+    (Left e, _) -> error ("#129 fixture: program parse failed: " ++ show e)
+    (_, Left e) -> error ("#129 fixture: policy parse failed: " ++ show e)
+    (Right prog, Right pol) -> elaborate (registryOf pol) prog pol
+
+-- | What a row asserts: either the citing argument's @audit@ discharge target
+-- resolves to exactly this term, or elaboration fails with exactly this error.
+data DischargeExpect
+  = ResolvesTo SupportTerm
+  | FailsWith ElabError
+  deriving (Show)
+
+-- | The 10-row matrix: {explicit, inferred} payload × {leaf only, prior-arg
+-- only, both, absent, later-arg only}. Rows name the /same/ target @x@ in every
+-- case, so the only variable is which namespaces declare it.
+dischargeMatrix :: [(String, DischargePayload, String, DischargeExpect)]
+dischargeMatrix =
+  [ (label payload name, payload, dischargeProgramSource payload before body after, expect)
+  | payload <- [ExplicitPayload, InferredPayload]
+  , (name, before, after, expect) <- rows
+  ]
+  where
+    body = ["  discharge audit with x"]
+    label payload name = show payload ++ ": " ++ name
+    rows =
+      [ ( "declared leaf only resolves to that leaf"
+        , dischargeLeafX
+        , []
+        , ResolvesTo (SLeaf (LeafId "x"))
+        )
+      , ( "prior argument only resolves to that argument's term"
+        , dischargeArgX
+        , []
+        , ResolvesTo dischargeArgXTerm
+        )
+      , ( "leaf and prior argument together are AmbiguousDischarge"
+        , dischargeLeafX ++ dischargeArgX
+        , []
+        , FailsWith (AmbiguousDischarge (ArgId "a_cite") (QuestionId "audit") (ArgRef "x"))
+        )
+      , ( "neither namespace declares it: UnresolvedDischarge"
+        , []
+        , []
+        , FailsWith (UnresolvedDischarge (ArgId "a_cite") (QuestionId "audit") (ArgRef "x"))
+        )
+      , ( "later argument only is UnresolvedDischarge, never a forward reference"
+        , []
+        , dischargeArgX
+        , FailsWith (UnresolvedDischarge (ArgId "a_cite") (QuestionId "audit") (ArgRef "x"))
+        )
+      ]
+
+-- | #129: @discharge q with x@ resolves against declared leaves and /prior/
+-- arguments under one collision policy, on both payload surfaces.
+--
+-- Before this, a name carried by both namespaces silently resolved to the leaf
+-- — the last carve-out in a reference namespace where the θ resolver
+-- ('ThetaReferenceAmbiguous') and the certificate premise-slot resolver
+-- ('CertSlotAmbiguous') both already rejected the same collision. Each row
+-- asserts the /exact/ resolved term or the /exact/ error constructor, so a
+-- future resolver cannot satisfy this by failing for a different reason.
+prop_dischargeCollisionMatrix :: Property
+prop_dischargeCollisionMatrix = once $ conjoin (map one dischargeMatrix)
+  where
+    one (name, _, src, expect) =
+      counterexample name $ case (expect, elabDischarge src) of
+        (ResolvesTo term, Right unit) ->
+          counterexample "resolved discharge target" $
+            dischargeTargetsOf unit === [(QuestionId "audit", term)]
+        (ResolvesTo _, Left e) ->
+          counterexample ("expected acceptance, got: " ++ elabErrorMessage e) (property False)
+        (FailsWith err, Left e) -> e === err
+        (FailsWith _, Right _) ->
+          counterexample "expected Left, got Right" (property False)
+
+    -- The citing argument's own discharge map, straight off the Unit.
+    dischargeTargetsOf unit =
+      case lookup (ArgId "a_cite") (unitArgs unit) of
+        Just (SRule _ _ _ ds _ _) -> ds
+        other -> error ("#129 fixture: unexpected a_cite term: " ++ show other)
+
+-- | The admission-free elaborator is a sanctioned test/tooling escape hatch,
+-- so its shared reference policy must reject duplicate names even though the
+-- production 'prepareSource' boundary rejects duplicate leaf ids first.
+prop_dischargeDuplicateLeafAmbiguous :: Property
+prop_dischargeDuplicateLeafAmbiguous =
+  once $
+    conjoin
+      [ counterexample (show payload) $
+          elabDischarge
+            ( dischargeProgramSource
+                payload
+                (dischargeLeafX ++ dischargeLeafX)
+                ["  discharge audit with x"]
+                []
+            )
+            === Left
+              (AmbiguousDischarge (ArgId "a_cite") (QuestionId "audit") (ArgRef "x"))
+      | payload <- [ExplicitPayload, InferredPayload]
+      ]
+
+-- | #129 determinism: two faulty @discharge@ lines in one argument report the
+-- /first in declaration order/, whichever error family it belongs to. Both
+-- orderings are pinned, on both payload surfaces, so the resolver cannot pass
+-- by preferring one constructor over the other.
+prop_dischargeFirstErrorInDeclarationOrder :: Property
+prop_dischargeFirstErrorInDeclarationOrder =
+  once $
+    conjoin
+      [ counterexample (show payload ++ ": " ++ name) $
+          elabDischarge
+            (dischargeProgramSource payload (dischargeLeafX ++ dischargeArgX) body [])
+            === Left expected
+      | payload <- [ExplicitPayload, InferredPayload]
+      , (name, body, expected) <-
+          [ ( "ambiguous first, unresolved second"
+            , ["  discharge audit with x", "  discharge audit2 with no_such_ref"]
+            , AmbiguousDischarge (ArgId "a_cite") (QuestionId "audit") (ArgRef "x")
+            )
+          , ( "unresolved first, ambiguous second"
+            , ["  discharge audit with no_such_ref", "  discharge audit2 with x"]
+            , UnresolvedDischarge (ArgId "a_cite") (QuestionId "audit") (ArgRef "no_such_ref")
+            )
+          ]
+      ]
+
+-- ---------------------------------------------------------------------------
 -- Runner
 -- ---------------------------------------------------------------------------
 
@@ -1249,6 +1485,9 @@ elaborateSpecProps =
   , ("prepareSource A default-admit preserves frozen golden", quickCheckResult prop_A_prepareSourceAllAdmit)
   , ("elaborate B reproduces the frozen A0 golden (byte-exact)", quickCheckResult prop_B_frozenGolden)
   , ("elaborate negatives are located Left ElabError", quickCheckResult prop_negatives)
+  , ("#129 discharge collision matrix (payload x namespace)", quickCheckResult prop_dischargeCollisionMatrix)
+  , ("#129 duplicate leaf discharge is ambiguous", quickCheckResult prop_dischargeDuplicateLeafAmbiguous)
+  , ("#129 discharge reports the first faulty line in declaration order", quickCheckResult prop_dischargeFirstErrorInDeclarationOrder)
   , ("comparison expansion reproduces the hand-written S2 Unit", quickCheckResult prop_comparisonReproducesS2)
   , ("comparison expansion replays through ord@1 to accept", quickCheckResult prop_comparisonReplaysToAccept)
   , ("comparison binds the exact named evidence leaves", quickCheckResult prop_comparisonBindsNamedLeaves)

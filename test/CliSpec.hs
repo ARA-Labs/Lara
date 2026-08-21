@@ -491,6 +491,78 @@ admissionProgram declarations =
     ]
     ++ concat declarations
 
+-- | @lara-syntax\@0.7@ (#129) on the __production CLI__: a @discharge@ target
+-- that names both a declared leaf and a prior argument is an /elaboration/
+-- error, not a silent preference for the leaf. It surfaces on the same
+-- source-invalidity channel every other pre-check rejection uses — exit 2,
+-- empty stdout, one located line on stderr — so every byte is pinned.
+prop_cliLaraAmbiguousDischarge :: Property
+prop_cliLaraAmbiguousDischarge = once $ ioProperty $
+  withTempLaraDir ambiguousDischargeProgram [("dq.policy.lara", ambiguousDischargePolicy)] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "exact stderr" $
+            err
+              === "lara: source invalid: arg 'a_cite': discharge of 'audit' names 'x', \
+                  \which is ambiguous between a declared leaf and a prior argument\n"
+        ]
+
+-- | @leaf x@ and @arg x@ both declared, and @a_cite@ discharges through @x@.
+ambiguousDischargeProgram :: String
+ambiguousDischargeProgram =
+  unlines
+    [ "artifact paper_129 at sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    , "policy dq"
+    , "use backends [nd@1]"
+    , "claim c1"
+    , "  nl      = \"The safety invariant holds for D\""
+    , "  formal  = holds(safety_invariant, D)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , "claim c_other"
+    , "  nl      = \"The other invariant holds for D\""
+    , "  formal  = holds(other_invariant, D)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , "leaf e1 : holds(safety_invariant, D)"
+    , "  kind       = attested"
+    , "  provenance = user"
+    , "  refs       = [evidence/safety.txt]"
+    , "leaf e2 : holds(other_invariant, D)"
+    , "  kind       = attested"
+    , "  provenance = user"
+    , "  refs       = [evidence/other.txt]"
+    , "leaf x : audited(safety_invariant)"
+    , "  kind       = attested"
+    , "  provenance = user"
+    , "  refs       = [evidence/audit.txt]"
+    , "arg x : supports(c_other) by cited(other_invariant, D)"
+    , "  open audit"
+    , "  assurance = trusted"
+    , "arg a_cite : supports(c1) by cited(safety_invariant, D)"
+    , "  discharge audit with x"
+    , "  assurance = trusted"
+    , "status c1"
+    ]
+
+ambiguousDischargePolicy :: String
+ambiguousDischargePolicy =
+  unlines
+    [ "policy dq"
+    , "sort Property, Scope"
+    , "con safety_invariant : Property"
+    , "con other_invariant : Property"
+    , "con D : Scope"
+    , "pred holds(Property, Scope)"
+    , "pred audited(Property)"
+    , "rule cited(X, S)"
+    , "  mode       = defeasible"
+    , "  premises   = [ holds(X, S) ]"
+    , "  conclusion = holds(X, S)"
+    , "  question audit : audited(X) (optional)"
+    ]
+
 -- | Duplicate admission keys are source invalidity, not first-match R8.
 -- Every byte is pinned because this diagnostic is the only observable result.
 prop_cliDuplicateAdmissionKey :: Property
@@ -677,6 +749,79 @@ prop_cliLaraParseError = once $ ioProperty $
         , counterexample "stdout empty" (out === "")
         ]
 
+-- | @lara-syntax\@0.7@ (#135) on the __production CLI__: a @discharge@ under a
+-- bare @leaf(…)@ has no rule to attach to, so the front door exits 2 with the
+-- located parse message on stderr and nothing on stdout — the same shape the
+-- codec error already uses. Pinned here, not only in "SyntaxSpec", because the
+-- exit code and the stdout\/stderr split are a CLI contract (spec §10.1 R14).
+prop_cliLaraDischargeOnBareLeaf :: Property
+prop_cliLaraDischargeOnBareLeaf = once $ ioProperty $
+  withTempLaraDir (bareLeafArg "  discharge q with e\n") [] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "diagnostic" $
+            property
+              ("discharge requires a rule application, not a bare leaf" `isInfixOf` err)
+        ]
+
+-- | @lara-syntax\@0.7@ (#135) on the production CLI, @open@ half.
+prop_cliLaraOpenOnBareLeaf :: Property
+prop_cliLaraOpenOnBareLeaf = once $ ioProperty $
+  withTempLaraDir (bareLeafArg "  open q\n") [] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "diagnostic" $
+            property
+              ("open requires a rule application, not a bare leaf" `isInfixOf` err)
+        ]
+
+-- | @lara-syntax\@0.7@ (#133) on the production CLI: the retired @open q as o@
+-- spelling exits 2 carrying its repair, so an author migrating a @0.6 source
+-- is told what to write instead.
+prop_cliLaraLegacyOpenAs :: Property
+prop_cliLaraLegacyOpenAs = once $ ioProperty $
+  withTempLaraDir legacyOpenAsProgram [] $ \path -> do
+    (code, out, err) <- runLara ["check", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        , counterexample "diagnostic" $
+            property ("lara-syntax@0.7 uses 'open q'; remove 'as …'" `isInfixOf` err)
+        ]
+
+-- | A one-argument program whose support term is a bare @leaf(…)@, plus the
+-- given body line.
+bareLeafArg :: String -> String
+bareLeafArg bodyLine =
+  unlines
+    [ "artifact x at sha256:aaaa..."
+    , "policy p"
+    , "use backends [nd@1]"
+    , "leaf e : fact"
+    , "  kind = observed"
+    , "  provenance = user"
+    , "  refs = []"
+    , "arg a : supports(derived) by leaf(e)"
+    ]
+    ++ bodyLine
+
+legacyOpenAsProgram :: String
+legacyOpenAsProgram =
+  unlines
+    [ "artifact x at sha256:aaaa..."
+    , "policy p"
+    , "use backends [nd@1]"
+    , "arg a : supports(derived) by r(e)"
+    , "  open q as q"
+    ]
+
 -- | @.lara@ missing co-located policy: the program parses but
 -- @<policyId>.policy.lara@ is absent from the artifact's directory, so the policy
 -- read fails — exit 2, nothing on stdout.
@@ -764,6 +909,10 @@ cliSpecProps =
   , ("cli .lara accept S1 strict cert exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS1)
   , ("cli .lara accept S2 comparison form exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS2)
   , ("cli .lara parse error exit 2", quickCheckResult prop_cliLaraParseError)
+  , ("cli .lara discharge on bare leaf exit 2 (#135)", quickCheckResult prop_cliLaraDischargeOnBareLeaf)
+  , ("cli .lara open on bare leaf exit 2 (#135)", quickCheckResult prop_cliLaraOpenOnBareLeaf)
+  , ("cli .lara legacy 'open q as o' exit 2 (#133)", quickCheckResult prop_cliLaraLegacyOpenAs)
+  , ("cli .lara ambiguous discharge exit 2 (#129)", quickCheckResult prop_cliLaraAmbiguousDischarge)
   , ("cli .lara missing policy exit 2", quickCheckResult prop_cliLaraMissingPolicy)
   , ("cli .lara duplicate argument id exit 2", quickCheckResult prop_cliLaraDuplicateArgId)
   , ("cli .lara dangling attack endpoint exit 2", quickCheckResult prop_cliLaraDanglingAttack)

@@ -81,9 +81,15 @@ data ElabError
   | -- | ≥2 declared conclusions @≡@ the ground premise: @arg@, @rule@, premise
     -- index, the ground premise, and the matching leaf\/arg ids.
     AmbiguousPremise ArgId RuleId Int Prop [String]
-  | -- | a @discharge q with ref@ whose @ref@ is neither a declared leaf nor a
-    -- prior arg: @arg@, @question@, the ref name.
-    UnresolvedDischarge ArgId QuestionId String
+  | -- | a @discharge q with ref@ whose @ref@ names neither a declared leaf nor
+    -- a prior arg: @arg@, @question@, the reference. The renderer is the only
+    -- place the source identifier is unwrapped.
+    UnresolvedDischarge ArgId QuestionId ArgRef
+  | -- | a @discharge q with ref@ whose @ref@ names /both/ a declared leaf and a
+    -- prior arg (#129): @arg@, @question@, the reference. The one collision
+    -- policy shared with 'ThetaReferenceAmbiguous' and 'CertSlotAmbiguous' —
+    -- a shadowed discharge target is never silently resolved to the leaf.
+    AmbiguousDischarge ArgId QuestionId ArgRef
   | -- | a @supports(c)@ over a declared claim whose term conclusion ≠ the claim
     -- formal: @arg@, @claim@, @concl(w)@, @claimFormal(c)@.
     ConclusionMismatch ArgId PropId Prop Prop
@@ -296,9 +302,12 @@ elabErrorMessage e = case e of
   AmbiguousPremise (ArgId a) (RuleId r) i g ms ->
     "arg '" ++ a ++ "': rule '" ++ r ++ "' premise #" ++ show i
       ++ " (" ++ prettyProp g ++ ") is ambiguous — matched " ++ show ms
-  UnresolvedDischarge (ArgId a) (QuestionId q) ref ->
+  UnresolvedDischarge (ArgId a) (QuestionId q) (ArgRef ref) ->
     "arg '" ++ a ++ "': discharge of '" ++ q ++ "' names '" ++ ref
       ++ "', which is neither a declared leaf nor a prior argument"
+  AmbiguousDischarge (ArgId a) (QuestionId q) (ArgRef ref) ->
+    "arg '" ++ a ++ "': discharge of '" ++ q ++ "' names '" ++ ref
+      ++ "', which is ambiguous between a declared leaf and a prior argument"
   ConclusionMismatch (ArgId a) (PropId c) w formal ->
     "arg '" ++ a ++ "': supports(" ++ c ++ ") but its conclusion "
       ++ prettyProp w ++ " ≢ the claim formal " ++ prettyProp formal

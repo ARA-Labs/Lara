@@ -297,13 +297,18 @@ dedupQuestions (q : qs) =
 
 -- | The hole set of an instance as question names. The AST types a hole as an
 -- 'ObligationId' — the spec §2 obligation name class @o@, kept as its own
--- newtype so the surface syntax can name obligations separately from questions
--- (the symbolic-core discipline: distinct namespaces get distinct types). The
--- §6.1 accounting, however, treats a hole as the /question name/ it leaves open
--- (Lean @H : List QuestionId@; the Lean driver decodes @holes@ straight to
--- 'QuestionId', collapsing the two). The names share their textual identity, so
--- this one sanctioned cast is the deliberate spec-obligation → executable-question
--- bridge, confined to exactly this boundary.
+-- newtype because the symbolic-core discipline gives distinct name classes
+-- distinct types (CLAUDE.md), so a question name and an obligation name cannot
+-- be swapped silently anywhere in the kernel. The §6.1 accounting treats a hole
+-- as the /question name/ it leaves open (Lean @H : List QuestionId@; the Lean
+-- driver decodes @holes@ straight to 'QuestionId', collapsing the two).
+--
+-- The surface does /not/ name the two independently: since @lara-syntax\@0.7@
+-- (#133, grammar App. F.3) a hole is spelled @open q@ and carries one
+-- identifier, so @open q → 'ObligationId' q → 'QuestionId' q@ is the single
+-- presentation-to-executable bridge, and this function is the one sanctioned
+-- cast that performs it. (The retired @open q as o@ form let an author write a
+-- second, divergent name that nothing downstream ever read.)
 holeNames :: [ObligationId] -> [QuestionId]
 holeNames = map (\(ObligationId s) -> QuestionId s)
 

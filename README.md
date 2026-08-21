@@ -126,9 +126,12 @@ that discharges external validity: no complete support argument for `c1` can
 be declared, and the verdict reports **gap** — honest incompleteness is a
 located, first-class outcome, not a rejection.
 
-A symbolic premise name that resolves to no premise, or ambiguously, is a
-located elaboration error — never a guess. The `lara-syntax@0.6` named-slot
-spelling is specified in [grammar Appendix E](docs/lara-surface-grammar.md);
+A source name that resolves to no premise, or ambiguously, is a located
+error — never a guess. Since `lara-syntax@0.7` that is one policy across all
+three places an argument body names a source: inferred θ references,
+certificate premise slots, and discharge targets ([grammar
+Appendix F](docs/lara-surface-grammar.md)). The `lara-syntax@0.6` named-slot
+spelling itself is specified in [grammar Appendix E](docs/lara-surface-grammar.md);
 [`examples/S6/`](examples/S6/) is its standing byte-identity witness (the
 committed wire bytes are re-proved equal to the numeric spelling's on every CI
 run). For a program where certified arithmetic genuinely feeds a defeasible
@@ -168,7 +171,7 @@ CI runs both, including the `AxCheck.lean` axiom audit, on every push.
 | Document | What it covers |
 | --- | --- |
 | [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen at M1; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
-| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.6`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots |
+| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.7`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work LARA builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |

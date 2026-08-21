@@ -154,3 +154,23 @@
 - **Sensitivity**: high
 - **Code ref**: ["src/Lara/Syntax.hs", "src/Lara/Elaborate/CertSlots.hs", "lean/Lara/CertSlots.lean", "test/CertSlotsSpec.hs"]
 - **Last revised**: 2026-08-13 (2026-08-13_001#3)
+
+## H15: A rejection rule is only as strong as its weakest sibling helper
+- **Rationale**: When a parser records a rule in the *caller* (a keyword branch that
+  refuses a shape) but the helpers that build the AST still accept it with a silent
+  no-op equation, the rule holds only while every future caller remembers to check. The
+  fix is to push the refusal into each helper as a returned error with one equation per
+  constructor shape and no catch-all, so the compiler enforces exhaustiveness and a
+  caller cannot bypass the rule. Crucially this has to reach the siblings whose
+  rejection *already worked* — those are the ones most likely to be scoped out of the
+  fix, because no bug report names them. In the `lara-syntax@0.7` arg-body fold, `#135`
+  named only `addArgDischarge` and `addArgHole`; `setArgAssurance` kept `inst _ = inst`,
+  leaving grammar Appendix A.1's long-settled ruling resting on a parser-side
+  convention. Closing it cost one equation. Keep the caller's own shape check ahead of
+  any operand parsing, so the structural guarantee does not change which diagnostic an
+  author sees when the operand is also malformed.
+- **Sources**: [3 sibling helpers ← src/Lara/Syntax.hs:1119-1157 «addArgDischarge / addArgHole / setArgAssurance» [input]; 1 remaining fall-through ← spec review of commit 62e23f9 «setArgAssurance inst _ = inst» [result]]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: medium
+- **Code ref**: ["src/Lara/Syntax.hs", "test/SyntaxSpec.hs"]

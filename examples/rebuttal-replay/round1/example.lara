@@ -55,7 +55,7 @@ leaf pb3 : valid_benchmark(dense_baseline, openllm_avg)
 arg a_bench : supports(c_bench) by benchmark_evaluation(apt, dense_baseline, openllm_avg, e02)
   discharge protocol_fixed    with pb2
   discharge benchmark_valid   with pb3
-  open      environment_match as environment_match
+  open      environment_match
 
 # --- c_measure: low training-memory footprint -------------------------------------------------
 
@@ -82,7 +82,7 @@ leaf pm3 : covers_scope(e04, apt)
 arg a_meas : supports(c_measure) by measurement(low_memory_footprint, apt, e04)
   discharge instrument_validity with pm2
   discharge coverage            with pm3
-  open      confound_control     as confound_control
+  open      confound_control
 
 # --- c_kurt: the kurtosis-salience ablation (still gap; reviewers ask for error bars) ----------
 
