@@ -1,0 +1,103 @@
+# S7 — premise-LABEL certificate citation worked example (lara-syntax@0.8)
+#
+# The first worked example authored in the @0.8 premise-label spelling (#131):
+# an ord@1 certificate may cite a premise slot by the LABEL the rule declares
+# for it — `(prem base)` instead of `(prem 0)` — and elaboration lowers the
+# label to the byte-identical numeric payload the backend already decodes.
+#
+# THE DIFFERENCE FROM S6, IN ONE SENTENCE. S6's `@0.6` spelling names a slot by
+# the source name of the TERM that fills it (`(prem base_cell)` — a leaf id);
+# S7's `@0.8` spelling names the slot by the rule's own name for it
+# (`(prem base)` — a premise label, declared in ord-labeled-v1.policy.lara).
+# Both lower to the same numerals, and both are available at once: a name now
+# resolves in three classes (premise label, declared leaf, prior argument),
+# with any cross-class collision a hard elaboration error.
+#
+# WHY THE SECOND ARGUMENT IS THE POINT. Argument a1 is S6's, relabelled: its
+# two slots are filled by two different leaves, so `@0.6`'s leaf names already
+# worked there and the labels are simply a second, equivalent spelling.
+# Argument a2 is the case `@0.6` CANNOT express. `le_reflex`'s two premises
+# share one pattern, and a2 fills BOTH of them with the same leaf `base_cell`.
+# Writing `(ordcmp (prem base_cell) (prem base_cell))` there is a located
+# elaboration error — `CertSlotMultiSlot`: the leaf occupies slots 0 and 1, so
+# its name cannot say which slot the certificate means, and before `@0.8` the
+# only exit was to count slots by hand. `left` and `right` name the two slots
+# themselves, so they stay unambiguous however the instance is filled. That
+# dead end is issue #131's headline, and this file is its worked exit.
+#
+# THE COMMITTED GOLDEN IS THE STANDING BYTE-IDENTITY WITNESS FOR #131. Its
+# example.core.sexp was verified byte-equal to the one produced by the numeric
+# twin of this artifact (same program, certificate payloads written
+# `(ordcmp (prem 0) (prem 1))`). Because the golden carries only the LOWERED
+# payloads, test/WorkedExamplesSpec.hs's freshness property re-proves that
+# byte-identity on every CI run: if label lowering ever produced anything but
+# the numeric spelling's bytes, this example would go stale and the suite would
+# fail. test/CertSlotsSpec.hs pins the same property as in-memory fixtures;
+# this directory pins it as committed artifact bytes.
+#
+# No defeasible bridge: as in S6, each claim here IS the bare arithmetic, so
+# the two arguments are the whole unit. S2 carries the §3.6 layering story.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact ord_labeled_demo at sha256:5757575757575757575757575757575757575757575757575757575757575757
+policy ord-labeled-v1
+use backends [ord@1]
+
+# --- The claims: two bare ordered comparisons -------------------------------------------------
+
+claim c1
+  nl      = "The reported baseline accuracy 0.71 is strictly below the reported system accuracy 0.74"
+  formal  = num_lt(0.71, 0.74)
+  binding = { author = alice, rationale = "Certified ordered comparison of two reported accuracy cells.", audit-status = reviewed }
+
+claim c2
+  nl      = "The reported baseline accuracy 0.71 is no greater than itself"
+  formal  = num_le(0.71, 0.71)
+  binding = { author = alice, rationale = "Certified reflexive comparison: one reported cell fills both premise slots.", audit-status = reviewed }
+
+# --- The two measured cells the certificates consult ------------------------------------------
+# One leaf per reported cell, named for the ROLE its cell plays. Their truth is observed
+# evidence, never certified content — a certificate discharges only that each cited premise's
+# numeric literal equals the corresponding goal numeral and that the goal's relation holds of
+# those numerals (the factivity firewall, as in S2).
+
+leaf base_cell : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_base]
+
+leaf new_cell : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.74))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_new]
+
+# --- a1: two distinct leaves, cited by the rule's labels ---------------------------------------
+# `base` and `new` are lt_recheck's declared names for its two premise slots. Contrast S6, whose
+# certificate cites `base_cell` and `new_cell` — the leaf ids. Both spellings resolve here, and
+# both lower to `(ordcmp (prem 0) (prem 1))`.
+
+arg a1 : supports(c1) by lt_recheck from [base_cell, new_cell]
+  assurance = cert(ord@1, sha256:ord-labeled-v1-theory-0, (ordcmp (prem base) (prem new)))
+
+# --- a2: ONE leaf filling BOTH slots, citable only by label ------------------------------------
+# `base_cell` occupies premise slot 0 AND premise slot 1. `(prem base_cell)` is therefore a
+# located elaboration error here (CertSlotMultiSlot, naming both witnesses), and `(prem left)` /
+# `(prem right)` are the only symbolic spelling that resolves — the exit #131 adds. The lowered
+# payload is again `(ordcmp (prem 0) (prem 1))`, and ord@1 replays it at the tie: both cited
+# cells carry 0.71, and 0.71 <= 0.71.
+
+arg a2 : supports(c2) by le_reflex from [base_cell, base_cell]
+  assurance = cert(ord@1, sha256:ord-labeled-v1-theory-0, (ordcmp (prem left) (prem right)))
+
+status c1
+status c2
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 (the strict ord@1 comparison step) and a2 (the strict ord@1 reflexive step),
+# both unattacked -> in (grounded).
+# Claim status:
+#   c1 -> justified (a1 is a complete argument for it, with no attackers)
+#   c2 -> justified (a2 is a complete argument for it, with no attackers)

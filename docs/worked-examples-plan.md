@@ -8,9 +8,10 @@ examples"). Anchored in the real corpus shapes catalogued in `corpus-map.md`._
 
 _**What actually shipped (2026-08-19).** This plan specifies the E/R series. The
 delivered suite is larger — it also carries `R2-sort` (the `lara-core@0.2`
-well-sortedness negative) and the strict-certificate series `S1`–`S6` (`nd@1`,
+well-sortedness negative) and the strict-certificate series `S1`–`S7` (`nd@1`,
 `ord@1` comparison, the `num_le` tie, an undermined binding, a lower-is-better
-measurand, and the `lara-syntax@0.6` named-slot byte-identity witness). The
+measurand, the `lara-syntax@0.6` named-slot byte-identity witness, and the
+`lara-syntax@0.8` premise-label witness). The
 authoritative catalogue of every committed example, with its witnesses, attack
 kinds, and statuses, is `../examples/README.md`._
 

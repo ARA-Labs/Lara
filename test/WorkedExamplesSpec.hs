@@ -38,6 +38,10 @@
 --   * __S5__ @ord-lower-is-better@ — 'Accept'; the same @strictly-better@
 --     source shape as S2 over a @lower-is-better@ measurand, so the generated
 --     goal is the flipped @num_lt(ours, theirs)@ — and ord@1 accepts it.
+--   * __S7__ @ord-labeled@ — 'Accept'; the certificates cite the rules'
+--     declared premise LABELS rather than the source names of the terms
+--     filling the slots, including the case only labels can express — one
+--     leaf filling both slots of a two-premise rule.
 --   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
 --     a same-atom contrary pair contested via a rebut 2-cycle, and a
 --     setting-index-mismatch pair left justified (zero attacks).
@@ -447,6 +451,35 @@ prop_S6 = once $ ioProperty $
                 === [(numRelP "num_lt" "0.71" "0.74", Published Justified)]
           ]
 
+-- | S7 (#131, @lara-syntax\@0.8@): the premise-label demonstrator. Where S6
+-- cites a slot by the source name of the /term/ filling it, S7 cites the
+-- __label the rule declares for the slot__ — @(ordcmp (prem base) (prem new))@
+-- and @(ordcmp (prem left) (prem right))@ — and elaboration lowers both to the
+-- numeric slots before the wire. The committed golden carries only
+-- @(ordcmp (prem 0) (prem 1))@ twice, so 'prop_freshness' re-proves on every
+-- run that the label spelling produces the numeric spelling's bytes.
+--
+-- @a2@ is the argument #131 exists for: one leaf, @base_cell@, fills /both/ of
+-- @le_reflex@'s premise slots, so the @\@0.6@ leaf name is 'CertSlotMultiSlot'
+-- there and only the labels resolve. The typed pin is the verdict — the
+-- lowered certificate must still be a certificate, so @ord\@1@ replays both
+-- steps, including the tie @0.71 <= 0.71@, and both are @in@.
+prop_S7 :: Property
+prop_S7 = once $ ioProperty $
+  runExample "examples/S7" "ord-labeled-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S7: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S7 labels: a1 (strict lt) and a2 (strict le, one leaf in both slots) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S7 statuses: both certified comparisons justified" $
+              verdictStatuses outcome
+                === [ (numRelP "num_lt" "0.71" "0.74", Published Justified)
+                    , (numRelP "num_le" "0.71" "0.71", Published Justified)
+                    ]
+          ]
+
 -- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
 -- grain. The genuine-disagreement pair (P1) shares the SAME (S,B,Q,D) atoms, so
 -- @better@/@not_better@ form a contrary instance ⇒ a rebut 2-cycle ⇒ both
@@ -700,8 +733,9 @@ prop_groupConflictExpectedJson =
 -- Freshness — the derivation path reproduces the committed .core.sexp anchor
 -- ---------------------------------------------------------------------------
 
--- | For every example in 'examplePolicies' (A, B, E1–E5, R1–R3, S1–S4, agreement-map, and
--- the D1 rebuttal-replay rounds round0–round2), re-running the full
+-- | For every example in 'examplePolicies' — the module header's list is the
+-- authoritative one, and this comment deliberately does not restate it —
+-- re-running the full
 -- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
 -- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
 -- the committed @example.core.sexp@ bytes __exactly__ (matching
@@ -897,6 +931,7 @@ workedExamplesSpecProps =
   , ("S4 undermined binding → bridge out, comparative claim defeated, comparison still justified", quickCheckResult prop_S4)
   , ("S5 lower-is-better → flipped goal num_lt(28.4, 31.6), accepted by ord@1, better justified", quickCheckResult prop_S5)
   , ("S6 named cert slots → lowered (prem 0)/(prem 1) replayed by ord@1, num_lt justified", quickCheckResult prop_S6)
+  , ("S7 premise-label cert slots → the same lowered payload, incl. one leaf filling both slots", quickCheckResult prop_S7)
   , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)

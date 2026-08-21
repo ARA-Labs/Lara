@@ -121,6 +121,47 @@ every one of which is unchanged, so the numbers of record stand as measured:
 also unchanged (differential 581 pass / 0 fail, admission 20/20,
 presentation-parity 73 rows)._
 
+_**Post-`lara-syntax@0.8` movement, still `m5-freeze-v4` (premise-label
+citation, 2026-08-21).** `lara-syntax@0.8` (grammar Appendix G) is an additive
+surface release: a certificate premise reference may cite the citing rule's
+declared premise label beside the `@0.6` leaf and prior-argument names. No
+`lara-core` change, no AST change, no wire change.
+
+**No source migration, and none was possible.** `@0.8` adds names to a
+namespace and removes nothing, so **zero** of the 109 tracked `.lara` files
+moved a line. The new class is also empty corpus-wide: no tracked policy labels
+a premise of a rule whose certificates cite names, so `premiseLabelIndex`
+returns `Nothing` for every name in every controlled source and the resolver's
+behavior there is bitwise `@0.6`'s. Acceptance is unchanged.
+
+**One tree re-pins, for the S6 reason.** `examples/` moved because worked
+example **S7** was added — the `lara-syntax@0.8` premise-label byte-identity
+witness (#131), four new files under `examples/S7/`. This is the same shape as
+S6's addition recorded in the `@0.7` note above: new content in a
+classified-as-moved-since-v4 tree, not a modification of measured bytes. The
+prior hash is retained here as provenance:
+
+| tree | at `@0.7` | at `@0.8` |
+| --- | --- | --- |
+| `examples/` | `9e6291fbf1a53703092123a4550ab2099cbed52c` | `9ac2b03eec8dd3043ccb9ac99e685265cc69b122` |
+
+**The other three frozen trees hold their `@0.7` SHAs exactly**, verified by
+`git rev-parse`: `corpus-units/` = `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b`,
+`fixtures/mutants/` = `fd7142072d58da4d35642cbad6f144c970627afa`,
+`measurements/frozen/` = `a067c921e0142eae69b34ed500ff18c7efea1bed`.
+
+**No derived byte outside `examples/S7/` changed.** Re-running
+`scripts/gen-worked-examples.hs` over the whole registry rewrote every anchor
+and left all of them byte-identical except the two new S7 files; S7's own
+goldens were separately verified byte-equal to those its numeric twin produces
+(both certificates lower to `(ordcmp (prem 0) (prem 1))`).
+
+**No measurement re-run is owed**, for the reason above: every measured
+`.core.sexp` byte is unchanged, so 564/564 class match, 564/564 `lean_agree`
+and 60/60 replay stand as measured. One gate count moves: the differential row
+rose **581 → 582** (+1 S7 anchor, the same `+1` bookkeeping S6 produced).
+`admission 20/20` and `presentation-parity 73 rows` are unchanged._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,

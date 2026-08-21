@@ -45,19 +45,28 @@ data ElabError
     ThetaReferenceConclUnderivable ArgId RuleId Int ArgRef
   | -- | a rule parameter is absent from every inferred premise binding.
     ThetaParameterUnbound ArgId RuleId Param
-    -- * Named certificate premise slots (@lara-syntax\@0.6@, #105)
+    -- * Named certificate premise slots (@lara-syntax\@0.6@, #105; @\@0.8@, #131)
     --
     -- | Each names the citing @arg@, the certificate backend and version,
     -- and the offending reference as structured identifiers. The renderer
-    -- alone constructs the author's @beta\@version@ spelling. The scope is the
-    -- same one 'ThetaReferenceUnresolved' and 'ThetaReferenceAmbiguous' police
-    -- — declared leaves and prior arguments — but the failures are their own
+    -- alone constructs the author's @beta\@version@ spelling. The scope
+    -- extends the one 'ThetaReferenceUnresolved' and 'ThetaReferenceAmbiguous'
+    -- police — declared leaves and prior arguments — with the citing rule's
+    -- declared premise labels (@\@0.8@, #131), but the failures are their own
     -- family because a certificate cites a /premise slot of one instance/,
     -- not a θ position, and the author's fix differs.
-  | -- | the reference names neither a declared leaf nor a prior argument.
-    CertSlotUnresolved ArgId BackendId Int ArgRef
+    --
+    -- The two constructors that speak about the name /classes/ also carry the
+    -- citing 'RuleId': whose labels were consulted is part of the answer.
+  | -- | the reference names no premise label of the citing rule, no declared
+    -- leaf, and no prior argument.
+    CertSlotUnresolved ArgId BackendId Int ArgRef RuleId
   | -- | the reference names both a declared leaf and a prior argument.
     CertSlotAmbiguous ArgId BackendId Int ArgRef
+  | -- | the reference names both a premise label of the citing rule and a
+    -- declared leaf or prior argument (#131). Rejected even when the two
+    -- classes agree on the slot: one collision policy, no carve-outs.
+    CertSlotLabelAmbiguous ArgId BackendId Int ArgRef RuleId
   | -- | the reference resolves, but to nothing this instance takes as a premise.
     CertSlotNotAPremise ArgId BackendId Int ArgRef
   | -- | the named premise fills two slots, so the name cannot say which: the
@@ -277,10 +286,14 @@ elabErrorMessage e = case e of
   ThetaParameterUnbound (ArgId a) (RuleId r) (Param x) ->
     "arg '" ++ a ++ "': rule '" ++ r ++ "' parameter '" ++ x
       ++ "' is not bound by inferred theta"
-  CertSlotUnresolved a b v n ->
-    certSlotPrefix a b v n ++ "names neither a declared leaf nor prior argument"
+  CertSlotUnresolved a b v n (RuleId r) ->
+    certSlotPrefix a b v n ++ "names neither a premise label of rule '" ++ r
+      ++ "', a declared leaf, nor a prior argument"
   CertSlotAmbiguous a b v n ->
     certSlotPrefix a b v n ++ "is ambiguous between a declared leaf and a prior argument"
+  CertSlotLabelAmbiguous a b v n (RuleId r) ->
+    certSlotPrefix a b v n ++ "is ambiguous between rule '" ++ r
+      ++ "' premise label and a declared leaf or prior argument"
   CertSlotNotAPremise a b v n ->
     certSlotPrefix a b v n ++ "does not resolve to any of this argument's premise slots"
   CertSlotMultiSlot a b v n i j ->

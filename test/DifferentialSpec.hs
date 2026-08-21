@@ -341,6 +341,19 @@ workedExampleGoldens =
     , "(verdict accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
     )
+  , -- S7: the premise-LABEL worked example (lara-syntax@0.8, #131). Its
+    -- artifact authors the two ord@1 certificates as (prem base)/(prem new)
+    -- and (prem left)/(prem right) — the labels the rules declare for those
+    -- slots — and the anchor carries only the LOWERED (prem 0)/(prem 1)
+    -- payloads, byte-identical to the numeric twin's. The second argument is
+    -- the one #131 exists for: one leaf fills both of le_reflex's slots, so
+    -- the @0.6 leaf name is CertSlotMultiSlot there and only the labels
+    -- resolve; ord@1 replays it at the tie 0.71 <= 0.71.
+    ( "examples/S7/example.core.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom num_lt (num 0.71) (num 0.74)) justified)"
+        ++ " (status (atom num_le (num 0.71) (num 0.71)) justified)))"
+    )
   , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;
     -- the setting-mismatch pair (P2) differs only in the setting index ⇒ zero

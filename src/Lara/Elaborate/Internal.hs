@@ -423,8 +423,10 @@ elabInstantiation env priors aid inst = case inst of
     (theta, prems) <- inferTheta env priors aid rule refs
     disch <- resolveArgDischarges env priors aid shallowDisch
     -- lara-syntax@0.6 (#105): named certificate premise slots lower here,
-    -- after premise resolution, because a slot is an index into @prems@.
-    assurance' <- lowerArgCert env priors aid prems assurance
+    -- after premise resolution, because a slot is an index into @prems@. The
+    -- rule rides along from @0.8 (#131): its declared premise labels are the
+    -- third class a name resolves in.
+    assurance' <- lowerArgCert env rule priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
 
 lookupRule :: Env -> ArgId -> RuleId -> Either ElabError Rule
@@ -461,8 +463,9 @@ elabTerm env priors aid term = case term of
     -- lara-syntax@0.6 (#105) adds exactly one rewrite above that: symbolic
     -- premise references become the numeric slots the backend already decodes.
     -- 'elabTerm' recurses, so a nested instance's certificate lowers against
-    -- its own premise list, not the enclosing one (D8).
-    assurance' <- lowerArgCert env priors aid prems assurance
+    -- its own premise list — and, from @0.8 (#131), against its own rule's
+    -- premise labels — not the enclosing one's (D8).
+    assurance' <- lowerArgCert env rule priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
 
 -- | The one namespace lookup shared by every argument-body source reference:
@@ -498,11 +501,32 @@ refMatches env priors name =
 -- slot it occupies in @prems@, the citing instance's __already resolved__
 -- premise list.
 --
--- The name scope is 'refMatches' — exactly the one a θ reference sees — and
--- the collision policy is the same: a name that is both a declared leaf and a
--- prior argument is ambiguous, never silently one of them. What differs is the
--- second step, which a θ reference does not have: the resolved source must
--- also /be a premise of this instance/, at exactly one slot.
+-- A name resolves in __three__ classes (@lara-syntax\@0.8@, #131): the citing
+-- rule's declared premise labels, the declared leaves, and the prior
+-- arguments. The last two are 'refMatches' — exactly the scope a θ reference
+-- sees — and carry its collision policy: a name that is both a declared leaf
+-- and a prior argument is ambiguous, never silently one of them. What differs
+-- is the second step, which a θ reference does not have: the resolved source
+-- must also /be a premise of this instance/, at exactly one slot.
+--
+-- A __label is different in kind__: it names the slot itself, not the term
+-- that fills it, so it needs no locating step and it keeps working where the
+-- other two classes cannot — when one leaf feeds two premises, the leaf name
+-- is 'SlotNameMultiSlot' but each label still names its own slot (#131's
+-- headline). The one guard is that the label's slot must exist in this
+-- instance's premise list, which an authored premise list shorter than the
+-- rule's can violate. That case reuses 'SlotNameNotAPremise', whose rendered
+-- template says the reference \"does not resolve to any of this argument's
+-- premise slots\" — read strictly, a statement about the /slot/ rather than
+-- the name, since a label always resolves against the rule and it is the slot
+-- this instance lacks. The verdict is shared rather than split into an eighth
+-- family because the @\@0.8@ family list is frozen (grammar App. G.5) and both
+-- cases are one author mistake: citing a premise this instance does not have.
+--
+-- Cross-class collision is rejected outright ('SlotNameLabelAmbiguous'), even
+-- when the two classes would agree on the slot: that is the one collision
+-- policy of @\@0.6@\/@\@0.7@ (grammar App. F.4) applied to the new class, and
+-- an agreeing-referent carve-out would be its first conditional case.
 --
 -- Locating is by term equality against the premise list, because that is what
 -- premise resolution stores: a leaf premise is @'SLeaf' l@ ('resolvePremises',
@@ -515,16 +539,22 @@ refMatches env priors name =
 -- 'CertSlotNotAPremise' once the same instance is written out.
 certSlotResolver
   :: Env
+  -> Rule -- ^ the citing instance's rule, for its declared premise labels
   -> [(ArgId, SupportTerm)]
   -> [SupportTerm] -- ^ this instance's resolved premises, in slot order
   -> String
   -> Either SlotRefError Int
-certSlotResolver env priors prems name =
-  case refMatches env priors name of
-    ([(leafId, _)], []) -> locate [SLeaf leafId]
-    ([], [(_, term)]) -> locate [term, SLeaf (LeafId name)]
-    ([], []) -> Left SlotNameUnresolved
-    _ -> Left SlotNameAmbiguous
+certSlotResolver env rule priors prems name =
+  case (premiseLabelIndex rule name, refMatches env priors name) of
+    (Just i, ([], []))
+      | i < length prems -> Right i
+      -- The rule labels a slot this instance's premise list does not have.
+      | otherwise -> Left SlotNameNotAPremise
+    (Just _, _) -> Left SlotNameLabelAmbiguous
+    (Nothing, ([(leafId, _)], [])) -> locate [SLeaf leafId]
+    (Nothing, ([], [(_, term)])) -> locate [term, SLeaf (LeafId name)]
+    (Nothing, ([], [])) -> Left SlotNameUnresolved
+    (Nothing, _) -> Left SlotNameAmbiguous
   where
     locate candidates =
       case [i | (i, p) <- zip [0 ..] prems, p `elem` candidates] of
@@ -543,23 +573,29 @@ certSlotResolver env priors prems name =
 -- an author reads and edits) and naming the backend as @beta\@version@.
 lowerArgCert
   :: Env
+  -> Rule
   -> [(ArgId, SupportTerm)]
   -> ArgId
   -> [SupportTerm]
   -> Assurance
   -> Either ElabError Assurance
-lowerArgCert env priors aid prems assurance = case assurance of
+lowerArgCert env rule priors aid prems assurance = case assurance of
   AssuranceCert cert ->
-    case lowerCertPayload (certSlotResolver env priors prems) cert of
+    case lowerCertPayload (certSlotResolver env rule priors prems) cert of
       Right cert' -> Right (AssuranceCert cert')
-      Left (name, err) -> Left (certSlotError aid cert name err)
+      Left (name, err) -> Left (certSlotError aid (ruleId rule) cert name err)
   _ -> Right assurance
 
 -- | Translate one resolver\/lowering verdict into its located 'ElabError'.
-certSlotError :: ArgId -> Cert -> String -> SlotRefError -> ElabError
-certSlotError aid cert name err = case err of
-  SlotNameUnresolved -> CertSlotUnresolved aid backend version ref
+--
+-- The two verdicts that mention the name /classes/ carry the citing 'RuleId'
+-- too (@lara-syntax\@0.8@, #131), because \"a premise label\" is only
+-- meaningful once the author knows which rule's labels were consulted.
+certSlotError :: ArgId -> RuleId -> Cert -> String -> SlotRefError -> ElabError
+certSlotError aid rid cert name err = case err of
+  SlotNameUnresolved -> CertSlotUnresolved aid backend version ref rid
   SlotNameAmbiguous -> CertSlotAmbiguous aid backend version ref
+  SlotNameLabelAmbiguous -> CertSlotLabelAmbiguous aid backend version ref rid
   SlotNameNotAPremise -> CertSlotNotAPremise aid backend version ref
   SlotNameMultiSlot i j -> CertSlotMultiSlot aid backend version ref i j
   SlotNonCanonicalNumeral -> CertSlotNonCanonicalNumeral aid backend version ref

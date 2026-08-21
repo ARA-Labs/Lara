@@ -409,3 +409,10 @@ sessions:
   events_count: 5
   claims_touched: []
   open_threads: 2
+- id: 2026-08-21_001
+  date: '2026-08-21'
+  summary: 'Shipped lara-syntax@0.8 premise-label certificate citation (#131) as Part A of the named-certificate-authoring plan: a third name class with a no-carve-out collision policy, byte-identity measured against the numeric twin, zero Lean re-proof owed, worked example S7, grammar Appendix G, PR #141.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: [C31]
+  open_threads: 4

@@ -821,3 +821,13 @@ entries:
     - "Touched no claim. @0.7 restricts the surface and changes no judgment, no AST, and no wire byte, so nothing in claims.md bears on it; recording a claim here would manufacture research content out of an engineering release."
     - "Revised concepts.md notation as terminology drift rather than flagging a contradiction: the concept's definition was still correct, only the notation named a spelling the parser now rejects."
     - "Left the H15 sensitivity at medium rather than high. It cost one equation and changed no diagnostic, but the class it closes is the same one #135 was filed for."
+- turn: "2026-08-21_001#1"
+  notes:
+    - "Routed N199 with provenance: user. The three-class design, the no-carve-out collision policy and the Part A/Part B split are the researcher's eng-reviewed plan decisions; only the implementation was ai-executed."
+    - "Recorded the CliSpec-instead-of-ElaborateSpec test siting in the plan banner and the PR, not as its own trace node. It is an implementation-siting choice with no research content."
+    - "Did NOT crystallize O77 despite a second instance landing this turn. Last turn withheld it as 'worked once, on one release'; @0.8 is a materially different release shape (additive, not restrictive), so that specific doubt is answered - but 'it worked twice' is a counter, and maturity is not a counter. The signal that would close it is the researcher treating the sweep as the standing pre-release procedure, or a third release where it catches something rather than confirming nothing."
+    - "Staged O78 as potential_type: claim, not heuristic. It asserts a structural property of two naming schemes (referent-indexed naming is undefined on the non-injective case) rather than a practice, and it is falsifiable independently of LARA."
+    - "Staged O79 as heuristic rather than claim: it is a mechanization practice with a stated cost/payoff, not a testable assertion about the system."
+    - "Revised C31's Conditions rather than flagging a contradiction. The @0.8 resolver does not contradict the locate-step mechanism C31 asserts - it adds a class that bypasses locate entirely - so the honest repair is a scope note, not an unresolved decision node. Statement, Status and Falsification untouched."
+    - "Did NOT touch C31's Status. Artifact commitment upgrades hypothesis -> testing; C31 is already supported and nothing this turn bears on that."
+    - "Created no claim for @0.8 itself, on the 2026-08-20 precedent: a presentation-only release that changes no judgment, no AST and no wire byte is an engineering release, and minting a claim for it would manufacture research content."

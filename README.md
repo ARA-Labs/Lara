@@ -134,7 +134,12 @@ Appendix F](docs/lara-surface-grammar.md)). The `lara-syntax@0.6` named-slot
 spelling itself is specified in [grammar Appendix E](docs/lara-surface-grammar.md);
 [`examples/S6/`](examples/S6/) is its standing byte-identity witness (the
 committed wire bytes are re-proved equal to the numeric spelling's on every CI
-run). For a program where certified arithmetic genuinely feeds a defeasible
+run). Since `lara-syntax@0.8` a certificate may also cite the **premise label**
+the rule declares for a slot ([grammar Appendix G](docs/lara-surface-grammar.md)),
+which names the slot rather than the term filling it and so stays unambiguous
+where a leaf name cannot — when one leaf feeds two premises;
+[`examples/S7/`](examples/S7/) works that case. For a program where certified
+arithmetic genuinely feeds a defeasible
 claim — and survives while the claim it serves is defeated — see
 [`examples/S4/`](examples/S4/).
 
@@ -171,7 +176,7 @@ CI runs both, including the `AxCheck.lean` axiom audit, on every push.
 | Document | What it covers |
 | --- | --- |
 | [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen at M1; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
-| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.7`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness |
+| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.8`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work LARA builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |

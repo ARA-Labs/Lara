@@ -71,19 +71,42 @@ slots by construction, so the value-mismatch wording above is the one a `compari
 (`Lara.Elaborate.sourceResultAuthorDiagnostics`; pinned by `test/CliSpec.hs`
 `prop_cliLaraComparisonRejectionContext`, which pins both doors in one test.)
 
-### 1.2 One rejection the `.lara` door moves (`lara-syntax@0.6`)
+### 1.2 The certificate premise-slot rejections (`lara-syntax@0.6`, `@0.8`)
 
 Since `lara-syntax@0.6` (grammar Appendix E), the declared premise-reference
 positions of an `ord@1`/`ra@1` certificate payload are lowered at elaboration.
 A spelling-level slot mistake there, such as a malformed numeral `(prem 007)`
 or `(prem -1)`, or a symbolic name that fails to resolve, rejects at the source
-boundary (`ElabError`, exit 2, the `CertSlot*` family of grammar Appendix E.5)
-rather than reaching certificate replay as an R13. Nodes outside the schema's
-declared reference positions remain backend-owned. This applies only on the
+boundary (`ElabError`, exit 2, the `CertSlot*` family of grammar Appendix E.5,
+superseded by G.5) rather than reaching certificate replay as an R13. Nodes
+outside the schema's declared reference positions remain backend-owned. This applies only on the
 `.lara` door: a raw `.sexp` carries no presentation layer, and a symbolic slot
 arriving there is still the backend's to refuse at replay.
 Acceptance is unchanged — every payload the frozen corpus can contain lowers to
 itself byte-identically.
+
+Since `lara-syntax@0.8` (grammar Appendix G) the same lowering resolves a
+reference in a third name class — the citing rule's declared premise labels
+(#131) — so this section's rejection surface gains **one** family and rewords
+two messages. The normative template list is grammar Appendix G.5.
+
+- **New:** `CertSlotLabelAmbiguous` — a reference that names both a premise
+  label of the citing rule and a declared leaf or prior argument:
+  `arg 'A': certificate 'B' premise reference 'N' is ambiguous between rule 'R' premise label and a declared leaf or prior argument`.
+  Rejected even when both classes would resolve to the same slot; that is the
+  one collision policy of Appendix E.2 and F.4, with no carve-out (Appendix
+  G.3).
+- **Reworded:** `CertSlotUnresolved` now names the citing rule and all three
+  classes —
+  `arg 'A': certificate 'B' premise reference 'N' names neither a premise label of rule 'R', a declared leaf, nor a prior argument`.
+  Same rejection, same class, same exit code; only the wording moved.
+
+Neither can fire on any **pre-existing** source, which is the scoping grammar
+Appendix G.7 states: no tracked policy other than S7's `ord-labeled-v1` — added
+by `@0.8` itself — labels a premise of a rule whose certificates cite names, and
+S7 declares no name that collides with one of its own labels. The label class is
+therefore empty across every policy frozen before `@0.8`, and acceptance is
+unchanged. As above, this applies only on the `.lara` door.
 
 ### 1.3 Three rejections the `.lara` door gains (`lara-syntax@0.7`)
 
@@ -286,7 +309,7 @@ document should not be read as implying it does.
 
 - `docs/spec.md` §10.1 — the frozen class table this document adds anchors and prose to.
 - `examples/README.md` — the worked-example suite (`A`, `B`, `E1`–`E5`, `R1`–`R3`, `R2-sort`,
-  `S1`–`S6`, plus the demo directories), several
+  `S1`–`S7`, plus the demo directories), several
   of which are the anchors above.
 - `fixtures/mutants/README.md` and `MANIFEST.tsv` — the generated mutation suite that exercises every
   class at scale, differentially checked between the Haskell and Lean drivers.

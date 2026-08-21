@@ -3,7 +3,11 @@
 -- strict certificate. An @ord\@1@ or @ra\@1@ certificate may cite a premise
 -- by its source name — @(prem e4)@ instead of @(prem 0)@ — and this pass
 -- rewrites exactly those references to the byte-identical numeric payload
--- the backend already decodes.
+-- the backend already decodes. At @lara-syntax\@0.8@ (#131) the name a
+-- reference may carry also includes the citing rule's declared /premise
+-- label/, which names the slot itself rather than the term filling it; the
+-- name scope stays entirely the caller's, so that extension shows up here
+-- only as one more 'SlotRefError' verdict.
 --
 -- Payloads stay backend-owned. The pass consults only a backend's declared
 -- flat 'SlotSchema' — head keyword, arity, and reference positions — and
@@ -24,7 +28,7 @@
 -- >   → lowerCertPayload + resolver
 -- >       no schema match, no symbolic (prem s) (nd@1, unknown backend, wrong head/arity) → payload byte-identical
 -- >       schema'd backend, mismatched payload WITH symbolic (prem s) → Left SlotSchemaMismatch
--- >       (prem s), s symbolic → resolve s vs leaves∪priors, locate in resolved prems
+-- >       (prem s), s symbolic → resolve s vs labels∪leaves∪priors, locate in resolved prems
 -- >           ok → rewrite to (prem N) ; fail → Left CertSlot* (rejected before the checker)
 -- >   → Unit: declared references numeric; all other payload nodes backend-owned → encode → replay → strictCheck
 module Lara.Elaborate.CertSlots
@@ -44,15 +48,19 @@ import Lara.Strict.Cell (SlotSchema (..), Tag (TPrem), parseCanonicalNat, tagToS
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
 
--- | Why a symbolic premise reference failed to lower. The first four are
+-- | Why a symbolic premise reference failed to lower. The first five are
 -- verdicts of the caller-supplied resolver (the elaborator owns the name
 -- scope; this pass never inspects it); the last two are produced by
 -- 'lowerCertPayload' itself.
 data SlotRefError
-  = -- | the name matches neither a declared leaf nor a prior argument
+  = -- | the name matches no premise label, declared leaf, or prior argument
     SlotNameUnresolved
   | -- | the name denotes more than one candidate in scope
     SlotNameAmbiguous
+  | -- | the name is both a rule premise label and a declared leaf or prior
+    -- argument (@lara-syntax\@0.8@, #131): never silently either class, even
+    -- when the two classes would agree on the slot.
+    SlotNameLabelAmbiguous
   | -- | the name resolves, but not to a premise of this instance
     SlotNameNotAPremise
   | -- | the named premise occupies two slots (the two 0-based witnesses)

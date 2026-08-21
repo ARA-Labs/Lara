@@ -5100,3 +5100,67 @@ tree:
     - "commit 20a5bb8"
   also_depends_on: [N196]
   status: resolved
+
+- id: N199
+  type: decision
+  title: "lara-syntax@0.8: premise labels as a third name class, split out from the nd@1 feature"
+  provenance: user
+  timestamp: "2026-08-21T04:00"
+  choice: >
+    Land #131 alone as lara-syntax@0.8 rather than bundling it with #132's
+    named nd@1 proof terms, and give a certificate premise reference a THIRD
+    name class: the premise label the citing rule declares for that slot, sat
+    beside the @0.6 declared-leaf and prior-argument classes under the
+    unchanged `(prem s)` spelling. Cross-class collision is a hard error
+    (CertSlotLabelAmbiguous) even when both classes would resolve to the same
+    slot, and CertSlotUnresolved gains the citing RuleId so the message can say
+    whose labels were consulted. Labels are per-rule, not per-policy: a nested
+    instance's certificate resolves against its own rule's labels, never the
+    enclosing one's. The plan's own no-combine constraint drove the split -
+    #131 is S-M and #132 is L with its own Lean mechanization, so bundling
+    would hold the small feature hostage to the large one.
+  alternatives:
+    - "Let the label win on a cross-class collision - rejected: it reintroduces the silent preference #129 removed from the discharge resolver."
+    - "Carve out agreeing referents (allow the collision when both classes name the same slot) - rejected: whether `base` is ambiguous would then depend on which slot a leaf elsewhere in the artifact happens to fill, which is invisible from the citing line. It would be the first conditional case in an otherwise uniform collision policy; relaxing later is additive, tightening later would be breaking."
+    - "Make labels replace the leaf/prior namespace - rejected: labels are optional (`rulePremiseLabels :: [Maybe PremiseLabel]`), so they cannot be universal; a third class beside the other two keeps every pre-@0.8 rule cited exactly as before."
+    - "Bundle #131 and #132 into one release - rejected by the plan's split; recorded here because it was the live alternative."
+  evidence:
+    - "docs/lara-surface-grammar.md Appendix G"
+    - "commit 567b639 (resolver + error plumbing)"
+    - "commit df2c832 (recursion, conservativity and message pins)"
+    - "commit 2384dae (Appendix G, rejection surface, version sweep)"
+    - "PR #141"
+  also_depends_on: [N196]
+  status: resolved
+
+- id: N200
+  type: experiment
+  title: "@0.8 is byte-identical to the numeric spelling and owes no Lean re-proof"
+  provenance: ai-executed
+  timestamp: "2026-08-21T05:30"
+  result: >
+    Two things were at risk and both were measured rather than argued. (1)
+    Byte-identity: the new worked example examples/S7 was regenerated from its
+    numeric twin - the same artifact with both certificates written
+    `(ordcmp (prem 0) (prem 1))` - and diffed; example.core.sexp and
+    expected.json are identical, so the label spelling produces the numeric
+    spelling's exact bytes. scripts/differential.sh reports pass=582 fail=0,
+    both drivers agreeing on the new anchor. (2) Mechanization debt: zero Lean
+    edits were needed. lean/Lara/CertSlots.lean parameterizes the mechanized
+    pass over an abstract resolver `p : String -> Option Nat`, and both
+    theorems (lower_id_of_no_symbolic, lower_eq_numeric_subst) are universally
+    quantified over it, so the label-extended resolver is one more instance.
+    `lake build` clean, `lake env lean AxCheck.lean | scripts/check-axioms.sh`
+    passes within the propext/Classical.choice/Quot.sound trio,
+    check-presentation-parity.sh PASS at 73 rows, and `cabal test` green -
+    all against an unmodified lean/ tree. Corpus-wide the label class is
+    empty: no tracked policy labels a premise of a rule whose certificates
+    cite names, so acceptance is unchanged and no derived artifact outside
+    examples/S7 moved. The S7 header's own CertSlotMultiSlot claim was
+    verified against the production CLI rather than asserted.
+  evidence:
+    - "docs/lara-surface-grammar.md Appendix G.6, G.7"
+    - "examples/S7/example.core.sexp"
+    - "commit 4a32367 (S7)"
+  also_depends_on: [N199]
+  status: resolved

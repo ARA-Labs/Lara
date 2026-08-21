@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.7`)
+# LARA surface grammar — frozen (`lara-syntax@0.8`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -30,17 +30,22 @@ instead of `(prem 0)`), and elaboration lowers the name to the canonical
 numeric slot after premise resolution, so the wire `Unit` and `lara-core@0.2`
 remain unchanged. The `@0.5` inferred-theta form (`Arg` carrying
 `ArgInstantiation` with `ArgRef` references, exercised by the migrated A/S1
-witnesses) remains specified in Appendix D. The current surface is `@0.7`,
-whose three *restrictions* — `discharge`/`open` on a bare leaf are parse
-errors, a hole is spelled `open q`, and a shadowed discharge target is a hard
-error — are specified in Appendix F; they remove surface and add none, so the
-AST, the wire, and `lara-core@0.2` are again unchanged.
+witnesses) remains specified in Appendix D. `@0.7`'s three *restrictions* —
+`discharge`/`open` on a bare leaf are parse errors, a hole is spelled `open q`,
+and a shadowed discharge target is a hard error — are specified in Appendix F;
+they remove surface and add none, so the AST, the wire, and `lara-core@0.2` are
+again unchanged. The current surface is `@0.8`, which lets a certificate
+premise reference cite the citing rule's declared premise **label** beside the
+`@0.6` leaf and prior-argument names (Appendix G); like `@0.6` it changes no
+lexer or parser rule, and a label citation lowers to the numeric spelling's
+exact bytes.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.7`; it decodes to
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.8`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
-`@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and `@0.6`
-symbolic certificate premise references remain presentation-layer data until
+`@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and the `@0.6`
+symbolic and `@0.8` premise-label certificate premise references remain
+presentation-layer data until
 elaboration, and `@0.7`'s restrictions (bare-leaf body lines, the sole `open q`
 hole spelling, and the unified discharge collision policy) remove
 presentation-layer forms without adding any, so the decoded `lara-core@0.2`
@@ -1479,6 +1484,10 @@ every resolved name first).
 
 ### E.2 Name resolution: namespace and collision policy (D3)
 
+*Extended at `@0.8`:* Appendix G.2 adds the citing rule's declared premise
+labels as a third name class, under the same collision policy (G.3). The
+two classes below and their collision rule are unchanged.
+
 A symbolic name resolves in the `lara-syntax@0.5` reference namespace —
 declared leaves ∪ prior arguments, exactly the scope an inferred θ reference
 sees (Appendix D.1): "prior" means already elaborated earlier in declaration
@@ -1502,7 +1511,9 @@ against", never a positional convention of the surface text.
 - Zero slots → error: the referent is real but is not among this argument's
   premises.
 - Two or more slots (the same leaf feeding two premises) → error; the author
-  must cite numeric slots there.
+  must cite numeric slots there. *Superseded at `@0.8`:* a numeric slot is no
+  longer the only exit — the rule's premise label for the intended slot is the
+  other, and the better one (Appendix G.4).
 
 *Representation rule:* locating matches whatever representation the author's
 spelling actually put in the resolved premise sequence. A prior-argument
@@ -1542,13 +1553,18 @@ the R13 row). Acceptance is unchanged.
 
 ### E.5 Stable error messages
 
+*Superseded by Appendix G.5:* `@0.8` adds a seventh family
+(`CertSlotLabelAmbiguous`) and rewords two of the six below, so **G.5 is the
+normative template list**. The list here is kept as the `@0.6` record.
+
 The six diagnostic families are `CertSlotUnresolved`, `CertSlotAmbiguous`,
 `CertSlotNotAPremise`, `CertSlotMultiSlot`, `CertSlotNonCanonicalNumeral`, and
 `CertSlotSchemaMismatch` — located `ElabError`s in the `ThetaReference*` style
-(D.3), attributed to the enclosing `arg` block. This list is their normative
-home. The renderer uses these exact templates, where `A` is the enclosing
-argument, `B` is the backend spelling `name@version` from the `assurance`
-line, `N` is the authored reference spelling, and `I`/`J` are 0-based slots:
+(D.3), attributed to the enclosing `arg` block. This *was* their normative
+home at `@0.6`; the renderer *used* these exact templates, where `A` is the
+enclosing argument, `B` is the backend spelling `name@version` from the
+`assurance` line, `N` is the authored reference spelling, and `I`/`J` are
+0-based slots:
 
 ```text
 arg 'A': certificate 'B' premise reference 'N' names neither a declared leaf nor prior argument
@@ -1606,6 +1622,13 @@ Two future-work notes, recorded here so the next design starts from them:
   priors, growing exactly the resolution surface this feature is supposed to
   keep predictable. Premise-label citation remains a natural future
   `lara-syntax@0.x` extension.
+  *Resolved at `@0.8`:* Appendix G lands premise-label citation (#131). The
+  collision policy this bullet asks for is G.3 — cross-class collision is a
+  hard error, with no carve-out for agreeing referents — and the optionality
+  concern is answered by keeping labels a *third* class beside the other two
+  rather than a replacement (G.2): a rule that labels nothing is cited exactly
+  as at `@0.6`. The multi-slot case this bullet anticipated is G.4, worked in
+  `examples/S7/`.
 
 ## Appendix F — `lara-syntax@0.7` (surface strictness, 2026-08-20)
 
@@ -1857,3 +1880,175 @@ move: `fixtures/mutants/` = `fd7142072d58da4d35642cbad6f144c970627afa`,
 `.core.sexp` bytes, every one of which is unchanged, so the headline numbers of
 record stand as measured: **564/564** class match, **564/564** `lean_agree`,
 **60/60** replay.
+
+## Appendix G — `lara-syntax@0.8` (premise-label certificate citation, 2026-08-21)
+
+### G.1 Scope
+
+Additive over `lara-syntax@0.7`. A certificate premise reference may now cite
+the **premise label** the citing rule declares for that slot (Appendix B.4),
+alongside the `@0.6` leaf and prior-argument names. Like `@0.6`, this changes
+no lexer or parser rule: the spelling `(prem s)` is unchanged, and only the set
+of names `s` may carry grows.
+
+Nothing here reaches the kernel. No `lara-core@0.2` change, no `Lara.AST`
+change, no wire or `.core.sexp` change, no checker-judgment change, and no
+strict-backend or replay change. A label citation and its numeric twin produce
+byte-identical `Cert` payloads, byte-identical encoded `Unit`s, and
+byte-identical verdicts; `examples/S7/` authors the label spelling and its
+committed `.core.sexp` golden is the standing byte-identity witness (G.7).
+
+**Why labels earned their own name class.** `@0.6` resolves a name by locating
+the *referent's term* in the resolved premise sequence, which has one case it
+structurally cannot express: when one leaf feeds two premises, the leaf name
+occupies both slots and the author is pushed back to numerals (E.3's third
+bullet). A label does not name the term — it names the **slot**, in the rule
+that declares it — so it stays unambiguous however the instance is filled.
+That is the gap #131 closes, and it is closed with an existing, tested
+mechanism (`premiseLabelIndex`) rather than new machinery.
+
+### G.2 The three-class namespace and resolution rule
+
+A symbolic `(prem s)` resolves in **three** classes:
+
+1. the **premise labels declared by the rule of the instance whose certificate
+   this is** — the citing rule, never an enclosing or nested one;
+2. the **declared leaves**;
+3. the **prior arguments** (already elaborated, in declaration order).
+
+Class 1 is answered by `premiseLabelIndex`, which maps a label to its 0-based
+slot directly and needs no locating step. Classes 2 and 3 are `@0.6`'s
+namespace (`refMatches`) and keep E.3's locating rule verbatim: the referent's
+term is located in the resolved premise sequence by term equality, with the
+representation rule of E.3 intact.
+
+Resolution reads as one case split, in this order:
+
+- label hit, and the name is in **neither** other class → that label's slot,
+  provided the slot exists in this instance's premise list. It does not exist
+  only when an authored premise list is shorter than the rule's premise
+  vector, which is a not-a-premise error.
+- label hit, and the name is **also** a declared leaf or prior argument →
+  hard error (G.3), whatever the other class would have resolved to.
+- no label hit → exactly `@0.6`, with all of E.2's and E.3's verdicts.
+
+Labels are optional (`rulePremiseLabels :: [Maybe PremiseLabel]`, `[]` when the
+rule labels nothing), so class 1 is empty for every rule written before `@0.8`
+— which is every rule in the frozen corpus. For those rules the resolver is
+bitwise the `@0.6` one, and `test/CertSlotsSpec.hs` carries an unlabelled
+control rule pinning both its resolving and its failing path.
+
+The class is **per rule, not per policy**: a label of rule `r` is not a name
+that rule `r'` knows, and a nested instance's certificate resolves against its
+own rule's labels, never the enclosing instance's (E.6, extended in G.6).
+
+### G.3 Collision policy: cross-class collision is a hard error
+
+A name carried by both class 1 and class 2 or 3 is `CertSlotLabelAmbiguous`,
+never silently either class. This is E.2's and F.4's one collision policy
+applied to the new class, and it holds **even when the two classes would
+resolve to the same slot**.
+
+That last clause is the deliberate part. A carve-out for agreeing referents is
+tempting — nothing is lost by picking either — but it would be the first
+conditional case in a policy that is otherwise a single uniform sentence, and
+its condition is not visible in the citing line: whether `base` is ambiguous
+would depend on which slot a leaf elsewhere in the artifact happens to fill.
+An author reading `(prem base)` could not tell. Predictability beats
+convenience here, and relaxing the rule later is additive while tightening it
+later would be breaking.
+
+The rejected alternatives, for the record: *label wins* and *leaf wins* both
+reintroduce the silent preference #129 removed from the discharge resolver;
+*agreeing referents are fine* is the conditional rule above.
+
+### G.4 What labels resolve that names could not
+
+E.3's third bullet — two or more occupied slots — said the author "must cite
+numeric slots there". That is no longer the only exit. **Superseded by this
+section:** the multi-slot case now has two exits, a numeric slot or the
+label of the intended slot, and the label is the better one, because it says
+which slot was meant in the rule's own vocabulary rather than by position.
+
+The `CertSlotMultiSlot` message still reads "cite a numeric slot"; it names
+one working exit, not the exhaustive list. `examples/S7/` argument `a2` is the
+worked case: one leaf fills both premise slots of a two-premise rule, and only
+`(prem left)`/`(prem right)` resolve there.
+
+Note that this does not make labels a *universal* namespace. Labels are
+optional, so a rule that declares none is cited exactly as at `@0.6`, and the
+multi-slot dead end survives for such a rule. What `@0.8` gives is an exit the
+policy author can open.
+
+### G.5 Stable error messages
+
+Seven diagnostic families: E.5's six, of which **two are reworded here**, plus
+`CertSlotLabelAmbiguous`. This list supersedes E.5's as the normative home;
+E.5 carries a banner pointing here. `A` is the enclosing argument, `B` the
+backend spelling `name@version`, `N` the authored reference spelling, `R` the
+citing rule's id, and `I`/`J` are 0-based slots:
+
+```text
+arg 'A': certificate 'B' premise reference 'N' names neither a premise label of rule 'R', a declared leaf, nor a prior argument
+arg 'A': certificate 'B' premise reference 'N' is ambiguous between a declared leaf and a prior argument
+arg 'A': certificate 'B' premise reference 'N' is ambiguous between rule 'R' premise label and a declared leaf or prior argument
+arg 'A': certificate 'B' premise reference 'N' does not resolve to any of this argument's premise slots
+arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot
+arg 'A': certificate 'B' premise reference 'N' is not a canonical slot numeral (use unsigned decimal with no leading zeros); write the canonical numeral or a source name
+arg 'A': certificate 'B' payload does not match the backend's premise-reference schema but contains symbolic premise reference 'N'
+```
+
+The two changed templates are the first and third. Both name the citing rule,
+because "a premise label" is only actionable once the author knows whose labels
+were consulted — the same reason `ThetaReference*` messages name their rule.
+`test/CertSlotsSpec.hs` pins all seven character-for-character, and
+`test/CliSpec.hs` pins the two changed ones end to end on the production CLI's
+stderr.
+
+### G.6 Recursion, and why no Lean change is owed
+
+E.6's recursion semantics hold verbatim, with the citing rule's labels now part
+of what "that node's own scope" means: a nested certificate resolves against
+the nested instance's premise list *and* the nested rule's labels. A label of
+the enclosing rule is unresolved inside a nested certificate, and vice versa.
+`test/CertSlotsSpec.hs` pins both directions at the AST level, because a leaked
+label would be the worst kind of silent success — it names a slot index both
+instances have.
+
+**No Lean change is owed.** `lean/Lara/CertSlots.lean` parameterizes the
+mechanized pass over an *abstract* resolver `ρ : String → Option Nat` and an
+abstract classifier `startsSourceIdentifier : String → Bool`, and both
+theorems — `lower_id_of_no_symbolic` (byte preservation on every payload the
+frozen corpus can contain) and `lower_eq_numeric_subst` (a successful lowering
+is exactly the declarative substitution) — are universally quantified over `ρ`.
+The label-extended resolver is one more instance of `ρ`, so both theorems hold
+over it without re-proof. This is the F.1 precedent restated: a surface change
+that does not alter the modeled shape owes no Lean work, and saying so
+explicitly is part of the record. `scripts/check-axioms.sh` and
+`scripts/check-presentation-parity.sh` stayed green with no Lean edit.
+
+The resolver itself lives in the validated-not-verified elaborator
+(`ara/logic/solution/constraints.md`), which the mechanization plan does not
+cover; the Lean mirror carries the lowering math, and the Haskell property
+tests carry conformance.
+
+### G.7 Migration and derived artifacts
+
+**No source migration.** `@0.8` adds names to a namespace and removes nothing,
+so every `.lara` source in the repository is unchanged and every existing
+spelling keeps its meaning. `@0.8` cannot fire on any pre-existing artifact:
+no tracked policy labels a premise of a rule whose certificates cite names, so
+class 1 is empty throughout the frozen corpus and the resolver's behavior there
+is bitwise `@0.6`'s.
+
+**One new worked example, no changed derived artifact.** `examples/S7/`
+(`example.lara`, `ord-labeled-v1.policy.lara`, and the two generated files) is
+added; no other `example.core.sexp`, `expected.json`, mutant fixture, or frozen
+measurement byte changes. S7's own golden was verified byte-equal to the one
+its numeric twin produces — both certificates lower to
+`(ordcmp (prem 0) (prem 1))` — and `test/WorkedExamplesSpec.hs`'s freshness
+property re-proves that on every run, while `scripts/differential.sh` confirms
+both drivers agree on the new anchor.
+
+**No measurement re-run is owed**, for F.5's reason: the measurement harness
+consumes `.core.sexp` bytes and none of the measured ones moved.

@@ -45,6 +45,7 @@ import Lara.AST
   , Program (..)
   , RejectClass (..)
   , Rejection (..)
+  , RuleId (..)
   , Status (..)
   , SupportTerm (..)
   , TheoryDigest (..)
@@ -349,6 +350,15 @@ prop_identityOnSymbolicFreePayloads =
 -- leaves, 'twin' takes the /same/ premise pattern twice (so one leaf occupies
 -- two slots), 'select' produces a prior argument for 'promote' to cite, and
 -- @e3@ is a declared leaf that no instance below admits.
+--
+-- Every rule but 'plain' /labels/ its premises (@lara-syntax\@0.8@, #131), so
+-- the same fixture reaches the third name class: 'pair' for the twin property,
+-- 'twin' for the multi-slot case only labels can cite, and 'select'\/'promote'
+-- for the nested-instance scoping pin (a label belongs to the rule of the
+-- instance that cites it, never to an enclosing one). 'plain' is 'pair' with
+-- the labels removed, and is the pre-@0.8@ control: 'premiseLabelIndex' is
+-- 'Nothing' for every name there, so the resolver must behave exactly as it
+-- did at @0.6@ — the shape of every frozen policy in the corpus.
 certPolicySource :: String
 certPolicySource =
   unlines
@@ -363,25 +373,31 @@ certPolicySource =
     , "pred twinned(System, Num)"
     , "rule select(X, V)"
     , "  mode = strict"
-    , "  premises = [ alpha(X, V) ]"
+    , "  premises = [ src: alpha(X, V) ]"
     , "  conclusion = selected(X, V)"
     , "  allow-trusted = true"
     , "  certifiers = []"
     , "rule pair(X, V)"
     , "  mode = strict"
-    , "  premises = [ alpha(X, V), beta(X, V) ]"
+    , "  premises = [ base: alpha(X, V), new: beta(X, V) ]"
     , "  conclusion = paired(X, V)"
     , "  allow-trusted = false"
     , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
     , "rule promote(X, V)"
     , "  mode = strict"
-    , "  premises = [ selected(X, V), beta(X, V) ]"
+    , "  premises = [ chosen: selected(X, V), other: beta(X, V) ]"
+    , "  conclusion = paired(X, V)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
+    , "rule plain(X, V)"
+    , "  mode = strict"
+    , "  premises = [ alpha(X, V), beta(X, V) ]"
     , "  conclusion = paired(X, V)"
     , "  allow-trusted = false"
     , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
     , "rule twin(X, V)"
     , "  mode = strict"
-    , "  premises = [ alpha(X, V), alpha(X, V) ]"
+    , "  premises = [ left: alpha(X, V), right: alpha(X, V) ]"
     , "  conclusion = twinned(X, V)"
     , "  allow-trusted = false"
     , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
@@ -452,6 +468,58 @@ pairArgInferred :: String -> [String]
 pairArgInferred payload =
   [ "arg a_pair : supports(c_paired) by pair from [e1, e2]"
   , certLine payload
+  ]
+
+-- | @twin@ over its one repeated premise pattern, certified by the given
+-- payload text. Both slots are filled by @e1@, so a /leaf/ name cannot say
+-- which slot it means — this is the instance the @\@0.8@ premise labels exist
+-- for (#131).
+twinArg :: String -> [String]
+twinArg payload =
+  [ "arg a_twin : supports(c_twinned) by twin(sys_a, 0.74)"
+  , certLine payload
+  ]
+
+-- | The pre-@\@0.8@ control: @plain@ is @pair@ with its premise labels
+-- removed, so every resolution here runs the path a policy written before
+-- #131 takes.
+plainArg :: String -> [String]
+plainArg payload =
+  [ "arg a_plain : supports(c_paired) by plain(sys_a, 0.74)"
+  , certLine payload
+  ]
+
+-- | A @pair@ instance under a declared leaf whose name is also one of @pair@'s
+-- premise labels. Both classes would resolve — and to the same slot — but the
+-- collision is rejected outright (@\@0.8@ decision 2, the one collision policy
+-- of @\@0.6@\/@\@0.7@).
+labelCollisionDecls :: [String]
+labelCollisionDecls =
+  [ "leaf base : beta(sys_b, 0.74)"
+  , "  kind = observed"
+  , "  provenance = user"
+  , "  refs = [evidence/label-collision.txt]"
+  , ""
+  ]
+    ++ pairArg "(ordcmp (prem base) (prem 1))"
+
+-- | The same cross-class collision as 'labelCollisionDecls', in the /other/
+-- class it can happen in: a prior __argument__ whose id is one of the citing
+-- rule's premise labels. @promote@ labels its slots @chosen@\/@other@, and the
+-- argument it cites in slot 0 is named @chosen@ here.
+--
+-- The two fixtures reach the resolver's @('Just' _, _)@ catch-all through
+-- different 'refMatches' shapes — @([leaf], [])@ there, @([], [prior])@ here —
+-- so only both together pin what the guard claims: a label collision with
+-- /either/ other class is rejected, never silently resolved to the label's
+-- slot.
+priorArgLabelCollisionDecls :: [String]
+priorArgLabelCollisionDecls =
+  [ "arg chosen : supports(c_selected) by select(sys_a, 0.74)"
+  , "  assurance = trusted"
+  , ""
+  , "arg a2 : supports(c_paired) by promote(sys_a, 0.74)"
+  , certLine "(ordcmp (prem chosen) (prem 1))"
   ]
 
 -- | @promote@ citing the prior argument @a1@ in premise slot 0 and the leaf
@@ -573,7 +641,172 @@ prop_priorArgumentCitationBothSpellings = once $
     ]
 
 -- ---------------------------------------------------------------------------
--- Elaboration: the six author-facing failures
+-- Elaboration: premise-label citation (lara-syntax@0.8, #131)
+-- ---------------------------------------------------------------------------
+
+-- | #131's twin property: a certificate citing its rule's declared premise
+-- __labels__ elaborates to exactly the 'Unit' the numeric spelling produces.
+-- Pinned at both elaboration sites, because a label resolves the same way
+-- under @from […]@ as it does under an explicit θ.
+prop_labelCitationLowersToNumericTwin :: Property
+prop_labelCitationLowersToNumericTwin = once $
+  conjoin
+    [ sameUnit
+        "premise-label citation, explicit spelling"
+        (pairArg "(ordcmp (prem base) (prem new))")
+        (pairArg "(ordcmp (prem 0) (prem 1))")
+    , sameUnit
+        "premise-label citation, inferred spelling"
+        (pairArgInferred "(ordcmp (prem base) (prem new))")
+        (pairArg "(ordcmp (prem 0) (prem 1))")
+    , sameUnit
+        "labels and numerals mix position-wise"
+        (pairArg "(ordcmp (prem base) (prem 1))")
+        (pairArg "(ordcmp (prem 0) (prem 1))")
+    ]
+
+-- | #131's headline: labels name the /slots/, so they keep working in the one
+-- case the @\@0.6@ leaf\/prior namespace cannot express. @twin@'s two premises
+-- share one pattern, so the leaf @e1@ fills both and its name is
+-- 'CertSlotMultiSlot' — while @left@ and @right@ resolve, because a label
+-- names a slot rather than the term that fills it. Both halves are asserted
+-- together: the contrast /is/ the feature.
+prop_labelResolvesMultiSlot :: Property
+prop_labelResolvesMultiSlot = once $
+  conjoin
+    [ sameUnit
+        "labels cite the two slots one leaf fills"
+        (twinArg "(ordcmp (prem left) (prem right))")
+        (twinArg "(ordcmp (prem 0) (prem 1))")
+    , expectCertError
+        (twinArg "(ordcmp (prem e1) (prem 1))")
+        ( \err -> case err of
+            CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 -> True
+            _ -> False
+        )
+        ["arg 'a_twin'", "'e1'", "occupies premise slots 0 and 1"]
+    ]
+
+-- | Decision 2: a name carried by /both/ a premise label and a declared leaf
+-- is a hard error — even here, where both classes would resolve to the same
+-- slot. Predictability over convenience: an agreeing-referent carve-out would
+-- be the first conditional rule in an otherwise uniform collision policy.
+prop_labelLeafCollisionIsHardError :: Property
+prop_labelLeafCollisionIsHardError = once $
+  expectCertError
+    labelCollisionDecls
+    ( \err -> case err of
+        CertSlotLabelAmbiguous (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "base") (RuleId "pair") -> True
+        _ -> False
+    )
+    [ "arg 'a_pair'"
+    , "'base'"
+    , "is ambiguous between rule 'pair' premise label and a declared leaf or prior argument"
+    ]
+
+-- | Decision 2's other half: the colliding name is carried by a premise label
+-- and a prior __argument__ rather than a declared leaf. Same verdict, same
+-- reason — and it is the half a narrowing refactor would drop, because the
+-- resolver's @('Just' _, _)@ pattern covers all three 'refMatches' shapes at
+-- once while 'labelLeafCollisionIsHardError' only observes @([leaf], [])@.
+prop_labelPriorArgumentCollisionIsHardError :: Property
+prop_labelPriorArgumentCollisionIsHardError = once $
+  expectCertError
+    priorArgLabelCollisionDecls
+    ( \err -> case err of
+        CertSlotLabelAmbiguous (ArgId "a2") (AST.BackendId "ord") 1 (AST.ArgRef "chosen") (RuleId "promote") -> True
+        _ -> False
+    )
+    [ "arg 'a2'"
+    , "'chosen'"
+    , "is ambiguous between rule 'promote' premise label and a declared leaf or prior argument"
+    ]
+
+-- | The one guard the label class carries, pinned. A label names a /slot/, so
+-- it resolves against the rule's declared premise list — but the slot it names
+-- must exist in __this instance's__ premise list, and an authored premise list
+-- shorter than the rule's can violate that. @promote@ labels two slots; this
+-- instance is written out with one premise, so @other@ (slot 1) names a slot
+-- that is not there.
+--
+-- Reachable only from an authored premise list: 'elabTerm''s explicit-premise
+-- path elaborates its premises verbatim with no arity check against the rule's
+-- declared list, unlike the inferred path. Without this pin, dropping the
+-- guard (or inverting it to @i <= length prems@) would lower @(prem other)@ to
+-- an out-of-range @(prem 1)@ and the suite would stay green — the suite's only
+-- other 'CertSlotNotAPremise' fixture cites a /leaf/ and reaches the verdict
+-- through 'locate''s @[]@ case, a different path.
+--
+-- The verdict reuses 'CertSlotNotAPremise', whose template reads \"does not
+-- resolve to any of this argument's premise slots\". Read strictly that is a
+-- statement about the slot, not the name: @other@ /did/ resolve, to a slot
+-- this instance lacks. The wording is kept rather than split into an eighth
+-- family because the @\@0.8@ family list is frozen (grammar App. G.5) and both
+-- cases are the same author mistake — citing a premise this instance does not
+-- have.
+prop_labelSlotOutsideAuthoredPremises :: Property
+prop_labelSlotOutsideAuthoredPremises = once $
+  case elaborateRewrittenA2 shortPremiseList of
+    Right term -> counterexample ("expected rejection, got " ++ show term) False
+    Left msg ->
+      property $
+        "arg 'a2'" `isInfixOf` msg
+          && "'other'" `isInfixOf` msg
+          && "does not resolve to any of this argument's premise slots" `isInfixOf` msg
+  where
+    shortPremiseList a1Term =
+      withPremisesAndCert
+        [a1Term]
+        (ordAssurance (ordcmp (prem "other") (prem "0")))
+
+-- | The unresolved verdict now names the rule and all three classes, so an
+-- author who mistyped a label is told a label was one of the things looked for.
+prop_unresolvedNamesAllThreeClasses :: Property
+prop_unresolvedNamesAllThreeClasses = once $
+  expectCertError
+    (pairArg "(ordcmp (prem no_such) (prem 1))")
+    ( \err -> case err of
+        CertSlotUnresolved (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "no_such") (RuleId "pair") -> True
+        _ -> False
+    )
+    [ "arg 'a_pair'"
+    , "'no_such'"
+    , "names neither a premise label of rule 'pair', a declared leaf, nor a prior argument"
+    ]
+
+-- | Conservativity for every policy written before @\@0.8@ — which is every
+-- policy in the frozen corpus. A rule with no premise labels leaves
+-- 'premiseLabelIndex' returning 'Nothing' for /every/ name, so the third class
+-- is not merely unused but unreachable, and both the resolving and the failing
+-- path must read exactly as they did at @\@0.6@. Pinned on both, because the
+-- resolver's case split changed shape around them.
+prop_unlabelledRuleResolvesAsBefore :: Property
+prop_unlabelledRuleResolvesAsBefore = once $
+  conjoin
+    [ sameUnit
+        "unlabelled rule, leaf citation"
+        (plainArg "(ordcmp (prem e1) (prem e2))")
+        (plainArg "(ordcmp (prem 0) (prem 1))")
+    , expectCertError
+        (plainArg "(ordcmp (prem e9) (prem 1))")
+        ( \err -> case err of
+            CertSlotUnresolved (ArgId "a_plain") (AST.BackendId "ord") 1 (AST.ArgRef "e9") (RuleId "plain") -> True
+            _ -> False
+        )
+        ["arg 'a_plain'", "'e9'", "premise label of rule 'plain'"]
+    , -- A label of a labelled rule is not a name an unlabelled rule knows:
+      -- the class is per-rule, not per-policy.
+      expectCertError
+        (plainArg "(ordcmp (prem base) (prem 1))")
+        ( \err -> case err of
+            CertSlotUnresolved (ArgId "a_plain") (AST.BackendId "ord") 1 (AST.ArgRef "base") (RuleId "plain") -> True
+            _ -> False
+        )
+        ["arg 'a_plain'", "'base'"]
+    ]
+
+-- ---------------------------------------------------------------------------
+-- Elaboration: the seven author-facing failures
 -- ---------------------------------------------------------------------------
 
 prop_certSlotFailureMatrix :: Property
@@ -583,10 +816,22 @@ prop_certSlotFailureMatrix =
         expectCertError
           (pairArg "(ordcmp (prem e9) (prem e2))")
           ( \err -> case err of
-              CertSlotUnresolved (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "e9") -> True
+              CertSlotUnresolved (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "e9") (RuleId "pair") -> True
               _ -> False
           )
-          ["arg 'a_pair'", "'ord@1'", "'e9'", "neither a declared leaf nor prior argument"]
+          [ "arg 'a_pair'"
+          , "'ord@1'"
+          , "'e9'"
+          , "names neither a premise label of rule 'pair', a declared leaf, nor a prior argument"
+          ]
+    , once $
+        expectCertError
+          labelCollisionDecls
+          ( \err -> case err of
+              CertSlotLabelAmbiguous (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "base") (RuleId "pair") -> True
+              _ -> False
+          )
+          ["arg 'a_pair'", "'base'", "is ambiguous between rule 'pair' premise label"]
     , once $
         expectCertError
           ambiguousDecls
@@ -605,7 +850,7 @@ prop_certSlotFailureMatrix =
           ["arg 'a_pair'", "'e3'", "does not resolve to any of this argument's premise slots"]
     , once $
         expectCertError
-          twinDecls
+          (twinArg "(ordcmp (prem e1) (prem 1))")
           ( \err -> case err of
               CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 -> True
               _ -> False
@@ -643,12 +888,6 @@ prop_certSlotFailureMatrix =
       , "arg a_bad : supports(c_paired) by pair(sys_a, 0.74)"
       , certLine "(ordcmp (prem a1) (prem e2))"
       ]
-    -- @twin@'s two premises share one pattern, so @e1@ fills both slots and the
-    -- name cannot say which one the certificate means.
-    twinDecls =
-      [ "arg a_twin : supports(c_twinned) by twin(sys_a, 0.74)"
-      , certLine "(ordcmp (prem e1) (prem 1))"
-      ]
 
 -- | The @InferTheta@ site enforces the failures too, not just the successes:
 -- the same undeclared name under @from […]@ is rejected with the same
@@ -658,10 +897,13 @@ prop_inferredSpellingRejectsUnresolved = once $
   expectCertError
     (pairArgInferred "(ordcmp (prem e9) (prem e2))")
     ( \err -> case err of
-        CertSlotUnresolved (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "e9") -> True
+        CertSlotUnresolved (ArgId "a_pair") (AST.BackendId "ord") 1 (AST.ArgRef "e9") (RuleId "pair") -> True
         _ -> False
     )
-    ["arg 'a_pair'", "'e9'", "neither a declared leaf nor prior argument"]
+    [ "arg 'a_pair'"
+    , "'e9'"
+    , "names neither a premise label of rule 'pair', a declared leaf, nor a prior argument"
+    ]
 
 -- | A schema-less backend is untouched by the pass even in an authored
 -- program: @nd\@1@'s recursive proof terms reach the wire byte-identical.
@@ -762,19 +1004,50 @@ elaborateRewrittenA2 rewrite = do
 -- enclosing @promote@ — whose slot 0 is that very @select@ — is untouched.
 prop_lowersNestedCertificate :: Property
 prop_lowersNestedCertificate = once $
-  case elaborateRewrittenA2 nested of
+  case elaborateRewrittenA2 (nestedCert (ordcmp (prem "e1") (prem "0"))) of
     Left err -> counterexample err False
     Right (SRule _ _ [inner, SLeaf (LeafId "e2")] _ _ AssuranceTrusted) ->
       payloadOf inner === Just (ordcmp (prem "0") (prem "0"))
     Right other -> counterexample ("unexpected a2 term: " ++ show other) False
-  where
-    nested a1Term =
-      withPremisesAndCert
-        [ certified a1Term (ordcmp (prem "e1") (prem "0"))
-        , SLeaf (LeafId "e2")
-        ]
-        AssuranceTrusted
-    certified term payload = withPremisesAndCert [] (ordAssurance payload) term
+
+-- | The @\@0.8@ half of D8 (#131): premise __labels__ are scoped to the rule
+-- of the instance that cites them, exactly as the leaf\/prior classes are
+-- scoped to that instance's premise list.
+--
+-- The nesting is @promote@ (labels @chosen@\/@other@) over a nested @select@
+-- (label @src@). Inside the nested certificate, @src@ resolves — against
+-- @select@'s own single premise — and @chosen@, a label of the /enclosing/
+-- rule, does not resolve at all. A leaked label would be the worst kind of
+-- silent success: it names a slot index that exists in both instances.
+prop_nestedCertificateLabelScope :: Property
+prop_nestedCertificateLabelScope = once $
+  conjoin
+    [ counterexample "the nested rule's own label lowers against its own premises" $
+        case elaborateRewrittenA2 (nestedCert (ordcmp (prem "src") (prem "0"))) of
+          Left err -> counterexample err False
+          Right (SRule _ _ [inner, _] _ _ _) ->
+            payloadOf inner === Just (ordcmp (prem "0") (prem "0"))
+          Right other -> counterexample ("unexpected a2 term: " ++ show other) False
+    , counterexample "a label of the enclosing rule is unresolved in the nested certificate" $
+        case elaborateRewrittenA2 (nestedCert (ordcmp (prem "chosen") (prem "0"))) of
+          Right term -> counterexample ("expected rejection, got " ++ show term) False
+          Left msg ->
+            property $
+              "premise label of rule 'select'" `isInfixOf` msg
+                && "'chosen'" `isInfixOf` msg
+    ]
+
+-- | @a2@ rewritten so its premise slot 0 is the nested @select@ instance
+-- carrying the given certificate payload, and slot 1 is the leaf @e2@. The
+-- trailing @a2Term@ argument 'elaborateRewrittenA2' supplies is the term
+-- 'withPremisesAndCert' rewrites, so it stays implicit.
+nestedCert :: SExpr -> SupportTerm -> SupportTerm -> SupportTerm
+nestedCert payload a1Term =
+  withPremisesAndCert
+    [ withPremisesAndCert [] (ordAssurance payload) a1Term
+    , SLeaf (LeafId "e2")
+    ]
+    AssuranceTrusted
 
 -- | The representation rule, pinned at the one place the two spellings could
 -- diverge. An authored premise list spells a prior argument the way the parser
@@ -1207,8 +1480,11 @@ prop_certSlotDiagnosticMessages :: Property
 prop_certSlotDiagnosticMessages = once $
   conjoin
     [ counterexample "unresolved wording drifted" $
-        elabErrorMessage (CertSlotUnresolved (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "e4"))
-          === "arg 'a1': certificate 'ord@1' premise reference 'e4' names neither a declared leaf nor prior argument"
+        elabErrorMessage (CertSlotUnresolved (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "e4") (RuleId "pair"))
+          === "arg 'a1': certificate 'ord@1' premise reference 'e4' names neither a premise label of rule 'pair', a declared leaf, nor a prior argument"
+    , counterexample "label-ambiguous wording drifted" $
+        elabErrorMessage (CertSlotLabelAmbiguous (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "e4") (RuleId "pair"))
+          === "arg 'a1': certificate 'ord@1' premise reference 'e4' is ambiguous between rule 'pair' premise label and a declared leaf or prior argument"
     , counterexample "ambiguous wording drifted" $
         elabErrorMessage (CertSlotAmbiguous (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "e4"))
           === "arg 'a1': certificate 'ord@1' premise reference 'e4' is ambiguous between a declared leaf and a prior argument"
@@ -1247,10 +1523,18 @@ certSlotsSpecProps =
   , ("the inferred spelling lowers to the same Unit as the explicit one", quickCheckResult prop_inferredSpellingLowersIdentically)
   , ("mixed symbolic/numeric positions lower position-wise", quickCheckResult prop_mixedSpellingLowers)
   , ("a prior-argument citation lowers in both spellings", quickCheckResult prop_priorArgumentCitationBothSpellings)
+  , ("a premise-label citation elaborates to the numeric twin's Unit", quickCheckResult prop_labelCitationLowersToNumericTwin)
+  , ("labels cite the two slots one leaf fills, where the leaf name cannot", quickCheckResult prop_labelResolvesMultiSlot)
+  , ("a label colliding with a declared leaf is a hard error", quickCheckResult prop_labelLeafCollisionIsHardError)
+  , ("a label colliding with a prior argument is a hard error", quickCheckResult prop_labelPriorArgumentCollisionIsHardError)
+  , ("a label whose slot the authored premise list lacks is refused", quickCheckResult prop_labelSlotOutsideAuthoredPremises)
+  , ("the unresolved verdict names the rule and all three name classes", quickCheckResult prop_unresolvedNamesAllThreeClasses)
+  , ("an unlabelled rule resolves exactly as it did at @0.6", quickCheckResult prop_unlabelledRuleResolvesAsBefore)
   , ("certificate slot failures are fail-closed and located", quickCheckResult prop_certSlotFailureMatrix)
   , ("the inferred spelling rejects an unresolved slot name", quickCheckResult prop_inferredSpellingRejectsUnresolved)
   , ("a schema-less backend's authored payload is untouched", quickCheckResult prop_schemalessBackendUntouched)
   , ("a nested instance's certificate lowers against its own premises", quickCheckResult prop_lowersNestedCertificate)
+  , ("premise labels are scoped to the citing instance's own rule", quickCheckResult prop_nestedCertificateLabelScope)
   , ("both prior-argument premise representations resolve", quickCheckResult prop_priorArgumentPremiseSpellingsAgree)
   , ("certificate slot diagnostics carry their exact wording", quickCheckResult prop_certSlotDiagnosticMessages)
   , ("ord@1 twins encode to byte-identical wire units", quickCheckResult prop_ordTwinsEncodeByteIdentical)

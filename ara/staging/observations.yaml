@@ -1632,3 +1632,56 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O78
+  timestamp: "2026-08-21T05:00"
+  provenance: ai-suggested
+  content: >
+    A presentation-layer name class that indexes the SLOT is strictly more
+    expressive than one that indexes the REFERENT, and the gap is exactly the
+    non-injective case. @0.6 resolves a citation by locating the referent's
+    term in the resolved premise sequence, which is undefined when one term
+    fills two slots - the leaf name occupies both and the author is forced back
+    to numerals. A premise label names the position in the rule that declares
+    it, so it needs no locate step and stays defined however the instance is
+    filled. The generalization: whenever a surface name must denote a position
+    in a sequence that may hold duplicates, referent-based naming has a
+    structural dead end that position-based naming does not, and adding the
+    position-based class beside it (rather than instead of it) costs only a
+    collision policy.
+  context: >
+    lara-syntax@0.8 (#131). Worked in examples/S7 argument a2, where one leaf
+    fills both premise slots of le_reflex; specified in grammar Appendix G.2
+    and G.4, which supersedes E.3's "cite a numeric slot" as the only exit.
+  potential_type: claim
+  bound_to: [N199, N200]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O79
+  timestamp: "2026-08-21T05:30"
+  provenance: ai-suggested
+  content: >
+    Parameterizing a mechanized pass over the decision procedures it consults -
+    rather than over a concrete instance of them - buys forward compatibility
+    that is checkable rather than argued. CertSlots.lean quantifies both of its
+    theorems over an abstract resolver `p : String -> Option Nat` and an
+    abstract identifier classifier, so @0.8's extension of the resolver's name
+    scope from two classes to three landed with zero Lean edits and the axiom
+    audit still green. The cost is paid once, at mechanization time, by
+    resisting the urge to model the resolver the implementation actually has;
+    the payoff is that a whole category of surface change - anything that
+    changes WHICH names resolve without changing HOW a resolved name is
+    substituted - is proof-neutral by construction.
+  context: >
+    lara-syntax@0.8 (#131). Recorded as grammar Appendix G.6 and in the
+    mechanization-plan row 12 note; verified by lake build + check-axioms.sh
+    against an unmodified lean/ tree.
+  potential_type: heuristic
+  bound_to: [N199, N200]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

@@ -563,6 +563,93 @@ ambiguousDischargePolicy =
     , "  question audit : audited(X) (optional)"
     ]
 
+-- | @lara-syntax\@0.8@ (#131) on the __production CLI__: the two certificate
+-- premise-slot diagnostics that speak about the /name classes/ now name the
+-- citing rule, because \"a premise label\" is only meaningful once the author
+-- knows whose labels were consulted. Both surface on the source-invalidity
+-- channel — exit 2, empty stdout, one located line — so every byte of the two
+-- reworded templates is pinned end to end, not only at the renderer.
+prop_cliLaraPremiseLabelDiagnostics :: Property
+prop_cliLaraPremiseLabelDiagnostics = once $ ioProperty $ do
+  ambiguous <- runLabelFixture "(ordcmp (prem base) (prem 1))"
+  unresolved <- runLabelFixture "(ordcmp (prem no_such) (prem 1))"
+  pure $
+    conjoin
+      [ counterexample "label/leaf collision" $
+          ambiguous
+            === ( ExitFailure 2
+                , ""
+                , "lara: source invalid: arg 'a1': certificate 'ord@1' premise \
+                  \reference 'base' is ambiguous between rule 'pair' premise label \
+                  \and a declared leaf or prior argument\n"
+                )
+      , counterexample "unresolved names all three classes" $
+          unresolved
+            === ( ExitFailure 2
+                , ""
+                , "lara: source invalid: arg 'a1': certificate 'ord@1' premise \
+                  \reference 'no_such' names neither a premise label of rule 'pair', \
+                  \a declared leaf, nor a prior argument\n"
+                )
+      ]
+
+-- | Run the @\@0.8@ fixture with one certificate payload through the CLI.
+runLabelFixture :: String -> IO (ExitCode, String, String)
+runLabelFixture payload =
+  withTempLaraDir
+    (premiseLabelProgram payload)
+    [("pl.policy.lara", premiseLabelPolicy)]
+    (\path -> runLara ["check", path])
+
+-- | @pair@ labels its premises @base@\/@new@, and the artifact also declares a
+-- __leaf__ named @base@ — the cross-class collision decision 2 rejects even
+-- though both classes would name slot 0.
+premiseLabelProgram :: String -> String
+premiseLabelProgram payload =
+  unlines
+    [ "artifact paper_131 at sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    , "policy pl"
+    , "use backends [ord@1]"
+    , "claim c1"
+    , "  nl      = \"The two reported cells are paired\""
+    , "  formal  = paired(sys_a, 0.74)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , "leaf base : alpha(sys_b, 0.74)"
+    , "  kind       = observed"
+    , "  provenance = user"
+    , "  refs       = [evidence/collision.txt]"
+    , "leaf e1 : alpha(sys_a, 0.74)"
+    , "  kind       = observed"
+    , "  provenance = user"
+    , "  refs       = [evidence/alpha.txt]"
+    , "leaf e2 : beta(sys_a, 0.74)"
+    , "  kind       = observed"
+    , "  provenance = user"
+    , "  refs       = [evidence/beta.txt]"
+    , "arg a1 : supports(c1) by pair from [e1, e2]"
+    , "  assurance = cert(ord@1, sha256:pl-theory-0, " ++ payload ++ ")"
+    , "status c1"
+    ]
+
+premiseLabelPolicy :: String
+premiseLabelPolicy =
+  unlines
+    [ "policy pl"
+    , "sort System"
+    , "con sys_a : System"
+    , "con sys_b : System"
+    , "pred alpha(System, Num)"
+    , "pred beta(System, Num)"
+    , "pred paired(System, Num)"
+    , "rule pair(X, V)"
+    , "  mode       = strict"
+    , "  premises   = [ base: alpha(X, V), new: beta(X, V) ]"
+    , "  conclusion = paired(X, V)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:pl-theory-0) ]"
+    , "theory sha256:pl-theory-0 = []"
+    ]
+
 -- | Duplicate admission keys are source invalidity, not first-match R8.
 -- Every byte is pinned because this diagnostic is the only observable result.
 prop_cliDuplicateAdmissionKey :: Property
@@ -913,6 +1000,7 @@ cliSpecProps =
   , ("cli .lara open on bare leaf exit 2 (#135)", quickCheckResult prop_cliLaraOpenOnBareLeaf)
   , ("cli .lara legacy 'open q as o' exit 2 (#133)", quickCheckResult prop_cliLaraLegacyOpenAs)
   , ("cli .lara ambiguous discharge exit 2 (#129)", quickCheckResult prop_cliLaraAmbiguousDischarge)
+  , ("cli .lara premise-label diagnostics exit 2 (#131)", quickCheckResult prop_cliLaraPremiseLabelDiagnostics)
   , ("cli .lara missing policy exit 2", quickCheckResult prop_cliLaraMissingPolicy)
   , ("cli .lara duplicate argument id exit 2", quickCheckResult prop_cliLaraDuplicateArgId)
   , ("cli .lara dangling attack endpoint exit 2", quickCheckResult prop_cliLaraDanglingAttack)

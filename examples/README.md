@@ -51,6 +51,7 @@ asserts each stays in sync with its `.lara` source.
 | `S4/example.lara` | S2's artifact plus a settings audit undermining the binding, attacked by **label** (`a2.binding.leaf`) (policy `ord-setting-v1`) | undermine (on a premise leaf) | **defeated** (`better`) + **justified** (`num_lt`) | the factivity firewall in the grounded semantics: the attack lands on the layer that asserted comparability and stops at the certified arithmetic. Also that *generated* structure is ordinary structure — attackable at exactly the same point, by a name rather than a slot index |
 | `S5/example.lara` | the same `strictly-better` source shape over a **`lower-is-better`** measurand (perplexity, policy `ord-ppl-v1`) | — | **justified** (`better`) + **justified** (`num_lt`) | direction of goodness is *declared* domain knowledge, not inferable from use. The same authored relation generates the mirrored goal `num_lt(ours, theirs)`, which `ord@1` then accepts — polarity chooses which comparison to make, the backend still decides it |
 | `S6/example.lara` | S2's strict leg with the certificate premises cited **by source name** — `(ordcmp (prem base_cell) (prem new_cell))` (policy `ord-named-v1`, `lara-syntax@0.6`) | — | **justified** (`num_lt`) | the committed golden is the standing byte-identity witness for #105: the symbolic spelling elaborates to the numeric spelling's exact `.core.sexp` bytes, so the freshness check re-proves the lowering on every run |
+| `S7/example.lara` | S6's shape with the certificates cited **by premise label** — `(ordcmp (prem base) (prem new))` — plus a second argument where **one leaf fills both slots** of a two-premise rule, citable only as `(prem left)`/`(prem right)` (policy `ord-labeled-v1`, `lara-syntax@0.8`) | — | **justified** (`num_lt`) + **justified** (`num_le`) | the standing byte-identity witness for #131. A label names the *slot* rather than the term filling it, so it keeps working where the `@0.6` leaf name is `CertSlotMultiSlot` — the one case names could not express, and the reason labels earned their own name class |
 | `E4/example.lara` | reinstatement — three claims justified **while attacked** (policy `empirical-v2`) | rebut + undermine + undercut, each defended | **justified** ×3 (under attack) + **defeated** | defense is policy vocabulary (an exception, a one-directional contrary, a withheld edge), not a new mechanism |
 | `E5/example.lara` | contested beyond rebut + gap amid attacks (policy `empirical-v2`) | undermine 2-cycle + undercut 2-cycle | **contested** ×2 + **gap** | `contested` is any-kind undec, not a rebut artifact; `gap` is missing support, orthogonal to conflict |
 
@@ -109,6 +110,19 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
   premise list, so the committed `.core.sexp` carries only the numeric
   spelling; the golden is the standing byte-identity witness that the symbolic
   and numeric authors produce the same wire bytes.
+- **S7** is the premise-label demonstrator (`lara-syntax@0.8`, #131), and its
+  point is the *second* argument. A name in a certificate now resolves in three
+  classes — the rule's declared premise label, a declared leaf, a prior
+  argument — and `a1` shows the two spellings agreeing on the easy case: its
+  two slots hold two different leaves, so `@0.6`'s leaf names already worked
+  and `(prem base)`/`(prem new)` are simply the rule's own names for the same
+  slots. `a2` is the case `@0.6` cannot express at all. Both premises of
+  `le_reflex` share one pattern and `a2` fills both with the leaf `base_cell`,
+  so `(prem base_cell)` occupies slots 0 and 1 at once and is rejected as
+  `CertSlotMultiSlot` — before `@0.8` the only exit was to count slots by hand.
+  A label names the slot rather than the term filling it, so `left` and `right`
+  stay unambiguous however the instance is filled. Both certificates lower to
+  the same `(ordcmp (prem 0) (prem 1))` the numeric twin produces.
 - **E4/E5** are the M5 worked cases (tracker #48, T4). E1–E3/A/B leave three
   label cells structurally empty: an attacked argument that *survives* (E4 —
   grounded reinstatement, one context per attack kind), a `contested` produced
