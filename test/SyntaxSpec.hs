@@ -9,7 +9,7 @@
 --     generators are constrained to the /surface-representable/ subset of the
 --     presentation AST (grammar-legal identifiers\/numbers, both 'ExplicitTheta'
 --     and 'InferTheta' argument forms, 'SLeaf' discharge targets, and @open@
---     holes — see "Lara.Syntax"'s current @0.5@ header):
+--     holes — see "Lara.Syntax"'s current @0.7@ header):
 --     the property is exact @parse (print x) == Right x@, so a value the printer
 --     cannot faithfully render must not be generated. Holes were excluded until
 --     issue #127; they are generated now, and 'prop_programFormCoverage' pins

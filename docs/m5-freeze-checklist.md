@@ -71,7 +71,7 @@ re-run is owed. Row 3's tree moved twice, both outside the measured set:
 worked example **S6** (the `lara-syntax@0.6` named-slot byte-identity witness,
 #105/#110) was added, and the paper's **running-example** run1/run2 — demo
 content this file has classified as non-measured since the v3 note — was
-refreshed to the current surface (@0.4 value bindings, @0.5 inferred
+refreshed to the then-current surface (@0.4 value bindings, @0.5 inferred
 instantiation, a strict `ord@1` step with an @0.6 named-slot certificate, on a
 run-local `empirical-v3` policy). Unlike prior row-3 movement the refresh
 *modifies* existing demo bytes, so its derived goldens

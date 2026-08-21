@@ -557,9 +557,9 @@ Worked from Example A:
 
 3. **Premises implicit, discharges explicit (§5).** Legacy positional `by r(…)`
    supplies full ground `θ`; premise sub-terms are reconstructed by unique
-   `≡`-match (0 ⇒ error, 1 ⇒ resolved, ≥2 ⇒ error). Current `@0.5` sources may
-   use `by r from […]`, whose ordered source references and matching contract
-   are defined in Appendix D. Discharges and holes remain explicit.
+   `≡`-match (0 ⇒ error, 1 ⇒ resolved, ≥2 ⇒ error). Current sources may use the
+   `@0.5` form `by r from […]`, whose ordered source references and matching
+   contract are defined in Appendix D. Discharges and holes remain explicit.
 
 4. **`#` lexing (§1.2).** `#` is a to-EOL comment everywhere **except** inside a
    `refs = […]` list, where it is a literal source-ref character. Two lexer modes,
@@ -1011,7 +1011,7 @@ nlChar    ::= any-char-except '"', newline, "{", "}"
 directive ::= "{" "cell" leafId "}"
 ```
 
-This block records the historical `@0.3` spelling. The active `@0.5` surface
+This block records the historical `@0.3` spelling. The active `@0.7` surface
 retains the historical `@0.4` value-binding grammar introduced in Appendix
 C.5: it permits inline spaces or tabs around directive tokens and retains those
 authored gaps for round-tripping; the cell lookup and `renderDecimal` semantics
