@@ -2,6 +2,21 @@
 
 ### Mechanized Claim-Support Checking for Research Claims — A Research Proposal
 
+> **Status (2026-08-21): living — kept for §7's open milestone and §§1–5, 9 as the
+> standing framing.** The spine in §7 has moved: **M0–M5 are closed** (M5 tracker
+> #48; `docs/engineering-plan.md` §0 carries the module-level state), **M6 is
+> partial** — axes (a) and (c) are measured and frozen in `measurements/frozen/`,
+> while the LLM-dependent axes (b) and (d) are deliberately deferred to the
+> ACL/EMNLP follow-up (#52, #30) — and **M7 (the paper package) is the open
+> milestone**, tracked by #60. The optional **TL-1** row was never taken up.
+> §8's open questions were decided at the M0 corpus study and the M1 freeze
+> (`docs/corpus-map.md`, `docs/m1-freeze-checklist.md`,
+> `docs/strict-backend-decision.md`,
+> `docs/policy-admission-calculus-decision.md`); the sole exception is #7
+> (behavioral-vs-empirical routing), which gates TL-1 and is open only because
+> TL-1 is unbuilt (`docs/corpus-map.md`, `docs/engineering-plan.md` §7). Read §7
+> and §8 as the record of what was decided, not as pending work.
+
 > **The name.** **LARA** = a **L**anguage for formally verifying **ARA** (Agent-Native Research
 > Artifacts). The `L` is the contribution: a small formal language of typed claim-support certificates,
 > with a backend-parametric strict-certificate interface and a structured-argumentation semantics,

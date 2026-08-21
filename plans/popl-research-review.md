@@ -4,6 +4,20 @@ _Research snapshot: 2026-07-20; strict-fragment recommendation amended 2026-07-2
 `../docs/strict-backend-decision.md`. This is an adversarial design review, not a claim that the
 cited preprints have passed peer review._
 
+> **Status (2026-08-21): living — kept for §5's open phase and for §§2, 7–9,
+> which `docs/` cites as their source.** Of §5's work plan, **Phases A–E are
+> executed** (M0–M4; the checker, the mechanization, and the untrusted
+> `elaborator/` are in the tree), **Phase F is partial** — its exit criterion
+> asks for evidence on all four axes, and axes (a)/(c) have it while (b)/(d) are
+> deferred to the ACL/EMNLP follow-up (#52, #30) — and **Phase G (paper) is the
+> open one**, tracked by #60. §9's venue calibration — "the realistic main-conference
+> target is POPL 2028" — is superseded by `../docs/venue-decision.md` (POPL 2028
+> baseline, PLDI 2027 stretch) and by #60's current reading of it (PLDI 2027 shot
+> first, POPL 2028 fallback, decision point ~Nov 2026). The §2
+> corrections and the §7–8 literature map are still live references:
+> `../docs/study-plan.md`, `../docs/novelty-and-related-work.md`,
+> `../docs/mechanization-plan.md`, and `ara/logic/` cite them by section.
+
 ## 1. Executive verdict
 
 The central problem is real and the producer/checker architecture is sound as a direction. The
