@@ -831,3 +831,15 @@ entries:
     - "Revised C31's Conditions rather than flagging a contradiction. The @0.8 resolver does not contradict the locate-step mechanism C31 asserts - it adds a class that bypasses locate entirely - so the honest repair is a scope note, not an unresolved decision node. Statement, Status and Falsification untouched."
     - "Did NOT touch C31's Status. Artifact commitment upgrades hypothesis -> testing; C31 is already supported and nothing this turn bears on that."
     - "Created no claim for @0.8 itself, on the 2026-08-20 precedent: a presentation-only release that changes no judgment, no AST and no wire byte is an engineering release, and minting a claim for it would manufacture research content."
+
+- turn: "2026-08-21_001#2"
+  notes:
+    - "Routed N201 as decision, not pivot: the module boundary moved but nothing about the research direction did, and the turn executed a plan reviewed in an earlier turn rather than choosing a new course."
+    - "N201 provenance is `user` even though the plan's design decisions were AI-drafted: the user carried them through gstack CEO/eng/design/DX review to PASS and then directed execution verbatim, which is adoption, not suggestion."
+    - "Split the turn into N201 (decision) + N202 (experiment) rather than one node. The gate battery is genuinely falsifiable work with a recorded result and a baseline, and folding it into the decision would hide that the byte-identity claim was measured rather than asserted."
+    - "Staged O80 as potential_type: heuristic, not claim - it is a design property to exploit (wire the seed key to what refactors disturb) rather than an assertion about the system's behavior."
+    - "Staged O81 as potential_type: claim - it asserts a structural impossibility about namespace splits (a vocabulary-owning root cannot facade its siblings), which is a what, not a how."
+    - "Did NOT crystallize either: one instance each, and the user gave a procedural instruction ('commit, record ara, push') with no evaluative language about the design. Execution of a plan is artifact commitment for the plan's OWN content, not for observations the manager derived from watching it run."
+    - "Considered and rejected an empirical-resolution signal for O77/O78/O79 - this turn's subject (mutation-generator module layout) shares no bound_to node with the @0.8 surface work those observations sit under."
+    - "No Stage 4 edits. Checked whether N202 bears on C29 (zero reclassification delta is a property of the mutation generators) - it does not: C29 is about what the generators produce under a new checker stage, and this turn changed only where their source lives, holding output byte-fixed."
+    - "Recorded the freeze-checklist 580-vs-582 drift as an open thread rather than fixing it: out of #122's scope, and the plan explicitly ruled the live baseline the authority, so the doc row is a separate correction someone must budget."

@@ -1685,3 +1685,64 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O80
+  timestamp: "2026-08-21T19:15"
+  provenance: ai-suggested
+  content: >
+    A seeded artifact generator can make its own refactors mechanically
+    checkable, but only if the seed key and the selection rule are wired to the
+    things a refactor is likely to disturb. Lara.Mutate keys its stream on
+    (base, operator) THROUGH opName, and picks sites from each enumerator's
+    output in list order. Both couplings are usually described as constraints -
+    do not rename an operator, do not reorder a list. Under an output-preserving
+    refactor they invert into a detector: the failure modes a large cut-and-paste
+    actually produces (a reordered sum-type constructor, a reordered entry in an
+    operator table, a reordered list comprehension, a renamed symbol) are exactly
+    the ones that move committed bytes, so a byte-diff of the regenerated corpus
+    is a near-complete test for move errors without a single new assertion. The
+    generalization: when a frozen artifact is derived deterministically from
+    source, the refactor gate is free, and its strength is a function of how much
+    of the source's structure the derivation is sensitive to. A generator keyed
+    on stable integers with order-independent selection would have caught none
+    of these.
+  context: >
+    Splitting Lara.Mutate (#122) moved 870 lines across six new modules with no
+    intended behavior change. 506 checksums (504 mutants + MANIFEST.tsv +
+    README.md) came back identical against a pre-split baseline, and the
+    differential held at 582/0 and 56/0.
+  potential_type: heuristic
+  bound_to: [N201, N202]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O81
+  timestamp: "2026-08-21T19:15"
+  provenance: ai-suggested
+  content: >
+    When a module is split and the ROOT is what owns the shared vocabulary its
+    new siblings consume, the usual source-compatibility move - leave the root
+    as a facade re-exporting everything - is structurally unavailable rather than
+    merely undesirable. Every sibling imports the root, so a root importing them
+    back closes a cycle; preserving the old import surface requires interposing a
+    further Core layer beneath both, which is new public surface bought for
+    compatibility alone. The consequence worth stating is a sequencing one: with
+    no facade available there is also no partially-split intermediate state that
+    compiles, so the move must land atomically, and reviewability has to come
+    from an explicit move map and output gates rather than from small commits.
+    The alternative shape - splitting so the shared vocabulary sinks into a leaf
+    and the root becomes the facade - keeps compatibility but inverts which
+    module names the namespace.
+  context: >
+    Design decision D1/D4 of the #122 split plan, taken through gstack eng
+    review. The break was bounded first: exactly two files imported Lara.Mutate
+    wholesale, and the four selective importers took only names that stay in the
+    root, so they did not change at all.
+  potential_type: claim
+  bound_to: [N201]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

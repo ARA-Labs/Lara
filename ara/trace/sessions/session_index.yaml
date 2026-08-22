@@ -411,8 +411,8 @@ sessions:
   open_threads: 2
 - id: 2026-08-21_001
   date: '2026-08-21'
-  summary: 'Shipped lara-syntax@0.8 premise-label certificate citation (#131) as Part A of the named-certificate-authoring plan: a third name class with a no-carve-out collision policy, byte-identity measured against the numeric twin, zero Lean re-proof owed, worked example S7, grammar Appendix G, PR #141.'
-  turn_count: 1
-  events_count: 4
+  summary: 'Shipped lara-syntax@0.8 premise-label certificate citation (#131) as Part A of the named-certificate-authoring plan: a third name class with a no-carve-out collision policy, byte-identity measured against the numeric twin, zero Lean re-proof owed, worked example S7, grammar Appendix G, PR #141. Then split the 1209-line Lara.Mutate into seven ownership modules (#122) as one atomic output-preserving commit, verified byte-identical against a pre-split baseline of 506 checksums with the differential unmoved at 582/0 and 56/0.'
+  turn_count: 2
+  events_count: 8
   claims_touched: [C31]
-  open_threads: 4
+  open_threads: 6

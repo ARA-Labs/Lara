@@ -1,8 +1,10 @@
 -- | Seeded mutation-suite generator (M5 tracker #48, T1).
 --
 -- Reads the accept-verdict worked-example anchors @examples\/<NAME>\/example.core.sexp@,
--- derives every mutant "Lara.Mutate" proposes for them (plus the constructed
--- rebut-cycle family), __verifies each mutant against the production
+-- derives every mutant the @Lara.Mutate.*@ generators propose for them
+-- ("Lara.Mutate.Suite" and "Lara.Mutate.Codec" per base, plus the constructed
+-- "Lara.Mutate.Cycle" and "Lara.Mutate.Accept" families), __verifies each
+-- mutant against the production
 -- checker__ — a rejection mutant must produce exactly its specified class
 -- through 'Lara.Driver.runCheck', a cycle mutant must accept with all-@undec@
 -- labels and all-@contested@ statuses, and a codec mutant must fail
@@ -40,7 +42,25 @@ import System.FilePath ((</>))
 import Lara.AST (Label (..), Rejection (..), Status (..))
 import Lara.Driver (runCheck)
 import Lara.Mutate
+  ( Expected (..)
+  , Mutant (..)
+  , codecDiagnostics
+  , expectedText
+  , mutationBases
+  , mutationSeed
+  , opFamily
+  , opName
+  )
 import Lara.Mutate.Accept (acceptMutants, acceptStructureOk)
+import Lara.Mutate.Codec (codecMutantsForBase)
+import Lara.Mutate.Cycle (cycleMutants)
+import Lara.Mutate.Manifest (manifestFor, mutantPath)
+import Lara.Mutate.Suite
+  ( corpusBudget
+  , corpusMutants
+  , corpusSweepReport
+  , mutantsForBase
+  )
 import Lara.Replay (CheckInput)
 import Lara.Wire
   ( Outcome (..)

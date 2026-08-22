@@ -1,6 +1,6 @@
 -- | The accept-verdict mutation family (M5 tracker #48, T1 status/attack half).
 --
--- The rejection operators of "Lara.Mutate" produce rejects; #48 also requires
+-- The rejection operators of "Lara.Mutate.Suite" produce rejects; #48 also requires
 -- generated mutants that exercise __every claim status and every attack kind__.
 -- This module supplies that half: five /accept-verdict/ operators over the nine
 -- @justified@ corpus units, each constructing an attack against @corpus-v1@'s

@@ -11,8 +11,8 @@
 --     any-failure would let a deleted codec check stay green via a different
 --     downstream check.
 --   * __seeded reproducibility__: re-deriving the whole suite from the
---     committed worked-example anchors with "Lara.Mutate" (same
---     'mutationSeed') reproduces the committed files and manifest
+--     committed worked-example anchors with the @Lara.Mutate.*@ generators
+--     (same "Lara.Mutate".@mutationSeed@) reproduces the committed files and manifest
 --     byte-for-byte. A drifted base anchor, seed, or operator fails here —
 --     regenerate with @scripts\/gen-mutants.hs@.
 --   * __coverage__: every executable rejection class
@@ -39,7 +39,25 @@ import Lara.AST (Label (..), RejectClass (..), Rejection (..), Status (..))
 import Lara.Diagnostics (LocatedRejection (..), constituentText, parseConstituent)
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
+  ( Expected (..)
+  , Mutant (..)
+  , MutationOp (..)
+  , codecDiagnostics
+  , expectedText
+  , mutationBases
+  , opName
+  , parseExpected
+  )
 import Lara.Mutate.Accept (acceptMutants, acceptStructureOk)
+import Lara.Mutate.Codec (codecMutantsForBase)
+import Lara.Mutate.Cycle (cycleMutants)
+import Lara.Mutate.Manifest (manifestFor, mutantPath)
+import Lara.Mutate.Suite
+  ( corpusBudget
+  , corpusMutants
+  , corpusSweepReport
+  , mutantsForBase
+  )
 import Lara.Replay (CheckInput)
 import Lara.Wire
   ( Outcome (..)

@@ -188,7 +188,7 @@ the git tree object SHA is itself the content hash of the tree.
 | 2 | Corpus units (T2, hand-lowered M0 sample; `lara-core@0.2` signatures; C04 carries the #57 `ra@1` certificate) | `corpus-units/` | 60 units | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` (was `1dc20ea9d79adb2690731a66216dae828a100cf3` through `@0.6`; the `@0.7` re-pin is source-only — see the note below) |
 | 3 | Worked examples (golden verdicts, both drivers; 11 measured examples plus additive demonstrators including S2–S5) | `examples/` | 11 measured examples (+ additive demonstrators) | `2f7fa9adf45fefe649f9a9ed59def3f3d2257fc0` |
 
-**Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs:380`,
+**Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs`,
 SplitMix64, keyed per `(base, operator)`). Verified byte-identically
 reproducible: `cabal exec -- runghc scripts/gen-mutants.hs` over the committed
 tree leaves the generated suite unchanged (504 mutants).
@@ -202,7 +202,7 @@ semantics. Pinned by the freeze commit SHA below.
 | Gate | Command | Result |
 | --- | --- | --- |
 | Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 504 mutants byte-identical (empty generated-suite diff) ✓ |
-| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=580 fail=0 ✓ |
+| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=582 fail=0 ✓ |
 | Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=56 fail=0 ✓ |
 | Admission differential (#81) | `bash scripts/admission-differential.sh` | pass=20 fail=0 (15 semantic byte-identical + 5 codec rejects) ✓ |
 | Replay-tamper detection | `bash scripts/test-replay-tamper.sh` | both tamper classes detected ✓ |
@@ -210,6 +210,15 @@ semantics. Pinned by the freeze commit SHA below.
 | Lean axiom audit | `cd lean && lake env lean AxCheck.lean \| ../scripts/check-axioms.sh` | `sorry`-free, standard trio (incl. `Lara.RA`) ✓ |
 | Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`, Σ closeout coverage) ✓ |
 | Freeze-bundle tests | `python3 scripts/test_freeze_bundle.py` | 4/4 ✓ |
+
+The positive differential row tracks the **live** count, not the count as it
+stood at the freeze commit: it is pure `+1`-per-anchor bookkeeping, and each
+movement is recorded in the addenda above (`580 → 581` with S6, `581 → 582`
+with S7). Re-measured 2026-08-22 during PR #142: `pass=582 fail=0`,
+`negative pass=56 fail=0`. Every other row is the freeze-time result and does
+not move. The `580/0` under "Reproduce from scratch" below is **correct as
+written and must not be refreshed**: it is scoped to `git checkout
+m5-freeze-v4`, a tree in which the S6 and S7 anchors do not exist.
 
 ## Post-freeze measurement run
 

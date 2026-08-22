@@ -5164,3 +5164,83 @@ tree:
     - "commit 4a32367 (S7)"
   also_depends_on: [N199]
   status: resolved
+
+- id: N201
+  type: decision
+  title: "Split Lara.Mutate as a hard split into seven ownership modules, not a re-export facade"
+  provenance: user
+  timestamp: "2026-08-21T18:30"
+  choice: >
+    Factor the 1209-line src/Lara/Mutate.hs (three times the repo's 400-line
+    guideline, and the largest module with a tracked issue against it) across
+    seven ownership modules: the root keeps the closed operator vocabulary, the
+    Expected outcome type and the Mutant record; six new siblings take Manifest
+    (the MANIFEST.tsv contract), Seed (the SplitMix64 stream, internal), Sites
+    (the fourteen site enumerators, internal), Suite (worked-example assembly
+    plus the corpus sweep), Codec (the R14 corruption family) and Cycle (the
+    constructed rebut-cycle family). Two structural decisions carried the plan.
+    First, the root imports NO sibling: every sibling depends on the root's
+    vocabulary, so a root that re-exported them would close a cycle. That makes
+    the source-API break a consequence of the dependency direction rather than a
+    compatibility choice, and it is why no facade was offered. Second, the six
+    moves land as ONE atomic compiling commit: extracting Seed first would
+    transiently form Lara.Mutate -> Seed -> Lara.Mutate, so there is no
+    intermediate state that both compiles and is partially split. Two deviations
+    from issue #122's own sketch were taken deliberately: the sweep module is
+    named Suite rather than Corpus because the sweep and the worked-example
+    assembly share unitMutants and the operator order and must be read together,
+    and three cuts beyond the issue's Sites/Codec/Corpus sketch (Seed, Cycle,
+    Manifest) were needed because the issue's split leaves core at ~460 and
+    Sites at ~465, both still over the bound.
+  alternatives:
+    - "Re-export facade at Lara.Mutate preserving the old import surface - rejected: needs a further Lara.Mutate.Core layer to break the cycle, adding public surface for a goal #122 did not ask for."
+    - "Per-module commits for reviewability - rejected: the root-first dependency direction makes every intermediate state cyclic or uncompilable."
+    - "Issue #122's literal Sites/Codec/Corpus + core split - rejected on measurement: leaves two modules over the 400-line bound."
+    - "Split the 445-line Lara.Mutate.Accept in the same pass - rejected: out of scope for #122, left as the one explicit documented exception."
+  evidence:
+    - "commit 3dd655c"
+    - "commit 08985e8 (gstack-reviewed plan)"
+    - "src/Lara/Mutate.hs namespace map in the module header"
+  status: resolved
+
+- id: N202
+  type: experiment
+  title: "The split is output-preserving: 506 checksums identical, differential unmoved"
+  provenance: ai-executed
+  timestamp: "2026-08-21T19:15"
+  result: >
+    The refactor's whole claim is that no runtime or generated-artifact behavior
+    changed, so it was measured against a baseline captured before anything was
+    touched rather than asserted. (1) Byte-identity, the primary gate: the
+    pre-split tree was first shown to regenerate its own frozen fixture subtree
+    unchanged, then 504 mutant .sexp files plus MANIFEST.tsv and README.md were
+    hashed (506 checksums). After the split, `cabal exec -- runghc
+    scripts/gen-mutants.hs` left `git status` on fixtures/mutants empty and the
+    post-split checksum file diffed identical to the baseline. This gate is
+    strong rather than ceremonial: the seeded stream is keyed by (base,
+    operator) THROUGH opName, and selection runs pickSome over each enumerator's
+    output in list order, so reordering the MutationOp constructors, reordering
+    an entry in mutantsForBase or sweepOps, reordering a list comprehension
+    inside an enumerator, or changing an opName string would each move bytes -
+    precisely the accidents a 870-line cut-and-paste invites. It is also
+    self-verifying twice over: gen-mutants.hs re-checks every mutant against the
+    production checker before writing, so a regeneration that COMPLETES has
+    re-proved the suite. (2) Cross-language differential: pass=582 fail=0,
+    negative pass=56 fail=0, matching the baseline run exactly. The baseline was
+    the authority here, not the freeze checklist's gate table, which still
+    records 580 from before the S6 anchor. (3) `cabal test all` PASS, including
+    MutationSpec's independent re-derivation of the suite. (4) Structure: root
+    374, Manifest 69, Seed 76, Sites 363, Suite 260, Codec 128, Cycle 123 - all
+    at or under 400; namespace sum 2140 against 1956 before, +9.4%, which is
+    module headers and import blocks only and under the ~10% tripwire that would
+    indicate code was rewritten rather than moved. `cabal haddock lib:lara` shows
+    no unresolved link for any moved name. (5) Freeze integrity: the change
+    touches zero files under fixtures/, corpus/, corpus-units/, measurements/,
+    examples/, tables/ or lean/; Mutate/Sorts.hs is unchanged; m5-freeze-v4
+    remains the current tag and no new tag was cut.
+  evidence:
+    - "commit 3dd655c"
+    - "scripts/differential.sh (582/0 positive, 56/0 negative)"
+    - "docs/m5-freeze-checklist.md"
+  also_depends_on: [N201]
+  status: resolved
