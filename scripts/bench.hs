@@ -1,8 +1,8 @@
 -- | The checker-performance bench (E1, issue #69).
 --
 -- One command that measures the production checker on the frozen corpus
--- units and the manifest-discovered harness and emits the paper's performance
--- table (@tables\/performance.tex@) plus a raw JSON record
+-- units and the manifest-discovered harness, prints the performance table in
+-- the requested format, and writes a raw JSON record
 -- (@measurements\/bench.json@) — the table is generated, never hand-typed.
 --
 -- Protocols (deliberately aligned with @scripts\/measure.hs@):
@@ -27,23 +27,37 @@
 --   in-memory pass (decode + check + render, or the codec failure path).
 --
 -- Timing numbers are reproducible-but-unfrozen (the @measure.hs@
--- discipline): @measurements\/@ is gitignored, and the committed
--- @tables\/performance.tex@ is refreshed by re-running @make bench@.
+-- discipline): @measurements\/@ is gitignored and no rendered table is
+-- committed to this repository. A table is machine state, not source — it is
+-- valid only for the machine and commit that produced it — so it is printed
+-- on demand and pasted into whichever document consumes it (the paper
+-- repository owns its own @tables\/performance.tex@).
 --
 -- Run with the built library on the path:
 --
 -- >  cabal exec -- runghc scripts/bench.hs
+-- >  cabal exec -- runghc scripts/bench.hs --format=latex --out ../paper/tables/performance.tex
 module Main (main) where
 
 import Control.Exception (evaluate)
 import Control.Monad (forM, forM_, replicateM, unless, when)
 import qualified Data.ByteString as B
-import Data.List (intercalate, maximumBy, nub, sortOn)
+import Data.List (intercalate, maximumBy, nub, stripPrefix)
 import Data.Ord (comparing)
 import GHC.Clock (getMonotonicTimeNSec)
 import System.Directory (createDirectoryIfMissing, doesFileExist)
-import System.Exit (ExitCode (..), exitFailure)
-import System.IO (hPutStrLn, stderr)
+import System.Environment (getArgs)
+import System.Exit (ExitCode (..), exitFailure, exitSuccess)
+import System.IO
+  ( IOMode (WriteMode)
+  , hPutStr
+  , hPutStrLn
+  , hSetEncoding
+  , stderr
+  , stdout
+  , utf8
+  , withFile
+  )
 import System.Info (arch, os)
 import System.Process
   ( CreateProcess (cwd)
@@ -87,6 +101,9 @@ sweepSamples = 3
 
 main :: IO ()
 main = do
+  argv <- getArgs
+  when ("--help" `elem` argv || "-h" `elem` argv) (putStrLn usage >> exitSuccess)
+  opts <- either (\e -> die (e ++ "\n" ++ usage)) pure (parseOptions argv)
   preflightLean
   mutantManifest <- readFile "fixtures/mutants/MANIFEST.tsv"
   corpusManifest <- readFile "corpus-units/MANIFEST.tsv"
@@ -100,13 +117,15 @@ main = do
   units <- mapM benchUnit corpus
   sweepNs <- benchSweep inputs
   createDirectoryIfMissing True "measurements"
-  createDirectoryIfMissing True "tables"
   writeFile "measurements/bench.json" (benchJson env inputCount units sweepNs)
-  writeFile "tables/performance.tex" (performanceTex env inputCount units sweepNs)
-  putStrLn
-    ( "wrote " ++ show (length units)
+  emit (optOut opts) (renderTable (optFormat opts) env inputCount units sweepNs)
+  -- Progress goes to stderr so the table itself stays pipeable on stdout.
+  hPutStrLn
+    stderr
+    ( "bench: " ++ show (length units)
         ++ " unit benches and one " ++ show inputCount
-        ++ "-record harness sweep to measurements/bench.json and tables/performance.tex"
+        ++ "-record harness sweep; raw record in measurements/bench.json"
+        ++ maybe "" ("; table written to " ++) (optOut opts)
     )
 
 preflightLean :: IO ()
@@ -383,16 +402,84 @@ benchJson env inputCount units sweepNs =
     esc '\\' = "\\\\"
     esc c = [c]
 
-performanceTex :: Env -> Int -> [UnitBench] -> Integer -> String
-performanceTex env inputCount units sweepNs =
-  unlines
+-- | The environment-of-record line the table header and the paper's prose
+-- must agree on.
+settingLine :: Env -> Int -> String
+settingLine env inputCount =
+  show inputCount ++ "-record harness; "
+    ++ envCpuModel env ++ ", " ++ ramGb ++ " GB RAM, "
+    ++ envOsArch env ++ ", GHC " ++ envGhc env ++ ", " ++ envLean env
+    ++ "; medians over " ++ show samples ++ " sections of "
+    ++ show reps ++ " batched runs each."
+  where
+    ramGb = maybe "?" (\b -> show (b `div` (1024 * 1024 * 1024))) (envRamBytes env)
+
+-- | The table's content, independent of how it is spelled.
+benchRows :: Int -> [UnitBench] -> Integer -> [Row]
+benchRows inputCount units sweepNs =
+  [ Row (plain 0 "Corpus unit, end-to-end" Micro)
+      (usNum (medianOf totals))
+      (usNum (snd worstTotal))
+  , phase "parse" ubParseNs
+  , phase "check + render, pre-decoded" ubKernelNs
+  , phase "validate" ubValidateNs
+  , phase "check" ubCheckNs
+  , phase "compile" ubCompileNs
+  , phase "evaluate" ubEvaluateNs
+  , Row (Label 0 "Per-artifact total" (Just (show (length artifacts) ++ " artifacts")) Micro)
+      (usNum (medianOf (map snd artifactTotals)))
+      (usNum (snd worstArtifact))
+  , Row (plain 0 "Framework size (nodes / edges)" Bare)
+      (sizeCell medianOf)
+      (sizeCell maximum)
+  , Row (plain 0 "Lean reference driver, subprocess" Milli)
+      (msNum (medianOf (map ubLeanNs units)))
+      (msNum (maximum (map ubLeanNs units)))
+  , RowRule
+  , RowSpan
+      (plain 0 (show inputCount ++ "-record harness, one full pass") Milli)
+      (msNum sweepNs)
+  ]
+  where
+    plain ind lbl = Label ind lbl Nothing
+    usNum = Num . us1
+    msNum = Num . ms1
+    phase lbl field =
+      Row
+        (plain 1 lbl Micro)
+        (usNum (medianOf (map field units)))
+        (usNum (maximum (map field units)))
+    sizeCell agg =
+      Plain
+        ( show (agg (map (toInteger . ubNodes) units))
+            ++ " / "
+            ++ show (agg (map (toInteger . ubEdges) units))
+        )
+    totals = map ubTotalNs units
+    worstTotal = worstOf [(ubBase u, ubTotalNs u) | u <- units]
+    artifacts = nub (map ubArtifact units)
+    artifactTotals =
+      [ (a, sum [ubTotalNs u | u <- units, ubArtifact u == a])
+      | a <- artifacts
+      ]
+    worstArtifact = worstOf artifactTotals
+
+renderTable :: Format -> Env -> Int -> [UnitBench] -> Integer -> String
+renderTable fmt env inputCount units sweepNs = case fmt of
+  FmtLatex -> latexTable env setting rows
+  FmtMarkdown -> markdownTable setting rows
+  FmtText -> textTable setting rows
+  where
+    rows = benchRows inputCount units sweepNs
+    setting = settingLine env inputCount
+
+-- LaTeX ----------------------------------------------------------------------
+
+latexTable :: Env -> String -> [Row] -> String
+latexTable env setting rows =
+  unlines $
     [ "% Generated by scripts/bench.hs (make bench) at " ++ envGitRev env ++ " -- do not edit."
-    , "% Setting (stated in prose in src/evaluation.tex; keep in sync): "
-        ++ show inputCount ++ "-record harness; "
-        ++ envCpuModel env ++ ", " ++ ramGb ++ " GB RAM, "
-        ++ envOsArch env ++ ", GHC " ++ envGhc env ++ ", " ++ envLean env
-        ++ "; medians over " ++ show samples ++ " sections of "
-        ++ show reps ++ " batched runs each."
+    , "% Setting (stated in prose in src/evaluation.tex; keep in sync): " ++ setting
     , "\\begin{table}[t]"
     , "\\caption{Production-checker performance. End-to-end is"
     , "decode + check + verdict render; each phase is timed with earlier"
@@ -404,44 +491,173 @@ performanceTex env inputCount units sweepNs =
     , "\\toprule"
     , " & median & worst \\\\"
     , "\\midrule"
-    , "Corpus unit, end-to-end (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf totals)) ++ " & " ++ num (us1 (snd worstTotal)) ++ " \\\\"
-    , "\\quad parse (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map ubParseNs units))) ++ " & " ++ num (us1 (maximum (map ubParseNs units))) ++ " \\\\"
-    , "\\quad check + render, pre-decoded (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map ubKernelNs units))) ++ " & " ++ num (us1 (maximum (map ubKernelNs units))) ++ " \\\\"
-    , "\\quad validate (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map ubValidateNs units))) ++ " & " ++ num (us1 (maximum (map ubValidateNs units))) ++ " \\\\"
-    , "\\quad check (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map ubCheckNs units))) ++ " & " ++ num (us1 (maximum (map ubCheckNs units))) ++ " \\\\"
-    , "\\quad compile (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map ubCompileNs units))) ++ " & " ++ num (us1 (maximum (map ubCompileNs units))) ++ " \\\\"
-    , "\\quad evaluate (\\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map ubEvaluateNs units))) ++ " & " ++ num (us1 (maximum (map ubEvaluateNs units))) ++ " \\\\"
-    , "Per-artifact total (" ++ show (length artifacts) ++ " artifacts, \\si{\\micro\\second}) & "
-        ++ num (us1 (medianOf (map snd artifactTotals))) ++ " & " ++ num (us1 (snd worstArtifact)) ++ " \\\\"
-    , "Framework size (nodes / edges) & "
-        ++ show (medianOf (map (toInteger . ubNodes) units)) ++ " / "
-        ++ show (medianOf (map (toInteger . ubEdges) units)) ++ " & "
-        ++ show (maximum (map ubNodes units)) ++ " / "
-        ++ show (maximum (map ubEdges units)) ++ " \\\\"
-    , "Lean reference driver, subprocess (\\si{\\milli\\second}) & "
-        ++ num (ms1 (medianOf (map ubLeanNs units))) ++ " & " ++ num (ms1 (maximum (map ubLeanNs units))) ++ " \\\\"
-    , "\\midrule"
-    , show inputCount ++ "-record harness, one full pass (\\si{\\milli\\second}) & \\multicolumn{2}{r}{"
-        ++ num (ms1 sweepNs) ++ "} \\\\"
-    , "\\bottomrule"
-    , "\\end{tabular}"
-    , "\\end{table}"
     ]
+      ++ map latexRow rows
+      ++ [ "\\bottomrule"
+         , "\\end{tabular}"
+         , "\\end{table}"
+         ]
+
+latexRow :: Row -> String
+latexRow RowRule = "\\midrule"
+latexRow (Row l m w) =
+  labelText FmtLatex l ++ " & " ++ cellText FmtLatex m ++ " & " ++ cellText FmtLatex w ++ " \\\\"
+latexRow (RowSpan l v) =
+  labelText FmtLatex l ++ " & \\multicolumn{2}{r}{" ++ cellText FmtLatex v ++ "} \\\\"
+
+-- Markdown and plain text ----------------------------------------------------
+
+-- | A row reduced to already-spelled strings, for the two column formats.
+data PlainRow = PlainRule | PlainCells String String String
+
+plainRow :: Format -> Row -> PlainRow
+plainRow _ RowRule = PlainRule
+plainRow fmt (Row l m w) = PlainCells (labelText fmt l) (cellText fmt m) (cellText fmt w)
+plainRow fmt (RowSpan l v) = PlainCells (labelText fmt l) (cellText fmt v) ""
+
+captionLines :: [String]
+captionLines =
+  [ "Production-checker performance. End-to-end is decode + check + verdict"
+  , "render; each phase is timed with earlier stages pre-forced, so phases"
+  , "need not sum exactly."
+  ]
+
+markdownTable :: String -> [Row] -> String
+markdownTable setting rows =
+  unlines $
+    captionLines
+      ++ [ ""
+         , "_Setting: " ++ setting ++ "_"
+         , ""
+         , "| | median | worst |"
+         , "| --- | ---: | ---: |"
+         ]
+      ++ map (markdownRow . plainRow FmtMarkdown) rows
+
+markdownRow :: PlainRow -> String
+markdownRow PlainRule = "| | | |"
+markdownRow (PlainCells l m w) = "| " ++ l ++ " | " ++ m ++ " | " ++ w ++ " |"
+
+textTable :: String -> [Row] -> String
+textTable setting rows =
+  unlines $
+    captionLines
+      ++ [ "Setting: " ++ setting
+         , ""
+         , line (PlainCells "" "median" "worst")
+         ]
+      ++ map line entries
   where
-    totals = map ubTotalNs units
-    worstTotal = worstOf [(ubBase u, ubTotalNs u) | u <- units]
-    artifacts = nub (map ubArtifact units)
-    artifactTotals =
-      [ (a, sum [ubTotalNs u | u <- units, ubArtifact u == a])
-      | a <- artifacts
-      ]
-    worstArtifact = worstOf artifactTotals
-    num s = "\\num{" ++ s ++ "}"
-    ramGb = maybe "?" (\b -> show (b `div` (1024 * 1024 * 1024))) (envRamBytes env)
+    entries = map (plainRow FmtText) rows
+    labelW = maximum (0 : [length l | PlainCells l _ _ <- entries])
+    numW = maximum (6 : [length c | PlainCells _ m w <- entries, c <- [m, w]])
+    line PlainRule = replicate (labelW + 2 + numW + 2 + numW) '-'
+    line (PlainCells l m w) = trimEnd (padR labelW l ++ "  " ++ padL numW m ++ "  " ++ padL numW w)
+    padR n s = s ++ replicate (n - length s) ' '
+    padL n s = replicate (n - length s) ' ' ++ s
+    trimEnd = reverse . dropWhile (== ' ') . reverse
+
+-- Table model ----------------------------------------------------------------
+
+-- | The rendered table's output shapes. Each format's concrete spelling lives
+-- in 'formatName' / 'parseFormat' and the per-format cases below, so no format
+-- name is written as a bare string anywhere else.
+data Format = FmtText | FmtMarkdown | FmtLatex
+  deriving (Eq)
+
+everyFormat :: [Format]
+everyFormat = [FmtText, FmtMarkdown, FmtLatex]
+
+formatName :: Format -> String
+formatName FmtText = "text"
+formatName FmtMarkdown = "markdown"
+formatName FmtLatex = "latex"
+
+parseFormat :: String -> Maybe Format
+parseFormat s = lookup s [(formatName f, f) | f <- everyFormat]
+
+-- | A measured quantity's unit, spelled per format.
+data Scale = Micro | Milli | Bare
+
+unitWord :: Format -> Scale -> Maybe String
+unitWord _ Bare = Nothing
+unitWord FmtLatex Micro = Just "\\si{\\micro\\second}"
+unitWord FmtLatex Milli = Just "\\si{\\milli\\second}"
+unitWord _ Micro = Just "µs"
+unitWord _ Milli = Just "ms"
+
+-- | A table cell. 'Num' is numeric and takes the format's number wrapper;
+-- 'Plain' is passed through untouched.
+data Cell = Num String | Plain String
+
+cellText :: Format -> Cell -> String
+cellText FmtLatex (Num s) = "\\num{" ++ s ++ "}"
+cellText _ (Num s) = s
+cellText _ (Plain s) = s
+
+-- | A row's left column: indent depth, label, an optional parenthetical note,
+-- and the unit. Rendered as @label (note, unit)@, dropping the absent parts.
+data Label = Label Int String (Maybe String) Scale
+
+labelText :: Format -> Label -> String
+labelText fmt (Label ind lbl note sc) = indent ++ lbl ++ paren
+  where
+    -- Markdown collapses leading spaces inside a cell, so it indents with
+    -- explicit non-breaking spaces instead.
+    indent = concat (replicate ind (indentUnit fmt))
+    paren = case (note, unitWord fmt sc) of
+      (Nothing, Nothing) -> ""
+      (Just n, Nothing) -> " (" ++ n ++ ")"
+      (Nothing, Just u) -> " (" ++ u ++ ")"
+      (Just n, Just u) -> " (" ++ n ++ ", " ++ u ++ ")"
+
+indentUnit :: Format -> String
+indentUnit FmtLatex = "\\quad "
+indentUnit FmtMarkdown = "&nbsp;&nbsp;"
+indentUnit FmtText = "  "
+
+data Row
+  = Row Label Cell Cell -- ^ label, median, worst
+  | RowSpan Label Cell -- ^ label, one value covering both columns
+  | RowRule -- ^ horizontal separator
+
+-- Options --------------------------------------------------------------------
+
+data Options = Options
+  { optFormat :: Format
+  , optOut :: Maybe FilePath -- ^ 'Nothing' prints to stdout
+  }
+
+parseOptions :: [String] -> Either String Options
+parseOptions = go (Options FmtText Nothing)
+  where
+    go acc [] = Right acc
+    go acc (a : rest)
+      | Just v <- stripPrefix "--format=" a = withFormat acc v rest
+      | a == "--format", (v : rest') <- rest = withFormat acc v rest'
+      | a == "--format" = Left "--format needs a value"
+      | Just v <- stripPrefix "--out=" a = go acc {optOut = Just v} rest
+      | a == "--out", (v : rest') <- rest = go acc {optOut = Just v} rest'
+      | a == "--out" = Left "--out needs a path"
+      | otherwise = Left ("unknown argument " ++ show a)
+    withFormat acc v rest = case parseFormat v of
+      Just f -> go acc {optFormat = f} rest
+      Nothing ->
+        Left
+          ( "unknown format " ++ show v ++ " (expected "
+              ++ intercalate ", " (map formatName everyFormat) ++ ")"
+          )
+
+usage :: String
+usage =
+  "usage: bench.hs [--format=" ++ intercalate "|" (map formatName everyFormat)
+    ++ "] [--out PATH]\n"
+    ++ "  the table goes to stdout unless --out names a file;\n"
+    ++ "  the raw record always goes to measurements/bench.json (gitignored)."
+
+-- | Write the rendered table, forcing UTF-8 so the micro sign survives a
+-- non-UTF-8 locale.
+emit :: Maybe FilePath -> String -> IO ()
+emit Nothing s = hSetEncoding stdout utf8 >> putStr s
+emit (Just path) s =
+  withFile path WriteMode $ \h -> hSetEncoding h utf8 >> hPutStr h s

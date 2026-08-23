@@ -17,13 +17,21 @@ presentation-parity:
 	bash scripts/check-presentation-parity.sh
 
 # E1 checker-performance bench (issue #69): measures the production checker
-# on the frozen corpus units and the manifest-discovered harness, then regenerates
-# tables/performance.tex (generated, never hand-typed) plus the raw
-# measurements/bench.json.
+# on the frozen corpus units and the manifest-discovered harness, prints the
+# performance table, and writes the raw measurements/bench.json (gitignored).
+#
+# No rendered table is committed here — a table is only valid for the machine
+# and commit that produced it. Print the one the consumer needs:
+#
+#   make bench
+#   make bench FORMAT=markdown
+#   make bench FORMAT=latex OUT=../paper/tables/performance.tex
+FORMAT ?= text
+OUT ?=
 bench:
 	cabal build exe:lara
 	cd lean && lake build
-	cabal exec -- runghc scripts/bench.hs
+	cabal exec -- runghc scripts/bench.hs --format=$(FORMAT) $(if $(OUT),--out $(OUT),)
 
 # The full axis-(c) measurement harness (M5): measurements/report.{json,tsv}
 # and ablation reports.

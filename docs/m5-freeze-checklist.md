@@ -249,6 +249,11 @@ aggregation and the committed `measurements/binding-audit/worklist.tsv`.
 The canonical aggregate snapshot is committed under `measurements/frozen/`;
 other working measurement outputs remain gitignored as regenerable output.
 
+The same rule covers the E1 performance table: `make bench` prints it and
+writes the raw `measurements/bench.json`, but **no rendered table is committed
+to this repository** — a timing table is valid only for the machine and commit
+that produced it. Protocol, snapshot, and rationale: `performance.md`.
+
 ### Frozen headline numbers
 
 | Metric | Value |

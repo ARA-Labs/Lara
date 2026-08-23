@@ -665,7 +665,7 @@ the result is stated but not yet proved or mechanized._
 - **Status**: supported
 - **Provenance**: ai-suggested
 - **Falsification**: Re-run the fixed protocol with the association-list and Map implementations under matched conditions and observe a median parse reduction below 15%, or exhibit any accepted/rejected input whose stdout, stderr-pinned codec message, position, or exit code differs between the new Haskell driver and the Lean oracle.
-- **Proof**: [`ara/evidence/results/parsetag_map_lookup.md`, `tables/performance.tex`, `src/Lara/Wire.hs`, `test/WireSpec.hs`, `scripts/differential.sh`, trace N187, trace N188, PR #117, commit `a7b498a`]
+- **Proof**: [`ara/evidence/results/parsetag_map_lookup.md`, `src/Lara/Wire.hs`, `test/WireSpec.hs`, `scripts/differential.sh`, trace N187, trace N188, PR #117, commit `a7b498a`]
 - **Dependencies**: []
 - **Tags**: performance, wire-codec, differential-testing, parseTag, issue-114
 - **Last revised**: 2026-08-18 (2026-08-18_001#1)

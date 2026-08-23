@@ -190,6 +190,7 @@ CI runs both, including the `AxCheck.lean` axiom audit, on every push.
 | [`docs/strict-backend-decision.md`](docs/strict-backend-decision.md) | The backend-parametric strict-certificate interface and its proof obligations |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
+| [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and a dated snapshot (checking a corpus unit costs ~200 µs; one pass over all 564 harness records, under 200 ms) |
 | [`docs/engineering-plan.md`](docs/engineering-plan.md) | Milestone roadmap and the module dependency graph (open follow-ups are tracked as GitHub issues) |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The M0 semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example) |
