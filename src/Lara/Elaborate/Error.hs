@@ -18,7 +18,7 @@ module Lara.Elaborate.Error
   ) where
 
 import Lara.AST
-import Lara.Prop (FunSym (..), Pred (..), Prop, Term, prettyProp, prettyTerm)
+import Lara.Prop (Prop, Term, prettyProp, prettyTerm)
 import Lara.Syntax (polarityStr, relationStr)
 import Lara.Sigma (SortFault (..), sortText)
 
@@ -69,10 +69,13 @@ data ElabError
     CertSlotLabelAmbiguous ArgId BackendId Int ArgRef RuleId
   | -- | the reference resolves, but to nothing this instance takes as a premise.
     CertSlotNotAPremise ArgId BackendId Int ArgRef
-  | -- | the named premise fills two slots, so the name cannot say which: the
-    -- two witnesses, 0-based — the same numbering the author writes back into
-    -- @(prem N)@, so these are /not/ converted at the message boundary.
-    CertSlotMultiSlot ArgId BackendId Int ArgRef Int Int
+  | -- | the named premise fills multiple slots, so the name cannot say which:
+    -- the first two witnesses, 0-based — the same numbering the author writes
+    -- back into @(prem N)@, so these are /not/ converted at the message
+    -- boundary. The final flag says whether every matching slot has a premise
+    -- label, so the renderer advertises the label repair only when it is
+    -- available for whichever matching slot the author intended.
+    CertSlotMultiSlot ArgId BackendId Int ArgRef Int Int Bool
   | -- | a reference atom that is neither a canonical numeral nor a source
     -- identifier, such as @007@ or @-1@.
     CertSlotNonCanonicalNumeral ArgId BackendId Int ArgRef
@@ -81,6 +84,15 @@ data ElabError
     -- wire there, so the certificate is rejected here rather than handed to a
     -- backend that must refuse it (the dead-wire rule).
     CertSlotSchemaMismatch ArgId BackendId Int ArgRef
+    -- * Named natural-deduction proof terms (@lara-syntax\@0.9@, #132)
+  | CertNdBinderUnbound ArgId BackendId Int ArgRef
+  | CertNdBinderShadowed ArgId BackendId Int ArgRef
+  | CertNdBinderShadowsPremise ArgId BackendId Int ArgRef
+  | CertNdMalformedBinder ArgId BackendId Int ArgRef
+  | CertNdNonCanonicalIndex ArgId BackendId Int ArgRef
+  | CertNdKernelIndex ArgId BackendId Int ArgRef
+  | CertNdPremOutOfRange ArgId BackendId Int ArgRef Integer Int
+  | CertNdResidualNamed ArgId BackendId Int ArgRef
   | -- | positional θ length ≠ the rule's parameter count: @arg@, @rule@,
     -- expected, got.
     ArityMismatch ArgId RuleId Int Int
@@ -296,9 +308,12 @@ elabErrorMessage e = case e of
       ++ "' premise label and a declared leaf or prior argument"
   CertSlotNotAPremise a b v n ->
     certSlotPrefix a b v n ++ "does not resolve to any of this argument's premise slots"
-  CertSlotMultiSlot a b v n i j ->
+  CertSlotMultiSlot a b v n i j allMatchesLabelled ->
     certSlotPrefix a b v n ++ "occupies premise slots " ++ show i ++ " and " ++ show j
       ++ "; cite a numeric slot"
+      ++ if allMatchesLabelled
+        then " or the rule's premise label for the slot you mean"
+        else ""
   CertSlotNonCanonicalNumeral a b v n ->
     certSlotPrefix a b v n ++ "is not a canonical slot numeral "
       ++ "(use unsigned decimal with no leading zeros); write the canonical numeral or a source name"
@@ -306,6 +321,23 @@ elabErrorMessage e = case e of
     "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling b v
       ++ "' payload does not match the backend's premise-reference schema but "
       ++ "contains symbolic premise reference '" ++ n ++ "'"
+  CertNdBinderUnbound a b v n ->
+    certNdPrefix a b v ++ "reference '" ++ argRefText n ++ "' names no enclosing lam binder"
+  CertNdBinderShadowed a b v n ->
+    certNdPrefix a b v ++ "lam binder '" ++ argRefText n ++ "' shadows an enclosing binder; rename one"
+  CertNdBinderShadowsPremise a b v n ->
+    certNdPrefix a b v ++ "lam binder '" ++ argRefText n ++ "' is also a citable premise name of this instance; rename the binder"
+  CertNdMalformedBinder a b v n ->
+    certNdPrefix a b v ++ "lam binder '" ++ argRefText n ++ "' is not a source identifier"
+  CertNdNonCanonicalIndex a b v n ->
+    certNdPrefix a b v ++ "index '" ++ argRefText n ++ "' is not a canonical index (use unsigned decimal with no leading zeros)"
+  CertNdKernelIndex a b v n ->
+    certNdPrefix a b v ++ "kernel index '" ++ argRefText n ++ "' appears in a named-form payload; cite a binder by name, a premise with (prem ...), or a theory entry with (thy ...)"
+  CertNdPremOutOfRange a b v n i j ->
+    certNdPrefix a b v ++ "premise reference '" ++ argRefText n ++ "' names slot " ++ show i
+      ++ " but this argument has only " ++ show j ++ " premise slot(s)"
+  CertNdResidualNamed a b v n ->
+    certNdPrefix a b v ++ "named spelling '" ++ argRefText n ++ "' sits where the nd@1 grammar gives it no meaning"
   ArityMismatch (ArgId a) (RuleId r) expd got ->
     "arg '" ++ a ++ "': rule '" ++ r ++ "' expects " ++ show expd
       ++ " argument(s) but " ++ show got ++ " were supplied"
@@ -471,6 +503,13 @@ certSlotPrefix :: ArgId -> BackendId -> Int -> ArgRef -> String
 certSlotPrefix (ArgId a) backend version (ArgRef name) =
   "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling backend version
     ++ "' premise reference '" ++ name ++ "' "
+
+certNdPrefix :: ArgId -> BackendId -> Int -> String
+certNdPrefix (ArgId a) backend version =
+  "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling backend version ++ "' "
+
+argRefText :: ArgRef -> String
+argRefText (ArgRef name) = name
 
 certBackendSpelling :: BackendId -> Int -> String
 certBackendSpelling (BackendId backend) version = backend ++ "@" ++ show version

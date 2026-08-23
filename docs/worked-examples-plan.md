@@ -6,12 +6,14 @@ the target set of `research-proposal.md` §7 M6 ("at least five worked cases spa
 status/attack kind") and `popl-research-review.md` §5 Phase B ("three complete + three rejected
 examples"). Anchored in the real corpus shapes catalogued in `corpus-map.md`._
 
-_**What actually shipped (2026-08-19).** This plan specifies the E/R series. The
+_**What actually shipped (2026-08-19; augmented 2026-08-22).** This plan
+specifies the E/R series. The
 delivered suite is larger — it also carries `R2-sort` (the `lara-core@0.2`
-well-sortedness negative) and the strict-certificate series `S1`–`S7` (`nd@1`,
+well-sortedness negative) and the strict-certificate series `S1`–`S8` (`nd@1`,
 `ord@1` comparison, the `num_le` tie, an undermined binding, a lower-is-better
-measurand, the `lara-syntax@0.6` named-slot byte-identity witness, and the
-`lara-syntax@0.8` premise-label witness). The
+measurand, the `lara-syntax@0.6` named-slot byte-identity witness, the
+`lara-syntax@0.8` premise-label witness, and the `lara-syntax@0.9` named-`nd@1`
+binder/premise byte-identity witness S8). The
 authoritative catalogue of every committed example, with its witnesses, attack
 kinds, and statuses, is `../examples/README.md`._
 

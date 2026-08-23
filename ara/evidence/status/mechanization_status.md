@@ -2,7 +2,7 @@
 
 - **Source**: spec.md §9 (the 12 required results); docs/mechanization-plan.md §1 (the status table);
   docs/strict-backend-decision.md §5 (the paper proofs).
-- **As of**: 2026-08-01.
+- **As of**: 2026-08-23.
 - **Legend**: `paper-proved` = proof written in a decision record; `mechanized` = machine-checked in
   Lean/Rocq; `implemented+tested` = Haskell code + passing
   properties; `spec-only` = defined in the spec, no proof or code yet; `open` = not yet provable /
@@ -23,7 +23,7 @@
 | 9 | Backend replacement | **mechanized** (Model A: uniform injective relabel) | C04 | Theorem 2, `lean/Lara/Erase.lean`: `backend_replacement` — two `CheckedProgram`s related by a uniform assurance relabel `mapAssur f` (`P₂.args = P₁.args.map (mapAssur f)`, `P₂.atts = P₁.atts.map (mapAssurAtt f)`) with `f` injective compile to a *definitionally equal* AF (`checkedAF_relabel`), hence agree on every grounded label (`labelC_relabel`) and every claim status. The node bijection is the identity on list positions (`toAF.args = List.range`); `containsB_mapAssur`/`mapAssur_injective` carry the payload-independence of the edge relation. Statement-model note: the doc's non-injective erase-to-a-single-`certified`-marker is *not* an isomorphism (it can merge distinct subterms and add subargument-closure edges — `containsB` keys on exact structural equality); injectivity-on-used-certs is the faithful backend-swap condition, and both programs being well-checked discharges "accept the same strict instances." **Now non-vacuous by construction** — `lean/Lara/EraseTransport.lean` proves well-checkedness transport (`hasSupport_mapAssur`, `hasAttack_mapAssur`, `mapCertProg`): a uniform relabel that preserves `AssuranceOk` acceptance (`hpres`, the formal content of "accept the same strict instances") maps a `CheckedProgram` over one backend to a `CheckedProgram` over the other, so `backend_replacement_transport` exhibits the second program rather than assuming it. No `sorry`; AxCheck reports only `propext` and `Quot.sound`. |
 | 10 | Reference ND adapter soundness + dependency exactness | **mechanized and executable** (+Haskell conformance) | C05 | Theorem 4 + Lemma 5, `lean/Lara/ND.lean`: `nd_sound`, `nd_relevance`, `fv_in_range`, and the sound/complete `infer` bridge. `lean/Lara/Strict.lean` now closes the concrete boundary: total Formula/Cert decoding, canonical Nat indices, exact `ndReplay`, `ndReplay_iff`, and the fully instantiated `ndBackend`. Its UTF-8 framed A/N/S/C/L atom codec has the proved left inverse `decodeAtomKey_encodeAtomKey`, yielding encoder injectivity and `ndEnc_iff` without `repr`. Theory-resolved backends append fixed selected-theory encodings after premise encodings. No `sorry`; AxCheck reports only the standard trio. The matching Haskell adapter passes normalization, golden-vector, malformed-wire, closed-decoder, replay, soundness, and registry conformance properties. |
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** (+implemented+tested) | C01 | `lean/Lara/Prop.lean`: `nf`/`≡`, equivalence laws, decidability, idempotence, no-reorder — no `sorry`, axioms `propext` only. Also `Lara.Prop` Haskell + 8 QuickCheck properties. |
-| 12 | Codec round-trip to α-equivalent AST | **mechanized presentation codec** (+Haskell conformance) | C12 | `lean/Lara/Presentation.lean` proves structured encode/decode round-trip over every field of the frozen `Program`/`Policy` AST. This is an AST-shape anchor, not a proof of the concrete Haskell `.lara` parser; `Lara.Syntax` separately checks `parse ∘ print = id` with 2,000-case QuickCheck conformance on its documented surface subset. |
+| 12 | Codec round-trip to α-equivalent AST | **mechanized presentation codec** (+Haskell conformance) | C12 | `lean/Lara/Presentation.lean` proves structured encode/decode round-trip over every field of the frozen `Program`/`Policy` AST. This is an AST-shape anchor, not a proof of the concrete Haskell `.lara` parser; `Lara.Syntax` separately checks `parse ∘ print = id` with 2,000-case QuickCheck conformance on its documented surface subset. Presentation lowering is mechanized separately: `Lara.CertSlots` proves flat named-slot identity/substitution, and `Lara.NDNamed` proves named `nd@1` kernel identity and named-to-de-Bruijn translation correspondence. Both take the production classifier/resolver decisions as abstract inputs, so their Haskell implementations and dispatch/error surfaces remain validated-not-verified. |
 
 **Summary**: results 2, 3 (both halves), 4 (relational), 5, 7 (checked complete
 claims), 8, 9 (Model A), 10, 11, and 12 (presentation codec) are mechanized;
@@ -40,6 +40,29 @@ constructs its second checked program rather than assuming one. Every theorem is
 `sorry`-free and audited within the standard axiom trio. Haskell property,
 golden, mutation, and differential tests remain conformance evidence rather than
 substitutes for these Lean proofs.
+
+### Verification run (2026-08-23, lara-syntax@0.9 named nd@1 lowering)
+
+- `lean/Lara/NDNamed.lean` defines the marker-selected recursive lowering over
+  abstract source-name classification and premise resolution. It proves
+  `lowerNamed_id_of_kernel` and `lowerNamed_eq_translation`; twelve executable
+  guards cover the fixed conformance vectors that reach this boundary.
+- `cd lean && lake build` completed **76 jobs**. `lake env lean AxCheck.lean |
+  ../scripts/check-axioms.sh` passed; the new theorems introduce no axiom
+  outside the standard `propext` / `Classical.choice` / `Quot.sound` audit
+  allowance. Scans found no `sorry`, `admit`, `native_decide`, or new `axiom`.
+- Independent Haskell evidence pins 21 named-lowering vectors, marker-free
+  identity, equality with a separately implemented de Bruijn oracle, exact
+  diagnostics, and S8's named/numeric **1070-byte core** and **661-byte
+  expected-verdict JSON** identity with exact replay dependency
+  `{PremiseSlot 0}`.
+- Final cross-boundary gates: Haskell suite **1/1**, differential **583/0**,
+  malformed negatives **56/0**, **504** seeded mutants regenerated with an
+  empty diff, and presentation parity **73 rows**.
+- Scope remains explicit: Lean proves the structured lowering mathematics, not
+  the concrete `.lara` parser, Haskell classifier/resolver implementation,
+  exact backend-identity dispatch, or author-facing error taxonomy. Those are
+  covered by Haskell properties and exact integration tests.
 
 ### Verification run (2026-07-31, result 3 certificate half — fixed-core registry)
 

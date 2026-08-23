@@ -13,6 +13,7 @@ Lean trio (`propext`, `Classical.choice`, `Quot.sound`). See `lean/README.md`.
 import Lara.Prop
 import Lara.Presentation
 import Lara.ND
+import Lara.NDNamed
 import Lara.Strict
 import Lara.Cell
 import Lara.RA
@@ -276,6 +277,18 @@ open Lara
 #print axioms Lara.ND.fv_in_range
 #print axioms Lara.ND.hyp_out_of_range_untypable
 #print axioms Lara.ND.mem_shiftDown
+
+-- Named nd@1 proof-term lowering (`lara-syntax@0.9`, #132): closed-tag and
+-- encoder support, kernel conservativity, and structural agreement with the
+-- independent named-term-to-de-Bruijn translation.  This mechanizes the pure
+-- pass semantics; the Haskell classifier/resolver remain validated-not-verified.
+#print axioms Lara.NDNamed.NamedTag.parse_toString
+#print axioms Lara.NDNamed.decodeFormula_encodeFormula
+#print axioms Lara.NDNamed.decodeCert_encodeCert
+#print axioms Lara.NDNamed.encodeFormula_markerFree
+#print axioms Lara.NDNamed.encodeCert_markerFree
+#print axioms Lara.NDNamed.lowerNamed_id_of_kernel
+#print axioms Lara.NDNamed.lowerNamed_eq_translation
 
 -- Layer C: the algorithm `infer` (port of Haskell `inferType`) decides the
 -- relation `HasType` and returns exactly `fv` — ties the running checker to the

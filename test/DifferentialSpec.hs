@@ -354,6 +354,14 @@ workedExampleGoldens =
         ++ " (statuses (status (atom num_lt (num 0.71) (num 0.74)) justified)"
         ++ " (status (atom num_le (num 0.71) (num 0.71)) justified)))"
     )
+  , -- S8: named @nd\@1@ binder/premise syntax (lara-syntax@0.9).  The
+    -- artifact's beta-redex names the same source premise at depths one and
+    -- zero; its golden carries the numeric `(hyp 1)` / `(hyp 0)` twin that the
+    -- backend replays, byte-identical to the named source's lowering.
+    ( "examples/S8/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom holds (con safety_invariant) (con D)) justified)))"
+    )
   , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;
     -- the setting-mismatch pair (P2) differs only in the setting index ⇒ zero

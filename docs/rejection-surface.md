@@ -7,7 +7,9 @@ live against the `lara` binary while writing this note (`cabal build exe:lara`);
 recheck them after a change. Updated 2026-08-08 for `lara-syntax@0.3`'s surface-context line (§1.1);
 every anchor below was re-run against the binary at that point and reproduced unchanged. Updated
 2026-08-19: mutation-suite counts refreshed to the `m5-freeze-v4` suite (504 mutants) and the R14
-row gained the codec-boundary note from #115 (code-point columns, invalid UTF-8)._
+row gained the codec-boundary note from #115 (code-point columns, invalid UTF-8). Updated
+2026-08-22 for `lara-syntax@0.9` named-`nd@1` lowering and the exact #140
+partial-label repair condition._
 
 ## 1. Two doors, two failure modes
 
@@ -88,7 +90,8 @@ itself byte-identically.
 Since `lara-syntax@0.8` (grammar Appendix G) the same lowering resolves a
 reference in a third name class — the citing rule's declared premise labels
 (#131) — so this section's rejection surface gains **one** family and rewords
-two messages. The normative template list is grammar Appendix G.5.
+two messages. `lara-syntax@0.9` rewords `CertSlotMultiSlot` as described
+below. The normative template list is grammar Appendix G.5.
 
 - **New:** `CertSlotLabelAmbiguous` — a reference that names both a premise
   label of the citing rule and a declared leaf or prior argument:
@@ -100,6 +103,14 @@ two messages. The normative template list is grammar Appendix G.5.
   classes —
   `arg 'A': certificate 'B' premise reference 'N' names neither a premise label of rule 'R', a declared leaf, nor a prior argument`.
   Same rejection, same class, same exit code; only the wording moved.
+- **Reworded:** `CertSlotMultiSlot` names the rule-premise-label repair only
+  when every slot matched by the ambiguous source name has a label whose
+  spelling does not collide with a declared leaf or prior argument:
+  `arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot or the rule's premise label for the slot you mean`.
+  A wholly, partially, or unusably labelled matching-slot set retains the
+  numeric-only ending `; cite a numeric slot`; labels on unrelated slots do not
+  enable the advice. Same rejection, same class, same exit code; only the repair
+  text is conditional.
 
 Neither can fire on any **pre-existing** source, which is the scoping grammar
 Appendix G.7 states: no tracked policy other than S7's `ord-labeled-v1` — added
@@ -149,6 +160,50 @@ source attaches a body line to a bare leaf, and no tracked `.lara` file has a
 name that is both a declared leaf id and an argument id, so the ambiguity error
 cannot fire on any committed source.
 
+### 1.4 Named `nd@1` source-boundary rejections (`lara-syntax@0.9`)
+
+`lara-syntax@0.9` (grammar Appendix H) adds a named presentation for the
+otherwise unchanged de Bruijn `nd@1` certificate grammar. A `.lara` payload
+containing a named marker is lowered during elaboration, before replay. These
+eight failures are therefore `ElabError`s: exit 2, empty stdout, and one located
+source-invalid diagnostic. The templates below are exact; `A` is the argument,
+`B` the backend spelling, `N` the offending authored spelling, `I` a slot, and
+`J` the premise count. For a non-atom `lam` binder, `N` is its canonical
+S-expression rendering.
+
+| Family | Trigger | Exact template |
+| --- | --- | --- |
+| `CertNdBinderUnbound` | `(hyp N)` names no enclosing named binder | `arg 'A': certificate 'B' reference 'N' names no enclosing lam binder` |
+| `CertNdBinderShadowed` | a named `lam` reuses an enclosing binder name | `arg 'A': certificate 'B' lam binder 'N' shadows an enclosing binder; rename one` |
+| `CertNdBinderShadowsPremise` | a named binder is also a successfully citable premise name | `arg 'A': certificate 'B' lam binder 'N' is also a citable premise name of this instance; rename the binder` |
+| `CertNdMalformedBinder` | a four-field `lam` binder is not an atom or its first decoded character fails `isIdentStart` | `arg 'A': certificate 'B' lam binder 'N' is not a source identifier` |
+| `CertNdNonCanonicalIndex` | a named-mode hypothesis or theory index is not unsigned canonical decimal | `arg 'A': certificate 'B' index 'N' is not a canonical index (use unsigned decimal with no leading zeros)` |
+| `CertNdKernelIndex` | canonical numeric `(hyp N)` occurs after a named marker selected named mode | `arg 'A': certificate 'B' kernel index 'N' appears in a named-form payload; cite a binder by name, a premise with (prem ...), or a theory entry with (thy ...)` |
+| `CertNdPremOutOfRange` | `(prem N)` names `I >= J`, instead of silently crossing into the theory offset | `arg 'A': certificate 'B' premise reference 'N' names slot I but this argument has only J premise slot(s)` |
+| `CertNdResidualNamed` | a named marker survives in a formula position or unknown subtree | `arg 'A': certificate 'B' named spelling 'N' sits where the nd@1 grammar gives it no meaning` |
+
+`(prem s)` is shared syntax, not a ninth `CertNd` family. Unresolved,
+leaf/prior ambiguity, label ambiguity, not-a-premise, multi-slot, and
+noncanonical failures from the shared resolver reuse the applicable `CertSlot*`
+family and the grammar Appendix G.5 message verbatim, including the #140
+conditional `CertSlotMultiSlot` repair wording preserved in §1.2. A schema
+mismatch belongs only to flat schema lowering and is not produced by this
+direct `nd@1` resolver path.
+
+The D7 boundary is exact. The named-mode markers are a `(prem _)` node, a
+`(thy _)` node, a four-element `lam`, and `(hyp a)` whose decoded atom begins
+with a character satisfying `isIdentStart`. The elaborator lowers known
+constructors and rejects surviving named markers in a payload containing any
+marker. Residual named syntax therefore migrates from
+R13 to `CertNdResidualNamed`. A payload
+containing none is passed structure-identically to the backend—marker-free junk
+such as `(foo bar)` and `(hyp 007)` included—and retains its existing R13
+behavior. A raw `.sexp` never runs the presentation lowering, so even named-looking
+atoms there remain backend decode/replay input rather than `CertNd*` source
+errors. If a successfully lowered term later fails replay, the R13 diagnostic is
+phrased over its numeric de Bruijn image; no source map restores the authored
+names.
+
 ## 2. The class table, with a runnable anchor per class
 
 `docs/spec.md` §10.1 freezes fourteen rejection classes (R1–R14); the table below adds one runnable
@@ -168,7 +223,7 @@ reproduce the class shown.
 | R10 attack-position | attack position undefined, or wrong occurrence kind for the attack kind | `examples/R3` | `lara check examples/R3/example.lara` → `reject R10` |
 | R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut | `fixtures/mutants/A--unlicensed-attack-0.sexp` | `reject R11` |
 | R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
-| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E) — acceptance unchanged | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` |
+| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's four named markers (§1.4; grammar Appendix H); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` |
 | R14 codec | wire program fails to decode: malformed JSON/S-expression, unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
 One class is not individually anchored above, because it is a source-boundary rejection rather

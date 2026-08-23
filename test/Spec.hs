@@ -36,6 +36,7 @@ import ClaimSupportSpec (claimSupportSpecProps)
 import MechReviewSpec (mechReviewSpecProps)
 import MeasureSpec (measureSpecProps)
 import MutationSpec (mutationSpecProps)
+import NDNamedSpec (ndNamedSpecProps)
 import PropSpec (propSpecProps)
 import OrdSpec (ordSpecProps)
 import RASpec (raSpecProps)
@@ -222,6 +223,7 @@ main = do
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- thetaInferenceSpecProps]
         ++ [run name act | (name, act) <- certSlotsSpecProps]
+        ++ [run name act | (name, act) <- ndNamedSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]
   unless (and results) exitFailure
   where

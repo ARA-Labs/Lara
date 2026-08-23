@@ -1746,3 +1746,48 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O82
+  timestamp: "2026-08-22T23:50"
+  provenance: ai-suggested
+  content: >
+    A surface-to-kernel transformation with binders can be meaningfully
+    mechanized without formalizing the entire concrete parser and elaborator if
+    the proof boundary is the transformation's structured input and every
+    external decision is explicit data. For named nd@1 terms, abstracting the
+    source-identifier classifier and premise resolver leaves the binder stack,
+    index shifting, marker traversal and rejection-preserving Option boundary
+    inside Lean. This supports two load-bearing theorems: identity on kernel
+    terms and equality with an independent named-to-de-Bruijn translation. The
+    price is an honest validated-not-verified boundary around the production
+    classifier, resolver, dispatch and error taxonomy.
+  context: >
+    lara-syntax@0.9 (#132), lean/Lara/NDNamed.lean. The proof design was chosen
+    after the earlier N132 dead end established that this Lean development has
+    no concrete `.lara` elaborator to prove correct end to end.
+  potential_type: heuristic
+  bound_to: [N132, N203, N205]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O83
+  timestamp: "2026-08-23T00:05"
+  provenance: ai-suggested
+  content: >
+    A repair suggestion attached to an ambiguity is sound only if it works for
+    every candidate the ambiguity leaves open. Testing global availability
+    (`some label exists`) or only the candidates selected for display can both
+    advertise an impossible exit; the availability predicate belongs beside
+    candidate construction and quantifies over the complete candidate set.
+  context: >
+    #140 final review defect. The counterexamples are an unrelated labelled
+    slot beside two unlabelled matches and a three-match case whose first two
+    displayed witnesses are labelled but whose third match is not.
+  potential_type: heuristic
+  bound_to: [N206]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

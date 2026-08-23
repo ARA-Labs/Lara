@@ -52,6 +52,7 @@ asserts each stays in sync with its `.lara` source.
 | `S5/example.lara` | the same `strictly-better` source shape over a **`lower-is-better`** measurand (perplexity, policy `ord-ppl-v1`) | — | **justified** (`better`) + **justified** (`num_lt`) | direction of goodness is *declared* domain knowledge, not inferable from use. The same authored relation generates the mirrored goal `num_lt(ours, theirs)`, which `ord@1` then accepts — polarity chooses which comparison to make, the backend still decides it |
 | `S6/example.lara` | S2's strict leg with the certificate premises cited **by source name** — `(ordcmp (prem base_cell) (prem new_cell))` (policy `ord-named-v1`, `lara-syntax@0.6`) | — | **justified** (`num_lt`) | the committed golden is the standing byte-identity witness for #105: the symbolic spelling elaborates to the numeric spelling's exact `.core.sexp` bytes, so the freshness check re-proves the lowering on every run |
 | `S7/example.lara` | S6's shape with the certificates cited **by premise label** — `(ordcmp (prem base) (prem new))` — plus a second argument where **one leaf fills both slots** of a two-premise rule, citable only as `(prem left)`/`(prem right)` (policy `ord-labeled-v1`, `lara-syntax@0.8`) | — | **justified** (`num_lt`) + **justified** (`num_le`) | the standing byte-identity witness for #131. A label names the *slot* rather than the term filling it, so it keeps working where the `@0.6` leaf name is `CertSlotMultiSlot` — the one case names could not express, and the reason labels earned their own name class |
+| `S8/example.lara` | S1's strict `nd@1` step with one named binder and the same named premise on both sides of a beta-redex — `(app (lam h (atom KEY) (prem e1)) (prem e1))` (policy `strict-v1`, `lara-syntax@0.9`) | — | **justified** (`holds`) | the inner `prem e1`, at binder depth 1, lowers to `(hyp 1)`; the outer one at depth 0 lowers to `(hyp 0)`. The redex adds no source-level logical strength: it isolates binder-depth shifting. `atom` is the frozen ND formula wrapper (correcting §2.2's bare-key placeholder), while the opaque key inside remains hand-hostile because the present surface cannot encode source propositions there; [#144](https://github.com/ARA-Labs/lara/issues/144) owns that limitation. |
 | `E4/example.lara` | reinstatement — three claims justified **while attacked** (policy `empirical-v2`) | rebut + undermine + undercut, each defended | **justified** ×3 (under attack) + **defeated** | defense is policy vocabulary (an exception, a one-directional contrary, a withheld edge), not a new mechanism |
 | `E5/example.lara` | contested beyond rebut + gap amid attacks (policy `empirical-v2`) | undermine 2-cycle + undercut 2-cycle | **contested** ×2 + **gap** | `contested` is any-kind undec, not a rebut artifact; `gap` is missing support, orthogonal to conflict |
 
@@ -123,6 +124,18 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
   A label names the slot rather than the term filling it, so `left` and `right`
   stay unambiguous however the instance is filled. Both certificates lower to
   the same `(ordcmp (prem 0) (prem 1))` the numeric twin produces.
+- **S8** is the named-`nd@1` binder/premise demonstrator (`lara-syntax@0.9`).
+  It keeps S1's single strict premise and conclusion, but deliberately inserts
+  a beta-redex: `(app (lam h (atom KEY) (prem e1)) (prem e1))`. The inner
+  occurrence of the same source name sits at binder depth 1 and lowers to
+  `(hyp 1)`; the outer occurrence at depth 0 lowers to `(hyp 0)`. Thus the
+  committed anchor is the numeric twin's redex, while replay still reports
+  only free premise slot 0 as a dependency. The redex is not a new
+  source-level inference. `atom` is the frozen ND formula wrapper (correcting
+  §2.2's bare-key placeholder); the opaque encoded key inside it is honestly
+  still hand-hostile, because the surface does not yet encode formula
+  annotations from source propositions. That follow-up is
+  [#144](https://github.com/ARA-Labs/lara/issues/144).
 - **E4/E5** are the M5 worked cases (tracker #48, T4). E1–E3/A/B leave three
   label cells structurally empty: an attacked argument that *survives* (E4 —
   grounded reinstatement, one context per attack kind), a `contested` produced

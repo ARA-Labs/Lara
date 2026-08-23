@@ -13,7 +13,7 @@
 module CliSpec (cliSpecProps) where
 
 import Control.Exception (bracket)
-import Data.List (isInfixOf)
+import Data.List (isInfixOf, isPrefixOf)
 import System.Directory
   ( createDirectoryIfMissing
   , getTemporaryDirectory
@@ -468,6 +468,65 @@ prop_cliLaraAcceptS1 = once $ ioProperty $ do
             === ("(verdict " ++ replayText ++ " accept (labels (0 in)) (edges) (statuses (status (atom holds (con safety_invariant) (con D)) justified)))\n")
       , counterexample "audit stderr empty" (err === "")
       ]
+
+-- | Every named @nd\@1@ presentation failure is rejected at the source
+-- boundary, before replay. These are end-to-end pins because the author sees
+-- the CLI's prefix and newline, not merely 'elabErrorMessage'.
+prop_cliLaraNdNamedDiagnostics :: Property
+prop_cliLaraNdNamedDiagnostics = once $ ioProperty $ do
+  base <- readFile "examples/S1/example.lara"
+  policy <- readFile "examples/S1/strict-v1.policy.lara"
+  checks <- mapM (runCase base policy) namedDiagnosticCases
+  pure (conjoin checks)
+  where
+    runCase base policy (payload, expected) =
+      withTempLaraDir
+        (replaceFirstCli "(hyp 0)" payload base)
+        [("strict-v1.policy.lara", policy)]
+        (\path -> do
+          (code, out, err) <- runLara ["check", path]
+          pure $
+            conjoin
+              [ counterexample (payload ++ ": exit code") (code === ExitFailure 2)
+              , counterexample (payload ++ ": stdout") (out === "")
+              , counterexample (payload ++ ": stderr") $
+                  err === ("lara: source invalid: " ++ expected ++ "\n")
+              ])
+
+    namedDiagnosticCases =
+      [ ( "(hyp h)"
+        , "arg 'a1': certificate 'nd@1' reference 'h' names no enclosing lam binder"
+        )
+      , ( "(lam h <F> (lam h <G> (hyp h)))"
+        , "arg 'a1': certificate 'nd@1' lam binder 'h' shadows an enclosing binder; rename one"
+        )
+      , ( "(lam e1 <F> (hyp e1))"
+        , "arg 'a1': certificate 'nd@1' lam binder 'e1' is also a citable premise name of this instance; rename the binder"
+        )
+      , ( "(lam 0 <F> (prem e1))"
+        , "arg 'a1': certificate 'nd@1' lam binder '0' is not a source identifier"
+        )
+      , ( "(lam h <F> (hyp 007))"
+        , "arg 'a1': certificate 'nd@1' index '007' is not a canonical index (use unsigned decimal with no leading zeros)"
+        )
+      , ( "(lam h <F> (hyp 0))"
+        , "arg 'a1': certificate 'nd@1' kernel index '0' appears in a named-form payload; cite a binder by name, a premise with (prem ...), or a theory entry with (thy ...)"
+        )
+      , ( "(prem 1)"
+        , "arg 'a1': certificate 'nd@1' premise reference '1' names slot 1 but this argument has only 1 premise slot(s)"
+        )
+      , ( "(foo (prem e1))"
+        , "arg 'a1': certificate 'nd@1' named spelling 'e1' sits where the nd@1 grammar gives it no meaning"
+        )
+      ]
+
+replaceFirstCli :: String -> String -> String -> String
+replaceFirstCli needle replacement = go
+  where
+    go [] = []
+    go rest@(c : cs)
+      | needle `isPrefixOf` rest = replacement ++ drop (length needle) rest
+      | otherwise = c : go cs
 
 -- ---------------------------------------------------------------------------
 -- Source admission CLI matrix
@@ -994,6 +1053,7 @@ cliSpecProps =
   , ("cli .lara accept A exit 0 + bytes", quickCheckResult prop_cliLaraAcceptA)
   , ("cli .lara accept B exit 0 + bytes", quickCheckResult prop_cliLaraAcceptB)
   , ("cli .lara accept S1 strict cert exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS1)
+  , ("cli .lara nd@1 named diagnostics are exact", quickCheckResult prop_cliLaraNdNamedDiagnostics)
   , ("cli .lara accept S2 comparison form exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS2)
   , ("cli .lara parse error exit 2", quickCheckResult prop_cliLaraParseError)
   , ("cli .lara discharge on bare leaf exit 2 (#135)", quickCheckResult prop_cliLaraDischargeOnBareLeaf)

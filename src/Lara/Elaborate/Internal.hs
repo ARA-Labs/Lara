@@ -56,6 +56,7 @@ import Lara.AST
 import Lara.Elaborate.CertSlots (SlotRefError (..), lowerCertPayload)
 import Lara.Elaborate.Comparison (GeneratedArg (..), expandSurfaceProvenance)
 import Lara.Elaborate.Error (ElabError (..), elabErrorMessage)
+import Lara.Elaborate.NDNamed (NamedRefError (..), lowerNamedPayload)
 import Lara.Elaborate.Subst
   ( MatchFailure (..)
   , apatToProp
@@ -63,6 +64,8 @@ import Lara.Elaborate.Subst
   )
 import Lara.Syntax (attackPathTerminalMarkers)
 import Lara.Prop (Prop, equiv)
+import qualified Lara.Strict as Strict
+import Lara.Strict.ND (ndBackendId)
 
 -- ---------------------------------------------------------------------------
 -- Caller-supplied environment inputs
@@ -557,15 +560,23 @@ certSlotResolver env rule priors prems name =
     (Nothing, _) -> Left SlotNameAmbiguous
   where
     locate candidates =
-      case [i | (i, p) <- zip [0 ..] prems, p `elem` candidates] of
+      case matchingSlots of
         [i] -> Right i
         [] -> Left SlotNameNotAPremise
-        (i : j : _) -> Left (SlotNameMultiSlot i j)
+        (i : j : _) -> Left (SlotNameMultiSlot i j (all slotHasLabel matchingSlots))
+      where
+        matchingSlots = [i | (i, p) <- zip [0 ..] prems, p `elem` candidates]
+        slotHasLabel i =
+          case drop i (rulePremiseLabels rule) of
+            Just (PremiseLabel label) : _ -> refMatches env priors label == ([], [])
+            _ -> False
 
 -- | Lower the symbolic premise references of one rule instance's assurance
 -- (#105), against that instance's own resolved premises. Every other assurance
--- passes through: only 'AssuranceCert' has a payload, and even then only a
--- backend with a declared 'Lara.Strict.Cell.SlotSchema' is touched.
+-- passes through. Flat certificate grammars are lowered only through a
+-- declared 'Lara.Strict.Cell.SlotSchema'; the registered @nd\@1@ identity
+-- instead takes the marker-selected named-proof-term pass, whose marker-free
+-- payloads return byte-identically.
 --
 -- This is where the pass's failures become author-facing: the resolver's
 -- 'SlotRefError' vocabulary is backend-shaped, so it is translated here into
@@ -581,10 +592,23 @@ lowerArgCert
   -> Either ElabError Assurance
 lowerArgCert env rule priors aid prems assurance = case assurance of
   AssuranceCert cert ->
-    case lowerCertPayload (certSlotResolver env rule priors prems) cert of
-      Right cert' -> Right (AssuranceCert cert')
-      Left (name, err) -> Left (certSlotError aid (ruleId rule) cert name err)
+    if isNdCert cert
+      then
+        case lowerNamedPayload (certSlotResolver env rule priors prems) (length prems) (certPayload cert) of
+          Right payload -> Right (AssuranceCert cert {certPayload = payload})
+          Left (name, err) -> Left (ndNamedError aid (ruleId rule) cert name err)
+      else
+        case lowerCertPayload (certSlotResolver env rule priors prems) cert of
+          Right cert' -> Right (AssuranceCert cert')
+          Left (name, err) -> Left (certSlotError aid (ruleId rule) cert name err)
   _ -> Right assurance
+
+-- | The named proof-term presentation pass is owned by precisely the
+-- registered @nd\@1@ identity, never merely a similarly named backend.
+isNdCert :: Cert -> Bool
+isNdCert cert =
+  certBackend cert == BackendId (Strict.backendName ndBackendId)
+    && certVersion cert == Strict.backendVersion ndBackendId
 
 -- | Translate one resolver\/lowering verdict into its located 'ElabError'.
 --
@@ -597,9 +621,28 @@ certSlotError aid rid cert name err = case err of
   SlotNameAmbiguous -> CertSlotAmbiguous aid backend version ref
   SlotNameLabelAmbiguous -> CertSlotLabelAmbiguous aid backend version ref rid
   SlotNameNotAPremise -> CertSlotNotAPremise aid backend version ref
-  SlotNameMultiSlot i j -> CertSlotMultiSlot aid backend version ref i j
+  SlotNameMultiSlot i j allMatchesLabelled -> CertSlotMultiSlot aid backend version ref i j allMatchesLabelled
   SlotNonCanonicalNumeral -> CertSlotNonCanonicalNumeral aid backend version ref
   SlotSchemaMismatch -> CertSlotSchemaMismatch aid backend version ref
+  where
+    backend = certBackend cert
+    version = certVersion cert
+    ref = ArgRef name
+
+-- | Translate named proof-term lowering failures at the same source location
+-- as ordinary certificate-slot failures.  A named @(prem source)@ delegates
+-- to 'certSlotError' exactly, retaining the established diagnostic family.
+ndNamedError :: ArgId -> RuleId -> Cert -> String -> NamedRefError -> ElabError
+ndNamedError aid rid cert name err = case err of
+  NamedPremSlot slotErr -> certSlotError aid rid cert name slotErr
+  NamedPremOutOfRange slot count -> CertNdPremOutOfRange aid backend version ref slot count
+  NamedBinderUnbound -> CertNdBinderUnbound aid backend version ref
+  NamedBinderShadowed -> CertNdBinderShadowed aid backend version ref
+  NamedBinderShadowsPremise -> CertNdBinderShadowsPremise aid backend version ref
+  NamedMalformedBinder -> CertNdMalformedBinder aid backend version ref
+  NamedNonCanonicalIndex -> CertNdNonCanonicalIndex aid backend version ref
+  NamedKernelIndex -> CertNdKernelIndex aid backend version ref
+  NamedResidual -> CertNdResidualNamed aid backend version ref
   where
     backend = certBackend cert
     version = certVersion cert

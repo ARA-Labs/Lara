@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.8`)
+# LARA surface grammar — frozen (`lara-syntax@0.9`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -34,20 +34,21 @@ witnesses) remains specified in Appendix D. `@0.7`'s three *restrictions* —
 `discharge`/`open` on a bare leaf are parse errors, a hole is spelled `open q`,
 and a shadowed discharge target is a hard error — are specified in Appendix F;
 they remove surface and add none, so the AST, the wire, and `lara-core@0.2` are
-again unchanged. The current surface is `@0.8`, which lets a certificate
-premise reference cite the citing rule's declared premise **label** beside the
-`@0.6` leaf and prior-argument names (Appendix G); like `@0.6` it changes no
-lexer or parser rule, and a label citation lowers to the numeric spelling's
-exact bytes.
+again unchanged. `@0.8` lets a certificate premise reference cite the citing
+rule's declared premise **label** beside the `@0.6` leaf and prior-argument
+names (Appendix G). The current surface is `@0.9`, which gives `nd@1` a named
+proof-term presentation over its unchanged de Bruijn kernel (Appendix H).
+Neither addition changes a lexer or parser rule, and each successful named
+form lowers to the numeric spelling's exact bytes.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.8`; it decodes to
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.9`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
 `@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and the `@0.6`
-symbolic and `@0.8` premise-label certificate premise references remain
-presentation-layer data until
-elaboration, and `@0.7`'s restrictions (bare-leaf body lines, the sole `open q`
-hole spelling, and the unified discharge collision policy) remove
+symbolic, `@0.8` premise-label, and `@0.9` named-`nd@1` certificate references
+remain presentation-layer data until elaboration, and `@0.7`'s restrictions
+(bare-leaf body lines, the sole `open q` hole spelling, and the unified
+discharge collision policy) remove
 presentation-layer forms without adding any, so the decoded `lara-core@0.2`
 object is unchanged. The Haskell `parse ∘ print == id` property covers this current
 concrete surface. The structured Lean round-trip in
@@ -1594,34 +1595,44 @@ behavior at the AST level through the real elaborator entry point.
 
 ### E.7 The nd@1 exclusion and future work (D1, D3)
 
-`nd@1` admits no named slots and is deliberately schema-less: its payloads
-pass through byte-identical and keep numeric `hyp` indices. `ord@1` and `ra@1`
-payloads are single flat head applications with premise references at fixed
-argument positions — a name is a stable notion there. `nd@1` payloads are
-recursive de Bruijn proof terms: `hyp i` shifts under `lam` binders and
-conflates premise slots with theory entries by offset, so "the premise named
-`e4`" is not well-defined at a fixed payload position without teaching the
+> **Resolved at `lara-syntax@0.9`:** Appendix H lands the first bullet's named
+> kernel/surface split (#132). This section remains as the historical record of
+> why `nd@1` was excluded at `@0.6`; Appendix H is normative for current
+> `nd@1` authoring.
+
+`nd@1` admitted no named slots and was deliberately schema-less: its payloads
+passed through byte-identical and kept numeric `hyp` indices. `ord@1` and
+`ra@1` payloads were single flat head applications with premise references at
+fixed argument positions — a name was a stable notion there. `nd@1` payloads
+were recursive de Bruijn proof terms: `hyp i` shifted under `lam` binders and
+conflated premise slots with theory entries by offset, so "the premise named
+`e4`" was not well-defined at a fixed payload position without teaching the
 presentation layer the full ND grammar and binder discipline.
 
-Two future-work notes, recorded here so the next design starts from them:
+Two future-work notes were recorded here so the next design could start from them:
 
-- *A named `nd@1` form* should start from Lean 4's kernel/surface split rather
-  than inventing new machinery: the kernel term stays de Bruijn (`hyp i`), the
-  presentation writes named binders (`(lam h FORMULA CERT)` with `h` bound in
-  `CERT`, and premise/theory slots cited by source name), and the elaborator
-  owns the index shifting, exactly as Lean's elaborator lowers
+- *A named `nd@1` form* was expected to start from Lean 4's kernel/surface
+  split rather than inventing new machinery. The kernel term would stay de
+  Bruijn (`hyp i`). The presentation would write named binders
+  (`(lam h FORMULA CERT)` with `h` bound in `CERT`) and cite premise/theory
+  slots by source name. The elaborator would own the index shifting, exactly
+  as Lean's elaborator lowered
   `fun h => … h …` to bound-variable indices. The locally-nameless literature
-  covers the metatheory of that lowering.
+  covered the metatheory of that lowering.
+  *Resolved at `@0.9`:* Appendix H defines this form, including the exact
+  binder discipline, mode boundary, lowering arithmetic, and rejection
+  surface. Formula annotation authoring is the one deliberately separate
+  follow-up, tracked by [#144](https://github.com/ARA-Labs/lara/issues/144).
 - *Rule premise labels as a second symbolic class (considered and deferred).*
-  `premiseLabelIndex` already maps a rule's declared premise labels to slot
-  indices, and a label names the backend slot directly — it would even cover
-  the E.3 multi-slot case, where this design falls back to numerals. Deferred
-  at `@0.6` because labels are optional (`rulePremiseLabels ::
-  [Maybe PremiseLabel]`), so they cannot be the universal namespace, and a
-  second symbolic class would need its own collision policy against leaves and
-  priors, growing exactly the resolution surface this feature is supposed to
-  keep predictable. Premise-label citation remains a natural future
-  `lara-syntax@0.x` extension.
+  `premiseLabelIndex` already mapped a rule's declared premise labels to slot
+  indices, and a label named the backend slot directly — it would even have
+  covered the E.3 multi-slot case, where this design fell back to numerals.
+  It was deferred at `@0.6` because labels were optional
+  (`rulePremiseLabels :: [Maybe PremiseLabel]`) and could not be the universal
+  namespace. A second symbolic class would have needed its own collision
+  policy against leaves and priors, growing the resolution surface that this
+  feature was supposed to keep predictable. Premise-label citation remained a
+  natural future `lara-syntax@0.x` extension.
   *Resolved at `@0.8`:* Appendix G lands premise-label citation (#131). The
   collision policy this bullet asks for is G.3 — cross-class collision is a
   hard error, with no carve-out for agreeing referents — and the optionality
@@ -1970,10 +1981,14 @@ section:** the multi-slot case now has two exits, a numeric slot or the
 label of the intended slot, and the label is the better one, because it says
 which slot was meant in the rule's own vocabulary rather than by position.
 
-The `CertSlotMultiSlot` message still reads "cite a numeric slot"; it names
-one working exit, not the exhaustive list. `examples/S7/` argument `a2` is the
-worked case: one leaf fills both premise slots of a two-premise rule, and only
-`(prem left)`/`(prem right)` resolve there.
+When every slot occupied by the ambiguous source name has its own usable
+premise label, the `CertSlotMultiSlot` message names both repairs: cite a
+numeric slot or that rule's label for the intended slot. A label is usable only
+when its spelling does not collide with a declared leaf or prior argument.
+`examples/S7/` argument `a2` is the worked case: one leaf fills both premise
+slots of a two-premise rule, and only `(prem left)`/`(prem right)` resolve
+there. An unrelated, partially declared, or colliding label does not advertise
+a nonexistent repair.
 
 Note that this does not make labels a *universal* namespace. Labels are
 optional, so a rule that declares none is cited exactly as at `@0.6`, and the
@@ -1982,8 +1997,9 @@ policy author can open.
 
 ### G.5 Stable error messages
 
-Seven diagnostic families: E.5's six, of which **two are reworded here**, plus
-`CertSlotLabelAmbiguous`. This list supersedes E.5's as the normative home;
+Seven diagnostic families: E.5's six, of which **two are reworded here** and
+the multi-slot template is reworded at `@0.9`, plus `CertSlotLabelAmbiguous`.
+This list supersedes E.5's as the normative home;
 E.5 carries a banner pointing here. `A` is the enclosing argument, `B` the
 backend spelling `name@version`, `N` the authored reference spelling, `R` the
 citing rule's id, and `I`/`J` are 0-based slots:
@@ -1993,17 +2009,24 @@ arg 'A': certificate 'B' premise reference 'N' names neither a premise label of 
 arg 'A': certificate 'B' premise reference 'N' is ambiguous between a declared leaf and a prior argument
 arg 'A': certificate 'B' premise reference 'N' is ambiguous between rule 'R' premise label and a declared leaf or prior argument
 arg 'A': certificate 'B' premise reference 'N' does not resolve to any of this argument's premise slots
+arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot or the rule's premise label for the slot you mean
 arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot
 arg 'A': certificate 'B' premise reference 'N' is not a canonical slot numeral (use unsigned decimal with no leading zeros); write the canonical numeral or a source name
 arg 'A': certificate 'B' payload does not match the backend's premise-reference schema but contains symbolic premise reference 'N'
 ```
 
-The two changed templates are the first and third. Both name the citing rule,
+The first and third templates changed at `@0.8`; the labelled multi-slot
+template changes at `@0.9`. The first and third name the citing rule,
 because "a premise label" is only actionable once the author knows whose labels
 were consulted — the same reason `ThetaReference*` messages name their rule.
-`test/CertSlotsSpec.hs` pins all seven character-for-character, and
-`test/CliSpec.hs` pins the two changed ones end to end on the production CLI's
-stderr.
+The labelled multi-slot template applies exactly when every slot in the
+resolver's complete matching-slot set has a `Just` at the corresponding
+position in `rulePremiseLabels` and each label has no declared-leaf or
+prior-argument collision. Otherwise the following numeric-only template
+applies. Thus the advice is actionable for whichever matching slot the author
+intended. `test/CertSlotsSpec.hs` pins all seven families, both multi-slot
+branches, the partial-label case, a three-match case, and a shadowed-label case;
+the production CLI preserves the rendered diagnostic on stderr.
 
 ### G.6 Recursion, and why no Lean change is owed
 
@@ -2052,3 +2075,201 @@ both drivers agree on the new anchor.
 
 **No measurement re-run is owed**, for F.5's reason: the measurement harness
 consumes `.core.sexp` bytes and none of the measured ones moved.
+
+## Appendix H — `lara-syntax@0.9` (named `nd@1` proof terms, 2026-08-22)
+
+### H.1 Scope and the two modes
+
+Additive over `lara-syntax@0.8`. The registered `nd@1` backend keeps its
+closed, numeric de Bruijn grammar; `@0.9` adds a presentation form that the
+untrusted elaborator lowers before replay. The grammars are deliberately
+separate:
+
+```text
+formula       ::= "false"
+                | "(" "atom" KEY ")"
+                | "(" "imp" formula formula ")"
+
+kernelCert    ::= "(" "hyp" canonicalNat ")"
+                | "(" "lam" formula kernelCert ")"
+                | "(" "app" kernelCert kernelCert ")"
+                | "(" "abort" formula kernelCert ")"
+
+namedCert     ::= "(" "hyp" sourceName ")"             -- enclosing named binder
+                | "(" "prem" premRef ")"               -- premise slot
+                | "(" "thy" canonicalNat ")"           -- theory entry
+                | "(" "lam" sourceName formula namedCert ")" -- named binder
+                | "(" "lam" formula namedCert ")"       -- anonymous kernel binder
+                | "(" "app" namedCert namedCert ")"
+                | "(" "abort" formula namedCert ")"
+
+premRef       ::= canonicalNat | sourceName
+sourceName    ::= S-expression atom whose decoded string is nonempty and
+                  whose first character satisfies §1.3 `isIdentStart`
+canonicalNat  ::= "0" | nonZeroDigit { digit }
+```
+
+`formula` is the frozen backend annotation grammar. In particular an atom is
+still `(atom KEY)`, never a bare key. Producing `KEY` from a source proposition
+is an encoding feature, not reference lowering, and remains tracked only by
+[#144](https://github.com/ARA-Labs/lara/issues/144).
+
+`sourceName` deliberately uses the shipped source-name classifier, not the
+complete concrete-syntax `ident` production. The first decoded character must
+be a Unicode letter or `_`; the entire decoded S-expression atom is then the
+name. Consequently punctuation after that first character can survive the
+S-expression codec and remains part of binder lookup and comparison. This is
+the same first-character boundary used by named certificate-slot lowering.
+
+**D9 — kernel/named mode separation.** A payload is in exactly one mode. If
+the D7 marker scan in H.4 finds no marker,
+the payload is **kernel mode** and passes through structure-identically for the
+backend to decode and replay. If it finds any marker, the whole payload is
+**named mode** and is subject to this appendix. A canonical numeric `(hyp N)`
+inside named mode is therefore `CertNdKernelIndex`, not a second spelling. The
+rejected gradual-conversion alternative would have retained raw `hyp` indices
+inside named terms; it was rejected because `(prem N)` shifts under binders
+while `(hyp N)` would not, giving one term two context-sensitive shift regimes.
+Relaxing this rule later would be additive; tightening it later would break
+authored artifacts.
+
+Nothing in this appendix changes `lara-core@0.2`, `Lara.AST`, the wire,
+`.core.sexp`, the frozen corpus, a checker judgment, or replay. No corpus
+regeneration or freeze-tag bump is owed.
+
+`@0.9` is the **substrate** for eventual named formula authoring, not a complete
+deep-`nd@1` authoring solution. It closes silent index-misbinding by giving
+binders, premises, and theory offsets one explicit lowering discipline, while
+formula annotations remain opaque `(atom KEY)` values that still require
+out-of-band tooling until #144 lands.
+
+### H.2 Namespaces and binder discipline
+
+The three reference namespaces are separated by their heads (D1): `(hyp x)`
+consults only enclosing named binders; `(prem s)` consults only premise slots;
+and `(thy N)` consults only theory entries. They never compete for one syntactic
+position. That head separation is why E.7's general collision concern dissolves
+for recursive proof terms instead of requiring a global shadowing preference.
+
+A named binder is spelled `(lam x FORMULA CERT)`. Its `x` must be a
+`sourceName`: an S-expression atom whose first decoded character satisfies
+`isIdentStart`. Numeral and structured binders are rejected, but the remainder
+of the atom is not re-lexed as a complete §1.3 `ident`; it stays part of the
+name verbatim. The kernel three-field spelling `(lam FORMULA CERT)` remains
+legal inside named mode as an anonymous binder and still contributes one level
+to de Bruijn depth.
+
+Local binder shadowing is forbidden (D3): a nested named `lam` may not reuse an
+enclosing binder's name. Lean-style shadowing was considered and rejected
+because the same `(hyp x)` would silently change its referent after crossing the
+inner binder. A named binder also may not use a name that the citing instance's
+shared resolver successfully resolves to a citable premise (D10). Only a
+successful resolution reserves the name: unresolved, ambiguous, and
+not-a-premise resolver failures leave it available, so an irrelevant
+program-global name does not poison the binder namespace.
+
+**D2 — premise resolver reuse.** A `(prem s)` whose `s` is a `sourceName` uses
+Appendix G's three-class resolver—citing-rule premise labels, declared leaves,
+and prior arguments—with its hard collision policy and exact `CertSlot*` errors
+unchanged. D1 keeps that premise namespace under the `prem` head rather than
+letting it compete with binder lookup.
+
+**D5 — theory references stay numeric-only.** `(thy N)` accepts only a
+canonical natural because theory entries have no source names. Separately,
+**D6 — numeric premises are slot-stable and range-checked.** A canonical
+numeric `(prem N)` is a legal premise spelling, and D6 owns its range guard;
+D5 does not govern numeric premises.
+
+### H.3 Lowering arithmetic
+
+Let `depth` be the count of all enclosing `lam` binders, named or anonymous;
+let `nPrem` be the citing instance's premise count; and let `slot` be the
+resolved zero-based premise slot. Lowering is:
+
+```text
+(hyp x)     -> (hyp binderIndex(x))
+(prem s)    -> (hyp (depth + slot(s)))
+(thy N)     -> (hyp (depth + nPrem + N))
+(lam x F C) -> (lam F lower(C))
+```
+
+Thus the same `(prem e1)` lowers to `(hyp 1)` inside one binder and `(hyp 0)`
+outside it. A numeric `(prem N)` is slot-stable and is checked before the theory
+offset is applied: `N >= nPrem` is `CertNdPremOutOfRange`, never a silent slide
+into theory entry `N - nPrem`. Theory indices have no presentation-side upper
+bound; the backend checks them against the selected theory table during replay.
+
+### H.4 Exact D7 boundary and rejection-site migration
+
+The same marker vocabulary drives two leftmost-outermost scans. The first
+selects named mode. Before lowering, a traversal-aware scan checks positions
+that the lowering grammar treats as opaque. The markers are exactly:
+
+1. a two-field `(prem ATOM)` node;
+2. a two-field `(thy ATOM)` node;
+3. a four-element `(lam BINDER FORMULA CERT)` node; and
+4. a two-field `(hyp a)` whose decoded atom `a` is nonempty and whose first
+   character satisfies `isIdentStart`.
+
+Everything with none of those markers is kernel mode and passes through
+unchanged—valid kernel certificates, marker-free junk such as `(foo bar)`, and
+even noncanonical `(hyp 007)` alike. The backend continues to own their decode
+or replay result, including R13. Once any marker selects named mode, known proof
+constructors are recursively lowered. A named marker in an opaque formula
+position or an unknown subtree is `CertNdResidualNamed` at the source boundary,
+even when lowering a traversed node would fail for another reason. Consequently
+only payloads that actually contain one of the four markers migrate from
+backend R13 to a located elaboration error; marker-free payload behavior is
+unchanged. A raw `.sexp` has no presentation lowering and remains backend-owned.
+
+### H.5 Stable source-boundary diagnostics
+
+Eight `CertNd*` templates are normative. `A` is the enclosing argument, `B` is
+the backend spelling `name@version`, `N` is the offending authored spelling,
+`I` is an authored/resolved slot, and `J` is the number of premise slots. For a
+non-atom `lam` binder, `N` is its canonical S-expression rendering:
+
+```text
+arg 'A': certificate 'B' reference 'N' names no enclosing lam binder
+arg 'A': certificate 'B' lam binder 'N' shadows an enclosing binder; rename one
+arg 'A': certificate 'B' lam binder 'N' is also a citable premise name of this instance; rename the binder
+arg 'A': certificate 'B' lam binder 'N' is not a source identifier
+arg 'A': certificate 'B' index 'N' is not a canonical index (use unsigned decimal with no leading zeros)
+arg 'A': certificate 'B' kernel index 'N' appears in a named-form payload; cite a binder by name, a premise with (prem ...), or a theory entry with (thy ...)
+arg 'A': certificate 'B' premise reference 'N' names slot I but this argument has only J premise slot(s)
+arg 'A': certificate 'B' named spelling 'N' sits where the nd@1 grammar gives it no meaning
+```
+
+These are, in order, `CertNdBinderUnbound`, `CertNdBinderShadowed`,
+`CertNdBinderShadowsPremise`, `CertNdMalformedBinder`,
+`CertNdNonCanonicalIndex`, `CertNdKernelIndex`, `CertNdPremOutOfRange`, and
+`CertNdResidualNamed`. A `(prem s)` resolver failure does **not** acquire a
+parallel `CertNd` rendering: it reuses the applicable `CertSlot*` family and
+the Appendix G.5 template verbatim.
+
+Lowering is one-way. If lowering succeeds but `nd@1` later rejects at R13, its
+backend diagnostic describes the lowered de Bruijn term; there is no source map
+back to binder or premise names. The source author may therefore have to map an
+index back by hand. This error-attribution limitation does not weaken replay,
+but it belongs to the honest user-facing boundary.
+
+### H.6 Mechanization, witness, and trust boundary
+
+The Lean mirror proves two named results:
+`Lara.NDNamed.lowerNamed_id_of_kernel` (every encoded kernel certificate takes
+the marker-free identity arm) and
+`Lara.NDNamed.lowerNamed_eq_translation` (every well-formed named term lowers
+to exactly the independently defined de Bruijn translation). Twelve executable,
+axiom-free `#guard` vectors pin the successful and failing boundary shapes to
+the Haskell tests. `examples/S8/` is the standing end-to-end byte-identity
+witness: the named redex lowers to the numeric redex in its committed
+`.core.sexp`, and freshness tests re-prove that equality.
+
+The trust split remains explicit. `Lara.Elaborate.NDNamed` is Haskell
+validated-not-verified boundary code: its classifier, resolver, traversal, and
+execution are covered by properties and integration tests. The Lean mirror
+proves the lowering mathematics over abstract classifier and resolver
+parameters; it does **not** prove that the Haskell implementation executed that
+function, nor verify the Haskell classifier or resolver. `@0.9` removes silent
+index-misbinding from named premise/binder authoring, but complete formula
+authoring still needs tooling until #144 lands.

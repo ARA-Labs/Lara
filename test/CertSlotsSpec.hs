@@ -131,7 +131,7 @@ prop_schemaKeysDistinct =
 res :: String -> Either SlotRefError Int
 res "e1" = Right 0
 res "e2" = Right 1
-res "dup" = Left (SlotNameMultiSlot 0 1)
+res "dup" = Left (SlotNameMultiSlot 0 1 False)
 res "off" = Left SlotNameNotAPremise
 res "both" = Left SlotNameAmbiguous
 res _ = Left SlotNameUnresolved
@@ -239,7 +239,7 @@ prop_reportsResolverFailures =
     [ ("nope", SlotNameUnresolved)
     , ("both", SlotNameAmbiguous)
     , ("off", SlotNameNotAPremise)
-    , ("dup", SlotNameMultiSlot 0 1)
+    , ("dup", SlotNameMultiSlot 0 1 False)
     ]
 
 -- | @ra\@1@'s witness fraction is not a reference position: it passes
@@ -351,7 +351,10 @@ prop_identityOnSymbolicFreePayloads =
 -- two slots), 'select' produces a prior argument for 'promote' to cite, and
 -- @e3@ is a declared leaf that no instance below admits.
 --
--- Every rule but 'plain' /labels/ its premises (@lara-syntax\@0.8@, #131), so
+-- Every rule but 'plain', 'plainTwin', the two ambiguous slots of
+-- 'partialTwin', and the final ambiguous slot of 'partialTriple' /labels/
+-- its premises
+-- (@lara-syntax\@0.8@, #131), so
 -- the same fixture reaches the third name class: 'pair' for the twin property,
 -- 'twin' for the multi-slot case only labels can cite, and 'select'\/'promote'
 -- for the nested-instance scoping pin (a label belongs to the rule of the
@@ -395,9 +398,27 @@ certPolicySource =
     , "  conclusion = paired(X, V)"
     , "  allow-trusted = false"
     , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
+    , "rule plainTwin(X, V)"
+    , "  mode = strict"
+    , "  premises = [ alpha(X, V), alpha(X, V) ]"
+    , "  conclusion = twinned(X, V)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
     , "rule twin(X, V)"
     , "  mode = strict"
     , "  premises = [ left: alpha(X, V), right: alpha(X, V) ]"
+    , "  conclusion = twinned(X, V)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
+    , "rule partialTwin(X, V)"
+    , "  mode = strict"
+    , "  premises = [ alpha(X, V), alpha(X, V), repair: beta(X, V) ]"
+    , "  conclusion = twinned(X, V)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
+    , "rule partialTriple(X, V)"
+    , "  mode = strict"
+    , "  premises = [ first: alpha(X, V), second: alpha(X, V), alpha(X, V), repair: beta(X, V) ]"
     , "  conclusion = twinned(X, V)"
     , "  allow-trusted = false"
     , "  certifiers = [ (ord@1, sha256:cert-slots-theory-0) ]"
@@ -480,12 +501,52 @@ twinArg payload =
   , certLine payload
   ]
 
+-- | The repeated-slot fixture with slot 0's label shadowed by a declared leaf.
+-- The label exists but cannot repair a reference to @e1@ because citing
+-- @left@ is itself ambiguous.
+shadowedTwinLabelArg :: String -> [String]
+shadowedTwinLabelArg payload =
+  [ "leaf left : beta(sys_b, 0.74)"
+  , "  kind = observed"
+  , "  provenance = user"
+  , "  refs = [evidence/shadowed-label.txt]"
+  , ""
+  ]
+    ++ twinArg payload
+
 -- | The pre-@\@0.8@ control: @plain@ is @pair@ with its premise labels
 -- removed, so every resolution here runs the path a policy written before
 -- #131 takes.
 plainArg :: String -> [String]
 plainArg payload =
   [ "arg a_plain : supports(c_paired) by plain(sys_a, 0.74)"
+  , certLine payload
+  ]
+
+-- | The pre-@\@0.8@ multi-slot control: one leaf fills both premises of an
+-- unlabelled rule, so its repair must not advertise a label that does not
+-- exist.
+plainTwinArg :: String -> [String]
+plainTwinArg payload =
+  [ "arg a_plain_twin : supports(c_twinned) by plainTwin(sys_a, 0.74)"
+  , certLine payload
+  ]
+
+-- | A partial-label regression fixture: @e1@ fills the two unlabelled
+-- @alpha@ slots, while the unrelated @beta@ slot alone has a label. The
+-- label therefore cannot repair the ambiguity in @(prem e1)@.
+partialTwinArg :: String -> [String]
+partialTwinArg payload =
+  [ "arg a_partial_twin : supports(c_twinned) by partialTwin(sys_a, 0.74)"
+  , certLine payload
+  ]
+
+-- | Three matching slots whose first two displayed witnesses are labelled
+-- but whose third match is not. This makes checking only the rendered
+-- witnesses observably wrong.
+partialTripleArg :: String -> [String]
+partialTripleArg payload =
+  [ "arg a_partial_triple : supports(c_twinned) by partialTriple(sys_a, 0.74)"
   , certLine payload
   ]
 
@@ -585,6 +646,14 @@ expectCertError decls matches fragments =
             all (`isInfixOf` elabErrorMessage err) fragments
         ]
 
+-- | The exact author-facing diagnostic for a fixture that must fail during
+-- certificate-slot elaboration.
+certErrorMessage :: [String] -> Either String String
+certErrorMessage decls = case elaborateDecls decls of
+  Left err -> Left ("fixture parse failed: " ++ err)
+  Right (Right unit) -> Left ("expected a certificate slot error, got " ++ show unit)
+  Right (Left err) -> Right (elabErrorMessage err)
+
 -- | The certificate payload carried by a support term's assurance.
 payloadOf :: SupportTerm -> Maybe SExpr
 payloadOf (SRule _ _ _ _ _ (AssuranceCert cert)) = Just (certPayload cert)
@@ -681,10 +750,60 @@ prop_labelResolvesMultiSlot = once $
     , expectCertError
         (twinArg "(ordcmp (prem e1) (prem 1))")
         ( \err -> case err of
-            CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 -> True
+            CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 True -> True
             _ -> False
         )
-        ["arg 'a_twin'", "'e1'", "occupies premise slots 0 and 1"]
+        [ "arg 'a_twin'"
+        , "'e1'"
+        , "occupies premise slots 0 and 1"
+        , "cite a numeric slot or the rule's premise label for the slot you mean"
+        ]
+    ]
+
+-- | #140: label advice is valid only when every slot matched by the
+-- ambiguous source name has its own label. An unrelated labelled slot must
+-- not turn a numeric-only repair into the two-exit repair wording.
+prop_partialLabelsDoNotAdvertiseUnavailableRepair :: Property
+prop_partialLabelsDoNotAdvertiseUnavailableRepair = once $
+  counterexample "an unrelated premise label enabled impossible label repair advice" $
+    certErrorMessage (partialTwinArg "(ordcmp (prem e1) (prem 1))")
+      === Right "arg 'a_partial_twin': certificate 'ord@1' premise reference 'e1' occupies premise slots 0 and 1; cite a numeric slot"
+
+-- | The availability condition is computed from the complete matching-slot
+-- set, not merely the two witnesses retained for the diagnostic.
+prop_allMatchingSlotsNeedLabels :: Property
+prop_allMatchingSlotsNeedLabels = once $
+  counterexample "only the first two of three matching slots were checked for labels" $
+    certErrorMessage (partialTripleArg "(ordcmp (prem e1) (prem 1))")
+      === Right "arg 'a_partial_triple': certificate 'ord@1' premise reference 'e1' occupies premise slots 0 and 1; cite a numeric slot"
+
+-- | #140: every matching slot needs a label that the same resolver would
+-- accept. Merely declaring @left@ does not make it actionable when a leaf
+-- shadows that label.
+prop_shadowedLabelDoesNotAdvertiseUnavailableRepair :: Property
+prop_shadowedLabelDoesNotAdvertiseUnavailableRepair = once $
+  conjoin
+    [ expectCertError
+        (shadowedTwinLabelArg "(ordcmp (prem e1) (prem 1))")
+        ( \err -> case err of
+            CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 False -> True
+            _ -> False
+        )
+        [ "arg 'a_twin'"
+        , "'e1'"
+        , "occupies premise slots 0 and 1"
+        , "cite a numeric slot"
+        ]
+    , expectCertError
+        (shadowedTwinLabelArg "(ordcmp (prem left) (prem 1))")
+        ( \err -> case err of
+            CertSlotLabelAmbiguous (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "left") (RuleId "twin") -> True
+            _ -> False
+        )
+        [ "arg 'a_twin'"
+        , "'left'"
+        , "is ambiguous between rule 'twin' premise label and a declared leaf or prior argument"
+        ]
     ]
 
 -- | Decision 2: a name carried by /both/ a premise label and a declared leaf
@@ -852,10 +971,26 @@ prop_certSlotFailureMatrix =
         expectCertError
           (twinArg "(ordcmp (prem e1) (prem 1))")
           ( \err -> case err of
-              CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 -> True
+              CertSlotMultiSlot (ArgId "a_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 True -> True
               _ -> False
           )
-          ["arg 'a_twin'", "'e1'", "occupies premise slots 0 and 1", "cite a numeric slot"]
+          [ "arg 'a_twin'"
+          , "'e1'"
+          , "occupies premise slots 0 and 1"
+          , "cite a numeric slot or the rule's premise label for the slot you mean"
+          ]
+    , once $
+        expectCertError
+          (plainTwinArg "(ordcmp (prem e1) (prem 1))")
+          ( \err -> case err of
+              CertSlotMultiSlot (ArgId "a_plain_twin") (AST.BackendId "ord") 1 (AST.ArgRef "e1") 0 1 False -> True
+              _ -> False
+          )
+          [ "arg 'a_plain_twin'"
+          , "'e1'"
+          , "occupies premise slots 0 and 1"
+          , "cite a numeric slot"
+          ]
     , once $
         expectCertError
           (pairArg "(ordcmp (prem 007) (prem 1))")
@@ -905,8 +1040,8 @@ prop_inferredSpellingRejectsUnresolved = once $
     , "names neither a premise label of rule 'pair', a declared leaf, nor a prior argument"
     ]
 
--- | A schema-less backend is untouched by the pass even in an authored
--- program: @nd\@1@'s recursive proof terms reach the wire byte-identical.
+-- | A marker-free @nd\@1@ payload is untouched by named proof-term lowering;
+-- malformed kernel payloads remain the strict decoder's concern.
 prop_schemalessBackendUntouched :: Property
 prop_schemalessBackendUntouched = once $
   case unitOf decls of
@@ -914,11 +1049,11 @@ prop_schemalessBackendUntouched = once $
     Right unit ->
       counterexample (show (lookup (ArgId "a_nd") (unitArgs unit))) $
         (payloadOf =<< lookup (ArgId "a_nd") (unitArgs unit))
-          === Just (SList [SAtom "app", SList [SAtom "hyp", SAtom "e1"]])
+          === Just (SList [SAtom "app", SList [SAtom "hyp", SAtom "0"]])
   where
     decls =
       [ "arg a_nd : supports(c_paired) by pair(sys_a, 0.74)"
-      , "  assurance = cert(nd@1, sha256:cert-slots-theory-0, (app (hyp e1)))"
+      , "  assurance = cert(nd@1, sha256:cert-slots-theory-0, (app (hyp 0)))"
       ]
 
 -- ---------------------------------------------------------------------------
@@ -1403,9 +1538,9 @@ prop_ndE2EHypAccepts = once $
                   === [Published Gap, Published Gap, Published Justified]
             ]
 
--- | An adversarial @nd\@1@ payload — a spurious @(prem x)@ nested inside an
--- @app@ — reaches the wire byte-identical to its authored spelling, and its
--- verdict is the R13 the nd decoder always produced for it.
+-- | An adversarial marker-free @nd\@1@ payload reaches the wire byte-identical
+-- to its authored spelling, and its verdict is still the R13 the nd decoder
+-- owns. Named markers are now lowered or refused by the presentation pass.
 --
 -- Reachability boundary: no ACCEPTING @nd\@1@ fixture can carry the spurious
 -- node, because @nd\@1@'s closed decoder owns the whole payload and @prem@ is
@@ -1430,13 +1565,13 @@ prop_ndE2EAdversarialPayloadUntouched = once $
                 verdictOutcome verdict === Reject (RejectClass R13)
         ]
   where
-    payloadText = "(app (hyp 0) (prem x))"
+    payloadText = "(app (hyp 0) (hyp 0))"
     decls = ndE2EArg payloadText
     authored =
       SList
         [ SAtom "app"
         , SList [SAtom "hyp", SAtom "0"]
-        , SList [SAtom "prem", SAtom "x"]
+        , SList [SAtom "hyp", SAtom "0"]
         ]
 
 -- ---------------------------------------------------------------------------
@@ -1491,9 +1626,12 @@ prop_certSlotDiagnosticMessages = once $
     , counterexample "not-a-premise wording drifted" $
         elabErrorMessage (CertSlotNotAPremise (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "e4"))
           === "arg 'a1': certificate 'ord@1' premise reference 'e4' does not resolve to any of this argument's premise slots"
-    , counterexample "multi-slot wording drifted" $
-        elabErrorMessage (CertSlotMultiSlot (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "e4") 0 1)
-          === "arg 'a1': certificate 'ord@1' premise reference 'e4' occupies premise slots 0 and 1; cite a numeric slot"
+    , counterexample "labelled multi-slot wording drifted" $
+        certErrorMessage (twinArg "(ordcmp (prem e1) (prem 1))")
+          === Right "arg 'a_twin': certificate 'ord@1' premise reference 'e1' occupies premise slots 0 and 1; cite a numeric slot or the rule's premise label for the slot you mean"
+    , counterexample "unlabelled multi-slot wording drifted" $
+        certErrorMessage (plainTwinArg "(ordcmp (prem e1) (prem 1))")
+          === Right "arg 'a_plain_twin': certificate 'ord@1' premise reference 'e1' occupies premise slots 0 and 1; cite a numeric slot"
     , counterexample "non-canonical-numeral wording drifted" $
         elabErrorMessage (CertSlotNonCanonicalNumeral (ArgId "a1") (AST.BackendId "ord") 1 (AST.ArgRef "007"))
           === "arg 'a1': certificate 'ord@1' premise reference '007' is not a canonical slot numeral (use unsigned decimal with no leading zeros); write the canonical numeral or a source name"
@@ -1525,6 +1663,9 @@ certSlotsSpecProps =
   , ("a prior-argument citation lowers in both spellings", quickCheckResult prop_priorArgumentCitationBothSpellings)
   , ("a premise-label citation elaborates to the numeric twin's Unit", quickCheckResult prop_labelCitationLowersToNumericTwin)
   , ("labels cite the two slots one leaf fills, where the leaf name cannot", quickCheckResult prop_labelResolvesMultiSlot)
+  , ("partial premise labels do not advertise an unavailable multi-slot repair", quickCheckResult prop_partialLabelsDoNotAdvertiseUnavailableRepair)
+  , ("all matching slots need labels before multi-slot label repair is advertised", quickCheckResult prop_allMatchingSlotsNeedLabels)
+  , ("shadowed premise labels do not advertise an unavailable repair", quickCheckResult prop_shadowedLabelDoesNotAdvertiseUnavailableRepair)
   , ("a label colliding with a declared leaf is a hard error", quickCheckResult prop_labelLeafCollisionIsHardError)
   , ("a label colliding with a prior argument is a hard error", quickCheckResult prop_labelPriorArgumentCollisionIsHardError)
   , ("a label whose slot the authored premise list lacks is refused", quickCheckResult prop_labelSlotOutsideAuthoredPremises)
@@ -1532,7 +1673,7 @@ certSlotsSpecProps =
   , ("an unlabelled rule resolves exactly as it did at @0.6", quickCheckResult prop_unlabelledRuleResolvesAsBefore)
   , ("certificate slot failures are fail-closed and located", quickCheckResult prop_certSlotFailureMatrix)
   , ("the inferred spelling rejects an unresolved slot name", quickCheckResult prop_inferredSpellingRejectsUnresolved)
-  , ("a schema-less backend's authored payload is untouched", quickCheckResult prop_schemalessBackendUntouched)
+  , ("a marker-free nd@1 payload is untouched", quickCheckResult prop_schemalessBackendUntouched)
   , ("a nested instance's certificate lowers against its own premises", quickCheckResult prop_lowersNestedCertificate)
   , ("premise labels are scoped to the citing instance's own rule", quickCheckResult prop_nestedCertificateLabelScope)
   , ("both prior-argument premise representations resolve", quickCheckResult prop_priorArgumentPremiseSpellingsAgree)
@@ -1543,6 +1684,6 @@ certSlotsSpecProps =
   , ("ra@1 end-to-end twins produce byte-identical accept verdicts", quickCheckResult prop_raE2EVerdictIdentity)
   , ("the lowered unit replays; a tampered payload byte rejects R13", quickCheckResult prop_e2eReplayAndTamper)
   , ("nd@1 end-to-end: the (hyp 0) certificate still accepts", quickCheckResult prop_ndE2EHypAccepts)
-  , ("nd@1 adversarial payload reaches the wire untouched and rejects R13", quickCheckResult prop_ndE2EAdversarialPayloadUntouched)
+  , ("nd@1 marker-free adversarial payload reaches the wire untouched and rejects R13", quickCheckResult prop_ndE2EAdversarialPayloadUntouched)
   , ("the authored symbolic spelling survives the printer round-trip", quickCheckResult prop_symbolicSpellingPrintRoundTrips)
   ]

@@ -416,3 +416,10 @@ sessions:
   events_count: 8
   claims_touched: [C31]
   open_threads: 6
+- id: 2026-08-22_001
+  date: '2026-08-22'
+  summary: 'Executed lara-syntax@0.9 named nd@1 proof terms (#132), mechanized conservativity and translation, added byte-identical S8, corrected #140 candidate-scoped label advice in final review, passed all release gates, and opened PR #145; #144 remains the formula-annotation follow-up.'
+  turn_count: 1
+  events_count: 7
+  claims_touched: []
+  open_threads: 2

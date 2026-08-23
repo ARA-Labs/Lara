@@ -42,6 +42,10 @@
 --     declared premise LABELS rather than the source names of the terms
 --     filling the slots, including the case only labels can express — one
 --     leaf filling both slots of a two-premise rule.
+--   * __S8__ @strict-binder@ — 'Accept'; a named @nd\@1@ binder contains a
+--     named premise citation, so the same source name lowers to different
+--     de Bruijn indices inside and outside the binder while retaining its one
+--     free premise dependency.
 --   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
 --     a same-atom contrary pair contested via a rebut 2-cycle, and a
 --     setting-index-mismatch pair left justified (zero attacks).
@@ -54,6 +58,7 @@ module WorkedExamplesSpec (workedExamplesSpecProps) where
 import Test.QuickCheck
 
 import Data.List (sort)
+import qualified Data.Set as Set
 
 import Lara.AST
   ( Attack (..)
@@ -104,6 +109,8 @@ import Lara.Replay
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Strict (SExpr (..))
+import qualified Lara.Strict as Strict
+import qualified Lara.Strict.ND as ND
 import Lara.Wire (PublicStatus (..), conditionalStatus, Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
 import Lara.WorkedExamples (workedExamples)
 import SigmaFixture (sigmaOf)
@@ -479,6 +486,66 @@ prop_S7 = once $ ioProperty $
                     , (numRelP "num_le" "0.71" "0.71", Published Justified)
                     ]
           ]
+
+-- | S8 (@lara-syntax\@0.9): one named @nd\@1@ binder and the same named
+-- premise on both sides of an application.  The inner occurrence is under one
+-- binder and therefore lowers to @(hyp 1)@, while the outer occurrence lowers
+-- to @(hyp 0)@.  Replaying the lowered redex must retain exactly premise slot
+-- zero as its dependency; the binder-local hypothesis is not a source
+-- dependency.
+prop_S8 :: Property
+prop_S8 = once $ ioProperty $ do
+  prog <- loadProgram "examples/S8/example.lara"
+  pol <- loadPolicy "examples/S8/strict-v1.policy.lara"
+  let expectedPayload =
+        SList
+          [ SAtom (ND.tagToString ND.TApp)
+          , SList
+              [ SAtom (ND.tagToString ND.TLam)
+              , SList [SAtom (ND.tagToString ND.TAtom), SAtom "1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0"]
+              , SList [SAtom (ND.tagToString ND.THyp), SAtom "1"]
+              ]
+          , SList [SAtom (ND.tagToString ND.THyp), SAtom "0"]
+          ]
+      loweredAndDependent =
+        case elaborate (registryOf pol) prog pol of
+          Left err -> counterexample ("S8: elaborate failed " ++ elabErrorMessage err) False
+          Right unit ->
+            case unitArgs unit of
+              [(ArgId "a1", SRule {srAssurance = AssuranceCert cert})] ->
+                conjoin
+                  [ counterexample "S8 lowers named binder/premises to the numeric twin payload" $
+                      certPayload cert === expectedPayload
+                  , case
+                      Strict.strictCheck
+                        (Strict.mkRegistry [ND.mkNDBackend [(Strict.TheoryDigest "sha256:strict-v1-theory-0", [])]])
+                        ND.ndBackendId
+                        (Strict.TheoryDigest "sha256:strict-v1-theory-0")
+                        [holdsP "safety_invariant" "D"]
+                        (holdsP "safety_invariant" "D")
+                        (certPayload cert) of
+                      Right judgment ->
+                        counterexample "S8 replay depends only on its free premise slot" $
+                          Strict.sjDependencies judgment === Set.singleton (Strict.PremiseSlot 0)
+                      Left err -> counterexample ("S8: numeric-twin replay rejected " ++ show err) False
+                  ]
+              args -> counterexample ("S8: expected one certified a1, got " ++ show args) False
+  semantic <- runExample "examples/S8" "strict-v1.policy.lara" $ \verdict ->
+    case verdictOutcome verdict of
+      Reject rejection -> counterexample ("S8: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S8 labels: the strict nd@1 redex argument is in" $
+              verdictLabels outcome === [(0, LIn)]
+          , counterexample "S8 status: holds(safety_invariant, D) is justified" $
+              verdictStatuses outcome
+                === [(holdsP "safety_invariant" "D", Published Justified)]
+          ]
+  pure $
+    conjoin
+      [ loweredAndDependent
+      , semantic
+      ]
 
 -- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
 -- grain. The genuine-disagreement pair (P1) shares the SAME (S,B,Q,D) atoms, so
@@ -932,6 +999,7 @@ workedExamplesSpecProps =
   , ("S5 lower-is-better → flipped goal num_lt(28.4, 31.6), accepted by ord@1, better justified", quickCheckResult prop_S5)
   , ("S6 named cert slots → lowered (prem 0)/(prem 1) replayed by ord@1, num_lt justified", quickCheckResult prop_S6)
   , ("S7 premise-label cert slots → the same lowered payload, incl. one leaf filling both slots", quickCheckResult prop_S7)
+  , ("S8 named nd@1 binder/premises → numeric redex, slot 0 dependency, justified", quickCheckResult prop_S8)
   , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
   , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
   , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)

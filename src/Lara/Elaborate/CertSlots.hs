@@ -63,8 +63,9 @@ data SlotRefError
     SlotNameLabelAmbiguous
   | -- | the name resolves, but not to a premise of this instance
     SlotNameNotAPremise
-  | -- | the named premise occupies two slots (the two 0-based witnesses)
-    SlotNameMultiSlot Int Int
+  | -- | the named premise occupies multiple slots: the first two 0-based
+    -- witnesses, plus whether every matching slot has a premise label.
+    SlotNameMultiSlot Int Int Bool
   | -- | atom cannot be a source name but is not a canonical numeral
     SlotNonCanonicalNumeral
   | -- | symbolic name in a schema-mismatched payload

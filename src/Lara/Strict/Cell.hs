@@ -104,8 +104,9 @@ decodeSlot backend e =
 -- application of fixed arity with references at fixed argument positions).
 -- A backend whose payload is not of this shape — nd\@1's recursive de Bruijn
 -- proof terms, whose @hyp@ indices shift under binders and conflate premise
--- and theory slots by offset — simply exports no schema, and its payloads
--- pass through the presentation lowering byte-identical.
+-- and theory slots by offset — simply exports no flat schema. Marker-free
+-- @nd\@1@ payloads pass through byte-identically, while its separate
+-- marker-selected named-proof-term pass owns recursive lowering.
 data SlotSchema = SlotSchema
   { ssBackend :: BackendId -- ^ which registered backend this schema presents
   , ssHead :: String -- ^ payload head keyword, from the backend's tag table

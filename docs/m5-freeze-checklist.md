@@ -162,6 +162,21 @@ and 60/60 replay stand as measured. One gate count moves: the differential row
 rose **581 → 582** (+1 S7 anchor, the same `+1` bookkeeping S6 produced).
 `admission 20/20` and `presentation-parity 73 rows` are unchanged._
 
+_**Post-`lara-syntax@0.9` movement, still `m5-freeze-v4` (named `nd@1` proof
+terms, 2026-08-22).** `lara-syntax@0.9` (grammar Appendix H) adds named binders,
+premise references, and numeric theory references inside the existing opaque
+`nd@1` certificate payload. Elaboration lowers them to the unchanged de Bruijn
+kernel image. There is no `lara-core`, AST, wire, checker, replay, corpus, mutant,
+or frozen-measurement change, and no source migration.
+
+Worked example **S8** is the additive byte-identity witness: its named redex
+lowers to its numeric twin's exact `.core.sexp`. The worked-example freshness
+tests re-prove that equality. Fresh verification measured differential
+**583 pass / 0 fail** (+1 S8 anchor), presentation parity **73 rows**, and mutant
+regeneration **504 verified mutants with an empty tracked diff**. The measured
+564/564 class match, 564/564 `lean_agree`, and 60/60 replay numbers therefore
+remain the numbers of record; no measurement re-run or freeze-tag bump is owed._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,
