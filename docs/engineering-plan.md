@@ -11,17 +11,22 @@ contract every module implements._
 **Surface update (2026-08-22):** `lara-syntax@0.9` adds named `nd@1` proof
 terms as a presentation-only lowering to the unchanged de Bruijn kernel;
 Appendix H and the S8 worked example are the durable specification and witness.
+**Surface update (2026-08-23):** `lara-syntax@0.10` adds source-authored
+`nd@1` formula annotations — `(prop TEXT)` lowered through the shared
+`encodeAtomKey ∘ nf` path — closing #144; Appendix I and the rewritten S8 are
+the durable specification and witness.
 
 **M5 update (2026-08-19): M1–M5 are closed and the build order below is fully
 implemented.** Since the M3 note, the core moved to **`lara-core@0.2`** (a
 declared many-sorted signature carried in `Unit` and enforced in `checkUnit`
 stage 2, making R2 a real rejection class — `spec.md` §3.4), the authoring
-surface reached **`lara-syntax@0.9`** (`docs/lara-surface-grammar.md`
-Appendices A–H; `@0.7` is the surface-strictness release — it removes three
+surface reached **`lara-syntax@0.10`** (`docs/lara-surface-grammar.md`
+Appendices A–I; `@0.7` is the surface-strictness release — it removes three
 spellings and adds none — and `@0.8` lets a certificate premise reference cite
 the citing rule's declared premise label, so the core and the wire are
 untouched; `@0.9` adds named `nd@1` proof terms lowered to the same de Bruijn
-kernel, again without a core or wire change), and the deterministic evaluation corpus froze at tag
+kernel and `@0.10` adds source-authored formula annotations for them, again
+without a core or wire change), and the deterministic evaluation corpus froze at tag
 `m5-freeze-v4` (`m5-freeze-checklist.md`). Layers added beyond the M3 spine:
 `Lara.Admission` (the `.lara` source-boundary admission judgment,
 `policy-admission-calculus-decision.md`), the `ord@1` and `ra@1` strict backends

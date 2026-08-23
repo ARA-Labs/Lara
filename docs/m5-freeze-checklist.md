@@ -177,6 +177,18 @@ regeneration **504 verified mutants with an empty tracked diff**. The measured
 564/564 class match, 564/564 `lean_agree`, and 60/60 replay numbers therefore
 remain the numbers of record; no measurement re-run or freeze-tag bump is owed._
 
+_**Post-`lara-syntax@0.10` movement, still `m5-freeze-v4` (source-authored
+`nd@1` formula annotations, 2026-08-23).** `lara-syntax@0.10` (grammar
+Appendix I, closing #144) adds the `(prop TEXT)` presentation formula, lowered
+during elaboration through the shared `encodeAtomKey ∘ nf` path to the frozen
+`(atom KEY)` node. There is again no `lara-core`, AST, wire, checker, replay,
+corpus, mutant, or frozen-measurement change, and no source migration. Worked
+example **S8** was rewritten to the authored spelling; its committed
+`.core.sexp` and `expected.json` are byte-unchanged, so it remains the same
+differential anchor and the worked-example freshness tests re-prove the
+byte-identity. All gate counts and the numbers of record are unchanged; no
+measurement re-run or freeze-tag bump is owed._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,

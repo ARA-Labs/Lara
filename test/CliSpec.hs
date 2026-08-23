@@ -518,6 +518,12 @@ prop_cliLaraNdNamedDiagnostics = once $ ioProperty $ do
       , ( "(foo (prem e1))"
         , "arg 'a1': certificate 'nd@1' named spelling 'e1' sits where the nd@1 grammar gives it no meaning"
         )
+      , ( "(lam h (prop \"holds(\") (prem e1))"
+        , "arg 'a1': certificate 'nd@1' formula annotation 'holds(' is not a source proposition"
+        )
+      , ( "(app (prop \"holds(safety_invariant, D)\") (prem e1))"
+        , "arg 'a1': certificate 'nd@1' named spelling 'holds(safety_invariant, D)' sits where the nd@1 grammar gives it no meaning"
+        )
       ]
 
 replaceFirstCli :: String -> String -> String -> String

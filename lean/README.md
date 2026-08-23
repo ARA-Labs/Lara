@@ -89,15 +89,18 @@ source of the 76/760 counts unless its own dated snapshot says so.
   without re-proof — the argument of grammar Appendix G.6, and the reason
   `@0.8` owed no Lean edit. The Haskell elaborator's name resolution and
   `CertSlot*` error taxonomy stay validated-not-verified.
-- `Lara/NDNamed.lean` is the `lara-syntax@0.9` named-`nd@1` lowering mirror
-  (#132), also outside the numbered spec results. It proves
+- `Lara/NDNamed.lean` is the `lara-syntax@0.9`/`@0.10` named-`nd@1` lowering
+  mirror (#132, #144), also outside the numbered spec results. It proves
   `lowerNamed_id_of_kernel` (encoded kernel certificates take the marker-free
-  identity arm) and `lowerNamed_eq_translation` (well-formed named terms lower
-  to the independent de Bruijn translation), with 12 executable `#guard`
-  vectors. The classifier and premise resolver are abstract parameters. Thus
-  the mathematics is mechanized, while the Haskell traversal, classifier,
-  resolver, execution, and `CertNd*` error taxonomy remain
-  validated-not-verified.
+  identity arm), `lowerFormula_eq_translation` (well-formed `(prop TEXT)`
+  formula annotations lower to exactly the kernel wire image of the abstract
+  proposition encoder's output), and `lowerNamed_eq_translation` (well-formed
+  named terms lower to the independent de Bruijn translation), with 19
+  executable `#guard` vectors. The classifier, premise resolver, and
+  proposition encoder are abstract parameters. Thus the mathematics is
+  mechanized, while the Haskell traversal, classifier, resolver, surface
+  proposition parser/`encodeAtomKey` composition, execution, and `CertNd*`
+  error taxonomy remain validated-not-verified.
 - The proposition type is `Atom` (Lean reserves `Prop` for its sort of props).
 - A constructor's argument list is a bespoke `Terms` type mutual with `Term`
   (Lean's `deriving DecidableEq` doesn't recurse through `List`, but handles

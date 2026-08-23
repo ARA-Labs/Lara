@@ -5380,3 +5380,64 @@ tree:
   supports: []
   also_depends_on: [N205, N206]
   status: resolved
+
+- id: N208
+  type: decision
+  title: "lara-syntax@0.10 formula spelling: embed the surface prop production as a quoted atom under a new prop marker"
+  provenance: ai-suggested
+  timestamp: "2026-08-23T12:14"
+  choice: >
+    Author nd@1 formula annotations as `(prop TEXT)` where TEXT is one
+    S-expression atom (in practice a quoted string) whose decoded string is a
+    complete surface `prop` production, parsed by the same newly-exported
+    `Lara.Syntax.parseProp` the formal/leaf/theory lines use and lowered
+    through the shared `encodeAtomKey . nf` path to the frozen `(atom KEY)`
+    node. `prop` becomes the fifth D7 marker under the unchanged D9
+    whole-payload mode discipline; the residual scan and lowering traverse
+    `imp` formula positions; the CertNd* family grows to nine with
+    CertNdFormulaMalformed. Coverage is exactly the propositions the surface
+    can already declare (the surface term grammar has no string literals).
+  alternatives:
+    - "A second S-expression-structural prop grammar ((prop PRED (con ...) ...)) — rejected: it mints a parallel concrete spelling for propositions, violating the one-parse/one-print-table discipline and requiring a separate agreement proof with the surface grammar"
+    - "A citing form referencing a premise's proposition by name ((of e1)) — deferred: adds a fourth name class for a value the authored spelling now expresses readably"
+    - "Widening the frozen nd@1 kernel formula grammar — rejected outright: the kernel, wire, and replay are frozen"
+  evidence:
+    - "docs/lara-surface-grammar.md Appendix I"
+    - "src/Lara/Elaborate/NDNamed.hs lowerFormula"
+    - "issue #144"
+  also_depends_on: [N203, N204, N207]
+  status: resolved
+
+- id: N209
+  type: experiment
+  title: "The lara-syntax@0.10 release closes #144 with byte-identical S8 goldens and all gates green"
+  provenance: ai-executed
+  timestamp: "2026-08-23T12:14"
+  result: >
+    The authored spelling lowers to the backend encoder's exact bytes:
+    prop_sourceFormulaMatchesEncoder pins random printProp-authored
+    propositions against encode_ND itself and prop_parsePropRoundTrip pins
+    parseProp . printProp; 12 new lowering vectors and two exact CLI
+    diagnostics cover the success, malformed, residual, and inert-junk
+    boundary shapes. S8 was rewritten to
+    (app (lam h (prop "holds(safety_invariant, D)") (prem e1)) (prem e1))
+    with its committed .core.sexp and expected.json byte-unchanged, retiring
+    the out-of-band key-generation command from its provenance. The Lean
+    mirror abstracts encodeProp : String -> Option String and proves the new
+    named theorem lowerFormula_eq_translation beside the two Appendix H
+    theorems (statements gain the parameter; the formula extension itself
+    required restating NCert/WellFormed over an NFormula type), with 19
+    executable guards; the axiom audit stays sorry-free in the standard trio.
+    Fresh verification: full Haskell suite PASS (53 named-ND tests),
+    differential 583/0 with 56/0 negatives, presentation parity 73 rows,
+    504-mutant byte-identical regeneration; m5-freeze-v4 stands with no core,
+    wire, checker, replay, or corpus change. PR #147 is open and closes #144
+    on merge.
+  evidence:
+    - "commit ddb39b6"
+    - "PR #147"
+    - "docs/lara-surface-grammar.md Appendix I"
+    - "lean/Lara/NDNamed.lean lowerFormula_eq_translation"
+  supports: []
+  also_depends_on: [N208]
+  status: resolved

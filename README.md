@@ -145,10 +145,12 @@ claim — and survives while the claim it serves is defeated — see
 
 Since `lara-syntax@0.9`, an `nd@1` certificate may also use named binders and
 premise references while retaining the numeric de Bruijn kernel
-([grammar Appendix H](docs/lara-surface-grammar.md));
-[`examples/S8/`](examples/S8/) is the byte-identity witness. Formula annotations
-remain `(atom KEY)` and source-proposition-to-key authoring is tracked by
-[#144](https://github.com/ARA-Labs/lara/issues/144).
+([grammar Appendix H](docs/lara-surface-grammar.md)), and since
+`lara-syntax@0.10` its formula annotations may be authored as source
+propositions — `(prop "holds(safety_invariant, D)")` — which the elaborator
+lowers to the frozen `(atom KEY)` encoding (grammar Appendix I, closing
+[#144](https://github.com/ARA-Labs/lara/issues/144));
+[`examples/S8/`](examples/S8/) is the byte-identity witness.
 
 More worked examples, each a self-contained directory with its surface
 artifact, co-located policy, derived wire anchor, and expected verdict, are
@@ -183,7 +185,7 @@ CI runs both, including the `AxCheck.lean` axiom audit, on every push.
 | Document | What it covers |
 | --- | --- |
 | [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen at M1; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
-| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.9`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, and named `nd@1` proof terms |
+| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.10`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, and source-authored `nd@1` formula annotations |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work LARA builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |

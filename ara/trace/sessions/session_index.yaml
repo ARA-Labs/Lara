@@ -423,3 +423,10 @@ sessions:
   events_count: 7
   claims_touched: []
   open_threads: 2
+- id: 2026-08-23_001
+  date: '2026-08-23'
+  summary: 'Executed lara-syntax@0.10 source-authored nd@1 formula annotations (#144): (prop TEXT) reuses the surface prop production and lowers via encodeAtomKey . nf; S8 goldens byte-unchanged; Lean lowerFormula_eq_translation added; all gates green; PR #147 opened.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: []
+  open_threads: 3

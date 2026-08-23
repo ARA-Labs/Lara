@@ -642,6 +642,7 @@ ndNamedError aid rid cert name err = case err of
   NamedMalformedBinder -> CertNdMalformedBinder aid backend version ref
   NamedNonCanonicalIndex -> CertNdNonCanonicalIndex aid backend version ref
   NamedKernelIndex -> CertNdKernelIndex aid backend version ref
+  NamedFormulaMalformed -> CertNdFormulaMalformed aid backend version ref
   NamedResidual -> CertNdResidualNamed aid backend version ref
   where
     backend = certBackend cert

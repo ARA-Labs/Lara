@@ -42,10 +42,10 @@
 --     declared premise LABELS rather than the source names of the terms
 --     filling the slots, including the case only labels can express — one
 --     leaf filling both slots of a two-premise rule.
---   * __S8__ @strict-binder@ — 'Accept'; a named @nd\@1@ binder contains a
---     named premise citation, so the same source name lowers to different
---     de Bruijn indices inside and outside the binder while retaining its one
---     free premise dependency.
+--   * __S8__ @strict-binder@ — 'Accept'; a named @nd\@1@ binder carries a
+--     source-authored formula annotation and a named premise citation, so the
+--     same source name lowers to different de Bruijn indices inside and
+--     outside the binder while retaining its one free premise dependency.
 --   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
 --     a same-atom contrary pair contested via a rebut 2-cycle, and a
 --     setting-index-mismatch pair left justified (zero attacks).
@@ -487,12 +487,14 @@ prop_S7 = once $ ioProperty $
                     ]
           ]
 
--- | S8 (@lara-syntax\@0.9): one named @nd\@1@ binder and the same named
--- premise on both sides of an application.  The inner occurrence is under one
--- binder and therefore lowers to @(hyp 1)@, while the outer occurrence lowers
--- to @(hyp 0)@.  Replaying the lowered redex must retain exactly premise slot
--- zero as its dependency; the binder-local hypothesis is not a source
--- dependency.
+-- | S8 (@lara-syntax\@0.10): one named @nd\@1@ binder and the same named
+-- premise on both sides of an application, with the binder's formula authored
+-- as a source proposition @(prop \"holds(safety_invariant, D)\")@ that must
+-- lower to the numeric twin's opaque atom key.  The inner premise occurrence
+-- is under one binder and therefore lowers to @(hyp 1)@, while the outer
+-- occurrence lowers to @(hyp 0)@.  Replaying the lowered redex must retain
+-- exactly premise slot zero as its dependency; the binder-local hypothesis is
+-- not a source dependency.
 prop_S8 :: Property
 prop_S8 = once $ ioProperty $ do
   prog <- loadProgram "examples/S8/example.lara"

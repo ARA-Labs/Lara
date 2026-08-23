@@ -2,9 +2,10 @@
 -- Currently mechanized:
 --   * the frozen nf/≡ carve-out (spec §9 result 11 / claim C01)  — Lara.Prop
 --   * the presentation-AST codec round-trip (spec §9 result 12): the complete
---     live presentation Program/Policy shape at lara-syntax@0.9 — every field of
---     both top-levels, value bindings, inferred argument instantiations, and
---     policySigma included — serializes to a structured
+--     live presentation Program/Policy shape at lara-syntax@0.10 — every field
+--     of both top-levels, value bindings, inferred argument instantiations, and
+--     policySigma included; @0.9/@0.10 lower named nd@1 payload atoms without
+--     changing the presentation AST — serializes to a structured
 --     S-expression and parses back exactly (parse ∘ print = id) — a metatheory
 --     anchor for the AST shape, NOT a proof of the concrete-syntax Haskell
 --     parser — Lara.Presentation
@@ -75,10 +76,12 @@
 --     (dead-wire arm included) and agreement with the declarative positional
 --     substitution SymNumericSubst; the Haskell elaborator's name resolution
 --     and error taxonomy stay validated-not-verified — Lara.CertSlots
---   * named nd@1 proof terms (lara-syntax@0.9, #132): marker-selected lowering
---     of named binders, premise references, and theory references to the
---     frozen de Bruijn kernel image; conservativity for kernel certificates
---     and structural agreement with an independent named-term translation —
+--   * named nd@1 proof terms (lara-syntax@0.9, #132; source-authored formula
+--     annotations lara-syntax@0.10, #144): marker-selected lowering of named
+--     binders, premise references, theory references, and (prop TEXT) formula
+--     annotations to the frozen de Bruijn kernel image; conservativity for
+--     kernel certificates and structural agreement with an independent
+--     named-term translation over an abstract proposition encoder —
 --     Lara.NDNamed
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop

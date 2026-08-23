@@ -354,10 +354,11 @@ workedExampleGoldens =
         ++ " (statuses (status (atom num_lt (num 0.71) (num 0.74)) justified)"
         ++ " (status (atom num_le (num 0.71) (num 0.71)) justified)))"
     )
-  , -- S8: named @nd\@1@ binder/premise syntax (lara-syntax@0.9).  The
-    -- artifact's beta-redex names the same source premise at depths one and
-    -- zero; its golden carries the numeric `(hyp 1)` / `(hyp 0)` twin that the
-    -- backend replays, byte-identical to the named source's lowering.
+  , -- S8: named @nd\@1@ binder/premise/formula syntax (lara-syntax@0.10).
+    -- The artifact's beta-redex names the same source premise at depths one
+    -- and zero and authors its formula annotation as a source proposition;
+    -- its golden carries the numeric `(hyp 1)` / `(hyp 0)` twin with the
+    -- opaque atom key, byte-identical to the named source's lowering.
     ( "examples/S8/example.core.sexp"
     , "(verdict accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom holds (con safety_invariant) (con D)) justified)))"

@@ -1,31 +1,26 @@
-# S8 — named nd@1 binder/premise worked example (lara-syntax@0.9)
+# S8 — named nd@1 binder/premise worked example (lara-syntax@0.10)
 #
 # This is S1's strict step with a deliberately inert beta-redex around its
 # single premise citation. The named payload is:
 #
-#   (app (lam h (atom 1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0) (prem e1)) (prem e1))
+#   (app (lam h (prop "holds(safety_invariant, D)") (prem e1)) (prem e1))
 #
-# The opaque atom key was produced with this self-contained checked command;
-# zsh's @=(...)@ materializes the complete temporary Haskell source for
-# @runghc@, so no untracked helper remains:
+# Every spelling in it is source-level: the binder and premise are cited by
+# name (lara-syntax@0.9), and the formula annotation is the surface prop
+# production itself (lara-syntax@0.10, #144), which the elaborator lowers
+# through the shared normalization/encodeAtomKey path to the frozen nd@1
+# grammar's opaque `(atom KEY)` wrapper. No out-of-band key-generation
+# command is needed anymore.
 #
-#   cabal exec -- runghc --ghc-arg=-isrc =(printf '%s\n' \
-#     'import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))' \
-#     'import Lara.Strict.ND (encodeAtomKey)' \
-#     'main :: IO ()' \
-#     'main = putStrLn (encodeAtomKey (Prop (Pred "holds") [TCon (FunSym "safety_invariant") [], TCon (FunSym "D") []]))')
-#
-# The frozen @nd\@1@ formula grammar requires the atom wrapper shown above.
-# Section 2.2's bare-key placeholder was corrected here rather than changing
-# that kernel grammar. The detour exists only to exercise binder-depth shifting; it adds no
+# The detour exists only to exercise binder-depth shifting; it adds no
 # source-level logical strength. The two `prem e1` occurrences name the same
 # source premise, but the inner one at depth 1 lowers to `(hyp 1)` and the
-# outer one at depth 0 lowers to `(hyp 0)`. The opaque formula key remains the
-# certificate surface's hand-hostile spot; issue #144 tracks source-level
-# formula annotation authoring.
+# outer one at depth 0 lowers to `(hyp 0)`.
 #
 # The committed goldens were generated from, and byte-compared with, the
-# numeric twin `(app (lam (atom 1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0) (hyp 1)) (hyp 0))`.
+# numeric twin `(app (lam (atom 1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0) (hyp 1)) (hyp 0))`;
+# the @0.9 opaque-key spelling `(lam h (atom 1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0) ...)`
+# lowers to the same bytes and remains legal.
 
 artifact paper_42 at sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 policy strict-v1
@@ -42,7 +37,7 @@ leaf e1 : holds(safety_invariant, D)
   refs       = [evidence/safety_audit.txt#section=invariants]
 
 arg a1 : supports(c1) by certified_citation from [e1]
-  assurance = cert(nd@1, sha256:strict-v1-theory-0, (app (lam h (atom 1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0) (prem e1)) (prem e1)))
+  assurance = cert(nd@1, sha256:strict-v1-theory-0, (app (lam h (prop "holds(safety_invariant, D)") (prem e1)) (prem e1)))
 
 status c1
 

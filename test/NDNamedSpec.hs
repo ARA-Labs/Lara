@@ -29,12 +29,12 @@ import Lara.Elaborate.CertSlots (SlotRefError (..))
 import Lara.Elaborate.Internal (ElabError (..), elaborate, elabErrorMessage, registryOf)
 import Lara.Elaborate.NDNamed
   ( NamedRefError (..)
-  , NamedTag (NTThy)
+  , NamedTag (NTProp, NTThy)
   , firstNamedMarker
   , lowerNamedPayload
   , namedTagToString
   )
-import Lara.Prop (Pred (..), Prop (..))
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Replay
   ( CoreVersion (LaraCoreV02)
   , mkCheckInput
@@ -44,7 +44,7 @@ import qualified Lara.Strict as Strict
 import Lara.Strict (SExpr (..))
 import qualified Lara.Strict.Cell as Cell
 import qualified Lara.Strict.ND as ND
-import Lara.Syntax (parsePolicy, parseProgram, printProgram)
+import Lara.Syntax (parsePolicy, parseProgram, parseProp, printProgram, printProp)
 import Lara.Wire
   ( Outcome (..)
   , Verdict (..)
@@ -76,6 +76,18 @@ prem n = node (Cell.tagToString Cell.TPrem) [atom n]
 
 thy :: String -> SExpr
 thy n = node (namedTagToString NTThy) [atom n]
+
+propNode :: String -> SExpr
+propNode text = node (namedTagToString NTProp) [atom text]
+
+atomKey :: String -> SExpr
+atomKey key = node (ND.tagToString ND.TAtom) [atom key]
+
+abortN :: SExpr -> SExpr -> SExpr
+abortN f e = node (ND.tagToString ND.TAbort) [f, e]
+
+impN :: SExpr -> SExpr -> SExpr
+impN a b = node (ND.tagToString ND.TImp) [a, b]
 
 lam :: SExpr -> SExpr -> SExpr
 lam f e = node (ND.tagToString ND.TLam) [f, e]
@@ -192,6 +204,74 @@ vectors =
     , namedLam "h" (atom "<F>") (hyp "007")
     , Left ("007", NamedNonCanonicalIndex)
     )
+  , ( "source formula lowers in an anonymous binder"
+    , lam (propNode "p(a)") (prem "0")
+    , Right (lam (atomKey "1:A1:p1:L1:112:1:C1:a1:L1:0") (hyp "1"))
+    )
+  , ( "source formula lowers in a named binder"
+    , namedLam "h" (propNode "p(a)") (hyp "h")
+    , Right (lam (atomKey "1:A1:p1:L1:112:1:C1:a1:L1:0") (hyp "0"))
+    )
+  , ( "source formula lowers under abort"
+    , abortN (propNode "p") (prem "0")
+    , Right (abortN (atomKey "1:A1:p1:L1:0") (hyp "0"))
+    )
+  , ( "source formula normalizes its numeric literals"
+    , lam (propNode "q(007)") (prem "0")
+    , Right (lam (atomKey "1:A1:q1:L1:16:1:N1:7") (hyp "1"))
+    )
+  , ( "imp recursion reaches a nested source formula"
+    , lam (impN (propNode "p") (atom (ND.tagToString ND.TFalse))) (prem "0")
+    , Right (lam (impN (atomKey "1:A1:p1:L1:0") (atom (ND.tagToString ND.TFalse))) (hyp "1"))
+    )
+  , ( "source formula alone selects named mode"
+    , lam (propNode "p(a)") (hyp "0")
+    , Left ("0", NamedKernelIndex)
+    )
+  , ( "malformed source formula"
+    , lam (propNode "p(") (prem "0")
+    , Left ("p(", NamedFormulaMalformed)
+    )
+  , ( "trailing input after a source formula is malformed"
+    , lam (propNode "p(a) q") (prem "0")
+    , Left ("p(a) q", NamedFormulaMalformed)
+    )
+  , ( "hash comment after a source formula is malformed"
+    , lam (propNode "p # note") (prem "0")
+    , Left ("p # note", NamedFormulaMalformed)
+    )
+  , ( "hash comment cannot truncate a source formula"
+    , lam (propNode "holds#(a)") (prem "0")
+    , Left ("holds#(a)", NamedFormulaMalformed)
+    )
+  , ( "surrounding whitespace in a source formula is tolerated"
+    , lam (propNode " p(a) ") (prem "0")
+    , Right (lam (atomKey "1:A1:p1:L1:112:1:C1:a1:L1:0") (hyp "1"))
+    )
+  , ( "empty source formula is malformed"
+    , lam (propNode "") (prem "0")
+    , Left ("", NamedFormulaMalformed)
+    )
+  , ( "unicode source formula uses UTF-8 key lengths"
+    , lam (propNode "héld(é)") (prem "0")
+    , Right (lam (atomKey "1:A5:héld1:L1:113:1:C2:é1:L1:0") (hyp "1"))
+    )
+  , ( "source formula in certificate position is residual"
+    , app (propNode "p") (prem "0")
+    , Left ("p", NamedResidual)
+    )
+  , ( "source formula under unknown constructor is residual"
+    , node "foo" [propNode "p"]
+    , Left ("p", NamedResidual)
+    )
+  , ( "marker inside a non-atom prop payload is residual"
+    , lam (node (namedTagToString NTProp) [prem "a"]) (prem "0")
+    , Left ("a", NamedResidual)
+    )
+  , ( "three-field prop head is inert formula junk"
+    , lam (node (namedTagToString NTProp) [atom "p", atom "q"]) (prem "0")
+    , Right (lam (node (namedTagToString NTProp) [atom "p", atom "q"]) (hyp "1"))
+    )
   ]
 
 -- | Each fixed vector is registered separately, so the test runner reports
@@ -208,6 +288,10 @@ ndNamedSpecProps =
     ++
       [ ("named ND: parse/elaborate lowers S1 premise spelling", quickCheckResult prop_s1NamedPremiseTwin)
       , ("named ND: parse/elaborate lowers program-level binder vector", quickCheckResult prop_s1NamedBinderTwin)
+      , ("named ND: source formula spelling round-trips the surface prop grammar", quickCheckResult prop_parsePropRoundTrip)
+      , ("named ND: source formulas lower to the backend encoder's bytes", quickCheckResult prop_sourceFormulaMatchesEncoder)
+      , ("named ND: parse/elaborate lowers a source-formula binder to numeric bytes", quickCheckResult prop_s1SourceFormulaTwin)
+      , ("named ND: malformed source formula is located and exact", quickCheckResult prop_s1MalformedFormulaMessage)
       , ("named ND: theory references match the kernel free-context layout", quickCheckResult prop_theoryReferenceMatchesKernelLayout)
       , ("named ND: kernel payloads are marker-free and byte-identical", quickCheckResult prop_kernelPayloadConservative)
       , ("named ND: lowering agrees with an independent de Bruijn oracle", quickCheckResult prop_namedTranslationAgreesWithOracle)
@@ -304,13 +388,19 @@ data NamedPremRef
   | PremName String
   deriving (Eq, Show)
 
+data NamedFormula
+  = NamedKernelFormula ND.Formula
+  | NamedSourceFormula Prop
+  | NamedImpFormula NamedFormula NamedFormula
+  deriving (Eq, Show)
+
 data NamedTerm
   = NamedHyp String
   | NamedPrem NamedPremRef
   | NamedThy Integer
-  | NamedLam (Maybe String) ND.Formula NamedTerm
+  | NamedLam (Maybe String) NamedFormula NamedTerm
   | NamedApp NamedTerm NamedTerm
-  | NamedAbort ND.Formula NamedTerm
+  | NamedAbort NamedFormula NamedTerm
   deriving (Eq, Show)
 
 namedResolver :: [(String, Int)]
@@ -319,15 +409,21 @@ namedResolver = [("a", 0), ("b", 1), ("source", 2)]
 namedPremiseCount :: Int
 namedPremiseCount = 3
 
+renderNamedFormula :: NamedFormula -> SExpr
+renderNamedFormula (NamedKernelFormula formula) = formulaToSExpr formula
+renderNamedFormula (NamedSourceFormula proposition) = propNode (printProp proposition)
+renderNamedFormula (NamedImpFormula antecedent consequent) =
+  impN (renderNamedFormula antecedent) (renderNamedFormula consequent)
+
 renderNamedTerm :: NamedTerm -> SExpr
 renderNamedTerm (NamedHyp name) = hyp name
 renderNamedTerm (NamedPrem (PremNumber slot)) = prem (show slot)
 renderNamedTerm (NamedPrem (PremName name)) = prem name
 renderNamedTerm (NamedThy slot) = thy (show slot)
-renderNamedTerm (NamedLam Nothing formula body) = lam (formulaToSExpr formula) (renderNamedTerm body)
-renderNamedTerm (NamedLam (Just name) formula body) = namedLam name (formulaToSExpr formula) (renderNamedTerm body)
+renderNamedTerm (NamedLam Nothing formula body) = lam (renderNamedFormula formula) (renderNamedTerm body)
+renderNamedTerm (NamedLam (Just name) formula body) = namedLam name (renderNamedFormula formula) (renderNamedTerm body)
 renderNamedTerm (NamedApp fun argument) = app (renderNamedTerm fun) (renderNamedTerm argument)
-renderNamedTerm (NamedAbort formula body) = node (ND.tagToString ND.TAbort) [formulaToSExpr formula, renderNamedTerm body]
+renderNamedTerm (NamedAbort formula body) = node (ND.tagToString ND.TAbort) [renderNamedFormula formula, renderNamedTerm body]
 
 referenceIndex :: String -> [Maybe String] -> Maybe Integer
 referenceIndex wanted = go 0
@@ -337,6 +433,12 @@ referenceIndex wanted = go 0
     go index (Just name : rest)
       | wanted == name = Just index
       | otherwise = go (index + 1) rest
+
+lowerNamedFormula :: NamedFormula -> ND.Formula
+lowerNamedFormula (NamedKernelFormula formula) = formula
+lowerNamedFormula (NamedSourceFormula proposition) = ND.encodeND proposition
+lowerNamedFormula (NamedImpFormula antecedent consequent) =
+  ND.FImp (lowerNamedFormula antecedent) (lowerNamedFormula consequent)
 
 referenceLower :: [Maybe String] -> NamedTerm -> Either (String, NamedRefError) ND.Cert
 referenceLower binders = go binders
@@ -359,13 +461,28 @@ referenceLower binders = go binders
           | Just _ <- referenceIndex name scope -> Left (name, NamedBinderShadowed)
           | Just _ <- lookup name namedResolver -> Left (name, NamedBinderShadowsPremise)
         _ -> Right ()
-      ND.Lam formula <$> go (binder : scope) body
+      ND.Lam (lowerNamedFormula formula) <$> go (binder : scope) body
     go scope (NamedApp fun argument) = ND.App <$> go scope fun <*> go scope argument
-    go scope (NamedAbort formula body) = ND.Abort formula <$> go scope body
+    go scope (NamedAbort formula body) = ND.Abort (lowerNamedFormula formula) <$> go scope body
 
--- The formula generator is shared with the kernel generator, while the term
--- generator chooses only references that its supplied scope can resolve.
--- Thus it does not discard malformed samples to obtain well-scoped terms.
+-- The formula generator includes source annotations at arbitrary implication
+-- depth, while the term generator chooses only references that its supplied
+-- scope can resolve. Thus it does not discard malformed samples to obtain
+-- well-scoped terms.
+genNamedFormula :: Int -> Gen NamedFormula
+genNamedFormula n
+  | n <= 0 =
+      frequency
+        [ (3, NamedKernelFormula <$> genKernelFormula 0)
+        , (1, NamedSourceFormula <$> resize 0 genSourceProp)
+        ]
+  | otherwise =
+      frequency
+        [ (3, NamedKernelFormula <$> genKernelFormula n)
+        , (2, NamedSourceFormula <$> resize n genSourceProp)
+        , (3, NamedImpFormula <$> genNamedFormula (n `div` 2) <*> genNamedFormula (n `div` 2))
+        ]
+
 genWellScopedNamedTerm :: Gen NamedTerm
 genWellScopedNamedTerm = sized (go [])
   where
@@ -374,10 +491,10 @@ genWellScopedNamedTerm = sized (go [])
       | otherwise =
           frequency
             [ (4, genLeaf scope)
-            , (2, NamedLam Nothing <$> genKernelFormula (n `div` 3) <*> go (Nothing : scope) (n - 1))
+            , (2, NamedLam Nothing <$> genNamedFormula (n `div` 3) <*> go (Nothing : scope) (n - 1))
             , (3, namedBinder scope n)
             , (2, NamedApp <$> go scope (n `div` 2) <*> go scope (n `div` 2))
-            , (2, NamedAbort <$> genKernelFormula (n `div` 3) <*> go scope (n - 1))
+            , (2, NamedAbort <$> genNamedFormula (n `div` 3) <*> go scope (n - 1))
             ]
 
     genLeaf scope =
@@ -392,7 +509,7 @@ genWellScopedNamedTerm = sized (go [])
 
     namedBinder scope n = do
       let name = "v" ++ show (length scope)
-      NamedLam (Just name) <$> genKernelFormula (n `div` 3) <*> go (Just name : scope) (n - 1)
+      NamedLam (Just name) <$> genNamedFormula (n `div` 3) <*> go (Just name : scope) (n - 1)
 
 prop_namedTranslationAgreesWithOracle :: Property
 prop_namedTranslationAgreesWithOracle =
@@ -412,8 +529,8 @@ genIllScopedTerm =
   oneof
     [ NamedHyp <$> elements ["missing", "unbound", "z"]
     , do
-        formula <- genKernelFormula 2
-        bodyFormula <- genKernelFormula 1
+        formula <- genNamedFormula 2
+        bodyFormula <- genNamedFormula 1
         name <- elements ["h", "x", "v"]
         pure (NamedLam (Just name) formula (NamedLam (Just name) bodyFormula (NamedHyp name)))
     ]
@@ -441,9 +558,54 @@ renameOuterBinderToPremise term = term
 
 genNamedLam :: Gen NamedTerm
 genNamedLam = sized $ \n -> do
-  formula <- genKernelFormula (n `div` 3)
+  formula <- genNamedFormula (n `div` 3)
   body <- resize (max 0 (n - 1)) genWellScopedNamedTerm
   pure (NamedLam (Just "binder") formula body)
+
+-- The authored formula spelling is the surface @prop@ production itself, so
+-- the printer's output must reparse to the same proposition: this is what
+-- makes 'printProp' a legitimate authoring guide for @(prop TEXT)@.
+genSourceName :: Gen String
+genSourceName = elements ["p", "q", "holds", "safety_invariant", "d0", "x_y", "héld", "é"]
+
+genSourceProp :: Gen Prop
+genSourceProp = do
+  predicate <- genSourceName
+  count <- choose (0, 3 :: Int)
+  Prop (Pred predicate) <$> vectorOf count (sized genSourceTerm)
+  where
+    genSourceTerm n
+      | n <= 0 = genSourceLeaf
+      | otherwise =
+          frequency
+            [ (2, genSourceLeaf)
+            , ( 1
+              , do
+                  k <- genSourceName
+                  count <- choose (1, 2 :: Int)
+                  TCon (FunSym k) <$> vectorOf count (genSourceTerm (n `div` 2))
+              )
+            ]
+    genSourceLeaf =
+      oneof
+        [ TCon <$> (FunSym <$> genSourceName) <*> pure []
+        , TNum <$> elements ["0", "1", "42", "007", "+3", "2.10", "-0.0"]
+        ]
+
+prop_parsePropRoundTrip :: Property
+prop_parsePropRoundTrip =
+  forAll genSourceProp $ \proposition ->
+    parseProp (printProp proposition) === Right proposition
+
+-- Byte-equivalence with the opaque spelling, against the backend's own
+-- encoder: @(prop TEXT)@ must lower to exactly the @(atom KEY)@ node that
+-- @encode_ND@ produces for the same proposition, so the authored and the
+-- hand-computed key spellings can never drift.
+prop_sourceFormulaMatchesEncoder :: Property
+prop_sourceFormulaMatchesEncoder =
+  forAll genSourceProp $ \proposition ->
+    lowerNamedPayload rho 2 (lam (propNode (printProp proposition)) (prem "0"))
+      === Right (lam (formulaToSExpr (ND.encodeND proposition)) (hyp "1"))
 
 prop_premiseNameBinderIsRejected :: Property
 prop_premiseNameBinderIsRejected =
@@ -527,6 +689,46 @@ prop_s1NamedBinderTwin = once $ ioProperty $ do
     (_, _, Left err, _) -> counterexample err False
     (_, _, _, Left err) -> counterexample err False
 
+-- S8's shape on S1's policy: the authored source-formula annotation and the
+-- hand-computed opaque key must produce identical Unit and verdict bytes.
+prop_s1SourceFormulaTwin :: Property
+prop_s1SourceFormulaTwin = once $ ioProperty $ do
+  let namedPayload = "(app (lam h (prop \"holds(safety_invariant, D)\") (prem e1)) (prem e1))"
+      numericPayload = "(app (lam (atom 1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0) (hyp 1)) (hyp 0))"
+  namedUnit <- elaborateS1 namedPayload
+  numericUnit <- elaborateS1 numericPayload
+  namedVerdict <- sourceVerdictS1 namedPayload
+  numericVerdict <- sourceVerdictS1 numericPayload
+  pure $ case (namedUnit, numericUnit, namedVerdict, numericVerdict) of
+    (Right a, Right b, Right v1, Right v2) ->
+      conjoin
+        [ counterexample "source-formula Unit bytes drifted" (printSExpr (encodeUnit a) === printSExpr (encodeUnit b))
+        , counterexample "source-formula verdict bytes drifted" (printSExpr (encodeVerdict v1) === printSExpr (encodeVerdict v2))
+        ]
+    (Left err, _, _, _) -> counterexample err False
+    (_, Left err, _, _) -> counterexample err False
+    (_, _, Left err, _) -> counterexample err False
+    (_, _, _, Left err) -> counterexample err False
+
+prop_s1MalformedFormulaMessage :: Property
+prop_s1MalformedFormulaMessage = once $ ioProperty $ do
+  parsed <- parseS1 "(lam h (prop \"holds(\") (prem e1))"
+  pure $ case parsed of
+    Left err -> counterexample err False
+    Right (program, policy) ->
+      case elaborate (registryOf policy) program policy of
+        Left err ->
+          conjoin
+            [ counterexample (show err) $
+                property $ case err of
+                  CertNdFormulaMalformed (ArgId "a1") (AST.BackendId "nd") 1 (ArgRef "holds(") -> True
+                  _ -> False
+            , counterexample "formula annotation wording changed" $
+                elabErrorMessage err
+                  === "arg 'a1': certificate 'nd@1' formula annotation 'holds(' is not a source proposition"
+            ]
+        Right _ -> counterexample "malformed source formula elaborated" False
+
 prop_theoryReferenceMatchesKernelLayout :: Property
 prop_theoryReferenceMatchesKernelLayout = once $
   case lowerNamedPayload rho 1 (thy "0") of
@@ -582,6 +784,7 @@ prop_namedErrorMessages = once $
     , exact (CertNdNonCanonicalIndex a b 1 (ArgRef "007")) "arg 'a': certificate 'nd@1' index '007' is not a canonical index (use unsigned decimal with no leading zeros)"
     , exact (CertNdKernelIndex a b 1 (ArgRef "0")) "arg 'a': certificate 'nd@1' kernel index '0' appears in a named-form payload; cite a binder by name, a premise with (prem ...), or a theory entry with (thy ...)"
     , exact (CertNdPremOutOfRange a b 1 (ArgRef "1") 1 1) "arg 'a': certificate 'nd@1' premise reference '1' names slot 1 but this argument has only 1 premise slot(s)"
+    , exact (CertNdFormulaMalformed a b 1 (ArgRef "p(")) "arg 'a': certificate 'nd@1' formula annotation 'p(' is not a source proposition"
     , exact (CertNdResidualNamed a b 1 (ArgRef "e1")) "arg 'a': certificate 'nd@1' named spelling 'e1' sits where the nd@1 grammar gives it no meaning"
     ]
   where
@@ -651,10 +854,21 @@ prop_r13Boundary = once $ ioProperty $ do
 prop_namedPrinterRoundTrip :: Property
 prop_namedPrinterRoundTrip = once $ ioProperty $ do
   source <- s1Program "(app (lam h <F> (hyp h)) (prem e1))"
-  pure $ case parseProgram source of
-    Left err -> counterexample (show err) False
-    Right program ->
-      conjoin
-        [ counterexample "named atoms did not round-trip" (parseProgram (printProgram program) === Right program)
-        , counterexample "printer erased named atoms" (property ("(lam h <F> (hyp h)) (prem e1)" `isInfixOf` printProgram program))
-        ]
+  formulaSource <- s1Program "(lam h (prop \"holds(safety_invariant, D)\") (prem e1))"
+  pure $
+    conjoin
+      [ case parseProgram source of
+          Left err -> counterexample (show err) False
+          Right program ->
+            conjoin
+              [ counterexample "named atoms did not round-trip" (parseProgram (printProgram program) === Right program)
+              , counterexample "printer erased named atoms" (property ("(lam h <F> (hyp h)) (prem e1)" `isInfixOf` printProgram program))
+              ]
+      , case parseProgram formulaSource of
+          Left err -> counterexample (show err) False
+          Right program ->
+            conjoin
+              [ counterexample "source formula did not round-trip" (parseProgram (printProgram program) === Right program)
+              , counterexample "printer erased the source formula's quoted atom" (property ("(prop \"holds(safety_invariant, D)\")" `isInfixOf` printProgram program))
+              ]
+      ]

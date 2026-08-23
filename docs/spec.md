@@ -141,16 +141,16 @@ and policy-allowlisted theory digests are part of replay identity.
 
 The language surface is itself versioned: **`lara-core@0.2`** names the abstract syntax, the
 static judgments (§6.1, §7.1, §8, §8.1), and the JSON wire schema, as frozen by M1. The
-presentation syntax is versioned separately (**`lara-syntax@0.9`**) because it may evolve against
+presentation syntax is versioned separately (**`lara-syntax@0.10`**) because it may evolve against
 a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
 Presentation syntax versions live in `docs/lara-surface-grammar.md`; this specification pins the
 core. The codec round-trip obligation (§9 result 12) is stated against `lara-core@0.2`. Lean
 mechanizes `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at
-`lara-syntax@0.9`, including value bindings, inferred argument instantiations, `policySigma`,
+`lara-syntax@0.10`, including value bindings, inferred argument instantiations, `policySigma`,
 and optional measurand polarity (`lean/Lara/Presentation.lean`) — `lara-syntax@0.7` restricts the
-concrete `.lara` surface, `@0.8` widens a certificate premise-reference namespace, and `@0.9`
-lowers named `nd@1` payload atoms without changing the presentation AST, so the theorem proved
-for `@0.6` still holds verbatim. The separate `Lara.NDNamed` development proves the `@0.9`
+concrete `.lara` surface, `@0.8` widens a certificate premise-reference namespace, and `@0.9`/`@0.10`
+lower named `nd@1` payload atoms without changing the presentation AST, so the theorem proved
+for `@0.6` still holds verbatim. The separate `Lara.NDNamed` development proves the `@0.9`/`@0.10`
 lowering mathematics. The Haskell `parse ∘ print = id` property separately covers the concrete `.lara`
 parser/printer. The Lean theorem is an AST-shape
 anchor, not a correctness proof for the Haskell concrete parser.

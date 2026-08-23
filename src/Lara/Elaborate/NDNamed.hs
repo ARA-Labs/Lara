@@ -4,8 +4,11 @@
 -- backend's otherwise de Bruijn-indexed certificate grammar.  It runs after
 -- premise-name resolution but before strict replay, replacing source-premise
 -- references, source-theory references, and named binders with ordinary
--- indices.  It neither parses nor validates formulas: annotated formulas stay
--- opaque to preserve the strict decoder's ownership of that grammar.
+-- indices, and lowering source-authored @(prop TEXT)@ formula annotations to
+-- the backend's opaque @(atom KEY)@ encoding (@lara-syntax\@0.10@, #144).
+-- Formula positions are otherwise left to the strict decoder: @false@,
+-- @(atom KEY)@, and non-grammar subtrees pass through unchanged, and @imp@
+-- recursion exists only to reach nested @prop@ spellings.
 --
 -- == Pipeline
 --
@@ -41,12 +44,14 @@ import qualified Lara.Strict.Cell as Cell
   , parseTag
   , tagToString
   )
+import Lara.Prop (nf)
 import qualified Lara.Strict.ND as ND
   ( Tag (..)
+  , encodeAtomKey
   , parseTag
   , tagToString
   )
-import Lara.Syntax (isIdentStart)
+import Lara.Syntax (isIdentStart, parseProp)
 import Lara.Wire (printSExpr)
 
 -- | Why a named proof-term reference could not lower.  A premise-resolution
@@ -70,6 +75,9 @@ data NamedRefError
     NamedNonCanonicalIndex
   | -- | a numeric kernel assumption appeared after named mode was selected
     NamedKernelIndex
+  | -- | a @(prop TEXT)@ annotation whose text is not a complete surface
+    -- proposition
+    NamedFormulaMalformed
   | -- | a named marker survived in an opaque or unknown sub-tree
     NamedResidual
   deriving (Eq, Show)
@@ -77,12 +85,13 @@ data NamedRefError
 -- | The closed vocabulary owned by this named presentation extension.  The
 -- existing strict tags continue to live only in 'Lara.Strict.ND.Tag', and the
 -- premise-reference tag continues to live only in 'Lara.Strict.Cell.Tag'.
-data NamedTag = NTThy
+data NamedTag = NTThy | NTProp
   deriving (Eq, Ord, Show, Enum, Bounded)
 
--- | The sole concrete spelling owned by 'NamedTag'.
+-- | The concrete spellings owned by 'NamedTag'.
 namedTagToString :: NamedTag -> String
 namedTagToString NTThy = "thy"
+namedTagToString NTProp = "prop"
 
 -- | Lower a possible named payload for the natural-deduction backend.
 --
@@ -116,8 +125,10 @@ lowerNamedPayload resolve nPrem payload =
           lowerKernelAbstraction binders formula body
       | Just (fun, arg) <- application expr =
           SList . (SAtom (ND.tagToString ND.TApp) :) <$> sequence [lower binders fun, lower binders arg]
-      | Just (formula, body) <- abort expr =
-          SList . (SAtom (ND.tagToString ND.TAbort) :) . (formula :) . (: []) <$> lower binders body
+      | Just (formula, body) <- abort expr = do
+          formula' <- lowerFormula formula
+          body' <- lower binders body
+          Right (SList [SAtom (ND.tagToString ND.TAbort), formula', body'])
       | otherwise = Right expr
 
     lowerPremise binders source =
@@ -152,13 +163,42 @@ lowerNamedPayload resolve nPrem payload =
       | Just _ <- binderIndex binder binders = Left (binder, NamedBinderShadowed)
       | Right _ <- resolve binder = Left (binder, NamedBinderShadowsPremise)
       | otherwise = do
+          formula' <- lowerFormula formula
           body' <- lower (Just binder : binders) body
-          Right (SList [SAtom (ND.tagToString ND.TLam), formula, body'])
+          Right (SList [SAtom (ND.tagToString ND.TLam), formula', body'])
     lowerNamedAbstraction _ binder _ _ = Left (markerSource binder, NamedMalformedBinder)
 
     lowerKernelAbstraction binders formula body = do
+      formula' <- lowerFormula formula
       body' <- lower (Nothing : binders) body
-      Right (SList [SAtom (ND.tagToString ND.TLam), formula, body'])
+      Right (SList [SAtom (ND.tagToString ND.TLam), formula', body'])
+
+-- | Lower one formula annotation.  A @(prop TEXT)@ node parses its text with
+-- the complete surface proposition production and re-emits the backend's
+-- @(atom KEY)@ encoding of its normal form — exactly the @encode_ND@ path, so
+-- the authored spelling and the opaque key spelling are byte-equivalent by
+-- construction.  An @imp@ node recurses to reach nested @prop@ spellings and
+-- rebuilds byte-identically when none occur.  Everything else — @false@,
+-- @(atom KEY)@, and non-grammar subtrees — passes through unchanged for the
+-- strict decoder to judge; 'firstResidualMarker' has already rejected any
+-- named marker hiding in those subtrees.
+lowerFormula :: SExpr -> Either (String, NamedRefError) SExpr
+lowerFormula expr
+  | Just source <- propSource expr =
+      case parseProp source of
+        Right p ->
+          Right
+            ( SList
+                [ SAtom (ND.tagToString ND.TAtom)
+                , SAtom (ND.encodeAtomKey (nf p))
+                ]
+            )
+        Left _ -> Left (source, NamedFormulaMalformed)
+  | Just (a, b) <- implication expr = do
+      a' <- lowerFormula a
+      b' <- lowerFormula b
+      Right (SList [SAtom (ND.tagToString ND.TImp), a', b'])
+  | otherwise = Right expr
 
 -- | The first named extension marker in leftmost-outermost order.  This scan
 -- selects named mode; 'firstResidualMarker' narrows the same marker vocabulary
@@ -170,21 +210,35 @@ firstNamedMarker expr =
     SList children -> foldr ((<|>) . firstNamedMarker) Nothing children
 
 -- | The first marker in a position that 'lower' deliberately does not visit.
--- Formula annotations and unknown subtrees remain backend-owned, so a marker
--- there takes precedence over errors caused only by named-mode selection.
+-- Unknown subtrees remain backend-owned, so a marker there takes precedence
+-- over errors caused only by named-mode selection.  Formula positions are
+-- scanned by 'formulaResidualMarker', which knows the one marker the formula
+-- grammar gives meaning to.
 firstResidualMarker :: SExpr -> Maybe String
 firstResidualMarker expr
   | Just _ <- premiseSource expr = Nothing
   | Just _ <- theorySource expr = Nothing
   | Just _ <- hypothesisSource expr = Nothing
   | Just (_, formula, body) <- namedAbstraction expr =
-      firstNamedMarker formula <|> firstResidualMarker body
+      formulaResidualMarker formula <|> firstResidualMarker body
   | Just (formula, body) <- kernelAbstraction expr =
-      firstNamedMarker formula <|> firstResidualMarker body
+      formulaResidualMarker formula <|> firstResidualMarker body
   | Just (fun, arg) <- application expr =
       firstResidualMarker fun <|> firstResidualMarker arg
   | Just (formula, body) <- abort expr =
-      firstNamedMarker formula <|> firstResidualMarker body
+      formulaResidualMarker formula <|> firstResidualMarker body
+  | otherwise = firstNamedMarker expr
+
+-- | The first marker in a formula position that 'lowerFormula' will not
+-- consume.  A @(prop TEXT)@ node is the formula grammar's own spelling and an
+-- @imp@ node is traversed, so only markers under other constructors — a
+-- @(prem s)@ posing as a formula, a @prop@ nested inside an opaque subtree —
+-- remain residual.
+formulaResidualMarker :: SExpr -> Maybe String
+formulaResidualMarker expr
+  | Just _ <- propSource expr = Nothing
+  | Just (a, b) <- implication expr =
+      formulaResidualMarker a <|> formulaResidualMarker b
   | otherwise = firstNamedMarker expr
 
 -- | The marker at a node, if any.  Source atoms are extracted only to report
@@ -193,6 +247,7 @@ markerHere :: SExpr -> Maybe String
 markerHere expr
   | Just source <- premiseSource expr = Just source
   | Just source <- theorySource expr = Just source
+  | Just source <- propSource expr = Just source
   | Just source <- namedHypSource expr = Just source
   | Just (binder, _, _) <- namedAbstraction expr = Just (markerSource binder)
   | otherwise = Nothing
@@ -209,6 +264,15 @@ theorySource :: SExpr -> Maybe String
 theorySource (SList [SAtom tag, SAtom source])
   | parseNamedTag tag == Just NTThy = Just source
 theorySource _ = Nothing
+
+-- | The source-authored formula-annotation node owned by this module's closed
+-- table.  Like @prem@ and @thy@, only the exact two-field atom shape is a
+-- marker: a @prop@ head with any other arity or a non-atom payload is inert
+-- junk that the strict decoder continues to own.
+propSource :: SExpr -> Maybe String
+propSource (SList [SAtom tag, SAtom source])
+  | parseNamedTag tag == Just NTProp = Just source
+propSource _ = Nothing
 
 -- | A named assumption is distinguished only by its identifier-shaped atom.
 -- Numeric assumptions remain kernel syntax until another marker selects named
@@ -239,11 +303,19 @@ markerSource :: SExpr -> String
 markerSource (SAtom source) = source
 markerSource expr = printSExpr expr
 
--- | The three-field kernel abstraction.  Its formula remains opaque.
+-- | The three-field kernel abstraction.  Its formula is visited only by
+-- 'lowerFormula' and 'formulaResidualMarker'.
 kernelAbstraction :: SExpr -> Maybe (SExpr, SExpr)
 kernelAbstraction (SList [SAtom tag, formula, body])
   | ND.parseTag tag == Just ND.TLam = Just (formula, body)
 kernelAbstraction _ = Nothing
+
+-- | A formula-position implication, traversed to reach nested @prop@
+-- spellings.
+implication :: SExpr -> Maybe (SExpr, SExpr)
+implication (SList [SAtom tag, a, b])
+  | ND.parseTag tag == Just ND.TImp = Just (a, b)
+implication _ = Nothing
 
 
 -- | A kernel application, whose two certificate children are lowered.
@@ -252,8 +324,8 @@ application (SList [SAtom tag, fun, arg])
   | ND.parseTag tag == Just ND.TApp = Just (fun, arg)
 application _ = Nothing
 
--- | A kernel falsum eliminator; its formula remains opaque while its proof
--- child is lowered.
+-- | A kernel falsum eliminator; its formula is visited by 'lowerFormula'
+-- while its proof child is lowered.
 abort :: SExpr -> Maybe (SExpr, SExpr)
 abort (SList [SAtom tag, formula, body])
   | ND.parseTag tag == Just ND.TAbort = Just (formula, body)

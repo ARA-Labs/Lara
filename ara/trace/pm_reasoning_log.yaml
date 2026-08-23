@@ -856,3 +856,11 @@ entries:
     - "Did NOT crystallize O78 or O79. #140 reinforces slot-indexed naming and @0.9 again abstracts external decisions in Lean, but neither is the closure signal their staged records require. Added O82 rather than overloading O79 because @0.9 proves a new recursive binder transformation, not a proof-neutral resolver extension."
     - "No claim was created or revised. Like @0.7/@0.8, @0.9 changes authoring and no judgment, AST or wire contract; minting a claim would manufacture research content. Updated the mechanization status ledger as direct experiment evidence instead."
     - "The only open research-design thread from the implementation is #144. PR #145 is an integration thread, while #132 and #140 are resolved by the branch and close on merge."
+- turn: "2026-08-23_001#1"
+  notes:
+    - "Routed N208 as ai-suggested decision: the user directed execution of #144 ('do it directly and pr') but the specific (prop TEXT) embedded-sub-language spelling, the marker/residual amendments, and the rejected alternatives were chosen autonomously; direction to act is not ratification of the design."
+    - "Routed N209 as the release experiment on the N207 pattern: byte-equivalence oracles, unchanged S8 goldens, Lean theorem, and full gate counts are falsifiable results; PR #147 is the integration artifact."
+    - "Staged O84 as a heuristic (embedding an existing sub-language as one opaque host token vs a parallel structural grammar). One implementation episode, no researcher evaluation of the generalized wording."
+    - "Did NOT crystallize O79/O82 despite a third abstraction-parameter instance (encodeProp). The instance is mixed: the new external decision was abstracted per the practice, but O79's zero-edit payoff story did not repeat because @0.10 changes the transformation itself (NFormula restatement), so this is neither clean artifact commitment on the generalized wording nor empirical resolution. Noted in ai_suggestions_pending instead."
+    - "No claim minted for @0.10, matching the standing @0.7-@0.9 precedent: a presentation release that changes authoring but no judgment, AST, or wire contract is engineering evidence, not a research claim."
+    - "Opened session 2026-08-23_001 rather than appending to 2026-08-22_001: calendar-day rule; the @0.9 spillover past midnight stayed in its originating session."

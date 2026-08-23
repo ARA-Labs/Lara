@@ -84,7 +84,8 @@ data ElabError
     -- wire there, so the certificate is rejected here rather than handed to a
     -- backend that must refuse it (the dead-wire rule).
     CertSlotSchemaMismatch ArgId BackendId Int ArgRef
-    -- * Named natural-deduction proof terms (@lara-syntax\@0.9@, #132)
+    -- * Named natural-deduction proof terms (@lara-syntax\@0.9@, #132;
+    -- formula annotations @lara-syntax\@0.10@, #144)
   | CertNdBinderUnbound ArgId BackendId Int ArgRef
   | CertNdBinderShadowed ArgId BackendId Int ArgRef
   | CertNdBinderShadowsPremise ArgId BackendId Int ArgRef
@@ -92,6 +93,7 @@ data ElabError
   | CertNdNonCanonicalIndex ArgId BackendId Int ArgRef
   | CertNdKernelIndex ArgId BackendId Int ArgRef
   | CertNdPremOutOfRange ArgId BackendId Int ArgRef Integer Int
+  | CertNdFormulaMalformed ArgId BackendId Int ArgRef
   | CertNdResidualNamed ArgId BackendId Int ArgRef
   | -- | positional θ length ≠ the rule's parameter count: @arg@, @rule@,
     -- expected, got.
@@ -336,6 +338,8 @@ elabErrorMessage e = case e of
   CertNdPremOutOfRange a b v n i j ->
     certNdPrefix a b v ++ "premise reference '" ++ argRefText n ++ "' names slot " ++ show i
       ++ " but this argument has only " ++ show j ++ " premise slot(s)"
+  CertNdFormulaMalformed a b v n ->
+    certNdPrefix a b v ++ "formula annotation '" ++ argRefText n ++ "' is not a source proposition"
   CertNdResidualNamed a b v n ->
     certNdPrefix a b v ++ "named spelling '" ++ argRefText n ++ "' sits where the nd@1 grammar gives it no meaning"
   ArityMismatch (ArgId a) (RuleId r) expd got ->

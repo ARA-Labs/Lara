@@ -1791,3 +1791,30 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O84
+  timestamp: "2026-08-23T12:14"
+  provenance: ai-suggested
+  content: >
+    When a presentation layer must carry an existing concrete sub-language
+    inside a host grammar, embedding it as one opaque token of the host (a
+    quoted S-expression atom) and reusing the sub-language's single existing
+    parser/printer beats minting a parallel structural grammar. Equivalence
+    with the backend encoder then holds by construction - the authored
+    spelling and the encoder share one code path (parseProp then
+    encodeAtomKey . nf) - instead of requiring a proof that two independently
+    maintained grammars agree, and the printer (printProp) becomes a legal
+    authoring guide for free. The coverage boundary is inherited honestly:
+    the spelling expresses exactly what the sub-language's surface can
+    already declare.
+  context: >
+    lara-syntax@0.10 design choice for #144. The rejected alternative was a
+    second S-expression-structural prop spelling; the byte-equivalence
+    property against encode_ND reduced to a shared-code-path argument plus
+    one QuickCheck oracle rather than a grammar-agreement proof.
+  potential_type: heuristic
+  bound_to: [N208, N209]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

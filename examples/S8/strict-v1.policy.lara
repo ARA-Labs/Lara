@@ -2,7 +2,9 @@
 #
 # S8 carries its own copy of S1's policy. Its source program changes only the
 # nd@1 certificate spelling: the same premise is cited inside and outside a
-# named binder, then lowered to the numeric proof term the backend replays.
+# named binder and the binder's formula annotation is authored as a source
+# proposition, then everything is lowered to the numeric proof term the
+# backend replays.
 
 policy strict-v1
 

@@ -12,8 +12,8 @@ delivered suite is larger — it also carries `R2-sort` (the `lara-core@0.2`
 well-sortedness negative) and the strict-certificate series `S1`–`S8` (`nd@1`,
 `ord@1` comparison, the `num_le` tie, an undermined binding, a lower-is-better
 measurand, the `lara-syntax@0.6` named-slot byte-identity witness, the
-`lara-syntax@0.8` premise-label witness, and the `lara-syntax@0.9` named-`nd@1`
-binder/premise byte-identity witness S8). The
+`lara-syntax@0.8` premise-label witness, and the `lara-syntax@0.9`/`@0.10`
+named-`nd@1` binder/premise/formula byte-identity witness S8). The
 authoritative catalogue of every committed example, with its witnesses, attack
 kinds, and statuses, is `../examples/README.md`._
 

@@ -113,6 +113,7 @@ module Lara.Syntax
   , parseSource
   , parseProgram
   , parsePolicy
+  , parseProp
   , isIdentStart
     -- * Canonical printing
   , printSource
@@ -170,10 +171,15 @@ data ParseError = ParseError
 -- Parser state and monad (hand-rolled; no external combinator library)
 -- ---------------------------------------------------------------------------
 
+data TriviaMode
+  = NormalTrivia
+  | WhitespaceOnlyTrivia
+
 data PState = PState
   { psInput :: String
   , psLine :: !Int
   , psCol :: !Int
+  , psTriviaMode :: !TriviaMode
   }
 
 -- | A backtracking parser threading source position, the same shape as the
@@ -232,7 +238,7 @@ takeWhileP p = P $ \s -> Right (go s)
       _ -> ("", st)
 
 -- ---------------------------------------------------------------------------
--- Lexical layer (two modes: normal, and ref-list — grammar §1.2)
+-- Lexical layer (normal and whitespace-only trivia; grammar §1.2)
 -- ---------------------------------------------------------------------------
 
 -- | Whether a character may begin a source identifier. Exported so
@@ -253,13 +259,14 @@ isSourceRefChar :: Char -> Bool
 isSourceRefChar c =
   c /= ',' && c /= ']' && c /= ' ' && c /= '\t' && c /= '\n' && c /= '\r'
 
--- | Normal-mode trivia: whitespace and @\'#\'@ line comments.
+-- | Consume trivia according to the parser's current lexical mode.
 skipTrivia :: P ()
 skipTrivia = do
+  mode <- P $ \s -> Right (psTriviaMode s, s)
   _ <- takeWhileP isSpaceChar
   s <- getInput
-  case s of
-    '#' : _ -> do
+  case (mode, s) of
+    (NormalTrivia, '#' : _) -> do
       _ <- takeWhileP (/= '\n')
       skipTrivia
     _ -> pure ()
@@ -641,6 +648,16 @@ propP = do
   case next of
     Just '(' -> Prop (Pred h) <$> parenList termP
     _ -> pure (Prop (Pred h) [])
+
+-- | Parse one complete surface proposition (the same @prop@ production used by
+-- @formal@\/@leaf@\/@theory@ lines), for callers that receive a proposition
+-- spelling outside a source file — notably the @nd\@1@ named formula
+-- annotation @(prop TEXT)@ (grammar App. I), whose carrier atom decodes to
+-- exactly this production. Surrounding whitespace is tolerated, while @\#@
+-- remains literal and therefore fails as trailing input rather than silently
+-- truncating the authored proposition.
+parseProp :: String -> Either ParseError Prop
+parseProp = runCompleteWith WhitespaceOnlyTrivia (propP <* eof)
 
 -- | @pat ::= number | ident | ident \"(\" pat,… \")\"@. A bare identifier is
 -- recorded as 'PVar'; the elaborator reclassifies it to a ground literal when
@@ -1764,9 +1781,12 @@ parseSource input = runComplete p input
         Just "policy" -> SourcePolicy <$> (policyP <* eof)
         _ -> failP "expected a source file beginning with 'artifact' or 'policy'"
 
--- | Run a parser over whole input, returning the value or the located error.
+-- | Run a parser over whole input with normal source-file trivia.
 runComplete :: P a -> String -> Either ParseError a
-runComplete p input = fst <$> runP p (PState input 1 1)
+runComplete = runCompleteWith NormalTrivia
+
+runCompleteWith :: TriviaMode -> P a -> String -> Either ParseError a
+runCompleteWith mode p input = fst <$> runP p (PState input 1 1 mode)
 
 -- ===========================================================================
 -- Canonical printer (grammar §3–§4 field order; §7 position spelling)

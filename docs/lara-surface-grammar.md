@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.9`)
+# LARA surface grammar — frozen (`lara-syntax@0.10`)
 
 _Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -36,16 +36,19 @@ and a shadowed discharge target is a hard error — are specified in Appendix F;
 they remove surface and add none, so the AST, the wire, and `lara-core@0.2` are
 again unchanged. `@0.8` lets a certificate premise reference cite the citing
 rule's declared premise **label** beside the `@0.6` leaf and prior-argument
-names (Appendix G). The current surface is `@0.9`, which gives `nd@1` a named
-proof-term presentation over its unchanged de Bruijn kernel (Appendix H).
-Neither addition changes a lexer or parser rule, and each successful named
-form lowers to the numeric spelling's exact bytes.
+names (Appendix G). `@0.9` gives `nd@1` a named proof-term presentation over
+its unchanged de Bruijn kernel (Appendix H). The current surface is `@0.10`,
+which lets those `nd@1` proof terms author their formula annotations as source
+propositions instead of opaque encoded atom keys (Appendix I).
+None of these additions changes a lexer or parser rule, and each successful
+named form lowers to the numeric spelling's exact bytes.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.9`; it decodes to
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.10`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
 `@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and the `@0.6`
-symbolic, `@0.8` premise-label, and `@0.9` named-`nd@1` certificate references
+symbolic, `@0.8` premise-label, and `@0.9`/`@0.10` named-`nd@1` certificate
+spellings
 remain presentation-layer data until elaboration, and `@0.7`'s restrictions
 (bare-leaf body lines, the sole `open q` hole spelling, and the unified
 discharge collision policy) remove
@@ -1621,8 +1624,9 @@ Two future-work notes were recorded here so the next design could start from the
   covered the metatheory of that lowering.
   *Resolved at `@0.9`:* Appendix H defines this form, including the exact
   binder discipline, mode boundary, lowering arithmetic, and rejection
-  surface. Formula annotation authoring is the one deliberately separate
-  follow-up, tracked by [#144](https://github.com/ARA-Labs/lara/issues/144).
+  surface. Formula annotation authoring was the one deliberately separate
+  follow-up ([#144](https://github.com/ARA-Labs/lara/issues/144)), resolved at
+  `@0.10` by Appendix I.
 - *Rule premise labels as a second symbolic class (considered and deferred).*
   `premiseLabelIndex` already mapped a rule's declared premise labels to slot
   indices, and a label named the backend slot directly — it would even have
@@ -2111,8 +2115,9 @@ canonicalNat  ::= "0" | nonZeroDigit { digit }
 
 `formula` is the frozen backend annotation grammar. In particular an atom is
 still `(atom KEY)`, never a bare key. Producing `KEY` from a source proposition
-is an encoding feature, not reference lowering, and remains tracked only by
-[#144](https://github.com/ARA-Labs/lara/issues/144).
+is an encoding feature, not reference lowering; it was deferred to
+[#144](https://github.com/ARA-Labs/lara/issues/144) and landed at `@0.10` as
+Appendix I's `(prop TEXT)` presentation formula.
 
 `sourceName` deliberately uses the shipped source-name classifier, not the
 complete concrete-syntax `ident` production. The first decoded character must
@@ -2137,11 +2142,11 @@ Nothing in this appendix changes `lara-core@0.2`, `Lara.AST`, the wire,
 `.core.sexp`, the frozen corpus, a checker judgment, or replay. No corpus
 regeneration or freeze-tag bump is owed.
 
-`@0.9` is the **substrate** for eventual named formula authoring, not a complete
+`@0.9` is the **substrate** for named formula authoring, not a complete
 deep-`nd@1` authoring solution. It closes silent index-misbinding by giving
 binders, premises, and theory offsets one explicit lowering discipline, while
-formula annotations remain opaque `(atom KEY)` values that still require
-out-of-band tooling until #144 lands.
+formula annotations remain opaque `(atom KEY)` values at this version; #144
+landed the source-authored spelling at `@0.10` (Appendix I).
 
 ### H.2 Namespaces and binder discipline
 
@@ -2271,5 +2276,98 @@ execution are covered by properties and integration tests. The Lean mirror
 proves the lowering mathematics over abstract classifier and resolver
 parameters; it does **not** prove that the Haskell implementation executed that
 function, nor verify the Haskell classifier or resolver. `@0.9` removes silent
-index-misbinding from named premise/binder authoring, but complete formula
-authoring still needs tooling until #144 lands.
+index-misbinding from named premise/binder authoring; the remaining formula
+tooling gap was closed by #144 at `@0.10` (Appendix I).
+
+## Appendix I — `lara-syntax@0.10` (source-authored `nd@1` formula annotations, 2026-08-23)
+
+### I.1 Scope
+
+Additive over `lara-syntax@0.9`, closing [#144](https://github.com/ARA-Labs/lara/issues/144).
+Appendix H left exactly one hand-hostile position in a named `nd@1` proof
+term: the formula annotation of a `lam` or `abort`, which had to be an opaque
+`(atom KEY)` whose `KEY` was produced by out-of-band tooling. `@0.10` adds a
+presentation formula grammar for named mode:
+
+```text
+namedFormula ::= "false"
+               | "(" "atom" KEY ")"                       -- opaque, unchanged
+               | "(" "imp" namedFormula namedFormula ")"
+               | "(" "prop" TEXT ")"                      -- NEW: source authored
+```
+
+`TEXT` is one S-expression atom — in practice a quoted string, since surface
+propositions contain parentheses — whose decoded string is a **complete §2
+`prop` production**, parsed by `Lara.Syntax.parseProp`. Annotation text shares
+the proposition grammar and Unicode identifier rules used by `formal`, `leaf`,
+and `theory` lines, but accepts whitespace only as trivia: `#` remains literal
+and causes a complete-input parse failure instead of starting a line comment.
+There is no second proposition grammar; `printProp` output is by construction a
+legal annotation text. Because the surface `term` production has no string
+literals, the spelling covers exactly the propositions the surface can already
+declare.
+
+The untrusted elaborator lowers `(prop TEXT)` through the shared
+normalization/encoding path — `encodeAtomKey (nf p)`, precisely the backend's
+`encode_ND` — and re-emits the frozen `(atom KEY)` node. The authored and the
+hand-computed key spellings are therefore byte-equivalent by construction, and
+S8's key-generation command is retired. Nothing changes in `lara-core@0.2`,
+`Lara.AST`, the wire, `.core.sexp`, the frozen corpus, a checker judgment, or
+replay. No corpus regeneration or freeze-tag bump is owed.
+
+### I.2 Boundary amendments to Appendix H
+
+- **Marker vocabulary (H.4).** A two-field `(prop ATOM)` node is the fifth
+  D7 marker; any payload containing one is named mode, subject to D9's whole-
+  payload discipline (in particular, a numeric kernel `(hyp N)` beside a
+  `(prop TEXT)` is `CertNdKernelIndex`). Like `prem` and `thy`, only the exact
+  two-field atom shape is a marker: a `prop` head of any other arity, or with
+  a non-atom payload, is inert junk that the strict backend continues to own
+  (R13).
+- **Formula positions are no longer fully opaque.** The residual scan and the
+  lowering both now traverse `imp` nodes in formula positions to reach nested
+  `prop` spellings, rebuilding byte-identically when none occur; `false`,
+  `(atom KEY)`, and non-grammar formula subtrees still pass through unchanged.
+  A *different* named marker in a formula position — for example `(prem s)`
+  posing as a formula, or any marker inside an opaque formula subtree — stays
+  `CertNdResidualNamed`, as does a `(prop _)` node sitting in a certificate
+  position.
+- **Rejection surface (H.5).** The family grows to nine. The one new
+  template, `CertNdFormulaMalformed`, fires when the annotation text is not a
+  complete surface proposition (including trailing input):
+
+  ```text
+  arg 'A': certificate 'B' formula annotation 'N' is not a source proposition
+  ```
+
+  `N` is the decoded annotation text. Rejection-site migration follows H.4
+  verbatim: only payloads carrying a marker move from backend R13 to a located
+  elaboration error.
+- **Σ is not consulted.** A lowered annotation is an opaque atom key to the
+  checker, exactly as a hand-authored key was; it matters only up to equality
+  with the premise/goal encodings during replay. `@0.10` therefore adds no
+  signature obligation that the numeric spelling did not have.
+
+### I.3 Mechanization and witness
+
+The Lean mirror (`lean/Lara/NDNamed.lean`) abstracts the proposition encoder
+as `encodeProp : String → Option String` — the composition of the surface
+proposition parser with `encodeAtomKey ∘ nf` stays validated-not-verified
+Haskell boundary code — and proves the new named result
+`Lara.NDNamed.lowerFormula_eq_translation` (every well-formed named formula
+lowers to exactly the kernel wire image of its independent translation)
+alongside the two Appendix H theorems, whose statements gain the parameter
+unchanged. Nineteen executable `#guard` vectors pin the boundary, seven of
+them new for `prop`. On the Haskell side,
+`prop_sourceFormulaMatchesEncoder` checks authored spellings against
+`encode_ND` itself, `prop_parsePropRoundTrip` pins `parseProp ∘ printProp`,
+and `examples/S8/` — rewritten to
+`(app (lam h (prop "holds(safety_invariant, D)") (prem e1)) (prem e1))` —
+remains the end-to-end byte-identity witness against its committed numeric
+`.core.sexp`, now with no out-of-band command anywhere in its provenance.
+
+The post-lowering error-attribution limitation is unchanged from H.5: if a
+lowered term fails replay at R13, the diagnostic is phrased over the numeric
+de Bruijn image with the encoded key, and no source map restores the authored
+proposition. Whether such a map is worth its cost remains the separately
+deliberate deferral recorded at `@0.9`.
