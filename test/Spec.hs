@@ -29,6 +29,7 @@ import BindingAuditSpec (bindingAuditSpecProps)
 import CertSlotsSpec (certSlotsSpecProps)
 import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
+import SlotNamesSpec (slotNamesSpecProps)
 import CorpusUnitsSpec (corpusUnitsSpecProps)
 import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
@@ -223,6 +224,7 @@ main = do
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- thetaInferenceSpecProps]
         ++ [run name act | (name, act) <- certSlotsSpecProps]
+        ++ [run name act | (name, act) <- slotNamesSpecProps]
         ++ [run name act | (name, act) <- ndNamedSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]
   unless (and results) exitFailure

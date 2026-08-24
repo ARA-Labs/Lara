@@ -2256,7 +2256,15 @@ Lowering is one-way. If lowering succeeds but `nd@1` later rejects at R13, its
 backend diagnostic describes the lowered de Bruijn term; there is no source map
 back to binder or premise names. The source author may therefore have to map an
 index back by hand. This error-attribution limitation does not weaken replay,
-but it belongs to the honest user-facing boundary.
+but it belongs to the honest user-facing boundary, and is tracked as
+[#148](https://github.com/ARA-Labs/lara/issues/148).
+
+One half of it has since closed: an R13 now renders the slot → source mapping
+of the refused instance, in the authored spelling on the `.lara` door
+([#130](https://github.com/ARA-Labs/lara/issues/130);
+`docs/rejection-surface.md` §1.5). That covers the *premise list* — the
+`(prem s)` references a named term cites. It does not cover the binder names or
+the formula annotations inside the proof term, which remain #148's subject.
 
 ### H.6 Mechanization, witness, and trust boundary
 
@@ -2370,4 +2378,9 @@ The post-lowering error-attribution limitation is unchanged from H.5: if a
 lowered term fails replay at R13, the diagnostic is phrased over the numeric
 de Bruijn image with the encoded key, and no source map restores the authored
 proposition. Whether such a map is worth its cost remains the separately
-deliberate deferral recorded at `@0.9`.
+deliberate deferral recorded at `@0.9`, tracked as
+[#148](https://github.com/ARA-Labs/lara/issues/148). The premise-list half of
+the same attribution problem closed at
+[#130](https://github.com/ARA-Labs/lara/issues/130), which renders the slot →
+source mapping under every R13 (`docs/rejection-surface.md` §1.5); the formula
+annotation an `nd@1` binder carries is not reached by it.

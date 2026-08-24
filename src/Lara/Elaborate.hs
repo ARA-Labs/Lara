@@ -67,6 +67,10 @@ module Lara.Elaborate
     -- * Surface provenance (plan D5)
   , GeneratedArg (..)
   , sourceResultGeneratedArgs
+    -- * Premise-slot attribution (#130)
+  , sourceResultSlotSources
+  , sourceResultAuthoredSlots
+  , slotMappingFor
   ) where
 
 import Data.Bifunctor (first)
@@ -84,13 +88,19 @@ import Lara.Admission.Internal
   , validateAdmissionKeys
   )
 import Lara.Blocked (Prune, pruneChecked, pruneWithPolicySeed)
+import Lara.Elaborate.SlotNames
+  ( AuthoredSlot
+  , authoredSlotMap
+  , renderAuthoredSlots
+  )
 import Lara.Check (fullConfig)
 import Lara.Diagnostics
   ( Constituent (..)
   , LocatedRejection (..)
   , Stage (..)
   )
-import Lara.Driver.Internal (runCheckReported)
+import Lara.Driver.Internal (runCheckReported, slotMappingLines)
+import Lara.SupportTerm (SlotSource)
 import Lara.Elaborate.Internal
   ( ElabError (..)
   , GeneratedArg (..)
@@ -169,12 +179,14 @@ data SourceResult = SourceResult
   [ArgId]
   CheckInput
   [GeneratedArg]
+  [SlotSource]
+  [(ArgId, [AuthoredSlot])]
 
 sourceResultVerdict :: SourceResult -> Verdict
-sourceResultVerdict (SourceResult verdict _ _ _ _ _ _) = verdict
+sourceResultVerdict (SourceResult verdict _ _ _ _ _ _ _ _) = verdict
 
 sourceResultAudit :: SourceResult -> AdmissionAudit
-sourceResultAudit (SourceResult _ audit _ _ _ _ _) = audit
+sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _) = audit
 
 -- | The @stderr@ lines this result's rejection warrants, in the raw driver's
 -- established precedence: a replay-preflight R13
@@ -189,7 +201,7 @@ sourceResultAudit (SourceResult _ audit _ _ _ _ _) = audit
 -- verdict, so a line here can never explain a rejection this result did not
 -- make.
 sourceResultDiagnostics :: SourceResult -> [String]
-sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _) = diagnostics
+sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _) = diagnostics
 
 -- | The located rejection that produced this result's verdict, from the /same/
 -- decision path ("Lara.Driver.Internal".@runCheckReported@): its class, failing
@@ -201,7 +213,7 @@ sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _) = diagnostics
 -- rather than in a message line — so an R1 on a pruned source would print an
 -- empty diagnostic.
 sourceResultLocatedRejection :: SourceResult -> Maybe LocatedRejection
-sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _) = located
+sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _) = located
 
 -- | The argument ids of the __checked__ (post-prune) program, in the order the
 -- checker indexed them.  A 'LocatedRejection' constituent names arguments by
@@ -211,14 +223,37 @@ sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _) = located
 -- checked 'Unit' is deliberately not, so a caller still cannot rebuild a
 -- policy-pruned envelope and re-run it without the blocked-status overlay.
 sourceResultCheckedArgIds :: SourceResult -> [ArgId]
-sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _) = argIds
+sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _ _ _) = argIds
 
 -- | Every argument this source's @comparison@ blocks generated, tied back to
 -- the block that minted it (plan D5).  Empty for a program that authors no
 -- @comparison@ — which is every raw @.sexp@ input, and every @lara-syntax\@0.2@
 -- program.
 sourceResultGeneratedArgs :: SourceResult -> [GeneratedArg]
-sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated) = generated
+sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _) = generated
+
+-- | The __structural__ premise-slot mapping of a checker-side R13 (#130): what
+-- the checked term put in each slot the refused certificate cites, read off the
+-- same decision that produced the verdict
+-- ("Lara.Driver.Internal".@backendRejectionSlots@). Empty for every other
+-- outcome.
+--
+-- This is the reading a raw @.sexp@ input also gets. It is exported beside the
+-- authored one so a caller can tell the two apart rather than parsing them back
+-- out of a rendered line.
+sourceResultSlotSources :: SourceResult -> [SlotSource]
+sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _) = slots
+
+-- | The __authored__ premise-slot spelling of every checked argument (#130),
+-- keyed by argument id: the leaf, prior-argument, and premise-label names the
+-- source actually used ("Lara.Elaborate.SlotNames").
+--
+-- Present for every checked argument, not only a rejected one, because it is a
+-- property of the source rather than of the verdict. Empty for a program with
+-- no rule-instance arguments — which is every raw @.sexp@ input, since a wire
+-- program has no authored names to recover.
+sourceResultAuthoredSlots :: SourceResult -> [(ArgId, [AuthoredSlot])]
+sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored) = authored
 
 -- | The validated raw core envelope bound into this source result, unless
 -- policy admission removed source material. Duplicate-group quarantine is
@@ -228,7 +263,7 @@ sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated) = generated
 -- fail closed rather than recompute the declared envelope through
 -- 'Lara.Driver.runCheck'.
 sourceResultCheckInput :: SourceResult -> Either AdmissionAudit CheckInput
-sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _)
+sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _)
   | admissionAuditHasPolicyQuarantine audit = Left audit
   | otherwise = Right checkInput
 
@@ -277,17 +312,20 @@ prepareSource program policy = do
             )
 
 runSourceCheck :: SourceCheckInput -> SourceResult
-runSourceCheck (SourceCheckInput _ _ _ _ finalPrune audit checkInput generated) =
-  let (verdict, located, diagnostics) =
+runSourceCheck (SourceCheckInput _ policy _ _ finalPrune audit checkInput generated) =
+  let checked = pruneChecked finalPrune
+      (verdict, located, diagnostics, slots) =
         runCheckReported fullConfig checkInput finalPrune
    in SourceResult
         verdict
         audit
         diagnostics
         located
-        (map fst (unitArgs (pruneChecked finalPrune)))
+        (map fst (unitArgs checked))
         checkInput
         generated
+        slots
+        (authoredSlotMap policy (unitArgs checked))
 
 -- ---------------------------------------------------------------------------
 -- The author-facing layer (plan D5, eng review 2A)
@@ -315,7 +353,71 @@ runSourceCheck (SourceCheckInput _ _ _ _ finalPrune audit checkInput generated) 
 sourceResultAuthorDiagnostics :: SourceResult -> [String]
 sourceResultAuthorDiagnostics result = case sourceResultDiagnostics result of
   [] -> []
-  diagnostics -> surfaceContextLines result ++ diagnostics
+  diagnostics -> surfaceContextLines result ++ diagnostics ++ slotLines result
+
+-- | The premise-slot mapping under a checker-side R13's reason line (#130), in
+-- the authored spelling where the source door has one.
+--
+-- __Why the mapping is worth printing at all.__ The backend's reason names a
+-- @(prem i)@. Nothing else in the rejection says what @i@ /is/, so the reader
+-- decodes it by hand against the policy declarations — for a numeric
+-- certificate, an @nd\@1@ proof term, or a third-party artifact, every time.
+--
+-- __Why the source door prints a different one.__ The structural reading
+-- ('Lara.Driver.slotMappingLines') is what the checked 'Unit' can say: leaf
+-- ids, and the rule of an inline sub-derivation. The @.lara@ author wrote
+-- names — leaves, prior arguments, and @lara-syntax\@0.8@ premise labels — and
+-- a diagnosis in the kernel's vocabulary makes them translate. Where those
+-- names survive ('Lara.Elaborate.SlotNames'), they are printed instead.
+--
+-- __Fallback, and why it is a fallback rather than a failure.__ The authored
+-- map is keyed by argument id and only a located argument rejection resolves
+-- one. When the rejection does not locate at an argument, or the located
+-- argument has no recovered spelling, or the two readings disagree on how many
+-- slots there are, the structural lines are printed unchanged: the mapping is
+-- still true, it is just phrased in the kernel's vocabulary. Printing nothing
+-- would be the one outcome worse than printing the indices the author already
+-- had.
+slotLines :: SourceResult -> [String]
+slotLines result =
+  slotMappingFor (sourceResultSlotSources result) (authoredForRejection result)
+
+-- | Choose between the two readings of one rejection's slot block: the authored
+-- spelling when it was recovered and the two readings agree on how many slots
+-- there are, the structural spelling otherwise, and nothing at all when there
+-- are no slots to explain.
+--
+-- Split out of 'slotLines' as a total function of the two readings because the
+-- fallback is the arm that has to keep working. By construction the authored and
+-- structural lists are built from the same premise list, so their lengths agree
+-- and no artifact reaches the mismatch arm today; only a direct test can hold
+-- the documented fallback in place if a later change to 'authoredSlotMap' or to
+-- the backend's reported slots breaks that assumption.
+slotMappingFor :: [SlotSource] -> Maybe [AuthoredSlot] -> [String]
+slotMappingFor [] _ = []
+slotMappingFor structural authored = case authored of
+  Just as
+    | length as == length structural -> renderAuthoredSlots as
+  _ -> slotMappingLines structural
+
+-- | The authored slot spelling of the argument this result's rejection located
+-- at, when it located at one (#130).
+--
+-- Gated on 'StageSupport' + 'CArgument' for the same reason
+-- 'surfaceContextLines' is: that pair is exactly the checker-side backend
+-- rejection, the only class whose slots this explains.
+authoredForRejection :: SourceResult -> Maybe [AuthoredSlot]
+authoredForRejection result = case sourceResultLocatedRejection result of
+  Just (LocatedRejection _ StageSupport (CArgument i))
+    | Just aid <- nth i (sourceResultCheckedArgIds result) ->
+        lookup aid (sourceResultAuthoredSlots result)
+  _ -> Nothing
+  where
+    nth i xs
+      | i < 0 = Nothing
+      | otherwise = case drop i xs of
+          x : _ -> Just x
+          [] -> Nothing
 
 -- | The surface-context line, or none.
 --

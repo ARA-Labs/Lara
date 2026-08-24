@@ -119,6 +119,11 @@ prop_cliReject = once $ ioProperty $ do
 -- empty stderr, in a checker built around located rejections. Both halves are
 -- pinned — the reason text (so the channel cannot regress to silence) and the
 -- stdout bytes (so the diagnostic cannot leak onto the wire).
+--
+-- Since #130 the reason is followed by the slot → source mapping: the reason
+-- names a @(prem i)@ and this is what says what @i@ is. On the raw door the
+-- mapping is __structural__ — leaf ids read off the checked 'Lara.AST.Unit' —
+-- because a wire program has no authored names to recover.
 prop_cliBackendRejectionReason :: Property
 prop_cliBackendRejectionReason = once $ ioProperty $ do
   let fixture = "fixtures/corpus/ord-premise-only-reject.sexp"
@@ -128,10 +133,12 @@ prop_cliBackendRejectionReason = once $ ioProperty $ do
     conjoin
       [ counterexample "exit code" (code === ExitFailure 1)
       , counterexample "stdout" (out === ("(verdict " ++ replayText ++ " reject R13)\n"))
-      , counterexample "stderr names the backend and its reason" $
+      , counterexample "stderr names the backend, its reason, and its slots" $
           err
             === "certificate replay: ord@1 (theory t0) rejected the certificate: \
-                \ord cites premise slots only; slot names theory entry 0\n"
+                \ord cites premise slots only; slot names theory entry 0\n\
+                \  slot 0 = leaf e0\n\
+                \  slot 1 = leaf e1\n"
       ]
 
 -- | The value-carrying half: a cell comparison that fails names the offending
@@ -143,7 +150,8 @@ prop_cliBackendRejectionValues = once $ ioProperty $ do
     counterexample "stderr carries the compared values" $
       err
         === "certificate replay: ord@1 (theory t0) rejected the certificate: \
-            \the claimed comparison does not hold: 5 < 5 is false\n"
+            \the claimed comparison does not hold: 5 < 5 is false\n\
+            \  slot 0 = leaf e0\n"
 
 -- | The same stderr line on the __@.lara@ front door__.
 --
@@ -158,6 +166,13 @@ prop_cliBackendRejectionValues = once $ ioProperty $ do
 -- the same certificate over the same two equal cells now replays false. The
 -- @stdout@ verdict is again the bare class atom, so the reason cannot leak onto
 -- the wire on this door either.
+--
+-- The slot mapping beneath the reason (#130) is the __authored__ one here: this
+-- artifact's two premises resolve to the leaves @e1@ and @e2@ the source
+-- declares, and 'Lara.Elaborate.SlotNames' recovers those names rather than
+-- reporting the structural reading the raw door gets. The two coincide for a
+-- leaf-fed instance, which is why the sharper cases — a prior argument and a
+-- premise label — are pinned in "ElaborateSpec" instead.
 prop_cliLaraBackendRejectionReason :: Property
 prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
   withTempLaraDir ltTieProgram [("p.policy.lara", ltTiePolicy)] $ \path -> do
@@ -172,10 +187,12 @@ prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
                       ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
                       ++ " reject R13)\n"
                   )
-        , counterexample "stderr carries the backend's own reason" $
+        , counterexample "stderr carries the backend's reason and the authored slots" $
             err
               === "certificate replay: ord@1 (theory sha256:t0) rejected the certificate: \
-                  \the claimed comparison does not hold: 0.71 < 0.71 is false\n"
+                  \the claimed comparison does not hold: 0.71 < 0.71 is false\n\
+                  \  slot 0 = leaf e1\n\
+                  \  slot 1 = leaf e2\n"
         ]
 
 -- | The @lara-syntax\@0.3@ half of the same rejection, and the D5 contract
@@ -192,9 +209,13 @@ prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
 --     'prop_cliLaraBackendRejectionReason' pins for the hand-written @0.2@
 --     spelling of the same artifact — D5 adds context, it does not reword the
 --     backend;
---   * the raw @.sexp@ door is __byte-unchanged__: a wire program has no
---     surface, no @comparison@, and no breadcrumb, so its stderr stays the bare
---     kernel line with no @lara:@ framing at all.
+--   * the slot mapping under the kernel line (#130) names the leaves the author
+--     wrote in the block's @result@ and @baseline@ fields, which is the whole
+--     point on this form: the author never wrote a slot index, so a rejection
+--     phrased over @(prem i)@ is unreadable without it;
+--   * the raw @.sexp@ door carries __no surface framing__: a wire program has
+--     no surface, no @comparison@, and no breadcrumb, so its stderr is the
+--     kernel line and the structural mapping, with no @lara:@ line at all.
 --
 -- The artifact is 'ltTieProgram' rewritten on the @comparison@ form: the same
 -- two equal cells, and a policy whose recheck rule concludes @num_lt@, so the
@@ -206,6 +227,9 @@ prop_cliLaraComparisonRejectionContext = once $ ioProperty $ do
   let kernelLine =
         "certificate replay: ord@1 (theory sha256:t0) rejected the certificate: \
         \the claimed comparison does not hold: 0.71 < 0.71 is false\n"
+      slotLines =
+        "  slot 0 = leaf e1\n\
+        \  slot 1 = leaf e2\n"
       surfaceLine =
         "lara: comparison claiming 'c2': argument 'a1' was generated by that block \
         \from result = 'e2', baseline = 'e1', on 'accuracy'\n"
@@ -223,14 +247,17 @@ prop_cliLaraComparisonRejectionContext = once $ ioProperty $ do
                       ++ " reject R13)\n"
                   )
         , counterexample "surface context above the unchanged kernel line" $
-            err === (surfaceLine ++ kernelLine)
+            err === (surfaceLine ++ kernelLine ++ slotLines)
         , counterexample "the kernel line itself is untouched" $
-            drop (length surfaceLine) err === kernelLine
+            take (length kernelLine) (drop (length surfaceLine) err) === kernelLine
+        , counterexample "the generated argument's slots name the authored leaves" $
+            drop (length surfaceLine + length kernelLine) err === slotLines
         , counterexample ".sexp door exit code unchanged" (rawCode === ExitFailure 1)
-        , counterexample ".sexp door stderr is the bare kernel line, no surface framing" $
+        , counterexample ".sexp door stderr has no surface framing" $
             rawErr
               === "certificate replay: ord@1 (theory t0) rejected the certificate: \
-                  \the claimed comparison does not hold: 5 < 5 is false\n"
+                  \the claimed comparison does not hold: 5 < 5 is false\n\
+                  \  slot 0 = leaf e0\n"
         ]
 
 -- | The @comparison@-form front door on an __accepting__ artifact
@@ -834,6 +861,8 @@ prop_cliAdmissionPrecedenceMatrix = once $ ioProperty $ do
       , resultIs "R13" (ExitFailure 1) "reject R13" "replay preflight" r13
       , resultIs "R9" (ExitFailure 1) "reject R9" "group 'g'" r9
       , resultIs "core" (ExitFailure 1) "reject missing-conflict" "" core
+      , noSlotBlock "R13" r13
+      , noSlotBlock "R9" r9
       ]
   where
     runVariant duplicateKey hasR8 badBackend rejectGroup =
@@ -849,6 +878,15 @@ prop_cliAdmissionPrecedenceMatrix = once $ ioProperty $ do
           , property (if null outMarker then null out else outMarker `isInfixOf` out)
           , property (if null errMarker then null err else errMarker `isInfixOf` err)
           ]
+
+    -- The replay-preflight (R13) and group-conflict (R9) paths report no slot
+    -- sources at all -- "Lara.Driver.Internal".@runCheckReported@ returns @[]@
+    -- for both -- so the #130 slot mapping must not appear under either.  The
+    -- marker assertions above are substring matches and would pass unchanged if
+    -- a regression appended a slot block to these two classes' stderr.
+    noSlotBlock name (_, _, err) =
+      counterexample (name ++ " printed a slot mapping: " ++ show err) $
+        property (not (any ((== "  slot ") . take 7) (lines err)))
 
 precedenceArtifact :: Bool -> String
 precedenceArtifact badBackend =

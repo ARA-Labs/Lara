@@ -30,6 +30,8 @@ module Lara.Driver.Internal
   , groupConflictReject
   , groupConflictMessage
   , backendRejectionMessage
+  , backendRejectionSlots
+  , slotMappingLines
   , buildCertOk
   , buildAccept
   , runCheck
@@ -50,6 +52,7 @@ import Lara.AST
   , GroupConflictMode (..)
   , GroupId (..)
   , LeafId (..)
+  , RuleId (..)
   , TheoryDigest (..)
   , RejectClass (..)
   , Rejection (..)
@@ -101,6 +104,7 @@ import Lara.SupportTerm
   , CertOk
   , CertOutcome (..)
   , CheckError (..)
+  , SlotSource (..)
   )
 import qualified Lara.Strict as St
 import qualified Lara.Strict.ND as ND
@@ -153,7 +157,9 @@ runCheckLocatedReported
   -> CheckInput
   -> (Verdict, Maybe LocatedRejection, [String])
 runCheckLocatedReported cfg input =
-  runCheckReported cfg input (prune (inputUnit input))
+  let (verdict, located, diagnostics, slots) =
+        runCheckReported cfg input (prune (inputUnit input))
+   in (verdict, located, diagnostics ++ slotMappingLines slots)
 
 -- | Execute the checker against a source-boundary prune while retaining replay
 -- preflight and group decisions over the original declared unit.  The source
@@ -165,7 +171,7 @@ runCheckLocatedReported cfg input =
 -- @
 runCheckWithPrune :: CheckConfig -> CheckInput -> Prune -> (Verdict, Maybe LocatedRejection)
 runCheckWithPrune cfg input pruned =
-  let (verdict, located, _) = runCheckReported cfg input pruned
+  let (verdict, located, _, _) = runCheckReported cfg input pruned
    in (verdict, located)
 
 -- | 'runCheckWithPrune' plus the @stderr@ lines the rejection warrants, all
@@ -181,7 +187,7 @@ runCheckReported
   :: CheckConfig
   -> CheckInput
   -> Prune
-  -> (Verdict, Maybe LocatedRejection, [String])
+  -> (Verdict, Maybe LocatedRejection, [String], [SlotSource])
 runCheckReported cfg input pruned =
   let replayId = inputReplayId input
       verdict outcome = Verdict replayId outcome
@@ -190,12 +196,14 @@ runCheckReported cfg input pruned =
           ( verdict (Reject (RejectClass R13))
           , Just (LocatedRejection (RejectClass R13) StageReplayPreflight (replayFailureConstituent failure))
           , [replayFailureMessage failure]
+          , []
           )
         Nothing
           | groupConflictRejectPrune pruned ->
               ( verdict (Reject (RejectClass R9))
               , Just (LocatedRejection (RejectClass R9) StageGroupBoundary (groupConflictConstituent pruned))
               , maybe [] (: []) (groupConflictMessageWithPrune pruned)
+              , []
               )
           | otherwise ->
               let checked = pruneChecked pruned
@@ -204,8 +212,9 @@ runCheckReported cfg input pruned =
                       ( verdict (Reject (rejectionOf err))
                       , Just (locate err)
                       , maybe [] (: []) (backendRejectionMessage err)
+                      , backendRejectionSlots err
                       )
-                    Right accepted -> (verdict (buildAccept pruned accepted), Nothing, [])
+                    Right accepted -> (verdict (buildAccept pruned accepted), Nothing, [], [])
 
 -- | The one @stderr@ line explaining a __checker-side__ R13: the registered
 -- backend replayed the certificate and refused it, and this is the reason it
@@ -232,7 +241,7 @@ runCheckReported cfg input pruned =
 -- mechanized seam to carry prose, which buys nothing a proof depends on.
 backendRejectionMessage :: UnitError -> Maybe String
 backendRejectionMessage err = case err of
-  UEProgram (PERejection _ (CE_R13 _ (ReplayRejected (BackendId name) (TheoryDigest digest) ref reason)))
+  UEProgram (PERejection _ (CE_R13 _ (ReplayRejected (BackendId name) (TheoryDigest digest) ref reason _)))
     | not (null reason) ->
         Just
           ( "certificate replay: "
@@ -245,6 +254,46 @@ backendRejectionMessage err = case err of
               ++ reason
           )
   _ -> Nothing
+
+-- | The slot → source mapping of a __checker-side__ R13 (#130): what the
+-- checked term put in each premise slot the refused certificate cites. Empty
+-- for every other rejection class, and for the preflight R13s, which reject
+-- before a premise list exists.
+--
+-- It is read off the /same/ 'UnitError' that produced the verdict — the
+-- mapping is built where the rejection is raised
+-- ("Lara.SupportTerm".@assuranceError@), never reconstructed from the input,
+-- so it cannot describe a different instance than the one that was refused.
+backendRejectionSlots :: UnitError -> [SlotSource]
+backendRejectionSlots err = case err of
+  UEProgram (PERejection _ (CE_R13 _ (ReplayRejected _ _ _ _ slots))) -> slots
+  _ -> []
+
+-- | Render a slot → source mapping as one @stderr@ line per slot, under the
+-- rejection reason it explains (#130).
+--
+-- __Why this is worth a line each.__ The bare reason names a @(prem i)@ the
+-- author is left to decode by hand against the policy declarations. A numeric
+-- certificate, an @nd\@1@ proof term, and a third-party artifact all reject
+-- this way, and none of them is reached by the @lara-syntax\@0.6@ named slots,
+-- which fix the same mistake at authoring time on the @.lara@ door only.
+--
+-- This is the __structural__ reading, so it is what both doors can always say.
+-- The @.lara@ door replaces it with the authored spelling where it has one
+-- ('Lara.Elaborate.sourceResultAuthorDiagnostics'); this rendering is what a
+-- raw @.sexp@ input gets, and what the source door falls back to.
+--
+-- Empty in, empty out — a rejection with no premise list adds nothing.
+slotMappingLines :: [SlotSource] -> [String]
+slotMappingLines = zipWith line [0 :: Int ..]
+  where
+    line i src = "  slot " ++ show i ++ " = " ++ renderSlotSource src
+
+-- | The structural spelling of one slot's source (#130).
+renderSlotSource :: SlotSource -> String
+renderSlotSource src = case src of
+  SlotLeaf (LeafId l) -> "leaf " ++ l
+  SlotDerived (RuleId r) -> "derived by " ++ r
 
 -- | The located constituent of a replay-preflight (R13) failure: the
 -- backend-selection failures locate at the replay envelope (the ground truth

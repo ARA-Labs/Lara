@@ -38,6 +38,8 @@ module Lara.SupportTerm
   , DischargeReason (..)
   , AssuranceReason (..)
   , BackendReason (..)
+  , SlotSource (..)
+  , slotSourceOf
   , AttackKind (..)
   , AttackOccurrenceKind (..)
   , AttackPositionReason (..)
@@ -181,18 +183,49 @@ data AssuranceReason
   | CertifierUnallowlisted BackendId TheoryDigest
   deriving (Eq, Show)
 
+-- | What fills one premise slot, as the __checked term__ says (#130).
+--
+-- This is the structural reading, available on both doors: it names what the
+-- 'Unit' actually put in the slot the certificate cites, never a surface name.
+-- A leaf premise names its leaf; a derived premise names the rule of the
+-- instance that concluded it, because at this layer that argument's authored
+-- id no longer exists — premise resolution inlines a prior argument as its own
+-- elaborated term ("Lara.Elaborate.Internal".@resolvePremises@). The @.lara@
+-- door layers the authored names over this reading
+-- ('Lara.Elaborate.sourceResultAuthorDiagnostics'); the raw @.sexp@ door has
+-- only this one, which is the point — a third-party artifact and a numeric
+-- certificate get the same mapping a named one does.
+data SlotSource
+  = -- | the slot is filled by a declared leaf
+    SlotLeaf LeafId
+  | -- | the slot is filled by a derived sub-argument, concluded by this rule
+    SlotDerived RuleId
+  deriving (Eq, Show)
+
+-- | The structural reading of one resolved premise ('SlotSource').
+slotSourceOf :: SupportTerm -> SlotSource
+slotSourceOf w = case w of
+  SLeaf l -> SlotLeaf l
+  SRule{srRule = r} -> SlotDerived r
+
 -- | R13 backend failures (Lean @BackendReason@).
 --
--- 'ReplayRejected' carries the backend adapter's own reason string. It is a
--- diagnostic payload only: 'Lara.Diagnostics.rejectionOf' maps every
--- constructor here to the same wire class @R13@, so the string never reaches
+-- 'ReplayRejected' carries the backend adapter's own reason string and, since
+-- #130, the slot → source mapping of the instance whose certificate was
+-- refused. Both are diagnostic payload only: 'Lara.Diagnostics.rejectionOf'
+-- maps every constructor here to the same wire class @R13@, so neither reaches
 -- @stdout@ and the wire verdict is unchanged. The Lean @BackendReason@
 -- deliberately has no such field — see "Lara.Driver.Internal" for why the two
 -- drivers are allowed to differ here.
+--
+-- The mapping is positional and total: entry @i@ is the source of premise slot
+-- @i@, in the same order the premise conclusions were handed to
+-- 'Lara.Strict.strictCheck', so it indexes exactly the @(prem i)@ the
+-- certificate cites.
 data BackendReason
   = BackendMissing BackendId
   | DigestMissing BackendId TheoryDigest
-  | ReplayRejected BackendId TheoryDigest CertRef String
+  | ReplayRejected BackendId TheoryDigest CertRef String [SlotSource]
   deriving (Eq, Show)
 
 -- | The attack kinds, for R10\/R11 diagnostics (Lean @AttackKind@).
@@ -452,8 +485,8 @@ answerError theta questions d results loc fallback =
         loc
         (AnswerInstantiation (headDefault (QuestionId "") (map fst d)) fallback)
 
-assuranceError :: CertOk -> Rule -> [Prop] -> Prop -> Assurance -> CheckLoc -> CheckError
-assuranceError certOk r as c a loc = case a of
+assuranceError :: CertOk -> Rule -> [Prop] -> Prop -> Assurance -> [SupportTerm] -> CheckLoc -> CheckError
+assuranceError certOk r as c a ws loc = case a of
   AssuranceNone -> CE_R7 loc (WrongMode (ruleMode r) a)
   AssuranceTrusted ->
     if ruleMode r == Strict
@@ -474,7 +507,16 @@ assuranceError certOk r as c a loc = case a of
           -- never a second evaluation path. 'CertAccepted' is unreachable;
           -- if it ever occurred, the honest thing is to say nothing rather than
           -- invent a cause, so it maps to the empty reason.
-          else CE_R13 loc (ReplayRejected b h (CertRef b v h) (reasonOf (certOk cert as c)))
+          else
+            CE_R13
+              loc
+              ( ReplayRejected
+                  b
+                  h
+                  (CertRef b v h)
+                  (reasonOf (certOk cert as c))
+                  (map slotSourceOf ws)
+              )
   where
     reasonOf CertAccepted = ""
     reasonOf (CertRejected msg) = msg
@@ -552,7 +594,7 @@ inferSupport pI gamma certOk = go
           (CE_R7 loc (QuestionsPresent dkeys hns))
         require
           (assuranceOkB certOk r as c a)
-          (assuranceError certOk r as c a loc)
+          (assuranceError certOk r as c a ws loc)
         pure
           ( SupportResult
               c

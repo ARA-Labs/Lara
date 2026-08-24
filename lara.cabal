@@ -42,6 +42,7 @@ library
                       Lara.Elaborate.Error
                       Lara.Elaborate.CertSlots
                       Lara.Elaborate.NDNamed
+                      Lara.Elaborate.SlotNames
                       Lara.Elaborate.Subst
                       Lara.Elaborate.Comparison
                       Lara.Elaborate.ValueBinding
@@ -142,6 +143,7 @@ test-suite lara-test
                       RuntimeSpec
                       ReportingSpec
                       CliSpec
+                      SlotNamesSpec
     build-depends:    base >=4 && <5
                     , lara
                     , aeson

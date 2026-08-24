@@ -16,6 +16,8 @@ module Lara.Driver
   , groupConflictReject
   , groupConflictMessage
   , backendRejectionMessage
+  , backendRejectionSlots
+  , slotMappingLines
   , buildCertOk
   , buildAccept
   , runCheck
@@ -39,6 +41,8 @@ import Lara.Driver.Internal
   , quarantineUnit
   , quarantinedLeaves
   , backendRejectionMessage
+  , backendRejectionSlots
+  , slotMappingLines
   , runCheck
   , runCheckLocated
   , runCheckLocatedWith
