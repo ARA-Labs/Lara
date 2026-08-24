@@ -288,6 +288,68 @@ edges, and the structural fallback; and by `test/CliSpec.hs` for the binary's by
 on both doors and for the absence of a slot block on the R9/R13 paths that report
 no slot sources.)
 
+### 1.6 The formula mapping under an `nd@1` R13 (#148)
+
+§1.5 makes the *premise list* of a refused certificate readable. The formulas in
+the same reason were still opaque. When an `nd@1` proof term lowers cleanly and
+is then refused, the backend names atoms by the `encodeAtomKey` framing:
+
+```
+certificate replay: nd@1 (theory sha256:strict-v1-theory-0) rejected the certificate:
+  application mismatch: expected FAtom (AtomId "1:A5:holds1:L1:227:1:C15:other_invariant1:L1:012:1:C1:D1:L1:0"),
+                        got FAtom (AtomId "1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0")
+  slot 0 = leaf e1
+```
+
+`lara-syntax@0.10` removed the last out-of-band key from *authoring* — the author
+wrote `(prop "holds(other_invariant, D)")` — and a rejection put it straight
+back, at the moment it is hardest to read. Since #148 the `.lara` door adds one
+line per atom the reason names, in the order it names them:
+
+```
+  formula 0 = holds(other_invariant, D)  (authored annotation)
+  formula 1 = holds(safety_invariant, D)  (leaf e1)
+```
+
+**The map draws on two sources, because a mismatch names one of each.** The
+`expected` side is the author's `(prop TEXT)` annotation. The `got` side is the
+conclusion of the leaf a `(prem s)` cited — never spelled as a `prop` at all. A
+map built from annotations alone would have spelled back exactly the first line
+of every mismatch, which is the half that happens to be listed first;
+`Lara.Elaborate.FormulaNames` therefore collects both, tagging each entry with
+its origin. A proposition spelled *both* ways shares one key and reports the
+annotation, the author's own words for the position under diagnosis.
+
+**Selective, not a glossary.** Only keys the reason actually names get a line,
+so the block grows with the rejection rather than with the program. The match is
+on the key's `show` spelling, because the adapter renders formulas with `show`
+(`Lara.Strict.ND.inferType`) and an atom therefore reaches the reason as
+`FAtom (AtomId "…")` — escapes and all. A key the map cannot explain, such as a
+theory formula, contributes no line, which is honest: nothing authored
+corresponds to it.
+
+**Recovered, not threaded**, the same way §1.5's authored reading is. Elaboration
+lowers certificate payloads in place, so the checked `Unit` no longer holds the
+authored spellings — but the parsed source `Program` is retained beside it and
+still does. Nothing is carried out of the elaborator, nothing new reaches `Unit`,
+nothing reaches the wire, and `sourceResultDiagnostics` — whose `messages` field
+`expected.json` renders — is untouched; the lines ride
+`sourceResultAuthorDiagnostics`, the same `.lara`-only channel §1.1 and §1.5
+use. The raw `.sexp` door has no authored spellings to recover and prints none.
+
+**What this deliberately does not do** is map the `hyp i` de Bruijn indices in
+the same reason back to binder names. That index is relative to the local binder
+context *at the failure site inside the adapter*, which reports through a flat
+`String`, so no sound recovery exists from outside it — and a best-effort
+reconstruction could print a confidently wrong name, the failure §1.5 also
+exists to prevent. Closing it means giving the registered-backend seam a
+structured rejection, tracked as
+[#151](https://github.com/ARA-Labs/lara/issues/151).
+
+(Pinned by `test/FormulaNamesSpec.hs`: both sources of a mismatch, the
+reason-driven ordering, the shared-key precedence, the unmentioned-key and empty
+cases, and the collector's nested and unparsable arms.)
+
 ## 2. The class table, with a runnable anchor per class
 
 `docs/spec.md` §10.1 freezes fourteen rejection classes (R1–R14); the table below adds one runnable

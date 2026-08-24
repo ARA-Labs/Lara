@@ -21,7 +21,9 @@ Lara.Mutate                 core; imports no sibling
 ├── Suite ────────────────→ core + Seed + Sites + Sorts
 ├── Codec ────────────────→ core
 ├── Cycle ────────────────→ core + Seed
-├── Accept ───────────────→ core
+├── Accept ───────────────→ core + Accept.Ops + Accept.Build
+│   ├── Accept.Ops ───────→ core + Accept.Build
+│   └── Accept.Build ─────→ core
 └── Sorts ────────────────→ core
 ```
 
@@ -106,33 +108,72 @@ with the codec, cycle, and accept families.
 This is a deliberate deviation from the issue's sketch. The issue is closed; if
 its wording and this record disagree, this record is the one that shipped.
 
-## Sizing rule, and the `Accept` exception
+## Sizing rule
 
 Every module in the namespace stays at or below the coding guideline's 400-line
-upper bound, with one documented exception. As landed:
+upper bound. **There is no longer an exception** (#143). As it now stands:
 
 | Module | Lines |
 |---|---|
 | `Lara.Mutate` | 379 |
-| `Lara.Mutate.Accept` | 445 — **the documented exception** |
 | `Lara.Mutate.Sites` | 363 |
 | `Lara.Mutate.Sorts` | 302 |
 | `Lara.Mutate.Suite` | 260 |
+| `Lara.Mutate.Accept.Ops` | 241 |
+| `Lara.Mutate.Accept.Build` | 161 |
+| `Lara.Mutate.Accept` | 154 |
 | `Lara.Mutate.Codec` | 128 |
 | `Lara.Mutate.Cycle` | 123 |
 | `Lara.Mutate.Seed` | 76 |
 | `Lara.Mutate.Manifest` | 69 |
-| **Σ** | **2145** |
+| **Σ** | **2256** |
 
-Counts are as of the commit that added this record (`git ls-files` /
-`wc -l`), which is why the root reads 379 rather than the 374 it measured
-before this document's own five-line Haddock cross-reference was added to it.
+Counts are `git ls-files` / `wc -l`. The root reads 379 rather than the 374 it
+measured before this document's own five-line Haddock cross-reference was added
+to it.
 
-`Accept` (445) predates the split — it was extracted as new material in M5 T1 —
-and splitting it was explicitly outside #122. It received a documentation-only
-edit and remains the single standing exception; it is not precedent for a new
-module over the bound. The deferral is tracked as issue #143, so the exception
-has a home in the tracker rather than only in this sentence.
+### History of the `Accept` exception, and how it closed
+
+`Lara.Mutate.Accept` landed at **445** lines, the one module over the bound.
+It predates the #122 split — it was extracted as new material in M5 T1, so it
+never went through the re-partitioning pass the rest of the namespace had — and
+splitting it was explicitly outside #122's scope. This record originally carried
+it as a single documented exception, explicitly not precedent, with the deferral
+tracked as issue #143 so the exception had a home in the tracker rather than
+only in a sentence here.
+
+**#143 closed it by splitting along the seam this record predicted** — the
+constructed accept-verdict family versus its site/assembly helpers — into three
+modules under a facade:
+
+- `Lara.Mutate.Accept` (154) — the facade and the whole public surface:
+  `acceptMutants` (which operators, in what order), `isJustified` (which bases),
+  and `acceptStructureOk` (was it the mutant asked for).
+- `Lara.Mutate.Accept.Ops` (241) — the six constructions and the vocabulary each
+  injects.
+- `Lara.Mutate.Accept.Build` (161) — mutant assembly, the asserted
+  justified-unit invariants, and the attack-site helpers.
+
+The dependency order is forced, and is why assembly sits *below* the operators
+rather than beside them in the facade: every operator emits through
+`acceptMutantWith`, so a facade that both listed the operators and owned the
+assembly would close an import cycle.
+
+**The public API did not change.** `Lara.Mutate.Accept` stays the only exposed
+module of the three, still exporting exactly `acceptMutants` and
+`acceptStructureOk`; `Ops` and `Build` are `other-modules`, like
+`Lara.Mutate.Seed` and `Lara.Mutate.Sites`. The source-API break #143 warned
+about — `Accept` being in `exposed-modules`, so a split that moved exported
+names would break importers — never materialized, because the facade kept both
+names. `scripts/gen-mutants.hs` and `test/MutationSpec.hs`, the only two
+importers, are untouched.
+
+The move was verified byte-preserving in two independent ways: the generated
+suite came out byte-identical (`gen-mutants.hs` → empty `fixtures/mutants`
+diff, so `m5-freeze-v4` stays valid), and every non-comment, non-import code
+line of the original file is present in the union of the three new files with
+none lost. The `error` messages still name `Lara.Mutate.Accept`, the public
+entry point, rather than the module they now live in.
 
 ## What the split deliberately did not change
 

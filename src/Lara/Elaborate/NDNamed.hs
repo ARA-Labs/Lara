@@ -32,6 +32,7 @@ module Lara.Elaborate.NDNamed
   , namedTagToString
   , firstNamedMarker
   , lowerNamedPayload
+  , authoredPropAnnotations
   ) where
 
 import Control.Applicative ((<|>))
@@ -199,6 +200,42 @@ lowerFormula expr
       b' <- lowerFormula b
       Right (SList [SAtom (ND.tagToString ND.TImp), a', b'])
   | otherwise = Right expr
+
+-- | Every source-authored formula annotation in a named proof-term payload, as
+-- @(atom key, authored text)@ pairs in leftmost-outermost order (#148).
+--
+-- This is the inverse direction of 'lowerFormula', for one purpose only:
+-- when a payload lowers cleanly and the certificate is then refused at replay,
+-- the backend's reason is phrased over the __lowered__ image and names atoms by
+-- the opaque 'ND.encodeAtomKey' spelling.  The author wrote @(prop TEXT)@ and
+-- reads about a key.  This recovers the pairing so the diagnosis can be printed
+-- in the vocabulary the source used.
+--
+-- == Why a whole-tree scan is sound
+--
+-- It does not mirror 'lowerFormula'\'s traversal, and does not have to.  Named
+-- lowering only succeeds when no @prop@ marker sits in a residual position
+-- ('firstResidualMarker' \/ 'formulaResidualMarker' reject that first), so on
+-- the success path __every__ @prop@ node in the term is one 'lowerFormula'
+-- consumed.  A flat scan therefore sees exactly that set — no more, no fewer —
+-- and cannot drift from the lowering as the grammar grows.
+--
+-- == Why the key matches
+--
+-- It is computed through the same @'ND.encodeAtomKey' . 'nf' . 'parseProp'@
+-- path 'lowerFormula' emits through, so it is the same key by construction
+-- rather than by agreement.  An annotation whose text does not parse
+-- contributes nothing: that payload cannot have lowered, so no key of its
+-- exists to explain.
+authoredPropAnnotations :: SExpr -> [(String, String)]
+authoredPropAnnotations expr
+  | Just source <- propSource expr =
+      case parseProp source of
+        Right p -> [(ND.encodeAtomKey (nf p), source)]
+        Left _ -> []
+  | otherwise = case expr of
+      SAtom _ -> []
+      SList children -> concatMap authoredPropAnnotations children
 
 -- | The first named extension marker in leftmost-outermost order.  This scan
 -- selects named mode; 'firstResidualMarker' narrows the same marker vocabulary

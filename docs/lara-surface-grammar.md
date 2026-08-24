@@ -2253,18 +2253,27 @@ parallel `CertNd` rendering: it reuses the applicable `CertSlot*` family and
 the Appendix G.5 template verbatim.
 
 Lowering is one-way. If lowering succeeds but `nd@1` later rejects at R13, its
-backend diagnostic describes the lowered de Bruijn term; there is no source map
-back to binder or premise names. The source author may therefore have to map an
-index back by hand. This error-attribution limitation does not weaken replay,
-but it belongs to the honest user-facing boundary, and is tracked as
-[#148](https://github.com/ARA-Labs/lara/issues/148).
+backend diagnostic describes the lowered de Bruijn term. Three parts of that
+term could in principle be mapped back to what the author wrote; two now are.
 
-One half of it has since closed: an R13 now renders the slot → source mapping
-of the refused instance, in the authored spelling on the `.lara` door
-([#130](https://github.com/ARA-Labs/lara/issues/130);
-`docs/rejection-surface.md` §1.5). That covers the *premise list* — the
-`(prem s)` references a named term cites. It does not cover the binder names or
-the formula annotations inside the proof term, which remain #148's subject.
+- **The premise list** — the `(prem s)` references a named term cites — closed
+  at [#130](https://github.com/ARA-Labs/lara/issues/130): an R13 renders the
+  slot → source mapping of the refused instance, in the authored spelling on
+  the `.lara` door (`docs/rejection-surface.md` §1.5).
+- **The formula annotations** closed at
+  [#148](https://github.com/ARA-Labs/lara/issues/148): the same R13 renders the
+  authored spelling of every atom the reason names, drawn from the `(prop
+  TEXT)` annotations *and* the declared leaf propositions, because a mismatch
+  names one of each (`docs/rejection-surface.md` §1.6).
+- **The binder names** remain unmapped. A `hyp i` index is relative to the
+  local binder context at the failure site *inside* the adapter, which reports
+  through a flat string, so no sound recovery exists from outside it. Closing
+  it means giving the registered-backend seam a structured rejection — the one
+  boundary the `@0.6`–`@0.10` arc kept frozen — and is tracked separately as
+  [#151](https://github.com/ARA-Labs/lara/issues/151).
+
+This residual limitation does not weaken replay; it belongs to the honest
+user-facing boundary.
 
 ### H.6 Mechanization, witness, and trust boundary
 
@@ -2374,13 +2383,22 @@ and `examples/S8/` — rewritten to
 remains the end-to-end byte-identity witness against its committed numeric
 `.core.sexp`, now with no out-of-band command anywhere in its provenance.
 
-The post-lowering error-attribution limitation is unchanged from H.5: if a
-lowered term fails replay at R13, the diagnostic is phrased over the numeric
-de Bruijn image with the encoded key, and no source map restores the authored
-proposition. Whether such a map is worth its cost remains the separately
-deliberate deferral recorded at `@0.9`, tracked as
-[#148](https://github.com/ARA-Labs/lara/issues/148). The premise-list half of
-the same attribution problem closed at
-[#130](https://github.com/ARA-Labs/lara/issues/130), which renders the slot →
-source mapping under every R13 (`docs/rejection-surface.md` §1.5); the formula
-annotation an `nd@1` binder carries is not reached by it.
+The post-lowering error-attribution limitation recorded here at `@0.9` has since
+closed for formulas ([#148](https://github.com/ARA-Labs/lara/issues/148)). If a
+lowered term fails replay at R13, the reason is still phrased over the numeric
+de Bruijn image with the encoded key — that much is inherent to a one-way
+lowering — but the `.lara` door now prints, beneath it, the authored spelling of
+every atom the reason names (`docs/rejection-surface.md` §1.6). The map is
+recovered from the retained source `Program`, not threaded out of the
+elaborator, so `@0.10`'s zero-cost property holds unchanged: no core, wire,
+`.core.sexp`, checker-judgment or replay change.
+
+The map draws on **two** sources, because a mismatch names one atom of each: the
+`(prop TEXT)` annotations of the proof term, and the propositions of the
+declared leaves a `(prem s)` cites. An annotation-only map would have spelled
+back exactly the `expected` side of every mismatch and left the `got` side
+opaque.
+
+What remains unmapped is the binder names — see H.5 for why that half is a seam
+change rather than a rendering one, tracked as
+[#151](https://github.com/ARA-Labs/lara/issues/151).

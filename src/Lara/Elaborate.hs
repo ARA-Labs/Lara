@@ -71,6 +71,8 @@ module Lara.Elaborate
   , sourceResultSlotSources
   , sourceResultAuthoredSlots
   , slotMappingFor
+    -- * Formula attribution (#148)
+  , sourceResultAuthoredFormulas
   ) where
 
 import Data.Bifunctor (first)
@@ -88,6 +90,11 @@ import Lara.Admission.Internal
   , validateAdmissionKeys
   )
 import Lara.Blocked (Prune, pruneChecked, pruneWithPolicySeed)
+import Lara.Elaborate.FormulaNames
+  ( AuthoredFormula
+  , authoredFormulaMap
+  , formulaMappingLines
+  )
 import Lara.Elaborate.SlotNames
   ( AuthoredSlot
   , authoredSlotMap
@@ -181,12 +188,13 @@ data SourceResult = SourceResult
   [GeneratedArg]
   [SlotSource]
   [(ArgId, [AuthoredSlot])]
+  [AuthoredFormula]
 
 sourceResultVerdict :: SourceResult -> Verdict
-sourceResultVerdict (SourceResult verdict _ _ _ _ _ _ _ _) = verdict
+sourceResultVerdict (SourceResult verdict _ _ _ _ _ _ _ _ _) = verdict
 
 sourceResultAudit :: SourceResult -> AdmissionAudit
-sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _) = audit
+sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _ _) = audit
 
 -- | The @stderr@ lines this result's rejection warrants, in the raw driver's
 -- established precedence: a replay-preflight R13
@@ -201,7 +209,7 @@ sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _) = audit
 -- verdict, so a line here can never explain a rejection this result did not
 -- make.
 sourceResultDiagnostics :: SourceResult -> [String]
-sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _) = diagnostics
+sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _ _) = diagnostics
 
 -- | The located rejection that produced this result's verdict, from the /same/
 -- decision path ("Lara.Driver.Internal".@runCheckReported@): its class, failing
@@ -213,7 +221,7 @@ sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _) = diagnostics
 -- rather than in a message line — so an R1 on a pruned source would print an
 -- empty diagnostic.
 sourceResultLocatedRejection :: SourceResult -> Maybe LocatedRejection
-sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _) = located
+sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _ _) = located
 
 -- | The argument ids of the __checked__ (post-prune) program, in the order the
 -- checker indexed them.  A 'LocatedRejection' constituent names arguments by
@@ -223,14 +231,14 @@ sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _) = located
 -- checked 'Unit' is deliberately not, so a caller still cannot rebuild a
 -- policy-pruned envelope and re-run it without the blocked-status overlay.
 sourceResultCheckedArgIds :: SourceResult -> [ArgId]
-sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _ _ _) = argIds
+sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _ _ _ _) = argIds
 
 -- | Every argument this source's @comparison@ blocks generated, tied back to
 -- the block that minted it (plan D5).  Empty for a program that authors no
 -- @comparison@ — which is every raw @.sexp@ input, and every @lara-syntax\@0.2@
 -- program.
 sourceResultGeneratedArgs :: SourceResult -> [GeneratedArg]
-sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _) = generated
+sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _) = generated
 
 -- | The __structural__ premise-slot mapping of a checker-side R13 (#130): what
 -- the checked term put in each slot the refused certificate cites, read off the
@@ -242,7 +250,7 @@ sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _) = generated
 -- authored one so a caller can tell the two apart rather than parsing them back
 -- out of a rendered line.
 sourceResultSlotSources :: SourceResult -> [SlotSource]
-sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _) = slots
+sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _) = slots
 
 -- | The __authored__ premise-slot spelling of every checked argument (#130),
 -- keyed by argument id: the leaf, prior-argument, and premise-label names the
@@ -253,7 +261,19 @@ sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _) = slots
 -- no rule-instance arguments — which is every raw @.sexp@ input, since a wire
 -- program has no authored names to recover.
 sourceResultAuthoredSlots :: SourceResult -> [(ArgId, [AuthoredSlot])]
-sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored) = authored
+sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _) = authored
+
+-- | The __authored__ spelling of every formula this source can name (#148):
+-- the @lara-syntax\@0.10@ @(prop TEXT)@ annotations of its @nd\@1@ payloads,
+-- and the propositions of its declared leaves, each paired with the opaque
+-- 'Lara.Strict.ND.encodeAtomKey' framing a backend names it by
+-- ("Lara.Elaborate.FormulaNames").
+--
+-- Present for every source, not only a rejected one, because it is a property
+-- of the program rather than of the verdict. Empty for a raw @.sexp@ input,
+-- which has no authored spellings to recover.
+sourceResultAuthoredFormulas :: SourceResult -> [AuthoredFormula]
+sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas) = formulas
 
 -- | The validated raw core envelope bound into this source result, unless
 -- policy admission removed source material. Duplicate-group quarantine is
@@ -263,7 +283,7 @@ sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored) = authored
 -- fail closed rather than recompute the declared envelope through
 -- 'Lara.Driver.runCheck'.
 sourceResultCheckInput :: SourceResult -> Either AdmissionAudit CheckInput
-sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _)
+sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _)
   | admissionAuditHasPolicyQuarantine audit = Left audit
   | otherwise = Right checkInput
 
@@ -312,7 +332,7 @@ prepareSource program policy = do
             )
 
 runSourceCheck :: SourceCheckInput -> SourceResult
-runSourceCheck (SourceCheckInput _ policy _ _ finalPrune audit checkInput generated) =
+runSourceCheck (SourceCheckInput program policy declared _ finalPrune audit checkInput generated) =
   let checked = pruneChecked finalPrune
       (verdict, located, diagnostics, slots) =
         runCheckReported fullConfig checkInput finalPrune
@@ -326,6 +346,10 @@ runSourceCheck (SourceCheckInput _ policy _ _ finalPrune audit checkInput genera
         generated
         slots
         (authoredSlotMap policy (unitArgs checked))
+        -- Built from the __declared__ unit, not the checked one: a leaf a
+        -- policy prune removed can still be named by a rejection reason, and
+        -- an entry the reason never mentions costs nothing (#148).
+        (authoredFormulaMap program declared)
 
 -- ---------------------------------------------------------------------------
 -- The author-facing layer (plan D5, eng review 2A)
@@ -353,7 +377,40 @@ runSourceCheck (SourceCheckInput _ policy _ _ finalPrune audit checkInput genera
 sourceResultAuthorDiagnostics :: SourceResult -> [String]
 sourceResultAuthorDiagnostics result = case sourceResultDiagnostics result of
   [] -> []
-  diagnostics -> surfaceContextLines result ++ diagnostics ++ slotLines result
+  diagnostics ->
+    surfaceContextLines result
+      ++ diagnostics
+      ++ slotLines result
+      ++ formulaLines result diagnostics
+
+-- | The authored spelling of every formula a rejection reason names (#148), in
+-- the order the reason names them, under the slot mapping it sits beside.
+--
+-- __The gap this closes.__ @lara-syntax\@0.9@ removed hand-computed de Bruijn
+-- indices from /authoring/ and @\@0.10@ removed the last out-of-band key from
+-- the formula annotations. Neither reaches a /rejection/: a certificate that
+-- lowers cleanly and is then refused at R13 is reported over the lowered image,
+-- so the author reads @FAtom (AtomId \"1:A5:holds1:L1:2…\")@ for a formula they
+-- wrote as @(prop \"holds(safety_invariant, D)\")@. That is the one point where
+-- the named surface still leaks its lowered image, and it arrives exactly when
+-- it is hardest to read.
+--
+-- __What is not done here.__ The @hyp i@ de Bruijn indices in the same reason
+-- are __not__ mapped back to binder names. That index is relative to the local
+-- binder context at the failure site inside the adapter, and the adapter
+-- reports through a flat 'String' ('Lara.SupportTerm.ReplayRejected'), so no
+-- sound recovery exists from outside it. Doing it properly means giving the
+-- registered-backend seam a structured rejection — the one boundary the
+-- @\@0.6@-@\@0.10@ arc kept frozen — and is tracked separately rather than
+-- smuggled in here.
+--
+-- Strictly additive, like the slot lines it follows: the kernel line is
+-- unchanged and in the same order, @stdout@, the verdict class and the exit
+-- code are untouched, and 'sourceResultDiagnostics' — whose bytes
+-- "Lara.ExpectedJson" pins in every @expected.json@ — is not this channel.
+formulaLines :: SourceResult -> [String] -> [String]
+formulaLines result diagnostics =
+  formulaMappingLines (unlines diagnostics) (sourceResultAuthoredFormulas result)
 
 -- | The premise-slot mapping under a checker-side R13's reason line (#130), in
 -- the authored spelling where the source door has one.

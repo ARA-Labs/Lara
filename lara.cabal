@@ -22,6 +22,8 @@ library
     hs-source-dirs:   src
     other-modules:    Lara.Admission.Internal
                       Lara.Driver.Internal
+                      Lara.Mutate.Accept.Build
+                      Lara.Mutate.Accept.Ops
                       Lara.Mutate.Seed
                       Lara.Mutate.Sites
     exposed-modules:  Lara.Prop
@@ -41,6 +43,7 @@ library
                       Lara.Elaborate.Internal
                       Lara.Elaborate.Error
                       Lara.Elaborate.CertSlots
+                      Lara.Elaborate.FormulaNames
                       Lara.Elaborate.NDNamed
                       Lara.Elaborate.SlotNames
                       Lara.Elaborate.Subst
@@ -143,6 +146,7 @@ test-suite lara-test
                       RuntimeSpec
                       ReportingSpec
                       CliSpec
+                      FormulaNamesSpec
                       SlotNamesSpec
     build-depends:    base >=4 && <5
                     , lara
