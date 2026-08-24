@@ -73,6 +73,7 @@ acceptMutantWith base input op expected u' =
   | Right mutated <- [mkCheckInput (inputReplayId input) u']
   , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
   ]
+
 -- ---------------------------------------------------------------------------
 -- Justified-unit invariants (asserted, plan D13/OV-11)
 -- ---------------------------------------------------------------------------

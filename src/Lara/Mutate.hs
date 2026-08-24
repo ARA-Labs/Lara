@@ -23,6 +23,8 @@
 -- * "Lara.Mutate.Codec" — the codec-corruption family (R14)
 -- * "Lara.Mutate.Cycle" — the constructed rebut-cycle family
 -- * "Lara.Mutate.Accept" — the constructed accept-verdict family
+-- * "Lara.Mutate.Accept.Ops" — the six accept constructions (internal)
+-- * "Lara.Mutate.Accept.Build" — accept mutant assembly and site helpers (internal)
 --
 -- The ownership contract behind this layout — which module owns which
 -- names, why the root deliberately does not re-export the ones that moved,

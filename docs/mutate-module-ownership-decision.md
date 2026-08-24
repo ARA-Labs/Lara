@@ -78,8 +78,11 @@ small in-repo. Exactly two files import `Lara.Mutate` wholesale
 The four selective importers — `Lara.Measure`, `test/AblationSpec.hs`,
 `scripts/bench.hs`, `scripts/measure.hs` — take only
 `Expected`/`parseExpected`/`statusText`, which stay in the root, so they did not
-change at all. Neither did `Lara.Mutate.Accept`, whose four imported names also
-stay in the root.
+change at all. Neither did the accept family, whose four imported names also
+stay in the root. Since the #143 split those four are spread across its three
+modules rather than imported by one: the facade takes `Expected`/`Mutant`/
+`MutationOp`, `Lara.Mutate.Accept.Ops` takes `Mutant`/`MutationOp`, and
+`Lara.Mutate.Accept.Build` takes all four, `mutantFileName` included.
 
 ## D2 — Seven ownership modules, six of them new
 
