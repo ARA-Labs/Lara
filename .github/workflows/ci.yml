@@ -85,6 +85,9 @@ jobs:
       - name: Replay freezer unit tests
         run: python3 -m unittest scripts/test_freeze_bundle.py -v
 
+      - name: Container benchmark runner unit tests
+        run: python3 -m unittest scripts/test_bench_container.py -v
+
       - name: Policy-copy authenticity (T7)
         run: |
           cmp -s \

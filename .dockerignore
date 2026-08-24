@@ -1,0 +1,14 @@
+.git
+.worktrees
+.superpowers
+dist-newstyle
+lean/.lake
+measurements
+__pycache__
+*.pyc
+*.prof
+*.hp
+*.eventlog
+.DS_Store
+.env
+.env.*

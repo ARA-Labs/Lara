@@ -7,7 +7,9 @@ numbers**. They describe one machine at one commit; re-run the bench rather
 than trusting them. The paper's typeset table is generated separately and is
 not tracked in this repository — see [why](#why-no-rendered-table-is-committed).
 
-## Running it
+## Running It
+
+### Native Developer Run
 
 ```sh
 make bench                                                 # aligned text (default)
@@ -20,8 +22,35 @@ so stdout stays pipeable. Every run also writes the raw per-unit record to
 `measurements/bench.json`, which is gitignored as regenerable output
 (`m5-freeze-checklist.md`).
 
-Both binaries must be built *before* the timed command, so a rebuild never
-lands inside a measurement — the `bench` target does this for you.
+`make bench` builds the Haskell benchmark executable and Lean driver before it
+runs. A direct `lara-bench --prebuilt` invocation suppresses that build only
+when an existing Lean driver is present.
+
+### Publication Container
+
+The planned publication measurement will use a pinned Linux/arm64 container on
+the local Apple M5 Pro:
+
+```sh
+make bench-container
+```
+
+The host runner requires a clean commit with successful GitHub Actions CI for
+that exact SHA. It builds the image before measurement, then waits until the
+macOS one-minute load average remains below `0.5` for 120 continuous seconds.
+Any excursion resets the quiet interval. The timed container has no network,
+uses a read-only root filesystem, and performs no compilation.
+
+A successful run writes `provenance.json`, `bench.json`, and text, Markdown,
+and LaTeX tables under
+`measurements/bench-runs/<UTC>-<short-SHA>/`. These regenerable files remain
+gitignored. `provenance.json` records exact CI and job times, host and container
+resources, the image ID, every quiet-window sample, the timed command, and
+SHA-256 digests of the four benchmark outputs.
+
+For a local wiring smoke test that does not claim a publication measurement,
+use `BENCH_ARGS="--skip-ci --quiet-seconds 0" make bench-container`. The
+bypass is explicit in its provenance.
 
 ## What is measured
 
@@ -48,7 +77,7 @@ manifest-discovered harness. Its protocols are deliberately aligned with
 - **The harness sweep** pre-reads every manifest input, then times one full
   in-memory pass (decode + check + render, or the codec-failure path).
 
-## Snapshot
+## Current Native Snapshot
 
 Measured at commit `7183c48` on 2026-08-23.
 

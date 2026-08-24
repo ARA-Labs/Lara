@@ -109,6 +109,19 @@ executable lara
                     , lara
     default-language: GHC2021
 
+executable lara-bench
+    import:           warnings
+    hs-source-dirs:   scripts
+    main-is:          bench.hs
+    ghc-options:      -O2
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , directory
+                    , filepath
+                    , lara
+                    , process
+    default-language: GHC2021
+
 test-suite lara-test
     import:           warnings
     type:             exitcode-stdio-1.0

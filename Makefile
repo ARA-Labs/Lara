@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench measure presentation-parity
+.PHONY: build test bench bench-image bench-container measure presentation-parity
 
 build:
 	cabal build all
@@ -29,9 +29,17 @@ presentation-parity:
 FORMAT ?= text
 OUT ?=
 bench:
-	cabal build exe:lara
+	cabal build exe:lara exe:lara-bench
 	cd lean && lake build
-	cabal exec -- runghc scripts/bench.hs --format=$(FORMAT) $(if $(OUT),--out $(OUT),)
+	cabal run exe:lara-bench -- --format=$(FORMAT) $(if $(OUT),--out $(OUT),)
+
+BENCH_IMAGE ?= lara-bench:$(shell git rev-parse --short=12 HEAD)
+BENCH_ARGS ?=
+bench-image:
+	docker build --platform linux/arm64 --build-arg LARA_GIT_REV=$(shell git rev-parse HEAD) -f containers/bench/Dockerfile -t $(BENCH_IMAGE) .
+
+bench-container:
+	python3 scripts/bench_container.py $(BENCH_ARGS)
 
 # The full axis-(c) measurement harness (M5): measurements/report.{json,tsv}
 # and ablation reports.

@@ -46,7 +46,7 @@ import Data.List (intercalate, maximumBy, nub, stripPrefix)
 import Data.Ord (comparing)
 import GHC.Clock (getMonotonicTimeNSec)
 import System.Directory (createDirectoryIfMissing, doesFileExist)
-import System.Environment (getArgs)
+import System.Environment (getArgs, lookupEnv)
 import System.Exit (ExitCode (..), exitFailure, exitSuccess)
 import System.IO
   ( IOMode (WriteMode)
@@ -58,6 +58,7 @@ import System.IO
   , utf8
   , withFile
   )
+import System.FilePath ((</>))
 import System.Info (arch, os)
 import System.Process
   ( CreateProcess (cwd)
@@ -65,6 +66,7 @@ import System.Process
   , readCreateProcessWithExitCode
   , readProcessWithExitCode
   )
+import Text.Read (readMaybe)
 
 import Lara.AST (Unit (..))
 import Lara.Check (checkUnitWith, cuNodes, cuProgram, fullConfig)
@@ -104,7 +106,7 @@ main = do
   argv <- getArgs
   when ("--help" `elem` argv || "-h" `elem` argv) (putStrLn usage >> exitSuccess)
   opts <- either (\e -> die (e ++ "\n" ++ usage)) pure (parseOptions argv)
-  preflightLean
+  preflightLean (optPrebuilt opts)
   mutantManifest <- readFile "fixtures/mutants/MANIFEST.tsv"
   corpusManifest <- readFile "corpus-units/MANIFEST.tsv"
   let mutants = parseMutantManifest mutantManifest
@@ -116,26 +118,45 @@ main = do
   env <- gatherEnv
   units <- mapM benchUnit corpus
   sweepNs <- benchSweep inputs
-  createDirectoryIfMissing True "measurements"
-  writeFile "measurements/bench.json" (benchJson env inputCount units sweepNs)
-  emit (optOut opts) (renderTable (optFormat opts) env inputCount units sweepNs)
+  let raw = benchJson env inputCount units sweepNs
+      table fmt = renderTable fmt env inputCount units sweepNs
+  rawPath <- case optOutputDir opts of
+    Just dir -> do
+      createDirectoryIfMissing True dir
+      writeFile (dir </> "bench.json") raw
+      emit (Just (dir </> "performance.txt")) (table FmtText)
+      emit (Just (dir </> "performance.md")) (table FmtMarkdown)
+      emit (Just (dir </> "performance.tex")) (table FmtLatex)
+      pure (dir </> "bench.json")
+    Nothing -> do
+      createDirectoryIfMissing True "measurements"
+      writeFile "measurements/bench.json" raw
+      emit (optOut opts) (table (optFormat opts))
+      pure "measurements/bench.json"
   -- Progress goes to stderr so the table itself stays pipeable on stdout.
   hPutStrLn
     stderr
     ( "bench: " ++ show (length units)
         ++ " unit benches and one " ++ show inputCount
-        ++ "-record harness sweep; raw record in measurements/bench.json"
+        ++ "-record harness sweep; raw record in " ++ rawPath
         ++ maybe "" ("; table written to " ++) (optOut opts)
+        ++ maybe "" ("; all formats written to " ++) (optOutputDir opts)
     )
 
-preflightLean :: IO ()
-preflightLean = do
-  (code, _out, err) <- readCreateProcessWithExitCode (proc "lake" ["build"]) {cwd = Just "lean"} ""
-  case code of
-    ExitSuccess -> pure ()
-    ExitFailure _ -> die ("lake build failed (run `cd lean && lake build`):\n" ++ err)
+preflightLean :: Bool -> IO ()
+preflightLean prebuilt = do
+  unless prebuilt $ do
+    (code, _out, err) <- readCreateProcessWithExitCode (proc "lake" ["build"]) {cwd = Just "lean"} ""
+    case code of
+      ExitSuccess -> pure ()
+      ExitFailure _ -> die ("lake build failed (run `cd lean && lake build`):\n" ++ err)
   present <- doesFileExist leanBin
-  unless present (die ("Lean driver missing after lake build: " ++ leanBin))
+  unless present $
+    die
+      ( if prebuilt
+          then "Lean driver missing in --prebuilt mode: " ++ leanBin
+          else "Lean driver missing after lake build: " ++ leanBin
+      )
 
 die :: String -> IO a
 die msg = hPutStrLn stderr ("bench: " ++ msg) >> exitFailure
@@ -273,9 +294,15 @@ medianSection act x = do
 timeLean :: FilePath -> IO Integer
 timeLean path = do
   t0 <- getMonotonicTimeNSec
-  _ <- readProcessWithExitCode leanBin [path] ""
+  (code, _out, err) <- readProcessWithExitCode leanBin [path] ""
   t1 <- getMonotonicTimeNSec
-  pure (toInteger (t1 - t0))
+  case code of
+    ExitSuccess -> pure (toInteger (t1 - t0))
+    ExitFailure n ->
+      die
+        ( "Lean driver failed with exit " ++ show n ++ " for " ++ path
+            ++ if null err then "" else ":\n" ++ err
+        )
 
 -- | One full pass over every harness record, in memory: decode + check +
 -- render (or the codec-failure path, its own protocol, as in measure.hs).
@@ -312,15 +339,20 @@ data Env = Env
 
 gatherEnv :: IO Env
 gatherEnv = do
-  rev <- capture "git" ["rev-parse", "--short", "HEAD"]
-  ghc <- capture "ghc" ["--numeric-version"]
-  leanVer <- capture "lean" ["--version"]
-  cpuDarwin <- capture "sysctl" ["-n", "machdep.cpu.brand_string"]
-  memDarwin <- capture "sysctl" ["-n", "hw.memsize"]
+  rev <- captureOverride "LARA_BENCH_GIT_REV" "git" ["rev-parse", "HEAD"]
+  ghc <- captureOverride "LARA_BENCH_GHC_VERSION" "ghc" ["--numeric-version"]
+  leanVer <- captureOverride "LARA_BENCH_LEAN_VERSION" "lean" ["--version"]
+  cpu <- captureOverride "LARA_BENCH_HOST_CPU" "sysctl" ["-n", "machdep.cpu.brand_string"]
+  memOverride <- lookupEnv "LARA_BENCH_HOST_RAM_BYTES"
+  mem <- case memOverride of
+    Nothing -> readMaybe <$> capture "sysctl" ["-n", "hw.memsize"]
+    Just raw -> case readMaybe raw of
+      Just bytes | bytes >= 0 -> pure (Just bytes)
+      _ -> die ("invalid LARA_BENCH_HOST_RAM_BYTES " ++ show raw)
   pure
     Env
-      { envCpuModel = if null cpuDarwin then arch else cpuDarwin
-      , envRamBytes = if null memDarwin then Nothing else Just (read memDarwin)
+      { envCpuModel = if null cpu then arch else cpu
+      , envRamBytes = mem
       , envOsArch = os ++ "/" ++ arch
       , envGhc = ghc
       , envLean = case words leanVer of
@@ -328,6 +360,14 @@ gatherEnv = do
           _ -> takeWhile (/= ',') leanVer
       , envGitRev = rev
       }
+
+captureOverride :: String -> String -> [String] -> IO String
+captureOverride name cmd args = do
+  override <- lookupEnv name
+  case override of
+    Nothing -> capture cmd args
+    Just "" -> die ("empty " ++ name)
+    Just value -> pure value
 
 capture :: String -> [String] -> IO String
 capture cmd args = do
@@ -626,19 +666,25 @@ data Row
 data Options = Options
   { optFormat :: Format
   , optOut :: Maybe FilePath -- ^ 'Nothing' prints to stdout
+  , optPrebuilt :: Bool
+  , optOutputDir :: Maybe FilePath
   }
 
 parseOptions :: [String] -> Either String Options
-parseOptions = go (Options FmtText Nothing)
+parseOptions = go (Options FmtText Nothing False Nothing)
   where
     go acc [] = Right acc
     go acc (a : rest)
       | Just v <- stripPrefix "--format=" a = withFormat acc v rest
       | a == "--format", (v : rest') <- rest = withFormat acc v rest'
       | a == "--format" = Left "--format needs a value"
-      | Just v <- stripPrefix "--out=" a = go acc {optOut = Just v} rest
-      | a == "--out", (v : rest') <- rest = go acc {optOut = Just v} rest'
+      | Just v <- stripPrefix "--out=" a = withOut acc v rest
+      | a == "--out", (v : rest') <- rest = withOut acc v rest'
       | a == "--out" = Left "--out needs a path"
+      | a == "--prebuilt" = go acc {optPrebuilt = True} rest
+      | Just v <- stripPrefix "--output-dir=" a = withOutputDir acc v rest
+      | a == "--output-dir", (v : rest') <- rest = withOutputDir acc v rest'
+      | a == "--output-dir" = Left "--output-dir needs a path"
       | otherwise = Left ("unknown argument " ++ show a)
     withFormat acc v rest = case parseFormat v of
       Just f -> go acc {optFormat = f} rest
@@ -647,13 +693,23 @@ parseOptions = go (Options FmtText Nothing)
           ( "unknown format " ++ show v ++ " (expected "
               ++ intercalate ", " (map formatName everyFormat) ++ ")"
           )
+    withOut acc v rest
+      | null v = Left "--out needs a nonempty path"
+      | Just _ <- optOutputDir acc = Left "cannot combine --out with --output-dir"
+      | otherwise = go acc {optOut = Just v} rest
+    withOutputDir acc v rest
+      | null v = Left "--output-dir needs a nonempty path"
+      | Just _ <- optOut acc = Left "cannot combine --out with --output-dir"
+      | otherwise = go acc {optOutputDir = Just v} rest
 
 usage :: String
 usage =
   "usage: bench.hs [--format=" ++ intercalate "|" (map formatName everyFormat)
-    ++ "] [--out PATH]\n"
+    ++ "] [--out PATH] [--prebuilt] [--output-dir DIR]\n"
     ++ "  the table goes to stdout unless --out names a file;\n"
-    ++ "  the raw record always goes to measurements/bench.json (gitignored)."
+    ++ "  --output-dir writes bench.json plus text, markdown, and LaTeX tables;\n"
+    ++ "  --prebuilt requires the existing Lean driver and runs no build;\n"
+    ++ "  the default raw record is measurements/bench.json (gitignored)."
 
 -- | Write the rendered table, forcing UTF-8 so the micro sign survives a
 -- non-UTF-8 locale.
