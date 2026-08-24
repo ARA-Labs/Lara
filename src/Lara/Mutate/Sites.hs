@@ -21,8 +21,15 @@
 -- re-exported here; 'Lara.Mutate.Suite' imports them directly, so the wrapper
 -- that attaches 'Lara.Mutate.Expected' stays at the single assembly site.
 --
+-- The certificate-family enumerators live in "Lara.Mutate.Sites.Cert" and /are/
+-- re-exported here, so 'Lara.Mutate.Suite' keeps its single import of this
+-- module; the navigation helpers they share live in "Lara.Mutate.Sites.Nav"
+-- (#125, splitting this module back under the 400-line bound
+-- @docs\/mutate-module-ownership-decision.md@ fixes).
+--
 -- Internal to the library: the navigation helpers were private before the
--- split and stay private, and the enumerators have exactly one consumer.
+-- split and stay library-internal, and the enumerators have exactly one
+-- consumer.
 module Lara.Mutate.Sites
   ( undeclaredLeafSites
   , hiddenRuleSites
@@ -35,6 +42,7 @@ module Lara.Mutate.Sites
   , trustedAssuranceSites
   , certTheorySwapSites
   , certPayloadSites
+  , certWrongFractionSites
   , badAttackPositionSites
   , unlicensedAttackSites
   , groupConflictSites
@@ -44,76 +52,24 @@ import Data.List (find)
 
 import Lara.AST
 import Lara.Diagnostics (Constituent (..))
-import Lara.Prop (Prop (..), equiv)
+import Lara.Prop (equiv)
 import Lara.Sigma (declarePred)
-import Lara.Strict (SExpr (..))
 import Lara.SupportTerm (instAPat, instAPats)
 
 import Lara.Mutate (Expected (..))
-
--- | Every subterm occurrence of a term, keyed by its 'Position'.
-occurrences :: SupportTerm -> [(Position, SupportTerm)]
-occurrences w = go [] w
-  where
-    go pos t =
-      (reverse pos, t) : case t of
-        SLeaf _ -> []
-        SRule _ _ ws d _ _ ->
-          concat
-            [ go (StepPremise i : pos) wi
-            | (i, wi) <- zip [0 ..] ws
-            ]
-            ++ concat
-              [ go (StepQuestion q : pos) wq
-              | (q, wq) <- d
-              ]
-
--- | Rewrite the subterm at a position (total: an unreachable position is the
--- identity, but sites always come from 'occurrences').
-rewriteAt :: Position -> (SupportTerm -> SupportTerm) -> SupportTerm -> SupportTerm
-rewriteAt [] f t = f t
-rewriteAt (step : rest) f t = case t of
-  SLeaf _ -> t
-  SRule r theta ws d hs a -> case step of
-    StepPremise i ->
-      SRule r theta [if j == i then rewriteAt rest f w else w | (j, w) <- zip [0 ..] ws] d hs a
-    StepQuestion q ->
-      SRule r theta ws [(q', if q' == q then rewriteAt rest f w else w) | (q', w) <- d] hs a
-
--- | Rewrite one declared argument's term.
-rewriteArg :: Int -> (SupportTerm -> SupportTerm) -> Unit -> Unit
-rewriteArg ix f u =
-  u
-    { unitArgs =
-        [ (aid, if j == ix then f t else t)
-        | (j, (aid, t)) <- zip [0 ..] (unitArgs u)
-        ]
-    }
-
--- | All rule occurrences across the declared arguments:
--- @(arg index, position, occurrence)@.
-ruleSites :: Unit -> [(Int, Position, SupportTerm)]
-ruleSites u =
-  [ (ix, pos, t)
-  | (ix, (_, w)) <- zip [0 ..] (unitArgs u)
-  , (pos, t@SRule{}) <- occurrences w
-  ]
-
--- | All leaf-reference occurrences across the declared arguments.
-leafSites :: Unit -> [(Int, Position, LeafId)]
-leafSites u =
-  [ (ix, pos, l)
-  | (ix, (_, w)) <- zip [0 ..] (unitArgs u)
-  , (pos, SLeaf l) <- occurrences w
-  ]
-
-ruleOf :: Unit -> RuleId -> Maybe Rule
-ruleOf u rn = find ((== rn) . ruleId) (unitRules u)
-
--- | A declared leaf whose proposition is ≢ the wanted one (the swap target
--- for premise\/discharge mismatch mutations).
-inequivLeaf :: Unit -> Prop -> Maybe LeafId
-inequivLeaf u p = fst <$> find (not . equiv p . snd) (unitLeaves u)
+import Lara.Mutate.Sites.Cert
+  ( certPayloadSites
+  , certTheorySwapSites
+  , certWrongFractionSites
+  )
+import Lara.Mutate.Sites.Nav
+  ( inequivLeaf
+  , leafSites
+  , ruleOf
+  , ruleSites
+  , rewriteArg
+  , rewriteAt
+  )
 
 -- R1: rewrite one leaf reference to an undeclared id.
 undeclaredLeafSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
@@ -276,34 +232,6 @@ trustedAssuranceSites u =
   where
     setTrusted (SRule r theta ws d hs _) = SRule r theta ws d hs AssuranceTrusted
     setTrusted t = t
-
--- R7: point an allowlisted certificate at a theory digest no certifier lists.
-certTheorySwapSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
-certTheorySwapSites u =
-  [ ( ExpectClass R7
-    , CArgument ix
-    , rewriteArg ix (rewriteAt pos swapTheory)
-    )
-  | (ix, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites u
-  ]
-  where
-    swapTheory (SRule r theta ws d hs (AssuranceCert cert)) =
-      SRule r theta ws d hs (AssuranceCert cert {certTheory = TheoryDigest "sha256:mut"})
-    swapTheory t = t
-
--- R13: corrupt an allowlisted certificate's opaque payload (replay reject).
-certPayloadSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
-certPayloadSites u =
-  [ ( ExpectClass R13
-    , CArgument ix
-    , rewriteArg ix (rewriteAt pos tamper)
-    )
-  | (ix, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites u
-  ]
-  where
-    tamper (SRule r theta ws d hs (AssuranceCert cert)) =
-      SRule r theta ws d hs (AssuranceCert cert {certPayload = SAtom "mut_corrupt"})
-    tamper t = t
 
 -- R10: push an attack position off the target term (undercut/undermine) or
 -- retarget a rebut at a leaf-rooted argument (wrong occurrence kind).

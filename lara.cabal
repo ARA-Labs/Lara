@@ -26,6 +26,8 @@ library
                       Lara.Mutate.Accept.Ops
                       Lara.Mutate.Seed
                       Lara.Mutate.Sites
+                      Lara.Mutate.Sites.Cert
+                      Lara.Mutate.Sites.Nav
     exposed-modules:  Lara.Prop
                       Lara.Strict
                       Lara.Strict.Cell

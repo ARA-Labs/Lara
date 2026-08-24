@@ -69,6 +69,7 @@ mutantsForBase base input =
     , unitMutants base input OpTrustedAssurance 1 trustedAssuranceSites
     , unitMutants base input OpCertTheorySwap 1 certTheorySwapSites
     , unitMutants base input OpCertPayloadTamper 1 certPayloadSites
+    , unitMutants base input OpCertWrongFraction 1 certWrongFractionSites
     , unitMutants base input OpBadAttackPosition 2 badAttackPositionSites
     , unitMutants base input OpUnlicensedAttack 1 unlicensedAttackSites
     , unitMutants base input OpGroupConflict 1 groupConflictSites
@@ -192,6 +193,7 @@ sweepOps =
   , unitSweep OpTrustedAssurance trustedAssuranceSites
   , unitSweep OpCertTheorySwap certTheorySwapSites
   , unitSweep OpCertPayloadTamper certPayloadSites
+  , unitSweep OpCertWrongFraction certWrongFractionSites
   , unitSweep OpBadAttackPosition badAttackPositionSites
   , unitSweep OpUnlicensedAttack unlicensedAttackSites
   , unitSweep OpGroupConflict groupConflictSites

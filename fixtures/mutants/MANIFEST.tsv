@@ -326,6 +326,7 @@ rebench-rust_codecontests.C02--trusted-assurance-0.sexp	rebench-rust_codecontest
 rebench-triton_cumsum.C09--trusted-assurance-0.sexp	rebench-triton_cumsum.C09	certificate-tampering	trusted-assurance	reject-R7			arg:0
 adaptive-pruning.C04--cert-theory-swap-0.sexp	adaptive-pruning.C04	certificate-tampering	cert-theory-swap	reject-R7			arg:0
 adaptive-pruning.C04--cert-payload-tamper-0.sexp	adaptive-pruning.C04	certificate-tampering	cert-payload-tamper	reject-R13			arg:0
+adaptive-pruning.C04--cert-wrong-fraction-0.sexp	adaptive-pruning.C04	certificate-tampering	cert-wrong-fraction	reject-R13			arg:0
 fre.C04--bad-attack-position-0.sexp	fre.C04	bad-attack-targets	bad-attack-position	reject-R10			attack:0
 test-time-model-adaptation.C04--bad-attack-position-0.sexp	test-time-model-adaptation.C04	bad-attack-targets	bad-attack-position	reject-R10			attack:0
 rebench-triton_cumsum.C09--bad-attack-position-0.sexp	rebench-triton_cumsum.C09	bad-attack-targets	bad-attack-position	reject-R10			attack:0

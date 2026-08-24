@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 504
+Total mutants: 505
 
 | expected outcome | mutants |
 | --- | --- |
@@ -34,7 +34,7 @@ Total mutants: 504
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
 | `reject-R12` | 40 |
-| `reject-R13` | 42 |
+| `reject-R13` | 43 |
 | `reject-R2` | 113 |
 | `reject-R3` | 19 |
 | `reject-R4` | 18 |
@@ -47,7 +47,7 @@ Total mutants: 504
 | --- | --- |
 | `accept-verdict` | 54 |
 | `bad-attack-targets` | 30 |
-| `certificate-tampering` | 62 |
+| `certificate-tampering` | 63 |
 | `codec-corruption` | 47 |
 | `cycles` | 4 |
 | `data-integrity` | 19 |
@@ -77,6 +77,7 @@ site (corpus units carry no strict certificates), recorded as 0/0.
 | `trusted-assurance` | 12 | 12 |
 | `cert-theory-swap` | 1 | 1 |
 | `cert-payload-tamper` | 1 | 1 |
+| `cert-wrong-fraction` | 1 | 1 |
 | `bad-attack-position` | 3 | 3 |
 | `unlicensed-attack` | 13 | 12 |
 | `group-conflict` | 55 | 12 |

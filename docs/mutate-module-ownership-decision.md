@@ -17,7 +17,9 @@ code)._
 Lara.Mutate                 core; imports no sibling
 ├── Manifest ─────────────→ core
 ├── Seed ─────────────────→ core
-├── Sites ────────────────→ core
+├── Sites ────────────────→ core + Sites.Cert + Sites.Nav
+│   ├── Sites.Cert ───────→ core + Sites.Nav
+│   └── Sites.Nav ────────→ (no sibling; structural only)
 ├── Suite ────────────────→ core + Seed + Sites + Sorts
 ├── Codec ────────────────→ core
 ├── Cycle ────────────────→ core + Seed
@@ -37,14 +39,18 @@ bearing property of the whole arrangement, and it is what D1 below protects.
 | `Lara.Mutate` | `MutationOp(..)`, `opName`, `opFamily`, `Expected(..)`, `expectedText`, `parseExpected`, `statusText`, `codecDiagnostics`, `Mutant(..)`, `mutantFileName`, `mutationSeed`, `mutationBases` |
 | `Lara.Mutate.Manifest` | `mutantPath`, `manifestFor` |
 | `Lara.Mutate.Seed` (internal) | `streamForKey`, `streamFor`, `pickWithStream`, `pickSome` |
-| `Lara.Mutate.Sites` (internal) | the fourteen per-operator site enumerators |
+| `Lara.Mutate.Sites` (internal) | the fifteen per-operator site enumerators, three of them re-exported from `Sites.Cert` |
+| `Lara.Mutate.Sites.Cert` (internal) | `certTheorySwapSites`, `certPayloadSites`, `certWrongFractionSites`, `bumpWitness` |
+| `Lara.Mutate.Sites.Nav` (internal) | `occurrences`, `rewriteAt`, `rewriteArg`, `ruleSites`, `leafSites`, `ruleOf`, `inequivLeaf` |
 | `Lara.Mutate.Suite` | `mutantsForBase`, `corpusBudget`, `corpusMutants`, `corpusSweepReport` |
 | `Lara.Mutate.Codec` | `codecMutantsForBase` |
 | `Lara.Mutate.Cycle` | `cycleMutants` |
 
-`Seed` and `Sites` are in `other-modules`: their names had to become module-
-visible so `Suite` and `Cycle` could consume them, but keeping them out of
-`exposed-modules` means the package's public surface does not grow. `splitMix64`
+`Seed`, `Sites`, `Sites.Cert`, and `Sites.Nav` are in `other-modules`: their
+names had to become module-visible so `Suite`, `Cycle`, and `Sites` could
+consume them, but keeping them out of `exposed-modules` means the package's
+public surface does not grow. `Sites` is the only importer of its two children,
+and it re-exports the cert enumerators, so `Suite` still sees one module. `splitMix64`
 and `stringSeed` stay private inside `Seed` — the old "exposed for tests"
 heading was stale, no test or script imported either name.
 
@@ -54,7 +60,9 @@ heading was stale, no test or script imported either name.
 |---|---|
 | `Seed` | `Data.Bits`, `Data.Char`, `Data.Word`, `Lara.Mutate` |
 | `Manifest` | `Lara.Diagnostics`, `Lara.Mutate` |
-| `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.Strict`, `Lara.SupportTerm`, `Lara.Mutate` |
+| `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Nav` |
+| `Sites.Cert` | `Data.Ratio`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Strict`, `Lara.Strict.Cell`, `Lara.Strict.RA`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
+| `Sites.Nav` | `Data.List`, `Lara.AST`, `Lara.Prop` |
 | `Suite` | `Lara.AST`, `Lara.Diagnostics`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed`, `Lara.Mutate.Sites`, `Lara.Mutate.Sorts` |
 | `Codec` | `Lara.Strict`, `Lara.Wire`, `Lara.Mutate` |
 | `Cycle` | `Lara.AST`, `Lara.Prop`, `Lara.Replay`, `Lara.Sigma`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed` |
@@ -118,22 +126,39 @@ upper bound. **There is no longer an exception** (#143). As it now stands:
 
 | Module | Lines |
 |---|---|
-| `Lara.Mutate` | 379 |
-| `Lara.Mutate.Sites` | 363 |
+| `Lara.Mutate` | 386 |
 | `Lara.Mutate.Sorts` | 302 |
-| `Lara.Mutate.Suite` | 260 |
+| `Lara.Mutate.Sites` | 291 |
+| `Lara.Mutate.Suite` | 262 |
 | `Lara.Mutate.Accept.Ops` | 241 |
-| `Lara.Mutate.Accept.Build` | 161 |
+| `Lara.Mutate.Accept.Build` | 162 |
 | `Lara.Mutate.Accept` | 154 |
+| `Lara.Mutate.Sites.Cert` | 141 |
 | `Lara.Mutate.Codec` | 128 |
 | `Lara.Mutate.Cycle` | 123 |
+| `Lara.Mutate.Sites.Nav` | 91 |
 | `Lara.Mutate.Seed` | 76 |
 | `Lara.Mutate.Manifest` | 69 |
-| **Σ** | **2256** |
+| **Σ** | **2426** |
 
-Counts are `git ls-files` / `wc -l`. The root reads 379 rather than the 374 it
-measured before this document's own five-line Haddock cross-reference was added
-to it.
+`Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the #125 split. Adding
+the `cert-wrong-fraction` operator took `Sites` to 428 — the first breach of
+this rule since #143 removed its last exception — so the certificate-family
+enumerators moved to `Sites.Cert` and the navigation helpers they share with
+`Sites` moved to `Sites.Nav`. The shape mirrors the #143 `Accept` split: a
+facade that keeps the single import site, one module of shared helpers, one of
+family operators. `Sites` re-exports the three cert enumerators, so
+`Lara.Mutate.Suite` was unchanged. Both new modules are `other-modules`, so
+this added no public surface, and the split is byte-neutral: regeneration
+reproduces `fixtures/mutants` exactly, since enumerator order is what fixes the
+seeded picks and no list order moved.
+
+Counts are `git ls-files` / `wc -l`. The root reads 386 rather than the 379
+recorded at #143: two lines of later drift, the three #125 added for the new
+operator — one `MutationOp` constructor and its `opName` / `opFamily` rows — and
+two more for the split's entries in the root's own module list. Each new
+operator costs the root exactly three lines, which is what keeps it under the
+bound as the operator set grows.
 
 ### History of the `Accept` exception, and how it closed
 

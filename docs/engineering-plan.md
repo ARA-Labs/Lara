@@ -6,7 +6,17 @@ milestone spine (`../plans/research-proposal.md` §7, M0–M7) and the phased wo
 describes the *module dependency graph* and the *build discipline*. The spec (`spec.md`) is the
 contract every module implements._
 
-## 0. Current state (2026-07-21; M1 update 2026-07-22; M5 update 2026-08-19; surface update 2026-08-22)
+## 0. Current state (2026-07-21; M1 update 2026-07-22; M5 update 2026-08-19; surface updates 2026-08-22/23; milestone update 2026-08-24)
+
+**Milestone update (2026-08-24): no milestone is open in this repository.** #60
+(M7, the paper package) was closed as completed — paper-writing and
+submission-package work is tracked in the paper repository, not here. The
+milestone spine in `../plans/research-proposal.md` §7 is now a record rather than
+a worklist. Remaining engineering work is the open GitHub issues, chiefly the
+`refreeze-batch` evaluation-suite extensions (#123, #124, and the shared
+refreeze cycle #156; #125 landed in #154)
+(`../plans/2026-08-24-m5-freeze-v5-batch.md`), which cut the next
+evaluation-corpus freeze after `m5-freeze-v4`.
 
 **Surface update (2026-08-22):** `lara-syntax@0.9` adds named `nd@1` proof
 terms as a presentation-only lowering to the unchanged de Bruijn kernel;
@@ -33,8 +43,7 @@ without a core or wire change), and the deterministic evaluation corpus froze at
 beside `nd@1`, `Lara.Mutate` + `Lara.Measure` (the seeded mutation suite and the
 axis-(c) harness), `Lara.ClaimSupport` + `Lara.BindingAudit` (reporting and the
 blinded audit pipeline), and the cross-language presentation-parity guard
-(`scripts/check-presentation-parity.sh`). Remaining engineering work is the M7
-paper package (tracker #60) plus the open GitHub issues.
+(`scripts/check-presentation-parity.sh`).
 
 **M1 update (2026-07-22):** M0 exited (PR #8/#9) and the v0.1 language froze — `spec.md` is now
 "v0.1 — frozen at M1" with the row-by-row record in `m1-freeze-checklist.md`. The Lean

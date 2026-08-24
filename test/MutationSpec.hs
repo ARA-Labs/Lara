@@ -35,7 +35,16 @@ import Test.QuickCheck
 import Data.List (isInfixOf, sort)
 import Data.Maybe (mapMaybe)
 
-import Lara.AST (Label (..), RejectClass (..), Rejection (..), Status (..))
+import Lara.AST
+  ( Assurance (..)
+  , Cert (..)
+  , Label (..)
+  , RejectClass (..)
+  , Rejection (..)
+  , Status (..)
+  , SupportTerm (..)
+  , Unit (..)
+  )
 import Lara.Diagnostics (LocatedRejection (..), constituentText, parseConstituent)
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
@@ -58,7 +67,9 @@ import Lara.Mutate.Suite
   , corpusSweepReport
   , mutantsForBase
   )
-import Lara.Replay (CheckInput)
+import Lara.Replay (CheckInput, inputUnit)
+import Lara.Strict (SExpr)
+import qualified Lara.Strict.RA as RA
 import Lara.Wire
   ( Outcome (..)
   , PublicStatus (..)
@@ -481,6 +492,89 @@ prop_acceptStructure = once $ ioProperty $ do
 nubOrd :: Ord a => [a] -> [a]
 nubOrd = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
 
+-- | The @cert-wrong-fraction@ mutant survives the @ra\@1@ decoder and is
+-- refused by the /value recheck/; @cert-payload-tamper@ dies in the decoder.
+-- That difference is the whole reason the two operators coexist, and no
+-- manifest column expresses it: both are @certificate-tampering@, both
+-- @reject-R13@, both @arg:0@, and 'codecDiagnostics' is 'Nothing' for both, so
+-- the diagnostic columns are empty and @scripts\/differential.sh@ compares
+-- stderr only for the codec half.
+--
+-- Without this property the distinction is unpinned: drop the @(%)@
+-- renormalization from 'Lara.Mutate.Sites.Cert.bumpWitness' so the operator
+-- emits @(frac 120 500)@, and every other property still passes — 'decodeFrac'
+-- rejects it as "not in lowest terms", the outcome is still @reject-R13@, and
+-- @prop_seededReproducibility@ simply re-pins the new bytes. The corpus would
+-- lose its only witness for the value recheck with nothing turning red (#125).
+prop_certWrongFractionDecodes :: Property
+prop_certWrongFractionDecodes = once $ ioProperty $ do
+  rows <- readManifest
+  let rowsFor op = [r | r <- rows, rowOp r == opName op]
+      wrongRows = rowsFor OpCertWrongFraction
+      -- Contrast on the same base, so the two rows differ only by operator.
+      tamperRows =
+        [r | r <- rowsFor OpCertPayloadTamper, rowBase r `elem` map rowBase wrongRows]
+  wrong <- mapM loadPayloads wrongRows
+  tamper <- mapM loadPayloads tamperRows
+  pure $
+    conjoin
+      [ counterexample
+          "expected exactly one cert-wrong-fraction row"
+          (length wrongRows === 1)
+      , counterexample
+          "expected a cert-payload-tamper row on the same base to contrast against"
+          (not (null tamperRows))
+      , conjoin [counterexample (rowPath r) (decodesAndRejects p) | (r, p) <- zip wrongRows wrong]
+      , conjoin [counterexample (rowPath r) (failsToDecode p) | (r, p) <- zip tamperRows tamper]
+      ]
+  where
+    loadPayloads row = do
+      bytes <- readFile (suiteRoot ++ "/" ++ rowPath row)
+      pure $ case decodeCheckInputFile bytes of
+        Left _ -> Nothing
+        Right input ->
+          Just (concatMap (certPayloadsOf . snd) (unitArgs (inputUnit input)), runCheck input)
+    decodesAndRejects Nothing =
+      counterexample "the mutant did not decode as a check input at all" (property False)
+    decodesAndRejects (Just (payloads, verdict)) =
+      conjoin
+        [ counterexample
+            ("expected exactly one certificate payload, got " ++ show (length payloads))
+            (length payloads === 1)
+        , conjoin
+            [ counterexample
+                ( "payload must survive the ra@1 decoder — this operator's whole"
+                    ++ " point is that it is refused on value, not on grammar; got "
+                    ++ show err
+                )
+                (property False)
+            | p <- payloads
+            , Left err <- [RA.decodeCert p]
+            ]
+        , counterexample
+            ("expected a reject R13 verdict, got " ++ show (verdictOutcome verdict))
+            (verdictOutcome verdict === Reject (RejectClass R13))
+        ]
+    failsToDecode Nothing = property True -- a codec-boundary mutant; not our contrast
+    failsToDecode (Just (payloads, _)) =
+      conjoin
+        [ counterexample
+            "cert-payload-tamper payload decoded cleanly — the two operators have converged"
+            (property (isLeftE (RA.decodeCert p)))
+        | p <- payloads
+        ]
+    isLeftE = either (const True) (const False)
+
+-- | Every certificate payload carried anywhere in a support term, in traversal
+-- order. Local to this module: "Lara.Mutate.Sites.Nav" is library-internal.
+certPayloadsOf :: SupportTerm -> [SExpr]
+certPayloadsOf t = case t of
+  SLeaf _ -> []
+  SRule _ _ ws d _ a ->
+    [certPayload c | AssuranceCert c <- [a]]
+      ++ concatMap certPayloadsOf ws
+      ++ concatMap (certPayloadsOf . snd) d
+
 mutationSpecProps :: [(String, IO Result)]
 mutationSpecProps =
   [ ("mutation suite: every mutant produces its specified outcome", quickCheckResult prop_specifiedOutcomes)
@@ -493,4 +587,5 @@ mutationSpecProps =
   , ("mutation suite: accept family verified structurally (status + label shape)", quickCheckResult prop_acceptStructure)
   , ("mutation suite: runCheck == fst . runCheckLocated over every mutant", quickCheckResult prop_runCheckLocatedConsistent)
   , ("mutation suite: expected-location column round-trips and is present on reject rows", quickCheckResult prop_expectedLocationColumn)
+  , ("mutation suite: cert-wrong-fraction decodes cleanly and is refused on value", quickCheckResult prop_certWrongFractionDecodes)
   ]

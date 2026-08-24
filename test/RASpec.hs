@@ -509,6 +509,13 @@ prop_checkDropMatrix =
       isLeft (checkDrop (RAGoal 50 (381 % 10) (119 % 500) (1 % 20)) (1 % 4))
     , -- witness agrees with the recomputation but not the claimed drop
       isLeft (checkDrop (RAGoal 50 (381 % 10) (1 % 4) (1 % 20)) (119 % 500))
+    , -- witness agrees with the claimed drop but not the recomputation, and
+      -- clears the threshold: the recomputation guard is the only branch that
+      -- can reject here. Without this case that guard is deletable with the
+      -- whole suite green (#125) — and deleting it would let a certificate
+      -- certify a relative drop its own premise cells contradict, since every
+      -- other branch consults only the goal's self-declared @C@.
+      isLeft (checkDrop (RAGoal 50 (381 % 10) (1 % 4) (1 % 20)) (1 % 4))
     , -- claimed drop below the threshold
       isLeft (checkDrop (RAGoal 50 (381 % 10) (119 % 500) (1 % 2)) (119 % 500))
     ]

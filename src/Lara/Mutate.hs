@@ -18,6 +18,8 @@
 -- * "Lara.Mutate.Manifest" — the @MANIFEST.tsv@ contract and suite layout
 -- * "Lara.Mutate.Seed" — the SplitMix64 stream and seeded selection (internal)
 -- * "Lara.Mutate.Sites" — per-operator site enumerators (internal)
+-- * "Lara.Mutate.Sites.Cert" — the certificate-family enumerators (internal)
+-- * "Lara.Mutate.Sites.Nav" — shared term navigation and rewriting (internal)
 -- * "Lara.Mutate.Sorts" — the signature-family site enumerators
 -- * "Lara.Mutate.Suite" — worked-example assembly and the corpus sweep
 -- * "Lara.Mutate.Codec" — the codec-corruption family (R14)
@@ -94,6 +96,7 @@ data MutationOp
   | OpTrustedAssurance -- ^ @trusted@ on a defeasible instance → R7
   | OpCertTheorySwap -- ^ certificate theory not allowlisted → R7
   | OpCertPayloadTamper -- ^ corrupt an allowlisted cert payload → R13
+  | OpCertWrongFraction -- ^ well-formed @ra\@1@ payload, wrong value → R13
   | OpDuplicateBackend -- ^ replay selects one backend twice → R13
   | OpUnknownBackend -- ^ replay selects an unknown backend → R13
   | OpGroupConflict -- ^ escalated ≢ duplicate-report group → R9
@@ -142,6 +145,7 @@ opName op = case op of
   OpTrustedAssurance -> "trusted-assurance"
   OpCertTheorySwap -> "cert-theory-swap"
   OpCertPayloadTamper -> "cert-payload-tamper"
+  OpCertWrongFraction -> "cert-wrong-fraction"
   OpDuplicateBackend -> "duplicate-backend"
   OpUnknownBackend -> "unknown-backend"
   OpGroupConflict -> "group-conflict"
@@ -189,6 +193,7 @@ opFamily op = case op of
   OpTrustedAssurance -> "certificate-tampering"
   OpCertTheorySwap -> "certificate-tampering"
   OpCertPayloadTamper -> "certificate-tampering"
+  OpCertWrongFraction -> "certificate-tampering"
   OpDuplicateBackend -> "certificate-tampering"
   OpUnknownBackend -> "certificate-tampering"
   OpGroupConflict -> "data-integrity"
