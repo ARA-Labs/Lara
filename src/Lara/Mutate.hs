@@ -1,7 +1,8 @@
 -- | The shared core of the seeded mutation generators for the M5 evaluation
 -- corpus (tracker #48, T1; spec §10.1 mutation table; freeze
--- @docs/m5-freeze-checklist.md@): the closed operator vocabulary, the
--- specified-outcome type, and the 'Mutant' record every generator produces.
+-- @docs/m5-freeze-checklist.md@): the closed operator vocabulary, the 'Mutant'
+-- record every generator produces, and — re-exported from
+-- "Lara.Mutate.Outcome" — the specified-outcome type.
 --
 -- Each 'MutationOp' is a surgical, single-defect transformation of a decoded
 -- worked-example 'Lara.Replay.CheckInput' (or, for the codec family, of its
@@ -12,13 +13,16 @@
 -- == The namespace
 --
 -- The generators themselves live in siblings, each owning one job. This module
--- sits below all of them and imports none of them, so the namespace graph is
--- acyclic and the vocabulary has exactly one home.
+-- sits below all of them and imports only "Lara.Mutate.Outcome", which imports
+-- no sibling in turn, so the namespace graph is acyclic and the vocabulary has
+-- exactly one home.
 --
+-- * "Lara.Mutate.Outcome" — the specified-outcome vocabulary, re-exported here
 -- * "Lara.Mutate.Manifest" — the @MANIFEST.tsv@ contract and suite layout
 -- * "Lara.Mutate.Seed" — the SplitMix64 stream and seeded selection (internal)
 -- * "Lara.Mutate.Sites" — per-operator site enumerators (internal)
 -- * "Lara.Mutate.Sites.Cert" — the certificate-family enumerators (internal)
+-- * "Lara.Mutate.Sites.Conflict" — the completeness-scan enumerator (internal)
 -- * "Lara.Mutate.Sites.Nav" — shared term navigation and rewriting (internal)
 -- * "Lara.Mutate.Sorts" — the signature-family site enumerators
 -- * "Lara.Mutate.Suite" — worked-example assembly and the corpus sweep
@@ -28,10 +32,11 @@
 -- * "Lara.Mutate.Accept.Ops" — the six accept constructions (internal)
 -- * "Lara.Mutate.Accept.Build" — accept mutant assembly and site helpers (internal)
 --
--- The ownership contract behind this layout — which module owns which
--- names, why the root deliberately does not re-export the ones that moved,
--- and the re-export façade alternative that was rejected as cycle-forming —
--- is recorded in @docs\/mutate-module-ownership-decision.md@.
+-- The ownership contract behind this layout — which module owns which names,
+-- why "Lara.Mutate.Outcome" is the only module this one re-exports, why the
+-- names that moved /upward/ are deliberately not re-exported, and the re-export
+-- façade alternative that was rejected as cycle-forming — is recorded in
+-- @docs\/mutate-module-ownership-decision.md@.
 --
 -- == Namespace invariants
 --
@@ -53,11 +58,12 @@ module Lara.Mutate
     MutationOp (..)
   , opName
   , opFamily
-    -- * Specified outcomes
+    -- * Specified outcomes (re-exported from "Lara.Mutate.Outcome")
   , Expected (..)
   , expectedText
   , parseExpected
   , statusText
+    -- * Operator metadata
   , codecDiagnostics
     -- * Mutants
   , Mutant (..)
@@ -68,8 +74,8 @@ module Lara.Mutate
 
 import Data.Word (Word64)
 
-import Lara.AST
 import Lara.Diagnostics (Constituent (..))
+import Lara.Mutate.Outcome
 
 -- ---------------------------------------------------------------------------
 -- Operators
@@ -227,84 +233,6 @@ opFamily op = case op of
   OpCodecTheoryMismatch -> "codec-corruption"
   OpCodecDanglingAttack -> "codec-corruption"
   OpCodecTruncate -> "codec-corruption"
-
--- ---------------------------------------------------------------------------
--- Specified outcomes
--- ---------------------------------------------------------------------------
-
--- | The outcome a mutant is specified to have (spec §10.1): a rejection with
--- a fixed class, one of the two structural rejects this suite specifies (the
--- obligation gate, the completeness scan; 'Rejection' has two more,
--- 'DuplicateRule' and 'DuplicateArgument', which no operator targets), a
--- codec-boundary reject (exit 2, no verdict), or — for the cycle family — an
--- accept where every label is @undec@ and every queried status is @contested@.
-data Expected
-  = ExpectClass RejectClass
-  | ExpectIncompleteArgument
-  -- ^ the structural obligation-gate reject ('Lara.AST.IncompleteArgument', a
-  -- 'Rejection' with no R-class by design): the mutant is schema-valid — R5
-  -- coverage holds because the open question is covered by a declared hole —
-  -- and the full system rejects it only at the obligation gate
-  -- ('Lara.Check.ccObligationGate'), i.e. an argument reaching the root with
-  -- an open mandatory obligation.
-  | ExpectMissingConflict
-  -- ^ the structural completeness reject ('Lara.AST.MissingConflict', a
-  -- 'Rejection' with no R-class by design): the mutant declares an attackable
-  -- contrary pair between complete arguments and no attack covering it, so the
-  -- full system rejects it at the seventh stage's completeness scan
-  -- ('Lara.Check.ccConflictScan') — the executable witness of the
-  -- attack-completeness theorem (#124).
-  | ExpectCodecReject
-  | ExpectAllContested
-  | ExpectEvidenceBlocked
-  -- ^ the conservative-reporting outcome (spec §4.3, issue #76, spelled
-  -- @accept-evidence-blocked@): the verdict accepts, but §4.3 quarantine edited
-  -- the program under the queried claim, so its four-state label is only a
-  -- conditional diagnostic and its public status is @evidence-blocked@. A
-  -- mutant of this class that reported an ordinary status would be the #76 bug
-  -- back again.
-  | ExpectPrimaryStatus Status
-  -- ^ the accept-family outcome: the verdict accepts and the queried claim's
-  -- status is exactly this one (spelled @accept-\<status\>@). Structural
-  -- verification of the constructed attack shape lives in "Lara.Mutate.Accept"
-  -- ('Lara.Mutate.Accept.acceptStructureOk'), not in the manifest spelling.
-  deriving (Eq, Ord, Show)
-
--- | Manifest spelling of an expected outcome.
-expectedText :: Expected -> String
-expectedText e = case e of
-  ExpectClass c -> "reject-" ++ show c
-  ExpectIncompleteArgument -> "reject-" ++ show IncompleteArgument
-  ExpectMissingConflict -> "reject-" ++ show MissingConflict
-  ExpectCodecReject -> "codec-reject"
-  ExpectAllContested -> "accept-all-contested"
-  ExpectEvidenceBlocked -> "accept-evidence-blocked"
-  ExpectPrimaryStatus s -> "accept-" ++ statusText s
-
--- | Manifest spelling of a claim status (the accept-family @accept-\<status\>@
--- suffix; matches @corpus-units/expected.json@'s status strings).
-statusText :: Status -> String
-statusText s = case s of
-  Gap -> "gap"
-  Justified -> "justified"
-  Contested -> "contested"
-  Defeated -> "defeated"
-
--- | Inverse of 'expectedText' — the one parse table for the @expected@ manifest
--- column (shared by @test\/MutationSpec.hs@, "Lara.Measure", and
--- @scripts\/measure.hs@). 'Nothing' on any spelling this table does not produce.
-parseExpected :: String -> Maybe Expected
-parseExpected s =
-  lookup s $
-    ("codec-reject", ExpectCodecReject)
-      : ("accept-all-contested", ExpectAllContested)
-      : (expectedText ExpectEvidenceBlocked, ExpectEvidenceBlocked)
-      : (expectedText ExpectIncompleteArgument, ExpectIncompleteArgument)
-      : (expectedText ExpectMissingConflict, ExpectMissingConflict)
-      : [(expectedText (ExpectClass c), ExpectClass c) | c <- [minBound .. maxBound]]
-      ++ [ (expectedText (ExpectPrimaryStatus st), ExpectPrimaryStatus st)
-         | st <- [Gap, Justified, Contested, Defeated]
-         ]
 
 -- | The deletion-sensitivity pin of a codec-corruption operator: a fixed
 -- substring of the Haskell decode failure (the driver's

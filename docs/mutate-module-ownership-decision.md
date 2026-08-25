@@ -3,8 +3,8 @@
 _Records the settled ownership contract for the seeded mutation generators
 after the seven-module split (issue #122, PR #142). The implementation plan that
 produced the split was deleted when the work landed, per the `plans/` rule; this
-record carries its durable decisions — which module owns what, why the root
-deliberately does not re-export, and which alternatives were rejected. Companion
+record carries its durable decisions — which module owns what, what the root may
+and may not re-export, and which alternatives were rejected. Companion
 to `docs/m5-freeze-checklist.md` (the freeze the generators feed) and the root
 module Haddock in `src/Lara/Mutate.hs` (the same graph, stated for readers of the
 code)._
@@ -14,7 +14,8 @@ code)._
 `A → B` is an import inside the `Lara.Mutate` namespace.
 
 ```
-Lara.Mutate                 core; imports no sibling
+Lara.Mutate                 core; imports only Outcome
+├── Outcome ─────────────→ (no sibling; the specified-outcome vocabulary)
 ├── Manifest ─────────────→ core
 ├── Seed ─────────────────→ core
 ├── Sites ────────────────→ core + Sites.Cert + Sites.Conflict + Sites.Nav
@@ -30,14 +31,17 @@ Lara.Mutate                 core; imports no sibling
 └── Sorts ────────────────→ core
 ```
 
-The graph is acyclic **because the root imports no sibling**. That is the load-
-bearing property of the whole arrangement, and it is what D1 below protects.
+The graph is acyclic **because nothing the root imports imports it back**. Since
+#157 the root has exactly one sibling import, `Outcome`, which imports no sibling
+in turn and so is the new bottom of the namespace. That is the load-bearing
+property of the whole arrangement, and it is what D1 below protects.
 
 ### Export ownership
 
 | Module | Exported names |
 |---|---|
-| `Lara.Mutate` | `MutationOp(..)`, `opName`, `opFamily`, `Expected(..)`, `expectedText`, `parseExpected`, `statusText`, `codecDiagnostics`, `Mutant(..)`, `mutantFileName`, `mutationSeed`, `mutationBases` |
+| `Lara.Mutate` | `MutationOp(..)`, `opName`, `opFamily`, `codecDiagnostics`, `Mutant(..)`, `mutantFileName`, `mutationSeed`, `mutationBases`, plus `Expected(..)`, `expectedText`, `parseExpected`, `statusText` re-exported from `Outcome` |
+| `Lara.Mutate.Outcome` (internal) | `Expected(..)`, `expectedText`, `parseExpected`, `statusText` |
 | `Lara.Mutate.Manifest` | `mutantPath`, `manifestFor` |
 | `Lara.Mutate.Seed` (internal) | `streamForKey`, `streamFor`, `pickWithStream`, `pickSome` |
 | `Lara.Mutate.Sites` (internal) | the sixteen per-operator site enumerators, four of them re-exported from `Sites.Cert` and `Sites.Conflict` |
@@ -48,10 +52,11 @@ bearing property of the whole arrangement, and it is what D1 below protects.
 | `Lara.Mutate.Codec` | `codecMutantsForBase` |
 | `Lara.Mutate.Cycle` | `cycleMutants` |
 
-`Seed`, `Sites`, `Sites.Cert`, `Sites.Conflict`, and `Sites.Nav` are in
-`other-modules`: their names had to become module-visible so `Suite`, `Cycle`,
-and `Sites` could consume them, but keeping them out of `exposed-modules` means
-the package's public surface does not grow — with one deliberate exception. The
+`Outcome`, `Seed`, `Sites`, `Sites.Cert`, `Sites.Conflict`, and `Sites.Nav` are
+in `other-modules`: their names had to become module-visible so `Suite`, `Cycle`,
+`Sites`, and the root could consume them, but keeping them out of
+`exposed-modules` means the package's public surface does not grow — with one
+deliberate exception. The
 #158 review added a property (`prop_conflictSiteMatchesChecker`) that has to
 compare the enumerator's *predicted* conflict pair against the checker's, which
 means calling `dropCoveringAttackSites` directly; going through `mutantsForBase`
@@ -69,6 +74,8 @@ heading was stale, no test or script imported either name.
 
 | Module | Imports |
 |---|---|
+| `Lara.Mutate` | `Data.Word`, `Lara.Diagnostics`, `Lara.Mutate.Outcome` |
+| `Outcome` | `Lara.AST` |
 | `Seed` | `Data.Bits`, `Data.Char`, `Data.Word`, `Lara.Mutate` |
 | `Manifest` | `Lara.Diagnostics`, `Lara.Mutate` |
 | `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Conflict`, `Lara.Mutate.Sites.Nav` |
@@ -81,16 +88,18 @@ heading was stale, no test or script imported either name.
 
 ## D1 — Hard split, not a re-export façade
 
-`Lara.Mutate` exports only what it still owns. It does **not** re-export the
-names that moved, and a future change should not add such a re-export.
+`Lara.Mutate` exports what it owns, plus the `Outcome` names it re-exports
+because `Mutant` carries one of them. It does **not** re-export the names that
+moved *upward* — the generators in `Sites`, `Suite`, `Codec`, `Cycle`, `Accept`
+— and a future change should not add such a re-export.
 
 The rejected alternative is a façade root that imports its siblings and
 re-exports their names. It is not merely unwanted — it is unavailable at this
-shape of the graph. Every sibling imports the root for the operator vocabulary
-and the `Mutant`/`Expected` core, so a root that imported them back would close
-a cycle. Restoring the old surface would therefore require interposing a new
-`Lara.Mutate.Core` module: extra public surface bought purely for source
-compatibility, and a different goal from #122.
+shape of the graph. Every generator sibling imports the root for the operator
+vocabulary and the `Mutant`/`Expected` core, so a root that imported them back
+would close a cycle. Restoring the old surface would therefore require
+interposing a new `Lara.Mutate.Core` module: extra public surface bought purely
+for source compatibility, and a different goal from #122.
 
 The resulting source-API break was bounded *before* it was accepted, and is
 small in-repo. Exactly two files import `Lara.Mutate` wholesale
@@ -104,6 +113,27 @@ modules rather than imported by one: the facade takes `Expected`/`Mutant`/
 `MutationOp`, `Lara.Mutate.Accept.Ops` takes `Mutant`/`MutationOp`, and
 `Lara.Mutate.Accept.Build` takes all four, `mutantFileName` included.
 
+### The `Outcome` re-export is the one exception, and it is not a façade (#157)
+
+`Lara.Mutate.Outcome` sits *below* the root, not above it: it imports no sibling,
+and in particular does not import `Lara.Mutate`. The direction is forced by the
+data — `Mutant` has an `Expected` field, so the root must see the type — and it
+is what makes the re-export cycle-free where a generator re-export would not be.
+
+Re-exporting rather than repointing importers is deliberate. Fourteen call sites
+across `src/`, `test/`, and `scripts/` name `Expected` in an explicit import list
+(and five also name `parseExpected` / `statusText` / `expectedText`);
+`Lara.Mutate.Suite` imports the root openly, so it is a fifteenth module that
+would have been affected, though not by name. Repointing them would be a
+wide diff for no gain, and would additionally force `Outcome` into
+`exposed-modules`, growing the public surface. With the re-export, `Outcome`
+stays an `other-module`, **no importer changed**, and the public surface is
+byte-for-byte what it was.
+
+The rule this leaves for a future contributor: a re-export from the root is
+admissible only for a module the root itself imports — i.e. one strictly below it
+in the graph. Everything above it stays a hard split.
+
 ## D2 — Seven ownership modules, six of them new
 
 Issue #122 sketches `Sites` / `Codec` / `Corpus` plus core. Measured against the
@@ -116,6 +146,17 @@ stream), `Cycle` (the constructed rebut-cycle family), and `Manifest` (the
 The frozen public `mutationSeed` constant and the operator metadata function
 `codecDiagnostics` stay in the root. That is what keeps `Seed` internal and the
 root under 400 lines.
+
+`codecDiagnostics` also *cannot* move to `Outcome`, which is worth stating
+because #157 proposed it and costed the split on the assumption that it would
+(predicting a ~250-line root). Its type is `MutationOp -> Maybe (String, String)`,
+so an `Outcome` that owned it would import the root for `MutationOp` — and the
+root already imports `Outcome` for `Expected`, because `Mutant` has an `Expected`
+field. That is a cycle. Moving it would require `MutationOp` and `Mutant` to
+part company, which is a larger redesign than the sizing rule asks for. So the
+seam cuts at `Expected` and its spellings only, and the root lands at 328 rather
+than the ~250 the issue projected. It is operator metadata, and D2 has always
+placed it with the operators.
 
 ## D3 — `Suite`, not the issue's `Corpus`
 
@@ -138,7 +179,7 @@ upper bound. **There is no longer an exception** (#143). As it now stands:
 
 | Module | Lines |
 |---|---|
-| `Lara.Mutate` | 400 |
+| `Lara.Mutate` | 328 |
 | `Lara.Mutate.Sorts` | 302 |
 | `Lara.Mutate.Sites` | 294 |
 | `Lara.Mutate.Suite` | 274 |
@@ -149,10 +190,11 @@ upper bound. **There is no longer an exception** (#143). As it now stands:
 | `Lara.Mutate.Sites.Conflict` | 130 |
 | `Lara.Mutate.Codec` | 128 |
 | `Lara.Mutate.Cycle` | 123 |
+| `Lara.Mutate.Outcome` | 97 |
 | `Lara.Mutate.Sites.Nav` | 91 |
 | `Lara.Mutate.Seed` | 76 |
 | `Lara.Mutate.Manifest` | 69 |
-| **Σ** | **2585** |
+| **Σ** | **2610** |
 
 `Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the #125 split. Adding
 the `cert-wrong-fraction` operator took `Sites` to 428 — the first breach of
@@ -174,29 +216,38 @@ the completeness scan's search order so it can publish the *located* ground
 truth, and that dependency deserves its own module rather than being smuggled
 into the shared one.
 
-Counts are `git ls-files` / `wc -l`. The root reads 400 rather than the 386
-recorded at #125: three lines for the `drop-covering-attack` operator — one
-`MutationOp` constructor and its `opName` / `opFamily` rows — ten for the new
-`Expected` constructor, its Haddock, and its `expectedText` / `parseExpected`
-rows, and one for the #158 review reword that names the two `Rejection`
-constructors no operator targets. An operator costs the root three lines; an
-operator that also needs a new *specified outcome* costs it thirteen, which is
-the case this count records.
+Counts are `git ls-files` / `wc -l`.
 
-**The root is now at the bound exactly, with zero headroom.** It briefly went to
-401 during the #158 review — the first actual breach of this rule since #143 —
-and came back to 400 by reflowing that Haddock, which is the whole of the
-runway that was available. Nothing further fits: not a new operator (3 lines),
-not a new `Expected` constructor (13), not another comment line.
+`Lara.Mutate.Outcome` is the **#157** split, and it is the reason the root reads
+328. It had reached the bound exactly: 400 lines, zero headroom, after
+`drop-covering-attack` cost it thirteen (a `MutationOp` constructor with its
+`opName` / `opFamily` rows, plus a new `Expected` constructor with its Haddock
+and its `expectedText` / `parseExpected` rows) and the #158 review reword cost it
+one more. It briefly went to **401** during that review — the first actual breach
+of this rule since #143 — and came back to 400 by reflowing the Haddock, which
+was the whole of the runway available. Nothing further fitted: not a new operator
+(3 lines), not a new `Expected` constructor (13), not another comment line.
 
-The split that buys headroom back is **#157**, still taken there rather than
-here so #124 stays one reviewable change. It is no longer a prediction — the
-condition it was opened against has occurred, and the next change to this module
-of any kind has to land it first.
+The seam is *specified outcome* versus *operator vocabulary*, the one the export
+list already grouped under two headings. `Expected`, `expectedText`,
+`parseExpected`, and `statusText` moved; `MutationOp`, `opName`, `opFamily`,
+`codecDiagnostics`, `Mutant`, `mutantFileName`, and the two frozen constants
+stayed. This is the split D1's new sub-section governs: the root imports the
+child and re-exports it, so no importer changed and no public surface was added.
+
+What it buys, and where the next growth lands:
+
+- an operator costs the root **3** lines (328 → 331); there is room for roughly
+  twenty more before the bound;
+- an operator that also needs a new *specified outcome* now costs the root 3 and
+  `Outcome` **10** (97 → 107), instead of costing the root 13. The growth that
+  breached the bound is the growth that moved.
 
 The breach was silent: no test, no CI step, and no `scripts/*.sh` measures
 module length, so this table is the only thing standing between a contributor
-and a repeat. **#161** adds the mechanical guard.
+and a repeat — and the root's own namespace map was itself stale in the same
+commit, missing `Sites.Conflict`. **#161** adds the mechanical guard, and is not
+closed by this change.
 
 ### History of the `Accept` exception, and how it closed
 

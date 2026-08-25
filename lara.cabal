@@ -24,6 +24,7 @@ library
                       Lara.Driver.Internal
                       Lara.Mutate.Accept.Build
                       Lara.Mutate.Accept.Ops
+                      Lara.Mutate.Outcome
                       Lara.Mutate.Seed
                       Lara.Mutate.Sites
                       Lara.Mutate.Sites.Cert
