@@ -43,6 +43,13 @@ propositions instead of opaque encoded atom keys (Appendix I).
 None of these additions changes a lexer or parser rule, and each successful
 named form lowers to the numeric spelling's exact bytes.
 
+That byte-identity is the executable form of a standing policy: this surface
+gets *more readable*, never *natural*, and every convenience must remove
+transcription rather than checking. The boundary — including where natural
+language **is** admitted (the untrusted producer) and where it is free
+(rejection prose and reports) — is recorded in `docs/naturalness-boundary.md`
+(#109); read it before proposing a surface addition.
+
 Versioning: the presentation surface is versioned **separately** from the core
 (`docs/spec.md` §2.1). This document defines `lara-syntax@0.10`; it decodes to
 `lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
