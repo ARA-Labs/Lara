@@ -17,8 +17,9 @@ code)._
 Lara.Mutate                 core; imports no sibling
 ├── Manifest ─────────────→ core
 ├── Seed ─────────────────→ core
-├── Sites ────────────────→ core + Sites.Cert + Sites.Nav
+├── Sites ────────────────→ core + Sites.Cert + Sites.Conflict + Sites.Nav
 │   ├── Sites.Cert ───────→ core + Sites.Nav
+│   ├── Sites.Conflict ───→ core (no sibling; mirrors the checker)
 │   └── Sites.Nav ────────→ (no sibling; structural only)
 ├── Suite ────────────────→ core + Seed + Sites + Sorts
 ├── Codec ────────────────→ core
@@ -39,18 +40,28 @@ bearing property of the whole arrangement, and it is what D1 below protects.
 | `Lara.Mutate` | `MutationOp(..)`, `opName`, `opFamily`, `Expected(..)`, `expectedText`, `parseExpected`, `statusText`, `codecDiagnostics`, `Mutant(..)`, `mutantFileName`, `mutationSeed`, `mutationBases` |
 | `Lara.Mutate.Manifest` | `mutantPath`, `manifestFor` |
 | `Lara.Mutate.Seed` (internal) | `streamForKey`, `streamFor`, `pickWithStream`, `pickSome` |
-| `Lara.Mutate.Sites` (internal) | the fifteen per-operator site enumerators, three of them re-exported from `Sites.Cert` |
+| `Lara.Mutate.Sites` (internal) | the sixteen per-operator site enumerators, four of them re-exported from `Sites.Cert` and `Sites.Conflict` |
 | `Lara.Mutate.Sites.Cert` (internal) | `certTheorySwapSites`, `certPayloadSites`, `certWrongFractionSites`, `bumpWitness` |
+| `Lara.Mutate.Sites.Conflict` (internal) | `dropCoveringAttackSites` |
 | `Lara.Mutate.Sites.Nav` (internal) | `occurrences`, `rewriteAt`, `rewriteArg`, `ruleSites`, `leafSites`, `ruleOf`, `inequivLeaf` |
-| `Lara.Mutate.Suite` | `mutantsForBase`, `corpusBudget`, `corpusMutants`, `corpusSweepReport` |
+| `Lara.Mutate.Suite` | `mutantsForBase`, `corpusBudget`, `corpusMutants`, `corpusSweepReport`, `dropCoveringAttackSites` (re-export, tests only) |
 | `Lara.Mutate.Codec` | `codecMutantsForBase` |
 | `Lara.Mutate.Cycle` | `cycleMutants` |
 
-`Seed`, `Sites`, `Sites.Cert`, and `Sites.Nav` are in `other-modules`: their
-names had to become module-visible so `Suite`, `Cycle`, and `Sites` could
-consume them, but keeping them out of `exposed-modules` means the package's
-public surface does not grow. `Sites` is the only importer of its two children,
-and it re-exports the cert enumerators, so `Suite` still sees one module. `splitMix64`
+`Seed`, `Sites`, `Sites.Cert`, `Sites.Conflict`, and `Sites.Nav` are in
+`other-modules`: their names had to become module-visible so `Suite`, `Cycle`,
+and `Sites` could consume them, but keeping them out of `exposed-modules` means
+the package's public surface does not grow — with one deliberate exception. The
+#158 review added a property (`prop_conflictSiteMatchesChecker`) that has to
+compare the enumerator's *predicted* conflict pair against the checker's, which
+means calling `dropCoveringAttackSites` directly; going through `mutantsForBase`
+sees only the seeded subset and the rendered bytes. Since `Sites.Conflict` is an
+`other-module`, the name is re-exported from `Suite`, which *is* exposed. That
+grows the public API by exactly one name, recorded here rather than left to be
+discovered. Any further such re-export should be weighed against a test-only
+`.Internal` module instead. `Sites` is the only importer of its
+three children, and it re-exports their enumerators, so `Suite` still sees one
+module. `splitMix64`
 and `stringSeed` stay private inside `Seed` — the old "exposed for tests"
 heading was stale, no test or script imported either name.
 
@@ -60,8 +71,9 @@ heading was stale, no test or script imported either name.
 |---|---|
 | `Seed` | `Data.Bits`, `Data.Char`, `Data.Word`, `Lara.Mutate` |
 | `Manifest` | `Lara.Diagnostics`, `Lara.Mutate` |
-| `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Nav` |
+| `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Conflict`, `Lara.Mutate.Sites.Nav` |
 | `Sites.Cert` | `Data.Ratio`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Strict`, `Lara.Strict.Cell`, `Lara.Strict.RA`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
+| `Sites.Conflict` | `Lara.AST`, `Lara.Attack`, `Lara.Blocked`, `Lara.Check`, `Lara.Compile`, `Lara.Diagnostics`, `Lara.Policy`, `Lara.Prop`, `Lara.SupportTerm`, `Lara.Mutate` |
 | `Sites.Nav` | `Data.List`, `Lara.AST`, `Lara.Prop` |
 | `Suite` | `Lara.AST`, `Lara.Diagnostics`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed`, `Lara.Mutate.Sites`, `Lara.Mutate.Sorts` |
 | `Codec` | `Lara.Strict`, `Lara.Wire`, `Lara.Mutate` |
@@ -126,20 +138,21 @@ upper bound. **There is no longer an exception** (#143). As it now stands:
 
 | Module | Lines |
 |---|---|
-| `Lara.Mutate` | 386 |
+| `Lara.Mutate` | 400 |
 | `Lara.Mutate.Sorts` | 302 |
-| `Lara.Mutate.Sites` | 291 |
-| `Lara.Mutate.Suite` | 262 |
+| `Lara.Mutate.Sites` | 294 |
+| `Lara.Mutate.Suite` | 274 |
 | `Lara.Mutate.Accept.Ops` | 241 |
 | `Lara.Mutate.Accept.Build` | 162 |
 | `Lara.Mutate.Accept` | 154 |
 | `Lara.Mutate.Sites.Cert` | 141 |
+| `Lara.Mutate.Sites.Conflict` | 130 |
 | `Lara.Mutate.Codec` | 128 |
 | `Lara.Mutate.Cycle` | 123 |
 | `Lara.Mutate.Sites.Nav` | 91 |
 | `Lara.Mutate.Seed` | 76 |
 | `Lara.Mutate.Manifest` | 69 |
-| **Σ** | **2426** |
+| **Σ** | **2585** |
 
 `Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the #125 split. Adding
 the `cert-wrong-fraction` operator took `Sites` to 428 — the first breach of
@@ -153,12 +166,37 @@ this added no public surface, and the split is byte-neutral: regeneration
 reproduces `fixtures/mutants` exactly, since enumerator order is what fixes the
 seeded picks and no list order moved.
 
-Counts are `git ls-files` / `wc -l`. The root reads 386 rather than the 379
-recorded at #143: two lines of later drift, the three #125 added for the new
-operator — one `MutationOp` constructor and its `opName` / `opFamily` rows — and
-two more for the split's entries in the root's own module list. Each new
-operator costs the root exactly three lines, which is what keeps it under the
-bound as the operator set grows.
+`Lara.Mutate.Sites.Conflict` is the #124 addition. It is a new module rather
+than a sixteenth enumerator in `Sites` for two reasons: `Sites` was at 291 with
+its own history of breaching this bound, and this enumerator is the only one that
+imports the checker (`Lara.Check` / `Lara.Compile` / `Lara.Policy`) — it mirrors
+the completeness scan's search order so it can publish the *located* ground
+truth, and that dependency deserves its own module rather than being smuggled
+into the shared one.
+
+Counts are `git ls-files` / `wc -l`. The root reads 400 rather than the 386
+recorded at #125: three lines for the `drop-covering-attack` operator — one
+`MutationOp` constructor and its `opName` / `opFamily` rows — ten for the new
+`Expected` constructor, its Haddock, and its `expectedText` / `parseExpected`
+rows, and one for the #158 review reword that names the two `Rejection`
+constructors no operator targets. An operator costs the root three lines; an
+operator that also needs a new *specified outcome* costs it thirteen, which is
+the case this count records.
+
+**The root is now at the bound exactly, with zero headroom.** It briefly went to
+401 during the #158 review — the first actual breach of this rule since #143 —
+and came back to 400 by reflowing that Haddock, which is the whole of the
+runway that was available. Nothing further fits: not a new operator (3 lines),
+not a new `Expected` constructor (13), not another comment line.
+
+The split that buys headroom back is **#157**, still taken there rather than
+here so #124 stays one reviewable change. It is no longer a prediction — the
+condition it was opened against has occurred, and the next change to this module
+of any kind has to land it first.
+
+The breach was silent: no test, no CI step, and no `scripts/*.sh` measures
+module length, so this table is the only thing standing between a contributor
+and a repeat. **#161** adds the mechanical guard.
 
 ### History of the `Accept` exception, and how it closed
 

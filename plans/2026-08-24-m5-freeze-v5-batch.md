@@ -1,8 +1,8 @@
 # m5-freeze-v5 batch — evaluation-suite completion
 
-> **Status (2026-08-24): live, Task 1 landed (#154); Tasks 2–4 remain.** Three
-> code tasks plus one shared refreeze cycle. Delete this file once Task 4 lands
-> and `m5-freeze-v5` is cut; move anything durable into
+> **Status (2026-08-24): live, Tasks 1–2 landed (#154, #124); Tasks 3–4 remain.**
+> Three code tasks plus one shared refreeze cycle. Delete this file once Task 4
+> lands and `m5-freeze-v5` is cut; move anything durable into
 > `docs/m5-freeze-checklist.md` first. Update this line as each task lands.
 
 ## Where this sits
@@ -159,14 +159,30 @@ Steps:
    `reject-MissingConflict`.
 5. Extend the ablation partition in the measure harness to the third dimension.
 
-Note this task is additive for *mutants* but **not** for *ablations*: splitting
-the flag changes `ablation.tsv` even with zero mutant-byte churn, so the paper's
-cells (no-cq 18, no-typed 30) move. Expected, not a regression.
+Note this task is additive for *mutants* but **not** for *ablations*:
+`ablation.tsv` gains a whole third run.
 
-**Open question, resolve here, not at refreeze time:** is the `:184`
-monotonicity property proved in Lean or only asserted in Haskell? Per CLAUDE.md's
-mechanization discipline, if it is a frozen claim then a third flag owes an
-`AxCheck.lean` entry. Check `lean/` before writing the Haskell.
+**How the published cells actually moved (measured in the Task 2 PR).** The
+flags were split, but `noTypedConfig` was NOT redefined: it still drops the
+whole typed-attack bundle, because it is the paper's "nodes and arbitrary attack
+edges" baseline and redefining it would silently change what a published number
+means. So no existing row changed its ablation outcome. The cells moved only by
+the five new mutants: **no-cq 18 → 18**, **no-typed 30 → 35** (the baseline
+misses the new rows too — correct, it requires no completeness), and the new
+isolating cell **no-conflict-scan = 5**, all `reject-MissingConflict`. The cost
+is that `no-typed` now flips two partition buckets rather than one, so
+`ablationConfigs` carries a bucket *list* per run.
+
+**Open question — resolved (2026-08-24, in the Task 2 PR): Haskell only, and no
+Lean entry is owed.** `CheckConfig` has no counterpart anywhere in `lean/`
+(no hit for `CheckConfig`, ablation, or the inclusion), which is consistent with
+the type's own contract — it "exists only at the checker boundary" and never
+reaches the kernel or the wire. The Lean development mechanizes the *frozen*
+semantics, i.e. `fullConfig` alone. The inclusion is pinned in Haskell by
+`test/AblationSpec.hs`'s `prop_monotonicity`, over every manifest input. A new
+flag therefore owes an `AxCheck.lean` entry only if it changes what `fullConfig`
+accepts — which by construction it must not. Recorded at the definition site in
+`src/Lara/Check.hs`.
 
 ## Task 3 — #123 discriminating localization benchmark
 

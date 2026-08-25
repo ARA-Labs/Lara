@@ -28,6 +28,16 @@ module Lara.Mutate.Suite
   , corpusBudget
   , corpusMutants
   , corpusSweepReport
+    -- * Site enumerators reachable for testing
+    --
+    -- | "Lara.Mutate.Sites" and its children are @other-modules@: the
+    -- enumerators are an implementation detail of the suite, not API. This one
+    -- is re-exported because @test\/MutationSpec.hs@'s
+    -- @prop_conflictSiteMatchesChecker@ has to compare the /predicted/ pair
+    -- against the checker's, which means calling the enumerator directly —
+    -- going through 'mutantsForBase' would only see the seeded subset and the
+    -- rendered bytes, not the prediction.
+  , dropCoveringAttackSites
   ) where
 
 import Lara.AST
@@ -72,6 +82,7 @@ mutantsForBase base input =
     , unitMutants base input OpCertWrongFraction 1 certWrongFractionSites
     , unitMutants base input OpBadAttackPosition 2 badAttackPositionSites
     , unitMutants base input OpUnlicensedAttack 1 unlicensedAttackSites
+    , unitMutants base input OpDropCoveringAttack 1 dropCoveringAttackSites
     , unitMutants base input OpGroupConflict 1 groupConflictSites
     , -- The signature family (@lara-core\@0.2@, #89 D10): R2 had zero mutants
       -- before this pass, and spec §10.1 requires every class to be exercised.
@@ -196,6 +207,7 @@ sweepOps =
   , unitSweep OpCertWrongFraction certWrongFractionSites
   , unitSweep OpBadAttackPosition badAttackPositionSites
   , unitSweep OpUnlicensedAttack unlicensedAttackSites
+  , unitSweep OpDropCoveringAttack dropCoveringAttackSites
   , unitSweep OpGroupConflict groupConflictSites
   , -- The signature family. Sweeping it over the corpus is what makes the
     -- applicability assertion meaningful: `wrong-arg-sort` must find real sites

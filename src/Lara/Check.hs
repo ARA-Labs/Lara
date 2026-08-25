@@ -53,6 +53,7 @@ module Lara.Check
   , fullConfig
   , noCQConfig
   , noTypedConfig
+  , noConflictScanConfig
     -- * The detailed program checker and its conflict scan
   , ProgramAcceptance (..)
   , ConflictNode (..)
@@ -185,30 +186,61 @@ firstDuplicate = go 0
 -- @cfg@. The config never reaches the support kernel ('inferSupport' and the
 -- R3–R7 rules run unconditionally) and is never carried on the wire: it exists
 -- only at the checker boundary, for the M5 ablation baselines.
+--
+-- __Where that inclusion is enforced.__ In Haskell, by
+-- @test\/AblationSpec.hs@'s @prop_monotonicity@, over every manifest input and
+-- over all 8 inhabitants of this record (its @allConfigs@ — not merely the
+-- three named baselines of 'Lara.Measure.ablationConfigs', which are the
+-- reporting vocabulary). It is deliberately NOT a Lean obligation: the Lean
+-- development mechanizes the frozen semantics, which is 'fullConfig' alone, and
+-- a checker-boundary flag owes an @AxCheck.lean@ entry only if it changes what
+-- 'fullConfig' accepts — which by construction it must not.
+--
+-- That scope rule, the six @AxCheck.lean@ entries that pin the conflict scan
+-- independently of this switch, and the rejected alternative are recorded in
+-- @docs\/mechanization-scope-decision.md@.
 data CheckConfig = CheckConfig
   { ccObligationGate :: Bool
     -- ^ Enforce the open-obligation gate ('PEIncompleteArgument' in
     -- 'checkArguments'). Off, an argument with open critical-question
     -- obligations is retained instead of rejected.
   , ccTypedAttacks :: Bool
-    -- ^ Enforce the typed-attack bundle: the per-attack 'checkAttack' typing in
-    -- 'checkAttacks' and the 'firstMissingConflictInfo' completeness scan. Off,
-    -- attacks still must reference declared arguments (R1), but are not typed
-    -- and completeness is not required.
+    -- ^ Enforce the per-attack 'checkAttack' typing in 'checkAttacks'. Off,
+    -- attacks still must reference declared arguments (R1), but are not typed.
+  , ccConflictScan :: Bool
+    -- ^ Enforce the 'firstMissingConflictInfo' completeness scan. Off, an
+    -- attackable contrary pair between complete arguments may go undeclared.
+    --
+    -- Separate from 'ccTypedAttacks' (#124) because the two answer different
+    -- questions: typing asks whether a /declared/ edge is licensed, the scan
+    -- asks whether every /required/ edge is declared. Folded together, no
+    -- ablation cell isolated the scan, which is the executable witness of the
+    -- attack-completeness theorem.
   }
   deriving (Eq, Show)
 
 -- | The frozen semantics: every gate enforced. All production callers use this.
 fullConfig :: CheckConfig
-fullConfig = CheckConfig True True
+fullConfig = CheckConfig True True True
 
 -- | Ablation: no critical-question obligation gate.
 noCQConfig :: CheckConfig
 noCQConfig = fullConfig{ccObligationGate = False}
 
--- | Ablation: no typed-attack bundle.
+-- | Ablation: no typed-attack bundle — the paper's \"nodes and arbitrary attack
+-- edges\" baseline, which neither types a declared edge nor requires a needed
+-- one. It drops BOTH flags of the bundle: splitting 'ccConflictScan' out (#124)
+-- added a way to switch the scan alone, and deliberately did not redefine this
+-- baseline, whose measured cells are published.
 noTypedConfig :: CheckConfig
-noTypedConfig = fullConfig{ccTypedAttacks = False}
+noTypedConfig = fullConfig{ccTypedAttacks = False, ccConflictScan = False}
+
+-- | Ablation: typed attacks still checked, completeness not required (#124).
+-- The isolating cell for attack completeness: the only difference from
+-- 'fullConfig' is the scan, so a row that flips under it and under nothing else
+-- is evidence the scan alone is load-bearing.
+noConflictScanConfig :: CheckConfig
+noConflictScanConfig = fullConfig{ccConflictScan = False}
 
 -- ---------------------------------------------------------------------------
 -- The checked argument cache and the attack pass
@@ -332,8 +364,7 @@ data ProgramAcceptance = ProgramAcceptance
 
 -- | Stages 4–7: duplicate arguments, support, typed attacks, missing conflict
 -- (Lean @checkProgramDetailed@ = @checkProgramBase@ then the conflict scan).
--- The conflict scan is part of the typed-attack bundle and is skipped when
--- 'ccTypedAttacks' is off.
+-- The conflict scan is skipped when 'ccConflictScan' is off.
 checkProgramDetailed
   :: CheckConfig
   -> (RuleId -> Maybe Rule)
@@ -351,7 +382,7 @@ checkProgramDetailed cfg pI gamma certOk dp args atts =
       checkAttacks cfg pI gamma certOk dp args atts
       let nodes = [CheckedNode w (srConclusion res) | (w, res) <- cache]
           missing
-            | ccTypedAttacks cfg = firstMissingConflictInfo dp (conflictCache pI atts nodes)
+            | ccConflictScan cfg = firstMissingConflictInfo dp (conflictCache pI atts nodes)
             | otherwise = Nothing
       case missing of
         Just m -> Left (PEMissingConflict m)

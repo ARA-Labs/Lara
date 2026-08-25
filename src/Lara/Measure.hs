@@ -55,7 +55,7 @@ module Lara.Measure
 import Data.List (intercalate, isInfixOf, isPrefixOf, nub, sort)
 
 import Lara.AST (Label (..), RejectClass (..), Rejection (..), Status (..))
-import Lara.Check (CheckConfig, fullConfig, noCQConfig, noTypedConfig)
+import Lara.Check (CheckConfig, fullConfig, noCQConfig, noConflictScanConfig, noTypedConfig)
 import Lara.Diagnostics
   ( Constituent
   , LocatedRejection (..)
@@ -232,6 +232,7 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
               -- point, not a generation failure (measured, never gated).
               ExpectClass _ -> Just (loc == imExpectedLocation im)
               ExpectIncompleteArgument -> Just (loc == imExpectedLocation im)
+              ExpectMissingConflict -> Just (loc == imExpectedLocation im)
               _ -> Nothing
           , detReplayOk = case imKind im of
               CorpusRow -> Just (replayStable input verdict)
@@ -260,6 +261,7 @@ classMatches e outcome = case e of
   ExpectCodecReject -> False -- decoded cleanly; expected a codec failure
   ExpectClass c -> outcome == Reject (RejectClass c)
   ExpectIncompleteArgument -> outcome == Reject IncompleteArgument
+  ExpectMissingConflict -> outcome == Reject MissingConflict
   ExpectAllContested -> allContested outcome
   ExpectEvidenceBlocked -> evidenceBlocked outcome
   ExpectPrimaryStatus s -> primaryStatus outcome == Just s
@@ -338,11 +340,14 @@ findSection tag = go
 -- partition. Drives the per-ablation table and the surgical assertions.
 data AblationBucket
   = FlipUnderNoCQ
-    -- ^ 'noCQConfig' must flip reject→accept (the hole-obligation mutants)
+    -- ^ the obligation gate is load-bearing (the hole-obligation mutants)
   | FlipUnderNoTyped
-    -- ^ 'noTypedConfig' must flip reject→accept (R10\/R11 bad-attack-targets)
+    -- ^ per-attack typing is load-bearing (R10\/R11 bad-attack-targets)
+  | FlipUnderNoConflictScan
+    -- ^ the completeness scan is load-bearing (the drop-covering-attack
+    -- mutants, #124) — the isolating evidence for attack completeness
   | UnchangedUnderAblations
-    -- ^ identical under both ablations: rejects decided by rules behind no
+    -- ^ identical under every ablation: rejects decided by rules behind no
     -- flag, codec rows (decode fails before any config), and all accepts
     -- (monotonicity: the config only removes rejections)
   deriving (Eq, Ord, Show)
@@ -351,6 +356,7 @@ data AblationBucket
 ablationBucket :: Expected -> AblationBucket
 ablationBucket e = case e of
   ExpectIncompleteArgument -> FlipUnderNoCQ
+  ExpectMissingConflict -> FlipUnderNoConflictScan
   ExpectClass R10 -> FlipUnderNoTyped
   ExpectClass R11 -> FlipUnderNoTyped
   ExpectClass _ -> UnchangedUnderAblations -- R1/R3/…: rules behind no flag
@@ -362,11 +368,19 @@ ablationBucket e = case e of
   ExpectPrimaryStatus _ -> UnchangedUnderAblations
 
 -- | The named ablation runs the script and tests iterate, each with the
--- partition bucket it must flip (and must flip nothing else).
-ablationConfigs :: [(String, CheckConfig, AblationBucket)]
+-- partition buckets it must flip (and must flip nothing else).
+--
+-- @no-typed@ carries TWO buckets because it is the paper's \"nodes and
+-- arbitrary attack edges\" baseline: it drops the whole typed-attack bundle,
+-- so both the typing rows and the completeness rows flip under it. @no-cq@ and
+-- @no-conflict-scan@ each carry one, and are therefore the isolating cells —
+-- the second exists (#124) precisely because the first-generation partition had
+-- no cell that separated the completeness scan from the typing it shipped with.
+ablationConfigs :: [(String, CheckConfig, [AblationBucket])]
 ablationConfigs =
-  [ ("no-cq", noCQConfig, FlipUnderNoCQ)
-  , ("no-typed", noTypedConfig, FlipUnderNoTyped)
+  [ ("no-cq", noCQConfig, [FlipUnderNoCQ])
+  , ("no-typed", noTypedConfig, [FlipUnderNoTyped, FlipUnderNoConflictScan])
+  , ("no-conflict-scan", noConflictScanConfig, [FlipUnderNoConflictScan])
   ]
 
 -- | One (input × ablation-config) measurement. No @status_shift@ column —
@@ -432,7 +446,7 @@ classSummaries cells =
 -- | One ablation run over the manifests: the named config's cells. The
 -- renderers derive the aggregate ('classSummaries') from the cells.
 data AblationReport = AblationReport
-  { abrAblation :: String -- ^ the 'ablationConfigs' name (@no-cq@ \/ @no-typed@)
+  { abrAblation :: String -- ^ the 'ablationConfigs' name (@no-cq@, @no-typed@, @no-conflict-scan@)
   , abrCells :: [AblationCell]
   }
   deriving (Eq, Show)

@@ -65,9 +65,10 @@ import Lara.Mutate.Suite
   ( corpusBudget
   , corpusMutants
   , corpusSweepReport
+  , dropCoveringAttackSites
   , mutantsForBase
   )
-import Lara.Replay (CheckInput, inputUnit)
+import Lara.Replay (CheckInput, inputReplayId, inputUnit, mkCheckInput)
 import Lara.Strict (SExpr)
 import qualified Lara.Strict.RA as RA
 import Lara.Wire
@@ -253,6 +254,10 @@ prop_mutationCoverage = once $ ioProperty $ do
           -- operator specified to `reject-IncompleteArgument`, so requiring the
           -- outcome here requires the operator to produce mutants of its class.
           : ExpectIncompleteArgument
+          -- The attack-completeness witness (#124), the same way:
+          -- `drop-covering-attack` is the one operator specified to
+          -- `reject-MissingConflict`.
+          : ExpectMissingConflict
           : map ExpectClass [minBound .. maxBound]
   pure $
     conjoin
@@ -364,9 +369,64 @@ prop_expectedLocationColumn = once $ ioProperty $ do
     wellFormed row = case rowExpected row of
       ExpectClass _ -> sited row
       ExpectIncompleteArgument -> sited row -- single-seeded-site reject too
+      ExpectMissingConflict -> sited row -- located at the uncovered pair
       _ -> rowSite row == "-"
     sited row = rowSite row /= "-" && roundTrips (rowSite row)
     roundTrips s = maybe False ((== s) . constituentText) (parseConstituent s)
+
+-- | The mirror is pinned to the checker: for every site
+-- 'dropCoveringAttackSites' proposes, on every base it runs against, the
+-- 'Lara.Diagnostics.CConflictPair' it /predicts/ is the one
+-- 'Lara.Driver.runCheckLocated' actually reports on the mutated unit.
+--
+-- This is the property that earns @drop-covering-attack@'s design rationale.
+-- Every other check around this operator is strictly weaker:
+-- @scripts\/gen-mutants.hs@ and 'prop_specifiedOutcomes' pin the rejection
+-- /class/, 'prop_expectedLocationColumn' pins only that the site column is
+-- present and round-trips, and 'Lara.Measure.detLocationMatch' does compare
+-- located-vs-seeded but flows into @measurements\/report.{json,tsv}@ and is
+-- measured, never gated. Without this, a wrong @si@\/@ti@ leaves the whole
+-- suite green and silently corrupts the answer key that the localization
+-- benchmark (#123) consumes — the mutant still rejects with the right class,
+-- so nothing else can see it.
+prop_conflictSiteMatchesChecker :: Property
+prop_conflictSiteMatchesChecker = once $ ioProperty $ do
+  corpusBases <- readCorpusBases
+  anchors <- mapM readBase mutationBases
+  let bases = [(b, i) | (b, Just i) <- anchors] ++ corpusBases
+      sites =
+        [ (base, input, expected, predicted, mutate)
+        | (base, input) <- bases
+        , (expected, predicted, mutate) <- dropCoveringAttackSites (inputUnit input)
+        ]
+  pure $
+    conjoin
+      ( counterexample
+          "no drop-covering-attack sites found — the property would be vacuous"
+          (not (null sites))
+          : [ counterexample (base ++ ": predicted " ++ show predicted) (agrees site)
+            | site@(base, _, _, predicted, _) <- sites
+            ]
+      )
+  where
+    readBase base = do
+      bytes <- readFile ("examples/" ++ base ++ "/example.core.sexp")
+      pure (base, either (const Nothing) Just (decodeCheckInputFile bytes))
+
+    agrees (_, input, expected, predicted, mutate) =
+      case mkCheckInput (inputReplayId input) (mutate (inputUnit input)) of
+        Left err ->
+          counterexample ("mutated unit failed to rebuild: " ++ show err) False
+        Right mutated ->
+          let (verdict, located) = runCheckLocated mutated
+           in conjoin
+                [ counterexample "enumerator proposed a non-MissingConflict site" $
+                    expected === ExpectMissingConflict
+                , counterexample ("outcome was " ++ show (verdictOutcome verdict)) $
+                    verdictOutcome verdict === Reject MissingConflict
+                , counterexample "checker reported no located rejection" $
+                    fmap lrConstituent located === Just predicted
+                ]
 
 -- | The corpus half of the T1 coverage criterion (tracker #48): every
 -- executable rejection class is witnessed by ≥1 corpus-based mutant. All eleven
@@ -587,5 +647,6 @@ mutationSpecProps =
   , ("mutation suite: accept family verified structurally (status + label shape)", quickCheckResult prop_acceptStructure)
   , ("mutation suite: runCheck == fst . runCheckLocated over every mutant", quickCheckResult prop_runCheckLocatedConsistent)
   , ("mutation suite: expected-location column round-trips and is present on reject rows", quickCheckResult prop_expectedLocationColumn)
+  , ("mutation suite: drop-covering-attack site is the pair the checker reports", quickCheckResult prop_conflictSiteMatchesChecker)
   , ("mutation suite: cert-wrong-fraction decodes cleanly and is refused on value", quickCheckResult prop_certWrongFractionDecodes)
   ]

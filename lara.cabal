@@ -27,6 +27,7 @@ library
                       Lara.Mutate.Seed
                       Lara.Mutate.Sites
                       Lara.Mutate.Sites.Cert
+                      Lara.Mutate.Sites.Conflict
                       Lara.Mutate.Sites.Nav
     exposed-modules:  Lara.Prop
                       Lara.Strict

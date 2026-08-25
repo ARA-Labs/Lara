@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 505
+Total mutants: 510
 
 | expected outcome | mutants |
 | --- | --- |
@@ -30,6 +30,7 @@ Total mutants: 505
 | `accept-justified` | 9 |
 | `codec-reject` | 47 |
 | `reject-IncompleteArgument` | 18 |
+| `reject-MissingConflict` | 5 |
 | `reject-R1` | 44 |
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
@@ -46,7 +47,7 @@ Total mutants: 505
 | mutation family | mutants |
 | --- | --- |
 | `accept-verdict` | 54 |
-| `bad-attack-targets` | 30 |
+| `bad-attack-targets` | 35 |
 | `certificate-tampering` | 63 |
 | `codec-corruption` | 47 |
 | `cycles` | 4 |
@@ -61,8 +62,12 @@ Total mutants: 505
 
 Per rejection operator over the corpus units: how many bases carry ≥1
 site (applicable) and how many were selected (all when ≤ B, else B
-picked by the operator-keyed stream). Cert operators find no corpus
-site (corpus units carry no strict certificates), recorded as 0/0.
+picked by the operator-keyed stream). Two operator groups find no
+corpus site and are recorded as 0/0: the cert operators (corpus units
+carry no strict certificates) and `drop-covering-attack` (only three
+corpus units declare an attack at all, and none of those attacks
+covers a contrary pair, so deleting one leaves the completeness scan
+with nothing to report).
 
 | corpus operator | applicable bases | selected |
 | --- | --- | --- |
@@ -80,6 +85,7 @@ site (corpus units carry no strict certificates), recorded as 0/0.
 | `cert-wrong-fraction` | 1 | 1 |
 | `bad-attack-position` | 3 | 3 |
 | `unlicensed-attack` | 13 | 12 |
+| `drop-covering-attack` | 0 | 0 |
 | `group-conflict` | 55 | 12 |
 | `undeclared-pred` | 60 | 12 |
 | `wrong-pred-arity` | 60 | 12 |

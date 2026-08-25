@@ -103,8 +103,8 @@ preflightLean = do
 -- | One named ablation pass over every input: 'computeAblation' re-runs the
 -- checker under the ablated config against the full one. Haskell-only by
 -- construction — no Lean subprocess, no timing samples.
-runAblation :: [InputMeta] -> (String, CheckConfig, AblationBucket) -> IO AblationReport
-runAblation inputs (name, cfg, _bucket) = do
+runAblation :: [InputMeta] -> (String, CheckConfig, [AblationBucket]) -> IO AblationReport
+runAblation inputs (name, cfg, _buckets) = do
   cells <- mapM cellFor inputs
   pure (AblationReport name cells)
   where

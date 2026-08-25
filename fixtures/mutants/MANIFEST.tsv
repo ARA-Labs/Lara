@@ -12,6 +12,7 @@ A--trusted-assurance-0.sexp	A	certificate-tampering	trusted-assurance	reject-R7	
 A--bad-attack-position-0.sexp	A	bad-attack-targets	bad-attack-position	reject-R10			attack:2
 A--bad-attack-position-1.sexp	A	bad-attack-targets	bad-attack-position	reject-R10			attack:0
 A--unlicensed-attack-0.sexp	A	bad-attack-targets	unlicensed-attack	reject-R11			attack:4
+A--drop-covering-attack-0.sexp	A	bad-attack-targets	drop-covering-attack	reject-MissingConflict			conflict:3-0
 A--group-conflict-0.sexp	A	data-integrity	group-conflict	reject-R9			group:mut_g
 A--undeclared-pred-0.sexp	A	signature	undeclared-pred	reject-R2			policy
 A--wrong-pred-arity-0.sexp	A	signature	wrong-pred-arity	reject-R2			policy
@@ -47,6 +48,7 @@ B--hole-obligation-0.sexp	B	open-obligations	hole-obligation	reject-IncompleteAr
 B--wrong-discharge-0.sexp	B	open-obligations	wrong-discharge	reject-R6			arg:1
 B--trusted-assurance-0.sexp	B	certificate-tampering	trusted-assurance	reject-R7			arg:1
 B--unlicensed-attack-0.sexp	B	bad-attack-targets	unlicensed-attack	reject-R11			attack:2
+B--drop-covering-attack-0.sexp	B	bad-attack-targets	drop-covering-attack	reject-MissingConflict			conflict:1-0
 B--group-conflict-0.sexp	B	data-integrity	group-conflict	reject-R9			group:mut_g
 B--undeclared-pred-0.sexp	B	signature	undeclared-pred	reject-R2			policy
 B--wrong-pred-arity-0.sexp	B	signature	wrong-pred-arity	reject-R2			policy
@@ -117,6 +119,7 @@ E3--trusted-assurance-0.sexp	E3	certificate-tampering	trusted-assurance	reject-R
 E3--bad-attack-position-0.sexp	E3	bad-attack-targets	bad-attack-position	reject-R10			attack:1
 E3--bad-attack-position-1.sexp	E3	bad-attack-targets	bad-attack-position	reject-R10			attack:2
 E3--unlicensed-attack-0.sexp	E3	bad-attack-targets	unlicensed-attack	reject-R11			attack:4
+E3--drop-covering-attack-0.sexp	E3	bad-attack-targets	drop-covering-attack	reject-MissingConflict			conflict:4-5
 E3--group-conflict-0.sexp	E3	data-integrity	group-conflict	reject-R9			group:mut_g
 E3--undeclared-pred-0.sexp	E3	signature	undeclared-pred	reject-R2			policy
 E3--wrong-pred-arity-0.sexp	E3	signature	wrong-pred-arity	reject-R2			policy
@@ -146,6 +149,7 @@ E4--trusted-assurance-0.sexp	E4	certificate-tampering	trusted-assurance	reject-R
 E4--bad-attack-position-0.sexp	E4	bad-attack-targets	bad-attack-position	reject-R10			attack:0
 E4--bad-attack-position-1.sexp	E4	bad-attack-targets	bad-attack-position	reject-R10			attack:4
 E4--unlicensed-attack-0.sexp	E4	bad-attack-targets	unlicensed-attack	reject-R11			attack:7
+E4--drop-covering-attack-0.sexp	E4	bad-attack-targets	drop-covering-attack	reject-MissingConflict			conflict:5-4
 E4--group-conflict-0.sexp	E4	data-integrity	group-conflict	reject-R9			group:mut_g
 E4--undeclared-pred-0.sexp	E4	signature	undeclared-pred	reject-R2			policy
 E4--wrong-pred-arity-0.sexp	E4	signature	wrong-pred-arity	reject-R2			policy
@@ -175,6 +179,7 @@ E5--trusted-assurance-0.sexp	E5	certificate-tampering	trusted-assurance	reject-R
 E5--bad-attack-position-0.sexp	E5	bad-attack-targets	bad-attack-position	reject-R10			attack:1
 E5--bad-attack-position-1.sexp	E5	bad-attack-targets	bad-attack-position	reject-R10			attack:3
 E5--unlicensed-attack-0.sexp	E5	bad-attack-targets	unlicensed-attack	reject-R11			attack:6
+E5--drop-covering-attack-0.sexp	E5	bad-attack-targets	drop-covering-attack	reject-MissingConflict			conflict:2-1
 E5--group-conflict-0.sexp	E5	data-integrity	group-conflict	reject-R9			group:mut_g
 E5--undeclared-pred-0.sexp	E5	signature	undeclared-pred	reject-R2			policy
 E5--wrong-pred-arity-0.sexp	E5	signature	wrong-pred-arity	reject-R2			policy

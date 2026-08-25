@@ -336,9 +336,13 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
   re-freeze PR #99). Cut after main CI run `31463095876` passed on PR #100's
   benchmark-harness repair.
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
-  invalidates this freeze; re-run the gates and cut the next tag. The deferred
-  `drop-covering-attack` / `wrong-fraction` operators would therefore require
-  `m5-freeze-v5`.
+  invalidates this freeze; re-run the gates and cut the next tag. Both operators
+  this rule once named as deferred have now landed on `main` —
+  `cert-wrong-fraction` (#125, PR #154) and `drop-covering-attack` (#124) — so
+  the tree no longer regenerates the v4 suite, and `m5-freeze-v5` is owed. It is
+  tracked as #156 and cut once the batch in
+  `plans/2026-08-24-m5-freeze-v5-batch.md` completes. **Until that lands, every
+  number below describes v4, not the working tree.**
 
 ## Reproduce from scratch
 

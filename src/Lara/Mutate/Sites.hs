@@ -21,7 +21,8 @@
 -- re-exported here; 'Lara.Mutate.Suite' imports them directly, so the wrapper
 -- that attaches 'Lara.Mutate.Expected' stays at the single assembly site.
 --
--- The certificate-family enumerators live in "Lara.Mutate.Sites.Cert" and /are/
+-- The certificate-family enumerators live in "Lara.Mutate.Sites.Cert" and the
+-- attack-completeness one in "Lara.Mutate.Sites.Conflict"; both /are/
 -- re-exported here, so 'Lara.Mutate.Suite' keeps its single import of this
 -- module; the navigation helpers they share live in "Lara.Mutate.Sites.Nav"
 -- (#125, splitting this module back under the 400-line bound
@@ -45,6 +46,7 @@ module Lara.Mutate.Sites
   , certWrongFractionSites
   , badAttackPositionSites
   , unlicensedAttackSites
+  , dropCoveringAttackSites
   , groupConflictSites
   ) where
 
@@ -62,6 +64,7 @@ import Lara.Mutate.Sites.Cert
   , certTheorySwapSites
   , certWrongFractionSites
   )
+import Lara.Mutate.Sites.Conflict (dropCoveringAttackSites)
 import Lara.Mutate.Sites.Nav
   ( inequivLeaf
   , leafSites

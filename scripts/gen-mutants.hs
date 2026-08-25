@@ -177,8 +177,12 @@ readmeFor corpusBases mutants =
          , ""
          , "Per rejection operator over the corpus units: how many bases carry ≥1"
          , "site (applicable) and how many were selected (all when ≤ B, else B"
-         , "picked by the operator-keyed stream). Cert operators find no corpus"
-         , "site (corpus units carry no strict certificates), recorded as 0/0."
+         , "picked by the operator-keyed stream). Two operator groups find no"
+         , "corpus site and are recorded as 0/0: the cert operators (corpus units"
+         , "carry no strict certificates) and `drop-covering-attack` (only three"
+         , "corpus units declare an attack at all, and none of those attacks"
+         , "covers a contrary pair, so deleting one leaves the completeness scan"
+         , "with nothing to report)."
          , ""
          , "| corpus operator | applicable bases | selected |"
          , "| --- | --- | --- |"
@@ -226,6 +230,11 @@ verify m = case mutantExpected m of
       Reject IncompleteArgument -> pure ()
       outcome ->
         bad ("expected reject " ++ show IncompleteArgument ++ ", got " ++ describe outcome)
+  ExpectMissingConflict -> withDecoded $ \verdict ->
+    case verdictOutcome verdict of
+      Reject MissingConflict -> pure ()
+      outcome ->
+        bad ("expected reject " ++ show MissingConflict ++ ", got " ++ describe outcome)
   ExpectAllContested -> withDecoded $ \verdict ->
     case verdictOutcome verdict of
       Accept labels _ statuses

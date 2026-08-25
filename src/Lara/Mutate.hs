@@ -91,6 +91,7 @@ data MutationOp
   | OpHiddenContrary -- ^ smuggle in a strict rule + contrary on it → R12
   | OpBadAttackPosition -- ^ attack position off the term / wrong kind → R10
   | OpUnlicensedAttack -- ^ self-rebut with no declared contrary → R11
+  | OpDropCoveringAttack -- ^ drop the sole cover of a contrary pair → missing conflict
   | OpOpenObligation -- ^ drop a mandatory discharge, no hole → R5
   | OpHoleObligation -- ^ swap a mandatory discharge for a declared hole → obligation gate
   | OpTrustedAssurance -- ^ @trusted@ on a defeasible instance → R7
@@ -140,6 +141,7 @@ opName op = case op of
   OpHiddenContrary -> "hidden-contrary"
   OpBadAttackPosition -> "bad-attack-position"
   OpUnlicensedAttack -> "unlicensed-attack"
+  OpDropCoveringAttack -> "drop-covering-attack"
   OpOpenObligation -> "open-obligation"
   OpHoleObligation -> "hole-obligation"
   OpTrustedAssurance -> "trusted-assurance"
@@ -188,6 +190,7 @@ opFamily op = case op of
   OpHiddenContrary -> "hidden-policy-extension"
   OpBadAttackPosition -> "bad-attack-targets"
   OpUnlicensedAttack -> "bad-attack-targets"
+  OpDropCoveringAttack -> "bad-attack-targets"
   OpOpenObligation -> "open-obligations"
   OpHoleObligation -> "open-obligations"
   OpTrustedAssurance -> "certificate-tampering"
@@ -230,9 +233,11 @@ opFamily op = case op of
 -- ---------------------------------------------------------------------------
 
 -- | The outcome a mutant is specified to have (spec §10.1): a rejection with
--- a fixed class, the structural obligation-gate reject, a codec-boundary
--- reject (exit 2, no verdict), or — for the cycle family — an accept in which
--- every label is @undec@ and every queried status is @contested@.
+-- a fixed class, one of the two structural rejects this suite specifies (the
+-- obligation gate, the completeness scan; 'Rejection' has two more,
+-- 'DuplicateRule' and 'DuplicateArgument', which no operator targets), a
+-- codec-boundary reject (exit 2, no verdict), or — for the cycle family — an
+-- accept where every label is @undec@ and every queried status is @contested@.
 data Expected
   = ExpectClass RejectClass
   | ExpectIncompleteArgument
@@ -242,6 +247,13 @@ data Expected
   -- and the full system rejects it only at the obligation gate
   -- ('Lara.Check.ccObligationGate'), i.e. an argument reaching the root with
   -- an open mandatory obligation.
+  | ExpectMissingConflict
+  -- ^ the structural completeness reject ('Lara.AST.MissingConflict', a
+  -- 'Rejection' with no R-class by design): the mutant declares an attackable
+  -- contrary pair between complete arguments and no attack covering it, so the
+  -- full system rejects it at the seventh stage's completeness scan
+  -- ('Lara.Check.ccConflictScan') — the executable witness of the
+  -- attack-completeness theorem (#124).
   | ExpectCodecReject
   | ExpectAllContested
   | ExpectEvidenceBlocked
@@ -263,6 +275,7 @@ expectedText :: Expected -> String
 expectedText e = case e of
   ExpectClass c -> "reject-" ++ show c
   ExpectIncompleteArgument -> "reject-" ++ show IncompleteArgument
+  ExpectMissingConflict -> "reject-" ++ show MissingConflict
   ExpectCodecReject -> "codec-reject"
   ExpectAllContested -> "accept-all-contested"
   ExpectEvidenceBlocked -> "accept-evidence-blocked"
@@ -287,6 +300,7 @@ parseExpected s =
       : ("accept-all-contested", ExpectAllContested)
       : (expectedText ExpectEvidenceBlocked, ExpectEvidenceBlocked)
       : (expectedText ExpectIncompleteArgument, ExpectIncompleteArgument)
+      : (expectedText ExpectMissingConflict, ExpectMissingConflict)
       : [(expectedText (ExpectClass c), ExpectClass c) | c <- [minBound .. maxBound]]
       ++ [ (expectedText (ExpectPrimaryStatus st), ExpectPrimaryStatus st)
          | st <- [Gap, Justified, Contested, Defeated]
