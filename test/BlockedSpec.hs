@@ -45,6 +45,7 @@ import Lara.Blocked
   , retainedAttackIndices
   , retainedEdge
   , retainedIndices
+  , retainedLeafIndices
   )
 import Lara.Check (checkUnit, cuNodes)
 import Lara.Driver (buildCertOk, buildGamma)
@@ -279,6 +280,7 @@ blockedSpecProps =
   , ("blocked queries are support-driven", quickCheckResult prop_blockedSupported)
   , ("blocked prune accepts an explicit policy seed", quickCheckResult prop_explicitPolicySeed)
   , ("blocked retained attack indices project the checked attack list", quickCheckResult prop_retainedAttackIndices)
+  , ("blocked retained leaf indices project the checked leaf list", quickCheckResult prop_retainedLeafIndices)
   ]
 
 -- | 'retainedAttackIndices' is the attack counterpart of 'retainedIndices'
@@ -315,6 +317,33 @@ prop_retainedAttackIndices =
 
     -- Anything other than [] or [0 .. n-1] — i.e. an index the checked-space
     -- misimplementation would get wrong.
+    isGapped ix = ix /= [0 .. length ix - 1]
+
+-- | 'retainedLeafIndices' is the leaf counterpart of the same contract (#165):
+-- indexing the declared leaf list by it reproduces the checked leaf list
+-- exactly, order and multiplicity included. This is what lets the
+-- "Lara.Mutate.Sorts" leaf-mutating operators draw sites from the checked Γ
+-- while rewriting the declared one. The discriminating fixture is again
+-- 'CheckSpec.quarantiningConflictBase', whose retained-leaf list is @[2, 3]@ —
+-- gapped, so a checked-space misimplementation fails rather than passing
+-- vacuously.
+prop_retainedLeafIndices :: Property
+prop_retainedLeafIndices =
+  once $
+    conjoin
+      ( [ counterexample (name ++ ": projected declared leaves differ from checked leaves") $
+            map (unitLeaves (pruneDeclared p) !!) (retainedLeafIndices p)
+              === unitLeaves (pruneChecked p)
+        | (name, p) <- prunesUnderTest
+        ]
+          ++ [ counterexample "no fixture has a gapped retained-leaf list — the property is vacuous" $
+                 any (\(_, p) -> isGapped (retainedLeafIndices p)) prunesUnderTest
+             ]
+      )
+  where
+    prunesUnderTest =
+      [(name, prune unit) | (name, unit) <- quarantineFixtures ++ unquarantinedFixtures]
+        ++ [("policy-seed", pruneWithPolicySeed [LeafId "policy"] policySeedUnit)]
     isGapped ix = ix /= [0 .. length ix - 1]
 
 -- The unit-level properties run over the in-memory "CheckSpec" quarantine

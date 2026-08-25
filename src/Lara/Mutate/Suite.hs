@@ -31,12 +31,17 @@ module Lara.Mutate.Suite
     -- * Site enumerators reachable for testing
     --
     -- | "Lara.Mutate.Sites" and its children are @other-modules@: the
-    -- enumerators are an implementation detail of the suite, not API. This one
-    -- is re-exported because @test\/MutationSpec.hs@'s
-    -- @prop_conflictSiteMatchesChecker@ has to compare the /predicted/ pair
-    -- against the checker's, which means calling the enumerator directly —
-    -- going through 'mutantsForBase' would only see the seeded subset and the
-    -- rendered bytes, not the prediction.
+    -- enumerators are an implementation detail of the suite, not API. These
+    -- are re-exported because @test\/MutationSpec.hs@'s checker-agreement
+    -- properties have to compare each /predicted/ constituent against the
+    -- checker's, which means calling the enumerators directly — going through
+    -- 'mutantsForBase' would only see the seeded subset and the rendered
+    -- bytes, not the prediction. 'siteOps' is the whole table
+    -- (@prop_siteMatchesChecker@, #165); 'dropCoveringAttackSites' stays
+    -- exported for the conflict-specific property that carries the
+    -- @drop-covering-attack@ design rationale (#159).
+  , SiteOp (..)
+  , siteOps
   , dropCoveringAttackSites
   ) where
 
@@ -61,55 +66,76 @@ import Lara.Mutate.Seed (pickSome, pickWithStream, streamForKey)
 import Lara.Mutate.Sites
 import qualified Lara.Mutate.Sorts as Sorts
 
--- | All verdict-level mutants of one decoded base anchor, in fixed operator
--- order, sites picked by the seeded stream. Inapplicable operators produce no
--- mutants for the base. Codec mutants are separate
--- ("Lara.Mutate.Codec".@codecMutantsForBase@).
-mutantsForBase :: String -> CheckInput -> [Mutant]
-mutantsForBase base input =
-  concat
-    [ unitMutants base input OpUndeclaredLeaf 2 undeclaredLeafSites
-    , unitMutants base input OpHiddenRule 1 hiddenRuleSites
-    , unitMutants base input OpHiddenContrary 1 hiddenContrarySites
-    , unitMutants base input OpWrongSubstDomain 1 wrongSubstSites
-    , unitMutants base input OpWrongPremise 1 wrongPremiseSites
-    , unitMutants base input OpOpenObligation 1 openObligationSites
-    , unitMutants base input OpHoleObligation 1 holeObligationSites
-    , unitMutants base input OpWrongDischarge 1 wrongDischargeSites
-    , unitMutants base input OpTrustedAssurance 1 trustedAssuranceSites
-    , unitMutants base input OpCertTheorySwap 1 certTheorySwapSites
-    , unitMutants base input OpCertPayloadTamper 1 certPayloadSites
-    , unitMutants base input OpCertWrongFraction 1 certWrongFractionSites
-    , unitMutants base input OpBadAttackPosition 2 badAttackPositionSites
-    , unitMutants base input OpUnlicensedAttack 1 unlicensedAttackSites
-    , unitMutants base input OpDropCoveringAttack 1 dropCoveringAttackSites
-    , unitMutants base input OpGroupConflict 1 groupConflictSites
-    , -- The signature family (@lara-core\@0.2@, #89 D10): R2 had zero mutants
-      -- before this pass, and spec §10.1 requires every class to be exercised.
-      unitMutants base input OpUndeclaredPred 1 (classed Sorts.undeclaredPredSites)
-    , unitMutants base input OpWrongPredArity 1 (classed Sorts.wrongPredAritySites)
-    , unitMutants base input OpWrongArgSort 2 (classed Sorts.wrongArgSortSites)
-    , unitMutants base input OpUndeclaredCon 1 (classed Sorts.undeclaredConSites)
-    , unitMutants base input OpWrongThetaSort 1 (classed Sorts.wrongThetaSortSites)
-    , unitMutants base input OpOutOfScopeVar 1 (classed Sorts.outOfScopeVarSites)
-    , -- Integrated Σ well-formedness fixtures are dedicated negatives, not a
-      -- sweep: one row per clause, anchored once at the first worked example.
-      dedicatedSigma OpSigmaDuplicateSort Sorts.duplicateSortSites
-    , dedicatedSigma OpSigmaShadowBase Sorts.shadowBaseSortSites
-    , dedicatedSigma OpSigmaDuplicateCon Sorts.duplicateConSites
-    , dedicatedSigma OpSigmaDuplicatePred Sorts.duplicatePredSites
-    , dedicatedSigma OpSigmaConUndeclaredSort Sorts.conUndeclaredSortSites
-    , dedicatedSigma OpSigmaPredUndeclaredSort Sorts.predUndeclaredSortSites
-    , replayMutants base input
-    ]
+-- | One rejection-site operator, as generation sees it: its per-base cap at a
+-- worked-example anchor, whether it is a dedicated Σ closeout fixture
+-- (anchored once at base @\"A\"@, excluded from the corpus sweep), and its
+-- site enumerator. 'mutantsForBase', 'sweepOps', and
+-- @test\/MutationSpec.hs@'s checker-agreement property all read 'siteOps', so
+-- the generated suite, the corpus sweep, and the gated answer key cannot
+-- drift apart (#165).
+data SiteOp = SiteOp
+  { siteOp :: MutationOp
+  , siteCap :: Int
+  , siteDedicated :: Bool
+  , siteSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
+  }
+
+-- | The rejection-site operators in the frozen generation order. The replay
+-- operators are not here — they corrupt the replay envelope, not the unit, so
+-- they have no site enumerator ('replayMutants' \/ 'replaySweep').
+siteOps :: [SiteOp]
+siteOps =
+  [ SiteOp OpUndeclaredLeaf 2 False undeclaredLeafSites
+  , SiteOp OpHiddenRule 1 False hiddenRuleSites
+  , SiteOp OpHiddenContrary 1 False hiddenContrarySites
+  , SiteOp OpWrongSubstDomain 1 False wrongSubstSites
+  , SiteOp OpWrongPremise 1 False wrongPremiseSites
+  , SiteOp OpOpenObligation 1 False openObligationSites
+  , SiteOp OpHoleObligation 1 False holeObligationSites
+  , SiteOp OpWrongDischarge 1 False wrongDischargeSites
+  , SiteOp OpTrustedAssurance 1 False trustedAssuranceSites
+  , SiteOp OpCertTheorySwap 1 False certTheorySwapSites
+  , SiteOp OpCertPayloadTamper 1 False certPayloadSites
+  , SiteOp OpCertWrongFraction 1 False certWrongFractionSites
+  , SiteOp OpBadAttackPosition 2 False badAttackPositionSites
+  , SiteOp OpUnlicensedAttack 1 False unlicensedAttackSites
+  , SiteOp OpDropCoveringAttack 1 False dropCoveringAttackSites
+  , SiteOp OpGroupConflict 1 False groupConflictSites
+  , -- The signature family (@lara-core\@0.2@, #89 D10): R2 had zero mutants
+    -- before this pass, and spec §10.1 requires every class to be exercised.
+    SiteOp OpUndeclaredPred 1 False (classed Sorts.undeclaredPredSites)
+  , SiteOp OpWrongPredArity 1 False (classed Sorts.wrongPredAritySites)
+  , SiteOp OpWrongArgSort 2 False (classed Sorts.wrongArgSortSites)
+  , SiteOp OpUndeclaredCon 1 False (classed Sorts.undeclaredConSites)
+  , SiteOp OpWrongThetaSort 1 False (classed Sorts.wrongThetaSortSites)
+  , SiteOp OpOutOfScopeVar 1 False (classed Sorts.outOfScopeVarSites)
+  , -- Integrated Σ well-formedness fixtures are dedicated negatives, not a
+    -- sweep: one row per clause, anchored once at the first worked example.
+    SiteOp OpSigmaDuplicateSort 1 True (classed Sorts.duplicateSortSites)
+  , SiteOp OpSigmaShadowBase 1 True (classed Sorts.shadowBaseSortSites)
+  , SiteOp OpSigmaDuplicateCon 1 True (classed Sorts.duplicateConSites)
+  , SiteOp OpSigmaDuplicatePred 1 True (classed Sorts.duplicatePredSites)
+  , SiteOp OpSigmaConUndeclaredSort 1 True (classed Sorts.conUndeclaredSortSites)
+  , SiteOp OpSigmaPredUndeclaredSort 1 True (classed Sorts.predUndeclaredSortSites)
+  ]
   where
     -- "Lara.Mutate.Sorts" sits below the operator vocabulary and yields bare
     -- rejection classes; wrapping them here keeps 'Expected' owned by exactly
     -- one module.
     classed sites u = [(ExpectClass c, loc, f) | (c, loc, f) <- sites u]
-    dedicatedSigma op sites
-      | base == "A" = unitMutants base input op 1 (classed sites)
-      | otherwise = []
+
+-- | All verdict-level mutants of one decoded base anchor, in fixed operator
+-- order ('siteOps'), sites picked by the seeded stream. Inapplicable operators
+-- produce no mutants for the base. Codec mutants are separate
+-- ("Lara.Mutate.Codec".@codecMutantsForBase@).
+mutantsForBase :: String -> CheckInput -> [Mutant]
+mutantsForBase base input =
+  concat
+    [ unitMutants base input (siteOp op) (siteCap op) (siteSites op)
+    | op <- siteOps
+    , not (siteDedicated op) || base == "A"
+    ]
+    ++ replayMutants base input
 
 -- | Assemble the picked unit-mutation sites of one operator into mutants. Each
 -- site carries its seeded ground-truth 'Constituent', threaded into
@@ -185,44 +211,27 @@ data SweepOp = SweepOp
   , sweepAt :: String -> CheckInput -> [Mutant]
   }
 
--- | The rejection operators swept over corpus bases, in fixed order. This is
+-- | The rejection operators swept over corpus bases, in fixed order: the
+-- non-dedicated 'siteOps' (the Σ closeout fixtures are one-row negatives
+-- anchored at base @\"A\"@, not a sweep), then the replay operators. This is
 -- the same operator set 'mutantsForBase' runs over the worked examples (cert
 -- and other arg-dependent operators self-gate via their site enumerators — a
 -- gap corpus unit with no args yields no sites, so they propose nothing there,
--- no special casing). Codec corruption and the constructed cycle family are not
--- part of the corpus sweep (they are base-independent structural families).
+-- no special casing; sweeping the signature family is what makes its
+-- applicability assertion meaningful — `wrong-arg-sort` must find real sites
+-- in corpus-v1's own vocabulary, not only in hand-built examples, #89 §8).
+-- Codec corruption and the constructed cycle family are not part of the corpus
+-- sweep (they are base-independent structural families).
 sweepOps :: [SweepOp]
 sweepOps =
-  [ unitSweep OpUndeclaredLeaf undeclaredLeafSites
-  , unitSweep OpHiddenRule hiddenRuleSites
-  , unitSweep OpHiddenContrary hiddenContrarySites
-  , unitSweep OpWrongSubstDomain wrongSubstSites
-  , unitSweep OpWrongPremise wrongPremiseSites
-  , unitSweep OpOpenObligation openObligationSites
-  , unitSweep OpHoleObligation holeObligationSites
-  , unitSweep OpWrongDischarge wrongDischargeSites
-  , unitSweep OpTrustedAssurance trustedAssuranceSites
-  , unitSweep OpCertTheorySwap certTheorySwapSites
-  , unitSweep OpCertPayloadTamper certPayloadSites
-  , unitSweep OpCertWrongFraction certWrongFractionSites
-  , unitSweep OpBadAttackPosition badAttackPositionSites
-  , unitSweep OpUnlicensedAttack unlicensedAttackSites
-  , unitSweep OpDropCoveringAttack dropCoveringAttackSites
-  , unitSweep OpGroupConflict groupConflictSites
-  , -- The signature family. Sweeping it over the corpus is what makes the
-    -- applicability assertion meaningful: `wrong-arg-sort` must find real sites
-    -- in corpus-v1's own vocabulary, not only in hand-built examples (#89 §8).
-    unitSweep OpUndeclaredPred (classedSites Sorts.undeclaredPredSites)
-  , unitSweep OpWrongPredArity (classedSites Sorts.wrongPredAritySites)
-  , unitSweep OpWrongArgSort (classedSites Sorts.wrongArgSortSites)
-  , unitSweep OpUndeclaredCon (classedSites Sorts.undeclaredConSites)
-  , unitSweep OpWrongThetaSort (classedSites Sorts.wrongThetaSortSites)
-  , unitSweep OpOutOfScopeVar (classedSites Sorts.outOfScopeVarSites)
-  , replaySweep OpDuplicateBackend
-  , replaySweep OpUnknownBackend
+  [ unitSweep (siteOp op) (siteSites op)
+  | op <- siteOps
+  , not (siteDedicated op)
   ]
+    ++ [ replaySweep OpDuplicateBackend
+       , replaySweep OpUnknownBackend
+       ]
   where
-    classedSites sites u = [(ExpectClass c, loc, f) | (c, loc, f) <- sites u]
     unitSweep op sites =
       SweepOp
         op

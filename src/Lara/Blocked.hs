@@ -71,6 +71,7 @@ module Lara.Blocked
     -- * The two frameworks in one index space
   , retainedIndices
   , retainedAttackIndices
+  , retainedLeafIndices
   , declaredEdge
   , retainedEdge
     -- * The driver entry points
@@ -328,6 +329,23 @@ retainedAttackIndices p =
   where
     declared = pruneDeclared p
     keptArgSet = pruneKeptArgSet p
+
+-- | Declaration-order indices of the leaves quarantine retained — the leaf
+-- counterpart of 'retainedIndices' (#165). 'pruneWithPolicySeed' filters, so
+-- the retained leaves keep their declared relative order and entry @i@ of this
+-- list is the declared index of checked-unit leaf @i@. Selection is by
+-- membership in 'pruneRemovedLeaves' rather than the smart constructor's full
+-- removed-leaf set; the two differ only on ids the declared context never
+-- carries (a dangling group member), which this selection never tests, so the
+-- filter is the same one that built the checked leaf list.
+retainedLeafIndices :: Prune -> [Int]
+retainedLeafIndices p =
+  [ i
+  | (i, (leaf, _)) <- zip [0 ..] (unitLeaves (pruneDeclared p))
+  , Set.notMember leaf removed
+  ]
+  where
+    removed = Set.fromList (pruneRemovedLeaves p)
 
 -- | The edge relation of a unit in declared index space: the same structural
 -- subargument-closure rule the checker compiles with ('Lara.Compile.edgeB'),

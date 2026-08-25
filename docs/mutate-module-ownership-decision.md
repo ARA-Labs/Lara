@@ -305,7 +305,7 @@ line of the original file is present in the union of the three new files with
 none lost. The `error` messages still name `Lara.Mutate.Accept`, the public
 entry point, rather than the module they now live in.
 
-## D4 — The index-space contract `Sites.Conflict` publishes (#159)
+## D4 — The index-space contract the site enumerators publish (#159, #165)
 
 The checker does not run on the declared unit; it runs on the §4.3 quarantine of
 it. Before #159, `dropCoveringAttackSites` handled that by refusing to emit any
@@ -366,10 +366,100 @@ and the emitted sites are byte-identical to the pre-#159 ones — which is why t
 change needed no corpus regeneration and no freeze-tag bump, and equally why the
 quarantining path is reachable only from the in-memory fixtures.
 
-**Scope.** This contract binds `Sites.Conflict` only. The sibling enumerators in
-`Lara.Mutate.Sites` and `Sites.Cert` still publish `CArgument` in *declared*
-index space, which is latent for the same reason (no corpus base quarantines)
-and is tracked as **#165**.
+### Generalized to every enumerator (#165)
+
+**Scope.** The contract above bound `Sites.Conflict` alone, and the sibling
+enumerators in `Lara.Mutate.Sites` and `Sites.Cert` still published `CArgument`
+in *declared* index space — latent for the same reason (no corpus base
+quarantines). #165 closed that asymmetry, and the contract now binds **every
+site enumerator**:
+
+- **Sites are drawn from the checked unit.** `Sites.Nav`'s `argSites` /
+  `ruleSites` / `leafSites` / `attackSites` read a `Prune`, not a `Unit`. A
+  mutation into pruned material is an accepting no-op the checker never sees, so
+  it can witness nothing — self-gating on retained material is part of the
+  contract, not an optimization. This binds the space-free enumerators too: the
+  `Lara.Mutate.Sorts` leaf/θ operators publish `CPolicy`, which needs no
+  mapping, but still draw their sites from retained leaves and arguments.
+- **Every indexed constituent is published in checked space.** `CArgument`,
+  `CAttack`, and `CConflictPair` all index the checked unit, because that is the
+  space `Lara.Diagnostics` names in the verdict. `CPolicy`, `CGroup`, and
+  `CReplayEnvelope` are space-free and are published as-is.
+- **Only the rewrite maps back to declared space**, and the three retained-index
+  lists are the **sole bridges**: `Lara.Blocked.retainedIndices` (arguments),
+  `retainedAttackIndices` (attacks), and `retainedLeafIndices` (leaves, added by
+  #165). Nothing else may map between the two spaces.
+
+**The two spaces are types, not a naming convention (#166 review).** `Sites.Nav`
+exports `CheckedIx` and `DeclaredIx` newtypes, and the site tuples pair them;
+`rewriteArg` / `setAttackAt` / `dropAttackAt` take a `DeclaredIx`. A transposed
+pair is a compile error rather than a silently corrupted answer key — the repo's
+"separate namespaces get separate types" rule.
+
+The invariant is **not a count of unwrap sites**; it is that nothing pairs the
+two spaces except a retained-index list. Construction is either from such a list
+(`argSites` / `attackSites` in `Sites.Nav`, `retainedLeafDecls` /
+`retainedArgDecls` in `Sorts`), or directly in checked space from a measurement
+of the checked unit, which pairs nothing — `unlicensedAttackSites`'
+`CheckedIx (length (unitAttacks checked))` is the one such site. Unwrapping
+happens in three kinds of place, each staying within one space:
+
+1. publishing a `Constituent`, through `checkedIx`;
+2. inside a rewrite helper taking a `DeclaredIx` — `rewriteArg`, `setAttackAt`,
+   `dropAttackAt` in `Sites.Nav`, and `mapLeaf` / the θ rewrite in `Sorts`;
+3. where a `CheckedIx` indexes the *checked* unit itself, crossing nothing —
+   `Sites.Conflict`'s survivor scan (`dropIx (checkedIx ci) checkedAttacks`) is
+   the only such site.
+
+`Constituent` and the `Lara.Blocked` retained-index lists keep their bare-`Int`
+APIs.
+
+**The rejected alternative is a quarantining corpus base.** The quarantining
+path is exercised only from in-memory fixtures (`CheckSpec.quarantiningConflictBase`
+and the derived skew below), so no committed mutant file walks it. Adding a
+corpus base whose §4.3 quarantine is non-trivial was considered and rejected on
+cost: it forces a full corpus regeneration and a freeze-tag bump, which must be
+budgeted rather than discovered. It rides with **#156** if ever wanted.
+
+**Known boundary, and it fails closed.** A leaf-mutating operator striking a
+member of a *consistent* group would flip that group inconsistent, turning the
+mutant's outcome into R9/quarantine instead of R2. No base carries a consistent
+group today. If one enters the corpus, `scripts/gen-mutants.hs`'s per-mutant
+`verify` and `prop_siteMatchesChecker` both fail loudly at that point — unlike
+the index skew #165 closed, which failed *open*.
+
+**Guarded by.** `test/MutationSpec.hs` `prop_siteMatchesChecker` (every site of
+every enumerator, over the worked examples, all corpus units, the quarantining
+fixture, and a skewed sibling of each, rejects with its specified outcome at
+exactly the predicted `Constituent` — this is what turns `expected-location`
+from a measured column into a gated one), `prop_sitesQuarantiningBase` (the
+hand-checked absolute pins on the fixture), and `prop_siteDirectionSkewed`.
+
+That last one is the answer to the coverage gap the #166 review found: the one
+committed quarantining base has no rules, so every `ruleSites`-based enumerator
+was exercised only where checked and declared indices coincide, and a
+per-operator transposition would have failed open. `quarantineSkewed` gives
+*every* base a skewed sibling — it prepends an inconsistent group, an argument
+on one of its members, and an attack targeting that argument, all declared
+first, so quarantine removes exactly the added material and the checked unit is
+the original base. The property then states the mapping itself (the declared
+index a rewrite edits is the one the retained-index list pairs with the
+published checked index) and carries an anti-vacuity gate: every operator
+publishing an indexed constituent must have at least one site where the two
+spaces actually differ.
+
+**Why no Lean entry is owed for `retainedLeafIndices`.** The same strong-form
+argument #159 made for `retainedAttackIndices`. `Admission.buildPrune` proves
+`p.removedLeaves = leaves.filterMap …` and
+`p.checkedLeaves = Groups.quarantineLeaves qs leaves`
+(`lean/Lara/Admission.lean:764-765`), and the argument-side `retainedIndices`
+counterpart exists at `lean/Lara/BlockedProgram.lean:57` with axiom-checked
+theorems. `retainedLeafIndices` only re-expresses an already-proved filter as an
+index list for the generator.
+
+**Cost.** No corpus regeneration and no freeze-tag bump: every committed base
+prunes to itself, so regeneration is byte-identical and `fixtures/mutants/` is
+untouched. #156's scope is unchanged.
 
 ## What the split deliberately did not change
 

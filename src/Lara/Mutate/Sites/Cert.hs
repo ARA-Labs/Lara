@@ -28,22 +28,23 @@ module Lara.Mutate.Sites.Cert
 import Data.Ratio (denominator, numerator, (%))
 
 import Lara.AST
+import Lara.Blocked (prune)
 import Lara.Diagnostics (Constituent (..))
 import Lara.Strict (SExpr (..))
 import Lara.Strict.Cell (parseCanonicalInt, parseCanonicalNat)
 import Lara.Strict.RA (Tag (..), parseTag)
 
 import Lara.Mutate (Expected (..))
-import Lara.Mutate.Sites.Nav (rewriteArg, rewriteAt, ruleSites)
+import Lara.Mutate.Sites.Nav (CheckedIx (..), rewriteArg, rewriteAt, ruleSites)
 
 -- R7: point an allowlisted certificate at a theory digest no certifier lists.
 certTheorySwapSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 certTheorySwapSites u =
   [ ( ExpectClass R7
-    , CArgument ix
-    , rewriteArg ix (rewriteAt pos swapTheory)
+    , CArgument (checkedIx ci)
+    , rewriteArg di (rewriteAt pos swapTheory)
     )
-  | (ix, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites u
+  | (ci, di, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites (prune u)
   ]
   where
     swapTheory (SRule r theta ws d hs (AssuranceCert cert)) =
@@ -54,10 +55,10 @@ certTheorySwapSites u =
 certPayloadSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 certPayloadSites u =
   [ ( ExpectClass R13
-    , CArgument ix
-    , rewriteArg ix (rewriteAt pos tamper)
+    , CArgument (checkedIx ci)
+    , rewriteArg di (rewriteAt pos tamper)
     )
-  | (ix, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites u
+  | (ci, di, pos, SRule _ _ _ _ _ (AssuranceCert _)) <- ruleSites (prune u)
   ]
   where
     tamper (SRule r theta ws d hs (AssuranceCert cert)) =
@@ -90,10 +91,10 @@ certPayloadSites u =
 certWrongFractionSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 certWrongFractionSites u =
   [ ( ExpectClass R13
-    , CArgument ix
-    , rewriteArg ix (rewriteAt pos (setPayload payload'))
+    , CArgument (checkedIx ci)
+    , rewriteArg di (rewriteAt pos (setPayload payload'))
     )
-  | (ix, pos, SRule _ _ _ _ _ (AssuranceCert cert)) <- ruleSites u
+  | (ci, di, pos, SRule _ _ _ _ _ (AssuranceCert cert)) <- ruleSites (prune u)
   , certBackend cert == BackendId "ra"
   , certVersion cert == 1
   , Just payload' <- [bumpWitness (certPayload cert)]

@@ -44,7 +44,7 @@ module Lara.Mutate.Sites.Conflict
 
 import Lara.AST
 import Lara.Attack (contraryMatchB)
-import Lara.Blocked (prune, pruneChecked, retainedAttackIndices)
+import Lara.Blocked (prune, pruneChecked)
 import Lara.Check (resolveAttacks)
 import Lara.Compile (conflictAttackableB, coveredB)
 import Lara.Diagnostics (Constituent (..))
@@ -54,6 +54,7 @@ import Lara.Prop (Prop)
 import Lara.SupportTerm (instAPat)
 
 import Lara.Mutate (Expected (..))
+import Lara.Mutate.Sites.Nav (CheckedIx (..), attackSites, dropAttackAt)
 
 -- | Missing conflict: delete one declared attack that is the sole cover of an
 -- attackable contrary pair, leaving the completeness scan with an uncovered
@@ -84,10 +85,10 @@ dropCoveringAttackSites u
   | otherwise =
       [ ( ExpectMissingConflict
         , CConflictPair si ti
-        , \u' -> u' {unitAttacks = dropIx d (unitAttacks u')}
+        , dropAttackAt di
         )
-      | (i, d) <- zip [0 ..] (retainedAttackIndices pruned)
-      , Just (si, ti) <- [firstUncovered (dropIx i checkedAttacks)]
+      | (ci, di, _) <- attackSites pruned
+      , Just (si, ti) <- [firstUncovered (dropIx (checkedIx ci) checkedAttacks)]
       ]
   where
     pruned = prune u

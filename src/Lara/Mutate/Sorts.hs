@@ -51,10 +51,13 @@ module Lara.Mutate.Sorts
   ) where
 
 import Lara.AST
+import Lara.Blocked (prune, pruneChecked, retainedIndices, retainedLeafIndices)
 import Lara.Diagnostics (Constituent (..))
 import Lara.Prop (Prop (..), Term (..))
 import Lara.Sigma (ConSig (..), PredSig (..), Sigma (..), Sort (..), SortName (..), sortOf)
 import Lara.Sigma.WellSorted (ruleParamSorts)
+
+import Lara.Mutate.Sites.Nav (DeclaredIx (..))
 
 -- | The seeded ground-truth constituent of every signature-family mutant.
 -- "Lara.Diagnostics".@locate@ places a stage-2 failure at the policy — a sort
@@ -178,9 +181,27 @@ otherSorted u s = case [t | (t, s') <- sortedTerms u, s' /= s] of
   [] -> Nothing
 
 -- | Rewrite the proposition of the @i@-th declared leaf.
-mapLeaf :: Int -> (Prop -> Prop) -> Unit -> Unit
-mapLeaf i f u =
+mapLeaf :: DeclaredIx -> (Prop -> Prop) -> Unit -> Unit
+mapLeaf (DeclaredIx i) f u =
   u{unitLeaves = [(l, if j == i then f p else p) | (j, (l, p)) <- zip [0 :: Int ..] (unitLeaves u)]}
+
+-- | The declared leaf declarations the §4.3 quarantine retains, each with its
+-- declared index — the sites the leaf-mutating operators may strike (#165). A
+-- quarantined leaf leaves Γ before the signature stage runs, so a mutation
+-- into one is invisible to the checker: an accepting no-op, not an R2 witness.
+-- The published constituent needs no mapping — a sort failure locates at
+-- 'CPolicy', which is space-free.
+retainedLeafDecls :: Unit -> [(DeclaredIx, (LeafId, Prop))]
+retainedLeafDecls u = zip (map DeclaredIx (retainedLeafIndices p)) (unitLeaves (pruneChecked p))
+  where
+    p = prune u
+
+-- | The declared arguments the quarantine retains, each with its declared
+-- index — the argument counterpart of 'retainedLeafDecls', for the θ operator.
+retainedArgDecls :: Unit -> [(DeclaredIx, (ArgId, SupportTerm))]
+retainedArgDecls u = zip (map DeclaredIx (retainedIndices p)) (unitArgs (pruneChecked p))
+  where
+    p = prune u
 
 -- ---------------------------------------------------------------------------
 -- The operators
@@ -193,7 +214,7 @@ mapLeaf i f u =
 undeclaredPredSites :: Unit -> [Site]
 undeclaredPredSites u =
   [ (R2, sigmaLoc, mapLeaf i (\(Prop _ ts) -> Prop (Pred "mut_undeclared_pred") ts))
-  | (i, _) <- zip [0 :: Int ..] (unitLeaves u)
+  | (i, _) <- retainedLeafDecls u
   ]
 
 -- | R2: arity mismatch against Σ — already the frozen spec text, and never
@@ -202,7 +223,7 @@ undeclaredPredSites u =
 wrongPredAritySites :: Unit -> [Site]
 wrongPredAritySites u =
   [ (R2, sigmaLoc, mapLeaf i (\(Prop p args) -> Prop p (init args)))
-  | (i, (_, Prop _ ts)) <- zip [0 :: Int ..] (unitLeaves u)
+  | (i, (_, Prop _ ts)) <- retainedLeafDecls u
   , not (null ts)
   ]
 
@@ -212,7 +233,10 @@ wrongPredAritySites u =
 wrongArgSortSites :: Unit -> [Site]
 wrongArgSortSites u =
   [ (R2, sigmaLoc, mapLeaf i (replaceArg k t))
-  | (i, (_, Prop _ ts)) <- zip [0 :: Int ..] (unitLeaves u)
+  | -- The replacement inventory ('otherSorted') still reads the declared unit:
+    -- a term is sorted by Σ alone, so one drawn from a quarantined leaf is as
+    -- good a wrong-sort witness as any — only the mutated site must survive.
+    (i, (_, Prop _ ts)) <- retainedLeafDecls u
   , (k, arg) <- zip [0 :: Int ..] ts
   , Right s <- [sortOf (unitSigma u) arg]
   , Just t <- [otherSorted u s]
@@ -225,7 +249,7 @@ wrongArgSortSites u =
 undeclaredConSites :: Unit -> [Site]
 undeclaredConSites u =
   [ (R2, sigmaLoc, mapLeaf i (renameCon k))
-  | (i, (_, Prop _ ts)) <- zip [0 :: Int ..] (unitLeaves u)
+  | (i, (_, Prop _ ts)) <- retainedLeafDecls u
   , (k, TCon _ _) <- zip [0 :: Int ..] ts
   ]
   where
@@ -244,7 +268,7 @@ undeclaredConSites u =
 wrongThetaSortSites :: Unit -> [Site]
 wrongThetaSortSites u =
   [ (R2, sigmaLoc, rewriteTheta i x t)
-  | (i, (_, w)) <- zip [0 :: Int ..] (unitArgs u)
+  | (i, (_, w)) <- retainedArgDecls u
   , (rid, theta) <- topInstance w
   , r <- ruleWith rid
   , Right env <- [ruleParamSorts (unitSigma u) r]
@@ -259,7 +283,7 @@ wrongThetaSortSites u =
     topInstance (SRule rid theta _ _ _ _) = [(rid, theta)]
     topInstance _ = []
     ruleWith rid = [r | r <- unitRules u, ruleId r == rid]
-    rewriteTheta i x t un =
+    rewriteTheta (DeclaredIx i) x t un =
       un
         { unitArgs =
             [ (aid, if j == i then setTheta w else w)

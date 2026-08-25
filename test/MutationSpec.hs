@@ -40,14 +40,20 @@ import Lara.AST
   , Assurance (..)
   , Attack (..)
   , Cert (..)
+  , DupGroup (..)
   , GroupConflictMode (..)
+  , GroupId (..)
   , Label (..)
+  , LeafId (..)
+  , Pred (..)
   , RejectClass (..)
   , Rejection (..)
   , Status (..)
+  , Step (..)
   , SupportTerm (..)
   , Unit (..)
   )
+import Lara.Blocked (prune, retainedAttackIndices, retainedIndices)
 import Lara.Diagnostics (Constituent (..), LocatedRejection (..), constituentText, parseConstituent)
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
@@ -65,13 +71,17 @@ import Lara.Mutate.Codec (codecMutantsForBase)
 import Lara.Mutate.Cycle (cycleMutants)
 import Lara.Mutate.Manifest (manifestFor, mutantPath)
 import Lara.Mutate.Suite
-  ( corpusBudget
+  ( SiteOp (..)
+  , corpusBudget
   , corpusMutants
   , corpusSweepReport
   , dropCoveringAttackSites
   , mutantsForBase
+  , siteOps
   )
+import Lara.Prop (Prop (..))
 import Lara.Replay (CheckInput, inputReplayId, inputUnit, mkCheckInput)
+import Lara.Sigma (declarePred)
 import Lara.Strict (SExpr)
 import qualified Lara.Strict.RA as RA
 import Lara.Wire
@@ -379,6 +389,294 @@ prop_expectedLocationColumn = once $ ioProperty $ do
       _ -> rowSite row == "-"
     sited row = rowSite row /= "-" && roundTrips (rowSite row)
     roundTrips s = maybe False ((== s) . constituentText) (parseConstituent s)
+
+-- | The whole answer key is pinned to the checker (#165), the way
+-- 'prop_conflictSiteMatchesChecker' pins the completeness mirror: for every
+-- site every rejection-site enumerator ('Lara.Mutate.Suite.siteOps') proposes
+-- — not just the seeded subset the committed suite carries — on the worked
+-- examples, every corpus unit, and the quarantining fixture, the mutated unit
+-- rejects with the site's specified outcome and 'runCheckLocated' reports
+-- exactly the site's predicted 'Constituent'.
+--
+-- This is what turns the @expected-location@ column from a measured ground
+-- truth into a gated one: 'Lara.Measure.detLocationMatch' compares
+-- located-vs-seeded but flows into @measurements\/report.{json,tsv}@ and is
+-- never asserted. The quarantining fixture is the discriminating base — every
+-- committed base's §4.3 quarantine is the identity, so declared indices
+-- coincide with checked ones there and only the fixture can catch an
+-- enumerator publishing declared-space indices or striking pruned material
+-- (an accepting no-op, which the specified-outcome half catches).
+prop_siteMatchesChecker :: Property
+prop_siteMatchesChecker = once $ ioProperty $ do
+  corpusBases <- readCorpusBases
+  anchors <- mapM readAnchorBase mutationBases
+  let bases =
+        [(b, i) | (b, Just i) <- anchors]
+          ++ corpusBases
+          ++ [("quarantining-conflict-fixture", testCheckInput quarantiningConflictBase)]
+      -- Every base again with both index spaces skewed (#166 review), so the
+      -- rule-rooted enumerators — which the one committed quarantining base
+      -- cannot reach, having no rules — are gated off the diagonal too.
+      --
+      -- Rebuilt against the base's /own/ replay id: re-deriving one would
+      -- change the backend and policy the unit is checked under, and a
+      -- cert-carrying base would then reject at the backend layer (R13)
+      -- instead of at the seeded site.
+      skewed =
+        [ (b ++ "+skew", input')
+        | (b, input) <- bases
+        , let u = quarantineSkewed (inputUnit input)
+        , isSkewed u
+        , Right input' <- [mkCheckInput (inputReplayId input) u]
+        ]
+      sites =
+        [ (base, siteOp op, input, expected, predicted, mutate)
+        | (base, input) <- bases ++ skewed
+        , op <- siteOps
+        , (expected, predicted, mutate) <- siteSites op (inputUnit input)
+        ]
+  pure $
+    conjoin
+      ( [ counterexample
+            (opName (siteOp op) ++ ": no sites on any base — the operator would be ungated")
+            (any (\(_, o, _, _, _, _) -> o == siteOp op) sites)
+        | op <- siteOps
+        ]
+          ++ [ counterexample
+                 (base ++ "/" ++ opName op ++ ": predicted " ++ show predicted)
+                 (siteAgrees input expected predicted mutate)
+             | (base, op, input, expected, predicted, mutate) <- sites
+             ]
+      )
+  where
+    readAnchorBase base = do
+      bytes <- readFile ("examples/" ++ base ++ "/example.core.sexp")
+      pure (base, either (const Nothing) Just (decodeCheckInputFile bytes))
+
+    siteAgrees input expected predicted mutate =
+      case mkCheckInput (inputReplayId input) (mutate (inputUnit input)) of
+        Left err ->
+          counterexample ("mutated unit failed to rebuild: " ++ show err) False
+        Right mutated ->
+          let (verdict, located) = runCheckLocated mutated
+           in conjoin
+                [ counterexample ("outcome was " ++ show (verdictOutcome verdict)) $
+                    case specifiedRejection expected of
+                      Just rej -> verdictOutcome verdict === Reject rej
+                      Nothing ->
+                        counterexample "site specified a non-rejection outcome" False
+                , counterexample ("checker located " ++ show (fmap lrConstituent located)) $
+                    fmap lrConstituent located === Just predicted
+                ]
+
+    -- Every site enumerator specifies a rejection; the accept, cycle, and
+    -- codec families are constructions, not sites.
+    specifiedRejection e = case e of
+      ExpectClass c -> Just (RejectClass c)
+      ExpectIncompleteArgument -> Just IncompleteArgument
+      ExpectMissingConflict -> Just MissingConflict
+      _ -> Nothing
+
+-- | Skew both index spaces of a base without changing what the checker sees.
+--
+-- 'quarantiningConflictBase' is the only committed base whose §4.3 quarantine
+-- is not the identity, and it carries no rules and no rule-rooted argument —
+-- so every @ruleSites@-based enumerator was exercised only where checked and
+-- declared indices coincide, and a per-operator transposition would have
+-- failed open (#166 review). This derivation gives every base a skewed
+-- sibling: it prepends an inconsistent duplicate-report group, a leaf-rooted
+-- argument on one of its members, and an attack /targeting/ that argument, all
+-- declared first.
+--
+-- Quarantine removes exactly the added material, so the checked unit is the
+-- original base — same arguments, same attacks, same order, so the same
+-- verdict — while every declared index is shifted by one (leaves by two). The
+-- attack targets the added argument rather than issuing from it, so no
+-- retained argument loses an incoming edge and nothing becomes
+-- evidence-blocked by the skew ('CheckSpec.groupQuarantineLostEdgeUnit' is the
+-- case that would).
+--
+-- Bases that already declare a group are returned unchanged: overriding
+-- 'unitGroupMode' there could change the base's own verdict.
+quarantineSkewed :: Unit -> Unit
+quarantineSkewed u
+  | not (null (unitGroups u)) = u
+  | otherwise =
+      u
+        { unitSigma = declarePred skewP [] (declarePred skewQ [] (unitSigma u))
+        , unitLeaves =
+            [(skewLeafA, Prop skewP []), (skewLeafB, Prop skewQ [])] ++ unitLeaves u
+        , unitArgs = (skewArg, SLeaf skewLeafA) : unitArgs u
+        , unitAttacks = skewAttacks ++ unitAttacks u
+        , unitGroups = [DupGroup (GroupId "mut_skew_g") [skewLeafA, skewLeafB]]
+        , unitGroupMode = QuarantineOnConflict
+        }
+  where
+    skewP = Pred "mut_skew_p"
+    skewQ = Pred "mut_skew_q"
+    skewLeafA = LeafId "mut_skew_a"
+    skewLeafB = LeafId "mut_skew_b"
+    skewArg = ArgId "mut_skew_arg"
+    skewAttacks = [Undermine aid skewArg [] | aid <- take 1 (map fst (unitArgs u))]
+
+-- | Whether the derivation actually skewed this base — a base it declined to
+-- skew (one that already declares a group) contributes no direction evidence.
+isSkewed :: Unit -> Bool
+isSkewed u = retainedIndices (prune u) /= [0 .. length (unitArgs u) - 1]
+
+-- | The sole declared index a rewrite touched: the one position at which the
+-- lists differ, or the index of a lone appended entry. 'Nothing' when the
+-- rewrite was not a single-site edit.
+soleEdit :: (Eq a) => [a] -> [a] -> Maybe Int
+soleEdit old new
+  | length new == length old =
+      case [i | (i, a, b) <- zip3 [0 :: Int ..] old new, a /= b] of
+        [i] -> Just i
+        _ -> Nothing
+  | length new == length old + 1, take (length old) new == old = Just (length old)
+  | otherwise = Nothing
+
+atIx :: [a] -> Int -> Maybe a
+atIx xs i
+  | i >= 0, i < length xs = Just (xs !! i)
+  | otherwise = Nothing
+
+-- | The __direction__ of #165's index mapping, pinned for every enumerator
+-- that publishes an indexed constituent, on bases where the two spaces
+-- actually differ (#166 review).
+--
+-- 'prop_siteMatchesChecker' pins that the published constituent is the one the
+-- checker reports, but an enumerator that transposes /both/ maps — publishing
+-- the declared index while rewriting the checked one — cancels to a pass on
+-- any base whose quarantine is the identity, which is every committed base but
+-- one. This property states the mapping itself: for each site, the declared
+-- index the rewrite edited is exactly the one 'Lara.Blocked.retainedIndices'
+-- (or 'Lara.Blocked.retainedAttackIndices') pairs with the published checked
+-- index. A transposition fails it as soon as the two spaces differ, which
+-- 'quarantineSkewed' arranges for every base.
+--
+-- The second half is the anti-vacuity gate, the sibling of
+-- 'prop_siteMatchesChecker'\'s \"no sites on any base\" check: every operator
+-- that publishes an indexed constituent must have at least one site on a
+-- skewed base where the checked index and the declared index /differ/. Without
+-- it a future operator could satisfy the first half everywhere by never being
+-- exercised off the diagonal — the exact gap this property was added to close.
+prop_siteDirectionSkewed :: Property
+prop_siteDirectionSkewed = once $ ioProperty $ do
+  corpusBases <- readCorpusBases
+  anchors <- mapM readAnchorBase mutationBases
+  let bases =
+        [(b, inputUnit i) | (b, Just i) <- anchors]
+          ++ [(b, inputUnit i) | (b, i) <- corpusBases]
+          ++ [("quarantining-conflict-fixture", quarantiningConflictBase)]
+      skewed = [(b ++ "+skew", quarantineSkewed u) | (b, u) <- bases]
+      sites =
+        [ (base, siteOp op, u, predicted, mutate)
+        | (base, u) <- skewed ++ bases
+        , isSkewed u
+        , op <- siteOps
+        , (_, predicted, mutate) <- siteSites op u
+        ]
+      indexed = [s | s@(_, _, _, c, _) <- sites, isIndexed c]
+      isIndexed c = case c of
+        CArgument _ -> True
+        CAttack _ -> True
+        _ -> False
+      offDiagonal (_, _, u, c, _) = case c of
+        CArgument ci -> retainedIndices (prune u) `atIx` ci /= Just ci
+        CAttack ci -> retainedAttackIndices (prune u) `atIx` ci /= Just ci
+        _ -> False
+      opsWithIndex = [op | op <- siteOps, any (\(_, o, _, _, _) -> o == siteOp op) indexed]
+  pure $
+    conjoin
+      ( [ counterexample
+            ( opName (siteOp op)
+                ++ ": publishes an indexed constituent but has no site where the"
+                ++ " checked and declared indices differ — a transposed mapping"
+                ++ " would fail open"
+            )
+            (any (\s@(_, o, _, _, _) -> o == siteOp op && offDiagonal s) indexed)
+        | op <- opsWithIndex
+        ]
+          ++ [ counterexample
+                 (base ++ "/" ++ opName op ++ ": published " ++ show predicted)
+                 (directionHolds u predicted mutate)
+             | (base, op, u, predicted, mutate) <- indexed
+             ]
+      )
+  where
+    readAnchorBase base = do
+      bytes <- readFile ("examples/" ++ base ++ "/example.core.sexp")
+      pure (base, either (const Nothing) Just (decodeCheckInputFile bytes))
+
+    directionHolds u predicted mutate =
+      let u' = mutate u
+       in case predicted of
+            CArgument ci ->
+              case soleEdit (unitArgs u) (unitArgs u') of
+                Nothing ->
+                  counterexample "rewrite did not edit exactly one declared argument" False
+                Just di ->
+                  counterexample
+                    ("rewrite edited declared argument " ++ show di)
+                    (retainedIndices (prune u) `atIx` ci === Just di)
+            CAttack ci ->
+              case soleEdit (unitAttacks u) (unitAttacks u') of
+                Nothing ->
+                  counterexample "rewrite did not edit or append exactly one attack" False
+                Just di
+                  -- An in-place rewrite keeps the attack retained, so the base's
+                  -- prune maps it; an append is only present in the mutant, so
+                  -- the mutant's prune is the one that names its checked index.
+                  | di < length (unitAttacks u) ->
+                      counterexample
+                        ("rewrite edited declared attack " ++ show di)
+                        (retainedAttackIndices (prune u) `atIx` ci === Just di)
+                  | otherwise ->
+                      counterexample
+                        ("rewrite appended declared attack " ++ show di)
+                        (retainedAttackIndices (prune u') `atIx` ci === Just di)
+            _ -> property True
+
+-- | #165's fixture pins, the argument\/attack siblings of
+-- 'prop_conflictSiteQuarantiningBase': on 'quarantiningConflictBase' the
+-- enumerators read the checked unit and publish checked indices, mapping only
+-- the rewrite back to declared space. @undeclared-leaf@ yields exactly the two
+-- retained arguments at @CArgument 0@\/@CArgument 1@ — a declared-space
+-- enumerator would publish @1@\/@2@ and offer a third, vanishing site at the
+-- pruned @aQ@ — with each rewrite landing on the matching declared argument
+-- and @aQ@ untouched. @bad-attack-position@ yields exactly the retained attack
+-- at @CAttack 0@ (declared space: @CAttack 1@, plus a vanishing site at the
+-- pruned attack), its rewrite landing on declared attack 1. Checker agreement
+-- for every site is 'prop_siteMatchesChecker'; this pins the /direction/ of
+-- each mapping, so an enumerator inverting both maps cannot cancel to a pass.
+prop_sitesQuarantiningBase :: Property
+prop_sitesQuarantiningBase =
+  once $
+    conjoin
+      [ counterexample "undeclared-leaf: two sites at checked indices 0 and 1" $
+          [c | (_, c, _) <- leafSitesQ] === [CArgument 0, CArgument 1]
+      , counterexample "undeclared-leaf: rewrites land on declared aS then aK, aQ untouched" $
+          [argsAfter m | (_, _, m) <- leafSitesQ]
+            === [ [(ArgId "aQ", SLeaf (LeafId "Lq")), (ArgId "aS", mutLeaf), (ArgId "aK", SLeaf (LeafId "Lk"))]
+                , [(ArgId "aQ", SLeaf (LeafId "Lq")), (ArgId "aS", SLeaf (LeafId "La")), (ArgId "aK", mutLeaf)]
+                ]
+      , counterexample "bad-attack-position: one site at checked index 0" $
+          [c | (_, c, _) <- attackSitesQ] === [CAttack 0]
+      , counterexample "bad-attack-position: rewrite lands on declared attack 1" $
+          [unitAttacks (m u) | (_, _, m) <- attackSitesQ]
+            === [ [ Undermine (ArgId "aS") (ArgId "aQ") []
+                  , Undermine (ArgId "aS") (ArgId "aK") [StepPremise 99]
+                  ]
+                ]
+      ]
+  where
+    u = quarantiningConflictBase
+    sitesOf op = concat [siteSites s u | s <- siteOps, siteOp s == op]
+    leafSitesQ = sitesOf OpUndeclaredLeaf
+    attackSitesQ = sitesOf OpBadAttackPosition
+    argsAfter m = unitArgs (m u)
+    mutLeaf = SLeaf (LeafId "mut_undeclared")
 
 -- | The mirror is pinned to the checker: for every site
 -- 'dropCoveringAttackSites' proposes, on every base it runs against, the
@@ -723,6 +1021,9 @@ mutationSpecProps =
   , ("mutation suite: accept family verified structurally (status + label shape)", quickCheckResult prop_acceptStructure)
   , ("mutation suite: runCheck == fst . runCheckLocated over every mutant", quickCheckResult prop_runCheckLocatedConsistent)
   , ("mutation suite: expected-location column round-trips and is present on reject rows", quickCheckResult prop_expectedLocationColumn)
+  , ("mutation suite: every proposed site is the constituent the checker reports", quickCheckResult prop_siteMatchesChecker)
+  , ("mutation suite: site enumerators map sites through the quarantine prune", quickCheckResult prop_sitesQuarantiningBase)
+  , ("mutation suite: published index is checked, rewritten index is declared", quickCheckResult prop_siteDirectionSkewed)
   , ("mutation suite: drop-covering-attack site is the pair the checker reports", quickCheckResult prop_conflictSiteMatchesChecker)
   , ("mutation suite: drop-covering-attack maps sites through the quarantine prune", quickCheckResult prop_conflictSiteQuarantiningBase)
   , ("mutation suite: cert-wrong-fraction decodes cleanly and is refused on value", quickCheckResult prop_certWrongFractionDecodes)
