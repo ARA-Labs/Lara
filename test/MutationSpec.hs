@@ -36,8 +36,11 @@ import Data.List (isInfixOf, sort)
 import Data.Maybe (mapMaybe)
 
 import Lara.AST
-  ( Assurance (..)
+  ( ArgId (..)
+  , Assurance (..)
+  , Attack (..)
   , Cert (..)
+  , GroupConflictMode (..)
   , Label (..)
   , RejectClass (..)
   , Rejection (..)
@@ -45,7 +48,7 @@ import Lara.AST
   , SupportTerm (..)
   , Unit (..)
   )
-import Lara.Diagnostics (LocatedRejection (..), constituentText, parseConstituent)
+import Lara.Diagnostics (Constituent (..), LocatedRejection (..), constituentText, parseConstituent)
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
   ( Expected (..)
@@ -79,6 +82,9 @@ import Lara.Wire
   , decodeCheckInputFile
   , isPublished
   )
+
+import CheckSpec (quarantiningConflictBase)
+import TestReplay (testCheckInput)
 
 suiteRoot :: FilePath
 suiteRoot = "fixtures/mutants"
@@ -393,7 +399,10 @@ prop_conflictSiteMatchesChecker :: Property
 prop_conflictSiteMatchesChecker = once $ ioProperty $ do
   corpusBases <- readCorpusBases
   anchors <- mapM readBase mutationBases
-  let bases = [(b, i) | (b, Just i) <- anchors] ++ corpusBases
+  let bases =
+        [(b, i) | (b, Just i) <- anchors]
+          ++ corpusBases
+          ++ [("quarantining-conflict-fixture", testCheckInput quarantiningConflictBase)]
       sites =
         [ (base, input, expected, predicted, mutate)
         | (base, input) <- bases
@@ -427,6 +436,73 @@ prop_conflictSiteMatchesChecker = once $ ioProperty $ do
                 , counterexample "checker reported no located rejection" $
                     fmap lrConstituent located === Just predicted
                 ]
+
+-- | The @RejectOnConflict@ sibling of 'quarantiningConflictBase' (#159). Same
+-- graph, same inconsistent group — only the mode differs, so the driver
+-- escalates the group conflict to R9 and rejects before the completeness scan
+-- ever runs. Nothing else in the enumerator reads 'unitGroupMode' and the prune
+-- is mode-independent, so without the @groupConflictReject@ gate this unit
+-- would yield exactly the site its quarantining twin yields, and the mutant
+-- would reject R9 rather than @MissingConflict@ — a corrupted answer key for
+-- the localization benchmark (#123).
+quarantiningConflictRejectBase :: Unit
+quarantiningConflictRejectBase =
+  quarantiningConflictBase {unitGroupMode = RejectOnConflict}
+
+-- | The result of deleting 'quarantiningConflictBase'\'s /pruned/ attack
+-- (declared index 0, the one naming the quarantined @aQ@). The checked unit is
+-- unchanged by that deletion, so the unit must still accept — which is why
+-- pruned attacks are not candidate sites.
+prunedAttackDeletedBase :: Unit
+prunedAttackDeletedBase =
+  quarantiningConflictBase {unitAttacks = [Undermine (ArgId "aS") (ArgId "aK") []]}
+
+-- | #159: on a quarantining base the enumerator reads the checked unit and maps
+-- the deletion back through the prune. Under the fixture's index skew a mirror
+-- over the declared unit would publish @(1, 2)@ where the checker reports
+-- @(0, 1)@, and a deletion applied in checked index space would remove the
+-- pruned attack — an accepting no-op — instead of the cover. Checker agreement
+-- for the site itself is asserted by 'prop_conflictSiteMatchesChecker', which
+-- carries this fixture as a base.
+--
+-- Two sibling bases pin the gates the main fixture cannot reach:
+-- 'prunedAttackDeletedBase' pins that deleting a /pruned/ attack is an
+-- accepting no-op (the length check above is insensitive to it — an enumerator
+-- iterating declared attacks would also yield exactly one site here), and
+-- 'quarantiningConflictRejectBase' pins the @groupConflictReject@ gate by both
+-- its effect (no sites) and its reason (the driver rejects R9 before the
+-- scan). No corpus base declares a @groups@ form, so nothing else reaches
+-- either path.
+prop_conflictSiteQuarantiningBase :: Property
+prop_conflictSiteQuarantiningBase =
+  once $
+    conjoin
+      [ counterexample "fixture base must accept" (isAccept (verdictOutcome (runCheck input)))
+      , counterexample "exactly one covering attack on the checked unit" (length sites === 1)
+      , counterexample "deleting the pruned attack must be an accepting no-op" $
+          isAccept (verdictOutcome (runCheck (testCheckInput prunedAttackDeletedBase)))
+      , counterexample "an R9-escalating base must yield no sites" $
+          null (dropCoveringAttackSites quarantiningConflictRejectBase)
+      , counterexample "the R9-escalating base must reject at the driver, not the scan" $
+          verdictOutcome (runCheck (testCheckInput quarantiningConflictRejectBase))
+            === Reject (RejectClass R9)
+      , conjoin
+          [ conjoin
+              [ counterexample "pair must be published in checked index space" $
+                  predicted === CConflictPair 0 1
+              , counterexample "deletion must land on the retained declared attack" $
+                  unitAttacks (mutate (inputUnit input))
+                    === [Undermine (ArgId "aS") (ArgId "aQ") []]
+              ]
+          | (_, predicted, mutate) <- sites
+          ]
+      ]
+  where
+    input = testCheckInput quarantiningConflictBase
+    sites = dropCoveringAttackSites (inputUnit input)
+    isAccept o = case o of
+      Accept{} -> True
+      Reject{} -> False
 
 -- | The corpus half of the T1 coverage criterion (tracker #48): every
 -- executable rejection class is witnessed by ≥1 corpus-based mutant. All eleven
@@ -648,5 +724,6 @@ mutationSpecProps =
   , ("mutation suite: runCheck == fst . runCheckLocated over every mutant", quickCheckResult prop_runCheckLocatedConsistent)
   , ("mutation suite: expected-location column round-trips and is present on reject rows", quickCheckResult prop_expectedLocationColumn)
   , ("mutation suite: drop-covering-attack site is the pair the checker reports", quickCheckResult prop_conflictSiteMatchesChecker)
+  , ("mutation suite: drop-covering-attack maps sites through the quarantine prune", quickCheckResult prop_conflictSiteQuarantiningBase)
   , ("mutation suite: cert-wrong-fraction decodes cleanly and is refused on value", quickCheckResult prop_certWrongFractionDecodes)
   ]

@@ -70,6 +70,7 @@ module Lara.Blocked
   , blockedSet
     -- * The two frameworks in one index space
   , retainedIndices
+  , retainedAttackIndices
   , declaredEdge
   , retainedEdge
     -- * The driver entry points
@@ -237,8 +238,7 @@ pruneWithPolicySeed policySeed declared =
         partition (supportUsesLeafSet removedLeafSet . snd) (unitArgs declared)
       removedArgs = map fst removedArgPairs
       keptArgSet = Set.fromList (map fst keptArgs)
-      keepsAttack attack = all (`Set.member` keptArgSet) (attackEndpoints attack)
-      (keptAttacks, removedAttacks) = partition keepsAttack (unitAttacks declared)
+      (keptAttacks, removedAttacks) = partition (keepsAttackWith keptArgSet) (unitAttacks declared)
       checked =
         declared
           { unitLeaves =
@@ -302,6 +302,32 @@ retainedIndices p =
 -- | The checked argument-id index built by the smart constructor.
 pruneKeptArgSet :: Prune -> Set ArgId
 pruneKeptArgSet (Prune _ _ _ _ _ kept _ _) = kept
+
+-- | An attack survives quarantine exactly when both endpoints do. The one
+-- carrier for that rule: 'pruneWithPolicySeed' partitions the declared attack
+-- list with it and 'retainedAttackIndices' re-expresses the same partition as
+-- an index list, so the two are the /same/ binding rather than two copies of
+-- one line — they cannot desync.
+keepsAttackWith :: Set ArgId -> Attack -> Bool
+keepsAttackWith keptArgSet attack =
+  all (`Set.member` keptArgSet) (attackEndpoints attack)
+
+-- | Declaration-order indices of the attacks quarantine retained — the attack
+-- counterpart of 'retainedIndices'. 'pruneWithPolicySeed' filters, so the
+-- retained attacks keep their declared relative order and entry @i@ of this
+-- list is the declared index of checked-unit attack @i@. Selects with
+-- 'keepsAttackWith' against 'pruneKeptArgSet' — the same binding and the same
+-- kept-argument set the smart constructor partitioned with, so the two cannot
+-- disagree.
+retainedAttackIndices :: Prune -> [Int]
+retainedAttackIndices p =
+  [ i
+  | (i, attack) <- zip [0 ..] (unitAttacks declared)
+  , keepsAttackWith keptArgSet attack
+  ]
+  where
+    declared = pruneDeclared p
+    keptArgSet = pruneKeptArgSet p
 
 -- | The edge relation of a unit in declared index space: the same structural
 -- subargument-closure rule the checker compiles with ('Lara.Compile.edgeB'),

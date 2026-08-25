@@ -23,6 +23,7 @@ module CheckSpec
   , negMissingConflict
     -- * Quarantine fixtures, shared with "BlockedSpec" (spec §4.3, issue #76)
   , quarantineFixtures
+  , quarantiningConflictBase
   , unquarantinedFixtures
   ) where
 
@@ -1082,6 +1083,7 @@ quarantineFixtures =
   , ("group-quarantine-drops-arg", groupQuarantineDropsArgUnit)
   , ("group-quarantine-promotion", groupQuarantinePromotionUnit)
   , ("group-quarantine-lost-edge", groupQuarantineLostEdgeUnit)
+  , ("quarantining-conflict", quarantiningConflictBase)
   ]
 
 -- | Units with no @≢@ group: quarantine prunes nothing, so nothing may be
@@ -1093,6 +1095,44 @@ unquarantinedFixtures =
   , ("R10 rebut on leaf occurrence", negR10)
   , ("missing-conflict", negMissingConflict)
   ]
+
+-- | A base whose §4.3 quarantine is not the identity (#159): the leaf group
+-- @g1@ is inconsistent (@q@ vs @conflictq@), so quarantine removes @Lq@, the
+-- argument @aQ@ built on it, and the declared attack that names @aQ@ as an
+-- endpoint. What survives is the minimal covering shape: @aS@ (@notk@)
+-- undermines @aK@ (@k@) at its root leaf, the sole cover of the one declared
+-- contrary pair. Both index spaces are skewed on purpose — declared argument 0
+-- and declared attack 0 are pruned — so checked indices differ from declared
+-- indices for every constituent the enumerator touches.
+quarantiningConflictBase :: Unit
+quarantiningConflictBase =
+  Unit
+    { unitSigma = sigmaOf [] [] [("q", []), ("conflictq", []), ("k", []), ("notk", [])]
+    , unitRules = []
+    , unitContraries = [Contrary (AtomPat (Pred "notk") []) (AtomPat (Pred "k") [])]
+    , unitExceptions = []
+    , unitTheories = []
+    , unitLeaves =
+        [ (LeafId "Lq", nullary "q")
+        , (LeafId "Lc", nullary "conflictq")
+        , (LeafId "La", nullary "notk")
+        , (LeafId "Lk", nullary "k")
+        ]
+    , unitArgs =
+        [ (ArgId "aQ", SLeaf (LeafId "Lq"))
+        , (ArgId "aS", SLeaf (LeafId "La"))
+        , (ArgId "aK", SLeaf (LeafId "Lk"))
+        ]
+    , unitAttacks =
+        [ Undermine (ArgId "aS") (ArgId "aQ") []
+        , Undermine (ArgId "aS") (ArgId "aK") []
+        ]
+    , unitQueries = [nullary "k"]
+    , unitGroups = [DupGroup (GroupId "g1") [LeafId "Lq", LeafId "Lc"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+  where
+    nullary n = Prop (Pred n) []
 
 -- | A ≡-consistent group of __three__ members admits normally (all @: p@).
 group3ConsistentUnit :: Unit

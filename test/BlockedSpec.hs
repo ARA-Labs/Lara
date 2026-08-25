@@ -42,6 +42,7 @@ import Lara.Blocked
   , pruneWithPolicySeed
   , pruneChecked
   , pruneDeclared
+  , retainedAttackIndices
   , retainedEdge
   , retainedIndices
   )
@@ -277,7 +278,44 @@ blockedSpecProps =
   , ("blocked unquarantined units block nothing", quickCheckResult prop_noQuarantine)
   , ("blocked queries are support-driven", quickCheckResult prop_blockedSupported)
   , ("blocked prune accepts an explicit policy seed", quickCheckResult prop_explicitPolicySeed)
+  , ("blocked retained attack indices project the checked attack list", quickCheckResult prop_retainedAttackIndices)
   ]
+
+-- | 'retainedAttackIndices' is the attack counterpart of 'retainedIndices'
+-- (#159): indexing the declared attack list by it reproduces the checked attack
+-- list exactly, order and multiplicity included. This is the contract
+-- "Lara.Mutate.Sites.Conflict" leans on to map a checked-space deletion back to
+-- the declared attack it must remove.
+--
+-- The projection equation alone is satisfied by the wrong implementation
+-- @[0 .. length (unitAttacks (pruneChecked p)) - 1]@ — checked-space indices,
+-- the exact confusion #159 exists to prevent — on any fixture whose retained
+-- list is @[]@ or @[0 .. n-1]@, which is every group fixture taken alone. The
+-- discriminating case is 'CheckSpec.quarantiningConflictBase': two declared
+-- attacks, the /pruned/ one first, so the retained list is @[1]@ — non-empty,
+-- non-zero, and gapped. The seeded prune is covered too, since
+-- 'pruneWithPolicySeed' is otherwise exercised only by 'prop_explicitPolicySeed'.
+prop_retainedAttackIndices :: Property
+prop_retainedAttackIndices =
+  once $
+    conjoin
+      ( [ counterexample (name ++ ": projected declared attacks differ from checked attacks") $
+            map (unitAttacks (pruneDeclared p) !!) (retainedAttackIndices p)
+              === unitAttacks (pruneChecked p)
+        | (name, p) <- prunesUnderTest
+        ]
+          ++ [ counterexample "no fixture has a gapped retained-attack list — the property is vacuous" $
+                 any (\(_, p) -> isGapped (retainedAttackIndices p)) prunesUnderTest
+             ]
+      )
+  where
+    prunesUnderTest =
+      [(name, prune unit) | (name, unit) <- quarantineFixtures ++ unquarantinedFixtures]
+        ++ [("policy-seed", pruneWithPolicySeed [LeafId "policy"] policySeedUnit)]
+
+    -- Anything other than [] or [0 .. n-1] — i.e. an index the checked-space
+    -- misimplementation would get wrong.
+    isGapped ix = ix /= [0 .. length ix - 1]
 
 -- The unit-level properties run over the in-memory "CheckSpec" quarantine
 -- fixtures. Separate corpus and generated-mutant fixtures exercise the shipped

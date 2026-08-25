@@ -80,7 +80,7 @@ heading was stale, no test or script imported either name.
 | `Manifest` | `Lara.Diagnostics`, `Lara.Mutate` |
 | `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Conflict`, `Lara.Mutate.Sites.Nav` |
 | `Sites.Cert` | `Data.Ratio`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Strict`, `Lara.Strict.Cell`, `Lara.Strict.RA`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
-| `Sites.Conflict` | `Lara.AST`, `Lara.Attack`, `Lara.Blocked`, `Lara.Check`, `Lara.Compile`, `Lara.Diagnostics`, `Lara.Policy`, `Lara.Prop`, `Lara.SupportTerm`, `Lara.Mutate` |
+| `Sites.Conflict` | `Lara.AST`, `Lara.Attack`, `Lara.Blocked`, `Lara.Check`, `Lara.Compile`, `Lara.Diagnostics`, `Lara.Driver`, `Lara.Policy`, `Lara.Prop`, `Lara.SupportTerm`, `Lara.Mutate` |
 | `Sites.Nav` | `Data.List`, `Lara.AST`, `Lara.Prop` |
 | `Suite` | `Lara.AST`, `Lara.Diagnostics`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed`, `Lara.Mutate.Sites`, `Lara.Mutate.Sorts` |
 | `Codec` | `Lara.Strict`, `Lara.Wire`, `Lara.Mutate` |
@@ -222,6 +222,17 @@ mirrors the completeness scan's search order so it can publish the *located*
 ground truth, and that dependency deserves its own module rather than being
 smuggled into the shared one.
 
+Since **#159** it also imports `Lara.Driver`, a strictly higher layer than the
+checker modules above. It reaches for exactly one name, `groupConflictReject`:
+the enumerator must know whether the driver will escalate a group conflict to
+R9 *before* the completeness scan runs, because on such a base no deletion can
+produce a `MissingConflict` mutant. That is a driver-ordering fact, not a
+checker fact, so there is nowhere lower to get it from. It strengthens rather
+than weakens the case for the separate module — `Sites.Conflict` is the only
+enumerator whose correctness depends on the pipeline stage order, and confining
+that dependency to one module is the point. There is no cycle: `Lara.Driver`
+does not depend on `Lara.Mutate`.
+
 `Lara.Mutate.Outcome` is the **#157** split, and it is the reason the root reads
 328 lines rather than 400. The root's growth had concentrated in one place:
 `drop-covering-attack` cost it thirteen lines (a `MutationOp` constructor with
@@ -293,6 +304,72 @@ diff, so `m5-freeze-v4` stays valid), and every non-comment, non-import code
 line of the original file is present in the union of the three new files with
 none lost. The `error` messages still name `Lara.Mutate.Accept`, the public
 entry point, rather than the module they now live in.
+
+## D4 — The index-space contract `Sites.Conflict` publishes (#159)
+
+The checker does not run on the declared unit; it runs on the §4.3 quarantine of
+it. Before #159, `dropCoveringAttackSites` handled that by refusing to emit any
+site when the quarantine was not the identity (`quarantineIsIdentity`) — a
+fail-closed gate. #159 replaced the gate with a mapping. The contract that
+replaced it is frozen here because it is split across three modules and is not
+reconstructable from any one of them:
+
+- **The published `si`/`ti` are in checked index space.** The scan cache, the
+  coverage decider, and the emitted `Lara.Diagnostics.CConflictPair` all index
+  the *checked* unit. This is not a free choice: `Lara.Diagnostics` builds the
+  verdict's pair as `CConflictPair (mcSourceIndex mc) (mcTargetIndex mc)` with no
+  remapping, so checked space is the space the verdict names, and the mirror must
+  name the same one or the answer key is wrong.
+- **The deletion is in declared index space.** The mutation edits
+  `unitAttacks` of the declared unit, because that is what gets re-encoded.
+- **`Lara.Blocked.retainedAttackIndices` is the sole bridge.** Entry `i` of it is
+  the declared index of checked attack `i`. Nothing else may map between the two
+  spaces.
+
+Soundness rests on attack deletion commuting with the prune, which holds because
+the kept-argument set is attack-independent: `pruneWithPolicySeed` derives it
+from the policy seed and inconsistent-group members via `supportUsesLeafSet` over
+*arguments*, strictly before any attack is examined. So deleting retained
+declared attack `d` prunes to exactly the checked attack list minus entry `i`.
+Deleting a *pruned* attack is an accepting no-op, which is why only retained
+attacks are candidate sites.
+
+**The rejected alternative is widening the gate.** Keeping a fail-closed
+`quarantineIsIdentity`-style guard and merely relaxing its condition was
+considered and rejected: it preserves the defect it was hiding. The gate existed
+because a declared-space mirror publishes a *plausible but wrong* pair on a
+quarantining base rather than failing loudly, and no widening of a guard fixes a
+wrong mapping — only the mapping does. The gate is therefore gone, replaced by
+`retainedAttackIndices` plus the R9 pre-scan gate (`Lara.Driver.groupConflictReject`),
+which is a different condition: it excludes bases the driver rejects *before* the
+scan, where no deletion could yield `MissingConflict` at all.
+
+**Why no Lean entry is owed.** The prune's attack-retention predicate is already
+mechanized. `Admission.buildPrune`'s `keepAttack` is exactly "both endpoints ∈
+keptIds" (`lean/Lara/Admission.lean` `retained_attack_endpoints`, axiom-checked),
+and `retained_attacks_selectAligned` with `RawAttack.resolve_filter_commute` pins
+that the checker consumes exactly that filtered sublist. `retainedAttackIndices`
+only re-expresses that proved filter as an index list for the generator; it
+introduces no new definition the proofs do not already quantify over. This is the
+*strong* form of the exemption argument — the one
+`docs/mechanization-scope-decision.md` says is worth relying on — not the weak
+"the type has no counterpart" form, which is false here anyway: a `retainedIndices`
+counterpart does exist at `lean/Lara/BlockedProgram.lean`.
+
+**Guarded by.** `test/BlockedSpec.hs` `prop_retainedAttackIndices` (the bridge is
+an exact projection, with `CheckSpec.quarantiningConflictBase` supplying the
+gapped retained list `[1]` that makes it non-vacuous), and `test/MutationSpec.hs`
+`prop_conflictSiteQuarantiningBase` / `prop_conflictSiteMatchesChecker` (the
+published pair is the one the checker reports). No corpus base declares a
+`groups` form, so on every committed mutant `retainedAttackIndices == [0..n-1]`
+and the emitted sites are byte-identical to the pre-#159 ones — which is why the
+change needed no corpus regeneration and no freeze-tag bump, and equally why the
+quarantining path is reachable only from the in-memory fixtures.
+
+**Scope.** This contract binds `Sites.Conflict` only. The sibling enumerators in
+`Lara.Mutate.Sites` and `Sites.Cert` still publish `CArgument` in *declared*
+index space, which is latent for the same reason (no corpus base quarantines)
+and is tracked as **#165**.
 
 ## What the split deliberately did not change
 
