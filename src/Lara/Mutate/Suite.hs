@@ -46,7 +46,7 @@ module Lara.Mutate.Suite
   ) where
 
 import Lara.AST
-import Lara.Diagnostics (Constituent (..))
+import Lara.Diagnostics (Constituent (..), SeededSites, seededSite)
 import Lara.Replay
   ( CheckInput
   , inputReplayId
@@ -78,11 +78,12 @@ data SiteOp = SiteOp
   { siteOp :: MutationOp
   , siteCap :: Int
   , siteDedicated :: Bool
-  , siteSites :: Unit -> [(Expected, [Constituent], Unit -> Unit)]
-  -- ^ each proposed site carries its ordered ground-truth list ('mutantSites'
+  , siteSites :: Unit -> [(Expected, SeededSites, Unit -> Unit)]
+  -- ^ each proposed site carries its ordered ground truth ('mutantSites'
   -- contract: head = the spec-order-first constituent, every element
-  -- admissible). The single-defect enumerators publish singletons via
-  -- 'single'.
+  -- admissible). 'SeededSites' is non-empty by construction, so an enumerator
+  -- cannot publish a site seeded at nothing (#169). The single-defect
+  -- enumerators publish singletons via 'single'.
   }
 
 -- | The rejection-site operators in the frozen generation order. The replay
@@ -133,7 +134,7 @@ siteOps =
     -- Every enumerator above seeds exactly one defect, so its ground truth is
     -- the singleton of the mutated constituent — the degenerate case under
     -- which membership and head-equality coincide.
-    single sites u = [(e, [loc], f) | (e, loc, f) <- sites u]
+    single sites u = [(e, seededSite loc, f) | (e, loc, f) <- sites u]
     -- "Lara.Mutate.Sorts" sits below the operator vocabulary and yields bare
     -- rejection classes; wrapping them here keeps 'Expected' owned by exactly
     -- one module.
@@ -159,10 +160,10 @@ unitMutants
   -> CheckInput
   -> MutationOp
   -> Int
-  -> (Unit -> [(Expected, [Constituent], Unit -> Unit)])
+  -> (Unit -> [(Expected, SeededSites, Unit -> Unit)])
   -> [Mutant]
 unitMutants base input op cap sites =
-  [ Mutant (mutantFileName base op k) base op expected locs bytes
+  [ Mutant (mutantFileName base op k) base op expected (Just locs) bytes
   | (k, (expected, locs, mutate)) <- zip [0 :: Int ..] picked
   , Right mutated <- [mkCheckInput (inputReplayId input) (mutate u)]
   , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
@@ -186,7 +187,13 @@ replayMutant :: String -> CheckInput -> MutationOp -> [Mutant]
 replayMutant base input op
   | null backends = []
   | otherwise =
-      [ Mutant (mutantFileName base op 0) base op (ExpectClass R13) [CReplayEnvelope] bytes
+      [ Mutant
+          (mutantFileName base op 0)
+          base
+          op
+          (ExpectClass R13)
+          (Just (seededSite CReplayEnvelope))
+          bytes
       | Right rid' <-
           [ mkReplayId
               (replayCore rid)

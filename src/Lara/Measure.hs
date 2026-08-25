@@ -59,8 +59,12 @@ import Lara.Check (CheckConfig, fullConfig, noCQConfig, noConflictScanConfig, no
 import Lara.Diagnostics
   ( Constituent
   , LocatedRejection (..)
+  , SeededSites
   , constituentText
   , parseConstituentList
+  , seededPrimary
+  , seededSites
+  , seededSitesList
   )
 import Lara.Driver (runCheck, runCheckLocatedWith)
 import Lara.ExpectedJson (JValue (..), renderJson)
@@ -95,11 +99,13 @@ data InputMeta = InputMeta
   , imOperator :: Maybe String -- ^ 'Nothing' for corpus units
   , imExpected :: Expected
   , imExpectedText :: String
-  , imExpectedLocation :: [Constituent]
+  , imExpectedLocation :: Maybe SeededSites
   -- ^ ordered seeded ground truth (manifest column 8): every element is an
   -- admissible located report, the head is the spec-order-first one
-  -- (@docs\/localization-metric-decision.md@); empty when the row seeds no
-  -- site (@-@)
+  -- (@docs\/localization-metric-decision.md@); 'Nothing' when the row seeds no
+  -- site (@-@). Non-empty by construction, so a row cannot be seeded at
+  -- nothing and thereby drop out of the location metrics' denominator
+  -- unnoticed (#169)
   , imHsDiag :: String -- ^ codec deletion-sensitivity pin (empty otherwise)
   , imLeanDiag :: String
   , imKind :: InputKind
@@ -116,7 +122,7 @@ parseMutantManifest raw =
       , imOperator = Just op
       , imExpected = e
       , imExpectedText = expected
-      , imExpectedLocation = locs
+      , imExpectedLocation = seededSites locs
       , imHsDiag = hsDiag
       , imLeanDiag = leanDiag
       , imKind = MutantRow
@@ -140,7 +146,7 @@ parseCorpusManifest raw =
       , imOperator = Nothing
       , imExpected = e
       , imExpectedText = "accept-" ++ status
-      , imExpectedLocation = []
+      , imExpectedLocation = Nothing
       , imHsDiag = ""
       , imLeanDiag = ""
       , imKind = CorpusRow
@@ -256,9 +262,8 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
       ExpectIncompleteArgument -> withLocs f
       ExpectMissingConflict -> withLocs f
       _ -> Nothing
-    withLocs f = case imExpectedLocation im of
-      [] -> Nothing
-      locs@(primary : _) -> Just (f primary locs)
+    withLocs f =
+      fmap (\ss -> f (seededPrimary ss) (seededSitesList ss)) (imExpectedLocation im)
     base =
       Deterministic
         { detActual = "-"

@@ -17,12 +17,13 @@ module Lara.Mutate.Manifest
   , manifestFor
   ) where
 
-import Lara.Diagnostics (constituentListText)
+import Lara.Diagnostics (seededSitesText)
 import Lara.Mutate
   ( Expected (..)
   , Mutant (..)
   , codecDiagnostics
   , expectedText
+  , familyText
   , opFamily
   , opName
   )
@@ -40,7 +41,7 @@ mutantPath m = case mutantExpected m of
 -- diagnostic columns are the 'codecDiagnostics' deletion-sensitivity pins —
 -- non-empty exactly for the codec-corruption rows. @expected-location@ is the
 -- ordered seeded ground truth ('mutantSites'), rendered by
--- 'constituentListText' as column 8 (@-@ when there is no seeded site; a
+-- 'seededSitesText' as column 8 (@-@ when there is no seeded site; a
 -- single-defect row's singleton spells as the bare constituent); it is
 -- appended, never inserted earlier, because @scripts\/differential.sh@
 -- hardcodes the expected column (@$5@) and the diagnostic pins (@$6@\/@$7@).
@@ -52,7 +53,7 @@ manifestFor ms =
               ++ "\t"
               ++ mutantBase m
               ++ "\t"
-              ++ opFamily (mutantOp m)
+              ++ familyText (opFamily (mutantOp m))
               ++ "\t"
               ++ opName (mutantOp m)
               ++ "\t"
@@ -62,7 +63,7 @@ manifestFor ms =
               ++ "\t"
               ++ leanDiag
               ++ "\t"
-              ++ constituentListText (mutantSites m)
+              ++ seededSitesText (mutantSites m)
           | m <- ms
           , let (hsDiag, leanDiag) =
                   maybe ("", "") id (codecDiagnostics (mutantOp m))

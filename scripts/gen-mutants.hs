@@ -58,6 +58,7 @@ import Lara.Mutate
   , Mutant (..)
   , codecDiagnostics
   , expectedText
+  , familyText
   , mutationBases
   , mutationSeed
   , opFamily
@@ -264,7 +265,7 @@ readmeFor corpusBases mutants =
          , "| --- | --- |"
          ]
       ++ [ "| `" ++ family ++ "` | " ++ show n ++ " |"
-         | (family, n) <- tally (opFamily . mutantOp)
+         | (family, n) <- tally (familyText . opFamily . mutantOp)
          ]
       ++ [ ""
          , "## Corpus sweep (uniform derived-applicability, B = "

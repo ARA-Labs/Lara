@@ -16,6 +16,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 
 import Control.Exception (SomeException, evaluate, try)
 import Data.List (isInfixOf)
+import Data.Maybe (isJust)
 
 import Test.QuickCheck
 
@@ -26,6 +27,8 @@ import Lara.Diagnostics
   , constituentText
   , parseConstituent
   , parseConstituentList
+  , seededSites
+  , seededSitesList
   )
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Measure
@@ -387,7 +390,7 @@ prop_locationMetricsDomain = once $ ioProperty $ do
                 (detLocationPrimary det /= Just True .||. detLocationMatch det === Just True)
             , counterexample
                 "singleton ground truth: membership must equal head-equality"
-                ( length (imExpectedLocation im) /= 1
+                ( length (groundTruth im) /= 1
                     .||. detLocationMatch det === detLocationPrimary det
                 )
             ]
@@ -395,6 +398,10 @@ prop_locationMetricsDomain = once $ ioProperty $ do
 -- ---------------------------------------------------------------------------
 -- Small local utility
 -- ---------------------------------------------------------------------------
+
+-- | The row's ordered ground truth as a list (@[]@ when it seeds no site).
+groundTruth :: InputMeta -> [Constituent]
+groundTruth = maybe [] seededSitesList . imExpectedLocation
 
 splitOn :: Char -> String -> [String]
 splitOn sep s = case break (== sep) s of
@@ -415,7 +422,10 @@ prop_locationMetricsDiscriminate = once $ ioProperty $ do
   pure $ case located of
     Nothing -> counterexample "no seeded-reject row with a located constituent" False
     Just (im, bytes, c) ->
-      let det locs = computeDeterministic im {imExpectedLocation = locs} bytes
+      -- 'seededSites' is the sanctioned way in: it maps @[]@ to 'Nothing',
+      -- so the off-domain case below is still reachable without forging an
+      -- empty 'SeededSites' — which is why this needs no @.Internal@ hatch.
+      let det locs = computeDeterministic im {imExpectedLocation = seededSites locs} bytes
           -- Constituent shapes no unit-mutant rejection locates at here — the
           -- row's actual located constituent is c, and c is asserted distinct.
           other = CConflictPair 97 98
@@ -445,7 +455,7 @@ prop_locationMetricsDiscriminate = once $ ioProperty $ do
             Just c -> pure (Just (im, bytes, c))
             Nothing -> firstLocated rest
       | otherwise = firstLocated rest
-    seededReject im = not (null (imExpectedLocation im))
+    seededReject im = isJust (imExpectedLocation im)
 
 measureSpecProps :: [(String, IO Result)]
 measureSpecProps =

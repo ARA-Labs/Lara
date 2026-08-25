@@ -432,8 +432,8 @@ sessions:
   open_threads: 3
 - id: 2026-08-25_001
   date: '2026-08-25'
-  summary: 'Resolved the #167 review of the discriminating-localization benchmark: closed a critical hole where the composite operators never applied or verified their second rewrite (tails now derived from the mutant by reverting the head defect), pinned the report header and the two location cells apart, covered the expected-location comma guard, and corrected both documents to say location_match is 100% by construction with the discrimination living in the gate strength rather than the number. That correction contradicts C23''s untested-boundary prediction; flagged as N212 and deferred.'
-  turn_count: 1
-  events_count: 5
+  summary: 'Resolved the #167 review of the discriminating-localization benchmark: closed a critical hole where the composite operators never applied or verified their second rewrite (tails now derived from the mutant by reverting the head defect), pinned the report header and the two location cells apart, covered the expected-location comma guard, and corrected both documents to say location_match is 100% by construction with the discrimination living in the gate strength rather than the number. That correction contradicts C23''s untested-boundary prediction; flagged as N212 and deferred. Then executed the #169 type refactor that review produced (OpFamily sum type; SeededSites non-empty wrapper), verified byte-neutral on the frozen corpus and landed as PR #170 ahead of the #156 refreeze, and closed #168 in favour of a paper-repository issue this repo cannot discharge.'
+  turn_count: 2
+  events_count: 8
   claims_touched: [C23]
   open_threads: 4

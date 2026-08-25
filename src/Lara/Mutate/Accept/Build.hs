@@ -69,7 +69,7 @@ acceptMutantBlocked base input op = acceptMutantWith base input op ExpectEvidenc
 
 acceptMutantWith :: String -> CheckInput -> MutationOp -> Expected -> Unit -> [Mutant]
 acceptMutantWith base input op expected u' =
-  [ Mutant (mutantFileName base op 0) base op expected [] bytes
+  [ Mutant (mutantFileName base op 0) base op expected Nothing bytes
   | Right mutated <- [mkCheckInput (inputReplayId input) u']
   , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
   ]

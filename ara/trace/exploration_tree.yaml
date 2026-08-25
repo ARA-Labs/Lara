@@ -5543,3 +5543,71 @@ tree:
     - "staging O85"
   also_depends_on: [N210]
   status: unresolved
+
+- id: N213
+  type: decision
+  title: "Land the #169 type refactor before the m5-freeze-v5 refreeze, gated on a byte-neutrality check rather than on an argument"
+  provenance: user-revised
+  timestamp: "2026-08-25T20:40"
+  choice: >
+    The researcher asked whether #169 and #168 should land before the #156
+    refreeze cycle. Answered by splitting them. #168 is not sequenceable here
+    at all — its work is results prose in the paper repository, so it was
+    closed in favour of EYH0602/lara-paper#1 and the two in-repo pointers were
+    retargeted. #169 lands first, because the decision turns on a property
+    that is cheap to test rather than to argue: the family spellings are
+    manifest column 3 and the ground-truth list is column 8, both inside the
+    frozen deterministic projection, so the refactor is only free to land in
+    either order if it moves no bytes. scripts/gen-mutants.hs --check decides
+    that in one run and CI does not gate the generator, so the check costs
+    nothing. An empty diff means one gate-suite run covers both and the tagged
+    tree is the typed one; a non-empty diff is a signal worth having before
+    the tag rather than after, when it would cost a second corpus
+    regeneration.
+  alternatives:
+    - "Refreeze first, land #169 after — defensible, since the refactor is cleanup with no live defect and #156 is on the submission critical path. Rejected on the asymmetry of discovery: if byte-neutrality fails, finding out after the tag costs a full regeneration, while finding out before costs one --check run."
+    - "Land #169 and #168 together as one pre-refreeze batch — rejected: #168 cannot be discharged from this repository, so batching them would have parked a paper-repo obligation behind a code change indefinitely."
+    - "Argue byte-neutrality from the code (familyText preserves the spellings; the wrapper renders identically) and skip the check — rejected: the argument is sound but is exactly the kind of claim the freeze discipline exists to verify rather than trust."
+  evidence:
+    - "issue #169; issue #156 (Task 4 refreeze cycle); plans/2026-08-24-m5-freeze-v5-batch.md"
+    - "trace node N214 (the check itself)"
+    - "EYH0602/lara-paper#1 (the #168 handoff)"
+  also_depends_on: [N210]
+  status: resolved
+
+- id: N214
+  type: experiment
+  title: "The #169 typed mutation vocabulary is byte-neutral on the frozen corpus"
+  provenance: ai-executed
+  timestamp: "2026-08-25T20:55"
+  description: >
+    Implemented #169 and tested the property the sequencing decision (N213)
+    rested on. opFamily :: MutationOp -> String became a closed OpFamily sum
+    type with familyText as the sole spelling table; mutantSites ::
+    [Constituent] and Lara.Measure.imExpectedLocation became Maybe
+    SeededSites, a constructor-hidden newtype over NonEmpty Constituent.
+    Prediction under test: the committed suite is unchanged, because the
+    refactor preserves every family spelling, reorders no enumerator, and
+    renames no operator (the pickWithStream draw-order caveat).
+  result: >
+    Byte-neutral, confirmed on every gate. scripts/gen-mutants.hs --check:
+    "OK: fixtures/mutants matches its generator (541 mutants)". MANIFEST.tsv
+    diffed against a copy taken before the refactor: identical. cabal test
+    all: PASS, including prop_localizationSites, prop_siteMatchesChecker,
+    prop_expectedLocationColumn and the two location-metric properties.
+    scripts/differential.sh: pass=620 fail=0, negative pass=56 fail=0.
+    scripts/admission-differential.sh: pass=20 fail=0 expected=20. No Lean
+    change, so the axiom audit is untouched. Landed as PR #170.
+    Two secondary findings, both from the type rather than from testing: in
+    Localize.retractRuleSites the smart constructor replaces the hand-written
+    "not (null affected)" guard, making that self-gate structural; and
+    seededPrimary is total, so location_primary can no longer fail to have a
+    head. The .Internal escape hatch #169 anticipated turned out to be
+    unnecessary — the only value test/MeasureSpec.hs forges is the empty one,
+    and seededSites [] is legitimately Nothing.
+  evidence:
+    - "PR #170; commit ac3b6a0"
+    - "src/Lara/Diagnostics.hs (SeededSites), src/Lara/Mutate.hs (OpFamily/familyText)"
+    - "scripts/gen-mutants.hs --check output"
+  also_depends_on: [N213]
+  status: resolved

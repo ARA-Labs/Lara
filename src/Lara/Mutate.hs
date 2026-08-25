@@ -57,7 +57,9 @@ module Lara.Mutate
   ( -- * Operators (closed vocabulary, one name table)
     MutationOp (..)
   , opName
+  , OpFamily (..)
   , opFamily
+  , familyText
     -- * Specified outcomes (re-exported from "Lara.Mutate.Outcome")
   , Expected (..)
   , expectedText
@@ -74,7 +76,7 @@ module Lara.Mutate
 
 import Data.Word (Word64)
 
-import Lara.Diagnostics (Constituent (..))
+import Lara.Diagnostics (SeededSites)
 import Lara.Mutate.Outcome
 
 -- ---------------------------------------------------------------------------
@@ -191,57 +193,99 @@ opName op = case op of
   OpCodecDanglingAttack -> "codec-dangling-attack"
   OpCodecTruncate -> "codec-truncate"
 
--- | The Phase D mutation family an operator realizes (manifest column).
-opFamily :: MutationOp -> String
+-- | The mutation families the operator vocabulary partitions into: the Phase D
+-- list plus the families the later passes added (localization, signature,
+-- cycles, accept verdicts, codec corruption). Closed, like 'MutationOp' — a
+-- family is a fixed vocabulary, so it is a sum type with one spelling table
+-- ('familyText'), not a bare 'String' (spec "symbolic core" rule, #169).
+--
+-- Test sites branch on family membership (the localization gate in
+-- @test\/MutationSpec.hs@), so a rename or a new registration must fail to
+-- compile rather than silently widen an exemption.
+data OpFamily
+  = FamWrongFormulas
+  | FamOpenObligations
+  | FamUndeclaredLeaves
+  | FamHiddenPolicyExtension
+  | FamBadAttackTargets
+  | FamCertificateTampering
+  | FamDataIntegrity
+  | FamLocalization
+  | FamSignature
+  | FamCycles
+  | FamAcceptVerdict
+  | FamCodecCorruption
+  deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | The one place the concrete family spelling exists — the @family@ manifest
+-- column (column 3, carried into the measurement report) and the generated
+-- README tally. Changing a spelling here moves committed manifest bytes.
+familyText :: OpFamily -> String
+familyText f = case f of
+  FamWrongFormulas -> "wrong-formulas"
+  FamOpenObligations -> "open-obligations"
+  FamUndeclaredLeaves -> "undeclared-leaves"
+  FamHiddenPolicyExtension -> "hidden-policy-extension"
+  FamBadAttackTargets -> "bad-attack-targets"
+  FamCertificateTampering -> "certificate-tampering"
+  FamDataIntegrity -> "data-integrity"
+  FamLocalization -> "localization"
+  FamSignature -> "signature"
+  FamCycles -> "cycles"
+  FamAcceptVerdict -> "accept-verdict"
+  FamCodecCorruption -> "codec-corruption"
+
+-- | The mutation family an operator realizes.
+opFamily :: MutationOp -> OpFamily
 opFamily op = case op of
-  OpWrongPremise -> "wrong-formulas"
-  OpWrongSubstDomain -> "wrong-formulas"
-  OpWrongDischarge -> "open-obligations"
-  OpUndeclaredLeaf -> "undeclared-leaves"
-  OpHiddenRule -> "hidden-policy-extension"
-  OpHiddenContrary -> "hidden-policy-extension"
-  OpBadAttackPosition -> "bad-attack-targets"
-  OpUnlicensedAttack -> "bad-attack-targets"
-  OpDropCoveringAttack -> "bad-attack-targets"
-  OpOpenObligation -> "open-obligations"
-  OpHoleObligation -> "open-obligations"
-  OpTrustedAssurance -> "certificate-tampering"
-  OpCertTheorySwap -> "certificate-tampering"
-  OpCertPayloadTamper -> "certificate-tampering"
-  OpCertWrongFraction -> "certificate-tampering"
-  OpDuplicateBackend -> "certificate-tampering"
-  OpUnknownBackend -> "certificate-tampering"
-  OpGroupConflict -> "data-integrity"
-  OpRetractRule -> "localization"
-  OpTwinSupportDefect -> "localization"
-  OpCrossStageDefect -> "localization"
-  OpUndeclaredPred -> "signature"
-  OpWrongPredArity -> "signature"
-  OpWrongArgSort -> "signature"
-  OpUndeclaredCon -> "signature"
-  OpWrongThetaSort -> "signature"
-  OpOutOfScopeVar -> "hidden-policy-extension"
-  OpSigmaDuplicateSort -> "signature"
-  OpSigmaShadowBase -> "signature"
-  OpSigmaDuplicateCon -> "signature"
-  OpSigmaDuplicatePred -> "signature"
-  OpSigmaConUndeclaredSort -> "signature"
-  OpSigmaPredUndeclaredSort -> "signature"
-  OpRebutCycle -> "cycles"
-  OpDropSupport -> "accept-verdict"
-  OpAttachUndercut -> "accept-verdict"
-  OpAttachRebutCycle -> "accept-verdict"
-  OpAttachUndermine -> "accept-verdict"
-  OpAttachReinstate -> "accept-verdict"
-  OpQuarantineAttacker -> "accept-verdict"
-  OpCodecSigmaJunk -> "codec-corruption"
-  OpCodecSigmaOrder -> "codec-corruption"
-  OpCodecJunkSection -> "codec-corruption"
-  OpCodecCoreVersion -> "codec-corruption"
-  OpCodecReplayOrder -> "codec-corruption"
-  OpCodecTheoryMismatch -> "codec-corruption"
-  OpCodecDanglingAttack -> "codec-corruption"
-  OpCodecTruncate -> "codec-corruption"
+  OpWrongPremise -> FamWrongFormulas
+  OpWrongSubstDomain -> FamWrongFormulas
+  OpWrongDischarge -> FamOpenObligations
+  OpUndeclaredLeaf -> FamUndeclaredLeaves
+  OpHiddenRule -> FamHiddenPolicyExtension
+  OpHiddenContrary -> FamHiddenPolicyExtension
+  OpBadAttackPosition -> FamBadAttackTargets
+  OpUnlicensedAttack -> FamBadAttackTargets
+  OpDropCoveringAttack -> FamBadAttackTargets
+  OpOpenObligation -> FamOpenObligations
+  OpHoleObligation -> FamOpenObligations
+  OpTrustedAssurance -> FamCertificateTampering
+  OpCertTheorySwap -> FamCertificateTampering
+  OpCertPayloadTamper -> FamCertificateTampering
+  OpCertWrongFraction -> FamCertificateTampering
+  OpDuplicateBackend -> FamCertificateTampering
+  OpUnknownBackend -> FamCertificateTampering
+  OpGroupConflict -> FamDataIntegrity
+  OpRetractRule -> FamLocalization
+  OpTwinSupportDefect -> FamLocalization
+  OpCrossStageDefect -> FamLocalization
+  OpUndeclaredPred -> FamSignature
+  OpWrongPredArity -> FamSignature
+  OpWrongArgSort -> FamSignature
+  OpUndeclaredCon -> FamSignature
+  OpWrongThetaSort -> FamSignature
+  OpOutOfScopeVar -> FamHiddenPolicyExtension
+  OpSigmaDuplicateSort -> FamSignature
+  OpSigmaShadowBase -> FamSignature
+  OpSigmaDuplicateCon -> FamSignature
+  OpSigmaDuplicatePred -> FamSignature
+  OpSigmaConUndeclaredSort -> FamSignature
+  OpSigmaPredUndeclaredSort -> FamSignature
+  OpRebutCycle -> FamCycles
+  OpDropSupport -> FamAcceptVerdict
+  OpAttachUndercut -> FamAcceptVerdict
+  OpAttachRebutCycle -> FamAcceptVerdict
+  OpAttachUndermine -> FamAcceptVerdict
+  OpAttachReinstate -> FamAcceptVerdict
+  OpQuarantineAttacker -> FamAcceptVerdict
+  OpCodecSigmaJunk -> FamCodecCorruption
+  OpCodecSigmaOrder -> FamCodecCorruption
+  OpCodecJunkSection -> FamCodecCorruption
+  OpCodecCoreVersion -> FamCodecCorruption
+  OpCodecReplayOrder -> FamCodecCorruption
+  OpCodecTheoryMismatch -> FamCodecCorruption
+  OpCodecDanglingAttack -> FamCodecCorruption
+  OpCodecTruncate -> FamCodecCorruption
 
 -- | The deletion-sensitivity pin of a codec-corruption operator: a fixed
 -- substring of the Haskell decode failure (the driver's
@@ -309,14 +353,17 @@ data Mutant = Mutant
   , mutantBase :: String -- ^ base anchor label (worked-example name), or @-@
   , mutantOp :: MutationOp
   , mutantExpected :: Expected
-  , mutantSites :: [Constituent]
+  , mutantSites :: Maybe SeededSites
   -- ^ the seeded ground-truth manifestation sites, ordered: the head is the
   -- constituent the checker's spec-fixed stage order designates first, and
   -- every element is an admissible located report
   -- (@docs\/localization-metric-decision.md@). Rendered as the
-  -- @expected-location@ manifest column; empty for mutants with no seeded
-  -- site (the codec family and the constructed rebut-cycle family), which
-  -- render @-@.
+  -- @expected-location@ manifest column; 'Nothing' for mutants with no seeded
+  -- site (the codec family, the constructed rebut-cycle family, and the
+  -- accept-verdict family), which render @-@.
+  -- 'Lara.Diagnostics.SeededSites' is non-empty by construction, so "seeded
+  -- at nothing" — which would silently leave the row out of the
+  -- @location-accuracy-rate@ denominator — cannot be built (#169).
   , mutantBytes :: String
   }
   deriving (Eq, Show)

@@ -135,6 +135,14 @@ were wrong — not the number.
   seeded site, today's `Nothing`); likewise `imExpectedLocation` in
   `src/Lara/Measure.hs`. `detLocationMatch` becomes membership;
   `detLocationPrimary` is added beside it.
+  **Superseded by #169:** both fields are now `Maybe SeededSites`, a newtype
+  over `NonEmpty Constituent`. The widening above made `[]` mean "no seeded
+  site" — the same state as the old `Nothing` — which also made an enumerator
+  that accidentally published `[]` indistinguishable from one that seeds
+  nothing, silently dropping the row from the `location-accuracy-rate`
+  denominator instead of counting it as a miss. The wrapper restores the
+  distinction in the type: `Nothing` seeds nothing, and a `SeededSites` cannot
+  be empty. The rendered column is unchanged.
 - **Manifest column 8 spelling:** elements joined by `,` in ground-truth order
   (`arg:0,attack:2`); `-` still means no seeded site. `,` appears in no
   spelling `constituentText` produces today and is TSV-safe; single-element

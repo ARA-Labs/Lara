@@ -1880,3 +1880,37 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O87
+  timestamp: "2026-08-25T20:55"
+  provenance: ai-suggested
+  content: >
+    When a rate's denominator guard maps "not applicable" and "malformed" to
+    the same value, a malformed row leaves the denominator instead of
+    counting against the numerator, and the rate reports as healthier than
+    the data supports. The failure is silent because both paths render
+    identically downstream. The fix is in the type rather than in a check:
+    make the malformed case unrepresentable at the producer, so the guard's
+    remaining branch means only "not applicable". Distinguishing the two at
+    the metric boundary — asserting non-emptiness where the rate is computed
+    — is strictly weaker, because by then the producer has already discarded
+    which case it meant.
+  context: >
+    #169's second half. mutantSites :: [Constituent] let a site enumerator
+    publish [], which rendered "-", parsed back as [], and made withLocs
+    return Nothing for both location metrics — the same state as a row that
+    seeds no site by design (the codec, cycle and accept families), so the
+    row silently left the location-accuracy-rate denominator rather than
+    counting as a miss. Wrapping the field as Maybe SeededSites over NonEmpty
+    Constituent separates the two: Nothing is "seeds nothing", and an empty
+    publication cannot be built. Two tests already caught the condition, so it
+    was test-detected rather than live. One implementation instance, no
+    researcher evaluation of the generalized wording. Related to O85 (what
+    caps a localization metric) but distinct: O85 is about where ground truth
+    is validated, this is about what the metric's domain guard can express.
+  potential_type: heuristic
+  bound_to: [N214]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

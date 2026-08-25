@@ -2,8 +2,8 @@ session:
   id: "2026-08-25_001"
   date: "2026-08-25"
   started: "2026-08-25T12:42"
-  last_turn: "2026-08-25T13:05"
-  turn_count: 1
+  last_turn: "2026-08-25T20:55"
+  turn_count: 2
   summary: >
     Resolved the #167 review of the discriminating-localization benchmark
     (#123). External review found that the composite operators' second rewrite
@@ -13,7 +13,12 @@ session:
     by deriving each composite's tail from the mutant, corrected both
     documents to say the rate is 100% by construction and the discrimination
     lives in the gate's strength, and flagged the contradiction this creates
-    with C23 rather than rewriting the claim.
+    with C23 rather than rewriting the claim. Turn 2 executed the #169 type
+    refactor that review produced (OpFamily sum type; SeededSites non-empty
+    wrapper), verified it byte-neutral against the frozen corpus, and landed
+    it as PR #170 ahead of the #156 refreeze; #168 was closed in favour of a
+    paper-repository issue, since this repo can carry that obligation but not
+    discharge it.
 
 events_logged:
   - turn: 1
@@ -46,6 +51,24 @@ events_logged:
     routing: staged
     provenance: ai-suggested
     summary: "A composite fixture's expectation must be re-derived from the composed artifact, not from its components"
+  - turn: 2
+    type: decision
+    id: "N213"
+    routing: direct
+    provenance: user-revised
+    summary: "Land #169 before the #156 refreeze, gated on a byte-neutrality check rather than on an argument; #168 split off to the paper repository"
+  - turn: 2
+    type: experiment
+    id: "N214"
+    routing: direct
+    provenance: ai-executed
+    summary: "#169 typed vocabulary is byte-neutral: --check OK 541 mutants, MANIFEST identical, tests PASS, differential 620/56, admission 20/20"
+  - turn: 2
+    type: observation
+    id: "O87"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A denominator guard that collapses 'not applicable' with 'malformed' silently inflates a rate; fix belongs in the producer's type"
 
 ai_actions:
   - turn: 1
@@ -90,6 +113,53 @@ ai_actions:
     action: "Opened #168 (paper results prose must carry the by-construction caveat; moved off closed #60) and #169 (OpFamily sum type, non-empty SeededSites). Committed a8b3885, pushed, replied to all seven review threads plus a summary comment."
     provenance: ai-executed
     files_changed: []
+  - turn: 2
+    action: >
+      Implemented #169. Added OpFamily (closed sum type) + familyText as the
+      single spelling table in Lara.Mutate; added SeededSites (newtype over
+      NonEmpty Constituent, constructor hidden, built via seededSite /
+      seededSitesNE / seededSites) to Lara.Diagnostics; retyped mutantSites
+      and Lara.Measure.imExpectedLocation to Maybe SeededSites; threaded the
+      new types through the site enumerators, the four Mutant construction
+      sites, the manifest renderer, the README tally, and the two test
+      modules. In Localize.retractRuleSites the smart constructor replaced the
+      "not (null affected)" guard.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Diagnostics.hs"
+      - "src/Lara/Mutate.hs"
+      - "src/Lara/Measure.hs"
+      - "src/Lara/Mutate/Manifest.hs"
+      - "src/Lara/Mutate/Suite.hs"
+      - "src/Lara/Mutate/Sites/Localize.hs"
+      - "src/Lara/Mutate/Codec.hs"
+      - "src/Lara/Mutate/Cycle.hs"
+      - "src/Lara/Mutate/Accept/Build.hs"
+      - "scripts/gen-mutants.hs"
+      - "test/MutationSpec.hs"
+      - "test/MeasureSpec.hs"
+      - "docs/localization-metric-decision.md"
+      - "docs/mutate-module-ownership-decision.md"
+  - turn: 2
+    action: >
+      Ran the byte-neutrality gate and the full verification set: gen-mutants
+      --check (OK, 541 mutants), MANIFEST.tsv diff against a pre-change copy
+      (identical), cabal test all (PASS), differential.sh (620/0 positive,
+      56/0 negative), admission-differential.sh (20/20). Committed ac3b6a0,
+      pushed mutate/169-typed-mutation-vocabulary, opened PR #170.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: >
+      Closed #168 in favour of EYH0602/lara-paper#1, raised in the paper
+      repository with the canonical caveat wording, the two enforcing
+      properties, and a warning not to copy m5-freeze-v4 counts while #156 is
+      in flight. Re-pointed the two in-repo references off the closed tracker
+      on branch docs/168-repoint-paper-caveat (ba1faa5, unpushed).
+    provenance: ai-executed
+    files_changed:
+      - "docs/localization-metric-decision.md"
+      - "plans/2026-08-24-m5-freeze-v5-batch.md"
 
 claims_touched:
   - id: C23
@@ -112,6 +182,13 @@ logic_revisions:
       extrapolation to an untested boundary, not the tested Statement.
 
 key_context:
+  - turn: 2
+    excerpt: >
+      Researcher, posing the sequencing question that became N213: "should we
+      first finish 169 and 168, then refreeze?" — answered by splitting them,
+      since #168's work is not in this repository at all, and by making #169's
+      order contingent on a check rather than on the argument that it should
+      be byte-neutral.
   - turn: 1
     excerpt: >
       Reviewer, demonstrating rather than conjecturing: "Changing Localize.hs:106
@@ -131,10 +208,11 @@ key_context:
 
 open_threads:
   - "C23 contradiction (N212) awaits the researcher: what should the Statement's last clause say, given the ceiling is set by ground-truth gating rather than defect structure? O85 is the candidate generalization."
-  - "#168 — the paper's results prose must carry the by-construction caveat; this repo can carry the obligation but not discharge it."
-  - "#169 — OpFamily as a closed sum type; non-empty SeededSites behind a smart constructor. Neither needs a corpus regeneration if the boundary tables stay byte-identical."
-  - "#156 (Task 4 refreeze) still open; its checklist pointers are now named rather than numbered."
+  - "#156 (Task 4 refreeze) is now the only blocker to m5-freeze-v5, and its last code prerequisite is in review as PR #170. The frozen set is already stale: 504 mutants pinned vs 541 generated."
+  - "PR #170 (#169) awaits review; the branch docs/168-repoint-paper-caveat (ba1faa5) is committed but unpushed and has no PR."
+  - "EYH0602/lara-paper#1 — the results-prose caveat, now tracked where it can be discharged. No location metric appears in the paper's src/ yet, so it constrains prose not yet written."
 
 ai_suggestions_pending:
   - "O85 — the generalized ground-truth-gating claim, offered as C23's replacement clause but not adopted."
   - "O86 — the composite-fixture oracle heuristic; one instance, no researcher evaluation."
+  - "O87 — the denominator-guard heuristic from #169; one instance, no researcher evaluation of the generalized wording."

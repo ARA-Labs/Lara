@@ -43,11 +43,17 @@ module Lara.Mutate.Sites.Localize
   ) where
 
 import Data.List (tails)
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Maybe (isNothing)
 
 import Lara.AST
 import Lara.Blocked (prune)
-import Lara.Diagnostics (Constituent (..))
+import Lara.Diagnostics
+  ( Constituent (..)
+  , SeededSites
+  , seededSites
+  , seededSitesNE
+  )
 import Lara.Policy (firstViolation)
 import Lara.Sigma.WellSorted (unitSortError)
 
@@ -70,18 +76,19 @@ import Lara.Mutate.Sites.Nav (CheckedIx (..), ruleSites)
 -- stage the support stage hides behind — the mutated unit must keep
 -- 'unitSortError' and 'firstViolation' clean, or the mutant would reject
 -- before support at 'CPolicy' and the prediction would be wrong.
-retractRuleSites :: Unit -> [(Expected, [Constituent], Unit -> Unit)]
+retractRuleSites :: Unit -> [(Expected, SeededSites, Unit -> Unit)]
 retractRuleSites u =
-  [ ( ExpectClass R1
-    , [CArgument (checkedIx ci) | ci <- affected]
-    , dropRule rid
-    )
+  [ (ExpectClass R1, sites, dropRule rid)
   | r <- unitRules u
   , let rid = ruleId r
   , let affected =
           ascendingNub
             [ci | (ci, _, _, SRule rid' _ _ _ _ _) <- ruleSites pruned, rid' == rid]
-  , not (null affected)
+  -- A rule no retained argument instantiates has an empty manifestation set,
+  -- and retracting it is an accepting no-op. 'seededSites' is that self-gate:
+  -- the enumerator skips the rule instead of publishing ground truth seeded
+  -- at nothing (#169).
+  , Just sites <- [seededSites [CArgument (checkedIx ci) | ci <- affected]]
   , policyStaysClean (dropRule rid u)
   ]
   where
@@ -101,9 +108,9 @@ retractRuleSites u =
 -- composed in the fixed pair order regardless. The component's @R4@ class is
 -- bound in the pattern, so a component-class drift empties the enumerator —
 -- caught by the anti-vacuity gate — instead of mislabeling the composite.
-twinSupportDefectSites :: Unit -> [(Expected, [Constituent], Unit -> Unit)]
+twinSupportDefectSites :: Unit -> [(Expected, SeededSites, Unit -> Unit)]
 twinSupportDefectSites u =
-  [ (ExpectClass R4, [ci, cj], mutJ . mutI)
+  [ (ExpectClass R4, seededSitesNE (ci :| [cj]), mutJ . mutI)
   | (ExpectClass R4, ci, mutI) : later <- tails (wrongPremiseSites u)
   , (ExpectClass R4, cj, mutJ) <- later
   , ci /= cj
@@ -118,9 +125,9 @@ twinSupportDefectSites u =
 -- rewrite is applied first regardless. The components' @R4@\/@R10@ classes are
 -- bound in the patterns, so a component-class drift empties the enumerator —
 -- caught by the anti-vacuity gate — instead of mislabeling the composite.
-crossStageDefectSites :: Unit -> [(Expected, [Constituent], Unit -> Unit)]
+crossStageDefectSites :: Unit -> [(Expected, SeededSites, Unit -> Unit)]
 crossStageDefectSites u =
-  [ (ExpectClass R4, [cp, ca], mutA . mutP)
+  [ (ExpectClass R4, seededSitesNE (cp :| [ca]), mutA . mutP)
   | (ExpectClass R4, cp, mutP) <- wrongPremiseSites u
   , (ExpectClass R10, ca, mutA) <- badAttackPositionSites u
   ]

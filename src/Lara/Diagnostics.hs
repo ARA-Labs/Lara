@@ -21,9 +21,19 @@ module Lara.Diagnostics
   , parseConstituent
   , constituentListText
   , parseConstituentList
+    -- * Seeded ground truth (non-empty by construction)
+  , SeededSites
+  , seededSite
+  , seededSitesNE
+  , seededSites
+  , seededSitesList
+  , seededPrimary
+  , seededSitesText
   ) where
 
 import Data.List (intercalate)
+import Data.List.NonEmpty (NonEmpty ((:|)))
+import qualified Data.List.NonEmpty as NE
 
 import Lara.AST (GroupId (..), Rejection (..), RejectClass (R2, R12))
 import Lara.Check
@@ -82,7 +92,8 @@ data Stage
 -- declared duplicate-report group, ground truth for @group-conflict@) — are
 -- produced only by "Lara.Driver".'Lara.Driver.runCheckLocated'. This is the one
 -- location vocabulary shared by seeded ground truth
--- ("Lara.Mutate".@mutantSites@, an ordered list of admissible constituents)
+-- ("Lara.Mutate".@mutantSites@, an ordered non-empty list of admissible
+-- constituents — 'SeededSites')
 -- and located diagnostics; in the measurement harness @location_match@ is
 -- membership in that list and @location_primary@ is '==' with its head
 -- (@docs\/localization-metric-decision.md@).
@@ -158,6 +169,57 @@ parseConstituentList s = traverse parseConstituent (splitComma s)
     splitComma t = case break (== ',') t of
       (seg, ',' : rest) -> seg : splitComma rest
       (seg, _) -> [seg]
+
+-- | A mutant's seeded ground truth: the ordered, /non-empty/ list of
+-- admissible manifestation sites, head first in the checker's spec-fixed
+-- stage order. Wrapping 'NonEmpty' makes "seeded, but at nothing" — the one
+-- shape the metric boundary cannot distinguish from "seeds no site" — a type
+-- error rather than a silently-dropped row (#169).
+--
+-- The distinction the wrapper protects is @Maybe SeededSites@: 'Nothing' is
+-- "this row seeds no site" (the codec, cycle, and accept families), which
+-- renders @-@ and puts both location metrics off-domain by design. Before the
+-- wrapper an enumerator returning @[]@ reached that same state through the
+-- other door, leaving the row out of the @location-accuracy-rate@ denominator
+-- instead of counting as a miss ("Lara.Measure".@withLocs@).
+--
+-- The constructor is hidden: build one with 'seededSite' (a single defect),
+-- 'seededSitesNE' (a statically non-empty list), or 'seededSites' (from a
+-- list that might be empty, hence 'Maybe').
+newtype SeededSites = SeededSites (NonEmpty Constituent)
+  deriving (Eq, Show)
+
+-- | The ground truth of a single-defect mutant: the singleton of the
+-- constituent it mutates, the degenerate case under which membership
+-- (@location_match@) and head-equality (@location_primary@) coincide.
+seededSite :: Constituent -> SeededSites
+seededSite c = SeededSites (c :| [])
+
+-- | Seeded ground truth from a statically non-empty list — for the composite
+-- enumerators, whose element count is fixed by construction.
+seededSitesNE :: NonEmpty Constituent -> SeededSites
+seededSitesNE = SeededSites
+
+-- | Seeded ground truth from a list that may be empty: 'Nothing' exactly on
+-- @[]@, which is the manifest's @-@. This is the sanctioned way to turn a
+-- comprehension's output (or a parsed manifest column) into ground truth —
+-- the empty case must be handled, not dropped.
+seededSites :: [Constituent] -> Maybe SeededSites
+seededSites = fmap SeededSites . NE.nonEmpty
+
+-- | The admissible sites, in order.
+seededSitesList :: SeededSites -> [Constituent]
+seededSitesList (SeededSites ne) = NE.toList ne
+
+-- | The spec-order-first site — total, which is the point of the wrapper:
+-- @location_primary@ needs a head and now cannot fail to have one.
+seededPrimary :: SeededSites -> Constituent
+seededPrimary (SeededSites ne) = NE.head ne
+
+-- | The @expected-location@ manifest column of a row's ground truth: @-@ when
+-- the row seeds no site, else 'constituentListText' of the list.
+seededSitesText :: Maybe SeededSites -> String
+seededSitesText = constituentListText . maybe [] seededSitesList
 
 -- | A located rejection: the wire class plus the stage and constituent that
 -- produced it.

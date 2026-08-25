@@ -60,13 +60,16 @@ import Lara.Diagnostics
   , LocatedRejection (..)
   , constituentListText
   , parseConstituentList
+  , seededSitesList
   )
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
   ( Expected (..)
   , Mutant (..)
   , MutationOp (..)
+  , OpFamily (..)
   , expectedText
+  , familyText
   , mutationBases
   , opFamily
   , opName
@@ -263,6 +266,34 @@ prop_seededReproducibility = once $ ioProperty $ do
 -- reject (@reject-IncompleteArgument@, M5 T6), the codec negatives, and the
 -- cycle family are witnessed. The status\/attack-kind half of the criterion
 -- needs T2 corpus units and is not asserted here.
+-- | The family vocabulary is well formed, independently of what the committed
+-- suite happens to contain: 'opFamily' is surjective onto 'OpFamily', and
+-- 'familyText' is injective.
+--
+-- Neither has a live violation — all 12 families are reachable and distinctly
+-- spelled today — so this guards the shapes that only bite later. A family
+-- constructor wired to no operator has a spelling that reaches no manifest
+-- column and is therefore gated by nothing, and it would enter committed bytes
+-- on its first real use. Two constructors sharing a spelling would silently
+-- merge two families in column 3, which is the exact confusion a single
+-- spelling table exists to prevent (#169 review).
+prop_familyVocabulary :: Property
+prop_familyVocabulary =
+  once $
+    conjoin
+      [ counterexample
+          "opFamily is not surjective — some OpFamily constructor has no operator"
+          ( sort (nubOrd (map opFamily [minBound .. maxBound :: MutationOp]))
+              === [minBound .. maxBound :: OpFamily]
+          )
+      , counterexample
+          "familyText is not injective — two families share a manifest spelling"
+          ( length (nubOrd (map familyText allFamilies)) === length allFamilies
+          )
+      ]
+  where
+    allFamilies = [minBound .. maxBound :: OpFamily]
+
 prop_mutationCoverage :: Property
 prop_mutationCoverage = once $ ioProperty $ do
   rows <- readManifest
@@ -286,22 +317,15 @@ prop_mutationCoverage = once $ ioProperty $ do
       [ counterexample
           ("outcome coverage incomplete — witnessed " ++ show (map expectedText witnessed))
           (all (`elem` witnessed) wanted)
-      , counterexample
+      , -- Enumerated, never re-spelled: a hand-written copy of the table is a
+        -- second place the spelling lives, and the one that shipped here had
+        -- drifted to 10 of 12 — 'localization' and 'signature' (the largest
+        -- family, 113 mutants) had no coverage assertion at all. Enumerating
+        -- 'OpFamily' also means a renamed spelling fails HERE, as missing
+        -- coverage, rather than only as a stale-fixture diff (#169 review).
+        counterexample
           ("family coverage incomplete — witnessed " ++ show families)
-          ( all
-              (`elem` families)
-              [ "wrong-formulas"
-              , "undeclared-leaves"
-              , "hidden-policy-extension"
-              , "bad-attack-targets"
-              , "open-obligations"
-              , "cycles"
-              , "codec-corruption"
-              , "certificate-tampering"
-              , "data-integrity"
-              , "accept-verdict"
-              ]
-          )
+          (all (`elem` families) (map familyText [minBound .. maxBound]))
       , counterexample
           "quarantine-attacker mutation operator disappeared"
           ("quarantine-attacker" `elem` map rowOp rows)
@@ -396,6 +420,13 @@ prop_expectedLocationColumn = once $ ioProperty $ do
     sited row = rowSite row /= "-" && roundTrips (rowSite row)
     roundTrips s = maybe False ((== s) . constituentListText) (parseConstituentList s)
 
+-- | An operator's proposed sites, with each published ground truth as a plain
+-- list. The enumerators return 'Lara.Diagnostics.SeededSites', which is
+-- non-empty by construction (#169); these properties inspect the /shape/ of
+-- what was published — singleton versus composite — so they read the list.
+publishedSites :: SiteOp -> Unit -> [(Expected, [Constituent], Unit -> Unit)]
+publishedSites op u = [(e, seededSitesList ss, m) | (e, ss, m) <- siteSites op u]
+
 -- | The whole answer key is pinned to the checker (#165), the way
 -- 'prop_conflictSiteMatchesChecker' pins the completeness mirror: for every
 -- site every rejection-site enumerator ('Lara.Mutate.Suite.siteOps') proposes
@@ -443,7 +474,7 @@ prop_siteMatchesChecker = once $ ioProperty $ do
         [ (base, siteOp op, input, expected, predicted, mutate)
         | (base, input) <- bases ++ skewed
         , op <- siteOps
-        , (expected, predicted, mutate) <- siteSites op (inputUnit input)
+        , (expected, predicted, mutate) <- publishedSites op (inputUnit input)
         ]
   pure $
     conjoin
@@ -595,8 +626,8 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
         -- bases — a stronger index-space pin than the sole-edit argument,
         -- which cannot apply here anyway: @retract-rule@ edits the policy (no
         -- indexed material moves), and the composites edit two constituents.
-        , opFamily (siteOp op) /= "localization"
-        , (_, predicted, mutate) <- siteSites op u
+        , opFamily (siteOp op) /= FamLocalization
+        , (_, predicted, mutate) <- publishedSites op u
         ]
       -- The sole-edit direction argument pairs ONE published index with ONE
       -- edited constituent, so the per-site check runs on singleton-published
@@ -704,7 +735,7 @@ prop_sitesQuarantiningBase =
       ]
   where
     u = quarantiningConflictBase
-    sitesOf op = concat [siteSites s u | s <- siteOps, siteOp s == op]
+    sitesOf op = concat [publishedSites s u | s <- siteOps, siteOp s == op]
     leafSitesQ = sitesOf OpUndeclaredLeaf
     attackSitesQ = sitesOf OpBadAttackPosition
     argsAfter m = unitArgs (m u)
@@ -769,7 +800,7 @@ prop_localizationSites = once $ ioProperty $ do
         [(b, inputReplayId i, inputUnit i) | (b, i) <- bases]
           ++ [(b ++ "+skew", inputReplayId i, quarantineSkewed (inputUnit i)) | (b, i) <- bases]
       skewedBases = [(b, u) | (b, _, u) <- allBases, isSkewed u]
-      sitesOf op u = concat [siteSites s u | s <- siteOps, siteOp s == op]
+      sitesOf op u = concat [publishedSites s u | s <- siteOps, siteOp s == op]
       singles op u = [c | (_, [c], _) <- sitesOf op u]
       ungatedOn op =
         counterexample
@@ -784,10 +815,10 @@ prop_localizationSites = once $ ioProperty $ do
         ]
           ++ [ counterexample
                  ( "the localization family is exactly the three gated operators —"
-                     ++ " a fourth opFamily == \"localization\" registration must"
+                     ++ " a fourth FamLocalization registration must"
                      ++ " extend this gate"
                  )
-                 ( sort [siteOp s | s <- siteOps, opFamily (siteOp s) == "localization"]
+                 ( sort [siteOp s | s <- siteOps, opFamily (siteOp s) == FamLocalization]
                      === sort [OpRetractRule, OpTwinSupportDefect, OpCrossStageDefect]
                  )
              , ungatedOn OpTwinSupportDefect
@@ -1260,6 +1291,7 @@ mutationSpecProps :: [(String, IO Result)]
 mutationSpecProps =
   [ ("mutation suite: every mutant produces its specified outcome", quickCheckResult prop_specifiedOutcomes)
   , ("mutation suite: seeded regeneration reproduces committed bytes", quickCheckResult prop_seededReproducibility)
+  , ("mutation suite: opFamily is surjective and familyText injective", quickCheckResult prop_familyVocabulary)
   , ("mutation suite: every rejection class, codec negatives, and cycles witnessed", quickCheckResult prop_mutationCoverage)
   , ("mutation suite: Sigma well-formedness and codec clauses have dedicated fixtures", quickCheckResult prop_sigmaFixtureCoverage)
   , ("mutation suite: every rejection class witnessed by a corpus-based mutant", quickCheckResult prop_corpusCoverage)
