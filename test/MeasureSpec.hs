@@ -15,7 +15,7 @@ import qualified Data.Aeson.Types as AT
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 import Control.Exception (SomeException, evaluate, try)
-import Data.List (isInfixOf)
+import Data.List (intercalate, isInfixOf)
 import Data.Maybe (isJust)
 
 import Test.QuickCheck
@@ -32,6 +32,7 @@ import Lara.Diagnostics
   )
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Measure
+import Lara.Mutate (OpFamily, familyText, parseFamily)
 import Lara.Wire (decodeCheckInputFile, encodeVerdict, printSExpr, verdictOutcome)
 
 -- ---------------------------------------------------------------------------
@@ -66,6 +67,120 @@ prop_manifestParsersTotal = once $ ioProperty $ do
       , counterexample "corpus manifest parser dropped a data row" (length corpus === length corpusRows)
       , counterexample "mutant manifest has no data rows" (not (null mutants))
       , counterexample "corpus manifest has no data rows" (not (null corpus))
+      ]
+
+-- | The @family@ column round-trips (#171). Column 3 is now gated on the way in
+-- by 'parseFamily', so the manifest's spelling and the vocabulary cannot drift
+-- apart without a row being dropped — and a dropped row fails
+-- 'prop_manifestParsersTotal'. This pins the inverse itself: every 'OpFamily'
+-- spelling parses back to the family that produced it.
+--
+-- The unparseable direction matters as much as the parseable one: a family
+-- spelling that is /not/ in the table must fail, or the gate admits anything.
+prop_familyColumnRoundTrips :: Property
+prop_familyColumnRoundTrips =
+  once $
+    conjoin
+      [ counterexample "parseFamily . familyText is not the identity" $
+          conjoin
+            [ counterexample (familyText f) (parseFamily (familyText f) === Just f)
+            | f <- [minBound .. maxBound :: OpFamily]
+            ]
+      , counterexample
+          "parseFamily accepted a spelling familyText never produces"
+          ( conjoin
+              [ counterexample bogus (parseFamily bogus === Nothing)
+              | bogus <- ["", "-", "signature-RENAMED", "Signature", "paperbench", "rebench"]
+              ]
+          )
+      ]
+
+-- | The column gates are /wired into/ 'parseMutantManifest', not merely
+-- defined (#171). This is the negative test the other three cannot be:
+-- 'prop_familyColumnRoundTrips' exercises 'parseFamily' in isolation, and
+-- 'prop_manifestParsersTotal' \/ 'prop_seededDenominatorPinned' run against a
+-- committed manifest whose every column-3 and column-5 spelling is already
+-- valid — so the guards drop nothing there and all three stay green if a
+-- refactor binds without filtering. The drop-is-loud coupling only fires when
+-- a row /is/ dropped, never when the gate stops dropping.
+--
+-- Synthetic rather than fixture-backed: 'parseMutantManifest' is pure
+-- (@String -> [InputMeta]@), so the fault needs no corpus edit, no IO, and
+-- cannot be masked by a later manifest change. Each gate is checked against a
+-- two-row manifest whose rows differ only in the gated column, plus a control
+-- where that column holds a second /valid/ spelling — the control is what
+-- proves the dropped row was well formed apart from the gate, rather than
+-- rejected for an unrelated shape error.
+prop_manifestGatesRejectUnknownSpellings :: Property
+prop_manifestGatesRejectUnknownSpellings =
+  once $
+    conjoin
+      [ counterexample "column 3 (family) gate is not wired into parseMutantManifest" $
+          conjoin
+            [ counterexample "an unknown family spelling survived the gate" $
+                parsedFamilies ["signature", "signature-RENAMED"] === ["signature"]
+            , counterexample "control: two valid family spellings must both survive" $
+                parsedFamilies ["signature", "localization"] === ["signature", "localization"]
+            ]
+      , counterexample "column 5 (expected) gate is not wired into parseMutantManifest" $
+          conjoin
+            [ counterexample "an unknown expectation spelling survived the gate" $
+                parsedExpectations ["reject-R1", "reject-R1-RENAMED"] === ["reject-R1"]
+            , counterexample "control: two valid expectation spellings must both survive" $
+                parsedExpectations ["reject-R1", "codec-reject"] === ["reject-R1", "codec-reject"]
+            ]
+      ]
+  where
+    parsedFamilies vals = map imFamily (parseMutantManifest (unlines (map familyRow vals)))
+    parsedExpectations vals = map imExpectedText (parseMutantManifest (unlines (map expectedRow vals)))
+    -- Well-formed 8-column rows, varying only the gated column.
+    familyRow fam = tabs ["m.sexp", "A", fam, "undeclared-leaf", "reject-R1", "", "", "arg:3"]
+    expectedRow ex = tabs ["m.sexp", "A", "signature", "undeclared-leaf", ex, "", "", "arg:3"]
+    tabs = intercalate "\t"
+
+-- | The location metrics' denominator is pinned by count against the raw
+-- manifest column (#172).
+--
+-- 'Lara.Measure.withLocs' defines @location_match@ and @location_primary@
+-- exactly on the rows carrying seeded ground truth. A row that silently leaves
+-- that set leaves the @location-accuracy-rate@ denominator instead of counting
+-- as a miss, so the rate reports healthier than the data supports — and the
+-- failure is invisible, because "seeds no site" and "seeded at nothing" render
+-- identically as @-@.
+--
+-- #169 closed the producer half in the type ('Lara.Diagnostics.SeededSites' is
+-- non-empty by construction). This is the decoder half: the number of rows the
+-- harness treats as seeded must equal the number whose raw column 8 is not
+-- @-@. Asserted as a count rather than per row, because the failure this
+-- guards is a row going missing, which a per-row property over the surviving
+-- rows cannot see.
+prop_seededDenominatorPinned :: Property
+prop_seededDenominatorPinned = once $ ioProperty $ do
+  raw <- readFile "fixtures/mutants/MANIFEST.tsv"
+  let dataRows =
+        [ ln
+        | ln <- lines raw
+        , not (null ln)
+        , take 1 ln /= "#"
+        ]
+      -- Binds only on a well-formed 8-column row, matching the shape
+      -- 'parseMutantManifest' itself requires; a malformed row is not counted
+      -- as seeded here and is separately caught by prop_manifestParsersTotal.
+      rawSeeded =
+        [ ln
+        | ln <- dataRows
+        , [col] <- [drop 7 (splitOn '\t' ln)]
+        , col /= "-"
+        ]
+      parsedSeeded = [im | im <- parseMutantManifest raw, isJust (imExpectedLocation im)]
+  pure $
+    conjoin
+      [ counterexample
+          "seeded-row count disagrees with the raw expected-location column"
+          (length parsedSeeded === length rawSeeded)
+      , counterexample
+          "no seeded rows at all — the join would be vacuous"
+          (not (null rawSeeded))
       ]
 
 -- ---------------------------------------------------------------------------
@@ -460,6 +575,9 @@ prop_locationMetricsDiscriminate = once $ ioProperty $ do
 measureSpecProps :: [(String, IO Result)]
 measureSpecProps =
   [ ("measure: manifest parsers account for every data row", quickCheckResult prop_manifestParsersTotal)
+  , ("measure: family column round-trips and rejects unknown spellings", quickCheckResult prop_familyColumnRoundTrips)
+  , ("measure: manifest column gates reject unknown spellings", quickCheckResult prop_manifestGatesRejectUnknownSpellings)
+  , ("measure: seeded-row count matches the raw expected-location column", quickCheckResult prop_seededDenominatorPinned)
   , ("measure: runCheck == fst . runCheckLocated over both manifests", quickCheckResult prop_runCheckLocated)
   , ("measure: class_match holds for every mutant and corpus unit", quickCheckResult prop_classMatch)
   , ("measure: replay_ok on corpus units, - on mutants", quickCheckResult prop_replayOk)

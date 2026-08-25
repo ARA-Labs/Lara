@@ -68,7 +68,7 @@ import Lara.Diagnostics
   )
 import Lara.Driver (runCheck, runCheckLocatedWith)
 import Lara.ExpectedJson (JValue (..), renderJson)
-import Lara.Mutate (Expected (..), parseExpected, statusText)
+import Lara.Mutate (Expected (..), parseExpected, parseFamily, statusText)
 import Lara.Replay (CheckInput, inputReplayId)
 import Lara.Strict (SExpr (..))
 import Lara.Wire
@@ -113,6 +113,24 @@ data InputMeta = InputMeta
   deriving (Eq, Show)
 
 -- | Parse @fixtures\/mutants\/MANIFEST.tsv@ into input rows (8 columns).
+--
+-- Columns 3 and 5 are both gated against their vocabularies ('parseFamily',
+-- 'parseExpected') and a row failing either is dropped, so a stale or
+-- hand-edited manifest cannot carry an unrecognized family or expectation into
+-- @measurements\/report.{json,tsv}@ (#171). Dropping is safe precisely because
+-- it is loud: @prop_manifestParsersTotal@ requires this parser to account for
+-- every data row, so a dropped row fails the suite rather than silently
+-- shrinking the measured set. That coupling only fires when a row /is/
+-- dropped, though, and says nothing about a gate that stops dropping — so the
+-- guards are pinned negatively by @prop_manifestGatesRejectUnknownSpellings@,
+-- over a synthetic manifest rather than the committed one, whose spellings are
+-- all valid and so leave both guards inert.
+--
+-- 'imFamily' stays a 'String' on purpose. 'parseCorpusManifest' fills the same
+-- field with corpus group names (@paperbench@, @rebench@), which are an open
+-- vocabulary and deliberately not mutation families — so the gate belongs on
+-- this path only, and the parsed value is used to validate rather than to
+-- replace the raw spelling (the 'imExpected' \/ 'imExpectedText' shape).
 parseMutantManifest :: String -> [InputMeta]
 parseMutantManifest raw =
   [ InputMeta
@@ -132,6 +150,7 @@ parseMutantManifest raw =
   , not ("#" `isPrefixOf` ln)
   , [file, base, family, op, expected, hsDiag, leanDiag, loc] <- [splitTab ln]
   , Just e <- [parseExpected expected]
+  , Just _family <- [parseFamily family]
   , Just locs <- [parseConstituentList loc]
   ]
 

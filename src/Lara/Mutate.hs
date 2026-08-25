@@ -60,6 +60,7 @@ module Lara.Mutate
   , OpFamily (..)
   , opFamily
   , familyText
+  , parseFamily
     -- * Specified outcomes (re-exported from "Lara.Mutate.Outcome")
   , Expected (..)
   , expectedText
@@ -234,6 +235,18 @@ familyText f = case f of
   FamCycles -> "cycles"
   FamAcceptVerdict -> "accept-verdict"
   FamCodecCorruption -> "codec-corruption"
+
+-- | Parse the @family@ manifest column back to its 'OpFamily' (inverse of
+-- 'familyText'). 'Nothing' on any spelling the table does not produce — a
+-- stale or hand-edited manifest row, which "Lara.Measure" drops rather than
+-- carrying an unrecognized family into the measurement report (#171).
+--
+-- Built by inverting 'familyText' rather than as a second case table, the way
+-- 'parseExpected' inverts 'expectedText': a hand-written inverse would be
+-- exactly the duplicated spelling table #169 removed. Well defined because
+-- 'familyText' is injective, which @test\/MutationSpec.hs@ asserts.
+parseFamily :: String -> Maybe OpFamily
+parseFamily s = lookup s [(familyText f, f) | f <- [minBound .. maxBound]]
 
 -- | The mutation family an operator realizes.
 opFamily :: MutationOp -> OpFamily
