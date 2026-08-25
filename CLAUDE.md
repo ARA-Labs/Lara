@@ -47,6 +47,18 @@ depends on surface syntax. Concretely:
   correct — it is untyped by design, like a JSON lexer's string node. Parse it
   into the symbolic core at the boundary; don't push surface concerns inward.
 
+## Module size is a guideline, not a gate
+The global coding style's file-length advice (split around 400 lines) is good
+practice and worth following by default, but nothing in this repo enforces it and
+no CI step measures it. Split a module when there is a nameable seam — a group of
+definitions with its own vocabulary, its own dependencies, or its own reason to be
+read alone — and treat length as a hint that such a seam may have appeared, never
+as the reason on its own. A module stays as it is when it is long because it is
+well documented, or because what it owns is genuinely one thing (`Lara.Syntax`,
+`Lara.Wire`, `Lara.BindingAudit` are all past the guideline by design). See
+`docs/mutate-module-ownership-decision.md` for the worked case, including why the
+one namespace that had a hard bound no longer does.
+
 ## ARA: agent-native research artifacts
 This project uses ARA (https://github.com/ARA-Labs/Agent-Native-Research-Artifact).
 Update `ara/` and run `/research-manager` only when a session:

@@ -1,6 +1,6 @@
 -- | The certificate-family site enumerators (#125, split out of
--- "Lara.Mutate.Sites" to keep every module in the namespace at or below the
--- 400-line bound @docs\/mutate-module-ownership-decision.md@ fixes).
+-- "Lara.Mutate.Sites" once the family had its own vocabulary; see
+-- @docs\/mutate-module-ownership-decision.md@).
 --
 -- Three operators strike an allowlisted certificate, at three different depths
 -- of the strict-adapter pipeline:

@@ -1,6 +1,6 @@
 -- | Navigation and rewriting helpers shared by the site enumerators (#125,
--- split out of "Lara.Mutate.Sites" to keep every module in the namespace at or
--- below the 400-line bound @docs\/mutate-module-ownership-decision.md@ fixes).
+-- split out of "Lara.Mutate.Sites" alongside the certificate family; see
+-- @docs\/mutate-module-ownership-decision.md@).
 --
 -- These were private to "Lara.Mutate.Sites" before the split and stay
 -- library-internal: the module is an @other-module@, and its only consumers are

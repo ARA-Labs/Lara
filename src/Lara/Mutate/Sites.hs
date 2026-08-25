@@ -25,8 +25,8 @@
 -- attack-completeness one in "Lara.Mutate.Sites.Conflict"; both /are/
 -- re-exported here, so 'Lara.Mutate.Suite' keeps its single import of this
 -- module; the navigation helpers they share live in "Lara.Mutate.Sites.Nav"
--- (#125, splitting this module back under the 400-line bound
--- @docs\/mutate-module-ownership-decision.md@ fixes).
+-- (#125, splitting the certificate family off this module along the seam
+-- @docs\/mutate-module-ownership-decision.md@ records).
 --
 -- Internal to the library: the navigation helpers were private before the
 -- split and stay library-internal, and the enumerators have exactly one

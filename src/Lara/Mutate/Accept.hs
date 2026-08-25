@@ -10,8 +10,8 @@
 -- This module is the family's __facade__ and its whole public surface: which
 -- operators run and in what order ('acceptMutants'), which bases they run on
 -- ('isJustified'), and whether the result is the mutant that was asked for
--- ('acceptStructureOk'). The parts it composes were split out at #143, to keep
--- every module in the namespace inside the 400-line bound:
+-- ('acceptStructureOk'). The parts it composes were split out at #143, along
+-- the seam @docs\/mutate-module-ownership-decision.md@ records:
 --
 -- * "Lara.Mutate.Accept.Ops" — the six constructions, and the injected
 --   vocabulary each needs.

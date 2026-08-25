@@ -8,11 +8,11 @@
 -- re-exports every name here, so importers say @Lara.Mutate@ as before; this
 -- is the one sanctioned re-export in the namespace (ownership record D1, #157).
 --
--- The split exists because the root reached its 400-line bound exactly
--- (@docs\/mutate-module-ownership-decision.md@, sizing rule). The seam is
+-- The split exists because the root's growth had concentrated in one place
+-- (@docs\/mutate-module-ownership-decision.md@, module size). The seam is
 -- *specified outcome* versus *operator vocabulary*: adding an 'Expected'
 -- constructor now costs this module rather than the root, which is the growth
--- that breached the bound.
+-- that was pushing it.
 module Lara.Mutate.Outcome
   ( Expected (..)
   , expectedText
