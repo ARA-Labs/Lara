@@ -11,7 +11,9 @@ row gained the codec-boundary note from #115 (code-point columns, invalid UTF-8)
 2026-08-22 for `lara-syntax@0.9` named-`nd@1` lowering and the exact #140
 partial-label repair condition. Updated 2026-08-23 for `lara-syntax@0.10`
 source-authored formula annotations (§1.4 row `CertNdFormulaMalformed`; the D7
-marker vocabulary gains `(prop _)`)._
+marker vocabulary gains `(prop _)`). Updated 2026-08-25: mutation-suite counts
+refreshed to the `m5-freeze-v5` suite (541 mutants, #156); the accept half is
+unchanged at 58, since all 37 added mutants are rejects._
 
 ## 1. Two doors, two failure modes
 
@@ -409,7 +411,7 @@ valid UTF-8 also fails *inside* the codec as a located R14 rather than as an IO-
 decoding uses `decodeUtf8'`, never the lenient form, so malformed bytes are never accepted with
 substituted content.
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 504 mutants) exercises every class at
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 541 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
@@ -450,7 +452,7 @@ land in the "valid but unsupported" bucket by design
 counter-argument"). The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
-The seeded mutation suite quantifies the split. Of 504 mutants, 446 reject across the R1–R14/codec
+The seeded mutation suite quantifies the split. Of 541 mutants, 483 reject across the R1–R14/codec
 classes and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
 (`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,
 `accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker

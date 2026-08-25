@@ -7,6 +7,17 @@ set, corpus sample, and generator seeds before the final measurement runs; the
 paper's axis-(c) tables are generated only from post-freeze runs against the
 inputs pinned here._
 
+_**The `m5-` prefix is legacy.** M5 closed long ago (tracker #48); this series
+is the **evaluation-corpus freeze**, and all four re-cuts after v1 were
+unrelated to that milestone — v2 for the `ra@1` certifier (#57), v3 for
+conservative quarantine reporting (#76/#79), v4 for the `lara-core@0.2`
+signature bump (#89), v5 for the evaluation-suite completion batch (#156). The
+name is kept because v1–v4 are published, addressable anchors and a mid-series
+rename would give "the freeze after v4" two names; `corpus-units/corpus-v1.policy.lara`
+is itself a frozen input that references this file by path, so renaming it would
+change frozen corpus bytes for a cosmetic reason. Current tag:
+**`m5-freeze-v5`**._
+
 _**Re-freeze history.** `m5-freeze-v1` (tag on the #55 merge commit) froze the
 358-mutant suite over the all-defeasible corpus. Issue #57 (the `ra@1`
 rational-arithmetic certifier, PR #59) changed frozen inputs — the
@@ -189,6 +200,59 @@ differential anchor and the worked-example freshness tests re-prove the
 byte-identity. All gate counts and the numbers of record are unchanged; no
 measurement re-run or freeze-tag bump is owed._
 
+_**`m5-freeze-v5`, the evaluation-suite completion batch (#156; snapshot
+measured at clean `89c25ef`, 2026-08-25).** Three landed code tasks each changed
+a frozen input, so they share one regeneration cycle rather than three: #125 /
+PR #154 (`cert-wrong-fraction`), #124 (`drop-covering-attack` and the standalone
+conflict-scan ablation), and #123 / PR #167 (the discriminating localization
+benchmark). The seeded sweep grew **504 → 541** mutants and the measured input
+set **564 → 601** (541 mutants + 60 corpus units). The seed is unchanged at
+`20260801`.
+
+**The 37 new mutants are five new operators, and they account for every class
+delta**, which is the additivity check this cycle claims:
+
+| Operator | Task | Mutants | Class |
+| --- | --- | --- | --- |
+| `cert-wrong-fraction` | #125 | 1 | `reject-R13` (42 → 43) |
+| `drop-covering-attack` | #124 | 5 | `reject-MissingConflict` (0 → 5, a new class) |
+| `retract-rule` | #123 | 19 | `reject-R1` (44 → 63) |
+| `cross-stage-defect` | #123 | 7 | `reject-R4` (18 → 30, with `twin-support-defect`) |
+| `twin-support-defect` | #123 | 5 | `reject-R4` |
+
+No other class moved, and **no pre-existing mutant's bytes changed** — measured,
+not assumed: `git diff --name-status m5-freeze-v4 HEAD -- fixtures/mutants/`
+reports 37 additions and two modifications, which are `MANIFEST.tsv` (37
+insertions, **zero deletions** — the generated index grew and no existing row
+moved) and `README.md` (prose). The mechanism is the string-keyed generator
+streams (`src/Lara/Mutate/Seed.hs`), which key on `base ++ "/" ++ opName op`, so
+a new constructor cannot perturb an existing operator's draw wherever it sits in
+the enum. `corpus-units/` holds its `@0.7`
+SHA exactly (`cadb5fa6…`), so **`claim-support.{json,tsv}` is content-identical
+to v4**: 1/1 load-bearing strict step carrying a checked certificate, and the
+same 48 gap / 9 justified / 3 defeated status diversity. `measurements/binding-audit/worklist.tsv`
+was regenerated and is byte-identical, re-confirming that the 38-leaf audit
+denominator is untouched by this cycle.
+
+**The location denominator moved, the rate did not.** `location_match` is
+399/399 → **436/436**, and the new deterministic `location_primary` column
+(#123) reports **436/436** beside it. This is the caveat below paying off rather
+than an accuracy improvement: both are ≈100% *by construction*, because every
+site of the `localization` family is gated against the checker before it reaches
+`MANIFEST.tsv`. Cite the gate, not the rate.
+
+**Two provenance repairs land with this snapshot.** `claim-support.json` is now
+recorded from a clean tree — the v4 copy carried `git-dirty: true` at
+`16fa55fa`, while `report.json` correctly carried `git-dirty: false`, so the two
+halves of the frozen snapshot disagreed about their own provenance. And the
+deterministic projection widens from `cut -f1-14` to `cut -f1-15`, absorbing
+`location_primary`; the v4 anchors below are retained as provenance and stay
+correct for the tree they describe.
+
+**On the series name.** Cutting a fifth tag was the moment to decide whether the
+series keeps its legacy `m5-` name. It does; see the note at the top of this
+file for the decision and its cost._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,
@@ -211,41 +275,53 @@ the git tree object SHA is itself the content hash of the tree.
 
 | # | Frozen input | Path | Count | Content anchor (git tree SHA) |
 | --- | --- | --- | --- | --- |
-| 1 | Seeded mutation suite (verdict + specified-status anchors; includes dedicated Σ-WF and `sigma` codec closeout fixtures) | `fixtures/mutants/` | 504 mutants (457 verdict/status-anchored + 47 codec-reject malformed negatives) | `fd7142072d58da4d35642cbad6f144c970627afa` |
+| 1 | Seeded mutation suite (verdict + specified-status anchors; includes dedicated Σ-WF and `sigma` codec closeout fixtures, and the #123 localization families) | `fixtures/mutants/` | 541 mutants (494 verdict/status-anchored + 47 codec-reject malformed negatives) | `9c174f459d3fd856d306282d1ceb38891e0beff2` (was `fd7142072d58da4d35642cbad6f144c970627afa` at v4) |
 | 2 | Corpus units (T2, hand-lowered M0 sample; `lara-core@0.2` signatures; C04 carries the #57 `ra@1` certificate) | `corpus-units/` | 60 units | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` (was `1dc20ea9d79adb2690731a66216dae828a100cf3` through `@0.6`; the `@0.7` re-pin is source-only — see the note below) |
-| 3 | Worked examples (golden verdicts, both drivers; 11 measured examples plus additive demonstrators including S2–S5) | `examples/` | 11 measured examples (+ additive demonstrators) | `2f7fa9adf45fefe649f9a9ed59def3f3d2257fc0` |
+| 3 | Worked examples (golden verdicts, both drivers; 11 measured examples plus additive demonstrators including S2–S8) | `examples/` | 11 measured examples (+ additive demonstrators) | `34b3451b4afc2a5a30814db8062ea1d69803f9bb` (re-pinned at v5; the post-v4 addenda above record the intermediate moves from `2f7fa9ad…`) |
 
 **Generator seed.** `mutationSeed = 20260801` (`src/Lara/Mutate.hs`,
 SplitMix64, keyed per `(base, operator)`). Verified byte-identically
 reproducible: `cabal exec -- runghc scripts/gen-mutants.hs` over the committed
-tree leaves the generated suite unchanged (504 mutants).
+tree leaves the generated suite unchanged (541 mutants). CI enforces this
+between freezes: the **Generated mutation suite is fresh** step runs
+`gen-mutants.hs --check`, so a tree that no longer regenerates its own committed
+suite fails before it can reach a measurement run.
 
-**Ablation configs.** `noCQConfig` / `noTypedConfig` from
-`Lara.Check.CheckConfig` (`src/Lara/Check.hs`); `fullConfig` is the frozen
-semantics. Pinned by the freeze commit SHA below.
+**Ablation configs.** `noCQConfig` / `noTypedConfig` / `noConflictScanConfig`
+from `Lara.Check.CheckConfig` (`src/Lara/Check.hs`); `fullConfig` is the frozen
+semantics. Pinned by the freeze commit SHA below. `noConflictScanConfig` is new
+at v5 (#124) and adds a third ablation run, so `ablation.{json,tsv}` grows by a
+whole run rather than only by rows.
 
 ## Reproducibility gates (all green pre-freeze)
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs` | 504 mutants byte-identical (empty generated-suite diff) ✓ |
-| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=582 fail=0 ✓ |
+| Seed reproducibility | `cabal exec -- runghc scripts/gen-mutants.hs --check` | 541 mutants byte-identical (empty generated-suite diff) ✓ |
+| Cross-driver differential (positive) | `bash scripts/differential.sh` | pass=620 fail=0 ✓ |
 | Cross-driver differential (negative) | `bash scripts/differential.sh` | pass=56 fail=0 ✓ |
 | Admission differential (#81) | `bash scripts/admission-differential.sh` | pass=20 fail=0 (15 semantic byte-identical + 5 codec rejects) ✓ |
 | Replay-tamper detection | `bash scripts/test-replay-tamper.sh` | both tamper classes detected ✓ |
 | Lean build | `cd lean && lake build` | green ✓ |
 | Lean axiom audit | `cd lean && lake env lean AxCheck.lean \| ../scripts/check-axioms.sh` | `sorry`-free, standard trio (incl. `Lara.RA`) ✓ |
-| Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`, Σ closeout coverage) ✓ |
+| Test suite | `cabal test all` | green (incl. `AblationSpec`, `ClaimSupportSpec`, Σ closeout coverage, and the #123/#165 site-gating properties) ✓ |
 | Freeze-bundle tests | `python3 scripts/test_freeze_bundle.py` | 4/4 ✓ |
+| Presentation parity | `make presentation-parity` | 73 rows ✓ |
 
-The positive differential row tracks the **live** count, not the count as it
-stood at the freeze commit: it is pure `+1`-per-anchor bookkeeping, and each
-movement is recorded in the addenda above (`580 → 581` with S6, `581 → 582`
-with S7). Re-measured 2026-08-22 during PR #142: `pass=582 fail=0`,
-`negative pass=56 fail=0`. Every other row is the freeze-time result and does
-not move. The `580/0` under "Reproduce from scratch" below is **correct as
-written and must not be refreshed**: it is scoped to `git checkout
-m5-freeze-v4`, a tree in which the S6 and S7 anchors do not exist.
+Every row above is the **v5 freeze-time result**, measured on the clean tree
+`89c25ef` on 2026-08-25 with the toolchain recorded under "Measurement
+environment of record" below.
+
+The positive differential row tracks the **live** count rather than a
+freeze-frozen one: it grows by one per added anchor, and each movement is
+recorded in the addenda above (`580 → 581` with S6, `581 → 582` with S7,
+`582 → 583` with S8). This cycle moved it `583 → 620`, exactly the 37 new
+mutants and no more — which is the same additivity the empty pre-existing-bytes
+diff claims, measured from the other side.
+
+The recipe numbers under "Reproduce from scratch" below are **scoped to the tag
+they name and must not be refreshed** to track later movement: reproducing from
+`m5-freeze-v5` checks out a tree in which exactly these anchors exist.
 
 ## Post-freeze measurement run
 
@@ -255,7 +331,7 @@ Command (one command, manifest-driven discovery):
 cabal exec -- runghc scripts/measure.hs
 ```
 
-Emits `measurements/{report,ablation}.{json,tsv}` over 564 inputs (504 mutants +
+Emits `measurements/{report,ablation}.{json,tsv}` over 601 inputs (541 mutants +
 60 corpus units); `scripts/claim-support.hs` emits the claim-support
 aggregation and the committed `measurements/binding-audit/worklist.tsv`.
 The canonical aggregate snapshot is committed under `measurements/frozen/`;
@@ -270,14 +346,27 @@ that produced it. Protocol, snapshot, and rationale: `performance.md`.
 
 | Metric | Value |
 | --- | --- |
-| Measurement records | 564 (504 mutants + 60 corpus units) |
-| Class match (`actual` = `expected`) | 564 / 564 |
-| Cross-driver agreement (`lean_agree`) | 564 / 564 |
-| Location match (where applicable) | 399 / 399 (165 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — and codec failures) |
+| Measurement records | 601 (541 mutants + 60 corpus units) |
+| Class match (`actual` = `expected`) | 601 / 601 |
+| Cross-driver agreement (`lean_agree`) | 601 / 601 |
+| Location match (where applicable) | 436 / 436 (165 n/a: accepts — incl. the 9 `quarantine-attacker` mutants — and codec failures) |
+| Location primary (`location_primary`, #123) | 436 / 436 |
 | Replay success (corpus units) | 60 / 60 |
 | Claim-support (4): load-bearing strict steps carrying a checked certificate | 1 / 1 (#57, `adaptive-pruning/C04`) |
 | Ablation **no-cq** missed rejections | 18 — all `reject-IncompleteArgument` (surgical) |
-| Ablation **no-typed** missed rejections | 30 — 11 `reject-R10` + 19 `reject-R11` (surgical) |
+| Ablation **no-typed** missed rejections | 35 — 11 `reject-R10` + 19 `reject-R11` + 5 `reject-MissingConflict` (surgical) |
+| Ablation **no-conflict-scan** missed rejections (#124) | 5 — all `reject-MissingConflict` (surgical) |
+
+**`no-typed` was not redefined when the flags split (#124).** `CheckConfig`
+gained `ccConflictScan` beside `ccTypedAttacks`, but `noTypedConfig` still
+clears **both**, because it is the paper's "nodes and arbitrary attack edges"
+baseline and narrowing it would silently change what an already-published number
+means. So no pre-existing row changed its ablation outcome: `no-typed` moved
+30 → 35 purely by missing the five new `drop-covering-attack` mutants, which is
+correct for a baseline that requires no completeness. The isolating cell is the
+new `no-conflict-scan` run. The monotonicity invariant `accept(fullConfig) ⊆
+accept(cfg)` still holds for all three and is asserted over every manifest input
+by `test/AblationSpec.hs`'s `prop_monotonicity`.
 
 **Location-match caveat (#123).** `location_match` is ≈100% by construction and
 stays that way. For single-defect rows a reject can only localize at its mutated
@@ -285,7 +374,7 @@ constituent; and every site of the `localization` operator family (post-v4
 trees) — off-site and multi-defect alike — is gated against the checker by
 `prop_siteMatchesChecker` / `prop_localizationSites` before it reaches
 `MANIFEST.tsv`, so a mislocating ground truth fails CI at generation time
-instead of lowering the rate. The 399/399 above therefore verifies the harness
+instead of lowering the rate. The 436/436 above therefore verifies the harness
 and the answer key, not localization accuracy, and the discriminating families
 do **not** turn it into a number that can move (#167 review). What they add is a
 stronger gate — ground truth re-derived from the mutant rather than echoed from
@@ -321,22 +410,30 @@ carried by worked example E5).
 
 ### Determinism note
 
-v4's `report.{json,tsv}` columns 1–14 are deterministic; columns `hs_check_ns`
-and `lean_wall_ns` are wall-clock timing (reported, environment-dependent, **not**
-frozen). `ablation.{json,tsv}` carries no timing and is fully deterministic. The
-reproducibility anchors below hash only the deterministic content.
+v5's `report.{json,tsv}` carries **17 columns, of which 1–15 are deterministic**;
+columns 16–17 (`hs_check_ns`, `lean_wall_ns`) are wall-clock timing (reported,
+environment-dependent, **not** frozen). `ablation.{json,tsv}` carries no timing
+and is fully deterministic. The reproducibility anchors below hash only the
+deterministic content.
 
-Scope note for trees after v4: `report.tsv` gains the deterministic
+The projection widened at v5. `report.tsv` gained the deterministic
 `location_primary` column after `location_match` (#123,
-`docs/localization-metric-decision.md`), making 17 columns of which 1–15 are
-deterministic; the projection for such trees is `cut -f1-15`, re-pinned when
-`m5-freeze-v5` is cut (#156). The `cut -f1-14` ranges in this document apply to
-the v4 artifacts they anchor and stay correct as written.
+`docs/localization-metric-decision.md`), so the projection is `cut -f1-15`
+where v1–v4 used `cut -f1-14`. `test/MeasureSpec.hs`'s `prop_reportColumnOrder`
+pins the header verbatim and pins `location_match` and `location_primary` apart
+on a synthetic record, which is what makes this field numbering executable
+rather than prose — a silent column swap would keep the arity identical while
+mislabelling every `cut -f` consumer, this document included.
 
 | Frozen output anchor | SHA-256 |
 | --- | --- |
-| `report.tsv` deterministic projection (`cut -f1-14`) | `eae0c82e8c1607a4daf74b8dfb8ecab333996f0e213bcbf22f9b81533add3d7a` |
-| `ablation.tsv` (full, deterministic) | `23112189212d4e6e154fafa4a7a2d9425e9d77de2b228702f3bf52b29859cdc3` |
+| `report.tsv` deterministic projection (`cut -f1-15`) | `d7396558022965c842e51bb223dce9ef6753325d2a638c2753558239e99aaff0` |
+| `ablation.tsv` (full, deterministic) | `503c231a2e9759c1207cbf48dbb9b446466c84237b2cdac2091a26de85821c1b` |
+
+Superseded v4 anchors, retained as provenance (`cut -f1-14`, 564 records):
+`report.tsv` `eae0c82e8c1607a4daf74b8dfb8ecab333996f0e213bcbf22f9b81533add3d7a`,
+`ablation.tsv` `23112189212d4e6e154fafa4a7a2d9425e9d77de2b228702f3bf52b29859cdc3`.
+Both remain correct for the tree `m5-freeze-v4` names.
 
 Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 (recorded in `report.json` `environment`).
@@ -356,29 +453,42 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 - **v4 tag:** `m5-freeze-v4` (annotated), on `f4327b4` (merge commit of the v4
   re-freeze PR #99). Cut after main CI run `31463095876` passed on PR #100's
   benchmark-harness repair.
+- **v5 snapshot commit:** `89c25ef` (clean measurement input and environment
+  recorded in `report.json`: `git-dirty: false`, GHC 9.14.1, Lean 4.32.0,
+  darwin/aarch64).
+- **v5 tag:** `m5-freeze-v5` (annotated), on the merge commit of the #156
+  re-freeze PR. Cut after the batch #125 / #124 / #123 landed and all gates
+  above were re-run green on the snapshot tree.
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
-  invalidates this freeze; re-run the gates and cut the next tag. Both operators
-  this rule once named as deferred have now landed on `main` —
-  `cert-wrong-fraction` (#125, PR #154) and `drop-covering-attack` (#124) — so
-  the tree no longer regenerates the v4 suite, and `m5-freeze-v5` is owed. It is
-  tracked as #156 and cut once the batch in
-  `plans/2026-08-24-m5-freeze-v5-batch.md` completes. **Until that lands, every
-  number below describes v4, not the working tree.**
+  invalidates this freeze; re-run the gates and cut the next tag. **Every number
+  in this document describes v5 and the working tree it was measured on.** Two
+  mechanisms keep that true between freezes rather than by trust: CI's
+  `gen-mutants.hs --check` step fails a tree that no longer regenerates its own
+  committed suite, and the generator's string-keyed streams
+  (`src/Lara/Mutate/Seed.hs`) make a *new* operator additive by construction, so
+  intermediate PRs may grow `fixtures/mutants/` without owing a measurement run.
+  The bytes do move, however, if an enumerator's output is **reordered** or an
+  existing operator is **renamed** — `pickWithStream` draws in candidate-list
+  order — so neither is a cosmetic edit and both invalidate the freeze.
 
 ## Reproduce from scratch
 
-Reproduce v4 from the annotated tag:
+Reproduce v5 from the annotated tag:
 
 ```
-git checkout m5-freeze-v4
+git checkout m5-freeze-v5
 cabal build all
-cabal exec -- runghc scripts/gen-mutants.hs   # empty generated-suite diff
-bash scripts/differential.sh                  # positive 580/0, negative 56/0
-cabal exec -- runghc scripts/measure.hs       # regenerates measurements/
+cabal exec -- runghc scripts/gen-mutants.hs   # empty generated-suite diff (541 mutants)
+bash scripts/differential.sh                  # positive 620/0, negative 56/0
+cabal exec -- runghc scripts/measure.hs       # regenerates measurements/ (601 records)
 cabal exec -- runghc scripts/claim-support.hs # claim-support aggregation
-cut -f1-14 measurements/report.tsv | shasum -a 256   # matches anchor above
+cut -f1-15 measurements/report.tsv | shasum -a 256   # matches anchor above
 shasum -a 256 measurements/ablation.tsv               # matches anchor above
 ```
+
+The v4 recipe is recoverable from the `m5-freeze-v4` tag itself; against that
+tree the projection is `cut -f1-14`, the suite is 504 mutants, and the
+differential reads positive `580/0`.
 
 ## Clean-tree verification (M7 task T7, tracker #60)
 
@@ -403,12 +513,12 @@ bash scripts/test-replay-tamper.sh            # both tamper classes detected
 cabal test all --test-show-details=direct
 python3 scripts/test_freeze_bundle.py -v      # 4/4
 cabal exec -- runghc scripts/measure.hs
-cut -f1-14 measurements/report.tsv | shasum -a 256   # must equal the anchor above
+cut -f1-15 measurements/report.tsv | shasum -a 256   # must equal the anchor above
 shasum -a 256 measurements/ablation.tsv              # must equal the anchor above
 ```
 
-For a `<tag-or-branch>` after v4 the projection line is `cut -f1-15` (the
-determinism scope note above), against that freeze's own anchor.
+The projection line above is v5's. For a `<tag-or-branch>` at v4 or earlier it
+is `cut -f1-14` (the determinism note above), against that freeze's own anchor.
 
 Two notes carried over from the T7 execution pass, both easy to get wrong:
 

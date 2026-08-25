@@ -1,9 +1,9 @@
 # Decision: what `location_match` measures once mutants carry more than one defect
 
 _Resolves the metric question of #123 (discriminating localization benchmark),
-Task 3 of the m5-freeze-v5 batch (`plans/2026-08-24-m5-freeze-v5-batch.md`).
-The plan requires this decision to be recorded in `docs/` before any mutant is
-generated: it is a measurement contract, not an implementation detail. Companion
+Task 3 of the batch frozen as `m5-freeze-v5` (#156). The decision was required
+in `docs/` before any mutant was generated: it is a measurement contract, not an
+implementation detail. Companion
 to `src/Lara/Diagnostics.hs` (the shared location vocabulary) and
 `docs/m5-freeze-checklist.md` (the frozen headline this changes)._
 

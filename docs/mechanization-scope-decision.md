@@ -3,8 +3,9 @@
 _Records the settled scope rule for the Lean development, fixed when issue #124
 split the attack-completeness scan out of the typed-attack bundle and added a
 third `Lara.Check.CheckConfig` flag. The implementation plan that produced the
-split (`plans/2026-08-24-m5-freeze-v5-batch.md`) is deleted once its Task 4
-lands, per the `plans/` rule; this record carries the durable half. Companion to
+split has since been executed and deleted, per the `plans/` rule; this record
+carries the durable half, and the cycle it fed is `m5-freeze-v5`
+(`docs/m5-freeze-checklist.md`). Companion to
 `docs/mechanization-plan.md` (what is mechanized) and the Haddock on
 `Lara.Check.CheckConfig` (the same rule, stated for readers of the code)._
 

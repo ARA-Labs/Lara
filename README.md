@@ -224,11 +224,11 @@ theorems (spec §9).
 Milestones M1–M5 are complete: the frozen core (`lara-core@0.2`), the
 mechanized reference semantics, the production compiler/checker, the
 walking-skeleton replay pipeline, and the deterministic evaluation corpus
-(frozen at tag `m5-freeze-v4`: 504 generated mutants + 60 corpus units,
-564/564 rejection-class matches, 564/564 cross-driver agreement, 60/60
-replay). Current work is the paper package
-([#60](https://github.com/EYH0602/lara/issues/60)); open follow-ups are tracked
-as [GitHub issues](https://github.com/ARA-Labs/lara/issues).
+(frozen at tag `m5-freeze-v5`: 541 generated mutants + 60 corpus units,
+601/601 rejection-class matches, 601/601 cross-driver agreement, 60/60
+replay). Paper and submission-package work now lives in the paper repository;
+open follow-ups here are tracked as
+[GitHub issues](https://github.com/ARA-Labs/lara/issues).
 
 ## License
 
