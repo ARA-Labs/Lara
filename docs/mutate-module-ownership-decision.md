@@ -145,7 +145,7 @@ stream), `Cycle` (the constructed rebut-cycle family), and `Manifest` (the
 
 The frozen public `mutationSeed` constant and the operator metadata function
 `codecDiagnostics` stay in the root. That is what keeps `Seed` internal and the
-root under 400 lines.
+root within the sizing bound.
 
 `codecDiagnostics` also *cannot* move to `Outcome`, which is worth stating
 because #157 proposed it and costed the split on the assumption that it would
@@ -174,27 +174,66 @@ its wording and this record disagree, this record is the one that shipped.
 
 ## Sizing rule
 
-Every module in the namespace stays at or below the coding guideline's 400-line
-upper bound. **There is no longer an exception** (#143). As it now stands:
+Every module in the namespace stays at or below **300 code lines**, warning from
+250. **There is no longer an exception** (#143), and since **#161** the rule is
+no longer documentation-only: `scripts/check-module-size.sh` measures it in CI,
+and also checks this table against reality. As it now stands:
 
-| Module | Lines |
-|---|---|
-| `Lara.Mutate` | 328 |
-| `Lara.Mutate.Sorts` | 302 |
-| `Lara.Mutate.Sites` | 294 |
-| `Lara.Mutate.Suite` | 274 |
-| `Lara.Mutate.Accept.Ops` | 241 |
-| `Lara.Mutate.Accept.Build` | 162 |
-| `Lara.Mutate.Accept` | 154 |
-| `Lara.Mutate.Sites.Cert` | 141 |
-| `Lara.Mutate.Sites.Conflict` | 130 |
-| `Lara.Mutate.Codec` | 128 |
-| `Lara.Mutate.Cycle` | 123 |
-| `Lara.Mutate.Outcome` | 97 |
-| `Lara.Mutate.Sites.Nav` | 91 |
-| `Lara.Mutate.Seed` | 76 |
-| `Lara.Mutate.Manifest` | 69 |
-| **Σ** | **2610** |
+| Module | Lines | Code |
+|---|---|---|
+| `Lara.Mutate` | 328 | 215 |
+| `Lara.Mutate.Sorts` | 302 | 181 |
+| `Lara.Mutate.Sites` | 294 | 197 |
+| `Lara.Mutate.Suite` | 274 | 156 |
+| `Lara.Mutate.Accept.Ops` | 241 | 138 |
+| `Lara.Mutate.Accept.Build` | 162 | 84 |
+| `Lara.Mutate.Accept` | 154 | 65 |
+| `Lara.Mutate.Sites.Cert` | 141 | 68 |
+| `Lara.Mutate.Sites.Conflict` | 130 | 45 |
+| `Lara.Mutate.Codec` | 128 | 85 |
+| `Lara.Mutate.Cycle` | 123 | 87 |
+| `Lara.Mutate.Outcome` | 97 | 42 |
+| `Lara.Mutate.Sites.Nav` | 91 | 57 |
+| `Lara.Mutate.Seed` | 76 | 38 |
+| `Lara.Mutate.Manifest` | 69 | 32 |
+| **Σ** | **2610** | **1490** |
+
+### What the bound counts, and why it changed (#161)
+
+The rule used to read "at or below the coding guideline's 400-line upper bound",
+measured by `wc -l`. Both halves changed when the guard was written, because
+mechanizing the rule as stated would have mechanized the wrong thing.
+
+**It counts code lines, not total lines.** A line counts unless it is blank, a
+comment, a pragma, or an import (continuation lines of a bracketed import list
+included); the module header and export list do count, since the public surface
+is part of a module's weight. The 401-line breach that motivated #161 was caused
+by a two-line Haddock clarification *asked for in review*, and was repaired by
+reflowing prose to buy the line back — the metric driving the work instead of
+the reverse. This repository's value rests on auditable, documented semantics,
+so a bound that charges a contributor for explaining themselves is aimed at the
+wrong quantity. Code lines keep every seam the rule has actually found
+(`Outcome`, `Sites.Cert`/`Sites.Nav`, `Accept`/`Ops`/`Build`) and make a comment
+free. This is also the measure #143 already trusted: its split was verified by
+checking that "every non-comment, non-import code line of the original file is
+present in the union of the three new files".
+
+**It has two tiers.** Warn at 250, fail at 300. The source guideline is itself
+two-tier — split when exceeding 400, prohibited over 800 — and this record had
+collapsed it into a single hard bound with no headroom. Restoring the tiers
+means a review comment can never break the build, while growth that genuinely
+needs a seam still stops the gate. 300 was chosen to preserve roughly the
+pressure the old bound applied: `Lara.Mutate` at 215 keeps about 28 operators of
+runway, against the "roughly twenty more" the 400-line bound left it.
+
+**The scope is this namespace, and only this namespace.** That was always true
+and is now explicit, because a guard makes it testable. The bound is a
+`Lara.Mutate` decision, not a repository invariant: eleven modules elsewhere in
+`src/` exceed 400 lines by design, three of them past the source guideline's own
+800-line prohibition (`Lara.Syntax` at 2136, `Lara.Wire` at 1579,
+`Lara.BindingAudit` at 1365). A repo-wide sweep would fail instantly on a third
+of the codebase. Extending the guard's `SCOPE_ROOTS` to another namespace is a
+decision that belongs in a `docs/` record first.
 
 `Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the #125 split. Adding
 the `cert-wrong-fraction` operator took `Sites` to 428 — the first breach of
@@ -237,17 +276,20 @@ child and re-exports it, so no importer changed and no public surface was added.
 
 What it buys, and where the next growth lands:
 
-- an operator costs the root **3** lines (328 → 331); there is room for roughly
-  twenty more before the bound;
+- an operator costs the root **3** code lines (215 → 218); there is room for
+  roughly twenty-eight more before the bound;
 - an operator that also needs a new *specified outcome* now costs the root 3 and
-  `Outcome` **10** (97 → 107), instead of costing the root 13. The growth that
+  `Outcome` **10** (42 → 52), instead of costing the root 13. The growth that
   breached the bound is the growth that moved.
 
-The breach was silent: no test, no CI step, and no `scripts/*.sh` measures
-module length, so this table is the only thing standing between a contributor
+The breach was silent: no test, no CI step, and no `scripts/*.sh` measured
+module length, so this table was the only thing standing between a contributor
 and a repeat — and the root's own namespace map was itself stale in the same
-commit, missing `Sites.Conflict`. **#161** adds the mechanical guard, and is not
-closed by this change.
+commit, missing `Sites.Conflict`. **#161 closed that gap**:
+`scripts/check-module-size.sh` now measures every module in the namespace and
+verifies this table against reality, in both directions. Note the counts in this
+bullet are code lines under the revised rule above, not the `wc -l` figures the
+#157 analysis originally used.
 
 ### History of the `Accept` exception, and how it closed
 
@@ -268,7 +310,7 @@ modules under a facade:
   and `acceptStructureOk` (was it the mutant asked for).
 - `Lara.Mutate.Accept.Ops` (241) — the six constructions and the vocabulary each
   injects.
-- `Lara.Mutate.Accept.Build` (161) — mutant assembly, the asserted
+- `Lara.Mutate.Accept.Build` (162) — mutant assembly, the asserted
   justified-unit invariants, and the attack-site helpers.
 
 The dependency order is forced, and is why assembly sits *below* the operators

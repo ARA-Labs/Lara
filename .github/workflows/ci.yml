@@ -13,6 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pure bash, no toolchain needed, so it runs first and fails fast (#161).
+      # The self-test runs alongside the guard: a sizing guard that silently
+      # stopped measuring anything would otherwise look exactly like a pass.
+      - name: Module sizing guard (Lara.Mutate namespace)
+        run: |
+          bash scripts/test-check-module-size.sh
+          bash scripts/check-module-size.sh
+
       - name: Set up GHC and cabal
         uses: haskell-actions/setup@v2
         with:
@@ -107,6 +115,13 @@ jobs:
 
       - name: Replay tamper and schema gates
         run: bash scripts/test-replay-tamper.sh
+
+      # The committed fixtures/mutants tree must be exactly what the generator
+      # emits today (#160). test/MutationSpec.hs re-derives the mutant bytes and
+      # MANIFEST.tsv from the library, but README.md is rendered inside the
+      # script, so no test can reach it — which is how it shipped stale in #158.
+      - name: Generated mutation suite is fresh
+        run: cabal exec -- runghc scripts/gen-mutants.hs --check
 
       - name: Haskell-Lean differential (fixtures, examples, and bundles)
         run: bash scripts/differential.sh

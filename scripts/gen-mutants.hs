@@ -27,17 +27,29 @@
 --
 -- Run with the built library on the path:
 --
--- >  cabal exec -- runghc scripts/gen-mutants.hs
+-- >  cabal exec -- runghc scripts/gen-mutants.hs            -- write the suite
+-- >  cabal exec -- runghc scripts/gen-mutants.hs --check    -- assert it is fresh
+--
+-- @--check@ regenerates to a scratch tree and diffs it against the committed
+-- one, exiting non-zero on any difference (issue #160). CI runs it beside
+-- @scripts/differential.sh@, so a generated artifact can no longer drift from
+-- its generator unnoticed — the failure that shipped a stale
+-- @fixtures\/mutants\/README.md@ in #158.
 module Main (main) where
 
-import Control.Monad (forM, forM_, when)
-import Data.List (isInfixOf, sort)
+import Control.Monad (forM, forM_, unless, when)
+import Data.List (isInfixOf, sort, (\\))
+import GHC.IO.Encoding (setLocaleEncoding, utf8)
 import System.Directory
   ( createDirectoryIfMissing
   , doesDirectoryExist
+  , listDirectory
   , removeDirectoryRecursive
   )
+import System.Environment (getArgs, getProgName)
+import System.Exit (exitFailure)
 import System.FilePath ((</>))
+import System.IO (hPutStrLn, stderr)
 
 import Lara.AST (Label (..), Rejection (..), Status (..))
 import Lara.Driver (runCheck)
@@ -74,8 +86,35 @@ import Lara.Wire
 suiteRoot :: FilePath
 suiteRoot = "fixtures/mutants"
 
+-- | Where @--check@ regenerates before diffing. Under @dist-newstyle@ (already
+-- ignored) rather than the system temp dir, so a crashed run leaves the
+-- evidence beside the build tree and never inside the committed suite.
+checkRoot :: FilePath
+checkRoot = "dist-newstyle" </> "gen-mutants-check"
+
 main :: IO ()
 main = do
+  -- Pin UTF-8 rather than inheriting the locale: the README carries @≥@ and
+  -- @§@, so a C-locale run would fail to write it (and @--check@ would fail to
+  -- read the committed copy) for reasons unrelated to the suite. Byte-neutral
+  -- wherever the locale was already UTF-8.
+  setLocaleEncoding utf8
+  args <- getArgs
+  case args of
+    [] -> do
+      n <- generate suiteRoot
+      putStrLn ("wrote " ++ show n ++ " verified mutants to " ++ suiteRoot)
+    ["--check"] -> check
+    _ -> do
+      prog <- getProgName
+      hPutStrLn stderr ("usage: " ++ prog ++ " [--check]")
+      exitFailure
+
+-- | Regenerate the whole suite into @root@; returns the mutant count. Every
+-- mutant is verified against the production checker before anything is
+-- written, so an unmet specification aborts before the tree is touched.
+generate :: FilePath -> IO Int
+generate root = do
   perBase <- forM mutationBases $ \base -> do
     let anchor = "examples" </> base </> "example.core.sexp"
     bytes <- readFile anchor
@@ -90,13 +129,70 @@ main = do
           ++ corpusMutants corpusBases
           ++ acceptMutants corpusBases
   forM_ mutants verify
-  fresh <- doesDirectoryExist suiteRoot
-  when fresh (removeDirectoryRecursive suiteRoot)
-  createDirectoryIfMissing True (suiteRoot </> "malformed")
-  forM_ mutants $ \m -> writeFile (suiteRoot </> mutantPath m) (mutantBytes m)
-  writeFile (suiteRoot </> "MANIFEST.tsv") (manifestFor mutants)
-  writeFile (suiteRoot </> "README.md") (readmeFor corpusBases mutants)
-  putStrLn ("wrote " ++ show (length mutants) ++ " verified mutants to " ++ suiteRoot)
+  stale <- doesDirectoryExist root
+  when stale (removeDirectoryRecursive root)
+  createDirectoryIfMissing True (root </> "malformed")
+  forM_ mutants $ \m -> writeFile (root </> mutantPath m) (mutantBytes m)
+  writeFile (root </> "MANIFEST.tsv") (manifestFor mutants)
+  writeFile (root </> "README.md") (readmeFor corpusBases mutants)
+  pure (length mutants)
+
+-- | @--check@ (issue #160): regenerate into a scratch tree and assert the
+-- committed suite is byte-identical to it, naming every file that is missing,
+-- unexpected, or differing.
+--
+-- This covers what @test\/MutationSpec.hs@ structurally cannot.
+-- @prop_seededReproducibility@ re-derives the mutant bytes and @MANIFEST.tsv@
+-- from the library, but @README.md@ is rendered by 'readmeFor' /in this
+-- script/, so no test can import it — which is why it shipped stale in #158.
+-- Comparing whole trees additionally catches a file the generator has stopped
+-- emitting, which no per-file property ever sees.
+check :: IO ()
+check = do
+  n <- generate checkRoot
+  expected <- treeFiles checkRoot
+  actual <- treeFiles suiteRoot
+  differing <- forM (filter (`elem` actual) expected) $ \rel -> do
+    fresh <- readStrict (checkRoot </> rel)
+    committed <- readStrict (suiteRoot </> rel)
+    pure (if fresh == committed then Nothing else Just rel)
+  let problems =
+        [ ("missing from " ++ suiteRoot, expected \\ actual)
+        , ("not emitted by the generator", actual \\ expected)
+        , ("differing from the generator's output", [rel | Just rel <- differing])
+        ]
+  removeDirectoryRecursive checkRoot
+  if all (null . snd) problems
+    then
+      putStrLn
+        ("OK: " ++ suiteRoot ++ " matches its generator (" ++ show n ++ " mutants)")
+    else do
+      forM_ problems $ \(label, files) ->
+        unless (null files) $ do
+          hPutStrLn stderr ("FAIL: " ++ show (length files) ++ " file(s) " ++ label ++ ":")
+          forM_ files $ \rel -> hPutStrLn stderr ("  " ++ rel)
+      hPutStrLn stderr ""
+      hPutStrLn stderr "Regenerate with: cabal exec -- runghc scripts/gen-mutants.hs"
+      exitFailure
+
+-- | Every regular file under @root@, relative to it, sorted.
+treeFiles :: FilePath -> IO [FilePath]
+treeFiles root = sort <$> go ""
+  where
+    go rel = do
+      entries <- listDirectory (root </> rel)
+      fmap concat $ forM entries $ \entry -> do
+        let child = if null rel then entry else rel </> entry
+        isDir <- doesDirectoryExist (root </> child)
+        if isDir then go child else pure [child]
+
+-- | 'readFile' is lazy, and a mismatch found early leaves its handle open —
+-- with ~570 files per side that exhausts the handle limit precisely on the
+-- failing runs this check exists to report. Force the contents instead.
+readStrict :: FilePath -> IO String
+readStrict path = do
+  contents <- readFile path
+  length contents `seq` pure contents
 
 -- | The corpus units as mutation bases, in @corpus-units/MANIFEST.tsv@ order,
 -- each labelled @\<artifact\>.\<claim_id\>@ and decoded from its committed
