@@ -39,7 +39,7 @@ cycleMutants =
       "-"
       OpRebutCycle
       ExpectAllContested
-      Nothing
+      []
       (cycleBytes n)
   | n <- sizes
   ]

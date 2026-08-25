@@ -1818,3 +1818,65 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O85
+  timestamp: "2026-08-25T13:05"
+  provenance: ai-suggested
+  content: >
+    What caps a mutation-localization metric at ceiling is where the ground
+    truth is validated, not how the defects are structured. If the answer key
+    is gated against the system under test before it is published, the metric
+    is confirmatory by construction no matter how adversarial the inputs are:
+    a disagreement between key and system fails the generation gate rather
+    than lowering the score, so the failure mode the metric was built to
+    detect is precisely the one it cannot report. Enriching the input
+    distribution (off-site manifestation, multiple defects, cross-stage
+    composition) strengthens what the gate asserts but cannot make the number
+    move; only ground truth established independently of the system — or a
+    measured population admitted without that gate — can. The corollary for
+    reporting: such a suite's contribution is stated as the content of its
+    gate, and quoting its rate as accuracy evidence is a category error.
+  context: >
+    #167 review of the #123 discriminating-localization benchmark. C23
+    predicted the off-site and multi-defect families would detach
+    location_match from 100%; they do not, because prop_siteMatchesChecker
+    and prop_localizationSites gate every published site against the checker
+    before it reaches MANIFEST.tsv. Generalizes past the LARA harness and is
+    the honest replacement for C23's last Statement clause, so it is the
+    researcher's call — see the unresolved contradiction node N212.
+  potential_type: claim
+  bound_to: [N210, N212]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O86
+  timestamp: "2026-08-25T13:05"
+  provenance: ai-suggested
+  content: >
+    A composite test fixture built by composing component generators must
+    have its published expectation re-derived from the composed artifact, not
+    from the components that built it. A check that re-runs the component
+    enumerators with the same comprehension shape is an identity, not an
+    oracle: it catches ordering and typing drift between components but is
+    blind to whether the composition applied them at all. The workable
+    inverse is to subtract one component from the artifact and require the
+    system to report the next one — for a two-defect mutant, revert the head
+    defect and require the checker to reject at the tail — which reduces the
+    composite's obligation to a prediction the component is already
+    independently gated on.
+  context: >
+    #167 review found that twin-support-defect and cross-stage-defect never
+    had their second rewrite applied by any property: changing mutJ . mutI to
+    mutI left the whole suite green, with the only failure
+    (prop_seededReproducibility) pointing the developer at the regeneration
+    that erases the evidence. The retract-rule clause was already sound
+    because it derives the manifestation set from the mutant. Implemented at
+    N211; one instance, no researcher evaluation of the generalized wording.
+  potential_type: heuristic
+  bound_to: [N211]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

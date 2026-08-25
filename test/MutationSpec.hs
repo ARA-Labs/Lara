@@ -32,7 +32,7 @@ module MutationSpec (mutationSpecProps) where
 
 import Test.QuickCheck
 
-import Data.List (isInfixOf, sort)
+import Data.List (isInfixOf, sort, tails)
 import Data.Maybe (mapMaybe)
 
 import Lara.AST
@@ -48,21 +48,27 @@ import Lara.AST
   , Pred (..)
   , RejectClass (..)
   , Rejection (..)
+  , Rule (..)
   , Status (..)
   , Step (..)
   , SupportTerm (..)
   , Unit (..)
   )
-import Lara.Blocked (prune, retainedAttackIndices, retainedIndices)
-import Lara.Diagnostics (Constituent (..), LocatedRejection (..), constituentText, parseConstituent)
+import Lara.Blocked (prune, pruneChecked, retainedAttackIndices, retainedIndices)
+import Lara.Diagnostics
+  ( Constituent (..)
+  , LocatedRejection (..)
+  , constituentListText
+  , parseConstituentList
+  )
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Mutate
   ( Expected (..)
   , Mutant (..)
   , MutationOp (..)
-  , codecDiagnostics
   , expectedText
   , mutationBases
+  , opFamily
   , opName
   , parseExpected
   )
@@ -366,9 +372,9 @@ prop_runCheckLocatedConsistent = once $ ioProperty $ do
       _ -> False
 
 -- | The @expected-location@ column (column 8) is present exactly on the
--- verdict-bearing single-site (rejection) rows and round-trips through the one
--- 'constituentText'\/'parseConstituent' table; the codec and cycle rows carry
--- @-@ (no single seeded site).
+-- verdict-bearing seeded-reject rows and round-trips through the one
+-- 'constituentListText'\/'parseConstituentList' spelling (a non-empty ordered
+-- list); the codec and cycle rows carry @-@ (no seeded site).
 prop_expectedLocationColumn :: Property
 prop_expectedLocationColumn = once $ ioProperty $ do
   rows <- readManifest
@@ -388,7 +394,7 @@ prop_expectedLocationColumn = once $ ioProperty $ do
       ExpectMissingConflict -> sited row -- located at the uncovered pair
       _ -> rowSite row == "-"
     sited row = rowSite row /= "-" && roundTrips (rowSite row)
-    roundTrips s = maybe False ((== s) . constituentText) (parseConstituent s)
+    roundTrips s = maybe False ((== s) . constituentListText) (parseConstituentList s)
 
 -- | The whole answer key is pinned to the checker (#165), the way
 -- 'prop_conflictSiteMatchesChecker' pins the completeness mirror: for every
@@ -396,7 +402,11 @@ prop_expectedLocationColumn = once $ ioProperty $ do
 -- — not just the seeded subset the committed suite carries — on the worked
 -- examples, every corpus unit, and the quarantining fixture, the mutated unit
 -- rejects with the site's specified outcome and 'runCheckLocated' reports
--- exactly the site's predicted 'Constituent'.
+-- exactly the /head/ of the site's ordered ground-truth list (the
+-- spec-order-first constituent; membership follows,
+-- docs\/localization-metric-decision.md). A fail-fast checker witnesses only
+-- the head in one run, so this property cannot gate the non-head elements of
+-- a composite site; any operator publishing them owes them a gate of its own.
 --
 -- This is what turns the @expected-location@ column from a measured ground
 -- truth into a gated one: 'Lara.Measure.detLocationMatch' compares
@@ -466,7 +476,9 @@ prop_siteMatchesChecker = once $ ioProperty $ do
                       Nothing ->
                         counterexample "site specified a non-rejection outcome" False
                 , counterexample ("checker located " ++ show (fmap lrConstituent located)) $
-                    fmap lrConstituent located === Just predicted
+                    case predicted of
+                      [] -> counterexample "site published an empty ground-truth list" False
+                      primary : _ -> fmap lrConstituent located === Just primary
                 ]
 
     -- Every site enumerator specifies a rejection; the accept, cycle, and
@@ -557,10 +569,12 @@ atIx xs i
 --
 -- The second half is the anti-vacuity gate, the sibling of
 -- 'prop_siteMatchesChecker'\'s \"no sites on any base\" check: every operator
--- that publishes an indexed constituent must have at least one site on a
--- skewed base where the checked index and the declared index /differ/. Without
--- it a future operator could satisfy the first half everywhere by never being
--- exercised off the diagonal — the exact gap this property was added to close.
+-- that publishes an indexed constituent — except the localization family,
+-- whose composite lists are deferred to 'prop_localizationSites' — must have
+-- at least one site on a skewed base where the checked index and the declared
+-- index /differ/. Without it a future operator could satisfy the first half
+-- everywhere by never being exercised off the diagonal — the exact gap this
+-- property was added to close.
 prop_siteDirectionSkewed :: Property
 prop_siteDirectionSkewed = once $ ioProperty $ do
   corpusBases <- readCorpusBases
@@ -570,13 +584,27 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
           ++ [(b, inputUnit i) | (b, i) <- corpusBases]
           ++ [("quarantining-conflict-fixture", quarantiningConflictBase)]
       skewed = [(b ++ "+skew", quarantineSkewed u) | (b, u) <- bases]
-      sites =
+      allSites =
         [ (base, siteOp op, u, predicted, mutate)
         | (base, u) <- skewed ++ bases
         , isSkewed u
         , op <- siteOps
+        -- The localization family is deferred to its own gate,
+        -- 'prop_localizationSites', which re-derives every published list
+        -- from the mutant and the component enumerators on these same skewed
+        -- bases — a stronger index-space pin than the sole-edit argument,
+        -- which cannot apply here anyway: @retract-rule@ edits the policy (no
+        -- indexed material moves), and the composites edit two constituents.
+        , opFamily (siteOp op) /= "localization"
         , (_, predicted, mutate) <- siteSites op u
         ]
+      -- The sole-edit direction argument pairs ONE published index with ONE
+      -- edited constituent, so the per-site check runs on singleton-published
+      -- sites; the operator census below still reads every published list, so
+      -- an undeferred composite-publishing operator cannot vanish from the
+      -- anti-vacuity gate — it fails it until it carries an off-diagonal
+      -- singleton or a gate of its own.
+      sites = [(base, op, u, c, mutate) | (base, op, u, [c], mutate) <- allSites]
       indexed = [s | s@(_, _, _, c, _) <- sites, isIndexed c]
       isIndexed c = case c of
         CArgument _ -> True
@@ -586,14 +614,18 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
         CArgument ci -> retainedIndices (prune u) `atIx` ci /= Just ci
         CAttack ci -> retainedAttackIndices (prune u) `atIx` ci /= Just ci
         _ -> False
-      opsWithIndex = [op | op <- siteOps, any (\(_, o, _, _, _) -> o == siteOp op) indexed]
+      opsWithIndex =
+        [ op
+        | op <- siteOps
+        , any (\(_, o, _, cs, _) -> o == siteOp op && any isIndexed cs) allSites
+        ]
   pure $
     conjoin
       ( [ counterexample
             ( opName (siteOp op)
-                ++ ": publishes an indexed constituent but has no site where the"
-                ++ " checked and declared indices differ — a transposed mapping"
-                ++ " would fail open"
+                ++ ": publishes an indexed constituent but yields no"
+                ++ " off-diagonal singleton site this property can check — a"
+                ++ " transposed mapping would fail open"
             )
             (any (\s@(_, o, _, _, _) -> o == siteOp op && offDiagonal s) indexed)
         | op <- opsWithIndex
@@ -655,14 +687,14 @@ prop_sitesQuarantiningBase =
   once $
     conjoin
       [ counterexample "undeclared-leaf: two sites at checked indices 0 and 1" $
-          [c | (_, c, _) <- leafSitesQ] === [CArgument 0, CArgument 1]
+          [cs | (_, cs, _) <- leafSitesQ] === [[CArgument 0], [CArgument 1]]
       , counterexample "undeclared-leaf: rewrites land on declared aS then aK, aQ untouched" $
           [argsAfter m | (_, _, m) <- leafSitesQ]
             === [ [(ArgId "aQ", SLeaf (LeafId "Lq")), (ArgId "aS", mutLeaf), (ArgId "aK", SLeaf (LeafId "Lk"))]
                 , [(ArgId "aQ", SLeaf (LeafId "Lq")), (ArgId "aS", SLeaf (LeafId "La")), (ArgId "aK", mutLeaf)]
                 ]
       , counterexample "bad-attack-position: one site at checked index 0" $
-          [c | (_, c, _) <- attackSitesQ] === [CAttack 0]
+          [cs | (_, cs, _) <- attackSitesQ] === [[CAttack 0]]
       , counterexample "bad-attack-position: rewrite lands on declared attack 1" $
           [unitAttacks (m u) | (_, _, m) <- attackSitesQ]
             === [ [ Undermine (ArgId "aS") (ArgId "aQ") []
@@ -677,6 +709,221 @@ prop_sitesQuarantiningBase =
     attackSitesQ = sitesOf OpBadAttackPosition
     argsAfter m = unitArgs (m u)
     mutLeaf = SLeaf (LeafId "mut_undeclared")
+
+-- | The localization family's own gate (#123), the composite-list sibling of
+-- 'prop_siteMatchesChecker' (which pins every list's /head/ to the checker but
+-- cannot see a tail — the checker is fail-fast). Every published element is
+-- gated against the /mutant/, on every base the answer key is generated from
+-- (anchors, corpus units, the quarantining fixture, and every skewed sibling):
+--
+--   * @twin-support-defect@ and @cross-stage-defect@ publish a pair, and the
+--     tail is derived from the mutant's own bytes: reverting the head defect —
+--     restoring the declared argument the published head maps to — must leave a
+--     unit the checker rejects at the /tail/ constituent, carrying the tail
+--     component's class (@R4@ for twin's second premise defect, @R10@ for
+--     cross-stage's attack defect). A composite that publishes a pair but
+--     applies only the head rewrite reverts to a clean unit and fails here;
+--     one that applies only the tail rewrite fails the sibling arm requiring
+--     the head rewrite to have edited that declared argument (and
+--     'prop_siteMatchesChecker' besides). This is the #167 review's finding:
+--     the previous construction-only clauses re-derived the published lists
+--     from the very component enumerators the implementation calls, so
+--     dropping the second rewrite left the whole suite green.
+--   * the composite lists are /additionally/ pinned to the ordered
+--     distinct-constituent pairs of @wrong-premise@'s sites (twin) and the
+--     ordered @wrong-premise@ x @bad-attack-position@ cross product
+--     (cross-stage). That half catches pair-order, @a \/= b@, and
+--     component-class drift; the mutant-derived half above is what makes the
+--     tail a real prediction.
+--   * @retract-rule@'s published list is re-derived from the /mutant/ alone:
+--     in the quarantine-pruned mutated unit, the published arguments are
+--     exactly the checked arguments referencing a rule id the mutated policy
+--     no longer declares — soundness and completeness of the manifestation
+--     set, not a re-run of the enumerator.
+--   * where the design fixes an order (twin and retract: ascending checked
+--     argument index), the published list is strictly ascending.
+--
+-- This is also the gate 'prop_siteDirectionSkewed'\'s operator census defers
+-- composite-publishing operators to — and that deferral is by the open-ended
+-- family string, so the family membership is pinned here: a fourth
+-- @localization@ registration fails until this gate covers it. The
+-- anti-vacuity half requires each operator to yield a site on a /skewed/
+-- base, so the checked-space derivation clauses are exercised off the
+-- diagonal, not only where the two index spaces coincide. Since this property
+-- is the only gate covering the composite tails, an anchor that fails to
+-- decode fails the property outright rather than silently narrowing its
+-- coverage (#167 review).
+prop_localizationSites :: Property
+prop_localizationSites = once $ ioProperty $ do
+  corpusBases <- readCorpusBases
+  anchors <- mapM readBase mutationBases
+  let bases =
+        [(b, i) | (b, Right i) <- anchors]
+          ++ corpusBases
+          ++ [("quarantining-conflict-fixture", testCheckInput quarantiningConflictBase)]
+      -- Each base carries its own replay id: the head-revert gate rebuilds a
+      -- 'CheckInput' to run the checker, and re-deriving an id would change
+      -- the backend and policy the unit is checked under (cf.
+      -- 'prop_siteMatchesChecker').
+      allBases =
+        [(b, inputReplayId i, inputUnit i) | (b, i) <- bases]
+          ++ [(b ++ "+skew", inputReplayId i, quarantineSkewed (inputUnit i)) | (b, i) <- bases]
+      skewedBases = [(b, u) | (b, _, u) <- allBases, isSkewed u]
+      sitesOf op u = concat [siteSites s u | s <- siteOps, siteOp s == op]
+      singles op u = [c | (_, [c], _) <- sitesOf op u]
+      ungatedOn op =
+        counterexample
+          ( "no " ++ opName op ++ " site on any skewed base — the family's"
+              ++ " checked-space evidence would be on-diagonal only"
+          )
+          (any (\(_, u) -> not (null (sitesOf op u))) skewedBases)
+  pure $
+    conjoin
+      ( [ counterexample ("anchor failed to decode: " ++ b ++ ": " ++ show err) (property False)
+        | (b, Left err) <- anchors
+        ]
+          ++ [ counterexample
+                 ( "the localization family is exactly the three gated operators —"
+                     ++ " a fourth opFamily == \"localization\" registration must"
+                     ++ " extend this gate"
+                 )
+                 ( sort [siteOp s | s <- siteOps, opFamily (siteOp s) == "localization"]
+                     === sort [OpRetractRule, OpTwinSupportDefect, OpCrossStageDefect]
+                 )
+             , ungatedOn OpTwinSupportDefect
+             , ungatedOn OpCrossStageDefect
+             , ungatedOn OpRetractRule
+             ]
+          ++ concat
+            [ [ counterexample (base ++ ": twin lists are the ordered wrong-premise pairs") $
+                  [cs | (_, cs, _) <- sitesOf OpTwinSupportDefect u]
+                    === [ [a, b]
+                        | a : rest <- tails (singles OpWrongPremise u)
+                        , b <- rest
+                        , a /= b
+                        ]
+              , counterexample (base ++ ": cross lists are the ordered premise x attack product") $
+                  [cs | (_, cs, _) <- sitesOf OpCrossStageDefect u]
+                    === [ [p, a]
+                        | p <- singles OpWrongPremise u
+                        , a <- singles OpBadAttackPosition u
+                        ]
+              , conjoin
+                  [ tailManifests base rid u R4 cs mutate
+                  | (_, cs, mutate) <- sitesOf OpTwinSupportDefect u
+                  ]
+              , conjoin
+                  [ tailManifests base rid u R10 cs mutate
+                  | (_, cs, mutate) <- sitesOf OpCrossStageDefect u
+                  ]
+              , conjoin
+                  [ retractManifests base cs (mutate u)
+                  | (_, cs, mutate) <- sitesOf OpRetractRule u
+                  ]
+              , conjoin
+                  [ counterexample (base ++ ": " ++ opName op ++ " list not strictly ascending") $
+                      strictlyAscendingArgs cs
+                  | op <- [OpTwinSupportDefect, OpRetractRule]
+                  , (_, cs, _) <- sitesOf op u
+                  ]
+              ]
+            | (base, rid, u) <- allBases
+            ]
+      )
+  where
+    -- The composite tail, from the mutant. Both composites publish an
+    -- argument-headed pair whose head rewrite edits exactly one declared
+    -- argument (the components are 'wrongPremiseSites' proposals). Restoring
+    -- that argument in the mutant leaves precisely the tail component's
+    -- single-defect mutant, so the checker must reject it at the tail
+    -- constituent with the tail component's class — the same prediction
+    -- 'prop_siteMatchesChecker' holds that component to, now re-derived
+    -- through the composite's own rewrite instead of re-running the
+    -- enumerator that produced it.
+    tailManifests base rid u tailClass cs mutate = case cs of
+      [CArgument ci, tailC] ->
+        case retainedIndices (prune u) `atIx` ci of
+          Nothing ->
+            counterexample
+              (base ++ ": published head CArgument " ++ show ci ++ " has no declared index")
+              (property False)
+          Just di ->
+            let m = mutate u
+             in case (unitArgs u `atIx` di, unitArgs m `atIx` di) of
+                  (Just before, Just after) ->
+                    conjoin
+                      [ counterexample
+                          ( base
+                              ++ ": the head rewrite left declared argument "
+                              ++ show di
+                              ++ " untouched — the composite published a head it did not seed"
+                          )
+                          (before /= after)
+                      , headRevertLocates base rid m di before tailClass tailC
+                      ]
+                  _ ->
+                    counterexample
+                      (base ++ ": declared argument " ++ show di ++ " is out of range")
+                      (property False)
+      _ ->
+        counterexample
+          (base ++ ": composite published " ++ show cs ++ ", expected an argument-headed pair")
+          (property False)
+
+    headRevertLocates base rid m di before tailClass tailC =
+      let reverted = m {unitArgs = replaceAt di before (unitArgs m)}
+       in case mkCheckInput rid reverted of
+            Left err ->
+              counterexample
+                (base ++ ": head-reverted mutant failed to rebuild: " ++ show err)
+                (property False)
+            Right input ->
+              let (verdict, located) = runCheckLocated input
+               in conjoin
+                    [ counterexample
+                        ( base
+                            ++ ": head-reverted mutant produced "
+                            ++ show (verdictOutcome verdict)
+                            ++ " — the second rewrite is absent from the mutant"
+                        )
+                        (verdictOutcome verdict === Reject (RejectClass tailClass))
+                    , counterexample
+                        ( base
+                            ++ ": head-reverted mutant located "
+                            ++ show (fmap lrConstituent located)
+                            ++ ", but the composite publishes tail "
+                            ++ show tailC
+                        )
+                        (fmap lrConstituent located === Just tailC)
+                    ]
+
+    replaceAt i x xs = take i xs ++ x : drop (i + 1) xs
+
+    -- Soundness + completeness of the manifestation set, from the mutant: the
+    -- published arguments are exactly the checked arguments referencing an
+    -- undeclared rule id in the quarantine-pruned mutated unit.
+    retractManifests base cs u' =
+      let declared = [ruleId r | r <- unitRules u']
+          checkedArgs = zip [0 :: Int ..] (map snd (unitArgs (pruneChecked (prune u'))))
+          dangling = [CArgument i | (i, t) <- checkedArgs, any (`notElem` declared) (ruleRefs t)]
+       in counterexample
+            (base ++ ": retract-rule published " ++ show cs ++ ", mutant manifests " ++ show dangling)
+            (cs === dangling)
+    readBase base = do
+      bytes <- readFile ("examples/" ++ base ++ "/example.core.sexp")
+      pure (base, decodeCheckInputFile bytes)
+    -- A deliberately independent traversal — not Nav's @occurrences@ — so the
+    -- oracle cannot inherit a defect from the code under test.
+    ruleRefs t = case t of
+      SLeaf _ -> []
+      SRule rid _ ws d _ _ -> rid : concatMap ruleRefs ws ++ concatMap (ruleRefs . snd) d
+    strictlyAscendingArgs cs =
+      case mapM argIx cs of
+        Just ixs -> and (zipWith (<) ixs (drop 1 ixs))
+        Nothing -> False
+      where
+        argIx (CArgument i) = Just i
+        argIx _ = Nothing
 
 -- | The mirror is pinned to the checker: for every site
 -- 'dropCoveringAttackSites' proposes, on every base it runs against, the
@@ -1024,6 +1271,7 @@ mutationSpecProps =
   , ("mutation suite: every proposed site is the constituent the checker reports", quickCheckResult prop_siteMatchesChecker)
   , ("mutation suite: site enumerators map sites through the quarantine prune", quickCheckResult prop_sitesQuarantiningBase)
   , ("mutation suite: published index is checked, rewritten index is declared", quickCheckResult prop_siteDirectionSkewed)
+  , ("mutation suite: localization lists decompose to components and the mutant", quickCheckResult prop_localizationSites)
   , ("mutation suite: drop-covering-attack site is the pair the checker reports", quickCheckResult prop_conflictSiteMatchesChecker)
   , ("mutation suite: drop-covering-attack maps sites through the quarantine prune", quickCheckResult prop_conflictSiteQuarantiningBase)
   , ("mutation suite: cert-wrong-fraction decodes cleanly and is refused on value", quickCheckResult prop_certWrongFractionDecodes)

@@ -64,6 +64,7 @@ import Lara.Wire (encodeCheckInput, printSExpr)
 import Lara.Mutate
 import Lara.Mutate.Seed (pickSome, pickWithStream, streamForKey)
 import Lara.Mutate.Sites
+import qualified Lara.Mutate.Sites.Localize as Localize
 import qualified Lara.Mutate.Sorts as Sorts
 
 -- | One rejection-site operator, as generation sees it: its per-base cap at a
@@ -77,7 +78,11 @@ data SiteOp = SiteOp
   { siteOp :: MutationOp
   , siteCap :: Int
   , siteDedicated :: Bool
-  , siteSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
+  , siteSites :: Unit -> [(Expected, [Constituent], Unit -> Unit)]
+  -- ^ each proposed site carries its ordered ground-truth list ('mutantSites'
+  -- contract: head = the spec-order-first constituent, every element
+  -- admissible). The single-defect enumerators publish singletons via
+  -- 'single'.
   }
 
 -- | The rejection-site operators in the frozen generation order. The replay
@@ -85,22 +90,28 @@ data SiteOp = SiteOp
 -- they have no site enumerator ('replayMutants' \/ 'replaySweep').
 siteOps :: [SiteOp]
 siteOps =
-  [ SiteOp OpUndeclaredLeaf 2 False undeclaredLeafSites
-  , SiteOp OpHiddenRule 1 False hiddenRuleSites
-  , SiteOp OpHiddenContrary 1 False hiddenContrarySites
-  , SiteOp OpWrongSubstDomain 1 False wrongSubstSites
-  , SiteOp OpWrongPremise 1 False wrongPremiseSites
-  , SiteOp OpOpenObligation 1 False openObligationSites
-  , SiteOp OpHoleObligation 1 False holeObligationSites
-  , SiteOp OpWrongDischarge 1 False wrongDischargeSites
-  , SiteOp OpTrustedAssurance 1 False trustedAssuranceSites
-  , SiteOp OpCertTheorySwap 1 False certTheorySwapSites
-  , SiteOp OpCertPayloadTamper 1 False certPayloadSites
-  , SiteOp OpCertWrongFraction 1 False certWrongFractionSites
-  , SiteOp OpBadAttackPosition 2 False badAttackPositionSites
-  , SiteOp OpUnlicensedAttack 1 False unlicensedAttackSites
-  , SiteOp OpDropCoveringAttack 1 False dropCoveringAttackSites
-  , SiteOp OpGroupConflict 1 False groupConflictSites
+  [ SiteOp OpUndeclaredLeaf 2 False (single undeclaredLeafSites)
+  , SiteOp OpHiddenRule 1 False (single hiddenRuleSites)
+  , SiteOp OpHiddenContrary 1 False (single hiddenContrarySites)
+  , SiteOp OpWrongSubstDomain 1 False (single wrongSubstSites)
+  , SiteOp OpWrongPremise 1 False (single wrongPremiseSites)
+  , SiteOp OpOpenObligation 1 False (single openObligationSites)
+  , SiteOp OpHoleObligation 1 False (single holeObligationSites)
+  , SiteOp OpWrongDischarge 1 False (single wrongDischargeSites)
+  , SiteOp OpTrustedAssurance 1 False (single trustedAssuranceSites)
+  , SiteOp OpCertTheorySwap 1 False (single certTheorySwapSites)
+  , SiteOp OpCertPayloadTamper 1 False (single certPayloadSites)
+  , SiteOp OpCertWrongFraction 1 False (single certWrongFractionSites)
+  , SiteOp OpBadAttackPosition 2 False (single badAttackPositionSites)
+  , SiteOp OpUnlicensedAttack 1 False (single unlicensedAttackSites)
+  , SiteOp OpDropCoveringAttack 1 False (single dropCoveringAttackSites)
+  , SiteOp OpGroupConflict 1 False (single groupConflictSites)
+  , -- The localization family (#123, @docs\/localization-metric-decision.md@):
+    -- the only enumerators publishing composite ground-truth lists — off-site
+    -- manifestation and multi-defect ordering ("Lara.Mutate.Sites.Localize").
+    SiteOp OpRetractRule 1 False Localize.retractRuleSites
+  , SiteOp OpTwinSupportDefect 1 False Localize.twinSupportDefectSites
+  , SiteOp OpCrossStageDefect 1 False Localize.crossStageDefectSites
   , -- The signature family (@lara-core\@0.2@, #89 D10): R2 had zero mutants
     -- before this pass, and spec §10.1 requires every class to be exercised.
     SiteOp OpUndeclaredPred 1 False (classed Sorts.undeclaredPredSites)
@@ -119,10 +130,14 @@ siteOps =
   , SiteOp OpSigmaPredUndeclaredSort 1 True (classed Sorts.predUndeclaredSortSites)
   ]
   where
+    -- Every enumerator above seeds exactly one defect, so its ground truth is
+    -- the singleton of the mutated constituent — the degenerate case under
+    -- which membership and head-equality coincide.
+    single sites u = [(e, [loc], f) | (e, loc, f) <- sites u]
     -- "Lara.Mutate.Sorts" sits below the operator vocabulary and yields bare
     -- rejection classes; wrapping them here keeps 'Expected' owned by exactly
     -- one module.
-    classed sites u = [(ExpectClass c, loc, f) | (c, loc, f) <- sites u]
+    classed sites = single (\u -> [(ExpectClass c, loc, f) | (c, loc, f) <- sites u])
 
 -- | All verdict-level mutants of one decoded base anchor, in fixed operator
 -- order ('siteOps'), sites picked by the seeded stream. Inapplicable operators
@@ -138,18 +153,17 @@ mutantsForBase base input =
     ++ replayMutants base input
 
 -- | Assemble the picked unit-mutation sites of one operator into mutants. Each
--- site carries its seeded ground-truth 'Constituent', threaded into
--- 'mutantSite'.
+-- site carries its ordered seeded ground truth, threaded into 'mutantSites'.
 unitMutants
   :: String
   -> CheckInput
   -> MutationOp
   -> Int
-  -> (Unit -> [(Expected, Constituent, Unit -> Unit)])
+  -> (Unit -> [(Expected, [Constituent], Unit -> Unit)])
   -> [Mutant]
 unitMutants base input op cap sites =
-  [ Mutant (mutantFileName base op k) base op expected (Just site) bytes
-  | (k, (expected, site, mutate)) <- zip [0 :: Int ..] picked
+  [ Mutant (mutantFileName base op k) base op expected locs bytes
+  | (k, (expected, locs, mutate)) <- zip [0 :: Int ..] picked
   , Right mutated <- [mkCheckInput (inputReplayId input) (mutate u)]
   , let bytes = printSExpr (encodeCheckInput mutated) ++ "\n"
   ]
@@ -172,7 +186,7 @@ replayMutant :: String -> CheckInput -> MutationOp -> [Mutant]
 replayMutant base input op
   | null backends = []
   | otherwise =
-      [ Mutant (mutantFileName base op 0) base op (ExpectClass R13) (Just CReplayEnvelope) bytes
+      [ Mutant (mutantFileName base op 0) base op (ExpectClass R13) [CReplayEnvelope] bytes
       | Right rid' <-
           [ mkReplayId
               (replayCore rid)

@@ -21,8 +21,9 @@ Lara.Mutate                 core; imports only Outcome
 ├── Sites ────────────────→ core + Sites.Cert + Sites.Conflict + Sites.Nav
 │   ├── Sites.Cert ───────→ core + Sites.Nav
 │   ├── Sites.Conflict ───→ core (no sibling; mirrors the checker)
+│   ├── Sites.Localize ───→ core + Sites + Sites.Nav (imports the facade; not re-exported)
 │   └── Sites.Nav ────────→ (no sibling; structural only)
-├── Suite ────────────────→ core + Seed + Sites + Sorts
+├── Suite ────────────────→ core + Seed + Sites + Sites.Localize + Sorts
 ├── Codec ────────────────→ core
 ├── Cycle ────────────────→ core + Seed
 ├── Accept ───────────────→ core + Accept.Ops + Accept.Build
@@ -47,16 +48,17 @@ property of the whole arrangement, and it is what D1 below protects.
 | `Lara.Mutate.Sites` (internal) | the sixteen per-operator site enumerators, four of them re-exported from `Sites.Cert` and `Sites.Conflict` |
 | `Lara.Mutate.Sites.Cert` (internal) | `certTheorySwapSites`, `certPayloadSites`, `certWrongFractionSites`, `bumpWitness` |
 | `Lara.Mutate.Sites.Conflict` (internal) | `dropCoveringAttackSites` |
+| `Lara.Mutate.Sites.Localize` (internal) | `retractRuleSites`, `twinSupportDefectSites`, `crossStageDefectSites` |
 | `Lara.Mutate.Sites.Nav` (internal) | `occurrences`, `rewriteAt`, `rewriteArg`, `ruleSites`, `leafSites`, `ruleOf`, `inequivLeaf` |
 | `Lara.Mutate.Suite` | `mutantsForBase`, `corpusBudget`, `corpusMutants`, `corpusSweepReport`, `dropCoveringAttackSites` (re-export, tests only) |
 | `Lara.Mutate.Codec` | `codecMutantsForBase` |
 | `Lara.Mutate.Cycle` | `cycleMutants` |
 
-`Outcome`, `Seed`, `Sites`, `Sites.Cert`, `Sites.Conflict`, and `Sites.Nav` are
-in `other-modules`: their names had to become module-visible so `Suite`, `Cycle`,
-`Sites`, and the root could consume them, but keeping them out of
-`exposed-modules` means the package's public surface does not grow — with one
-deliberate exception. The
+`Outcome`, `Seed`, `Sites`, `Sites.Cert`, `Sites.Conflict`, `Sites.Localize`,
+and `Sites.Nav` are in `other-modules`: their names had to become
+module-visible so `Suite`, `Cycle`, `Sites`, and the root could consume them,
+but keeping them out of `exposed-modules` means the package's public surface
+does not grow — with one deliberate exception. The
 #158 review added a property (`prop_conflictSiteMatchesChecker`) that has to
 compare the enumerator's *predicted* conflict pair against the checker's, which
 means calling `dropCoveringAttackSites` directly; going through `mutantsForBase`
@@ -81,8 +83,9 @@ heading was stale, no test or script imported either name.
 | `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Conflict`, `Lara.Mutate.Sites.Nav` |
 | `Sites.Cert` | `Data.Ratio`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Strict`, `Lara.Strict.Cell`, `Lara.Strict.RA`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
 | `Sites.Conflict` | `Lara.AST`, `Lara.Attack`, `Lara.Blocked`, `Lara.Check`, `Lara.Compile`, `Lara.Diagnostics`, `Lara.Driver`, `Lara.Policy`, `Lara.Prop`, `Lara.SupportTerm`, `Lara.Mutate` |
+| `Sites.Localize` | `Data.List`, `Data.Maybe`, `Lara.AST`, `Lara.Blocked`, `Lara.Diagnostics`, `Lara.Policy`, `Lara.Sigma.WellSorted`, `Lara.Mutate`, `Lara.Mutate.Sites`, `Lara.Mutate.Sites.Nav` |
 | `Sites.Nav` | `Data.List`, `Lara.AST`, `Lara.Prop` |
-| `Suite` | `Lara.AST`, `Lara.Diagnostics`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed`, `Lara.Mutate.Sites`, `Lara.Mutate.Sorts` |
+| `Suite` | `Lara.AST`, `Lara.Diagnostics`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed`, `Lara.Mutate.Sites`, `Lara.Mutate.Sites.Localize`, `Lara.Mutate.Sorts` |
 | `Codec` | `Lara.Strict`, `Lara.Wire`, `Lara.Mutate` |
 | `Cycle` | `Lara.AST`, `Lara.Prop`, `Lara.Replay`, `Lara.Sigma`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed` |
 
@@ -201,7 +204,7 @@ own vocabulary, its own dependencies, or its own reason to be read alone. Length
 is a hint that one may have appeared, not by itself a reason to cut, and a
 module that is long because it is well documented is not a module to split.
 
-The three splits below are recorded because they explain the current graph.
+The splits recorded below explain the current graph.
 
 `Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the #125 split. Adding
 the `cert-wrong-fraction` operator took `Sites` to 428 lines and, more to the
@@ -233,8 +236,21 @@ enumerator whose correctness depends on the pipeline stage order, and confining
 that dependency to one module is the point. There is no cycle: `Lara.Driver`
 does not depend on `Lara.Mutate`.
 
-`Lara.Mutate.Outcome` is the **#157** split, and it is the reason the root reads
-328 lines rather than 400. The root's growth had concentrated in one place:
+`Lara.Mutate.Sites.Localize` is the **#123** addition. The localization
+family's composite enumerators consume `Sites`' single-site enumerators as
+components, so the module inverts the facade's usual direction: it imports
+`Sites`, and a re-export through the facade would cycle. It therefore follows
+the `Sorts` precedent, not the `Cert` one — no re-export, imported directly by
+`Lara.Mutate.Suite`, which gains one edge while the graph stays acyclic
+(`Sites` does not import it back). Its off-site enumerator also imports
+`Lara.Policy` and `Lara.Sigma.WellSorted`: a retraction must keep the mutated
+policy clean through the stages ahead of support, and those gates are checker
+components, not navigation.
+
+`Lara.Mutate.Outcome` is the **#157** split, and it is the reason the root landed
+at 328 lines rather than 400 (past tense on purpose: later operator additions
+move the number — it reads 340 after #123's three, at this document's own stated
+cost of 3 root lines each). The root's growth had concentrated in one place:
 `drop-covering-attack` cost it thirteen lines (a `MutationOp` constructor with
 its `opName` / `opFamily` rows, plus a new `Expected` constructor with its
 Haddock and its `expectedText` / `parseExpected` rows), of which only three were

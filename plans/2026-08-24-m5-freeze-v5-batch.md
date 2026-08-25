@@ -1,6 +1,6 @@
 # m5-freeze-v5 batch — evaluation-suite completion
 
-> **Status (2026-08-24): live, Tasks 1–2 landed (#154, #124); Tasks 3–4 remain.**
+> **Status (2026-08-25): live, Tasks 1–3 landed (#125 via #154, #124, #123); Task 4 (#156) remains.**
 > Three code tasks plus one shared refreeze cycle. Delete this file once Task 4
 > lands and `m5-freeze-v5` is cut; move anything durable into
 > `docs/m5-freeze-checklist.md` first. Update this line as each task lands.
@@ -128,8 +128,10 @@ than appending them, and `measure.hs` — being manifest-driven — reflects tha
 
 That is diff noise, not a correctness problem. Existing mutant *files* stay
 byte-identical (string-keyed streams), `MANIFEST.tsv` is a generated index whose
-growth is the intended outcome, and the pinned `cut -f1-14 report.tsv` hash moves
-at any refreeze by construction — a new hash is v5's deliverable. Keep the
+growth is the intended outcome, and the pinned v4 `cut -f1-14 report.tsv` hash
+moves at any refreeze by construction — a new hash is v5's deliverable (over
+`cut -f1-15` once Task 3's `location_primary` column lands; see the checklist's
+determinism scope note). Keep the
 logical grouping with the other certificate operators; do not reorder
 registrations to chase a tidier diff, since `Lara.Mutate.Seed` warns that
 reordering an enumerator's output moves bytes.
@@ -225,8 +227,13 @@ Tracked as **#156**. Only after Tasks 1–3 have landed.
 4. Update `measurements/frozen/`.
 5. Update `docs/m5-freeze-checklist.md`: new re-freeze history paragraph, three
    tree SHAs, mutant/input counts, headline numbers, and the deterministic
-   projection hashes at `:317`. Rewrite the post-freeze rule at `:338` — it
-   currently names the two operators from Tasks 1–2 as deferred.
+   projection hashes in the **reproducibility-anchor table** (the
+   `report.tsv` deterministic projection row — note the projection is now
+   `cut -f1-15`, widened by #123's `location_primary` column). Rewrite the
+   **Post-freeze rule** bullet — it currently names the two operators from
+   Tasks 1–2 as deferred. Both targets are named rather than numbered on
+   purpose: this batch's own edits to the checklist have staled line anchors
+   here once already (#167 review).
 6. Cut annotated tag `m5-freeze-v5` on the merge commit.
 7. Update the "Reproduce from scratch" recipe to the v5 tag and its counts.
 
@@ -239,18 +246,13 @@ description (it points at v5; retire or re-point it once cut).
 - **#126** — gated on the possible-worlds design; `future-work`.
 - **#52, #30** — `post-pldi`, ACL/EMNLP follow-up. Unaffected.
 
-## Caveat owed regardless
+## Caveat on `location_match` — discharged in-repo
 
-Even with Task 3 landed, the write-up owes an explicit statement of what
-`location_match` measures. The ≈100%-by-construction caveat currently exists
-**only** in issue #123's body: it appears nowhere in `docs/` or `plans/`, and
-`docs/m5-freeze-checklist.md:276` reports `399 / 399` with no such note.
-
-The results section itself now lives in the paper repository (#60, closed
-2026-08-24), so this repository cannot discharge the obligation — it can only
-carry it. Record the caveat next to the headline number in
-`docs/m5-freeze-checklist.md` so the number is not quotable without it. If Task 3
-slips, that note is the minimum.
+The ≈100%-by-construction caveat's canonical home is
+`docs/localization-metric-decision.md`, and it sits next to the headline
+number in `docs/m5-freeze-checklist.md`, so the number is not quotable without
+it. The results-prose half of the obligation stays with the paper repository
+and is tracked in **#168** (not #60, which closed 2026-08-24).
 
 ## Open question — the tag name
 

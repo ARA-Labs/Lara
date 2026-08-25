@@ -16,10 +16,14 @@ module Lara.Diagnostics
   , Constituent (..)
   , LocatedRejection (..)
   , locate
-    -- * Manifest spelling of a located constituent
+    -- * Manifest spelling of located constituents (element and list codecs)
   , constituentText
   , parseConstituent
+  , constituentListText
+  , parseConstituentList
   ) where
+
+import Data.List (intercalate)
 
 import Lara.AST (GroupId (..), Rejection (..), RejectClass (R2, R12))
 import Lara.Check
@@ -78,8 +82,10 @@ data Stage
 -- declared duplicate-report group, ground truth for @group-conflict@) — are
 -- produced only by "Lara.Driver".'Lara.Driver.runCheckLocated'. This is the one
 -- location vocabulary shared by seeded ground truth
--- ("Lara.Mutate".@mutantSite@) and located diagnostics; 'location_match' in the
--- measurement harness is '==' on this type.
+-- ("Lara.Mutate".@mutantSites@, an ordered list of admissible constituents)
+-- and located diagnostics; in the measurement harness @location_match@ is
+-- membership in that list and @location_primary@ is '==' with its head
+-- (@docs\/localization-metric-decision.md@).
 data Constituent
   = CPolicy
   | CArgument Int
@@ -121,6 +127,37 @@ parseConstituent s = case s of
     readInt t = case reads t of
       [(n, "")] -> Just n
       _ -> Nothing
+
+-- | The @expected-location@ manifest spelling of an ordered ground-truth
+-- list: @-@ for the empty list (no seeded site), else the 'constituentText'
+-- spellings joined with @,@. A single-element list renders exactly as its
+-- 'constituentText'. 'GroupId' is free-form, so a group id containing @,@
+-- would make the rendering ambiguous; that is a generation-time 'error',
+-- keeping 'parseConstituentList' a total inverse on everything this produces.
+constituentListText :: [Constituent] -> String
+constituentListText [] = "-"
+constituentListText cs
+  | any (elem ',') rendered =
+      error
+        ( "constituentListText: a group id contains ',', which would make the"
+            ++ " expected-location column ambiguous — rename the group: "
+            ++ show (filter (elem ',') rendered)
+        )
+  | otherwise = intercalate "," rendered
+  where
+    rendered = map constituentText cs
+
+-- | Parse the @expected-location@ list spelling back to its constituents
+-- (inverse of 'constituentListText'): @-@ is the empty list, and every
+-- comma-separated segment must parse via 'parseConstituent' ('Nothing' on any
+-- failure, including an empty segment).
+parseConstituentList :: String -> Maybe [Constituent]
+parseConstituentList "-" = Just []
+parseConstituentList s = traverse parseConstituent (splitComma s)
+  where
+    splitComma t = case break (== ',') t of
+      (seg, ',' : rest) -> seg : splitComma rest
+      (seg, _) -> [seg]
 
 -- | A located rejection: the wire class plus the stage and constituent that
 -- produced it.

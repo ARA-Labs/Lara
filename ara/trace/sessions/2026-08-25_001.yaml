@@ -1,0 +1,140 @@
+session:
+  id: "2026-08-25_001"
+  date: "2026-08-25"
+  started: "2026-08-25T12:42"
+  last_turn: "2026-08-25T13:05"
+  turn_count: 1
+  summary: >
+    Resolved the #167 review of the discriminating-localization benchmark
+    (#123). External review found that the composite operators' second rewrite
+    was never applied or verified by any property, and that the decision doc's
+    central claim — that the new families let location_match drop below 100%
+    for a reportable reason — is false while CI is green. Closed the gate hole
+    by deriving each composite's tail from the mutant, corrected both
+    documents to say the rate is 100% by construction and the discrimination
+    lives in the gate's strength, and flagged the contradiction this creates
+    with C23 rather than rewriting the claim.
+
+events_logged:
+  - turn: 1
+    type: dead_end
+    id: "N210"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Off-site/multi-defect families do not detach location_match from 100% — answer key is checker-gated upstream of measurement"
+  - turn: 1
+    type: decision
+    id: "N211"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Gate composite tails by reverting the head defect in the mutant and requiring the checker to reject at the tail"
+  - turn: 1
+    type: decision
+    id: "N212"
+    routing: direct
+    provenance: ai-suggested
+    summary: "CONTRADICTION between N210 and C23's boundary prediction; flagged and deferred (status unresolved)"
+  - turn: 1
+    type: observation
+    id: "O85"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Ground-truth validation site, not defect structure, is what caps a localization metric at ceiling"
+  - turn: 1
+    type: observation
+    id: "O86"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A composite fixture's expectation must be re-derived from the composed artifact, not from its components"
+
+ai_actions:
+  - turn: 1
+    action: >
+      Rewrote prop_localizationSites to derive each composite's tail from the
+      mutant (map published head through retainedIndices, restore that
+      declared argument in mutate u, require the checker to reject the
+      head-reverted mutant at the tail with the tail component's class), plus
+      an arm requiring the head rewrite to have edited that argument, and made
+      an undecodable anchor fail the property instead of silently narrowing
+      coverage. Verified by injecting both bugs the reviewer described
+      (mutJ . mutI -> mutI; mutA . mutP -> mutP) and confirming each fails on
+      the unregenerated tree, then restoring the source.
+    provenance: ai-executed
+    files_changed: ["test/MutationSpec.hs"]
+  - turn: 1
+    action: >
+      Added prop_reportColumnOrder (pins tsvHeader verbatim, making the
+      checklist's cut -f1-15 executable; renders one synthetic Record whose two
+      location metrics differ and asserts TSV fields 9/10 plus report.json's
+      location-match/location-primary, read back through aeson) and
+      prop_constituentListCommaGuard (asserts the comma guard throws, plus the
+      ambiguous-parse case). Both verified against the regressions they target:
+      the cell paste, a header-only reorder, and deleting the guard.
+    provenance: ai-executed
+    files_changed: ["test/MeasureSpec.hs"]
+  - turn: 1
+    action: >
+      Corrected the discrimination claim in both documents: the rate is 100%
+      by construction because every published site is checker-gated before it
+      reaches MANIFEST.tsv, and the contribution is the strength of the gate,
+      not a movable number. Also retargeted the plan's checklist pointers by
+      name rather than by line, restated the module-ownership line count in
+      past tense, and moved the paper-side caveat obligation off closed #60.
+    provenance: ai-executed
+    files_changed:
+      - "docs/localization-metric-decision.md"
+      - "docs/m5-freeze-checklist.md"
+      - "docs/mutate-module-ownership-decision.md"
+      - "plans/2026-08-24-m5-freeze-v5-batch.md"
+  - turn: 1
+    action: "Opened #168 (paper results prose must carry the by-construction caveat; moved off closed #60) and #169 (OpFamily sum type, non-empty SeededSites). Committed a8b3885, pushed, replied to all seven review threads plus a summary comment."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C23
+    action: flagged-contradiction
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C23
+    field: "<!-- CONFLICT --> marker (no content change)"
+    before: "no marker"
+    after: "CONFLICT marker referencing N210 / N212 / O85, naming the two contradicted passages (Statement's last clause; Conditions' untested-boundary prediction) and recording that the single-defect Statement is untouched"
+    signal: contradicting-evidence
+    provenance: ai-suggested
+    note: >
+      Deliberately NOT a content revision. The evidence contradicts a stated
+      prediction rather than narrowing a scope, which is the contradiction
+      trigger, and C23 is a paper-bearing methodology claim the researcher
+      owns. Status left at testing — the contradicted material is the
+      extrapolation to an untested boundary, not the tested Statement.
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Reviewer, demonstrating rather than conjecturing: "Changing Localize.hs:106
+      from mutJ . mutI to mutI and regenerating makes the whole suite green: 0
+      failures. Before regenerating, the sole failure is
+      prop_seededReproducibility, whose message is 'is stale — regenerate with
+      scripts/gen-mutants.hs' — i.e. the only signal points the developer at the
+      action that erases it."
+  - turn: 1
+    excerpt: >
+      Reviewer on the metric claim: "So on the committed suite both
+      location_match and location_primary are 100% by construction, just under a
+      stronger construction than before... What the off-site and multi-defect
+      families genuinely add is a harder-to-satisfy gate... That is a solid
+      contribution — it is just not the same thing as a headline number that can
+      move."
+
+open_threads:
+  - "C23 contradiction (N212) awaits the researcher: what should the Statement's last clause say, given the ceiling is set by ground-truth gating rather than defect structure? O85 is the candidate generalization."
+  - "#168 — the paper's results prose must carry the by-construction caveat; this repo can carry the obligation but not discharge it."
+  - "#169 — OpFamily as a closed sum type; non-empty SeededSites behind a smart constructor. Neither needs a corpus regeneration if the boundary tables stay byte-identical."
+  - "#156 (Task 4 refreeze) still open; its checklist pointers are now named rather than numbered."
+
+ai_suggestions_pending:
+  - "O85 — the generalized ground-truth-gating claim, offered as C23's replacement clause but not adopted."
+  - "O86 — the composite-fixture oracle heuristic; one instance, no researcher evaluation."

@@ -4,9 +4,10 @@
 --
 -- These were private to "Lara.Mutate.Sites" before the split and stay
 -- library-internal: the module is an @other-module@, and its consumers are the
--- site enumerators — "Lara.Mutate.Sites", "Lara.Mutate.Sites.Cert", and
--- "Lara.Mutate.Sites.Conflict", plus "Lara.Mutate.Sorts", which is the one
--- consumer that imports the index-space newtypes alone.
+-- site enumerators — "Lara.Mutate.Sites", "Lara.Mutate.Sites.Cert",
+-- "Lara.Mutate.Sites.Conflict", and "Lara.Mutate.Sites.Localize" — plus
+-- "Lara.Mutate.Sorts", which is the one consumer that imports the index-space
+-- newtypes alone.
 --
 -- Nothing here inspects an operator or an 'Lara.Mutate.Expected' — these are
 -- purely structural. The load-bearing ordering invariant lives with the

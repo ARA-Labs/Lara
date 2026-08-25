@@ -17,7 +17,7 @@ module Lara.Mutate.Manifest
   , manifestFor
   ) where
 
-import Lara.Diagnostics (constituentText)
+import Lara.Diagnostics (constituentListText)
 import Lara.Mutate
   ( Expected (..)
   , Mutant (..)
@@ -39,10 +39,11 @@ mutantPath m = case mutantExpected m of
 -- operator, expected, hs-diagnostic, lean-diagnostic, expected-location). The
 -- diagnostic columns are the 'codecDiagnostics' deletion-sensitivity pins —
 -- non-empty exactly for the codec-corruption rows. @expected-location@ is the
--- seeded ground-truth constituent ('mutantSite'), appended as column 8 (@-@
--- when there is no single seeded site); it is appended, never inserted earlier,
--- because @scripts\/differential.sh@ hardcodes the expected column (@$5@) and
--- the diagnostic pins (@$6@\/@$7@).
+-- ordered seeded ground truth ('mutantSites'), rendered by
+-- 'constituentListText' as column 8 (@-@ when there is no seeded site; a
+-- single-defect row's singleton spells as the bare constituent); it is
+-- appended, never inserted earlier, because @scripts\/differential.sh@
+-- hardcodes the expected column (@$5@) and the diagnostic pins (@$6@\/@$7@).
 manifestFor :: [Mutant] -> String
 manifestFor ms =
   unlines
@@ -61,7 +62,7 @@ manifestFor ms =
               ++ "\t"
               ++ leanDiag
               ++ "\t"
-              ++ maybe "-" constituentText (mutantSite m)
+              ++ constituentListText (mutantSites m)
           | m <- ms
           , let (hsDiag, leanDiag) =
                   maybe ("", "") id (codecDiagnostics (mutantOp m))

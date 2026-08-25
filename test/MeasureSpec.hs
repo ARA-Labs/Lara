@@ -10,12 +10,23 @@
 module MeasureSpec (measureSpecProps) where
 
 import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Key as AK
+import qualified Data.Aeson.Types as AT
 import qualified Data.ByteString.Lazy.Char8 as BL
+
+import Control.Exception (SomeException, evaluate, try)
+import Data.List (isInfixOf)
 
 import Test.QuickCheck
 
 import Lara.AST (GroupId (..))
-import Lara.Diagnostics (Constituent (..), constituentText, parseConstituent)
+import Lara.Diagnostics
+  ( Constituent (..)
+  , constituentListText
+  , constituentText
+  , parseConstituent
+  , parseConstituentList
+  )
 import Lara.Driver (runCheck, runCheckLocated)
 import Lara.Measure
 import Lara.Wire (decodeCheckInputFile, encodeVerdict, printSExpr, verdictOutcome)
@@ -137,6 +148,98 @@ prop_reportRoundTrips = once $ ioProperty $ do
         let n = length (splitOn '\t' header)
          in n == length (splitOn '\t' tsvHeader) && all ((== n) . length . splitOn '\t') rows
 
+-- | The report's column /identity/ and the two location cells' /values/
+-- (#167 review).
+--
+-- 'prop_reportRoundTrips' checks that every row carries the header's column
+-- count, which is invariant under reordering 'tsvHeader' or
+-- 'Lara.Measure.recordTsv' independently: such a swap keeps the arity
+-- identical while silently mislabelling every @cut -f@ consumer downstream
+-- (@docs\/m5-freeze-checklist.md@'s @cut -f1-15@ deterministic projection among
+-- them) and changing the bytes the freeze hashes. Pinning the header verbatim
+-- also makes the checklist's field numbers executable rather than prose.
+--
+-- The second half pins the values apart. @location_primary@ is 'Just' 'True'
+-- on every committed row — 'prop_siteMatchesChecker' forces the located
+-- constituent to equal the published head everywhere — so rendering
+-- 'detLocationMatch' into the primary cell, or the reverse, is byte-identical
+-- over the entire corpus and invisible to every property that reads the
+-- committed suite. One synthetic record on which the two metrics differ
+-- separates them in both renderers, TSV and JSON.
+prop_reportColumnOrder :: Property
+prop_reportColumnOrder = once $ ioProperty $ do
+  inputs <- allInputs
+  case inputs of
+    [] -> pure (counterexample "no inputs discovered" (property False))
+    im : _ -> do
+      bytes <- readFile (imPath im)
+      let det =
+            (computeDeterministic im bytes)
+              { detLocationMatch = Just True
+              , detLocationPrimary = Just False
+              }
+          synthetic = Record im det (Just True) [3, 1, 4, 1, 5] [10, 20, 30, 40, 50]
+          env = EnvBlock "0000000" False "9.14.1" "lean4" "test-os" "test-cpu"
+      pure $
+        conjoin
+          [ counterexample "tsvHeader names or order drifted" $
+              splitOn '\t' tsvHeader
+                === [ "input"
+                    , "base"
+                    , "family"
+                    , "operator"
+                    , "expected"
+                    , "actual"
+                    , "class_match"
+                    , "location"
+                    , "location_match"
+                    , "location_primary"
+                    , "lean_agree"
+                    , "replay_ok"
+                    , "total_bytes"
+                    , "policy_bytes"
+                    , "payload_bytes"
+                    , "hs_check_ns"
+                    , "lean_wall_ns"
+                    ]
+          , case filter (not . null) (lines (reportTsv [synthetic])) of
+              [_, row] ->
+                let cells = splitOn '\t' row
+                 in conjoin
+                      [ counterexample
+                          ("field 9 (location_match) rendered " ++ show (cells `cellAt` 8))
+                          (cells `cellAt` 8 === Just "true")
+                      , counterexample
+                          ("field 10 (location_primary) rendered " ++ show (cells `cellAt` 9))
+                          (cells `cellAt` 9 === Just "false")
+                      ]
+              rows ->
+                counterexample
+                  ("reportTsv rendered " ++ show (length rows) ++ " lines, expected header + one row")
+                  (property False)
+          , counterexample "report.json location-match / location-primary" $
+              jsonLocationCells (reportJson env [synthetic]) === Just (Just True, Just False)
+          ]
+  where
+    cellAt xs i
+      | i >= 0, i < length xs = Just (xs !! i)
+      | otherwise = Nothing
+    -- Read the two cells back through aeson rather than the house renderer, so
+    -- a renderer defect cannot be masked by reusing it as its own oracle.
+    jsonLocationCells s = do
+      v <- Aeson.decode (BL.pack s) :: Maybe Aeson.Value
+      AT.parseMaybe
+        ( Aeson.withObject "report" $ \o -> do
+            records <- o Aeson..: AK.fromString "records"
+            case records of
+              [r] ->
+                (,)
+                  <$> (r Aeson..: AK.fromString "location-match")
+                  <*> (r Aeson..: AK.fromString "location-primary")
+              _ -> fail "expected exactly one record"
+        )
+        v
+
 -- ---------------------------------------------------------------------------
 -- Pure helpers (no IO): lean_agree comparators, median, Constituent table
 -- ---------------------------------------------------------------------------
@@ -180,7 +283,8 @@ prop_median =
       ]
 
 -- | The 'Constituent' render/parse manifest-spelling table round-trips for every
--- shape (the shared location vocabulary; @location_match@ is '==' on it).
+-- shape (the shared location vocabulary; @location_match@ is membership in the
+-- ground-truth list over it, @location_primary@ '==' with the list head).
 prop_constituentRoundTrip :: Property
 prop_constituentRoundTrip =
   once $
@@ -197,6 +301,97 @@ prop_constituentRoundTrip =
           ]
       ]
 
+-- | The ordered-list spelling of the @expected-location@ column
+-- (docs\/localization-metric-decision.md): @-@ ↔ the empty list, singletons
+-- spell as the bare constituent, multi-element lists round-trip in order, and
+-- malformed spellings (empty segment, unknown segment) parse to 'Nothing'.
+prop_constituentListRoundTrip :: Property
+prop_constituentListRoundTrip =
+  once $
+    conjoin
+      ( [ counterexample (constituentListText cs) (parseConstituentList (constituentListText cs) === Just cs)
+        | cs <-
+            [ []
+            , [CArgument 0]
+            , [CArgument 0, CAttack 2]
+            , [CArgument 1, CArgument 3, CConflictPair 0 2]
+            , [CGroup (GroupId "mut_g"), CPolicy]
+            ]
+        ]
+          ++ [ counterexample "empty list spells -" (constituentListText [] === "-")
+             , counterexample
+                 "singleton spells as the bare constituent"
+                 (constituentListText [CAttack 4] === constituentText (CAttack 4))
+             , counterexample "empty segment rejected" (parseConstituentList "arg:0,,arg:1" === Nothing)
+             , counterexample "unknown segment rejected" (parseConstituentList "arg:0,bogus" === Nothing)
+             , counterexample "empty string rejected" (parseConstituentList "" === Nothing)
+             ]
+      )
+
+-- | The @,@ guard in 'Lara.Diagnostics.constituentListText' (#167 review).
+--
+-- 'GroupId' is free-form, so a group id containing a comma would render an
+-- @expected-location@ column that 'parseConstituentList' cannot invert;
+-- generation fails loudly instead. No committed corpus group id contains a
+-- comma and 'prop_constituentListRoundTrip' only uses @mut_g@, so nothing else
+-- in the suite reaches this branch — deleting the guard as an unreachable
+-- 'error' would be invisible today, and a later comma-bearing group id would
+-- then silently corrupt that row's ground truth instead of failing generation.
+--
+-- The second arm is the ambiguity the guard exists to prevent, stated
+-- directly: @group:a,b@ — what the render /would/ produce — does not parse
+-- back, so the round-trip 'constituentListText' promises is unavailable for
+-- such an id at any spelling.
+prop_constituentListCommaGuard :: Property
+prop_constituentListCommaGuard = once $ ioProperty $ do
+  thrown <-
+    try (evaluate (length (constituentListText [CGroup (GroupId "a,b")])))
+      :: IO (Either SomeException Int)
+  pure $
+    conjoin
+      [ counterexample "a comma-bearing group id must fail generation, not render" $
+          case thrown of
+            Right n ->
+              counterexample
+                ("rendered " ++ show n ++ " characters instead of failing")
+                (property False)
+            Left e ->
+              counterexample
+                ("threw, but not the guard's error: " ++ show e)
+                ("constituentListText" `isInfixOf` show e)
+      , counterexample "the render the guard suppresses does not parse back" $
+          parseConstituentList "group:a,b" === Nothing
+      ]
+
+-- | The two location metrics over every discovered row: defined exactly
+-- together (both 'Just' or both 'Nothing'), primary implies membership, and on
+-- a singleton ground truth the two coincide — the decision doc's guarantee
+-- that a single-defect row means the same thing under both metrics.
+prop_locationMetricsDomain :: Property
+prop_locationMetricsDomain = once $ ioProperty $ do
+  inputs <- allInputs
+  checks <- mapM check inputs
+  pure $ conjoin (counterexample "no inputs discovered" (not (null checks)) : checks)
+  where
+    check im = do
+      bytes <- readFile (imPath im)
+      let det = computeDeterministic im bytes
+      pure $
+        counterexample (imPath im) $
+          conjoin
+            [ counterexample
+                "location_match and location_primary must share a domain"
+                ((detLocationMatch det == Nothing) === (detLocationPrimary det == Nothing))
+            , counterexample
+                "location_primary=true must imply location_match=true"
+                (detLocationPrimary det /= Just True .||. detLocationMatch det === Just True)
+            , counterexample
+                "singleton ground truth: membership must equal head-equality"
+                ( length (imExpectedLocation im) /= 1
+                    .||. detLocationMatch det === detLocationPrimary det
+                )
+            ]
+
 -- ---------------------------------------------------------------------------
 -- Small local utility
 -- ---------------------------------------------------------------------------
@@ -206,6 +401,52 @@ splitOn sep s = case break (== sep) s of
   (field, _ : rest) -> field : splitOn sep rest
   (field, "") -> [field]
 
+-- | Membership and head-equality are genuinely different metrics, witnessed on
+-- real mutant bytes: take a discovered seeded-reject row whose located
+-- constituent @c@ is known, and re-measure it under synthetic ground-truth
+-- lists. @[other, c]@ separates the two (member, not primary); @[c, other]@
+-- satisfies both; @[other, other']@ fails both; @[]@ puts both off-domain.
+-- Without this, swapping the two metric definitions would leave the suite
+-- green, since a singleton ground truth cannot tell them apart.
+prop_locationMetricsDiscriminate :: Property
+prop_locationMetricsDiscriminate = once $ ioProperty $ do
+  inputs <- allInputs
+  located <- firstLocated inputs
+  pure $ case located of
+    Nothing -> counterexample "no seeded-reject row with a located constituent" False
+    Just (im, bytes, c) ->
+      let det locs = computeDeterministic im {imExpectedLocation = locs} bytes
+          -- Constituent shapes no unit-mutant rejection locates at here — the
+          -- row's actual located constituent is c, and c is asserted distinct.
+          other = CConflictPair 97 98
+          other' = CGroup (GroupId "synthetic_g")
+       in conjoin
+            [ counterexample "picked constituent collides with the synthetic ones" (c /= other && c /= other')
+            , counterexample "[other, c]: member but not primary" $
+                let d = det [other, c]
+                 in (detLocationMatch d, detLocationPrimary d) === (Just True, Just False)
+            , counterexample "[c, other]: member and primary" $
+                let d = det [c, other]
+                 in (detLocationMatch d, detLocationPrimary d) === (Just True, Just True)
+            , counterexample "[other, other']: neither" $
+                let d = det [other, other']
+                 in (detLocationMatch d, detLocationPrimary d) === (Just False, Just False)
+            , counterexample "[]: both off-domain" $
+                let d = det []
+                 in (detLocationMatch d, detLocationPrimary d) === (Nothing, Nothing)
+            ]
+  where
+    firstLocated [] = pure Nothing
+    firstLocated (im : rest)
+      | seededReject im = do
+          bytes <- readFile (imPath im)
+          let d = computeDeterministic im bytes
+          case detLocation d of
+            Just c -> pure (Just (im, bytes, c))
+            Nothing -> firstLocated rest
+      | otherwise = firstLocated rest
+    seededReject im = not (null (imExpectedLocation im))
+
 measureSpecProps :: [(String, IO Result)]
 measureSpecProps =
   [ ("measure: manifest parsers account for every data row", quickCheckResult prop_manifestParsersTotal)
@@ -213,7 +454,12 @@ measureSpecProps =
   , ("measure: class_match holds for every mutant and corpus unit", quickCheckResult prop_classMatch)
   , ("measure: replay_ok on corpus units, - on mutants", quickCheckResult prop_replayOk)
   , ("measure: report.json parses (aeson) and report.tsv is well-formed", quickCheckResult prop_reportRoundTrips)
+  , ("measure: tsvHeader is pinned and the two location cells render apart", quickCheckResult prop_reportColumnOrder)
   , ("measure: lean_agree comparators (both regimes, with mismatches)", quickCheckResult prop_leanAgree)
   , ("measure: median-of-samples helper", quickCheckResult prop_median)
   , ("measure: Constituent render/parse table round-trips", quickCheckResult prop_constituentRoundTrip)
+  , ("measure: expected-location list spelling round-trips", quickCheckResult prop_constituentListRoundTrip)
+  , ("measure: a comma-bearing group id fails generation loudly", quickCheckResult prop_constituentListCommaGuard)
+  , ("measure: location metrics share a domain and singletons coincide", quickCheckResult prop_locationMetricsDomain)
+  , ("measure: membership and head-equality are distinguishable metrics", quickCheckResult prop_locationMetricsDiscriminate)
   ]

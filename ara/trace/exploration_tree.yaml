@@ -5441,3 +5441,105 @@ tree:
   supports: []
   also_depends_on: [N208]
   status: resolved
+
+- id: N210
+  type: dead_end
+  title: "Off-site and multi-defect mutation families do not detach location_match from 100% — the answer key is checker-gated"
+  provenance: ai-suggested
+  timestamp: "2026-08-25T12:58"
+  hypothesis: >
+    C23's recorded untested boundary: that over inputs whose defect manifests
+    off the seeded site, or that carry multiple defects, measured
+    localization accuracy detaches from 100% for reasons other than
+    diagnostic ordering — i.e. that the #123 families turn location_match
+    into a number that discriminates.
+  failure_mode: >
+    The number cannot move in this harness, and the reason is upstream of the
+    defect structure. Every published ground-truth site is gated against the
+    checker before it can reach MANIFEST.tsv: prop_siteMatchesChecker pins
+    every published list's head to the constituent runCheckLocated actually
+    reports, on every base the answer key is generated from, with no family
+    filter; prop_localizationSites pins the tails. A row whose ground truth
+    the checker disagreed with therefore fails CI at generation time and
+    never becomes a measured row. Both location_match and location_primary
+    are consequently 100% on the committed suite by construction — the same
+    ceiling the single-defect families sit at, reached by a different route.
+    If the checker's localization regressed, CI would go red at
+    prop_siteMatchesChecker before any measurement run could report a rate
+    below 100%.
+  lesson: >
+    What the off-site and multi-defect families buy is the strength of the
+    gate, not the movability of the rate. retract-rule's ground truth is a
+    genuine prediction that a mislocating implementation fails — the
+    manifestation set is re-derived from the mutant rather than echoed from
+    the edit site — which the earlier families could not state at all. That
+    is a real contribution, but it is not a headline number that can move,
+    and prose quoting 399/399 as evidence of discriminating localization is
+    a false claim. Found by external review of PR #167, not by the
+    implementation.
+  evidence:
+    - "PR #167 review (fenfenai), inline comment on docs/localization-metric-decision.md:104"
+    - "docs/localization-metric-decision.md — 'These families do not make the reported rate move'"
+    - "docs/m5-freeze-checklist.md — rewritten Location-match caveat"
+    - "commit a8b3885"
+    - "issue #168"
+  also_depends_on: [N96]
+  status: resolved
+
+- id: N211
+  type: decision
+  title: "Gate a composite mutant's published tail against the mutant by reverting the head defect, not by re-deriving it from the components"
+  provenance: ai-suggested
+  timestamp: "2026-08-25T13:02"
+  choice: >
+    For the twin-support-defect and cross-stage-defect operators, which
+    publish an ordered pair of constituents, prop_localizationSites now maps
+    the published head through retainedIndices (prune u) to its declared
+    index, restores that argument in mutate u, and requires the checker to
+    reject the head-reverted mutant at the tail constituent with the tail
+    component's own class (R4 for twin's second premise defect, R10 for
+    cross-stage's attack defect). Because the two rewrites edit distinct
+    declared material, the head-reverted mutant is exactly the tail
+    component's single-defect mutant, so this is the same prediction
+    prop_siteMatchesChecker holds that component to — re-derived through the
+    composite's own rewrite rather than by re-running the enumerator that
+    produced it. A sibling arm requires the head rewrite to have actually
+    edited that declared argument, closing the mirror-image defect.
+  alternatives:
+    - "Keep re-deriving the published lists from wrongPremiseSites / badAttackPositionSites with the same comprehension shape — rejected: this is what shipped, and it catches only pair-order, a /= b, and component-class drift. It says nothing about the mutant, so dropping the second rewrite left the entire suite green while the answer key advertised a defect the mutant did not contain."
+    - "Assert only that the mutant's bytes differ from the base at both edited positions — rejected as too weak: it witnesses that an edit happened, not that the edit is a defect the checker reports at the published constituent."
+  evidence:
+    - "PR #167 review (fenfenai), inline comment on test/MutationSpec.hs:772, with the defect demonstrated empirically rather than by reading"
+    - "test/MutationSpec.hs prop_localizationSites (tailManifests / headRevertLocates)"
+    - "commit a8b3885"
+  also_depends_on: [N210]
+  status: resolved
+
+- id: N212
+  type: decision
+  title: "CONTRADICTION — N210 refutes C23's stated untested-boundary prediction; adjudication deferred"
+  provenance: ai-suggested
+  timestamp: "2026-08-25T13:05"
+  choice: >
+    Deferred to the researcher. C23's Conditions record the prediction that
+    localization accuracy "detaches from 100%" over multi-defect and
+    off-site-manifesting suites, and its Statement asserts that localization
+    "becomes a real signal only over inputs whose defect manifests off the
+    seeded site or that carry multiple defects". N210 shows both are wrong
+    for this harness: the #123 families were built and the rate stays at
+    ceiling by construction, because the ground truth is checker-gated
+    upstream of the measurement rather than because of the defect structure.
+    C23's core Statement about the single-defect regime is untouched and
+    still supported by N96. Flagged on the claim rather than rewritten: what
+    the Statement's last clause should say instead is a research judgment
+    the researcher owns, and the honest replacement generalizes past this
+    harness (staged as O85).
+  alternatives:
+    - "Rewrite C23's Statement and Conditions autonomously as an ai-suggested narrowing — rejected: the evidence contradicts a stated prediction rather than narrowing a scope, which is the contradiction trigger, and C23 is a paper-bearing methodology claim."
+    - "Flip C23 to weakened — rejected: the contradicted material is the extrapolation to an untested boundary, not the tested single-defect Statement, and a single new event must not demote a claim."
+  evidence:
+    - "logic/claims.md C23"
+    - "trace node N210"
+    - "staging O85"
+  also_depends_on: [N210]
+  status: unresolved

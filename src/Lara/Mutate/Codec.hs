@@ -38,7 +38,7 @@ codecMutantsForBase :: String -> String -> [Mutant]
 codecMutantsForBase base bytes = case parseSExpr bytes of
   Left _ -> []
   Right top ->
-    [ Mutant (mutantFileName base op 0) base op ExpectCodecReject Nothing out
+    [ Mutant (mutantFileName base op 0) base op ExpectCodecReject [] out
     | (op, mutate) <- ops
     , Just mutated <- [mutate top]
     , let out = printSExpr mutated ++ "\n"
@@ -48,7 +48,7 @@ codecMutantsForBase base bytes = case parseSExpr bytes of
              base
              OpCodecTruncate
              ExpectCodecReject
-             Nothing
+             []
              (truncateBytes bytes)
          ]
   where

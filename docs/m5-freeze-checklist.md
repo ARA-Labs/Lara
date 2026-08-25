@@ -279,6 +279,20 @@ that produced it. Protocol, snapshot, and rationale: `performance.md`.
 | Ablation **no-cq** missed rejections | 18 — all `reject-IncompleteArgument` (surgical) |
 | Ablation **no-typed** missed rejections | 30 — 11 `reject-R10` + 19 `reject-R11` (surgical) |
 
+**Location-match caveat (#123).** `location_match` is ≈100% by construction and
+stays that way. For single-defect rows a reject can only localize at its mutated
+constituent; and every site of the `localization` operator family (post-v4
+trees) — off-site and multi-defect alike — is gated against the checker by
+`prop_siteMatchesChecker` / `prop_localizationSites` before it reaches
+`MANIFEST.tsv`, so a mislocating ground truth fails CI at generation time
+instead of lowering the rate. The 399/399 above therefore verifies the harness
+and the answer key, not localization accuracy, and the discriminating families
+do **not** turn it into a number that can move (#167 review). What they add is a
+stronger gate — ground truth re-derived from the mutant rather than echoed from
+the edit site — plus the ordering claim `location_primary`, reported separately.
+The headline is not quotable as localization evidence at all; cite the gate.
+Contract and rationale in `docs/localization-metric-decision.md`.
+
 **`lara-core@0.2` (#89) re-freeze.** The suite grew from 369 to 496 mutants: the
 signature family adds 107 `reject-R2` rows (five operators, one per clause of
 the amended class) and 20 `reject-R12` rows from `out-of-scope-var`, the witness
@@ -307,10 +321,17 @@ carried by worked example E5).
 
 ### Determinism note
 
-`report.{json,tsv}` columns 1–14 are deterministic; columns `hs_check_ns` and
-`lean_wall_ns` are wall-clock timing (reported, environment-dependent, **not**
+v4's `report.{json,tsv}` columns 1–14 are deterministic; columns `hs_check_ns`
+and `lean_wall_ns` are wall-clock timing (reported, environment-dependent, **not**
 frozen). `ablation.{json,tsv}` carries no timing and is fully deterministic. The
 reproducibility anchors below hash only the deterministic content.
+
+Scope note for trees after v4: `report.tsv` gains the deterministic
+`location_primary` column after `location_match` (#123,
+`docs/localization-metric-decision.md`), making 17 columns of which 1–15 are
+deterministic; the projection for such trees is `cut -f1-15`, re-pinned when
+`m5-freeze-v5` is cut (#156). The `cut -f1-14` ranges in this document apply to
+the v4 artifacts they anchor and stay correct as written.
 
 | Frozen output anchor | SHA-256 |
 | --- | --- |
@@ -385,6 +406,9 @@ cabal exec -- runghc scripts/measure.hs
 cut -f1-14 measurements/report.tsv | shasum -a 256   # must equal the anchor above
 shasum -a 256 measurements/ablation.tsv              # must equal the anchor above
 ```
+
+For a `<tag-or-branch>` after v4 the projection line is `cut -f1-15` (the
+determinism scope note above), against that freeze's own anchor.
 
 Two notes carried over from the T7 execution pass, both easy to get wrong:
 

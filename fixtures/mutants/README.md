@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 510
+Total mutants: 541
 
 | expected outcome | mutants |
 | --- | --- |
@@ -31,14 +31,14 @@ Total mutants: 510
 | `codec-reject` | 47 |
 | `reject-IncompleteArgument` | 18 |
 | `reject-MissingConflict` | 5 |
-| `reject-R1` | 44 |
+| `reject-R1` | 63 |
 | `reject-R10` | 11 |
 | `reject-R11` | 19 |
 | `reject-R12` | 40 |
 | `reject-R13` | 43 |
 | `reject-R2` | 113 |
 | `reject-R3` | 19 |
-| `reject-R4` | 18 |
+| `reject-R4` | 30 |
 | `reject-R5` | 18 |
 | `reject-R6` | 18 |
 | `reject-R7` | 20 |
@@ -53,6 +53,7 @@ Total mutants: 510
 | `cycles` | 4 |
 | `data-integrity` | 19 |
 | `hidden-policy-extension` | 59 |
+| `localization` | 31 |
 | `open-obligations` | 54 |
 | `signature` | 113 |
 | `undeclared-leaves` | 25 |
@@ -62,12 +63,12 @@ Total mutants: 510
 
 Per rejection operator over the corpus units: how many bases carry ≥1
 site (applicable) and how many were selected (all when ≤ B, else B
-picked by the operator-keyed stream). Two operator groups find no
-corpus site and are recorded as 0/0: the cert operators (corpus units
-carry no strict certificates) and `drop-covering-attack` (only three
+picked by the operator-keyed stream). Two operators find no corpus
+site and are recorded as 0/0: `drop-covering-attack` (only three
 corpus units declare an attack at all, and none of those attacks
 covers a contrary pair, so deleting one leaves the completeness scan
-with nothing to report).
+with nothing to report) and `twin-support-defect` (no corpus unit
+carries wrong-premise sites at two distinct arguments).
 
 | corpus operator | applicable bases | selected |
 | --- | --- | --- |
@@ -87,6 +88,9 @@ with nothing to report).
 | `unlicensed-attack` | 13 | 12 |
 | `drop-covering-attack` | 0 | 0 |
 | `group-conflict` | 55 | 12 |
+| `retract-rule` | 13 | 12 |
+| `twin-support-defect` | 0 | 0 |
+| `cross-stage-defect` | 3 | 3 |
 | `undeclared-pred` | 60 | 12 |
 | `wrong-pred-arity` | 60 | 12 |
 | `wrong-arg-sort` | 60 | 12 |

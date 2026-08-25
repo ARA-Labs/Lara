@@ -60,7 +60,7 @@ import Lara.Diagnostics
   ( Constituent
   , LocatedRejection (..)
   , constituentText
-  , parseConstituent
+  , parseConstituentList
   )
 import Lara.Driver (runCheck, runCheckLocatedWith)
 import Lara.ExpectedJson (JValue (..), renderJson)
@@ -95,7 +95,11 @@ data InputMeta = InputMeta
   , imOperator :: Maybe String -- ^ 'Nothing' for corpus units
   , imExpected :: Expected
   , imExpectedText :: String
-  , imExpectedLocation :: Maybe Constituent -- ^ seeded ground truth (manifest column 8)
+  , imExpectedLocation :: [Constituent]
+  -- ^ ordered seeded ground truth (manifest column 8): every element is an
+  -- admissible located report, the head is the spec-order-first one
+  -- (@docs\/localization-metric-decision.md@); empty when the row seeds no
+  -- site (@-@)
   , imHsDiag :: String -- ^ codec deletion-sensitivity pin (empty otherwise)
   , imLeanDiag :: String
   , imKind :: InputKind
@@ -112,7 +116,7 @@ parseMutantManifest raw =
       , imOperator = Just op
       , imExpected = e
       , imExpectedText = expected
-      , imExpectedLocation = if loc == "-" then Nothing else parseConstituent loc
+      , imExpectedLocation = locs
       , imHsDiag = hsDiag
       , imLeanDiag = leanDiag
       , imKind = MutantRow
@@ -122,6 +126,7 @@ parseMutantManifest raw =
   , not ("#" `isPrefixOf` ln)
   , [file, base, family, op, expected, hsDiag, leanDiag, loc] <- [splitTab ln]
   , Just e <- [parseExpected expected]
+  , Just locs <- [parseConstituentList loc]
   ]
 
 -- | Parse @corpus-units\/MANIFEST.tsv@ into input rows (6 columns; the
@@ -135,7 +140,7 @@ parseCorpusManifest raw =
       , imOperator = Nothing
       , imExpected = e
       , imExpectedText = "accept-" ++ status
-      , imExpectedLocation = Nothing
+      , imExpectedLocation = []
       , imHsDiag = ""
       , imLeanDiag = ""
       , imKind = CorpusRow
@@ -161,7 +166,12 @@ data Deterministic = Deterministic
   { detActual :: String -- ^ actual outcome text (@reject-Rn@ / @accept-\<status\>@ / @codec-fail@)
   , detClassMatch :: Bool -- ^ actual outcome matches the specified one
   , detLocation :: Maybe Constituent -- ^ located defect constituent (rejects only)
-  , detLocationMatch :: Maybe Bool -- ^ located vs seeded ground truth ('-' off rejects)
+  , detLocationMatch :: Maybe Bool
+  -- ^ located constituent ∈ the seeded ground-truth list — the faithfulness
+  -- claim ('-' off rejects)
+  , detLocationPrimary :: Maybe Bool
+  -- ^ located constituent '==' the list head (the spec-order-first site) —
+  -- the ordering claim, measured never gated ('-' off rejects)
   , detReplayOk :: Maybe Bool -- ^ #36 replay identity carried + stable (corpus units only)
   , detTotalBytes :: Int
   , detPolicyBytes :: Int -- ^ rendered bytes of the @(policy …)@ subtree
@@ -226,14 +236,11 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
           { detActual = actualText outcome
           , detClassMatch = classMatches (imExpected im) outcome
           , detLocation = loc
-          , detLocationMatch = case imExpected im of
-              -- single-defect rejects localize at the mutated constituent by
-              -- construction; a deviation is an honest diagnostic-ordering data
-              -- point, not a generation failure (measured, never gated).
-              ExpectClass _ -> Just (loc == imExpectedLocation im)
-              ExpectIncompleteArgument -> Just (loc == imExpectedLocation im)
-              ExpectMissingConflict -> Just (loc == imExpectedLocation im)
-              _ -> Nothing
+          -- location metrics are defined on the seeded-reject expectations
+          -- only; both are measured, never gated
+          -- (docs/localization-metric-decision.md).
+          , detLocationMatch = onSeededReject (\_ locs -> maybe False (`elem` locs) loc)
+          , detLocationPrimary = onSeededReject (\primary _ -> maybe False (== primary) loc)
           , detReplayOk = case imKind im of
               CorpusRow -> Just (replayStable input verdict)
               MutantRow -> Nothing
@@ -241,12 +248,24 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
   where
     total = length bytes
     policy = policyBytes bytes
+    -- The location metrics' shared domain guard: defined exactly on the
+    -- seeded-reject expectations with a non-empty ground-truth list, whose
+    -- head (the spec-order-first constituent) is passed alongside the list.
+    onSeededReject f = case imExpected im of
+      ExpectClass _ -> withLocs f
+      ExpectIncompleteArgument -> withLocs f
+      ExpectMissingConflict -> withLocs f
+      _ -> Nothing
+    withLocs f = case imExpectedLocation im of
+      [] -> Nothing
+      locs@(primary : _) -> Just (f primary locs)
     base =
       Deterministic
         { detActual = "-"
         , detClassMatch = False
         , detLocation = Nothing
         , detLocationMatch = Nothing
+        , detLocationPrimary = Nothing
         , detReplayOk = Nothing
         , detTotalBytes = total
         , detPolicyBytes = policy
@@ -544,6 +563,7 @@ recordJson (Record im det leanAgree hsNs leanNs) =
     , ("class-match", JBool (detClassMatch det))
     , ("location", maybe JNull (JString . constituentText) (detLocation det))
     , ("location-match", maybeBoolJson (detLocationMatch det))
+    , ("location-primary", maybeBoolJson (detLocationPrimary det))
     , ("lean-agree", maybeBoolJson leanAgree)
     , ("replay-ok", maybeBoolJson (detReplayOk det))
     , ("total-bytes", JNumber (detTotalBytes det))
@@ -566,9 +586,10 @@ bigNum :: Integer -> JValue
 bigNum = JNumber . fromIntegral
 
 -- | Aggregate block: overall + per-expected-class accuracy, location-accuracy
--- rate, replay-success rate, cross-driver agreement rate, byte-size
--- distributions over total + payload, and checking-time distributions over
--- @hs_check@ + @lean_wall@ (the two are different protocols — not comparable).
+-- (membership) and location-primary (head-equality) rates, replay-success
+-- rate, cross-driver agreement rate, byte-size distributions over total +
+-- payload, and checking-time distributions over @hs_check@ + @lean_wall@ (the
+-- two are different protocols — not comparable).
 aggregateJson :: [Record] -> JValue
 aggregateJson records =
   JObject
@@ -577,6 +598,9 @@ aggregateJson records =
     , ("class-accuracy", JObject [(cls, classRate cls) | cls <- classes])
     , ( "location-accuracy-rate"
       , rateJson [b | r <- records, Just b <- [detLocationMatch (recDet r)]]
+      )
+    , ( "location-primary-rate"
+      , rateJson [b | r <- records, Just b <- [detLocationPrimary (recDet r)]]
       )
     , ( "replay-success-rate"
       , rateJson [b | r <- records, Just b <- [detReplayOk (recDet r)]]
@@ -635,6 +659,7 @@ tsvHeader =
     , "class_match"
     , "location"
     , "location_match"
+    , "location_primary"
     , "lean_agree"
     , "replay_ok"
     , "total_bytes"
@@ -661,6 +686,7 @@ recordTsv (Record im det leanAgree hsNs leanNs) =
     , boolCell (detClassMatch det)
     , maybe "-" constituentText (detLocation det)
     , maybeBoolCell (detLocationMatch det)
+    , maybeBoolCell (detLocationPrimary det)
     , maybeBoolCell leanAgree
     , maybeBoolCell (detReplayOk det)
     , show (detTotalBytes det)

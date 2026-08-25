@@ -32,6 +32,12 @@
 -- re-exported here; 'Lara.Mutate.Suite' imports them directly, so the wrapper
 -- that attaches 'Lara.Mutate.Expected' stays at the single assembly site.
 --
+-- The localization family lives in "Lara.Mutate.Sites.Localize" and is not
+-- re-exported here either, for a different reason: its composite enumerators
+-- import this module's single-site enumerators as components, so a re-export
+-- would cycle. 'Lara.Mutate.Suite' imports it directly, following the
+-- "Lara.Mutate.Sorts" precedent.
+--
 -- The certificate-family enumerators live in "Lara.Mutate.Sites.Cert" and the
 -- attack-completeness one in "Lara.Mutate.Sites.Conflict"; both /are/
 -- re-exported here, so 'Lara.Mutate.Suite' keeps its single import of this

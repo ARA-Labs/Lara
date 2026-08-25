@@ -107,6 +107,9 @@ data MutationOp
   | OpDuplicateBackend -- ^ replay selects one backend twice → R13
   | OpUnknownBackend -- ^ replay selects an unknown backend → R13
   | OpGroupConflict -- ^ escalated ≢ duplicate-report group → R9
+  | OpRetractRule -- ^ retract a rule checked args instantiate → R1 off-site
+  | OpTwinSupportDefect -- ^ wrong premises at two distinct args → R4 at the first
+  | OpCrossStageDefect -- ^ wrong premise + bad attack position → R4 (stage order)
   | OpUndeclaredPred -- ^ atom head with no @pred@ declaration → R2
   | OpWrongPredArity -- ^ drop an atom argument → R2
   | OpWrongArgSort -- ^ swap in a differently-sorted term from the unit → R2
@@ -157,6 +160,9 @@ opName op = case op of
   OpDuplicateBackend -> "duplicate-backend"
   OpUnknownBackend -> "unknown-backend"
   OpGroupConflict -> "group-conflict"
+  OpRetractRule -> "retract-rule"
+  OpTwinSupportDefect -> "twin-support-defect"
+  OpCrossStageDefect -> "cross-stage-defect"
   OpUndeclaredPred -> "undeclared-pred"
   OpWrongPredArity -> "wrong-pred-arity"
   OpWrongArgSort -> "wrong-arg-sort"
@@ -206,6 +212,9 @@ opFamily op = case op of
   OpDuplicateBackend -> "certificate-tampering"
   OpUnknownBackend -> "certificate-tampering"
   OpGroupConflict -> "data-integrity"
+  OpRetractRule -> "localization"
+  OpTwinSupportDefect -> "localization"
+  OpCrossStageDefect -> "localization"
   OpUndeclaredPred -> "signature"
   OpWrongPredArity -> "signature"
   OpWrongArgSort -> "signature"
@@ -300,11 +309,14 @@ data Mutant = Mutant
   , mutantBase :: String -- ^ base anchor label (worked-example name), or @-@
   , mutantOp :: MutationOp
   , mutantExpected :: Expected
-  , mutantSite :: Maybe Constituent
-  -- ^ the seeded ground-truth location (the constituent the operator mutated),
-  -- rendered as the @expected-location@ manifest column; 'Nothing' for mutants
-  -- with no single seeded site (the codec family and the constructed
-  -- rebut-cycle family), which render @-@.
+  , mutantSites :: [Constituent]
+  -- ^ the seeded ground-truth manifestation sites, ordered: the head is the
+  -- constituent the checker's spec-fixed stage order designates first, and
+  -- every element is an admissible located report
+  -- (@docs\/localization-metric-decision.md@). Rendered as the
+  -- @expected-location@ manifest column; empty for mutants with no seeded
+  -- site (the codec family and the constructed rebut-cycle family), which
+  -- render @-@.
   , mutantBytes :: String
   }
   deriving (Eq, Show)
