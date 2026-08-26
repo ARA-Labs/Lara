@@ -456,9 +456,13 @@ Measurement environment of record: GHC 9.14.1, Lean 4.32.0, darwin/aarch64
 - **v5 snapshot commit:** `89c25ef` (clean measurement input and environment
   recorded in `report.json`: `git-dirty: false`, GHC 9.14.1, Lean 4.32.0,
   darwin/aarch64).
-- **v5 tag:** `m5-freeze-v5` (annotated), on the merge commit of the #156
-  re-freeze PR. Cut after the batch #125 / #124 / #123 landed and all gates
-  above were re-run green on the snapshot tree.
+- **v5 tag:** `m5-freeze-v5` (annotated), on `5dd326b` (merge commit of the v5
+  re-freeze PR #175). Cut after the batch #125 / #124 / #123 landed and all
+  gates above were re-run green on the snapshot tree. Verified at the tag before
+  cutting: the three frozen-input tree SHAs and both output anchors reproduce
+  the values recorded above exactly. CI could not corroborate — GitHub Actions
+  was not running any job in this window (account billing), so every gate result
+  in this document is a local run on the environment of record.
 - Post-freeze rule: any change to a frozen input (rows 1–3) or the seed
   invalidates this freeze; re-run the gates and cut the next tag. **Every number
   in this document describes v5 and the working tree it was measured on.** Two
