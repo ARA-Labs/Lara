@@ -5611,3 +5611,169 @@ tree:
     - "scripts/gen-mutants.hs --check output"
   also_depends_on: [N213]
   status: resolved
+
+- id: N215
+  type: decision
+  title: "Close the code side as one session: the v5 refreeze plus the naturalness-boundary policy note"
+  provenance: user-revised
+  timestamp: "2026-08-25T22:10"
+  description: >
+    Audited the remote to test the researcher's read that only the refreeze
+    remained. Confirmed: no open PRs, main == origin/main at 89c25ef, and of
+    the seven open issues only #156 was schedulable code work. #151 is a
+    decision whose own recommendation is "do nothing until the paper package
+    is out"; #126 is future-work gated on the possible-worlds design; #121 is
+    blocked on a second author, not on code; #78 is a scope decision; #52 and
+    #30 are post-pldi. #109 was the one open item that could be finished
+    alongside the freeze without touching a frozen input.
+  choice: >
+    Run #156 and #109 in this session as two independent PRs, docs first. The
+    two do not interact: #109 is docs-only and touches no frozen input, while
+    #156 requires a clean tree for its measurement run, so landing the docs
+    change first keeps the tree clean for the freeze rather than complicating
+    it.
+  alternatives:
+    - "Fold both into one PR — rejected: unrelated concerns, and it would put a policy note inside the diff a future reader consults for the freeze protocol."
+    - "Refreeze alone and defer #109 — rejected: #109 costs nothing against a frozen input and the researcher asked for both."
+  evidence:
+    - "issue #156; issue #109; gh issue list / gh pr list audit of ARA-Labs/lara"
+    - "PR #174 (#109); PR #175 (#156)"
+  also_depends_on: [N213]
+  status: resolved
+
+- id: N216
+  type: decision
+  title: "Skip the #165 quarantining-corpus-base rider; keep the quarantine path gated from fixtures"
+  provenance: user-revised
+  timestamp: "2026-08-25T22:25"
+  description: >
+    #156 carried an optional rider deferred from #165: add a corpus base whose
+    section 4.3 quarantine is not the identity, so that some committed mutant
+    file walks the non-identity path. It had to be settled before step 1
+    (gen-mutants.hs), because it changes the mutant count and every downstream
+    headline number. The researcher asked what taking it would buy, which
+    forced the benefit case to be made from the code rather than from the
+    issue's summary.
+  choice: >
+    Skip, the issue's documented default. What the rider would add is narrow:
+    the committed corpus already exercises the checker's quarantine machinery
+    (38 group-conflict and 18 quarantine-attacker mutants inject a groups
+    form, and both drivers run them), so the real gap is only that sites are
+    enumerated on bases whose quarantine is the identity, leaving no committed
+    mutant whose expected-location was published off-diagonal. Since #166 that
+    contract is gated from fixtures by prop_siteMatchesChecker,
+    prop_siteDirectionSkewed, prop_sitesQuarantiningBase and
+    prop_localizationSites, which run over a skewed sibling of every base with
+    explicit anti-vacuity clauses. A corpus base buys a second, more expensive
+    witness for an already-gated contract and pays for it by permanently
+    enlarging a frozen count.
+  alternatives:
+    - "Take the rider — it rides along at no extra tag or regeneration cost and would give the #123 answer key an end-to-end anchor through gen-mutants -> MANIFEST -> measure -> report on a quarantining base. Rejected on cost/benefit, not on soundness; it remains available at the next refreeze as a standalone item."
+  evidence:
+    - "issue #165; issue #166 (the skewed-sibling gates); issue #156 rider section"
+    - "test/MutationSpec.hs quarantineSkewed / prop_siteDirectionSkewed / prop_sitesQuarantiningBase"
+    - "fixtures/mutants/MANIFEST.tsv operator census (38 group-conflict, 18 quarantine-attacker)"
+  also_depends_on: [N215]
+  status: resolved
+
+- id: N217
+  type: decision
+  title: "Keep the m5-freeze series name; record the m5- prefix as legacy rather than renaming"
+  provenance: user
+  timestamp: "2026-08-25T22:25"
+  description: >
+    Cutting a fifth tag was the natural moment to decide whether the series
+    keeps a name that no longer describes it: M5 closed long ago (tracker
+    #48), and every re-cut after v1 was for something else.
+  choice: >
+    Keep m5-freeze-v5 and add a line to the checklist header saying the m5-
+    prefix is legacy and the series is the evaluation-corpus freeze.
+  alternatives:
+    - "Rename to corpus-freeze-v5 — rejected: v1-v4 are published, addressable anchors, so a mid-series rename gives 'the freeze after v4' two names. The decisive cost is that corpus-units/corpus-v1.policy.lara is itself a frozen input referencing the checklist by path, so renaming the file either changes frozen corpus bytes for a cosmetic reason or leaves a dangling pointer inside the frozen set."
+  evidence:
+    - "docs/m5-freeze-checklist.md header note"
+    - "corpus-units/corpus-v1.policy.lara:5 (frozen input citing the checklist by path)"
+  also_depends_on: [N215]
+  status: resolved
+
+- id: N218
+  type: experiment
+  title: "The m5-freeze-v5 regeneration cycle: every class delta is accounted for by the five new operators, and no pre-existing byte moved"
+  provenance: ai-executed
+  timestamp: "2026-08-25T23:40"
+  description: >
+    Task 4 of the batch — the single regeneration cycle shared by #125, #124
+    and #123, each of which had changed a frozen input. Predictions under
+    test, all falsifiable: (a) the committed suite already regenerates
+    unchanged, since the task PRs regenerated additively; (b) the class
+    deltas are exactly the new operators' rows and nothing else moved; (c) no
+    pre-existing mutant file changed a byte, per the string-keyed generator
+    streams; (d) claim-support and the binding-audit worklist are untouched,
+    since corpus-units/ did not change; (e) the location rate stays at
+    ceiling while its denominator grows.
+  result: >
+    All five confirmed. (a) gen-mutants.hs --check: "OK: fixtures/mutants
+    matches its generator (541 mutants)" — step 1 was already a no-op, and
+    CI gates this via its own --check step, contradicting the batch plan's
+    claim that CI does not gate gen-mutants. (b) 504 -> 541 mutants, 564 ->
+    601 records, and the 37 new rows are cert-wrong-fraction 1 (R13 42->43),
+    drop-covering-attack 5 (MissingConflict 0->5, a new class), retract-rule
+    19 (R1 44->63), cross-stage-defect 7 and twin-support-defect 5 (R4
+    18->30). No other class moved. (c) Measured, not assumed: git diff
+    --name-status m5-freeze-v4 HEAD -- fixtures/mutants/ is 37 additions plus
+    MANIFEST.tsv (37 insertions, zero deletions) and README.md (prose). The
+    differential moving 583 -> 620 is the same fact from the other side.
+    (d) corpus-units/ holds its @0.7 tree SHA exactly, claim-support.tsv is
+    byte-identical, and binding-audit/worklist.tsv regenerated byte-identical,
+    so the 38-leaf audit denominator (#121) is untouched. (e) location_match
+    399/399 -> 436/436 and the new location_primary column also 436/436 — the
+    denominator grew by the seeded rows and the rate did not move, which is
+    N210's finding reproduced at larger scale.
+    Headline: 601/601 class match, 601/601 lean_agree, 60/60 replay, 1/1
+    claim-support. Ablations no-cq 18, no-typed 30 -> 35, and the new
+    isolating no-conflict-scan cell at 5 — exactly the split #124 predicted,
+    with noTypedConfig deliberately not narrowed so no published row changed
+    meaning. All ten gates green on clean 89c25ef.
+    Two provenance defects found in the v4 snapshot. The v4 claim-support.json
+    had been committed with git-dirty true at 16fa55fa while report.json
+    carried git-dirty false, so the two halves of the frozen snapshot
+    disagreed about their own provenance and nothing had caught it across two
+    freezes; repaired here. Separately, frozen-tag is hardcoded to
+    "m5-freeze-v2" in ClaimSupport.hs and BindingAudit.hs and has been stale
+    since v3; filed as #176 rather than fixed here, since it rewrites a
+    committed artifact.
+    Caveat on the evidence: GitHub Actions ran no job in this window (account
+    billing), and no run was created for either PR, so all ten gate results
+    are local runs on the environment of record rather than CI corroboration.
+  evidence:
+    - "PR #175; tag m5-freeze-v5 (annotated 0c55580) on commit 5dd326b"
+    - "measurements/frozen/report.{json,tsv}, ablation.{json,tsv} at 601 records"
+    - "report.tsv cut -f1-15 = d7396558022965c842e51bb223dce9ef6753325d2a638c2753558239e99aaff0; ablation.tsv = 503c231a2e9759c1207cbf48dbb9b446466c84237b2cdac2091a26de85821c1b"
+    - "docs/m5-freeze-checklist.md (v5 addendum, gates table, anchors); PR #177 (tag commit pinned)"
+    - "issue #176 (stale frozen-tag literal)"
+  also_depends_on: [N215, N216, N217, N214]
+  status: resolved
+
+- id: N219
+  type: pivot
+  title: "Code side closed; the remaining PLDI/POPL work is writing"
+  provenance: user
+  timestamp: "2026-08-25T23:58"
+  description: >
+    With m5-freeze-v5 cut, the researcher declared the code side of this paper
+    complete. What remains open in this repository is not code work: #151 is a
+    decision recommending no action until the paper package ships, #126 is
+    gated on the possible-worlds design and may never fire, #78 is a scope
+    decision, #52 and #30 are post-pldi, and #176 is a small provenance
+    cleanup. The one exception is #121, whose dependency is a person rather
+    than code.
+  from: "Evaluation-suite completion and corpus freezing"
+  to: "Paper writing (paper repository)"
+  trigger: >
+    m5-freeze-v5 cut on 5dd326b; the batch #123/#124/#125 landed and frozen;
+    no schedulable code work remains against the PLDI/POPL scope.
+  evidence:
+    - "trace node N218 (the freeze this pivot rests on)"
+    - "gh issue list ARA-Labs/lara after the merge: #176, #151, #126, #121, #78, #52, #30"
+  also_depends_on: [N218]
+  status: open

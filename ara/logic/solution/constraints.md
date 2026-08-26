@@ -151,3 +151,55 @@ disagreement; dependent claims surface as `gap`).
   process startup, not semantics — any cross-driver speed claim needs a same-protocol measurement.
   The harness labels the columns separately for exactly this reason, and an unforced lazy
   `runCheck` would instead read ~0 ns (D8/5A), so the forcing discipline is part of the protocol.
+
+## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/naturalness-boundary.md`, issue #109)
+
+Where natural language may and may not enter the system, split by **trust direction** rather
+than by convenience. Fixed policy so that ease-of-use work cites it instead of re-deciding
+"how natural should this be?" once per feature. Extends the design-audience constraint above
+(Python readability stays the calibration baseline).
+
+- **Layer 1 — the verified surface (`.lara`) gets more readable, never natural.** The
+  precedent is Isar, not the controlled-natural-language one: a surface that looks like
+  English but parses a fragment has an *invisible parse boundary*, so every rejection reads as
+  arbitrary to an author who cannot see where the fragment ends. The surface exists for
+  auditability — a human must be able to read what the checker actually saw — which requires
+  determinism, not naturalness. **NL-in through the verified parser is permanently out of
+  scope**, not deferred; a proposal to accept prose here reopens this constraint rather than
+  being a per-feature call.
+
+- **Layer 2 — NL as input belongs exclusively to the untrusted producer** (`Lara.Json` / the
+  LLM elaborator, issue #30). Already pinned by the tree: `docs/spec.md` §1.1 places the
+  elaborator outside the TCB, §11 makes NL formalization the first of its six logged lowering
+  tasks, and §3.1's claim triple carries `binding` as an untrusted, audited annotation. The two
+  mechanisms any layer-2 feature inherits are **replay** (nothing a producer emits is believed
+  until re-checked by trusted code) and the **binding audit** (prose-to-formal agreement is
+  confirmed by a human, not the checker — #121). Consequence: an NL-in feature cannot be made
+  safe by improving the producer.
+
+- **Layer 3 — NL as output is free and worth exploiting.** Verdicts, rejection reasons and
+  reports derive from already-checked artifacts and feed nothing back, so improving their prose
+  cannot change what is accepted. Two bounds (ai-suggested, added at crystallization): a
+  rendering must **stay** a rendering — the moment an output becomes an input it is a layer-1
+  or layer-2 change; and "free" describes the *prose*, not the *templates*, which are normative
+  (surface-grammar H.5 fixes eight `CertNd*` templates verbatim and `scripts/differential.sh`
+  byte-compares the two drivers' stdout and exit code).
+
+- **The design rule: every ease-of-use feature must remove transcription, never checking.** A
+  convenience crosses the line the moment the checker sees something the author did not legibly
+  write. At layer 1 the rule has an **executable form** — the readable spelling must lower to
+  the terse spelling's exact bytes — which is the invariant the surface grammar already records
+  for the `@0.6`/`@0.8`/`@0.9`/`@0.10` named certificate spellings. Every surface version `@0.4`
+  through `@0.10` satisfies it.
+
+- **Permissible is not the same as worth building** (ai-suggested). The rule licenses a
+  convenience; it does not schedule one. #151 is the worked case: the `nd@1` binder half is
+  squarely layer 3 and therefore permitted, yet correctly deferred, because the only sound
+  implementation restructures a backend seam `ord@1` and `ra@1` share and the Lean side mirrors.
+  The same framing rejects that issue's option (c) on principle — a best-effort reconstruction
+  outside the adapter could print a *wrong* name, i.e. a layer-3 rendering that has stopped
+  being faithful to the checked artifact.
+
+**Venue split.** The PLDI/POPL core paper may cite the design rule and layer 1 as a
+language-design commitment; layer-2 evaluation (how faithfully a producer lowers prose) belongs
+to the ACL/EMNLP follow-up with #52 and #30.

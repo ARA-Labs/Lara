@@ -2,8 +2,8 @@ session:
   id: "2026-08-25_001"
   date: "2026-08-25"
   started: "2026-08-25T12:42"
-  last_turn: "2026-08-25T20:55"
-  turn_count: 2
+  last_turn: "2026-08-25T23:58"
+  turn_count: 3
   summary: >
     Resolved the #167 review of the discriminating-localization benchmark
     (#123). External review found that the composite operators' second rewrite
@@ -18,7 +18,16 @@ session:
     wrapper), verified it byte-neutral against the frozen corpus, and landed
     it as PR #170 ahead of the #156 refreeze; #168 was closed in favour of a
     paper-repository issue, since this repo can carry that obligation but not
-    discharge it.
+    discharge it. Turn 3 closed the code side: cut m5-freeze-v5 (#156) as the
+    single regeneration cycle for the whole batch — 541 mutants, 601 records,
+    every class delta accounted for by the five new operators and no
+    pre-existing byte moved — and landed the naturalness-boundary policy note
+    (#109). Skipped the #165 corpus-base rider and kept the series name, both
+    the documented default. Found two provenance defects in the v4 snapshot
+    (one repaired, one filed as #176), and found that CI has not run at all in
+    this window for account-billing reasons, so the freeze rests on local gate
+    runs. The researcher then declared the code side complete, pivoting the
+    project to writing.
 
 events_logged:
   - turn: 1
@@ -69,6 +78,49 @@ events_logged:
     routing: staged
     provenance: ai-suggested
     summary: "A denominator guard that collapses 'not applicable' with 'malformed' silently inflates a rate; fix belongs in the producer's type"
+
+  - turn: 3
+    type: decision
+    id: "N215"
+    routing: direct
+    provenance: user-revised
+    summary: "Remote audit confirms #156 is the only schedulable code work; run it with #109 as two independent PRs, docs first"
+  - turn: 3
+    type: decision
+    id: "N216"
+    routing: direct
+    provenance: user-revised
+    summary: "Skip the #165 quarantining-corpus-base rider; the path is already gated from fixtures over every base's skewed sibling"
+  - turn: 3
+    type: decision
+    id: "N217"
+    routing: direct
+    provenance: user
+    summary: "Keep the m5-freeze name, record the m5- prefix as legacy; a rename would change frozen corpus bytes cosmetically"
+  - turn: 3
+    type: experiment
+    id: "N218"
+    routing: direct
+    provenance: ai-executed
+    summary: "m5-freeze-v5 cycle: 504->541 mutants, 564->601 records, all five predictions confirmed, ten gates green, tag on 5dd326b"
+  - turn: 3
+    type: pivot
+    id: "N219"
+    routing: direct
+    provenance: user
+    summary: "Code side closed; remaining PLDI/POPL work is writing"
+  - turn: 3
+    type: observation
+    id: "O88"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Provenance metadata in a frozen artifact has no oracle and drifts silently; a golden pins the wrong value rather than catching it"
+  - turn: 3
+    type: observation
+    id: "O89"
+    routing: crystallized
+    provenance: user
+    summary: "Naturalness boundary: three layers split by trust direction, plus the remove-transcription-never-checking rule -> constraints.md"
 
 ai_actions:
   - turn: 1
@@ -161,6 +213,77 @@ ai_actions:
       - "docs/localization-metric-decision.md"
       - "plans/2026-08-24-m5-freeze-v5-batch.md"
 
+  - turn: 3
+    action: >
+      Wrote docs/naturalness-boundary.md (#109): three layers split by trust
+      direction, the remove-transcription-never-checking rule with its
+      executable byte-identity form, and @0.4-@0.10 tabulated against it.
+      Added the pointer paragraph to docs/lara-surface-grammar.md's intro,
+      placed on the byte-identity invariant it is the policy for. Verified
+      every quoted invariant against its source and corrected three
+      over-broad claims of my own before committing (the lexer/parser-rule
+      quote scoped to the certificate spellings it actually covers,
+      differential.sh described as comparing stdout and exit code, @0.4
+      attributed to the let table of Appendix C). Landed as PR #174.
+    provenance: ai-executed
+    files_changed:
+      - "docs/naturalness-boundary.md"
+      - "docs/lara-surface-grammar.md"
+  - turn: 3
+    action: >
+      Ran the full v5 freeze cycle on a clean tree at 89c25ef: gen-mutants
+      --check (OK, 541 — already fresh), lake build, axiom audit, cabal test
+      all, differential (620/0, 56/0), admission (20/0), replay-tamper,
+      freeze-bundle 4/4, presentation parity 73 rows; then measure.hs (601
+      records) and claim-support.hs, both recording git-dirty false.
+      Re-rendered mechanical-reviews.md and running-example.txt to confirm
+      they were still fresh (byte-identical) before installing the six
+      regenerated files into measurements/frozen/.
+    provenance: ai-executed
+    files_changed:
+      - "measurements/frozen/report.json"
+      - "measurements/frozen/report.tsv"
+      - "measurements/frozen/ablation.json"
+      - "measurements/frozen/ablation.tsv"
+      - "measurements/frozen/claim-support.json"
+  - turn: 3
+    action: >
+      Rewrote docs/m5-freeze-checklist.md for v5: the re-freeze history entry
+      with the five-operator delta table, frozen-input rows 1 and 3, the seed
+      paragraph (plus the CI --check gate the batch plan had wrongly said did
+      not exist), the gates table and its bookkeeping paragraph, the headline
+      numbers, the no-typed-not-redefined note, the determinism note and the
+      widened cut -f1-15 anchors with the v4 pair retained as provenance, the
+      tag section and post-freeze rule, and both reproduction recipes. Added
+      the legacy-prefix header note. Deleted the executed batch plan and
+      repointed the three docs that referenced it. Refreshed downstream
+      counts in README.md, docs/engineering-plan.md and
+      docs/rejection-surface.md, leaving historical v4 statements alone.
+      Landed as PR #175.
+    provenance: ai-executed
+    files_changed:
+      - "docs/m5-freeze-checklist.md"
+      - "docs/engineering-plan.md"
+      - "docs/localization-metric-decision.md"
+      - "docs/mechanization-scope-decision.md"
+      - "docs/rejection-surface.md"
+      - "README.md"
+      - "plans/2026-08-24-m5-freeze-v5-batch.md"
+  - turn: 3
+    action: >
+      After both PRs merged: re-verified all five anchors at the merge commit
+      (three frozen-input tree SHAs, both output hashes) before cutting, then
+      cut and pushed the annotated tag m5-freeze-v5 (0c55580) on 5dd326b.
+      Re-pointed the refreeze-batch label off v5 to a freeze-generic
+      description, commented on #78 recording that its refreeze-window
+      argument no longer holds, filed #176 for the stale frozen-tag literal,
+      and opened PR #177 pinning the tag commit in the checklist and
+      recording that the gates were local runs because Actions was not
+      running.
+    provenance: ai-executed
+    files_changed:
+      - "docs/m5-freeze-checklist.md"
+
 claims_touched:
   - id: C23
     action: flagged-contradiction
@@ -182,6 +305,26 @@ logic_revisions:
       extrapolation to an untested boundary, not the tested Statement.
 
 key_context:
+  - turn: 3
+    excerpt: >
+      Researcher, declining to accept the recommendation on trust: asked "what
+      are the benefits" of the #165 rider rather than taking the skip default.
+      That forced the case to be rebuilt from the code, which changed the
+      answer's grounds — the committed corpus already runs 56 quarantine
+      mutants through both drivers, so the gap is not "quarantine is untested"
+      but the narrower "no committed mutant's expected-location was published
+      off-diagonal". Same verdict, honest reasons.
+  - turn: 3
+    excerpt: >
+      Researcher closing the phase: "now we completed the code side tasks for
+      this paper, the rest is writing" — recorded as pivot N219.
+  - turn: 3
+    excerpt: >
+      GitHub Actions annotation on every run in this window, including both
+      merged PRs: "The job was not started because recent account payments
+      have failed or your spending limit needs to be increased." No run was
+      created for #174 or #175 at all, so m5-freeze-v5 has no machine-verified
+      gate pass — every result in the checklist is a local run.
   - turn: 2
     excerpt: >
       Researcher, posing the sequencing question that became N213: "should we
@@ -207,12 +350,15 @@ key_context:
       move."
 
 open_threads:
-  - "C23 contradiction (N212) awaits the researcher: what should the Statement's last clause say, given the ceiling is set by ground-truth gating rather than defect structure? O85 is the candidate generalization."
-  - "#156 (Task 4 refreeze) is now the only blocker to m5-freeze-v5, and its last code prerequisite is in review as PR #170. The frozen set is already stale: 504 mutants pinned vs 541 generated."
-  - "PR #170 (#169) awaits review; the branch docs/168-repoint-paper-caveat (ba1faa5) is committed but unpushed and has no PR."
-  - "EYH0602/lara-paper#1 — the results-prose caveat, now tracked where it can be discharged. No location metric appears in the paper's src/ yet, so it constrains prose not yet written."
+  - "C23 contradiction (N212) still awaits the researcher. The v5 numbers strengthen N210's side without adjudicating it: location_match went 399/399 -> 436/436, so the denominator grew by 37 seeded rows and the rate did not move. O85 remains the candidate replacement clause."
+  - "m5-freeze-v5 has no CI corroboration. Actions ran no job during the freeze (account billing), so all ten gates are local runs on the environment of record. Re-running CI on the v5 tree once billing is restored would be its first machine-verified pass — PR #177 records this in the checklist."
+  - "#121 is the only open item with a paper consequence and its dependency is a person, not code: either the blinded binding audit runs and the evaluation gains an exhaustive-audit sentence, or the paper states plainly that the checker does not certify binding faithfulness. Now on the critical path, since writing has started."
+  - "#176 — frozen-tag hardcoded to m5-freeze-v2 in ClaimSupport.hs and BindingAudit.hs. Cheapest to land right after a re-cut rather than before one; recommendation in the issue is to drop the field for environment.git-rev."
+  - "PR #177 (tag commit pinned in the checklist) is open and unreviewed."
+  - "EYH0602/lara-paper#1 — the results-prose caveat. Its warning not to copy m5-freeze-v4 counts is now actionable in the other direction: v5's numbers (541 mutants, 601 records, 436/436) are the ones the paper must quote."
 
 ai_suggestions_pending:
   - "O85 — the generalized ground-truth-gating claim, offered as C23's replacement clause but not adopted."
   - "O86 — the composite-fixture oracle heuristic; one instance, no researcher evaluation."
   - "O87 — the denominator-guard heuristic from #169; one instance, no researcher evaluation of the generalized wording."
+  - "O88 — provenance metadata in a frozen artifact has no oracle; two instances this turn, but no researcher evaluation of the generalized wording."

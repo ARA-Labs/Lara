@@ -1914,3 +1914,64 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O88
+  timestamp: "2026-08-25T23:40"
+  provenance: ai-suggested
+  content: >
+    Provenance metadata inside a frozen artifact is the part nothing gates,
+    so it drifts silently while the measured content stays correct. Two
+    independent instances surfaced in one cycle. (1) The v4 snapshot's
+    claim-support.json was produced from a dirty tree (git-dirty true at
+    16fa55fa) while its sibling report.json recorded git-dirty false — the
+    freeze protocol checks that a clean-tree run happened, but nothing
+    checks that every file in the snapshot agrees about it, so a
+    half-dirty snapshot survived two freezes. (2) frozen-tag is a string
+    literal "m5-freeze-v2" in ClaimSupport.hs and BindingAudit.hs, pinned
+    by a golden test, and has misnamed the corpus since v3 — the golden
+    froze the wrong value rather than catching it. The generalization: a
+    field that describes the artifact rather than being computed from it
+    has no oracle, and pinning it in a golden converts an unchecked value
+    into a defended one.
+  context: >
+    Found while cutting m5-freeze-v5 (#156) — diffing the newly measured
+    claim-support.json against the committed frozen copy showed the only
+    delta was the environment block, which is what exposed the v4 dirty-tree
+    record. Filed (2) as #176 rather than fixing it in the freeze PR, since
+    it rewrites a committed artifact and a golden.
+  potential_type: heuristic
+  bound_to: [N218]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O89
+  timestamp: "2026-08-25T22:40"
+  provenance: user
+  content: >
+    Natural language meets the system at three layers and the three get
+    different answers, split by trust direction rather than by convenience:
+    the verified surface gets more readable but never natural (Isar, not CNL —
+    an invisible parse boundary makes every rejection read as arbitrary, and
+    the surface exists for auditability, which needs determinism); NL as input
+    belongs exclusively to the untrusted producer, where replay and the human
+    binding audit are what make it sound; NL as output is free, because it
+    derives from checked artifacts and feeds nothing back. The governing rule
+    is that every ease-of-use feature must remove transcription, never
+    checking — and at layer 1 that rule is executable, since the readable
+    spelling must lower to the terse spelling's exact bytes.
+  context: >
+    The researcher's own framing, stated in issue #109 and directed into the
+    tree this turn alongside the v5 refreeze. Crystallized the same turn on
+    artifact commitment: docs/naturalness-boundary.md merged in PR #174 and
+    docs/lara-surface-grammar.md's intro now cites it as binding policy for
+    any surface addition. Two bounds were added at crystallization and are
+    marked ai-suggested inside the constraint: that layer 3's freedom covers
+    the prose but not the normative CertNd* templates, and that permissible is
+    not the same as worth building (#151 as the worked case).
+  potential_type: constraint
+  bound_to: [N215]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:Naturalness boundary"
+  crystallized_via: artifact-commitment
+  stale: false
