@@ -768,8 +768,7 @@ renderAuditSummary identity auditSummary =
       [ ("schema", JString "lara-binding-audit@0.1")
       , ( "corpus"
         , JObject
-            [ ("frozen-tag", JString "m5-freeze-v2")
-            , ("seed", JNumber 20260801)
+            [ ("seed", JNumber 20260801)
             , ("units", JNumber (summaryUnits auditSummary))
             ]
         )

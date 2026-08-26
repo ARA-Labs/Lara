@@ -103,7 +103,28 @@ claimSupportSpecProps =
   , ("claim-support: binding-audit worklist is fresh", quickCheckResult prop_bindingAuditFresh)
   , ("claim-support: atomic worklist writes preserve complete destinations", quickCheckResult prop_atomicWriteFile)
   , ("claim-support: recomputed json/tsv re-diff the committed frozen deliverable", quickCheckResult prop_frozenDeliverable)
+  , ("claim-support: JSON provenance uses git revision only", quickCheckResult prop_gitRevisionOnlyProvenance)
   ]
+
+prop_gitRevisionOnlyProvenance :: Property
+prop_gitRevisionOnlyProvenance =
+  once $
+    let env =
+          EnvBlock
+            { envGitRev = "test-rev"
+            , envGitDirty = False
+            , envGhc = "test-ghc"
+            , envLean = "test-lean"
+            , envOs = "test-os"
+            , envCpu = "test-cpu"
+            }
+        rendered = claimSupportJson env (aggregate []) []
+     in conjoin
+          [ counterexample "git revision missing from environment" $
+              "\"git-rev\": \"test-rev\"" `isInfixOf` rendered
+          , counterexample "stale freeze tag remains in corpus provenance" $
+              not ("\"frozen-tag\"" `isInfixOf` rendered)
+          ]
 
 prop_valueBindingConsumerParity :: Property
 prop_valueBindingConsumerParity =

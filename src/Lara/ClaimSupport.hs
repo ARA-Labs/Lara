@@ -727,7 +727,7 @@ claimSupportJson env rep recs =
   renderJson $
     JObject
       [ ("environment", envJson env)
-      , ("corpus", JObject [("frozen-tag", JString "m5-freeze-v2"), ("seed", JNumber 20260801), ("units", JNumber (csUnits rep))])
+      , ("corpus", JObject [("seed", JNumber 20260801), ("units", JNumber (csUnits rep))])
       , ("status-distribution", JObject (map statusCell (csStatus rep)))
       , ( "load-bearing-leaves"
         , JObject

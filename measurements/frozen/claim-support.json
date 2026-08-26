@@ -1,6 +1,6 @@
 {
   "environment": {
-    "git-rev": "89c25ef898e0c85de1715c832164463d39e52e89",
+    "git-rev": "619d1f152c3621b784582a0cd4830669529f3393",
     "git-dirty": false,
     "ghc": "9.14.1",
     "lean": "",
@@ -8,7 +8,6 @@
     "cpu": "aarch64"
   },
   "corpus": {
-    "frozen-tag": "m5-freeze-v2",
     "seed": 20260801,
     "units": 60
   },

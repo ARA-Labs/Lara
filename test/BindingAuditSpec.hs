@@ -686,7 +686,6 @@ summaryJsonGolden =
     [ "{"
     , "  \"schema\": \"lara-binding-audit@0.1\","
     , "  \"corpus\": {"
-    , "    \"frozen-tag\": \"m5-freeze-v2\","
     , "    \"seed\": 20260801,"
     , "    \"units\": 4"
     , "  },"

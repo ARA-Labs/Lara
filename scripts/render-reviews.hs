@@ -1,7 +1,7 @@
 -- | D2 — mechanical reviewer (#63): the IO around the pure
 -- "Lara.MechReview" renderer. One command that turns the checker's own per-claim
--- verdicts over the FROZEN 60 corpus units (@corpus-units\/MANIFEST.tsv@, tag
--- @m5-freeze-v2@, seed 20260801) into reviewer-style markdown — one review
+-- verdicts over the frozen 60-unit corpus sample
+-- (@corpus-units\/MANIFEST.tsv@, seed 20260801) into reviewer-style markdown — one review
 -- comment per non-@justified@ claim, generated from the located diagnostics, NOT
 -- from an LLM and with no new trusted code.
 --
