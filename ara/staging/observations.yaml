@@ -1975,3 +1975,82 @@ observations:
   promoted_to: "logic/solution/constraints.md:Naturalness boundary"
   crystallized_via: artifact-commitment
   stale: false
+
+- id: O90
+  timestamp: "2026-08-26T16:22"
+  provenance: ai-suggested
+  content: >
+    Fixing the signature, policy and backend registry makes the image of
+    compilation a proper subset of the finite argumentation frameworks: the
+    forced-edge invariant derives edges from the node labelling, so a
+    framework that labels two nodes with declared-contrary conclusions and
+    omits the edge between them is not compiled by any accepted unit. A
+    realizability theorem over this carrier therefore has content in both
+    directions -- the constraint is neither vacuous (some finite AFs are
+    excluded) nor total (the carrier is not just the set of checked programs).
+  context: >
+    Read off the frozen M0 invariant record while writing
+    docs/theory-m0-compilation-invariants.md section 3, as one of two things
+    M1 (#184) should know before its sufficiency direction is attempted.
+    Witnessed in Lean by unforcedConflictEx and, off the diagonal after the
+    #194 review, by unforcedDistinctConflict_not_invariant.
+  potential_type: claim
+  bound_to: [N221, N223]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O91
+  timestamp: "2026-08-26T16:22"
+  provenance: ai-suggested
+  content: >
+    The forcing runs one way only. conflictComplete constrains which edges
+    must be present; it does not say an edge implies contrariety between its
+    endpoints' conclusions. Reading Attack.HasAttack: only rebut matches the
+    source conclusion against the target's conclusion. Undercut matches
+    against an exception pattern for a rule occurrence inside the target and
+    needs no contrary at all; undermine matches against a leaf proposition
+    inside the target. Both produce edges invisible to a conclusion labelling.
+    A sufficiency proof must therefore *construct* attacks behind an edge
+    rather than read them off the labels, which is a strictly harder
+    obligation than the necessity direction and is where an M1 attempt is
+    most likely to fail.
+  context: >
+    Same reading as O90, recorded in section 3 of the M0 record as the second
+    of the two findings handed to M1. Separated from O90 because they cut in
+    opposite directions: O90 says the theorem has content, O91 says the
+    expensive half is the construction.
+  potential_type: claim
+  bound_to: [N221]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O92
+  timestamp: "2026-08-26T17:00"
+  provenance: ai-suggested
+  content: >
+    A counterexample stated as a theorem conditional on a hypothesis is only
+    as strong as the witnesses supplied for that hypothesis, and a witness at
+    a degenerate instance can leave the general case untested while every
+    mechanized gate stays green. The failure is silent by construction: the
+    conditional theorem is provable, the axiom audit reports it, and nothing
+    distinguishes "holds generally" from "holds only where a neighbouring
+    invariant already bites". The check is to ask, for each conditional
+    rejection, whether its witnesses instantiate the hypothesis anywhere other
+    than the degenerate point -- and to supply one that does not if they do
+    not.
+  context: >
+    Generalized from the #194 review's second-pass finding 2: both
+    conflict-completeness counterexamples were conditional on ContraryMatch,
+    and selfContrary at p = q was the only witness, which is the self-attack
+    diagonal the invariant table counts separately. Closed by sharedContrary
+    at distinct conclusions (N223). One instance so far.
+  potential_type: heuristic
+  bound_to: [N223]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

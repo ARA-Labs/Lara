@@ -37,6 +37,8 @@ import Lara.Check
 import Lara.Driver
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
+import Lara.Invariants
+import Lara.Examples.CompilerInvariants
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 
@@ -993,3 +995,28 @@ open Lara
 #print axioms Lara.BlockedProgram.production_justified_nonpromotion
 #print axioms Lara.BlockedProgram.production_justified_nonpromotion_of_not_blocked
 #print axioms Lara.BlockedProgram.checked_production_justified_nonpromotion_of_not_blocked
+
+/-! ### M0 — the frozen compilation carrier and invariant record (issue #183) -/
+
+#print axioms Lara.Invariants.compileUnit_size
+#print axioms Lara.Invariants.erase_compileUnit
+#print axioms Lara.Invariants.compileUnit_ranged
+#print axioms Lara.Invariants.compileUnit_conflictComplete
+#print axioms Lara.Invariants.compileUnit_invariant
+#print axioms Lara.Invariants.compileUnit_selfConflict
+#print axioms Lara.Invariants.support_compileUnit
+#print axioms Lara.Invariants.status_compileUnit
+
+/-! ### M0 rejecting counterexamples -/
+
+#print axioms Lara.Examples.CompilerInvariants.unrangedEx_not_invariant
+#print axioms Lara.Examples.CompilerInvariants.unrangedEx_not_realizable
+#print axioms Lara.Examples.CompilerInvariants.unforcedConflictEx_not_invariant
+#print axioms Lara.Examples.CompilerInvariants.unforcedConflictEx_not_realizable
+#print axioms Lara.Examples.CompilerInvariants.selfContrary
+#print axioms Lara.Examples.CompilerInvariants.unforcedSelfConflict_not_invariant
+#print axioms Lara.Examples.CompilerInvariants.sharedContrary
+#print axioms Lara.Examples.CompilerInvariants.unforcedDistinctConflict_not_invariant
+#print axioms Lara.Examples.CompilerInvariants.closure_rejects_noncontaining_target
+#print axioms Lara.Examples.CompilerInvariants.selfEdgeUnit_nodes
+#print axioms Lara.Examples.CompilerInvariants.selfEdgeUnit_selfEdge

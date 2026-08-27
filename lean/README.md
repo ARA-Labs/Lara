@@ -57,14 +57,14 @@ Every main theorem stays within the standard trio (`propext`,
 the `lean` job fails if any theorem's transitive axiom set contains `sorryAx` or
 anything outside that trio.
 
-The latest verification snapshot is: `lake build` completes 76 jobs;
-AxCheck emits 760 declaration reports with no `sorryAx` and no axiom outside
+The latest verification snapshot is: `lake build` completes 78 jobs;
+AxCheck emits 780 declaration reports with no `sorryAx` and no axiom outside
 `propext`, `Classical.choice`, and `Quot.sound`. The transport declarations use
 only `propext` and `Quot.sound`. The reproducible commands above and the current
 module inventory in this README are the source for this snapshot. The
 project-wide `../ara/evidence/status/mechanization_status.md` ledger is
 maintained separately and may lag this tree; it must not be read as the exact
-source of the 76/760 counts unless its own dated snapshot says so.
+source of the 78/780 counts unless its own dated snapshot says so.
 
 ## Modeling notes
 
@@ -131,3 +131,16 @@ are verdict-carried replay identity (#36) and duplicate-report groups with R9
 checking (#38); these are language/reporting additions, not missing pieces of
 the existing Lean checker proofs. The shared serialized first-order core AST
 remains the Haskell↔Lean differential-testing anchor.
+
+### Theory spine (POPL 2028)
+
+`Lara/Invariants.lean` and `Lara/Examples/CompilerInvariants.lean` open the
+theory-spine tracker (#180). They are M0 (#183): the frozen M1 carrier
+(`StructuredAF`, a conclusion-labelled finite framework), the frozen erasure to
+a naked Dung framework, the two-field `CompilerInvariant` record with its
+necessity proof over accepted units, the rejecting counterexample per carrier
+invariant, and the adequacy theorems showing claim support and four-state status
+factor through the carrier. They add no obligation to the existing checker
+results and change no existing declaration. The carrier decision and the full
+source/carrier invariant classification are recorded in
+`docs/theory-m0-compilation-invariants.md`.

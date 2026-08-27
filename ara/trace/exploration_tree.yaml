@@ -5777,3 +5777,151 @@ tree:
     - "gh issue list ARA-Labs/lara after the merge: #176, #151, #126, #121, #78, #52, #30"
   also_depends_on: [N218]
   status: open
+
+- id: N220
+  type: pivot
+  title: "Theory spine opens: POPL 2028 core mechanization (#180)"
+  provenance: user
+  timestamp: "2026-08-26T09:00"
+  description: >
+    A second, independent milestone series opened in this repository after the
+    PLDI/POPL code freeze. Its canonical design lives in the paper repository
+    (EYH0602/lara-paper, plan/theory-depth-plan.md); tracker #180 carries B0
+    and M0-M5 as native sub-issues, with the possible-world wrapper (#192) on
+    a separate tracker because it is gated by M2a and is not a committed
+    addition to the core calculus. The work is metatheory about the existing
+    checker, not new checker features: realizability of the compilation image
+    (M1), an observation interface (M2a), hardness (M2b, M3).
+  from: "Paper writing on the frozen PLDI/POPL package (N219)"
+  to: "Core theory mechanization for POPL 2028"
+  trigger: >
+    N219 closed the code side against the PLDI/POPL scope, which left the
+    metatheory questions the frozen calculus raises as the next schedulable
+    work. This node exists because the theory spine had run through M0 with
+    no trace record at all.
+  evidence:
+    - "issues #180 (tracker), #181, #182, #183, #184, #185, #186, #192"
+    - "PR #194 (M0), branch theory/m0-compilation-invariants"
+  also_depends_on: [N219]
+  status: open
+
+- id: N221
+  type: decision
+  title: "The M1 carrier is a conclusion-labelled finite AF"
+  provenance: ai-suggested
+  timestamp: "2026-08-26T16:22"
+  choice: >
+    Invariants.StructuredAF: node conclusions in declaration order plus a Bool
+    edge relation over positions. Adequacy is what licenses it rather than
+    convenience -- status_compileUnit proves the four-state status of any
+    claim, computed entirely inside the carrier, equals what the existing
+    pipeline reports over Compile.checkedAF, so M1 may quantify over carriers
+    instead of over programs. erase_compileUnit ties it the other way: erasing
+    a compiled accepted unit returns exactly Compile.checkedAF, so the carrier
+    refines the existing pipeline rather than paralleling it.
+  alternatives:
+    - "Naked AF (no node labels): rejected as uninformative. The constraint
+       that makes the image interesting -- edges forced by the fixed contrary
+       policy -- is invisible without conclusions to force them from."
+    - "Term-labelled AF: rejected as vacuous. Labelling nodes by their support
+       terms degenerates 'realizable' into 'already built from checked terms',
+       so the theorem would restate its own hypothesis."
+  evidence:
+    - "PR #194; commit 80d6160; lean/Lara/Invariants.lean (StructuredAF, eraseAF, CompilerInvariant, compileUnit)"
+    - "Invariants.status_compileUnit, Invariants.support_compileUnit (adequacy)"
+    - "Invariants.erase_compileUnit, Invariants.compileUnit_size"
+    - "docs/theory-m0-compilation-invariants.md sections 1-2 (carrier decision, eight-row invariant table)"
+  also_depends_on: [N220]
+  status: resolved
+
+- id: N222
+  type: dead_end
+  title: "A per-node `attackable` flag in the carrier"
+  provenance: ai-suggested
+  timestamp: "2026-08-26T16:22"
+  hypothesis: >
+    The carrier needs an `attackable` Bool per node. Compile.AttackComplete --
+    the source-side property the forced-edge invariant is lifted from -- is
+    guarded by Compile.ConflictAttackable, which is a property of a support
+    *term* (a leaf, or a defeasible-rooted term). Erasure to conclusions
+    discards term structure, so the guard appeared to have to be carried as a
+    node label, and an early draft of the carrier carried one.
+  failure_mode: >
+    The flag was redundant, not merely awkward.
+    Consistency.wellFormed_contrary_target_attackable proves that in a
+    well-formed policy a declared-contrary target can never be a strict-rule
+    root, and CheckedUnit.valid already supplies the completeness that lemma
+    needs. So the guard is discharged by well-formedness at every node the
+    invariant quantifies over, and the label would have recorded a fact that
+    is never false.
+  lesson: >
+    A guard on a source-level property is not automatically a carrier
+    obligation. Carrying it forward would have produced a *guarded*
+    conflictComplete -- strictly weaker than what shipped, and it would have
+    put a forgeable Bool into the frozen record that M1's realize construction
+    would then have had to justify supplying. Check whether an existing
+    well-formedness theorem discharges the guard before widening the carrier;
+    a carrier field is a freeze, and a redundant one is expensive to remove.
+  also_depends_on: [N221]
+  status: resolved
+
+- id: N223
+  type: decision
+  title: "conflictComplete needed a witness off the diagonal"
+  provenance: ai-suggested
+  timestamp: "2026-08-26T17:00"
+  choice: >
+    Added sharedContrary and unforcedDistinctConflict_not_invariant, reusing
+    the existing Examples.dpShared / pTa / qTa fixture, and gated both in
+    AxCheck. An external review pass found that both conflict-completeness
+    counterexamples are conditional on an Attack.ContraryMatch, and the only
+    witness anywhere was selfContrary at p = q -- the self-attack diagonal,
+    which the invariant table already counts separately as row 3. So the
+    off-diagonal forcing constraint, the entire reason conflictComplete is a
+    carrier field rather than a corollary of the diagonal, was untested for
+    non-vacuity.
+  alternatives:
+    - "Leave it: rejected. If ContraryMatch were ever narrowed to self-contrary
+       pairs, both conditional theorems would go silently vacuous,
+       compileUnit_conflictComplete would still be provable, and the axiom
+       audit would stay green -- the freeze would record a field nothing
+       constrains."
+    - "Weaken the documents to claim only the diagonal: rejected. The
+       off-diagonal case is what makes M1's only-if direction bite; conceding
+       it would have made the carrier decision (N221) unmotivated."
+  evidence:
+    - "PR #194 review (fenfenai, second pass, finding 2)"
+    - "commit f0c692f; lean/Lara/Examples/CompilerInvariants.lean (sharedContrary, unforcedDistinctConflict_not_invariant)"
+    - "existing fixture Examples.contrary_shared_substitution (lean/Lara/Examples.lean:1242) over Examples.dpShared, pTa, qTa"
+    - "gates after the change: lake build 78 jobs clean; scripts/check-axioms.sh pass, 780 declaration reports, no sorryAx; make presentation-parity PASS (73 rows)"
+  also_depends_on: [N221]
+  status: resolved
+
+- id: N224
+  type: decision
+  title: "M0's counterexample obligation is scoped to carrier-level invariants"
+  provenance: user-revised
+  timestamp: "2026-08-26T17:02"
+  choice: >
+    #183's acceptance criterion "every invariant has a rejecting
+    counterexample" is narrowed to *carrier-level* invariants. A source-level
+    invariant -- one quantifying over term structure erasure discards -- is
+    accepted with its Lean declaration plus a named owner for its witness,
+    because its rejection is a statement about programs rather than about the
+    carrier M1 quantifies over. Exactly one row is affected: strict-chain
+    well-formedness, proved by Support.cert_steps_accounted, whose
+    backend-leakage rejection is already the fourth Work item on #182 (B0).
+  alternatives:
+    - "Keep #183 open until #182 lands (Refs #183 rather than Closes #183):
+       rejected. #184 is marked blocked by the M0 sub-issue, so this would
+       block M1 on a witness with no bearing on the carrier M1 consumes."
+    - "Merge with Closes #183 and say nothing: rejected. The auto-close would
+       erase the distinction the PR body is otherwise honest about."
+  evidence:
+    - "issue #183 (acceptance edited; reasoning recorded as a comment)"
+    - "issue #182 Work list, item 4 (the backend-leakage rejecting example)"
+    - "issue #184 Work list (conclusion well-sortedness added as an M1 obligation)"
+    - "docs/theory-m0-compilation-invariants.md section 2, Recorded obligations"
+    - "PR #194 review (fenfenai, first pass, findings 1 and 2)"
+  also_depends_on: [N221, N223]
+  status: resolved

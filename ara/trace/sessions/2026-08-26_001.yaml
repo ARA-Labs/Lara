@@ -1,0 +1,172 @@
+session:
+  id: "2026-08-26_001"
+  date: "2026-08-26"
+  started: "2026-08-26T16:55"
+  last_turn: "2026-08-26T17:10"
+  turn_count: 1
+  summary: >
+    Resolved two review passes on PR #194 (theory M0). The substantive finding
+    was real: both conflict-completeness counterexamples are conditional on an
+    Attack.ContraryMatch and the only witness anywhere was selfContrary at
+    p = q, so the off-diagonal forcing constraint -- the reason
+    conflictComplete is a carrier field rather than a corollary of the
+    self-attack diagonal -- was untested for non-vacuity, and would have gone
+    silently vacuous under any narrowing of ContraryMatch with the axiom audit
+    still green. Closed with sharedContrary and
+    unforcedDistinctConflict_not_invariant over the existing dpShared fixture.
+    Corrected four doc-precision defects (wrong decider named for
+    Compile.Covered; nodup cited at the structure line; a dead relative path
+    to the theory-depth plan; lean/README.md's verification snapshot stale at
+    76/760 against a measured 78/780) and added the one AxCheck-gated theorem
+    missing from the name-map index. Renamed the M0 record to
+    docs/theory-m0-compilation-invariants.md: the repo already carries an
+    unprefixed M0-M5 series for the closed engineering spine, and the theory
+    spine had no free docs/m1-*.md name left. Tracking: the
+    conclusion-well-sortedness obligation moved from prose-only into #184's
+    Work list, and #183's counterexample criterion was scoped to carrier-level
+    invariants so the merge does not auto-close over an outstanding
+    source-level row that #182 owns. Also backfilled the theory spine's trace,
+    which had no record at all: the pivot (N220), the three-way carrier
+    decision (N221) and the designed-out `attackable` node label (N222).
+
+events_logged:
+  - turn: 1
+    type: pivot
+    id: "N220"
+    routing: direct
+    provenance: user
+    summary: "Theory spine opens: POPL 2028 core mechanization, tracker #180, B0 + M0-M5. Backfilled -- had no trace record."
+  - turn: 1
+    type: decision
+    id: "N221"
+    routing: direct
+    provenance: ai-suggested
+    summary: "M1 carrier = conclusion-labelled finite AF. Naked AF uninformative, term-labelled vacuous. Adequacy by status_compileUnit; erasure by erase_compileUnit. Backfilled from commit 80d6160."
+  - turn: 1
+    type: dead_end
+    id: "N222"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Per-node `attackable` flag designed out. wellFormed_contrary_target_attackable discharges the ConflictAttackable guard, so conflictComplete ships unguarded and stronger. Backfilled."
+  - turn: 1
+    type: decision
+    id: "N223"
+    routing: direct
+    provenance: ai-suggested
+    summary: "conflictComplete witnessed off the diagonal: sharedContrary + unforcedDistinctConflict_not_invariant over dpShared/pTa/qTa, both AxCheck-gated."
+  - turn: 1
+    type: decision
+    id: "N224"
+    routing: direct
+    provenance: user-revised
+    summary: "#183's counterexample criterion scoped to carrier-level invariants; source-level row 7 witness owned by #182; conclusion well-sortedness added to #184's Work list."
+  - turn: 1
+    type: observation
+    id: "O90"
+    routing: staged
+    provenance: ai-suggested
+    summary: "The image of compilation is a proper subset of finite AFs -- forced edges exclude some, so realizability has content both ways."
+  - turn: 1
+    type: observation
+    id: "O91"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Forcing is one-directional: undercut and undermine produce edges invisible to conclusion labels, so sufficiency must construct attacks, not read them off."
+  - turn: 1
+    type: observation
+    id: "O92"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A conditional counterexample witnessed only at a degenerate instance can be silently vacuous with every gate green."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Added the off-diagonal conflict-completeness witness pair and gated it in
+      AxCheck. Rebuilt and re-audited: lake build 78 jobs clean (only the two
+      pre-existing unusedSimpArgs warnings in Lara/Examples.lean),
+      scripts/check-axioms.sh exit 0 over 780 declaration reports (728 with
+      axioms, 52 without), no sorryAx, standard trio only; make
+      presentation-parity PASS (73 rows).
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Examples/CompilerInvariants.lean"
+      - "lean/AxCheck.lean"
+  - turn: 1
+    action: >
+      Renamed docs/m0-compilation-invariants.md to
+      docs/theory-m0-compilation-invariants.md, updated the five in-tree
+      references, retitled the document, and added a note distinguishing the
+      two milestone series that share numbers.
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-m0-compilation-invariants.md"
+      - "docs/paper-lean-name-map.md"
+      - "lean/README.md"
+      - "lean/Lara/Invariants.lean"
+      - "lean/Lara/Examples/CompilerInvariants.lean"
+  - turn: 1
+    action: >
+      Doc precision fixes: Compile.Covered's decider corrected from
+      attackClosureB_iff (the inner per-attack test only) to coveredB_iff;
+      CheckedProgram.nodup recited at its field line 478 rather than the
+      structure line 471; the canonical-scope pointer changed from a bare
+      relative path that does not resolve in this repo to the full lara-paper
+      URL #180-#184 already use; lean/README.md's verification snapshot
+      updated from 76 jobs / 760 reports to the measured 78 / 780;
+      closure_rejects_noncontaining_target added to the name-map declaration
+      index, which had omitted the only one of the AxCheck-gated theorems.
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-m0-compilation-invariants.md"
+      - "docs/paper-lean-name-map.md"
+      - "lean/README.md"
+  - turn: 1
+    action: >
+      Issue tracker updates: added conclusion well-sortedness as a Work item on
+      #184; narrowed #183's second acceptance bullet to carrier-level
+      invariants and posted the reasoning as a comment on #183, including the
+      offer to reopen and confirm row 7 after #182 lands if the narrowing reads
+      as fitting the criterion to the delivery.
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Review finding that carried real content: "The only witness supplied
+      anywhere is selfContrary at p = q -- the diagonal, which this PR itself
+      classifies as a separate invariant (row 3). ... if ContraryMatch were
+      ever narrowed so only self-contrary pairs matched, both conditional
+      theorems would go silently vacuous, compileUnit_conflictComplete would
+      still be provable, and the axiom audit would stay green."
+  - turn: 1
+    excerpt: >
+      The same review independently cleared the deferral of conclusion
+      well-sortedness against CLAUDE.md's do-not-defer-provable-results rule:
+      Unit.CheckedUnit is parameterized by Gamma with no field constraining
+      Gamma's range, checkUnit's `ground` is a separate parameter with nothing
+      tying Gamma's output into it, and CertOk is abstract throughout, so the
+      obligation needs a genuinely new field or bridge lemma and is not
+      provable now. It is a tracking gap, not a mechanization-discipline
+      violation.
+  - turn: 1
+    excerpt: >
+      Both review passes reported zero correctness defects across the 624
+      inserted lines, and independently reproduced all three gates. Everything
+      actioned this turn was non-vacuity, doc precision, or tracking.
+
+open_threads:
+  - "PR #194 not yet merged; the review response is pushed but the PR body still cites the pre-rename doc path and needs updating before merge."
+  - "M1 (#184) is next and now carries three obligations: the realize construction, conclusion well-sortedness under Sigma, and the O91 problem -- sufficiency must construct undercut/undermine attacks that a conclusion labelling cannot see."
+  - "Row 7 of the M0 invariant table (strict-chain well-formedness) still has no rejecting witness; it lands with B0 (#182)."
+  - "The staging buffer has ~30 unpromoted, unstale observations, many idle since well before the N219 pivot. The stale sweep is overdue and was deliberately not run this turn -- see pm_reasoning_log."
+  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the PLDI/POPL paper may claim (carried from 2026-08-25_001)."
+
+ai_suggestions_pending:
+  - "O90 and O91: the two properties of the compilation image handed to M1. Recorded in the M0 document but not researcher-evaluated; both are consequences read off the frozen record rather than results."
+  - "O92: the general lesson about conditional counterexamples witnessed only at a degenerate instance. One instance."

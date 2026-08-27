@@ -250,7 +250,8 @@ Notes for the paper wording:
 Issue #77 follow-on family (metatheory plan Task 2, commit `014173e`).
 Every paper display in the source-boundary paragraph and
 `figures/admissionrules.tex` is transcribed from `lean/Lara/Admission.lean`;
-all rows are `lean/AxCheck.lean`-gated (sorry-free, standard trio).
+every theorem row is `lean/AxCheck.lean`-gated (sorry-free, standard trio). Rows
+that name only definitions carry no independent axiom obligation.
 
 | Paper object | Lean declaration | File |
 |---|---|---|
@@ -278,3 +279,46 @@ with a test-only Haskell adapter over the production admission/prune
 primitives. `test/AdmissionSpec.hs` separately exercises the real
 `prepareSource` / `runSourceCheck` seam, including all-admit exact verdict
 bytes and quarantine-sensitive blocked status rendering.
+
+---
+
+## 5. M0 compilation carrier and invariant record (theory spine)
+
+Issue #183, tracker #180. The carrier decision and the full invariant
+classification live in `docs/theory-m0-compilation-invariants.md`; this section
+is the declaration index. Every *theorem* row is `lean/AxCheck.lean`-gated
+(sorry-free, standard trio). The rows naming the carrier, the erasure, the
+compilation and the invariant record name *definitions*, which carry no
+independent axiom obligation — each is transitively audited through a gated
+theorem that mentions it: `StructuredAF` and `compileUnit` through
+`compileUnit_invariant`, `StructuredAF.size` through `compileUnit_size`,
+`eraseAF` through `erase_compileUnit`, and `CompilerInvariant` with both its
+fields through `compileUnit_invariant`, `compileUnit_ranged` and
+`compileUnit_conflictComplete`. So the frozen carrier *is* covered by the audit,
+just not by a line of its own.
+
+No paper display cites these yet. The theory-depth plan's follow-through rule
+applies: an M-item becomes claimable only when its own gate closes, and M0 is a
+carrier freeze, not a paper theorem. Rows are listed so M1–M3 and the
+possible-world wrapper can cite a stable key rather than re-deriving one.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| The M1 carrier (conclusion-labelled AF) | `Invariants.StructuredAF`, `StructuredAF.size` | `Lara/Invariants.lean` |
+| The frozen erasure to a naked Dung framework | `Invariants.eraseAF`; coherence with the existing pipeline by `Invariants.erase_compileUnit` | `Lara/Invariants.lean` |
+| Structured compilation of an accepted unit | `Invariants.compileUnit`, `Invariants.compileUnit_size` | `Lara/Invariants.lean` |
+| The invariant record | `Invariants.CompilerInvariant` (fields `ranged`, `conflictComplete`) | `Lara/Invariants.lean` |
+| M0 necessity (M1's only-if direction, carrier level) | `Invariants.compileUnit_invariant`, from `Invariants.compileUnit_ranged` and `Invariants.compileUnit_conflictComplete` | `Lara/Invariants.lean` |
+| Self-attack as the conflict-completeness diagonal | `Invariants.compileUnit_selfConflict` | `Lara/Invariants.lean` |
+| Observational adequacy of the carrier | `Invariants.support_compileUnit` (claim support), `Invariants.status_compileUnit` (four-state status) | `Lara/Invariants.lean` |
+| Rejecting counterexample: endpoint-safe pruning | `Examples.CompilerInvariants.unrangedEx`, `unrangedEx_not_invariant`, `unrangedEx_not_realizable` | `Lara/Examples/CompilerInvariants.lean` |
+| Rejecting counterexample: conflict completeness and self-attack | `Examples.CompilerInvariants.unforcedConflictEx`, `unforcedConflictEx_not_invariant`, `unforcedConflictEx_not_realizable`, `selfContrary`, `unforcedSelfConflict_not_invariant` | `Lara/Examples/CompilerInvariants.lean` |
+| Conflict completeness off the diagonal (distinct conclusions) | `Examples.CompilerInvariants.sharedContrary`, `unforcedDistinctConflict_not_invariant` | `Lara/Examples/CompilerInvariants.lean` |
+| Rejecting counterexample: subargument closure (source-level) | `Examples.CompilerInvariants.closure_rejects_noncontaining_target` | `Lara/Examples/CompilerInvariants.lean` |
+| Positive anchor (a real accepted unit in the carrier) | `Examples.CompilerInvariants.selfEdgeUnit_nodes`, `selfEdgeUnit_selfEdge` | `Lara/Examples/CompilerInvariants.lean` |
+
+Two obligations are recorded rather than discharged, and are M1's to close: the
+strict-chain rejecting example waits on B0 (#182), and there is no theorem yet
+that a checked node's *conclusion* is well-sorted under Σ (`args_well_sorted`
+covers argument terms; tracked on #184). See
+`docs/theory-m0-compilation-invariants.md` §2.
