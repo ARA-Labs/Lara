@@ -103,54 +103,60 @@ rejecting counterexample. "Layer" is the classification M0 owes its dependents:
 
 ### Recorded obligations
 
-Two rows are not fully discharged and are recorded rather than quietly dropped,
-per the M0 scope's "give every candidate invariant a Lean declaration **or** mark
-it as a new obligation":
+M0 recorded two downstream obligations rather than dropping them, following
+the scope rule to give every candidate invariant a Lean declaration or mark it
+as a new obligation:
 
-- **Row 7** waits on B0 (#182) for its rejecting example. M1 may proceed: the
-  invariant itself is proved, only its counterexample is outstanding.
-- **Signature well-sortedness of node conclusions.** `Unit.CheckedUnit`
-  carries `args_well_sorted` (`Unit.lean:204`) over argument *terms*, but there
-  is no theorem that a checked node's *conclusion* is well-sorted under Σ. M1's
-  `realize` construction will need one to build a program from a labelled
-  framework, since it must produce well-sorted conclusions. This is a new
-  mechanization obligation for M1, not a gap in the carrier, and it is tracked
-  as a Work item on #184 rather than by this record alone.
+- **Row 7** still waits on B0 (#182) for its rejecting example. The invariant
+  itself is proved; only its counterexample remains outstanding.
+- **Signature well-sortedness of node conclusions.** M0 recorded that
+  `Unit.CheckedUnit.args_well_sorted` (`Unit.lean:204`) covers argument terms,
+  not node conclusions. M1 now closes the executable realization obligation
+  with `Realizability.Realization.node_conclusion_wellSorted`, under successful
+  checking and used-leaf ground coverage. The result does not add a field to
+  the frozen invariant record.
 
 ---
 
-## 3. What M1 inherits
+## 3. What M1 established
 
-`Invariants.compileUnit_invariant` (`:208`) is M1's necessity direction in the
-carrier: every accepted unit compiles to a framework satisfying the record. M1
-owes the converse — a `realize` operation from an invariant-satisfying framework
-back to an accepted unit, and a proof that compiling it returns an isomorphic
-framework.
+`Invariants.compileUnit_invariant` (`:208`) supplies the carrier-level premise
+for M1's necessity result. `Realizability.realizable_invariant` now proves the
+fixed-context only-if direction: every executable realization compiles, up to
+`StructuredAFIso`, to a framework satisfying the unchanged M0 record.
 
-Two consequences of the record are worth stating before M1 begins, because they
-determine whether the sufficiency direction is even plausible:
+M1 tested the proposed converse and refuted it under an empty defeat policy.
+`Examples.Realizability.oneSelfEdge_invariant` proves that a one-node self-edge
+framework satisfies both frozen fields: its endpoints are in range, and
+conflict completeness is vacuous because the policy declares no contraries.
+`Examples.Realizability.oneSelfEdge_not_realizable` proves that the same
+framework is not realizable under any fixed signature and registry paired with
+that policy. `emptyUnitCheck_ok` supplies a successful executable unit in the
+same empty-policy context, so the negative result does not depend on an
+inconsistent checker context.
 
-1. **The image is not all finite AFs.** M1 fixes the signature, policy, and
-   backend registry. With the contrary relation fixed, `conflictComplete` forces
-   an edge between every declared-contrary pair of node conclusions. A framework
-   that labels two nodes with contrary conclusions and omits the edge is outside
-   the image — that is `unforcedConflictEx`, witnessed at two *distinct*
-   conclusions by `unforcedDistinctConflict_not_invariant`.
-2. **Forcing is one-directional.** `conflictComplete` constrains which edges must
-   be *present*; it does not say an edge implies contrariety between its
-   endpoints' conclusions. `Attack.HasAttack` (`Attack.lean:538`) is precise
-   about why: only the rebut rule matches the source conclusion against the
-   *target's* conclusion. An undercut matches it against a declared exception
-   pattern for a rule occurrence inside the target and requires no contrary at
-   all; an undermine matches it against a leaf proposition drawn from Γ inside
-   the target. Both therefore produce edges invisible to the conclusion
-   labelling, so M1's sufficiency direction will have to *construct* the
-   attacks backing an edge, not read them off the labels.
+The counterexample identifies the information M0 deliberately erased.
+`conflictComplete` constrains which edges must be present, but it does not show
+that every present edge has a typed source attack. Optional edge support,
+including support terms, attacked positions, and declared attack provenance,
+does not survive in `StructuredAF`. Under the empty defeat policy no typed
+attack exists, so compilation produces no edge even though the carrier-only
+record accepts the self-edge.
 
-The erased-AF corollary stays open by design. The M0 scope permits an erased
-statement "only if it remains nontrivial after labels and term structure
-disappear"; whether it does is an M1 question, and `eraseAF` is frozen here so
-that question has a fixed subject.
+The recorded conclusion-sortedness obligation is now closed at the executable
+realization boundary by
+`Realizability.Realization.node_conclusion_wellSorted`. The theorem requires a
+`Realization`, including successful checking and used-leaf ground coverage; it
+does not strengthen the frozen M0 record or state an unconditional property of
+every standalone `CheckedUnit`.
+
+There is therefore no `realize` operation under M1's original quantifiers and
+no sufficiency theorem. The paper-facing result is necessity together with a
+fixed-policy failure of sufficiency. The erased-AF result is omitted: after
+labels and term structure disappear, the surviving range condition is generic
+endpoint well-formedness rather than a Lara-specific image characterization.
+The full declaration map and prohibited paper claims are recorded in
+`docs/theory-m1-compilation-image.md`.
 
 ---
 

@@ -2054,3 +2054,28 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O93
+  timestamp: "2026-08-26T17:46"
+  provenance: ai-suggested
+  content: >
+    For every fixed Lara context, the frozen carrier predicate
+    CompilerInvariant is necessary for realizability. A converse quantified
+    over all fixed contexts is false. Its ranged field constrains endpoints and
+    conflictComplete forces edges from contrary node conclusions, but neither
+    field requires a present optional edge to have a typed rebut, undercut or
+    undermine witness. With empty contraries and exceptions no typed attack
+    exists, while a ranged one-node self-edge framework satisfies
+    conflictComplete vacuously.
+  context: >
+    Source-derived while investigating issue #184 before implementation.
+    Recorded as the failure mode in N225 and used to choose the corrected draft
+    plan in N226. The Lean counterexample is planned but has not been
+    mechanized, and the researcher has not yet reviewed the scope correction,
+    so the observation remains staged.
+  potential_type: claim
+  bound_to: [N225, N226]
+  promoted: true
+  promoted_to: "logic/claims.md:C34"
+  crystallized_via: empirical-resolution
+  stale: false

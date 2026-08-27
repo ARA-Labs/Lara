@@ -439,8 +439,8 @@ sessions:
   open_threads: 6
 - id: 2026-08-26_001
   date: '2026-08-26'
-  summary: 'Resolved two review passes on PR #194 (theory M0). Closed a real non-vacuity hole: conflictComplete''s counterexamples were conditional on ContraryMatch with selfContrary at p = q the only witness anywhere, so the off-diagonal forcing constraint was untested and would have gone silently vacuous with the axiom audit green; added sharedContrary and unforcedDistinctConflict_not_invariant over the existing dpShared fixture. Fixed four doc-precision defects (wrong decider for Compile.Covered, nodup cited at the structure line, a dead relative path to the theory-depth plan, lean/README.md stale at 76/760 vs a measured 78/780) and the one AxCheck-gated theorem missing from the name-map index. Renamed the record to docs/theory-m0-compilation-invariants.md to separate the theory spine from the closed engineering M0-M5 series. Tracking: conclusion well-sortedness moved into #184''s Work list; #183''s counterexample criterion scoped to carrier-level invariants so the merge does not auto-close over row 7, which #182 owns. Backfilled the theory spine''s missing trace: pivot N220, carrier decision N221, and the designed-out `attackable` node label as dead end N222.'
-  turn_count: 1
-  events_count: 8
-  claims_touched: []
-  open_threads: 5
+  summary: 'Theory M1 complete: fixed-policy realizability is executable and implies the frozen invariant, the empty-defeat singleton self-edge mechanizes non-sufficiency, the M0 gate retained the carrier, all focused/full gates passed, and O93 crystallized as C34.'
+  turn_count: 5
+  events_count: 16
+  claims_touched: [C34]
+  open_threads: 11

@@ -38,9 +38,11 @@ import Lara.Driver
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
 import Lara.Invariants
+import Lara.Realizability
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
+import Lara.Examples.Realizability
 
 open Lara
 
@@ -1020,3 +1022,22 @@ open Lara
 #print axioms Lara.Examples.CompilerInvariants.closure_rejects_noncontaining_target
 #print axioms Lara.Examples.CompilerInvariants.selfEdgeUnit_nodes
 #print axioms Lara.Examples.CompilerInvariants.selfEdgeUnit_selfEdge
+
+#print axioms Lara.Realizability.StructuredAFIso.refl
+#print axioms Lara.Realizability.StructuredAFIso.symm
+#print axioms Lara.Realizability.StructuredAFIso.trans
+
+#print axioms Lara.Realizability.compilerInvariant_iso
+#print axioms Lara.Realizability.realizable_invariant
+#print axioms Lara.Realizability.HasSupport.conclusion_wellSorted
+#print axioms Lara.Realizability.Realization.node_conclusion_wellSorted
+
+/-! ### M1 — frozen-invariant non-sufficiency under a fixed policy -/
+
+#print axioms Lara.Examples.Realizability.noAttack_of_emptyDefeat
+#print axioms Lara.Examples.Realizability.compiled_no_edges_of_emptyDefeat
+#print axioms Lara.Examples.Realizability.emptyUnitCheck_ok
+#print axioms Lara.Examples.Realizability.nonempty_swapped_realizable
+#print axioms Lara.Examples.Realizability.nonempty_swapped_node_wellSorted
+#print axioms Lara.Examples.Realizability.oneSelfEdge_invariant
+#print axioms Lara.Examples.Realizability.oneSelfEdge_not_realizable

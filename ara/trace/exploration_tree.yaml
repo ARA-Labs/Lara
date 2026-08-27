@@ -5925,3 +5925,156 @@ tree:
     - "PR #194 review (fenfenai, first pass, findings 1 and 2)"
   also_depends_on: [N221, N223]
   status: resolved
+
+- id: N225
+  type: dead_end
+  title: "Empty defeat refutes a converse universal over fixed contexts"
+  provenance: ai-suggested
+  timestamp: "2026-08-26T17:46"
+  hypothesis: >
+    M1 can prove the requested fixed-context converse directly from M0's
+    frozen two-field CompilerInvariant: every ranged,
+    conflict-complete StructuredAF can be realized by a checked Lara unit
+    under the fixed signature, policy and backend registry.
+  failure_mode: >
+    Under a defeat policy with no contraries and no exceptions, all three
+    Attack.HasAttack constructors are impossible: rebut and undermine require
+    ContraryMatch, while undercut requires an exception membership. Every
+    checked program under that policy therefore compiles to an edgeless
+    framework. A one-node self-edge framework still satisfies ranged, and
+    conflictComplete is vacuous under the empty policy. Hence the frozen
+    invariant is necessary in every fixed context, while this empty-defeat
+    instance refutes a converse quantified over all fixed contexts.
+  lesson: >
+    A carrier can retain every downstream observation and still erase source
+    witnesses needed for an exact image theorem. Forced-edge completeness
+    constrains missing edges but does not license present optional edges.
+    Do not recover sufficiency by adding hidden source witnesses to the frozen
+    record: that invalidates M0 and risks turning realizability into a
+    definitional restatement.
+  evidence:
+    - "issue #184 and EYH0602/lara-paper plan/theory-depth-plan.md, M1 target theorem"
+    - "lean/Lara/Invariants.lean:121-128 (CompilerInvariant.ranged and conflictComplete)"
+    - "lean/Lara/Attack.lean:538-570 (the three HasAttack constructors and their contrary/exception premises)"
+    - "lean/Lara/Compile.lean:563-572 (every compiled edge exposes a typed declared attack)"
+    - "docs/theory-m1-compilation-image.md (counterexample and corrected theorem boundary)"
+  also_depends_on: [N221, N223]
+  status: resolved
+
+- id: N226
+  type: decision
+  title: "Draft M1 as necessity plus a mechanized non-sufficiency boundary"
+  provenance: ai-suggested
+  timestamp: "2026-08-26T17:46"
+  choice: >
+    Preserve the M0 carrier and CompilerInvariant unchanged. Define
+    all-Nat structured-framework isomorphism, executable realizability and
+    the checked-conclusion sortedness bridge; prove realizability implies the
+    frozen invariant; then mechanize N225's empty-policy one-self-edge
+    counterexample. Amend #184 and the paper plan before implementation claims
+    completion. A generated-policy universality theorem, if wanted, gets a
+    separate issue with different quantifiers.
+  alternatives:
+    - "Implement the literal iff: rejected by N225."
+    - "Add hidden term/attack witnesses to CompilerInvariant: rejected because
+       M0 is frozen and the resulting converse would approach a definitional
+       restatement."
+    - "Generate or extend the policy inside realize: separated as follow-up,
+       because it changes the fixed-context quantifiers of #184."
+  evidence:
+    - "N225 (universal fixed-context converse dead end)"
+    - "docs/theory-m1-compilation-image.md"
+    - "docs/theory-m0-compilation-invariants.md sections 1-3"
+  also_depends_on: [N221, N224, N225]
+  status: unresolved
+
+- id: N227
+  type: decision
+  title: "M1 may reopen M0, but only after the counterexample identifies a non-circular strengthening"
+  provenance: user-revised
+  timestamp: "2026-08-26T17:58"
+  choice: >
+    The researcher approved N226's recommendation and explicitly removed the
+    assumption that earlier M0 artifacts are untouchable. The implementation
+    starts against the current carrier, proves the empty-policy obstruction,
+    and then runs an evidence gate: M0 may change only if a carrier-observable
+    field is independently necessary of compilation and sufficient for a
+    constructive converse. Otherwise M1 lands the necessity/non-sufficiency
+    boundary.
+  alternatives:
+    - "Keep M0 procedurally frozen regardless of evidence: rejected by the
+       researcher; existing definitions and documents may be corrected."
+    - "Freely add source witnesses until the iff holds: rejected because that
+       makes the theorem circular even when edits are permitted."
+    - "Change the policy quantifiers inside the same theorem: separated from
+       M1's fixed-context necessity and empty-defeat counterexample because
+       generated-policy universality is a different result."
+  evidence:
+    - "Researcher: 'your recommendation make sense. we can also make modifications to what we already had'"
+    - "N225 (counterexample to the current two-field converse)"
+    - "N226 (draft recommendation)"
+    - "N229 and docs/theory-m1-compilation-image.md (post-counterexample M0 revision decision)"
+  also_depends_on: [N225, N226]
+  status: resolved
+
+- id: N228
+  type: experiment
+  title: "M1 realizability boundary is mechanized and repository-clean"
+  provenance: ai-executed
+  timestamp: "2026-08-26T21:08"
+  description: >
+    Implemented and independently reviewed the all-Nat structured-framework
+    isomorphism, executable Realization/Realizable witness, frozen-invariant
+    necessity theorem, retained-node sortedness bridge, and the empty-defeat
+    self-edge counterexample; then ran the three focused Lean/axiom gates and
+    all seven repository gates from the Task 6 brief without weakening scope.
+  result: >
+    `lake build` completed 80 jobs. AxCheck reported 792 declarations
+    (740 with axioms, 52 axiom-free), no `sorryAx`, and no axiom outside
+    `propext`, `Classical.choice`, and `Quot.sound`; all 7 checker-script cases
+    passed. Cabal built and its single test suite passed. Presentation parity
+    passed 73 rows. The main differential passed 620 positive and 56 malformed
+    negative anchors with zero failures; admission differential passed 20 of
+    20 with zero failures. Both replay-tamper classes were detected, and all 4
+    freeze-bundle tests passed.
+  evidence:
+    - "commits dc4d521, 8775029, 8c3ffed, 1bff5ac, 53689f1"
+    - "focused: (cd lean && lake build)"
+    - "focused: (set -o pipefail; cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh)"
+    - "focused: bash scripts/test-check-axioms.sh"
+    - "full: cabal build all; cabal test all --test-show-details=direct; make presentation-parity"
+    - "full: bash scripts/differential.sh; bash scripts/admission-differential.sh"
+    - "full: bash scripts/test-replay-tamper.sh; python3 scripts/test_freeze_bundle.py -v"
+  also_depends_on: [N225, N226, N227]
+  status: resolved
+
+- id: N229
+  type: decision
+  title: "Retain the M0 carrier after the post-counterexample revision gate"
+  provenance: ai-executed
+  timestamp: "2026-08-26T21:08"
+  choice: >
+    Retain the existing conclusion-labelled `StructuredAF` carrier and its
+    `CompilerInvariant`. State M1 as executable realizability implying that
+    invariant plus a mechanized empty-defeat non-sufficiency result. None of
+    the evaluated carrier extensions supplied both an independent
+    compiler-necessity proof and a constructive checker-success proof.
+  alternatives:
+    - "Add checked support terms, declared attacks, attack positions, or an
+       existential source blueprint: rejected because these are hidden source
+       witnesses and repackage Realizable, making the converse circular."
+    - "Require every edge to be licensed by endpoint conclusion labels:
+       rejected because undercut, undermine, and closure edges depend on
+       erased target occurrences and containment."
+    - "Adopt an empty-policy edge-soundness or canonical leaf-only predicate:
+       rejected because each is necessary or constructible only for a strict
+       subclass, not both necessary and sufficient for the compiler image."
+    - "Change to generated-policy quantifiers: separated because it is a
+       different theorem from fixed-context necessity and the empty-defeat counterexample."
+  evidence:
+    - "docs/theory-m1-compilation-image.md section 4 (evaluated carrier extensions and decision scope)"
+    - "N225 (falsified universal fixed-context converse)"
+    - "N228 (mechanized witness and complete green gate set)"
+    - "lean/Lara/Invariants.lean; lean/Lara/Realizability.lean"
+    - "lean/Lara/Examples/Realizability.lean"
+  also_depends_on: [N225, N227, N228]

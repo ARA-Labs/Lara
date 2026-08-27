@@ -317,8 +317,48 @@ possible-world wrapper can cite a stable key rather than re-deriving one.
 | Rejecting counterexample: subargument closure (source-level) | `Examples.CompilerInvariants.closure_rejects_noncontaining_target` | `Lara/Examples/CompilerInvariants.lean` |
 | Positive anchor (a real accepted unit in the carrier) | `Examples.CompilerInvariants.selfEdgeUnit_nodes`, `selfEdgeUnit_selfEdge` | `Lara/Examples/CompilerInvariants.lean` |
 
-Two obligations are recorded rather than discharged, and are M1's to close: the
-strict-chain rejecting example waits on B0 (#182), and there is no theorem yet
-that a checked node's *conclusion* is well-sorted under Σ (`args_well_sorted`
-covers argument terms; tracked on #184). See
-`docs/theory-m0-compilation-invariants.md` §2.
+M0 recorded two downstream obligations. B0 (#182), not M1, owns the
+strict-chain rejecting example. M1 closes conclusion sortedness at the
+executable realization boundary:
+`Realizability.Realization.node_conclusion_wellSorted` requires successful
+checking and used-leaf ground coverage. It does not assert sorted conclusions
+for every standalone `CheckedUnit`. See
+`docs/theory-m1-compilation-image.md` for the resulting theorem boundary.
+
+---
+
+## 6. M1 compilation-image boundary (theory spine)
+
+Issue #184, tracker #180. M1 fixes `canon`, `sigma`, `policy`, and `reg`, then
+defines executable realizability up to exact structured-framework isomorphism.
+Necessity holds in every fixed context. The empty-defeat counterexample refutes
+a converse quantified over all fixed contexts; it does not prove
+non-sufficiency for every policy. Every theorem row below is gated by
+`lean/AxCheck.lean` (sorry-free, standard trio).
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Equality up to node renaming | `Realizability.StructuredAFIso` | `Lara/Realizability.lean` |
+| Isomorphism equivalence proofs | `Realizability.StructuredAFIso.refl`, `Realizability.StructuredAFIso.symm`, `Realizability.StructuredAFIso.trans` | `Lara/Realizability.lean` |
+| Executable witness and realizability proposition | `Realizability.Realization`, `Realizability.Realizable` | `Lara/Realizability.lean` |
+| Invariant transport across isomorphism | `Realizability.compilerInvariant_iso` | `Lara/Realizability.lean` |
+| **Only-if direction: realizability implies the frozen invariant** | `Realizability.realizable_invariant` | `Lara/Realizability.lean` |
+| Conclusion sortedness under successful checking and used-leaf ground coverage | `Realizability.Realization.node_conclusion_wellSorted` | `Lara/Realizability.lean` |
+| Nonempty checker, coverage, and non-identity isomorphism witness | `Examples.Realizability.nonempty_swapped_realizable` | `Lara/Examples/Realizability.lean` |
+| Sortedness instantiated on a retained nonempty-fixture node | `Examples.Realizability.nonempty_swapped_node_wellSorted` | `Lara/Examples/Realizability.lean` |
+| Accepted empty-policy positive anchor | `Examples.Realizability.emptyUnitCheck_ok` | `Lara/Examples/Realizability.lean` |
+| Empty-policy edge impossibility used by the counterexample | `Examples.Realizability.noAttack_of_emptyDefeat`, `Examples.Realizability.compiled_no_edges_of_emptyDefeat` | `Lara/Examples/Realizability.lean` |
+| Invariant-satisfying self-edge | `Examples.Realizability.oneSelfEdge_invariant` | `Lara/Examples/Realizability.lean` |
+| Empty-defeat non-realizability of that self-edge | `Examples.Realizability.oneSelfEdge_not_realizable` | `Lara/Examples/Realizability.lean` |
+
+The paper may claim necessity and the failure of the universal converse. For
+the latter, it must state the hypothesis
+`policy.defeat = Examples.Realizability.emptyDefeat` from
+`oneSelfEdge_not_realizable` and cite `emptyUnitCheck_ok` to show that the
+fixed context accepts an executable unit.
+
+The paper must not print the original unconditional iff, name a constructive
+`realize` theorem, or say that every invariant-satisfying framework has a
+checked source program. No such declaration exists. M1 also omits an erased-AF
+theorem because the surviving range condition is not a Lara-specific image
+characterization.

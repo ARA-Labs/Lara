@@ -571,7 +571,7 @@ the result is stated but not yet proved or mechanized._
 ## C25: Production quarantine cannot manufacture an unqualified justified verdict for a query omitted from evidence-blocked output
 - **Statement**: For the shipped quarantine path, if the compact checked argumentation framework labels a query's complete compact support `justified`, and that query is absent from the driver's evidence-blocked output, then the corresponding declared-index claim is justified in the structurally reconstructed pre-quarantine framework over all declared arguments. Thus deleting inconsistent evidence cannot be the sole reason an affected claim is publicly presented as unqualified `justified`. The reconstructed `declaredAF` is not itself asserted to be the output of a successful `checkUnit` run.
 - **Conditions**: At least one argument is quarantined. The retained arguments are the support-filtered subsequence selected by `Groups.keepArg` (each retained support uses no quarantined leaf); retained attacks are the resolved attacks aligned with raw declarations whose endpoint IDs both survive; `checkUnit` succeeds on exactly those retained support terms and attacks; the compact claim is `completeClaimFor` for the query; and the public blocked-query computation is the production `BlockedProgram.blockedQueries`. The result is a non-promotion theorem, not equality of statuses: unaffected attacks may still make the compact status more conservative. `statusC_agree` separately requires equal support sets.
-- **Sources**: ["436/436 ← scripts/differential.sh positive anchors [result]", "54/54 ← scripts/differential.sh negative anchors [result]", "axiom audit passed ← cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh [result]"]
+- **Sources**: ["436/436 ← scripts/differential.sh positive anchors [result]", "54/54 ← scripts/differential.sh negative anchors [result]", "axiom audit passed ← (set -o pipefail; cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh) [result]"]
 - **Status**: supported
 - **Provenance**: ai-executed
 - **Falsification**: A production input accepted by `checkUnit` for which a query is omitted from the evidence-blocked list, its compact complete claim is justified, but its lifted declared-index claim is not justified; or any hidden axiom in the checker-instantiated theorem's audit.
@@ -681,3 +681,15 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [`ara/evidence/results/bytestring_wire_parser.md`, `src/Lara/Wire.hs`, `test/WireSpec.hs` (`referenceParseSExpr` differential over 581 committed inputs plus eleven exact position pins), `scripts/differential.sh`, `docs/m5-freeze-checklist.md`, trace N191, trace N192, trace N193, PR #118, commit `a2904d7`]
 - **Dependencies**: [C32]
 - **Tags**: performance, wire-codec, differential-testing, unicode, trusted-base, issue-115, issue-116
+
+## C34: Necessity holds in every fixed context, while empty defeat refutes the universal converse
+- **Statement**: For every fixed signature, policy, and backend registry, executable realizability implies the frozen `CompilerInvariant`. A converse quantified over all fixed contexts is false: when `policy.defeat = emptyDefeat`, the singleton self-edge satisfies the invariant but is not realizable.
+- **Conditions**: The counterexample uses a valid context whose defeat policy has no contrary or exception declarations. Under such a policy every compiled edge is false, while the singleton self-edge still satisfies the frozen range and conflict-completeness fields. This establishes non-sufficiency for the empty-defeat class and refutes the universal converse; it does not establish non-sufficiency for every fixed policy. Generated-policy universality is a different theorem. The M0 carrier remains unchanged.
+- **Sources**: [`singleton self-edge ← lean/Lara/Examples/Realizability.lean:24-26 «def oneSelfEdge (p : Atom) : Invariants.StructuredAF := { nodes := [p], attack := fun i j => decide (i = 0 ∧ j = 0) }» [input]`, `axiom set ← focused AxCheck gate «Axiom audit passed.» [result]`]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit a successful checker witness under a policy whose defeat component is `emptyDefeat` that compiles, up to `StructuredAFIso`, to `oneSelfEdge`; or refute the necessity theorem by exhibiting an executable realization whose target violates `CompilerInvariant`.
+- **Proof**: [`lean/Lara/Realizability.lean` (`realizable_invariant`), `lean/Lara/Examples/Realizability.lean` (`noAttack_of_emptyDefeat`, `compiled_no_edges_of_emptyDefeat`, `emptyUnitCheck_ok`, `oneSelfEdge_invariant`, `oneSelfEdge_not_realizable`), `lean/AxCheck.lean`, trace N225, trace N228, trace N229]
+- **Dependencies**: []
+- **Tags**: mechanization, compilation-image, realizability, counterexample, fixed-policy, M1
+- **Last revised**: 2026-08-26 (2026-08-26_001#5)

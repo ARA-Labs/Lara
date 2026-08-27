@@ -2,32 +2,18 @@ session:
   id: "2026-08-26_001"
   date: "2026-08-26"
   started: "2026-08-26T16:55"
-  last_turn: "2026-08-26T17:10"
-  turn_count: 1
+  last_turn: "2026-08-26T21:22"
+  turn_count: 5
   summary: >
-    Resolved two review passes on PR #194 (theory M0). The substantive finding
-    was real: both conflict-completeness counterexamples are conditional on an
-    Attack.ContraryMatch and the only witness anywhere was selfContrary at
-    p = q, so the off-diagonal forcing constraint -- the reason
-    conflictComplete is a carrier field rather than a corollary of the
-    self-attack diagonal -- was untested for non-vacuity, and would have gone
-    silently vacuous under any narrowing of ContraryMatch with the axiom audit
-    still green. Closed with sharedContrary and
-    unforcedDistinctConflict_not_invariant over the existing dpShared fixture.
-    Corrected four doc-precision defects (wrong decider named for
-    Compile.Covered; nodup cited at the structure line; a dead relative path
-    to the theory-depth plan; lean/README.md's verification snapshot stale at
-    76/760 against a measured 78/780) and added the one AxCheck-gated theorem
-    missing from the name-map index. Renamed the M0 record to
-    docs/theory-m0-compilation-invariants.md: the repo already carries an
-    unprefixed M0-M5 series for the closed engineering spine, and the theory
-    spine had no free docs/m1-*.md name left. Tracking: the
-    conclusion-well-sortedness obligation moved from prose-only into #184's
-    Work list, and #183's counterexample criterion was scoped to carrier-level
-    invariants so the merge does not auto-close over an outstanding
-    source-level row that #182 owns. Also backfilled the theory spine's trace,
-    which had no record at all: the pivot (N220), the three-way carrier
-    decision (N221) and the designed-out `attackable` node label (N222).
+    Closed and merged theory M0 after review, then corrected M1 issue #184's
+    false universal fixed-context iff. M1 now mechanizes all-Nat
+    structured-framework isomorphism, executable realizability,
+    frozen-invariant necessity, retained-node sortedness, and an accepted
+    empty-defeat self-edge counterexample to sufficiency. The
+    post-counterexample gate retained the
+    M0 carrier because no non-circular strengthening passed both proof
+    sketches. All focused and full repository gates passed, and O93
+    crystallized as C34.
 
 events_logged:
   - turn: 1
@@ -78,6 +64,54 @@ events_logged:
     routing: staged
     provenance: ai-suggested
     summary: "A conditional counterexample witnessed only at a degenerate instance can be silently vacuous with every gate green."
+  - turn: 2
+    type: dead_end
+    id: "N225"
+    routing: direct
+    provenance: ai-suggested
+    summary: "CompilerInvariant is necessary in every fixed context; empty defeat plus a one-node self-edge refutes a converse quantified over all fixed contexts."
+  - turn: 2
+    type: decision
+    id: "N226"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Draft M1 as isomorphism + executable realizability + necessity + sortedness + mechanized non-sufficiency; preserve M0 and separate generated-policy universality."
+  - turn: 2
+    type: observation
+    id: "O93"
+    routing: staged
+    provenance: ai-suggested
+    summary: "CompilerInvariant is necessary in every fixed context, while empty defeat refutes the universal converse because present optional edges retain no source attack witness."
+  - turn: 3
+    type: decision
+    id: "N227"
+    routing: direct
+    provenance: user-revised
+    summary: "Researcher approved the M1 boundary recommendation and allowed M0 revisions; any revision must pass a post-counterexample non-circularity and downstream-migration gate."
+  - turn: 4
+    type: experiment
+    id: "N228"
+    routing: direct
+    provenance: ai-executed
+    summary: "M1 theorem correction mechanized; 80-job Lean build, 792-declaration axiom audit, 73-row parity, 620/56 differential, 20-row admission differential, replay tamper, freeze, and Haskell gates all passed."
+  - turn: 4
+    type: decision
+    id: "N229"
+    routing: direct
+    provenance: ai-executed
+    summary: "Post-counterexample M0 gate retained the current carrier; every candidate strengthening was non-necessary, non-constructive, policy-special, or a circular hidden source witness."
+  - turn: 4
+    type: claim
+    id: "C34"
+    routing: crystallized
+    provenance: user-revised
+    summary: "O93 -> C34 via mechanized empirical resolution and researcher-approved artifact commitment: necessity holds in every fixed context, and the empty-defeat self-edge refutes the universal converse."
+  - turn: 5
+    type: correction
+    id: "C34"
+    routing: direct
+    provenance: ai-executed
+    summary: "Normalized current-turn metadata: removed unsupported decision status from N229 and corrected C34 provenance to ai-suggested; empirical resolution does not upgrade provenance without claim-level user affirmation."
 
 ai_actions:
   - turn: 1
@@ -130,10 +164,99 @@ ai_actions:
       as fitting the criterion to the delivery.
     provenance: ai-executed
     files_changed: []
+  - turn: 2
+    action: >
+      Inspected live issue #184, parent tracker #180, predecessor #183, merged
+      PR #194, the canonical theory-depth M1 scope, the frozen invariant
+      record, and the Lean checker/compiler/attack/sortedness paths. Created
+      branch theory/m1-compilation-image from main at 153bc63.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: >
+      Wrote and self-reviewed a 601-line M1 implementation plan. Corrected its
+      first isomorphism design after identifying that a Fin-only relation
+      cannot transport CompilerInvariant.ranged over StructuredAF's total Nat
+      attack function. The durable theorem boundary and equality notion now
+      live in docs/theory-m1-compilation-image.md.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: >
+      Revised the issue #184 implementation plan to replace the absolute M0
+      preservation rule with a post-Task-4 evidence gate. The gate permits an
+      exact-iff carrier revision only when the new field is carrier-observable,
+      does not quantify over realizability witnesses, has an independent
+      compiler-necessity proof, enables a constructive converse, and migrates
+      all downstream statements.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/exploration_tree.yaml"
+  - turn: 4
+    action: >
+      Completed the M1 implementation and contract across commits dc4d521,
+      8775029, 8c3ffed, 1bff5ac, and 53689f1; evaluated the post-counterexample
+      M0 revision gate and retained the carrier; then ran every focused and
+      full Task 6 command successfully. Exact results: Lean 80 jobs; AxCheck
+      792 declarations (740 with axioms, 52 axiom-free), no sorryAx and only
+      the standard trio; axiom-checker tests 7/7; Cabal 1/1 suites;
+      presentation parity 73 rows; differential 620 positive and 56 negative
+      with zero failures; admission differential 20/20; both replay tamper
+      classes detected; freeze bundle 4/4.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Realizability.lean"
+      - "lean/Lara/Examples/Realizability.lean"
+      - "lean/AxCheck.lean"
+      - "lean/Lara.lean"
+      - "docs/theory-m1-compilation-image.md"
+      - "docs/theory-m0-compilation-invariants.md"
+      - "docs/paper-lean-name-map.md"
+      - "lean/README.md"
+  - turn: 4
+    action: >
+      Ran the research-manager pipeline after final gate evidence, appended
+      N228 and N229, promoted O93 to supported claim C34, and synchronized the
+      current session, index, and reasoning log.
+    provenance: ai-executed
+    files_changed:
+      - "ara/logic/claims.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/sessions/2026-08-26_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+  - turn: 5
+    action: >
+      Corrected only task-local ARA metadata after schema/provenance review:
+      removed N229's unsupported decision status and restored C34 provenance
+      to ai-suggested. Historical trace nodes and their 33 fixable aliases
+      remain untouched.
+    provenance: ai-executed
+    files_changed:
+      - "ara/logic/claims.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-26_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
 
-claims_touched: []
+claims_touched:
+  - id: C34
+    action: crystallized
+    turn: 4
+  - id: C34
+    action: revised
+    turn: 5
 
-logic_revisions: []
+logic_revisions:
+  - turn: 5
+    entry: C34
+    field: Provenance
+    before: "user-revised"
+    after: "ai-suggested"
+    signal: user-directive
+    provenance: ai-suggested
+    note: "Empirical resolution crystallized O93 but did not supply claim-level verbal affirmation; the staged observation's provenance therefore carries through unchanged."
 
 key_context:
   - turn: 1
@@ -159,6 +282,40 @@ key_context:
       Both review passes reported zero correctness defects across the 624
       inserted lines, and independently reproduced all three gates. Everything
       actioned this turn was non-vacuity, doc precision, or tracking.
+  - turn: 2
+    excerpt: >
+      Source-level obstruction to #184 as written: CompilerInvariant has only
+      ranged and conflictComplete. With empty contraries and exceptions every
+      HasAttack constructor is impossible, so compiled frameworks are
+      edgeless; a one-node self-edge remains ranged and conflictComplete is
+      vacuous. The requested converse therefore cannot hold for arbitrary
+      fixed policies.
+  - turn: 2
+    excerpt: >
+      Isomorphism must preserve the total Nat attack function, not only
+      in-range Fin positions. Otherwise a target framework can carry an
+      out-of-range true edge invisible to the bijection, and
+      compilerInvariant_iso cannot transport ranged.
+  - turn: 3
+    excerpt: >
+      Researcher approval: "your recommendation make sense. we can also make
+      modifications to what we already had." Interpreted as approval of the
+      necessity/non-sufficiency default and permission to reopen M0 when a
+      stronger non-circular theorem justifies the migration.
+  - turn: 4
+    excerpt: >
+      Mechanized boundary: `realizable_invariant` proves necessity;
+      `oneSelfEdge_invariant` and `oneSelfEdge_not_realizable` prove that an
+      accepted empty-defeat context leaves the self-edge invariant but outside
+      the compilation image. The M0 gate found no carrier-observable,
+      independently necessary strengthening that also constructs checker
+      success without hiding the source witness.
+  - turn: 4
+    excerpt: >
+      Final evidence: Lean built 80 jobs; AxCheck passed over 792 declarations
+      with only propext, Classical.choice, and Quot.sound; differential suites
+      passed 620 positive, 56 negative, and 20 admission rows with zero
+      failures; replay tampering and all 4 freeze rollback tests passed.
 
 open_threads:
   - "PR #194 not yet merged; the review response is pushed but the PR body still cites the pre-rename doc path and needs updating before merge."
@@ -166,7 +323,16 @@ open_threads:
   - "Row 7 of the M0 invariant table (strict-chain well-formedness) still has no rejecting witness; it lands with B0 (#182)."
   - "The staging buffer has ~30 unpromoted, unstale observations, many idle since well before the N219 pivot. The stale sweep is overdue and was deliberately not run this turn -- see pm_reasoning_log."
   - "#121's dependency is a person and it remains the one open issue whose resolution changes what the PLDI/POPL paper may claim (carried from 2026-08-25_001)."
+  - "The first open thread above is historical: PR #194 merged as commit 153bc63 and #183 closed before turn 2 began."
+  - "N226 is an unapproved scope recommendation. The researcher must review the draft plan before implementation or edits to issue #184 and the lara-paper theory plan."
+  - "The M1 counterexample is source-derived but not yet mechanized; O93 remains staged until implementation evidence or researcher affirmation supplies a closure signal."
+  - "The N226 approval thread is closed by N227. M0 is editable, but the post-Task-4 gate must identify an independently necessary and constructively sufficient carrier field before any rewrite."
+  - "O93 remains staged. The researcher approved the scope recommendation, not the counterexample as mechanized evidence; the planned Lean theorem remains its closure path."
+  - "The M1 implementation and counterexample threads above are closed by N228/N229; O93 crystallized as C34, and the current M0 carrier was retained."
 
 ai_suggestions_pending:
   - "O90 and O91: the two properties of the compilation image handed to M1. Recorded in the M0 document but not researcher-evaluated; both are consequences read off the frozen record rather than results."
   - "O92: the general lesson about conditional counterexamples witnessed only at a degenerate instance. One instance."
+  - "O93/N226: proposed correction of #184 from an unconditional iff and realize operation to necessity plus a mechanized non-sufficiency boundary; awaiting researcher review."
+  - "Supersedes the prior O93/N226 pending line only for N226: N227 records approval of the evidence-gated scope decision; O93 remains staged pending the planned Lean counterexample or explicit claim-level affirmation."
+  - "The O93/N226 pending lines are closed: N228 supplies the mechanized counterexample and complete gates, N229 records carrier retention, and O93 is now C34."

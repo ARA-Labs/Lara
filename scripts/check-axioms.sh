@@ -11,7 +11,7 @@
 # an axiom split across lines cannot evade the check.
 #
 # Usage:
-#   (cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
+#   (set -o pipefail; cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
 #   scripts/check-axioms.sh < saved-output.txt
 set -euo pipefail
 

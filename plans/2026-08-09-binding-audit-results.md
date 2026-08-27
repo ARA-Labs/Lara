@@ -900,7 +900,7 @@ and worklist, packets, and summary are byte-deterministic.
 
 ```bash
 (cd lean && lake build)
-(cd lean && lake env lean AxCheck.lean) | scripts/check-axioms.sh
+(set -o pipefail; cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
 bash scripts/differential.sh
 bash scripts/admission-differential.sh
 bash scripts/test-replay-tamper.sh

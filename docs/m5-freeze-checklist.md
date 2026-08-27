@@ -513,7 +513,7 @@ cabal exec -- runghc scripts/gen-mutants.hs   # empty generated-suite diff
 bash scripts/differential.sh                  # positive/negative counts above
 bash scripts/admission-differential.sh        # 20 files: 15 semantic + 5 codec-reject
 bash scripts/test-replay-tamper.sh            # both tamper classes detected
-(cd lean && lake env lean AxCheck.lean) | scripts/check-axioms.sh
+(set -o pipefail; cd lean && lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
 cabal test all --test-show-details=direct
 python3 scripts/test_freeze_bundle.py -v      # 4/4
 cabal exec -- runghc scripts/measure.hs
