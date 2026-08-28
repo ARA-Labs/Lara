@@ -31,6 +31,7 @@ import CheckSpec (checkSpecProps)
 import CliSpec (cliSpecProps)
 import FormulaNamesSpec (formulaNamesSpecProps)
 import SlotNamesSpec (slotNamesSpecProps)
+import SemanticsSpec (semanticsSpecProps)
 import CorpusUnitsSpec (corpusUnitsSpecProps)
 import DifferentialSpec (differentialSpecProps)
 import ElaborateSpec (elaborateSpecProps)
@@ -229,6 +230,7 @@ main = do
         ++ [run name act | (name, act) <- formulaNamesSpecProps]
         ++ [run name act | (name, act) <- ndNamedSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]
+        ++ [run name act | (name, act) <- semanticsSpecProps]
   unless (and results) exitFailure
   where
     run name act = do

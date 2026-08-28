@@ -79,6 +79,9 @@ jobs:
       - name: Haskell-Lean presentation AST parity
         run: make presentation-parity
 
+      - name: Haskell-Lean semantics golden parity
+        run: make semantics-goldens
+
       - name: Elaborator unit tests
         run: uv run --no-project python -m unittest discover -s elaborator -v
 

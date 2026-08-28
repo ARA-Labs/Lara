@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-image bench-container measure presentation-parity
+.PHONY: build test bench bench-image bench-container measure presentation-parity semantics-goldens
 
 build:
 	cabal build all
@@ -15,6 +15,11 @@ test:
 # shape tripwires; the gate rebuilds both and diffs them.
 presentation-parity:
 	bash scripts/check-presentation-parity.sh
+
+# Lean-emitted extension-semantics goldens must match the checked-in Haskell
+# conformance table byte for byte.
+semantics-goldens:
+	bash scripts/check-semantics-goldens.sh
 
 # E1 checker-performance bench (issue #69): measures the production checker
 # on the frozen corpus units and the manifest-discovered harness, prints the

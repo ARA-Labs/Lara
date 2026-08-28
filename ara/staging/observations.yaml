@@ -2079,3 +2079,81 @@ observations:
   promoted_to: "logic/claims.md:C34"
   crystallized_via: empirical-resolution
   stale: false
+- id: O94
+  timestamp: "2026-08-28T18:40"
+  provenance: ai-suggested
+  content: >
+    In a development where proofs are machine-checked and prose is not, the
+    errors concentrate in the prose that reasons ABOUT the code — counts,
+    "together with X", "which is why", dependency and location claims — and
+    not in the prose that reports what the code outputs. Across M2a's review
+    rounds every caught false statement was of the first kind and every
+    evaluation-backed claim, from every author, was correct. The remedy that
+    worked was to stop writing the sentence and state a theorem the gate
+    checks.
+  context: >
+    Observed across eight review rounds on M2a. Instances included a use count
+    ("three times" for two uses), a "together with X" naming a lemma that
+    played no part, "a different route for each of five" over three routes,
+    "without this the constructor is unreachable" (backwards — it was derived
+    from the theorem that proves reachability), an importer list falsified
+    twice by later commits in the same milestone, and a Lean theorem asserted
+    to exist that does not. Three were the orchestrator's own. The
+    mechanize-instead responses were mem_attacked_iff, claimDefeatedB_of_nil /
+    claimAcceptedB_of_nil, twoCycle_defeated_unreachable, and
+    allSemantics_complete.
+  potential_type: heuristic
+  bound_to: [N234, N236]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O95
+  timestamp: "2026-08-28T18:40"
+  provenance: ai-suggested
+  content: >
+    Anything printed during the Lean build shares a channel with the axiom
+    audit. scripts/check-axioms.sh extracts every bracketed run in its input
+    and treats the comma-separated contents as axiom names, reading the whole
+    stream rather than only declaration reports — so a list literal emitted by
+    a `#eval` during `lake build` fails the gate, and the reported token is
+    the bare digit, the brackets having been stripped before comparison.
+  context: >
+    Surfaced when the M2a golden emitter had to print Haskell list literals.
+    Guarded on LARA_EMIT_GOLDENS instead. Two consequences already in force:
+    renderObservation prints one word per cell rather than delegating to the
+    derived Repr, and the observation table carries no extension lists. The
+    hazard is latent rather than active — the gate loads the module from its
+    .olean and never re-runs the #eval — which is why it is invisible from
+    either side alone.
+  potential_type: constraint
+  bound_to: [N235]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O96
+  timestamp: "2026-08-28T18:40"
+  provenance: ai-suggested
+  content: >
+    When a new general layer is built over a frozen specific one, the
+    attractive framing — "the old theorem is the instance of the new one" —
+    is usually false, and the honest relation is an equivalence at best. The
+    general result typically acquires a hypothesis the specific one did not
+    need, so it asks for more rather than less, and the two often have
+    different subjects entirely.
+  context: >
+    The framing was wrong three times in M2a: in the plan's instruction for
+    the paper name map, in a Lara.lean header entry, and in a module header.
+    In each case what is actually true is stronger for the paper — the frozen
+    theorem is untouched and independently proved, so its existing citation
+    stands unmodified rather than being rewritten to route through the new
+    result.
+  potential_type: heuristic
+  bound_to: [N234]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

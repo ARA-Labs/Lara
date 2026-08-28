@@ -362,3 +362,105 @@ The paper must not print the original unconditional iff, name a constructive
 checked source program. No such declaration exists. M1 also omits an erased-AF
 theorem because the surviving range condition is not a Lara-specific image
 characterization.
+
+---
+
+## 7. M2a semantics-parametric claim observation (theory spine)
+
+Issue #185, tracker #180. M2a makes the semantics parameter of the development
+an object: `ExtensionSemantics` bundles a declarative specification, a
+proof-oriented enumerator, and adequacy, and the grounded results become the
+`groundedSem` instance. The landing is additive — `Lara/Compile.lean` was not
+modified, and no result here lifts a `grounded`-indexed theorem to an arbitrary
+semantics. Every theorem row below is gated by `lean/AxCheck.lean` (sorry-free,
+standard trio); 157 declarations across the four modules are covered (67 in
+`Lara/Semantics.lean`, 7 in `Lara/Semantics/Sublists.lean`, 43 in
+`Lara/Observation.lean`, 40 in `Lara/Examples/Semantics.lean`). See
+`docs/theory-m2a-observation.md` for the boundary and for six corrections the
+mechanization forced on the plan.
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| The semantics interface (fields `spec`, `enumerate`, `sound`) | `Semantics.ExtensionSemantics` | `Lara/Semantics.lean` |
+| The five instances | `Semantics.groundedSem`, `completeSem`, `preferredSem`, `stableSem`, `semiStableSem` | `Lara/Semantics.lean` |
+| The carrier-bounded extension predicates | `Semantics.Bounded`, `Admissible`, `Complete`, `Stable`, `LeastComplete`, `Preferred`, `SemiStable`, each with its `..B` decider and `..B_iff` | `Lara/Semantics.lean` |
+| Dung's fundamental lemma, and preferred ⇒ complete as a theorem | `Semantics.admissible_cons`, `Semantics.preferred_complete` | `Lara/Semantics.lean` |
+| Sublist representation (hand-rolled: core Lean v4.32.0 has no `List.sublists`, and the project carries no Mathlib dependency today — `lean/lakefile.toml` records it as planned for result 5) | `Semantics.subseqs`, `mem_subseqs`, `sublist_ext`, `subseqs_ext`, `subseqs_nodup` | `Lara/Semantics/Sublists.lean` |
+| Representative uniqueness from `sound` alone, for any instance | `Semantics.enumerate_ext`, from `Semantics.candidates_ext` and `candidates_nodup` | `Lara/Semantics.lean` |
+| **Adequacy needs no `Nodup`** (the refutation of the plan's D4 rationale) | `Examples.Semantics.sound_holds_without_nodup` | `Lara/Examples/Semantics.lean` |
+| **Representative uniqueness genuinely fails without `Nodup`** | `Examples.Semantics.not_candidates_ext_without_nodup`, `not_enumerate_ext_without_nodup`, `dupCarrier`, `dupCarrier_candidates`, `dupCarrier_enumerate` | `Lara/Examples/Semantics.lean` |
+| Grounded is the singleton instance | `Semantics.groundedSem_enumerate`, `mem_canonize_grounded`, `groundedSem_singleton` | `Lara/Semantics.lean` |
+| The argument-level acceptance record | `Semantics.AcceptanceProfile` (fields `inAll`, `inSome`, `outAll`, `outSome`), `Semantics.profile` | `Lara/Semantics.lean` |
+| Skeptical/credulous collapse under grounded | `Semantics.profile_grounded` | `Lara/Semantics.lean` |
+| The claim-level observation type and its aggregation | `Semantics.ClaimObservation` (constructors `noExtension`, `observed`), `Semantics.observe`, `claimAcceptedB`, `claimDefeatedB` | `Lara/Semantics.lean` |
+| The two "attacked by" notions, kept apart | `Semantics.attackedByB`, `Semantics.mem_attacked_iff` | `Lara/Semantics.lean` |
+| **The four-state status the paper prints is the grounded instance** | `Semantics.observe_grounded` | `Lara/Semantics.lean` |
+| **`gap` is semantics-independent** (arbitrary `sem`, no hypothesis but `c.support = []`) | `Semantics.observe_gap`, converse `Semantics.observe_gap_iff` | `Lara/Semantics.lean` |
+| `gap` exercised at all five instances, including where the guards compete | `Examples.Semantics.observe_claimNoSupport_uniform` | `Lara/Examples/Semantics.lean` |
+| The two vacuity hazards, mechanized rather than described | `Semantics.claimDefeatedB_of_nil`, `claimAcceptedB_of_nil` (support), `Semantics.no_verdict_on_empty` (enumeration) | `Lara/Semantics.lean` |
+| Emptiness report recovered; verdict backed by an extension | `Semantics.observe_noExtension_iff`, `Semantics.enumerate_ne_nil_of_observed_ne_gap` | `Lara/Semantics.lean` |
+| Exclusivity of `justified` and `defeated`, and its hypothesis | `Semantics.justified_defeated_exclusive`, `Semantics.observe_justified_not_all_defeated`, `Semantics.SpecConflictFree` | `Lara/Semantics.lean` |
+| The five `SpecConflictFree` discharges | `Semantics.groundedSem_specConflictFree`, `completeSem_specConflictFree`, `preferredSem_specConflictFree`, `stableSem_specConflictFree`, `semiStableSem_specConflictFree` | `Lara/Semantics.lean` |
+| Carrier-locality of a specification | `Observation.AttackExtensional`, `Observation.attackExtensional_of_imp`, and its seven instances `attackExtensional_bounded`, `attackExtensional_admissible`, `attackExtensional_complete`, `attackExtensional_leastComplete`, `attackExtensional_preferred`, `attackExtensional_stable`, `attackExtensional_semiStable` | `Lara/Observation.lean` |
+| **`AttackExtensional ConflictFree` is false** | `Observation.not_attackExtensional_conflictFree`; positive contrast `Observation.admissible_transports_on_junk`; correct decomposition `Observation.conflictFree_congr_af` | `Lara/Observation.lean` |
+| Observation transport, and the support bound it needs | `Observation.observe_congr`; necessity by `Observation.not_observe_congr_of_unbounded_support`, `observe_congr_needs_support_bound` | `Lara/Observation.lean` |
+| The transport hypothesis on the oracle | `Observation.AgreesOnArgs`, `agreesOnArgs_of_faithful`, `agreesOnArgs_edgeB` | `Lara/Observation.lean` |
+| **Why the hypothesis is not `Faithful`** | `Observation.faithful_unique` (any two are equal); `Examples.Semantics.agreesOnArgs_strictly_weaker_than_faithful`, from `eJunk_agreesOnArgs` and `not_faithful_eJunk` | `Lara/Observation.lean`, `Lara/Examples/Semantics.lean` |
+| Source-level observation and its preservation theorem | `Observation.SrcObservation`, `Observation.srcObservation_iff_checked`, `srcObservation_checked`, `srcObservation_unique` | `Lara/Observation.lean` |
+| **The honest bridge to result 6** (an equivalence, not an instantiation) | `Observation.srcStatus_iff_srcObservation` | `Lara/Observation.lean` |
+| Stable nonexistence, and `noExtension` actually reached | `Examples.Semantics.stableSem_enumerate_threeCycle`, `observe_stableSem_threeCycle`, `observe_stableSem_threeCycle_ne_justified`, `observe_stableSem_threeCycle_ne_defeated`, `threeCycle_enumerate_nonStable` | `Lara/Examples/Semantics.lean` |
+| Nonexistence is the bare cycle's, not an odd cycle's | `Examples.Semantics.stableSem_enumerate_threeCycleAttacked` | `Lara/Examples/Semantics.lean` |
+| All ten pairwise separations, count checked by the elaborator | `Examples.Semantics.five_semantics_pairwise_distinct` | `Lara/Examples/Semantics.lean` |
+| Reinstatement exercised by a two-element extension in all five semantics | `Examples.Semantics.reinstatementChain` | `Lara/Examples/Semantics.lean` |
+| **No four-state function realizes both credulous readings** | `Examples.Semantics.credulous_not_functional`, `profile_preferredSem_twoCycle_symm`, `profile_preferredSem_twoCycle`, `profile_groundedSem_twoCycle` | `Lara/Examples/Semantics.lean` |
+| **`observe` does not factor through `profile`** | `Examples.Semantics.observe_not_determined_by_profile` | `Lara/Examples/Semantics.lean` |
+| The three non-`gap` statuses vary with the semantics | `Examples.Semantics.observe_twoCycle_grounded_ne_preferred`, `observe_twoCycleSink_grounded_ne_preferred` | `Lara/Examples/Semantics.lean` |
+| Structural contrasts among the four non-grounded instances | `Examples.Semantics.preferred_exists_where_stable_does_not`, `semiStable_exists_where_stable_does_not`, `semiStable_proper_refinement_of_preferred` | `Lara/Examples/Semantics.lean` |
+| `defeated` unreachable on the two-cycle, for an arbitrary supported claim | `Examples.Semantics.twoCycle_defeated_unreachable`, from `twoCycle_extensions`, `twoCycle_defeat_split`, `observe_ne_defeated_of_mem_enumerate`, `claimDefeatedB_nil_eq_false` | `Lara/Examples/Semantics.lean` |
+| The observation table (the paper figure), generated not transcribed | `Examples.Semantics.observationTable`, `tableRow`, and the closed vocabularies `SemanticsName` / `FrameworkName` / `ClaimName` with `semanticsInstance` / `frameworkAF` / `claimOf` | `Lara/Examples/Semantics.lean` |
+| No table row can be silently dropped | `Examples.Semantics.allSemantics_complete`, `allFrameworks_complete`, `allClaims_complete` | `Lara/Examples/Semantics.lean` |
+
+The paper may claim that the observation interface is parametric and that the
+four-state status it already prints is the `groundedSem` instance of it
+(`observe_grounded`); that `gap` is the one semantics-independent status
+(`observe_gap`, `observe_gap_iff`); that stable extensions can fail to exist and
+that `observe` then reports `noExtension` rather than fabricating a `Status`;
+and that all ten pairwise separations among the five semantics are witnessed
+(`five_semantics_pairwise_distinct`). Where the table is displayed, the `|E|`
+column must be displayed with it: `groundedSem` and `completeSem` occupy 48 of
+the 120 rows, and on all 24 (framework, claim) inputs their observations are
+identical. They separate only by extension count, which differs on 12 of the 24.
+
+**`thm:preservation` does not change.** It continues to cite
+`Lara.Compile.srcStatus_iff_checked` (§1 above), unmodified and with no support
+side condition attached. `Observation.srcObservation_iff_checked` is **not** a
+generalization of it: the observation form requires
+`∀ i ∈ c.support, i < P.args.length`, so it asks for more, and the two subjects
+differ — `Compile.SrcStatus` is an inductive relation over `SrcIn`/`SrcOut`,
+while `SrcObservation` quantifies over every `Edge`-deciding oracle satisfying
+`AgreesOnArgs`. Neither is a substitution instance of the other. If the paper
+wants the connection displayed, the declaration to cite is
+`Observation.srcStatus_iff_srcObservation`, with its support hypothesis stated.
+
+The paper must not print the credulous reading as a four-state verdict.
+`credulous_not_functional` refutes every function that would make
+`justified ↔ inSome` and `defeated ↔ outSome` under preferred semantics;
+`profile_preferredSem_twoCycle_symm` shows that a framework-internal tie-break
+cannot distinguish the two arguments. The paper must also not say that `observe`
+is determined by
+per-argument acceptance data (`observe_not_determined_by_profile`), assert the
+general non-emptiness of preferred extensions (stated in `preferredSem`'s
+docstring, never proved), state a transport hypothesising `Compile.Faithful` on
+both sides (`faithful_unique` makes it contentless), or claim
+`AttackExtensional ConflictFree` (`not_attackExtensional_conflictFree`). It must
+also not claim that the table's completeness theorems rule out a missing
+semantics: they catch a dropped constructor, and nothing enumerates the
+instances of a structure, so a sixth `ExtensionSemantics` declared elsewhere
+would be invisible.
+
+The Haskell mirror (`src/Lara/Semantics.hs`, `test/SemanticsSpec.hs`) is
+conformance evidence, not soundness. The goldens agreeing is evidence about
+outputs on six frameworks under five semantics; it is not a proof that the two
+sets of definitions correspond, and the paper must not describe it as one.
+`make semantics-goldens` prevents the checked-in Haskell transcript from
+drifting from the Lean emitter.

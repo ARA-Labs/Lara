@@ -19,6 +19,25 @@
 --   * the abstract strict-backend seam: Theorem 1 + ND instantiation (result 8) — Lara.Strict
 --   * the whole-status layer: direct vs compiled grounded semantics agreement
 --     (result 6) + grounded termination/determinism (result 5 core) — Lara.Grounded
+--   * the semantics parameter, made explicit (theory M2a, issue #185): the
+--     generic ExtensionSemantics interface (declarative spec + proof-oriented
+--     reference enumerator + bundled adequacy), the carrier-bounded admissible /
+--     complete / stable / preferred / semi-stable predicates with their Bool
+--     deciders, and representative-uniqueness under a nodup carrier. The
+--     pre-existing grounded status layer is shown to AGREE with the groundedSem
+--     instance (observe_grounded, groundedSem_enumerate) rather than being
+--     re-derived from it, and no theorem here is a strict generalization of one
+--     downstream; the runtime evaluator stays grounded — Lara.Semantics. The
+--     list-level powerset scan it is built on — subseqs, its characterization
+--     against the core List.Sublist relation, and one-representative-per-subset
+--     under Nodup — mentions no framework and is proved separately in core
+--     Lean 4, no Mathlib — Lara.Semantics.Sublists. The disagreements that make
+--     the interface more than an abstraction over a one-element set — stable
+--     nonexistence and the noExtension arm it forces, credulous acceptance
+--     failing to be a function, observe not factoring through profile, gap's
+--     semantics-independence, semi-stable strictly between stable and
+--     preferred, and reinstatement in a multi-element extension — are six table
+--     frameworks and forty checked theorems in Lara.Examples.Semantics
 --   * support-term typing (spec §6.1, v0.1-frozen): dependency accountability
 --     (result 3, both halves — leaves_declared and the certDeps layer over
 --     Backend.uses), uniqueness/determinism, the D⊎H accounting invariants,
@@ -37,6 +56,15 @@
 --     constructively discharged by Compile.edgeB_faithful, exposed through the
 --     oracle-free wrappers checkedAF / srcStatus_checked / srcStatus_iff_checked
 --     — Lara.Compile
+--   * source-to-framework observation transport (theory M2a, issue #185): the
+--     carrier-locality property AttackExtensional, proved for all five
+--     specifications and refuted for bare ConflictFree; the generic transport
+--     of a carrier-local specification between two frameworks that decide
+--     Compile.Edge at declared argument positions, with one corollary per
+--     semantics; and the claim-level SrcObservation with
+--     srcObservation_iff_checked, whose groundedSem case is proved equivalent
+--     to Compile.srcStatus_iff_checked under a support-boundedness hypothesis
+--     — Lara.Observation
 --   * the many-sorted proposition signature and well-sortedness (result 13,
 --     lara-core@0.2 / issue #89): the object, sortOf, Sigma-WF, derived rule
 --     parameter sorts, decidability without classical input, and the
@@ -96,6 +124,8 @@ import Lara.Ord
 import Lara.Comparison
 import Lara.CertSlots
 import Lara.Grounded
+import Lara.Semantics
+import Lara.Semantics.Sublists
 import Lara.Support
 import Lara.Groups
 import Lara.Blocked
@@ -104,6 +134,7 @@ import Lara.RawAttack
 import Lara.Admission
 import Lara.Attack
 import Lara.Compile
+import Lara.Observation
 import Lara.Erase
 import Lara.EraseTransport
 import Lara.Policy
@@ -119,3 +150,4 @@ import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.Realizability
+import Lara.Examples.Semantics

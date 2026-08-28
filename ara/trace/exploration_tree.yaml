@@ -6078,3 +6078,207 @@ tree:
     - "lean/Lara/Invariants.lean; lean/Lara/Realizability.lean"
     - "lean/Lara/Examples/Realizability.lean"
   also_depends_on: [N225, N227, N228]
+
+- id: N230
+  type: pivot
+  title: "M1 closed; begin M2a, the semantics-parametric observation"
+  provenance: user
+  timestamp: "2026-08-28T07:00"
+  prior_direction: "M1 compilation-image boundary (#184, landed as #195)"
+  new_direction: "M2a semantics-parametric claim observation (#185)"
+  reason: >
+    M1 fixed the image boundary over one semantics without saying so. Every
+    status theorem in the tree read `Grounded.grounded` and nothing else;
+    `preferred`, `admissible` and `semiStable` appeared nowhere in `lean/`. The
+    paper cannot call compilation semantics-agnostic while there is no
+    observation interface to be agnostic over. M2a is the highest-leverage open
+    item on the spine: five issues unblock behind it.
+  also_depends_on: [N228, N229]
+
+- id: N231
+  type: decision
+  title: "Scope answers that gated implementation: Haskell mirror, semi-stable, and the frozen carrier"
+  provenance: user
+  timestamp: "2026-08-28T07:05"
+  choice: >
+    Mirror only `subseqs` and the five extension predicates on the Haskell
+    side, leaving the checker and its output untouched so no corpus
+    regeneration and no freeze-tag bump are needed. Keep semi-stable but
+    sequence it last so it can be cut cheaply. Do NOT add a `Nodup` field to
+    `Grounded.AF`: carry the hypothesis explicitly rather than reopening the
+    M0-frozen carrier, since changing a frozen carrier invalidates statements
+    and not merely proofs.
+  alternatives:
+    - "Full Haskell mirror including observe/profile — no consumer; the runtime evaluator only ever needs grounded."
+    - "Lean-only, deferring Haskell to M2b."
+    - "Drop semi-stable — would be a paper-plan amendment, not a repo decision."
+    - "Add Nodup to Grounded.AF — deletes a hypothesis from every theorem but reopens M0."
+  evidence:
+    - "lean/lakefile.toml: no Mathlib dependency; finite-fixpoint arguments done by hand."
+  also_depends_on: [N230]
+
+- id: N232
+  type: decision
+  title: "observe tests empty support before empty enumeration"
+  provenance: ai-executed
+  timestamp: "2026-08-28T08:06"
+  choice: >
+    Order `observe`'s guards support-first: `c.support = []` yields
+    `observed gap`, then `enumerate = []` yields `noExtension`, then the
+    `all`-guards. This makes `observe_gap` statable for an arbitrary semantics
+    with no hypothesis beyond `c.support = []`, mechanizing the plan's claim
+    that `gap` is the one semantics-independent status. Under the alternative
+    order that theorem is false.
+  alternatives:
+    - "Enumeration-first, keeping the invariant that `.observed _` implies at least one extension. Rejected: it makes the plan's gap sentence false of the shipped code, and the invariant it buys is recovered by enumerate_ne_nil_of_observed_ne_gap for every status but gap."
+  evidence:
+    - "lean/Lara/Semantics.lean: observe_gap, observe_gap_iff, no_verdict_on_empty"
+    - "Both orderings agree except when support and enumeration are BOTH empty, and both answers there are non-vacuous."
+  rationale: >
+    The relative order carries no safety content. There are two vacuous-`List.all`
+    hazards — one at the enumeration, one at the support — and each is blocked by
+    its own guard, both of which precede the `all`-guards under either
+    arrangement. An initial reading that attributed the support-level hazard to
+    this ordering was checked against the alternative and withdrawn.
+  also_depends_on: [N230]
+
+- id: N233
+  type: decision
+  title: "Transport hypothesises AgreesOnArgs, not Compile.Faithful"
+  provenance: ai-executed
+  timestamp: "2026-08-28T09:00"
+  choice: >
+    State the source-to-framework transport over `AgreesOnArgs` — the `agrees`
+    field of `Compile.Faithful` alone — rather than over `Faithful`.
+  alternatives:
+    - "Hypothesise Faithful on both sides, as the plan's Task 5 specified."
+  evidence:
+    - "lean/Lara/Observation.lean: faithful_unique proves any two Faithful oracles are literally equal, so a transport over Faithful on both sides is a funext away and AttackExtensional would never be invoked — the module would be vacuous."
+    - "lean/Lara/Examples/Semantics.lean: agreesOnArgs_strictly_weaker_than_faithful, built against Examples.PEx."
+  rationale: >
+    Dropping `ranged` is what leaves the two frameworks free to differ off the
+    carrier, which is what makes the carrier-locality property load-bearing. The
+    weakening is proved real rather than asserted.
+  also_depends_on: [N230]
+
+- id: N234
+  type: experiment
+  title: "Mechanizing M2a refuted six statements in the milestone's own prose"
+  provenance: ai-executed
+  timestamp: "2026-08-28T18:00"
+  evidence:
+    - "docs/theory-m2a-observation.md §4"
+    - "lean/Lara/Examples/Semantics.lean: sound_holds_without_nodup, not_candidates_ext_without_nodup, not_enumerate_ext_without_nodup"
+    - "lean/Lara/Observation.lean: not_attackExtensional_conflictFree, faithful_unique"
+  result: >
+    Four were defects in the executed plan, with their source sentences quoted
+    inline in `docs/theory-m2a-observation.md` §4; two were pre-commit review
+    catches that `git show` does not record and are flagged as
+    such. The consequential one: the plan directed the documentation step to
+    write that `Compile.srcStatus_iff_checked` is the `groundedSem` instance of
+    `srcObservation_iff_checked`. It is not — the former carries no support side
+    condition and the latter requires one, so the new result asks for MORE, and
+    the subjects differ (an inductive relation over SrcIn/SrcOut versus a
+    quantification over Edge-deciding oracles). Writing it would have attached a
+    side condition to a frozen theorem in print. `thm:preservation` continues to
+    cite `srcStatus_iff_checked` unmodified, which is a stronger outcome for the
+    paper than the plan expected. Also refuted: `sound` is unconditional
+    (`Nodup` buys representative uniqueness, not adequacy);
+    `AttackExtensional ConflictFree` is false.
+  status: resolved
+  also_depends_on: [N230, N232, N233]
+
+- id: N235
+  type: decision
+  title: "Haskell conformance by golden spec, not by differential vector"
+  provenance: user
+  timestamp: "2026-08-28T17:50"
+  choice: >
+    Check the Haskell mirror with a QuickCheck spec against golden values
+    emitted by Lean, rather than wiring vectors into scripts/differential.sh.
+  alternatives:
+    - "differential.sh vectors, as the plan specified — rejected: the harness is envelope-driven (fixtures through the checker and the Lean driver, byte-comparing stdout and exit code), so predicates with no envelope and no verdict need a new driver mode, contradicting the 'checker and its output untouched' clause the no-regeneration guarantee rests on."
+    - "A new check-semantics-parity.sh CI gate in the shape of check-presentation-parity.sh — more machinery than wanted here."
+    - "Skip the Haskell side entirely for M2a."
+  evidence:
+    - "test/SemanticsSpec.hs; src/Lara/Semantics.hs"
+    - "CLAUDE.md: Haskell property tests are conformance evidence, not soundness."
+  rationale: >
+    Accepted cost is that goldens are transcribed. Mitigated by a Lean `#eval`
+    that emits them already formatted as Haskell literals, with the regeneration
+    command recorded in both files. That emitter is guarded on an environment
+    variable because check-axioms.sh reads every bracketed token in its input as
+    an axiom name — an unguarded list literal printed during `lake build` makes
+    the axiom gate exit 1.
+  also_depends_on: [N231]
+
+- id: N236
+  type: pivot
+  title: "M2a complete and additive; PR #199 opened"
+  provenance: ai-executed
+  timestamp: "2026-08-28T18:45"
+  prior_direction: "M2a implementation (#185)"
+  new_direction: "M2a in review as PR #199; M2b (#181) and M3 (#186) unblocked"
+  reason: >
+    Nine commits, 4819 insertions and 0 deletions across 12 files.
+    Compile.lean, Grounded.lean, Invariants.lean and Realizability.lean are
+    untouched; the four modified pre-existing code files gained only
+    registration lines, while `docs/paper-lean-name-map.md` gained its §7.
+    All gates pass, including the five unchanged-behaviour gates —
+    differential, admission-differential, replay-tamper, freeze-bundle and
+    presentation-parity — which is what makes the additivity claim checkable
+    rather than asserted. Follow-ups filed as #196, #197, #198.
+  also_depends_on: [N234, N235]
+
+- id: N237
+  type: experiment
+  title: "PR review strengthens credulous non-functionality and generated conformance"
+  provenance: ai-executed
+  timestamp: "2026-08-28T19:44"
+  evidence:
+    - "PR #199 review comments 3883463248, 3883463255, 3883463263"
+    - "lake build; lake env lean AxCheck.lean | scripts/check-axioms.sh"
+    - "cabal test all --test-show-details=direct"
+    - "ara check ara --json"
+  result: >
+    All three findings were upheld. `credulous_not_functional` now quantifies
+    over every `AF → Arg → Status` candidate satisfying the two credulous
+    biconditionals instead of naming only the two-cycle witness. The Haskell
+    grounded conformance property now samples generated frameworks up to six
+    arguments through a shared, size-aware generator; a mutation returning no
+    grounded extension at five or more arguments failed after 12 cases, and the
+    final full suite passed 800 generated cases with 27.5% at five or more
+    arguments. Moving decision results to `rationale` and removing unpublished
+    status fields reduced `ara check` from 169 to 160 warnings with zero errors.
+    The 84-job Lean build, axiom audit, and full Haskell suite passed.
+  status: resolved
+  also_depends_on: [N236]
+
+- id: N238
+  type: experiment
+  title: "Second PR review closes unreachable conformance branches and trace debt"
+  provenance: ai-executed
+  timestamp: "2026-08-28T19:57"
+  evidence:
+    - "PR #199 review comments 3883479629, 3883497523, 3883497532, 3883497540, 3883497544"
+    - "issue #200"
+    - "make semantics-goldens"
+    - "cabal test all --test-show-details=direct"
+    - "lake build; lake env lean AxCheck.lean | scripts/check-axioms.sh"
+    - "ara check ara --json"
+  result: >
+    Added `reinstatementChain`, whose five semantics all enumerate `[0, 2]`,
+    expanding the observation table from 100 to 120 rows. Weakening
+    `completeB` to omit defended arguments now fails the golden property on its
+    first case. A generated outsider property makes `boundedB`,
+    `admissibleB`, and `stableB` reject non-carrier sets; replacing `boundedB`
+    with `True` now fails on its first case. A new CI parity gate regenerates
+    the Lean Haskell-literal block and rejected a deliberately stale chain row.
+    Deterministic table checks now run once, while grounded, outsider, and
+    powerset checks use generators. Executed-plan defects are quoted inline,
+    the pre-existing-file narrative names the prose file separately, and #200
+    tracks the stale-observation sweep. The 84-job Lean build, axiom audit,
+    full Haskell suite, golden parity gate, and ARA validation passed; ARA
+    remains at zero errors and 160 warnings.
+  status: resolved
+  also_depends_on: [N237]

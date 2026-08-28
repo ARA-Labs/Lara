@@ -43,6 +43,10 @@ import Lara.Examples.CompilerInvariants
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.Realizability
+import Lara.Semantics
+import Lara.Observation
+import Lara.Semantics.Sublists
+import Lara.Examples.Semantics
 
 open Lara
 
@@ -1041,3 +1045,251 @@ open Lara
 #print axioms Lara.Examples.Realizability.nonempty_swapped_node_wellSorted
 #print axioms Lara.Examples.Realizability.oneSelfEdge_invariant
 #print axioms Lara.Examples.Realizability.oneSelfEdge_not_realizable
+
+/-! ### M2a — semantics-parametric observation (issue #185)
+
+The generic `ExtensionSemantics` interface and its five instances. Each
+instance bundles its own adequacy proof (`sound`), so printing axioms for the
+instance covers that proof too — an instance cannot be added without one. -/
+
+#print axioms Lara.Semantics.not_eq_true_iff
+#print axioms Lara.Semantics.not_and_eq_true
+
+#print axioms Lara.Semantics.mem_subseqs
+#print axioms Lara.Semantics.sublist_ext
+#print axioms Lara.Semantics.subseqs_ext
+#print axioms Lara.Semantics.nodup_flatMap_pair
+#print axioms Lara.Semantics.subseqs_nodup
+#print axioms Lara.Semantics.mem_candidates
+#print axioms Lara.Semantics.candidates_ext
+#print axioms Lara.Semantics.candidates_nodup
+
+#print axioms Lara.Semantics.subB_iff
+#print axioms Lara.Semantics.boundedB_iff
+#print axioms Lara.Semantics.conflictFreeB_iff
+#print axioms Lara.Semantics.admissibleB_iff
+#print axioms Lara.Semantics.completeB_iff
+#print axioms Lara.Semantics.stableB_iff
+
+#print axioms Lara.Semantics.defendedB_mono
+#print axioms Lara.Semantics.defendedB_congr
+#print axioms Lara.Semantics.bounded_congr
+#print axioms Lara.Semantics.conflictFree_congr
+#print axioms Lara.Semantics.admissible_congr
+#print axioms Lara.Semantics.complete_congr
+#print axioms Lara.Semantics.stable_congr
+
+#print axioms Lara.Semantics.mem_canonize
+#print axioms Lara.Semantics.canonize_mem_candidates
+#print axioms Lara.Semantics.exists_candidate_ext
+#print axioms Lara.Semantics.enumerate_ext
+#print axioms Lara.Semantics.mem_filter_candidates
+
+#print axioms Lara.Semantics.iter_subset_complete
+#print axioms Lara.Semantics.grounded_complete
+#print axioms Lara.Semantics.grounded_least
+#print axioms Lara.Semantics.grounded_leastComplete
+#print axioms Lara.Semantics.leastCompleteB_iff
+
+#print axioms Lara.Semantics.maximalB_iff
+#print axioms Lara.Semantics.preferredB_iff
+#print axioms Lara.Semantics.admissible_cons
+#print axioms Lara.Semantics.preferred_complete
+
+#print axioms Lara.Semantics.mem_attacked
+#print axioms Lara.Semantics.mem_reach
+#print axioms Lara.Semantics.reach_congr
+#print axioms Lara.Semantics.semiStableB_iff
+
+#print axioms Lara.Semantics.groundedSem
+#print axioms Lara.Semantics.completeSem
+#print axioms Lara.Semantics.preferredSem
+#print axioms Lara.Semantics.stableSem
+#print axioms Lara.Semantics.semiStableSem
+
+/-! ### M2a — grounded is the singleton instance -/
+
+#print axioms Lara.Semantics.leastComplete_unique
+#print axioms Lara.Semantics.leastComplete_congr
+#print axioms Lara.Semantics.mem_canonize_grounded
+#print axioms Lara.Semantics.eq_singleton_of_nodup_of_unique
+#print axioms Lara.Semantics.groundedSem_enumerate
+#print axioms Lara.Semantics.groundedSem_singleton
+
+/-! ### M2a — semantics-parametric claim observation
+
+The per-argument acceptance profile, the claim-level observation, its collapse to
+`Grounded.statusC` on the grounded instance, and the justified/defeated
+exclusivity result with its five per-instance hypothesis discharges. -/
+
+#print axioms Lara.Semantics.mem_attacked_iff
+#print axioms Lara.Semantics.attackedByB_congr
+#print axioms Lara.Semantics.attackedByB_congr_eq
+#print axioms Lara.Semantics.profile_grounded
+
+#print axioms Lara.Semantics.observe_gap
+#print axioms Lara.Semantics.observe_gap_iff
+#print axioms Lara.Semantics.observe_noExtension_iff
+#print axioms Lara.Semantics.enumerate_ne_nil_of_observed_ne_gap
+#print axioms Lara.Semantics.no_verdict_on_empty
+#print axioms Lara.Semantics.claimDefeatedB_of_nil
+#print axioms Lara.Semantics.claimAcceptedB_of_nil
+
+#print axioms Lara.Semantics.labelC_inn_iff_mem
+#print axioms Lara.Semantics.attackedByB_grounded_iff
+#print axioms Lara.Semantics.labelC_undec_iff_unattacked
+#print axioms Lara.Semantics.observe_grounded
+
+#print axioms Lara.Semantics.justified_defeated_exclusive
+#print axioms Lara.Semantics.observe_justified_not_all_defeated
+#print axioms Lara.Semantics.completeSem_specConflictFree
+#print axioms Lara.Semantics.stableSem_specConflictFree
+#print axioms Lara.Semantics.preferredSem_specConflictFree
+#print axioms Lara.Semantics.semiStableSem_specConflictFree
+#print axioms Lara.Semantics.groundedSem_specConflictFree
+
+/-! ### M2a — concrete witnesses (`Lara.Examples.Semantics`)
+
+The six table frameworks cover stable nonexistence and the `noExtension` arm it
+forces, credulous non-functionality, the failure of `observe` to factor through
+`profile`, `gap`'s semantics-independence at all five instances, the
+semi-stable / preferred / stable strictness chain, and reinstatement through a
+defended argument in a multi-element extension. -/
+
+#print axioms Lara.Examples.Semantics.stableSem_enumerate_threeCycle
+#print axioms Lara.Examples.Semantics.observe_stableSem_threeCycle
+#print axioms Lara.Examples.Semantics.observe_stableSem_threeCycle_ne_justified
+#print axioms Lara.Examples.Semantics.observe_stableSem_threeCycle_ne_defeated
+#print axioms Lara.Examples.Semantics.stableSem_enumerate_threeCycleAttacked
+#print axioms Lara.Examples.Semantics.threeCycle_enumerate_nonStable
+#print axioms Lara.Examples.Semantics.preferred_exists_where_stable_does_not
+
+#print axioms Lara.Examples.Semantics.preferredSem_enumerate_twoCycle
+#print axioms Lara.Examples.Semantics.groundedSem_enumerate_twoCycle
+#print axioms Lara.Examples.Semantics.credulous_not_functional
+#print axioms Lara.Examples.Semantics.profile_preferredSem_twoCycle_symm
+#print axioms Lara.Examples.Semantics.profile_preferredSem_twoCycle
+#print axioms Lara.Examples.Semantics.profile_groundedSem_twoCycle
+#print axioms Lara.Examples.Semantics.observe_twoCycle_grounded_ne_preferred
+#print axioms Lara.Examples.Semantics.observe_twoCycleSink_grounded_ne_preferred
+
+#print axioms Lara.Examples.Semantics.completeSem_enumerate_twoCycle
+#print axioms Lara.Examples.Semantics.observe_not_determined_by_profile
+
+#print axioms Lara.Examples.Semantics.observe_claimNoSupport_uniform
+
+#print axioms Lara.Examples.Semantics.semiStable_proper_refinement_of_preferred
+#print axioms Lara.Examples.Semantics.semiStable_exists_where_stable_does_not
+
+/-! ### M2a — the enumerations behind the ten pairwise separations, and the
+last two evaluation-only claims of that module, promoted to theorems. -/
+
+#print axioms Lara.Examples.Semantics.semiStableSem_enumerate_twoCycle
+#print axioms Lara.Examples.Semantics.completeSem_enumerate_rangeSplit
+#print axioms Lara.Examples.Semantics.five_semantics_pairwise_distinct
+#print axioms Lara.Examples.Semantics.threeCycle_conflictFree
+#print axioms Lara.Examples.Semantics.twoCycle_extensions
+
+/-! ### M2a — `defeated` is unreachable on the bare two-cycle
+
+The entailment `twoCycleSink`'s docstring used to draw in prose from an
+upper-bound extension list, proved instead: one non-defeating extension closes
+`observe`'s defeat guard, and every one of the five enumerations on `twoCycle`
+contains such an extension for any claim with non-empty support. -/
+
+#print axioms Lara.Examples.Semantics.observe_ne_defeated_of_mem_enumerate
+#print axioms Lara.Examples.Semantics.claimDefeatedB_nil_eq_false
+#print axioms Lara.Examples.Semantics.twoCycle_defeat_split
+#print axioms Lara.Examples.Semantics.twoCycle_defeated_unreachable
+
+/-! ### M2a — what `ExtensionSemantics.sound`'s `Nodup` hypothesis is for
+
+Adequacy holds without it at all five instances; representative uniqueness
+(`candidates_ext`, `enumerate_ext`) is false without it. -/
+
+#print axioms Lara.Examples.Semantics.dupCarrier_candidates
+#print axioms Lara.Examples.Semantics.not_candidates_ext_without_nodup
+#print axioms Lara.Examples.Semantics.not_enumerate_ext_without_nodup
+#print axioms Lara.Examples.Semantics.dupCarrier_enumerate
+#print axioms Lara.Examples.Semantics.sound_holds_without_nodup
+
+/-! ### M2a — `Observation.AgreesOnArgs` is strictly weaker than `Compile.Faithful`
+
+The oracle `eJunk` agrees with `Compile.Edge` at every declared argument of
+`Lara.Examples.PEx` and carries one junk edge at an undeclared index pair, so it
+satisfies `AgreesOnArgs` and fails `Faithful.ranged`. -/
+
+#print axioms Lara.Examples.Semantics.eJunk_agreesOnArgs
+#print axioms Lara.Examples.Semantics.not_faithful_eJunk
+#print axioms Lara.Examples.Semantics.agreesOnArgs_strictly_weaker_than_faithful
+
+/-! ### M2a — the observation table's row axes are exhaustive
+
+`semanticsLabel` / `semanticsInstance` and their two counterparts are total
+matches, so a new constructor breaks them. The three order lists are hand-written
+literals and are not checked that way; these theorems are that check, and without
+them a new constructor would silently drop a table row. -/
+
+#print axioms Lara.Examples.Semantics.allSemantics_complete
+#print axioms Lara.Examples.Semantics.allFrameworks_complete
+#print axioms Lara.Examples.Semantics.allClaims_complete
+
+/-! ### M2a — source-to-framework observation transport (issue #185)
+
+Carrier-locality of the five specifications, the generic transport onto the
+compiled framework with its per-semantics corollaries, and the claim-level
+source observation. The three refutations (`not_attackExtensional_conflictFree`,
+`not_observe_congr_of_unbounded_support`, `observe_congr_needs_support_bound`)
+are audited alongside the positive results: they are what makes the two carrier
+bounds checked rather than asserted. -/
+
+#print axioms Lara.Observation.agree_symm
+#print axioms Lara.Observation.attackExtensional_of_imp
+#print axioms Lara.Observation.bounded_congr_af
+#print axioms Lara.Observation.conflictFree_congr_af
+#print axioms Lara.Observation.defendedB_congr_af
+#print axioms Lara.Observation.mem_reach_congr_af
+
+#print axioms Lara.Observation.attackExtensional_bounded
+#print axioms Lara.Observation.attackExtensional_admissible
+#print axioms Lara.Observation.attackExtensional_complete
+#print axioms Lara.Observation.attackExtensional_stable
+#print axioms Lara.Observation.attackExtensional_preferred
+#print axioms Lara.Observation.attackExtensional_leastComplete
+#print axioms Lara.Observation.attackExtensional_semiStable
+
+#print axioms Lara.Observation.oneJunk_agree
+#print axioms Lara.Observation.not_attackExtensional_conflictFree
+#print axioms Lara.Observation.admissible_transports_on_junk
+
+#print axioms Lara.Observation.all_congr_of_mem
+#print axioms Lara.Observation.isEmpty_congr_of_mem
+#print axioms Lara.Observation.bounded_of_mem_enumerate
+#print axioms Lara.Observation.enumerate_mem_congr
+#print axioms Lara.Observation.attackedByB_congr_af
+#print axioms Lara.Observation.claimDefeatedB_congr_af
+#print axioms Lara.Observation.observe_congr
+
+#print axioms Lara.Observation.oneAttacksJunk_agree
+#print axioms Lara.Observation.not_observe_congr_of_unbounded_support
+#print axioms Lara.Observation.observe_congr_needs_support_bound
+
+#print axioms Lara.Observation.agreesOnArgs_of_faithful
+#print axioms Lara.Observation.agreesOnArgs_edgeB
+#print axioms Lara.Observation.faithful_unique
+#print axioms Lara.Observation.mem_toAF_args
+#print axioms Lara.Observation.toAF_attack_agree
+#print axioms Lara.Observation.spec_congr_of_agreesOnArgs
+#print axioms Lara.Observation.spec_toAF_iff_checkedAF
+
+#print axioms Lara.Observation.admissible_toAF_iff_checkedAF
+#print axioms Lara.Observation.complete_toAF_iff_checkedAF
+#print axioms Lara.Observation.stable_toAF_iff_checkedAF
+#print axioms Lara.Observation.preferred_toAF_iff_checkedAF
+#print axioms Lara.Observation.semiStable_toAF_iff_checkedAF
+#print axioms Lara.Observation.leastComplete_toAF_iff_checkedAF
+
+#print axioms Lara.Observation.srcObservation_iff_checked
+#print axioms Lara.Observation.srcObservation_checked
+#print axioms Lara.Observation.srcObservation_unique
+#print axioms Lara.Observation.srcStatus_iff_srcObservation

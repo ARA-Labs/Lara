@@ -51,31 +51,7 @@ import Lara.Wire
   , printSExpr
   )
 import TestReplay (testCheckInput)
-
--- ---------------------------------------------------------------------------
--- Generators and helpers
--- ---------------------------------------------------------------------------
-
--- | A random small framework as an explicit edge relation over @[0..n-1]@.
--- Random pairs over the carrier naturally include self-loops (@i,i@), cycles
--- (@i→j@ and @j→i@), and isolated (disconnected) arguments. @n@ and the edge
--- count are bounded so the whole property runs in well under a second (the
--- sizing discipline of @test/WireSpec.hs@'s @smallListOf@).
-genAF :: Gen (Int, [(Int, Int)])
-genAF = do
-  n <- choose (0, 12)
-  edges <-
-    if n == 0
-      then pure []
-      else do
-        k <- choose (0, 20)
-        vectorOf k ((,) <$> choose (0, n - 1) <*> choose (0, n - 1))
-  pure (n, edges)
-
--- | The naive un-memoised backend: @afAttack@ is a direct membership test
--- against the edge relation, re-scanned on every query.
-naiveAF :: Int -> [(Int, Int)] -> AF
-naiveAF n edges = AF [0 .. n - 1] (\b a -> (b, a) `elem` edges)
+import TestAF (genAF, naiveAF)
 
 sameSet :: [Int] -> [Int] -> Bool
 sameSet a b = sort (nub a) == sort (nub b)

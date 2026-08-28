@@ -444,3 +444,10 @@ sessions:
   events_count: 16
   claims_touched: [C34]
   open_threads: 11
+- id: 2026-08-28_001
+  date: '2026-08-28'
+  summary: 'M2a is in review as PR #199: two external review rounds strengthened the credulous theorem, added generated grounded and carrier-bound properties, added a reinstatement framework with multi-element extensions, automated Lean-to-Haskell golden parity, corrected durable pointers and counts, removed schema-dropped fields, and tracked the stale sweep as #200. C35 matches the quantified theorem.'
+  turn_count: 2
+  events_count: 12
+  claims_touched: [C35, C36]
+  open_threads: 7
