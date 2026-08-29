@@ -279,6 +279,50 @@ mutual
       exact hcb
 end
 
+mutual
+  /-- Direct acceptance also reflects from the declared-index presentation back
+  to its compact isomorphic presentation. -/
+  theorem directIn_reflect_embedding {C F : Grounded.AF}
+      {lift : Nat → Option Nat} (he : AFEmbedding C F lift) :
+      ∀ {a A}, a ∈ C.args → lift a = some A →
+        Grounded.DirectIn F A → Grounded.DirectIn C a
+    | a, A, ha, hA, .intro _ defended => by
+        apply Grounded.DirectIn.intro ha
+        intro b hb hba
+        obtain ⟨B, hB⟩ := he.total b hb
+        apply directOut_reflect_embedding he hb hB
+        apply defended B (he.target_mem b hb B hB)
+        rw [← he.attack_agree b hb a ha B A hB hA]
+        exact hba
+  /-- Direct defeat reflects across the same embedding. -/
+  theorem directOut_reflect_embedding {C F : Grounded.AF}
+      {lift : Nat → Option Nat} (he : AFEmbedding C F lift) :
+      ∀ {a A}, a ∈ C.args → lift a = some A →
+        Grounded.DirectOut F A → Grounded.DirectOut C a
+    | a, A, ha, hA, .intro (c := B) hBIn hBA => by
+        have hBF := Grounded.directIn_mem_args hBIn
+        obtain ⟨b, hb, hB⟩ := he.onto B hBF
+        apply Grounded.DirectOut.intro
+          (directIn_reflect_embedding he hb hB hBIn)
+        rw [he.attack_agree b hb a ha B A hB hA]
+        exact hBA
+end
+
+/-- A mapped compact argument and its retained declared-index image have exactly
+the same grounded label. -/
+theorem labelC_eq_of_embedding {C F : Grounded.AF}
+    {lift : Nat → Option Nat} (he : AFEmbedding C F lift)
+    {a A : Nat} (ha : a ∈ C.args) (hA : lift a = some A) :
+    Grounded.labelC C a = Grounded.labelC F A := by
+  have hin : Grounded.DirectIn C a ↔ Grounded.DirectIn F A :=
+    ⟨fun h => directIn_embed he h hA,
+      fun h => directIn_reflect_embedding he ha hA h⟩
+  have hout : Grounded.DirectOut C a ↔ Grounded.DirectOut F A :=
+    ⟨fun h => directOut_embed he h ha hA,
+      fun h => directOut_reflect_embedding he ha hA h⟩
+  rw [Grounded.labelC_spec, Grounded.labelC_spec]
+  simp only [hin, hout]
+
 /-- A compact `in` label remains `in` after embedding into retained declared
 index space. -/
 theorem labelC_inn_embed {C F : Grounded.AF} {lift : Nat → Option Nat}
@@ -546,6 +590,50 @@ theorem production_justified_nonpromotion
   · intro A hA
     exact hA
   · exact hF
+
+/-- Every unblocked complete-support argument has the same label in the compact
+checked framework and the declared framework.  This is the per-argument bridge
+needed by the five-valued tighten row, including its defeated-to-contested
+impossibility. -/
+theorem production_unblocked_label_agree
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm)) (declAtts keptAtts : List Attack)
+    (p : Atom)
+    (hargs : accepted.program.args =
+      (retainedArguments keep declared).map (·.2))
+    (hatts : accepted.program.atts = keptAtts)
+    (hsub : ∀ k, k ∈ keptAtts → k ∈ declAtts)
+    (hunblocked :
+      let retained := retainedIndices keep declared
+      let blocked := blockedSet (declaredAF declared declAtts)
+        (blockedSeed declared declAtts keptAtts retained)
+      supportBlocked retained blocked (claimSupportFor accepted p) = false)
+    {a A : Nat} (ha : a ∈ claimSupportFor accepted p)
+    (hA : (retainedIndices keep declared)[a]? = some A) :
+    Grounded.labelC (Compile.checkedAF accepted.program) a =
+      Grounded.labelC (declaredAF declared declAtts) A := by
+  let retained := retainedIndices keep declared
+  let F := checkedAF declared keptAtts retained
+  let G := declaredAF declared declAtts
+  let B := blockedSet G (blockedSeed declared declAtts keptAtts retained)
+  have he : AFEmbedding (Compile.checkedAF accepted.program) F
+      (fun k => retained[k]?) :=
+    compile_checkedAF_embedding accepted.program keep declared keptAtts
+      hargs hatts
+  have haC : a ∈ (Compile.checkedAF accepted.program).args :=
+    claimSupportFor_mem_checkedAF a ha
+  have hAF : A ∈ F.args := he.target_mem a haC A hA
+  have hAlift :
+      A ∈ liftSupport retained (claimSupportFor accepted p) :=
+    mem_liftSupport_iff.mpr ⟨a, ha, hA⟩
+  have hAB : A ∉ B :=
+    supportBlocked_false_unblocked hunblocked A hAlift
+  exact (labelC_eq_of_embedding he haC hA).trans
+    (Blocked.labelC_agree
+      (blocking_of_blockedSeed declared declAtts keptAtts retained
+        (fun _ hi => retainedIndices_subset _ hi) hsub)
+      hAF hAB)
 
 /-- Driver-facing form of `production_justified_nonpromotion`: a requested
 query that is absent from the exact `blockedQueries` output supplies the

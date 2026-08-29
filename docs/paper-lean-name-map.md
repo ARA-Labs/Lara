@@ -464,3 +464,143 @@ outputs on six frameworks under five semantics; it is not a proof that the two
 sets of definitions correspond, and the paper must not describe it as one.
 `make semantics-goldens` prevents the checked-in Haskell transcript from
 drifting from the Lean emitter.
+
+---
+
+## 8. M3 source updates and status dynamics (theory spine)
+
+M3 is a first-fragment, one-step source-transition calculus. Its four core
+matrices instantiate `CoreTransition` with `Semantics.groundedSem`. In matrix
+labels, paper `refuted` means Lean `Grounded.Status.defeated`, and paper `both`
+means Lean `Grounded.Status.contested`. The five-valued public target adds
+`PublicReport.evidenceBlocked`. Public equality with core for additive updates is
+proved under `CleanBase` on the exact source `AcceptedRun`; the result is not
+unconditional. See `docs/theory-m3-source-updates.md` for the frozen claim
+boundary and emitted tables.
+
+### Source, Acceptance, and Update Surface
+
+All declarations in this table are in `lean/Lara/Update.lean`.
+
+| Paper object | Lean declaration |
+|---|---|
+| Raw source carrier; existential and proof-relevant acceptance | `Update.SourceState`, `Update.Accepted`, `Update.AcceptedRun`, `Update.AcceptedRun.accepted` |
+| Closed update and rejection vocabularies | `Update.SourceUpdate`, `Update.UpdateRejection` |
+| `addLeaf` freshness over leaf rows, metadata, and group members | `Update.AddLeafFresh`, `Update.addLeafFreshB`, `Update.addLeafFreshB_iff` |
+| Admit-at-key condition, including default admit | `Update.AdmittedAt`, `Update.admittedAtB`, `Update.admittedAtB_iff` |
+| Raw attack endpoint declaration | `Update.EndpointDeclared`, `Update.endpointDeclaredB`, `Update.endpointDeclaredB_iff` |
+| Raw argument name-and-term freshness | `Update.InstanceFresh`, `Update.instanceFreshB`, `Update.instanceFreshB_iff` |
+| Executable edit followed by admission and whole-unit rechecking | `Update.applyUpdate` |
+| Constructor-side rejection mapping | `Update.applyUpdate_addLeaf_notFresh`, `Update.applyUpdate_tighten_notAdmitted`, `Update.applyUpdate_addAttack_endpointNotDeclared`, `Update.applyUpdate_addInstance_notFresh` |
+| Sufficient-condition preservation | `Update.applyUpdate_addLeaf_ok`, `Update.applyUpdate_tighten_ok`, `Update.applyUpdate_addAttack_ok`, `Update.applyUpdate_addInstance_ok` |
+
+The preservation theorem directions are `Accepted source` plus each theorem's
+constructor-local hypotheses to existence of `target` with
+`applyUpdate ... = .ok target ∧ Accepted target`. They do not state converses or
+unconditional constructor success. In particular, `applyUpdate_addInstance_ok`
+requires well-sortedness, complete support, and attack completeness after
+extending the retained argument list.
+
+### Support Lemmas Promoted for M3
+
+| Role | Lean declaration | File |
+|---|---|---|
+| Accepted admission conditions and retained structure | `Admission.firstDuplicateLeafId_none_iff_nodup`, `Admission.evaluateAdmission_accepted_conditions`, `Admission.retained_semantic_attack_endpoints`, `Admission.retained_identity_of_length_eq` | `Lara/Admission.lean` |
+| Raw attack selection, append, lookup, and resolution transport | `RawAttack.mem_of_mem_selectAligned`, `RawAttack.resolveAttacks_append`, `RawAttack.resolveAttacks_attack_lookup`, `RawAttack.resolveAttacks_mono_lookup`, `RawAttack.lookupArg_append_of_some`, `RawAttack.lookupArg_some_row`, `RawAttack.selectAligned_append_of_length_eq`, `RawAttack.resolveAttacks_length`, `RawAttack.selectAligned_congr_on` | `Lara/RawAttack.lean` |
+| Checked/declared carrier identity | `Admission.liftSupport_range_eq_of_mem`, `Admission.checkedAF_eq_declaredAF` | `Lara/Admission.lean` |
+| Embedding reflection and unblocked-label transport | `BlockedProgram.directIn_reflect_embedding`, `BlockedProgram.directOut_reflect_embedding`, `BlockedProgram.labelC_eq_of_embedding`, `BlockedProgram.production_unblocked_label_agree` | `Lara/BlockedProgram.lean` |
+| Direct-in and direct-out transport for old nodes across a fresh sink | `Grounded.SinkExtension.directIn_forward`, `Grounded.SinkExtension.directOut_forward`, `Grounded.SinkExtension.directIn_backward`, `Grounded.SinkExtension.directOut_backward` | `Lara/Grounded.lean` |
+| Status facts and old-node status behavior under a fresh sink | `Grounded.statusC_defeated_all_out`, `Grounded.SinkExtension`, `Grounded.SinkExtension.label_old`, `Grounded.statusC_contested_has_undec`, `Grounded.statusC_ne_defeated_of_undec`, `Grounded.SinkExtension.justified_preserved`, `Grounded.SinkExtension.contested_not_defeated` | `Lara/Grounded.lean` |
+| Holes independence for arbitrary extension semantics | `Semantics.observe_holes_independent` | `Lara/Semantics.lean` |
+
+### Core and Public Transition API
+
+All declarations in this table are in `lean/Lara/Update.lean`.
+
+| Paper object | Lean declaration and direction |
+|---|---|
+| Semantics-indexed observation and belief projection | `Update.coreObs`, `Update.beliefSet`, `Update.CoreTransition` |
+| Public report vocabulary and spellings | `Update.PublicReport`, `Update.PublicReport.ofStatus`, `Update.PublicReport.ofStatus_injective`, `Update.PublicReport.render`, `Update.PublicReport.publicationLabel` |
+| Exact production blocked-query path | `Update.blockedQueriesForRun`, `Update.blockedSeedForRun`, `Update.blockedSetForRun`, `Update.publicReport`, `Update.publicReport_gap_of_empty_support`, `Update.PublicTransition` |
+| Clean source boundary | `Update.CleanBase`, `Update.AcceptedRun.prune_eq` |
+| Clean source collapses public to core | `Update.blockedQueriesForRun_eq_nil_of_clean`, `Update.publicReport_eq_core_of_clean`, `Update.keptArgs_eq_raw_of_clean`, `Update.retainedIndices_eq_range_of_clean`, `Update.keptAttacks_eq_resolved_of_clean`, `Update.checkedArgs_eq_raw_of_clean`, `Update.checkedAF_eq_declaredAF_of_clean`, `Update.blockedSeedForRun_eq_nil_of_clean`, `Update.blockedSetForRun_eq_nil_of_clean` |
+| Empty-closure and no-prune bridge lemmas | `Update.blockedSet_eq_nil_of_seed_nil`, `Update.blockedQueriesForRun_eq_nil_of_empty_closure`, `Update.publicReport_eq_core_of_empty_closure`, `Update.checkedAF_eq_declaredAF_of_no_arg_prune` |
+| Additive update classification and public/core equality | `Update.AdditiveUpdate`, `Update.additive_clean_target`, `Update.additive_target_blockedSeed_eq_nil`, `Update.additive_target_blockedSet_eq_nil`, `Update.additive_public_eq_core`, `Update.additive_public_ne_evidenceBlocked` |
+| Non-instance classification used by public tightening | `Update.NonInstanceUpdate`, `Update.tighten_lifted_support_subset` |
+| Core unreachable-cell theorems | `Update.addAttack_gap_fixed`, `Update.additive_no_gap_entry`, `Update.addLeaf_core_fixed`, `Update.nonInstance_gap_fixed`, `Update.addInstance_sink_status_monotone` |
+| Public tighten unreachable-cell theorems | `Update.tighten_public_defeated_not_contested`, `Update.tighten_public_justified_source_justified`, `Update.tighten_public_gap_fixed` |
+| Source checked-to-declared legacy bridge | `Update.tighten_public_row_justified_nonpromotion`: a justified checked complete claim on one exact clean run implies that run's lifted claim is justified in its declared framework |
+| Matrix-to-legacy quarantine safety | `Update.quarantine_nonpromotion_corollary`: exact source and target `AcceptedRun`s plus `applyUpdate reg source (.tighten key) = .ok target`, the `.tighten` `Update.NonInstanceUpdate` hypotheses, `Update.CleanBase sourceRun`, and `publicReport targetRun p = .justified` imply that the source lifted claim is justified in the source declared framework |
+
+`tighten_public_justified_source_justified` runs from a justified target public
+report back to a justified source core status under the exact clean-base,
+successful-update, and `.tighten` `NonInstanceUpdate` hypotheses.
+`quarantine_nonpromotion_corollary` applies that transition theorem, then the
+clean source's checked-framework and lifted-claim identities, to recover the
+legacy declared-framework conclusion. Its proof does not call
+`Admission.source_justified_nonpromotion`. This is a backward safety result; it
+does not say that tightening preserves every justified claim forward.
+
+### Reachable Witness Theorems
+
+The following declarations are in `lean/Lara/Examples/Update.lean`.
+`Examples.Update.AcceptedRun` abbreviates the fixed fixture registry.
+`SuccessfulCoreCell` and `SuccessfulPublicCell` package exact accepted runs and
+successful `applyUpdate` equalities; `SuccessfulCoreCell.transition` exposes
+those witnesses.
+
+| Matrix family | Exact reachable declarations |
+|---|---|
+| `addLeaf` core, 4 | `addLeaf_justified_to_justified`, `addLeaf_refuted_to_refuted`, `addLeaf_both_to_both`, `addLeaf_gap_to_gap` |
+| `tighten` core, 13 | `tighten_justified_to_justified`, `tighten_justified_to_refuted`, `tighten_justified_to_both`, `tighten_justified_to_gap`, `tighten_refuted_to_justified`, `tighten_refuted_to_refuted`, `tighten_refuted_to_both`, `tighten_refuted_to_gap`, `tighten_both_to_justified`, `tighten_both_to_refuted`, `tighten_both_to_both`, `tighten_both_to_gap`, `tighten_gap_to_gap` |
+| `addAttack` core, 10 | `addAttack_justified_to_justified`, `addAttack_justified_to_refuted`, `addAttack_justified_to_both`, `addAttack_refuted_to_justified`, `addAttack_refuted_to_refuted`, `addAttack_refuted_to_both`, `addAttack_both_to_justified`, `addAttack_both_to_refuted`, `addAttack_both_to_both`, `addAttack_gap_to_gap` |
+| `addInstance` core, 10 | `addInstance_justified_to_justified`, `addInstance_refuted_to_justified`, `addInstance_refuted_to_refuted`, `addInstance_refuted_to_both`, `addInstance_both_to_justified`, `addInstance_both_to_both`, `addInstance_gap_to_justified`, `addInstance_gap_to_refuted`, `addInstance_gap_to_both`, `addInstance_gap_to_gap` |
+| `tighten` public under `CleanBase`, 13 | `tighten_public_justified_to_justified`, `tighten_public_justified_to_defeated`, `tighten_public_justified_to_contested`, `tighten_public_justified_to_gap`, `tighten_public_justified_to_evidenceBlocked`, `tighten_public_defeated_to_defeated`, `tighten_public_defeated_to_gap`, `tighten_public_defeated_to_evidenceBlocked`, `tighten_public_contested_to_defeated`, `tighten_public_contested_to_contested`, `tighten_public_contested_to_gap`, `tighten_public_contested_to_evidenceBlocked`, `tighten_public_gap_to_gap` |
+
+`Examples.Update.addInstance_uncovered_rejected` is the negative acceptance
+anchor for the extended attack-completeness premise.
+`Examples.Update.addAttack_blocked_growth` is the non-clean public-growth
+witness that refutes unconditional additive/core equality.
+
+### Typed Matrix and Evidence Inventory
+
+All declarations below are in `lean/Lara/Examples/Update.lean`.
+
+| Paper or supplement object | Lean declarations |
+|---|---|
+| Core axes and canonical product | `UpdateKind`, `PublicationStatus`, `PublicationStatus.grounded`, `publicationStatuses`, `MatrixCoordinate`, `canonicalCoordinates`, `canonicalCoordinates_nodup`, `canonicalCoordinates_length`, `UpdateOfKind` |
+| Reachable and unreachable semantics | `ReachableClaim`, `ReachableTag`, `ReachableTag.sound`, `UnreachableTag`, `MatrixRun`, `InstanceSinkPremises`, `UnreachablePremises`, `UnreachableClaim`, `UnreachableTag.sound` |
+| Total core cell evidence | `CellEvidence`, `CellEvidence.Claim`, `CellEvidence.sound`, `evidenceFor`, `MatrixCellEntry` |
+| Four complete core matrices | `addLeafMatrix`, `tightenMatrix`, `addAttackMatrix`, `addInstanceMatrix` |
+| Core coordinate completeness | `addLeaf_coordinates`, `tighten_coordinates`, `addAttack_coordinates`, `addInstance_coordinates` |
+| Core counts | `addLeaf_reachable_count`, `tighten_reachable_count`, `addAttack_reachable_count`, `addInstance_reachable_count`, `grounded_matrix_cell_count`, `grounded_reachable_count` |
+| Core report | `groundedCoreMatrixReport` |
+| Public axis and canonical 4 by 5 product | `publicReports`, `PublicMatrixCoordinate`, `canonicalPublicCoordinates`, `canonicalPublicCoordinates_nodup`, `canonicalPublicCoordinates_length`, `canonicalPublicCoordinates_order` |
+| Public tighten runs and indexed evidence | `TightenPublicRun`, `TightenPublicReachableTag`, `TightenPublicReachableClaim`, `TightenPublicReachableTag.sound`, `TightenPublicUnreachableTag`, `TightenPublicUnreachableClaim`, `TightenPublicUnreachableTag.sound`, `TightenPublicCellEvidence`, `TightenPublicCellEvidence.Claim`, `TightenPublicCellEvidence.sound`, `tightenPublicEvidenceFor`, `TightenPublicCellEntry`, `tightenPublicMatrix`, `tightenPublicMatrix_coordinates` |
+| Public tighten counts | `tighten_public_reachable_count`, `tighten_public_blocked_reachable_count` |
+| Additive public bridge | `AdditiveKind`, `AdditiveKind.updateKind`, `AdditiveKind.label`, `AdditivePublicRun`, `AdditivePublicRun.toCore`, `AdditivePublicRun.publicTransition`, `AdditivePublicReachableClaim`, `ReachableTag.additivePublicSound` |
+| Additive blocked-column impossibility | `AdditiveBlockedRun`, `AdditiveBlockedRun.emptyClosure`, `AdditiveBlockedRun.false` |
+| Total additive public evidence | `AdditivePublicCellEvidence`, `AdditivePublicCellEvidence.Claim`, `AdditivePublicCellEvidence.sound`, `additivePublicEvidenceFor`, `AdditivePublicCellEntry` |
+| Three complete additive public matrices | `addLeafPublicMatrix`, `addAttackPublicMatrix`, `addInstancePublicMatrix` |
+| Additive public coordinate and length checks | `addLeafPublicMatrix_coordinates`, `addAttackPublicMatrix_coordinates`, `addInstancePublicMatrix_coordinates`, `addLeafPublicMatrix_length`, `addAttackPublicMatrix_length`, `addInstancePublicMatrix_length` |
+| Additive public counts | `addLeaf_public_reachable_count`, `addAttack_public_reachable_count`, `addInstance_public_reachable_count`, `addLeaf_public_blocked_reachable_count`, `addAttack_public_blocked_reachable_count`, `addInstance_public_blocked_reachable_count` |
+| Public report and executable golden entry | `fiveValuedPublicMatrixReport`; `main` in `lean/UpdateMatrices.lean` prints it after `groundedCoreMatrixReport` |
+
+The count theorem for `addInstance` is
+`Examples.Update.addInstance_reachable_count = 10`, not 13. The three additional
+unreachable cells use `Update.addInstance_sink_status_monotone`; this is a
+mechanized consequence of old-node sink monotonicity, not a missing witness.
+
+### Holes and AGM Names
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Complete-support projection with definitionally empty holes | `Consistency.claimSupportFor`, `Consistency.completeClaimFor` | `Lara/Consistency.lean` |
+| Observation does not depend on holes | `Semantics.observe_holes_independent` | `Lara/Semantics.lean` |
+| Separate holes diagnostic | `Grounded.incompleteAlternative` | `Lara/Grounded.lean` |
+| Grounded belief-set projection | `Update.beliefSet` | `Lara/Update.lean` |
+| Failed AGM success and inclusion probes | `Examples.Update.agm_success_fails`, `Examples.Update.agm_inclusion_fails` | `Lara/Examples/Update.lean` |
+
+Only success and additive inclusion were probed, and both fail. This name map
+does not license a full AGM-compliance claim. Holes remain a separate diagnostic
+and do not create a sixth `PublicReport`.

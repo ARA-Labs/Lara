@@ -69,6 +69,7 @@ library
                       Lara.Compile.Internal
                       Lara.Grounded
                       Lara.Semantics
+                      Lara.Update
                       Lara.Runtime
                       Lara.Check
                       Lara.Blocked
@@ -168,6 +169,7 @@ test-suite lara-test
                       FormulaNamesSpec
                       SlotNamesSpec
                       SemanticsSpec
+                      UpdateSpec
                       TestAF
     build-depends:    base >=4 && <5
                     , lara

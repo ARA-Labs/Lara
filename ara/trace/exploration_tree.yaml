@@ -6282,3 +6282,61 @@ tree:
     remains at zero errors and 160 warnings.
   status: resolved
   also_depends_on: [N237]
+
+- id: N239
+  type: experiment
+  title: "Theory M3 source-update dynamics are mechanized end to end"
+  provenance: ai-executed
+  timestamp: "2026-08-29T01:18"
+  description: >
+    Executed the approved seven-step source-update plan with a fresh implementer,
+    specification review, quality review, and traceable commit for each step.
+    The implementation defines four raw-source updates, re-runs the real
+    admission/check pipeline, proves constructor-specific preservation,
+    classifies grounded and public status transitions, mirrors the deciders in
+    Haskell, and generates the paper matrices from typed Lean evidence.
+  result: >
+    The grounded core matrices account for all 64 cells: addLeaf reaches 4,
+    tighten 13, addAttack 10, and addInstance 10. The clean-base public products
+    account for all 80 cells: the three additive rows reach 4, 10, and 10 cells
+    with no evidence-blocked target, while tighten reaches 13 cells including
+    three evidence-blocked targets. Mechanization refuted the proposed
+    addInstance bound of 13, proved the exact clean-base boundary, exhibited an
+    uncovered-conflict rejection for instance addition, and recovered the
+    legacy quarantine safety conclusion from an actual tighten transition.
+    Full Lean and Haskell builds passed; AxCheck reported only propext,
+    Classical.choice, and Quot.sound; the main differential passed 620 positive
+    and 56 malformed-negative anchors; admission differential passed 20 of 20;
+    presentation, semantics, update-golden, replay-tamper, and freeze gates all
+    passed. PR #201 opened from commit d246abf.
+  evidence:
+    - "PR #201; commits 81c4898, ec564dc, fae36e2, ac6a466, 5ab6f24, 6de9c74, c301cf8, d246abf"
+    - "docs/theory-m3-source-updates.md; test/update-matrices.golden"
+    - "lean/Lara/Update.lean; lean/Lara/Examples/Update.lean; lean/AxCheck.lean"
+    - "src/Lara/Update.hs; test/UpdateSpec.hs"
+    - "local gates: lake build; AxCheck; cabal build/test all; differential 620/0 + 56/0; admission differential 20/0"
+  also_depends_on: [N236, N238]
+
+- id: N240
+  type: dead_end
+  title: "The proposed thirteen-cell addInstance matrix"
+  provenance: ai-executed
+  timestamp: "2026-08-29T01:18"
+  hypothesis: >
+    Apart from the no-gap-entry boundary, every grounded addInstance source and
+    target status pair might be reachable, giving thirteen cells.
+  failure_mode: >
+    A successful fresh instance append is a sink extension of the old compiled
+    framework. Old-to-old attacks and grounded labels are preserved, while the
+    new node has no outgoing attack into the old carrier. Therefore a justified
+    source cannot become refuted or both, and a both source cannot become
+    refuted. The complete typed matrix reaches ten cells, not thirteen.
+  lesson: >
+    Additive non-monotonicity is constrained by the direction of new edges.
+    Enumerating fixtures is insufficient evidence for an impossible cell; the
+    matrix needs a structural extension theorem that rules it out.
+  evidence:
+    - "lean/Lara/Grounded.lean: Grounded.SinkExtension"
+    - "lean/Lara/Update.lean: addInstance_sink_status_monotone"
+    - "docs/theory-m3-source-updates.md: generated addInstance matrix"
+  also_depends_on: [N239]

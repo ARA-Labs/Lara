@@ -1,0 +1,130 @@
+session:
+  id: "2026-08-29_001"
+  date: "2026-08-29"
+  started: "2026-08-29T01:18"
+  last_turn: "2026-08-29T01:18"
+  turn_count: 1
+  summary: >
+    Theory M3 source-update dynamics implemented and opened as PR #201. Four
+    updates now have executable acceptance, preservation theorems, complete
+    grounded and clean-base public matrices, generated goldens, a Haskell
+    decider mirror, and durable paper boundaries. Mechanization refuted the
+    predicted addInstance matrix bound, established the CleanBase boundary,
+    and exhibited the coverage rejection. All local Lean, axiom, Haskell,
+    differential, golden, replay, and freeze gates passed.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: N239
+    routing: direct
+    provenance: ai-executed
+    summary: "M3 mechanized 64 core and 80 public cells, passed all local gates, and opened PR #201."
+  - turn: 1
+    type: dead_end
+    id: N240
+    routing: direct
+    provenance: ai-executed
+    summary: "The predicted 13-cell addInstance bound is not reachable; sink monotonicity leaves 10 cells."
+  - turn: 1
+    type: observation
+    id: O97
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "A fresh accepted instance is a sink extension of the old grounded framework."
+  - turn: 1
+    type: observation
+    id: O98
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Public additive/core equality requires an empty source quarantine seed."
+  - turn: 1
+    type: observation
+    id: O99
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Fresh complete support does not make addInstance unconditionally admissible; AttackComplete remains necessary."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Executed the approved seven-step M3 plan with per-step implementation,
+      specification review, quality review, traceable commits, holistic review,
+      full local gates, branch push, and PR #201 creation.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Update.lean"
+      - "lean/Lara/Examples/Update.lean"
+      - "lean/Lara/Grounded.lean"
+      - "lean/Lara/Semantics.lean"
+      - "lean/Lara/Admission.lean"
+      - "lean/Lara/RawAttack.lean"
+      - "lean/Lara/BlockedProgram.lean"
+      - "lean/AxCheck.lean"
+      - "lean/UpdateMatrices.lean"
+      - "src/Lara/Update.hs"
+      - "test/UpdateSpec.hs"
+      - "scripts/check-update-goldens.sh"
+      - "test/update-matrices.golden"
+      - "docs/theory-m3-source-updates.md"
+      - "docs/paper-lean-name-map.md"
+  - turn: 1
+    action: "Deleted the executed living plan after migrating its durable definitions, matrices, and paper claim boundary."
+    provenance: ai-executed
+    files_changed: ["plans/2026-08-28-theory-m3-source-updates.md"]
+
+claims_touched:
+  - id: C37
+    action: crystallized
+    turn: 1
+  - id: C38
+    action: crystallized
+    turn: 1
+  - id: C39
+    action: crystallized
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C37
+    field: created
+    before: "(none — new claim)"
+    after: "C37: Fresh accepted instance addition is a sink extension on the old grounded carrier"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The typed matrix, sink theorems, durable documentation, and PR #201 depend on this result."
+  - turn: 1
+    entry: C38
+    field: created
+    before: "(none — new claim)"
+    after: "C38: Public additive/core equality has an exact clean-base boundary"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The clean-base theorem and blocked-growth counterexample landed together."
+  - turn: 1
+    entry: C39
+    field: created
+    before: "(none — new claim)"
+    after: "C39: Pairwise attack completeness is a real admissibility condition for instance addition"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The preservation theorem and exact missing-conflict rejection witness both landed."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The core matrix is theorem-backed rather than predicted: addLeaf reaches
+      four cells, tighten thirteen, addAttack ten, and addInstance ten. The
+      addInstance prediction of thirteen was refuted by a general sink-extension
+      theorem, not by failure to find fixtures.
+  - turn: 1
+    excerpt: >
+      CleanBase is an exact AcceptedRun property. Off that boundary an addAttack
+      from a blocked source grows the blocked closure and changes a target's
+      public report to evidence-blocked.
+
+open_threads:
+  - "PR #201 review and hosted CI; issue #186 closes on merge."
+  - "Paper repository must transcribe the generated M3 matrices and preserve the may-claim/must-not-claim boundary."
+
+ai_suggestions_pending: []

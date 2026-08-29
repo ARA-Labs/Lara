@@ -78,8 +78,9 @@ def claimSupportFor
     if equiv canon entry.1.conclusion p then some entry.2 else none
 
 /-- The complete-support projection for `p`. Its holes are definitionally empty:
-this is not the full `holes(P,p)` or `incompleteAlternative` computation, which
-is deferred to M3. -/
+this is not the full `holes(P,p)` or `Grounded.incompleteAlternative`
+computation.  N17 point (1), `Semantics.observe_holes_independent`, proves that
+changing only this field cannot affect any semantics-parametric observation. -/
 def completeClaimFor
     (unit : Unit.CheckedUnit canon Gamma CertOk) (p : Atom) : Grounded.Claim :=
   { support := claimSupportFor unit p, holes := [] }

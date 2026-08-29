@@ -16,7 +16,7 @@ the result is stated but not yet proved or mechanized._
   ground-substituted away before a proposition forms). If the corpus needs AC predicates or binders,
   the normal form extends with argument sorting / de Bruijn indexing and the same properties must be
   re-established (the documented flip criterion), so the claim is bounded to the v0.1 atom language.
-- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:154 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
+- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:274-275 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
 - **Status**: supported
 - **Falsification criteria**: Exhibit two propositions the corpus treats as the same claim that
   `nf`/`≡` separates (or vice versa) without the AC/binder extension applying — i.e. a support
@@ -36,7 +36,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds under a policy-declared `contrary` relation (not classical negation) and the
   ASPIC+ restriction that strict rules are unattackable; positions are paths of premise indices and
   question names.
-- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:447 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:472 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
+- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:937-938 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:962-963 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A defeat pattern the corpus annotators find that cannot be typed as an
   attack on a root / internal-rule / leaf position (e.g. a genuine attack on something other than
@@ -130,7 +130,7 @@ the result is stated but not yet proved or mechanized._
   fidelity, certificate soundness, dependency accountability, closed registration, structural
   consequence laws); the ND adapter is sound but not complete for its Boolean semantics — completeness
   is deliberately not required because LARA checks submitted certificates rather than searching.
-- **Sources**: ["\"Intuitionistic natural deduction is sound but not complete for this Boolean semantics; completeness is not required because LARA checks submitted certificates rather than searching for every valid proof.\" ← docs/strict-backend-decision.md:210 «completeness is not required because LARA checks submitted certificates» [input]", "Theorem 4 (ND soundness) + Lemma 5 (dependency exactness) ← evidence/proofs/nd_adapter_soundness.md [result]"]
+- **Sources**: ["\"Intuitionistic natural deduction is sound but not complete for this Boolean semantics; completeness is not required because LARA checks submitted certificates rather than searching for every valid proof.\" ← docs/strict-backend-decision.md:210-211 «completeness is not required because LARA checks submitted certificates» [input]", "Theorem 4 (ND soundness) + Lemma 5 (dependency exactness) ← evidence/proofs/nd_adapter_soundness.md [result]"]
 - **Status**: supported
 - **Falsification criteria**: A well-typed natural-deduction certificate whose conclusion is not a
   Boolean consequence of its context (refuting Theorem 4), or a well-typed certificate whose true
@@ -154,7 +154,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Non-monotonicity is at the *consequence level*, across extensions of the input
   framework; for a *fixed* framework the internal transfer operator is monotone over a finite-height
   lattice, so grounded evaluation is still deterministic and terminating (no contradiction).
-- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← docs/spec.md:510 «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
+- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← docs/spec.md:1131-1132 «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
 - **Status**: supported
 - **Falsification criteria**: A monotonic consequence relation that reproduces LARA's grounded claim
   acceptance under all framework extensions (i.e. never needs to retract) — its existence would refute
@@ -175,7 +175,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds because `Args` is finite and the operator is monotone on the subset lattice;
   `contested` = grounded `undec`, which is broader than mutual defeat (even/odd cycles,
   undec-propagation) and must be explained by the responsible SCC in the report.
-- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:506 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
+- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:1126-1127 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
 - **Status**: supported
 - **Provenance**: ai-suggested
 - **Falsification criteria**: A finite compiled framework on which grounded iteration fails to
@@ -203,7 +203,7 @@ the result is stated but not yet proved or mechanized._
   strict-certificate theory dependencies are reported separately via each backend's `uses` function.
 - **Conditions**: Holds for checked support terms; every leaf in `leaves(w)` must be declared in the
   admitted context `Γ`, and backend dependencies (`certDeps`) are unioned in from accepted certificates.
-- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:424 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
+- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:823 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A checked support term whose actual load-bearing leaf set differs from
   `leaves(w)`, or a strict certificate whose consulted theory/premise dependency is not returned by
@@ -234,7 +234,7 @@ the result is stated but not yet proved or mechanized._
   all four rationality postulates at the cost of structuring the contrary relation. The v0.1
   executable `mayOverlap` check is conservative for non-linear patterns: it may reject a safe policy
   but cannot accept two patterns with canonically equivalent ground instances.
-- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:546 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
+- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:1193 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A Path-B-well-formed policy under which two contrary claims are both
   labelled `justified` by grounded semantics — refuting consistency (spec §9 result 7); or corpus
@@ -294,7 +294,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds for the proof-carrying-output / neurosymbolic pattern (DSP, Baldur, LeanDojo,
   Clover); LARA's Haskell checker is the trusted arbiter and the Python LLM front-end (Phase E) is the
   untrusted producer that may never define policy rules or logical schemas at runtime.
-- **Sources**: ["\"it reports high acceptance on correct instances and zero false positives on deliberately-incorrect (adversarial) instances\" ← docs/worked-examples-plan.md:160 «zero false positives on deliberately-incorrect (adversarial)» [input]", "\"An untrusted LLM front-end (added later, in Python) proposes certificates; the checker is the sole arbiter of structural validity.\" ← README.md:11 «front-end (added later, in Python) proposes certificates; the checker is the» [input]"]
+- **Sources**: ["\"it reports high acceptance on correct instances and zero false positives on deliberately-incorrect (adversarial) instances\" ← docs/worked-examples-plan.md:197-198 «zero false positives on deliberately-incorrect (adversarial)» [input]", "\"An untrusted LLM front-end (added later, in Python) proposes certificates; the checker is the sole arbiter of structural validity.\" ← docs/substrate-decision.md:11-13 «Python emits claim-support programs, opaque strict-certificate payloads, and leaf atoms; the Haskell checker decides validity.» [input]"]
 - **Status**: hypothesis
 - **Falsification criteria**: A seeded-incorrect certificate that the LARA checker *accepts* (a false
   positive) would refute the untrusted-by-construction guarantee; or an evaluation showing the split
@@ -321,7 +321,7 @@ the result is stated but not yet proved or mechanized._
   inconsistent driver identity functions (non-canonical numeric literals: `canonNum` vs the former
   Lean `canon = id`, O15), rather than a voting tie. The production Lean driver now uses `canonNum`, and the
   numeric/multi-blocked differential fixture prevents that defect from recurring.
-- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:129 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:130 «JEST found 44 engine bugs and 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]"]
+- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:132 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:133 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]"]
 - **Status**: testing
 - **Falsification criteria**: A demonstration that the shared-core differential setup cannot localize
   whether a divergence is a Haskell-checker bug or a Lean-model bug (i.e. the N+1 framing gives no
@@ -383,7 +383,7 @@ the result is stated but not yet proved or mechanized._
   should default to per-result-cell atoms with coarser grains as explicit, minority exceptions.
 - **Conditions**: 60-claim sample at pin `62e9b54`; coarser or mixed grains cover the remaining
   quarter of claims and must stay expressible.
-- **Sources**: ["grain distribution ← m0/annotation-summary.md:64–65 «per-result-cell 45, mixed 7, per-experiment-claim 6, per-run 2» [result]"]
+- **Sources**: ["grain distribution ← m0/annotation-summary.md:66–67 «per-result-cell 45, mixed 7, per-experiment-claim 6, per-run 2» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Further annotation showing cell-level atoms are systematically the
@@ -405,7 +405,7 @@ the result is stated but not yet proved or mechanized._
   expectedly so: the corpus is polished, peer-reviewed top-venue work. By decision N29 (user,
   2026-07-22), rebut/undermine are exercised via self-authored adversarial reports/mutations
   against corpus claims at language-testing time, not by corpus mining.
-- **Sources**: ["attack profile ← m0/annotation-summary.md:55–56 «4 undercut, 0 rebut, 0 undermine, 190 none (98%)» [result]", "CQ profile ← m0/annotation-summary.md:67–68 «Mandatory: 105 met, **68 unmet-gap (39%)**, 3 unmet-defeater» [result]"]
+- **Sources**: ["attack profile ← m0/annotation-summary.md:55–56 «4 undercut, 0 rebut, 0 undermine, 190 none (98%)» [result]", "CQ profile ← m0/annotation-summary.md:69–70 «Mandatory: 105 met, **68 unmet-gap (39%)**, 3 unmet-defeater» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Authored-adversarial or reserve annotation showing that gap-treatment
@@ -429,7 +429,7 @@ the result is stated but not yet proved or mechanized._
   flagged at gate time (whole-trace attack walk, dead-end-as-support, result-cell conflict) were
   resolved into spec §7/§4.3/§11 on 2026-07-22 (N30, N31, PR #9), leaving the six-item wishlist
   as the whole residue.
-- **Sources**: ["gate verdict ← m0/annotation-summary.md:99 «PASS — ~90% of sampled argument shapes are expressible» [result]", "flag partition ← m0/annotation-summary.md:75 «21/60 claims (35%) carry coverage flags» [result]"]
+- **Sources**: ["gate verdict ← m0/annotation-summary.md:101 «PASS — ~90% of sampled argument shapes are expressible» [result]", "flag partition ← m0/annotation-summary.md:77 «21/60 claims (35%) carry coverage flags» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Full-schema double annotation or reserve annotation pushing
@@ -622,8 +622,8 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds where the new stage rejects *undeclared* material and the suite's operators create material rather than only permuting existing declarations. The complementary half is class-boundary discipline: the delta also depends on the new stage declining jurisdiction it could plausibly claim (here, substitution-domain totality and rule-id resolution, which stay R3 and R1). Observed once, over one suite; the untested boundary is a stage that rejects *relational* rather than *declarational* facts.
 - **Sources**: [
   `369` ← `git dfa9811~1:fixtures/mutants/MANIFEST.tsv` «369 data rows (`wc -l` minus header)» [input];
-  `empty` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:23` «(empty)» [result];
-  `three operator groups` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:26` «**Why it is empty, and why that was not free.** Three operator groups synthesize» [result]
+  `empty` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:37` «(empty)» [result];
+  `three operator groups` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:40` «**Why it is empty, and why that was not free.** Three operator groups synthesize» [result]
   ]
 - **Status**: supported
 - **Provenance**: ai-suggested
@@ -716,3 +716,36 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [`lean/Lara/Semantics.lean` (`no_verdict_on_empty`, `observe_noExtension_iff`, `enumerate_ne_nil_of_observed_ne_gap`, `claimDefeatedB_of_nil`, `claimAcceptedB_of_nil`), `lean/Lara/Examples/Semantics.lean` (`stableSem_enumerate_threeCycle`, `observe_stableSem_threeCycle`, `observe_stableSem_threeCycle_ne_justified`, `observe_stableSem_threeCycle_ne_defeated`, `threeCycle_enumerate_nonStable`), `lean/AxCheck.lean`, `docs/theory-m2a-observation.md`, trace N232, trace N236]
 - **Dependencies**: [C35]
 - **Tags**: mechanization, extension-semantics, nonexistence, fabricated-verdicts, stable, M2a
+
+## C37: Fresh accepted instance addition is a sink extension on the old grounded carrier
+- **Statement**: When a source update appends one fresh, fully supported rule instance and the edited source is accepted, the old compiled argumentation framework embeds as the old-node subgraph of a sink extension. Old grounded labels are preserved; a justified source claim cannot become refuted or both, and a both source claim cannot become refuted solely through that append.
+- **Conditions**: Holds for the one-step `addInstance` constructor with exact accepted source and target runs, name-and-term freshness, complete support for the new term, and the extended-list attack-completeness obligation. It is a grounded-semantics result about the old carrier; it does not claim label preservation for the new node or for arbitrary extension semantics.
+- **Sources**: [`sink boundary` ← `docs/theory-m3-source-updates.md:239-240` «A fresh instance is a sink in the old framework: freshness prevents old raw attacks from naming it, while old-to-old edges and labels are preserved.» [result]; `axiom set` ← `lean/AxCheck.lean` via `scripts/check-axioms.sh` «Axiom audit passed.» [result]]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit an accepted successful fresh `addInstance` update satisfying the stated support and coverage conditions that changes an old justified claim to refuted or both, or an old both claim to refuted.
+- **Proof**: [`lean/Lara/Grounded.lean` (`Grounded.SinkExtension`, `label_old`, `justified_preserved`, `contested_not_defeated`), `lean/Lara/Update.lean` (`addInstance_sink_status_monotone`), `lean/Lara/Examples/Update.lean` (typed addInstance matrix), trace N239, trace N240]
+- **Dependencies**: []
+- **Tags**: mechanization, source-update, addInstance, sink-extension, grounded-semantics, M3
+
+## C38: CleanBase is a sufficient boundary for public additive/core equality
+- **Statement**: A successful additive source update has the same public and grounded-core report when its exact accepted source run starts with an empty quarantine seed. Without that condition, equality is not guaranteed: adding an attack from a blocked source can expand the blocked closure and change another query's public report to `evidence-blocked`.
+- **Conditions**: Applies to one-step `addLeaf`, `addAttack`, and `addInstance` updates. `CleanBase` means the source accepted run's `removedSeed` is empty. The claim does not cover an additive update after an earlier quarantine, update composition, or tightening.
+- **Sources**: [`clean-base definition` ← `docs/theory-m3-source-updates.md:136-142` «`Lara.Update.CleanBase run` means exactly `run.admission.prune.removedSeed = []` for the source accepted run.» [input]; `unconditional counterexample` ← `docs/theory-m3-source-updates.md:158-165` «This witness refutes an unconditional additive/core equality theorem; it does not make `CleanBase` necessary for every individual run.» [result]]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit an accepted successful additive update satisfying `CleanBase` whose public and grounded-core reports differ, or show that the blocked-growth witness does not pass the real admission/check/update pipeline.
+- **Proof**: [`lean/Lara/Update.lean` (`additive_target_blockedSet_eq_nil`, `additive_public_eq_core`, `additive_public_ne_evidenceBlocked`), `lean/Lara/Examples/Update.lean` (`addAttack_blocked_growth`, typed additive public matrices), `test/update-matrices.golden`, trace N239]
+- **Dependencies**: [C25]
+- **Tags**: mechanization, source-update, quarantine, public-reporting, clean-base, M3
+
+## C39: Pairwise attack completeness is a real admissibility condition for instance addition
+- **Statement**: Adding a fresh, completely supported rule instance can still make an accepted source invalid, because the new argument creates contrary pairs that require declared covering attacks. The extended argument list's `AttackComplete` property is therefore a genuine admissibility condition, not proof scaffolding.
+- **Conditions**: Holds at the one-step `addInstance` boundary. The rejection witness keeps name and term fresh and supplies complete support; it fails specifically because one new contrary pair has no declared conflict edge. Other update rejection causes are outside this witness.
+- **Sources**: [`preservation premise` ← `docs/theory-m3-source-updates.md:83-86` «`applyUpdate_addInstance_ok` assumes an accepted source, name-and-term freshness, well-sortedness of the new term, a complete support derivation for it, and `Compile.AttackComplete` for the old retained arguments extended by that term.» [input]; `non-unconditional boundary` ← `docs/theory-m3-source-updates.md:88-89` «None says that its constructor always succeeds.» [result]]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Prove that every fresh, well-sorted, completely supported single-instance append preserves `AttackComplete`, or show that `addInstance_uncovered_rejected` fails for a reason other than its uncovered contrary pair.
+- **Proof**: [`lean/Lara/Update.lean` (`applyUpdate_addInstance_ok`), `lean/Lara/Examples/Update.lean` (`addInstance_uncovered_rejected`), trace N239]
+- **Dependencies**: []
+- **Tags**: mechanization, source-update, addInstance, attack-completeness, rejection-witness, M3

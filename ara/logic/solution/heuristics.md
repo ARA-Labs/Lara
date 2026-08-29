@@ -169,7 +169,7 @@
   convention. Closing it cost one equation. Keep the caller's own shape check ahead of
   any operand parsing, so the structural guarantee does not change which diagnostic an
   author sees when the operand is also malformed.
-- **Sources**: [3 sibling helpers ← src/Lara/Syntax.hs:1119-1157 «addArgDischarge / addArgHole / setArgAssurance» [input]; 1 remaining fall-through ← spec review of commit 62e23f9 «setArgAssurance inst _ = inst» [result]]
+- **Sources**: [3 sibling helpers ← src/Lara/Syntax.hs:1139-1177 «addArgDischarge / addArgHole / setArgAssurance» [input]; 1 remaining fall-through ← spec review of commit 62e23f9 «setArgAssurance inst _ = inst» [result]]
 - **Status**: active
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium

@@ -82,6 +82,12 @@ jobs:
       - name: Haskell-Lean semantics golden parity
         run: make semantics-goldens
 
+      - name: Lean-emitted source-update matrix goldens
+        run: make update-goldens
+
+      - name: Haskell-Lean source-update precondition differential
+        run: make update-differential
+
       - name: Elaborator unit tests
         run: uv run --no-project python -m unittest discover -s elaborator -v
 
@@ -90,6 +96,12 @@ jobs:
 
       - name: Container benchmark runner unit tests
         run: python3 -m unittest scripts/test_bench_container.py -v
+
+      - name: ARA source-span unit tests
+        run: python3 -m unittest scripts/test_check_ara_source_spans.py -v
+
+      - name: ARA source quotations match cited spans
+        run: make ara-source-spans
 
       - name: Policy-copy authenticity (T7)
         run: |

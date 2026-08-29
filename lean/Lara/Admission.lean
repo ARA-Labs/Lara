@@ -188,6 +188,67 @@ def firstDuplicateLeafIdAux : List LeafId → List LeafId → Option LeafId
 def firstDuplicateLeafId (metas : List LeafMeta) : Option LeafId :=
   firstDuplicateLeafIdAux (metas.map (·.id)) []
 
+private theorem firstDuplicateLeafIdAux_none_no_seen (ids seen : List LeafId)
+    (h : firstDuplicateLeafIdAux ids seen = none) :
+    ∀ l ∈ ids, l ∉ seen := by
+  intro l hl
+  induction ids generalizing seen with
+  | nil => simp at hl
+  | cons head tail ih =>
+      by_cases hhead : head ∈ seen
+      · simp [firstDuplicateLeafIdAux, hhead] at h
+      · have htail : firstDuplicateLeafIdAux tail (head :: seen) = none := by
+          simpa [firstDuplicateLeafIdAux, hhead] using h
+        rcases List.mem_cons.mp hl with rfl | hl
+        · exact hhead
+        · have hnot := ih (head :: seen) htail hl
+          exact fun hin => hnot (by simp [hin])
+
+private theorem firstDuplicateLeafIdAux_none_nodup (ids seen : List LeafId)
+    (h : firstDuplicateLeafIdAux ids seen = none) : ids.Nodup := by
+  induction ids generalizing seen with
+  | nil => exact List.nodup_nil
+  | cons head tail ih =>
+      by_cases hhead : head ∈ seen
+      · simp [firstDuplicateLeafIdAux, hhead] at h
+      · have htail : firstDuplicateLeafIdAux tail (head :: seen) = none := by
+          simpa [firstDuplicateLeafIdAux, hhead] using h
+        apply List.nodup_cons.mpr
+        refine ⟨?_, ih (head :: seen) htail⟩
+        intro hmem
+        exact
+          (firstDuplicateLeafIdAux_none_no_seen tail (head :: seen)
+            htail head hmem) (by simp)
+
+private theorem firstDuplicateLeafIdAux_none_of_nodup
+    (ids seen : List LeafId) (hnodup : ids.Nodup)
+    (hdisjoint : ∀ l ∈ ids, l ∉ seen) :
+    firstDuplicateLeafIdAux ids seen = none := by
+  induction ids generalizing seen with
+  | nil => rfl
+  | cons head tail ih =>
+      have hhead : head ∉ seen := hdisjoint head (by simp)
+      have htailNodup := (List.nodup_cons.mp hnodup).2
+      have htailDisjoint : ∀ l ∈ tail, l ∉ head :: seen := by
+        intro l hl hmem
+        rcases List.mem_cons.mp hmem with heq | hseen
+        · exact (List.nodup_cons.mp hnodup).1 (heq ▸ hl)
+        · exact hdisjoint l (by simp [hl]) hseen
+      simp [firstDuplicateLeafIdAux, hhead,
+        ih (head :: seen) htailNodup htailDisjoint]
+
+/-- The leaf-id duplicate detector succeeds exactly when declared metadata
+identifiers are pairwise distinct. -/
+theorem firstDuplicateLeafId_none_iff_nodup (metas : List LeafMeta) :
+    firstDuplicateLeafId metas = none ↔ (metas.map (·.id)).Nodup := by
+  constructor
+  · intro h
+    apply firstDuplicateLeafIdAux_none_nodup
+    simpa [firstDuplicateLeafId] using h
+  · intro h
+    apply firstDuplicateLeafIdAux_none_of_nodup _ [] h
+    simp
+
 /-- Metadata and semantic leaf rows describe one declaration-ordered source
 exactly when their identifier lists are equal position-by-position. -/
 def metadataLeafAligned (metas : List LeafMeta) (leaves : List (LeafId × Atom)) : Prop :=
@@ -438,6 +499,30 @@ theorem evaluateAdmission_iff_judgment (canon : String → String) (table : List
               rw [← h]
               exact AdmissionJudgment.invalid_alignment hk hl ha
 
+/-- Every accepted evaluator result certifies all source-validation checks:
+the admission table and metadata identifiers are duplicate-free, metadata and
+semantic leaf rows are aligned, and no policy rejection remains. -/
+theorem evaluateAdmission_accepted_conditions {canon : String → String}
+    {table : List AdmissionRow} {metas : List LeafMeta}
+    {leaves : List (LeafId × Atom)}
+    {argsRaw : List (String × SupportTerm)} {rawAtts : List RawAttack}
+    {groups : List Groups.DupGroup} {declared : AlignedAttacks argsRaw rawAtts}
+    {admission : AdmissionResult}
+    (haccepted :
+      evaluateAdmission canon table metas leaves argsRaw rawAtts groups declared =
+        .accepted admission) :
+    firstDuplicateKey table = none ∧
+      firstDuplicateLeafId metas = none ∧
+      metadataLeafAligned metas leaves ∧
+      firstAdmissionRejection table metas = none := by
+  have hj :
+      AdmissionJudgment canon table metas leaves argsRaw rawAtts groups declared
+        (.accepted admission) :=
+    (evaluateAdmission_iff_judgment canon table metas leaves argsRaw rawAtts
+      groups declared (.accepted admission)).mpr haccepted
+  cases hj with
+  | accepted hk hl ha hn _ => exact ⟨hk, hl, ha, hn⟩
+
 /-- **The admission judgment is functional.** Two derivable outcomes for the
 same validated input coincide. -/
 theorem admission_deterministic (canon : String → String) (table : List AdmissionRow)
@@ -669,6 +754,42 @@ theorem retained_attacks_selectAligned (canon : String → String) (table : List
     (buildPrune canon table metas leaves argsRaw rawAtts groups declaredResolved).keepAttack hres]
   rfl
 
+/-- Every semantic attack retained by the canonical prune has both semantic
+endpoints among the retained argument terms.  This packages the raw-id
+filter, aligned resolution, and unique-id lookup into the endpoint fact used
+by whole-unit checking. -/
+theorem retained_semantic_attack_endpoints (canon : String → String)
+    (table : List AdmissionRow) (metas : List LeafMeta)
+    (leaves : List (LeafId × Atom))
+    (argsRaw : List (String × SupportTerm)) (rawAtts : List RawAttack)
+    (groups : List Groups.DupGroup) (declared : AlignedAttacks argsRaw rawAtts) :
+    ∀ k ∈ (buildPrune canon table metas leaves argsRaw rawAtts groups
+        declared.resolved).keptAttacks,
+      k.source ∈ (buildPrune canon table metas leaves argsRaw rawAtts groups
+        declared.resolved).keptArgs.map (·.2) ∧
+      k.target ∈ (buildPrune canon table metas leaves argsRaw rawAtts groups
+        declared.resolved).keptArgs.map (·.2) := by
+  intro k hk
+  have hresolved :=
+    retained_attacks_selectAligned canon table metas leaves argsRaw rawAtts
+      groups declared.resolve_eq
+  obtain ⟨ra, hra, hsourceLookup, htargetLookup⟩ :=
+    RawAttack.resolveAttacks_attack_lookup argsRaw hresolved k hk
+  have hkeep :
+      (buildPrune canon table metas leaves argsRaw rawAtts groups
+        declared.resolved).keepAttack ra = true :=
+    (List.mem_filter.mp hra).2
+  obtain ⟨⟨source, hsource, _, hsourceRow⟩,
+      ⟨target, htarget, _, htargetRow⟩⟩ :=
+    retained_attack_source_retained canon table metas leaves argsRaw rawAtts
+      groups declared hkeep
+  have hsourceEq : source.2 = k.source :=
+    Option.some.inj (hsourceRow.symm.trans hsourceLookup)
+  have htargetEq : target.2 = k.target :=
+    Option.some.inj (htargetRow.symm.trans htargetLookup)
+  exact ⟨List.mem_map.mpr ⟨source, hsource, hsourceEq⟩,
+    List.mem_map.mpr ⟨target, htarget, htargetEq⟩⟩
+
 /-! ### The canonical audit -/
 
 /-- **The audit is the combined prune's exact projection.**  Leaf causes,
@@ -884,43 +1005,6 @@ theorem removedSeed_subset_of_restrictive {t1 t2 : List AdmissionRow}
   · exact List.mem_append.mpr (Or.inl (policyQuarantineSeed_subset_of_restrictive hrestr metas l hl))
   · exact List.mem_append.mpr (Or.inr hl)
 
-private theorem firstDuplicateLeafIdAux_none_no_seen (ids seen : List LeafId)
-    (h : firstDuplicateLeafIdAux ids seen = none) :
-    ∀ l ∈ ids, l ∉ seen := by
-  intro l hl
-  induction ids generalizing seen with
-  | nil => simp at hl
-  | cons head tail ih =>
-      by_cases hhead : head ∈ seen
-      · simp [firstDuplicateLeafIdAux, hhead] at h
-      · have htail : firstDuplicateLeafIdAux tail (head :: seen) = none := by
-          simpa [firstDuplicateLeafIdAux, hhead] using h
-        rcases List.mem_cons.mp hl with rfl | hl
-        · exact hhead
-        · have hnot := ih (head :: seen) htail hl
-          exact fun hin => hnot (by simp [hin])
-
-private theorem firstDuplicateLeafIdAux_none_nodup (ids seen : List LeafId)
-    (h : firstDuplicateLeafIdAux ids seen = none) : ids.Nodup := by
-  induction ids generalizing seen with
-  | nil => exact List.nodup_nil
-  | cons head tail ih =>
-      by_cases hhead : head ∈ seen
-      · simp [firstDuplicateLeafIdAux, hhead] at h
-      · have htail : firstDuplicateLeafIdAux tail (head :: seen) = none := by
-          simpa [firstDuplicateLeafIdAux, hhead] using h
-        apply List.nodup_cons.mpr
-        refine ⟨?_, ih (head :: seen) htail⟩
-        intro hmem
-        exact (firstDuplicateLeafIdAux_none_no_seen tail (head :: seen) htail head hmem)
-          (by simp)
-
-private theorem firstDuplicateLeafId_none_nodup (metas : List LeafMeta)
-    (h : firstDuplicateLeafId metas = none) : (metas.map (·.id)).Nodup := by
-  apply firstDuplicateLeafIdAux_none_nodup
-    (metas.map (fun m : LeafMeta => m.id)) []
-  simpa [firstDuplicateLeafId] using h
-
 private theorem decision_ne_reject_of_first_none (table : List AdmissionRow)
     (metas : List LeafMeta)
     (hn : firstAdmissionRejection table metas = none) :
@@ -946,50 +1030,8 @@ theorem accepted_metadata_aligned (canon : String → String) (table : List Admi
     (hacc : evaluateAdmission canon table metas leaves argsRaw rawAtts groups declared =
       .accepted r) :
     metadataLeafAligned metas leaves := by
-  cases hk : firstDuplicateKey table with
-  | some k => simp [evaluateAdmission, hk] at hacc
-  | none =>
-      cases hl : firstDuplicateLeafId metas with
-      | some l => simp [evaluateAdmission, hk, hl] at hacc
-      | none =>
-          by_cases ha : metadataLeafAligned metas leaves
-          · exact ha
-          · simp [evaluateAdmission, hk, hl, ha] at hacc
-
-private theorem accepted_duplicate_leaf_none (canon : String → String)
-    (table : List AdmissionRow) (metas : List LeafMeta)
-    (leaves : List (LeafId × Atom)) (argsRaw : List (String × SupportTerm))
-    (rawAtts : List RawAttack) (groups : List Groups.DupGroup)
-    (declared : AlignedAttacks argsRaw rawAtts)
-    (hacc : evaluateAdmission canon table metas leaves argsRaw rawAtts groups declared =
-      .accepted r) :
-    firstDuplicateLeafId metas = none := by
-  cases hk : firstDuplicateKey table with
-  | some k => simp [evaluateAdmission, hk] at hacc
-  | none =>
-      cases hl : firstDuplicateLeafId metas with
-      | some l => simp [evaluateAdmission, hk, hl] at hacc
-      | none => rfl
-
-private theorem accepted_first_rejection_none (canon : String → String)
-    (table : List AdmissionRow) (metas : List LeafMeta)
-    (leaves : List (LeafId × Atom)) (argsRaw : List (String × SupportTerm))
-    (rawAtts : List RawAttack) (groups : List Groups.DupGroup)
-    (declared : AlignedAttacks argsRaw rawAtts)
-    (hacc : evaluateAdmission canon table metas leaves argsRaw rawAtts groups declared =
-      .accepted r) :
-    firstAdmissionRejection table metas = none := by
-  cases hk : firstDuplicateKey table with
-  | some k => simp [evaluateAdmission, hk] at hacc
-  | none =>
-      cases hl : firstDuplicateLeafId metas with
-      | some l => simp [evaluateAdmission, hk, hl] at hacc
-      | none =>
-          by_cases ha : metadataLeafAligned metas leaves
-          · cases hf : firstAdmissionRejection table metas with
-            | some rejection => simp [evaluateAdmission, hk, hl, ha, hf] at hacc
-            | none => rfl
-          · simp [evaluateAdmission, hk, hl, ha] at hacc
+  exact
+    (evaluateAdmission_accepted_conditions hacc).2.2.1
 
 /-- The accepted carrier's prune is the canonical combined prune. -/
 theorem accepted_prune_eq (canon : String → String) (table : List AdmissionRow)
@@ -1047,7 +1089,7 @@ private theorem checked_iff_policy_no_reject (canon : String → String)
     l ∈ checkedAdmittedIds canon table metas leaves groups ↔
       l ∈ policyAdmittedIds table metas ∧
       l ∉ Groups.quarantined canon leaves groups := by
-  have hnodup := firstDuplicateLeafId_none_nodup metas hdup
+  have hnodup := (firstDuplicateLeafId_none_iff_nodup metas).mp hdup
   constructor
   · intro hchecked
     obtain ⟨e, he, hid, hnotPolicy, hnotGroup⟩ :=
@@ -1105,12 +1147,10 @@ theorem accepted_checked_context_exact (canon : String → String) (table : List
       ∀ l, l ∈ r.prune.checkedLeaves.map (·.1) ↔
         l ∈ policyAdmittedIds table metas ∧
         l ∉ Groups.quarantined canon leaves groups := by
-  have ha :=
-    accepted_metadata_aligned canon table metas leaves argsRaw rawAtts groups declared hacc
-  have hdup :=
-    accepted_duplicate_leaf_none canon table metas leaves argsRaw rawAtts groups declared hacc
-  have hn :=
-    accepted_first_rejection_none canon table metas leaves argsRaw rawAtts groups declared hacc
+  have hconditions := evaluateAdmission_accepted_conditions hacc
+  have ha := hconditions.2.2.1
+  have hdup := hconditions.2.1
+  have hn := hconditions.2.2.2
   have hp :=
     accepted_prune_eq canon table metas leaves argsRaw rawAtts groups declared hacc
   refine ⟨ha, ?_, ?_⟩
@@ -1292,7 +1332,7 @@ theorem source_reject_no_checked_unit (canon : String → String) (table : List 
           · simp [evaluateAdmission, hk, hl, ha] at h
 
 /-! ### Source non-promotion -/
-private theorem retained_identity_of_length_eq
+theorem retained_identity_of_length_eq
     (keep : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm))
     (hlen : declared.length = (retainedArguments keep declared).length) :
@@ -1318,7 +1358,7 @@ private theorem retained_identity_of_length_eq
     rw [hview]
     rw [List.zipIdx_map_snd, List.range_eq_range']
 
-private theorem liftSupport_range_eq_of_mem {n : Nat} {support : List Nat}
+theorem liftSupport_range_eq_of_mem {n : Nat} {support : List Nat}
     (hmem : ∀ i, i ∈ support → i < n) :
     liftSupport (List.range n) support = support := by
   induction support with
@@ -1333,7 +1373,7 @@ private theorem liftSupport_range_eq_of_mem {n : Nat} {support : List Nat}
       change head :: liftSupport (List.range n) rest = head :: rest
       rw [ih hrest]
 
-private theorem checkedAF_eq_declaredAF
+theorem checkedAF_eq_declaredAF
     (P : CheckedProgram canon Pi Gamma CertOk dp)
     (argsRaw : List (String × SupportTerm)) (atts : List Attack)
     (hargs : P.args = argsRaw.map (·.2)) (hatts : P.atts = atts) :

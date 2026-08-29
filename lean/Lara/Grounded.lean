@@ -583,6 +583,34 @@ theorem statusC_all_out_not_justified (F : AF) (c : Claim)
   rw [hin] at this
   contradiction
 
+/-- A defeated claim has nonempty complete support and every supporting
+argument is labelled `out`. -/
+theorem statusC_defeated_all_out {F : AF} {c : Claim}
+    (h : statusC F c = Status.defeated) :
+    c.support ≠ [] ∧ ∀ i ∈ c.support, labelC F i = Label.out := by
+  unfold statusC at h
+  split at h
+  · contradiction
+  · rename_i hsupport
+    refine ⟨hsupport, ?_⟩
+    split at h
+    · contradiction
+    · rename_i hnoIn
+      split at h
+      · contradiction
+      · rename_i hnoUndec
+        intro i hi
+        cases hlabel : labelC F i with
+        | inn =>
+            apply False.elim
+            apply hnoIn
+            exact List.any_eq_true.mpr ⟨i, hi, by simp [hlabel]⟩
+        | out => rfl
+        | undec =>
+            apply False.elim
+            apply hnoUndec
+            exact List.any_eq_true.mpr ⟨i, hi, by simp [hlabel]⟩
+
 /-- Diagnostic accompanying `statusC`: an incomplete alternative exists (N17 (1)).
 Defined for reporting; `statusC` does not consume it. -/
 def incompleteAlternative (c : Claim) : Bool := decide (c.holes ≠ [])
@@ -615,5 +643,151 @@ theorem status_preservation {F : AF} (c : Claim) : statusDirect F c = statusC F 
   have hun : ∀ a, decide (¬ DirectIn F a ∧ ¬ DirectOut F a) = (labelC F a == Label.undec) := by
     intro a; rw [beq_und]; exact decide_eq_decide.mpr (labelC_undec_iff a).symm
   simp only [hin, hun]
+
+
+/-! ### Appending a sink argument -/
+
+/-- `larger` appends one argument whose outgoing attack row is empty, while
+preserving every old attack.  Incoming attacks to the new sink are unrestricted. -/
+structure SinkExtension (smaller larger : AF) (sink : Arg) : Prop where
+  args_eq : larger.args = smaller.args ++ [sink]
+  old_attack : ∀ a ∈ smaller.args, ∀ b ∈ smaller.args,
+    larger.attack a b = smaller.attack a b
+  sink_no_out : ∀ b, larger.attack sink b = false
+
+mutual
+  /-- Appending a sink preserves every old direct-in derivation. -/
+  theorem SinkExtension.directIn_forward
+      (extension : SinkExtension smaller larger sink) :
+      ∀ {a}, DirectIn smaller a → DirectIn larger a
+    | _, .intro ha defended => by
+        apply DirectIn.intro
+        · rw [extension.args_eq]
+          exact List.mem_append.mpr (Or.inl ha)
+        · intro b hb hba
+          rw [extension.args_eq] at hb
+          rcases List.mem_append.mp hb with hold | hsink
+          · apply extension.directOut_forward hold
+            apply defended b hold
+            simpa only [extension.old_attack b hold _ ha] using hba
+          · simp only [List.mem_singleton] at hsink
+            subst b
+            rw [extension.sink_no_out] at hba
+            contradiction
+
+  /-- Appending a sink preserves direct-out derivations at old arguments. -/
+  theorem SinkExtension.directOut_forward
+      (extension : SinkExtension smaller larger sink) :
+      ∀ {b}, b ∈ smaller.args → DirectOut smaller b → DirectOut larger b
+    | _, hb, .intro hc hcb => by
+        apply DirectOut.intro (extension.directIn_forward hc)
+        have hcMem := directIn_mem_args hc
+        simpa only [extension.old_attack _ hcMem _ hb] using hcb
+end
+
+mutual
+  /-- Appending a sink creates no new direct-in derivation for old arguments. -/
+  theorem SinkExtension.directIn_backward
+      (extension : SinkExtension smaller larger sink) :
+      ∀ {a}, a ∈ smaller.args → DirectIn larger a → DirectIn smaller a
+    | _, ha, .intro _ defended => by
+        apply DirectIn.intro ha
+        intro b hb hba
+        apply extension.directOut_backward hb
+        apply defended b
+        · rw [extension.args_eq]
+          exact List.mem_append.mpr (Or.inl hb)
+        · simpa only [extension.old_attack b hb _ ha] using hba
+
+  /-- Appending a sink creates no new direct-out derivation at old arguments. -/
+  theorem SinkExtension.directOut_backward
+      (extension : SinkExtension smaller larger sink) :
+      ∀ {b}, b ∈ smaller.args → DirectOut larger b → DirectOut smaller b
+    | _, hb, .intro hc hcb => by
+        have hcMem := directIn_mem_args hc
+        rw [extension.args_eq] at hcMem
+        rcases List.mem_append.mp hcMem with hold | hsink
+        · apply DirectOut.intro (extension.directIn_backward hold hc)
+          simpa only [extension.old_attack _ hold _ hb] using hcb
+        · simp only [List.mem_singleton] at hsink
+          subst sink
+          rw [extension.sink_no_out] at hcb
+          contradiction
+end
+
+/-- Old arguments keep exactly their grounded three-way label when a sink is
+appended. -/
+theorem SinkExtension.label_old
+    (extension : SinkExtension smaller larger sink)
+    {a : Arg} (ha : a ∈ smaller.args) :
+    labelC larger a = labelC smaller a := by
+  rw [labelC_spec, labelC_spec]
+  by_cases hin : DirectIn smaller a
+  · rw [if_pos hin, if_pos (extension.directIn_forward hin)]
+  · have hin' : ¬ DirectIn larger a := fun h =>
+      hin (extension.directIn_backward ha h)
+    rw [if_neg hin, if_neg hin']
+    by_cases hout : DirectOut smaller a
+    · rw [if_pos hout, if_pos (extension.directOut_forward ha hout)]
+    · have hout' : ¬ DirectOut larger a := fun h =>
+        hout (extension.directOut_backward ha h)
+      rw [if_neg hout, if_neg hout']
+
+/-- A contested claim contains an explicitly undecided support argument. -/
+theorem statusC_contested_has_undec
+    (h : statusC F claim = Status.contested) :
+    ∃ i ∈ claim.support, labelC F i = Label.undec := by
+  unfold statusC at h
+  split at h
+  · contradiction
+  split at h
+  · contradiction
+  split at h
+  · rename_i hundec
+    obtain ⟨i, hi, hilabel⟩ := List.any_eq_true.mp hundec
+    exact ⟨i, hi, by simpa using hilabel⟩
+  · contradiction
+
+/-- One undecided support rules out a defeated aggregate. -/
+theorem statusC_ne_defeated_of_undec
+    (hi : i ∈ claim.support) (hlabel : labelC F i = Label.undec) :
+    statusC F claim ≠ Status.defeated := by
+  unfold statusC
+  have hsupport : claim.support ≠ [] := by
+    intro hempty
+    simp [hempty] at hi
+  rw [if_neg hsupport]
+  split
+  · decide
+  · have hundec :
+        claim.support.any (fun a => labelC F a == Label.undec) = true :=
+      List.any_eq_true.mpr ⟨i, hi, by simp [hlabel]⟩
+    rw [if_pos hundec]
+    decide
+
+/-- A justified old claim remains justified after appending a sink, provided
+its old support indices remain support indices of the enlarged claim. -/
+theorem SinkExtension.justified_preserved
+    (extension : SinkExtension smaller larger sink)
+    (holdCarrier : ∀ i ∈ oldClaim.support, i ∈ smaller.args)
+    (hsupport : ∀ i ∈ oldClaim.support, i ∈ newClaim.support)
+    (hjustified : statusC smaller oldClaim = Status.justified) :
+    statusC larger newClaim = Status.justified := by
+  obtain ⟨i, hi, hlabel⟩ :=
+    (statusC_justified_iff smaller oldClaim).mp hjustified
+  apply (statusC_justified_iff larger newClaim).mpr
+  exact ⟨i, hsupport i hi, (extension.label_old (holdCarrier i hi)).trans hlabel⟩
+
+/-- A contested old claim cannot become defeated after appending a sink,
+provided its old support indices remain present. -/
+theorem SinkExtension.contested_not_defeated
+    (extension : SinkExtension smaller larger sink)
+    (holdCarrier : ∀ i ∈ oldClaim.support, i ∈ smaller.args)
+    (hsupport : ∀ i ∈ oldClaim.support, i ∈ newClaim.support)
+    (hcontested : statusC smaller oldClaim = Status.contested) :
+    statusC larger newClaim ≠ Status.defeated := by
+  obtain ⟨i, hi, hlabel⟩ := statusC_contested_has_undec hcontested
+  apply statusC_ne_defeated_of_undec (hsupport i hi)
+  exact (extension.label_old (holdCarrier i hi)).trans hlabel
 
 end Lara.Grounded

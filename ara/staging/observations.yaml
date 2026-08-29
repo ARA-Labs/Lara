@@ -2157,3 +2157,60 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O97
+  timestamp: "2026-08-29T01:18"
+  provenance: ai-suggested
+  content: >
+    A successful fresh and fully supported instance append is a sink extension
+    of the old grounded argumentation framework: old labels are preserved, a
+    justified source cannot degrade to refuted or both, and a both source cannot
+    become refuted.
+  context: >
+    Mechanized while closing every addInstance cell in Theory M3. The result
+    refuted the plan's proposed reachable-cell bound and is now consumed by the
+    typed matrix, durable documentation, and PR #201.
+  potential_type: claim
+  bound_to: [N239, N240]
+  promoted: true
+  promoted_to: "logic/claims.md:C37"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O98
+  timestamp: "2026-08-29T01:18"
+  provenance: ai-suggested
+  content: >
+    Equality between an additive update's public report and its grounded core
+    report has an exact boundary: the accepted source must have an empty
+    quarantine seed. Off that boundary, adding an attack from a blocked source
+    can grow the blocked closure and move another query to evidence-blocked.
+  context: >
+    Proved and counter-witnessed in Theory M3. Typed clean-base public matrices,
+    the blocked-growth example, durable paper restrictions, and PR #201 all
+    depend on the boundary.
+  potential_type: claim
+  bound_to: [N239]
+  promoted: true
+  promoted_to: "logic/claims.md:C38"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O99
+  timestamp: "2026-08-29T01:18"
+  provenance: ai-suggested
+  content: >
+    Name freshness and complete support do not make rule-instance addition
+    unconditionally admissible. Adding one argument creates new contrary pairs,
+    so the extended argument list must still satisfy AttackComplete; otherwise
+    the real unit checker rejects the update for a missing conflict.
+  context: >
+    Theory M3 proves the sufficient condition and an exact rejection witness.
+    The constructor theorem, paper claim boundary, and PR #201 depend on this
+    distinction.
+  potential_type: claim
+  bound_to: [N239]
+  promoted: true
+  promoted_to: "logic/claims.md:C39"
+  crystallized_via: artifact-commitment
+  stale: false

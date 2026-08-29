@@ -451,3 +451,10 @@ sessions:
   events_count: 12
   claims_touched: [C35, C36]
   open_threads: 7
+- id: 2026-08-29_001
+  date: '2026-08-29'
+  summary: 'Theory M3 source-update dynamics implemented and opened as PR #201: complete typed core/public matrices, conditional preservation, Haskell/golden conformance, three mechanized boundary claims, and all local gates green.'
+  turn_count: 1
+  events_count: 5
+  claims_touched: [C37, C38, C39]
+  open_threads: 2

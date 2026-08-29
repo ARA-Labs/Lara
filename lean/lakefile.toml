@@ -31,3 +31,10 @@ root = "Lara.AdmissionDriverMain"
 [[lean_exe]]
 name = "presentation-shape"
 root = "Lara.PresentationParityMain"
+
+# Exhaustive cross-language parity driver for Lara.Update's four constructor-side
+# precondition deciders. scripts/update-differential.sh diffs its canonical TSV
+# against the Haskell emitter.
+[[lean_exe]]
+name = "update-preconditions"
+root = "Lara.UpdatePreconditionParityMain"

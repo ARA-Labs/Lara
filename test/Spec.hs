@@ -52,6 +52,7 @@ import SurfaceRewriteSpec (surfaceRewriteSpecProps)
 import SyntaxSpec (syntaxSpecProps)
 import ValueBindingsSpec (valueBindingSpecProps)
 import WireSpec (wireSpecProps)
+import UpdateSpec (updateSpecProps)
 import ThetaInferenceSpec (thetaInferenceSpecProps)
 import WorkedExamplesSpec (workedExamplesSpecProps)
 
@@ -231,6 +232,7 @@ main = do
         ++ [run name act | (name, act) <- ndNamedSpecProps]
         ++ [run name act | (name, act) <- cliSpecProps]
         ++ [run name act | (name, act) <- semanticsSpecProps]
+        ++ [run name act | (name, act) <- updateSpecProps]
   unless (and results) exitFailure
   where
     run name act = do

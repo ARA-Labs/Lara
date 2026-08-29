@@ -132,6 +132,7 @@ import Lara.Blocked
 import Lara.BlockedProgram
 import Lara.RawAttack
 import Lara.Admission
+import Lara.Update
 import Lara.Attack
 import Lara.Compile
 import Lara.Observation
@@ -151,3 +152,4 @@ import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.Realizability
 import Lara.Examples.Semantics
+import Lara.Examples.Update

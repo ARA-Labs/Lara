@@ -1180,6 +1180,22 @@ theorem observe_gap_iff (sem : ExtensionSemantics) (F : AF) (c : Grounded.Claim)
           · exact absurd h (by decide)
   · exact observe_gap sem F c
 
+/-- **N17 point (1), holes independence.** For every extension semantics,
+changing only `Grounded.Claim.holes` leaves observation unchanged, and the
+resulting observation is `gap` exactly when complete support is empty.  Thus
+holes are an independent `Grounded.incompleteAlternative` diagnostic, not a
+fifth grounded status or a sixth public report.  M3 public transitions consume
+this result. -/
+theorem observe_holes_independent (sem : ExtensionSemantics) (F : AF)
+    (support holes₁ holes₂ : List Arg) :
+    observe sem F { support := support, holes := holes₁ } =
+        observe sem F { support := support, holes := holes₂ } ∧
+      (observe sem F { support := support, holes := holes₁ } =
+          ClaimObservation.observed Status.gap ↔ support = []) := by
+  constructor
+  · rfl
+  · exact observe_gap_iff sem F { support := support, holes := holes₁ }
+
 /-- **No verdict escapes an empty enumeration.** For every semantics, framework and
 claim, an empty extension set forces one of the two answers that consult no
 extension data. This is the general fact behind the concrete

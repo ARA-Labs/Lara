@@ -47,6 +47,8 @@ import Lara.Semantics
 import Lara.Observation
 import Lara.Semantics.Sublists
 import Lara.Examples.Semantics
+import Lara.Update
+import Lara.Examples.Update
 
 open Lara
 
@@ -1293,3 +1295,315 @@ bounds checked rather than asserted. -/
 #print axioms Lara.Observation.srcObservation_checked
 #print axioms Lara.Observation.srcObservation_unique
 #print axioms Lara.Observation.srcStatus_iff_srcObservation
+
+/-! ## Theory M3 — source updates and status dynamics
+
+The M3 audit covers the complete public source-update surface, every supporting
+lemma promoted for the preservation and transition proofs, all reachable and
+unreachable matrix witnesses, and the typed evidence used by the report
+emitters.  Private proof helpers and private fixture builders are intentionally
+outside the public audit surface. -/
+
+/-! ### M3 — source, acceptance, and update vocabulary -/
+
+#print axioms Lara.Update.SourceState
+#print axioms Lara.Update.Accepted
+#print axioms Lara.Update.AcceptedRun
+#print axioms Lara.Update.AcceptedRun.accepted
+#print axioms Lara.Update.UpdateRejection
+#print axioms Lara.Update.SourceUpdate
+
+#print axioms Lara.Update.AddLeafFresh
+#print axioms Lara.Update.addLeafFreshB
+#print axioms Lara.Update.addLeafFreshB_iff
+#print axioms Lara.Update.AdmittedAt
+#print axioms Lara.Update.admittedAtB
+#print axioms Lara.Update.admittedAtB_iff
+#print axioms Lara.Update.EndpointDeclared
+#print axioms Lara.Update.endpointDeclaredB
+#print axioms Lara.Update.endpointDeclaredB_iff
+#print axioms Lara.Update.InstanceFresh
+#print axioms Lara.Update.instanceFreshB
+#print axioms Lara.Update.instanceFreshB_iff
+
+#print axioms Lara.Update.applyUpdate
+#print axioms Lara.Update.applyUpdate_addLeaf_notFresh
+#print axioms Lara.Update.applyUpdate_tighten_notAdmitted
+#print axioms Lara.Update.applyUpdate_addAttack_endpointNotDeclared
+#print axioms Lara.Update.applyUpdate_addInstance_notFresh
+#print axioms Lara.Update.applyUpdate_addLeaf_ok
+#print axioms Lara.Update.applyUpdate_tighten_ok
+#print axioms Lara.Update.applyUpdate_addAttack_ok
+#print axioms Lara.Update.applyUpdate_addInstance_ok
+
+/-! ### M3 — preservation support -/
+
+#print axioms Lara.Admission.firstDuplicateLeafId_none_iff_nodup
+#print axioms Lara.Admission.evaluateAdmission_accepted_conditions
+#print axioms Lara.Admission.retained_semantic_attack_endpoints
+#print axioms Lara.Admission.retained_identity_of_length_eq
+#print axioms Lara.Admission.liftSupport_range_eq_of_mem
+#print axioms Lara.Admission.checkedAF_eq_declaredAF
+
+#print axioms Lara.RawAttack.mem_of_mem_selectAligned
+#print axioms Lara.RawAttack.resolveAttacks_append
+#print axioms Lara.RawAttack.resolveAttacks_attack_lookup
+#print axioms Lara.RawAttack.resolveAttacks_mono_lookup
+#print axioms Lara.RawAttack.lookupArg_append_of_some
+#print axioms Lara.RawAttack.lookupArg_some_row
+#print axioms Lara.RawAttack.selectAligned_append_of_length_eq
+#print axioms Lara.RawAttack.resolveAttacks_length
+#print axioms Lara.RawAttack.selectAligned_congr_on
+
+#print axioms Lara.BlockedProgram.directIn_reflect_embedding
+#print axioms Lara.BlockedProgram.directOut_reflect_embedding
+#print axioms Lara.BlockedProgram.labelC_eq_of_embedding
+#print axioms Lara.BlockedProgram.production_unblocked_label_agree
+
+#print axioms Lara.Grounded.statusC_defeated_all_out
+#print axioms Lara.Grounded.SinkExtension
+#print axioms Lara.Grounded.SinkExtension.directIn_forward
+#print axioms Lara.Grounded.SinkExtension.directOut_forward
+#print axioms Lara.Grounded.SinkExtension.directIn_backward
+#print axioms Lara.Grounded.SinkExtension.directOut_backward
+#print axioms Lara.Grounded.SinkExtension.label_old
+#print axioms Lara.Grounded.statusC_contested_has_undec
+#print axioms Lara.Grounded.statusC_ne_defeated_of_undec
+#print axioms Lara.Grounded.SinkExtension.justified_preserved
+#print axioms Lara.Grounded.SinkExtension.contested_not_defeated
+
+#print axioms Lara.Consistency.claimSupportFor
+#print axioms Lara.Consistency.completeClaimFor
+#print axioms Lara.Grounded.incompleteAlternative
+#print axioms Lara.Semantics.observe_holes_independent
+
+/-! ### M3 — core transition API and matrix boundaries -/
+
+#print axioms Lara.Update.coreObs
+#print axioms Lara.Update.beliefSet
+#print axioms Lara.Update.CoreTransition
+
+#print axioms Lara.Update.addAttack_gap_fixed
+#print axioms Lara.Update.additive_no_gap_entry
+#print axioms Lara.Update.addLeaf_core_fixed
+#print axioms Lara.Update.nonInstance_gap_fixed
+#print axioms Lara.Update.addInstance_sink_status_monotone
+
+/-! ### M3 — public transition API and matrix boundaries -/
+
+#print axioms Lara.Update.PublicReport
+#print axioms Lara.Update.PublicReport.ofStatus
+#print axioms Lara.Update.PublicReport.ofStatus_injective
+#print axioms Lara.Update.PublicReport.render
+#print axioms Lara.Update.PublicReport.publicationLabel
+
+#print axioms Lara.Update.blockedQueriesForRun
+#print axioms Lara.Update.blockedSeedForRun
+#print axioms Lara.Update.blockedSetForRun
+#print axioms Lara.Update.publicReport
+#print axioms Lara.Update.publicReport_gap_of_empty_support
+#print axioms Lara.Update.PublicTransition
+
+#print axioms Lara.Update.CleanBase
+#print axioms Lara.Update.AcceptedRun.prune_eq
+#print axioms Lara.Update.blockedQueriesForRun_eq_nil_of_clean
+#print axioms Lara.Update.publicReport_eq_core_of_clean
+#print axioms Lara.Update.keptArgs_eq_raw_of_clean
+#print axioms Lara.Update.retainedIndices_eq_range_of_clean
+#print axioms Lara.Update.keptAttacks_eq_resolved_of_clean
+#print axioms Lara.Update.checkedArgs_eq_raw_of_clean
+#print axioms Lara.Update.checkedAF_eq_declaredAF_of_clean
+#print axioms Lara.Update.blockedSeedForRun_eq_nil_of_clean
+#print axioms Lara.Update.blockedSetForRun_eq_nil_of_clean
+
+#print axioms Lara.Update.blockedSet_eq_nil_of_seed_nil
+#print axioms Lara.Update.blockedQueriesForRun_eq_nil_of_empty_closure
+#print axioms Lara.Update.publicReport_eq_core_of_empty_closure
+#print axioms Lara.Update.checkedAF_eq_declaredAF_of_no_arg_prune
+
+#print axioms Lara.Update.AdditiveUpdate
+#print axioms Lara.Update.additive_clean_target
+#print axioms Lara.Update.additive_target_blockedSeed_eq_nil
+#print axioms Lara.Update.additive_target_blockedSet_eq_nil
+#print axioms Lara.Update.additive_public_eq_core
+#print axioms Lara.Update.additive_public_ne_evidenceBlocked
+
+#print axioms Lara.Update.NonInstanceUpdate
+#print axioms Lara.Update.tighten_lifted_support_subset
+#print axioms Lara.Update.tighten_public_defeated_not_contested
+#print axioms Lara.Update.tighten_public_justified_source_justified
+#print axioms Lara.Update.tighten_public_gap_fixed
+#print axioms Lara.Update.tighten_public_row_justified_nonpromotion
+#print axioms Lara.Update.quarantine_nonpromotion_corollary
+
+/-! ### M3 — exported examples and reachable witnesses -/
+
+#print axioms Lara.Examples.Update.AcceptedRun
+#print axioms Lara.Examples.Update.SuccessfulCoreCell
+#print axioms Lara.Examples.Update.SuccessfulPublicCell
+#print axioms Lara.Examples.Update.SuccessfulCoreCell.transition
+
+#print axioms Lara.Examples.Update.addInstance_uncovered_rejected
+#print axioms Lara.Examples.Update.addAttack_blocked_growth
+
+-- The 37 reachable grounded core cells.
+#print axioms Lara.Examples.Update.addLeaf_justified_to_justified
+#print axioms Lara.Examples.Update.addLeaf_refuted_to_refuted
+#print axioms Lara.Examples.Update.addLeaf_both_to_both
+#print axioms Lara.Examples.Update.addLeaf_gap_to_gap
+
+#print axioms Lara.Examples.Update.tighten_justified_to_justified
+#print axioms Lara.Examples.Update.tighten_justified_to_refuted
+#print axioms Lara.Examples.Update.tighten_justified_to_both
+#print axioms Lara.Examples.Update.tighten_justified_to_gap
+#print axioms Lara.Examples.Update.tighten_refuted_to_justified
+#print axioms Lara.Examples.Update.tighten_refuted_to_refuted
+#print axioms Lara.Examples.Update.tighten_refuted_to_both
+#print axioms Lara.Examples.Update.tighten_refuted_to_gap
+#print axioms Lara.Examples.Update.tighten_both_to_justified
+#print axioms Lara.Examples.Update.tighten_both_to_refuted
+#print axioms Lara.Examples.Update.tighten_both_to_both
+#print axioms Lara.Examples.Update.tighten_both_to_gap
+#print axioms Lara.Examples.Update.tighten_gap_to_gap
+
+#print axioms Lara.Examples.Update.addAttack_justified_to_justified
+#print axioms Lara.Examples.Update.addAttack_justified_to_refuted
+#print axioms Lara.Examples.Update.addAttack_justified_to_both
+#print axioms Lara.Examples.Update.addAttack_refuted_to_justified
+#print axioms Lara.Examples.Update.addAttack_refuted_to_refuted
+#print axioms Lara.Examples.Update.addAttack_refuted_to_both
+#print axioms Lara.Examples.Update.addAttack_both_to_justified
+#print axioms Lara.Examples.Update.addAttack_both_to_refuted
+#print axioms Lara.Examples.Update.addAttack_both_to_both
+#print axioms Lara.Examples.Update.addAttack_gap_to_gap
+
+#print axioms Lara.Examples.Update.addInstance_justified_to_justified
+#print axioms Lara.Examples.Update.addInstance_refuted_to_justified
+#print axioms Lara.Examples.Update.addInstance_refuted_to_refuted
+#print axioms Lara.Examples.Update.addInstance_refuted_to_both
+#print axioms Lara.Examples.Update.addInstance_both_to_justified
+#print axioms Lara.Examples.Update.addInstance_both_to_both
+#print axioms Lara.Examples.Update.addInstance_gap_to_justified
+#print axioms Lara.Examples.Update.addInstance_gap_to_refuted
+#print axioms Lara.Examples.Update.addInstance_gap_to_both
+#print axioms Lara.Examples.Update.addInstance_gap_to_gap
+
+-- The 13 reachable five-valued public tightening cells.
+#print axioms Lara.Examples.Update.tighten_public_justified_to_justified
+#print axioms Lara.Examples.Update.tighten_public_justified_to_defeated
+#print axioms Lara.Examples.Update.tighten_public_justified_to_contested
+#print axioms Lara.Examples.Update.tighten_public_justified_to_gap
+#print axioms Lara.Examples.Update.tighten_public_justified_to_evidenceBlocked
+#print axioms Lara.Examples.Update.tighten_public_defeated_to_defeated
+#print axioms Lara.Examples.Update.tighten_public_defeated_to_gap
+#print axioms Lara.Examples.Update.tighten_public_defeated_to_evidenceBlocked
+#print axioms Lara.Examples.Update.tighten_public_contested_to_defeated
+#print axioms Lara.Examples.Update.tighten_public_contested_to_contested
+#print axioms Lara.Examples.Update.tighten_public_contested_to_gap
+#print axioms Lara.Examples.Update.tighten_public_contested_to_evidenceBlocked
+#print axioms Lara.Examples.Update.tighten_public_gap_to_gap
+
+#print axioms Lara.Examples.Update.agm_success_fails
+#print axioms Lara.Examples.Update.agm_inclusion_fails
+
+/-! ### M3 — typed matrix evidence and report emitters -/
+
+#print axioms Lara.Examples.Update.UpdateKind
+#print axioms Lara.Examples.Update.PublicationStatus
+#print axioms Lara.Examples.Update.PublicationStatus.grounded
+#print axioms Lara.Examples.Update.publicationStatuses
+#print axioms Lara.Examples.Update.MatrixCoordinate
+#print axioms Lara.Examples.Update.canonicalCoordinates
+#print axioms Lara.Examples.Update.canonicalCoordinates_nodup
+#print axioms Lara.Examples.Update.canonicalCoordinates_length
+#print axioms Lara.Examples.Update.UpdateOfKind
+
+#print axioms Lara.Examples.Update.ReachableClaim
+#print axioms Lara.Examples.Update.ReachableTag
+#print axioms Lara.Examples.Update.ReachableTag.sound
+#print axioms Lara.Examples.Update.UnreachableTag
+#print axioms Lara.Examples.Update.MatrixRun
+#print axioms Lara.Examples.Update.InstanceSinkPremises
+#print axioms Lara.Examples.Update.UnreachablePremises
+#print axioms Lara.Examples.Update.UnreachableClaim
+#print axioms Lara.Examples.Update.UnreachableTag.sound
+
+#print axioms Lara.Examples.Update.CellEvidence
+#print axioms Lara.Examples.Update.CellEvidence.Claim
+#print axioms Lara.Examples.Update.CellEvidence.sound
+#print axioms Lara.Examples.Update.evidenceFor
+#print axioms Lara.Examples.Update.MatrixCellEntry
+
+#print axioms Lara.Examples.Update.addLeafMatrix
+#print axioms Lara.Examples.Update.tightenMatrix
+#print axioms Lara.Examples.Update.addAttackMatrix
+#print axioms Lara.Examples.Update.addInstanceMatrix
+#print axioms Lara.Examples.Update.addLeaf_coordinates
+#print axioms Lara.Examples.Update.tighten_coordinates
+#print axioms Lara.Examples.Update.addAttack_coordinates
+#print axioms Lara.Examples.Update.addInstance_coordinates
+#print axioms Lara.Examples.Update.addLeaf_reachable_count
+#print axioms Lara.Examples.Update.tighten_reachable_count
+#print axioms Lara.Examples.Update.addAttack_reachable_count
+#print axioms Lara.Examples.Update.addInstance_reachable_count
+#print axioms Lara.Examples.Update.grounded_matrix_cell_count
+#print axioms Lara.Examples.Update.grounded_reachable_count
+#print axioms Lara.Examples.Update.groundedCoreMatrixReport
+
+#print axioms Lara.Examples.Update.publicReports
+#print axioms Lara.Examples.Update.PublicMatrixCoordinate
+#print axioms Lara.Examples.Update.canonicalPublicCoordinates
+#print axioms Lara.Examples.Update.canonicalPublicCoordinates_nodup
+#print axioms Lara.Examples.Update.canonicalPublicCoordinates_length
+#print axioms Lara.Examples.Update.canonicalPublicCoordinates_order
+
+#print axioms Lara.Examples.Update.TightenPublicRun
+#print axioms Lara.Examples.Update.TightenPublicReachableTag
+#print axioms Lara.Examples.Update.TightenPublicReachableClaim
+#print axioms Lara.Examples.Update.TightenPublicReachableTag.sound
+#print axioms Lara.Examples.Update.TightenPublicUnreachableTag
+#print axioms Lara.Examples.Update.TightenPublicUnreachableClaim
+#print axioms Lara.Examples.Update.TightenPublicUnreachableTag.sound
+#print axioms Lara.Examples.Update.TightenPublicCellEvidence
+#print axioms Lara.Examples.Update.TightenPublicCellEvidence.Claim
+#print axioms Lara.Examples.Update.TightenPublicCellEvidence.sound
+#print axioms Lara.Examples.Update.tightenPublicEvidenceFor
+#print axioms Lara.Examples.Update.TightenPublicCellEntry
+#print axioms Lara.Examples.Update.tightenPublicMatrix
+#print axioms Lara.Examples.Update.tightenPublicMatrix_coordinates
+#print axioms Lara.Examples.Update.tighten_public_reachable_count
+#print axioms Lara.Examples.Update.tighten_public_blocked_reachable_count
+
+#print axioms Lara.Examples.Update.AdditiveKind
+#print axioms Lara.Examples.Update.AdditiveKind.updateKind
+#print axioms Lara.Examples.Update.AdditiveKind.label
+#print axioms Lara.Examples.Update.AdditivePublicRun
+#print axioms Lara.Examples.Update.AdditivePublicRun.toCore
+#print axioms Lara.Examples.Update.AdditivePublicRun.publicTransition
+#print axioms Lara.Examples.Update.AdditivePublicReachableClaim
+#print axioms Lara.Examples.Update.ReachableTag.additivePublicSound
+#print axioms Lara.Examples.Update.AdditiveBlockedRun
+#print axioms Lara.Examples.Update.AdditiveBlockedRun.emptyClosure
+#print axioms Lara.Examples.Update.AdditiveBlockedRun.false
+#print axioms Lara.Examples.Update.AdditivePublicCellEvidence
+#print axioms Lara.Examples.Update.AdditivePublicCellEvidence.Claim
+#print axioms Lara.Examples.Update.AdditivePublicCellEvidence.sound
+#print axioms Lara.Examples.Update.additivePublicEvidenceFor
+#print axioms Lara.Examples.Update.AdditivePublicCellEntry
+
+#print axioms Lara.Examples.Update.addLeafPublicMatrix
+#print axioms Lara.Examples.Update.addAttackPublicMatrix
+#print axioms Lara.Examples.Update.addInstancePublicMatrix
+#print axioms Lara.Examples.Update.addLeafPublicMatrix_coordinates
+#print axioms Lara.Examples.Update.addAttackPublicMatrix_coordinates
+#print axioms Lara.Examples.Update.addInstancePublicMatrix_coordinates
+#print axioms Lara.Examples.Update.addLeafPublicMatrix_length
+#print axioms Lara.Examples.Update.addAttackPublicMatrix_length
+#print axioms Lara.Examples.Update.addInstancePublicMatrix_length
+#print axioms Lara.Examples.Update.addLeaf_public_reachable_count
+#print axioms Lara.Examples.Update.addAttack_public_reachable_count
+#print axioms Lara.Examples.Update.addInstance_public_reachable_count
+#print axioms Lara.Examples.Update.addLeaf_public_blocked_reachable_count
+#print axioms Lara.Examples.Update.addAttack_public_blocked_reachable_count
+#print axioms Lara.Examples.Update.addInstance_public_blocked_reachable_count
+#print axioms Lara.Examples.Update.fiveValuedPublicMatrixReport

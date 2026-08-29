@@ -960,3 +960,11 @@ entries:
     - "Treated the review comment's truncated golden-transcript paragraph as actionable because its complete premise and first remedy were unambiguous. Added a Lean-only emitter runner plus Makefile/CI diff gate, then mutation-tested the gate with a stale chain row."
     - "Inlined the four executed-plan defect quotes by retaining the quotations already present in §4 and replacing dead current-tree pointers with the pre-deletion git object. The two pre-commit catches remain explicitly non-historical."
     - "No new claim or staged observation: the second round repairs conformance reachability, traceability, and process tracking rather than changing the semantics result."
+- turn: "2026-08-29_001#1"
+  notes:
+    - "Routed the integrated M3 delivery as one experiment N239 rather than seven task nodes. The research event is the closed update-dynamics matrix; per-task implementation/review commits are engineering traceability recorded in the session ai_actions."
+    - "Routed the thirteen-cell addInstance prediction as dead_end N240. The prediction was explicitly present in the approved plan and was refuted by a general sink-extension theorem, so recording only the final count would erase the failed hypothesis and the reason it failed."
+    - "Staged O97-O99 and crystallized them in the same turn via artifact-commitment. PR #201, the typed matrices, durable paper boundaries, and AxCheck inventory depend on all three results; this follows the C35/C36 M2a precedent where implementation and evidence landed together."
+    - "Split the M3 interpretation into three claims. C37 is a grounded structural result about sink extension; C38 is the public-reporting clean-base boundary; C39 is the checker-admissibility coverage condition. Combining them would create unrelated conditions and falsification criteria."
+    - "Did NOT revise C25. The new matrix corollary recovers a clean-base transition instance of the established quarantine safety direction; it neither contradicts nor weakens C25's shipped production claim."
+    - "Recorded ARA validation as zero errors with the inherited warning/fixable set. No existing trace aliases or stale observations were normalized because that unrelated sweep remains issue #200."
