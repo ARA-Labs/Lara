@@ -6376,3 +6376,42 @@ tree:
     still carrying `promoted: false` is a bookkeeping gap the triage should
     settle, not something the sweep may quietly fix.
   also_depends_on: [N238]
+
+- id: N242
+  type: decision
+  title: "Triage of the swept staging backlog closes on evidence, not on idleness"
+  provenance: ai-executed
+  timestamp: "2026-08-29T17:05"
+  choice: >
+    Triaged all 33 swept observations plus the two the sweep held live. Closed
+    only what a closure signal actually reaches: O69 resolves to N176 by
+    empirical resolution. Everything else stays staged, sorted into three
+    buckets with the blocker named — 3 blocked on an unresolved contradiction
+    node (O12, O37 on N105; O85 on N212), 3 deliberately held by an earlier
+    researcher selection (O65, O66, O67), and 28 awaiting verbal affirmation.
+    Also determined that O37 and O85 are correctly `promoted: false`: the
+    claims.md CONFLICT markers cite them as challenges to C19 and C23, not as
+    premises, which is not crystallization.
+  alternatives:
+    - "Fire topic abandonment on the long-idle entries and crystallize them, which the signal taxonomy read literally permits — rejected: this artifact has never worked that way. 44 of 99 observations are promoted and the rest were left staged through equally long idle stretches, so the backlog exists precisely because abandonment was never treated as auto-promote here. Firing it now would crystallize 28 unaffirmed AI generalizations in one diff."
+    - "Promote everything whose content is still verifiable in the repo — rejected: verifiable is not the same as endorsed, and it is the endorsement that is missing. The artifacts for O46, O53, O54 and O66 all still exist and were checked; that establishes the observations are not stale in the ordinary sense, not that the project wants them as durable entries."
+    - "Leave the whole backlog untriaged for a researcher pass — rejected: the evidence-reachable part can be settled without taste, and O64/H13 settles the O65-O67 batch outright."
+  evidence:
+    - "O69's stated condition (hosted CI pending) is discharged by O70, which is itself promoted to N176 — the same #104 thread, one turn later"
+    - "N105 (status: unresolved) names O12 and O37 and says both should be narrowed unless a source path enforcing L1/K replay is produced"
+    - "N212 (status: unresolved) carries the C23 adjudication that O85 is the proposed replacement for"
+    - "O64 -> heuristics.md:H13 via verbal-affirmation; O65 and O67 record in their own `context` that they stay staged absent explicit affirmation"
+    - "artifact spot-checks still present: test/DifferentialSpec.hs prop_goldensCoverAnchors, test/RASpec.hs prop_raRejectionMessages, lean/Lara/PresentationParity.lean autoImplicit pin, scripts/differential.sh stderr branches"
+  rationale: >
+    The triage's discriminator is that staging already encodes a judgement. Each
+    of these observations was staged in the same turn as the work that produced
+    it, by a manager that could have crystallized it and chose not to — so the
+    implementation landing is not the closure signal, and re-reading the same
+    evidence later cannot manufacture one. Only something that happened AFTER
+    staging counts: a later artifact depending on the observation, an experiment
+    resolving it, or the researcher affirming it. Applied that way, exactly one
+    entry closes. The remaining value of the triage is negative information made
+    explicit — for 28 entries the blocker is named as researcher affirmation
+    rather than left as an unexplained backlog, and 6 more are attached to the
+    specific node or decision that governs them.
+  also_depends_on: [N241, N105, N212]

@@ -1448,10 +1448,10 @@ observations:
     record must not imply that #105 named certificate slots were implemented.
   potential_type: claim
   bound_to: [N175]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
-  stale: true
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N176"
+  crystallized_via: empirical-resolution
+  stale: false
 - id: O70
   timestamp: "2026-08-12T22:02"
   provenance: ai-executed

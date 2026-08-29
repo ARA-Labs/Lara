@@ -465,3 +465,10 @@ sessions:
   events_count: 1
   claims_touched: []
   open_threads: 3
+- id: 2026-08-29_003
+  date: '2026-08-29'
+  summary: 'Triaged the #200 stale set (33 entries) plus the two the sweep held live. Closure was tested against post-staging signals only, on the ground that staging already encodes the judgement that same-turn implementation is not a commitment: O69 closes to N176 by empirical resolution, O12/O37 and O85 are blocked on the unresolved N105 and N212 adjudications, O65-O67 were already settled when their sibling O64 became H13, and 28 await verbal affirmation with their subjects listed. Also determined that O37 and O85 are correctly unpromoted — a CONFLICT marker cites an observation as a challenge, not as a premise — which closes the bookkeeping question the sweep raised and leaves the C19 and C23 adjudications as the real open item.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
