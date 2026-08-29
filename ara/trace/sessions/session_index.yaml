@@ -458,3 +458,10 @@ sessions:
   events_count: 5
   claims_touched: [C37, C38, C39]
   open_threads: 2
+- id: 2026-08-29_002
+  date: '2026-08-29'
+  summary: 'Executed the #200 stale sweep: applied the research-manager 3+-session-day rule to the staging buffer with references read from the session records, the reasoning log, timestamped tree nodes, and staged cross-citations, counting idleness in session-days. 33 of 43 unpromoted, unstale observations were flagged, ten stay live (O37 and O85 held by live CONFLICT citations in claims.md), and the 33-entry stale set is surfaced for researcher triage. Flags only — no observation, forward reference, promotion, or deletion changed, and ARA validation held at the 0-error/160-warning baseline.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 3

@@ -1,0 +1,82 @@
+session:
+  id: "2026-08-29_002"
+  date: "2026-08-29"
+  started: "2026-08-29T16:16"
+  last_turn: "2026-08-29T16:16"
+  turn_count: 1
+  summary: >
+    Executed the #200 stale sweep. Applied the research-manager 3+-session-day
+    rule to staging/observations.yaml with reference detection across all four
+    trace surfaces: 33 of 43 unpromoted, unstale observations were flagged
+    stale, ten stay live. The diff changes only `stale` flags — no observation,
+    forward reference, or other field was touched, and no promotion or deletion
+    decision was made. The stale set is surfaced below for researcher triage.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N241"
+    routing: direct
+    provenance: ai-executed
+    summary: "Fixed the sweep's counting rule: idleness in session-days, references read from sessions, the reasoning log, timestamped tree nodes, and staged cross-citations, with logic/ citations holding an entry live."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Built the reference index over ara/trace and ara/logic, computed
+      session-day idleness for all 99 staged observations against the 32-day
+      session calendar, flipped `stale` on the 33 qualifying entries by
+      line-targeted edit, and verified semantically that no other field of any
+      observation changed and that `ara check ara` stayed at the pre-sweep
+      0-error / 160-warning baseline.
+    provenance: ai-executed
+    files_changed:
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-29_002.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Session-days, not calendar days. The 32 session-days run 2026-07-21 to
+      2026-08-29 with gaps at 07-26, 08-07, 08-14 through 08-16, 08-19, 08-24,
+      and 08-27. Counting calendar days would age entries through weeks with no
+      research on them.
+  - turn: 1
+    excerpt: >
+      Post-sweep census of the 99 staged observations: 44 promoted, 45
+      unpromoted and stale (12 already stale before this sweep, 33 flagged
+      now), 10 unpromoted and live. Two promoted entries also carry stale
+      (O06, O15); the sweep left them alone.
+  - turn: 1
+    excerpt: >
+      O37 and O85 are 18 and 3 session-days idle in the trace but are held live:
+      claims.md cites each inside an unresolved CONFLICT marker (O37 on C19's
+      stored-L1-value gap, O85 on C23's localization boundary). A live citation
+      from the logic layer is a reference. Both are cited by claims while still
+      carrying `promoted: false` — a bookkeeping gap for triage to settle, not
+      for the mechanical sweep to fix.
+
+open_threads:
+  - "Triage the 33-entry stale set below: promote, discard, or re-open. #200 closes on merge of the sweep; the triage decisions are separate work."
+  - "Settle whether O37 and O85 should be marked promoted, given that C19 and C23 already cite them in live CONFLICT markers."
+  - "PR #201 (theory M3) review and hosted CI; issue #186 closes on merge."
+
+ai_suggestions_pending:
+  - >
+    Stale set for triage — 33 unpromoted observations idle 3+ session-days,
+    listed as `id (potential_type, last-reference day, idle session-days)`.
+    Grouped by the work they came out of; none carries a closure signal.
+  - "M0/M1 corpus and policy findings: O12 (architecture, 08-04, 18) rit certificates compose into Lara.Strict leaves; O26 (concept, 08-04, 18) R5 optional-CQ accounting; O27 (claim, 08-01, 21) polished corpora are gap-dominated, not defeat-dominated; O28 (constraint, 08-01, 21) the C17 wishlist residue as finite policy-vocabulary gaps; O30 (claim, 08-01, 21) the inlined policy image dominates certificate size, so payload is the paper's size number; O33 (claim, 08-02, 20) ablated checkers miss by certifying justified, not by hedging."
+  - "Measurement and freeze discipline: O35 (heuristic, 08-03, 19) hash the deterministic projection, not the whole report file; O39 (constraint, 08-04, 18) an append-only local log does not resist HARKing without a remote anchor; O88 (heuristic, 08-25, 3) provenance metadata inside a frozen artifact is ungated and drifts silently."
+  - "Differential and mechanization evidence: O36 (claim, 08-04, 18) ra@1 parity holds by construction across different internal representations; O46 (heuristic, 08-06, 16) print captured stderr on every failure branch; O53 (heuristic, 08-08, 15) a differential proves agreement, so it is weakest where implementations were aligned deliberately; O55 (heuristic, 08-09, 14) settle vacuity by perturbation, not argument; O57 (heuristic, 08-09, 14) a mechanization can drift from its implementation with every gate still green; O56 (claim, 08-08, 15) the direction-of-goodness contract landed three independent ways without coordination."
+  - "Seam and backend design: O42 (architecture, 08-06, 16) quantify the admission theorem over an abstract checker registry; O48 (claim, 08-06, 16) restate a mechanized result at the granularity it proves; O51 (heuristic, 08-07, 16) a guard cannot depend on a distinction the seam erases; O52 (concept, 08-07, 16) a strict goal grammar accepts the preimage of the canonical image under nf; O62 (claim, 08-10, 13) nullary constants dominate the ground vocabulary and are invisible to grepping."
+  - "Cross-language shape guards (#104 era): O54 (heuristic, 08-08, 15) behaviour-preserving parameters create a failure mode the old suite cannot see; O65 (claim, 08-12, 11) paired compiler witnesses plus arity tripwires fail closed on observed drift; O66 (heuristic, 08-11, 12) a compile witness guards nothing with autoImplicit on; O67 (heuristic, 08-12, 11) hand-maintained inventories false-pass on counted aliases and arity-only sum arms; O69 (claim, 08-12, 11) the #104 local verification result, whose hosted-CI condition has since resolved."
+  - "Presentation layer (@0.6 era): O77 (heuristic, 08-22, 5) prove a restriction acceptance-preserving by namespace scan plus frozen-artifact pathspec diff; O78 (claim, 08-22, 5) slot-indexed naming is strictly more expressive than referent-indexed, and the gap is the non-injective case; O81 (claim, 08-21, 6) a root that owns shared vocabulary cannot be left as a re-export facade; O82 (heuristic, 08-23, 4) mechanize a binder transformation at its structured input; O83 (heuristic, 08-23, 4) a repair suggestion must hold for every candidate the ambiguity leaves open; O84 (heuristic, 08-23, 4) embed an existing sub-language as one opaque host token."
+  - "Mutation harness: O80 (heuristic, 08-21, 6) wire the seed key and selection rule to what refactors disturb; O86 (heuristic, 08-25, 3) re-derive a composite fixture's expectation from the composed artifact, since re-running the component enumerators is an identity, not an oracle."

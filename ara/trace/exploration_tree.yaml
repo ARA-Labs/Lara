@@ -6340,3 +6340,39 @@ tree:
     - "lean/Lara/Update.lean: addInstance_sink_status_monotone"
     - "docs/theory-m3-source-updates.md: generated addInstance matrix"
   also_depends_on: [N239]
+
+- id: N241
+  type: decision
+  title: "Stale sweep dates a staged observation by its last reference anywhere in the trace"
+  provenance: ai-executed
+  timestamp: "2026-08-29T16:16"
+  choice: >
+    Applied the research-manager 3+-session-day stale rule mechanically to
+    staging/observations.yaml (#200). An observation's last-reference day is the
+    latest of: its own timestamp, any session record naming it, any
+    pm_reasoning_log turn naming it, any timestamped exploration_tree node
+    naming it, and any citation of it from another staged entry. Idleness is
+    counted in SESSION-days from the 32-day session calendar, not calendar days.
+    A citation from logic/ holds an observation live regardless of date. 33 of
+    the 43 unpromoted, unstale observations qualified; only their `stale` flag
+    changed.
+  alternatives:
+    - "Calendar-day idleness — rejected: the rule says session-days, and the calendar has gaps (no sessions on 2026-07-26, 08-07, 08-14 through 08-16, 08-19, 08-24, 08-27) that would age entries during weeks with no research."
+    - "Date an observation only by its own timestamp — rejected: it ignores the reference half of the rule and would have flagged O37 and O85, which live CONFLICT markers in claims.md still cite."
+    - "Sweep and triage in one pass (promote or discard the stale set) — rejected: #200 scopes the mechanical flag only; promotion and deletion are researcher decisions."
+  evidence:
+    - "ara/staging/observations.yaml: 33 `stale: false` -> `stale: true`, no other field or line changed (git diff -U0 shows only stale lines)"
+    - "post-sweep census: 99 staged, 44 promoted, 45 unpromoted+stale, 10 unpromoted+live"
+    - "`ara check ara`: 0 errors, 160 warnings — unchanged from the pre-sweep baseline"
+    - "issue #200; PR #199 review comment 3883479629"
+  rationale: >
+    The counting rule is the whole content of the decision: idle-in-session-days
+    with reference detection across all four trace surfaces is what makes the
+    sweep reproducible rather than a judgement call, and it is what a later
+    sweep has to repeat to stay consistent. Two observations are deliberately
+    held live against a long idle gap (O37 at 18 session-days, O85 at 3) because
+    claims.md cites both inside unresolved CONFLICT markers on C19 and C23 — a
+    live artifact citation is a reference. That they are cited by claims while
+    still carrying `promoted: false` is a bookkeeping gap the triage should
+    settle, not something the sweep may quietly fix.
+  also_depends_on: [N238]
