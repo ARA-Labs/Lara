@@ -1690,3 +1690,13 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.BackendComposition.depsMixedTerm_both_halves_nonempty
 #print axioms Lara.Examples.BackendComposition.depsMixedTerm_certDeps
 #print axioms Lara.Examples.BackendComposition.depsMixedTerm_usedBackends
+
+-- The second golden vector (`depsDupTerm`): escapes, nested `con`, and the
+-- repeated-slot certificate that pins the List-vs-Set multiplicity
+-- reconciliation. Same shipped cores, same no-fixture discipline.
+#print axioms Lara.Examples.BackendComposition.depsDupOrdUses
+#print axioms Lara.Examples.BackendComposition.depsDupNdUses
+#print axioms Lara.Examples.BackendComposition.depsDupTerm_stepDeps
+#print axioms Lara.Examples.BackendComposition.depsDupOrdNode_stepDeps
+#print axioms Lara.Examples.BackendComposition.depsDupTerm_certDeps
+#print axioms Lara.Examples.BackendComposition.depsDupTerm_usedBackends

@@ -3,11 +3,11 @@ import Lara.Examples.BackendComposition
 open Lara.Examples.BackendComposition
 
 /-- Emit the canonical `certDeps` encoding of the **shipped** heterogeneous
-term — `Lara.Examples.BackendComposition.depsMixedTerm`, an `nd@1` root over an
-`ord@1` premise, both computed by the cores `Lara.Driver.buildRegistry`
-registers.  `scripts/check-backend-deps-golden.sh` diffs this against
-`test/backend-deps.golden`, which `test/StrictSpec.hs` independently asserts
-from the Haskell `Lara.Strict.Deps.certDeps`.
+vectors — `Lara.Examples.BackendComposition.depsMixedTerm` and `depsDupTerm`,
+each an `nd@1` root over `ord@1` premises, both computed by the cores
+`Lara.Driver.buildRegistry` registers.  `scripts/check-backend-deps-golden.sh`
+diffs this against `test/backend-deps.golden`, which `test/StrictSpec.hs`
+independently asserts from the Haskell `Lara.Strict.Deps.certDeps`.
 
 Read the word *shipped* literally.  Everything else in
 `Lara/Examples/BackendComposition.lean` that needs a **typed** heterogeneous

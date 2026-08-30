@@ -549,11 +549,37 @@ cellTheirs = Prop (Pred "cell") [TCon (FunSym "theirs") [], TNum "31.6"]
 comparison = Prop (Pred "num_lt") [TNum "28.4", TNum "31.6"]
 budgetRespected = head ndTheory
 
+-- | The second golden vector's atoms (Lean @depsCellSelf@, @depsNumLeSelf@,
+-- @depsNoteAtom@, mirrored atom for atom).
+--
+-- 'cellSelf' keeps the one-numeral cell shape 'cellOurs' has, so the shipped
+-- @ord\@1@ premise-cell convention accepts it. 'numLeSelf' is the reflexive
+-- family member: 'dupOrdPayload' compares slot 0 with itself, and @7.5 <= 7.5@
+-- is the goal that holds where @num_lt@ would be rejected — the collector
+-- sees a report only through 'CertAccepted', so the certificate must accept.
+--
+-- 'noteAtom' carries everything the first vector's atoms leave untested in
+-- the golden encoders: a 'TStr' whose encoding must escape both @\"@ and @\\@,
+-- and 'TCon's with arguments nested two deep.
+cellSelf, numLeSelf, noteAtom :: Prop
+cellSelf = Prop (Pred "cell") [TCon (FunSym "self") [], TNum "7.5"]
+numLeSelf = Prop (Pred "num_le") [TNum "7.5", TNum "7.5"]
+noteAtom =
+  Prop
+    (Pred "note")
+    [ TCon (FunSym "quote") [TStr "say \"hi\"\\bye"]
+    , TCon (FunSym "wrap") [TCon (FunSym "inner") []]
+    ]
+
 ordRuleId, ndRuleId, bridgeRuleId, trustedRuleId :: A.RuleId
 ordRuleId = A.RuleId "compare_cells"
 ndRuleId = A.RuleId "restate_budget"
 bridgeRuleId = A.RuleId "bridge"
 trustedRuleId = A.RuleId "assume_budget"
+
+dupOrdRuleId, dupNdRuleId :: A.RuleId
+dupOrdRuleId = A.RuleId "compare_self"
+dupNdRuleId = A.RuleId "restate_note"
 
 -- | The @ord\@1@ step: two measurement premises, a comparison conclusion.
 ordRule :: A.Rule
@@ -586,6 +612,40 @@ ndRule =
     , A.rulePremises = [patOf comparison]
     , A.rulePremiseLabels = []
     , A.ruleConclusion = patOf budgetRespected
+    , A.ruleAllowTrusted = False
+    , A.ruleCertifiers = [A.CertRef (A.BackendId "nd") 1 ndDigest]
+    , A.ruleQuestions = []
+    }
+
+-- | The @ord\@1@ self-comparison step: one measurement premise, the reflexive
+-- comparison as conclusion (Lean @depsDupOrdRule@).
+dupOrdRule :: A.Rule
+dupOrdRule =
+  A.Rule
+    { A.ruleId = dupOrdRuleId
+    , A.ruleParams = []
+    , A.ruleMode = A.Strict
+    , A.rulePremises = [patOf cellSelf]
+    , A.rulePremiseLabels = []
+    , A.ruleConclusion = patOf numLeSelf
+    , A.ruleAllowTrusted = False
+    , A.ruleCertifiers = [A.CertRef (A.BackendId "ord") 1 ordDigest]
+    , A.ruleQuestions = []
+    }
+
+-- | The @nd\@1@ step above it: two premises (the note atom and the
+-- self-comparison), the note atom restated as conclusion (Lean
+-- @depsDupNdRule@). Its certificate is @(hyp 0)@, so its report names premise
+-- slot 0 — the note atom, not the comparison.
+dupNdRule :: A.Rule
+dupNdRule =
+  A.Rule
+    { A.ruleId = dupNdRuleId
+    , A.ruleParams = []
+    , A.ruleMode = A.Strict
+    , A.rulePremises = [patOf noteAtom, patOf numLeSelf]
+    , A.rulePremiseLabels = []
+    , A.ruleConclusion = patOf noteAtom
     , A.ruleAllowTrusted = False
     , A.ruleCertifiers = [A.CertRef (A.BackendId "nd") 1 ndDigest]
     , A.ruleQuestions = []
@@ -639,18 +699,36 @@ depsPi r =
     , (ndRuleId, ndRule)
     , (bridgeRuleId, bridgeRule)
     , (trustedRuleId, trustedRule)
+    , (dupOrdRuleId, dupOrdRule)
+    , (dupNdRuleId, dupNdRule)
     ]
 
-oursLeaf, theirsLeaf :: A.LeafId
+oursLeaf, theirsLeaf, selfLeaf, noteLeaf :: A.LeafId
 oursLeaf = A.LeafId "e_ours"
 theirsLeaf = A.LeafId "e_theirs"
+selfLeaf = A.LeafId "e_self"
+noteLeaf = A.LeafId "e_note"
 
 depsGamma :: A.LeafId -> Maybe Prop
-depsGamma l = lookup l [(oursLeaf, cellOurs), (theirsLeaf, cellTheirs)]
+depsGamma l =
+  lookup
+    l
+    [ (oursLeaf, cellOurs)
+    , (theirsLeaf, cellTheirs)
+    , (selfLeaf, cellSelf)
+    , (noteLeaf, noteAtom)
+    ]
 
 ordPayload, ndPayload :: SExpr
 ordPayload = SList [SAtom (OrdB.tagToString OrdB.TOrdcmp), premSlot 0, premSlot 1]
 ndPayload = certToSExpr (Hyp 1)
+
+-- | The second vector's payloads (Lean @depsDupOrdCert@ / @depsSlot0Cert@).
+-- 'dupOrdPayload' names the same premise slot twice — the certificate whose
+-- multiplicity the two mechanizations carry differently.
+dupOrdPayload, dupNdPayload :: SExpr
+dupOrdPayload = SList [SAtom (OrdB.tagToString OrdB.TOrdcmp), premSlot 0, premSlot 0]
+dupNdPayload = certToSExpr (Hyp 0)
 
 -- | The @ord\@1@-certified node, used as a premise subterm and as a discharge
 -- subterm below.
@@ -674,6 +752,31 @@ mixedTerm =
     []
     []
     (A.AssuranceCert (A.Cert (A.BackendId "nd") 1 ndDigest ndPayload))
+
+-- | The repeated-slot @ord\@1@ node (Lean @depsDupOrdNode@): one measurement
+-- premise, consulted twice by the same certificate.
+dupOrdNode :: A.SupportTerm
+dupOrdNode =
+  A.SRule
+    dupOrdRuleId
+    []
+    [A.SLeaf selfLeaf]
+    []
+    []
+    (A.AssuranceCert (A.Cert (A.BackendId "ord") 1 ordDigest dupOrdPayload))
+
+-- | The second heterogeneous term (Lean @depsDupTerm@): an @nd\@1@ root over
+-- a note leaf and the repeated-slot @ord\@1@ node. Together with 'mixedTerm'
+-- it is what the cross-language golden pins — see the golden section below.
+dupTerm :: A.SupportTerm
+dupTerm =
+  A.SRule
+    dupNdRuleId
+    []
+    [A.SLeaf noteLeaf, dupOrdNode]
+    []
+    []
+    (A.AssuranceCert (A.Cert (A.BackendId "nd") 1 ndDigest dupNdPayload))
 
 -- | The same @ord\@1@ node in a __discharge__ position under a defeasible root.
 bridgeTerm :: A.SupportTerm
@@ -781,22 +884,53 @@ prop_rejectedStepKeepsDepsBeneath =
         A.SRule rn theta ws d o (A.AssuranceCert leakedCert)
       w -> w
 
+-- | The second golden vector is __accepted by the production checker__ — the
+-- same discipline 'prop_mixedBackendAccepted' applies to 'mixedTerm'. Note
+-- what makes it acceptable: @ord\@1@ accepts the same-slot certificate
+-- because the goal is the reflexive @num_le(7.5, 7.5)@, and @nd\@1@ accepts
+-- @(hyp 0)@ because the note atom is premise slot 0 of its own step.
+prop_dupBackendAccepted :: Property
+prop_dupBackendAccepted =
+  checkDeps dupTerm === Right (SupportResult noteAtom [])
+
+-- | __The multiplicity asymmetry, pinned as a Haskell value.__ The @ord\@1@
+-- adapter reports a 'Set' 'Dependency', so @(ordcmp (prem 0) (prem 0))@
+-- collapses to a single 'PremiseSlot' before 'resolve' ever runs — this list
+-- has TWO entries. Lean's @Backend.uses@ is a @List Nat@ and carries the
+-- duplicate through: @depsDupTerm_certDeps@ pins a THREE-entry list with
+-- @premise 0 cell(self, 7.5)@ twice. The two mechanizations reach the golden
+-- encoder holding different multiplicities, and agree only because both
+-- encoders dedup — which is exactly what the shared golden file records.
+prop_dupBackendDepsCollected :: Property
+prop_dupBackendDepsCollected =
+  certDeps depsCertOk depsPi dupTerm
+    === [CertPremise 0 noteAtom, CertPremise 0 cellSelf]
+
 -- ---------------------------------------------------------------------------
 -- The cross-language certDeps golden (B0)
 --
--- 'prop_mixedBackendDepsCollected' above pins the Haskell result as a Haskell
--- value. This section pins it as /text/, against the same bytes the Lean
--- witness emits, so the two mechanizations cannot drift apart silently.
+-- 'prop_mixedBackendDepsCollected' and 'prop_dupBackendDepsCollected' above
+-- pin the Haskell results as Haskell values. This section pins them as /text/,
+-- against the same bytes the Lean witness emits, so the two mechanizations
+-- cannot drift apart silently.
 --
--- Lean's half is @Lara.Examples.BackendComposition.depsMixedTerm@, whose
--- constants mirror 'mixedTerm' atom for atom: same two backend identities,
--- same rule shapes, same premise atoms, same certificate payloads, same
--- digests, same theory-entry index. Both halves of the Lean term run on the
+-- Lean's half is @Lara.Examples.BackendComposition.depsMixedTerm@ together
+-- with @depsDupTerm@, whose constants mirror 'mixedTerm' and 'dupTerm' atom
+-- for atom: same two backend identities, same rule shapes, same premise
+-- atoms, same certificate payloads, same digests, same theory-entry index.
+-- Both halves of each Lean term run on the
 -- __shipped__ backend cores (@Lara.Strict.ndBackend@, @Lara.Ord.ordBackend@) —
 -- the @ord\@1@ acceptance blocker that forces the rest of that module onto a
 -- fixture core does not reach a dependency report, because
 -- @Lara.Support.stepDeps@ never calls acceptance. See
 -- @scripts/check-backend-deps-golden.sh@ for the full argument.
+--
+-- 'mixedTerm' alone leaves both encoders' interesting branches dead — no
+-- escape character, no 'TCon' with arguments, no duplicate slot. 'dupTerm'
+-- is the vector that reaches them: its note atom exercises the escape and
+-- recursion branches of both encoders, and its same-slot @ord\@1@ certificate
+-- exercises both dedup paths, pinning the @List Nat@-versus-@Set Dependency@
+-- multiplicity reconciliation as an artifact rather than an argument.
 -- ---------------------------------------------------------------------------
 
 -- | Escape and quote one string for the golden encoding: backslash, double
@@ -875,22 +1009,32 @@ encodeCertDepGolden d = case d of
 -- two-element list in Lean and a one-element set here. The two languages agree
 -- as /collections/, which is what every accountability statement is about, so
 -- multiplicity is deliberately outside this contract and both encoders
--- canonicalize it away.
+-- canonicalize it away. This is not just an argument: 'dupTerm' carries
+-- exactly such a certificate, so 'prop_dupBackendDepsCollected' and Lean's
+-- @depsDupTerm_certDeps@ pin the two pre-dedup multiplicities while the
+-- golden pins the reconciled text both sides emit.
 --
 -- The result ends in a newline so it compares equal to the committed file as
 -- read, and to @IO.println@'s output on the Lean side.
 encodeCertDepsGolden :: [CertDep] -> String
 encodeCertDepsGolden = unlines . sort . nub . map encodeCertDepGolden
 
--- | The Haskell collector's answer on the mixed term, encoded canonically,
--- equals the committed golden that Lean emits. This is the cross-language
--- half of the assertion 'prop_mixedBackendDepsCollected' makes in Haskell
--- terms; @scripts\/check-backend-deps-golden.sh@ is the other half, and keeps
--- the file from going stale against Lean.
+-- | The Haskell collector's answer on the two golden vectors, concatenated
+-- and encoded canonically, equals the committed golden that Lean emits. This
+-- is the cross-language half of the assertions 'prop_mixedBackendDepsCollected'
+-- and 'prop_dupBackendDepsCollected' make in Haskell terms;
+-- @scripts\/check-backend-deps-golden.sh@ is the other half, and keeps the
+-- file from going stale against Lean. The concatenation happens /before/
+-- encoding, so the sort and dedup run over the union — mirroring
+-- @backendDepsGolden@ on the Lean side.
 prop_mixedBackendDepsGolden :: Property
 prop_mixedBackendDepsGolden = once $ ioProperty $ do
   golden <- readFile "test/backend-deps.golden"
-  pure (encodeCertDepsGolden (certDeps depsCertOk depsPi mixedTerm) === golden)
+  pure
+    ( encodeCertDepsGolden
+        (certDeps depsCertOk depsPi mixedTerm ++ certDeps depsCertOk depsPi dupTerm)
+        === golden
+    )
 
 -- ---------------------------------------------------------------------------
 -- Prop pair generator for normalization fidelity
@@ -956,5 +1100,7 @@ strictSpecProps =
   , ("certDeps of leaf and trusted instance is empty", quickCheckResult prop_uncertifiedNodesReportNothing)
   , ("cross-backend payload leakage rejected by nd@1", quickCheckResult prop_crossBackendPayloadRejected)
   , ("a rejected step does not hide the deps beneath it", quickCheckResult prop_rejectedStepKeepsDepsBeneath)
+  , ("repeated-slot nd@1/ord@1 term accepted by the checker", quickCheckResult prop_dupBackendAccepted)
+  , ("repeated-slot certDeps collapses to a set in Haskell", quickCheckResult prop_dupBackendDepsCollected)
   , ("mixed nd@1/ord@1 certDeps matches the Lean-emitted golden", quickCheckResult prop_mixedBackendDepsGolden)
   ]

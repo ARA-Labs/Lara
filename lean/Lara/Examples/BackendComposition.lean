@@ -795,9 +795,64 @@ def depsNdRule : Rule :=
   , questions := [], allowTrusted := false
   , certifiers := [(ndId, depsNdDigest)] }
 
+/-- `cell(self, 7.5)` — `test/StrictSpec.hs`' `cellSelf`.  Same one-numeral
+cell shape as `depsCellOurs`, so the shipped `ord@1` premise-cell convention
+accepts it on the Haskell side. -/
+def depsCellSelf : Atom :=
+  .atom "cell" (.cons (.con "self" .nil) (.cons (.num "7.5") .nil))
+
+/-- `num_le(7.5, 7.5)` — `test/StrictSpec.hs`' `numLeSelf`.  The reflexive
+family member: a same-slot certificate compares a cell with itself, so the
+goal must be one that holds. -/
+def depsNumLeSelf : Atom :=
+  .atom "num_le" (.cons (.num "7.5") (.cons (.num "7.5") .nil))
+
+/-- `note(quote("say \"hi\"\\bye"), wrap(inner))` — `test/StrictSpec.hs`'s
+`noteAtom`.  One atom carrying everything the first vector's atoms leave
+untested: a `str` whose encoding must escape both `"` and `\`, and `con`s
+with arguments nested two deep. -/
+def depsNoteAtom : Atom :=
+  .atom "note"
+    (.cons (.con "quote" (.cons (.str "say \"hi\"\\bye") .nil))
+      (.cons (.con "wrap" (.cons (.con "inner" .nil) .nil)) .nil))
+
+def depsCellSelfPat : APat :=
+  ⟨⟨"cell"⟩, .cons (.con ⟨"self"⟩ .nil) (.cons (.num "7.5") .nil)⟩
+
+def depsNumLeSelfPat : APat :=
+  ⟨⟨"num_le"⟩, .cons (.num "7.5") (.cons (.num "7.5") .nil)⟩
+
+def depsNotePat : APat :=
+  ⟨⟨"note"⟩,
+    .cons (.con ⟨"quote"⟩ (.cons (.str "say \"hi\"\\bye") .nil))
+      (.cons (.con ⟨"wrap"⟩ (.cons (.con ⟨"inner"⟩ .nil) .nil)) .nil)⟩
+
+def depsDupOrdRuleId : RuleId := ⟨"compare_self"⟩
+def depsDupNdRuleId : RuleId := ⟨"restate_note"⟩
+
+/-- The `ord@1` self-comparison step: one measurement premise, the reflexive
+comparison as conclusion (`test/StrictSpec.hs`' `dupOrdRule`). -/
+def depsDupOrdRule : Rule :=
+  { mode := .strict, params := []
+  , premises := [depsCellSelfPat], concl := depsNumLeSelfPat
+  , questions := [], allowTrusted := false
+  , certifiers := [(ordId, depsOrdDigest)] }
+
+/-- The `nd@1` step above it: two premises (the note atom and the
+self-comparison), the note atom restated as conclusion
+(`test/StrictSpec.hs`' `dupNdRule`).  Its certificate is `(hyp 0)`, so its
+report names premise slot 0 — the note atom, not the comparison. -/
+def depsDupNdRule : Rule :=
+  { mode := .strict, params := []
+  , premises := [depsNotePat, depsNumLeSelfPat], concl := depsNotePat
+  , questions := [], allowTrusted := false
+  , certifiers := [(ndId, depsNdDigest)] }
+
 def PiDeps : RuleId → Option Rule := fun rn =>
   if rn = depsOrdRuleId then some depsOrdRule
   else if rn = depsNdRuleId then some depsNdRule
+  else if rn = depsDupOrdRuleId then some depsDupOrdRule
+  else if rn = depsDupNdRuleId then some depsDupNdRule
   else none
 
 def depsOursLeaf : LeafId := ⟨"e_ours"⟩
@@ -939,6 +994,136 @@ theorem depsMixedTerm_usedBackends :
   simp [depsMixedTerm, depsOrdNode, usedBackends, usedBackendsList,
     usedBackendsDis]
 
+/-! #### The second vector: escapes, nesting, and a repeated slot
+
+`depsMixedTerm` leaves the interesting branches of *both* golden encoders dead:
+no `TStr` and no escape character (so every `escapeCharGolden` branch is
+unreached), no `con` with arguments (so `encodeTermsGolden` never recurses),
+and no duplicate slot in any report (so the `insertGolden` / `nub` dedup path
+never runs).  `depsDupTerm` — `test/StrictSpec.hs`' `dupTerm`, mirrored atom
+for atom — exercises all three at once, again over the two shipped cores:
+
+* its `nd@1` root reports premise slot 0, resolved to `depsNoteAtom`, whose
+  term tree carries a `str` containing `"` and `\` and a `con` nested inside a
+  `con`;
+* its `ord@1` child carries `(ordcmp (prem 0) (prem 0))`, a certificate that
+  names the same slot twice.
+
+The repeated slot is the point of the vector.  Lean's `Backend.uses` is a
+`List Nat` and carries the duplicate through, so `depsDupTerm_certDeps` below
+pins a THREE-element pre-encoder list with `premise 0 cell(self, 7.5)` twice.
+Haskell's adapters report a `Set Dependency`, so the duplicate collapses before
+`resolve` ever runs and `test/StrictSpec.hs`' `prop_dupBackendDepsCollected`
+pins a TWO-element list.  The two languages reach the encoder holding different
+multiplicities and agree only because both encoders dedup — and the golden file
+is what turns that agreement from an argument into an artifact.
+
+The Haskell side must additionally *accept* the certificate (its collector
+sees a report only through `CertAccepted`), which is why the self-comparison
+goal is `num_le(7.5, 7.5)`: `7.5 ≤ 7.5` holds, where `num_lt` would reject.
+Lean's `stepDeps` never calls acceptance, so only the goal's *shape* matters
+here — but the term is kept acceptable anyway, so neither side carries a
+vector the other cannot run.  The atoms, patterns, and rules live with the
+other golden constants above `PiDeps`; what follows is the term and its
+reports. -/
+
+def depsSelfLeaf : LeafId := ⟨"e_self"⟩
+def depsNoteLeaf : LeafId := ⟨"e_note"⟩
+
+/-- The repeated-slot certificate `(ordcmp (prem 0) (prem 0))`, spelled through
+the two backends' own keyword tables like `depsOrdCert`
+(`test/StrictSpec.hs`' `dupOrdPayload`). -/
+def depsDupOrdCert : CertRef :=
+  ⟨.list [.atom Lara.Ord.Tag.ordcmp.toString,
+    .list [.atom Lara.Cell.Tag.prem.toString, .atom "0"],
+    .list [.atom Lara.Cell.Tag.prem.toString, .atom "0"]]⟩
+
+/-- `(hyp 0)`, exactly `certToSExpr (Hyp 0)` on the Haskell side
+(`test/StrictSpec.hs`' `dupNdPayload`). -/
+def depsSlot0Cert : CertRef :=
+  ⟨.list [.atom Lara.ND.Tag.hyp.toString, .atom "0"]⟩
+
+/-- The repeated-slot `ord@1` node (`test/StrictSpec.hs`' `dupOrdNode`). -/
+def depsDupOrdNode : SupportTerm :=
+  .inst depsDupOrdRuleId [] [.leaf depsSelfLeaf] [] []
+    (.cert ordId depsOrdDigest depsDupOrdCert)
+
+/-- The second heterogeneous term: an `nd@1` root over a note leaf and the
+repeated-slot `ord@1` node (`test/StrictSpec.hs`' `dupTerm`). -/
+def depsDupTerm : SupportTerm :=
+  .inst depsDupNdRuleId [] [.leaf depsNoteLeaf, depsDupOrdNode] [] []
+    (.cert ndId depsNdDigest depsSlot0Cert)
+
+/-- **The shipped `ord@1` core reports the same slot twice.**  No dedup happens
+in `uses`: the `List Nat` report preserves the certificate's multiplicity,
+which is exactly the multiplicity Haskell's `Set` report does not have. -/
+theorem depsDupOrdUses : (Lara.Ord.ordBackend id).uses depsDupOrdCert = [0, 0] := by
+  show Lara.Ord.ordUses depsDupOrdCert = [0, 0]
+  simp [Lara.Ord.ordUses, depsDupOrdCert, Lara.Ord.decodeCert, Lara.Ord.Tag.parse,
+    Lara.Ord.Tag.all, Lara.Ord.Tag.toString, Lara.Cell.decodeSlot,
+    Lara.Cell.Tag.parse, Lara.Cell.Tag.all, Lara.Cell.Tag.toString,
+    depsParseCanonNat0]
+
+/-- **The shipped `nd@1` core reports slot 0.** -/
+theorem depsDupNdUses : (Lara.Strict.ndBackend id).uses depsSlot0Cert = [0] := by
+  show Lara.Strict.ndUses depsSlot0Cert = [0]
+  have h0 : Lara.ND.decodeNat "0" = some 0 := by
+    change Lara.ND.decodeNat (Nat.repr 0) = some 0
+    exact Lara.ND.decodeNat_repr 0
+  simp [Lara.Strict.ndUses, depsSlot0Cert, Lara.ND.decodeCert, Lara.ND.Tag.parse,
+    Lara.ND.Tag.toString, h0, Lara.ND.fv]
+
+/-- The `nd@1` root's own report: premise slot 0, resolved to the note atom.
+`As = [depsNoteAtom, depsNumLeSelf]` has length 2, so slot 0 lands inside `As`. -/
+theorem depsDupTerm_stepDeps :
+    stepDeps PiDeps registryDeps depsDupTerm = [.premise 0 depsNoteAtom] := by
+  simp [depsDupTerm, stepDeps, PiDeps, depsOrdRuleId, depsNdRuleId,
+    depsDupOrdRuleId, depsDupNdRuleId, registryDeps, ndId,
+    depsNdRegistered, depsDupNdRule, depsNdDigest, instAPats, instAPat,
+    instPats, instPat, depsNotePat, depsNumLeSelfPat, depsDupNdUses,
+    resolveSlot, depsNoteAtom]
+
+/-- The `ord@1` child's own report: the same premise slot, TWICE — Lean's
+pre-encoder multiplicity, pinned. -/
+theorem depsDupOrdNode_stepDeps :
+    stepDeps PiDeps registryDeps depsDupOrdNode =
+      [.premise 0 depsCellSelf, .premise 0 depsCellSelf] := by
+  simp [depsDupOrdNode, stepDeps, PiDeps, depsOrdRuleId, depsNdRuleId,
+    depsDupOrdRuleId, registryDeps, ordId, ndId,
+    depsOrdRegistered, depsDupOrdRule, depsOrdDigest, instAPats, instAPat,
+    instPats, instPat, depsCellSelfPat, depsDupOrdUses, resolveSlot,
+    depsCellSelf]
+
+/-- **The union, over the second vector: three entries, the `ord@1` slot
+repeated.**  This is the list the Lean encoder dedups, and the list Haskell
+never has — `test/StrictSpec.hs`' `prop_dupBackendDepsCollected` pins the
+two-entry counterpart.  The golden is where they meet. -/
+theorem depsDupTerm_certDeps :
+    certDeps PiDeps registryDeps depsDupTerm =
+      [ .premise 0 depsNoteAtom
+      , .premise 0 depsCellSelf
+      , .premise 0 depsCellSelf ] := by
+  show stepDeps PiDeps registryDeps depsDupTerm ++
+    certDepsList PiDeps registryDeps [.leaf depsNoteLeaf, depsDupOrdNode] ++
+    certDepsDis PiDeps registryDeps [] = _
+  rw [depsDupTerm_stepDeps]
+  show [CertDep.premise 0 depsNoteAtom] ++
+    (certDeps PiDeps registryDeps (.leaf depsNoteLeaf) ++
+      (certDeps PiDeps registryDeps depsDupOrdNode ++ [])) ++ [] = _
+  show [CertDep.premise 0 depsNoteAtom] ++
+    ([] ++ ((stepDeps PiDeps registryDeps depsDupOrdNode ++
+      certDepsList PiDeps registryDeps [.leaf depsSelfLeaf] ++
+      certDepsDis PiDeps registryDeps []) ++ [])) ++ [] = _
+  rw [depsDupOrdNode_stepDeps]
+  rfl
+
+/-- The second vector also names the two shipped identities, root then
+premise walk. -/
+theorem depsDupTerm_usedBackends :
+    usedBackends depsDupTerm = [ndId, ordId] := by
+  simp [depsDupTerm, depsDupOrdNode, usedBackends, usedBackendsList,
+    usedBackendsDis]
+
 /-! #### The canonical textual encoding
 
 The Lean and Haskell `certDeps` results are compared as *text*, through
@@ -976,7 +1161,10 @@ same slot twice — `(ordcmp (prem 0) (prem 0))` — is a two-element list in Le
 and a one-element set in Haskell.  The two languages agree as *collections*,
 which is what every accountability statement in `Lara/BackendComposition.lean`
 is about, so multiplicity is deliberately not part of this contract and the
-encoder canonicalizes it away on both sides. -/
+encoder canonicalizes it away on both sides.  This is not just an argument:
+`depsDupTerm` carries exactly such a certificate, so `depsDupTerm_certDeps`
+pins Lean's pre-dedup multiplicity while the golden pins the reconciled text
+both sides emit. -/
 
 /-- Code-point-lexicographic `<` on character lists.  Written out rather than
 taken from `List.lt` so that the ordering the golden depends on is visibly the
@@ -1046,9 +1234,13 @@ deduplicated, one line each. -/
 def encodeCertDepsGolden (ds : List CertDep) : List String :=
   sortDedupGolden (ds.map encodeCertDepGolden)
 
-/-- The golden body for the shipped mixed term — what
-`lean/BackendDepsGolden.lean` prints and `test/backend-deps.golden` holds. -/
+/-- The golden body for the two shipped vectors — `depsMixedTerm` and
+`depsDupTerm`, concatenated *before* encoding so the sort and dedup run over
+the union — what `lean/BackendDepsGolden.lean` prints and
+`test/backend-deps.golden` holds. -/
 def backendDepsGolden : String :=
   String.intercalate "\n"
-    (encodeCertDepsGolden (certDeps PiDeps registryDeps depsMixedTerm))
+    (encodeCertDepsGolden
+      (certDeps PiDeps registryDeps depsMixedTerm ++
+        certDeps PiDeps registryDeps depsDupTerm))
 end Lara.Examples.BackendComposition
