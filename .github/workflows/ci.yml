@@ -82,6 +82,9 @@ jobs:
       - name: Haskell-Lean semantics golden parity
         run: make semantics-goldens
 
+      - name: Lean-Haskell certDeps golden parity
+        run: make backend-deps-golden
+
       - name: Lean-emitted source-update matrix goldens
         run: make update-goldens
 

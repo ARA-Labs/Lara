@@ -127,6 +127,7 @@ import Lara.Grounded
 import Lara.Semantics
 import Lara.Semantics.Sublists
 import Lara.Support
+import Lara.BackendComposition
 import Lara.Groups
 import Lara.Blocked
 import Lara.BlockedProgram
@@ -151,5 +152,6 @@ import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.Realizability
+import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics
 import Lara.Examples.Update

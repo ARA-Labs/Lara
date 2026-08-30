@@ -70,8 +70,11 @@ module Lara.SupportTerm
   , inferSupport
   ) where
 
+import Data.Set (Set)
+
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..), equiv)
+import Lara.Strict (Dependency)
 import Lara.SupportTerm.Internal (CheckedNode (..))
 
 -- ---------------------------------------------------------------------------
@@ -86,26 +89,48 @@ data SupportResult = SupportResult
   }
   deriving (Eq, Show)
 
--- | The outcome of the certificate oracle: accepted, or rejected /with the
--- backend's own reason/.
+-- | The outcome of the certificate oracle: accepted /with the backend's own
+-- dependency report/, or rejected /with the backend's own reason/.
 --
 -- The oracle is 'Bool'-valued in the mechanization (Lean @certOkBOf@), and the
 -- checked graph still depends on nothing more than 'certAccepted' — every
 -- acceptance decision, and therefore every soundness statement, ranges over
--- that projection alone. The reason rides alongside for one purpose: reaching
--- the author. Before this, the one rejection class produced by a /registered/
--- backend was also the only one that said nothing — bare @reject R13@ with
--- empty @stderr@ — in a checker whose selling point is located rejections.
+-- that projection alone. The two payloads ride alongside for one purpose each:
+-- the reason reaches the author (before it, the one rejection class produced by
+-- a /registered/ backend was also the only one that said nothing — bare
+-- @reject R13@ with empty @stderr@ — in a checker whose selling point is
+-- located rejections), and the 'Dependency' set reaches the dependency
+-- accounting ("Lara.Strict.Deps", spec §6's @certDeps@ half of
+-- @leaves(w) ∪ certDeps(w)@).
+--
+-- __Design note D9 (why the report is retained here).__ Every adapter already
+-- computes its @Set Dependency@ correctly and 'Lara.Strict.strictCheck' already
+-- seals it into a 'Lara.Strict.StrictJudgment' — but @strictCheck@ is reached
+-- only from @test\/@, while the production checker reaches backends through
+-- @Lara.Driver.buildCertOk@, which called 'Lara.Strict.runBackend' directly and
+-- discarded the report. Two repairs were available: route @buildCertOk@ through
+-- @strictCheck@ and carry the sealed judgment, or widen 'CertOutcome' to retain
+-- what @runBackend@ already hands back. The second was taken. The invariant that
+-- makes widening safe is the one 'certAccepted' states: it is the /only/ part of
+-- a 'CertOutcome' the checked graph may consult, so the acceptance projection
+-- stays a 'Bool' and no checked-graph decision — hence no soundness statement —
+-- can start depending on dependency data. Routing through @strictCheck@ would
+-- put a sealed record on the hot path for no gain, and 'Dependency' is already
+-- the type @runBackend@ returns, so nothing is re-derived and nothing can drift.
 data CertOutcome
-  = CertAccepted
+  = -- | The 'Dependency' set the backend adapter reported (decision doc §2
+    -- obligation 4: exactly the slots the accepted certificate consulted).
+    CertAccepted (Set Dependency)
   | -- | The reason the backend adapter returned.
     CertRejected String
   deriving (Eq, Show)
 
 -- | The acceptance projection: the /only/ part of 'CertOutcome' the checked
--- graph may consult, and exactly the old @Bool@ oracle.
+-- graph may consult, and exactly the old @Bool@ oracle. Keeping this a 'Bool'
+-- is what makes the 'CertAccepted' payload inert with respect to acceptance
+-- (design note D9 above).
 certAccepted :: CertOutcome -> Bool
-certAccepted CertAccepted = True
+certAccepted (CertAccepted _) = True
 certAccepted (CertRejected _) = False
 
 -- | The executable certificate-acceptance oracle (mirrors Lean @certOkBOf@ over
@@ -518,7 +543,7 @@ assuranceError certOk r as c a ws loc = case a of
                   (map slotSourceOf ws)
               )
   where
-    reasonOf CertAccepted = ""
+    reasonOf (CertAccepted _) = ""
     reasonOf (CertRejected msg) = msg
 
 -- ---------------------------------------------------------------------------

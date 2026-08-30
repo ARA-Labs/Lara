@@ -968,6 +968,23 @@ entries:
     - "Split the M3 interpretation into three claims. C37 is a grounded structural result about sink extension; C38 is the public-reporting clean-base boundary; C39 is the checker-admissibility coverage condition. Combining them would create unrelated conditions and falsification criteria."
     - "Did NOT revise C25. The new matrix corollary recovers a clean-base transition instance of the established quarantine safety direction; it neither contradicts nor weakens C25's shipped production claim."
     - "Recorded ARA validation as zero errors with the inherited warning/fixable set. No existing trace aliases or stale observations were normalized because that unrelated sweep remains issue #200."
+- turn: "2026-08-29_001#2"
+  notes:
+    - "Routed N244 and N247 as dead_end rather than decision: both are hypotheses the work refuted, and their lesson fields are the transferable part."
+    - "N245 provenance is user, not ai-suggested: the maintainer selected the split witness from three presented options. The options themselves were ai-suggested; the choice was not."
+    - "Crystallized O100-O103 on artifact-commitment: mechanized theorems, an axiom-gated declaration set, and a durable docs record all landed this turn. Did NOT rely on affirmation - the user affirmed only the S1 scope decision, not the four claims."
+    - "C41 and C42 are methodological rather than about the object system. Kept them as claims anyway: both are falsifiable, both were discovered rather than assumed, and both changed what the milestone built."
+    - "C41 depends on C43 rather than standing alone - the separation of reporting from acceptance only matters because the accounting laws quantify per occurrence."
+    - "Considered crystallizing an observation about D4 (repackage, do not re-prove) as a heuristic and did not: it is a plan-level instruction that held, not a finding the turn established. Left unstaged rather than staged-and-idle."
+    - "Did NOT open a contradiction node for the S1 reversal. The plan explicitly authorized re-opening S1 on budget grounds, so this is a designed escape hatch firing, not a conflict between entries."
+    - "Deliberately did not claim the mixed witness uses two shipped backends in its typed results - the must-not-claim list in docs/ says the opposite, and the claim wording had to match."
+- turn: "2026-08-29_001#3"
+  notes:
+    - "Late subagent reports arrived after the PR was open. Treated them as input to adjudicate, not as findings to accept: three load-bearing claims in the recon report were re-run, and two were wrong (no Lean toolchain; splitOn as sole blocker)."
+    - "Routed the unseal result as a dead_end node rather than leaving it in the session record only. It closes a named escape route that the durable doc had asserted was expensive, so it belongs in the trace where the next reader will look."
+    - "Did NOT reopen S1 or touch C41/C43 status. The unseal result confirms the shipped decision; a confirming negative is not a reconciliation signal."
+    - "Logged the C43 revision under field: Sources rather than Statement - only the grounding prose the claim quotes changed, not the claim. Signal is dependency-change (the cited doc moved), not verbal-declaration."
+    - "Considered staging an observation about confident-but-wrong reconnaissance and did not: the transferable lesson is already in N249's lesson field, and a staged duplicate would just go idle."
 - turn: "2026-08-29_002#1"
   notes:
     - "Stage 3 only. #200 asks for the mechanical stale flag and nothing else, so Stage 4 made no change: no claim status flipped, no logic entry was revised, and no observation was promoted or discarded."

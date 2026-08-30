@@ -604,3 +604,83 @@ mechanized consequence of old-node sink monotonicity, not a missing witness.
 Only success and additive inclusion were probed, and both fail. This name map
 does not license a full AGM-compliance claim. Holes remain a separate diagnostic
 and do not create a sixth `PublicReport`.
+
+---
+
+## Heterogeneous backend compositionality (B0, issue #182)
+
+Frozen definitions and the claim boundary are recorded in
+`docs/theory-b0-backend-compositionality.md`. The paper plan's
+`LocalBackendConsequence` is this development's `OccurrenceConsequence`; the
+paper plan's `CertOccurrence` field list is to be revised to the
+derived-fields phrasing the mechanization uses (EYH0602/lara-paper#2).
+
+### Vocabulary
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Certified occurrence record | `BackendComposition.CertOccurrence`, `.node`, `BackendComposition.OccursIn` | `Lara/BackendComposition.lean` |
+| Backend identities a term names | `BackendComposition.usedBackends`, `usedBackendsList`, `usedBackendsDis` | `Lara/BackendComposition.lean` |
+| Occurrence-local backend consequence (`LocalBackendConsequence`) | `BackendComposition.OccurrenceConsequence` | `Lara/BackendComposition.lean` |
+| Named identities are exactly the occurrences' | `BackendComposition.mem_usedBackends_iff` | `Lara/BackendComposition.lean` |
+| Collection helpers | `BackendComposition.usedBackends_mem_list`, `usedBackends_mem_dis`, `certStep_usedBackends_subset`, `usedBackends_node`, `mem_usedBackends_occ`, `mem_usedBackendsListOcc`, `mem_usedBackendsDisOcc` | `Lara/BackendComposition.lean` |
+
+### The firewall
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Backend firewall, premise half | `BackendComposition.prem_subterm_swap` | `Lara/BackendComposition.lean` |
+| Backend firewall, discharge half | `BackendComposition.dis_subterm_swap` | `Lara/BackendComposition.lean` |
+| Discharge keys survive the swap | `BackendComposition.map_fst_set_of_getElem?` | `Lara/BackendComposition.lean` |
+
+Neither statement mentions a backend; that is the content. See the frozen
+record for why naming the backends is a corollary rather than the theorem.
+
+### Accounting
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Dependencies are the union of occurrence-local reports | `BackendComposition.certDeps_eq_union` | `Lara/BackendComposition.lean` |
+| Report shape inversion | `BackendComposition.stepDeps_cert_shape` | `Lara/BackendComposition.lean` |
+| **B0 headline** — occurrence-level compositionality | `BackendComposition.hetero_occurrences_accounted` | `Lara/BackendComposition.lean` |
+| Every named backend discharges an occurrence | `BackendComposition.usedBackends_accounted` | `Lara/BackendComposition.lean` |
+
+### The worked witness
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Fixture child core and its obligation-4 laws | `Examples.BackendComposition.fixReplay_iff`, `fixSound`, `fixUses_covers`, `fixUses_valid`, `fixUses_account` | `Lara/Examples/BackendComposition.lean` |
+| Mixed registry agreeing with `registryEx` | `Examples.BackendComposition.registryMix_nd`, `registryMix_ord`, `registryMix_fix`, `certOkOf_registry_congr` | `Lara/Examples/BackendComposition.lean` |
+| Acceptance at the mixed registry | `Examples.BackendComposition.nd_accepts_mix`, `fix_certOkB_pA`, `fix_accepts_pA`, `fix_certOkB_pB`, `fix_accepts_pB` | `Lara/Examples/BackendComposition.lean` |
+| A term naming two shipped identities | `Examples.BackendComposition.mixed_usedBackends` | `Lara/Examples/BackendComposition.lean` |
+| Distinct *registrations* (not distinct `Form`s) | `Examples.BackendComposition.mixed_registrations_distinct`, `ndRegistered_theory_length`, `ordRegistered_theory_length` | `Lara/Examples/BackendComposition.lean` |
+| Firewall instantiated, premise half | `Examples.BackendComposition.mixed_swap`, `mixed_swap_usedBackends`, `sideNdParent`, `ndParent_prems`, `ndParent_typed`, `sideFixA`, `fixChildA_typed` | `Lara/Examples/BackendComposition.lean` |
+| Firewall instantiated, discharge half | `Examples.BackendComposition.mixed_dis_swap`, `mixed_dis_swap_usedBackends`, `sideFixB`, `fixChildB_typed`, `sideDisMix`, `disParent_dis`, `disParent_typed` | `Lara/Examples/BackendComposition.lean` |
+| Headline at a concrete mixed term | `Examples.BackendComposition.mixed_swap_accounted` | `Lara/Examples/BackendComposition.lean` |
+
+`mixed_registrations_distinct` is named for *registrations* deliberately. Lean
+cannot state that two backends' `Form` types differ, record inequality would
+not imply it, and a registry may map two identities to the same core. A paper
+display asserting distinct formula types would be false; see the frozen record.
+
+`mixed_swap` and `mixed_dis_swap` both use a fixture core as the swapped-in
+child, because `ord@1` acceptance is kernel-opaque under Lean 4.32's
+Slice-based `String` API. They differ in what sits above that child, and the
+difference matters for how much each witnesses:
+
+- `mixed_swap` (premise half) has the real `nd@1` as **parent** —
+  `ndParent`, discharged by `registry_success_bridge` — and swaps a declared
+  leaf premise for the fixture-certified `fixChildA`. The swapped term names
+  both identities (`mixed_swap_usedBackends : usedBackends mixedSwapTerm =
+  [ndId, fixId]`), so it is a genuinely mixed witness.
+- `mixed_dis_swap` (discharge half) has an **unassured defeasible `ruleMix`
+  node as parent**, not `nd@1`: `strictNoQ` forces `D = []` on strict nodes, so
+  a certified node in a discharge position needs a defeasible ancestor, and
+  `sideDisMix` supplies one with `assur := .defeasible rfl`. Here `nd@1` is the
+  **replaced child** — `disParent` holds `ndParent` at `q1` and `disSwapTerm`
+  holds `fixChildB` — which is why `mixed_dis_swap_usedBackends` proves
+  `usedBackends disParent = [ndId]` and `usedBackends disSwapTerm = [fixId]`.
+  The swap crosses a backend boundary; the post-swap term is homogeneous.
+
+The syntactic, resolution, and `certDeps` results use the shipped `nd@1` +
+`ord@1`. The worked mixed acceptance vector is Haskell's (`test/StrictSpec.hs`).

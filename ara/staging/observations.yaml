@@ -2214,3 +2214,84 @@ observations:
   promoted_to: "logic/claims.md:C39"
   crystallized_via: artifact-commitment
   stale: false
+- id: O100
+  timestamp: "2026-08-29T15:10"
+  provenance: ai-suggested
+  content: >
+    A parent instance's side conditions reach its premise subterms only
+    through their lengths, so replacing a premise with any term of the same
+    conclusion and obligations preserves the parent's typing - and the parent
+    cannot express which backend certified the replacement. The check is
+    mechanical rather than a reading of the structure: the proof's structure
+    update over only the three length fields elaborating is the proof
+    assistant confirming no other field mentions the premise list.
+  context: >
+    Task 2 of the B0 plan, the milestone's one genuinely new theorem,
+    deliberately sequenced second so a wrong D5 would surface early.
+  potential_type: claim
+  bound_to: [N243, N248]
+  promoted: true
+  promoted_to: "logic/claims.md:C40"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O101
+  timestamp: "2026-08-29T16:30"
+  provenance: ai-suggested
+  content: >
+    A backend's dependency report is mechanically evaluable in settings where
+    its acceptance is not. Reporting needs only resolution plus the
+    certificate decoder, while acceptance additionally needs the domain
+    computation. For ord@1 the report path stops at String.toNat?, which
+    reduces per literal, while the acceptance path reaches String.splitOn and
+    String.startsWith, which do not.
+  context: >
+    Probed while deciding whether the cross-language certDeps golden had to
+    inherit the split-witness fixture core. It did not.
+  potential_type: claim
+  bound_to: [N244, N246]
+  promoted: true
+  promoted_to: "logic/claims.md:C41"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O102
+  timestamp: "2026-08-29T14:30"
+  provenance: ai-suggested
+  content: >
+    A sealed judgment type whose only constructor is reached from tests
+    carries no guarantee about the production path. Here the sealed
+    StrictJudgment retained the dependency report and the shipped checker,
+    which does not construct one, discarded it - so the mechanized accounting
+    result had no executable counterpart until the production oracle was
+    widened to retain what the adapter already returns.
+  context: >
+    Found during the Haskell survey for B0 Task 5; repaired via D9 and
+    tracked onward as issue #204.
+  potential_type: claim
+  bound_to: [N247, N248]
+  promoted: true
+  promoted_to: "logic/claims.md:C42"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O103
+  timestamp: "2026-08-29T17:00"
+  provenance: ai-suggested
+  content: >
+    Heterogeneous backend composition needs no relating binder: each
+    occurrence's formula type, theory data, and consequence relation are
+    bound inside its own existential, so conjoining two occurrences'
+    consequences asserts nothing connecting them. The content is the absence
+    of a relating binder, not the disjointness of the parts - a registry may
+    map two identities to the same core, so type disjointness is neither
+    provable nor claimed.
+  context: >
+    The B0 headline, hetero_occurrences_accounted, and the sentence the paper
+    is expected to quote.
+  potential_type: claim
+  bound_to: [N243, N248]
+  promoted: true
+  promoted_to: "logic/claims.md:C43"
+  crystallized_via: artifact-commitment
+  stale: false

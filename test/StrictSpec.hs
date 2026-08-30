@@ -20,7 +20,7 @@
 --     dependencies.
 module StrictSpec (strictSpecProps) where
 
-import Data.List (isPrefixOf, nub)
+import Data.List (isPrefixOf, nub, sort)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -56,6 +56,19 @@ import Lara.Strict.ND
   , tagToString
   )
 import Lara.Strict.ND.Internal (AtomId (..))
+import qualified Lara.AST as A
+import qualified Lara.Strict.Cell as Cell
+import qualified Lara.Strict.Ord as OrdB
+import Lara.Strict.Deps (CertDep (..), certDeps)
+import Lara.Driver (buildCertOk)
+import Lara.SupportTerm
+  ( CertOk
+  , CertOutcome (..)
+  , CheckError
+  , CheckLoc (..)
+  , SupportResult (..)
+  , inferSupport
+  )
 
 -- ---------------------------------------------------------------------------
 -- ND formula generators
@@ -476,6 +489,410 @@ prop_strictCheckSeals =
         _ -> False
 
 -- ---------------------------------------------------------------------------
+-- Heterogeneous backend composition (issue #182; spec §6 @certDeps@)
+--
+-- One support term may carry certificates from /different/ backends, and the
+-- dependency report of the whole term is the union of the per-step reports —
+-- the Haskell mirror of Lean's @Lara.Support.certDeps@ and of
+-- @lean\/Lara\/BackendComposition.lean@'s heterogeneity results.
+--
+-- Every vector below runs on the __shipped__ path: the oracle is the one
+-- 'Lara.Driver.buildCertOk' builds over the fixed registry (@nd\@1@, @ra\@1@,
+-- @ord\@1@), and acceptance is decided by the production 'inferSupport'.
+-- 'certDeps' validates nothing on its own, so each collection vector is paired
+-- with an acceptance assertion on the same term: a report collected from a term
+-- the checker rejects would prove nothing about the checker.
+-- ---------------------------------------------------------------------------
+
+-- | The ground atom pattern that instantiates, under the empty substitution, to
+-- exactly this proposition. Every rule in this section is parameter-free: what
+-- these vectors exercise is the backend seam, not 'Lara.SupportTerm.instAPat'.
+patOf :: Prop -> A.AtomPat
+patOf (Prop p ts) = A.AtomPat p (map A.PLit ts)
+
+-- | @(prem N)@, spelled through "Lara.Strict.Cell"'s own keyword table so the
+-- wire spelling stays defined in exactly one place — the discipline 'tag'
+-- already applies to the ND grammar above.
+premSlot :: Int -> SExpr
+premSlot i = SList [SAtom (Cell.tagToString Cell.TPrem), SAtom (show i)]
+
+ndDigest, ordDigest :: A.TheoryDigest
+ndDigest = A.TheoryDigest "sha256:nd0"
+ordDigest = A.TheoryDigest "sha256:ord0"
+
+-- | The @nd\@1@ background theory: one entry. It is non-empty on purpose. A
+-- 'CertPremise' carries no backend identity (it names a source-visible premise
+-- slot, which is the reporting node's own), so 'CertTheory' is the /only/
+-- 'CertDep' that carries one — and @ord\@1@ refuses to cite theory entries at
+-- all. A mixed-backend vector whose reports were all premise slots therefore
+-- could not witness per-step backend tagging; this entry is what makes the
+-- root's report say @nd\@1@ and nothing else.
+ndTheory :: [Prop]
+ndTheory = [Prop (Pred "within_compute_budget") []]
+
+-- | The theory table the oracle is built over — the same shape the wire
+-- @theories@ section lowers to.
+depsTheories :: [(A.TheoryDigest, [Prop])]
+depsTheories = [(ndDigest, ndTheory), (ordDigest, [])]
+
+-- | The production oracle. Not a stub: 'buildCertOk' is exactly what
+-- "Lara.Check" is handed on the shipped path.
+depsCertOk :: CertOk
+depsCertOk = buildCertOk depsTheories
+
+-- | Two measurement cells and the comparison they license. Each cell carries
+-- exactly one numeric literal, which is @ord\@1@'s premise-cell convention
+-- ('Lara.Strict.Cell.premiseCell').
+cellOurs, cellTheirs, comparison, budgetRespected :: Prop
+cellOurs = Prop (Pred "cell") [TCon (FunSym "ours") [], TNum "28.4"]
+cellTheirs = Prop (Pred "cell") [TCon (FunSym "theirs") [], TNum "31.6"]
+comparison = Prop (Pred "num_lt") [TNum "28.4", TNum "31.6"]
+budgetRespected = head ndTheory
+
+ordRuleId, ndRuleId, bridgeRuleId, trustedRuleId :: A.RuleId
+ordRuleId = A.RuleId "compare_cells"
+ndRuleId = A.RuleId "restate_budget"
+bridgeRuleId = A.RuleId "bridge"
+trustedRuleId = A.RuleId "assume_budget"
+
+-- | The @ord\@1@ step: two measurement premises, a comparison conclusion.
+ordRule :: A.Rule
+ordRule =
+  A.Rule
+    { A.ruleId = ordRuleId
+    , A.ruleParams = []
+    , A.ruleMode = A.Strict
+    , A.rulePremises = [patOf cellOurs, patOf cellTheirs]
+    , A.rulePremiseLabels = []
+    , A.ruleConclusion = patOf comparison
+    , A.ruleAllowTrusted = False
+    , A.ruleCertifiers = [A.CertRef (A.BackendId "ord") 1 ordDigest]
+    , A.ruleQuestions = []
+    }
+
+-- | The @nd\@1@ step sitting /above/ the @ord\@1@ one. Its certificate is
+-- @(hyp 1)@: the free context an ND certificate sees is @premises ++ theory@,
+-- so index 1 is theory entry 0 and the accepted report is a theory dependency,
+-- not a premise one. That the comparison premise is structurally required by
+-- the checker but is not part of this step's certificate report is the
+-- factivity firewall showing through — the report says what the /certificate/
+-- consulted, not what the term is built from.
+ndRule :: A.Rule
+ndRule =
+  A.Rule
+    { A.ruleId = ndRuleId
+    , A.ruleParams = []
+    , A.ruleMode = A.Strict
+    , A.rulePremises = [patOf comparison]
+    , A.rulePremiseLabels = []
+    , A.ruleConclusion = patOf budgetRespected
+    , A.ruleAllowTrusted = False
+    , A.ruleCertifiers = [A.CertRef (A.BackendId "nd") 1 ndDigest]
+    , A.ruleQuestions = []
+    }
+
+-- | A defeasible rule with one mandatory critical question answered by the
+-- comparison. A strict rule declares no questions, so a certified node can
+-- never carry a discharge itself: the only way a certificate reaches a
+-- @srDischarge@ position at all is under a defeasible ancestor, which is what
+-- this rule provides.
+bridgeQuestion :: A.QuestionId
+bridgeQuestion = A.QuestionId "q_measured"
+
+bridgeRule :: A.Rule
+bridgeRule =
+  A.Rule
+    { A.ruleId = bridgeRuleId
+    , A.ruleParams = []
+    , A.ruleMode = A.Defeasible
+    , A.rulePremises = []
+    , A.rulePremiseLabels = []
+    , A.ruleConclusion = patOf betterThanBaseline
+    , A.ruleAllowTrusted = False
+    , A.ruleCertifiers = []
+    , A.ruleQuestions = [A.Question bridgeQuestion (patOf comparison) A.Mandatory]
+    }
+
+betterThanBaseline :: Prop
+betterThanBaseline = Prop (Pred "better") [TCon (FunSym "ours") []]
+
+-- | A strict rule discharged by author trust rather than by a backend.
+trustedRule :: A.Rule
+trustedRule =
+  A.Rule
+    { A.ruleId = trustedRuleId
+    , A.ruleParams = []
+    , A.ruleMode = A.Strict
+    , A.rulePremises = []
+    , A.rulePremiseLabels = []
+    , A.ruleConclusion = patOf budgetRespected
+    , A.ruleAllowTrusted = True
+    , A.ruleCertifiers = []
+    , A.ruleQuestions = []
+    }
+
+depsPi :: A.RuleId -> Maybe A.Rule
+depsPi r =
+  lookup
+    r
+    [ (ordRuleId, ordRule)
+    , (ndRuleId, ndRule)
+    , (bridgeRuleId, bridgeRule)
+    , (trustedRuleId, trustedRule)
+    ]
+
+oursLeaf, theirsLeaf :: A.LeafId
+oursLeaf = A.LeafId "e_ours"
+theirsLeaf = A.LeafId "e_theirs"
+
+depsGamma :: A.LeafId -> Maybe Prop
+depsGamma l = lookup l [(oursLeaf, cellOurs), (theirsLeaf, cellTheirs)]
+
+ordPayload, ndPayload :: SExpr
+ordPayload = SList [SAtom (OrdB.tagToString OrdB.TOrdcmp), premSlot 0, premSlot 1]
+ndPayload = certToSExpr (Hyp 1)
+
+-- | The @ord\@1@-certified node, used as a premise subterm and as a discharge
+-- subterm below.
+ordNode :: A.SupportTerm
+ordNode =
+  A.SRule
+    ordRuleId
+    []
+    [A.SLeaf oursLeaf, A.SLeaf theirsLeaf]
+    []
+    []
+    (A.AssuranceCert (A.Cert (A.BackendId "ord") 1 ordDigest ordPayload))
+
+-- | The two-level heterogeneous term: an @nd\@1@ root over an @ord\@1@ premise.
+mixedTerm :: A.SupportTerm
+mixedTerm =
+  A.SRule
+    ndRuleId
+    []
+    [ordNode]
+    []
+    []
+    (A.AssuranceCert (A.Cert (A.BackendId "nd") 1 ndDigest ndPayload))
+
+-- | The same @ord\@1@ node in a __discharge__ position under a defeasible root.
+bridgeTerm :: A.SupportTerm
+bridgeTerm = A.SRule bridgeRuleId [] [] [(bridgeQuestion, ordNode)] [] A.AssuranceNone
+
+trustedTerm :: A.SupportTerm
+trustedTerm = A.SRule trustedRuleId [] [] [] [] A.AssuranceTrusted
+
+-- | Run the production checker on a term, from the root.
+checkDeps :: A.SupportTerm -> Either CheckError SupportResult
+checkDeps = inferSupport depsPi depsGamma depsCertOk LocRoot
+
+-- | The mixed-backend term is __accepted by the production checker__. This is
+-- the assertion that discharges "a heterogeneous vector passes in Haskell"; the
+-- collection properties below only read a report off a term this one has shown
+-- the checker takes.
+prop_mixedBackendAccepted :: Property
+prop_mixedBackendAccepted =
+  checkDeps mixedTerm === Right (SupportResult budgetRespected [])
+
+-- | 'certDeps' collects /both/ steps' reports, each resolved against its own
+-- reporting node and tagged with the backend that produced it: the root's
+-- @nd\@1@ theory entry (carrying @nd\@1@ and its digest) and the @ord\@1@
+-- node's two premise slots (each resolved to that node's own premise atom).
+-- Root-first, then the premise walk — the order of Lean's @certDeps@.
+prop_mixedBackendDepsCollected :: Property
+prop_mixedBackendDepsCollected =
+  certDeps depsCertOk depsPi mixedTerm
+    === [ CertTheory (BackendId "nd" 1) (TheoryDigest "sha256:nd0") 0
+        , CertPremise 0 cellOurs
+        , CertPremise 1 cellTheirs
+        ]
+
+-- | A certificate in a __discharge__ position is collected too. A walker that
+-- recursed only into 'A.srPremises' passes every vector above and fails here.
+prop_dischargeDepsCollected :: Property
+prop_dischargeDepsCollected =
+  conjoin
+    [ checkDeps bridgeTerm === Right (SupportResult betterThanBaseline [])
+    , certDeps depsCertOk depsPi bridgeTerm
+        === [CertPremise 0 cellOurs, CertPremise 1 cellTheirs]
+    ]
+
+-- | The edge vectors: a leaf and a trust-assured instance report nothing. Both
+-- are accepted terms, so this is the collector staying silent where there is no
+-- certificate — not a rejection in disguise.
+prop_uncertifiedNodesReportNothing :: Property
+prop_uncertifiedNodesReportNothing =
+  conjoin
+    [ checkDeps (A.SLeaf oursLeaf) === Right (SupportResult cellOurs [])
+    , certDeps depsCertOk depsPi (A.SLeaf oursLeaf) === []
+    , checkDeps trustedTerm === Right (SupportResult budgetRespected [])
+    , certDeps depsCertOk depsPi trustedTerm === []
+    ]
+
+-- | The backend firewall on the wire: an @nd\@1@ certificate whose payload is
+-- an @ord\@1@ sub-payload is rejected by the @nd\@1@ decoder, with @nd\@1@'s own
+-- reason. No backend may read another's certificate — a parent step cannot
+-- inspect, reuse, or re-interpret a child backend's proof term.
+--
+-- The vector exists in Haskell precisely because the wire form is untyped: an
+-- 'SExpr' payload can /syntactically/ be another backend's. In Lean the
+-- leakage is inexpressible — @Assurance@ carries only @(β, hd, κ)@ and there is
+-- no syntax naming another backend's formula type — so this artifact, not a
+-- Lean theorem, is what discharges the leakage criterion. It runs through
+-- 'buildCertOk' rather than @strictCheck@ because @strictCheck@ is reached only
+-- from tests, and a firewall vector that never runs on the shipped path checks
+-- the wrong checker.
+prop_crossBackendPayloadRejected :: Property
+prop_crossBackendPayloadRejected =
+  depsCertOk leakedCert [comparison] budgetRespected
+    === CertRejected ("malformed ND certificate: " ++ show ordPayload)
+
+-- | An @nd\@1@ certificate carrying an @ord\@1@ payload. Shared by
+-- 'prop_crossBackendPayloadRejected', which pins @nd\@1@'s exact rejection
+-- reason for it, and 'prop_rejectedStepKeepsDepsBeneath', which relies on that
+-- rejection. One binding rather than two copies, so the vector that assumes it
+-- is rejected cannot drift from the vector that proves it.
+leakedCert :: A.Cert
+leakedCert = A.Cert (A.BackendId "nd") 1 ndDigest ordPayload
+
+-- | __A rejected step never hides the accounting of the steps beneath it__ —
+-- the totality contract stated in "Lara.Strict.Deps"' module header.
+--
+-- 'mixedTerm' with its @nd\@1@ root certificate replaced by 'leakedCert': the
+-- root is now a certificate node the oracle /rejects/
+-- ('prop_crossBackendPayloadRejected' pins the exact reason), so it contributes
+-- no report of its own — the @nd\@1@ theory entry that
+-- 'prop_mixedBackendDepsCollected' sees is gone. The walk continues into the
+-- premise regardless, so the accepted @ord\@1@ node beneath it still reports
+-- both of its premise slots.
+--
+-- Without this vector a @go@ that short-circuited the entire subtree at a
+-- non-contributing node would pass every other property in this section: in
+-- 'mixedTerm' every rule id resolves, every rule is parameter-free with ground
+-- 'PLit' patterns so instantiation never fails, and every certificate is
+-- accepted — so no other vector ever walks /past/ a node that reports nothing.
+prop_rejectedStepKeepsDepsBeneath :: Property
+prop_rejectedStepKeepsDepsBeneath =
+  certDeps depsCertOk depsPi leakedRootTerm
+    === [CertPremise 0 cellOurs, CertPremise 1 cellTheirs]
+  where
+    leakedRootTerm = case mixedTerm of
+      A.SRule rn theta ws d o _ ->
+        A.SRule rn theta ws d o (A.AssuranceCert leakedCert)
+      w -> w
+
+-- ---------------------------------------------------------------------------
+-- The cross-language certDeps golden (B0)
+--
+-- 'prop_mixedBackendDepsCollected' above pins the Haskell result as a Haskell
+-- value. This section pins it as /text/, against the same bytes the Lean
+-- witness emits, so the two mechanizations cannot drift apart silently.
+--
+-- Lean's half is @Lara.Examples.BackendComposition.depsMixedTerm@, whose
+-- constants mirror 'mixedTerm' atom for atom: same two backend identities,
+-- same rule shapes, same premise atoms, same certificate payloads, same
+-- digests, same theory-entry index. Both halves of the Lean term run on the
+-- __shipped__ backend cores (@Lara.Strict.ndBackend@, @Lara.Ord.ordBackend@) —
+-- the @ord\@1@ acceptance blocker that forces the rest of that module onto a
+-- fixture core does not reach a dependency report, because
+-- @Lara.Support.stepDeps@ never calls acceptance. See
+-- @scripts/check-backend-deps-golden.sh@ for the full argument.
+-- ---------------------------------------------------------------------------
+
+-- | Escape and quote one string for the golden encoding: backslash, double
+-- quote, newline and tab become their two-character escapes; everything else
+-- is passed through. Mirrors @quoteGolden@ in the Lean witness.
+quoteGolden :: String -> String
+quoteGolden s = '"' : concatMap esc s ++ "\""
+  where
+    esc '\\' = "\\\\"
+    esc '"' = "\\\""
+    esc '\n' = "\\n"
+    esc '\t' = "\\t"
+    esc c = [c]
+
+-- | Encode a ground term. Mirrors @encodeTermGolden@ in the Lean witness.
+encodeTermGolden :: Term -> String
+encodeTermGolden t = case t of
+  TNum s -> "(num " ++ quoteGolden s ++ ")"
+  TStr s -> "(str " ++ quoteGolden s ++ ")"
+  TCon (FunSym k) ts -> "(con " ++ quoteGolden k ++ encodeTermsGolden ts ++ ")"
+
+-- | Encode an argument list, each element preceded by a single space.
+encodeTermsGolden :: [Term] -> String
+encodeTermsGolden = concatMap ((' ' :) . encodeTermGolden)
+
+-- | Encode a ground proposition. Mirrors @encodeAtomGolden@ in the Lean
+-- witness (Lean's @Atom@ is this @Prop@).
+encodeAtomGolden :: Prop -> String
+encodeAtomGolden (Prop (Pred p) ts) =
+  "(atom " ++ quoteGolden p ++ encodeTermsGolden ts ++ ")"
+
+-- | Encode one dependency as its golden line. The grammar, shared verbatim
+-- with @encodeCertDepGolden@ in @lean\/Lara\/Examples\/BackendComposition.lean@:
+--
+-- @
+--   line   ::= "premise " nat " " atom
+--            | "theory " qstr " " nat " " qstr " " nat
+--   atom   ::= "(atom " qstr terms ")"
+--   terms  ::= { " " term }
+--   term   ::= "(num " qstr ")" | "(str " qstr ")" | "(con " qstr terms ")"
+--   qstr   ::= '"' { char | "\\\\" | "\\\"" | "\\n" | "\\t" } '"'
+-- @
+--
+-- The @theory@ line's two naturals are the backend /version/ and the theory
+-- /entry index/; its two quoted strings are the backend name and the theory
+-- digest. __Nothing is dropped__: every field of both 'CertDep' constructors is
+-- encoded, including the premise slot's resolved atom in full ground form. The
+-- premise\/theory asymmetry is 'CertDep''s own (design note D7 in
+-- "Lara.Strict.Deps") — a premise dependency genuinely carries no backend
+-- identity — not an omission made to force the two languages to agree.
+encodeCertDepGolden :: CertDep -> String
+encodeCertDepGolden d = case d of
+  CertPremise i atom -> "premise " ++ show i ++ " " ++ encodeAtomGolden atom
+  CertTheory (BackendId name version) (TheoryDigest digest) t ->
+    "theory "
+      ++ quoteGolden name
+      ++ " "
+      ++ show version
+      ++ " "
+      ++ quoteGolden digest
+      ++ " "
+      ++ show t
+
+-- | The canonical encoding of a whole dependency collection.
+--
+-- __Sort order.__ Lines are emitted __sorted ascending by the encoded line
+-- text__, compared as a sequence of Unicode code points ('Data.List.sort' on
+-- 'String', which is exactly the @charListLtGolden@ order the Lean encoder
+-- spells out), and __deduplicated__. The order is on the /text/, not on the
+-- slot number: slot @10@ sorts before slot @2@. That is deliberate — the order
+-- is a canonicalization device, not a semantic ranking.
+--
+-- __Why deduplicated.__ Lean's per-node report is a @List Nat@
+-- (@Backend.uses@); a Haskell adapter reports a 'Set' 'Dependency'. A
+-- certificate naming the same slot twice — @(ordcmp (prem 0) (prem 0))@ — is a
+-- two-element list in Lean and a one-element set here. The two languages agree
+-- as /collections/, which is what every accountability statement is about, so
+-- multiplicity is deliberately outside this contract and both encoders
+-- canonicalize it away.
+--
+-- The result ends in a newline so it compares equal to the committed file as
+-- read, and to @IO.println@'s output on the Lean side.
+encodeCertDepsGolden :: [CertDep] -> String
+encodeCertDepsGolden = unlines . sort . nub . map encodeCertDepGolden
+
+-- | The Haskell collector's answer on the mixed term, encoded canonically,
+-- equals the committed golden that Lean emits. This is the cross-language
+-- half of the assertion 'prop_mixedBackendDepsCollected' makes in Haskell
+-- terms; @scripts\/check-backend-deps-golden.sh@ is the other half, and keeps
+-- the file from going stale against Lean.
+prop_mixedBackendDepsGolden :: Property
+prop_mixedBackendDepsGolden = once $ ioProperty $ do
+  golden <- readFile "test/backend-deps.golden"
+  pure (encodeCertDepsGolden (certDeps depsCertOk depsPi mixedTerm) === golden)
+
+-- ---------------------------------------------------------------------------
 -- Prop pair generator for normalization fidelity
 -- ---------------------------------------------------------------------------
 
@@ -533,4 +950,11 @@ strictSpecProps =
   , ("ND closed decoder/infer matrix", quickCheckResult prop_closedDecoderMatrix)
   , ("strict unregistered backend rejected", quickCheckResult prop_unregisteredRejected)
   , ("strictCheck seals a judgment", quickCheckResult prop_strictCheckSeals)
+  , ("mixed nd@1/ord@1 term accepted by the checker", quickCheckResult prop_mixedBackendAccepted)
+  , ("mixed nd@1/ord@1 certDeps unions both steps' reports", quickCheckResult prop_mixedBackendDepsCollected)
+  , ("certDeps collects a discharge-position certificate", quickCheckResult prop_dischargeDepsCollected)
+  , ("certDeps of leaf and trusted instance is empty", quickCheckResult prop_uncertifiedNodesReportNothing)
+  , ("cross-backend payload leakage rejected by nd@1", quickCheckResult prop_crossBackendPayloadRejected)
+  , ("a rejected step does not hide the deps beneath it", quickCheckResult prop_rejectedStepKeepsDepsBeneath)
+  , ("mixed nd@1/ord@1 certDeps matches the Lean-emitted golden", quickCheckResult prop_mixedBackendDepsGolden)
   ]

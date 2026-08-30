@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-image bench-container measure presentation-parity semantics-goldens update-goldens update-differential ara-source-spans
+.PHONY: build test bench bench-image bench-container measure presentation-parity semantics-goldens backend-deps-golden update-goldens update-differential ara-source-spans
 
 build:
 	cabal build all
@@ -20,6 +20,13 @@ presentation-parity:
 # conformance table byte for byte.
 semantics-goldens:
 	bash scripts/check-semantics-goldens.sh
+
+# The Lean-emitted `certDeps` of the shipped nd@1/ord@1 mixed term must match
+# the committed golden byte for byte; test/StrictSpec.hs asserts the same bytes
+# from the Haskell collector. Both halves run on the shipped backend cores — the
+# ord@1 acceptance blocker does not reach a dependency report.
+backend-deps-golden:
+	bash scripts/check-backend-deps-golden.sh
 
 # Lean-emitted source-update matrices must match the committed report byte for
 # byte. Pass UPDATE=1 to regenerate the golden deterministically.

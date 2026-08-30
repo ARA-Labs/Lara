@@ -49,6 +49,7 @@ import Lara.Semantics.Sublists
 import Lara.Examples.Semantics
 import Lara.Update
 import Lara.Examples.Update
+import Lara.Examples.BackendComposition
 
 open Lara
 
@@ -1607,3 +1608,85 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.Update.addAttack_public_blocked_reachable_count
 #print axioms Lara.Examples.Update.addInstance_public_blocked_reachable_count
 #print axioms Lara.Examples.Update.fiveValuedPublicMatrixReport
+
+-- Milestone B0: heterogeneous backend compositionality
+-- (`Lara.BackendComposition`).  The occurrence vocabulary and the syntactic
+-- identity scan, the two halves of the backend firewall, and the accounting
+-- laws restated per occurrence — including the B0 headline
+-- (`hetero_occurrences_accounted`) and its `usedBackends` corollary.
+#print axioms Lara.BackendComposition.CertOccurrence.node
+#print axioms Lara.BackendComposition.OccursIn
+#print axioms Lara.BackendComposition.usedBackends
+#print axioms Lara.BackendComposition.usedBackendsList
+#print axioms Lara.BackendComposition.usedBackendsDis
+#print axioms Lara.BackendComposition.OccurrenceConsequence
+#print axioms Lara.BackendComposition.usedBackends_mem_list
+#print axioms Lara.BackendComposition.usedBackends_mem_dis
+#print axioms Lara.BackendComposition.certStep_usedBackends_subset
+#print axioms Lara.BackendComposition.usedBackends_node
+#print axioms Lara.BackendComposition.mem_usedBackends_occ
+#print axioms Lara.BackendComposition.mem_usedBackendsListOcc
+#print axioms Lara.BackendComposition.mem_usedBackendsDisOcc
+#print axioms Lara.BackendComposition.mem_usedBackends_iff
+#print axioms Lara.BackendComposition.map_fst_set_of_getElem?
+#print axioms Lara.BackendComposition.prem_subterm_swap
+#print axioms Lara.BackendComposition.dis_subterm_swap
+#print axioms Lara.BackendComposition.stepDeps_cert_shape
+#print axioms Lara.BackendComposition.certDeps_eq_union
+#print axioms Lara.BackendComposition.hetero_occurrences_accounted
+#print axioms Lara.BackendComposition.usedBackends_accounted
+
+-- The worked mixed-backend witness (`Lara.Examples.BackendComposition`).
+-- The fixture child core and every one of its `Strict.Backend` obligations,
+-- proved rather than assumed; the registry extension and its transport
+-- lemma; the two shipped-identity facts (`mixed_usedBackends`,
+-- `mixed_registrations_distinct`); and the two firewall instantiations
+-- (`mixed_swap`, `mixed_dis_swap`) with the typing derivations they rest on.
+#print axioms Lara.Examples.BackendComposition.fixReplay_iff
+#print axioms Lara.Examples.BackendComposition.fixSound
+#print axioms Lara.Examples.BackendComposition.fixUses_covers
+#print axioms Lara.Examples.BackendComposition.fixUses_valid
+#print axioms Lara.Examples.BackendComposition.fixUses_account
+#print axioms Lara.Examples.BackendComposition.fixCore
+#print axioms Lara.Examples.BackendComposition.registryMix_nd
+#print axioms Lara.Examples.BackendComposition.registryMix_ord
+#print axioms Lara.Examples.BackendComposition.registryMix_fix
+#print axioms Lara.Examples.BackendComposition.certOkOf_registry_congr
+#print axioms Lara.Examples.BackendComposition.nd_accepts_mix
+#print axioms Lara.Examples.BackendComposition.fix_certOkB_pA
+#print axioms Lara.Examples.BackendComposition.fix_accepts_pA
+#print axioms Lara.Examples.BackendComposition.fix_certOkB_pB
+#print axioms Lara.Examples.BackendComposition.fix_accepts_pB
+#print axioms Lara.Examples.BackendComposition.mixed_usedBackends
+#print axioms Lara.Examples.BackendComposition.ndRegistered_theory_length
+#print axioms Lara.Examples.BackendComposition.ordRegistered_theory_length
+#print axioms Lara.Examples.BackendComposition.mixed_registrations_distinct
+#print axioms Lara.Examples.BackendComposition.sideNdParent
+#print axioms Lara.Examples.BackendComposition.ndParent_prems
+#print axioms Lara.Examples.BackendComposition.ndParent_typed
+#print axioms Lara.Examples.BackendComposition.sideFixA
+#print axioms Lara.Examples.BackendComposition.fixChildA_typed
+#print axioms Lara.Examples.BackendComposition.mixed_swap
+#print axioms Lara.Examples.BackendComposition.mixed_swap_usedBackends
+#print axioms Lara.Examples.BackendComposition.mixed_swap_accounted
+#print axioms Lara.Examples.BackendComposition.sideFixB
+#print axioms Lara.Examples.BackendComposition.fixChildB_typed
+#print axioms Lara.Examples.BackendComposition.sideDisMix
+#print axioms Lara.Examples.BackendComposition.disParent_dis
+#print axioms Lara.Examples.BackendComposition.disParent_typed
+#print axioms Lara.Examples.BackendComposition.mixed_dis_swap
+#print axioms Lara.Examples.BackendComposition.mixed_dis_swap_usedBackends
+
+-- The cross-language `certDeps` golden over the SHIPPED nd@1/ord@1 pair
+-- (`scripts/check-backend-deps-golden.sh`). No fixture core appears here: a
+-- dependency report never calls acceptance, so the `ord@1` kernel-opacity that
+-- forces the typed witnesses above onto `fixCore` does not reach these.
+#print axioms Lara.Examples.BackendComposition.depsParseCanonNat0
+#print axioms Lara.Examples.BackendComposition.depsParseCanonNat1
+#print axioms Lara.Examples.BackendComposition.depsOrdUses
+#print axioms Lara.Examples.BackendComposition.depsNdUses
+#print axioms Lara.Examples.BackendComposition.depsMixedTerm_stepDeps
+#print axioms Lara.Examples.BackendComposition.depsOrdNode_stepDeps
+#print axioms Lara.Examples.BackendComposition.depsMixedTerm_both_halves_nonempty
+#print axioms Lara.Examples.BackendComposition.depsMixedTerm_certDeps
+#print axioms Lara.Examples.BackendComposition.depsMixedTerm_usedBackends

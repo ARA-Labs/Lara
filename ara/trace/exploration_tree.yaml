@@ -6415,3 +6415,217 @@ tree:
     rather than left as an unexplained backlog, and 6 more are attached to the
     specific node or decision that governs them.
   also_depends_on: [N241, N105, N212]
+
+- id: N243
+  type: decision
+  title: "Treat B0 as consolidation of an unstated property, not a proof effort"
+  provenance: ai-suggested
+  timestamp: "2026-08-29T14:10"
+  choice: >
+    Survey Lara.Support before writing anything, and take the finding that
+    heterogeneity was already structural as the milestone's shape. certOkOf
+    already resolves each BackendId to its own RegisteredBackend carrying its
+    own core.Form; cert_steps_accounted already binds the backend record in a
+    per-node existential; mem_certDeps_step and certStep_deps_subset were
+    already the two directions of the dependency union. What was missing is
+    that no theorem stated heterogeneity - every result quantified one
+    occurrence at a time. So B0 is repackaging plus one new theorem, not a
+    new induction effort.
+  alternatives:
+    - "Prove occurrence-level compositionality by fresh induction over HasSupport."
+    - "Introduce a shared backend logic and quotient over it."
+  evidence:
+    - "lean/Lara/Support.lean: certOkOf, cert_node_accounted, cert_steps_accounted"
+    - "lean/Lara/Support.lean: mem_certDeps_step, certStep_deps_subset"
+    - "design decision D4 - repackage, do not re-prove"
+  status: resolved
+  also_depends_on: []
+
+- id: N244
+  type: dead_end
+  title: "Per-literal string lemmas for in-kernel ord@1 acceptance"
+  provenance: ai-executed
+  timestamp: "2026-08-29T15:40"
+  hypothesis: >
+    Scope decision S1 chose the literal reading: hand-prove per-literal String
+    lemmas in the style of Lara.ND.decodeNat_repr so that a real ord@1 numeric
+    certificate would be accepted inside the Lean kernel, giving a worked mixed
+    acceptance over shipped backends only. The plan budgeted about a day and
+    attached an explicit escape hatch.
+  failure_mode: >
+    ord@1 acceptance routes through Cell.parseDecimal to parseUnsigned to
+    String.splitOn, and through parseCanonInt to String.startsWith. Under Lean
+    4.32's Slice-based String API those are kernel-opaque. Direct probes on
+    literal goals such as "28".splitOn "." = ["28"] and "28".startsWith "-" =
+    false were rejected by rfl, decide, simp, exact? and grind; unfolding
+    String.splitOnAux diverges to max recursion depth. native_decide would
+    close the gap and is forbidden - it adds Lean.ofReduceBool and appears
+    nowhere under lean/. Only String.toNat?, string-literal equality,
+    String.toList and String.length reduce per literal.
+  lesson: >
+    The Lara.ND.decodeNat_repr precedent generalizes to String.toNat? and to
+    nothing else in the Slice-based API. A milestone that needs in-kernel
+    evaluation of a shipped decoder must first check which String primitives
+    that decoder's path actually touches - the reducible and irreducible ones
+    sit next to each other in the same parser. Probing four primitives cost
+    minutes and redirected the milestone; assuming the precedent generalized
+    would have cost days.
+  evidence:
+    - "lean/Lara/Cell.lean: parseCanonNat, parseCanonInt, parseUnsigned, parseDecimal"
+    - "lean/Lara/ND.lean:112-131: decodeNat_repr, decodeNat_leading_zero_01"
+    - "lean/Lara/Examples.lean:368-376: the pre-existing resolution-layer note"
+    - "scripts/check-axioms.sh: standard trio only"
+  also_depends_on: [N243]
+
+- id: N245
+  type: decision
+  title: "S1 re-decided: the split witness"
+  provenance: user
+  timestamp: "2026-08-29T15:55"
+  choice: >
+    Fire the plan's own S1 budget escape hatch and split the Lean witness.
+    Shipped nd@1 and ord@1 carry the syntactic and resolution facts
+    (mixed_usedBackends, mixed_registrations_distinct), which need no
+    acceptance. A fixture core with every Strict.Backend field genuinely proved
+    carries the typed facts (mixed_swap, mixed_dis_swap), with real nd@1 as
+    parent via the already-worked registry_success_bridge. The worked mixed
+    nd@1/ord@1 acceptance vector lives in Haskell on the shipped inferSupport
+    and buildCertOk path. The boundary is documented rather than papered over.
+  alternatives:
+    - "Pay the cost: build Slice-API unfolding lemmas for startsWith and splitOn. Rejected as research-grade plumbing against a freshly redesigned core API, with no precedent and a real chance of dead-ending."
+    - "Keep ord@1 at the resolution layer only and let Haskell carry the whole worked vector. Rejected as the weakest Lean content available."
+  evidence:
+    - "N244 probe results"
+    - "lean/Lara/Examples/BackendComposition.lean: fixCore and its obligation-4 laws"
+    - "docs/theory-b0-backend-compositionality.md: S1 section"
+  status: resolved
+  also_depends_on: [N244]
+
+- id: N246
+  type: experiment
+  title: "Dependency reporting is evaluable where acceptance is not"
+  provenance: ai-executed
+  timestamp: "2026-08-29T16:30"
+  description: >
+    Probe whether Lean's certDeps can be computed over the real shipped ord@1
+    core even though ord@1 acceptance is kernel-opaque, so the cross-language
+    golden need not inherit the acceptance split.
+  result: >
+    It can. Support.stepDeps never calls acceptsFull; it needs only the rule,
+    instAPats, the registry entry and resolveTheory to resolve, then maps
+    Backend.uses over the reported slots. ord@1's ordUses routes through
+    decodeCert to Cell.decodeSlot to parseCanonNat to String.toNat? - the one
+    primitive that is provable per literal - and never reaches splitOn or
+    startsWith. Probes confirmed parseCanonNat "0" = some 0, decodeSlot on
+    (prem 0), and ordUses on an ordcmp certificate all reduce. So the golden
+    computes over the shipped nd@1 and ord@1 cores on both sides, and the
+    acceptance blocker does not weaken the milestone's strongest
+    cross-language artifact.
+  evidence:
+    - "lean/Lara/Ord.lean: ordUses, decodeCert"
+    - "lean/Lara/Cell.lean: decodeSlot, parseCanonNat"
+    - "lean/Lara/Examples/BackendComposition.lean: depsMixedTerm_certDeps, depsMixedTerm_both_halves_nonempty"
+    - "test/backend-deps.golden; scripts/check-backend-deps-golden.sh"
+  status: resolved
+  also_depends_on: [N244, N245]
+
+- id: N247
+  type: dead_end
+  title: "The shipped Haskell checker's dependency accounting"
+  provenance: ai-executed
+  timestamp: "2026-08-29T14:30"
+  hypothesis: >
+    Since strictCheck seals a StrictJudgment retaining sjDependencies and every
+    adapter computes its Set Dependency correctly, the Haskell side was assumed
+    to have per-occurrence dependency accounting that B0 only had to collect
+    term-level.
+  failure_mode: >
+    strictCheck is called from test/ and from nowhere in src/. The production
+    checker reaches backends through buildCertOk, which called runBackend and
+    discarded the report at the last step. Lean proved certDeps accounts for
+    every certified occurrence; the shipped checker accounted for none of them.
+    A term-level collector built on strictCheck would have produced a
+    conformance vector that passes while the shipped checker still accounts
+    nothing.
+  lesson: >
+    A sealed type whose only constructor is reached from tests is not evidence
+    about the production path. Before building conformance on an abstraction,
+    grep for its constructor's call sites in src/ specifically - the type
+    existing and being correct says nothing about it being on the hot path.
+  evidence:
+    - "src/Lara/Strict.hs: strictCheck, StrictJudgment"
+    - "src/Lara/Driver/Internal.hs: buildCertOk"
+    - "src/Lara/SupportTerm.hs: CertOutcome, certAccepted"
+    - "issue #204"
+  also_depends_on: [N243]
+
+- id: N248
+  type: experiment
+  title: "B0 heterogeneous backend compositionality implemented"
+  provenance: ai-executed
+  timestamp: "2026-08-29T17:30"
+  description: >
+    Execute the approved six-task B0 plan: occurrence vocabulary, the firewall,
+    the accounting laws, the mixed witness, the Haskell collector, and the
+    cross-language golden with documentation and gates.
+  result: >
+    Landed as six traceable commits on theory/182-backend-compositionality.
+    Lean gained Lara.BackendComposition (CertOccurrence, OccursIn,
+    usedBackends, OccurrenceConsequence, mem_usedBackends_iff,
+    prem_subterm_swap, dis_subterm_swap, certDeps_eq_union,
+    hetero_occurrences_accounted, usedBackends_accounted) and
+    Lara.Examples.BackendComposition (the split witness plus the shipped-core
+    certDeps golden term). Haskell gained Lara.Strict.Deps and a widened
+    CertOutcome that stops discarding the adapter's report, with five new
+    vectors on the shipped path including the cross-backend leakage rejection.
+    D4 held - every repackaging followed from existing results with no new
+    induction. D5 held, and mechanically: the premise half's structure update
+    elaborating is Lean confirming that three length fields are the only place
+    InstSide reaches ws. AxCheck covers 55 new declarations; the audit reports
+    only propext, Classical.choice and Quot.sound. Both new gates were
+    negative-tested - perturbing the golden makes the script and the Haskell
+    suite each exit 1. All local gates green.
+  evidence:
+    - "commits ee9a8c6, 4bfe47b, 56e3ce3, 07a1146, 9573cd3, b314153"
+    - "lean/Lara/BackendComposition.lean; lean/Lara/Examples/BackendComposition.lean"
+    - "src/Lara/Strict/Deps.hs; src/Lara/SupportTerm.hs; src/Lara/Driver/Internal.hs; test/StrictSpec.hs"
+    - "docs/theory-b0-backend-compositionality.md; docs/paper-lean-name-map.md"
+    - "local gates: lake build; AxCheck; test-check-axioms; cabal test; presentation-parity; semantics-goldens; update-goldens; backend-deps-golden; differential; admission-differential"
+  status: resolved
+  also_depends_on: [N243, N245, N246, N247]
+
+- id: N249
+  type: dead_end
+  title: "unseal String.splitOnAux as an escape from kernel opacity"
+  provenance: ai-executed
+  timestamp: "2026-08-30T04:10"
+  hypothesis: >
+    A late reconnaissance report proposed that the obstruction to reducing
+    String.splitOn on a literal is the irreducibility that well-founded
+    recursion introduces, since core defines String.splitOnAux with a
+    termination measure over byte positions. On that theory `unseal
+    String.splitOnAux` would strip the seal, the literal would reduce, and
+    scope decision S1's literal reading would collapse to a few lines - making
+    the split-witness decision unnecessary.
+  failure_mode: >
+    It does not reduce. With the seal removed the goal "28".splitOn "." =
+    ["28"] fails identically under rfl, and "3".splitOn "." = ["3"] fails
+    identically under decide, with decide reporting the same stuck Decidable
+    instance as before. The obstruction is therefore not - or not only -
+    well-founded sealing, but String.Pos byte arithmetic over an opaque
+    primitive, which unseal cannot touch.
+  lesson: >
+    Testing the cheapest proposed escape route is worth doing even after the
+    decision it would have reversed has shipped, because the durable record
+    asserted that route was expensive. The negative result strengthens the
+    shipped decision instead of reopening it, and it saves the next reader the
+    same experiment. Note also that the same report asserted no Lean toolchain
+    existed on this machine and that String.splitOn was the sole blocker; both
+    were wrong - the toolchain needed elan on PATH, and String.startsWith sits
+    on the same parseDecimal/parseCanonInt path at Cell.lean:48 and :76.
+    Confident reconnaissance still needs its load-bearing claims re-run.
+  evidence:
+    - "lean/Lara/Cell.lean:48,58,62,76 - the four core String primitive sites on the ord@1 path"
+    - "docs/theory-b0-backend-compositionality.md: S1 section, unseal bullet"
+    - "commit c1dfdee"
+  also_depends_on: [N244, N245]

@@ -367,7 +367,13 @@ buildCertOk theories cert as c = case cert of
       Nothing -> CertRejected ("no registered backend " ++ name ++ "@" ++ show v)
       Just backend ->
         case St.runBackend backend (toStrictDigest (certTheory cert)) as c payload of
-          Right _ -> CertAccepted
+          -- The adapter's 'St.Dependency' report is retained, not discarded:
+          -- this is the production path that reaches backends (@strictCheck@ is
+          -- test-only), so accounting built on anything else would account
+          -- nothing the shipped checker ran. It stays inert with respect to
+          -- acceptance — 'certAccepted' is a 'Bool' — and is read only by
+          -- "Lara.Strict.Deps" (design note D9 in "Lara.SupportTerm").
+          Right deps -> CertAccepted deps
           Left reason -> CertRejected reason
   where
     registry =

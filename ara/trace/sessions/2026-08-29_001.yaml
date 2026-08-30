@@ -2,8 +2,8 @@ session:
   id: "2026-08-29_001"
   date: "2026-08-29"
   started: "2026-08-29T01:18"
-  last_turn: "2026-08-29T01:18"
-  turn_count: 1
+  last_turn: "2026-08-30T04:15"
+  turn_count: 3
   summary: >
     Theory M3 source-update dynamics implemented and opened as PR #201. Four
     updates now have executable acceptance, preservation theorems, complete
@@ -45,6 +45,73 @@ events_logged:
     provenance: ai-suggested
     summary: "Fresh complete support does not make addInstance unconditionally admissible; AttackComplete remains necessary."
 
+  - turn: 2
+    type: decision
+    id: N243
+    routing: direct
+    provenance: ai-suggested
+    summary: "B0 is consolidation of an already-structural property plus one new theorem, not a new induction effort."
+  - turn: 2
+    type: dead_end
+    id: N244
+    routing: direct
+    provenance: ai-executed
+    summary: "In-kernel ord@1 acceptance is unreachable; splitOn/startsWith/endsWith are opaque under the Slice-based String API."
+  - turn: 2
+    type: decision
+    id: N245
+    routing: direct
+    provenance: user
+    summary: "S1 re-decided as the split witness: shipped backends for syntax/resolution, a proved fixture core for the typed facts."
+  - turn: 2
+    type: experiment
+    id: N246
+    routing: direct
+    provenance: ai-executed
+    summary: "certDeps computes over the shipped ord@1 core; the golden does not inherit the acceptance split."
+  - turn: 2
+    type: dead_end
+    id: N247
+    routing: direct
+    provenance: ai-executed
+    summary: "The shipped checker discarded every dependency report; the sealed judgment retaining them is test-only."
+  - turn: 2
+    type: experiment
+    id: N248
+    routing: direct
+    provenance: ai-executed
+    summary: "B0 landed in six commits; D4 and D5 both held; 55 declarations axiom-gated; all local gates green."
+  - turn: 2
+    type: observation
+    id: O100
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Parent typing is insensitive to a child's backend because side conditions reach subterms only through lengths."
+  - turn: 2
+    type: observation
+    id: O101
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "A backend's dependency report is evaluable where its acceptance is not."
+  - turn: 2
+    type: observation
+    id: O102
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "A sealed judgment reached only from tests is not evidence about the production path."
+  - turn: 2
+    type: observation
+    id: O103
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Heterogeneous composition needs no relating binder; the content is absence, not disjointness."
+  - turn: 3
+    type: dead_end
+    id: N249
+    routing: direct
+    provenance: ai-executed
+    summary: "unseal String.splitOnAux does not reduce the literal either; the cheapest escape from kernel opacity is closed."
+
 ai_actions:
   - turn: 1
     action: >
@@ -73,6 +140,51 @@ ai_actions:
     provenance: ai-executed
     files_changed: ["plans/2026-08-28-theory-m3-source-updates.md"]
 
+  - turn: 2
+    action: >
+      Executed the approved six-task B0 plan with per-task implementation,
+      independent verification of the critical spec items, traceable commits,
+      the full local gate stack, and negative tests of both new gates.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/BackendComposition.lean"
+      - "lean/Lara/Examples/BackendComposition.lean"
+      - "lean/BackendDepsGolden.lean"
+      - "lean/AxCheck.lean"
+      - "lean/Lara.lean"
+      - "src/Lara/Strict/Deps.hs"
+      - "src/Lara/SupportTerm.hs"
+      - "src/Lara/Driver/Internal.hs"
+      - "test/StrictSpec.hs"
+      - "test/backend-deps.golden"
+      - "scripts/check-backend-deps-golden.sh"
+      - "Makefile"
+      - "lara.cabal"
+      - "docs/theory-b0-backend-compositionality.md"
+      - "docs/paper-lean-name-map.md"
+  - turn: 2
+    action: >
+      Probed four String primitives directly to establish which are
+      kernel-reducible, which redirected scope decision S1 and later enabled
+      the shipped-core golden.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: "Deleted the executed living plan after migrating its durable content into docs/."
+    provenance: ai-executed
+    files_changed: ["plans/2026-08-29-theory-b0-backend-compositionality.md"]
+
+  - turn: 3
+    action: >
+      Adjudicated late subagent reports against source. Tested the one
+      actionable proposal (unseal String.splitOnAux) and recorded its negative
+      result; corrected two docstring imprecisions on the passage the paper
+      quotes; re-ran the full gate stack green.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/BackendComposition.lean"
+      - "docs/theory-b0-backend-compositionality.md"
+
 claims_touched:
   - id: C37
     action: crystallized
@@ -83,6 +195,18 @@ claims_touched:
   - id: C39
     action: crystallized
     turn: 1
+  - id: C40
+    action: crystallized
+    turn: 2
+  - id: C41
+    action: crystallized
+    turn: 2
+  - id: C42
+    action: crystallized
+    turn: 2
+  - id: C43
+    action: crystallized
+    turn: 2
 
 logic_revisions:
   - turn: 1
@@ -109,6 +233,50 @@ logic_revisions:
     signal: artifact-commitment
     provenance: ai-suggested
     note: "The preservation theorem and exact missing-conflict rejection witness both landed."
+  - turn: 2
+    entry: C40
+    field: created
+    before: "(none - new claim)"
+    after: "C40: A parent's typing is insensitive to which backend certified its children"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "prem_subterm_swap and dis_subterm_swap landed with their instantiations and the durable record."
+  - turn: 2
+    entry: C41
+    field: created
+    before: "(none - new claim)"
+    after: "C41: A backend's dependency report is evaluable where its acceptance is not"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The finding is load-bearing: it let the cross-language golden use shipped cores on both sides."
+  - turn: 2
+    entry: C42
+    field: created
+    before: "(none - new claim)"
+    after: "C42: A sealed judgment reached only from tests is not evidence about the production path"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The production oracle was widened to retain the report; onward work tracked as #204."
+  - turn: 2
+    entry: C43
+    field: created
+    before: "(none - new claim)"
+    after: "C43: Heterogeneous backend composition requires no relating binder"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "hetero_occurrences_accounted plus the may-claim/must-not-claim boundary in docs/."
+  - turn: 3
+    entry: C43
+    field: Sources
+    before: "D3 stated what is not shared between two occurrences without stating what is."
+    after: >
+      Docstring and docs/ passage now name the two shared binders - the registry
+      reg and the source canonicalizer canon - as source-side and non-relating,
+      so the enumerated three remain unshared. C43's Statement and Conditions
+      are unchanged; the grounding prose it quotes is sharper.
+    signal: dependency-change
+    provenance: ai-suggested
+    note: "Spec review flagged that a reader could compress the passage into a false 'nothing is shared'."
 
 key_context:
   - turn: 1
@@ -123,8 +291,36 @@ key_context:
       from a blocked source grows the blocked closure and changes a target's
       public report to evidence-blocked.
 
+  - turn: 2
+    excerpt: >
+      The plan's own S1 budget escape hatch fired on measured evidence. Direct
+      probes showed String.splitOn, startsWith and endsWith are kernel-opaque
+      under Lean 4.32's Slice-based API - rfl, decide, simp, exact? and grind
+      all fail, unfolding diverges, and native_decide is forbidden by the axiom
+      gate. Only String.toNat? reduces per literal, and the ND precedent
+      generalizes to it and to nothing else.
+  - turn: 2
+    excerpt: >
+      The maintainer chose the split witness over paying the Slice-API cost or
+      retreating to resolution-only: shipped nd@1 and ord@1 carry the syntactic
+      and resolution facts, a fully proved fixture core carries the typed ones,
+      and the boundary is documented rather than papered over.
+  - turn: 2
+    excerpt: >
+      Dependency reporting turned out not to inherit the acceptance blocker.
+      stepDeps never calls acceptance and ord@1's uses stops at String.toNat?,
+      so the cross-language golden computes over the shipped nd@1 and ord@1
+      cores on both sides - the strongest artifact in the milestone, and the
+      one the split does not weaken.
+
 open_threads:
   - "PR #201 review and hosted CI; issue #186 closes on merge."
   - "Paper repository must transcribe the generated M3 matrices and preserve the may-claim/must-not-claim boundary."
+  - "B0 PR review and hosted CI; issue #182 closes on merge."
+  - "Paper plan revision to the derived-fields CertOccurrence phrasing (EYH0602/lara-paper#2)."
+  - "#204: surface the now-retained dependency reports through inferSupport and the driver output."
+  - "Revisit in-kernel ord@1/ra@1 acceptance if Lean core gains reduction lemmas for the Slice-based String API."
+  - "M4 (#187) and PW-T6 (#191) are unblocked by B0's occurrence-level obligations."
+  - "Lara.NDNamed.parseCanonNat_repr is private; promote it to Lara.Cell if in-kernel ord@1 work resumes."
 
 ai_suggestions_pending: []

@@ -1,0 +1,3 @@
+premise 0 (atom "cell" (con "ours") (num "28.4"))
+premise 1 (atom "cell" (con "theirs") (num "31.6"))
+theory "nd" 1 "sha256:nd0" 0

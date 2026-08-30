@@ -34,6 +34,7 @@ library
     exposed-modules:  Lara.Prop
                       Lara.Strict
                       Lara.Strict.Cell
+                      Lara.Strict.Deps
                       Lara.Strict.ND
                       Lara.Strict.ND.Internal
                       Lara.Strict.Ord
