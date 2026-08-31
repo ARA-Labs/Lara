@@ -1052,3 +1052,11 @@ entries:
     - "Routed the verified commit, push, and three evidence-backed review replies as experiment N261. This is one delivery event over N259/N260, not three new research decisions."
     - "Did NOT promote O108 or revise C44/C45. Shipping the fixture and documentation fixes changes review state, not the unresolved family-wide realization result or its interpretation."
     - "Updated the live open thread from push/request-review to await re-review; the durable record still says re-review pending and keeps #181 open."
+- turn: "2026-08-30_001#8"
+  notes:
+    - "Skipped the conversation's first two exchanges (foresight next-step answer, branch checkout) as routine guidance and mechanics per the project's ARA thresholds; the recorded turn starts at the commissioning directive."
+    - "Routed the commissioning as user decision N262 and the issue/plan/PR delivery as one experiment N263, mirroring the N254/N255 split between selecting a direction and producing the reviewed artifact."
+    - "Crystallized O108 into logic/solution/constraints.md via artifact commitment: plan commit bcd16a6 adopts and operationalizes its compositional-lemma architecture, matching the O104-O107 precedent of crystallizing on a committed plan with engineering review still pending. Provenance stays ai-suggested."
+    - "Staged O109 rather than crystallizing: the decodeNat_repr risk re-pricing is an interpretation inside an unreviewed plan; no affirmation, resolution, or dependent artifact beyond the plan that proposed it."
+    - "Did NOT change C44/C45. #181's COMPLETED closure is administrative (the record merged, succeeded by #209); the plan commits to supplying the missing proofs but resolves nothing empirically, so both stay testing. Logged as a near-miss on artifact commitment: they are already at testing, so the signal is a no-op."
+    - "Replaced both open threads: PR #208 re-review discharged by the merge and #181 closure; the follow-up-plan thread converted into the concrete PR #210 review gate."

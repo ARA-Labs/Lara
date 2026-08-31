@@ -6908,3 +6908,54 @@ tree:
     - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891413397"
     - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891413805"
   also_depends_on: [N259, N260]
+
+- id: N262
+  type: decision
+  title: "M2b follow-up commissioned after the spike record merged"
+  provenance: user
+  timestamp: "2026-08-30T20:31"
+  choice: >
+    With PR #208 merged as a27b7ae and #181 closed COMPLETED on the
+    INCONCLUSIVE record, adopt the recorded open thread as the next step:
+    draft a follow-up plan for closing the fixed-policy realization theorem
+    on a fresh branch and open it as a PR that serves as the plan's
+    engineering review; implementation may not start before that review
+    clears.
+  alternatives:
+    - "Implement the realization closure directly without a reviewed plan — not chosen; the spike stop condition and the predecessor plan's D6 require a separately reviewed follow-up."
+    - "Deprioritize M2b for other theory-spine work — not chosen; no other spine item was recorded as schedulable ahead of it."
+  evidence:
+    - "commit a27b7ae (merge of PR #208)"
+    - "gh issue view 181: CLOSED COMPLETED 2026-08-31T04:03:50Z"
+    - "session 2026-08-30_001 open_threads (pre-turn-8)"
+  also_depends_on: [N256, N261]
+
+- id: N263
+  type: experiment
+  title: "Follow-up plan drafted, issued as #209, opened as PR #210"
+  provenance: ai-executed
+  timestamp: "2026-08-30T21:15"
+  description: >
+    Draft the M2b realization-closure follow-up plan against the spike's
+    exact obstruction record, open the successor issue, and open the plan PR
+    as the engineering-review vehicle.
+  result: >
+    Issue #209 opened under tracker #180 as #181's successor. Commit bcd16a6
+    adds plans/2026-08-30-m2b-realization-followup.md on
+    theory/m2b-realization-followup-plan, opened as PR #210. The plan selects
+    compositional lifting lemmas through Check.Unit.checkUnit_complete over
+    manual CheckedUnit construction and over a replacement gadget, freezes
+    D7 (numeral injectivity by verified decoder round-trip), D8 (gadget
+    promoted to lean/Lara/Complexity/Gadget.lean behind a closed-sum
+    GadgetLeaf vocabulary guarded by the byte-identical rawUnitOfFormula_shape
+    regression), and D9 (renewed three-outcome gate), and restates the
+    retired plan's post-gate Tasks 3-7 verbatim as Phase 2. Drafting
+    established that Lara.ND.decodeNat_repr already provides the family-wide
+    decimal round-trip via Std.Data.String.ToNat.
+  evidence:
+    - "https://github.com/ARA-Labs/lara/issues/209"
+    - "https://github.com/ARA-Labs/lara/pull/210"
+    - "commit bcd16a6"
+    - "plans/2026-08-30-m2b-realization-followup.md"
+    - "lean/Lara/ND.lean:112 (decodeNat_repr)"
+  also_depends_on: [N262, N257, N255]

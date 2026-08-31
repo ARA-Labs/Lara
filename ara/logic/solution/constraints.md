@@ -220,3 +220,17 @@ to the ACL/EMNLP follow-up with #52 and #30.
   unit; it is not serialized wire length because no `CarrierCode` serializer
   exists. `Formula3.byteSize`, by contrast, is the UTF-8 length of its canonical
   S-expression (`lean/Lara/Complexity/Encoding.lean`).
+
+## M2b follow-up realization constraints (2026-08-30 — grounds: O108, N257, N263)
+
+- **A family-wide realization theorem requires compositional checker lemmas, not
+  closed fixtures.** Closed `checkUnit` fixtures establish schema directionality and
+  concrete realizability, but they do not discharge the family-wide obligations
+  `Check.Unit.checkUnit_complete` exposes for a generated map/flatMap unit family:
+  duplicate-freedom of root support terms, recursive `HasSupport` with exact
+  substitution domains, `HasAttack` for every declaration, attack-endpoint
+  membership, and exact `Compile.AttackComplete`. A realization attempt over a
+  formula-indexed family must first package compositional lifting lemmas for those
+  obligations, or select a separately reviewed specialized construction; it may not
+  extrapolate acceptance from closed instances. Operationalized by the follow-up
+  plan (`plans/2026-08-30-m2b-realization-followup.md`, PR #210, issue #209).

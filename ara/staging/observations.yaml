@@ -2387,6 +2387,25 @@ observations:
     checkUnit_formula_ok and every dependent hardness obligation.
   potential_type: constraint
   bound_to: [N256, N257]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M2b follow-up realization constraints"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O109
+  timestamp: "2026-08-30T21:15"
+  provenance: ai-suggested
+  content: >
+    Family-wide decimal-numeral injectivity is already derivable in this
+    repository from the Lara.ND.decodeNat round-trip (Std.Data.String.ToNat),
+    so the residual mechanization risk of a fixed-policy realization closure
+    concentrates in the AttackComplete characterization over generated root
+    conclusions, not in numeral or leaf-identifier bookkeeping.
+  context: >
+    Discovered while risk-pricing plan PR #210: the predecessor spike treated
+    family-wide injectivity as unpriced, but decodeNat_repr proves the
+    round-trip for all n, making Nodup and atom-inversion lemmas cheap.
+  potential_type: claim
+  bound_to: [N263, N257]
   promoted: false
   promoted_to: null
   crystallized_via: null
