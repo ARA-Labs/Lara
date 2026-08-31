@@ -146,6 +146,8 @@ import Lara.Check.Unit
 import Lara.Consistency
 import Lara.Invariants
 import Lara.Realizability
+import Lara.Complexity.Context
+import Lara.Complexity.Encoding
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
 import Lara.Examples.PolicyAcceptance

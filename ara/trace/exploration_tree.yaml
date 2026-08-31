@@ -6629,3 +6629,282 @@ tree:
     - "docs/theory-b0-backend-compositionality.md: S1 section, unseal bullet"
     - "commit c1dfdee"
   also_depends_on: [N244, N245]
+
+- id: N250
+  type: experiment
+  title: "M2b plan cost lower bounds refuted before implementation"
+  provenance: ai-executed
+  timestamp: "2026-08-30T00:08"
+  description: >
+    Simulate the exact short-circuit schedule proposed for anyAttackerC,
+    defendedAuxC, stepC, iterC, labelCC, and statusCC against the plan's
+    universal cubic floor, pinned quartic witness, and status upper bound.
+  result: >
+    All three planned statements fail. A family where the first carrier node
+    attacks every target costs n^2, below the claimed universal n^3 floor for
+    every sampled n from 2 through 8. The pinnedAF counts are 2107 at n=7 and
+    3136 at n=8, below n^4 = 2401 and 4096 respectively: an undefended target
+    short-circuits after its first attacker, so the family is cubic rather than
+    quartic. A three-block family that does attain quartic grounded cost also
+    refutes the proposed exact status bound at carrier size 24 and support
+    length 48: 30,978,584 counted queries versus the stated bound 25,272,600,
+    because labelC's repeated grounded calls were not priced consistently.
+  evidence:
+    - "git object 4772231^:plans/2026-08-29-m2b-restricted-class-complexity.md, lines 226-250, 261-277, 297-321"
+    - "functions.eval outputs in 2026-08-30_001#1"
+  also_depends_on: [N220, N221]
+
+- id: N251
+  type: question
+  title: "Which M2b scope preserves the restricted-class motivation?"
+  provenance: user
+  timestamp: "2026-08-30T00:08"
+  description: >
+    Review the implementation plan against the canonical question "what does
+    deciding a claim status cost on the realizable class?" and choose between a
+    minimal grounded-only correction, a motivation-first restricted-class
+    result, or the current broad full-semantics programme after its invalid
+    statements and non-exhaustive reduction fork are repaired.
+  also_depends_on: [N220, N221, N250]
+
+- id: N252
+  type: decision
+  title: "M2b held to one fixed-policy restricted-class result"
+  provenance: user
+  timestamp: "2026-08-30T00:08"
+  choice: >
+    Hold scope around a motivation-first result. Run the scientific spike
+    before implementation; fix canon, signature, policy, and registry
+    independently of source instances; define credulous complete acceptance as
+    a promise problem over an explicit carrier encoding; keep the issue open if
+    neither hardness nor tractability is established; make carrier claim status
+    the grounded surface; prove a shared verified status procedure; and add no
+    Haskell query-count gate.
+  alternatives:
+    - "Grounded-only minimum, which would require reducing canonical #181 scope."
+    - "Broad full-semantics programme, which retains high cost and theorem risk."
+    - "Variable encoded policy, which weakens the fixed-class scientific claim."
+    - "Checked-unit or witness-bearing hardness inputs, which change the measured problem."
+    - "Grounded-first sequencing, which risks polishing a proxy before the central result exists."
+  evidence:
+    - "N250: the current cost statements fail under their own schedule"
+    - "N251: the motivation-alignment question"
+    - "issue #181 and the canonical M2b section"
+    - "memory/m2b-restricted-class-complexity-review.txt"
+  also_depends_on: [N220, N221, N250, N251]
+
+- id: N253
+  type: dead_end
+  title: "Unrevised M2b implementation cannot satisfy the cubic floor"
+  provenance: ai-executed
+  timestamp: "2026-08-30T07:24"
+  hypothesis: >
+    The committed implementation plan could be executed unchanged after a user
+    override of its missing engineering-review clearance, including the
+    requested theorem that every grounded run costs at least the cube of the
+    carrier length.
+  failure_mode: >
+    A fresh Task 1 implementer reduced the mandated short-circuit evaluator on
+    a two-node all-attacks carrier with an empty defense set. defendedC stops
+    after one attack query, and groundedC costs four queries across two rounds,
+    contradicting the requested lower bounds 2 <= 1 and 8 <= 4. No source file
+    was edited.
+  lesson: >
+    A user override of a review gate permits taking review risk; it cannot make
+    a false theorem provable. The plan must replace its refuted statements and
+    witnesses before implementation resumes.
+  evidence:
+    - "N250: source-faithful simulation already refuted the planned floor"
+    - "GroundedCostKernel task result in session 2026-08-30_001 turn 2"
+    - "git object 4772231^:plans/2026-08-29-m2b-restricted-class-complexity.md, lines 243-250"
+  also_depends_on: [N250, N252]
+
+- id: N254
+  type: decision
+  title: "Revise and engineering-review M2b before implementation"
+  provenance: user
+  timestamp: "2026-08-30T07:24"
+  choice: >
+    Stop implementation without source edits or a pull request. Rewrite the
+    committed plan around the recorded corrections, then clear engineering
+    review before invoking implementation again.
+  alternatives:
+    - "Apply the recorded corrected scope immediately without another review."
+    - "Ship only the valid grounded-cost subset as a deliberately partial pull request."
+  evidence:
+    - "N253: exact Task 1 counterexample blocks the unchanged plan"
+    - "N250: three planned cost statements were already refuted"
+    - "N252: accepted fixed-policy replacement scope"
+    - "memory/m2b-restricted-class-complexity-review.txt"
+  also_depends_on: [N250, N252, N253]
+
+- id: N255
+  type: experiment
+  title: "M2b plan revised around a fixed-context realization gate"
+  provenance: ai-executed
+  timestamp: "2026-08-30T07:46"
+  description: >
+    Replace the refuted implementation plan with the scope selected in N252 and
+    N254, then challenge the revised task graph for mathematical and sequencing
+    blockers before committing it.
+  result: >
+    Commit 4772231 freezes one formula-independent canon, signature, policy,
+    and registry; an explicit finite carrier encoding; a fixed-policy
+    realization gate that stops on inconclusive evidence; the corrected
+    universal quadratic floor; a fixed-context realizable quartic witness; a
+    shared carrier-status procedure and status-level quartic lower bound; and a
+    two-sided 3SAT reduction conditional on the gate. Placeholder and rejected-
+    statement scans passed, git diff --check passed, and the final skeptical
+    consistency review returned PASS. Engineering review remains required.
+  evidence:
+    - "commit 4772231"
+    - "git object 4772231:plans/2026-08-29-m2b-restricted-class-complexity.md"
+    - "memory/m2b-restricted-class-complexity-review.txt"
+    - "N250: source-faithful cost refutation"
+    - "N254: user decision to revise before implementation"
+  also_depends_on: [N250, N252, N253, N254]
+
+- id: N256
+  type: experiment
+  title: "M2b fixed-policy realization gate returns INCONCLUSIVE"
+  provenance: ai-executed
+  timestamp: "2026-08-30T08:45"
+  description: >
+    Execute the engineering-approved M2b plan through its mandatory realization
+    gate, with independent specification and quality reviews after each step.
+  result: >
+    Commit c0061fd mechanizes the fixed signature, policy, empty registry,
+    finite Formula3 and CarrierCode encodings, complete-acceptance decider, and
+    accounting facts. Commit 32243cb adds Lean-checked closed path and two-cycle
+    checker fixtures, exact carrier isomorphisms, a reversed-edge control, and
+    the formula-indexed raw-unit construction. The general checker acceptance,
+    compile-image, realizability, and size theorem family did not close, so the
+    gate is INCONCLUSIVE. Tasks 3-7 stopped and PR #208 explicitly keeps #181
+    open without a hardness or tractability claim.
+  evidence:
+    - "commit c0061fd"
+    - "commit 32243cb"
+    - "docs/theory-m2b-complexity-spike.md"
+    - "lake env lean Lara/Examples/Complexity/Realization.lean: success, no output"
+    - "lake build: 90 jobs"
+    - "PR #208"
+  also_depends_on: [N252, N254, N255]
+
+- id: N257
+  type: dead_end
+  title: "Closed realization fixtures do not lift automatically to Formula3 units"
+  provenance: ai-executed
+  timestamp: "2026-08-30T08:45"
+  hypothesis: >
+    The fixed path and two-cycle checker constructions would supply enough
+    reusable structure to prove checkUnit_formula_ok uniformly for the
+    Formula3 map/flatMap raw-unit family in the same implementation step.
+  failure_mode: >
+    Check.Unit.checkUnit_complete exposes coupled whole-program obligations for
+    generated-list Nodup, recursive HasSupport, HasAttack, endpoint membership,
+    and exact AttackComplete. The spike did not establish compositional lifting
+    lemmas for those obligations, so no accepted formula unit exists from which
+    the compile-image and polynomial-size proof chain can proceed.
+  lesson: >
+    A follow-up hardness attempt must first package compositional checker
+    lemmas for generated argument and attack families, or select a separately
+    reviewed specialized construction. Closed executable fixtures establish
+    directionality but are not a general realization theorem.
+  evidence:
+    - "N256"
+    - "docs/theory-m2b-complexity-spike.md"
+    - "lean/Lara/Examples/Complexity/Realization.lean"
+  also_depends_on: [N256, N254]
+
+- id: N258
+  type: experiment
+  title: "PR #208 review hardens fixture independence and accounting wording"
+  provenance: ai-executed
+  timestamp: "2026-08-30T19:27"
+  description: >
+    Apply the two remaining Changes Requested findings: make the Formula3 shape
+    fixture independently pin generated lookup, ground, and substitution data,
+    and remove serialized-byte wording from the carrier accounting measure.
+  result: >
+    rawUnitOfFormula_shape now checks all eight gammaOfFormula lookups, the
+    exact eight-atom ground list and its length, and the seven concrete
+    clauseSubst bindings before checking arguments and attacks. Encoding.lean
+    now says framing unit; the plan distinguishes Formula3 encoded byte length
+    from the carrier size/accounting measure. The direct Realization.lean check
+    completed with no output, and the ARA source-span validator passed all 38
+    quotations.
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/208#pullrequestreview-5062656252"
+    - "lean/Lara/Examples/Complexity/Realization.lean"
+    - "lean/Lara/Complexity/Encoding.lean"
+    - "git object 17d07ffec693797b4b39599e787723328fa3f61f:plans/2026-08-29-m2b-restricted-class-complexity.md"
+    - "lake env lean Lara/Examples/Complexity/Realization.lean: success, no output"
+    - "python3 scripts/check_ara_source_spans.py: PASS (38 quotations)"
+  also_depends_on: [N256, N257]
+
+- id: N259
+  type: decision
+  title: "Completed M2b plan retired into durable API documentation"
+  provenance: user
+  timestamp: "2026-08-30T19:53"
+  choice: >
+    Delete the completed implementation plan and preserve only user-relevant
+    implemented interfaces and design boundaries in durable API/design
+    documentation.
+  alternatives:
+    - "Keep the completed plan as a live current-tree document."
+    - "Delete the plan without preserving implemented API contracts."
+  evidence:
+    - "User directive in session 2026-08-30_001 turn 6"
+    - "docs/theory-m2b-complexity-spike.md: Implemented API"
+    - "git object 17d07ffec693797b4b39599e787723328fa3f61f:plans/2026-08-29-m2b-restricted-class-complexity.md"
+  also_depends_on: [N256, N258]
+
+- id: N260
+  type: experiment
+  title: "Fixture-owned clause term detects production constructor regression"
+  provenance: ai-executed
+  timestamp: "2026-08-30T19:53"
+  description: >
+    Replace the shared clauseArgument expectation in rawUnitOfFormula_shape
+    with an explicit fixture-owned inst term, then mutation-check independence
+    by temporarily removing the production constructor's premise children.
+  result: >
+    The focused Lean check passed with the explicit expected term. Removing
+    the production children made the theorem fail at the expected attack-list
+    equality; restoring them made the focused check pass again. The ARA
+    source-span validator passed all 38 quotations, all three edited trace YAML
+    files parsed, and the completed plan is absent from the working tree.
+  evidence:
+    - "lean/Lara/Examples/Complexity/Realization.lean: rawShapeExpectedClauseArgument"
+    - "lake env lean Lara/Examples/Complexity/Realization.lean: pass"
+    - "temporary empty-child mutation: expected Lean type-mismatch failure"
+    - "make ara-source-spans: PASS (38 quotations)"
+    - "YAML parse: PASS (3 files)"
+  also_depends_on: [N257, N258, N259]
+
+- id: N261
+  type: experiment
+  title: "Remaining PR #208 findings shipped and answered"
+  provenance: ai-executed
+  timestamp: "2026-08-30T19:58"
+  description: >
+    Run the full pre-push verification stack, commit the remaining fixture,
+    documentation, plan-lifecycle, and trace corrections, push the PR branch,
+    and answer each outstanding review thread with specific evidence.
+  result: >
+    Commit 5ce6339 was pushed to theory/m2b-complexity and became PR #208's
+    head. The full Lean build completed all 90 jobs, all 38 ARA source
+    quotations passed, four edited trace YAML files parsed, and git diff
+    whitespace validation passed. Replies were posted to all three outstanding
+    findings with the exact commit, mutation check, documentation boundary, and
+    re-review-pending wording.
+  evidence:
+    - "commit 5ce633947a3d880404b266e7f55a584293924e49"
+    - "PR #208 headRefOid 5ce633947a3d880404b266e7f55a584293924e49"
+    - "lake build: 90 jobs"
+    - "make ara-source-spans: PASS (38 quotations)"
+    - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891412827"
+    - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891413397"
+    - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891413805"
+  also_depends_on: [N259, N260]

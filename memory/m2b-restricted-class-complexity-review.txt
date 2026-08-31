@@ -1,0 +1,50 @@
+CEO REVIEW SUMMARY
+
+Mode: HOLD SCOPE
+Approach: Motivation-first restricted class
+Reviewed plan: git object 4772231^:plans/2026-08-29-m2b-restricted-class-complexity.md
+
+Verdict
+The direction matches canonical M2b, but the current plan is not implementation-ready. Three planned cost statements are false, the proposed tightness family is not tied to M1 realizability, the hardness input encoding is incomplete, and the hardness/tractability fork is not exhaustive.
+
+Accepted scope
+1. Run the fixed-policy structure/reduction spike first.
+2. Fix one canon, sigma, policy, and registry independent of source instances.
+3. Define the non-grounded problem as a promise problem over an explicit encoded StructuredAF: credulous complete acceptance of an in-range argument, promised Realizable under the fixed context.
+4. If neither a fixed-policy hardness reduction nor a tractability theorem is established, stop and keep #181 open; do not infer tractability from a failed kit.
+5. Prove grounded attack-query complexity with the corrected universal floor n^2 and upper bound n^3(1+n).
+6. Establish worst-case quartic tightness only with a family carrying an M1 Realization under the same fixed context.
+7. Make Invariants.status canon F p the paper-citable grounded query.
+8. Use a shared verified status procedure: compute grounded once, aggregate labels/support, and prove equality with Invariants.status.
+9. Keep generic AF/Claim bounds internal.
+10. Retain Lean agreement, AxCheck, negative evaluations, name-map, Runtime.hs correction, and the durable decision record.
+
+Strongest challenges
+- groundedC_cost_ge n^3 is false because defendedAuxC can stop after one carrier query; a sampled first-node-attacks-all family costs n^2.
+- pinnedAF_cost_ge n^4 is false: counts 2107 < 2401 at n=7 and 3136 < 4096 at n=8.
+- The proposed statusCC bound is false under its stated no-sharing schedule; one size-24/support-48 instance costs 30,978,584 queries against a 25,272,600 bound.
+- A generic Grounded.AF witness does not establish tightness on the realizable class.
+- Nat -> Nat -> Bool is not a finite classical input encoding; the reduction must count the explicit label vector, adjacency matrix, query, and all source-instance syntax.
+- A generated policy per graph risks making the restricted class effectively unrestricted; fixed policy was selected.
+
+Deferred
+- Complete/stable/preferred observation complexity beyond credulous complete acceptance.
+- Additional policy regimes.
+- New Haskell query-count mirror, IORef counter, golden emitter, shell gate, Cabal wiring, and CI wiring.
+- Production evaluator refactoring.
+
+Not in scope
+- Variable-policy hardness.
+- Runtime, RAM, or wall-clock bounds.
+- NP-membership and complexity-class bookkeeping in Lean unless later needed to state the paper theorem precisely.
+- Treating a failed realization kit as proof of tractability.
+
+Recommended rewritten order
+0. Freeze explicit carrier encoding, fixed context, and Cred_complete promise problem.
+1. Spike fixed-policy realization: two concrete graphs, then the reduction-relevant graph family.
+2. Gate: hardness path, tractability path, or stop with #181 open.
+3. Implement grounded cost evaluator and corrected bounds.
+4. Construct a fixed-context realizable quartic family.
+5. Implement the shared carrier-status procedure and bound.
+6. Mechanize the selected fixed-policy reduction or tractability algorithm.
+7. Register AxCheck/name-map/docs, correct Runtime.hs, and run existing repository gates.

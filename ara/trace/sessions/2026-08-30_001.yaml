@@ -1,0 +1,439 @@
+session:
+  id: "2026-08-30_001"
+  date: "2026-08-30"
+  started: "2026-08-30T00:08"
+  last_turn: "2026-08-30T19:58"
+  turn_count: 7
+  summary: >
+    M2b remains INCONCLUSIVE at its mandatory realization gate. PR #208's
+    remaining fixes shipped in 5ce6339 and each outstanding review thread has
+    an evidence-backed reply; re-review is pending. The Formula3 fixture uses a
+    fixture-owned explicit clause term, carrier accounting is distinguished
+    from serialized wire length, the completed plan is retired into durable
+    API documentation, and prior closure wording is corrected. The full
+    90-job Lean build, all 38 ARA source quotations, edited trace YAML, and
+    whitespace validation pass. The general checker/compile/size theorem chain
+    remains unproved, and #181 remains open without hardness or tractability
+    claims.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N250"
+    routing: direct
+    provenance: ai-executed
+    summary: "Exact short-circuit simulation refuted three planned cost statements before implementation."
+  - turn: 1
+    type: question
+    id: "N251"
+    routing: direct
+    provenance: user
+    summary: "Which revised M2b scope best preserves the restricted-class motivation?"
+  - turn: 1
+    type: observation
+    id: "O104"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Short-circuiting separates the universal quadratic floor from existential worst-case quartic tightness."
+  - turn: 1
+    type: observation
+    id: "O105"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A restricted-class tightness witness needs an M1 Realization under the claimed parameter regime."
+  - turn: 1
+    type: observation
+    id: "O106"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Oracle-query complexity and classical hardness need separate encodings and size measures."
+  - turn: 1
+    type: observation
+    id: "O107"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Failure of one realization kit does not force tractability, and variable policy may erase the restriction."
+  - turn: 1
+    type: decision
+    id: "N252"
+    routing: direct
+    provenance: user
+    summary: "Hold M2b to one spike-first fixed-policy restricted-class result with explicit encoding."
+  - turn: 2
+    type: dead_end
+    id: "N253"
+    routing: direct
+    provenance: ai-executed
+    summary: "Unrevised Task 1 stopped on an exact two-node counterexample to its cubic floor."
+  - turn: 2
+    type: decision
+    id: "N254"
+    routing: direct
+    provenance: user
+    summary: "Rewrite and engineering-review the corrected M2b plan before implementation."
+  - turn: 3
+    type: experiment
+    id: "N255"
+    routing: direct
+    provenance: ai-executed
+    summary: "Committed and consistency-checked the fixed-context gate-driven M2b plan."
+  - turn: 3
+    type: observation
+    id: "O104"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Quadratic universal floor and realizable quartic worst case crystallized as C44."
+  - turn: 3
+    type: observation
+    id: "O105"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Restricted-class witnesses must carry fixed-context realization."
+  - turn: 3
+    type: observation
+    id: "O106"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Oracle-query cost and classical hardness require separate finite encodings."
+  - turn: 3
+    type: observation
+    id: "O107"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "A failed realization kit does not imply tractability; crystallized as C45."
+  - turn: 4
+    type: experiment
+    id: "N256"
+    routing: direct
+    provenance: ai-executed
+    summary: "Reviewed M2b execution reached the mandatory realization gate as INCONCLUSIVE and opened PR #208."
+  - turn: 4
+    type: dead_end
+    id: "N257"
+    routing: direct
+    provenance: ai-executed
+    summary: "Closed checker fixtures did not lift automatically to the Formula3 generated-unit proof obligations."
+  - turn: 4
+    type: observation
+    id: "O108"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A follow-up fixed-policy realization needs compositional checker lemmas over generated families."
+
+  - turn: 5
+    type: experiment
+    id: "N258"
+    routing: direct
+    provenance: ai-executed
+    summary: "Implemented fixes for PR #208's two remaining fixture-independence and accounting-wording findings; re-review pending."
+  - turn: 6
+    type: decision
+    id: "N259"
+    routing: direct
+    provenance: user
+    summary: "Delete the completed M2b plan and retain implemented contracts in durable API/design documentation."
+  - turn: 6
+    type: experiment
+    id: "N260"
+    routing: direct
+    provenance: ai-executed
+    summary: "Explicit expected clause term caught a production-child mutation; focused Lean and ARA validations passed."
+  - turn: 7
+    type: experiment
+    id: "N261"
+    routing: direct
+    provenance: ai-executed
+    summary: "Commit 5ce6339 was verified, pushed to PR #208, and linked in replies to all three outstanding findings."
+ai_actions:
+  - turn: 1
+    action: >
+      Read the canonical theory-depth M2b section, issues #180/#181, the frozen
+      carrier and realizability definitions, grounded/status/observation
+      evaluators, compiled-edge and contrary characterizations, and both Lean
+      and Haskell evaluation schedules; then executed source-faithful query-count
+      simulations against the draft's formulas.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-29_004.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+  - turn: 2
+    action: >
+      Checked implementation prerequisites, dispatched a fresh Task 1
+      implementer, preserved the exact counterexample when the requested lower
+      bounds failed, and stopped before source edits, commits, pushes, or pull
+      requests.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+  - turn: 3
+    action: >
+      Rewrote the M2b implementation plan around the reviewed fixed-context
+      scope, checked repository interfaces, removed the false cost statements
+      and non-exhaustive fork, added a status-level quartic obligation after an
+      adversarial consistency review, validated the diff, and committed the
+      result as 4772231.
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-29-m2b-restricted-class-complexity.md"
+      - "ara/logic/claims.md"
+      - "ara/logic/solution/constraints.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+  - turn: 4
+    action: >
+      Recorded human engineering approval, implemented and independently
+      reviewed plan steps 1-2, validated the fixed context/encoding and direct
+      realization spike, obeyed the INCONCLUSIVE stop rule, pushed the branch,
+      and opened PR #208 without claiming completion of #181.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Complexity/Context.lean"
+      - "lean/Lara/Complexity/Encoding.lean"
+      - "lean/Lara/Examples/Complexity/Realization.lean"
+      - "lean/Lara.lean"
+      - "docs/theory-m2b-complexity-spike.md"
+      - "plans/2026-08-29-m2b-restricted-class-complexity.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+  - turn: 5
+    action: >
+      Expanded rawUnitOfFormula_shape with independent gamma, ground, and
+      substitution checks; corrected serialized-byte wording in Encoding.lean
+      and the M2b plan; then compiled Realization.lean directly and validated
+      every repository-local ARA source quotation.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Examples/Complexity/Realization.lean"
+      - "lean/Lara/Complexity/Encoding.lean"
+      - "plans/2026-08-29-m2b-restricted-class-complexity.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+  - turn: 6
+    action: >
+      Replaced the shared clauseArgument expectation with a fixture-owned
+      explicit inst term, mutation-checked that it detects production child
+      regressions, deleted the completed plan, moved implemented contracts into
+      the M2b spike document, repaired current-tree plan citations and review
+      closure wording, and ran focused Lean, ARA source-span, and YAML checks.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Examples/Complexity/Realization.lean"
+      - "docs/theory-m2b-complexity-spike.md"
+      - "plans/2026-08-29-m2b-restricted-class-complexity.md"
+      - "memory/m2b-restricted-class-complexity-review.txt"
+      - "ara/logic/claims.md"
+      - "ara/logic/solution/constraints.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+  - turn: 7
+    action: >
+      Ran the full Lean build and artifact checks, committed and pushed the
+      remaining M2b review fixes as 5ce6339, replied individually to the three
+      outstanding review threads, and confirmed PR #208's remote head.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+claims_touched:
+  - id: C44
+    action: crystallized
+    turn: 3
+  - id: C45
+    action: crystallized
+    turn: 3
+  - id: C44
+    action: revised
+    turn: 6
+  - id: C45
+    action: revised
+    turn: 6
+
+logic_revisions:
+  - turn: 6
+    entry: C44
+    field: Conditions
+    before: >
+      Applies to the frozen attacker-first, defense-scan-second evaluator and
+      attack-oracle query model. The universal bound ranges over finite
+      carriers. The restricted-class quartic statement additionally requires
+      an M1 `Realization` under the same fixed context as the paper claim. The
+      replacement family and proofs are planned but not implemented.
+    after: >
+      Applies to the frozen attacker-first, defense-scan-second evaluator and
+      attack-oracle query model. The universal bound ranges over finite
+      carriers. The restricted-class quartic statement additionally requires
+      an M1 `Realization` under the same fixed context as the paper claim. The
+      replacement family and proofs were not implemented after the realization
+      gate stopped.
+    signal: user-directive
+    provenance: user-revised
+    note: "Remove live-plan language after deleting the completed plan."
+  - turn: 6
+    entry: C44
+    field: Sources
+    before: >
+      [`quadratic floor` ←
+      `plans/2026-08-29-m2b-restricted-class-complexity.md:50-53`
+      «**The universal floor is quadratic, not cubic.** For a nonempty
+      all-attacks carrier, every defender check stops after its first attacker;
+      `groundedC` costs exactly `n²`.» [result]; `quartic witness obligation` ←
+      `plans/2026-08-29-m2b-restricted-class-complexity.md:55-57` «Quartic
+      tightness must use the three-block family in Task 4 and must carry an M1
+      `Realization` under the same fixed context as the complexity claim.»
+      [input]]
+    after: >
+      [`quadratic short-circuit` ←
+      `ara/trace/exploration_tree.yaml:6643-6648` «A family where the first
+      carrier node attacks every target costs n^2, below the claimed universal
+      n^3 floor / an undefended target short-circuits after its first attacker,
+      so the family is cubic rather than quartic.» [result]; `realizability
+      gate` ← `docs/theory-m2b-complexity-spike.md:102-110` «Without the checker
+      equation there is no accepted unit from which to prove that compilation
+      has exactly the gadget edges and no closure-generated extras.» [result]]
+    signal: user-directive
+    provenance: user-revised
+    note: "Replace deleted-plan source spans with durable trace and result documentation."
+  - turn: 6
+    entry: C44
+    field: Proof
+    before: >
+      [trace N250, trace N253, plan commit 4772231; mechanized Task 3/4
+      declarations pending]
+    after: >
+      [trace N250, trace N253, trace N256, corrected-plan commit 4772231;
+      restricted-class tightness declarations absent after the INCONCLUSIVE
+      gate]
+    signal: user-directive
+    provenance: user-revised
+  - turn: 6
+    entry: C45
+    field: Sources
+    before: >
+      [`gate discipline` ←
+      `plans/2026-08-29-m2b-restricted-class-complexity.md:224-224` «a failed
+      realization alone is not evidence for this outcome.» [input]; `fixed
+      policy` ←
+      `plans/2026-08-29-m2b-restricted-class-complexity.md:65-65` «**The policy
+      is fixed.** The reduction may not synthesize a policy from its input.»
+      [input]]
+    after: >
+      [`gate discipline` ← `docs/theory-m2b-complexity-spike.md:133-137` «The
+      mandatory realization gate stopped at **INCONCLUSIVE**. / it must not
+      reinterpret this record as evidence for hardness or tractability.»
+      [result]; `fixed context` ←
+      `docs/theory-m2b-complexity-spike.md:120-129` «the target checker equation
+      fixes the registry to `m2bRegistry`, whose type fixes the canonicalizer to
+      `id` / No formula-specific policy, signature, registry, axiom, `sorry`, or
+      placeholder was introduced.» [result]]
+    signal: user-directive
+    provenance: user-revised
+    note: "Replace deleted-plan source spans with the durable gate record."
+  - turn: 6
+    entry: C45
+    field: Proof
+    before: >
+      [trace N252, trace N255, plan commit 4772231; Task 2 gate recorded
+      INCONCLUSIVE in `docs/theory-m2b-complexity-spike.md`]
+    after: >
+      [trace N252, trace N255, plan commit 4772231; realization gate recorded
+      INCONCLUSIVE in `docs/theory-m2b-complexity-spike.md`]
+    signal: user-directive
+    provenance: user-revised
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The canonical paper question is "What does deciding a claim status cost
+      on that realizable class?" The draft's arbitrary-AF quartic witness has no
+      Realization, so even a corrected witness would not discharge that question.
+  - turn: 1
+    excerpt: >
+      The planned groundedC_cost_ge n^3 is false because defendedAuxC exits on
+      the first undefended attacker. The first-node-attacks-all family costs n^2;
+      pinnedAF also exits after its first attacker and falls below n^4 from n=7.
+  - turn: 1
+    excerpt: >
+      D1-D3 price attack-oracle calls, but Task 6 introduces variable policies,
+      fresh atom labels, raw units, and checker witnesses without defining their
+      encoding size. That is not yet a classical reduction model.
+  - turn: 1
+    excerpt: >
+      The researcher selected one fixed policy, an explicit carrier promise,
+      credulous complete acceptance, spike-first sequencing, carrier claim
+      status, a shared verified procedure, and no new Haskell count gate.
+  - turn: 2
+    excerpt: >
+      For args [0,1] with every attack true and an empty defense set, defendedC
+      costs one query and groundedC costs four across two rounds; the plan asks
+      for lower bounds of two and eight respectively.
+  - turn: 2
+    excerpt: >
+      The researcher chose plan revision plus engineering review over either
+      applying the recorded corrections immediately or opening a partial
+      grounded-only pull request.
+  - turn: 3
+    excerpt: >
+      The revised plan fixes one formula-independent context, materializes the
+      carrier as labels plus a square Boolean matrix, and allows only a proved
+      general realization theorem to unlock the hardness path.
+  - turn: 3
+    excerpt: >
+      The final self-review caught that grounded quartic tightness alone did not
+      establish status tightness; Task 5 now requires a nonempty carrier claim
+      and `carrierStatus_quartic_cost_ge`.
+  - turn: 4
+    excerpt: >
+      The closed path and two-cycle units check and compile to their exact
+      hand-written carriers, but the Formula3 family still lacks compositional
+      proofs for generated-list checker obligations. The plan therefore records
+      INCONCLUSIVE and stops before every complexity claim.
+  - turn: 4
+    excerpt: >
+      PR #208 contains only the fixed context/encoding and the bounded spike
+      evidence; it explicitly keeps #181 open and claims neither hardness nor
+      tractability.
+  - turn: 5
+    excerpt: >
+      Changes Requested identified that the raw-unit fixture reused
+      clauseArgument on both sides and left formula gamma/ground data implicit,
+      while carrier accounting still retained serialized-byte wording. Turn 5
+      made partial, local remediations, but independently pinning every
+      substitution value and completing the accounting documentation remained
+      pending re-review until turn 6.
+  - turn: 6
+    excerpt: >
+      The researcher required the completed plan to be deleted, with any
+      user-relevant residue rewritten as API/design documentation, and required
+      the prior fixes to remain explicitly pending re-review. The strengthened
+      fixture now owns its complete expected inst term rather than sharing the
+      production clause constructor.
+  - turn: 7
+    excerpt: >
+      The researcher directed the remaining fixes to be committed, pushed, and
+      answered on the review. Commit 5ce6339 is on PR #208 and all three open
+      findings now have replies carrying concrete verification evidence.
+
+open_threads:
+  - "Await PR #208 re-review; keep #181 open."
+  - "Write and engineering-review a follow-up plan for compositional checker lemmas or a specialized fixed-policy realization."
+
+ai_suggestions_pending: []

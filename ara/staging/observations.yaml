@@ -2295,3 +2295,99 @@ observations:
   promoted_to: "logic/claims.md:C43"
   crystallized_via: artifact-commitment
   stale: false
+
+- id: O104
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    Short-circuiting separates three different grounded query notions that the
+    draft conflates: the universal per-instance floor is only quadratic, a
+    worst-case quartic lower bound needs an existential family whose every
+    attacked pair is successfully defended late in the scan, and pinnedAF does
+    not provide that family.
+  context: >
+    Found by executing the draft's proposed cost schedule before approving the
+    M2b implementation plan.
+  potential_type: claim
+  bound_to: [N250]
+  promoted: true
+  promoted_to: "logic/claims.md:C44"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O105
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    A tightness family over arbitrary Grounded.AF does not answer M2b's
+    restricted-class question. The lower-bound witness must carry an M1
+    Realization under the same parameter regime as the paper claim, or the
+    result must be labelled as tight only for the unrestricted evaluator.
+  context: >
+    The draft proves upper bounds for every AF but gives pinnedAF no
+    realizability witness while its goal and definition of done promise tight
+    results on the M1-realizable class.
+  potential_type: constraint
+  bound_to: [N221, N250, N251]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M2b fixed-context witness"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O106
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    Attack-oracle query complexity and classical hardness require separate
+    frozen representations and size measures. Node count plus claim-support
+    length can price the grounded oracle schedule, but it cannot justify a
+    polynomial reduction whose variable policy, atom labels, raw unit, and
+    checker witness have omitted encodings.
+  context: >
+    The draft uses D1-D3 for evaluator queries and then invokes NP-hardness with
+    the policy in the input without defining that input language or its size.
+  potential_type: constraint
+  bound_to: [N251]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M2b finite complexity input"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O107
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    Failure of an arbitrary-digraph realization kit does not imply a
+    tractability-inducing invariant. A restricted class may reject that kit yet
+    remain hard through a specialized reduction, so the draft's hardness versus
+    structure-theorem fork is not exhaustive; allowing a fresh policy per graph
+    also risks making the advertised restricted class effectively unrestricted.
+  context: >
+    Motivation review of Tasks 5-6 against M1's fixed-context Realizable
+    predicate and the canonical restricted-class exit condition.
+  potential_type: claim
+  bound_to: [N221, N251]
+  promoted: true
+  promoted_to: "logic/claims.md:C45"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O108
+  timestamp: "2026-08-30T08:45"
+  provenance: ai-suggested
+  content: >
+    Formula-indexed fixed-policy realization needs compositional checker
+    lemmas over generated map/flatMap argument and attack families. Closed
+    checkUnit fixtures establish schema directionality and concrete
+    realizability, but they do not discharge family-wide Nodup, recursive
+    HasSupport, HasAttack, endpoint-membership, and exact AttackComplete
+    obligations.
+  context: >
+    The M2b Task 2 spike compiled its closed fixtures but stopped before
+    checkUnit_formula_ok and every dependent hardness obligation.
+  potential_type: constraint
+  bound_to: [N256, N257]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

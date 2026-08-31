@@ -793,3 +793,25 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [`lean/Lara/BackendComposition.lean` (`OccurrenceConsequence`, `hetero_occurrences_accounted`, `certDeps_eq_union`, `usedBackends_accounted`), `lean/Lara/Examples/BackendComposition.lean` (`mixed_usedBackends`, `mixed_registrations_distinct`, `mixed_swap_accounted`), trace N243, N248]
 - **Dependencies**: [C40]
 - **Tags**: mechanization, backend-composition, heterogeneity, occurrence-level, B0
+
+## C44: Short-circuit grounded cost separates a universal floor from worst-case tightness
+- **Statement**: In the transparent grounded evaluator, short-circuit failure makes the universal attack-query floor quadratic, while quartic lower bounds are existential worst-case results requiring families whose successful defense scans run late. An unrestricted witness does not establish tightness on the realizable class.
+- **Conditions**: Applies to the frozen attacker-first, defense-scan-second evaluator and attack-oracle query model. The universal bound ranges over finite carriers. The restricted-class quartic statement additionally requires an M1 `Realization` under the same fixed context as the paper claim. The replacement family and proofs were not implemented after the realization gate stopped.
+- **Sources**: [`quadratic short-circuit` ← `ara/trace/exploration_tree.yaml:6643-6648` «A family where the first carrier node attacks every target costs n^2, below the claimed universal n^3 floor / an undefended target short-circuits after its first attacker, so the family is cubic rather than quartic.» [result]; `realizability gate` ← `docs/theory-m2b-complexity-spike.md:102-110` «Without the checker equation there is no accepted unit from which to prove that compilation has exactly the gadget edges and no closure-generated extras.» [result]]
+- **Status**: testing
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit a finite carrier whose instrumented grounded cost is below the squared carrier length, prove the rejected pinned family has quartic cost under the frozen schedule, or show that the planned fixed-context family cannot carry the required realization.
+- **Proof**: [trace N250, trace N253, trace N256, corrected-plan commit 4772231; restricted-class tightness declarations absent after the INCONCLUSIVE gate]
+- **Dependencies**: [C34]
+- **Tags**: M2b, grounded-semantics, query-complexity, short-circuiting, realizability, tightness
+
+## C45: Failure of one realization construction does not establish tractability
+- **Statement**: Rejecting an arbitrary-digraph realization kit does not by itself imply a tractability-inducing invariant; a restricted class may reject that construction and remain hard through a specialized reduction. Allowing the policy to vary with each source instance also changes the class whose restriction is being studied.
+- **Conditions**: Applies to complexity claims over M1 `Realizable` carriers. Hardness requires one formula-independent canon, signature, policy, and registry plus a realization theorem for every reduction output. Tractability requires an independently proved structure theorem and adequate algorithm, not absence of one chosen encoding.
+- **Sources**: [`gate discipline` ← `docs/theory-m2b-complexity-spike.md:133-137` «The mandatory realization gate stopped at **INCONCLUSIVE**. / it must not reinterpret this record as evidence for hardness or tractability.» [result]; `fixed context` ← `docs/theory-m2b-complexity-spike.md:120-129` «the target checker equation fixes the registry to `m2bRegistry`, whose type fixes the canonicalizer to `id` / No formula-specific policy, signature, registry, axiom, `sorry`, or placeholder was introduced.» [result]]
+- **Status**: testing
+- **Provenance**: ai-suggested
+- **Falsification**: Prove that failure of the specified realization kit logically entails a carrier invariant yielding a decision algorithm, or prove that synthesizing a fresh policy per instance preserves the same fixed-context realizable class.
+- **Proof**: [trace N252, trace N255, plan commit 4772231; realization gate recorded INCONCLUSIVE in `docs/theory-m2b-complexity-spike.md`]
+- **Dependencies**: [C34]
+- **Tags**: M2b, realizability, hardness, tractability, fixed-policy, reduction-discipline

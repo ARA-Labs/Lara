@@ -203,3 +203,20 @@ than by convenience. Fixed policy so that ease-of-use work cites it instead of r
 **Venue split.** The PLDI/POPL core paper may cite the design rule and layer 1 as a
 language-design commitment; layer-2 evaluation (how faithfully a producer lowers prose) belongs
 to the ACL/EMNLP follow-up with #52 and #30.
+
+## M2b restricted-class complexity constraints (2026-08-30 — grounds: O105, O106, N255)
+
+- **A restricted-class lower-bound witness carries class membership.** A family over
+  arbitrary `Grounded.AF` values is not evidence of tightness over M1-realizable
+  carriers. The witness must provide an executable checker equation and
+  `StructuredAFIso` under the same fixed canon, signature, policy, and registry as
+  the paper claim. The implemented fixed context and the missing family-wide
+  equation are documented in `docs/theory-m2b-complexity-spike.md`.
+- **Oracle cost and classical input size use separate frozen representations.**
+  Grounded evaluation counts calls to the attack oracle on the frozen carrier.
+  Classical hardness uses `CarrierCode`: finite node labels, a square adjacency
+  matrix, and an in-range query. `CarrierCode.byteSize` is a carrier accounting
+  measure charging atom-key text, matrix cells, query-index text, and one framing
+  unit; it is not serialized wire length because no `CarrierCode` serializer
+  exists. `Formula3.byteSize`, by contrast, is the UTF-8 length of its canonical
+  S-expression (`lean/Lara/Complexity/Encoding.lean`).
