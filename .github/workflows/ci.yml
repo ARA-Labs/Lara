@@ -171,6 +171,12 @@ jobs:
         run: lake build
 
       - name: Axiom audit (no `sorry`, only standard axioms)
+        # `set -o pipefail` is required, not cosmetic: without it the pipeline
+        # reports only check-axioms.sh's status, so a Lean failure that still
+        # emits some reports (e.g. `#print axioms` naming a renamed or deleted
+        # theorem) would be masked and the audit would go green over a silently
+        # reduced set. This is the script's own documented invocation.
         run: |
+          set -o pipefail
           ../scripts/test-check-axioms.sh
           lake env lean AxCheck.lean | ../scripts/check-axioms.sh

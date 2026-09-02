@@ -328,3 +328,47 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
    `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved`,
    `certDeps_theory_valid`; `Lara.Examples.certDeps_theory_entry_reported`
    pins the accepted theory-consuming fixture's report.
+
+---
+
+## 8. PW0: the possible-world outer-model gate (#192, tracker #189)
+
+An outer *comparison* layer over unchanged local judgments — the first
+mechanized piece of the possible-world semantics wrapper. It is a spike, not a
+milestone: its exit decision (whether to proceed to T6, #191) is taken on #192.
+
+Mechanized in five modules that **only import** — no existing semantics module
+changed, which is the wrapper's first gate:
+
+- `Lara.PW.Outer` — the frame (contexts, bridges, per-context worlds and
+  queries, candidate relation, applicability judgment, bridge-global partial
+  claim translation), the many-sorted typed formula language, satisfaction
+  parameterized by the valuation, the T2 normality laws, the valuation
+  coherence side conditions (`Functional`/`Total`), and the valuation
+  congruence that makes T4 a one-line instantiation.
+- `Lara.PW.Uniform` — T3, reducing the typed clauses to ordinary multimodal
+  Kripke semantics, defined independently so the reduction is evidence rather
+  than a tautology.
+- `Lara.PW.Compare` — the tagged comparison result (incomparability reasons
+  and status profiles in separate constructors, neither carrying a `Status`),
+  the executable `crossCompare`, and the `Presents`/`mem_compare_iff_sat_dia`
+  adequacy tying it to the model's `⟨b⟩`.
+- `Lara.PW.Instance` — Lara contexts and worlds over `Unit.CheckedUnit`, the
+  two *independently defined* observations (relational `Compile.SrcStatus`
+  versus executable `Grounded.statusC ∘ Compile.checkedAF`), T1 as
+  `Compile.srcStatus_iff_checked` applied at a world, T4, the coherence
+  discharges, and T0 conservativity.
+- `Lara.Examples.PW` — the T7 justified→defeated non-preservation witness in
+  both modal readings, each under both valuations, the mechanized refutation
+  of every stronger frame axiom (T, 4, B, D, 5), the overlapping-fields
+  example, one executable fixture per incomparability reason, and the
+  `Presents`-discharged instantiation of `not_sat_dia_of_incomparable`.
+
+Fifty-four theorems, all `AxCheck`-gated, `decide` never `native_decide`.
+
+The frozen contract, the five-condition gate assessment, the three known
+limitations (`accept` is an unconstrained `Prop`; `gap` conflates four
+conditions; `Context` fixes the checking environment, not a scientific state),
+and the T6 feasibility note are recorded in
+`docs/theory-pw0-outer-model.md`; stable citation keys are in
+`docs/paper-lean-name-map.md` §PW0.

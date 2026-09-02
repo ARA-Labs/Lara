@@ -65,6 +65,11 @@ import Lara.Surface.Correctness
 import Lara.Surface.Observation
 import Lara.Examples.Surface
 import Lara.PresentationParity
+import Lara.PW.Outer
+import Lara.PW.Uniform
+import Lara.PW.Compare
+import Lara.PW.Instance
+import Lara.Examples.PW
 
 open Lara
 
@@ -2086,3 +2091,75 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Support.nodup_map_of_injective
 #print axioms Lara.Check.Unit.exists_ok_of_isOk
 #print axioms Lara.Check.Unit.okValue_eq
+
+/-! ### PW0 — possible-world outer-model gate (issue #192) -/
+-- Task 1 (Lara.PW.Outer): typed normality, valuation coherence, and the
+-- valuation-congruence core that makes T4 a one-line instantiation.
+#print axioms Lara.PW.sat_imp
+#print axioms Lara.PW.sat_K
+#print axioms Lara.PW.sat_nec
+#print axioms Lara.PW.sat_dia_iff_not_box_neg
+#print axioms Lara.PW.sat_box_top
+#print axioms Lara.PW.sat_box_conj
+#print axioms Lara.PW.sat_congr
+#print axioms Lara.PW.not_sat_two_status
+#print axioms Lara.PW.exists_status_of_total
+
+-- Task 2 (Lara.PW.Uniform): T3 reduction to ordinary multimodal Kripke
+-- semantics, with KForm/KSat defined independently.
+#print axioms Lara.PW.sat_lift
+
+-- Task 3 (Lara.PW.Compare): T5 tagged comparison, the profile
+-- characterization, and the adequacy tying `crossCompare` to the model's ⟨b⟩.
+#print axioms Lara.PW.compare_none
+#print axioms Lara.PW.compare_no_candidate
+#print axioms Lara.PW.compare_all_rejected
+#print axioms Lara.PW.compare_comparable
+#print axioms Lara.PW.mem_compare_profile_iff
+#print axioms Lara.PW.incomparable_ne_comparable
+#print axioms Lara.PW.mem_compare_iff_sat_dia
+#print axioms Lara.PW.not_sat_dia_of_incomparable
+#print axioms Lara.PW.compare_translationUndefined_iff
+
+-- Task 4 (Lara.PW.Instance): T1 world-local preservation, T4 coherence, the
+-- valuation coherence discharges, and T0 conservativity.
+#print axioms Lara.PW.Instance.srcStatus_iff_cmpStatus
+#print axioms Lara.PW.Instance.sat_src_iff_cmp
+#print axioms Lara.PW.Instance.cmpVal_functional
+#print axioms Lara.PW.Instance.cmpVal_total
+#print axioms Lara.PW.Instance.srcVal_functional
+#print axioms Lara.PW.Instance.srcVal_total
+#print axioms Lara.PW.Instance.t0_cmp
+#print axioms Lara.PW.Instance.t0_src
+
+-- Task 5 (Lara.Examples.PW): the T7 witness in both modal readings, each
+-- under both valuations, the T2 negative controls (all five stronger frame
+-- axioms refuted), one fixture per incomparability reason, and the
+-- Presents-discharged instantiation of the gate-3 semantic theorem.
+#print axioms Lara.Examples.PW.unitT7src_accepted
+#print axioms Lara.Examples.PW.unitT7tgt_accepted
+#print axioms Lara.Examples.PW.t7_src_justified
+#print axioms Lara.Examples.PW.t7_tgt_defeated
+#print axioms Lara.Examples.PW.t7_transport_wellFormed
+#print axioms Lara.Examples.PW.t7_support_transported
+#print axioms Lara.Examples.PW.t7_witness
+#print axioms Lara.Examples.PW.t7_dia_defeated
+#print axioms Lara.Examples.PW.t7_box_defeated
+#print axioms Lara.Examples.PW.t7_dia_defeated_src
+#print axioms Lara.Examples.PW.t7_box_defeated_src
+#print axioms Lara.Examples.PW.presentsT7
+#print axioms Lara.Examples.PW.t7_dia_via_adequacy
+#print axioms Lara.Examples.PW.t7_no_two_status
+#print axioms Lara.Examples.PW.sat_T_fails
+#print axioms Lara.Examples.PW.sat_D_fails
+#print axioms Lara.Examples.PW.sat_B_fails
+#print axioms Lara.Examples.PW.sat_5_fails
+#print axioms Lara.Examples.PW.sat_4_fails
+#print axioms Lara.Examples.PW.unitOverlap_accepted
+#print axioms Lara.Examples.PW.overlap_comparable
+#print axioms Lara.Examples.PW.overlap_translationUndefined
+#print axioms Lara.Examples.PW.overlap_local_gap
+#print axioms Lara.Examples.PW.overlap_noCandidate
+#print axioms Lara.Examples.PW.overlap_allRejected
+#print axioms Lara.Examples.PW.presentsOverlapRejected
+#print axioms Lara.Examples.PW.overlap_rejected_no_dia

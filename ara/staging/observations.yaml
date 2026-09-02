@@ -2431,3 +2431,71 @@ observations:
   promoted_to: "logic/solution/mechanization.md:§8"
   crystallized_via: verbal-affirmation
   stale: false
+- id: O111
+  timestamp: "2026-09-02T00:00"
+  provenance: ai-suggested
+  content: >
+    The possible-world wrapper is conservative over current Lara by
+    construction rather than by theorem-chasing: with a singleton context and
+    B := Empty the outer language contains no modal formula at all, and atomic
+    satisfaction is definitionally the unchanged local status judgment, so
+    both T0 directions close by Iff.rfl. Conservativity of an outer layer is
+    cheap when the layer only imports; the cost is paid instead by the
+    adequacy obligations that connect the executable interface back to the
+    model.
+  context: >
+    Observed while mechanizing PW0 (issue #192). t0_cmp and t0_src are Iff.rfl
+    and the diff is pure insertion touching no existing semantics module, which
+    together are gate 1's evidence.
+  potential_type: claim
+  bound_to: [N271]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O112
+  timestamp: "2026-09-02T00:00"
+  provenance: ai-suggested
+  content: >
+    PW0's accept field is an arbitrary Prop with no posited connection to any
+    checker, certificate, soundness condition, or even to the candidate
+    relation R. The outer model therefore names an applicability judgment it
+    does not constrain, and every T2 normality law holds regardless of what
+    accept means. Supplying that connection is exactly the structural-bridge
+    work of T6 (#191), so the T6 exit decision is not an extension of PW0 but
+    the discharge of PW0's largest open hypothesis.
+  context: >
+    Recorded as limitation 1 of the frozen PW0 contract while writing
+    docs/theory-pw0-outer-model.md; surfaced independently by the plan's
+    engineering review and by both post-implementation reviews.
+  potential_type: constraint
+  bound_to: [N271]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O113
+  timestamp: "2026-09-02T00:00"
+  provenance: ai-suggested
+  content: >
+    A bridge-global partial translation (translate : B -> Query src -> Option
+    (Query tgt)) cannot express a resolution that depends on the target world.
+    Concrete breaking case: a source atom naming an entity by an obsolete
+    alias, where one target world under the bridge carries the ontology version
+    that resolves it and another does not; a single global Option must answer
+    once for both and is wrong at one. The edge-indexed successor is a relation
+    Translate b w v src tgt : Prop, which additionally admits the ambiguity
+    Option forbids. This is a contract change rather than a refinement:
+    mem_compare_iff_sat_dia and compare_translationUndefined_iff are both
+    stated against the Option form and the executable compare takes a single
+    Option as its first guard.
+  context: >
+    Recorded as limitation 3 and the T6 feasibility note in
+    docs/theory-pw0-outer-model.md, sizing the cost of #191 as input to the
+    #192 exit decision.
+  potential_type: constraint
+  bound_to: [N271, N272]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

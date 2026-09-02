@@ -169,6 +169,47 @@
 --     quartic floor transfers to this surface via
 --     `carrierStatus_quartic_cost_ge` — Lara.Complexity and
 --     Lara.Examples.Complexity
+--   * the PW0 possible-world outer-model gate (issue #192, tracker #189): the
+--     typed outer frame — scientific contexts, per-context worlds and queries,
+--     bridges carrying a candidate relation, a checked applicability judgment,
+--     and a bridge-global partial claim translation — the many-sorted outer
+--     modal language and its satisfaction (formula-first, `Sat F V φ w`, for
+--     the elaboration reason recorded in that definition's doc comment), and
+--     the T2 typed normality laws (K, necessitation, duality, `[b]⊤`, finite
+--     meets) together with the refutation of every stronger frame axiom
+--     (T, 4, B, D, 5) in Lara.Examples.PW, so "normal, and no more" is a
+--     theorem and not a comment — Lara.PW.Outer. The T3 uniform-language reduction embeds an
+--     independently defined ordinary multimodal Kripke semantics into the
+--     one-context frame and matches satisfaction clause by clause —
+--     Lara.PW.Uniform. The executable comparison layer keeps incomparability
+--     in its own constructor (neither CrossResult nor IncomparabilityReason
+--     contains a Status, so no collapse into a local status is constructible),
+--     pins each reason to exactly its defining condition, and is tied to the
+--     model by the `Presents` obligation and the adequacy theorems
+--     `mem_compare_iff_sat_dia` / `not_sat_dia_of_incomparable` — so `crossCompare`
+--     implements the model's ⟨b⟩ rather than resembling it — Lara.PW.Compare.
+--     The Lara instantiation reads two INDEPENDENTLY DEFINED world-local
+--     observations — the relational oracle-free Compile.SrcStatus and the
+--     executable Grounded.statusC over Compile.checkedAF — whose agreement
+--     (T1) is the existing srcStatus_iff_checked preservation chain applied at
+--     a world; T4 is valuation congruence instantiated at T1, the
+--     Functional/Total valuation coherence side conditions are discharged for
+--     both valuations (for the source one only THROUGH T1), and T0 embeds a
+--     current Lara run into a bridge-free singleton context where atomic
+--     satisfaction is definitionally the unchanged local status judgment —
+--     Lara.PW.Instance. The T7 witness exhibits an accepted bridge edge whose
+--     source world justifies a claim and whose target world defeats its
+--     identity-translated form while the transported support term remains a
+--     checked argument of the target program — in both the ⟨b⟩ and [b]
+--     readings, each under both valuations — beside one executable fixture
+--     per incomparability reason (every decidable fixture closed by decide;
+--     the modal-layer facts are term or tactic proofs) and a
+--     Presents-discharged instantiation of not_sat_dia_of_incomparable —
+--     Lara.Examples.PW. The
+--     wrapper redefines nothing local: the PW modules only import, and no
+--     existing semantics module changed. Deliberately absent: structural
+--     bridges/T6, T8-T10, approximation, epistemic/dynamic/hybrid operators,
+--     global scenarios, surface syntax — see docs/theory-pw0-outer-model.md
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -220,3 +261,8 @@ import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics
 import Lara.Examples.Update
+import Lara.PW.Outer
+import Lara.PW.Uniform
+import Lara.PW.Compare
+import Lara.PW.Instance
+import Lara.Examples.PW

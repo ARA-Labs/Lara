@@ -96,6 +96,35 @@ valid_report="'Lara.foo' depends on axioms: [propext, Classical.choice, Quot.sou
 expect_pipeline_pass "zero-exit producer" 0 "$valid_report"
 expect_pipeline_fail "failing producer after valid output" 42 "$valid_report"
 
+# A `#print axioms` naming a declaration that no longer exists does not remove a
+# report -- it adds an `Unknown constant` error while every other line still
+# reports normally. Rejecting on the reports alone is therefore not enough: the
+# audit must reject the input itself, so that a theorem cannot silently leave
+# the audited set via a rename, deletion, or typo.
+expect_fail "unknown constant alongside valid reports" \
+  "$valid_report
+AxCheck.lean:3:14: error(lean.unknownIdentifier): Unknown constant \`Lara.PW.gone\`"
+
+expect_fail "positionless lean error alongside valid reports" \
+  "$valid_report
+error: unknown module prefix 'Lara'"
+
+# The same input, checked without any producer status available -- the saved
+# output path from this script's usage line, where pipefail cannot help.
+expect_fail "unknown constant in saved output" \
+  "AxCheck.lean:9:14: error(lean.unknownIdentifier): Unknown constant \`Lara.PW.gone\`
+$valid_report"
+
+# Errors must be distinguished from Lean's routine linter warnings, and from
+# audited theorems whose NAMES contain the word "error".
+expect_pass "linter warning alongside valid reports" \
+  "$valid_report
+AxCheck.lean:12:4: warning: unused variable \`h\`"
+
+expect_pass "theorem name containing 'error'" \
+  "'Lara.Examples.check_child_error_precedes_parent_shape' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.unit_error_reject_classes' does not depend on any axioms"
+
 if [ "$failures" -gt 0 ]; then
   echo "$failures test(s) failed" >&2
   exit 1

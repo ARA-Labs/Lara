@@ -1,0 +1,222 @@
+session:
+  id: "2026-09-02_001"
+  date: "2026-09-02"
+  started: "2026-09-02T00:00"
+  last_turn: "2026-09-02T00:00"
+  turn_count: 3
+  summary: >
+    PW0 possible-world outer-model gate implemented and opened as PR #221. Five
+    modules land under Lara.PW and Lara.Examples.PW carrying T0-T5 and the T7
+    non-preservation witness; the wrapper redefines nothing local and the diff
+    is pure insertion. Two independent post-implementation reviews found three
+    doc comments asserting more than their theorems; all were closed by
+    strengthening the proofs rather than narrowing the prose, adding five
+    theorems including t7_support_transported, which is the statement the
+    T7/T8 boundary actually rests on. C47 crystallized. The executable
+    comparison was then renamed compare -> crossCompare (N273) after measuring
+    that the Ord.compare collision breaks `unfold` in any module that opens
+    Lara.PW. Full build (127 jobs) and axiom audit (1612 declarations) clean.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N271"
+    routing: direct
+    provenance: ai-executed
+    summary: "PW0 mechanized from the compile-verified plan; 47 theorems registered; build and audit clean."
+  - turn: 1
+    type: decision
+    id: "N272"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Review findings closed by mechanizing the missing content, not by weakening doc comments."
+  - turn: 1
+    type: observation
+    id: "O111"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Outer-layer conservativity is cheap when the layer only imports; the cost moves to adequacy."
+  - turn: 1
+    type: observation
+    id: "O112"
+    routing: staged
+    provenance: ai-suggested
+    summary: "accept is an unconstrained Prop; T6 is the discharge of PW0's largest open hypothesis."
+  - turn: 1
+    type: observation
+    id: "O113"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Bridge-global Option translation cannot express target-world-dependent alias resolution."
+  - turn: 2
+    type: decision
+    id: "N273"
+    routing: direct
+    provenance: user
+    summary: "Executable comparison renamed compare -> crossCompare; compare_* theorem names kept."
+  - turn: 3
+    type: decision
+    id: "N274"
+    routing: direct
+    provenance: user
+    summary: "Axiom audit hardened: it could previously pass over a silently reduced declaration set."
+  - turn: 1
+    type: claim
+    id: "C47"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Support transport does not imply status preservation; crystallized via artifact commitment plus empirical resolution."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Transcribed the plan's five compile-verified Lean blocks byte-identically
+      into new modules, wired both roots, and gated each task on lake build plus
+      a per-task #print axioms run.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Outer.lean"
+      - "lean/Lara/PW/Uniform.lean"
+      - "lean/Lara/PW/Compare.lean"
+      - "lean/Lara/PW/Instance.lean"
+      - "lean/Lara/Examples/PW.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+  - turn: 1
+    action: >
+      Wrote the landing record, appended the paper-name-map keys, and added the
+      mechanization-plan inventory section that lean/Lara.lean already pointed at.
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-pw0-outer-model.md"
+      - "docs/paper-lean-name-map.md"
+      - "docs/mechanization-plan.md"
+  - turn: 1
+    action: >
+      Ran two independent reviews (spec compliance, code quality) over the full
+      diff, then applied their findings by adding t7_support_transported,
+      presentsT7, t7_dia_via_adequacy, overlap_local_gap and t7_no_two_status,
+      and by giving sigmaOverlap its own predicate r.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Examples/PW.lean"
+      - "lean/Lara/PW/Outer.lean"
+      - "lean/Lara/PW/Compare.lean"
+      - "lean/AxCheck.lean"
+  - turn: 1
+    action: "Deleted the executed plan per repo rule, pushed the branch, opened PR #221."
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-09-02-pw0-outer-model-gate.md"
+
+  - turn: 2
+    action: >
+      Measured the Ord.compare collision rather than assuming it, then renamed
+      Lara.PW.compare to crossCompare and re-ran the full build and audit. The
+      rename script's prefix guard wrongly renamed five AxCheck theorem lines;
+      the audit caught it (exit 1, 1607 instead of 1612) and it was reverted.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Compare.lean"
+      - "lean/Lara/PW/Outer.lean"
+      - "lean/Lara/Examples/PW.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-pw0-outer-model.md"
+      - "docs/paper-lean-name-map.md"
+      - "docs/mechanization-plan.md"
+
+  - turn: 3
+    action: >
+      Reproduced the audit-gate hole end to end (bad #print axioms names ->
+      "Axiom audit passed.", exit 0), then fixed it in two layers: CI now uses
+      the documented set -o pipefail form, and check-axioms.sh rejects Lean
+      error diagnostics in its input. Four regression cases added; 14/14 pass;
+      real audit re-run clean at 1612 declarations.
+    provenance: ai-executed
+    files_changed:
+      - "scripts/check-axioms.sh"
+      - "scripts/test-check-axioms.sh"
+      - ".github/workflows/ci.yml"
+
+claims_touched:
+  - id: C47
+    action: crystallized
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C47
+    field: created
+    before: "(none — new claim)"
+    after: "C47: Transporting well-formed checked support across an accepted bridge does not transport grounded status"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      The T7 witness is committed, AxCheck-registered, and documented in
+      docs/theory-pw0-outer-model.md as the T6/T8 boundary; the decide-closed
+      fixtures are the empirical resolution. Status set to supported rather
+      than hypothesis because the proof IS the evidence and it is audited.
+  - turn: 1
+    entry: "logic/solution/mechanization.md §9"
+    field: created
+    before: "(none — file ended at §8)"
+    after: "§9 PW0 wraps the local layer without redefining it"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Mirrors the §8 precedent set for M5 by O110."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The plan's Lean was already compiled and axiom-audited during its
+      engineering review, and it explicitly warned against simplifying proofs
+      back toward obvious forms. Byte-identical transcription with lake build
+      and the axiom audit as gates was therefore stronger evidence than any
+      reviewer reading; both reviewers independently confirmed the transcription
+      was byte-exact and re-ran the audit themselves.
+  - turn: 1
+    excerpt: >
+      The plan's own prose claimed 45 registered theorems while its code block
+      listed 42; the implementation followed the block. After the review fixes
+      the set is 47. A count stated in a landing record must match the file, so
+      the doc now says 47 and asserts the stronger property that every theorem
+      the five modules declare has an audit line.
+  - turn: 1
+    excerpt: >
+      Both reviews converged on the same failure mode without coordination:
+      doc comments asserting more than the theorem beneath them.
+      t7_transport_wellFormed said only that leaf l1 was among the target's
+      arguments — which any coincidental argument satisfies — while its comment
+      claimed the source claim's complete checked support had transported.
+  - turn: 2
+    excerpt: >
+      The collision was measured before deciding, and the measurement changed
+      the argument. Ordinary applications of `compare` never broke -- argument
+      shape disambiguates -- so the risk was narrower than first reported. What
+      decided it was `unfold compare` failing with "ambiguous term" in any
+      module that opens Lara.PW, since the T5 proofs unfold this definition and
+      T6 (#191) will be such a module; plus the name map's own statement that
+      no paper display cites the key yet, which makes the rename free now and
+      costly later.
+
+  - turn: 3
+    excerpt: >
+      The audit gate could pass vacuously. A `#print axioms` naming a
+      nonexistent declaration does not remove a report -- Lean errors on that
+      line and every other line reports normally -- so the filter saw only
+      healthy reports and printed "Axiom audit passed." CI discarded Lean's
+      exit 1 by piping without pipefail, against the script's own documented
+      usage. A theorem could therefore leave the audited set unnoticed. This
+      matters beyond the one incident: every evidence file in this artifact
+      cites the audit as its verification.
+
+open_threads:
+  - "The #192 exit decision — whether to proceed to T6 (#191) — is taken on the tracker, not in the repo. O112 and O113 are its two inputs."
+  - "gap conflates out-of-vocabulary, ill-sorted, not-posed, and posed-but-unsupported until the M5 well-sortedness refinement of Query_κ lands."
+  - "PR #221 awaits CI and human review."
+
+ai_suggestions_pending:
+  - "O111: outer-layer conservativity is structurally cheap; the real cost is the adequacy obligation. Not yet affirmed."
+  - "O112: accept is an unconstrained Prop — T6 is the discharge of PW0's largest open hypothesis, not an extension of it."
+  - "O113: the bridge-global Option translation is a contract that T6 must break, not refine."

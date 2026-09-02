@@ -493,3 +493,10 @@ sessions:
   events_count: 5
   claims_touched: [C44, C45, C46]
   open_threads: 0
+- id: 2026-09-02_001
+  date: '2026-09-02'
+  summary: 'PW0 possible-world outer-model gate mechanized and opened as PR #221: the typed outer frame, modal language and satisfaction, T0 conservativity, T1 world-local preservation via the existing srcStatus_iff_checked chain, T2 normality with a mechanized refutation of the reflexivity axiom, T3 reduction, T4 coherence, T5 tagged incomparability with discharged adequacy, and the T7 justified-to-defeated non-preservation witness. Two independent reviews found three doc comments overstating their theorems; all were closed by strengthening proofs rather than prose, adding t7_support_transported which is what the T7/T8 boundary actually rests on. C47 crystallized. Build 127 jobs and axiom audit 1612 declarations both clean; the wrapper redefines nothing local.'
+  turn_count: 1
+  events_count: 6
+  claims_touched: [C47]
+  open_threads: 3

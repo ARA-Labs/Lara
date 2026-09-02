@@ -145,3 +145,48 @@ _Committed by N269/N270; durable theorem contract:
 `docs/theory-m5-surface-calculus.md`. Reviewed implementation-plan history:
 `git show aec9facc1ba3890016401847e6ddca09c0715795:plans/2026-08-30-m5-surface-calculus.md`;
 promoted from O110._
+
+## 9. PW0 wraps the local layer without redefining it
+
+PW0 is a spike, not a milestone: it mechanizes the minimum typed possible-world
+wrapper so that the decision on proceeding to structural bridges (T6, #191) is
+taken against proved objects rather than a design sketch. The exit decision
+itself stays on tracker #189.
+
+The architectural commitment is that the wrapper only *imports*. Five modules
+land under `Lara.PW` and `Lara.Examples.PW`; no existing checking, compilation,
+grounded-labelling, or status definition is touched, and the diff is pure
+insertion. Conservativity is then cheap to state — with a singleton context and
+no bridges the outer language contains no modal formula, and atomic
+satisfaction is definitionally the local status judgment, so both T0 directions
+are `Iff.rfl`.
+
+The model is factored as frame plus valuation, with the valuation a parameter
+of satisfaction rather than a frame field. That factoring is what lets one
+parameterized model be instantiated at the two independently defined Lara
+observations — the relational oracle-free `Compile.SrcStatus` and the
+executable `Grounded.statusC ∘ Compile.checkedAF` — so their agreement is a
+theorem (T1, the existing `srcStatus_iff_checked` chain applied at a world)
+rather than a definitional identity. `Prop`-valued valuations do not by
+themselves make status a function; `Valuation.Functional`/`.Total` name that
+side condition and both Lara valuations discharge it, the source one only
+through T1.
+
+Two obligations sit around that spine and are easy to lose. The executable
+`crossCompare` takes its candidate list and acceptance test as plain inputs, so
+`Presents` plus `mem_compare_iff_sat_dia` are what make it an implementation of
+`⟨b⟩` rather than a separate artifact that resembles one; PW0 discharges
+`Presents` at a real bridge so the adequacy theorem has an instance.
+Incomparability is kept out of the status lattice structurally, behaviorally,
+and semantically, never by convention.
+
+What PW0 deliberately does not contain: structural bridges and T6 (#191),
+conditional status preservation T8 (#193), exact structural-path composition T9
+(#190), approximation bridges, epistemic/dynamic/hybrid operators, global
+scenarios, and surface syntax. The well-sortedness refinement of `Query_κ` is
+deferred to the M5 surface layer, which is why `gap` currently conflates four
+distinct conditions.
+
+_Committed by N271/N272; durable theorem contract:
+`docs/theory-pw0-outer-model.md`; proof record:
+`evidence/proofs/pw0_outer_model.md`. The T7 finding is C47._

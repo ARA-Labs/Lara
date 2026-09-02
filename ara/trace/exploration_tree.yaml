@@ -7106,3 +7106,133 @@ tree:
     - "make build: PASS; make test: PASS"
     - "AxCheck audit: PASS; make ara-source-spans: PASS (42 quotations)"
   also_depends_on: [N266, N264]
+
+- id: N271
+  type: experiment
+  title: "PW0 possible-world outer-model gate mechanized and verified"
+  provenance: ai-executed
+  timestamp: "2026-09-02T00:00"
+  description: >
+    Execute the compile-verified PW0 implementation plan (issue #192, tracker
+    #189): the typed outer frame, the many-sorted modal language and
+    satisfaction, the tagged executable comparison, the Lara instantiation, and
+    the executable examples. The plan's Lean blocks had already been compiled
+    and axiom-audited during its engineering review, so the five modules were
+    transcribed byte-identically rather than re-derived, with `lake build` and
+    the axiom audit as the acceptance gates.
+  result: >
+    Five new modules land under Lara.PW and Lara.Examples.PW: T0
+    conservativity, T1 world-local preservation (Compile.srcStatus_iff_checked
+    applied at a world), T2 typed normality with a mechanized refutation of the
+    reflexivity axiom, T3 uniform-language reduction, T4 modal
+    source-compilation coherence, T5 tagged incomparability with adequacy tying
+    the executable compare to the model's diamond, and the T7 justified to
+    defeated status non-preservation witness. Forty-seven theorems registered
+    in AxCheck. The wrapper redefines nothing local: the diff is pure insertion
+    and the only Lean files touched outside the new modules are the two roots.
+    Full library build 127 jobs, axiom audit 1612 declarations, both clean.
+  evidence:
+    - "PR #221; commits 54fdce4..071f0e7"
+    - "lean/Lara/PW/Outer.lean: sat_K, sat_congr, not_sat_two_status"
+    - "lean/Lara/PW/Compare.lean: mem_compare_iff_sat_dia, not_sat_dia_of_incomparable"
+    - "lean/Lara/PW/Instance.lean: srcStatus_iff_cmpStatus, sat_src_iff_cmp, t0_cmp, t0_src"
+    - "lean/Lara/Examples/PW.lean: t7_witness, t7_support_transported, sat_T_fails"
+    - "docs/theory-pw0-outer-model.md"
+    - "lake build: 127 jobs PASS; axiom audit: 1612 declarations, PASS"
+  status: resolved
+  also_depends_on: [N268, N236]
+
+- id: N272
+  type: decision
+  title: "Review findings on PW0 closed by mechanizing, not by narrowing prose"
+  provenance: ai-suggested
+  timestamp: "2026-09-02T00:00"
+  choice: >
+    Two independent post-implementation reviews found that three PW0 doc
+    comments asserted more than the theorems beneath them. Rather than weaken
+    the prose to match the proofs, strengthen the proofs to match the prose.
+    t7_transport_wellFormed only said that leaf l1 is among the target
+    program's arguments, which coincidental membership would satisfy; add
+    t7_support_transported, proving that source and target complete checked
+    supports for the claim are the same index set and resolve to the same term
+    in both programs. The overlap example's claim that neither context contains
+    the other's language was false, since sigmaOverlap was a strict subset of
+    sigmaEx; add the predicate r to sigmaOverlap so the two languages genuinely
+    overlap. Also mechanize three previously abstract claims: presentsT7 and
+    t7_dia_via_adequacy (Presents had no instance, so the adequacy theorem was
+    never applied), overlap_local_gap, and t7_no_two_status.
+  alternatives:
+    - "Downgrade the three doc comments to what was actually proved and leave the theorem set unchanged."
+  evidence:
+    - "commit 86c5163"
+    - "lean/Lara/Examples/PW.lean: t7_support_transported, presentsT7, t7_dia_via_adequacy, overlap_local_gap, t7_no_two_status"
+    - "axiom audit after fixes: 1612 declarations, PASS"
+  status: resolved
+  also_depends_on: [N271]
+
+- id: N273
+  type: decision
+  title: "PW0's executable comparison renamed compare -> crossCompare"
+  provenance: user
+  timestamp: "2026-09-02T00:00"
+  choice: >
+    Rename the executable comparison from Lara.PW.compare to
+    Lara.PW.crossCompare, keeping the nine compare_* theorem names unchanged.
+    Core exports Ord.compare into the root namespace, so under open Lara.PW a
+    plain compare loses in three ways measured on this branch: `unfold compare`
+    fails with "ambiguous term, use fully qualified name", a bare @compare
+    reports "Ambiguous term", and an unapplied compare silently resolves to
+    Ord.compare. Ordinary applications were never at risk, since argument shape
+    disambiguates. The deciding factor is that the T5 proofs reason about
+    unfolding this definition and T6 (#191) will be a downstream module that
+    opens Lara.PW, so the collision would land on the next module written
+    against the interface. The repository declares no Ord instance anywhere, so
+    nothing is conceded by leaving compare to core, and the name map records
+    that no paper display cites the key yet, so the rename is free now and
+    would not be later.
+  alternatives:
+    - "Keep the name and document the collision, spelling Lara.PW.compare where the shape does not decide."
+    - "Also rename the nine compare_* theorems for prefix consistency, at the cost of churning nine audit lines and four name-map rows."
+  evidence:
+    - "measured before: `unfold compare` -> ambiguous term; `@compare` -> Ambiguous term; bare `compare` -> Ord.compare"
+    - "measured after: `unfold crossCompare` resolves, leaving the match unreduced as the proof note documents"
+    - "lean/Lara/PW/Compare.lean: crossCompare"
+    - "docs/paper-lean-name-map.md: Naming note"
+    - "lake build 127 jobs PASS; axiom audit 1612 declarations PASS"
+  status: resolved
+  also_depends_on: [N271, N272]
+
+- id: N274
+  type: decision
+  title: "Axiom audit hardened against silently reduced coverage"
+  provenance: user
+  timestamp: "2026-09-02T00:00"
+  choice: >
+    Close a hole in the project's central soundness gate, found while renaming
+    Lara.PW.compare. A `#print axioms` line naming a declaration that does not
+    exist does not remove a report: Lean emits an "Unknown constant" error and
+    every other line still reports normally. check-axioms.sh inspected only the
+    surviving reports, found nothing wrong with them, and printed "Axiom audit
+    passed."; CI compounded this by invoking the pipeline WITHOUT set -o
+    pipefail, contrary to the script's own documented usage, so the pipeline
+    returned the filter's status and Lean's exit 1 was discarded. Reproduced
+    end to end: a file with two bad names exited 0 and reported passed. So a
+    theorem could leave the audited set by rename, deletion, or typo and CI
+    would stay green over the reduced set. Fix in two independent layers: CI
+    now uses the documented pipefail form, and check-axioms.sh itself rejects
+    any input containing a Lean error diagnostic, matched on Lean's
+    file:line:col shape so that routine linter warnings and the several audited
+    theorems with "error" in their names are unaffected. The script-level check
+    is what covers the saved-output invocation, where no producer status exists.
+  alternatives:
+    - "Add set -o pipefail to CI only, leaving the saved-output path unguarded."
+    - "Compare the report count against the number of #print axioms lines, which the script cannot see from stdin alone."
+  evidence:
+    - "before: bash -e -c 'lake env lean bad.lean | check-axioms.sh' -> Axiom audit passed., exit 0"
+    - "after: exit 1, offending constants named on stderr"
+    - "script-only, no pipefail (saved-output path): exit 1"
+    - "scripts/check-axioms.sh, scripts/test-check-axioms.sh (4 new regression cases, 14/14 pass)"
+    - ".github/workflows/ci.yml: axiom audit step"
+    - "real audit unaffected: 1612 declarations, exit 0"
+  status: resolved
+  also_depends_on: [N273, N271]

@@ -879,3 +879,111 @@ size adjacent (`reduce_correct_realizable`, `reduce_correct_nodes`,
   complexity-class bookkeeping (encodings, machine model, membership in NP)
   stays paper-level and cites the mechanized obligations
   `reduce_correct` + `reduce_realizable` + `reduce_byteSize`.
+
+---
+
+## PW0 possible-world outer-model gate (issue #192)
+
+Tracker #189. The frozen contract, the gate assessment, and the three known
+limitations live in `docs/theory-pw0-outer-model.md`; this section is the
+declaration index. Every *theorem* row is `lean/AxCheck.lean`-gated
+(sorry-free, standard trio, no `native_decide`). Rows naming `Frame`,
+`Valuation`, `Form`, `Sat`, `CrossResult`, `IncomparabilityReason`, `crossCompare`,
+`Context`, `World`, `cmpStatus`, `srcStatus` and the two Lara valuations name
+*definitions*, which carry no independent axiom obligation — each is
+transitively audited through a gated theorem that mentions it (`Frame`/`Sat`
+through the T2 laws, `crossCompare` through the T5 lemmas, `Context`/`World`/
+`cmpStatus`/`srcStatus` through T1, `srcVal`/`cmpVal` through T4).
+
+No paper display cites these yet. PW0 is a spike whose exit decision is taken
+on #192; the rows exist so that the decision, T6, and any later possible-world
+display can cite a stable key rather than re-deriving one.
+
+**Naming.** The executable comparison is `PW.crossCompare`, not `compare`.
+Core exports `Ord.compare` into the root namespace, and under `open Lara.PW` a
+plain `compare` loses in ways that are not merely cosmetic: `unfold compare`
+fails with `ambiguous term, use fully qualified name`, and an unapplied
+`compare` silently resolves to `Ord.compare`. Since the T5 proofs unfold this
+definition and downstream modules (T6, #191) will too, the prefix is
+load-bearing. The *theorem* names deliberately keep the `compare_*` prefix —
+they are namespace qualified and collide with nothing, so renaming them would
+churn citation keys for no gain.
+
+**Notation.** The paper writes `M, w ⊨ φ`. The Lean writes `Sat F V φ w` —
+**formula first**, and the valuation is an explicit parameter rather than a
+frame field. Both departures are load-bearing: the argument order is forced by
+elaboration (a world does not determine its context index, so a world-first
+`Sat` fails to elaborate at the `box`/`dia` arms), and the valuation parameter
+*is* the design's `M[V := …]` instantiation, stated once instead of duplicating
+the model. See `Sat`'s doc comment and `docs/theory-pw0-outer-model.md` §1.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| The outer frame (contexts, bridges, worlds, queries, `R`, `accept`, `translate`) | `PW.Frame`; accepted edges `PW.Frame.A` | `Lara/PW/Outer.lean` |
+| Selected local observation valuation | `PW.Valuation` | `Lara/PW/Outer.lean` |
+| Typed outer formula language | `PW.Form` (`status`, `top`, `neg`, `conj`, `box`, `dia`), derived `PW.Form.imp` | `Lara/PW/Outer.lean` |
+| Satisfaction (paper `M, w ⊨ φ`) | `PW.Sat` — formula-first, valuation-parameterized | `Lara/PW/Outer.lean` |
+| Singleton index types (never bare `Unit`, which binds `Lara.Unit`) | `PW.OneCtx`, `PW.OneBridge` | `Lara/PW/Outer.lean` |
+| T2 typed normality | `PW.sat_imp`, `PW.sat_K`, `PW.sat_nec`, `PW.sat_dia_iff_not_box_neg`, `PW.sat_box_top`, `PW.sat_box_conj` | `Lara/PW/Outer.lean` |
+| T2 negative controls (every stronger frame axiom refuted: T, D, B, 5 on the two-world frame, 4 on a three-world chain) | `Examples.PW.frameT`, `valT`, `sat_T_fails`, `sat_D_fails`, `sat_B_fails`, `sat_5_fails`; `Examples.PW.frame4`, `val4`, `sat_4_fails` | `Lara/Examples/PW.lean` |
+| Valuation coherence side conditions | `PW.Valuation.Functional`, `PW.Valuation.Total`; consequences `PW.not_sat_two_status`, `PW.exists_status_of_total` | `Lara/PW/Outer.lean` |
+| Their four discharges (source side **only through T1**) | `PW.Instance.cmpVal_functional`, `cmpVal_total`, `srcVal_functional`, `srcVal_total` | `Lara/PW/Instance.lean` |
+| T3 ordinary multimodal Kripke semantics (defined independently) | `PW.Kripke`, `PW.KForm`, `PW.KVal`, `PW.KSat`; embedding `PW.Kripke.frame`, `PW.KForm.lift`, `PW.KVal.lift` | `Lara/PW/Uniform.lean` |
+| T3 uniform-language reduction | `PW.sat_lift` | `Lara/PW/Uniform.lean` |
+| T4 generic valuation congruence | `PW.sat_congr` | `Lara/PW/Outer.lean` |
+| Incomparability reasons and the tagged result | `PW.IncomparabilityReason`, `PW.CrossResult` (neither contains a `Status`) | `Lara/PW/Compare.lean` |
+| The executable comparison | `PW.crossCompare` (guard order: translation, candidates, acceptance) | `Lara/PW/Compare.lean` |
+| T5 reason/profile characterization | `PW.compare_none`, `PW.compare_no_candidate`, `PW.compare_all_rejected`, `PW.compare_comparable`, `PW.mem_compare_profile_iff`, `PW.incomparable_ne_comparable`, `PW.compare_translationUndefined_iff` | `Lara/PW/Compare.lean` |
+| The presentation obligation on the executable inputs | `PW.Presents` (fields `mem_iff`, `accept_iff`) | `Lara/PW/Compare.lean` |
+| Adequacy: `crossCompare` computes the model's `⟨b⟩` | `PW.mem_compare_iff_sat_dia`; incomparability has no accepted witness by `PW.not_sat_dia_of_incomparable` | `Lara/PW/Compare.lean` |
+| The presentation obligation discharged, and the adequacy round trip run, at a real Lara bridge | `Examples.PW.presentsT7`, `Examples.PW.t7_dia_via_adequacy` | `Lara/Examples/PW.lean` |
+| The semantic incomparability theorem discharged at a real Lara bridge | `Examples.PW.bridgeOverlapRejected`, `presentsOverlapRejected`, `overlap_rejected_no_dia` | `Lara/Examples/PW.lean` |
+| Scientific context (the stable checking environment) | `PW.Instance.Context` | `Lara/PW/Instance.lean` |
+| Admissible local world (an accepted `CheckedUnit` under that environment) | `PW.Instance.World`; claim projection `PW.Instance.claimAt` | `Lara/PW/Instance.lean` |
+| The two independent world-local observations | `PW.Instance.srcStatus` (relational, oracle-free), `PW.Instance.cmpStatus` (executable) | `Lara/PW/Instance.lean` |
+| T1 world-local preservation | `PW.Instance.srcStatus_iff_cmpStatus` — `Compile.srcStatus_iff_checked` at the world | `Lara/PW/Instance.lean` |
+| Bridge data and the induced frame | `PW.Instance.BridgeData`, `PW.Instance.BridgeData.frame` | `Lara/PW/Instance.lean` |
+| The two Lara valuations | `PW.Instance.srcVal`, `PW.Instance.cmpVal` | `Lara/PW/Instance.lean` |
+| T4 modal source/compiled coherence | `PW.Instance.sat_src_iff_cmp`; worked instances `Examples.PW.t7_dia_defeated_src`, `t7_box_defeated_src` | `Lara/PW/Instance.lean`, `Lara/Examples/PW.lean` |
+| T0 current-Lara conservativity | `PW.Instance.singleton`, `PW.Instance.t0_cmp`, `PW.Instance.t0_src` (both `Iff.rfl`) | `Lara/PW/Instance.lean` |
+| T7 fixtures (context, two accepted worlds, the bridge) | `Examples.PW.polT7`, `ctxT7`, `unitT7src`, `unitT7tgt`, `unitT7src_accepted`, `unitT7tgt_accepted`, `wT7src`, `wT7tgt`, `bridgeT7` | `Lara/Examples/PW.lean` |
+| T7 status non-preservation | `Examples.PW.t7_src_justified`, `t7_tgt_defeated`, `t7_transport_wellFormed`, `t7_support_transported`, `t7_witness` | `Lara/Examples/PW.lean` |
+| T7 through the modal layer, both readings under both valuations | `Examples.PW.t7_dia_defeated`, `t7_box_defeated`, `t7_dia_defeated_src`, `t7_box_defeated_src` | `Lara/Examples/PW.lean` |
+| Overlapping fields (shared `p`/`q`; the second field declares `r` and not `s`, so neither language contains the other) | `Examples.PW.sigmaOverlap`, `polOverlap`, `ctxOverlap`, `unitOverlap`, `unitOverlap_accepted`, `wOverlap`, `tauOverlap` | `Lara/Examples/PW.lean` |
+| One executable fixture per incomparability reason | `Examples.PW.overlap_comparable`, `overlap_translationUndefined`, `overlap_noCandidate`, `overlap_allRejected` | `Lara/Examples/PW.lean` |
+| The local `gap` the outer layer declines to report, and the two-status instance | `Examples.PW.overlap_local_gap`, `Examples.PW.t7_no_two_status` | `Lara/Examples/PW.lean` |
+
+**Not X** notes:
+
+- `PW.Instance.sat_src_iff_cmp` (T4) is **not** the substantive result. It is
+  `PW.sat_congr` instantiated at T1 — an integration theorem whose content is
+  that satisfaction is extensional in the atomic valuation. The Lara theorem
+  underneath it is `PW.Instance.srcStatus_iff_cmpStatus` (T1), which is itself
+  `Compile.srcStatus_iff_checked` applied at a world. No display may cite T4
+  as source/compiled preservation.
+- `PW.Frame.accept` is **not** a checker, a certificate, or a soundness
+  condition. It is an arbitrary `Prop` with no posited connection to any Lara
+  judgment; supplying that connection is T6. See
+  `docs/theory-pw0-outer-model.md` §4 limitation 1.
+- A `PW.Valuation` alone does **not** say a claim has exactly one status. Any
+  claim about the four-state status being a function at the modal layer must
+  quote `Valuation.Functional`/`.Total` and their discharges alongside.
+- `PW.crossCompare` alone is **not** an implementation of `⟨b⟩`. It takes its
+  candidate list and acceptance test on trust; the implementation claim
+  requires `PW.Presents` and `PW.mem_compare_iff_sat_dia` adjacent.
+- `Status.gap` in the PW0 layer is **not** "considered and unsupported". It
+  conflates four conditions because queries are all of `Atom`; only the
+  bridge-domain case is separated, and it is reported as
+  `IncomparabilityReason.translationUndefined`, never as a status. See
+  `docs/theory-pw0-outer-model.md` §4 limitation 2.
+- `Examples.PW.t7_transport_wellFormed` alone is **not** the support-transport
+  half of the T7/T8 boundary: it says only that `leaf l1` is among the target's
+  arguments, which any coincidental argument would satisfy. Cite
+  `Examples.PW.t7_support_transported` beside it — that is the statement that
+  source and target complete supports are the same nonempty index set `[0]`
+  and that the shared index resolves, through both retained node caches (the
+  structure support indices actually index), to the same term `leaf l1`.
+- The T2 block is **not** a claim that the logic is more than normal.
+  No stronger frame axiom (T, 4, B, D, 5) is assumed or proved, and each of
+  the five is refuted on a PW0-legal frame (`Examples.PW.sat_T_fails`,
+  `sat_D_fails`, `sat_B_fails`, `sat_5_fails`, `sat_4_fails`).
