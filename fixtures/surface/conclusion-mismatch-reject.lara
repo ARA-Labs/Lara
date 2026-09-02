@@ -1,0 +1,29 @@
+artifact conclusion_mismatch at sha256:conclusion-mismatch
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "conclusion mismatch"
+  formal  = score(8)
+  binding = { author = author, rationale = "negative", audit-status = reviewed }
+
+claim claim-source
+  nl      = "attack source"
+  formal  = verdict(1)
+  binding = { author = author, rationale = "precedence adversary", audit-status = reviewed }
+
+leaf premise : evidence(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf source : verdict(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-mismatch : supports(claim-main) by pass from [premise]
+
+arg arg-source : supports(claim-source) by verdict-rule from [source]
+
+undercut arg-source arg-mismatch.missing-step.rule

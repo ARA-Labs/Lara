@@ -656,6 +656,124 @@ theorem lowerNamed_eq_translation (startsIdent : String → Bool)
   rw [lowerNamedExpr_eq_translation startsIdent ρ encodeProp nPrem hNat wf, hcert]
   simp [encodeCert_toDB_markerFree startsIdent hNat cert]
 
+/-! ### Alpha-equivalence of named binders -/
+
+/-- A binder-erased view of a named certificate.  Bound hypotheses are
+represented by their de Bruijn index; genuinely free hypothesis names remain
+names.  The Boolean on `lam` records whether the source binder was anonymous,
+because anonymous and named abstractions are different presentation forms. -/
+inductive AlphaView where
+  | hyp : Nat ⊕ String → AlphaView
+  | prem : Nat ⊕ String → AlphaView
+  | thy : Nat → AlphaView
+  | lam : Bool → NFormula → AlphaView → AlphaView
+  | app : AlphaView → AlphaView → AlphaView
+  | abort : NFormula → AlphaView → AlphaView
+deriving DecidableEq, Repr
+
+def alphaView : List (Option String) → NCert → AlphaView
+  | binders, .hypX name =>
+      match binderIndex name binders with
+      | some index => .hyp (.inl index)
+      | none => .hyp (.inr name)
+  | _, .prem source => .prem source
+  | _, .thy slot => .thy slot
+  | binders, .lam none formula body =>
+      .lam false formula (alphaView (none :: binders) body)
+  | binders, .lam (some name) formula body =>
+      .lam true formula (alphaView (some name :: binders) body)
+  | binders, .app fn arg =>
+      .app (alphaView binders fn) (alphaView binders arg)
+  | binders, .abort formula body =>
+      .abort formula (alphaView binders body)
+
+/-- Named certificates are alpha-equivalent exactly when erasing their named
+binders yields the same binder-indexed view.  This keeps numeric and symbolic
+premises, theory slots, formulas, and anonymous binders byte-for-byte fixed. -/
+def Alpha (left right : NCert) : Prop :=
+  alphaView [] left = alphaView [] right
+
+theorem alpha_refl (term : NCert) : Alpha term term := rfl
+
+theorem alpha_symm {left right : NCert} :
+    Alpha left right → Alpha right left :=
+  Eq.symm
+
+theorem alpha_trans {left middle right : NCert} :
+    Alpha left middle → Alpha middle right → Alpha left right :=
+  Eq.trans
+
+private def AlphaView.toDB (ρ : String → Option Nat)
+    (encodeProp : String → Option String) (nPrem depth : Nat) :
+    AlphaView → Option Lara.ND.Cert
+  | .hyp (.inl index) => some (.hyp index)
+  | .hyp (.inr _) => none
+  | .prem (.inl slot) =>
+      if slot < nPrem then some (.hyp (depth + slot)) else none
+  | .prem (.inr name) =>
+      (ρ name).map (fun slot => .hyp (depth + slot))
+  | .thy slot => some (.hyp (depth + nPrem + slot))
+  | .lam _ formula body => do
+      let formula' ← toFormula encodeProp formula
+      let body' ← body.toDB ρ encodeProp nPrem (depth + 1)
+      pure (.lam formula' body')
+  | .app fn arg => do
+      let fn' ← fn.toDB ρ encodeProp nPrem depth
+      let arg' ← arg.toDB ρ encodeProp nPrem depth
+      pure (.app fn' arg')
+  | .abort formula body => do
+      let formula' ← toFormula encodeProp formula
+      let body' ← body.toDB ρ encodeProp nPrem depth
+      pure (.abort formula' body')
+
+private theorem toDB_eq_alphaView
+    (ρ : String → Option Nat) (encodeProp : String → Option String)
+    (nPrem : Nat) (binders : List (Option String)) (term : NCert) :
+    toDB ρ encodeProp nPrem binders term =
+      (alphaView binders term).toDB ρ encodeProp nPrem binders.length := by
+  induction term generalizing binders with
+  | hypX name =>
+      simp [toDB, alphaView]
+      split <;> simp_all [AlphaView.toDB]
+  | prem source =>
+      cases source <;> simp [toDB, alphaView, AlphaView.toDB, depth]
+  | thy slot =>
+      simp [toDB, alphaView, AlphaView.toDB, depth]
+  | lam binder formula body ih =>
+      cases binder with
+      | none =>
+          simp [toDB, alphaView, AlphaView.toDB, ih]
+      | some name =>
+          simp [toDB, alphaView, AlphaView.toDB, ih]
+  | app fn arg ihFn ihArg =>
+      simp [toDB, alphaView, AlphaView.toDB, ihFn, ihArg]
+  | abort formula body ih =>
+      simp [toDB, alphaView, AlphaView.toDB, ih]
+
+/-- Alpha-equivalent named certificates lower to the same kernel de Bruijn
+certificate. -/
+theorem toDB_eq_of_alpha
+    (ρ : String → Option Nat) (encodeProp : String → Option String)
+    (nPrem : Nat) {left right : NCert} (h : Alpha left right) :
+    toDB ρ encodeProp nPrem [] left = toDB ρ encodeProp nPrem [] right := by
+  rw [toDB_eq_alphaView, toDB_eq_alphaView, h]
+
+/-- Rendering and running the production named pass is invariant under alpha
+renaming for well-formed closed named certificates. -/
+theorem lowerNamed_eq_of_alpha
+    (startsIdent : String → Bool) (ρ : String → Option Nat)
+    (encodeProp : String → Option String) (nPrem : Nat)
+    (hNat : ∀ n, startsIdent (Nat.repr n) = false)
+    {left right : NCert}
+    (leftWF : WellFormed startsIdent ρ encodeProp nPrem [] left)
+    (rightWF : WellFormed startsIdent ρ encodeProp nPrem [] right)
+    (h : Alpha left right) :
+    lowerNamed startsIdent ρ encodeProp nPrem [] (render left) =
+      lowerNamed startsIdent ρ encodeProp nPrem [] (render right) := by
+  rw [lowerNamed_eq_translation startsIdent ρ encodeProp nPrem hNat leftWF,
+    lowerNamed_eq_translation startsIdent ρ encodeProp nPrem hNat rightWF,
+    toDB_eq_of_alpha ρ encodeProp nPrem h]
+
 /-! ### Executable conformance vectors 1–7 and 17–28 -/
 
 private def vectorStarts (source : String) : Bool :=

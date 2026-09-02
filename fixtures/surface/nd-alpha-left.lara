@@ -1,0 +1,18 @@
+artifact nd_alpha at sha256:nd-alpha
+policy surface-policy
+use backends [nd@1]
+
+claim claim-main
+  nl      = "named binder left"
+  formal  = score(7)
+  binding = { author = author, rationale = "nd alpha", audit-status = reviewed }
+
+leaf proof : score(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+arg arg-strict : supports(claim-main) by main(7)
+  assurance = cert(nd@1, sha256:theory, (app (lam h (prop "score(7)") (hyp h)) (prem evidence)))
+
+status claim-main

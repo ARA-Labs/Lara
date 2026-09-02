@@ -6959,6 +6959,57 @@ tree:
     - "plans/2026-08-30-m2b-realization-followup.md"
     - "lean/Lara/ND.lean:112 (decodeNat_repr)"
   also_depends_on: [N262, N257, N255]
+- id: N268
+  type: question
+  title: "Concurrent track while M2b is active"
+  provenance: user
+  timestamp: "2026-08-30T00:13"
+  description: >
+    Which already-unblocked milestone can progress without competing with M2b's
+    representation, decision-problem, realizability, and complexity work? The
+    live candidates are M5 surface-calculus verification, PW0's possible-world
+    wrapper, and smaller follow-ups; the choice should minimize shared-file and
+    shared-contract ownership while advancing the core critical path.
+  also_depends_on: [N236, N239, N248]
+
+- id: N269
+  type: decision
+  title: "M5 formalizes the full presentation AST"
+  provenance: user
+  timestamp: "2026-08-30T00:32"
+  choice: >
+    Proceed with M5 on branch theory/m5-surface-calculus and make
+    Lara.Presentation.Program and Lara.Presentation.Policy the theorem input.
+    Define independent surface checking, production-ordered elaboration,
+    supported-fragment reflection, and semantics-parametric observation
+    coherence over the complete live lara-syntax@0.10 AST.
+  alternatives:
+    - "A smaller proof-oriented semantic surface core after parsing."
+    - "Feature-by-feature lowering equivalence without whole-program reflection or status coherence."
+    - "PW0 or a smaller open issue instead of M5."
+  evidence:
+    - "user selection: Full presentation AST"
+    - "issue #188 and EYH0602/lara-paper/plan/theory-depth-plan.md §M5"
+    - "plans/2026-08-30-m5-surface-calculus.md"
+  also_depends_on: [N268]
+
+- id: N270
+  type: decision
+  title: "Alpha-equivalence covers genuine binders only"
+  provenance: user
+  timestamp: "2026-08-30T00:32"
+  choice: >
+    Define alpha-equivalence for rule parameters and named nd@1 lambda binders.
+    Treat top-level declaration IDs, premise labels, value names, and
+    certificate premise references as typed global namespaces with fresh
+    renaming/equivariance laws. Keep replay-significant policy, backend,
+    version, theory, artifact, and digest identities fixed.
+  alternatives:
+    - "Treat every reference namespace as a whole-program binder under one alpha-equivalence relation."
+  evidence:
+    - "user selection: Genuine binders only"
+    - "plans/2026-08-30-m5-surface-calculus.md §D2"
+  also_depends_on: [N269]
 
 - id: N264
   type: experiment

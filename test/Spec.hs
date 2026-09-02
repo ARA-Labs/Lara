@@ -49,6 +49,7 @@ import RunningExampleSpec (runningExampleSpecProps)
 import RuntimeSpec (runtimeSpecProps)
 import StrictSpec (strictSpecProps)
 import SurfaceRewriteSpec (surfaceRewriteSpecProps)
+import SurfaceConformanceSpec (surfaceConformanceSpecProps)
 import SyntaxSpec (syntaxSpecProps)
 import ValueBindingsSpec (valueBindingSpecProps)
 import WireSpec (wireSpecProps)
@@ -233,6 +234,7 @@ main = do
         ++ [run name act | (name, act) <- cliSpecProps]
         ++ [run name act | (name, act) <- semanticsSpecProps]
         ++ [run name act | (name, act) <- updateSpecProps]
+        ++ [run name act | (name, act) <- surfaceConformanceSpecProps]
   unless (and results) exitFailure
   where
     run name act = do

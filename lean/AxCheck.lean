@@ -55,6 +55,16 @@ import Lara.Examples.Semantics
 import Lara.Update
 import Lara.Examples.Update
 import Lara.Examples.BackendComposition
+import Lara.Surface.Syntax
+import Lara.Surface.Binding
+import Lara.Surface.ValueBinding
+import Lara.Surface.Comparison
+import Lara.Surface.Check
+import Lara.Surface.Elaborate
+import Lara.Surface.Correctness
+import Lara.Surface.Observation
+import Lara.Examples.Surface
+import Lara.PresentationParity
 
 open Lara
 
@@ -1706,6 +1716,158 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.BackendComposition.depsDupTerm_certDeps
 #print axioms Lara.Examples.BackendComposition.depsDupTerm_usedBackends
 
+/-! ### M5 — verified surface calculus and full-AST elaboration -/
+
+-- Supported-fragment Boolean/Prop correspondence, including the named
+-- projections consumed by reflection.
+#print axioms Lara.Surface.declarationIdsNodupB_iff
+#print axioms Lara.Surface.ruleNamespacesWellFormedB_iff
+#print axioms Lara.Surface.valueBindingsWellFormedB_iff
+#print axioms Lara.Surface.comparisonsWellFormedB_iff
+#print axioms Lara.Surface.inferredArgsWellFormedB_iff
+#print axioms Lara.Surface.namedCertificatesWellFormedB_iff
+#print axioms Lara.Surface.surfaceAttacksWellFormedB_iff
+#print axioms Lara.Surface.canonicalPremiseLabelsB_iff
+#print axioms Lara.Surface.statusesWellFormedB_iff
+#print axioms Lara.Surface.groupsWellFormedB_iff
+#print axioms Lara.Surface.supportedB_iff
+
+-- Genuine binders: capture-avoiding parameter substitution, rule alpha,
+-- named-ND alpha, and invariance of de Bruijn/kernel lowering.
+#print axioms Lara.Surface.Binding.substParam_fresh_identity
+#print axioms Lara.Surface.Binding.substParam_preserves_wellSorted
+#print axioms Lara.Surface.Binding.substParam_compose_of_fresh
+#print axioms Lara.Surface.Binding.ruleAlpha_refl
+#print axioms Lara.Surface.Binding.ruleAlpha_symm
+#print axioms Lara.Surface.Binding.ruleAlpha_trans
+#print axioms Lara.NDNamed.alpha_refl
+#print axioms Lara.NDNamed.alpha_symm
+#print axioms Lara.NDNamed.alpha_trans
+#print axioms Lara.NDNamed.toDB_eq_of_alpha
+#print axioms Lara.NDNamed.lowerNamed_eq_of_alpha
+#print axioms Lara.Surface.lowerCertificate_alpha_invariant
+#print axioms Lara.Surface.alpha_elaboration_invariant
+
+-- Independent value/interpolation and comparison expansion relations.
+#print axioms Lara.Surface.expandNl_sound
+#print axioms Lara.Surface.expandNl_complete
+#print axioms Lara.Surface.expandValues_sound
+#print axioms Lara.Surface.expandValues_complete
+#print axioms Lara.Surface.expandComparisons_sound
+#print axioms Lara.Surface.expandComparisons_complete
+
+-- The syntax-directed assembly/derivation is independent of the elaborator:
+-- `Checks` reconstructs the source rather than assuming `elaborate` success.
+-- `Checks.core` carries declarative signature/policy/support/certificate/attack
+-- obligations; concrete `checkUnit` success is derived through completeness.
+#print axioms Lara.Surface.checkAuthoredConclusion_sound
+#print axioms Lara.Surface.checkAuthoredConclusion_complete
+#print axioms Lara.Surface.attackEndpointsDeclaredB_iff
+#print axioms Lara.Surface.validateAttackEndpoints_sound
+#print axioms Lara.Surface.validateAttackEndpoints_complete
+#print axioms Lara.Surface.validateGroups_sound
+#print axioms Lara.Surface.validateGroups_complete
+#print axioms Lara.Surface.resolveStatuses_sound
+#print axioms Lara.Surface.resolveStatuses_complete
+#print axioms Lara.Surface.CoreObligations.of_checkUnit_ok
+#print axioms Lara.Surface.CoreObligations.checkUnit_complete
+#print axioms Lara.Surface.check_sound
+#print axioms Lara.Surface.check_complete
+#print axioms Lara.Surface.checks_deterministic
+#print axioms Lara.Surface.checks_supported
+
+-- Pure elaboration alignment/completeness and production-pass boundaries.
+#print axioms Lara.Surface.elaborateWithAudit_alignment
+#print axioms Lara.Surface.elaborateWithAudit_reconstruction_boundary
+#print axioms Lara.Surface.elaborateWithAudit_attack_boundary
+#print axioms Lara.Surface.elaborateWithAudit_unit_boundary
+#print axioms Lara.Surface.elaborateWithAudit_admission_boundary
+#print axioms Lara.Surface.elaborateWithAudit_output_boundary
+#print axioms Lara.Surface.reconstructArgument_preserves_conclusion
+#print axioms Lara.Surface.reconstructArgument_preserves_obligations
+#print axioms Lara.Surface.lowerCertificate_sound
+#print axioms Lara.Surface.lowerCertificate_kernel_identity
+#print axioms Lara.Surface.lowerCertificate_alpha_invariant
+#print axioms Lara.Surface.resolveSurfaceAttacks_order_alignment
+#print axioms Lara.Surface.resolveSurfaceAttacks_endpoint_membership
+#print axioms Lara.Surface.outputFromAdmission_alignment
+#print axioms Lara.Surface.elaborationPrologue_complete
+#print axioms Lara.Surface.value_pass_complete
+#print axioms Lara.Surface.comparison_pass_complete
+#print axioms Lara.Surface.elaborate_complete
+
+-- Headline preservation/reflection and the separately quotable projections.
+#print axioms Lara.Surface.elaborate_preserves
+#print axioms Lara.Surface.elaborate_reflects
+#print axioms Lara.Surface.obligations_preserved
+#print axioms Lara.Surface.attacks_preserved
+#print axioms Lara.Surface.conclusions_preserved
+#print axioms Lara.Surface.argument_order_preserved
+
+-- Typed global renaming is distinct from alpha-equivalence. The transport
+-- package covers supportedness, every elaboration pass, admission, and the
+-- core checker; the headline theorem transports the audited elaboration.
+#print axioms Lara.Surface.Binding.supported_rename_iff
+#print axioms Lara.Surface.Renaming.checkUnit_ok_rename
+#print axioms Lara.Surface.Renaming.checkUnit_isOk_rename
+#print axioms Lara.Surface.Renaming.global_renaming_stage_transports
+#print axioms Lara.Surface.Renaming.global_renaming_equivariant
+
+-- Direct surface carrier/claim alignment and coherence parametric over
+-- extension semantics satisfying `Observation.AttackExtensional sem.spec`.
+#print axioms Lara.Surface.directAF_args
+#print axioms Lara.Surface.directAF_attack_iff
+#print axioms Lara.Surface.directClaims_eq_claims
+#print axioms Lara.Surface.directClaim_eq_coreClaim?
+#print axioms Lara.Surface.directClaim_support_bound
+#print axioms Lara.Surface.direct_compiled_agree
+#print axioms Lara.Surface.observe_coherent
+#print axioms Lara.Surface.observe_grounded_coherent
+#print axioms Lara.Surface.observe_complete_coherent
+#print axioms Lara.Surface.observe_preferred_coherent
+#print axioms Lara.Surface.observe_stable_coherent
+#print axioms Lara.Surface.observe_semiStable_coherent
+#print axioms Lara.Surface.unboundedDirectClaim_support_unaligned
+#print axioms Lara.Surface.not_observe_coherent_of_unbounded_support
+
+-- Exported surface examples and boundary witnesses.
+#print axioms Lara.Examples.Surface.allForms_supported
+#print axioms Lara.Examples.Surface.ambiguousInferenceReference_unsupported
+#print axioms Lara.Examples.Surface.ambiguousNamedCertificate_isolated
+#print axioms Lara.Examples.Surface.ambiguousNamedCertificate_unsupported
+#print axioms Lara.Examples.Surface.asciiIdentifierTailParity
+#print axioms Lara.Examples.Surface.asciiNumericStartParity
+#print axioms Lara.Examples.Surface.authoredCellSpellings_normalize
+#print axioms Lara.Examples.Surface.comparison_expansion_exact
+#print axioms Lara.Examples.Surface.comparison_expansion_relation
+#print axioms Lara.Examples.Surface.comparison_explicit_same_decls
+#print axioms Lara.Examples.Surface.comparison_explicit_same_printed_ast
+#print axioms Lara.Examples.Surface.declaredNonCellInterpolation_unsupported
+#print axioms Lara.Examples.Surface.duplicateArgument_isolated
+#print axioms Lara.Examples.Surface.duplicateArgument_unsupported
+#print axioms Lara.Examples.Surface.equalCellReversedVariable_unsupported
+#print axioms Lara.Examples.Surface.equalCellVariableProvenance_supported
+#print axioms Lara.Examples.Surface.inferenceShapeMismatch_unsupported
+#print axioms Lara.Examples.Surface.laterArgumentReference_isolated
+#print axioms Lara.Examples.Surface.laterArgumentReference_unsupported
+#print axioms Lara.Examples.Surface.literalGoalFallback_supported
+#print axioms Lara.Examples.Surface.missingComparisonScheme_isolated
+#print axioms Lara.Examples.Surface.missingComparisonScheme_unsupported
+#print axioms Lara.Examples.Surface.named_value_explicit_same_term
+#print axioms Lara.Examples.Surface.necessity_generated_ids_fresh
+#print axioms Lara.Examples.Surface.noBindings_skips_claim_sort_validation
+#print axioms Lara.Examples.Surface.normalizedCellCanonicalLiteral_supported
+#print axioms Lara.Examples.Surface.normalizedComparisonRoles_supported
+#print axioms Lara.Examples.Surface.premiseQuestionCollision_isolated
+#print axioms Lara.Examples.Surface.premiseQuestionCollision_unsupported
+#print axioms Lara.Examples.Surface.rawMatchingNoncanonicalLiteral_unsupported
+#print axioms Lara.Examples.Surface.renamedComparisonParameters_supported
+#print axioms Lara.Examples.Surface.sourceIdentifierClassifier_boundaries
+#print axioms Lara.Examples.Surface.unboundInferenceParameter_unsupported
+#print axioms Lara.Examples.Surface.unknownValueInterpolation_isolated
+#print axioms Lara.Examples.Surface.unknownValueInterpolation_unsupported
+#print axioms Lara.Examples.Surface.unresolvedAttackPath_isolated
+#print axioms Lara.Examples.Surface.unresolvedAttackPath_unsupported
 /-! ### M2b follow-up — realization closure (issue #209)
 
 The plan's headline rows: the numeral-injectivity foundation, the closed leaf

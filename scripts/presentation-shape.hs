@@ -272,6 +272,30 @@ programCtor ::
   [ValueBinding] -> [Decl] -> Program
 programCtor = Program
 
+-- M5 coverage witnesses.  These intentionally repeat the exact production
+-- constructors behind the five appended M5 inventory rows: the rows are not
+-- labels floating beside the model; each has a compile-time type ascription.
+m5RuleCarrier ::
+  RuleId -> [Param] -> Mode -> [AtomPat] -> [Maybe PremiseLabel] ->
+  AtomPat -> Bool -> [CertRef] -> [Question] -> Rule
+m5RuleCarrier = Rule
+
+m5InferThetaCarrier ::
+  RuleId -> [ArgRef] -> ArgDischarge -> [ObligationId] -> Assurance ->
+  ArgInstantiation
+m5InferThetaCarrier = InferTheta
+
+m5ComparisonCarrier ::
+  P.Prop -> MeasurandId -> DatasetId -> Relation -> ArgId -> ArgId ->
+  LeafId -> LeafId -> LeafId -> ComparisonClaim -> Maybe PropId -> Comparison
+m5ComparisonCarrier = Comparison
+
+m5ValueBindingCarrier :: ValueName -> P.Term -> ValueBinding
+m5ValueBindingCarrier = ValueBinding
+
+m5CertCarrier :: BackendId -> Int -> TheoryDigest -> SExpr -> Cert
+m5CertCarrier = Cert
+
 -- ---------------------------------------------------------------------------
 -- Sum-constructor payload witnesses
 -- ---------------------------------------------------------------------------
@@ -538,6 +562,8 @@ witnesses =
   , used explicitThetaCtor, used inferThetaCtor
   , used comparisonClaimCtor, used comparisonCtor, used valueBindingCtor
   , used programCtor, used termNumCtor, used termStrCtor, used termConCtor
+  , used m5RuleCarrier, used m5InferThetaCarrier, used m5ComparisonCarrier
+  , used m5ValueBindingCarrier, used m5CertCarrier
   , used provenanceCheckerCtor, used sortDeclCtor
   , used patVarCtor, used patLitCtor, used patConCtor
   , used assuranceCertCtor, used supportLeafCtor
@@ -655,6 +681,17 @@ shapeRows =
   , ("Subst", ["entries:List (Param,Term)"])
   , ("DischargeEntry", ["question:QuestionId", "term:SupportTerm"])
   , ("Position", ["steps:List Step"])
+  , ( "M5.Rule"
+    , [ "id", "params", "mode", "premises", "premise-labels", "conclusion"
+      , "allow-trusted", "certifiers", "questions" ]
+    )
+  , ("M5.InferTheta", ["rule", "refs", "discharge", "obligations", "assurance"])
+  , ( "M5.Comparison"
+    , [ "conclusion", "measurand", "dataset", "relation", "recheck-arg"
+      , "bridge-arg", "result", "baseline", "binding", "claim", "supports" ]
+    )
+  , ("M5.ValueBinding", ["name", "term"])
+  , ("M5.Cert", ["backend", "version", "theory", "payload"])
   ]
 
 renderRow :: (String, [String]) -> String
@@ -978,6 +1015,11 @@ shapeChecks =
   , ("Subst", AliasOf 1)
   , ("DischargeEntry", RecordOf (ctorsOf @ExpectedDischargeEntry))
   , ("Position", AliasOf 1)
+  , ("M5.Rule", namedRecordOf @Rule "rule")
+  , ("M5.InferTheta", CtorOf "InferTheta" (ctorsOf @ArgInstantiation))
+  , ("M5.Comparison", namedRecordOf @Comparison "cmp")
+  , ("M5.ValueBinding", namedRecordOf @ValueBinding "value")
+  , ("M5.Cert", namedRecordOf @Cert "cert")
   ]
 
 -- | Refuse to print unless every row's part count equals the real shape of the

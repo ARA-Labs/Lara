@@ -1060,6 +1060,19 @@ entries:
     - "Staged O109 rather than crystallizing: the decodeNat_repr risk re-pricing is an interpretation inside an unreviewed plan; no affirmation, resolution, or dependent artifact beyond the plan that proposed it."
     - "Did NOT change C44/C45. #181's COMPLETED closure is administrative (the record merged, succeeded by #209); the plan commits to supplying the missing proofs but resolves nothing empirically, so both stay testing. Logged as a near-miss on artifact commitment: they are already at testing, so the signal is a no-op."
     - "Replaced both open threads: PR #208 re-review discharged by the merge and #181 closure; the follow-up-plan thread converted into the concrete PR #210 review gate."
+- turn: "2026-08-30_002#1"
+  notes:
+    - "Routed the user's concurrency request as open question N268 rather than a decision: no milestone was selected or implementation authorized."
+    - "Staged O110 as architecture, not a claim. It maps milestone/file ownership and critical-path dependencies; no closure signal fired because the user has not affirmed or committed to M5."
+    - "Recommended M5 over PW0 because M5 advances the core tracker and unlocks M4, while PW0 is labeled future-work. Did not recommend #196 because it touches Semantics, a likely M2b dependency; did not recommend #204 because its own issue budgets a driver-output-format blast radius."
+    - "No existing staged observation gained a closure signal from this planning turn. O110 is new and not stale; the 2026-08-29 sweep and triage already handled the older backlog."
+- turn: "2026-08-30_002#2"
+  notes:
+    - "Routed the branch/scope commitment as N269 and the binding-semantics choice as N270. They are separate decisions because whole-AST scope and alpha-equivalence scope have different alternatives and can be revised independently."
+    - "Crystallized O110 to mechanization.md §8 via verbal affirmation and artifact commitment: the researcher selected M5, the branch exists, and the plan now depends on the concurrency architecture. Provenance becomes user-revised in the logic layer because the original recommendation was AI-suggested and the researcher selected and narrowed it."
+    - "Used the existing mechanization.md layer instead of creating architecture.md. M5 is a new verified boundary inside the mechanization architecture, and a new top-level solution file would split one canonical subject across two locations."
+    - "Recorded genuine binders only. Rule parameters and named nd@1 lambdas get alpha/substitution laws; global declaration/reference namespaces get typed equivariance; replay identities stay fixed."
+    - "Did NOT crystallize a general claim from the plan. The turn commits architecture and execution scope, not an empirical or semantic result; preservation, reflection, and observation coherence remain objectives until implemented."
 - turn: "2026-08-31_001#1"
   notes:
     - "Routed the branch-wide proof audit and fresh build/test result as experiment N264. The committed theorem chain and renewed gate are one empirical resolution of the M2b follow-up, not thirteen independent research events."

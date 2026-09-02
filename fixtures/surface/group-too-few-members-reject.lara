@@ -1,0 +1,10 @@
+artifact short_group at sha256:short-group
+policy surface-policy
+use backends []
+
+leaf e1 : score(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+group singleton = [e1]

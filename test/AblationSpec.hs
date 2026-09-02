@@ -13,6 +13,7 @@
 module AblationSpec (ablationSpecProps) where
 
 import qualified Data.Aeson as Aeson
+import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 import Data.List (find, isPrefixOf)
 
@@ -41,16 +42,21 @@ import TestReplay (testCheckInput)
 -- Discovery (both manifests, exactly as scripts/measure.hs)
 -- ---------------------------------------------------------------------------
 
+-- | Read fixture bytes strictly so the 8×input property product never retains
+-- semi-closed lazy handles inside its deferred 'Property' list.
+readFixture :: FilePath -> IO String
+readFixture path = BS.unpack <$> BS.readFile path
+
 allInputs :: IO [InputMeta]
 allInputs = do
-  mutants <- readFile "fixtures/mutants/MANIFEST.tsv"
-  corpus <- readFile "corpus-units/MANIFEST.tsv"
+  mutants <- readFixture "fixtures/mutants/MANIFEST.tsv"
+  corpus <- readFixture "corpus-units/MANIFEST.tsv"
   pure (parseMutantManifest mutants ++ parseCorpusManifest corpus)
 
 cellsFor :: CheckConfig -> IO [AblationCell]
 cellsFor cfg = do
   inputs <- allInputs
-  mapM (\im -> computeAblation cfg im <$> readFile (imPath im)) inputs
+  mapM (\im -> computeAblation cfg im <$> readFixture (imPath im)) inputs
 
 -- ---------------------------------------------------------------------------
 -- Full-path guard + monotonicity
@@ -67,7 +73,7 @@ prop_fullPathGuard = once $ ioProperty $ do
   pure $ conjoin (counterexample "no inputs discovered" (not (null checks)) : checks)
   where
     check im = do
-      bytes <- readFile (imPath im)
+      bytes <- readFixture (imPath im)
       pure $ counterexample (imPath im) $ case decodeCheckInputFile bytes of
         Left _ -> property True
         Right input ->
@@ -104,7 +110,7 @@ prop_monotonicity = once $ ioProperty $ do
   pure $ conjoin (counterexample "no inputs discovered" (not (null checks)) : checks)
   where
     check (name, cfg, im) = do
-      bytes <- readFile (imPath im)
+      bytes <- readFixture (imPath im)
       pure $ counterexample (name ++ ": " ++ imPath im) $ case decodeCheckInputFile bytes of
         Left _ -> property True
         Right input ->
@@ -171,7 +177,7 @@ prop_codecRows = once $ ioProperty $ do
   pure $ conjoin (counterexample "no codec rows discovered" (not (null checks)) : checks)
   where
     check (name, cfg, im) = do
-      bytes <- readFile (imPath im)
+      bytes <- readFixture (imPath im)
       let cell = computeAblation cfg im bytes
       pure $
         counterexample (name ++ ": " ++ imPath im) $
@@ -322,7 +328,7 @@ prop_acceptClassRecording = once $ ioProperty $ do
   case find ((== path) . imPath) inputs of
     Nothing -> pure (counterexample (path ++ " not in the manifest") (property False))
     Just im -> do
-      cell <- computeAblation noCQConfig im <$> readFile (imPath im)
+      cell <- computeAblation noCQConfig im <$> readFixture (imPath im)
       pure $
         conjoin
           [ counterexample "must be a missed reject" (acMissedReject cell)

@@ -479,6 +479,13 @@ sessions:
   events_count: 25
   claims_touched: [C44, C45]
   open_threads: 1
+- id: 2026-08-30_002
+  date: '2026-08-30'
+  summary: 'Selected M5 as the concurrent core track and created theory/m5-surface-calculus. The implementation plan uses the full lara-syntax@0.10 Program/Policy AST, reserves alpha-equivalence for genuine binders, keeps global/replay names distinct, requires an independent surface judgment, and evaluates formal theorems, cross-language conformance, and unchanged-core regression together.'
+  turn_count: 2
+  events_count: 5
+  claims_touched: []
+  open_threads: 3
 - id: 2026-08-31_001
   date: '2026-08-31'
   summary: 'Issue #209 is implemented and PR #212 is review-hardened: the first review added missing AxCheck rows and closed leaf-ID spelling fixtures, corrected the quartic parameter summary and realization-transfer direction, and narrowed C44 from an unsupported asymptotic-optimality claim to the proved universal n² lower bound plus the exact n=2 cubic counterexample. Fresh Lean/Haskell/AxCheck/ARA gates pass.'

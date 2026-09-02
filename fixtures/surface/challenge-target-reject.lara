@@ -1,0 +1,10 @@
+artifact challenge_target at sha256:challenge-target
+policy surface-policy
+use backends []
+
+leaf premise : evidence(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-challenge : challenges(no-such-leaf) by pass from [premise]

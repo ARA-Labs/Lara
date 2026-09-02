@@ -1,0 +1,38 @@
+artifact attack_path_reject at sha256:attack-path
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "invalid attack path"
+  formal  = score(7)
+  binding = { author = author, rationale = "negative", audit-status = reviewed }
+
+claim claim-pro
+  nl      = "positive verdict"
+  formal  = verdict(1)
+  binding = { author = author, rationale = "attack source", audit-status = reviewed }
+
+leaf proof : score(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+leaf pass-proof : evidence(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+leaf verdict-pro : verdict(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-pass-explicit : supports(claim-main) by pass(7)
+  discharge cq with proof
+
+arg arg-pass-inferred : supports(claim-main) by pass from [pass-proof]
+  discharge cq with arg-pass-explicit
+
+arg arg-pro : supports(claim-pro) by verdict-rule(1)
+
+undercut arg-pro arg-pass-inferred.missing.rule

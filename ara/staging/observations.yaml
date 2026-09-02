@@ -2410,3 +2410,24 @@ observations:
   promoted_to: "logic/claims.md:C46"
   crystallized_via: artifact-commitment
   stale: false
+- id: O110
+  timestamp: "2026-08-30T00:13"
+  provenance: ai-suggested
+  content: >
+    M5 is the strongest core-spine concurrency candidate while M2b is active.
+    The tracker gates M5 on stable carrier, observations, and updates rather
+    than on M2b; main now contains the M0, M1, M2a, M3, and B0 deliveries. M5's
+    surface syntax, binding, independent surface checking, elaboration
+    correctness, and codec parity are separable from M2b's realizable-class
+    decision problems and complexity proofs if shared integration files remain
+    singly owned. PW0 is also gate-unblocked but is explicitly future-work.
+  context: >
+    Inferred from issues #180, #181, #188, #189, and #192 plus main at 816812c
+    while answering which work can run concurrently with another contributor's
+    M2b effort. No milestone was selected this turn.
+  potential_type: architecture
+  bound_to: [N236, N239, N248, N268]
+  promoted: true
+  promoted_to: "logic/solution/mechanization.md:§8"
+  crystallized_via: verbal-affirmation
+  stale: false

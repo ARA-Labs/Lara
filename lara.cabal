@@ -130,6 +130,18 @@ executable lara-bench
                     , process
     default-language: GHC2021
 
+executable surface-conformance
+    import:           warnings
+    hs-source-dirs:   scripts
+    main-is:          surface-conformance.hs
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , directory
+                    , filepath
+                    , lara
+                    , text
+    default-language: GHC2021
+
 test-suite lara-test
     import:           warnings
     type:             exitcode-stdio-1.0
@@ -158,6 +170,7 @@ test-suite lara-test
                       ElaborateSpec
                       WorkedExamplesSpec
                       SurfaceRewriteSpec
+                      SurfaceConformanceSpec
                       CheckSpec
                       BlockedSpec
                       DifferentialSpec
@@ -184,4 +197,5 @@ test-suite lara-test
                     , unix
                     , QuickCheck
     build-tool-depends: lara:lara
+                      , lara:surface-conformance
     default-language: GHC2021

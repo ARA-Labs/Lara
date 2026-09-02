@@ -1,0 +1,10 @@
+artifact repeated_group_member at sha256:repeated-group-member
+policy surface-policy
+use backends []
+
+leaf e1 : score(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+group repeated-member = [e1, e1]

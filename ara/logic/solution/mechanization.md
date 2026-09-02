@@ -118,3 +118,30 @@ the ND adapter) may be *ported* to the prover early as a low-risk warm-up seedin
 proof development is anonymizable from day one; no `sorry`/`admit` in main theorems at M2 exit; a single
 replay command checks the whole development; every prover axiom and backend assumption is recorded.
 Differential + property + golden + mutation tests remain conformance evidence across the boundary.
+
+## 8. M5 verifies the full presentation boundary
+
+M5 quantifies over the complete `Lara.Presentation.Program` and
+`Lara.Presentation.Policy` AST at `lara-syntax@0.10`. It adds a
+syntax-directed surface judgment independent of core elaboration, mirrors the
+production elaboration pass order in Lean, and proves preservation,
+supported-fragment reflection, and semantics-parametric claim-observation
+coherence. Cross-language conformance must compare independently emitted
+Haskell and Lean results, while the existing core bytes and verdicts remain
+unchanged.
+
+Alpha-equivalence applies only to genuine lexical binders: rule parameters and
+named `nd@1` lambda binders. Other source names use typed fresh-renaming
+equivariance, and replay-significant identities remain fixed. Concrete `.lara`
+parser correctness, arbitrary-core surjectivity, and unique source recovery
+stay outside the theorem.
+
+The M5 modules may import M1/M2 observation and compilation interfaces but do
+not modify M2b's realizability, semantics, observation, or complexity
+definitions. Shared axiom-audit and paper-name-map edits land in a final
+additive integration commit.
+
+_Committed by N269/N270; durable theorem contract:
+`docs/theory-m5-surface-calculus.md`. Reviewed implementation-plan history:
+`git show aec9facc1ba3890016401847e6ddca09c0715795:plans/2026-08-30-m5-surface-calculus.md`;
+promoted from O110._

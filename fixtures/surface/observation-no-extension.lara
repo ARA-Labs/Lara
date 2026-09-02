@@ -1,0 +1,19 @@
+artifact observation_no_extension at sha256:observation-no-extension
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "stable no-extension claim"
+  formal  = verdict(1)
+  binding = { author = author, rationale = "no-extension witness", audit-status = reviewed }
+
+leaf verdict-pro : verdict(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-pro : supports(claim-main) by verdict-rule(1)
+
+rebut arg-pro arg-pro
+
+status claim-main

@@ -687,6 +687,147 @@ The syntactic, resolution, and `certDeps` results use the shipped `nd@1` +
 
 ---
 
+## Verified surface calculus and elaboration (M5, issue #188)
+
+The exact theorem boundary, hypotheses, counterexamples, and paper-safe
+wording are frozen in `docs/theory-m5-surface-calculus.md`. Unless a table
+says otherwise, declarations below are in namespace `Lara.Surface`.
+
+### Surface boundary and supported fragment
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Abstract environment, full-AST input, retained output | `Env`, `Input`, `Elaborated` | `Lara/Surface/Syntax.lean` |
+| Closed surface error vocabulary | `Error` | `Lara/Surface/Syntax.lean` |
+| Structural supported-fragment proposition and executable decider | `Supported`, `supportedB` | `Lara/Surface/Syntax.lean` |
+| Supported Boolean/Prop correspondence | `supportedB_iff` | `Lara/Surface/Syntax.lean` |
+| Named field correspondences used by reflection | `declarationIdsNodupB_iff`, `ruleNamespacesWellFormedB_iff`, `valueBindingsWellFormedB_iff`, `comparisonsWellFormedB_iff`, `inferredArgsWellFormedB_iff`, `namedCertificatesWellFormedB_iff`, `surfaceAttacksWellFormedB_iff`, `canonicalPremiseLabelsB_iff` | `Lara/Surface/Syntax.lean` |
+| Sole presentation-to-core identifier/support conversion layer | `toSupportLeafId`, `toSupportQuestionId`, `toSupportRuleId`, `toSupportBackendId`, `toSupportDigest`, `toSupportTheoryDigest`, `toSupportParam`, `toSupportObligationId`, `toSupportTerm`, `toSupportTerms`, `toSupportDischarges` | `Lara/Surface/Syntax.lean` |
+
+### Binding, alpha-equivalence, and global renaming
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Capture-avoiding rule-parameter substitution laws | `Binding.substParam_fresh_identity`, `Binding.substParam_preserves_wellSorted`, `Binding.substParam_compose_of_fresh` | `Lara/Surface/Binding.lean` |
+| Rule-parameter alpha-equivalence | `Binding.RuleAlpha`, `Binding.ruleAlpha_refl`, `Binding.ruleAlpha_symm`, `Binding.ruleAlpha_trans` | `Lara/Surface/Binding.lean` |
+| Named-ND binder alpha-equivalence | `NDNamed.Alpha`, `NDNamed.alpha_refl`, `NDNamed.alpha_symm`, `NDNamed.alpha_trans` | `Lara/NDNamed.lean` |
+| Alpha-equivalent named certificates have equal de Bruijn/kernel lowering | `NDNamed.toDB_eq_of_alpha`, `NDNamed.lowerNamed_eq_of_alpha`, `alpha_elaboration_invariant` | `Lara/NDNamed.lean`; `Lara/Surface/Correctness.lean` |
+| Typed global renamer (replay identities excluded) | `Binding.GlobalRenaming` | `Lara/Surface/Binding.lean` |
+| Structural and environment soundness hypotheses | `RenamingSound`, `Renaming.EnvRenamingSound` | `Lara/Surface/Syntax.lean`; `Lara/Surface/Check.lean` |
+| Supported fragment is equivariant | `Binding.supported_rename_iff` | `Lara/Surface/Syntax.lean` |
+| Per-stage and core-check transport package | `Renaming.GlobalRenamingStageTransports`, `Renaming.global_renaming_stage_transports`, `Renaming.checkUnit_ok_rename`, `Renaming.checkUnit_isOk_rename` | `Lara/Surface/Correctness.lean` |
+| Actual-output mixed-ground relation | `Renaming.GroundRelated`, `Renaming.ElaboratedRelated.ground` | `Lara/Surface/Correctness.lean` |
+| Fully mapped-ground accepted-carrier relation | `Renaming.CheckedUnitRelated` | `Lara/Surface/Correctness.lean` |
+| Headline all-namespace equivariance | `Renaming.global_renaming_equivariant` | `Lara/Surface/Correctness.lean` |
+
+`RenamingSound` supplies structural and fixed-spelling premises.
+`Renaming.EnvRenamingSound` has exactly classifier preservation
+(`startsIdent`) and registry replay fields. It has no proposition-encoder
+field: `Env.encodeProp` is reused unchanged on formula source text fixed by
+the structural renaming premises.
+
+Alpha-equivalence applies only to rule parameters and named `nd@1` lambda
+binders. Do not cite `GlobalRenaming` as an alpha-equivalence theorem, and do
+not describe backend IDs, policy IDs, versions, or digests as renamable.
+`GroundRelated` relates actual elaboration outputs by renaming the executable
+ground prefix while retaining the literal theory suffix. The final
+`CheckedUnitRelated` existential in `global_renaming_equivariant` instead uses
+the fully mapped source ground and renamed core unit; do not identify that
+witness ground with the actual target output ground.
+
+### Independent expansion and checking
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Prose/value interpolation relation and correspondence | `ExpandsNl`, `expandNl_sound`, `expandNl_complete` | `Lara/Surface/ValueBinding.lean` |
+| Whole-program value expansion relation and correspondence | `ExpandsValues`, `expandValues_sound`, `expandValues_complete` | `Lara/Surface/ValueBinding.lean` |
+| Comparison expansion relation and correspondence | `ExpandsComparisons`, `expandComparisons_sound`, `expandComparisons_complete` | `Lara/Surface/Comparison.lean` |
+| Independent syntax-directed surface judgment | `Checks` | `Lara/Surface/Check.lean` |
+| Authored argument-role relation and executable correspondence | `ChecksAuthoredConclusion`, `checkAuthoredConclusion`, `checkAuthoredConclusion_sound`, `checkAuthoredConclusion_complete` | `Lara/Surface/Check.lean` |
+| Raw attack-endpoint predicate/decider before group validation | `AttackEndpointsDeclared`, `attackEndpointsDeclaredB`, `attackEndpointsDeclaredB_iff`, `validateAttackEndpoints`, `validateAttackEndpoints_sound`, `validateAttackEndpoints_complete` | `Lara/Surface/Check.lean` |
+| Requested-status and duplicate-group predicates/deciders | `StatusesWellFormed`, `statusesWellFormedB`, `statusesWellFormedB_iff`, `resolveStatuses`, `resolveStatuses_sound`, `resolveStatuses_complete`; `GroupsWellFormed`, `groupsWellFormedB`, `groupsWellFormedB_iff`, `validateGroups`, `validateGroups_sound`, `validateGroups_complete` | `Lara/Surface/Syntax.lean`; `Lara/Surface/Check.lean` |
+| Declarative core-acceptance premises and completeness bridge | `CoreObligations`, `CoreObligations.of_checkUnit_ok`, `CoreObligations.checkUnit_complete` | `Lara/Surface/Check.lean` |
+| Executable checker correspondence and determinism | `check_sound`, `check_complete`, `checks_deterministic`, `checks_supported` | `Lara/Surface/Check.lean` |
+
+`Checks` is not an abbreviation for successful elaboration. Its final
+`core` field is `CoreObligations`: declarative signature, policy,
+support/certificate, typed-attack, endpoint, and conflict-completeness facts.
+`CoreObligations.checkUnit_complete` derives actual checker success through the
+core checker's completeness theorem; it does not store an executable-success
+wrapper.
+
+### Production-ordered elaboration and correctness
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Audited pure pipeline and output projection | `elaborateWithAudit`, `elaborate` | `Lara/Surface/Elaborate.lean` |
+| Successful-run alignment record | `ElaborationAlignment`, `elaborateWithAudit_alignment` | `Lara/Surface/Elaborate.lean` |
+| Adjacent production pass boundaries | `elaborateWithAudit_reconstruction_boundary`, `elaborateWithAudit_attack_boundary`, `elaborateWithAudit_unit_boundary`, `elaborateWithAudit_admission_boundary`, `elaborateWithAudit_output_boundary` | `Lara/Surface/Elaborate.lean` |
+| Argument, certificate, attack, and admission alignment helpers | `reconstructArgument_preserves_conclusion`, `reconstructArgument_preserves_obligations`, `lowerCertificate_sound`, `lowerCertificate_kernel_identity`, `lowerCertificate_alpha_invariant`, `resolveSurfaceAttacks_order_alignment`, `resolveSurfaceAttacks_endpoint_membership`, `outputFromAdmission_alignment` | `Lara/Surface/Elaborate.lean` |
+| Derivation-to-pass completeness | `elaborationPrologue_complete`, `value_pass_complete`, `comparison_pass_complete` | `Lara/Surface/Elaborate.lean` |
+| A surface derivation lowers successfully | `elaborate_complete` | `Lara/Surface/Elaborate.lean` |
+| **M5 preservation headline** | `elaborate_preserves` | `Lara/Surface/Correctness.lean` |
+| **M5 supported-fragment reflection headline** | `elaborate_reflects` | `Lara/Surface/Correctness.lean` |
+| Authored obligation ledger preservation | `obligations_preserved` | `Lara/Surface/Correctness.lean` |
+| Retained attack preservation | `attacks_preserved` | `Lara/Surface/Correctness.lean` |
+| Per-argument conclusion preservation | `conclusions_preserved` | `Lara/Surface/Correctness.lean` |
+| Authored/core question-order alignment | `argument_order_preserved` | `Lara/Surface/Correctness.lean` |
+
+There is no unconditional `elaborate_sound`. Cite `elaborate_reflects` only
+with both `Supported input` and the explicit successful `checkUnit` premise.
+It is reflection for the given surface input, not surjectivity from arbitrary
+core units and not unique source recovery.
+
+### Direct and compiled observation
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Direct retained framework and optional claim | `directAF`, `directClaims`, `directClaim` | `Lara/Surface/Observation.lean` |
+| Independent core optional lookup and lookup agreement | `coreClaim?`, `directClaims_eq_claims`, `directClaim_eq_coreClaim?` | `Lara/Surface/Observation.lean` |
+| Optional direct observation | `Surface.observe` | `Lara/Surface/Observation.lean` |
+| Direct carrier/edge equations | `directAF_args`, `directAF_attack_iff` | `Lara/Surface/Observation.lean` |
+| Direct support is carrier-local | `directClaim_support_bound` | `Lara/Surface/Observation.lean` |
+| Direct and compiled frameworks are equal | `direct_compiled_agree` | `Lara/Surface/Observation.lean` |
+| **M5 attack-extensional semantics-parametric observation headline** | `observe_coherent` (requires `Observation.AttackExtensional sem.spec`) | `Lara/Surface/Observation.lean` |
+| Grounded/complete/preferred/stable/semi-stable corollaries | `observe_grounded_coherent`, `observe_complete_coherent`, `observe_preferred_coherent`, `observe_stable_coherent`, `observe_semiStable_coherent` | `Lara/Surface/Observation.lean` |
+| Carrier-local support is load-bearing | `unboundedDirectClaim_support_unaligned`, `not_observe_coherent_of_unbounded_support` | `Lara/Surface/Observation.lean` |
+
+The generic theorem ranges only over extension semantics satisfying
+`Observation.AttackExtensional sem.spec`. Its five named corollaries discharge
+that premise internally. The stable theorem preserves `noExtension`; it is not
+a five-valued local status collapse. Grounded coherence is instantiated through
+`Observation.attackExtensional_leastComplete`.
+
+### Checked boundary witnesses and conformance
+
+| Boundary | Checked declaration/evidence | File |
+|---|---|---|
+| Fresh generated IDs | `Examples.Surface.necessity_generated_ids_fresh` | `Lara/Examples/Surface.lean` |
+| Unambiguous earlier premise resolution | `inferredArgsWellFormedB_iff` plus executable example | `Lara/Surface/Syntax.lean`; `Lara/Examples/Surface.lean` |
+| Capture-free named certificates | `namedCertificatesWellFormedB_iff` plus captured-binder/bypass examples | `Lara/Surface/Syntax.lean`; `Lara/Examples/Surface.lean` |
+| Comparison polarity | `comparisonsWellFormedB_iff` plus executable example | `Lara/Surface/Syntax.lean`; `Lara/Examples/Surface.lean` |
+| Argument-ID uniqueness before attack indexing | `declarationIdsNodupB_iff` plus executable example | `Lara/Surface/Syntax.lean`; `Lara/Examples/Surface.lean` |
+| Successful core checking | `CoreObligations.checkUnit_complete` plus invalid-core-support examples | `Lara/Surface/Check.lean`; `Lara/Examples/Surface.lean` |
+| Authored conclusion mismatch / undeclared challenge target | `checkAuthoredConclusion_sound` plus executable examples | `Lara/Surface/Check.lean`; `Lara/Examples/Surface.lean` |
+| Unknown requested status | `resolveStatuses_sound` plus executable example | `Lara/Surface/Check.lean`; `Lara/Examples/Surface.lean` |
+| Duplicate/malformed groups | `validateGroups_sound` plus executable examples | `Lara/Surface/Check.lean`; `Lara/Examples/Surface.lean` |
+| Production precedence and first-repeat diagnostics | `elaborateWithAudit_*_boundary` plus executable adversarial examples | `Lara/Surface/Elaborate.lean`; `Lara/Examples/Surface.lean`; `fixtures/surface/` |
+| Missing claim preserves absence | `directClaim_eq_coreClaim?` plus executable example | `Lara/Surface/Observation.lean`; `Lara/Examples/Surface.lean` |
+| Full-AST positive fixture | `Examples.Surface.allFormsInput`, `allForms_supported`, plus executable check examples | `Lara/Examples/Surface.lean` |
+| Cross-language ordered case provenance | `fixtures/surface/MANIFEST.tsv` | manifest, 25 cases, including `gap`, `defeated`, `contested`, and stable `noExtension` |
+| Canonical seven-column conformance table | `test/surface-conformance.golden` | committed golden |
+| Nonempty, ordered-manifest/closed-feature-complete two-emitter gate | `scripts/check-surface-conformance.sh` | executable conformance evidence |
+
+The executable necessity witnesses are examples, not additional foundational
+paper theorems. The Haskell rows exercise the production parser/elaborator;
+they provide finite representative conformance evidence and do not prove
+Haskell correctness. Manifest completeness covers the required closed feature
+vocabulary, not exhaustive parser paths or every AST instance.
+
+The conformance `obligations` cell enumerates open questions recursively in
+retained core support terms after admission/group pruning, keyed by retained
+authored argument ID. It is distinct from `obligations_preserved`, whose
+subject is the unpruned source-authored root-obligation ledger.
 ## M2b restricted-class complexity closure (issue #209)
 
 The frozen decisions, both gate records, and the claim boundary live in

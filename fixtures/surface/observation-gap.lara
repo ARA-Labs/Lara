@@ -1,0 +1,10 @@
+artifact observation_gap at sha256:observation-gap
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "unsupported claim"
+  formal  = score(7)
+  binding = { author = author, rationale = "gap witness", audit-status = reviewed }
+
+status claim-main

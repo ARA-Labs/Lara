@@ -1,0 +1,23 @@
+artifact ambiguous_premise at sha256:ambiguous
+policy surface-policy
+use backends [nd@1]
+
+claim claim-main
+  nl      = "ambiguous premise"
+  formal  = score(7)
+  binding = { author = author, rationale = "negative", audit-status = reviewed }
+
+leaf proof-left : score(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+leaf proof-right : score(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+arg arg-strict : supports(claim-main) by main(7)
+  assurance = cert(nd@1, sha256:theory, (prem evidence))
+
+status claim-main

@@ -73,6 +73,7 @@ Both are in the guard's scope.
 -/
 import Lean
 import Lara.Presentation
+import Lara.Examples.Surface
 
 namespace Lara.PresentationParity
 
@@ -209,6 +210,33 @@ def valueBindingCtor : ValueName → Term → ValueBinding := ValueBinding.mk
 def programCtor :
     String → Digest → PolicyId → List ExpectedBackendEntry →
     List ValueBinding → List Decl → Program := Program.mk
+
+/-! M5 coverage witnesses for the five appended inventory rows. -/
+
+def m5RuleCarrier :
+    RuleId → List Param → Mode → List AtomPat → List (Option PremiseLabel) →
+    AtomPat → Bool → List CertRef → List Question → Rule := Rule.mk
+
+def m5InferThetaCarrier :
+    RuleId → List ArgRef → ArgDischarge → List ObligationId → Assurance →
+    ArgInstantiation := ArgInstantiation.inferTheta
+
+def m5ComparisonCarrier :
+    Atom → MeasurandId → DatasetId → Relation → ArgId → ArgId →
+    LeafId → LeafId → LeafId → ComparisonClaim → Option PropId → Comparison :=
+  Comparison.mk
+
+def m5ValueBindingCarrier : ValueName → Term → ValueBinding := ValueBinding.mk
+
+def m5CertCarrier : BackendId → Int → TheoryDigest → Sx → Cert := Cert.mk
+
+example : parseProgram (printProgram Lara.Examples.Surface.allFormsInput.program) =
+    some Lara.Examples.Surface.allFormsInput.program :=
+  parse_printProgram _
+
+example : parsePolicy (printPolicy Lara.Examples.Surface.allFormsInput.policy) =
+    some Lara.Examples.Surface.allFormsInput.policy :=
+  parse_printPolicy _
 
 /-! ## Sum-constructor payload witnesses
 
@@ -466,6 +494,15 @@ def shapeRows : List (String × List String) :=
   , ("Subst", ["entries:List (Param,Term)"])
   , ("DischargeEntry", ["question:QuestionId", "term:SupportTerm"])
   , ("Position", ["steps:List Step"])
+  , ("M5.Rule",
+      [ "id", "params", "mode", "premises", "premise-labels", "conclusion"
+      , "allow-trusted", "certifiers", "questions" ])
+  , ("M5.InferTheta", ["rule", "refs", "discharge", "obligations", "assurance"])
+  , ("M5.Comparison",
+      [ "conclusion", "measurand", "dataset", "relation", "recheck-arg"
+      , "bridge-arg", "result", "baseline", "binding", "claim", "supports" ])
+  , ("M5.ValueBinding", ["name", "term"])
+  , ("M5.Cert", ["backend", "version", "theory", "payload"])
   ]
 
 /-- The inventory as the guard's normalized TSV: one row per line, name first,
@@ -658,12 +695,17 @@ def shapeChecks : List (String × ShapeCheck) :=
       .ctorPayloadArity ``Lara.Presentation.Discharges.cons 1)
   , ("Position", .aliasDefEq ``Lara.Presentation.Position
       ``Lara.PresentationParity.ExpectedPosition 1)
+  , ("M5.Rule", .fields ``Lara.Presentation.Rule)
+  , ("M5.InferTheta", .ctorArity ``Lara.Presentation.ArgInstantiation.inferTheta)
+  , ("M5.Comparison", .fields ``Lara.Presentation.Comparison)
+  , ("M5.ValueBinding", .fields ``Lara.Presentation.ValueBinding)
+  , ("M5.Cert", .fields ``Lara.Presentation.Cert)
   ]
 
 open Lean Meta in
 /-- Refuse to compile unless every row's part count equals the real shape of the
 type it names. Names the offending row on mismatch. -/
-def checkShapeRows : MetaM Unit := do
+def checkShapeRows : MetaM _root_.Unit := do
   unless shapeRows.length == shapeChecks.length do
     throwError "presentation parity: {shapeRows.length} inventory rows but \
       {shapeChecks.length} tripwire entries"

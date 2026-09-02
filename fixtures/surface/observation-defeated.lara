@@ -1,0 +1,30 @@
+artifact observation_defeated at sha256:observation-defeated
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "defeated claim"
+  formal  = verdict(1)
+  binding = { author = author, rationale = "defeated witness", audit-status = reviewed }
+
+claim claim-con
+  nl      = "attacking claim"
+  formal  = verdict(0)
+  binding = { author = author, rationale = "defeated witness", audit-status = reviewed }
+
+leaf verdict-pro : verdict(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf verdict-con : verdict(0)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-pro : supports(claim-main) by verdict-rule(1)
+arg arg-con : supports(claim-con) by verdict-rule(0)
+
+rebut arg-con arg-pro
+
+status claim-main

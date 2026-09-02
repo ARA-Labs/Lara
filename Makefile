@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-image bench-container measure presentation-parity semantics-goldens backend-deps-golden update-goldens update-differential ara-source-spans
+.PHONY: build test bench bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential ara-source-spans
 
 build:
 	cabal build all
@@ -15,6 +15,17 @@ test:
 # shape tripwires; the gate rebuilds both and diffs them.
 presentation-parity:
 	bash scripts/check-presentation-parity.sh
+
+# Independently parse/lower the concrete surface in Haskell and construct/check
+# the matching presentation AST in Lean, then compare both canonical tables to
+# one committed manifest-complete golden.
+surface-conformance:
+	bash scripts/check-surface-conformance.sh
+
+# Regression tests for atomic update, failed-update cleanup, and check-mode
+# immutability. All update exercises use a private temporary golden.
+surface-conformance-gate-test:
+	bash test/surface-conformance-gate.sh
 
 # Lean-emitted extension-semantics goldens must match the checked-in Haskell
 # conformance table byte for byte.
