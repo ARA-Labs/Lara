@@ -684,3 +684,57 @@ difference matters for how much each witnesses:
 
 The syntactic, resolution, and `certDeps` results use the shipped `nd@1` +
 `ord@1`. The worked mixed acceptance vector is Haskell's (`test/StrictSpec.hs`).
+
+---
+
+## M2b restricted-class complexity closure (issue #209)
+
+The frozen decisions, both gate records, and the claim boundary live in
+`docs/theory-m2b-complexity.md` (gate history:
+`docs/theory-m2b-complexity-spike.md`). Every theorem row is
+`lean/AxCheck.lean`-gated (sorry-free, standard trio). All statements are
+under the frozen M2b context — `canon := id`, `m2bSigma`, `m2bPolicy`,
+`m2bRegistry` — and the cost statements count `F.attack` queries of the
+instrumented Lean reference mirrors, not production-runtime measurements.
+
+| Paper object | Lean declaration | File |
+|---|---|---|
+| Family-wide checker equation (realization closure) | `Complexity.checkUnit_formula_ok` | `Lara/Complexity/Gadget.lean` |
+| Carrier-status agreement with `Invariants.status` | `Complexity.carrierStatusC_fst` | `Lara/Complexity.lean` |
+| **GroundedStatus upper bound (the paper-citable headline)**: `n³(1 + n) + 2n²` | `Complexity.carrierStatusC_cost_le` | `Lara/Complexity.lean` |
+| Universal grounded upper bound `n³(1 + n)` | `Complexity.groundedC_cost_le` | `Lara/Complexity.lean` |
+| Universal grounded lower bound `n²` | `Complexity.groundedC_cost_ge` | `Lara/Complexity.lean` |
+| Quartic witness class membership (fixed context) | `Examples.Complexity.quartic_realizable` | `Lara/Examples/Complexity.lean` |
+| Quartic worst-case grounded cost (existential, `2 ≤ k`) | `Examples.Complexity.quartic_cost_ge` | `Lara/Examples/Complexity.lean` |
+| Quartic worst-case carrier-status cost | `Examples.Complexity.carrierStatus_quartic_cost_ge` | `Lara/Examples/Complexity.lean` |
+| Reduction output class membership | `Complexity.reduce_realizable` | `Lara/Complexity/Reduction.lean` |
+| Reduction output size (quadratic carrier accounting) | `Complexity.reduce_byteSize` | `Lara/Complexity/Reduction.lean` |
+| **3SAT reduction correctness (two-sided)** | `Complexity.reduce_correct` | `Lara/Complexity/Reduction.lean` |
+| Class-membership negative control (`g(0)` self-edge not realizable) | `Complexity.selfEdgeCode_not_realizable` | `Lara/Complexity/Reduction.lean` |
+
+Quantifier discipline the paper must respect (constraint D4 of the frozen
+record): `groundedC_cost_ge` is a *universal* quadratic lower bound;
+`quartic_cost_ge` and `carrierStatus_quartic_cost_ge` are *existential*
+worst-case results on a realizable family. No display may merge the two
+quantifiers, and correctness must be quoted with class membership and output
+size adjacent (`reduce_correct_realizable`, `reduce_correct_nodes`,
+`reduce_correct_byteSize` package them).
+
+**Not X** notes:
+
+- `Grounded.deficit_bound` (`Lara/Grounded.lean`) bounds *rounds* of the
+  grounded iteration, not attack queries. It must not be cited as a
+  query-cost bound; the query bounds are the `*_cost_le` / `*_cost_ge`
+  rows above.
+- The generic Claim bound `Complexity.statusSharedC_cost_le` is internal
+  accounting behind `carrierStatusC_cost_le`. It must not be cited as the
+  restricted-class headline.
+- `Invariants.CompilerInvariant` alone is **not** class membership.
+  Realizability claims require the executable checker equation and a
+  `StructuredAFIso` under the fixed context (`Realizability.Realization`);
+  `selfEdgeCode_not_realizable` is the witness keeping the reduction a
+  restricted-class statement.
+- `reduce_correct` is **not** an NP-completeness statement. The
+  complexity-class bookkeeping (encodings, machine model, membership in NP)
+  stays paper-level and cites the mechanized obligations
+  `reduce_correct` + `reduce_realizable` + `reduce_byteSize`.

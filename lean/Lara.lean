@@ -111,6 +111,64 @@
 --     kernel certificates and structural agreement with an independent
 --     named-term translation over an abstract proposition encoder —
 --     Lara.NDNamed
+--   * the M2b realization closure (issue #209): the verified decimal
+--     round-trip and numeral injectivity for the complexity spine —
+--     Lara.Complexity.Numeral; the formula-indexed 3SAT gadget behind the
+--     closed injective leaf vocabulary `GadgetLeaf`, with the closed leaf
+--     table (Nodup + lookup spec), family-wide ground coverage for the
+--     realization record, and every family-wide `checkUnit_complete` premise
+--     (argument Nodup, the R2 sorts stage, recursive support, typed attacks
+--     with endpoint membership, exact attack completeness) assembled into the
+--     family-wide checker equation `checkUnit_formula_ok` under the frozen
+--     M2b context of Lara.Complexity.Context — Lara.Complexity.Gadget
+--   * the M2b compile image (issue #209, Task 8): the reduction output
+--     `reduceCode` with its intended adjacency matrix, the exact-edge
+--     characterization of the compiled closure over the generated family
+--     (`coveredB_gadget` — no closure-generated extras), the
+--     `StructuredAFIso` to the decoded carrier, and the frozen promise and
+--     size obligations `reduce_realizable` / `reduce_nodes` /
+--     `reduce_byteSize`; extended by the reduction correctness (Task 12):
+--     satisfiability over the explicit three-literal syntax
+--     (`Formula3.Satisfiable`), the complete-extension soundness and direct
+--     completeness arguments over the gadget edges, the frozen
+--     `reduce_correct` quoted beside the class-membership and size
+--     obligations, executable fixture verdicts through
+--     `fixedCredCompleteB`, and the `g(0)` self-edge negative control
+--     `selfEdgeCode_not_realizable` keeping the result a theorem about the
+--     realizable class, not unrestricted AFs — Lara.Complexity.Reduction
+--   * the M2b cost-instrumented grounded kernel (issue #209, Task 9): the
+--     attack-query-counting mirrors `anyAttackerC` / `defendedC` / `stepC` /
+--     `iterC` / `groundedC` of the proof-oriented grounded evaluator, their
+--     first-projection agreement with `Lara.Grounded`, and the two-sided
+--     query bounds with distinct quantifiers — the universal quadratic lower
+--     bound `groundedC_cost_ge`, the `n³(1+n)` ceiling `groundedC_cost_le`,
+--     and the two-node all-attacks regression (cost `4 = 2²`) refuting the
+--     rejected exact pointwise cubic inequality at `n = 2` — Lara.Complexity
+--   * the M2b realizable quartic witness (issue #209, Task 10): the
+--     three-block carrier `quarticAF` (for positive k: k-1 neutral `g` nodes,
+--     the defender `d` declared last in its block, k `b` nodes, and k `a`
+--     nodes; edges exactly `d → b(i)` and `b(i) → a(j)`), realized under
+--     a leaf-only raw unit through the executable checker with a
+--     `StructuredAFIso` at the identity reindexing (`quartic_realizable`,
+--     `quartic_size`); the grounded iterate shape (round one exactly the
+--     defender block, every later round defender + target blocks); and the
+--     quartic bound `quartic_cost_ge` (`k⁴ ≤` instrumented grounded cost,
+--     `2 ≤ k`) with closed evaluations at `k = 2, 3, 4` — a *worst-case*
+--     `Θ(n⁴)` result on this fixed-context realizable family, NOT a universal
+--     per-instance floor (the proved universal lower bound remains `n²`) —
+--     Lara.Examples.Complexity
+--   * the M2b shared carrier-status evaluator (issue #209, Task 11): the
+--     status query factored over one grounded run — `labelFromGroundedC`
+--     reading labels off a shared grounded result, `statusSharedC`
+--     preserving `Grounded.statusC`'s observable guard order while computing
+--     `groundedC` at most once, and the exposed carrier query
+--     `carrierStatusC` over the erased carrier with agreement
+--     `carrierStatusC_fst = Invariants.status`; `carrierStatusC_cost_le`
+--     (`n³(1+n) + 2n²`) is the paper-citable GroundedStatus upper theorem
+--     (the generic `statusSharedC_cost_le` is internal accounting), and the
+--     quartic floor transfers to this surface via
+--     `carrierStatus_quartic_cost_ge` — Lara.Complexity and
+--     Lara.Examples.Complexity
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -148,11 +206,16 @@ import Lara.Invariants
 import Lara.Realizability
 import Lara.Complexity.Context
 import Lara.Complexity.Encoding
+import Lara.Complexity.Numeral
+import Lara.Complexity.Gadget
+import Lara.Complexity.Reduction
+import Lara.Complexity
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
+import Lara.Examples.Complexity
 import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics

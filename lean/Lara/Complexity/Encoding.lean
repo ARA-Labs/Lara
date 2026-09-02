@@ -63,6 +63,45 @@ private theorem dedupNats_nodup :
         rename_i hnot
         exact ⟨fun hmem => hnot (Lara.Support.memB_iff.mpr hmem), ih⟩
 
+private theorem mem_dedupNats {n : Nat} {ns : List Nat} (h : n ∈ ns) :
+    n ∈ dedupNats ns := by
+  induction ns with
+  | nil => cases h
+  | cons m ns ih =>
+      simp only [dedupNats]
+      rcases List.mem_cons.mp h with rfl | hmem
+      · split
+        · rename_i hin
+          exact Lara.Support.memB_iff.mp hin
+        · exact List.mem_cons_self
+      · split
+        · exact ih hmem
+        · exact List.mem_cons_of_mem _ (ih hmem)
+
+private theorem dedupNats_subset {n : Nat} : ∀ {ns : List Nat},
+    n ∈ dedupNats ns → n ∈ ns := by
+  intro ns h
+  induction ns with
+  | nil => simp [dedupNats] at h
+  | cons m ns ih =>
+      simp only [dedupNats] at h
+      split at h
+      · exact List.mem_cons_of_mem _ (ih h)
+      · rcases List.mem_cons.mp h with rfl | hmem
+        · exact List.mem_cons_self
+        · exact List.mem_cons_of_mem _ (ih hmem)
+
+private theorem dedupNats_length_le : ∀ ns : List Nat,
+    (dedupNats ns).length ≤ ns.length := by
+  intro ns
+  induction ns with
+  | nil => simp [dedupNats]
+  | cons m ns ih =>
+      simp only [dedupNats, List.length_cons]
+      split
+      · exact Nat.le_succ_of_le ih
+      · simpa using Nat.succ_le_succ ih
+
 namespace Formula3
 
 /-- All literal occurrences in clause order and then field order. -/
@@ -91,6 +130,41 @@ def byteSize (formula : Formula3) : Nat :=
 theorem occurringVariables_nodup (formula : Formula3) :
     formula.occurringVariables.Nodup :=
   dedupNats_nodup _
+
+/-- Every literal occurrence's variable is an occurring variable. -/
+theorem mem_occurringVariables {formula : Formula3} {l : Literal}
+    (hl : l ∈ formula.literals) :
+    l.«variable» ∈ formula.occurringVariables :=
+  mem_dedupNats (List.mem_map.mpr ⟨l, hl, rfl⟩)
+
+/-- Every occurring variable is realized by an actual literal occurrence — the
+converse witness the compile-image size accounting reads its numeral bound
+from. -/
+theorem exists_literal_of_mem_occurringVariables {formula : Formula3} {v : Nat}
+    (hv : v ∈ formula.occurringVariables) :
+    ∃ l ∈ formula.literals, l.«variable» = v := by
+  obtain ⟨l, hl, hlv⟩ := List.mem_map.mp (dedupNats_subset hv)
+  exact ⟨l, hl, hlv⟩
+
+/-- Duplicate elimination never lengthens the occurrence list. -/
+theorem occurringVariables_length_le (formula : Formula3) :
+    formula.occurringVariables.length ≤ formula.literals.length := by
+  calc formula.occurringVariables.length
+      ≤ (formula.literals.map (·.«variable»)).length := dedupNats_length_le _
+    _ = formula.literals.length := List.length_map ..
+
+/-- Exactly three literal positions per clause. -/
+theorem literals_length (formula : Formula3) :
+    formula.literals.length = 3 * formula.length := by
+  induction formula with
+  | nil => rfl
+  | cons c rest ih =>
+      show (Clause3.literals c ++ rest.flatMap Clause3.literals).length = _
+      rw [List.length_append]
+      have hrest : (rest.flatMap Clause3.literals).length = 3 * rest.length := ih
+      simp only [Clause3.literals, List.length_cons, List.length_nil,
+        List.length_cons, hrest]
+      omega
 
 end Formula3
 

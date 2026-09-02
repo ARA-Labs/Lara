@@ -4,8 +4,15 @@
 -- single "Lara.Grounded" characteristic-operator iteration verbatim; the only
 -- thing it changes is /how the edge relation is realized/. The compiled edge
 -- decider ("Lara.Compile.edgeB", surfaced as 'Lara.Compile.checkedAF') rescans
--- the declared attacks on every @afAttack@ query, and the grounded fixpoint
--- queries @afAttack@ @O(|args|^3)@ times. The production backend evaluates that
+-- the declared attacks on every @afAttack@ query, and for @n = |args|@ the
+-- grounded fixpoint's @afAttack@ query count lies between @n^2@ and
+-- @n^3 * (1 + n)@ for every framework (Lean: @groundedC_cost_ge@,
+-- @groundedC_cost_le@); the fixed-context realizable three-block family
+-- attains quartic worst-case degree for both grounded evaluation and the
+-- nonempty carrier-status query (@quartic_realizable@, @quartic_cost_ge@,
+-- @carrierStatus_quartic_cost_ge@). Those counts are proved about the
+-- instrumented Lean mirrors ("Lara.Complexity"); this production runtime is
+-- not instrumented. The production backend evaluates that
 -- decider __once__ over the argument-index space, materialises the result into
 -- immutable @containers@ structures ('CachedAdj'), and hands "Lara.Grounded" an
 -- 'AF' whose @afAttack@ is a single 'Data.Set.member' lookup.

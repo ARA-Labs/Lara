@@ -1,5 +1,74 @@
 # M2b restricted-class realization spike
 
+## Renewed gate decision (2026-08-31)
+
+**HARDNESS**
+
+This is the D9 gate outcome of the follow-up plan
+(issue #209, branch `theory/m2b-realization-closure`): the realization
+closure is achieved and the hardness path (Phase 2, Tasks 9–13) is unlocked.
+It supersedes the 2026-08-30 INCONCLUSIVE record, which is preserved
+verbatim below.
+
+Every mandatory theorem named by the superseded record's "Exact obstruction"
+section now exists, `sorry`-free and within the standard axiom trio
+(`propext`, `Classical.choice`, `Quot.sound`), under the frozen context
+`canon := id`, `m2bSigma`, `m2bPolicy`, `m2bRegistry` — no formula-specific
+policy, signature, registry, or axiom anywhere:
+
+- **The family-wide checker equation** (`lean/Lara/Complexity/Gadget.lean`):
+  `acceptedUnitOfFormula` is defined for every `Formula3`, and
+  `checkUnit_formula_ok` proves
+  `Check.Unit.checkUnit (gammaOfFormula φ) m2bRegistry (groundOfFormula φ)
+  (rawUnitOfFormula φ) = .ok (acceptedUnitOfFormula φ)` through the public
+  executable checker, assembled from family-wide proofs of every
+  `checkUnit_complete` premise (argument duplicate-freedom, the R2 sorts
+  stage, recursive support, typed attacks with endpoint membership, and
+  exact attack completeness).
+- **The compile image** (`lean/Lara/Complexity/Reduction.lean`):
+  `reduceCode φ : CarrierCode` lists the gadget conclusions in declaration
+  order with the intended adjacency matrix, and `reduceIso φ` is a
+  `StructuredAFIso` from
+  `Invariants.compileUnit (acceptedUnitOfFormula φ)` to
+  `(reduceCode φ).decode` at the identity position reindexing.  The edge
+  half is `coveredB_gadget`: the checker's own closure-edge scan over the
+  generated family equals `gadgetEdgeB` — mutual literal pairs,
+  satisfying-literal-to-clause edges (positional undermines compile to edges
+  on the clause argument node), clause-to-query edges, and **no
+  closure-generated extras**, proved rather than stipulated.
+- **The promise and size obligations** (statements frozen by the plan):
+  `reduce_realizable : M2bPromise (reduceCode φ)` packages the checker
+  equation, fixed signature/policy, ground coverage
+  (`groundOfFormula_covers`), and the iso into an executable `Realization`
+  record — class membership carries the checker equation and the
+  `StructuredAFIso`, never `CompilerInvariant` alone;
+  `reduce_nodes : (reduceCode φ).nodes.length = 2 * variableCount φ +
+  φ.length + 1`; and
+  `reduce_byteSize : (reduceCode φ).byteSize ≤ 64 * (Formula3.byteSize φ +
+  1) ^ 2` with the engineering-cleared constant `64` intact.  Per the frozen
+  size contracts, `CarrierCode.byteSize` is the carrier accounting measure
+  and `Formula3.byteSize` the UTF-8 length of the canonical S-expression;
+  the two are not interchanged.
+
+Validation: `lake build` passes (93 jobs), the axiom audit
+(`lake env lean AxCheck.lean | scripts/check-axioms.sh`) reports only the
+standard trio with rows for every theorem above, and the closed fixtures and
+shape regression of `lean/Lara/Examples/Complexity/Realization.lean` are
+unchanged in statement and still check.
+
+**Scope.** HARDNESS here names the gate outcome only: the reduction target
+family is realizable in the fixed M2b context with polynomially bounded
+carrier accounting.  No NP-hardness claim is made — the 3SAT reduction
+correctness (`reduce_correct`) is Phase 2's Task 12 and does not yet exist.
+Nothing in this record merges the proved universal quadratic query lower bound
+with the existential worst-case quartic family; neither bound is part of this gate.
+
+---
+
+## Superseded record (2026-08-30)
+
+Everything below is the original spike record, preserved verbatim.
+
 ## Gate decision
 
 **INCONCLUSIVE**

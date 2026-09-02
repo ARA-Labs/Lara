@@ -39,6 +39,11 @@ import Lara.Examples
 import Lara.Examples.AttackCompleteness
 import Lara.Invariants
 import Lara.Realizability
+import Lara.Complexity.Numeral
+import Lara.Complexity.Gadget
+import Lara.Complexity.Reduction
+import Lara.Complexity
+import Lara.Examples.Complexity
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
@@ -1700,3 +1705,205 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.BackendComposition.depsDupOrdNode_stepDeps
 #print axioms Lara.Examples.BackendComposition.depsDupTerm_certDeps
 #print axioms Lara.Examples.BackendComposition.depsDupTerm_usedBackends
+
+/-! ### M2b follow-up — realization closure (issue #209)
+
+The plan's headline rows: the numeral-injectivity foundation, the closed leaf
+vocabulary, the family-wide `checkUnit_complete` premises, and the assembled
+checker equation (`Lara.Complexity.Numeral` / `Lara.Complexity.Gadget`). -/
+
+#print axioms Lara.Complexity.Numeral.natRepr_inj
+#print axioms Lara.Complexity.GadgetLeaf.encode_inj
+#print axioms Lara.Complexity.formulaLeafEntries_keys_nodup
+#print axioms Lara.Complexity.groundOfFormula_covers
+#print axioms Lara.Complexity.formulaArguments_nodup
+#print axioms Lara.Complexity.signatureStage_formula_none
+#print axioms Lara.Complexity.formulaArguments_supported
+#print axioms Lara.Complexity.hasAttack_formula
+#print axioms Lara.Complexity.formulaAttacks_complete
+#print axioms Lara.Complexity.checkUnit_formula_ok
+
+-- The supporting public surface the headline rows rest on (CLAUDE.md: AxCheck
+-- covers every new theorem).
+#print axioms Lara.Complexity.Numeral.decodeNat_repr
+#print axioms Lara.Complexity.Numeral.repr_no_dash
+#print axioms Lara.Complexity.Numeral.natRepr_toList_inj
+#print axioms Lara.Complexity.GadgetLeaf.encode_eq_iff
+#print axioms Lara.Complexity.m2bPolicy_ruleLookup_clause
+#print axioms Lara.Complexity.clauseSubst_keys
+#print axioms Lara.Complexity.instAPats_clauseSubst_premises
+#print axioms Lara.Complexity.instAPat_clauseSubst_concl
+#print axioms Lara.Complexity.occurrenceLeafId_inj
+#print axioms Lara.Complexity.lookupLeaf_eq_some_of_nodup
+#print axioms Lara.Complexity.lookupLeaf_mem_snd
+#print axioms Lara.Complexity.gammaOfFormula_negLit
+#print axioms Lara.Complexity.gammaOfFormula_posLit
+#print axioms Lara.Complexity.gammaOfFormula_occurrence
+#print axioms Lara.Complexity.gammaOfFormula_query
+#print axioms Lara.Complexity.gammaOfFormula_literalLeaf
+#print axioms Lara.Complexity.groundOfFormula_wellSorted
+#print axioms Lara.Complexity.formulaArguments_wellSorted
+#print axioms Lara.Complexity.formulaAttacks_source_mem
+#print axioms Lara.Complexity.formulaAttacks_target_mem
+#print axioms Lara.Complexity.formulaArgument_conclusion
+#print axioms Lara.Complexity.contraryMatch_rootConclusion_iff
+#print axioms Lara.Complexity.contraryMatch_negLit_posLit
+#print axioms Lara.Complexity.contraryMatch_posLit_negLit
+#print axioms Lara.Complexity.contraryMatch_lit_occ
+#print axioms Lara.Complexity.contraryMatch_clause_query
+#print axioms Lara.Complexity.hasSupport_gadgetLeaf
+#print axioms Lara.Complexity.hasSupport_clauseArgument
+#print axioms Lara.Complexity.hasAttack_negLit_posLit
+#print axioms Lara.Complexity.hasAttack_posLit_negLit
+#print axioms Lara.Complexity.hasAttack_literal_occurrence
+#print axioms Lara.Complexity.hasAttack_clause_query
+#print axioms Lara.Complexity.Formula3.occurringVariables_nodup
+#print axioms Lara.Complexity.Formula3.mem_occurringVariables
+#print axioms Lara.Complexity.checkUnit_formula_accepts
+
+-- Task 8: the compile image, the frozen promise/size obligations, and the
+-- exact-edge characterization ("no closure-generated extras") of
+-- Lara.Complexity.Reduction, with the reduction-facing surface of the gadget
+-- and encoding modules it reads.
+#print axioms Lara.Complexity.reduce_realizable
+#print axioms Lara.Complexity.reduce_nodes
+#print axioms Lara.Complexity.reduce_byteSize
+#print axioms Lara.Complexity.reduceIso
+#print axioms Lara.Complexity.coveredB_gadget
+#print axioms Lara.Complexity.clauseArgument_index_inj
+#print axioms Lara.Complexity.variable_mem_occurringVariables
+#print axioms Lara.Complexity.subterm_clauseArgument_prem
+#print axioms Lara.Complexity.clauseArgument_conclusion_eq
+#print axioms Lara.Complexity.mem_formulaAttacks
+#print axioms Lara.Complexity.undermine_negLit_mem
+#print axioms Lara.Complexity.undermine_posLit_mem
+#print axioms Lara.Complexity.undermine_clause_query_mem
+#print axioms Lara.Complexity.undermine_literal_occurrence_mem
+#print axioms Lara.Complexity.Formula3.exists_literal_of_mem_occurringVariables
+#print axioms Lara.Complexity.Formula3.occurringVariables_length_le
+#print axioms Lara.Complexity.Formula3.literals_length
+
+-- Spike-era fixed-context surface (issue #208): the pre-existing public
+-- theorems of Lara.Complexity.Context and Lara.Complexity.Encoding that the
+-- #209 closure reads (registered here per a Task-7 review follow-up; the
+-- occurringVariables Nodup row is above).
+#print axioms Lara.Complexity.m2bSigma_wellFormed
+#print axioms Lara.Complexity.m2bPolicy_wellSorted
+#print axioms Lara.Complexity.m2bPolicy_ruleIds_unique
+#print axioms Lara.Complexity.m2bPolicy_scopesWellFormed
+#print axioms Lara.Complexity.m2bPolicy_noViolation
+#print axioms Lara.Complexity.d_attacks_b
+#print axioms Lara.Complexity.b_attacks_a
+#print axioms Lara.Complexity.negative_lit_attacks_positive_lit
+#print axioms Lara.Complexity.positive_lit_attacks_negative_lit
+#print axioms Lara.Complexity.lit_attacks_occ
+#print axioms Lara.Complexity.clause_attacks_query
+#print axioms Lara.Complexity.b_does_not_attack_d
+#print axioms Lara.Complexity.a_does_not_attack_b
+#print axioms Lara.Complexity.lit_different_variable_does_not_attack
+#print axioms Lara.Complexity.occ_does_not_attack_lit
+#print axioms Lara.Complexity.m2bRegistry_empty
+#print axioms Lara.Complexity.decode_size
+#print axioms Lara.Complexity.decode_attack
+#print axioms Lara.Complexity.erase_decode_args_nodup
+#print axioms Lara.Complexity.fixedCredCompleteB_iff
+#print axioms Lara.Complexity.matrixByteSize_eq_square
+#print axioms Lara.Complexity.byteSize_accounting
+#print axioms Lara.Complexity.byteSize_pos
+#print axioms Lara.Complexity.nodeKeyByteSize_le
+#print axioms Lara.Complexity.queryByteSize_le
+
+-- Task 9 (Lara.Complexity): the cost-instrumented grounded kernel.
+-- Evaluator agreement — every mirror's first projection is its
+-- Lara.Grounded original.
+#print axioms Lara.Complexity.anyAttackerC_fst
+#print axioms Lara.Complexity.defendedAuxC_fst
+#print axioms Lara.Complexity.defendedC_fst
+#print axioms Lara.Complexity.stepAuxC_fst
+#print axioms Lara.Complexity.stepC_fst
+#print axioms Lara.Complexity.iterC_fst
+#print axioms Lara.Complexity.groundedC_fst
+-- Upper bounds: the full grounded run costs at most n³(1 + n).
+#print axioms Lara.Complexity.anyAttackerC_cost_le
+#print axioms Lara.Complexity.defendedAuxC_cost_le
+#print axioms Lara.Complexity.defendedC_cost_le
+#print axioms Lara.Complexity.stepAuxC_cost_cons
+#print axioms Lara.Complexity.stepAuxC_cost_le
+#print axioms Lara.Complexity.stepC_cost_le
+#print axioms Lara.Complexity.iter_length_le
+#print axioms Lara.Complexity.iterC_cost_le
+#print axioms Lara.Complexity.groundedC_cost_le
+-- Short-circuit scan composition (the public per-round accounting layer).
+#print axioms Lara.Complexity.anyAttackerC_cons_hit
+#print axioms Lara.Complexity.anyAttackerC_cons_miss
+#print axioms Lara.Complexity.anyAttackerC_prefix
+#print axioms Lara.Complexity.defendedAuxC_cons_miss
+#print axioms Lara.Complexity.defendedAuxC_cons_defended
+#print axioms Lara.Complexity.defendedAuxC_no_attack
+#print axioms Lara.Complexity.defendedAuxC_append_true
+#print axioms Lara.Complexity.defendedAuxC_uniform
+#print axioms Lara.Complexity.stepAuxC_cost_append
+#print axioms Lara.Complexity.stepAuxC_cost_uniform
+-- Corrected lower bounds: the proved universal lower bound is quadratic; the
+-- two-node evaluation refutes the rejected exact cubic inequality at `n = 2`.
+#print axioms Lara.Complexity.defendedAuxC_cost_ge_one
+#print axioms Lara.Complexity.defendedC_cost_ge_one
+#print axioms Lara.Complexity.stepAuxC_cost_ge
+#print axioms Lara.Complexity.stepC_cost_ge
+#print axioms Lara.Complexity.iterC_cost_ge
+#print axioms Lara.Complexity.groundedC_cost_ge
+#print axioms Lara.Complexity.groundedC_twoNodeAllAttacks_cost
+
+-- Task 10 (Lara.Examples.Complexity): the fixed-context realizable quartic
+-- witness — closed leaf vocabulary, class membership through the executable
+-- checker, iterate shape, and the existential quartic worst case.
+#print axioms Lara.Examples.Complexity.quarticLeaves_length
+#print axioms Lara.Examples.Complexity.quarticAttack_eq_true_iff
+#print axioms Lara.Examples.Complexity.quartic_size
+#print axioms Lara.Examples.Complexity.QuarticLeaf.encode_inj
+#print axioms Lara.Examples.Complexity.quarticGamma_encode
+#print axioms Lara.Examples.Complexity.quarticGround_covers
+#print axioms Lara.Examples.Complexity.contraryMatch_d_b
+#print axioms Lara.Examples.Complexity.contraryMatch_b_a
+#print axioms Lara.Examples.Complexity.quartic_checkUnit_accepts
+#print axioms Lara.Examples.Complexity.quartic_checkUnit_ok
+#print axioms Lara.Examples.Complexity.quarticEmpty_accepts
+#print axioms Lara.Examples.Complexity.quarticEmpty_checkUnit_ok
+#print axioms Lara.Examples.Complexity.quartic_realizable
+#print axioms Lara.Examples.Complexity.quartic_iter_one
+#print axioms Lara.Examples.Complexity.quartic_iter_fix
+#print axioms Lara.Examples.Complexity.quartic_cost_ge
+#print axioms Lara.Examples.Complexity.quartic_cost_eval_two
+#print axioms Lara.Examples.Complexity.quartic_cost_eval_three
+#print axioms Lara.Examples.Complexity.quartic_cost_eval_four
+
+-- Task 11 (Lara.Complexity + the Examples transfer): the shared
+-- carrier-status evaluator. carrierStatusC_cost_le is the paper-citable
+-- GroundedStatus headline; statusSharedC_cost_le is internal accounting.
+#print axioms Lara.Complexity.outScanC_fst
+#print axioms Lara.Complexity.outScanC_cost_le
+#print axioms Lara.Complexity.labelFromGroundedC_fst
+#print axioms Lara.Complexity.labelFromGroundedC_cost_le
+#print axioms Lara.Complexity.supportScanC_fst
+#print axioms Lara.Complexity.supportScanC_cost_le
+#print axioms Lara.Complexity.statusSharedC_fst
+#print axioms Lara.Complexity.statusSharedC_cost_le
+#print axioms Lara.Complexity.statusSharedC_cost_ge_grounded
+#print axioms Lara.Complexity.support_length_le
+#print axioms Lara.Complexity.carrierStatusC_fst
+#print axioms Lara.Complexity.carrierStatusC_cost_le
+#print axioms Lara.Examples.Complexity.carrierStatus_quartic_cost_ge
+
+-- Task 12 (Lara.Complexity.Reduction): 3SAT reduction correctness inside
+-- the fixed realizable class, the adjacency corollaries that keep class
+-- membership and size quotable with it, the executable fixtures, and the
+-- class-membership negative control.
+#print axioms Lara.Complexity.reduce_correct
+#print axioms Lara.Complexity.reduce_correct_realizable
+#print axioms Lara.Complexity.reduce_correct_nodes
+#print axioms Lara.Complexity.reduce_correct_byteSize
+#print axioms Lara.Complexity.positiveFixture_satisfiable
+#print axioms Lara.Complexity.positiveFixture_accepted
+#print axioms Lara.Complexity.negativeFixture_rejected
+#print axioms Lara.Complexity.negativeFixture_unsatisfiable
+#print axioms Lara.Complexity.selfEdgeCode_not_realizable

@@ -6959,3 +6959,99 @@ tree:
     - "plans/2026-08-30-m2b-realization-followup.md"
     - "lean/Lara/ND.lean:112 (decodeNat_repr)"
   also_depends_on: [N262, N257, N255]
+
+- id: N264
+  type: experiment
+  title: "M2b realization and restricted-class hardness closure audited"
+  provenance: ai-executed
+  timestamp: "2026-08-31T15:38"
+  description: >
+    Audit the completed issue-#209 branch against the renewed gate, the
+    preserved thirteen-task plan, the registered theorem surface, and fresh
+    repository verification before re-adjudicating the ARA claims.
+  result: >
+    The branch closes the family-wide checker equation, exact compile image,
+    fixed-context realizability, polynomial carrier accounting, realizable
+    quartic grounded and carrier-status lower bounds, and the two-sided 3SAT
+    reduction. The renewed gate records HARDNESS. All thirteen plan tasks are
+    implemented; the separate proof-refactoring ideas remain out of scope in
+    issue #211. Fresh Lean and Haskell build/test gates passed. The ARA
+    source-span gate found that C44/C45 still cited line ranges from the
+    superseded INCONCLUSIVE record, which this closeout replaces with the
+    durable closure record.
+  evidence:
+    - "commits bcd16a6..10d90f3"
+    - "lean/Lara/Complexity/Gadget.lean: checkUnit_formula_ok"
+    - "lean/Lara/Complexity/Reduction.lean: reduce_realizable, reduce_byteSize, reduce_correct"
+    - "lean/Lara/Examples/Complexity.lean: quartic_realizable, quartic_cost_ge, carrierStatus_quartic_cost_ge"
+    - "lean/AxCheck.lean: issue-#209 registration"
+    - "docs/theory-m2b-complexity.md"
+    - "make build: PASS; make test: PASS"
+  also_depends_on: [N263, N257, N255]
+
+- id: N265
+  type: decision
+  title: "Close the M2b research record and ship the implementation"
+  provenance: user
+  timestamp: "2026-08-31T15:39"
+  choice: >
+    Reconcile C44/C45 to the committed HARDNESS result, close O109 against
+    the implemented numeral and attack-completeness proof architecture, then
+    push theory/m2b-realization-closure and open its implementation pull
+    request.
+  alternatives:
+    - "Leave the ARA at the predecessor INCONCLUSIVE state and defer delivery — rejected because the implementation and durable decision record are complete."
+  evidence:
+    - "User directive: do the ARA re-adjudication and push/open the implementation PR"
+    - "issue #209 acceptance and closeout comment"
+  also_depends_on: [N264, N262]
+
+- id: N266
+  type: experiment
+  title: "M2b realization closure opened as implementation PR #212"
+  provenance: ai-executed
+  timestamp: "2026-08-31T15:53"
+  description: >
+    Push the completed theory/m2b-realization-closure branch with upstream
+    tracking and open the issue-#209 implementation pull request against main
+    with the proof, plan-completion, review, and verification evidence.
+  result: >
+    The branch was pushed to origin and PR #212 opened against main. Its body
+    maps all thirteen plan tasks to the implemented theorem surface, records
+    the 100% contract-family coverage audit and clean adversarial review, and
+    names the successful Lean, Haskell, AxCheck, ARA source-span, YAML, and
+    whitespace gates. Hosted CI is pending.
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/212"
+    - "commit 64346ed"
+    - "origin/theory/m2b-realization-closure"
+  also_depends_on: [N265, N264]
+
+- id: N267
+  type: experiment
+  title: "PR #212 review narrows the universal-cost claim and hardens audits"
+  provenance: ai-executed
+  timestamp: "2026-08-31T18:26"
+  description: >
+    Evaluate all five requested changes from the first PR #212 review against
+    the public theorem surface, leaf-ID definitions, quartic-family parameter,
+    realization quantifiers, and grounded-cost proofs; implement only findings
+    supported by the repository evidence and rerun the affected gates.
+  result: >
+    All five findings were upheld. Four public gadget theorems now have direct
+    AxCheck rows; closed literal-string fixtures pin all GadgetLeaf constructor
+    spellings including both separators of a multi-digit occurrence ID; the
+    quarticAF summary now uses the theorem-facing k parameter; C44 and its
+    downstream documentation now distinguish the proved universal n-squared
+    lower bound from unproved asymptotic optimality and state realization
+    transfer in the correct restricted-class direction. Full build, Haskell
+    tests, AxCheck, ARA source-span, and whitespace gates pass.
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/212#pullrequestreview-5069676657"
+    - "lean/AxCheck.lean: direct rows for the four public gadget theorems"
+    - "lean/Lara/Complexity/Gadget.lean: closed leaf-ID spelling fixtures"
+    - "lean/Lara/Complexity.lean: groundedC_twoNodeAllAttacks_cost scope"
+    - "ara/logic/claims.md: C44"
+    - "make build: PASS; make test: PASS"
+    - "AxCheck audit: PASS; make ara-source-spans: PASS (42 quotations)"
+  also_depends_on: [N266, N264]

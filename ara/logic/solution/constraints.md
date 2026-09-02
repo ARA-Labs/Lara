@@ -204,14 +204,15 @@ than by convenience. Fixed policy so that ease-of-use work cites it instead of r
 language-design commitment; layer-2 evaluation (how faithfully a producer lowers prose) belongs
 to the ACL/EMNLP follow-up with #52 and #30.
 
-## M2b restricted-class complexity constraints (2026-08-30 — grounds: O105, O106, N255)
+## M2b restricted-class complexity constraints (2026-08-31 — grounds: O105, O106, N255, N264)
 
 - **A restricted-class lower-bound witness carries class membership.** A family over
   arbitrary `Grounded.AF` values is not evidence of tightness over M1-realizable
   carriers. The witness must provide an executable checker equation and
   `StructuredAFIso` under the same fixed canon, signature, policy, and registry as
-  the paper claim. The implemented fixed context and the missing family-wide
-  equation are documented in `docs/theory-m2b-complexity-spike.md`.
+  the paper claim. The implemented fixed context, family-wide checker equation,
+  and realizable witnesses are documented in `docs/theory-m2b-complexity.md`;
+  `docs/theory-m2b-complexity-spike.md` preserves both gate decisions.
 - **Oracle cost and classical input size use separate frozen representations.**
   Grounded evaluation counts calls to the attack oracle on the frozen carrier.
   Classical hardness uses `CarrierCode`: finite node labels, a square adjacency
@@ -221,7 +222,7 @@ to the ACL/EMNLP follow-up with #52 and #30.
   exists. `Formula3.byteSize`, by contrast, is the UTF-8 length of its canonical
   S-expression (`lean/Lara/Complexity/Encoding.lean`).
 
-## M2b follow-up realization constraints (2026-08-30 — grounds: O108, N257, N263)
+## M2b follow-up realization constraints (2026-08-31 — grounds: O108, O109, N257, N263, N264)
 
 - **A family-wide realization theorem requires compositional checker lemmas, not
   closed fixtures.** Closed `checkUnit` fixtures establish schema directionality and
@@ -232,5 +233,8 @@ to the ACL/EMNLP follow-up with #52 and #30.
   membership, and exact `Compile.AttackComplete`. A realization attempt over a
   formula-indexed family must first package compositional lifting lemmas for those
   obligations, or select a separately reviewed specialized construction; it may not
-  extrapolate acceptance from closed instances. Operationalized by the follow-up
-  plan (`plans/2026-08-30-m2b-realization-followup.md`, PR #210, issue #209).
+  extrapolate acceptance from closed instances. Issue #209 discharges this
+  constraint through the compositional-lemma architecture in
+  `lean/Lara/Complexity/Gadget.lean`; the durable account is
+  `docs/theory-m2b-complexity.md`, and the retired execution plan is preserved
+  at git object `8155ec7:plans/2026-08-30-m2b-realization-followup.md`.

@@ -794,24 +794,38 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: [C40]
 - **Tags**: mechanization, backend-composition, heterogeneity, occurrence-level, B0
 
-## C44: Short-circuit grounded cost separates a universal floor from worst-case tightness
-- **Statement**: In the transparent grounded evaluator, short-circuit failure makes the universal attack-query floor quadratic, while quartic lower bounds are existential worst-case results requiring families whose successful defense scans run late. An unrestricted witness does not establish tightness on the realizable class.
-- **Conditions**: Applies to the frozen attacker-first, defense-scan-second evaluator and attack-oracle query model. The universal bound ranges over finite carriers. The restricted-class quartic statement additionally requires an M1 `Realization` under the same fixed context as the paper claim. The replacement family and proofs were not implemented after the realization gate stopped.
-- **Sources**: [`quadratic short-circuit` ← `ara/trace/exploration_tree.yaml:6643-6648` «A family where the first carrier node attacks every target costs n^2, below the claimed universal n^3 floor / an undefended target short-circuits after its first attacker, so the family is cubic rather than quartic.» [result]; `realizability gate` ← `docs/theory-m2b-complexity-spike.md:102-110` «Without the checker equation there is no accepted unit from which to prove that compilation has exactly the gadget edges and no closure-generated extras.» [result]]
-- **Status**: testing
-- **Provenance**: ai-suggested
-- **Falsification**: Exhibit a finite carrier whose instrumented grounded cost is below the squared carrier length, prove the rejected pinned family has quartic cost under the frozen schedule, or show that the planned fixed-context family cannot carry the required realization.
-- **Proof**: [trace N250, trace N253, trace N256, corrected-plan commit 4772231; restricted-class tightness declarations absent after the INCONCLUSIVE gate]
+## C44: A universal lower bound is distinct from worst-case tightness
+- **Statement**: In the transparent grounded evaluator, every finite framework incurs at least `n²` attack queries. The two-node all-attacks regression refutes the rejected exact pointwise `n³` inequality at `n = 2`, but does not prove that the quadratic lower bound is asymptotically optimal. Quartic lower bounds are existential worst-case results requiring families whose successful defense scans run late, and an unrestricted witness does not establish tightness on the realizable class.
+- **Conditions**: Applies to the frozen attacker-first, defense-scan-second evaluator and attack-oracle query model over finite carriers. Restricted-class tightness uses the fixed-context realizable `quarticAF` family, and the carrier-status transfer applies after the nonempty-support guard. No unrestricted-AF witness establishes a result for the fixed-context realizable class without its own realization proof.
+- **Sources**: [`universal bounds` ← `docs/theory-m2b-complexity.md:203-208` «`groundedC_cost_le : cost ≤ n³(1 + n)` and `groundedC_cost_ge : n² ≤ cost` for every framework, `n = F.args.length`.» [result]; `realizable quartic witness` ← `docs/theory-m2b-complexity.md:209-217` «The three-block family `quarticAF k` / is realizable in the fixed context (`quartic_realizable`, with `quartic_size : size = 3k`), and for `2 ≤ k` pays at least `k⁴` attack queries (`quartic_cost_ge`) / Together with `groundedC_cost_le` this is worst-case Θ(n⁴) *over the fixed-context realizable class*» [result]; `carrier-status transfer` ← `docs/theory-m2b-complexity.md:218-229` «The quartic floor transfers to this surface: `carrierStatus_quartic_cost_ge` (the `d` claim has nonempty complete support, so the grounded branch runs and is fully counted).» [result]]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification**: Exhibit a finite carrier violating either proved universal grounded-cost bound, a fixed-context checker or compile-image counterexample to `quartic_realizable`, a qualifying quartic-family instance violating `quartic_cost_ge`, or a carrier-status execution that bypasses the stated nonempty-support condition.
+- **Proof**: [`groundedC_cost_ge`, `groundedC_cost_le`, `quartic_realizable`, `quartic_cost_ge`, `carrierStatus_quartic_cost_ge`; commits f0e36ab, 9e3d557, 0193f5c; `docs/theory-m2b-complexity.md`]
 - **Dependencies**: [C34]
 - **Tags**: M2b, grounded-semantics, query-complexity, short-circuiting, realizability, tightness
+- **Last revised**: 2026-08-31 (2026-08-31_001#3)
 
 ## C45: Failure of one realization construction does not establish tractability
 - **Statement**: Rejecting an arbitrary-digraph realization kit does not by itself imply a tractability-inducing invariant; a restricted class may reject that construction and remain hard through a specialized reduction. Allowing the policy to vary with each source instance also changes the class whose restriction is being studied.
-- **Conditions**: Applies to complexity claims over M1 `Realizable` carriers. Hardness requires one formula-independent canon, signature, policy, and registry plus a realization theorem for every reduction output. Tractability requires an independently proved structure theorem and adequate algorithm, not absence of one chosen encoding.
-- **Sources**: [`gate discipline` ← `docs/theory-m2b-complexity-spike.md:133-137` «The mandatory realization gate stopped at **INCONCLUSIVE**. / it must not reinterpret this record as evidence for hardness or tractability.» [result]; `fixed context` ← `docs/theory-m2b-complexity-spike.md:120-129` «the target checker equation fixes the registry to `m2bRegistry`, whose type fixes the canonicalizer to `id` / No formula-specific policy, signature, registry, axiom, `sorry`, or placeholder was introduced.» [result]]
-- **Status**: testing
-- **Provenance**: ai-suggested
-- **Falsification**: Prove that failure of the specified realization kit logically entails a carrier invariant yielding a decision algorithm, or prove that synthesizing a fresh policy per instance preserves the same fixed-context realizable class.
-- **Proof**: [trace N252, trace N255, plan commit 4772231; realization gate recorded INCONCLUSIVE in `docs/theory-m2b-complexity-spike.md`]
+- **Conditions**: Applies to complexity claims over M1 `Realizable` carriers. The present support is one formula-independent canon, signature, policy, and registry with a realization theorem for every output of a specialized 3SAT reduction. It does not establish that every failed realization construction preserves hardness; NP-membership bookkeeping remains paper-level.
+- **Sources**: [`renewed gate` ← `docs/theory-m2b-complexity.md:126-134` «2026-08-31 — HARDNESS / Every mandatory theorem named by the INCONCLUSIVE record's obstruction section exists `sorry`-free under the frozen context / the reduction target family is realizable with polynomially bounded carrier accounting» [result]; `mechanized reduction` ← `docs/theory-m2b-complexity.md:235-246` «`reduce_correct : Formula3.Satisfiable φ ↔ FixedCredComplete (reduceCode φ)` / `reduce_realizable : M2bPromise (reduceCode φ)` / `reduce_nodes` and `reduce_byteSize` — polynomial output size under the frozen D5 measures.» [result]; `paper boundary` ← `docs/theory-m2b-complexity.md:248-250` «Paper-level only: NP-completeness bookkeeping (encodings, machine model, membership in NP). It is deliberately not a Lean statement» [result]]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification**: Prove that failure of the specified realization kit entails a tractability-inducing invariant and adequate algorithm, find a source formula whose `reduceCode` output violates the fixed `M2bPromise`, invalidate either direction of `reduce_correct`, or prove that synthesizing a fresh policy per source instance preserves the same fixed-context class.
+- **Proof**: [`checkUnit_formula_ok`, `reduceIso`, `reduce_realizable`, `reduce_nodes`, `reduce_byteSize`, `reduce_correct`, `selfEdgeCode_not_realizable`; commits e9f7842, 8155ec7; `docs/theory-m2b-complexity.md`]
 - **Dependencies**: [C34]
 - **Tags**: M2b, realizability, hardness, tractability, fixed-policy, reduction-discipline
+- **Last revised**: 2026-08-31 (2026-08-31_001#3)
+
+## C46: Verified numeral decoding separates identifier injectivity from attack completeness
+- **Statement**: When generated decimal identifiers are inverted through a proved decoder round-trip, their atom representation is injective; identifier-collision obligations can be discharged independently of the generated attack-family completeness proof.
+- **Conditions**: Applies to the M2b gadget's decimal payloads and closed `GadgetLeaf` encoding under the fixed module-ownership boundary. It does not make `AttackComplete` automatic: the assembly still needs root-conclusion inversion, contrary characterization, and declared-attack witnesses.
+- **Sources**: [`decoder round-trip` ← `docs/theory-m2b-complexity.md:83-92` «`natRepr_inj : Nat.repr m = Nat.repr n → m = n` is proved by applying a decoder with a proven round-trip, never by induction over string representations.» [result]; `attack-completeness boundary` ← `docs/theory-m2b-complexity.md:170-181` «**Exact attack completeness** (`formulaAttacks_complete`, the highest-risk step) / `litAtom_inj` (which is two applications of `natRepr_inj` to the `lit` atom's decimal payloads) forces equal variable indices when two root conclusions collide.» [result]]
+- **Status**: testing
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit distinct natural-number payloads with equal `Nat.repr`, a collision in `GadgetLeaf.encode`, or a proof dependency showing that decimal injectivity cannot be established before the attack-completeness characterization.
+- **Proof**: [`natRepr_inj`, `GadgetLeaf.encode_inj`, `formulaAttacks_complete`, `checkUnit_formula_ok`; commits 44ba0bf, a28ed93, e9f7842]
+- **Dependencies**: [C34, C45]
+- **Tags**: M2b, numeral-injectivity, gadget-encoding, attack-completeness, proof-architecture
+- **Last revised**: 2026-08-31 (2026-08-31_001#3)

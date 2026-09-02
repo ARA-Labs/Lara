@@ -10,25 +10,12 @@ described at the end of the spike was not closed; no theorem in this file
 claims that it was.
 -/
 
-import Lara.Complexity.Encoding
+import Lara.Complexity.Gadget
 
 namespace Lara.Examples.Complexity.Realization
 
 open Lara Lara.Support Lara.Attack
 open Lara.Complexity
-
-private def indexedLeafId (tag : String) (indices : List Nat) : LeafId :=
-  ⟨tag ++ "-" ++ String.intercalate "-" (indices.map Nat.repr)⟩
-
-private def numTerm (n : Nat) : Lara.Term := .num (Nat.repr n)
-
-private def literalSign (literal : Literal) : Nat :=
-  if literal.positive then 1 else 0
-
-private def lookupLeaf : List (LeafId × Lara.Atom) → LeafId → Option Lara.Atom
-  | [], _ => none
-  | (candidate, atom) :: rest, leaf =>
-      if candidate = leaf then some atom else lookupLeaf rest leaf
 
 /-! ## Closed checker and compilation fixtures -/
 
@@ -234,108 +221,7 @@ theorem checkUnit_reversedPath_rejected :
     (Check.Unit.checkUnit pathGamma m2bRegistry pathGround
       reversedPathRawUnit).isOk = false := by decide
 
-/-! ## Formula-indexed raw gadget -/
-
-private def negativeLiteralLeafId (varIdx : Nat) : LeafId :=
-  indexedLeafId "literal-negative" [varIdx]
-
-private def positiveLiteralLeafId (varIdx : Nat) : LeafId :=
-  indexedLeafId "literal-positive" [varIdx]
-
-private def literalLeafId (literal : Literal) : LeafId :=
-  if literal.positive then positiveLiteralLeafId literal.«variable»
-  else negativeLiteralLeafId literal.«variable»
-
-private def occurrenceLeafId (clauseIndex position : Nat) : LeafId :=
-  indexedLeafId "occurrence" [clauseIndex, position]
-
-private def queryLeafId : LeafId := ⟨"formula-query"⟩
-
-private def negativeLiteralArg (varIdx : Nat) : SupportTerm :=
-  .leaf (negativeLiteralLeafId varIdx)
-
-private def positiveLiteralArg (varIdx : Nat) : SupportTerm :=
-  .leaf (positiveLiteralLeafId varIdx)
-
-private def literalArg (literal : Literal) : SupportTerm :=
-  .leaf (literalLeafId literal)
-
-private def queryArg : SupportTerm := .leaf queryLeafId
-
-private def literalLeafEntries (varIdx : Nat) : List (LeafId × Lara.Atom) :=
-  [ (negativeLiteralLeafId varIdx, litAtom 0 varIdx)
-  , (positiveLiteralLeafId varIdx, litAtom 1 varIdx) ]
-
-private def occurrenceEntries (clauseIndex : Nat) (clause : Clause3) :
-    List (LeafId × Lara.Atom) :=
-  clause.literals.zipIdx.map fun entry =>
-    (occurrenceLeafId clauseIndex entry.2,
-      occAtom (literalSign entry.1) entry.1.«variable»)
-
-private def formulaLeafEntries (formula : Formula3) :
-    List (LeafId × Lara.Atom) :=
-  formula.occurringVariables.flatMap literalLeafEntries ++
-    formula.zipIdx.flatMap (fun entry => occurrenceEntries entry.2 entry.1) ++
-    [(queryLeafId, queryAtom)]
-
-/-- Formula-dependent leaf lookup; the fixed policy and registry do not depend
-on the formula. -/
-def gammaOfFormula (formula : Formula3) : LeafId → Option Lara.Atom :=
-  lookupLeaf (formulaLeafEntries formula)
-
-/-- Explicit finite ground list covering every formula-gadget leaf entry. -/
-def groundOfFormula (formula : Formula3) : List Lara.Atom :=
-  (formulaLeafEntries formula).map Prod.snd
-
-private def clauseSubst (clauseIndex : Nat) (clause : Clause3) : Subst :=
-  [ (⟨"S1"⟩, numTerm (literalSign clause.first))
-  , (⟨"X1"⟩, numTerm clause.first.«variable»)
-  , (⟨"S2"⟩, numTerm (literalSign clause.second))
-  , (⟨"X2"⟩, numTerm clause.second.«variable»)
-  , (⟨"S3"⟩, numTerm (literalSign clause.third))
-  , (⟨"X3"⟩, numTerm clause.third.«variable»)
-  , (⟨"J"⟩, numTerm clauseIndex) ]
-
-private def clauseArgument (clauseIndex : Nat) (clause : Clause3) : SupportTerm :=
-  .inst m2bClauseRuleId (clauseSubst clauseIndex clause)
-    (clause.literals.zipIdx.map fun entry =>
-      .leaf (occurrenceLeafId clauseIndex entry.2))
-    [] [] .none
-
-private def literalArguments (formula : Formula3) : List SupportTerm :=
-  formula.occurringVariables.flatMap fun varIdx =>
-    [negativeLiteralArg varIdx, positiveLiteralArg varIdx]
-private def clauseArguments (formula : Formula3) : List SupportTerm :=
-  formula.zipIdx.map fun entry => clauseArgument entry.2 entry.1
-
-private def formulaArguments (formula : Formula3) : List SupportTerm :=
-  literalArguments formula ++ clauseArguments formula ++ [queryArg]
-
-private def literalRootAttacks (formula : Formula3) : List Attack :=
-  formula.occurringVariables.flatMap fun varIdx =>
-    [ .undermine (negativeLiteralArg varIdx) (positiveLiteralArg varIdx) []
-    , .undermine (positiveLiteralArg varIdx) (negativeLiteralArg varIdx) [] ]
-
-private def occurrenceAttacks (clauseIndex : Nat) (clause : Clause3) : List Attack :=
-  clause.literals.zipIdx.map fun entry =>
-    .undermine (literalArg entry.1) (clauseArgument clauseIndex clause)
-      [.prem entry.2]
-
-private def clauseAttacks (formula : Formula3) : List Attack :=
-  formula.zipIdx.flatMap fun entry =>
-    occurrenceAttacks entry.2 entry.1 ++
-      [.undermine (clauseArgument entry.2 entry.1) queryArg []]
-
-private def formulaAttacks (formula : Formula3) : List Attack :=
-  literalRootAttacks formula ++ clauseAttacks formula
-
-/-- The exact formula-indexed raw unit attempted by the spike.  Only Γ, ground
-atoms, identifiers, support terms, and attacks vary with the formula. -/
-def rawUnitOfFormula (formula : Formula3) : Lara.Unit :=
-  { sigma := m2bSigma
-    policy := m2bPolicy
-    args := formulaArguments formula
-    atts := formulaAttacks formula }
+/-! ## Formula-indexed raw gadget (defined in `Lara.Complexity.Gadget`) -/
 
 private def rawShapeClause : Clause3 :=
   { first := ⟨true, 0⟩

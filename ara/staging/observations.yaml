@@ -2406,7 +2406,7 @@ observations:
     round-trip for all n, making Nodup and atom-inversion lemmas cheap.
   potential_type: claim
   bound_to: [N263, N257]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/claims.md:C46"
+  crystallized_via: artifact-commitment
   stale: false
