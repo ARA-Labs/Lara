@@ -22,6 +22,12 @@ theorem natRepr_toList_inj {m n : Nat}
     (h : (Nat.repr m).toList = (Nat.repr n).toList) : m = n :=
   natRepr_inj (String.toList_injective h)
 
+/-- Digit-list injectivity, the `Nat.toDigits` spelling of `natRepr_inj`
+(shared by the gadget and witness spelling-table proofs; issue #211). -/
+theorem toDigits_inj {m n : Nat}
+    (h : Nat.toDigits 10 m = Nat.toDigits 10 n) : m = n :=
+  natRepr_toList_inj (by rw [Nat.toList_repr, Nat.toList_repr]; exact h)
+
 /-- Every character of a decimal numeral is a digit, so `Nat.repr` never emits
 the `'-'` separator character. -/
 theorem repr_no_dash (n : Nat) : ¬ '-' ∈ (Nat.repr n).toList := by

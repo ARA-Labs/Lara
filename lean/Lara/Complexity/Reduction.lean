@@ -1657,16 +1657,8 @@ private theorem hasSupport_gAtom_leaf
       exfalso
       have hc := hside.concl
       rw [m2bRuleLookup_inv hside.rule] at hc
-      unfold Support.instAPat at hc
-      cases hts : Support.instPats _ m2bClauseRule.concl.args with
-      | none => rw [hts] at hc; exact absurd hc (by simp)
-      | some ts =>
-          rw [hts] at hc
-          simp only [Option.map_some] at hc
-          have hatom := Option.some.inj hc
-          rw [show m2bClauseRule.concl.pred.name = "clause" from rfl]
-            at hatom
-          exact absurd hatom (by simp [gAtom])
+      obtain ⟨ts, hts⟩ := Support.instAPat_head (pn := "clause") hc
+      exact absurd hts (by simp [gAtom])
 
 /-- A one-node self-attacking carrier labelled `g(0)`. -/
 def selfEdgeCode : CarrierCode :=

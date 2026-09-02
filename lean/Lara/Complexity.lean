@@ -696,7 +696,7 @@ open Invariants (eraseAF claim)
 
 /-- A carrier claim's complete support is a `filterMap` of the node list,
 so it never exceeds the node count. -/
-theorem support_length_le (canon : String → String)
+theorem claim_support_length_le (canon : String → String)
     (F : Invariants.StructuredAF) (p : Atom) :
     (Invariants.support canon F p).length ≤ F.size := by
   unfold Invariants.support
@@ -738,7 +738,7 @@ theorem carrierStatusC_cost_le (canon : String → String)
   rw [hargs] at h
   refine Nat.le_trans h (Nat.add_le_add_left ?_ _)
   have hsup : (claim canon F p).support.length ≤ F.size :=
-    support_length_le canon F p
+    claim_support_length_le canon F p
   have hpow : F.size ^ 2 = F.size * F.size := by
     rw [show (2 : Nat) = 1 + 1 from rfl, Nat.pow_succ, Nat.pow_one]
   rw [hpow, ← Nat.mul_assoc]

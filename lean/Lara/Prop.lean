@@ -159,6 +159,36 @@ theorem equiv_nf {canon : String → String}
     equiv canon (nf canon a) a := by
   simpa [equiv] using nf_idem hcanon a
 
+/-! ## The identity-canonicalizer collapse
+
+`canonId = id` in the frozen v0.1 (Unicode NFC is the deferred extension
+point), and the M2b complexity development works throughout under the identity
+canonicalizer, where `nf` collapses to the identity and `≡` to plain equality.
+Owned here, next to `nf`/`equiv`, so the gadget and witness modules consume one
+copy instead of each re-proving the collapse (issue #211). -/
+
+mutual
+  theorem nfTerm_id (t : Term) : nfTerm id t = t := by
+    match t with
+    | .num s => simp [nfTerm]
+    | .str _ => simp [nfTerm]
+    | .con k ts => simp [nfTerm, nfTerms_id ts]
+  theorem nfTerms_id (ts : Terms) : nfTerms id ts = ts := by
+    match ts with
+    | .nil => simp [nfTerms]
+    | .cons t rest => simp [nfTerms, nfTerm_id t, nfTerms_id rest]
+end
+
+/-- `nf id` is the identity. -/
+theorem nf_id (a : Atom) : nf id a = a := by
+  cases a with
+  | atom p ts => simp [nf, nfTerms_id]
+
+/-- Under the identity canonicalizer, `≡` is plain equality. -/
+theorem equiv_id_eq {a b : Atom} (h : equiv id a b) : a = b := by
+  have h' : nf id a = nf id b := h
+  rwa [nf_id, nf_id] at h'
+
 /-- **No argument reordering** (spec §3.2, the load-bearing non-property): a binary
 predicate's two argument orders are `≡` iff the two normalized arguments coincide.
 So `p(a,b) ≢ p(b,a)` whenever `a` and `b` differ after normalization — no predicate

@@ -221,7 +221,7 @@ agreement theorems (`*_fst`) tying every bound to the existing evaluator.
   exposed carrier query over `Invariants.eraseAF`/`Invariants.claim`.
   Agreement: `carrierStatusC_fst = Invariants.status`. **Citation
   discipline**: `carrierStatusC_cost_le : cost ≤ n³(1 + n) + 2n²` (with
-  `support_length_le`) is the paper-citable GroundedStatus upper theorem;
+  `claim_support_length_le`) is the paper-citable GroundedStatus upper theorem;
   the generic Claim bound `statusSharedC_cost_le` is internal accounting
   and must not be cited as the restricted-class headline. The quartic floor
   transfers to this surface: `carrierStatus_quartic_cost_ge` (the `d`

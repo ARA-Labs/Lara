@@ -168,6 +168,24 @@ def instAPats (θ : Subst) : List APat → Option (List Atom)
     | some a, some rest => some (a :: rest)
     | _, _ => none
 
+/-- A successful pattern instantiation carries the pattern's predicate head. -/
+theorem instAPat_head {θ : Subst} {pn : String} {ps : Pats}
+    {a : Atom} (h : instAPat θ ⟨⟨pn⟩, ps⟩ = some a) :
+    ∃ ts, a = .atom pn ts := by
+  simp only [instAPat] at h
+  cases hts : instPats θ ps with
+  | none => rw [hts] at h; exact nomatch h
+  | some ts => rw [hts] at h; exact ⟨ts, (Option.some.inj h).symm⟩
+
+/-- Mapping an injective function preserves duplicate-freedom. The shared home
+of the list-bookkeeping helper behind the gadget/witness leaf-table `Nodup`
+proofs (issue #211). -/
+theorem nodup_map_of_injective {α β : Type _} {f : α → β}
+    (hf : Function.Injective f) {l : List α} (hl : l.Nodup) :
+    (l.map f).Nodup := by
+  rw [List.nodup_iff_pairwise_ne, List.pairwise_map]
+  exact hl.imp fun hne heq => hne (hf heq)
+
 /-! ### Policy rules (spec §4) -/
 
 inductive Mode where

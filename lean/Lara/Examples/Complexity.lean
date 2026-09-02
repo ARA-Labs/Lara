@@ -143,10 +143,6 @@ theorem quartic_size (k : Nat) : (quarticAF k).size = 3 * k := by
 
 /-! ## Injectivity of the spelling table -/
 
-private theorem toDigits_inj {m n : Nat}
-    (h : Nat.toDigits 10 m = Nat.toDigits 10 n) : m = n :=
-  Numeral.natRepr_toList_inj (by rw [Nat.toList_repr, Nat.toList_repr]; exact h)
-
 /-- The single spelling table never collides: `QuarticLeaf.encode` is
 injective.  Same-constructor cases cancel the fixed prefix and reduce to
 decimal-numeral injectivity; cross-constructor cases differ at the fixed
@@ -160,7 +156,7 @@ theorem QuarticLeaf.encode_inj : Function.Injective QuarticLeaf.encode := by
       cases y with
       | g w =>
           simp [QuarticLeaf.encode, String.toList_append] at hlist
-          rw [toDigits_inj hlist]
+          rw [Numeral.toDigits_inj hlist]
       | d => simp [QuarticLeaf.encode, String.toList_append] at hlist
       | b w => simp [QuarticLeaf.encode, String.toList_append] at hlist
       | a w => simp [QuarticLeaf.encode, String.toList_append] at hlist
@@ -176,7 +172,7 @@ theorem QuarticLeaf.encode_inj : Function.Injective QuarticLeaf.encode := by
       | d => simp [QuarticLeaf.encode, String.toList_append] at hlist
       | b w =>
           simp [QuarticLeaf.encode, String.toList_append] at hlist
-          rw [toDigits_inj hlist]
+          rw [Numeral.toDigits_inj hlist]
       | a w => simp [QuarticLeaf.encode, String.toList_append] at hlist
   | a v =>
       cases y with
@@ -185,7 +181,7 @@ theorem QuarticLeaf.encode_inj : Function.Injective QuarticLeaf.encode := by
       | b w => simp [QuarticLeaf.encode, String.toList_append] at hlist
       | a w =>
           simp [QuarticLeaf.encode, String.toList_append] at hlist
-          rw [toDigits_inj hlist]
+          rw [Numeral.toDigits_inj hlist]
 
 /-! ## The raw unit under the fixed context -/
 
@@ -237,12 +233,6 @@ def quarticRaw (k : Nat) : Lara.Unit :=
     atts := quarticAtts k }
 
 /-! ## Leaf-list bookkeeping -/
-
-private theorem nodup_map_of_injective {α β : Type _} {f : α → β}
-    (hf : Function.Injective f) {l : List α} (hl : l.Nodup) :
-    (l.map f).Nodup := by
-  rw [List.nodup_iff_pairwise_ne, List.pairwise_map]
-  exact hl.imp fun hne heq => hne (hf heq)
 
 private theorem g_injective : Function.Injective QuarticLeaf.g :=
   fun _ _ h => by injection h
@@ -609,26 +599,6 @@ variables.  The four `lit`/`occ`/`clause`/`query` rows miss every witness
 predicate head.  Unlike the gadget's characterization, no numeral
 injectivity is needed here: no schema row binds a variable on both sides. -/
 
-mutual
-  private theorem nfTerm_id (t : Lara.Term) : nfTerm id t = t := by
-    match t with
-    | .num s => simp [nfTerm]
-    | .str _ => simp [nfTerm]
-    | .con k ts => simp [nfTerm, nfTerms_id ts]
-  private theorem nfTerms_id (ts : Lara.Terms) : nfTerms id ts = ts := by
-    match ts with
-    | .nil => simp [nfTerms]
-    | .cons t rest => simp [nfTerms, nfTerm_id t, nfTerms_id rest]
-end
-
-private theorem equiv_id_eq {a b : Lara.Atom} (h : equiv id a b) : a = b := by
-  have h' : nf id a = nf id b := h
-  cases a with
-  | atom p ts =>
-    cases b with
-    | atom p' ts' =>
-      simpa [nf, nfTerms_id] using h'
-
 private theorem gAtom_eq (i : Nat) :
     gAtom i = .atom "g" (.cons (.num (Nat.repr i)) .nil) := rfl
 
@@ -639,28 +609,6 @@ private theorem bAtom_eq (i : Nat) :
 
 private theorem aAtom_eq (i : Nat) :
     aAtom i = .atom "a" (.cons (.num (Nat.repr i)) .nil) := rfl
-
-/-- The six contrary rows of the fixed policy, re-spelled literally (a drift
-in `Lara.Complexity.Context` breaks this `rfl` at compile time). -/
-private theorem m2bDefeat_contraries :
-    m2bPolicy.defeat.contraries =
-      [ (⟨⟨"d"⟩, .nil⟩, ⟨⟨"b"⟩, .cons (.var ⟨"X"⟩) .nil⟩)
-      , (⟨⟨"b"⟩, .cons (.var ⟨"X"⟩) .nil⟩, ⟨⟨"a"⟩, .cons (.var ⟨"Y"⟩) .nil⟩)
-      , (⟨⟨"lit"⟩, .cons (.num "0") (.cons (.var ⟨"X"⟩) .nil)⟩,
-          ⟨⟨"lit"⟩, .cons (.num "1") (.cons (.var ⟨"X"⟩) .nil)⟩)
-      , (⟨⟨"lit"⟩, .cons (.num "1") (.cons (.var ⟨"X"⟩) .nil)⟩,
-          ⟨⟨"lit"⟩, .cons (.num "0") (.cons (.var ⟨"X"⟩) .nil)⟩)
-      , (⟨⟨"lit"⟩, .cons (.var ⟨"S"⟩) (.cons (.var ⟨"X"⟩) .nil)⟩,
-          ⟨⟨"occ"⟩, .cons (.var ⟨"S"⟩) (.cons (.var ⟨"X"⟩) .nil)⟩)
-      , (⟨⟨"clause"⟩, .cons (.var ⟨"J"⟩) .nil⟩, ⟨⟨"query"⟩, .nil⟩) ] := rfl
-
-private theorem instAPat_head {θ : Subst} {pn : String} {ps : Pats}
-    {a : Lara.Atom} (h : instAPat θ ⟨⟨pn⟩, ps⟩ = some a) :
-    ∃ ts, a = .atom pn ts := by
-  simp only [instAPat] at h
-  cases hts : instPats θ ps with
-  | none => rw [hts] at h; exact nomatch h
-  | some ts => rw [hts] at h; exact ⟨ts, (Option.some.inj h).symm⟩
 
 /-- The root conclusions of the witness arguments. -/
 private def QRoot (a : Lara.Atom) : Prop :=
@@ -814,26 +762,13 @@ theorem quartic_checkUnit_accepts (k : Nat) :
 /-- The accepted checker output, named once for the whole family. -/
 def quarticAccepted (k : Nat) :
     Lara.Unit.CheckedUnit id (quarticGamma k) (Support.certOkOf m2bRegistry) :=
-  (Check.Unit.checkUnit (quarticGamma k) m2bRegistry
-    (quarticGround k) (quarticRaw k)).toOption.get
-    (by
-      obtain ⟨accepted, h⟩ := quartic_checkUnit_accepts k
-      simp [h, Except.toOption])
+  Check.Unit.okValue (quartic_checkUnit_accepts k)
 
 /-- **The family-wide checker equation** for the quartic witness. -/
 theorem quartic_checkUnit_ok (k : Nat) :
     Check.Unit.checkUnit (quarticGamma k) m2bRegistry
-      (quarticGround k) (quarticRaw k) = .ok (quarticAccepted k) := by
-  obtain ⟨accepted, h⟩ := quartic_checkUnit_accepts k
-  have hoption : (Check.Unit.checkUnit (quarticGamma k) m2bRegistry
-      (quarticGround k) (quarticRaw k)).toOption = some accepted :=
-    congrArg Except.toOption h
-  have haccepted : quarticAccepted k = accepted := by
-    unfold quarticAccepted
-    apply Option.get_of_eq_some
-    exact hoption
-  rw [haccepted]
-  exact h
+      (quarticGround k) (quarticRaw k) = .ok (quarticAccepted k) :=
+  Check.Unit.okValue_eq (quartic_checkUnit_accepts k)
 
 /-! ## The compilation image -/
 
@@ -1070,25 +1005,12 @@ theorem quarticEmpty_accepts :
 /-- The accepted empty unit. -/
 def quarticEmptyAccepted :
     Lara.Unit.CheckedUnit id (fun _ => none) (Support.certOkOf m2bRegistry) :=
-  (Check.Unit.checkUnit (fun _ => none) m2bRegistry []
-    quarticEmptyRaw).toOption.get
-    (by
-      obtain ⟨accepted, h⟩ := quarticEmpty_accepts
-      simp [h, Except.toOption])
+  Check.Unit.okValue quarticEmpty_accepts
 
 theorem quarticEmpty_checkUnit_ok :
     Check.Unit.checkUnit (fun _ => none) m2bRegistry [] quarticEmptyRaw
-      = .ok quarticEmptyAccepted := by
-  obtain ⟨accepted, h⟩ := quarticEmpty_accepts
-  have hoption : (Check.Unit.checkUnit (fun _ => none) m2bRegistry []
-      quarticEmptyRaw).toOption = some accepted :=
-    congrArg Except.toOption h
-  have haccepted : quarticEmptyAccepted = accepted := by
-    unfold quarticEmptyAccepted
-    apply Option.get_of_eq_some
-    exact hoption
-  rw [haccepted]
-  exact h
+      = .ok quarticEmptyAccepted :=
+  Check.Unit.okValue_eq quarticEmpty_accepts
 
 private theorem quarticEmpty_nodes : quarticEmptyAccepted.nodes = [] := by
   have hargs : quarticEmptyAccepted.program.args = ([] : List SupportTerm) :=

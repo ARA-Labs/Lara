@@ -168,10 +168,6 @@ private theorem toDigits_no_dash (n : Nat) : '-' ∉ Nat.toDigits 10 n := by
   have h := Numeral.repr_no_dash n
   rwa [Nat.toList_repr] at h
 
-private theorem toDigits_inj {m n : Nat}
-    (h : Nat.toDigits 10 m = Nat.toDigits 10 n) : m = n :=
-  Numeral.natRepr_toList_inj (by rw [Nat.toList_repr, Nat.toList_repr]; exact h)
-
 /-- Splitting at a separator character that neither prefix contains is
 unambiguous. -/
 private theorem dashFree_append_inj {l₁ l₂ r₁ r₂ : List Char}
@@ -208,7 +204,7 @@ theorem GadgetLeaf.encode_inj : Function.Injective GadgetLeaf.encode := by
       cases b with
       | negLit w =>
           simp [GadgetLeaf.encode, String.toList_append] at hlist
-          rw [toDigits_inj hlist]
+          rw [Numeral.toDigits_inj hlist]
       | posLit w =>
           simp [GadgetLeaf.encode, String.toList_append] at hlist
       | occurrence j p =>
@@ -221,7 +217,7 @@ theorem GadgetLeaf.encode_inj : Function.Injective GadgetLeaf.encode := by
           simp [GadgetLeaf.encode, String.toList_append] at hlist
       | posLit w =>
           simp [GadgetLeaf.encode, String.toList_append] at hlist
-          rw [toDigits_inj hlist]
+          rw [Numeral.toDigits_inj hlist]
       | occurrence j p =>
           simp [GadgetLeaf.encode, String.toList_append] at hlist
       | query =>
@@ -236,7 +232,7 @@ theorem GadgetLeaf.encode_inj : Function.Injective GadgetLeaf.encode := by
           simp [GadgetLeaf.encode, String.toList_append] at hlist
           obtain ⟨hj, hp⟩ := dashFree_append_inj
             (toDigits_no_dash j) (toDigits_no_dash j') hlist
-          rw [toDigits_inj hj, toDigits_inj hp]
+          rw [Numeral.toDigits_inj hj, Numeral.toDigits_inj hp]
       | query =>
           simp [GadgetLeaf.encode, String.toList_append] at hlist
   | query =>
@@ -297,12 +293,6 @@ theorem lookupLeaf_mem_snd {entries : List (LeafId × Lara.Atom)}
         exact Or.inr (ih h)
 
 /-! ## Duplicate-freedom of the leaf-table keys -/
-
-private theorem nodup_map_of_injective {α β : Type _} {f : α → β}
-    (hf : Function.Injective f) {l : List α} (hl : l.Nodup) :
-    (l.map f).Nodup := by
-  rw [List.nodup_iff_pairwise_ne, List.pairwise_map]
-  exact hl.imp fun hne heq => hne (hf heq)
 
 private theorem nodup_of_map_nodup {α β : Type _} {f : α → β} {l : List α}
     (h : (l.map f).Nodup) : l.Nodup := by
@@ -1032,27 +1022,6 @@ variable index (`natRepr_inj` inside `litAtom_inj`), else two distinct
 variables with equal reprs would demand an undeclared attack.  Coverage
 finally exhibits each firing pair's declared undermine at the root path. -/
 
-mutual
-  private theorem nfTerm_id (t : Lara.Term) : nfTerm id t = t := by
-    match t with
-    | .num s => simp [nfTerm]
-    | .str _ => simp [nfTerm]
-    | .con k ts => simp [nfTerm, nfTerms_id ts]
-  private theorem nfTerms_id (ts : Lara.Terms) : nfTerms id ts = ts := by
-    match ts with
-    | .nil => simp [nfTerms]
-    | .cons t rest => simp [nfTerms, nfTerm_id t, nfTerms_id rest]
-end
-
-/-- Under the identity canonicalizer, `≡` is plain equality. -/
-private theorem equiv_id_eq {a b : Lara.Atom} (h : equiv id a b) : a = b := by
-  have h' : nf id a = nf id b := h
-  cases a with
-  | atom p ts =>
-    cases b with
-    | atom p' ts' =>
-      simpa [nf, nfTerms_id] using h'
-
 /- The context's ground-atom builders, re-spelled through `Nat.repr` (their
 `numTerm` is private to `Lara.Complexity.Context`, and this file's public
 `numTerm` is deliberately not used either: `litAtom_inj` consumes the explicit
@@ -1076,30 +1045,6 @@ private theorem litAtom_inj {s v s' v' : Nat}
   simp only [Lara.Atom.atom.injEq, Lara.Terms.cons.injEq, Lara.Term.num.injEq,
     true_and, and_true] at h
   exact ⟨Numeral.natRepr_inj h.1, Numeral.natRepr_inj h.2⟩
-
-/-- The six contrary rows of the fixed policy, re-spelled literally (their
-pattern builders are private to `Lara.Complexity.Context`; a drift there
-breaks this `rfl` at compile time). -/
-private theorem m2bDefeat_contraries :
-    m2bPolicy.defeat.contraries =
-      [ (⟨⟨"d"⟩, .nil⟩, ⟨⟨"b"⟩, .cons (.var ⟨"X"⟩) .nil⟩)
-      , (⟨⟨"b"⟩, .cons (.var ⟨"X"⟩) .nil⟩, ⟨⟨"a"⟩, .cons (.var ⟨"Y"⟩) .nil⟩)
-      , (⟨⟨"lit"⟩, .cons (.num "0") (.cons (.var ⟨"X"⟩) .nil)⟩,
-          ⟨⟨"lit"⟩, .cons (.num "1") (.cons (.var ⟨"X"⟩) .nil)⟩)
-      , (⟨⟨"lit"⟩, .cons (.num "1") (.cons (.var ⟨"X"⟩) .nil)⟩,
-          ⟨⟨"lit"⟩, .cons (.num "0") (.cons (.var ⟨"X"⟩) .nil)⟩)
-      , (⟨⟨"lit"⟩, .cons (.var ⟨"S"⟩) (.cons (.var ⟨"X"⟩) .nil)⟩,
-          ⟨⟨"occ"⟩, .cons (.var ⟨"S"⟩) (.cons (.var ⟨"X"⟩) .nil)⟩)
-      , (⟨⟨"clause"⟩, .cons (.var ⟨"J"⟩) .nil⟩, ⟨⟨"query"⟩, .nil⟩) ] := rfl
-
-/-- A successful pattern instantiation carries the pattern's predicate head. -/
-private theorem instAPat_head {θ : Subst} {pn : String} {ps : Pats}
-    {a : Lara.Atom} (h : instAPat θ ⟨⟨pn⟩, ps⟩ = some a) :
-    ∃ ts, a = .atom pn ts := by
-  simp only [instAPat] at h
-  cases hts : instPats θ ps with
-  | none => rw [hts] at h; exact nomatch h
-  | some ts => rw [hts] at h; exact ⟨ts, (Option.some.inj h).symm⟩
 
 /-- `HasSupport` inversion for a clause instance, at any obligation index:
 the §6.1 side-condition record pins the sole policy rule, and the conclusion
@@ -1401,27 +1346,14 @@ theorem checkUnit_formula_accepts (φ : Formula3) :
 /-- The accepted checker output, named once for the whole generated family. -/
 def acceptedUnitOfFormula (φ : Formula3) :
     Lara.Unit.CheckedUnit id (gammaOfFormula φ) (Support.certOkOf m2bRegistry) :=
-  (Check.Unit.checkUnit (gammaOfFormula φ) m2bRegistry
-    (groundOfFormula φ) (rawUnitOfFormula φ)).toOption.get
-    (by
-      obtain ⟨accepted, h⟩ := checkUnit_formula_accepts φ
-      simp [h, Except.toOption])
+  Check.Unit.okValue (checkUnit_formula_accepts φ)
 
 /-- **The family-wide checker equation.**  For every formula, the frozen M2b
 context accepts the generated raw unit through the public executable
 checker. -/
 theorem checkUnit_formula_ok (φ : Formula3) :
     Check.Unit.checkUnit (gammaOfFormula φ) m2bRegistry
-      (groundOfFormula φ) (rawUnitOfFormula φ) = .ok (acceptedUnitOfFormula φ) := by
-  obtain ⟨accepted, h⟩ := checkUnit_formula_accepts φ
-  have hoption : (Check.Unit.checkUnit (gammaOfFormula φ) m2bRegistry
-      (groundOfFormula φ) (rawUnitOfFormula φ)).toOption = some accepted :=
-    congrArg Except.toOption h
-  have haccepted : acceptedUnitOfFormula φ = accepted := by
-    unfold acceptedUnitOfFormula
-    apply Option.get_of_eq_some
-    exact hoption
-  rw [haccepted]
-  exact h
+      (groundOfFormula φ) (rawUnitOfFormula φ) = .ok (acceptedUnitOfFormula φ) :=
+  Check.Unit.okValue_eq (checkUnit_formula_accepts φ)
 
 end Lara.Complexity

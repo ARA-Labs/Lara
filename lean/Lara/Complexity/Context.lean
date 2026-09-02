@@ -78,6 +78,22 @@ def m2bPolicy : Lara.Policy.Policy :=
           , (unaryPat "clause" (.var contraryJ), nullaryPat "query") ]
         exceptions := [] } }
 
+/-- The six contrary rows of the fixed policy, re-spelled literally rather
+than through the private pattern builders above — the drift tripwire consumed
+by the gadget and witness attack characterizations (issue #211): any drift in
+the fixed defeat table breaks this `rfl` at compile time. -/
+theorem m2bDefeat_contraries :
+    m2bPolicy.defeat.contraries =
+      [ (⟨⟨"d"⟩, .nil⟩, ⟨⟨"b"⟩, .cons (.var ⟨"X"⟩) .nil⟩)
+      , (⟨⟨"b"⟩, .cons (.var ⟨"X"⟩) .nil⟩, ⟨⟨"a"⟩, .cons (.var ⟨"Y"⟩) .nil⟩)
+      , (⟨⟨"lit"⟩, .cons (.num "0") (.cons (.var ⟨"X"⟩) .nil)⟩,
+          ⟨⟨"lit"⟩, .cons (.num "1") (.cons (.var ⟨"X"⟩) .nil)⟩)
+      , (⟨⟨"lit"⟩, .cons (.num "1") (.cons (.var ⟨"X"⟩) .nil)⟩,
+          ⟨⟨"lit"⟩, .cons (.num "0") (.cons (.var ⟨"X"⟩) .nil)⟩)
+      , (⟨⟨"lit"⟩, .cons (.var ⟨"S"⟩) (.cons (.var ⟨"X"⟩) .nil)⟩,
+          ⟨⟨"occ"⟩, .cons (.var ⟨"S"⟩) (.cons (.var ⟨"X"⟩) .nil)⟩)
+      , (⟨⟨"clause"⟩, .cons (.var ⟨"J"⟩) .nil⟩, ⟨⟨"query"⟩, .nil⟩) ] := rfl
+
 /-- The restricted construction uses no strict backend. All non-rule support is
 provided by leaves. -/
 def m2bRegistry : BackendRegistry id := fun _ => none

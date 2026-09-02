@@ -278,6 +278,32 @@ theorem checkUnit_complete {canon : String → String}
             subst found
             exact ⟨_, rfl⟩
 
+/-! ### Naming a successful check's accepted output (issue #211)
+
+The generated families and closed fixtures all follow one assembly: prove a
+checker call succeeds, name the accepted payload, and export the `.ok`
+equation for that name. `okValue`/`okValue_eq` package the assembly once —
+`checkUnit_complete` supplies the existential directly, and
+`exists_ok_of_isOk` admits the closed fixtures' decidable `isOk` form. -/
+
+/-- A decidably successful `Except` is an `.ok`. -/
+theorem exists_ok_of_isOk {ε α : Type _} {e : Except ε α}
+    (h : e.isOk = true) : ∃ a, e = .ok a := by
+  cases e with
+  | error _ => simp [Except.isOk, Except.toBool] at h
+  | ok a => exact ⟨a, rfl⟩
+
+/-- The accepted payload of a checker call known to succeed. -/
+def okValue {ε α : Type _} {e : Except ε α} (h : ∃ a, e = .ok a) : α :=
+  e.toOption.get (by obtain ⟨a, rfl⟩ := h; rfl)
+
+/-- The `.ok` equation for the named payload. -/
+theorem okValue_eq {ε α : Type _} {e : Except ε α} (h : ∃ a, e = .ok a) :
+    e = .ok (okValue h) := by
+  cases e with
+  | error _ => exact h.elim fun a ha => nomatch ha
+  | ok a => rfl
+
 private theorem lookupSubst_mem {θ : Subst} {x : VarId} {t : Term}
     (h : lookupSubst θ x = some t) : (x, t) ∈ θ := by
   induction θ with

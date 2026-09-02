@@ -2051,7 +2051,7 @@ checker equation (`Lara.Complexity.Numeral` / `Lara.Complexity.Gadget`). -/
 #print axioms Lara.Complexity.statusSharedC_fst
 #print axioms Lara.Complexity.statusSharedC_cost_le
 #print axioms Lara.Complexity.statusSharedC_cost_ge_grounded
-#print axioms Lara.Complexity.support_length_le
+#print axioms Lara.Complexity.claim_support_length_le
 #print axioms Lara.Complexity.carrierStatusC_fst
 #print axioms Lara.Complexity.carrierStatusC_cost_le
 #print axioms Lara.Examples.Complexity.carrierStatus_quartic_cost_ge
@@ -2069,3 +2069,20 @@ checker equation (`Lara.Complexity.Numeral` / `Lara.Complexity.Gadget`). -/
 #print axioms Lara.Complexity.negativeFixture_rejected
 #print axioms Lara.Complexity.negativeFixture_unsatisfiable
 #print axioms Lara.Complexity.selfEdgeCode_not_realizable
+
+/-! ### M2b follow-up — shared lemma extraction (issue #211)
+
+The drift-tripwire lemmas formerly held as verbatim private copies by the
+gadget and witness modules, now public at their owning modules, plus the
+shared ok-assembly helper behind the named accepted checker outputs. -/
+
+#print axioms Lara.nfTerm_id
+#print axioms Lara.nfTerms_id
+#print axioms Lara.nf_id
+#print axioms Lara.equiv_id_eq
+#print axioms Lara.Complexity.Numeral.toDigits_inj
+#print axioms Lara.Complexity.m2bDefeat_contraries
+#print axioms Lara.Support.instAPat_head
+#print axioms Lara.Support.nodup_map_of_injective
+#print axioms Lara.Check.Unit.exists_ok_of_isOk
+#print axioms Lara.Check.Unit.okValue_eq

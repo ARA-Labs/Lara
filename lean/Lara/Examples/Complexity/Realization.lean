@@ -51,25 +51,13 @@ private theorem pathCheck_isOk : pathCheck.isOk = true := by decide
 /-- Named accepted checker output for the three-node path fixture. -/
 def acceptedPathUnit :
     Lara.Unit.CheckedUnit id pathGamma (certOkOf m2bRegistry) :=
-  pathCheck.toOption.get (by decide)
+  Check.Unit.okValue (Check.Unit.exists_ok_of_isOk pathCheck_isOk)
 
 /-- The concrete path fixture succeeds through the public unit checker. -/
 theorem checkUnit_path_ok :
     Check.Unit.checkUnit pathGamma m2bRegistry pathGround pathRawUnit =
-      .ok acceptedPathUnit := by
-  cases h : pathCheck with
-  | error error =>
-      have hs := pathCheck_isOk
-      rw [h] at hs
-      contradiction
-  | ok accepted =>
-      have hoption : pathCheck.toOption = some accepted :=
-        congrArg Except.toOption h
-      have haccepted : acceptedPathUnit = accepted := by
-        unfold acceptedPathUnit
-        apply Option.get_of_eq_some
-        exact hoption
-      simpa [pathCheck] using h.trans (congrArg Except.ok haccepted.symm)
+      .ok acceptedPathUnit :=
+  Check.Unit.okValue_eq (Check.Unit.exists_ok_of_isOk pathCheck_isOk)
 
 private theorem acceptedPath_args :
     acceptedPathUnit.program.args = pathRawUnit.args :=
@@ -144,25 +132,13 @@ private theorem cycleCheck_isOk : cycleCheck.isOk = true := by decide
 /-- Named accepted checker output for the two-cycle fixture. -/
 def acceptedCycleUnit :
     Lara.Unit.CheckedUnit id cycleGamma (certOkOf m2bRegistry) :=
-  cycleCheck.toOption.get (by decide)
+  Check.Unit.okValue (Check.Unit.exists_ok_of_isOk cycleCheck_isOk)
 
 /-- The concrete two-cycle succeeds through the public unit checker. -/
 theorem checkUnit_cycle_ok :
     Check.Unit.checkUnit cycleGamma m2bRegistry cycleGround cycleRawUnit =
-      .ok acceptedCycleUnit := by
-  cases h : cycleCheck with
-  | error error =>
-      have hs := cycleCheck_isOk
-      rw [h] at hs
-      contradiction
-  | ok accepted =>
-      have hoption : cycleCheck.toOption = some accepted :=
-        congrArg Except.toOption h
-      have haccepted : acceptedCycleUnit = accepted := by
-        unfold acceptedCycleUnit
-        apply Option.get_of_eq_some
-        exact hoption
-      simpa [cycleCheck] using h.trans (congrArg Except.ok haccepted.symm)
+      .ok acceptedCycleUnit :=
+  Check.Unit.okValue_eq (Check.Unit.exists_ok_of_isOk cycleCheck_isOk)
 
 private theorem acceptedCycle_args :
     acceptedCycleUnit.program.args = cycleRawUnit.args :=
