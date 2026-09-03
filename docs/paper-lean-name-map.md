@@ -987,3 +987,62 @@ the model. See `Sat`'s doc comment and `docs/theory-pw0-outer-model.md` §1.
   No stronger frame axiom (T, 4, B, D, 5) is assumed or proved, and each of
   the five is refuted on a PW0-legal frame (`Examples.PW.sat_T_fails`,
   `sat_D_fails`, `sat_B_fails`, `sat_5_fails`, `sat_4_fails`).
+
+## PW-T6 exact checked-support transport (issue #191)
+
+Tracker #189. The frozen contract and its limitations live in
+`docs/theory-pw-t6-structural-transport.md`; this section is the declaration
+index. Every *theorem* row is `lean/AxCheck.lean`-gated (sorry-free, standard
+trio, no `native_decide`). Rows naming `SymMap`, the `tr*` lifts,
+`StructuralBridge`, and `Admits` name *definitions*, transitively audited
+through the gated theorems that mention them.
+
+No paper display cites these yet. The rows exist so that T8 (#193), T9
+(#190), and any later structural-bridge display can cite a stable key.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| The partial symbol translation (predicate and constructor namespaces independent) | `PW.SymMap`; identity `PW.SymMap.id` | `Lara/PW/Translation.lean` |
+| The structural lifts (terms, atoms, patterns, substitutions, questions, rules) | `PW.trTerm`/`trTerms`, `PW.trAtom`/`trAtoms`, `PW.trPat`/`trPats`, `PW.trAPat`/`trAPats`, `PW.trSubst`, `PW.trQuestion`/`trQuestions`, `PW.trRule` | `Lara/PW/Translation.lean` |
+| The dependent partial support map `T_b` (leaves renamed, rule ids / hole sets / assurances verbatim) | `PW.trSupport`, `PW.trSupportList`, `PW.trSupportDis` | `Lara/PW/Translation.lean` |
+| Instantiation commutes with translation (the conclusion law at pattern level) | `PW.instPat_tr`/`instPats_tr`, `PW.instAPat_tr`/`instAPats_tr` | `Lara/PW/Translation.lean` |
+| `≡` survives translation (`nf` touches literals only, the translation touches names only) | `PW.trTerm_nf`/`trTerms_nf`, `PW.trAtom_nf`, `PW.equiv_tr` | `Lara/PW/Translation.lean` |
+| Carriers the translation preserves on the nose | `PW.trSubst_fst`, `PW.trRule_mode`/`_params`/`_allowTrusted`/`_certifiers`/`_questionNames`/`_mandatoryNames`, `PW.trSupportDis_fst` | `Lara/PW/Translation.lean` |
+| The structural-bridge contract (three clauses over a shared `canon`) | `PW.StructuralBridge` (fields `sym`, `leafMap`, `leaf_ok`, `rule_ok`, `cert_ok`); identity `PW.StructuralBridge.refl` | `Lara/PW/Structural.lean` |
+| **T6 — exact checked-support transport** (translated conclusion, verbatim obligations) | `PW.support_transport` | `Lara/PW/Structural.lean` |
+| T6 completeness clause | `PW.support_transport_complete` | `Lara/PW/Structural.lean` |
+| Claim-level transport (`≡`-closure survives) | `PW.supports_transport` | `Lara/PW/Structural.lean` |
+| Target-side occurrence replay against the target registry (B0's headline on the transported derivation) | `PW.transport_occurrences_accounted` | `Lara/PW/Structural.lean` |
+| The induced checker-tied applicability judgment (PW0 limitation 1 discharged at structural bridges) | `PW.Admits`; world-level transport `PW.admits_transport` | `Lara/PW/Structural.lean` |
+| The identity endobridge at the T7 pair | `Examples.PW.admitsIdT7`, `t7_t6_transport` | `Lara/Examples/PWStructural.lean` |
+| The T6/T8 boundary packaged at a live instance (transport succeeds, status flips) | `Examples.PW.t7_t6_boundary` | `Lara/Examples/PWStructural.lean` |
+| The genuine renaming bridge and its transported derivation | `Examples.PW.renSym`, `ruleRen`, `piRenSrc`, `piRenTgt`, `lRen`, `leafMapRen`, `gammaRenSrc`, `gammaRenTgt`, `bridgeRen`, `wRen`, `wRenTgt`, `hasSupport_ren`, `ren_conclusion`, `ren_transport` | `Lara/Examples/PWStructural.lean` |
+| The bridge's two non-vacuous clauses exercised off the identity (`rule_ok` by the translated policy, `leaf_ok` by the renamed leaf at the translated atom) | `Examples.PW.ren_support_renamed`, `ren_leaf_translated` | `Lara/Examples/PWStructural.lean` |
+| The translation-domain negative | `Examples.PW.ren_out_of_vocabulary`, `ren_translationUndefined` | `Lara/Examples/PWStructural.lean` |
+
+**Not X** notes:
+
+- `PW.support_transport` is **not** status preservation. It transports the
+  checked-support judgment only; `Examples.PW.t7_t6_boundary` is the
+  mechanized instance where the transport succeeds and grounded status still
+  flips. Any status-preservation display cites T8 (#193), not T6.
+- The transport's `some` hypothesis is **not** redundant. `trSupport` is not
+  total on checked supports: a substitution may bind a declared-but-unused
+  parameter to a term outside the bridge's vocabulary (`θDom` forces the
+  domain, not that every binding occurs in a pattern). Definedness of the
+  *conclusion's* translation is derived; definedness of the *term's*
+  translation is the design's explicit translation-domain evidence.
+- "Mapped obligations" is the **identity** map, not a claim that a bridge may
+  rename question keys. Question names, mandatory flags, discharge keys, and
+  hole sets are preserved verbatim (`trRule_questionNames`,
+  `trSupportDis_fst`), which is exactly why obligations — and hence
+  completeness — transport for free.
+- A `StructuralBridge` does **not** relate two canonicalizers. The `canon` is
+  shared by construction — the one thing bridged environments must agree on
+  for conclusions to be comparable as claims (the same shared binder B0
+  records for registries; see `docs/theory-b0-backend-compositionality.md`).
+- `PW.Admits` is **not** an acceptance oracle. It is one checker-tied
+  instantiation of PW0's `accept` — target program membership of every
+  transported source argument — supplied so `Frame.accept`'s name stops
+  promising more than the model provides at structural bridges. Other
+  disciplines remain expressible.

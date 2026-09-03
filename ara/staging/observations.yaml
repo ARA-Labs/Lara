@@ -2470,9 +2470,9 @@ observations:
     engineering review and by both post-implementation reviews.
   potential_type: constraint
   bound_to: [N271]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/claims.md:C48"
+  crystallized_via: artifact-commitment
   stale: false
 - id: O113
   timestamp: "2026-09-02T00:00"
@@ -2495,6 +2495,73 @@ observations:
     #192 exit decision.
   potential_type: constraint
   bound_to: [N271, N272]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:PW-T6 translation-form constraint"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O114
+  timestamp: "2026-09-02T23:55"
+  provenance: ai-suggested
+  content: >
+    Obligations transport verbatim across a structural bridge because
+    obligations are lists of question names, question names are rule-local
+    vocabulary the claim translation never touches, and discharge keys and
+    hole sets are carried unchanged. collectObligations therefore computes
+    identically on both sides, and the design's conditional completeness
+    clause ("transport of a complete support requires preservation of empty
+    obligations") is discharged by proving the stronger exact statement: the
+    same obligation list, with completeness the O = [] special case rather
+    than an extra hypothesis.
+  context: >
+    Observed while proving support_transport (#191): the theorem's index is
+    the SAME O on both sides, via trRule_questionNames /
+    trRule_mandatoryNames / trSupportDis_fst.
+  potential_type: claim
+  bound_to: [N276]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O115
+  timestamp: "2026-09-02T23:55"
+  provenance: ai-suggested
+  content: >
+    The entire T6 induction rides on two commuting facts with disjoint
+    footprints: instantiation commutes with translation because variables are
+    untouched and the instantiated constructor name is the pattern's own
+    (instAPat_tr), and the trusted identity relation survives translation
+    because nf canonicalizes numeric literals only while the translation
+    renames predicate/constructor names only (equiv_tr). Disjointness of the
+    two footprints — nf touches literals, translation touches names — is what
+    makes the commutation lemmas one-line-per-case rather than semantic.
+  context: >
+    Design observation from Lara.PW.Translation (#191); the 22-field InstSide
+    re-establishment consumes only these two facts plus verbatim-carrier
+    lemmas.
+  potential_type: heuristic
+  bound_to: [N276]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O116
+  timestamp: "2026-09-02T23:55"
+  provenance: ai-suggested
+  content: >
+    The transport's translation-domain hypothesis is irreducible: trSupport is
+    not total on checked supports, because InstSide.θDom forces the
+    substitution's domain to equal the rule's declared parameters, not that
+    every binding occurs in an instantiated pattern — so a checked support may
+    bind a declared-but-unused parameter to a term outside the bridge's
+    vocabulary. Definedness of the conclusion's translation is derivable;
+    definedness of the term's translation is genuine domain evidence the
+    caller must supply.
+  context: >
+    Found while deciding whether support_transport could conclude, rather
+    than assume, trSupport definedness (#191). Recorded as a Not-X note in
+    docs/paper-lean-name-map.md §PW-T6.
+  potential_type: constraint
+  bound_to: [N276]
   promoted: false
   promoted_to: null
   crystallized_via: null

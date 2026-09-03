@@ -1118,3 +1118,13 @@ entries:
     - "Did NOT revise C47 or any other claim. The audit that backs them was re-run after the fix and passes over the full 1612 declarations, so no claim's evidence changed -- only the confidence that the gate would have noticed if it had."
     - "Provenance user: the user identified the defect and directed the fix. The two rejected alternatives are recorded because the narrower CI-only fix was tempting and would have left the saved-output path unguarded."
     - "Did NOT open an issue. CLAUDE.md routes DEFERRED work to issues; this was fixed in the same turn it was found."
+- turn: "2026-09-02_001#4"
+  notes:
+    - "Routed the concurrency directive as decision N275 with provenance user: 'in parallel to M4' is a real scheduling choice among recorded alternatives (wait for #218; plan PR first), not mere acknowledgment."
+    - "Crystallized O112 -> C48 via artifact commitment: Admits/admits_transport are committed, AxCheck-registered, and PR #223 depends on them. Status supported on the C47 precedent (audited proof IS the evidence). Provenance stays ai-suggested — the user directed the track, not the specific claims."
+    - "Crystallized O113 -> constraints.md (PW-T6 translation-form constraint) via artifact commitment: docs/theory-pw-t6-structural-transport.md §8.1 now restates and depends on it. Routed as constraint, not claim — it is a design bound on T8/T9, not a falsifiable mechanism assertion."
+    - "Did NOT crystallize O111 (conservativity-is-cheap): T6 carries the modules-only-import discipline forward but no closure signal fired — no affirmation, no artifact depending on the generalized statement itself."
+    - "Staged O114/O115/O116 rather than folding them into C48: each is a distinct interpretive finding (verbatim obligations, disjoint commuting footprints, irreducible domain evidence) that may crystallize separately or die; C48's Statement carries only the first as a proved conjunct."
+    - "Did NOT revise C47: C48 depends on it and t7_t6_boundary re-exhibits its content through T6 machinery, but its Statement/Conditions/Status are untouched by new evidence."
+    - "Near-miss: considered treating PR-open as insufficient for artifact commitment (PR could be rejected). Followed the C47 precedent from turn 1 — commitment fired at PR-open there too — and recorded the pending-review caveat in ai_suggestions_pending."
+    - "No reader reports were supplied this turn."

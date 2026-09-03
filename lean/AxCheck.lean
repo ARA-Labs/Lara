@@ -69,7 +69,10 @@ import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare
 import Lara.PW.Instance
+import Lara.PW.Translation
+import Lara.PW.Structural
 import Lara.Examples.PW
+import Lara.Examples.PWStructural
 
 open Lara
 
@@ -2163,3 +2166,95 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.overlap_allRejected
 #print axioms Lara.Examples.PW.presentsOverlapRejected
 #print axioms Lara.Examples.PW.overlap_rejected_no_dia
+
+/-! ### PW-T6 — exact checked-support transport (issue #191) -/
+-- Task 1 (Lara.PW.Translation): the partial symbol translation and its
+-- structural lifts, the list/substitution/rule bookkeeping, the two
+-- commuting facts (instantiation, ≡), and the inert identity translation.
+#print axioms Lara.PW.SymMap.id
+#print axioms Lara.PW.trTerm
+#print axioms Lara.PW.trTerms
+#print axioms Lara.PW.trAtom
+#print axioms Lara.PW.trAtoms
+#print axioms Lara.PW.trPat
+#print axioms Lara.PW.trPats
+#print axioms Lara.PW.trAPat
+#print axioms Lara.PW.trAPats
+#print axioms Lara.PW.trSubst
+#print axioms Lara.PW.trQuestion
+#print axioms Lara.PW.trQuestions
+#print axioms Lara.PW.trRule
+#print axioms Lara.PW.trSupport
+#print axioms Lara.PW.trSupportList
+#print axioms Lara.PW.trSupportDis
+#print axioms Lara.PW.trAtoms_getElem?
+#print axioms Lara.PW.trAtoms_length
+#print axioms Lara.PW.trAtoms_defined
+#print axioms Lara.PW.trSubst_fst
+#print axioms Lara.PW.lookupSubst_tr
+#print axioms Lara.PW.instPat_tr
+#print axioms Lara.PW.instPats_tr
+#print axioms Lara.PW.instAPat_tr
+#print axioms Lara.PW.instAPats_tr
+#print axioms Lara.PW.trTerm_nf
+#print axioms Lara.PW.trTerms_nf
+#print axioms Lara.PW.trAtom_nf
+#print axioms Lara.PW.equiv_tr
+#print axioms Lara.PW.trQuestion_inv
+#print axioms Lara.PW.trQuestions_mem
+#print axioms Lara.PW.trQuestions_mem_rev
+#print axioms Lara.PW.trQuestions_names
+#print axioms Lara.PW.trQuestions_mand_names
+#print axioms Lara.PW.trRule_inv
+#print axioms Lara.PW.trRule_mode
+#print axioms Lara.PW.trRule_params
+#print axioms Lara.PW.trRule_allowTrusted
+#print axioms Lara.PW.trRule_certifiers
+#print axioms Lara.PW.trRule_questionNames
+#print axioms Lara.PW.trRule_mandatoryNames
+#print axioms Lara.PW.trSupportList_getElem?
+#print axioms Lara.PW.trSupportList_length
+#print axioms Lara.PW.trSupportDis_fst
+#print axioms Lara.PW.trSupportDis_getElem?
+#print axioms Lara.PW.trTerm_id
+#print axioms Lara.PW.trTerms_id
+#print axioms Lara.PW.trAtom_id
+#print axioms Lara.PW.trAtoms_id
+#print axioms Lara.PW.trPat_id
+#print axioms Lara.PW.trPats_id
+#print axioms Lara.PW.trAPat_id
+#print axioms Lara.PW.trAPats_id
+#print axioms Lara.PW.trSubst_id
+#print axioms Lara.PW.trQuestion_id
+#print axioms Lara.PW.trQuestions_id
+#print axioms Lara.PW.trRule_id
+#print axioms Lara.PW.trSupport_id
+#print axioms Lara.PW.trSupportList_id
+#print axioms Lara.PW.trSupportDis_id
+
+-- Task 2 (Lara.PW.Structural): the StructuralBridge contract, the T6
+-- transport theorem and its completeness/claim-level corollaries, the
+-- target-registry occurrence replay, and the induced checker-tied
+-- applicability judgment.
+#print axioms Lara.PW.StructuralBridge.refl
+#print axioms Lara.PW.support_transport
+#print axioms Lara.PW.support_transport_complete
+#print axioms Lara.PW.supports_transport
+#print axioms Lara.PW.transport_occurrences_accounted
+#print axioms Lara.PW.Admits
+#print axioms Lara.PW.admits_transport
+
+-- Task 3 (Lara.Examples.PWStructural): the identity endobridge at the T7
+-- pair with the packaged T6/T8 boundary, the genuine renaming bridge with
+-- its transported derivation, and the translation-domain negative.
+#print axioms Lara.Examples.PW.admitsIdT7
+#print axioms Lara.Examples.PW.t7_t6_transport
+#print axioms Lara.Examples.PW.t7_t6_boundary
+#print axioms Lara.Examples.PW.bridgeRen
+#print axioms Lara.Examples.PW.ren_support_renamed
+#print axioms Lara.Examples.PW.ren_leaf_translated
+#print axioms Lara.Examples.PW.hasSupport_ren
+#print axioms Lara.Examples.PW.ren_conclusion
+#print axioms Lara.Examples.PW.ren_transport
+#print axioms Lara.Examples.PW.ren_out_of_vocabulary
+#print axioms Lara.Examples.PW.ren_translationUndefined

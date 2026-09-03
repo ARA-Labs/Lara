@@ -7236,3 +7236,72 @@ tree:
     - "real audit unaffected: 1612 declarations, exit 0"
   status: resolved
   also_depends_on: [N273, N271]
+
+- id: N275
+  type: decision
+  title: "PW track proceeds to T6 in parallel with M4"
+  provenance: user
+  timestamp: "2026-09-02T22:30"
+  choice: >
+    With PR #221 merged, take the PW0 gate outcome forward: proceed to T6
+    (#191) now, running the possible-world track concurrently with the M4
+    core-spine work (PR #218) rather than waiting for it to land. The world
+    model's retrieval showed four of tracker #189's five advancement-gate
+    conditions discharged with mechanized evidence and B0 (#182) closed, so
+    the only open judgment was T6 tractability; the file-ownership precedent
+    (N268) supports the concurrent track since the PW modules are
+    insertion-only under Lara/PW/* while M4 lives in the fragment/linking
+    calculus, sharing only additive lines in the two roots.
+  alternatives:
+    - "Land M4 (PR #218) first and take the #189 exit decision afterwards."
+    - "Record the exit decision on #189 and open a compile-verified plan PR before implementing."
+  evidence:
+    - "user directive: continue possible-world semantics, in parallel to M4"
+    - "docs/theory-pw0-outer-model.md §3 (gate assessment) and §6 (T6 feasibility note)"
+    - "issue #189 sub-issues 1/4 complete; issue #182 closed; PR #218 open"
+  status: resolved
+  also_depends_on: [N271, N268]
+
+- id: N276
+  type: experiment
+  title: "PW-T6 exact checked-support transport mechanized and opened as PR #223"
+  provenance: ai-executed
+  timestamp: "2026-09-02T23:55"
+  description: >
+    Implement T6 (#191) directly against the frozen PW0 interface and the B0
+    occurrence layer: design the partial symbol translation, freeze the
+    three-clause StructuralBridge contract, prove the transport theorem by
+    full induction over HasSupport, derive the corollaries without new
+    inductions, and land executable examples at the T7 fixtures and at a
+    genuine renaming.
+  result: >
+    Three insertion-only modules land. Lara.PW.Translation lifts a partial
+    symbol map over terms, atoms, patterns, substitutions, rules, and support
+    terms, and proves the two facts the milestone rides on: instantiation
+    commutes with translation (instAPat_tr) and equivalence survives
+    translation (equiv_tr, since nf touches only numeric literals while the
+    translation touches only predicate/constructor names).
+    Lara.PW.Structural freezes the contract (leaf_ok / rule_ok / cert_ok over
+    a shared canon — one clause per environment parameter HasSupport reads)
+    and proves support_transport with the obligation list transported
+    verbatim, making the design's conditional completeness clause the O = []
+    special case; transport_occurrences_accounted replays target-side strict
+    occurrences against the target registry via B0's headline, and
+    Admits/admits_transport discharge PW0 limitation 1 (the arbitrary accept)
+    at structural bridges. Lara.Examples.PWStructural packages the T6/T8
+    boundary at the live T7 pair (t7_t6_boundary: transport succeeds, status
+    still flips) and exercises the vocabulary machinery off the identity with
+    a p -> p_r renaming bridge plus the translationUndefined domain negative.
+    Build 130 jobs and the hardened axiom audit at 1707 declarations (78
+    PW-T6) both clean; the diff is pure insertion (2142 lines) touching only
+    the three modules, the two roots, and the two docs. Opened as PR #223.
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/223; commit 13ae1d7"
+    - "lean/Lara/PW/Structural.lean: StructuralBridge, support_transport, Admits, admits_transport"
+    - "lean/Lara/PW/Translation.lean: instAPat_tr, equiv_tr, trSupport"
+    - "lean/Lara/Examples/PWStructural.lean: t7_t6_boundary, ren_transport, ren_translationUndefined"
+    - "docs/theory-pw-t6-structural-transport.md; docs/paper-lean-name-map.md §PW-T6"
+    - "ara/evidence/proofs/pw_t6_transport.md"
+    - "lake build: 130 jobs PASS; axiom audit: 1707 declarations PASS"
+  status: resolved
+  also_depends_on: [N275, N271, N268]

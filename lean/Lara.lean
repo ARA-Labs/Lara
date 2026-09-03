@@ -210,6 +210,31 @@
 --     existing semantics module changed. Deliberately absent: structural
 --     bridges/T6, T8-T10, approximation, epistemic/dynamic/hybrid operators,
 --     global scenarios, surface syntax — see docs/theory-pw0-outer-model.md
+--   * the PW-T6 exact checked-support transport (issue #191, tracker #189):
+--     the bridge-global partial symbol translation lifted structurally over
+--     terms, atoms, patterns, substitutions, rules, and support terms, with
+--     the two commuting facts that carry the milestone — instantiation
+--     commutes with translation (instAPat_tr), and ≡ survives translation
+--     (equiv_tr) because nf touches only numeric literals while the
+--     translation touches only predicate/constructor names —
+--     Lara.PW.Translation. The StructuralBridge contract is three clauses,
+--     one per environment parameter HasSupport reads (leaf_ok, rule_ok,
+--     cert_ok over a SHARED canon), and support_transport carries a checked
+--     source support to a checked target support with the translated
+--     conclusion and the VERBATIM obligation list (question keys are
+--     rule-local names the translation preserves), so completeness
+--     transports for free; target-side strict occurrences replay against
+--     the target registry by B0's headline applied to the transported
+--     derivation, and PW0's arbitrary `accept` gains its promised checker
+--     tie at structural bridges via Admits/admits_transport —
+--     Lara.PW.Structural. The identity endobridge at the T7 pair packages
+--     the T6/T8 boundary at a live instance (transport succeeds, status
+--     still flips), and a genuine predicate-renaming bridge exercises the
+--     vocabulary machinery off the identity, with the out-of-vocabulary
+--     claim reported as exactly translationUndefined —
+--     Lara.Examples.PWStructural. The theorem neither assumes nor concludes
+--     grounded status preservation (that boundary is T8, #193); the modules
+--     only import — see docs/theory-pw-t6-structural-transport.md
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -265,4 +290,7 @@ import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare
 import Lara.PW.Instance
+import Lara.PW.Translation
+import Lara.PW.Structural
 import Lara.Examples.PW
+import Lara.Examples.PWStructural

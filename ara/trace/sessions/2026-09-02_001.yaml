@@ -2,8 +2,8 @@ session:
   id: "2026-09-02_001"
   date: "2026-09-02"
   started: "2026-09-02T00:00"
-  last_turn: "2026-09-02T00:00"
-  turn_count: 3
+  last_turn: "2026-09-02T23:55"
+  turn_count: 4
   summary: >
     PW0 possible-world outer-model gate implemented and opened as PR #221. Five
     modules land under Lara.PW and Lara.Examples.PW carrying T0-T5 and the T7
@@ -16,6 +16,15 @@ session:
     comparison was then renamed compare -> crossCompare (N273) after measuring
     that the Ord.compare collision breaks `unfold` in any module that opens
     Lara.PW. Full build (127 jobs) and axiom audit (1612 declarations) clean.
+    After PR #221 merged, the researcher directed the PW track forward in
+    parallel with M4 (N275): T6 exact checked-support transport was mechanized
+    directly against the frozen interface — three insertion-only modules, the
+    three-clause StructuralBridge contract, support_transport with verbatim
+    obligations, target-registry occurrence replay via B0, and
+    Admits/admits_transport discharging PW0 limitation 1 — and opened as PR
+    #223 (N276). Build 130 jobs, audit 1707 declarations (78 PW-T6), clean.
+    C48 crystallized; O113 crystallized into the PW-T6 translation-form
+    constraint.
 
 events_logged:
   - turn: 1
@@ -66,6 +75,48 @@ events_logged:
     routing: crystallized
     provenance: ai-suggested
     summary: "Support transport does not imply status preservation; crystallized via artifact commitment plus empirical resolution."
+  - turn: 4
+    type: decision
+    id: "N275"
+    routing: direct
+    provenance: user
+    summary: "PW track proceeds to T6 (#191) in parallel with M4 (PR #218)."
+  - turn: 4
+    type: experiment
+    id: "N276"
+    routing: direct
+    provenance: ai-executed
+    summary: "T6 mechanized: three-clause contract, transport with verbatim obligations, occurrence replay, accept discharge; PR #223; build 130 jobs, audit 1707."
+  - turn: 4
+    type: observation
+    id: "O114"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Obligations transport verbatim because question keys are rule-local; completeness is the O=[] special case."
+  - turn: 4
+    type: observation
+    id: "O115"
+    routing: staged
+    provenance: ai-suggested
+    summary: "The T6 induction rides two commuting facts with disjoint footprints (nf touches literals, translation touches names)."
+  - turn: 4
+    type: observation
+    id: "O116"
+    routing: staged
+    provenance: ai-suggested
+    summary: "trSupport is not total on checked supports (θDom allows unused out-of-vocabulary bindings); domain evidence is irreducible."
+  - turn: 4
+    type: claim
+    id: "C48"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Checked-support transport needs only environment-parameter correspondences and ties accept to the checker; from O112 via artifact commitment."
+  - turn: 4
+    type: constraint
+    id: "PW-T6 translation-form constraint"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Bridge-global Option translation cannot express world-dependent resolution; from O113 via artifact commitment."
 
 ai_actions:
   - turn: 1
@@ -139,10 +190,42 @@ ai_actions:
       - "scripts/test-check-axioms.sh"
       - ".github/workflows/ci.yml"
 
+  - turn: 4
+    action: >
+      Ran the research-foresight world model over the ARA for the next-step
+      question, verified the live tracker (PR #218 open; #182 closed; #189 at
+      1/4 sub-issues), and reported that the #189 exit decision was the next
+      step with T6 as the recommended continuation.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
+    action: >
+      Implemented T6 end to end on theory/191-pw-t6-structural-transport:
+      Lara.PW.Translation (partial symbol map, instAPat_tr, equiv_tr),
+      Lara.PW.Structural (StructuralBridge, support_transport and corollaries,
+      Admits/admits_transport), Lara.Examples.PWStructural (identity
+      endobridge at T7, renaming bridge, domain negative), both roots wired,
+      78 new audit rows. lake build 130 jobs and the hardened audit at 1707
+      declarations both clean; diff pure insertion (2142 lines). Wrote
+      docs/theory-pw-t6-structural-transport.md and the paper-name-map §PW-T6
+      block; pushed and opened PR #223.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Translation.lean"
+      - "lean/Lara/PW/Structural.lean"
+      - "lean/Lara/Examples/PWStructural.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-pw-t6-structural-transport.md"
+      - "docs/paper-lean-name-map.md"
+
 claims_touched:
   - id: C47
     action: crystallized
     turn: 1
+  - id: C48
+    action: crystallized
+    turn: 4
 
 logic_revisions:
   - turn: 1
@@ -165,6 +248,35 @@ logic_revisions:
     signal: artifact-commitment
     provenance: ai-suggested
     note: "Mirrors the §8 precedent set for M5 by O110."
+  - turn: 4
+    entry: C48
+    field: created
+    before: "(none — new claim)"
+    after: "C48: Checked-support transport needs only environment-parameter correspondences, and it ties the outer model's applicability judgment to the checker"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      From O112. The committed, AxCheck-registered support_transport /
+      Admits / admits_transport theorems and PR #223 are the artifact
+      commitment; status set to supported on the C47 precedent — the audited
+      proof IS the evidence. The user has not yet commented on the result, so
+      provenance stays ai-suggested.
+  - turn: 4
+    entry: "logic/solution/constraints.md: PW-T6 translation-form constraint"
+    field: created
+    before: "(none — new constraint entry)"
+    after: "Bridge-global partial translation cannot express target-world-dependent resolution; adopting the edge-indexed form re-opens the adequacy layer and is budgeted as a contract change."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "From O113; docs/theory-pw-t6-structural-transport.md §8.1 now depends on it."
+  - turn: 4
+    entry: "logic/solution/mechanization.md §10"
+    field: created
+    before: "(none — file ended at §9)"
+    after: "§10 T6 transports the typing judgment, not the checker"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Mirrors the §9 precedent set for PW0 by N271/N272."
 
 key_context:
   - turn: 1
@@ -211,12 +323,32 @@ key_context:
       matters beyond the one incident: every evidence file in this artifact
       cites the audit as its verification.
 
+  - turn: 4
+    excerpt: >
+      The researcher's directive was "in parallel to M4" — a scheduling
+      decision, not a review waiver. The exit decision on #189 was taken
+      forward by implementing T6 as a reviewable PR rather than by posting a
+      tracker comment; the PR is the vehicle through which the decision can
+      still be rejected. The plan-PR cadence was skipped this once because the
+      implementation itself was compile-verified and audit-gated end to end
+      in the session, making a separate compile-verified plan document
+      redundant with the artifact it would describe.
+  - turn: 4
+    excerpt: >
+      The design's conditional completeness clause dissolved during
+      mechanization: obligations are question-name lists, question names are
+      rule-local vocabulary the translation preserves, so the transported
+      obligation list is not merely empty-preserving but identical. Proving
+      the stronger exact statement was cheaper than the conditional one.
+
 open_threads:
-  - "The #192 exit decision — whether to proceed to T6 (#191) — is taken on the tracker, not in the repo. O112 and O113 are its two inputs."
+  - "PR #223 (T6) awaits CI and human review; PR #218 (M4) still open in parallel."
+  - "T8 (#193) must quantify over the target's attackers; T9 (#190) needs the composition laws. Both stay on tracker #189, and both consume the PW-T6 translation-form constraint: choose the translation form first."
   - "gap conflates out-of-vocabulary, ill-sorted, not-posed, and posed-but-unsupported until the M5 well-sortedness refinement of Query_κ lands."
-  - "PR #221 awaits CI and human review."
 
 ai_suggestions_pending:
   - "O111: outer-layer conservativity is structurally cheap; the real cost is the adequacy obligation. Not yet affirmed."
-  - "O112: accept is an unconstrained Prop — T6 is the discharge of PW0's largest open hypothesis, not an extension of it."
-  - "O113: the bridge-global Option translation is a contract that T6 must break, not refine."
+  - "O114: obligations transport verbatim; completeness is the O=[] special case. Not yet affirmed."
+  - "O115: the T6 induction rides two disjoint-footprint commuting facts. Not yet affirmed."
+  - "O116: the transport's translation-domain hypothesis is irreducible. Not yet affirmed."
+  - "C48 crystallized ai-suggested with status supported on the C47 precedent; researcher has not yet commented on the T6 result."

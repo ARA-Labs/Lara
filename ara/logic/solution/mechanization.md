@@ -190,3 +190,38 @@ distinct conditions.
 _Committed by N271/N272; durable theorem contract:
 `docs/theory-pw0-outer-model.md`; proof record:
 `evidence/proofs/pw0_outer_model.md`. The T7 finding is C47._
+
+## 10. T6 transports the typing judgment, not the checker
+
+T6 is the first structural result over the PW0 wrapper, and its architecture
+is that the transported object is the *relational typing judgment*
+(`HasSupport`), never a checker run. The bridge's translation is a partial
+symbol map lifted structurally (`Lara.PW.Translation`); the contract
+(`Lara.PW.StructuralBridge`) states one correspondence per environment
+parameter the judgment reads — leaf typing, rule lookup, certificate
+acceptance — over a shared canonicalizer, and nothing else. That "nothing
+else" is enforced by issue #191's acceptance bullet taken literally: every
+contract field is consumed by a named arm of the transport induction.
+
+Two design facts carry the proof. First, the translation's footprint is
+disjoint from `nf`'s — `nf` canonicalizes numeric literals, the translation
+renames predicate/constructor names — so `≡` survives translation
+(`equiv_tr`) and premise identity and discharge answers transport. Second,
+question keys are rule-local vocabulary the translation preserves, so the
+obligation list transports *verbatim* and the design's conditional
+completeness clause becomes the `O = []` special case rather than a
+hypothesis.
+
+The corollaries are deliberately induction-free: target-registry occurrence
+replay is B0's headline applied to the transported derivation, and the
+checker tie for PW0's `accept` (`Admits`/`admits_transport`) is membership
+plus the main theorem. The T6/T8 boundary is now packaged at the live T7
+fixtures (`t7_t6_boundary`): transport succeeds, status still flips.
+
+What T6 deliberately does not contain: edge-indexed translation (see the
+PW-T6 translation-form constraint in `constraints.md`), partial leaf maps,
+attack correspondence (T8, #193), and bridge composition (T9, #190).
+
+_Committed by N275/N276; durable theorem contract:
+`docs/theory-pw-t6-structural-transport.md`; proof record:
+`evidence/proofs/pw_t6_transport.md`. The headline finding is C48._

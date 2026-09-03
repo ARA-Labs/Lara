@@ -238,3 +238,23 @@ to the ACL/EMNLP follow-up with #52 and #30.
   `lean/Lara/Complexity/Gadget.lean`; the durable account is
   `docs/theory-m2b-complexity.md`, and the retired execution plan is preserved
   at git object `8155ec7:plans/2026-08-30-m2b-realization-followup.md`.
+
+## PW-T6 translation-form constraint (2026-09-02 — grounds: O113, N271, N276)
+
+- **A bridge-global partial translation cannot express target-world-dependent
+  resolution, and moving past it is a contract change, not a refinement.** One
+  `translate : B → Query src → Option (Query tgt)` answers once for every world
+  pair of the bridge; a source atom whose resolution depends on the target world
+  (the obsolete-alias case: one target world carries the resolving ontology
+  version, another does not) is inexpressible, as is ambiguity — several target
+  queries for one source query — which `Option` forbids by construction. The
+  edge-indexed successor `Translate : (b) → World src → World tgt → Query src →
+  Query tgt → Prop` repairs both, but `mem_compare_iff_sat_dia`,
+  `compare_translationUndefined_iff`, and the executable `crossCompare` are all
+  stated against the `Option` form, so adopting it re-opens the adequacy layer
+  and must be budgeted as such. T6 (#191, PR #223) deliberately stayed on the
+  bridge-global form — `Lara.PW.SymMap` is functional, and the frozen
+  limitation is recorded in `docs/theory-pw-t6-structural-transport.md` §8.1
+  with the sizing note at `docs/theory-pw0-outer-model.md` §6. T8/T9 designs
+  choose the translation form *first*; a design assuming per-world resolution
+  on the `Option` interface is wrong before it starts.
