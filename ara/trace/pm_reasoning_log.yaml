@@ -1147,3 +1147,12 @@ entries:
   - "Did NOT create a new audit-coverage heuristic: N274 already records the same mechanism that an axiom audit cannot prove roster completeness. This turn adds the missing CI enforcement rather than a distinct research claim."
   - "The attempted independent code-review subagent failed before reading the diff because its runtime had no model selected; no review result was treated as evidence."
   - "No reader reports were supplied this turn."
+- turn: "2026-09-03_002#1"
+  notes:
+    - "Routed the task selection as decision N288 with provenance user: the user chose '#224' from explicitly offered alternatives, which are recorded because the M4-conflict reasoning (avoid #222/Compose.lean) is the durable part."
+    - "Folded the CI diagnosis into N288's choice text rather than a separate node: it is infrastructure, but the billing block bears on what every 'audit PASS' in this artifact currently means (author-reported, no independent CI), so it belongs in the record without owning a node."
+    - "Advanced C48's Sources/Proof via empirical resolution (audit re-run at 1712) — content revision only, Status stays supported; the Statement already asserted the cert_ok clause, and the new fixtures are evidence for it, not a scope change."
+    - "Staged O123 (point-mass acceptance pairs) as heuristic, not claim: it is fixture-design guidance, falsifiable only as practice."
+    - "Near-miss: considered crystallizing O114 (verbatim obligations) via artifact commitment since C48's Statement carries the conjunct — rejected: C48 crystallized from O112, and promoting O114 into it now would duplicate; left staged for its own closure or death."
+    - "Did NOT list the #224 boundary as untested in C48's Conditions removal — Conditions never named cert_ok vacuity, so nothing to remove."
+    - "No reader reports were supplied this turn."

@@ -507,3 +507,10 @@ sessions:
   events_count: 4
   claims_touched: [C49]
   open_threads: 1
+- id: 2026-09-03_002
+  date: '2026-09-03'
+  summary: 'Parallel-to-M4 session: CI outage #225 diagnosed to an ARA-Labs org billing block (org-admin action, not repo work), then #224 closed — the strict-certificate renaming bridge (bridgeCert) discharges StructuralBridge.cert_ok non-vacuously off the identity with a point-mass CertOk pair, cert_accept_translated as regression guard, and cert_transport running the transported derivation through the AssuranceOk.cert arm. Audit grows to 1712 declarations (83 PW-T6), counts moved together in doc/evidence/C48. Opened as PR #230.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: [C48]
+  open_threads: 3

@@ -70,16 +70,24 @@ does not consume.
 | Identity endobridge | `PW.StructuralBridge.refl`, `Examples.PW.admitsIdT7`, `t7_t6_transport` |
 | T6/T8 boundary at a live instance | `Examples.PW.t7_t6_boundary` |
 | Renaming instance | `Examples.PW.bridgeRen`, `hasSupport_ren`, `ren_transport` |
-| Contract clauses exercised off the identity | `Examples.PW.ren_leaf_translated`, `ren_support_renamed` |
+| Strict-certificate renaming instance | `Examples.PW.bridgeCert`, `hasSupport_cert`, `cert_transport` |
+| Contract clauses exercised off the identity | `Examples.PW.ren_leaf_translated`, `ren_support_renamed`, `cert_accept_translated`, `cert_reject_untranslated`, `cert_support_renamed` |
 | Translation-domain negative | `Examples.PW.ren_out_of_vocabulary`, `ren_translationUndefined` |
 
 The renaming instance discharges `rule_ok` and `leaf_ok` under a translation
 that actually renames — the target policy carries the translated rule, and the
-renamed leaf is admitted at the translated atom. `cert_ok` has no off-identity
-witness yet: it needs a strict rule with a live certifier allowlist and a
-certificate-accepting environment on both sides, tracked as #224. Soundness is
-carried by `support_transport`, not by these examples; what is missing is
-conformance evidence that the third clause is inhabitable off the identity.
+renamed leaf is admitted at the translated atom. The strict-certificate
+instance (#224) discharges the third clause: a strict rule with a live
+certifier allowlist and `allowTrusted` off, a `CertOk` pair holding exactly at
+the fixture's encoded step on each side, `cert_accept_translated` pinning that
+source acceptance at `([e], p)` survives translation to target acceptance at
+`([e_r], p_r)`, and `cert_reject_untranslated` pinning that neither side
+accepts the other's encoded step. `cert_transport` runs the transported
+derivation through
+the `AssuranceOk.cert` arm off the identity, the frozen `(β, hd, κ)` triple
+carried verbatim. Soundness is carried by `support_transport`, not by these
+examples; they are the conformance evidence that all three contract clauses
+are inhabitable off the identity.
 
 `support_transport` states: under the contract, if
 `HasSupport canon Pi Gamma CertOk w C O` and `trSupport sym leafMap w = some
@@ -148,7 +156,7 @@ preservation — is now exhibited *through* the T6 machinery itself. T8 (#193)
 must therefore quantify over the target's attackers; nothing in this
 milestone's theorem set can be strengthened into T8 without new hypotheses.
 
-## 7. Verification (2026-09-02)
+## 7. Verification (2026-09-03, with the #224 strict-certificate witness)
 
 ```
 $ cd lean && lake build
@@ -158,7 +166,7 @@ $ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axi
 Axiom audit passed.                                             EXIT: 0
 ```
 
-1707 audited declarations across the library, of which 78 are PW-T6 — every
+1713 audited declarations across the library, of which 84 are PW-T6 — every
 theorem the three modules declare, together with the translation and bridge
 definitions those theorems are stated over. The two structures (`SymMap`,
 `StructuralBridge`) and the renaming-example fixtures are audited
@@ -167,9 +175,12 @@ reports the whole dependency set, and the repo-wide convention is that
 example fixtures are gated through their theorems rather than registered
 separately. No `sorryAx`, no
 `ofReduceBool`, nothing outside `propext` / `Classical.choice` /
-`Quot.sound`. `git diff main --stat` touches only the three new modules, the
-two roots (`Lara.lean`, `AxCheck.lean`), and the two docs — no existing
-semantics module (the PW0 gate-1 discipline, carried forward).
+`Quot.sound`. The original landing (PR #223, verified 2026-09-02 at 1707
+declarations, 78 PW-T6) touched only the three new modules, the two roots
+(`Lara.lean`, `AxCheck.lean`), and the two docs — no existing semantics
+module (the PW0 gate-1 discipline, carried forward); the #224 follow-up adds
+the strict-certificate fixtures to `Lara/Examples/PWStructural.lean` and
+their six audit rows, again touching no semantics module.
 
 ## 8. Known limitations of the frozen contract
 

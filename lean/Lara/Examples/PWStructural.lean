@@ -1,7 +1,7 @@
 /-
 # PW-T6 executable examples (issue #191, tracker #189)
 
-Two instances of the structural-bridge contract, one boundary fact, and the
+Three instances of the structural-bridge contract, one boundary fact, and the
 translation-domain negative.
 
 **The identity endobridge at the T7 pair.** `StructuralBridge.refl` at
@@ -20,9 +20,19 @@ the source instance derivation across, concluding the renamed claim in the
 target environment — the vocabulary machinery of `Lara.PW.Translation`
 exercised off the identity. Two of the contract's three clauses are
 discharged non-vacuously here: `rule_ok` by the translated policy and
-`leaf_ok` by the renamed leaf at the translated atom. `cert_ok` still has no
-off-identity witness — it needs a strict rule with a live certifier
-allowlist, tracked as #224.
+`leaf_ok` by the renamed leaf at the translated atom. Its `CertOk` judgment
+is empty on both sides — the defeasible rule makes no `AssuranceOk.cert` arm
+reachable — so this bridge closes `cert_ok` vacuously.
+
+**The strict-certificate renaming bridge (#224).** The same renaming over a
+*strict* rule with a live certifier allowlist and `allowTrusted` off, so the
+only reachable assurance is a backend-accepted certificate. The `CertOk`
+pair holds exactly at the fixture's encoded step on each side — the
+instantiated premise and conclusion, source-vocabulary at the source,
+translated at the target — which makes `cert_ok` a real translation proof:
+acceptance at `([e], p)` is carried to acceptance at `([e_r], p_r)`. The
+transported derivation then runs the `AssuranceOk.cert` arm off the
+identity, with the frozen `(β, hd, κ)` triple preserved verbatim.
 
 **The domain negative.** The renaming is partial: the source-only claim `q`
 has no translation, and the executable comparison reports exactly
@@ -134,15 +144,16 @@ def gammaRenTgt : LeafId → Option Atom :=
   fun l => if l = leafMapRen lRen then some (.atom "e_r" .nil) else none
 
 /-- No certificate judgment on either side (the example rule is defeasible,
-so no `AssuranceOk.cert` arm is reachable). Exercising `cert_ok` off the
-identity needs a strict rule carrying a live certifier allowlist and a
-certificate-accepting environment on both sides; deferred to #224. -/
+so no `AssuranceOk.cert` arm is reachable). The strict-certificate bridge
+below (`bridgeCert`, #224) is where `cert_ok` is exercised off the
+identity. -/
 def certRen : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun _ _ _ _ _ => False
 
 /-- The renaming bridge. `rule_ok` holds by construction of the target
 policy, and `leaf_ok` discharges a real translation step at a renamed leaf;
-only the certificate clause is vacuous (#224). -/
+only the certificate clause is vacuous here (see `bridgeCert` for the
+non-vacuous discharge). -/
 def bridgeRen :
     StructuralBridge id piRenSrc piRenTgt gammaRenSrc gammaRenTgt
       certRen certRen
@@ -265,6 +276,209 @@ theorem ren_transport :
       [] := by
   obtain ⟨C', hC, h⟩ := support_transport bridgeRen hasSupport_ren
     (w' := wRenTgt) rfl
+  have hC' : trAtom renSym (.atom "p" .nil) = some C' := hC
+  rw [ren_conclusion] at hC'
+  cases hC'
+  exact h
+
+/-! ### The strict-certificate renaming bridge (#224) -/
+
+/-- The allowlisted certifier backend of the strict renaming example. -/
+def βRen : BackendId := ⟨"smt", 1⟩
+
+/-- The certifier's allowlisted theory digest. -/
+def hdRen : Digest := ⟨"th-ren"⟩
+
+/-- The opaque certificate reference the fixture submits. -/
+def κRen : CertRef := ⟨.atom "cert-ren"⟩
+
+/-- Strict source rule: concludes `p` from the evidence premise `e`, with
+`(βRen, hdRen)` its one allowlisted certifier and `allowTrusted` off — the
+only reachable assurance is a certificate `CertOk` accepts. -/
+def ruleCert : Rule :=
+  { mode := .strict, params := [], premises := [⟨⟨"e"⟩, .nil⟩]
+  , concl := ⟨⟨"p"⟩, .nil⟩, questions := [], allowTrusted := false
+  , certifiers := [(βRen, hdRen)] }
+
+/-- The rule identifier of the strict renaming example. -/
+def rnCert : RuleId := ⟨"cert-ren"⟩
+
+/-- Source policy lookup: the one strict rule. -/
+def piCertSrc : RuleId → Option Rule :=
+  fun rn => if rn = rnCert then some ruleCert else none
+
+/-- Target policy lookup: the translated source policy, as `rule_ok`
+requires. `trRule` preserves the mode and the certifier allowlist, so the
+target rule is strict with the same live allowlist. -/
+def piCertTgt : RuleId → Option Rule :=
+  fun rn => (piCertSrc rn).bind (trRule renSym)
+
+/-- Source certificate acceptance: `βRen` under `hdRen` accepts `κRen` for
+exactly the fixture's encoded step — instantiated premise `e`, conclusion
+`p`. Non-empty by construction, unlike the defeasible example's `certRen`. -/
+def certCertSrc : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
+  fun β hd κ As C =>
+    β = βRen ∧ hd = hdRen ∧ κ = κRen ∧
+      As = [.atom "e" .nil] ∧ C = .atom "p" .nil
+
+/-- Target certificate acceptance: the same certifier triple, at the
+*translated* encoded step — premise `e_r`, conclusion `p_r`. -/
+def certCertTgt : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
+  fun β hd κ As C =>
+    β = βRen ∧ hd = hdRen ∧ κ = κRen ∧
+      As = [.atom "e_r" .nil] ∧ C = .atom "p_r" .nil
+
+/-- The strict-certificate renaming bridge. All three contract clauses are
+now discharged non-vacuously: `rule_ok` by the translated strict policy,
+`leaf_ok` by the renamed leaf at the translated atom, and `cert_ok` by an
+acceptance pair that survives the translation of its encoded step. -/
+def bridgeCert :
+    StructuralBridge id piCertSrc piCertTgt gammaRenSrc gammaRenTgt
+      certCertSrc certCertTgt where
+  sym := renSym
+  leafMap := leafMapRen
+  leaf_ok := fun l p h => by
+    unfold gammaRenSrc at h
+    by_cases hl : l = lRen
+    · rw [if_pos hl] at h
+      cases h
+      refine ⟨.atom "e_r" .nil, rfl, ?_⟩
+      rw [hl]
+      unfold gammaRenTgt
+      rw [if_pos rfl]
+    · rw [if_neg hl] at h
+      exact nomatch h
+  rule_ok := fun rn r h => by
+    unfold piCertSrc at h
+    by_cases hrn : rn = rnCert
+    · rw [if_pos hrn] at h
+      cases h
+      refine ⟨_, rfl, ?_⟩
+      unfold piCertTgt piCertSrc
+      rw [if_pos hrn]
+      rfl
+    · rw [if_neg hrn] at h
+      exact nomatch h
+  cert_ok := fun β hd κ As C As' C' hAs hC hacc => by
+    obtain ⟨hβ, hhd, hκ, hAs0, hC0⟩ := hacc
+    subst hβ; subst hhd; subst hκ; subst hAs0; subst hC0
+    have hAs' : As' = [.atom "e_r" .nil] := by
+      have he : trAtoms renSym [Atom.atom "e" .nil] =
+          some [Atom.atom "e_r" .nil] := rfl
+      rw [he] at hAs
+      exact (Option.some.inj hAs).symm
+    have hC' : C' = .atom "p_r" .nil := by
+      rw [ren_conclusion] at hC
+      exact (Option.some.inj hC).symm
+    exact ⟨rfl, rfl, rfl, hAs', hC'⟩
+
+/-- **The certificate step survives the renaming.** The rule is strict with a
+allowlist, source acceptance holds at the fixture's encoded step, both
+components of the step translate, and target acceptance holds at the
+translated step. A future edit that emptied either judgment under a real
+renaming breaks this theorem — the regression guard #224 asked for. -/
+theorem cert_accept_translated :
+    ruleCert.mode = .strict ∧ (βRen, hdRen) ∈ ruleCert.certifiers ∧
+      certCertSrc βRen hdRen κRen [.atom "e" .nil] (.atom "p" .nil) ∧
+      trAtoms renSym [.atom "e" .nil] = some [.atom "e_r" .nil] ∧
+      trAtom renSym (.atom "p" .nil) = some (.atom "p_r" .nil) ∧
+      certCertTgt βRen hdRen κRen [.atom "e_r" .nil] (.atom "p_r" .nil) :=
+  ⟨rfl, List.mem_singleton.mpr rfl, ⟨rfl, rfl, rfl, rfl, rfl⟩, rfl, rfl,
+    ⟨rfl, rfl, rfl, rfl, rfl⟩⟩
+
+/-- The source and target certificate judgments reject one another's encoded
+step. This pins the off-identity distinction at the acceptance boundary, so
+widening either point-mass judgment to accept the untranslated step breaks the
+fixture. -/
+theorem cert_reject_untranslated :
+    ¬ certCertTgt βRen hdRen κRen [.atom "e" .nil] (.atom "p" .nil) ∧
+      ¬ certCertSrc βRen hdRen κRen [.atom "e_r" .nil] (.atom "p_r" .nil) := by
+  constructor
+  · rintro ⟨_, _, _, h, _⟩
+    exact absurd h (by decide)
+  · rintro ⟨_, _, _, h, _⟩
+    exact absurd h (by decide)
+
+/-- The source support term: one instance of the strict rule, its evidence
+premise discharged by the admitted leaf, certificate assurance carrying the
+frozen `(βRen, hdRen, κRen)` triple. -/
+def wCert : SupportTerm :=
+  .inst rnCert [] [.leaf lRen] [] [] (.cert βRen hdRen κRen)
+
+/-- The transported support term: the renamed leaf, the *same* certificate
+triple — `trSupport` carries assurances verbatim. -/
+def wCertTgt : SupportTerm :=
+  .inst rnCert [] [.leaf (leafMapRen lRen)] [] [] (.cert βRen hdRen κRen)
+
+/-- The strict support translation genuinely renames, and preserves the
+certificate triple on the nose. -/
+theorem cert_support_renamed :
+    trSupport renSym leafMapRen wCert = some wCertTgt ∧ wCertTgt ≠ wCert :=
+  ⟨rfl, by decide⟩
+
+/-- The source derivation: `wCert` supports `p` completely in the strict
+source environment, through the `AssuranceOk.cert` arm. -/
+theorem hasSupport_cert :
+    HasSupport id piCertSrc gammaRenSrc certCertSrc wCert (.atom "p" .nil)
+      [] := by
+  have hside : InstSide id piCertSrc certCertSrc rnCert [] ruleCert
+      [.leaf lRen] [] [] (.cert βRen hdRen κRen) [.atom "e" .nil]
+      [.atom "e" .nil] [[]] [] [] (.atom "p" .nil) :=
+    { rule := by unfold piCertSrc; rw [if_pos rfl]
+      θNodup := List.nodup_nil
+      θDom := fun _ => Iff.rfl
+      prems := rfl
+      concl := rfl
+      lenAs := rfl
+      lenCs := rfl
+      lenOs := rfl
+      premEq := by
+        intro i A B hA hB
+        cases i with
+        | zero =>
+          simp only [List.getElem?_cons_zero, Option.some.injEq] at hA hB
+          subst hA; subst hB
+          exact equiv_refl id _
+        | succ j => simp at hA
+      lenDCs := rfl
+      lenDOs := rfl
+      ans := fun _ _ _ _ h => nomatch h
+      qNodup := List.nodup_nil
+      dNodup := List.nodup_nil
+      hNodup := List.nodup_nil
+      cover := fun _ h => nomatch h
+      disj := fun _ h => nomatch h
+      keysD := fun _ h => nomatch h
+      keysH := fun _ h => nomatch h
+      strictNoQ := fun _ => ⟨rfl, rfl⟩
+      assur := .cert rfl (List.mem_singleton.mpr rfl)
+        ⟨rfl, rfl, rfl, rfl, rfl⟩ }
+  have hleaf : HasSupport id piCertSrc gammaRenSrc certCertSrc (.leaf lRen)
+      (.atom "e" .nil) [] :=
+    .leaf (by unfold gammaRenSrc; rw [if_pos rfl])
+  exact HasSupport.inst (canon := id) (Gamma := gammaRenSrc) hside
+    (by
+      intro i w A O hw hA hO
+      cases i with
+      | zero =>
+        simp only [List.getElem?_cons_zero, Option.some.injEq] at hw hA hO
+        subst hw; subst hA; subst hO
+        exact hleaf
+      | succ j => simp at hw)
+    (fun _ _ _ _ _ h => nomatch h)
+
+/-- **The transported strict derivation.** `support_transport` carries the
+certificate-assured instance across the renaming bridge: the transported
+term keeps the frozen `(βRen, hdRen, κRen)` triple, its leaf is renamed, and
+it supports the renamed claim `p_r`, completely, in the target environment —
+whose acceptance judgment `certCertTgt` accepts the translated encoded step
+through `bridgeCert.cert_ok`, exercised off the identity for the first time.
+-/
+theorem cert_transport :
+    HasSupport id piCertTgt gammaRenTgt certCertTgt wCertTgt
+      (.atom "p_r" .nil) [] := by
+  obtain ⟨C', hC, h⟩ := support_transport bridgeCert hasSupport_cert
+    (w' := wCertTgt) rfl
   have hC' : trAtom renSym (.atom "p" .nil) = some C' := hC
   rw [ren_conclusion] at hC'
   cases hC'

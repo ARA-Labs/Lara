@@ -7515,3 +7515,66 @@ tree:
           because it puts both sides in observed outcomes, not because observation is partial.
         status: resolved
         also_depends_on: [N280, N285, N286]
+
+- id: N288
+  type: decision
+  title: "Parallel-to-M4 slot goes to the #224 cert_ok witness"
+  provenance: user
+  timestamp: "2026-09-03T00:30"
+  choice: >
+    With others working M4, spend this session's parallel slot on #224 (the
+    strict-certificate cert_ok witness): self-contained in
+    Lara/Examples/PWStructural.lean, zero file overlap with the active M4
+    issues. Explicitly avoided #222, which edits Lara/Context/Compose.lean —
+    the module M4 issue #229 lives in. In the same turn the CI outage (#225)
+    was diagnosed to its root cause: the job annotation reports the run was
+    not started because of failed payments / spending limit on the ARA-Labs
+    org, so the fix is an org-admin billing action, not repo work.
+  alternatives:
+    - "#204: surface retained-certificate reports through the driver (engineering-side)."
+    - "#219/#220/#228 lemma-ownership refactors (merge-conflict risk with M4 branches on shared modules)."
+    - "No coding work; only the CI billing fix."
+  evidence:
+    - "user selection: '#224 PW-T6 witness (Recommended)'"
+    - "https://github.com/ARA-Labs/lara/issues/225#issuecomment-5520263197 (billing-block diagnosis)"
+    - "issue #229 names Lara/Context/Compose.lean as active M4 territory"
+  status: resolved
+  also_depends_on: [N275, N276]
+
+- id: N289
+  type: experiment
+  title: "#224 closed: cert_ok discharged off the identity, opened as PR #230"
+  provenance: ai-executed
+  timestamp: "2026-09-03T01:30"
+  description: >
+    Give StructuralBridge.cert_ok the off-identity witness #224 specified: a
+    strict rule with a live certifier allowlist, a CertOk pair that actually
+    holds at some (β, hd, κ, As, C), and a target CertOk' holding at the
+    translated (As', C') — under the existing p -> p_r, e -> e_r renaming
+    of Lara.Examples.PWStructural.
+  result: >
+    The strict-certificate renaming bridge lands: ruleCert (strict,
+    certifiers [(βRen, hdRen)], allowTrusted off, so only the
+    AssuranceOk.cert arm is reachable), certCertSrc/certCertTgt holding
+    exactly at the fixture's encoded step on each side, and bridgeCert
+    discharging all three contract clauses non-vacuously — cert_ok is a real
+    translation proof carrying acceptance at ([e], p) to acceptance at
+    ([e_r], p_r). cert_accept_translated is the regression guard (strict
+    mode, live allowlist, source acceptance, definedness of both
+    translations, target acceptance); hasSupport_cert derives the source
+    derivation through the cert arm and cert_transport transports it with
+    the frozen (β, hd, κ) triple carried verbatim (cert_support_renamed pins
+    the term is genuinely renamed). Five new audit rows: 1712 audited
+    declarations, 83 PW-T6, standard trio only (the new theorems report
+    propext / propext+Quot.sound). Counts moved together in the T6 doc, the
+    ARA evidence file, and C48's Sources per the issue's cost note; the
+    frozen contract in Lara/PW/Structural.lean is untouched. Build 130 jobs
+    and axiom audit both clean, locally — CI remains dark (#225).
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/230; commit 48187b0"
+    - "lean/Lara/Examples/PWStructural.lean: bridgeCert, cert_accept_translated, cert_transport"
+    - "docs/theory-pw-t6-structural-transport.md §7 (2026-09-03 verification)"
+    - "ara/evidence/proofs/pw_t6_transport.md"
+    - "lake build: 130 jobs PASS; axiom audit: 1712 declarations PASS"
+  status: resolved
+  also_depends_on: [N288, N276]

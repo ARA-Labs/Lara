@@ -2266,6 +2266,14 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.ren_transport
 #print axioms Lara.Examples.PW.ren_out_of_vocabulary
 #print axioms Lara.Examples.PW.ren_translationUndefined
+-- #224: the strict-certificate renaming bridge — cert_ok discharged
+-- non-vacuously off the identity, and the transported strict derivation.
+#print axioms Lara.Examples.PW.bridgeCert
+#print axioms Lara.Examples.PW.cert_accept_translated
+#print axioms Lara.Examples.PW.cert_reject_untranslated
+#print axioms Lara.Examples.PW.cert_support_renamed
+#print axioms Lara.Examples.PW.hasSupport_cert
+#print axioms Lara.Examples.PW.cert_transport
 
 /-! ### Theory M4 — the fragment/linking context calculus (issue #187)
 

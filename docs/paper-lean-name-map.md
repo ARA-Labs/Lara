@@ -1017,7 +1017,8 @@ No paper display cites these yet. The rows exist so that T8 (#193), T9
 | The identity endobridge at the T7 pair | `Examples.PW.admitsIdT7`, `t7_t6_transport` | `Lara/Examples/PWStructural.lean` |
 | The T6/T8 boundary packaged at a live instance (transport succeeds, status flips) | `Examples.PW.t7_t6_boundary` | `Lara/Examples/PWStructural.lean` |
 | The genuine renaming bridge and its transported derivation | `Examples.PW.renSym`, `ruleRen`, `piRenSrc`, `piRenTgt`, `lRen`, `leafMapRen`, `gammaRenSrc`, `gammaRenTgt`, `bridgeRen`, `wRen`, `wRenTgt`, `hasSupport_ren`, `ren_conclusion`, `ren_transport` | `Lara/Examples/PWStructural.lean` |
-| The bridge's two non-vacuous clauses exercised off the identity (`rule_ok` by the translated policy, `leaf_ok` by the renamed leaf at the translated atom) | `Examples.PW.ren_support_renamed`, `ren_leaf_translated` | `Lara/Examples/PWStructural.lean` |
+| The strict-certificate renaming bridge and its transported derivation | `Examples.PW.βRen`, `hdRen`, `κRen`, `ruleCert`, `rnCert`, `piCertSrc`, `piCertTgt`, `certCertSrc`, `certCertTgt`, `bridgeCert`, `wCert`, `wCertTgt`, `hasSupport_cert`, `cert_accept_translated`, `cert_reject_untranslated`, `cert_support_renamed`, `cert_transport` | `Lara/Examples/PWStructural.lean` |
+| The bridge's three non-vacuous clauses exercised off the identity (`rule_ok` by the translated policy, `leaf_ok` by the renamed leaf at the translated atom, `cert_ok` by translated certificate acceptance) | `Examples.PW.ren_support_renamed`, `ren_leaf_translated`, `cert_accept_translated`, `cert_reject_untranslated`, `cert_support_renamed` | `Lara/Examples/PWStructural.lean` |
 | The translation-domain negative | `Examples.PW.ren_out_of_vocabulary`, `ren_translationUndefined` | `Lara/Examples/PWStructural.lean` |
 
 **Not X** notes:

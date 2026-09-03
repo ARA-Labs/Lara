@@ -2678,3 +2678,24 @@ observations:
   promoted_to: logic/concepts.md#contextual-observation-outcome
   crystallized_via: verbal-affirmation + artifact-commitment
   stale: false
+- id: O123
+  timestamp: "2026-09-03T01:30"
+  provenance: ai-suggested
+  content: >
+    A point-mass acceptance pair is the minimal inhabitation witness for a
+    translation-survival clause: defining CertOk on each side as exact
+    equality with the fixture's encoded step (source vocabulary at the
+    source, translated at the target) turns cert_ok into a computation —
+    substitute the pinned tuple, reduce the two translations, done — while
+    still being a genuine non-vacuous discharge that a contract-breaking
+    edit would fail. The same pattern should serve any future per-occurrence
+    side condition the bridge contract grows.
+  context: >
+    Fixture-design observation from closing #224 (bridgeCert,
+    cert_accept_translated in Lara/Examples/PWStructural.lean, PR #230).
+  potential_type: heuristic
+  bound_to: [N289]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

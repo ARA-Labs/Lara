@@ -2,10 +2,13 @@
 
 ## Result
 
-Issue #191, tracker #189, PR #223 (branch `theory/191-pw-t6-structural-transport`,
-commit 13ae1d7). Three new modules that only import — `Lara.PW.Translation`,
-`Lara.PW.Structural`, `Lara.Examples.PWStructural` — over the unchanged local
-checker and the unchanged PW0 wrapper.
+Issue #191 (with follow-up #224), tracker #189. PR #223 (branch
+`theory/191-pw-t6-structural-transport`, commit 13ae1d7) established the
+transport; PR #230 (branch `theory/224-cert-ok-witness`, witness commit
+48187b0) added the strict-certificate witness. Three new modules that only
+import — `Lara.PW.Translation`, `Lara.PW.Structural`,
+`Lara.Examples.PWStructural` — over the unchanged local checker and the
+unchanged PW0 wrapper.
 
 The `StructuralBridge` contract is exactly three clauses over a shared source
 canonicalizer, one per environment parameter the typing judgment
@@ -48,16 +51,23 @@ predicate-renaming bridge `p ↦ p_r`, `e ↦ e_r` (`bridgeRen`,
 evidence typing carries a renamed leaf, plus the domain negative
 (`ren_out_of_vocabulary`, `ren_translationUndefined`).
 
-Two of the contract's three clauses are discharged non-vacuously by the
-renaming bridge: `rule_ok` by the translated policy, and `leaf_ok` by the
-renamed leaf admitted at the translated atom (`ren_leaf_translated`, with
-`ren_support_renamed` pinning that the transported term is not the source
-term). `cert_ok` has no off-identity witness — it needs a strict rule with a
-live certifier allowlist and a certificate-accepting environment on both
-sides, deferred to #224. This is a gap in conformance evidence, not in
-soundness: `support_transport` carries the theorem.
+All three contract clauses are discharged non-vacuously off the identity:
+`rule_ok` by the translated policy, `leaf_ok` by the renamed leaf admitted at
+the translated atom (`ren_leaf_translated`, with `ren_support_renamed`
+pinning that the transported term is not the source term), and — closing
+#224 — `cert_ok` by the strict-certificate renaming bridge (`bridgeCert`):
+a strict rule with a live certifier allowlist and `allowTrusted` off, a
+`CertOk` pair holding exactly at the fixture's encoded step on each side,
+`cert_accept_translated` pinning that source acceptance at `([e], p)`
+survives translation to target acceptance at `([e_r], p_r)`,
+`cert_reject_untranslated` pinning that neither side accepts the other's
+encoded step, and `cert_transport` running the transported derivation through
+the `AssuranceOk.cert` arm with the frozen `(β, hd, κ)` triple carried verbatim
+(`cert_support_renamed`). Soundness is carried by `support_transport`; the
+examples are the conformance evidence that the frozen contract is
+inhabitable off the identity.
 
-## Verification (2026-09-02)
+## Verification (2026-09-03, with the #224 strict-certificate witness)
 
 ```
 $ cd lean && lake build
@@ -67,7 +77,7 @@ $ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axi
 Axiom audit passed.                                             EXIT: 0
 ```
 
-1707 audited declarations across the library, of which 78 are PW-T6 — every
+1713 audited declarations across the library, of which 84 are PW-T6 — every
 theorem the three modules declare, together with the translation and bridge
 definitions those theorems are stated over. The two structures (`SymMap`,
 `StructuralBridge`) and the renaming-example fixtures are audited
@@ -76,9 +86,12 @@ reports the whole dependency set, and the repo-wide convention is that
 example fixtures are gated through their theorems rather than registered
 separately. No `sorryAx`, no
 `ofReduceBool`, nothing outside `propext` / `Classical.choice` / `Quot.sound`.
-`git diff main` is pure insertion, 2142 lines over 7 files; the only Lean
-files touched outside the three new modules are the two roots `Lara.lean` and
-`AxCheck.lean`.
+The original landing's `git diff main` (PR #223, verified 2026-09-02 at 1707
+declarations, 78 PW-T6) was pure insertion, 2142 lines over 7 files, the only
+Lean files touched outside the three new modules being the two roots
+`Lara.lean` and `AxCheck.lean`; the #224 follow-up adds the
+strict-certificate fixtures to `Lara/Examples/PWStructural.lean` and their
+six audit rows, again touching no semantics module.
 
 ## Boundary
 
