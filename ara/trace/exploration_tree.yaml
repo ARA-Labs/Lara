@@ -7578,3 +7578,61 @@ tree:
     - "lake build: 130 jobs PASS; axiom audit: 1712 declarations PASS"
   status: resolved
   also_depends_on: [N288, N276]
+
+- id: N290
+  type: decision
+  title: "#184 (M1) closed on maintainer review; paper integration deferred to lara-paper"
+  provenance: user
+  timestamp: "2026-09-03T00:20"
+  choice: >
+    Close #184 against its re-scoped acceptance (necessity + the emptyDefeat
+    non-sufficiency counterexample), verified present: realizable_invariant,
+    compilerInvariant_iso, oneSelfEdge_not_realizable, emptyUnitCheck_ok in
+    Lara/Realizability.lean and Examples/Realizability.lean, AxCheck coverage,
+    name-map §M1 rows, and every task box checked in the canonical
+    theory-depth-plan §M1. The researcher stated the maintainer review is done
+    and the paper side will integrate later. The generated-policy /
+    realization-kit follow-up stays unopened by decision.
+  alternatives:
+    - "Keep open until lara-paper states the M1 theorem — rejected: the remaining work is paper-side and the researcher chose to close now."
+  evidence:
+    - "https://github.com/ARA-Labs/lara/issues/184 (closing comment, 2026-09-03)"
+    - "lean/Lara/Realizability.lean; lean/Lara/Examples/Realizability.lean"
+    - "docs/paper-lean-name-map.md §M1"
+  status: resolved
+  also_depends_on: [N277]
+
+- id: N291
+  type: decision
+  title: "M4 Part B (full abstraction) descoped — not deferred — on researcher decision"
+  provenance: user-revised
+  timestamp: "2026-09-03T00:50"
+  choice: >
+    Descope Part B rather than leave it gated: close #187 on Part A with the
+    boundary recorded (PR #232 rewrites docs/theory-m4-contextual-adequacy.md
+    §7 as the durable descope record and deletes the executed plan file). The
+    rationale, articulated by the agent after the researcher's explicit
+    pushback ("do you think this is something we really have to prove?") and
+    affirmed by the researcher: (1) no consumer — Part A already delivers the
+    result the system's story needs, and no obligation in the development or
+    paper uses a context-free fragment-equivalence proof method; (2) the
+    tautology risk is structural — near-maximally discriminating contexts
+    (AttackComplete all-pairs, Covered subargument-closed, grounded fixpoint
+    over the linked AF) push contextual equivalence toward syntactic identity
+    up to contrary-invisible decoration, i.e. toward Erase.mapAssur
+    generalized, so full abstraction risks landing true-but-empty; (3) tracker
+    #180 named this the first item to drop under its explicit drop policy.
+    Reopening trigger recorded: committing to #215 or #216, entered through a
+    fresh issue and a G0 interface spike. The session also found the Part B
+    not-entered rationale had never been recorded in ara/ (only in docs/ and
+    #187); this node is that remediation.
+  alternatives:
+    - "Keep #187 open as the Part B gate-keeper (status quo) — rejected: leaves a milestone open indefinitely with no committed consumer."
+    - "Run the G0 soundness spike first to convert the suspected tautology into a recorded verdict — declined as not required to close honestly; still available under the reopening path."
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/232 (docs §7 descope record + plan deletion; closes #187)"
+    - "https://github.com/ARA-Labs/lara/issues/187#issuecomment-5522477874"
+    - "docs/theory-m4-contextual-adequacy.md §7 (retained G0-G4 design, LabelExpressive sketch, reopening triggers)"
+    - "cross-notes: issues #215 and #216 (reopening triggers)"
+  status: resolved
+  also_depends_on: [N277, N290]

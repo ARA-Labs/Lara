@@ -1,7 +1,8 @@
 # Theory M4 phase F0: the frozen context calculus
 
 _Status: frozen on 2026-09-02 for Theory M4 (issue #187, tracker #180), phase
-F0 of `plans/2026-09-02-theory-m4-full-abstraction.md`. This document records
+F0 of the since-deleted plan
+`plans/2026-09-02-theory-m4-full-abstraction.md`. This document records
 what F0 froze, why each choice is forced by the existing carrier rather than
 chosen for convenience, what F0 deliberately did not do, and the gate outcome
 that releases the theorem phases._

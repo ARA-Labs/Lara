@@ -1156,3 +1156,11 @@ entries:
     - "Near-miss: considered crystallizing O114 (verbatim obligations) via artifact commitment since C48's Statement carries the conjunct — rejected: C48 crystallized from O112, and promoting O114 into it now would duplicate; left staged for its own closure or death."
     - "Did NOT list the #224 boundary as untested in C48's Conditions removal — Conditions never named cert_ok vacuity, so nothing to remove."
     - "No reader reports were supplied this turn."
+  - turn: "2026-09-03_003#1"
+    notes:
+      - "Routed both closures as direct decision nodes (N290 user, N291 user-revised): journey facts with explicit researcher sign-off, not interpretive."
+      - "N291 provenance user-revised, not user: the researcher directed the pushback and affirmed, but the articulated rationale is the agent's."
+      - "Staged O124 (tautology-risk mechanism) rather than crystallizing despite the affirmed decision citing it: the researcher affirmed the ACTION, not the mechanism claim, and the mechanism is untested — artifact commitment exists (N291 cites it) but conservatism wins; revisit if #215/#216 commit."
+      - "No Stage 4 edits: Part A claims (C49 etc.) are untouched by the Part B descope; grep confirmed no logic/ entry mentions full abstraction."
+      - "Near-miss: considered a dead_end node for Part B — rejected: nothing was attempted and failed; descope is a decision, not a dead end."
+      - "Session filed as _003 (separate conversation from today's _001/_002 per existing multi-session-per-day precedent)."

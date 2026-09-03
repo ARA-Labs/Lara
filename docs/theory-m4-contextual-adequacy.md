@@ -1,11 +1,12 @@
 # Theory M4 Part A: contextual adequacy of backend replacement
 
 _Status: mechanized on 2026-09-02 for Theory M4 (issue #187, tracker #180),
-phases F0–F3 of `plans/2026-09-02-theory-m4-full-abstraction.md`. This document
-is the durable claim-boundary record for **Part A**. The design freeze that
-released the theorem phases is `docs/theory-m4-context-calculus-decision.md`;
-the declaration index is `docs/paper-lean-name-map.md` §M4. Part B (full
-abstraction) is **not** entered — §7._
+phases F0–F3 of the since-deleted plan
+`plans/2026-09-02-theory-m4-full-abstraction.md`. This document is the durable
+claim-boundary record for **Part A**. The design freeze that released the
+theorem phases is `docs/theory-m4-context-calculus-decision.md`; the
+declaration index is `docs/paper-lean-name-map.md` §M4. Part B (full
+abstraction) is **descoped** — §7._
 
 ## 1. What Part A proves
 
@@ -188,7 +189,7 @@ So the debt is marked **partially** discharged, and term-level holes are issue
   relational form is issue **#215**.
 - **Not full abstraction.** No logical relation is defined anywhere in Part A,
   and neither direction of a soundness/completeness pair is proved. Part B is
-  gated and not entered (§7).
+  descoped (§7).
 - **Not unconditional in the context quantifier.** The statement is about
   *admissible* contexts (§3). A paper display must carry that hypothesis.
 - **Not under contexts changed by the relabel.** `FixesContext f C` requires
@@ -209,11 +210,16 @@ So the debt is marked **partially** discharged, and term-level holes are issue
 - **Not a Haskell-side result.** M4 adds no checker, CLI, wire or corpus
   surface, so it moves no conformance vector and no performance number (D8).
 
-## 7. Part B: still gated, and why
+## 7. Part B: descoped (2026-09-03)
 
-Part B (a logical relation with soundness and completeness) was **not**
-entered. The two obstructions recorded at F0 stand unchanged, and nothing in
-Part A weakened them:
+Part B (a logical relation with soundness and completeness — full
+abstraction) was **not entered, and is now descoped by maintainer decision**
+rather than deferred. This section is the durable record of why, and of the
+design that a future reopening would start from; the working plan that carried
+it (`plans/2026-09-02-theory-m4-full-abstraction.md`) is deleted per the
+repository's plan discipline.
+
+### The two obstructions, recorded at F0 and unchanged by Part A
 
 1. **The semantic interface is wider than the declared imports.**
    `AttackComplete` is all-pairs and `Compile.Covered` closes under
@@ -231,8 +237,62 @@ Part A weakened them:
 Part A is deliberately immune to both: a uniform relabel preserves the whole
 occurrence profile, so "what is the interface" never has to be answered.
 
-**#187 stays open.** Part A closes the milestone's committed scope; Part B
-remains its optional continuation, to be entered only through its own gate.
+### Why descope rather than run the gate
+
+- **No consumer.** The result the system's story needs — backend
+  interchangeability under every admissible context — is Part A. Full
+  abstraction adds a context-free *proof method* for arbitrary fragment
+  equivalences, and no obligation in the development or the paper uses one.
+- **The tautology risk is structural, not incidental.** Full abstraction is
+  informative when the logical relation is coarser than syntax. Lara's
+  contexts are close to maximally discriminating (obstruction 1), which pushes
+  contextual equivalence toward syntactic identity up to contrary-invisible
+  decoration — i.e. toward `Erase.mapAssur` generalized. A full-abstraction
+  theorem with a near-syntactic relation would be true but empty.
+- **It was the tracker's named drop.** #180 lists this as the highest-effort
+  item with an explicit drop policy ("the first item removed if schedule or
+  page pressure threatens mechanization quality"); the completeness gadget
+  alone is priced against M2b's ~3,000-line checked-family construction
+  (`Complexity/Gadget.lean`, `Complexity/Reduction.lean`), parameterized here
+  by arbitrary interface labellings.
+
+The paper claims Part A under its honest name (contextual representation
+independence, §6) and states full abstraction as not attempted, with the
+`emptyDefeat` and symmetric-contrary boundary facts as content.
+
+### Retained design, for a reopening
+
+A future attempt should start here, not from scratch:
+
+- **Phasing.** G0: an unlanded soundness spike answering the interface
+  question (is a sound relation more than `Erase.mapAssur` generalized?);
+  G1: freeze `LogRel` over the contrary-visible occurrence profile, emitted
+  and observed sides separated, with a dated freeze record and amendment
+  procedure; G2: soundness by grounded-fixpoint induction over the linked AF
+  (M2a carrier-boundedness lemmas); G3: completeness by contrapositive via
+  `checkUnit_complete` plus a `ground_covers` obligation — **not**
+  `Realizability.Realizable`, whose `compiled_iso` targets a given whole-unit
+  `StructuredAF`, precisely the unknown; G4: closeout. Stop rule: if
+  completeness stalls beyond the expressiveness hypothesis, keep G2 as
+  *adequacy of the logical relation* — do not rename it full abstraction.
+- **`LabelExpressive`, the completeness hypothesis.** Forcing `out` needs an
+  asymmetric contrary pair or a strict-rooted attacker (`ConflictAttackable`
+  is unconditionally `True` on leaves; rebut needs `.defeasible`); a purely
+  symmetric contrary table forces only `{in, undec}`. Contraries are
+  *patterns* with universally quantified variables, so a "fresh" atom on the
+  same predicate still matches and causes collateral attacks — every forcing
+  gadget carries an explicit freshness side-condition relative to atoms unused
+  by *both* fragments. Positive witness: `m2bPolicy`'s asymmetry
+  (`Complexity/Context.lean`). Negative witness: `emptyDefeat`, seeded by
+  `Examples/Realizability.lean`'s `oneSelfEdge_not_realizable`.
+- **Reopening triggers.** Committing to **#215** (relational parametricity
+  over related backends) or **#216** (generic-`ExtensionSemantics` contextual
+  equivalence) — both want roughly this relation, and either would amortize
+  the G1 freeze. Absent such a consumer, the descope stands.
+
+**#187 is closed on Part A** with this boundary recorded; reopening goes
+through a fresh issue citing this section and answering G0's interface
+question first.
 
 ## 8. Verification
 

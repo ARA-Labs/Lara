@@ -1,0 +1,74 @@
+session:
+  id: "2026-09-03_003"
+  date: "2026-09-03"
+  started: "2026-09-03T00:00"
+  last_turn: "2026-09-03T00:56"
+  turn_count: 1
+  summary: >
+    Scope-closure session: #184 (M1) closed on maintainer review with paper
+    integration deferred to lara-paper, and M4 Part B (full abstraction)
+    descoped by researcher decision after explicit pushback — PR #232 records
+    the boundary in docs/theory-m4-contextual-adequacy.md §7, deletes the
+    executed plan, and closes #187 on merge; reopening triggers (#215/#216)
+    cross-noted. The session also surfaced and remediated an ara/ gap: the
+    Part B not-entered rationale existed only in docs/ and #187, never in the
+    artifact (now N291).
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N290"
+    routing: direct
+    provenance: user
+    summary: "#184 closed against re-scoped acceptance; paper integration deferred; follow-up issue deliberately unopened"
+  - turn: 1
+    type: decision
+    id: "N291"
+    routing: direct
+    provenance: user-revised
+    summary: "M4 Part B descoped: no consumer, structural tautology risk, tracker drop policy; reopening via #215/#216 + G0 spike; remediates the missing ara/ record"
+  - turn: 1
+    type: observation
+    id: "O124"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Context-language discriminating power, not proof difficulty, bounds a full-abstraction theorem's informativeness (potential claim, untested)"
+
+ai_actions:
+  - turn: 1
+    action: "Verified #184 deliverables in Lean (realizable_invariant, oneSelfEdge_not_realizable, emptyUnitCheck_ok, AxCheck rows, name-map §M1) and canonical plan §M1 checkboxes; closed #184 with closure-basis comment"
+    provenance: ai-executed
+    files_changed: []
+  - turn: 1
+    action: "Rewrote docs/theory-m4-contextual-adequacy.md §7 as the descope record (obstructions, rationale, retained G0-G4 + LabelExpressive design, reopening triggers); marked plan refs since-deleted in both M4 docs; deleted plans/2026-09-02-theory-m4-full-abstraction.md; opened PR #232 (closes #187)"
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-m4-contextual-adequacy.md"
+      - "docs/theory-m4-context-calculus-decision.md"
+      - "plans/2026-09-02-theory-m4-full-abstraction.md (deleted)"
+  - turn: 1
+    action: "Posted descope comments on #187, #215, #216 (reopening cross-notes)"
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Researcher: "let's push back a little. do you think this is something we
+      really have to prove?" — agent reversed its earlier keep-the-gate
+      recommendation and argued for descope (no consumer; structural tautology
+      risk; tracker drop policy); researcher: "yes" to executing the descope.
+      Earlier: "maintainer review and paper integration -> I reviewed, and the
+      paper side will do it later, we can close it" (#184).
+
+open_threads:
+  - "PR #232 awaits review/merge; #187 auto-closes on merge"
+  - "lara-paper: state M1 per its Paper direction and re-scope M4 to contextual representation independence (researcher-side)"
+  - "Next mechanization work: PW-T9 (#190) recommended, then PW-T8 (#193) — closes tracker #189"
+
+ai_suggestions_pending:
+  - "O124: the discriminating-power-bounds-informativeness mechanism is untested; a G0-style interface spike would test it if #215/#216 ever commit"

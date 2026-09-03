@@ -514,3 +514,10 @@ sessions:
   events_count: 3
   claims_touched: [C48]
   open_threads: 3
+- id: 2026-09-03_003
+  date: '2026-09-03'
+  summary: 'Scope closure: #184 (M1) closed on maintainer review; M4 Part B (full abstraction) descoped on researcher decision — PR #232 records the boundary in docs §7, deletes the executed plan, closes #187 on merge; reopening triggers #215/#216 cross-noted; the previously unrecorded Part B rationale is now in the trace (N291).'
+  turn_count: 1
+  events_count: 3
+  claims_touched: []
+  open_threads: 3

@@ -2699,3 +2699,27 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O124
+  timestamp: "2026-09-03T00:50"
+  provenance: ai-suggested
+  content: >
+    A full-abstraction theorem is informative only when its logical relation is
+    coarser than syntax; in a calculus whose contexts are near-maximally
+    discriminating (all-pairs attack completeness, subargument-closed coverage,
+    a grounded fixpoint over the linked framework), contextual equivalence is
+    pushed toward syntactic identity up to contrary-invisible decoration, so
+    full abstraction risks being true but empty — the relation collapses to a
+    generalized certificate relabel (Erase.mapAssur). The discriminating power
+    of the context language, not proof difficulty, is what bounds the
+    scientific value of the theorem.
+  context: >
+    The load-bearing rationale for descoping M4 Part B (N291). The researcher
+    affirmed the descope decision built on it, but the mechanism itself is
+    untested — a G0 interface spike would test it, and was declined as not
+    required for an honest close.
+  potential_type: claim
+  bound_to: [N291, N277]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
