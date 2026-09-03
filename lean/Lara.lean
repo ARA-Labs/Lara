@@ -235,6 +235,14 @@
 --     Lara.Examples.PWStructural. The theorem neither assumes nor concludes
 --     grounded status preservation (that boundary is T8, #193); the modules
 --     only import — see docs/theory-pw-t6-structural-transport.md
+--   * the fragment/linking context calculus and contextual representation
+--     independence (theory M4 part A, issue #187): fragments with import/export
+--     interfaces, a witnessed link guard, linking that saturates cross-boundary
+--     conflicts and merges structurally identical arguments, context
+--     composition, and the headline — an injective, acceptance-preserving
+--     relabel of a fragment's certificates is unobservable in every admissible
+--     context, with the acceptance-profile generalization over two registries.
+--     Not parametricity, not full abstraction — Lara.Context.*
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -286,6 +294,14 @@ import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics
 import Lara.Examples.Update
+import Lara.Context.Fragment
+import Lara.Context.Link
+import Lara.Context.Merge
+import Lara.Context.Compose
+import Lara.Invariants.Merge
+import Lara.Context.Equivalence
+import Lara.Context.Surface
+import Lara.Examples.Linking
 import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare

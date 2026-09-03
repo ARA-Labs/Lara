@@ -7305,3 +7305,213 @@ tree:
     - "lake build: 130 jobs PASS; axiom audit: 1707 declarations PASS"
   status: resolved
   also_depends_on: [N275, N271, N268]
+  children:
+  - id: N277
+    type: pivot
+    provenance: user
+    timestamp: 2026-09-02T17:40
+    title: Execute M4 Part A end to end rather than phase by phase across sessions
+    from: "M4 planned only — plan PR #218 open with F0 gate NOT YET RUN"
+    to: "M4 Part A executed F0-F3 in one session, plan reduced to its Part B half"
+    trigger: >
+      Researcher directive: implement the plan and finish it off, open a PR. The plan's own
+      structure (F0 gates the theorem phases; Part B separately gated) was kept as the commit
+      structure, so the history reads as the plan reads.
+    status: resolved
+    also_depends_on: [N276]
+    children:
+      - id: N278
+        type: decision
+        provenance: ai-executed
+        timestamp: 2026-09-02T18:10
+        title: F0 — freeze the carrier, with witnessed rather than Boolean rejection
+        choice: >
+          Froze Fragment/Interface/Context/link/compose/fragmentAF/obs as compiling definitions and
+          ran the F0 gate to PROCEED. Two departures from the plan text, both from review: rejection
+          classes became a closed LinkFault sum with linkOk = (linkFault ..).isNone, following
+          Check.Unit.signatureStage, so a rejected link carries a witness; and the registry moved
+          from a rejection class to a parameter of the calculus, since a context is data and cannot
+          re-invoke the checker.
+        alternatives:
+          - "Keep linkOk as a five-way Boolean conjunction (plan text) — rejected: no witness, and it fights CLAUDE.md's closed-sum rule for a fixed vocabulary."
+          - "Carry the registry on the Fragment so R-L3 covers it — rejected: unrepresentable is more honest than rejected."
+        evidence:
+          - docs/theory-m4-context-calculus-decision.md
+          - lean/Lara/Context/Fragment.lean
+        status: resolved
+      - id: N279
+        type: experiment
+        provenance: ai-executed
+        timestamp: 2026-09-02T20:30
+        title: F1 — the linking calculus, and the merge proved inert
+        description: >
+          Mechanized the guard's per-class characterizations, the conclusion cache pinned to
+          Check.inferSupport, saturation typing, Gamma transport, link_attackComplete, link_checked,
+          context composition, and the structural merge's semantic inertness. The merge result went
+          through a generic node-merging morphism of argumentation frameworks (AFMerge/CarrierMerge)
+          proved over the grounded iteration rather than the fixpoint, so two frameworks of different
+          sizes compare at one shared stage.
+        result: >
+          All theorems sorry-free inside the standard trio. Spec review returned FAIL on five gaps
+          (fragment re-indexing transport, the merge-to-obs connection, guard-level composition
+          associativity, the signature-stage decomposition, a SideOk instantiation); all five added.
+          Quality review found a duplicate of the public Support.hasSupport_unique and a generic AF
+          module misfiled under Lara/Context/; both fixed, the generic half moved to
+          Lara/Invariants/Merge.lean.
+        evidence:
+          - lean/Lara/Context/Link.lean
+          - lean/Lara/Context/Merge.lean
+          - lean/Lara/Context/Compose.lean
+          - lean/Lara/Invariants/Merge.lean
+        status: resolved
+      - id: N280
+        type: experiment
+        provenance: ai-executed
+        timestamp: 2026-09-02T22:00
+        title: F2 — contextual representation independence
+        description: >
+          Proved that a uniform relabel commutes with the linking saturation (crossAttsFrom_map,
+          crossAtts_relabel, link_relabel_commutes), that acceptance transports because stage 2
+          never inspects an assurance (argsWellSorted_map, signatureStage_map, checkUnit_map), and
+          that the M1 carrier is then equal on both sides (nodes_conclusion_map, compileUnit_map).
+          Also the D6 generalization with neither relabel nor injectivity, and result 9 cited rather
+          than re-derived.
+        result: >
+          backend_replacement_congruence proved. The statement had to be taken over ADMISSIBLE
+          contexts, not all compatible ones: obs is none on a rejected program and the acceptance
+          hypothesis is forward-only, so the plan's unconditional phrasing is false unless acceptance
+          is two-way.
+        evidence:
+          - lean/Lara/Context/Equivalence.lean
+          - ara/evidence/proofs/m4_contextual_adequacy.md
+        status: resolved
+      - id: N281
+        type: dead_end
+        provenance: ai-executed
+        timestamp: 2026-09-02T23:10
+        title: A worked surface pair witness is unreachable from the existing surface fixtures
+        hypothesis: >
+          F3's surface-transport corollary could be witnessed by instantiating it on one of the
+          development's accepted surface programs (Lara/Examples/Surface.lean).
+        failure_mode: >
+          Every accepted surface fixture in the development is proved by native_decide (92
+          occurrences in that file, including allForms_check_ok and allFormsChecked). M4's axiom
+          discipline bans it, so any witness built on one would pull Lean.ofReduceBool into
+          AxCheck.lean and fail scripts/check-axioms.sh, which admits only the standard trio.
+        lesson: >
+          An axiom-discipline boundary can make a milestone's own witnesses unreachable from
+          existing fixtures even when the theorem is proved and audited. The corollary shipped with
+          its hypotheses documented instead of an instance, and the missing fixture is issue #227 —
+          a smaller purpose-built surface program is the likely fix, not a reduction of the existing
+          one.
+        status: resolved
+      - id: N282
+        type: decision
+        provenance: ai-executed
+        timestamp: 2026-09-02T22:40
+        title: compose does not saturate — composition is closed for hygiene, not for linkability
+        choice: >
+          Kept compose registry-free and Gamma-free (its F0-frozen, data-only signature) and made
+          sideOk_composed take the two cross-boundary quadrants as explicit hypotheses, documenting
+          that a composite of mutually-attacking contexts is not admissible. Filed as #229.
+        alternatives:
+          - "Give compose a registry and a Gamma so it can saturate like link — rejected for now: it changes the F0-frozen signature and re-opens every Compose lemma."
+          - "Leave backend_replacement_congruence_composed assuming the composite's Admissible outright — rejected: the final review called it nominal, and it was."
+        evidence:
+          - lean/Lara/Context/Compose.lean
+          - lean/Lara/Context/Equivalence.lean
+        status: resolved
+      - id: N283
+        type: dead_end
+        provenance: ai-executed
+        timestamp: 2026-09-02T23:05
+        title: The first witness suite could not exercise the theorems it witnessed
+        hypothesis: >
+          A split of bare evidence leaves (ctxEx/fragEx) would witness the congruence and the
+          acceptance-profile generalization, as it had witnessed the guard, the saturation, the
+          merge and the gap-flip.
+        failure_mode: >
+          A fragment with no assurance is a fixed point of mapAssurFrag for EVERY relabel, so
+          congruence_witness reduced to obs X = obs X, and the D6 witness discharged an acceptance
+          hypothesis about certificate occurrences on a fragment that had none. Both were accepted
+          by the axiom audit and by two prior reviews; only the final integration review, told to
+          hunt for vacuity, caught it.
+        lesson: >
+          For a theorem about certificates, a witness is non-vacuous only if the fixture carries
+          one. The repair — a certificate-bearing split, a backend core that renames certificates,
+          and a proof that the relabel is not the identity (cert_relabel_moves) — is also the first
+          concrete instance of result 9's model in the development.
+        status: resolved
+      - id: N284
+        type: experiment
+        provenance: ai-executed
+        timestamp: 2026-09-02T23:25
+        title: A real backend swap, witnessed
+        description: >
+          Built a certificate-bearing fragment whose HasSupport is assembled relationally from
+          Examples.registry_exact_digest_accepts rather than by evaluating the checker; a backend
+          core that unwraps a wrapped certificate before replaying (renameCore, every field passing
+          through because the obligations all precompose with the same function); and certSwap,
+          which wraps every nd certificate payload.
+        result: >
+          certSwap is injective (certUnswap is its left inverse) and acceptance-preserving by
+          construction; cert_relabel_moves proves it is not the identity on the fragment; and
+          cert_congruence_witness applies the headline to it. AxCheck rose to 204 M4 entries after
+          the generator was fixed to see theorems indented inside mutual blocks; 1911 audited
+          declarations library-wide, audit PASS.
+        evidence:
+          - lean/Lara/Examples/Linking.lean
+          - ara/evidence/proofs/m4_contextual_adequacy.md
+        status: resolved
+      - id: N285
+        type: decision
+        provenance: user
+        timestamp: 2026-09-03T03:55
+        title: Preserve detailed contextual outcomes in the primary observation API
+        choice: >
+          Replace obs's partial Option result with a closed Observation sum and enrich every
+          LinkFault constructor with actionable side/value data.
+        alternatives:
+          - "Add a separate diagnostic observation wrapper — rejected: leaves CtxEquiv on the lossy API."
+          - "Enrich only the two payload-free LinkFault constructors — rejected: preserves inconsistent diagnostics."
+        evidence:
+          - "PR #218 review comments 3921042417 and 3921042420"
+          - lean/Lara/Context/Fragment.lean
+        status: resolved
+      - id: N286
+        type: experiment
+        provenance: ai-executed
+        timestamp: 2026-09-03T04:45
+        title: PR 218 review remediation closes semantic and audit-coverage gaps
+        description: >
+          Implemented detailed Observation outcomes, side/value-bearing LinkFaults, concrete
+          incompatible/rejected/composition/admissibility witnesses, all seven missing AxCheck
+          entries, and a committed source-to-AxCheck coverage checker wired into CI.
+        result: >
+          The checker found 218 public M4 theorem/lemma declarations and zero omissions;
+          AxCheck listed 1925 declarations and passed with only the standard trio; the complete
+          Lean build passed 138 jobs. The checker regression suite passed both tests.
+        evidence:
+          - ara/evidence/proofs/m4_contextual_adequacy.md
+          - scripts/check-axcheck-coverage.py
+          - lean/Lara/Examples/Linking.lean
+        status: resolved
+        also_depends_on: [N284, N285]
+      - id: N287
+        type: dead_end
+        provenance: ai-executed
+        timestamp: 2026-09-03T04:45
+        title: Partial observation is not the right account of contextual rejection
+        hypothesis: >
+          Observation should be undefined both when the link guard fails and when the checker
+          rejects, with admissibility justified by avoiding a definedness mismatch.
+        failure_mode: >
+          The shared none result made structurally incompatible links observationally equal to
+          compatible units rejected by the checker, so CtxEquiv erased which semantic boundary
+          failed.
+        lesson: >
+          Preserve incompatibility, checker rejection, and accepted statuses as separate
+          constructors. Admissibility remains load-bearing under forward-only acceptance, but
+          because it puts both sides in observed outcomes, not because observation is partial.
+        status: resolved
+        also_depends_on: [N280, N285, N286]

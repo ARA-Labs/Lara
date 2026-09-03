@@ -315,6 +315,20 @@ contextual equivalence; then prove both directions of full abstraction against
 an independently defined logical relation. Backend representation independence
 is a corollary target of that work, not a result of these one-step matrices.
 
+**Update (2026-09-02) — the contextual-adequacy obligation is *partially*
+discharged.** M4 Part A landed the fragment/linking calculus and proved backend
+replacement a congruence: an injective, acceptance-preserving relabel of a
+fragment's certificates is unobservable in every admissible context whose own
+assurances it fixes (`Lara.Context.backend_replacement_congruence`;
+`docs/theory-m4-contextual-adequacy.md`). Two pieces of the sentence above
+remain open. **Holes**: M4's openness is leaf-name openness only — a term-level
+hole is unrepresentable, because `Compile.CheckedProgram.complete` forces an
+empty obligation set on every declared argument and discharges live inside the
+term rather than in a name environment (issue **#217**). **Full abstraction**:
+Part B — a logical relation with soundness and completeness — is gated and was
+not entered; the two obstructions are recorded in
+`docs/theory-m4-contextual-adequacy.md` §7.
+
 Run the maintained checks from the repository root:
 
 ```sh

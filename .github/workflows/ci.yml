@@ -179,4 +179,14 @@ jobs:
         run: |
           set -o pipefail
           ../scripts/test-check-axioms.sh
+          python3 ../scripts/test_check_axcheck_coverage.py
+          python3 ../scripts/check-axcheck-coverage.py AxCheck.lean \
+            Lara/Invariants/Merge.lean \
+            Lara/Context/Fragment.lean \
+            Lara/Context/Link.lean \
+            Lara/Context/Merge.lean \
+            Lara/Context/Compose.lean \
+            Lara/Context/Equivalence.lean \
+            Lara/Context/Surface.lean \
+            Lara/Examples/Linking.lean
           lake env lean AxCheck.lean | ../scripts/check-axioms.sh

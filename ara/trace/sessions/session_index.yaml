@@ -495,8 +495,15 @@ sessions:
   open_threads: 0
 - id: 2026-09-02_001
   date: '2026-09-02'
-  summary: 'PW0 possible-world outer-model gate mechanized and opened as PR #221 (merged), then — on the researcher''s directive to continue the PW track in parallel with M4 — T6 exact checked-support transport mechanized and opened as PR #223: the partial symbol translation with its two commuting facts (instAPat_tr, equiv_tr), the three-clause StructuralBridge contract over a shared canon, support_transport with the obligation list transported verbatim (completeness unconditional), target-registry occurrence replay via B0''s headline, Admits/admits_transport discharging PW0 limitation 1, the T6/T8 boundary packaged at the live T7 pair, and a genuine renaming bridge with the translationUndefined domain negative. Also in-session: crossCompare rename (N273), audit-gate hardening (N274). C47 and C48 crystallized; PW-T6 translation-form constraint crystallized from O113. Final gates: build 130 jobs, audit 1707 declarations (78 PW-T6), diff pure insertion.'
-  turn_count: 4
-  events_count: 13
-  claims_touched: [C47, C48]
+  summary: 'PW0 possible-world outer-model gate mechanized and opened as PR #221 (merged), then — on the researcher''s directive to continue the PW track in parallel with M4 — T6 exact checked-support transport mechanized and opened as PR #223: the partial symbol translation with its two commuting facts (instAPat_tr, equiv_tr), the three-clause StructuralBridge contract over a shared canon, support_transport with the obligation list transported verbatim (completeness unconditional), target-registry occurrence replay via B0''s headline, Admits/admits_transport discharging PW0 limitation 1, the T6/T8 boundary packaged at the live T7 pair, and a genuine renaming bridge with the translationUndefined domain negative. Also in-session: crossCompare rename (N273), audit-gate hardening (N274). C47 and C48 crystallized; PW-T6 translation-form constraint crystallized from O113. Final gates: build 130 jobs, audit 1707 declarations (78 PW-T6), diff pure insertion. Then Theory M4 Part A executed end to end on the researcher''s directive (F0-F3 plus review fixes, PR #218): the fragment/linking calculus with a witnessed link guard and saturating linking, the structural merge proved inert via a generic AF node-merging morphism, context composition, and backend_replacement_congruence — a certificate relabel is unobservable in every admissible context. The plan''s unconditional phrasing was found false under forward-only acceptance; the final review found both headline witnesses vacuous and they were repaired with a certificate-bearing split and a real backend swap. C49 crystallized; #227/#228/#229 filed. Gates: build 138 jobs, 1911 audited declarations (204 M4).'
+  turn_count: 5
+  events_count: 27
+  claims_touched: [C47, C48, C49]
   open_threads: 3
+- id: 2026-09-03_001
+  date: '2026-09-03'
+  summary: 'PR #218 review remediation: detailed contextual outcomes, side/value-bearing LinkFaults, concrete rejection/composition/admissibility witnesses, and mechanically complete M4 AxCheck coverage; 138-job build and 1925-entry audit pass.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: [C49]
+  open_threads: 1

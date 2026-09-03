@@ -1046,3 +1046,77 @@ No paper display cites these yet. The rows exist so that T8 (#193), T9
   transported source argument — supplied so `Frame.accept`'s name stops
   promising more than the model provides at structural bridges. Other
   disciplines remain expressible.
+
+---
+
+## M4 Part A: fragment/linking calculus and contextual representation independence (issue #187)
+
+Tracker #180. The design freeze is `docs/theory-m4-context-calculus-decision.md`;
+the claim boundary is `docs/theory-m4-contextual-adequacy.md`. Every *theorem*
+row is `lean/AxCheck.lean`-gated (sorry-free, standard trio, no
+`native_decide`). Rows naming `Fragment`, `Context`, `link`, `obs`, `SideOk`,
+`Admissible`, `AFMerge`, `CarrierMerge` name *definitions*, transitively
+audited through the gated theorems that mention them.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| Fragments, interfaces, contexts, import environments | `Context.Fragment`, `Context.Interface`, `Context.Context`, `Context.ImportEnv` | `Lara/Context/Fragment.lean` |
+| The structural merge of argument lists | `Context.dedupList`; `Context.mem_dedupList`, `dedupList_nodup`, `dedupList_eq_self` | `Lara/Context/Fragment.lean`, `Lara/Context/Link.lean` |
+| The conclusion cache (inferred, because `link` runs before checking) | `Context.conclusionOf`, `Context.conclusionCache`; `Context.conclusionOf_eq_some_iff`, `mem_conclusionCache` | `Lara/Context/Link.lean` |
+| Saturation: the attack a target admits, and the cross-boundary emission | `Context.attackFor`, `Context.crossAttsFrom`, `Context.crossAtts`; `Context.mem_crossAttsFrom`, `hasAttack_attackFor`, `crossAtts_spec`, `crossAtts_covers`/`crossAtts_covers'` | `Lara/Context/Fragment.lean`, `Lara/Context/Link.lean` |
+| The **witnessed** link guard and its rejection classes (R-L1/R-L2/R-L3) | `Context.LinkSide`, `Context.LinkFault`, `Context.linkFault`, `Context.linkOk`; `Context.linkOk_eq_true_iff`, `idHygieneFault_none_iff`, `sigmaPolicyFault_none_iff`, `firstDup?_none_iff`, `firstMissing?_none_iff`, `firstShared?_none_iff` | `Lara/Context/Fragment.lean`, `Lara/Context/Link.lean` |
+| Linking, the linked unit and Γ | `Context.link`, `Context.linkedUnit`, `Context.linkGamma`, `Context.linkGround`; `Context.link_eq_some`, `link_eq_none` | `Lara/Context/Fragment.lean`, `Lara/Context/Link.lean` |
+| A side's well-formedness relative to the linked environment | `Context.SideOk`; `Context.SideOk.mono_gamma` | `Lara/Context/Link.lean` |
+| Γ transport into the linked environment | `Context.hasSupport_mono_gamma`, `hasAttack_mono_gamma`, `linkGamma_extends_left`, `linkGamma_extends_right`, `buildGamma_append_of_some`, `buildGamma_append_fresh`, `buildGamma_some_mem` | `Lara/Context/Link.lean` |
+| **Saturation correctness** — the linked attacks satisfy `AttackComplete` | `Context.link_attackComplete` | `Lara/Context/Link.lean` |
+| Stage 2 of a link, from per-side data | `Context.signatureStage_link`, `argsWellSorted_link`, `groundWellSorted_append`, `termsWellSorted_iff_mem` | `Lara/Context/Link.lean` |
+| **Linking respects checking** — a well-linked composition is accepted | `Context.link_checked` | `Lara/Context/Link.lean` |
+| The fragment-relative carrier and AF (an open fragment has no `CheckedProgram`) | `Context.fragmentCarrier`, `Context.fragmentAF`, `Context.fragmentGamma`, `Context.fragmentGround`; `Context.fragmentAF_eq` | `Lara/Context/Fragment.lean`, `Lara/Context/Link.lean` |
+| Re-indexing a fragment position into the linked program | `Context.linkedPos`, `Context.posOf`; `Context.linkedUnit_args_linkedPos_frag`/`_ctx`, `linkedPos_of_index` | `Lara/Context/Merge.lean` |
+| **Node-merging morphisms of argumentation frameworks** (generic) | `Invariants.AFMerge`, `Invariants.CarrierMerge`; `AFMerge.iter_iff`, `AFMerge.grounded_iff`, `AFMerge.labelC_eq`, `AFMerge.statusC_eq`, `CarrierMerge.status_eq`; `Grounded.mem_grounded_iff_iter` | `Lara/Invariants/Merge.lean` |
+| **The structural merge is semantically inert** (D3 discharged) | `Context.termCarrier`, `Context.checkerConcl`; `Context.dedup_carrierMerge`, `dedup_status_eq`, `compileUnit_eq_termCarrier`, `link_merge_status_eq`, `termCarrier_attack_eq_edgeB` | `Lara/Context/Merge.lean` |
+| Context composition, its guard, and closure | `Context.composedContext`, `Context.compose`, `Context.composeFault`, `Context.composeOk`, `Context.residualImports`; `Context.composeOk_eq_true_iff`, `composed_declared`, `composed_args`, `composed_atts`, `composed_imports`, `composed_ownIds`, `linkOk_composed` | `Lara/Context/Fragment.lean`, `Lara/Context/Compose.lean` |
+| Composition associates (guard, interface, material, remaining fields) | `Context.composeOk_assoc_left`/`_right`, `residualImports_assoc`, `compose_assoc_mem`, `compose_assoc_fields` | `Lara/Context/Compose.lean` |
+| Detailed observation over exported conclusions (D4), separating incompatibility, checker rejection, and statuses | `Context.Observation`, `Context.obs`; `Context.obs_eq_of_ok` | `Lara/Context/Fragment.lean`, `Lara/Context/Equivalence.lean` |
+| Contextual equivalence over detailed outcomes, admissibility, and the relabel's context side-condition | `Context.CtxEquiv`, `Context.Admissible`, `Context.FixesContext`; `Context.exists_accepted_of_admissible` | `Lara/Context/Equivalence.lean` |
+| Fragment relabeling, and the guard's blindness to it | `Context.mapAssurFrag`, `Context.relabelEntry`; `Context.linkFault_mapAssurFrag`, `linkOk_mapAssurFrag` | `Lara/Context/Equivalence.lean` |
+| **The one new lemma** — saturation commutes with a relabel | `Context.crossAttsFrom_map`, `Context.crossAtts_relabel`, `Context.conclusionCache_map` | `Lara/Context/Equivalence.lean` |
+| **`link_relabel_commutes`** — the linked unit of the relabeled fragment is the relabeled linked unit | `Context.link_relabel_commutes` | `Lara/Context/Equivalence.lean` |
+| Acceptance transports (stage 2 cannot see a certificate) | `Context.termWellSorted_mapAssur`, `argsWellSorted_map`, `signatureStage_map`, `attackComplete_map`, `covered_mapAssur`, `checkUnit_map`, `exists_accepted_relabel` | `Lara/Context/Equivalence.lean` |
+| The carrier is relabel-invariant | `Context.nodes_conclusion_map`, `Context.compileUnit_map`, `Context.compileUnit_link_relabel` | `Lara/Context/Equivalence.lean` |
+| **Contextual representation independence** (the M4 Part A headline) | `Context.backend_replacement_congruence` | `Lara/Context/Equivalence.lean` |
+| The acceptance-profile generalization (D6, no relabel, no injectivity) | `Context.registry_swap_congruence`; identity-relabel lemmas `Context.mapAssur_id`, `mapAssurFrag_id`, `fixesContext_id` | `Lara/Context/Equivalence.lean` |
+| Composite linkability from the halves (explicit cross-coverage — `compose` does not saturate, #229) | `Context.sideOk_composed`, `Context.admissible_composed` | `Lara/Context/Compose.lean`, `Lara/Context/Equivalence.lean` |
+| Stability under embedding into a larger context | `Context.backend_replacement_congruence_composed`, `Context.fixesContext_composed` | `Lara/Context/Equivalence.lean` |
+| Result 9 as the whole-program instance (cited, not re-derived) | `Context.whole_program_replacement` → `Erase.backend_replacement` | `Lara/Context/Equivalence.lean` |
+| **Surface transport** (D1's corollary) | `Context.checkedAF_map`, `Context.surface_directAF_relabel`, `Context.surface_directAF_link` | `Lara/Context/Surface.lean` |
+| **A certificate-bearing split, and a real backend swap**: the certified argument built relationally from `registry_exact_digest_accepts`, an unwrapping backend core, and the two witnesses that move an actual certificate | `Examples.Linking.certArg`, `certArg_checked`, `certAdmissible`, `renameCore`, `wrapCert`, `registryWrapped`, `certSwap`, `certSwap_injective`, `certSwap_preserving`, `cert_registry_swap_witness`, `cert_congruence_witness`, `cert_relabel_moves` | `Lara/Examples/Linking.lean` |
+| Witnesses: located rejection faults, distinct incompatible/rejected outcomes, saturation, merge, gap-flip, four statuses, `CtxEquiv` negative, D6 pair, composition rejection and admissibility | `Examples.Linking.reject_duplicate_own_id`, `reject_id_clash`, `reject_unsatisfied_import`, `reject_unsatisfied_context_import`, `reject_sigma_mismatch`, `reject_policy_mismatch`, `obs_incompatible_id_clash`, `obs_rejected_signature`, `reject_compose_id_clash`, `compose_rejected`, `crossAtts_nonempty`, `crossAttsFrom_skips_strict_target`, `merge_fires`, `merge_obs_unchanged`, `obs_gap`, `obs_gap_flipped`, `obs_four_states`, `ctxEquiv_negative`, `obs_no_exports`, `admissible_split`, `link_checked_split`, `admissible_composite`, `registry_swap_witness`, `congruence_witness`, `compose_assoc_witness` | `Lara/Examples/Linking.lean` |
+
+**Not X** notes:
+
+- `backend_replacement_congruence` is **not parametricity** (no relational
+  quantification over related backends — #215) and **not full abstraction** (no
+  logical relation; Part B is gated and unentered). A paper display must use
+  *contextual representation independence*.
+- The context quantifier is over **admissible** contexts satisfying
+  `FixesContext`. `obs` distinguishes checker rejection from an observed status
+  list and the acceptance hypothesis is forward-only, so the unconditional
+  form would be false; see `docs/theory-m4-contextual-adequacy.md` §3.
+- `link_checked` is **not** "linking always succeeds". It is the conditional
+  that a well-linked composition of two well-formed sides is accepted;
+  `Examples.Linking.admissible_split` discharges its premises on a concrete
+  pair so the conditional is not vacuous.
+- `dedup_status_eq` is **not** about `link` — it is about `termCarrier`.
+  `link_merge_status_eq` is the statement at the linked program, and
+  `compileUnit_eq_termCarrier` is what connects the two.
+- The assurance-free witnesses (`congruence_witness`, `registry_swap_witness`)
+  are *shape* witnesses only: their fragment declares no certificate, so
+  `mapAssurFrag f` is the identity on it for every `f`. The witnesses that
+  exercise the theorems are the certificate-bearing ones
+  (`cert_congruence_witness`, `cert_registry_swap_witness`), where
+  `cert_relabel_moves` proves the relabel is not the identity.
+- `surface_directAF_relabel` has **no worked pair instance**: every accepted
+  surface fixture in the development is proved by `native_decide`, which M4's
+  axiom discipline bans. The corollary is proved and audited; only a concrete
+  instance is missing.

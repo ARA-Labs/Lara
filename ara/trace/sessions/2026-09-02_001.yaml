@@ -2,8 +2,8 @@ session:
   id: "2026-09-02_001"
   date: "2026-09-02"
   started: "2026-09-02T00:00"
-  last_turn: "2026-09-02T23:55"
-  turn_count: 4
+  last_turn: "2026-09-02T23:50"
+  turn_count: 5
   summary: >
     PW0 possible-world outer-model gate implemented and opened as PR #221. Five
     modules land under Lara.PW and Lara.Examples.PW carrying T0-T5 and the T7
@@ -24,7 +24,7 @@ session:
     Admits/admits_transport discharging PW0 limitation 1 — and opened as PR
     #223 (N276). Build 130 jobs, audit 1707 declarations (78 PW-T6), clean.
     C48 crystallized; O113 crystallized into the PW-T6 translation-form
-    constraint.
+    constraint. Then, on the researcher's directive to implement and finish the M4 plan, Theory M4 Part A was executed end to end (F0-F3 plus review fixes) and pushed to PR #218: the fragment/linking calculus with a witnessed link guard, saturating linking, the structural merge proved semantically inert through a generic AF node-merging morphism, context composition, and the headline backend_replacement_congruence — an injective, acceptance-preserving certificate relabel is unobservable in every admissible context. The final review found both headline witnesses vacuous (assurance-free fixtures); repaired with a certificate-bearing split and a real backend swap. C49 crystallized. 1911 audited declarations, 204 M4.
 
 events_logged:
   - turn: 1
@@ -117,6 +117,91 @@ events_logged:
     routing: crystallized
     provenance: ai-suggested
     summary: "Bridge-global Option translation cannot express world-dependent resolution; from O113 via artifact commitment."
+
+  - turn: 5
+    type: pivot
+    id: "N277"
+    routing: direct
+    provenance: user
+    summary: "Directive: implement the M4 plan and finish it; Part A executed F0-F3 in one session."
+  - turn: 5
+    type: decision
+    id: "N278"
+    routing: direct
+    provenance: ai-executed
+    summary: "F0 froze the carrier; rejection became a witnessed LinkFault sum, registry became a parameter rather than a rejection class."
+  - turn: 5
+    type: experiment
+    id: "N279"
+    routing: direct
+    provenance: ai-executed
+    summary: "F1 mechanized the calculus; spec review FAIL on five gaps, all closed; generic AF morphism split to Lara/Invariants/Merge.lean."
+  - turn: 5
+    type: experiment
+    id: "N280"
+    routing: direct
+    provenance: ai-executed
+    summary: "F2 proved backend_replacement_congruence over admissible contexts; the plan's unconditional phrasing is false under forward-only acceptance."
+  - turn: 5
+    type: dead_end
+    id: "N281"
+    routing: direct
+    provenance: ai-executed
+    summary: "Surface-pair witness unreachable: every accepted surface fixture rests on native_decide, which the axiom discipline bans. Issue #227."
+  - turn: 5
+    type: decision
+    id: "N282"
+    routing: direct
+    provenance: ai-executed
+    summary: "compose does not saturate; composition closed for hygiene, not linkability. sideOk_composed takes cross-coverage explicitly. Issue #229."
+  - turn: 5
+    type: dead_end
+    id: "N283"
+    routing: direct
+    provenance: ai-executed
+    summary: "First witness suite was assurance-free, so both headline witnesses reduced to reflexivity; two prior reviews passed it."
+  - turn: 5
+    type: experiment
+    id: "N284"
+    routing: direct
+    provenance: ai-executed
+    summary: "Certificate-bearing split plus renameCore/certSwap/registryWrapped: a real backend swap, with cert_relabel_moves proving non-identity."
+  - turn: 5
+    type: observation
+    id: "O117"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Admissibility is forced by forward-only acceptance plus a partial observation."
+  - turn: 5
+    type: observation
+    id: "O118"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A data-only composition operator cannot saturate; closure is two properties."
+  - turn: 5
+    type: observation
+    id: "O119"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A certificate theorem's witness is vacuous unless the fixture carries a certificate; gates do not detect it."
+  - turn: 5
+    type: observation
+    id: "O120"
+    routing: staged
+    provenance: ai-suggested
+    summary: "An axiom-discipline ban is paid when a new result wants to reuse old fixtures."
+  - turn: 5
+    type: observation
+    id: "O121"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Grounded observation is invariant under any node-merging AF morphism; framework vocabulary, not calculus vocabulary."
+  - turn: 5
+    type: claim
+    id: "C49"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Profile-preservation buys the context quantifier for free — crystallized via artifact commitment (merged branch, PR #218, docs depend on it)."
 
 ai_actions:
   - turn: 1
@@ -219,6 +304,26 @@ ai_actions:
       - "docs/theory-pw-t6-structural-transport.md"
       - "docs/paper-lean-name-map.md"
 
+  - turn: 5
+    action: "Executed Theory M4 Part A phases F0-F3 plus review fixes; five commits on plan/m4-context-calculus, pushed; PR #218 updated; issues #227, #228, #229 filed; #187 and #180 updated."
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Context/Fragment.lean
+      - lean/Lara/Context/Link.lean
+      - lean/Lara/Context/Merge.lean
+      - lean/Lara/Context/Compose.lean
+      - lean/Lara/Context/Equivalence.lean
+      - lean/Lara/Context/Surface.lean
+      - lean/Lara/Invariants/Merge.lean
+      - lean/Lara/Examples/Linking.lean
+      - lean/AxCheck.lean
+      - lean/Lara.lean
+      - docs/theory-m4-context-calculus-decision.md
+      - docs/theory-m4-contextual-adequacy.md
+      - docs/paper-lean-name-map.md
+      - docs/theory-m3-source-updates.md
+      - plans/2026-09-02-theory-m4-full-abstraction.md
+
 claims_touched:
   - id: C47
     action: crystallized
@@ -226,6 +331,10 @@ claims_touched:
   - id: C48
     action: crystallized
     turn: 4
+
+  - id: C49
+    action: crystallized
+    turn: 5
 
 logic_revisions:
   - turn: 1
@@ -341,8 +450,26 @@ key_context:
       obligation list is not merely empty-preserving but identical. Proving
       the stronger exact statement was cheaper than the conditional one.
 
+  - turn: 5
+    excerpt: >
+      The plan said the congruence holds "for every compatible context". Mechanization showed that
+      statement is false under the plan's own forward-only acceptance hypothesis: obs is none on a
+      rejected program, so a second backend that accepts more would differ by definedness. The
+      theorem was taken over ADMISSIBLE contexts and the reason recorded as content, not as a
+      proof-engineering limitation.
+  - turn: 5
+    excerpt: >
+      Both headline witnesses were vacuous and passed two reviews: a fragment of bare evidence
+      leaves is a fixed point of every assurance relabel, so congruence_witness proved obs X = obs X
+      and the D6 witness discharged a certificate hypothesis on a fragment with no certificate. The
+      repair — a certificate-bearing split, a backend core that unwraps a renamed certificate before
+      replaying, and a proof that the relabel is not the identity — is the first concrete instance
+      of result 9's model in the development.
+
 open_threads:
-  - "PR #223 (T6) awaits CI and human review; PR #218 (M4) still open in parallel."
+  - "PR #223 (T6) awaits CI and human review; PR #218 (M4 Part A, five commits) pushed and awaiting review. CI has not run on any branch since 2026-08-25 (#225), so every gate was run locally."
+  - "M4 Part B (full abstraction) is gated and unentered; #187 stays open. The two F0 obstructions are unchanged: the semantic interface is wider than the declared imports, and completeness is policy-conditional."
+  - "#227 (native_decide-free surface fixture), #228 (private HasSupport inversion lemmas), #229 (compose does not saturate) are open follow-ups from this session."
   - "T8 (#193) must quantify over the target's attackers; T9 (#190) needs the composition laws. Both stay on tracker #189, and both consume the PW-T6 translation-form constraint: choose the translation form first."
   - "gap conflates out-of-vocabulary, ill-sorted, not-posed, and posed-but-unsupported until the M5 well-sortedness refinement of Query_κ lands."
 
@@ -352,3 +479,9 @@ ai_suggestions_pending:
   - "O115: the T6 induction rides two disjoint-footprint commuting facts. Not yet affirmed."
   - "O116: the transport's translation-domain hypothesis is irreducible. Not yet affirmed."
   - "C48 crystallized ai-suggested with status supported on the C47 precedent; researcher has not yet commented on the T6 result."
+  - "O117: admissibility is forced, not scaffolding. Not yet affirmed."
+  - "O118: composition closure is two properties, hygiene and linkability. Not yet affirmed."
+  - "O119: a certificate theorem needs a certificate-bearing witness; gates do not catch this vacuity. Not yet affirmed."
+  - "O120: an axiom-discipline ban is paid at reuse time. Not yet affirmed."
+  - "O121: node-merging AF morphism as framework vocabulary. Not yet affirmed."
+  - "C49 crystallized ai-suggested with status supported on the C47/C48 precedent; researcher has not yet commented on the M4 result."

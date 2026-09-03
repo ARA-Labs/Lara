@@ -54,6 +54,14 @@ import Lara.Semantics.Sublists
 import Lara.Examples.Semantics
 import Lara.Update
 import Lara.Examples.Update
+import Lara.Invariants.Merge
+import Lara.Context.Fragment
+import Lara.Context.Link
+import Lara.Context.Merge
+import Lara.Context.Compose
+import Lara.Context.Equivalence
+import Lara.Context.Surface
+import Lara.Examples.Linking
 import Lara.Examples.BackendComposition
 import Lara.Surface.Syntax
 import Lara.Surface.Binding
@@ -2258,3 +2266,244 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.ren_transport
 #print axioms Lara.Examples.PW.ren_out_of_vocabulary
 #print axioms Lara.Examples.PW.ren_translationUndefined
+
+/-! ### Theory M4 — the fragment/linking context calculus (issue #187)
+
+Phase F0 is definitions only (`Lara.Context.Fragment`), so it has nothing to
+audit. F1 mechanizes the calculus — the guard's rejection classes, the
+saturation, Γ transport, acceptance, the merge's semantic inertness and
+context composition — F2 proves contextual representation independence, and
+F3 adds the surface corollary. -/
+
+-- Invariants.Merge: node-merging morphisms of argumentation frameworks
+#print axioms Lara.Grounded.iter_add
+#print axioms Lara.Grounded.stable_iter_add
+#print axioms Lara.Grounded.mem_grounded_iff_iter
+#print axioms Lara.Invariants.AFMerge.iter_iff
+#print axioms Lara.Invariants.AFMerge.grounded_iff
+#print axioms Lara.Invariants.AFMerge.attackedByIn_eq
+#print axioms Lara.Invariants.AFMerge.labelC_eq
+#print axioms Lara.Invariants.AFMerge.statusC_eq
+#print axioms Lara.Invariants.mem_support_iff
+#print axioms Lara.Invariants.CarrierMerge.toAFMerge
+#print axioms Lara.Invariants.CarrierMerge.status_eq
+
+-- Context.Link: the linking calculus (F1)
+#print axioms Lara.Context.mem_dedupList
+#print axioms Lara.Context.dedupList_nodup
+#print axioms Lara.Context.dedupList_eq_self
+#print axioms Lara.Context.conclusionOf_eq_some_iff
+#print axioms Lara.Context.mem_conclusionCache
+#print axioms Lara.Context.conclusionCache_sound
+#print axioms Lara.Context.conclusionCache_terms
+#print axioms Lara.Context.firstDup?_none_iff
+#print axioms Lara.Context.firstMissing?_none_iff
+#print axioms Lara.Context.firstShared?_none_iff
+#print axioms Lara.Context.idHygieneFault_none_iff
+#print axioms Lara.Context.sigmaPolicyFault_none_iff
+#print axioms Lara.Context.linkOk_eq_true_iff
+#print axioms Lara.Context.link_eq_some
+#print axioms Lara.Context.link_eq_none
+#print axioms Lara.Context.exists_fault_of_not_linkOk
+#print axioms Lara.Context.mem_crossAttsFrom
+#print axioms Lara.Context.attackFor_source
+#print axioms Lara.Context.attackFor_target
+#print axioms Lara.Context.attackOcc_attackFor
+#print axioms Lara.Context.covered_of_mem_attackFor
+#print axioms Lara.Context.covered_mono
+#print axioms Lara.Context.hasAttack_attackFor
+#print axioms Lara.Context.crossAttsFrom_spec
+#print axioms Lara.Context.cache_spec_left
+#print axioms Lara.Context.cache_spec_right
+#print axioms Lara.Context.crossAtts_spec
+#print axioms Lara.Context.crossAtts_covers
+#print axioms Lara.Context.crossAtts_covers'
+#print axioms Lara.Context.hasSupport_mono_gamma
+#print axioms Lara.Context.hasAttack_mono_gamma
+#print axioms Lara.Context.buildGamma_append_of_some
+#print axioms Lara.Context.buildGamma_append_fresh
+#print axioms Lara.Context.buildGamma_some_mem
+#print axioms Lara.Context.linkGamma_extends_left
+#print axioms Lara.Context.linkGamma_extends_right
+#print axioms Lara.Context.groundWellSorted_append
+#print axioms Lara.Context.termsWellSorted_iff_mem
+#print axioms Lara.Context.argsWellSorted_link
+#print axioms Lara.Context.signatureStage_link
+#print axioms Lara.Context.SideOk.mono_gamma
+#print axioms Lara.Context.fragmentAF_eq
+#print axioms Lara.Context.link_attackComplete
+#print axioms Lara.Context.link_checked
+
+-- Context.Merge: the structural merge is semantically inert (F1)
+#print axioms Lara.Context.posOf_lt
+#print axioms Lara.Context.getElem?_posOf
+#print axioms Lara.Context.posOf_getElem
+#print axioms Lara.Context.termCarrier_attack_eq_edgeB
+#print axioms Lara.Context.dedup_carrierMerge
+#print axioms Lara.Context.dedup_status_eq
+#print axioms Lara.Context.compileUnit_eq_termCarrier
+#print axioms Lara.Context.link_merge_status_eq
+#print axioms Lara.Context.linkedUnit_args_linkedPos_frag
+#print axioms Lara.Context.linkedUnit_args_linkedPos_ctx
+#print axioms Lara.Context.linkedPos_of_index
+
+-- Context.Compose: composition of contexts (F1)
+#print axioms Lara.Context.composeOk_eq_true_iff
+#print axioms Lara.Context.compose_eq_some
+#print axioms Lara.Context.compose_eq_none
+#print axioms Lara.Context.exists_fault_of_not_composeOk
+#print axioms Lara.Context.eq_composedContext
+#print axioms Lara.Context.mem_residualImports
+#print axioms Lara.Context.composed_declared
+#print axioms Lara.Context.composed_args
+#print axioms Lara.Context.composed_atts
+#print axioms Lara.Context.composed_imports
+#print axioms Lara.Context.composed_ownIds
+#print axioms Lara.Context.linkOk_composed
+#print axioms Lara.Context.residualImports_assoc
+#print axioms Lara.Context.composeOk_assoc_left
+#print axioms Lara.Context.composeOk_assoc_right
+#print axioms Lara.Context.compose_assoc_fields
+#print axioms Lara.Context.compose_assoc_mem
+#print axioms Lara.Context.sideOk_composed
+
+-- Context.Equivalence: contextual representation independence (F2)
+#print axioms Lara.Context.mapAssurFrag_declared
+#print axioms Lara.Context.mapAssurFrag_imports
+#print axioms Lara.Context.mapAssurFrag_sigma
+#print axioms Lara.Context.mapAssurFrag_policy
+#print axioms Lara.Context.mapAssurFrag_exports
+#print axioms Lara.Context.mapAssurFrag_args
+#print axioms Lara.Context.mapAssurFrag_atts
+#print axioms Lara.Context.linkFault_mapAssurFrag
+#print axioms Lara.Context.linkOk_mapAssurFrag
+#print axioms Lara.Context.linkGamma_mapAssurFrag
+#print axioms Lara.Context.linkGround_mapAssurFrag
+#print axioms Lara.Context.dedupList_map_of_injective
+#print axioms Lara.Context.eq_of_map_eq_self
+#print axioms Lara.Context.conflictAttackableB_mapAssur
+#print axioms Lara.Context.attackFor_mapAssur
+#print axioms Lara.Context.crossAttsFrom_map
+#print axioms Lara.Context.conclusionCache_map
+#print axioms Lara.Context.termWellSorted_mapAssur
+#print axioms Lara.Context.termsWellSorted_mapAssur
+#print axioms Lara.Context.dischargesWellSorted_mapAssur
+#print axioms Lara.Context.argsWellSorted_map
+#print axioms Lara.Context.signatureStage_map
+#print axioms Lara.Context.attackOcc_mapAssurAtt
+#print axioms Lara.Context.contains_mapAssur
+#print axioms Lara.Context.covered_mapAssur
+#print axioms Lara.Context.conflictAttackable_mapAssur
+#print axioms Lara.Context.crossAtts_relabel
+#print axioms Lara.Context.link_relabel_commutes
+#print axioms Lara.Context.attackComplete_map
+#print axioms Lara.Context.signatureStage_of_ok
+#print axioms Lara.Context.checkUnit_map
+#print axioms Lara.Context.nodes_conclusion_map
+#print axioms Lara.Context.compileUnit_map
+#print axioms Lara.Context.obs_eq_of_ok
+#print axioms Lara.Context.exists_accepted_of_admissible
+#print axioms Lara.Context.exists_accepted_relabel
+#print axioms Lara.Context.compileUnit_link_relabel
+#print axioms Lara.Context.backend_replacement_congruence
+#print axioms Lara.Context.mapAssur_id
+#print axioms Lara.Context.mapAssurList_id
+#print axioms Lara.Context.mapAssurDis_id
+#print axioms Lara.Context.mapAssurAtt_id
+#print axioms Lara.Context.mapAssur_id_eq
+#print axioms Lara.Context.mapAssurAtt_id_eq
+#print axioms Lara.Context.mapAssurFrag_id
+#print axioms Lara.Context.fixesContext_id
+#print axioms Lara.Context.registry_swap_congruence
+#print axioms Lara.Context.map_eq_self_of_mem
+#print axioms Lara.Context.fixesContext_composed
+#print axioms Lara.Context.admissible_composed
+#print axioms Lara.Context.backend_replacement_congruence_composed
+#print axioms Lara.Context.whole_program_replacement
+
+-- Context.Surface: the surface-transport corollary (F3)
+#print axioms Lara.Context.checkedAF_map
+#print axioms Lara.Context.surface_directAF_relabel
+#print axioms Lara.Context.surface_directAF_link
+
+-- Examples.Linking: executable witnesses (F1, F2)
+#print axioms Lara.Examples.Linking.link_guard_ok
+#print axioms Lara.Examples.Linking.link_guard_ok_quiet
+#print axioms Lara.Examples.Linking.reject_duplicate_own_id
+#print axioms Lara.Examples.Linking.reject_id_clash
+#print axioms Lara.Examples.Linking.reject_unsatisfied_import
+#print axioms Lara.Examples.Linking.reject_unsatisfied_context_import
+#print axioms Lara.Examples.Linking.reject_sigma_mismatch
+#print axioms Lara.Examples.Linking.reject_policy_mismatch
+#print axioms Lara.Examples.Linking.link_rejected_of_fault
+#print axioms Lara.Examples.Linking.obs_incompatible_id_clash
+#print axioms Lara.Examples.Linking.malformed_link_guard_ok
+#print axioms Lara.Examples.Linking.obs_rejected_signature
+#print axioms Lara.Examples.Linking.crossAtts_nonempty
+#print axioms Lara.Examples.Linking.linked_atts
+#print axioms Lara.Examples.Linking.linked_args
+#print axioms Lara.Examples.Linking.linked_accepted
+#print axioms Lara.Examples.Linking.obs_defeated
+#print axioms Lara.Examples.Linking.obs_justified
+#print axioms Lara.Examples.Linking.obs_gap
+#print axioms Lara.Examples.Linking.obs_gap_flipped
+#print axioms Lara.Examples.Linking.merge_link_ok
+#print axioms Lara.Examples.Linking.merge_fires
+#print axioms Lara.Examples.Linking.merge_accepted
+#print axioms Lara.Examples.Linking.merge_obs_unchanged
+#print axioms Lara.Examples.Linking.compose_ok
+#print axioms Lara.Examples.Linking.reject_compose_id_clash
+#print axioms Lara.Examples.Linking.compose_rejected
+#print axioms Lara.Examples.Linking.compose_declares_both
+#print axioms Lara.Examples.Linking.compose_residual
+#print axioms Lara.Examples.Linking.compose_links
+#print axioms Lara.Examples.Linking.compose_obs
+#print axioms Lara.Examples.Linking.strict_target_contrary_matches
+#print axioms Lara.Examples.Linking.strict_target_not_attackable
+#print axioms Lara.Examples.Linking.crossAttsFrom_skips_strict_target
+#print axioms Lara.Examples.Linking.linkGamma_l2
+#print axioms Lara.Examples.Linking.linkGamma_l1
+#print axioms Lara.Examples.Linking.leaf2_checked
+#print axioms Lara.Examples.Linking.leaf1_checked
+#print axioms Lara.Examples.Linking.sideOk_ctx
+#print axioms Lara.Examples.Linking.sideOk_frag
+#print axioms Lara.Examples.Linking.admissible_split
+#print axioms Lara.Examples.Linking.admissible_composite
+#print axioms Lara.Examples.Linking.link_checked_split
+#print axioms Lara.Examples.Linking.compose_triple_ok
+#print axioms Lara.Examples.Linking.compose_triple_ok'
+#print axioms Lara.Examples.Linking.compose_assoc_witness
+#print axioms Lara.Examples.Linking.obs_contested
+#print axioms Lara.Examples.Linking.obs_four_states
+#print axioms Lara.Examples.Linking.ctxEquiv_negative
+#print axioms Lara.Examples.Linking.obs_no_exports
+#print axioms Lara.Examples.Linking.registryOnlyNd_ord
+#print axioms Lara.Examples.Linking.registryOnlyNd_ne_registryEx
+#print axioms Lara.Examples.Linking.certOk_onlyNd_le
+#print axioms Lara.Examples.Linking.assurPreserving_onlyNd
+#print axioms Lara.Examples.Linking.registry_swap_witness
+#print axioms Lara.Examples.Linking.congruence_witness
+#print axioms Lara.Examples.Linking.registryPlus_alias
+#print axioms Lara.Examples.Linking.registryEx_alias
+#print axioms Lara.Examples.Linking.registryPlus_ne_registryEx
+#print axioms Lara.Examples.Linking.certOk_plus_le
+#print axioms Lara.Examples.Linking.certOk_alias_of_nd
+#print axioms Lara.Examples.Linking.certLinkOk
+#print axioms Lara.Examples.Linking.certRuleLookup
+#print axioms Lara.Examples.Linking.certLinkGamma_l1
+#print axioms Lara.Examples.Linking.certArg_checked
+#print axioms Lara.Examples.Linking.certArg_nd
+#print axioms Lara.Examples.Linking.certLeaf_checked
+#print axioms Lara.Examples.Linking.certSideOk_ctx
+#print axioms Lara.Examples.Linking.certSideOk_frag
+#print axioms Lara.Examples.Linking.certAdmissible
+#print axioms Lara.Examples.Linking.cert_registry_swap_witness
+#print axioms Lara.Examples.Linking.unwrap_wrap
+#print axioms Lara.Examples.Linking.wrapCert_injective
+#print axioms Lara.Examples.Linking.certUnswap_certSwap
+#print axioms Lara.Examples.Linking.certSwap_injective
+#print axioms Lara.Examples.Linking.certSwap_preserving
+#print axioms Lara.Examples.Linking.cert_congruence_witness
+#print axioms Lara.Examples.Linking.cert_relabel_moves_args
+#print axioms Lara.Examples.Linking.cert_relabel_moves
+

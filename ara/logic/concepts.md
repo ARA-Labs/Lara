@@ -137,3 +137,15 @@
   mutants → R7; cert-payload-tamper and duplicate/unknown-backend mutants → R13). Source order:
   `assuranceError`'s certAllowed check precedes the replay oracle.
 - **Related concepts**: Backend replacement, Strict certificate
+
+## Contextual observation outcome
+- **Notation**: `incompatible(LinkFault) | rejected(UnitError) | observed(List Status)`
+- **Definition**: The result of linking one fragment into one context. It preserves which phase
+  stopped evaluation: structural incompatibility carries the witnessed link fault, checker
+  rejection carries the unit error, and successful evaluation carries the exported grounded
+  statuses. Contextual equivalence compares this whole outcome rather than projecting every
+  failure to one undefined value.
+- **Boundary conditions**: `LinkFault` identifies left/right ownership for one-sided failures and
+  carries both values for sigma/policy mismatches. The distinction does not remove the
+  admissibility premise from a theorem with only forward acceptance preservation.
+- **Related concepts**: Backend replacement, Grounded four-state claim status

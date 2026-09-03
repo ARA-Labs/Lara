@@ -2566,3 +2566,115 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O117
+  timestamp: "2026-09-02T22:10"
+  provenance: ai-suggested
+  content: >
+    A contextual-adequacy theorem whose observation is undefined on rejected programs cannot be
+    unconditional in the context quantifier while the acceptance hypothesis is forward-only: the
+    second backend may accept what the first rejects, so the two sides differ by definedness
+    rather than by status. The admissibility hypothesis that rules this out constrains the
+    material, never the conclusion, which is what keeps the theorem non-vacuous while bounding it.
+    Removing it would need acceptance to be two-way plus a reflection lemma inverting the relabel
+    on derivations.
+  context: >
+    Discovered while stating backend_replacement_congruence in F2. The plan's phrasing was
+    unconditional ("for every compatible context"); mechanization showed that statement is false
+    under the hypothesis the plan also specified.
+  potential_type: claim
+  bound_to: [N280]
+  promoted: true
+  promoted_to: trace/exploration_tree.yaml:N287
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false
+- id: O118
+  timestamp: "2026-09-02T22:45"
+  provenance: ai-suggested
+  content: >
+    A linking calculus whose composition operator is data-only (no registry, no environment)
+    cannot saturate, so composition is closed for identifier hygiene but not for linkability: a
+    composite of two contexts that attack each other across their own boundary has uncovered
+    conflicts no later step emits, and is therefore not well-formed for linking. Closure of a
+    context former under composition is two properties, not one.
+  context: >
+    Surfaced when the final review called backend_replacement_congruence_composed nominal.
+    Building sideOk_composed from the halves exposed the two uncovered quadrants. Filed as #229.
+  potential_type: constraint
+  bound_to: [N282]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O119
+  timestamp: "2026-09-02T23:10"
+  provenance: ai-suggested
+  content: >
+    A witness for a theorem about certificates is vacuous unless its fixture carries a
+    certificate: a term with no assurance is a fixed point of every assurance relabel, so the
+    witness reduces to reflexivity while still passing the axiom audit and reading as
+    non-vacuous. Machine-checked gates do not detect this class of vacuity; only a reviewer
+    asked to hunt for it did.
+  context: >
+    The first M4 witness suite used bare evidence leaves throughout. Two prior reviews passed it;
+    the final integration review, prompted explicitly to hunt vacuity, caught it.
+  potential_type: heuristic
+  bound_to: [N283, N284]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O120
+  timestamp: "2026-09-02T23:15"
+  provenance: ai-suggested
+  content: >
+    An axiom-discipline ban can make a milestone's own witnesses unreachable from the
+    development's existing fixtures even when the theorem is proved and audited: every accepted
+    surface fixture here rests on native_decide, so a witness built on one would import
+    ofReduceBool into the audit. The cost of a discipline is paid at the point where a new result
+    wants to reuse old evidence, not at the point where the discipline is adopted.
+  context: >
+    F3's surface-transport corollary shipped with documented hypotheses instead of an instance;
+    issue #227 tracks a purpose-built native_decide-free surface fixture.
+  potential_type: constraint
+  bound_to: [N281]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O121
+  timestamp: "2026-09-02T20:40"
+  provenance: ai-suggested
+  content: >
+    The grounded observation is invariant under any node-merging morphism of argumentation
+    frameworks — a map onto the target's nodes preserving the edge relation, not required to be
+    injective. Proving it over the iteration rather than the fixpoint lets frameworks of
+    different sizes be compared at one shared stage. This is framework vocabulary, independent of
+    the linking calculus that motivated it, and it is what makes a structural merge of argument
+    lists semantically inert.
+  context: >
+    Extracted to Lara/Invariants/Merge.lean during F1 after a review noted a generic AF module
+    sitting inside Lara/Context/.
+  potential_type: concept
+  bound_to: [N279]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O122
+  timestamp: "2026-09-03T04:53"
+  provenance: user-revised
+  content: >
+    Contextual observation must preserve the phase that stopped evaluation: structural link
+    incompatibility with its witnessed fault, checker rejection with its unit error, or accepted
+    exported statuses. A single undefined result collapses semantically distinct failures and makes
+    contextual equivalence unable to say which boundary was crossed.
+  context: >
+    PR #218 review identified the collapse. The researcher explicitly selected the broader redesign:
+    change obs itself to a closed sum and enrich every LinkFault payload rather than add a diagnostic
+    wrapper or patch only two constructors.
+  potential_type: concept
+  bound_to: [N285, N286]
+  promoted: true
+  promoted_to: logic/concepts.md#contextual-observation-outcome
+  crystallized_via: verbal-affirmation + artifact-commitment
+  stale: false

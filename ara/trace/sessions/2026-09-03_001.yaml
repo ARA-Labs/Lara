@@ -1,0 +1,114 @@
+session:
+  id: "2026-09-03_001"
+  date: "2026-09-03"
+  started: "2026-09-03T03:45"
+  last_turn: "2026-09-03T04:53"
+  turn_count: 1
+  summary: >
+    PR #218 review remediation replaced partial contextual observation with a detailed closed
+    outcome, enriched every LinkFault with side/value evidence, added rejection/composition/
+    admissibility witnesses, and mechanized AxCheck roster coverage. Full Lean build passed 138
+    jobs; 218 M4 public declarations were coverage-checked inside a 1925-entry passing axiom audit.
+    C49 and the contextual-observation concept now match the reviewed theorem boundary.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N285"
+    routing: direct
+    provenance: user
+    summary: "Selected the broad redesign: closed obs outcome plus actionable payloads on every LinkFault."
+  - turn: 1
+    type: experiment
+    id: "N286"
+    routing: direct
+    provenance: ai-executed
+    summary: "Review fixes verified: build 138 jobs, audit 1925 entries, coverage 218 M4 declarations, regression tests pass."
+  - turn: 1
+    type: dead_end
+    id: "N287"
+    routing: direct
+    provenance: ai-executed
+    summary: "Retired partial obs: it collapsed incompatible links and checker-rejected linked units."
+  - turn: 1
+    type: concept
+    id: "O122"
+    routing: crystallized
+    provenance: user-revised
+    summary: "Contextual observation outcome preserves incompatible, rejected, and observed phases."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Reworked the Lean observation and LinkFault types, migrated proofs and examples, added both
+      import-side witnesses plus incompatible/checker-rejected/composition/admissibility witnesses,
+      and registered every new declaration in AxCheck.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Context/Fragment.lean
+      - lean/Lara/Context/Equivalence.lean
+      - lean/Lara/Context/Link.lean
+      - lean/Lara/Examples/Linking.lean
+      - lean/AxCheck.lean
+  - turn: 1
+    action: >
+      Added a source-to-AxCheck coverage checker, regression tests, and CI wiring; corrected the
+      retained plan, theorem documentation, paper map, decision record, and contextual-adequacy
+      account against all requested review findings.
+    provenance: ai-executed
+    files_changed:
+      - scripts/check-axcheck-coverage.py
+      - scripts/test_check_axcheck_coverage.py
+      - .github/workflows/ci.yml
+      - docs/paper-lean-name-map.md
+      - docs/theory-m3-source-updates.md
+      - docs/theory-m4-context-calculus-decision.md
+      - docs/theory-m4-contextual-adequacy.md
+      - plans/2026-09-02-theory-m4-full-abstraction.md
+  - turn: 1
+    action: >
+      Corrected C49's boundary and evidence, added the contextual-observation concept, superseded
+      the false universal-coverage evidence, and recorded the abandoned partial-observation design.
+    provenance: ai-executed
+    files_changed:
+      - ara/logic/claims.md
+      - ara/logic/concepts.md
+      - ara/evidence/proofs/m4_contextual_adequacy.md
+      - ara/staging/observations.yaml
+      - ara/trace/exploration_tree.yaml
+
+claims_touched:
+  - id: C49
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C49
+    field: Conditions
+    before: >
+      Holds for grounded semantics over the frozen compilation carrier, for admissible contexts — the link guard passes, both sides' declared material is well-formed relative to the *linked* environment, and the linked program passes the signature stage — and for a forward-only acceptance-preservation hypothesis, which is why admissibility cannot be dropped (see the observation staged with this claim). Openness is leaf-name openness only: term-level holes are unrepresentable because the compile boundary forces an empty obligation set on every declared argument. Untested boundary: generic extension semantics, two-way acceptance, and relational quantification over related backends.
+    after: >
+      Holds for grounded semantics over the frozen compilation carrier, for admissible contexts — the link guard passes, both sides' declared material is well-formed relative to the *linked* environment, and the linked program passes the signature stage — whose own assurances satisfy `FixesContext`, and for a forward-only acceptance-preservation hypothesis. Admissibility supplies an accepted source and preservation supplies an accepted target, so both detailed observations land in `.observed`; without it their rejection outcomes need not agree. Openness is leaf-name openness only: term-level holes are unrepresentable because the compile boundary forces an empty obligation set on every declared argument. Untested boundary: contexts carrying assurances moved by the relabel, generic extension semantics, two-way acceptance, and relational quantification over related backends.
+    signal: dependency-change
+    provenance: ai-suggested
+    note: "Review exposed the missing theorem premise and invalid partial-observation explanation."
+  - turn: 1
+    entry: C49
+    field: Sources
+    before: >
+      [`138-job build` ← `ara/evidence/proofs/m4_contextual_adequacy.md:10` «Build completed successfully (138 jobs).» [result]; `audit outcome` ← `ara/evidence/proofs/m4_contextual_adequacy.md:19` «Axiom audit passed.» [result]; `1911 audited declarations` ← `ara/evidence/proofs/m4_contextual_adequacy.md:23` «1911 audited declarations across the library (1725 reporting the standard» [result]; `204 M4 entries` ← `ara/evidence/proofs/m4_contextual_adequacy.md:24` «trio, 186 axiom-free), of which 204 are M4 — every» [result]; `pure-insertion diff` ← `ara/evidence/proofs/m4_contextual_adequacy.md:38` « 15 files changed, 4659 insertions(+), 32 deletions(-)» [result]]
+    after: >
+      [`138-job build` ← `ara/evidence/proofs/m4_contextual_adequacy.md:54` «Build completed successfully (138 jobs).» [result]; `audit outcome` ← `ara/evidence/proofs/m4_contextual_adequacy.md:51` «Axiom audit passed.» [result]; `coverage outcome` ← `ara/evidence/proofs/m4_contextual_adequacy.md:47` «AxCheck coverage passed (218 declarations).» [result]; `1925-entry audit roster` ← `ara/evidence/proofs/m4_contextual_adequacy.md:57` «`AxCheck.lean` now lists 1925 declarations across the library.» [result]]
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Review found seven omitted simp theorems; the committed coverage checker now proves roster completeness for M4."
+
+key_context:
+  - turn: 1
+    excerpt: "Researcher selected ‘Use broader redesign’: change obs itself to a closed sum and enrich every LinkFault payload."
+
+open_threads:
+  - "PR #218 review follow-up and approval remain pending after the fixes are pushed and inline replies are posted."
+
+ai_suggestions_pending: []
