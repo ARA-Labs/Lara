@@ -472,6 +472,116 @@ theorem compose_assoc_witness :
             (composedContext emptyHalf thirdHalf)).frame.imports.leaves := by
   decide
 
+/-! ### Composition is not closed for linkability (issue #229)
+
+`compose` merges material and does not saturate, so `sideOk_composed` takes
+the two cross-boundary quadrants as explicit hypotheses. This section converts
+that boundary from prose into a theorem. `ctxEx` asserts `l2` (conclusion `q`)
+and `hostileHalf` asserts `l1` (conclusion `p`); `dpEx` declares `q` contrary
+to `p`. Each half is admissible for `thirdFrag`, a fragment declaring only
+`l3`, and the two halves compose — but the composite is **not** admissible for
+the same fragment: the conflict from `l2` onto `l1` crosses the halves'
+boundary and is covered by nothing. Neither half declared the attack, and
+neither *could* have on its own — a side's attacks must have both endpoints
+among its own arguments (`SideOk.target_declared`) — so the failure is the
+composite's, not a defect of either half. -/
+
+/-- A context asserting `l1`, the leaf `fragEx` normally supplies. -/
+def hostileHalf : Lara.Context.Context :=
+  ⟨{ ctxFrame with gammaFrag := [(l1, pA)], ground := [pA], args := [.leaf l1] }⟩
+
+/-- A fragment declaring only the third leaf, whose conclusion `s` conflicts
+with nothing. -/
+def thirdFrag : Fragment :=
+  { fragEx with gammaFrag := [(l3, pC)], ground := [pC], args := [.leaf l3], exports := [pC] }
+
+/-- A side asserting one leaf and declaring no attack is well-formed under any
+Γ that resolves the leaf to a conclusion not contrary to itself. -/
+private theorem sideOk_singleLeaf {reg : BackendRegistry id}
+    {Gamma : LeafId → Option Atom} {l : LeafId} {p : Atom}
+    (hΓ : Gamma l = some p)
+    (hself : contraryMatchB id unitPolicyEx.defeat p p = false) :
+    SideOk id reg Gamma unitPolicyEx [.leaf l] [] where
+  support := by
+    intro w hw
+    have hw' : w = .leaf l := by simpa using hw
+    exact ⟨p, hw' ▸ .leaf hΓ⟩
+  typed := by intro k hk; simp at hk
+  source_declared := by intro k hk; simp at hk
+  target_declared := by intro k hk; simp at hk
+  attack_complete := by
+    intro source hs target ht Cs Ct hsSup htSup hcm _
+    exfalso
+    have hsEq : source = .leaf l := by simpa using hs
+    have htEq : target = .leaf l := by simpa using ht
+    subst hsEq; subst htEq
+    have h1 : Cs = p := (Support.hasSupport_unique hsSup (.leaf hΓ)).1
+    have h2 : Ct = p := (Support.hasSupport_unique htSup (.leaf hΓ)).1
+    rw [h1, h2] at hcm
+    have := (contraryMatchB_iff id unitPolicyEx.defeat p p).mpr hcm
+    rw [hself] at this
+    exact Bool.false_ne_true this
+
+theorem hostile_compose_ok : composeOk ctxEx hostileHalf = true := by decide
+
+/-- The composite is hygienic and its guard passes against the fragment: the
+failure below is not a rejection class. -/
+theorem hostile_composite_links :
+    linkOk (composedContext ctxEx hostileHalf) thirdFrag = true := by decide
+
+/-- The left half alone is admissible for the fragment. -/
+theorem hostile_left_admissible (reg : BackendRegistry id) :
+    Admissible reg ctxEx thirdFrag where
+  guard := by decide
+  ctx := sideOk_singleLeaf (l := l2) (p := pB) (by decide) (by decide)
+  frag := sideOk_singleLeaf (l := l3) (p := pC) (by decide) (by decide)
+  signature :=
+    signatureStage_link (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide)
+  scope := by decide
+  ruleIds := by decide
+  policy := Policy.firstViolation_none_iff.mp (by decide)
+
+/-- The right half alone is admissible for the fragment. -/
+theorem hostile_right_admissible (reg : BackendRegistry id) :
+    Admissible reg hostileHalf thirdFrag where
+  guard := by decide
+  ctx := sideOk_singleLeaf (l := l1) (p := pA) (by decide) (by decide)
+  frag := sideOk_singleLeaf (l := l3) (p := pC) (by decide) (by decide)
+  signature :=
+    signatureStage_link (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide)
+  scope := by decide
+  ruleIds := by decide
+  policy := Policy.firstViolation_none_iff.mp (by decide)
+
+/-- **The composite is not well-formed as a side.** Its arguments include both
+leaves, `q` is contrary to `p`, a leaf is always attackable at its root, and
+the composite's attack list is the two halves' — empty. -/
+theorem hostile_composite_not_sideOk (reg : BackendRegistry id) :
+    ¬ SideOk id reg (linkGamma (composedContext ctxEx hostileHalf) thirdFrag)
+      unitPolicyEx (composedContext ctxEx hostileHalf).frame.args
+      (composedContext ctxEx hostileHalf).frame.atts := by
+  intro h
+  have hs : SupportTerm.leaf l2 ∈ (composedContext ctxEx hostileHalf).frame.args :=
+    composed_args.mpr (Or.inl (by simp [ctxEx, ctxFrame]))
+  have ht : SupportTerm.leaf l1 ∈ (composedContext ctxEx hostileHalf).frame.args :=
+    composed_args.mpr (Or.inr (by simp [hostileHalf]))
+  obtain ⟨k, hk, -⟩ :=
+    h.attack_complete _ hs _ ht pB pA (.leaf (by decide)) (.leaf (by decide))
+      ((contraryMatchB_iff id unitPolicyEx.defeat pB pA).mp (by decide)) trivial
+  rcases composed_atts.mp hk with hk | hk
+  · simp [ctxEx, ctxFrame] at hk
+  · simp [hostileHalf, ctxFrame] at hk
+
+/-- **Composition is not closed for linkability.** Two contexts, each
+admissible for the fragment, whose composite is hygienic and passes the guard —
+and is not admissible. This is the boundary `sideOk_composed`'s cross-coverage
+hypotheses draw, witnessed rather than described. -/
+theorem hostile_composite_not_admissible (reg : BackendRegistry id) :
+    ¬ Admissible reg (composedContext ctxEx hostileHalf) thirdFrag :=
+  fun h => hostile_composite_not_sideOk reg h.ctx
+
 /-! ### All four observable statuses, and a distinguishing context -/
 
 /-- A symmetric contrary table: `p` and `q` rebut each other, so two leaves

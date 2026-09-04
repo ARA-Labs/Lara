@@ -92,10 +92,16 @@ nothing ever emits the conflicts *between the two halves*. So
 hypotheses, and a composite of two contexts that attack each other across their
 own boundary is not admissible — outside the theorem's quantifier rather than a
 counterexample to it. Composition is closed for hygiene
-(`linkOk_composed`, `composed_ownIds`) but not for linkability. Giving
-`compose` the registry and Γ that saturation needs would change its F0-frozen,
-deliberately data-only signature, so the alternatives are tracked as issue
-**#229** rather than folded in.
+(`linkOk_composed`, `composed_ownIds`) but not for linkability, and that
+boundary is a **theorem**, not a paragraph: `Examples.Linking` builds two
+contexts each admissible for one fragment (`hostile_left_admissible`,
+`hostile_right_admissible`), composes them (`hostile_compose_ok`), shows the
+composite passes the guard (`hostile_composite_links`), and proves it is not
+admissible (`hostile_composite_not_admissible`, issue #229). Neither half
+could have covered the cross-boundary conflict on its own, since a side's
+attacks must have both endpoints among its own arguments. Giving `compose` the
+registry and Γ that saturation needs would change its F0-frozen, deliberately
+data-only signature; the witness is the honest alternative.
 
 ## 3. The admissibility hypothesis is content, not scaffolding
 
@@ -203,7 +209,8 @@ So the debt is marked **partially** discharged, and term-level holes are issue
   **#216**.
 - **Not a claim that contexts are closed under composition for *linkability*.**
   They are closed for hygiene; a composite whose halves attack each other is not
-  admissible (#229).
+  admissible, and `Examples.Linking.hostile_composite_not_admissible` exhibits
+  one (#229).
 - **Not a claim that a context may redefine the policy or the registry.** The
   policy is a rejection class (R-L3); the registry is a parameter of the
   calculus, so registry redefinition is unrepresentable rather than rejected.
@@ -308,15 +315,21 @@ python3 scripts/check-axcheck-coverage.py lean/AxCheck.lean \
   lean/Lara/Context/Surface.lean lean/Lara/Examples/Linking.lean
 ```
 
-The coverage checker mechanically confirms that all 218 public theorem/lemma
+The coverage checker mechanically confirms that all 224 public theorem/lemma
 declarations in the M4 modules are listed in `AxCheck.lean`; the axiom audit
 then checks them for `sorry` and permits only `propext`, `Classical.choice`, and
 `Quot.sound`. No `native_decide` is used. No Haskell conformance vector is
 required (D8), and there is no corpus regeneration or freeze-tag bump.
 
-Two mechanical follow-ups the phases surfaced are filed rather than folded in:
-**#219** (the `DecidableEq` instances R-L3 needs, derived downstream instead of
-at their owning modules), **#220** and **#228** (Γ-transport, `buildGamma`, and
-`HasSupport` inversion lemmas that are `private` at their owning modules and
-re-proved here). **#226** records the optional `conclusionCache` /
-`conflictCache` agreement bridge that no phase needed.
+The follow-ups the phases surfaced were filed rather than folded in, and then
+cleared in one pass after Part A closed: **#219** (the `DecidableEq` instances
+R-L3 needs now derive at their owning structures), **#220** and **#228** (the
+Γ-transport, `buildGamma`, and `HasSupport` inversion lemmas are public at
+`Lara/Support.lean`, `Lara/Attack.lean`, and `Lara/Admission.lean`, and the
+private re-proofs in `Lara/Update.lean`, `Lara/Consistency.lean`, and
+`Lara/Context/Link.lean` are gone), **#226** (the `conclusionCache` /
+`conflictCache` agreement bridge is `Context.conclusionCache_eq_conflictCache`
+and `Context.link_cache_bridge`), and **#229** (the composition boundary is
+witnessed, §2). **#222** was closed without change: the list helpers it named
+never landed in `Lara/Context/Compose.lean`. **#227** (a `native_decide`-free
+surface fixture, §4) remains open.

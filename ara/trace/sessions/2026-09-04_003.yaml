@@ -1,0 +1,96 @@
+session:
+  id: "2026-09-04_003"
+  date: "2026-09-04"
+  started: "2026-09-04T09:12"
+  last_turn: "2026-09-04T09:12"
+  turn_count: 1
+  summary: >
+    M4 Part A debt clearance on the researcher's direction: #219 (instances at
+    their structures), #220/#228 (Γ-transport, buildGamma, and HasSupport
+    inversion lemmas public at Support/Attack/Admission, private copies
+    deleted), #226 (conclusionCache/conflictCache bridge proved), #229
+    (composition non-closure for linkability witnessed), #222 closed as moot;
+    #227 left open with a sharper sizing. All M4 gates pass at commit 14b9e34.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N300"
+    routing: direct
+    provenance: user
+    summary: "Clear the M4 debts in one pass; owner-module placement over Update.lean; #229 option 2; #227 deferred as milestone-sized."
+  - turn: 1
+    type: experiment
+    id: "N301"
+    routing: direct
+    provenance: ai-executed
+    summary: "85/140-job builds, 2013-report axiom audit, 224-declaration M4 coverage, checker tests pass."
+  - turn: 1
+    type: observation
+    id: "O130"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Composition's non-closure for linkability is structural: a side's attacks cannot target the other half."
+  - turn: 1
+    type: observation
+    id: "O131"
+    routing: staged
+    provenance: ai-suggested
+    summary: "The pre-check conclusion cache equals the post-check conflict cache projection on accepted units."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Read the seven M4 follow-up issues, moved five DecidableEq instances and
+      eight lemmas to their owning modules, deleted the private re-proofs,
+      proved the cache bridge (five theorems) and the composition witness (six
+      theorems plus a private helper), extended AxCheck.lean, updated the two
+      M4 docs records and the paper name map, ran every documented gate, and
+      committed as 14b9e34.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Support.lean"
+      - "lean/Lara/Attack.lean"
+      - "lean/Lara/Policy.lean"
+      - "lean/Lara/Admission.lean"
+      - "lean/Lara/Update.lean"
+      - "lean/Lara/Consistency.lean"
+      - "lean/Lara/Check/Program.lean"
+      - "lean/Lara/Context/Fragment.lean"
+      - "lean/Lara/Context/Link.lean"
+      - "lean/Lara/Examples/Linking.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-m4-context-calculus-decision.md"
+      - "docs/theory-m4-contextual-adequacy.md"
+      - "docs/paper-lean-name-map.md"
+      - "ara/evidence/proofs/m4_contextual_adequacy.md"
+
+claims_touched: []
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User: "how about we clear the debts from M4 first". Read as the concrete
+      follow-up issues (#219, #220, #222, #226, #227, #228, #229), not the
+      future-work items #215/#216/#217.
+  - turn: 1
+    excerpt: >
+      While building the #229 witness: neither half can declare the covering
+      attack, because SideOk requires an attack's target among the side's own
+      arguments and the target lives in the other half. The boundary is
+      structural, which sharpens #229's framing (staged as O130).
+  - turn: 1
+    excerpt: >
+      #227 sizing: surfaceEnv's encodeProp parses text, canon is canonNum, and
+      the registry carries the ND backend — none reduce under kernel decide.
+      A witness needs a purpose-built environment, not only a smaller program.
+
+open_threads:
+  - "Open the PR for claude/m4-debts-clearance-af1b56 (closes #219, #220, #226, #228, #229); close #222 as moot; comment sizing on #227."
+  - "PR #236 awaits approval and merge."
+  - "Issue #234 tracks the deferred translation-traversal refactor."
+  - "Issue #235 tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+
+ai_suggestions_pending:
+  - "O130: the general 'cross-half coverage is vacuous or via shared terms' statement is unproved; worth a theorem if #229 option 1 is ever weighed."

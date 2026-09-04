@@ -79,6 +79,7 @@ def subterm : SupportTerm → Pos → Option SupportTerm
 structure DefeatPolicy where
   contraries : List (APat × APat)
   exceptions : List (RuleId × APat)
+deriving DecidableEq
 
 /-- §4.1 contrary instantiation: some declared `contrary A B` and one ground
 `rho` have `A rho ≡ p` and `B rho ≡ q`. -/
@@ -655,5 +656,24 @@ theorem rebut_concl_coherent {canon Pi Gamma CertOk dp}
       rw [hrr] at hside'
       have hCu : Cu₀ = Cu := Option.some.inj (hconcl.symm.trans hside'.concl)
       exact ⟨Cw₀, Ow₀, hw, hCu ▸ hcon⟩
+
+/-- **Γ-weakening.** An attack typing survives any extension of the leaf
+environment, because each of the three rules reads Γ only through a support
+derivation (`Support.hasSupport_mono_gamma`) or a single leaf lookup. Public at
+the judgment's module so that no downstream module re-proves it (issue #220). -/
+theorem hasAttack_mono_gamma {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {dp : DefeatPolicy}
+    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
+    {k : Attack} (h : HasAttack canon Pi Gamma CertOk dp k) :
+    HasAttack canon Pi Gamma' CertOk dp k := by
+  cases h with
+  | rebut hw hrule hdef hconcl hcon =>
+      exact .rebut (hasSupport_mono_gamma hext hw) hrule hdef hconcl hcon
+  | undercut hw hocc hrule hdef hexc hinst heq =>
+      exact .undercut (hasSupport_mono_gamma hext hw) hocc hrule hdef hexc hinst heq
+  | undermine hw hocc hl hcon =>
+      exact .undermine (hasSupport_mono_gamma hext hw) hocc (hext _ _ hl) hcon
 
 end Lara.Attack

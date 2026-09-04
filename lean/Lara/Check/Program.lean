@@ -233,6 +233,33 @@ theorem conflictCache_terms
     nodes.map (·.term)
   exact hzip 0
 
+/-- The cache records each node's own conclusion: the `(term, conclusion)`
+projection of the scan cache is that of the checked nodes. With
+`conflictCache_terms` this is what lets `Lara.Context` prove that the
+conclusions its saturation infers *before* checking are the ones this cache
+reads off *after* acceptance (`Lara.Context.conclusionCache_eq_conflictCache`). -/
+theorem conflictCache_conclusions
+    {canon : String → String} (Pi : RuleId → Option Rule)
+    {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (atts : List Attack)
+    (nodes : List (Compile.CheckedNode canon Pi Gamma CertOk)) :
+    (conflictCache Pi atts nodes).map (fun n => (n.term, n.conclusion))
+      = nodes.map (fun n => (n.term, n.conclusion)) := by
+  have hzip : ∀ n, (nodes.zipIdx n).map (fun entry => (entry.1.term, entry.1.conclusion)) =
+      nodes.map (fun n => (n.term, n.conclusion)) := by
+    intro n
+    induction nodes generalizing n with
+    | nil => rfl
+    | cons node rest ih =>
+      simp only [List.zipIdx_cons, List.map_cons]
+      exact congrArg ((node.term, node.conclusion) :: ·) (ih (n + 1))
+  unfold conflictCache
+  rw [List.map_map]
+  change (nodes.zipIdx.map (fun entry => (entry.1.term, entry.1.conclusion))) =
+    nodes.map (fun n => (n.term, n.conclusion))
+  exact hzip 0
+
 private theorem mem_map_fst_zipIdx_iff {α : Type} (x : α)
     (xs : List α) (n : Nat) :
     x ∈ (xs.zipIdx n).map Prod.fst ↔ x ∈ xs := by

@@ -104,3 +104,59 @@ The earlier assurance-free fixtures (`congruence_witness`,
 `registry_swap_witness`) are retained as shape witnesses only: a fragment of
 bare leaves has no certificate, so `mapAssurFrag f` is the identity on it for
 every `f`.
+
+### Debt clearance (2026-09-04)
+
+Gates run at commit `14b9e34` on branch `claude/m4-debts-clearance-af1b56`
+after closing #219, #220, #226, #228, #229 (and #222 as moot). Verbatim
+outputs.
+
+```
+$ cd lean && lake build Lara
+Build completed successfully (85 jobs).
+
+$ cd lean && lake build
+Build completed successfully (140 jobs).
+
+$ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
+'Lara.Examples.Linking.cert_relabel_moves' depends on axioms: [propext]
+Axiom audit passed.
+
+$ python3 scripts/check-axcheck-coverage.py lean/AxCheck.lean \
+    lean/Lara/Invariants/Merge.lean lean/Lara/Context/Fragment.lean \
+    lean/Lara/Context/Link.lean lean/Lara/Context/Merge.lean \
+    lean/Lara/Context/Compose.lean lean/Lara/Context/Equivalence.lean \
+    lean/Lara/Context/Surface.lean lean/Lara/Examples/Linking.lean
+AxCheck coverage passed (224 declarations).
+
+$ python3 scripts/test_check_axcheck_coverage.py
+Ran 2 tests in 0.124s
+OK
+
+$ bash scripts/test-check-axioms.sh
+All check-axioms tests passed.
+```
+
+The audit reported 2013 declarations. The new entries and their axiom sets:
+
+```
+'Lara.Admission.buildGamma_append_fresh' depends on axioms: [propext, Quot.sound]
+'Lara.Support.hasSupport_inst_root' depends on axioms: [propext]
+'Lara.Support.hasSupport_mono_gamma' depends on axioms: [propext]
+'Lara.Attack.hasAttack_mono_gamma' depends on axioms: [propext]
+'Lara.Check.conflictCache_conclusions' depends on axioms: [propext, Quot.sound]
+'Lara.Context.conclusionCache_eq_conflictCache' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Context.link_cache_bridge' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.Linking.hostile_compose_ok' depends on axioms: [propext]
+'Lara.Examples.Linking.hostile_composite_links' depends on axioms: [propext]
+'Lara.Examples.Linking.hostile_left_admissible' depends on axioms: [propext, Quot.sound]
+'Lara.Examples.Linking.hostile_right_admissible' depends on axioms: [propext, Quot.sound]
+'Lara.Examples.Linking.hostile_composite_not_sideOk' depends on axioms: [propext, Quot.sound]
+'Lara.Examples.Linking.hostile_composite_not_admissible' depends on axioms: [propext, Quot.sound]
+```
+
+Diff shape: `14 files changed, 452 insertions(+), 227 deletions(-)`; the
+deletions are the private lemma copies in `Lara/Update.lean`,
+`Lara/Consistency.lean`, and `Lara/Context/Link.lean` and the `DecidableEq`
+block in `Lara/Context/Fragment.lean`. No Haskell, CLI, wire, or corpus
+surface is touched, and no freeze tag moves.

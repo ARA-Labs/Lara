@@ -50,23 +50,6 @@ namespace Lara.Context
 
 open Lara.Support Lara.Attack Lara.Compile
 
-/-! ### Decidable equality on the fixed policy data
-
-Rejection class R-L3 compares Σ and the policy structurally, so both need
-`DecidableEq`; Σ already has one, the policy side had none. `Question`, `Rule`
-and `DefeatPolicy` appear only as the transitive prerequisites of
-`Policy.Policy`'s instance. Derived here rather than at the owning modules only
-because M4 is additive to a frozen core — issue #219 tracks moving them to
-`Lara/Support.lean`, `Lara/Attack.lean`, and `Lara/Policy.lean`, where a later
-`deriving DecidableEq` on the structure itself would otherwise collide with the
-generated instance name. -/
-
-deriving instance DecidableEq for Lara.Support.Question
-deriving instance DecidableEq for Lara.Support.Rule
-deriving instance DecidableEq for Lara.Attack.DefeatPolicy
-deriving instance DecidableEq for Lara.Policy.RuleDecl
-deriving instance DecidableEq for Lara.Policy.Policy
-
 /-! ### Structural merge
 
 `SupportTerm` equality is structural (`Lara/Support.lean:351`), and
@@ -319,7 +302,7 @@ def linkOk (C : Context) (F : Fragment) : Bool := (linkFault C F).isNone
 
 /-- The linked Γ: the two declared leaf lists, read by `Admission.buildGamma`.
 Γ is *not* fixed across linking — it is exactly what the two sides
-contribute — and `Lara.Update`'s Γ-extension transport carries derivations into
+contribute — and `Support.hasSupport_mono_gamma` carries derivations into
 it. Identifier hygiene is what makes the concatenation order irrelevant:
 `buildGamma` is first-wins, and the guard has already ruled out a leaf declared
 by both sides. -/

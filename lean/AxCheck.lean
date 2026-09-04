@@ -149,6 +149,10 @@ open Lara
 -- the declarative judgment, its correspondence with the evaluator, the two
 -- context layers, the endpoint-safe prune, the canonical audit, the
 -- all-admit identity, restrictiveness, rejection, and source non-promotion.
+#print axioms Lara.Admission.buildGamma_append_of_some
+#print axioms Lara.Admission.buildGamma_append_ne
+#print axioms Lara.Admission.buildGamma_append_fresh
+#print axioms Lara.Admission.buildGamma_some_mem
 #print axioms Lara.Admission.evaluateAdmission_iff_judgment
 #print axioms Lara.Admission.admission_deterministic
 #print axioms Lara.Admission.policy_admitted_iff
@@ -511,6 +515,9 @@ open Lara
 #print axioms Lara.Support.mem_questionNames
 #print axioms Lara.Support.leaves_declared
 #print axioms Lara.Support.hasSupport_unique
+#print axioms Lara.Support.hasSupport_inst_root
+#print axioms Lara.Support.hasSupport_leaf_gamma
+#print axioms Lara.Support.hasSupport_mono_gamma
 #print axioms Lara.Support.supports_resp_equiv
 #print axioms Lara.Support.strict_no_questions
 #print axioms Lara.Support.complete_mandatory_discharged
@@ -568,6 +575,7 @@ open Lara
 -- Spec §7.1 freeze: typed positional attacks — checked source (§1 guarantee 4),
 -- strict-unattackability, position-kind partition, and the coherence of local
 -- attack checking with global support typing.
+#print axioms Lara.Attack.hasAttack_mono_gamma
 #print axioms Lara.Attack.attack_source_checked
 #print axioms Lara.Attack.rebut_top_defeasible
 #print axioms Lara.Attack.undercut_pos_defeasible
@@ -859,6 +867,7 @@ open Lara
 #print axioms Lara.Check.CheckedArguments.nodes_terms
 #print axioms Lara.Check.sourceAttackBucket_mem_iff
 #print axioms Lara.Check.conflictCache_terms
+#print axioms Lara.Check.conflictCache_conclusions
 #print axioms Lara.Check.sourceAttackBucket_coveredB_iff
 #print axioms Lara.Check.firstMissingConflict_none_iff
 #print axioms Lara.Check.checkProgramDetailed_sound
@@ -2401,6 +2410,11 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.mem_conclusionCache
 #print axioms Lara.Context.conclusionCache_sound
 #print axioms Lara.Context.conclusionCache_terms
+#print axioms Lara.Context.conclusionCache_of_nodes
+#print axioms Lara.Context.conclusionCache_eq_conflictCache
+#print axioms Lara.Context.link_some_inv
+#print axioms Lara.Context.mem_conclusionCache_of_sub
+#print axioms Lara.Context.link_cache_bridge
 #print axioms Lara.Context.firstDup?_none_iff
 #print axioms Lara.Context.firstMissing?_none_iff
 #print axioms Lara.Context.firstShared?_none_iff
@@ -2423,11 +2437,6 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.crossAtts_spec
 #print axioms Lara.Context.crossAtts_covers
 #print axioms Lara.Context.crossAtts_covers'
-#print axioms Lara.Context.hasSupport_mono_gamma
-#print axioms Lara.Context.hasAttack_mono_gamma
-#print axioms Lara.Context.buildGamma_append_of_some
-#print axioms Lara.Context.buildGamma_append_fresh
-#print axioms Lara.Context.buildGamma_some_mem
 #print axioms Lara.Context.linkGamma_extends_left
 #print axioms Lara.Context.linkGamma_extends_right
 #print axioms Lara.Context.groundWellSorted_append
@@ -2578,6 +2587,12 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Linking.compose_triple_ok
 #print axioms Lara.Examples.Linking.compose_triple_ok'
 #print axioms Lara.Examples.Linking.compose_assoc_witness
+#print axioms Lara.Examples.Linking.hostile_compose_ok
+#print axioms Lara.Examples.Linking.hostile_composite_links
+#print axioms Lara.Examples.Linking.hostile_left_admissible
+#print axioms Lara.Examples.Linking.hostile_right_admissible
+#print axioms Lara.Examples.Linking.hostile_composite_not_sideOk
+#print axioms Lara.Examples.Linking.hostile_composite_not_admissible
 #print axioms Lara.Examples.Linking.obs_contested
 #print axioms Lara.Examples.Linking.obs_four_states
 #print axioms Lara.Examples.Linking.ctxEquiv_negative

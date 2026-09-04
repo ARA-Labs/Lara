@@ -251,6 +251,109 @@ theorem exists_fault_of_not_linkOk {C : Context} {F : Fragment}
   rw [linkOk, Bool.eq_false_iff, Ne, Option.isNone_iff_eq_none] at h
   exact Option.ne_none_iff_exists'.mp h
 
+/-! ### The cache bridge
+
+`conclusionCache` infers conclusions *before* checking, under the hypothetical
+linked Γ; `Check.conflictCache` reads them off `Unit.CheckedUnit.nodes` *after*
+acceptance. They are the same idea computed at two different times, and the
+saturation `link` performs is the one the checker would have computed exactly
+when the two agree. They do, and on the nose: on any accepted unit the inferred
+cache over the program's arguments *is* the `(term, conclusion)` projection of
+the conflict cache, because `conclusionOf_eq_some_iff` makes the inferred
+conclusion the derivable one and every checked node carries its derivation.
+Nothing in the saturation proofs consumes this — they use the two inverses
+above — so it is a statement about the calculus rather than about any one
+proof (issue #226). -/
+
+/-- The inferred cache over the terms of checked nodes is those nodes'
+`(term, conclusion)` pairs. -/
+theorem conclusionCache_of_nodes {canon : String → String} {Pi : RuleId → Option Rule}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    (nodes : List (Compile.CheckedNode canon Pi Gamma (certOkOf reg))) :
+    conclusionCache Pi Gamma reg (nodes.map (·.term))
+      = nodes.map (fun n => (n.term, n.conclusion)) := by
+  induction nodes with
+  | nil => rfl
+  | cons n rest ih =>
+      have hf : conclusionOf Pi Gamma reg n.term = some n.conclusion :=
+        conclusionOf_eq_some_iff.mpr n.valid
+      simp only [conclusionCache] at ih
+      simp [conclusionCache, List.filterMap_cons, hf, ih]
+
+/-- **The bridge on an accepted unit.** The conclusions `conclusionCache`
+infers for the program's arguments are exactly the ones `Check.conflictCache`
+records for its checked nodes, whatever attack list the scan is run against. -/
+theorem conclusionCache_eq_conflictCache {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    (checked : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)) (atts : List Attack) :
+    conclusionCache checked.policy.ruleLookup Gamma reg checked.program.args
+      = (Check.conflictCache checked.policy.ruleLookup atts checked.nodes).map
+          (fun n => (n.term, n.conclusion)) := by
+  rw [Check.conflictCache_conclusions, ← checked.nodes_terms, conclusionCache_of_nodes]
+
+/-- A successful link is the guarded pair: the guard held, and the result is
+`linkedUnit` with `linkGamma`. -/
+theorem link_some_inv {canon : String → String} {reg : BackendRegistry canon}
+    {C : Context} {F : Fragment} {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
+    (hlink : link reg C F = some (unit, Gamma)) :
+    linkOk C F = true ∧ unit = linkedUnit reg C F ∧ Gamma = linkGamma C F := by
+  by_cases hok : linkOk C F = true
+  · rw [link_eq_some hok] at hlink
+    have hpair := Option.some.inj hlink
+    exact ⟨hok, (congrArg Prod.fst hpair).symm, (congrArg Prod.snd hpair).symm⟩
+  · rw [Bool.not_eq_true] at hok
+    rw [link_eq_none hok] at hlink
+    exact absurd hlink (by simp)
+
+/-- A side's inferred cache is the restriction of the cache over any superset
+of its terms. -/
+theorem mem_conclusionCache_of_sub {canon : String → String} {Pi : RuleId → Option Rule}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {side args : List SupportTerm} (hsub : ∀ w ∈ side, w ∈ args)
+    {w : SupportTerm} {A : Atom} :
+    (w, A) ∈ conclusionCache Pi Gamma reg side ↔
+      w ∈ side ∧ (w, A) ∈ conclusionCache Pi Gamma reg args := by
+  rw [mem_conclusionCache, mem_conclusionCache]
+  constructor
+  · rintro ⟨hw, hsup⟩; exact ⟨hw, hsub w hw, hsup⟩
+  · rintro ⟨hw, -, hsup⟩; exact ⟨hw, hsup⟩
+
+/-- **The bridge on a linked program.** For a link the checker accepts, each
+side's saturation cache — built under the linked Γ before checking — is the
+restriction of the checker's conflict cache to that side's arguments: `(w, A)`
+is in the side's inferred cache exactly when `w` is one of that side's
+arguments and the accepted unit carries a checked node for `w` whose recorded
+conclusion is `A`. -/
+theorem link_cache_bridge {canon : String → String} {reg : BackendRegistry canon}
+    {C : Context} {F : Fragment} {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
+    {ground : List Atom} {checked : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+    (hlink : link reg C F = some (unit, Gamma))
+    (hcheck : Check.Unit.checkUnit Gamma reg ground unit = .ok checked)
+    {side : List SupportTerm} (hside : side = C.frame.args ∨ side = F.args)
+    {w : SupportTerm} {A : Atom} :
+    (w, A) ∈ conclusionCache F.policy.ruleLookup Gamma reg side ↔
+      w ∈ side ∧ ∃ n ∈ Check.conflictCache checked.policy.ruleLookup unit.atts checked.nodes,
+        n.term = w ∧ n.conclusion = A := by
+  obtain ⟨-, hunit, -⟩ := link_some_inv hlink
+  have hsound := Check.Unit.checkUnit_sound hcheck
+  have hpol : checked.policy = F.policy := by
+    rw [hsound.2.2.2.2.2.1, hunit]; rfl
+  have hargs : checked.program.args = dedupList (C.frame.args ++ F.args) := by
+    rw [hsound.2.2.2.2.2.2.2.2.1, hunit]; rfl
+  have hsub : ∀ v ∈ side, v ∈ checked.program.args := by
+    intro v hv
+    rw [hargs, mem_dedupList, List.mem_append]
+    rcases hside with rfl | rfl
+    · exact Or.inl hv
+    · exact Or.inr hv
+  rw [← hpol, mem_conclusionCache_of_sub hsub,
+    conclusionCache_eq_conflictCache checked unit.atts, List.mem_map]
+  constructor
+  · rintro ⟨hw, n, hn, hpair⟩
+    exact ⟨hw, n, hn, congrArg Prod.fst hpair, congrArg Prod.snd hpair⟩
+  · rintro ⟨hw, n, hn, hterm, hconcl⟩
+    exact ⟨hw, n, hn, by rw [hterm, hconcl]⟩
+
 /-! ### Saturation -/
 
 theorem mem_crossAttsFrom {canon : String → String} {dp : DefeatPolicy}
@@ -305,28 +408,8 @@ theorem covered_mono {atts atts' : List Attack} {s t : SupportTerm}
 `HasAttack` is the premise `Check.Unit.checkUnit_complete` takes for every
 declared attack, so saturation is sound only if every attack it emits types.
 Both shapes read their target-side premise off the target's own support
-derivation: `Support.InstSide.concl` for a rebut, the `HasSupport.leaf` Γ
-lookup for an undermine. -/
-
-private theorem hasSupport_inst_root {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
-    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
-    {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
-    {α : Assurance} {C : Atom} {O : List QuestionId}
-    (h : HasSupport canon Pi Gamma CertOk (.inst rn θ ws D H α) C O) :
-    ∃ r, Pi rn = some r ∧ instAPat θ r.concl = some C := by
-  cases h with
-  | inst hside _ _ => exact ⟨_, hside.rule, hside.concl⟩
-
-private theorem hasSupport_leaf_gamma {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
-    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    {l : LeafId} {C : Atom} {O : List QuestionId}
-    (h : HasSupport canon Pi Gamma CertOk (.leaf l) C O) :
-    Gamma l = some C := by
-  cases h with
-  | leaf hΓ => exact hΓ
+derivation — `Support.hasSupport_inst_root` for a rebut, the
+`Support.hasSupport_leaf_gamma` Γ lookup for an undermine. -/
 
 /-- **Every emitted cross-boundary attack types.** -/
 theorem hasAttack_attackFor {canon : String → String}
@@ -445,79 +528,18 @@ end Linked
 /-! ### Γ transport
 
 Γ is what the two sides contribute, so every judgment about a side has to move
-from the side's own environment into the linked one. The two monotonicity
-lemmas below are verbatim re-proofs of `Lara/Update.lean`'s Γ-extension
-transport, which is `private` at its own module; issue #220 tracks
-de-privatizing it so this copy can go. -/
-
-/-- Support derivations survive an extension of Γ. -/
-theorem hasSupport_mono_gamma {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
-    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
-    {w : SupportTerm} {C : Atom} {O : List QuestionId}
-    (h : HasSupport canon Pi Gamma CertOk w C O) :
-    HasSupport canon Pi Gamma' CertOk w C O := by
-  induction h with
-  | leaf hGamma => exact .leaf (hext _ _ hGamma)
-  | inst hside hprems hdis ihprems ihdis => exact .inst hside ihprems ihdis
-
-/-- Attack typings survive an extension of Γ. -/
-theorem hasAttack_mono_gamma {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
-    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    {dp : DefeatPolicy}
-    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
-    {k : Attack} (h : HasAttack canon Pi Gamma CertOk dp k) :
-    HasAttack canon Pi Gamma' CertOk dp k := by
-  cases h with
-  | rebut hw hrule hdef hconcl hcon =>
-      exact .rebut (hasSupport_mono_gamma hext hw) hrule hdef hconcl hcon
-  | undercut hw hocc hrule hdef hexc hinst heq =>
-      exact .undercut (hasSupport_mono_gamma hext hw) hocc hrule hdef hexc hinst heq
-  | undermine hw hocc hl hcon =>
-      exact .undermine (hasSupport_mono_gamma hext hw) hocc (hext _ _ hl) hcon
-
-/-! `Lara.Support.hasSupport_unique` (`Support.lean:693`) is the uniqueness
-fact several proofs below consume: a term has one conclusion and one obligation
-set, so two derivations of the same term agree. It is public and general in
-`CertOk`; nothing here re-proves it.
-
-The three `buildGamma` facts and the two Γ-monotonicity lemmas above are
-verbatim re-proofs of `Lara/Update.lean:283-365,510-534`, which are `private` at
-their own module. Issue #220 tracks de-privatizing them; the names here are the
-originals' so that closing it is a deletion rather than a rename. -/
-
-theorem buildGamma_append_of_some (leaves extra : List (LeafId × Atom)) {l : LeafId}
-    {p : Atom} (h : Admission.buildGamma leaves l = some p) :
-    Admission.buildGamma (leaves ++ extra) l = some p := by
-  unfold Admission.buildGamma at h ⊢
-  obtain ⟨row, hfind, hterm⟩ := Option.map_eq_some_iff.mp h
-  rw [List.find?_append, hfind]
-  simp [hterm]
-
-theorem buildGamma_append_fresh (leaves extra : List (LeafId × Atom)) {l : LeafId}
-    (hfresh : l ∉ leaves.map (·.1)) :
-    Admission.buildGamma (leaves ++ extra) l = Admission.buildGamma extra l := by
-  unfold Admission.buildGamma
-  rw [List.find?_append,
-    List.find?_eq_none.mpr (by
-      intro row hrow hdec
-      exact hfresh (List.mem_map.mpr ⟨row, hrow, of_decide_eq_true hdec⟩))]
-  rfl
-
-theorem buildGamma_some_mem {leaves : List (LeafId × Atom)} {l : LeafId} {p : Atom}
-    (h : Admission.buildGamma leaves l = some p) : l ∈ leaves.map (·.1) := by
-  unfold Admission.buildGamma at h
-  obtain ⟨row, hfind, -⟩ := Option.map_eq_some_iff.mp h
-  exact List.mem_map.mpr
-    ⟨row, List.mem_of_find?_eq_some hfind,
-      of_decide_eq_true (List.find?_eq_some_iff_getElem.mp hfind).1⟩
+from the side's own environment into the linked one. The transport itself is
+generic: `Support.hasSupport_mono_gamma` and `Attack.hasAttack_mono_gamma`
+carry derivations across a Γ extension, `Support.hasSupport_unique`
+(`Support.lean`) is the uniqueness fact several proofs below consume, and the
+`Admission.buildGamma_*` facts say how the linked environment extends each
+side's own. All of them are public at their owning modules (issue #220);
+nothing here re-proves them. -/
 
 /-- The linked Γ extends the context's own environment. -/
 theorem linkGamma_extends_left {C : Context} {F : Fragment} :
     ∀ l p, Admission.buildGamma C.frame.gammaFrag l = some p → linkGamma C F l = some p :=
-  fun _ _ h => buildGamma_append_of_some _ _ h
+  fun _ _ h => Admission.buildGamma_append_of_some _ _ h
 
 /-- The linked Γ extends the fragment's own environment. Hygiene is what makes
 this direction true: `buildGamma` is first-wins, and R-L1 has ruled out a leaf
@@ -527,9 +549,9 @@ theorem linkGamma_extends_right {C : Context} {F : Fragment}
     ∀ l p, Admission.buildGamma F.gammaFrag l = some p → linkGamma C F l = some p := by
   intro l p h
   obtain ⟨-, -, hdisj, -, -, -, -⟩ := linkOk_eq_true_iff.mp hok
-  have hmem : l ∈ F.declared := buildGamma_some_mem h
+  have hmem : l ∈ F.declared := Admission.buildGamma_some_mem h
   have hfresh : l ∉ C.frame.declared := fun hc => hdisj l hc hmem
-  rw [linkGamma, buildGamma_append_fresh _ _ hfresh]
+  rw [linkGamma, Admission.buildGamma_append_fresh _ _ hfresh]
   exact h
 
 /-! ### The signature stage of a link

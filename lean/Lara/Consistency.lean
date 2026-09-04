@@ -23,18 +23,6 @@ open Lara.Support
 
 /-! ### Path-B attackability -/
 
-private theorem hasSupport_inst_root
-    {Pi : RuleId → Option Rule}
-    {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
-    {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
-    {assurance : Assurance} {C : Atom} {O : List QuestionId}
-    (h : HasSupport canon Pi Gamma CertOk
-      (.inst rn θ ws D H assurance) C O) :
-    ∃ r, Pi rn = some r ∧ instAPat θ r.concl = some C := by
-  cases h with
-  | inst hside _ _ =>
-      exact ⟨_, hside.rule, hside.concl⟩
-
 /-- In a well-formed accepted policy, the target of an instantiated contrary
 cannot be a strict-rule root. Hence every complete contrary target is either a
 leaf or a defeasible-root instance, exactly the compile layer's conflict

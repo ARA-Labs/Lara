@@ -320,6 +320,53 @@ def inconsistentGroups (canon : String → String) (leaves : List (LeafId × Ato
 def buildGamma (leaves : List (LeafId × Atom)) : LeafId → Option Atom :=
   fun l => (leaves.find? (fun e => decide (e.1 = l))).map (·.2)
 
+/-! `buildGamma` is first-wins over the declaration list. The four facts below
+are the whole of what its consumers (`Lara.Update`'s Γ transport,
+`Lara.Context`'s linked environment) need, and they are public here rather
+than re-proved privately downstream (issue #220). -/
+
+/-- Appending declarations never loses an existing entry. -/
+theorem buildGamma_append_of_some
+    (leaves extra : List (LeafId × Atom)) {l : LeafId} {p : Atom}
+    (h : buildGamma leaves l = some p) :
+    buildGamma (leaves ++ extra) l = some p := by
+  unfold buildGamma at h ⊢
+  obtain ⟨row, hfind, hterm⟩ := Option.map_eq_some_iff.mp h
+  rw [List.find?_append, hfind]
+  simp [hterm]
+
+/-- Appending one declaration leaves every *other* identifier's entry alone. -/
+theorem buildGamma_append_ne
+    (leaves : List (LeafId × Atom)) (fresh : LeafId) (a : Atom)
+    {l : LeafId} (hne : l ≠ fresh) :
+    buildGamma (leaves ++ [(fresh, a)]) l = buildGamma leaves l := by
+  unfold buildGamma
+  rw [List.find?_append]
+  cases leaves.find? (fun e => decide (e.1 = l)) <;>
+    simp [Ne.symm hne]
+
+/-- An identifier the prefix does not declare is read from the suffix. -/
+theorem buildGamma_append_fresh (leaves extra : List (LeafId × Atom)) {l : LeafId}
+    (hfresh : l ∉ leaves.map (·.1)) :
+    buildGamma (leaves ++ extra) l = buildGamma extra l := by
+  unfold buildGamma
+  rw [List.find?_append,
+    List.find?_eq_none.mpr (by
+      intro row hrow hdec
+      exact hfresh (List.mem_map.mpr ⟨row, hrow, of_decide_eq_true hdec⟩))]
+  rfl
+
+/-- An entry comes from a declaration. -/
+theorem buildGamma_some_mem {leaves : List (LeafId × Atom)}
+    {l : LeafId} {p : Atom}
+    (h : buildGamma leaves l = some p) :
+    l ∈ leaves.map (·.1) := by
+  unfold buildGamma at h
+  obtain ⟨row, hfind, -⟩ := Option.map_eq_some_iff.mp h
+  exact List.mem_map.mpr
+    ⟨row, List.mem_of_find?_eq_some hfind,
+      of_decide_eq_true (List.find?_eq_some_iff_getElem.mp hfind).1⟩
+
 /-- The single leaf/argument/attack prune with the policy seed unioned once
 with the inconsistent-group members.  The kept attacks are the `selectAligned`
 projection of the declared resolved attacks under the raw-endpoint keep. -/

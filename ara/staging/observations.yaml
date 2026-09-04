@@ -2812,3 +2812,43 @@ observations:
   promoted_to: "logic/solution/heuristics.md:H17"
   crystallized_via: artifact-commitment
   stale: false
+- id: O130
+  timestamp: 2026-09-04T09:12
+  provenance: ai-suggested
+  content: >
+    Composition's failure to close for linkability is structural, not a missing saturation
+    step: SideOk.source_declared/target_declared force a side's declared attacks to have both
+    endpoints among its own arguments, so a cross-half contrary conflict in a composite can be
+    covered by the halves only vacuously (no such conflict) or through a term declared on both
+    sides. sideOk_composed's cross-coverage hypotheses are therefore satisfiable only in those
+    two cases; option 1 of #229 (a saturating compose) is the only route to genuine closure.
+  context: >
+    Surfaced while designing the #229 witness (hostileHalf/thirdFrag): neither half could be
+    repaired by declaring the covering attack, because the attack's target lives in the other
+    half. Witnessed by hostile_composite_not_admissible; the general statement is unproved.
+  potential_type: claim
+  bound_to: [N282, N300]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O131
+  timestamp: 2026-09-04T09:12
+  provenance: ai-suggested
+  content: >
+    The conclusion cache link infers before checking and the conflict cache the checker builds
+    after acceptance agree on the nose: on any accepted unit, conclusionCache over the program's
+    arguments equals the (term, conclusion) projection of conflictCache
+    (Context.conclusionCache_eq_conflictCache), and on an accepted link each side's saturation
+    cache is that cache restricted to the side (link_cache_bridge). So the saturation link
+    performs is the one the checker would compute, and drift between the two caches under a
+    change to either side now fails a proof rather than going unnoticed.
+  context: >
+    Issue #226's F0 aspiration, proved in the debt-clearance pass; nothing in the saturation
+    proofs consumes it. Cost turned out modest, as the issue guessed.
+  potential_type: claim
+  bound_to: [N300, N301]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

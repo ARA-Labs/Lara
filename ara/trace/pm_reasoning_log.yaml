@@ -1199,3 +1199,12 @@ entries:
     - "Did not stage a claim or revise the logic layer: this pass corrects artifact provenance and PR ownership, not the theory contract."
     - "The GitHub review was ordinary PR feedback, not a structured ARA reader report; reader-report adjudication did not apply."
     - "No older staged observation was marked stale; this closeout did not establish safe topic abandonment."
+- turn: "2026-09-04_003#1"
+  notes:
+    - "Routed the researcher's 'clear the debts from M4 first' as user decision N300, carrying the three executable choices the session made (owner modules over Update.lean, #229 option 2, #227 deferred) as its alternatives."
+    - "Routed the gate run as experiment N301; the two proof iterations are recorded in its result, not as dead ends — both were placement/tactic slips, not failed designs."
+    - "Staged O130 (structural non-closure) rather than crystallizing: the witness proves one instance, the general statement is unproved and the user has not affirmed it."
+    - "Staged O131 (cache bridge) despite the theorem being proved: artifact commitment is a commit on an unmerged branch; crystallize on merge."
+    - "Did NOT revise C49 at Stage 4. Its Conditions do not mention composition, its Sources quote the historical evidence lines which still stand, and #229's witness sharpens the boundary without changing what C49 asserts. Near-miss logged."
+    - "Appended a dated section to the append-only evidence file instead of editing the 218-declaration line; the coverage count is now 224 and both are true at their commits."
+    - "No reader reports or taste comments were supplied this turn."

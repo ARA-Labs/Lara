@@ -199,6 +199,7 @@ structure Question where
   name      : QuestionId
   answer    : APat
   mandatory : Bool
+deriving DecidableEq
 
 /-- A policy rule. `params` are the declared parameters `X1..Xm` (spec §4:
 rule well-formedness requires every variable in premises/conclusion/answers
@@ -213,6 +214,7 @@ structure Rule where
   questions    : List Question
   allowTrusted : Bool
   certifiers   : List (BackendId × Digest)
+deriving DecidableEq
 
 def questionNames (r : Rule) : List QuestionId := r.questions.map (·.name)
 
@@ -744,6 +746,51 @@ theorem hasSupport_unique {canon Pi Gamma CertOk} {w : SupportTerm}
         · rw [getElem?_none_of_ge DOs j (by have := hside.lenDOs; omega),
               getElem?_none_of_ge DOs' j (by have := hside'.lenDOs; omega)]
       exact ⟨hC, by simp only [collectObligations]; rw [hOs, hDOs]⟩
+
+/-! ### Generic facts about the judgment
+
+These are the inversion and weakening lemmas every downstream module needs
+about `HasSupport` itself — none is specific to a checker, an update, or a
+link. They live here, at the judgment's module, so that no downstream module
+re-proves them privately (issues #220 and #228). -/
+
+/-- **Root inversion.** A derivation of an instance is headed by its rule: the
+rule resolves, and the derived conclusion is the rule's instantiated
+conclusion. -/
+theorem hasSupport_inst_root {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {rn : RuleId} {θ : Subst} {ws : List SupportTerm}
+    {D : List (QuestionId × SupportTerm)} {H : List QuestionId}
+    {α : Assurance} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk (.inst rn θ ws D H α) C O) :
+    ∃ r, Pi rn = some r ∧ instAPat θ r.concl = some C := by
+  cases h with
+  | inst hside _ _ => exact ⟨_, hside.rule, hside.concl⟩
+
+/-- **Leaf inversion.** A derivation of a leaf is the environment's entry for
+it. -/
+theorem hasSupport_leaf_gamma {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {l : LeafId} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk (.leaf l) C O) :
+    Gamma l = some C := by
+  cases h with
+  | leaf hΓ => exact hΓ
+
+/-- **Γ-weakening.** A support derivation survives any extension of the leaf
+environment: the judgment only ever *reads* Γ at the leaves it mentions. -/
+theorem hasSupport_mono_gamma {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
+    {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk w C O) :
+    HasSupport canon Pi Gamma' CertOk w C O := by
+  induction h with
+  | leaf hGamma => exact .leaf (hext _ _ hGamma)
+  | inst hside hprems hdis ihprems ihdis => exact .inst hside ihprems ihdis
 
 /-- `Supports` respects `≡`: one term cannot support two `≢` claims. With
 uniqueness this is result 11's functionality at claim level. -/

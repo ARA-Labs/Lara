@@ -33,11 +33,13 @@ uses the derived `RuleId → Option Rule` lookup. -/
 structure RuleDecl where
   id   : RuleId
   rule : Rule
+deriving DecidableEq
 
 /-- The policy material needed by the §8.1 validator. -/
 structure Policy where
   rules  : List RuleDecl
   defeat : Attack.DefeatPolicy
+deriving DecidableEq
 
 /-- A duplicate rule identifier, with both declaration positions retained for
 the decode-boundary diagnostic. -/

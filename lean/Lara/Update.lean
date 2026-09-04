@@ -278,37 +278,11 @@ theorem applyUpdate_addInstance_notFresh {canon : String → String}
   simp [applyUpdate, h]
 
 
-/-! ### Sufficient-condition preservation -/
+/-! ### Sufficient-condition preservation
 
-private theorem hasSupport_mono_gamma {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
-    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
-    {w : SupportTerm} {C : Atom} {O : List QuestionId}
-    (h : HasSupport canon Pi Gamma CertOk w C O) :
-    HasSupport canon Pi Gamma' CertOk w C O := by
-  induction h with
-  | leaf hGamma => exact .leaf (hext _ _ hGamma)
-  | inst hside hprems hdis ihprems ihdis =>
-      exact .inst hside ihprems ihdis
-
-private theorem hasAttack_mono_gamma {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
-    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
-    {dp : Attack.DefeatPolicy}
-
-    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
-    {k : Attack.Attack}
-    (h : Attack.HasAttack canon Pi Gamma CertOk dp k) :
-    Attack.HasAttack canon Pi Gamma' CertOk dp k := by
-  cases h with
-  | rebut hw hrule hdef hconcl hcon =>
-      exact .rebut (hasSupport_mono_gamma hext hw) hrule hdef hconcl hcon
-  | undercut hw hocc hrule hdef hexc hinst heq =>
-      exact .undercut (hasSupport_mono_gamma hext hw) hocc hrule hdef hexc hinst heq
-  | undermine hw hocc hGamma hcon =>
-      exact .undermine (hasSupport_mono_gamma hext hw) hocc
-        (hext _ _ hGamma) hcon
+The Γ-weakening lemmas this section rests on — `Support.hasSupport_mono_gamma`,
+`Attack.hasAttack_mono_gamma` — and the `Admission.buildGamma_*` facts live at
+their owning modules (issue #220). -/
 
 private theorem mem_leavesList_of_mem {child : SupportTerm}
     {children : List SupportTerm} (hchild : child ∈ children)
@@ -507,36 +481,6 @@ private theorem termsWellSorted_append_singleton
         simpa [Lara.termsWellSorted] using hold
       simp [Lara.termsWellSorted, hparts.1, ih hparts.2]
 
-private theorem buildGamma_append_of_some
-    (leaves extra : List (LeafId × Atom)) {l : LeafId} {p : Atom}
-    (h : Admission.buildGamma leaves l = some p) :
-    Admission.buildGamma (leaves ++ extra) l = some p := by
-  unfold Admission.buildGamma at h ⊢
-  obtain ⟨row, hfind, hterm⟩ := Option.map_eq_some_iff.mp h
-  rw [List.find?_append, hfind]
-  simp [hterm]
-
-private theorem buildGamma_append_ne
-    (leaves : List (LeafId × Atom)) (fresh : LeafId) (a : Atom)
-    {l : LeafId} (hne : l ≠ fresh) :
-    Admission.buildGamma (leaves ++ [(fresh, a)]) l =
-      Admission.buildGamma leaves l := by
-  unfold Admission.buildGamma
-  rw [List.find?_append]
-  cases leaves.find? (fun e => decide (e.1 = l)) <;>
-    simp [Ne.symm hne]
-private theorem buildGamma_some_mem {leaves : List (LeafId × Atom)}
-    {l : LeafId} {p : Atom}
-    (h : Admission.buildGamma leaves l = some p) :
-    l ∈ leaves.map (·.1) := by
-  unfold Admission.buildGamma at h
-  obtain ⟨row, hfind, hterm⟩ := Option.map_eq_some_iff.mp h
-  exact List.mem_map.mpr
-    ⟨row, List.mem_of_find?_eq_some hfind, by
-      have hpred : decide (row.1 = l) = true :=
-        List.find?_some (p := fun e : LeafId × Atom => decide (e.1 = l)) hfind
-      exact of_decide_eq_true hpred⟩
-
 private theorem hasSupport_not_uses_prune_seed {canon : String → String}
     {Pi : RuleId → Option Rule}
     {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
@@ -566,7 +510,7 @@ private theorem hasSupport_not_uses_prune_seed {canon : String → String}
       obtain ⟨p, hgamma⟩ := Support.leaves_declared h l hl
       have hchecked :
           l ∈ Admission.checkedAdmittedIds canon table metas leaves groups := by
-        have := buildGamma_some_mem hgamma
+        have := Admission.buildGamma_some_mem hgamma
         simpa [Admission.buildPrune, Admission.checkedAdmittedIds] using this
       obtain ⟨_, _, _, hnotPolicy, hnotGroup⟩ :=
         (Admission.checked_admitted_iff canon table metas leaves groups l).mp
@@ -1375,7 +1319,7 @@ theorem applyUpdate_addLeaf_ok {canon : String → String}
     obtain ⟨C, hsupport⟩ := oldChecked.program.complete term (by
       simpa [← hprogramArgs'] using hterm)
     obtain ⟨p, hgamma⟩ := Support.leaves_declared hsupport id hid
-    have hcheckedId := buildGamma_some_mem hgamma
+    have hcheckedId := Admission.buildGamma_some_mem hgamma
     rw [holdPrune] at hcheckedId
     have hleafId : id ∈ σ.leaves.map (·.1) := by
       exact List.mem_map.mpr
@@ -1388,14 +1332,14 @@ theorem applyUpdate_addLeaf_ok {canon : String → String}
       Admission.buildGamma admission.prune.checkedLeaves l = some p := by
     intro l p h
     rw [hcheckedEq]
-    exact buildGamma_append_of_some oldAdmission.prune.checkedLeaves [(id, a)] h
+    exact Admission.buildGamma_append_of_some oldAdmission.prune.checkedLeaves [(id, a)] h
   have hgammaOn : ∀ term ∈ admission.prune.keptArgs.map (·.2),
       ∀ l, l ∈ Support.leaves term →
         Admission.buildGamma admission.prune.checkedLeaves l =
           Admission.buildGamma oldAdmission.prune.checkedLeaves l := by
     intro term hterm l hl
     rw [hcheckedEq]
-    apply buildGamma_append_ne
+    apply Admission.buildGamma_append_ne
     intro heq
     subst l
     exact holdNoFresh term (by simpa [hargsEq] using hterm) hl
@@ -1427,7 +1371,7 @@ theorem applyUpdate_addLeaf_ok {canon : String → String}
     have hold := oldChecked.program.typed current (by
       simpa [hattsEq, ← hprogramAttacks'] using hcurrent)
     simpa [checkedGamma, ← hpolicyEq'] using
-      hasAttack_mono_gamma hgammaExt hold
+      Attack.hasAttack_mono_gamma hgammaExt hold
   have hendpoints : ∀ current ∈ admission.prune.keptAttacks,
       current.source ∈ admission.prune.keptArgs.map (·.2) ∧
       current.target ∈ admission.prune.keptArgs.map (·.2) := by
@@ -2621,7 +2565,7 @@ private theorem addLeaf_transport {canon : String → String}
     intro l q hq
     simp only [checkedGamma] at hq ⊢
     rw [hchecked]
-    exact buildGamma_append_of_some sourceAdmission.prune.checkedLeaves
+    exact Admission.buildGamma_append_of_some sourceAdmission.prune.checkedLeaves
       [(id, a)] hq
   have hresolved :
       sourceDeclared.resolved = targetDeclared.resolved :=

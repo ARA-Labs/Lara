@@ -542,3 +542,10 @@ sessions:
   events_count: 2
   claims_touched: []
   open_threads: 3
+- id: 2026-09-04_003
+  date: '2026-09-04'
+  summary: 'M4 Part A debt clearance: #219 instances at their structures; #220/#228 generic lemmas public at Support/Attack/Admission with private copies deleted; #226 cache bridge proved; #229 composition non-closure witnessed; #222 moot; #227 re-sized as milestone work. All M4 gates pass at 14b9e34.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: []
+  open_threads: 4

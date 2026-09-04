@@ -7840,3 +7840,59 @@ tree:
     - "https://github.com/ARA-Labs/lara/pull/236"
   status: resolved
   also_depends_on: [N298]
+
+- id: N300
+  type: decision
+  title: "Clear the M4 Part A debts in one pass before new theory"
+  provenance: user
+  timestamp: "2026-09-04T09:12"
+  choice: >
+    The researcher directed that the M4 follow-up issues be cleared before any
+    new milestone. Executed as one branch (claude/m4-debts-clearance-af1b56,
+    commit 14b9e34): #219 moves the five DecidableEq instances onto their
+    structures; #220/#228 make the Γ-transport, buildGamma, and HasSupport
+    inversion lemmas public at the judgment modules (Support, Attack,
+    Admission) and delete every private re-proof in Update, Consistency, and
+    Context/Link; #226 proves the conclusionCache/conflictCache bridge
+    (Context.conclusionCache_eq_conflictCache, link_cache_bridge); #229 takes
+    option 2 and witnesses the composition boundary
+    (Examples.Linking.hostile_composite_not_admissible). #222 is closed as
+    moot — the list helpers it names never landed in Context/Compose.lean.
+    #227 stays open with a sharper sizing.
+  alternatives:
+    - "#220 literally at Update.lean (as the issue body says) with Context/Link importing Lara.Update — rejected: the issue's own rationale and #228 name the judgment's module as the owner, and it avoids a Context→Update dependency."
+    - "#229 option 1, give compose a registry and Γ so it saturates — rejected for now: changes the F0-frozen data-only signature and re-opens every Compose lemma; the witness converts the prose boundary into a theorem at small cost."
+    - "Attempt #227 in the same pass — rejected: surfaceEnv runs parseSurfaceProp, canonNum, and the ND registry, none of which reduce under kernel decide, so a witness needs a purpose-built environment as well as a purpose-built program; milestone-sized, not a debt."
+  evidence:
+    - "commit 14b9e34 on claude/m4-debts-clearance-af1b56"
+    - "lean/Lara/Context/Link.lean: conclusionCache_eq_conflictCache, link_cache_bridge"
+    - "lean/Lara/Examples/Linking.lean: hostile_composite_not_admissible"
+    - "docs/theory-m4-context-calculus-decision.md §4, §10"
+    - "docs/theory-m4-contextual-adequacy.md §2, §6, §8"
+  status: resolved
+  also_depends_on: [N281, N282, N288]
+
+- id: N301
+  type: experiment
+  title: "Debt-clearance branch passes every documented M4 gate"
+  provenance: ai-executed
+  timestamp: "2026-09-04T09:12"
+  description: >
+    After the lemma moves, the bridge theorems, and the composition witness,
+    reran the Lean library build, the full multi-target build, the AxCheck
+    axiom audit, the coverage checker over the M4 modules, and both checker
+    test suites; also compiled the touched modules standalone to look for new
+    linter warnings.
+  result: >
+    lake build Lara: 85 jobs; lake build (all targets): 140 jobs; axiom audit
+    passed with 2013 declaration reports, every new theorem inside
+    propext/Classical.choice/Quot.sound; M4 coverage passed at 224 declarations
+    (was 218); check-axioms and coverage tests pass; no new warnings in touched
+    regions. Two proof iterations were needed: link_some_inv had to sit after
+    link_eq_some/link_eq_none, and the single-leaf SideOk helper's subst
+    eliminated the wrong variable.
+  evidence:
+    - "ara/evidence/proofs/m4_contextual_adequacy.md: Debt clearance (2026-09-04)"
+    - "lean/AxCheck.lean"
+  status: resolved
+  also_depends_on: [N300]
