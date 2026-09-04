@@ -174,3 +174,32 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium
 - **Code ref**: ["src/Lara/Syntax.hs", "test/SyntaxSpec.hs"]
+
+## H16: Require semantic witness types to carry the judgment their prose names
+- **Rationale**: A theorem that computes two unequal translations has not yet
+  exhibited disagreement between checked transports. If the interpretation
+  depends on both endpoints being valid derivations, put the corresponding
+  judgments in the theorem type; otherwise describe the result as structural.
+  PW-T9's leaf-map negative carries source and target `HasSupport` judgments.
+  Its predicate-only negative deliberately uses empty environments, proves
+  equal leaf and constructor maps plus equal support translation, and isolates
+  only atom translation; it is not a checked-transport witness.
+- **Sources**: [`checked leaf-map triangle` ← `Lara.Examples.PW.Compose.direct_ne_composed_support` «HasSupport … ∧ HasSupport … ∧ ¬ Commutes» [result]; `predicate-only structural triangle` ← `Lara.Examples.PW.Compose.direct_ne_composed_claim` «leafMap equality ∧ conMap equality ∧ support-translation equality ∧ unequal atom translation ∧ ¬ Commutes» [result]]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: high
+- **Code ref**: ["lean/Lara/Examples/PWCompose.lean", "lean/Lara/PW/Compose.lean"]
+- **Last revised**: 2026-09-04 (2026-09-04_001#1)
+
+## H17: Make close-out invariants executable plan steps
+- **Rationale**: A close-out condition stated only in an audit paragraph is not
+  part of the execution path and is easy to omit while every code gate remains
+  green. When a transient artifact must disappear before review, give deletion,
+  staging, verification, and commit their own plan step. PW-T9 did so: the
+  implementation retired its executed plan in a dedicated commit before the
+  final audit.
+- **Sources**: [`plan retirement` ← commit `9e798df` «Delete executed PW-T9 implementation plan» [result]]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: medium
+- **Code ref**: ["CLAUDE.md", "docs/theory-pw-t9-path-composition.md"]

@@ -1048,6 +1048,83 @@ No paper display cites these yet. The rows exist so that T8 (#193), T9
   promising more than the model provides at structural bridges. Other
   disciplines remain expressible.
 
+## PW-T9 exact structural-path composition (issue #190)
+
+Tracker #189. The frozen contract, interpretation, and limitations live in
+`docs/theory-pw-t9-path-composition.md`; this section is the declaration
+index. Every *theorem* row is intended for the final `lean/AxCheck.lean` gate
+(sorry-free, standard trio, no `native_decide`). Definition rows are audited
+transitively through the gated theorems stated over them.
+
+No paper display cites these yet. The rows exist so that later
+structural-path, acceptance, and status-preservation displays can cite a
+stable key.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| First-leg-first Kleisli composition of partial symbol maps, with its two unit laws | `PW.SymMap.comp`; `PW.SymMap.id_comp`, `PW.SymMap.comp_id` | `Lara/PW/Compose.lean` |
+| Term and term-list composition laws | `PW.trTerm_comp`, `PW.trTerms_comp` | `Lara/PW/Compose.lean` |
+| Atom and atom-list composition laws | `PW.trAtom_comp`, `PW.trAtoms_comp` | `Lara/PW/Compose.lean` |
+| First-leg and mid-path atom-domain negatives | `PW.trAtom_comp_none_left`, `PW.trAtom_comp_none_mid` | `Lara/PW/Compose.lean` |
+| Pattern and pattern-list composition laws | `PW.trPat_comp`, `PW.trPats_comp` | `Lara/PW/Compose.lean` |
+| Atomic-pattern and atomic-pattern-list composition laws | `PW.trAPat_comp`, `PW.trAPats_comp` | `Lara/PW/Compose.lean` |
+| Substitution composition law | `PW.trSubst_comp` | `Lara/PW/Compose.lean` |
+| Support, support-list, and discharge-list composition laws | `PW.trSupport_comp`, `PW.trSupportList_comp`, `PW.trSupportDis_comp` | `Lara/PW/Compose.lean` |
+| Question and question-list composition laws | `PW.trQuestion_comp`, `PW.trQuestions_comp` | `Lara/PW/Compose.lean` |
+| Rule composition law | `PW.trRule_comp` | `Lara/PW/Compose.lean` |
+| Binary exact-bridge composition | `PW.StructuralBridge.comp` | `Lara/PW/Compose.lean` |
+| Explicit two-step checker applicability and its exact composite factorization | `PW.AdmitsSteps`; `PW.admits_comp`, `PW.admits_steps_of_intermediate` | `Lara/PW/Compose.lean` |
+| Binary support transport exposing intermediate and final checked judgments | `PW.support_transport_comp` | `Lara/PW/Compose.lean` |
+| First-class indexed exact paths, their folded bridge, and stepwise partial support map | `PW.BridgePath`, `PW.BridgePath.compose`, `PW.BridgePath.trans` | `Lara/PW/Compose.lean` |
+| Stepwise path transport equals transport by the folded bridge | `PW.BridgePath.trans_eq_compose` | `Lara/PW/Compose.lean` |
+| Direct/path commuting contract and exact map-equality characterization | `PW.Commutes` (fields `atom_eq`, `support_eq`); `PW.Commutes.of_maps_eq` | `Lara/PW/Compose.lean` |
+| Leaf, predicate, constructor, and full symbol-map equalities extracted from `Commutes` | `PW.Commutes.leafMap_eq`, `PW.Commutes.predMap_eq`, `PW.Commutes.conMap_eq`, `PW.Commutes.sym_eq` | `Lara/PW/Compose.lean` |
+| Agreement of direct and path transport on a checked source support | `PW.direct_transport_agrees` | `Lara/PW/Compose.lean` |
+| Rule and admitted-leaf translations pinned by common target typing | `PW.commutes_on_rules`, `PW.commutes_on_leaves` | `Lara/PW/Compose.lean` |
+| Direct/path checker-tied applicability equivalence | `PW.admits_iff_of_commutes` | `Lara/PW/Compose.lean` |
+| Full accepted edge (`R ∧ Admits`) and direct/path equivalence with a separate candidate-relation premise | `PW.Accepted`; `PW.accepted_iff_of_commutes` | `Lara/PW/Compose.lean` |
+| **T9 — checked-support transport along an arbitrary chosen exact path** | `PW.path_support_transport` | `Lara/PW/Compose.lean` |
+| Live second rename and concrete two-edge path | `Examples.PW.Compose.ren2Sym`, `bridgeRen2`, `pathRen`, `bridgeRenDirect`, `wRenTgt2`; `ren2_conclusion`, `ren_path_trans`, `ren_path_transport` | `Lara/Examples/PWCompose.lean` |
+| Positive direct/two-edge commuting triangle and transport agreement | `Examples.PW.Compose.ren_path_commutes`, `ren_direct_transport_agrees` | `Lara/Examples/PWCompose.lean` |
+| Concrete three-edge path, positive triangle, and transport agreement | `Examples.PW.Compose.pathRen3`; `ren_path3_commutes`, `ren_path3_transport_agrees` | `Lara/Examples/PWCompose.lean` |
+| Concrete binary theorem path with both checked judgments exposed | `Examples.PW.Compose.ren_support_transport_comp` | `Lara/Examples/PWCompose.lean` |
+| Concrete common-target and symbol-map consequences | `Examples.PW.Compose.ren_commutes_on_rule`, `ren_commutes_on_leaf`, `ren_commutes_on_symbol_maps` | `Lara/Examples/PWCompose.lean` |
+| Inhabited identity applicability and explicit intermediate world | `Examples.PW.Compose.bridgeIdT7`, `pathIdT7`; `admitsSelfT7`, `t7_admits_steps_of_intermediate` | `Lara/Examples/PWCompose.lean` |
+| Exact composite-applicability iff and inhabited reverse direction | `Examples.PW.Compose.t7_admits_comp_iff`, `t7_admits_composite` | `Lara/Examples/PWCompose.lean` |
+| Positive identity direct/path triangle and applicability equivalence | `Examples.PW.Compose.t7_identity_path_commutes`, `t7_admits_iff_of_commutes` | `Lara/Examples/PWCompose.lean` |
+| Candidate coherence, accepted-edge equivalence, inhabitation, and negative separation | `Examples.PW.Compose.candidateDirectT7`, `candidatePathT7`, `candidatePathFalseT7`; `t7_candidate_relations_agree`, `t7_accepted_iff_of_commutes`, `t7_accepted_inhabited`, `t7_accepted_needs_candidate_coherence` | `Lara/Examples/PWCompose.lean` |
+| Negative triangle: distinct leaf renaming despite checked supports | `Examples.PW.Compose.bridgeSwap`, `twinIdentityPath`; `direct_ne_composed_support` | `Lara/Examples/PWCompose.lean` |
+| Negative triangle: predicate-only disagreement with equal leaf and constructor maps | `Examples.PW.Compose.claimOnlySym`, `claimOnlyBridge`, `claimIdentityPath`; `direct_ne_composed_claim` | `Lara/Examples/PWCompose.lean` |
+| Non-vacuous certificate acceptance through two live bridge legs | `Examples.PW.Compose.certCertTgt2`, `bridgeCert2`, `certCompBridge`; `certComp_two_live_legs` | `Lara/Examples/PWCompose.lean` |
+| Real atom, support-transport, and context-tied applicability vocabulary gaps | `Examples.PW.Compose.gapSym`, `gapBridgeRen`, `gapBridgeRen2`, `gapBridgeDrop`, `gapPath`, `gapSupportPath`; `mid_path_out_of_vocabulary`, `mid_path_translationUndefined`, `mid_path_support_undefined`; `gapConFirstBridge`, `gapConDropBridge`, `gapAppContext`, `gapAppWorld`, `gap_admits_comp_fails` | `Lara/Examples/PWCompose.lean` |
+| Nonempty substitution, pattern, question-list, and discharge-list computations | `Examples.PW.Compose.substRenSrc`, `substRenTgt`, `substRenTgt2`, `patRenSrc`, `patRenTgt`, `patRenTgt2`, `questionRenSrc`, `questionRenTgt`, `questionRenTgt2`, `supportDisRenSrc`, `supportDisRenTgt`, `supportDisRenTgt2`; `trSubst_nonempty_computes`, `trPat_nonempty_computes`, `trQuestions_nonempty_computes`, `trSupportDis_nonempty_computes` | `Lara/Examples/PWCompose.lean` |
+
+**Not X** notes:
+
+- `PW.Commutes` is **not** a binary-only bridge predicate. It compares one
+  direct bridge with an arbitrary `PW.BridgePath`; the real three-edge
+  `pathRen3` witnesses that scope.
+- `PW.commutes_on_rules` and `PW.commutes_on_leaves` are **not** fields of, or
+  premises for, `PW.Commutes`. Common target typing pins those local
+  consequences; the two fields remain `atom_eq` and `support_eq`.
+- `PW.Commutes` is **not** weaker than bridge-data equality. Support
+  substitutions expose constructor translation, so `Commutes.of_maps_eq`
+  characterizes it exactly as equality of the full symbol map and leaf map.
+- `PW.Admits` is **not** the full accepted-edge relation. `PW.Accepted` is
+  literally a caller-supplied relation conjoined with `Admits`, and
+  `accepted_iff_of_commutes` requires candidate-relation coherence separately.
+- `BridgePath.trans_eq_compose` is **not** independence from the chosen
+  intermediate environments. The path is data, and the theorem identifies
+  its stepwise map with that same path's fold.
+- `PW.path_support_transport` is **not** status preservation. It preserves the
+  checked-support judgment and obligations along an exact path; pathwise
+  status preservation is T8 composed with T9.
+- The T9 laws are **not** approximation-bridge composition and do **not**
+  provide bridge-level associativity or unit equalities. Approximation needs
+  separate domains, observables/comparison spaces, and error/convergence laws;
+  the available unit equalities are only `PW.SymMap.id_comp` and
+  `PW.SymMap.comp_id`.
+
 ---
 
 ## M4 Part A: fragment/linking calculus and contextual representation independence (issue #187)

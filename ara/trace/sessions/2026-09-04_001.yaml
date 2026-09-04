@@ -1,0 +1,110 @@
+session:
+  id: "2026-09-04_001"
+  date: "2026-09-04"
+  started: "2026-09-04T05:03"
+  last_turn: "2026-09-04T05:03"
+  turn_count: 1
+  summary: >
+    PW-T9 review closeout synchronizes the merged foundation, pins the 33/67
+    declaration evidence to real implementation heads, distinguishes the checked
+    leaf-map negative from the predicate-only structural negative, and ties the
+    applicability-gap bridges to the checked world's actual context. The 140-job
+    build, targeted coverage guard, and standard-axiom audit pass.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N295"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Corrected the trace endpoint: one negative triangle is checked; the predicate-only triangle is deliberately structural."
+  - turn: 1
+    type: dead_end
+    id: "N296"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Rejected applicability bridges over environments unrelated to the checked world and rebuilt them over gapAppContext."
+  - turn: 1
+    type: experiment
+    id: "N297"
+    routing: direct
+    provenance: ai-executed
+    summary: "Synchronized PW-T9 closeout passes the 140-job build, 67-declaration targeted coverage, and standard-trio axiom audit."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Merged reviewed foundation head 3362f00 and current main, preserved all
+      foundation and triangle witnesses, rebuilt the applicability bridges over
+      gapAppContext's exact fields, corrected active and durable ARA prose,
+      pinned reproducible heads, and reran every documented proof gate.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Examples/PWCompose.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-pw-t9-path-composition.md"
+      - "docs/paper-lean-name-map.md"
+      - "ara/evidence/proofs/pw_t9_path_composition.md"
+      - "ara/logic/solution/heuristics.md"
+      - "ara/logic/solution/mechanization.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-09-04_001.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+claims_touched: [H16]
+
+logic_revisions:
+  - turn: 1
+    entry: H16
+    field: Rationale
+    before: >
+      A theorem that computes two unequal translations has not yet exhibited
+      disagreement between checked transports. If the interpretation depends on
+      both endpoints being valid derivations, put the corresponding judgments in
+      the theorem type; otherwise comments can overstate what the kernel checked.
+      PW-T9's negative triangles therefore include the source and target
+      HasSupport judgments together with the unequal output and ¬ Commutes.
+    after: >
+      A theorem that computes two unequal translations has not yet exhibited
+      disagreement between checked transports. If the interpretation depends on
+      both endpoints being valid derivations, put the corresponding judgments in
+      the theorem type; otherwise describe the result as structural. PW-T9's
+      leaf-map negative carries source and target HasSupport judgments. Its
+      predicate-only negative deliberately uses empty environments, proves equal
+      leaf and constructor maps plus equal support translation, and isolates only
+      atom translation; it is not a checked-transport witness.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The post-review theorem types and committed witness split contradict the original overbroad H16 instance."
+  - turn: 1
+    entry: "logic/solution/mechanization.md §11"
+    field: counterexample-scope
+    before: >
+      The counterexamples are part of the contract. The leaf-map and atom-map
+      triangles both contain their source and target HasSupport judgments and
+      prove ¬ Commutes.
+    after: >
+      The leaf-map triangle contains its source and target HasSupport judgments
+      and proves ¬ Commutes. The predicate-only triangle deliberately uses empty
+      environments: its leaf and constructor maps agree, a constructor-bearing
+      support translates identically, and only atom translation disagrees. It is
+      a structural independence witness, not a checked-judgment witness.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Appended decision N295 preserves the superseded trace event while making the current logic layer accurate."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      PR review found that the synchronized proof tree still conflated checked
+      and structural negative triangles, pinned stale implementation heads, and
+      allowed applicability bridges whose environment parameters did not match
+      the checked world's context.
+
+open_threads:
+  - "PR #236 awaits approval and merge."
+  - "Issue #234 tracks the deferred translation-traversal refactor."
+  - "Issue #235 tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+
+ai_suggestions_pending: []

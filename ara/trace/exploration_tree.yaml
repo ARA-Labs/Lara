@@ -7667,3 +7667,176 @@ tree:
     - "Lean 4.32 stdin elaboration probe: opposite-orientation Option.some equality rejected"
   status: resolved
   also_depends_on: [N289]
+
+- id: N293
+  type: decision
+  title: "Commit PW-T9 as exact typed-path composition with explicit accepted-edge coherence"
+  provenance: user
+  timestamp: "2026-09-03T18:55"
+  choice: >
+    Implement the reviewed PW-T9 plan as two stacked pull requests. PR #233
+    owns first-leg-first Kleisli composition for the existing partial
+    translation. PR #236 owns StructuralBridge.comp, indexed BridgePath,
+    stepwise/folded path coherence, path transport, and direct-versus-path
+    triangles. The triangle is path-level, not binary-only; its Commutes
+    predicate equates atom and support translations. Full accepted-edge
+    agreement keeps the caller-owned candidate relation separate from
+    checker-tied Admits through Accepted = R ∧ Admits and requires an explicit
+    candidate-relation equivalence. Negative witnesses carry the checked
+    HasSupport judgments they describe, the vocabulary-gap witness is a typed
+    path, and the transient plan is retired before close-out.
+  alternatives:
+    - "Ship only the binary composite and Admits equivalence — rejected because it does not characterize arbitrary BridgePath values or PW0's full accepted relation."
+    - "Leave the adversarial-review corrections as follow-up work — rejected because they are contract gaps, not optional hardening."
+    - "Encode the mid-path gap with standalone SymMap values — rejected because it would not witness failure along the milestone's typed path abstraction."
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/233"
+    - "https://github.com/ARA-Labs/lara/pull/236"
+    - "lean/Lara/PW/Compose.lean: BridgePath, Commutes, Accepted, accepted_iff_of_commutes"
+    - "lean/Lara/Examples/PWCompose.lean: checked triangles and gapPath"
+    - "docs/theory-pw-t9-path-composition.md"
+  status: resolved
+  also_depends_on: [N292, N276]
+
+- id: N294
+  type: experiment
+  title: "Synchronized PW-T9 branches pass their independent proof gates"
+  provenance: ai-executed
+  timestamp: "2026-09-03T18:56"
+  description: >
+    Rebased the logical stack by merging current main into PR #233 and the
+    updated PR #233 into PR #236, preserving both concurrent ARA histories, then
+    reran the branch-specific Lean build, coverage, and axiom gates. Also checked
+    that PR #236 does not modify the frozen T6 translation, structural-bridge,
+    or support modules relative to the synchronized PR #233 head.
+  result: >
+    PR #233: lake build completed successfully with 140 jobs; AxCheck coverage
+    passed for 31 declarations; the axiom audit passed with only propext,
+    Classical.choice, and Quot.sound. PR #236: lake build completed successfully
+    with 140 jobs; AxCheck coverage passed for 60 declarations; the same
+    standard-trio audit passed. The three frozen T6 module diffs are empty.
+    Both pull requests are open, non-draft, and mergeable; PR #236 targets the
+    PR #233 branch.
+  evidence:
+    - "ara/evidence/proofs/pw_t9_path_composition.md"
+    - "https://github.com/ARA-Labs/lara/pull/233 (verified head 7fdc573)"
+    - "https://github.com/ARA-Labs/lara/pull/236 (verified implementation head 920bf0c)"
+    - "lean/AxCheck.lean and scripts/check-axcheck-coverage.py (PW-T9 two-file scope)"
+  status: resolved
+  also_depends_on: [N293]
+
+- id: N295
+  type: decision
+  title: "Separate the checked leaf-map negative from the predicate-only structural negative"
+  provenance: ai-suggested
+  timestamp: "2026-09-04T05:03"
+  choice: >
+    Preserve the historical O128/N293 record, but correct the current contract
+    and trace endpoint: direct_ne_composed_support is a checked leaf-map
+    counterexample carrying both HasSupport judgments; direct_ne_composed_claim
+    deliberately uses empty environments to isolate predicate translation with
+    equal leaf maps, constructor maps, and support translation. H16,
+    mechanization §11, the theorem tables, and the proof record now state that
+    distinction.
+  alternatives:
+    - "Rewrite N293 or the prior session event — rejected because trace and staging are append-only journey records."
+    - "Add HasSupport to the empty-environment predicate witness — rejected because it would destroy the deliberately isolated structural counterexample."
+  evidence:
+    - "lean/Lara/Examples/PWCompose.lean: direct_ne_composed_support, direct_ne_composed_claim"
+    - "ara/logic/solution/heuristics.md:H16"
+    - "ara/logic/solution/mechanization.md §11"
+    - "https://github.com/ARA-Labs/lara/pull/236#discussion_r3930992343"
+  status: resolved
+  also_depends_on: [N293, N294]
+
+- id: N296
+  type: dead_end
+  title: "Raw-map applicability witness used bridge environments unrelated to its checked world"
+  provenance: ai-suggested
+  timestamp: "2026-09-04T05:03"
+  hypothesis: >
+    A checked source program plus any two StructuralBridge values carrying the
+    tested partial maps is enough to witness checker-tied AdmitsSteps failure.
+  failure_mode: >
+    AdmitsSteps quantifies over bridge values and worlds independently. The
+    first fixture used bridges over empty policy, evidence, and certificate
+    environments while gapAppWorld was checked under a nonempty policy and
+    certOkOf gapAppRegistry. Lean reproduced the type mismatch when the bridge
+    was required at gapAppContext's exact fields.
+  lesson: >
+    An applicability witness advertised as checker/bridge tied must instantiate
+    each StructuralBridge over the endpoint context's actual policy lookup,
+    Gamma, and CertOk fields, even when the generic AdmitsSteps theorem does not
+    encode that linkage.
+  also_depends_on: [N295]
+
+- id: N297
+  type: experiment
+  title: "Review-closed PW-T9 tree passes synchronized proof gates"
+  provenance: ai-executed
+  timestamp: "2026-09-04T05:03"
+  description: >
+    Merged the reviewed PR #233 foundation and current main into PR #236,
+    retained both witness sets, rebuilt the applicability bridges over
+    gapAppContext's exact policy, evidence, and certificate fields, corrected
+    the negative-triangle records, and reran every documented Lean gate.
+  result: >
+    lake build completed successfully with 140 jobs; targeted PW-T9 AxCheck
+    coverage passed for 67 declarations; the axiom audit passed with only
+    propext, Classical.choice, and Quot.sound. The implementation checkpoint is
+    43541ca; reviewed foundation head 3362f00 is tree-identical to merged main
+    commit 54c2052.
+  evidence:
+    - "ara/evidence/proofs/pw_t9_path_composition.md"
+    - "lean/AxCheck.lean"
+    - "lean/Lara/Examples/PWCompose.lean"
+    - "https://github.com/ARA-Labs/lara/pull/236"
+  status: resolved
+  also_depends_on: [N295, N296]
+
+- id: N298
+  type: decision
+  title: "Correct the PW-T9 pull-request ownership split"
+  provenance: ai-suggested
+  timestamp: "2026-09-04T05:18"
+  choice: >
+    Treat PR #233 as the owner of first-leg-first Kleisli laws together with
+    StructuralBridge.comp, support_transport_comp, indexed BridgePath,
+    stepwise/folded path coherence, and path_support_transport. Treat PR #236 as
+    the owner of applicability factorization, Commutes and direct-path
+    agreement, accepted-edge separation, the expanded witness suite, durable
+    records, and final audit wiring. Correct the active proof record and session
+    summaries while preserving N293 as the historical pre-review decision.
+  alternatives:
+    - "Leave the split as originally planned — rejected because reviewed head 3362f00 mechanically contains the core bridge/path declarations."
+    - "Rewrite N293 — rejected because the exploration tree records the historical decision; the corrected ownership is appended here."
+  evidence:
+    - "reviewed PR #233 head 3362f00: lean/Lara/PW/Compose.lean"
+    - "reviewed PR #233 head 3362f00: lean/Lara/Examples/PWCompose.lean"
+    - "ara/evidence/proofs/pw_t9_path_composition.md"
+    - "https://github.com/ARA-Labs/lara/pull/236#discussion_r3931080876"
+  status: resolved
+  also_depends_on: [N293, N294, N297]
+
+- id: N299
+  type: experiment
+  title: "Corrected PW-T9 ownership record passes all documented gates"
+  provenance: ai-executed
+  timestamp: "2026-09-04T05:18"
+  description: >
+    Corrected the active proof record and session summaries to match reviewed
+    PR #233 head 3362f00, appended ownership decision N298 without rewriting
+    historical N293, and reran the documented Lean build, targeted coverage,
+    and axiom audit on the unchanged synchronized proof tree.
+  result: >
+    lake build completed successfully with 140 jobs; targeted PW-T9 AxCheck
+    coverage passed for 67 declarations; the axiom audit passed with only
+    propext, Classical.choice, and Quot.sound. Ownership correction commit
+    5cf9647 changes only ARA records.
+  evidence:
+    - "ara/evidence/proofs/pw_t9_path_composition.md"
+    - "ara/trace/exploration_tree.yaml: N298"
+    - "reviewed PR #233 head 3362f00"
+    - "https://github.com/ARA-Labs/lara/pull/236"
+  status: resolved
+  also_depends_on: [N298]

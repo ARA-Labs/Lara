@@ -1,0 +1,61 @@
+session:
+  id: "2026-09-04_002"
+  date: "2026-09-04"
+  started: "2026-09-04T05:18"
+  last_turn: "2026-09-04T05:18"
+  turn_count: 1
+  summary: >
+    PW-T9 provenance closeout corrects the two-PR ownership split against
+    reviewed PR #233 head 3362f00. PR #233 owns bridge composition, indexed
+    paths, path coherence, and checked path transport in addition to the
+    first-leg-first translation laws; PR #236 owns applicability factorization,
+    commuting/direct-path agreement, accepted-edge separation, expanded
+    witnesses, durable records, and final audit wiring. All documented gates
+    pass on the unchanged synchronized proof tree.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N298"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Corrected the active PW-T9 PR ownership split while preserving the historical pre-review decision."
+  - turn: 1
+    type: experiment
+    id: "N299"
+    routing: direct
+    provenance: ai-executed
+    summary: "Corrected ownership records pass the 140-job build, 67-declaration targeted coverage, and standard-trio axiom audit."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Inspected reviewed PR #233 head 3362f00, corrected the active proof record
+      and session summaries to assign the bridge/path foundation to #233,
+      appended ownership correction N298 and verification N299, and reran every
+      documented proof gate.
+    provenance: ai-executed
+    files_changed:
+      - "ara/evidence/proofs/pw_t9_path_composition.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-09-03_004.yaml"
+      - "ara/trace/sessions/2026-09-04_002.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+claims_touched: []
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The evidence record pinned reviewed head 3362f00 but attributed
+      StructuralBridge.comp, BridgePath, path coherence, and path transport to
+      PR #236 even though those declarations already exist at that #233 head.
+
+open_threads:
+  - "PR #236 awaits approval and merge."
+  - "Issue #234 tracks the deferred translation-traversal refactor."
+  - "Issue #235 tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+
+ai_suggestions_pending: []

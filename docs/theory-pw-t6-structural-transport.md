@@ -203,7 +203,8 @@ These are design commitments, not oversights; each has a named home.
 4. **No composition.** Transport along a path of structural bridges, and the
    commuting-triangle conditions for equating a composite with a direct
    bridge, are T9 (#190). `trSupport` composes as a function, but nothing
-   here states the bridge-level coherence laws.
+   here states the bridge-level coherence laws. Discharged by T9 (#190): see
+   docs/theory-pw-t9-path-composition.md.
 5. **Question keys are frozen across the bridge.** A bridge that renames its
    critical-question vocabulary is not expressible; obligations transport
    verbatim *because* of this. Relaxing it would make "mapped obligations" a

@@ -2737,9 +2737,9 @@ observations:
     the canonical possible-world composition design.
   potential_type: architecture
   bound_to: [N292]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/solution/mechanization.md §11"
+  crystallized_via: artifact-commitment
   stale: false
 - id: O126
   timestamp: "2026-09-03T08:38"
@@ -2755,9 +2755,9 @@ observations:
     previously accepted review findings.
   potential_type: architecture
   bound_to: [N292]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/solution/mechanization.md §11"
+  crystallized_via: artifact-commitment
   stale: false
 - id: O127
   timestamp: "2026-09-03T08:38"
@@ -2773,9 +2773,9 @@ observations:
     generic compare_none theorem; it constructs no BridgePath or bridge.
   potential_type: constraint
   bound_to: [N292]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/solution/constraints.md (PW-T9 path-witness constraint)"
+  crystallized_via: artifact-commitment
   stale: false
 - id: O128
   timestamp: "2026-09-03T08:38"
@@ -2791,9 +2791,9 @@ observations:
     comments and acceptance mapping claim checked transports and derivations.
   potential_type: heuristic
   bound_to: [N292]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H16"
+  crystallized_via: artifact-commitment
   stale: false
 - id: O129
   timestamp: "2026-09-03T08:38"
@@ -2808,7 +2808,7 @@ observations:
     no deletion or deletion commit step.
   potential_type: heuristic
   bound_to: [N292]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H17"
+  crystallized_via: artifact-commitment
   stale: false

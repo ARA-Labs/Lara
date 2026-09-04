@@ -258,3 +258,14 @@ to the ACL/EMNLP follow-up with #52 and #30.
   with the sizing note at `docs/theory-pw0-outer-model.md` §6. T8/T9 designs
   choose the translation form *first*; a design assuming per-world resolution
   on the `Option` interface is wrong before it starts.
+
+## PW-T9 path-witness constraint (2026-09-03 — grounds: O127, N292, N293)
+
+- **A path-level failure must be witnessed on a typed structural path.** A
+  failed translation computed from standalone `SymMap` values cannot establish
+  failure along a path of contract-valid bridges. The witness must inhabit
+  `BridgePath`, expose the successful prefix and failing next edge, and connect
+  the folded path translation to the outer comparison result. PW-T9 discharges
+  this with `gapPath`, `mid_path_out_of_vocabulary`, and
+  `mid_path_translationUndefined` in
+  `lean/Lara/Examples/PWCompose.lean`.

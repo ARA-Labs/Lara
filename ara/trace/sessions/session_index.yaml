@@ -523,8 +523,22 @@ sessions:
   open_threads: 3
 - id: 2026-09-03_004
   date: '2026-09-03'
-  summary: 'Adversarial review of the PW-T9 plan found unresolved relation/modal composition, arbitrary-path agreement, path-level gap-witness, checked-counterexample, proof-direction, and close-out sequencing gaps beyond the twelve prior findings.'
+  summary: 'PW-T9 implemented as a synchronized two-PR stack: PR #233 freezes first-leg-first partial-translation composition together with structural-bridge composition, indexed paths, path coherence, and checked path transport; PR #236 adds applicability factorization, arbitrary-path commuting triangles, accepted-edge coherence, expanded witnesses, durable docs, and final Lean audit wiring. All adversarial-review findings are resolved and the executed plan is retired.'
+  turn_count: 2
+  events_count: 13
+  claims_touched: [C48]
+  open_threads: 3
+- id: 2026-09-04_001
+  date: '2026-09-04'
+  summary: 'PW-T9 review closeout: synchronized 33/67-declaration evidence is pinned to real heads, negative-triangle records distinguish checked leaf disagreement from predicate-only structural disagreement, applicability bridges now inhabit the checked world context, and the 140-job build plus standard-axiom audit pass.'
   turn_count: 1
-  events_count: 6
+  events_count: 3
+  claims_touched: [H16]
+  open_threads: 3
+- id: 2026-09-04_002
+  date: '2026-09-04'
+  summary: 'PW-T9 provenance closeout: PR #233 ownership now includes bridge composition, indexed paths, path coherence, and checked path transport; PR #236 ownership begins at applicability factorization, commuting/direct-path agreement, accepted-edge separation, expanded witnesses, durable records, and final audit wiring. The corrected tree passes the 140-job build, 67-declaration targeted coverage, and standard-axiom audit.'
+  turn_count: 1
+  events_count: 2
   claims_touched: []
-  open_threads: 5
+  open_threads: 3

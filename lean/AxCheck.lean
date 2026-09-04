@@ -2277,9 +2277,13 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.hasSupport_cert
 #print axioms Lara.Examples.PW.cert_transport
 
-/-! ### PW-T9 — structural-path composition foundation (issue #190) -/
--- Task 1 (Lara.PW.Compose): first-leg-first Kleisli translation laws,
--- structural-bridge composition, and coherent transport along typed paths.
+/-! ### PW-T9 — structural-path composition (issue #190) -/
+-- The definitions `StructuralBridge.comp`, `AdmitsSteps`, `BridgePath`,
+-- `BridgePath.compose`, `BridgePath.trans`, `Commutes`, and `Accepted` have no
+-- standalone axiom rows; the theorem rows below audit them transitively. Every
+-- theorem declaration in both PW-T9 modules is gated directly.
+
+-- Translation laws and exact binary structural-bridge composition.
 #print axioms Lara.PW.SymMap.id_comp
 #print axioms Lara.PW.SymMap.comp_id
 #print axioms Lara.PW.trTerm_comp
@@ -2299,19 +2303,69 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.PW.trQuestion_comp
 #print axioms Lara.PW.trQuestions_comp
 #print axioms Lara.PW.trRule_comp
+#print axioms Lara.PW.admits_comp
+#print axioms Lara.PW.admits_steps_of_intermediate
 #print axioms Lara.PW.support_transport_comp
+
+-- Arbitrary typed paths, their folded composite, and exact path transport.
 #print axioms Lara.PW.BridgePath.trans_eq_compose
 #print axioms Lara.PW.path_support_transport
 
--- Task 2 (Lara.Examples.PWCompose): foundation witnesses for a live two-leg
--- path, certificate composition, a mid-path vocabulary gap, and non-empty
--- translations.
+-- Explicit direct-versus-path commutation and its structural consequences.
+#print axioms Lara.PW.Commutes.of_maps_eq
+#print axioms Lara.PW.Commutes.leafMap_eq
+#print axioms Lara.PW.Commutes.predMap_eq
+#print axioms Lara.PW.Commutes.conMap_eq
+#print axioms Lara.PW.Commutes.sym_eq
+#print axioms Lara.PW.direct_transport_agrees
+#print axioms Lara.PW.commutes_on_rules
+#print axioms Lara.PW.commutes_on_leaves
+
+-- Checker-tied applicability and full accepted-edge separation.
+#print axioms Lara.PW.admits_iff_of_commutes
+#print axioms Lara.PW.accepted_iff_of_commutes
+
+-- The named bridges, paths, candidate relations, and checked worlds in the
+-- example module are definitions audited transitively by these direct theorem
+-- gates.
+
+-- Live two-leg path and its commuting direct bridge.
 #print axioms Lara.Examples.PW.Compose.ren2_conclusion
 #print axioms Lara.Examples.PW.Compose.ren_path_trans
 #print axioms Lara.Examples.PW.Compose.ren_path_transport
+#print axioms Lara.Examples.PW.Compose.ren_path_commutes
+#print axioms Lara.Examples.PW.Compose.ren_direct_transport_agrees
+
+-- Three-edge path and theorem-level composition/path witnesses.
+#print axioms Lara.Examples.PW.Compose.ren_path3_commutes
+#print axioms Lara.Examples.PW.Compose.ren_path3_transport_agrees
+#print axioms Lara.Examples.PW.Compose.ren_support_transport_comp
+#print axioms Lara.Examples.PW.Compose.ren_commutes_on_rule
+#print axioms Lara.Examples.PW.Compose.ren_commutes_on_leaf
+#print axioms Lara.Examples.PW.Compose.ren_commutes_on_symbol_maps
+
+-- Identity-world applicability and accepted-edge separation.
+#print axioms Lara.Examples.PW.Compose.admitsSelfT7
+#print axioms Lara.Examples.PW.Compose.t7_admits_steps_of_intermediate
+#print axioms Lara.Examples.PW.Compose.t7_admits_comp_iff
+#print axioms Lara.Examples.PW.Compose.t7_admits_composite
+#print axioms Lara.Examples.PW.Compose.t7_identity_path_commutes
+#print axioms Lara.Examples.PW.Compose.t7_admits_iff_of_commutes
+#print axioms Lara.Examples.PW.Compose.t7_candidate_relations_agree
+#print axioms Lara.Examples.PW.Compose.t7_accepted_iff_of_commutes
+#print axioms Lara.Examples.PW.Compose.t7_accepted_inhabited
+#print axioms Lara.Examples.PW.Compose.t7_accepted_needs_candidate_coherence
+
+-- Successful but noncommuting direct/path triangles.
+#print axioms Lara.Examples.PW.Compose.direct_ne_composed_support
+#print axioms Lara.Examples.PW.Compose.direct_ne_composed_claim
+
+-- Certificate composition, a mid-path gap, and nonempty translation witnesses.
 #print axioms Lara.Examples.PW.Compose.certComp_two_live_legs
 #print axioms Lara.Examples.PW.Compose.mid_path_out_of_vocabulary
 #print axioms Lara.Examples.PW.Compose.mid_path_translationUndefined
+#print axioms Lara.Examples.PW.Compose.gapAppUnit_accepted
+#print axioms Lara.Examples.PW.Compose.gap_admits_comp_fails
 #print axioms Lara.Examples.PW.Compose.trSubst_nonempty_computes
 #print axioms Lara.Examples.PW.Compose.trPat_nonempty_computes
 #print axioms Lara.Examples.PW.Compose.mid_path_support_undefined

@@ -225,3 +225,48 @@ attack correspondence (T8, #193), and bridge composition (T9, #190).
 _Committed by N275/N276; durable theorem contract:
 `docs/theory-pw-t6-structural-transport.md`; proof record:
 `evidence/proofs/pw_t6_transport.md`. The headline finding is C48._
+
+## 11. T9 composes exact structural bridges along explicit paths
+
+T9 keeps the T6 contract fixed and adds composition above it. `SymMap.comp` is
+first-leg-first Kleisli composition for the existing partial predicate and
+constructor maps; the lifted `_comp` theorem family proves that atoms, rules,
+support terms, questions, and substitutions follow the same definedness law.
+`StructuralBridge.comp` then chains T6's leaf, rule, and certificate clauses
+through the intermediate environment. `support_transport_comp` deliberately
+returns the intermediate and final `HasSupport` judgments instead of erasing
+the middle step.
+
+An indexed `BridgePath` carries every intermediate checking environment as
+constructor data. `BridgePath.trans` executes the chosen path stepwise,
+`BridgePath.compose` folds it to one bridge (reflexivity at the empty path), and
+`BridgePath.trans_eq_compose` proves the two views equal. Consequently
+`path_support_transport` is T6 transport over an arbitrary chosen path, with
+the obligation list preserved. It does not assert independence from path
+choice: the path is explicit because different intermediate environments may
+induce different partial translations.
+
+A named direct bridge agrees with a chosen path only under the explicit
+`Commutes` triangle, which equates atom translation and support transport for
+that arbitrary `BridgePath`. `direct_transport_agrees` yields the common
+translated conclusion and checked target judgment. Agreement of the outer
+accepted edge is intentionally split: `Accepted R` is literally
+`R ∧ Admits`; `Commutes` supplies the `Admits` equivalence, while
+`accepted_iff_of_commutes` separately requires the caller's direct and path
+candidate relations to agree. This prevents support membership from silently
+constraining PW0's independent `Frame.R`.
+
+The counterexamples are part of the contract. The leaf-map triangle contains
+its source and target `HasSupport` judgments and proves `¬ Commutes`. The
+predicate-only triangle deliberately uses empty environments: its leaf and
+constructor maps agree, a constructor-bearing support translates identically,
+and only atom translation disagrees. It is a structural independence witness,
+not a checked-judgment witness. The vocabulary-gap fixture is an actual typed
+`BridgePath`: its first edge succeeds, its second edge rejects the intermediate
+atom, and the comparison layer reports `incomparable translationUndefined`,
+never a local status. Approximation composition and status preservation remain
+separate work; the latter still requires T8 attack correspondence.
+
+_Committed by N293/N294; durable theorem contract:
+`docs/theory-pw-t9-path-composition.md`; proof record:
+`evidence/proofs/pw_t9_path_composition.md`. Promoted from O125/O126._

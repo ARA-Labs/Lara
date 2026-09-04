@@ -21,10 +21,15 @@ Composition of the T6 layer, three levels deep:
   folded composite, so T6's `support_transport` at the composite *is* the
   path theorem. The path is data — theorems are stated per chosen path,
   which is how intermediate-environment dependence stays explicit.
-* **Named direct-bridge agreement is reserved for stacked PR 2.** The
-  commuting-triangle relation, direct-versus-composite transport theorem,
-  rule and leaf consequences, and witness examples are intentionally absent
-  from this foundation module.
+* **Named direct bridges must agree with a chosen path** (`Commutes`,
+  `direct_transport_agrees`): the path-level commuting triangle compares one
+  direct bridge with an arbitrary `BridgePath` sharing its endpoints.
+  Because support terms expose constructor translation through substitutions,
+  the induced equalities are equivalent to full symbol-map and leaf-map
+  equality (`Commutes.of_maps_eq`). Target policy and evidence typing then pin
+  rule and admitted-leaf atom translations (`commutes_on_rules`,
+  `commutes_on_leaves`) as consequences, not as extra commuting fields or
+  "free corners".
 
 Nothing here concerns approximation bridges: composition for those needs
 separate domains, observables, comparison spaces, and error/convergence
@@ -384,6 +389,75 @@ def StructuralBridge.comp
     exact B₂.cert_ok β hd κ As' C' As'' C'' hAs₂ hC₂
       (B₁.cert_ok β hd κ As C As' C' hAs₁ hC₁ hacc)
 
+/-! ### Exact applicability factorization -/
+
+/-- The explicit two-step form of checker-tied applicability for a binary
+composite. Every source program term has a chosen intermediate translation,
+whose second translation belongs to the target program. -/
+def AdmitsSteps
+    {canon : String → String} {Pi Pi' Pi'' : RuleId → Option Rule}
+    {Gamma Gamma' Gamma'' : LeafId → Option Atom}
+    {CertOk CertOk' CertOk'' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B₂ : StructuralBridge canon Pi' Pi'' Gamma' Gamma'' CertOk' CertOk'')
+    (B₁ : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    {κ μ : Instance.Context}
+    (w : Instance.World κ) (u : Instance.World μ) : Prop :=
+  ∀ t, t ∈ w.unit.program.args →
+    ∃ t' t'', trSupport B₁.sym B₁.leafMap t = some t' ∧
+      trSupport B₂.sym B₂.leafMap t' = some t'' ∧
+      t'' ∈ u.unit.program.args
+
+/-- Applicability of a binary composite is exactly its two-step Kleisli
+factorization. This is an equality of the checker-tied `accept` conjunct, not
+of PW0's full accepted-edge relation. -/
+theorem admits_comp
+    {canon : String → String} {Pi Pi' Pi'' : RuleId → Option Rule}
+    {Gamma Gamma' Gamma'' : LeafId → Option Atom}
+    {CertOk CertOk' CertOk'' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B₂ : StructuralBridge canon Pi' Pi'' Gamma' Gamma'' CertOk' CertOk'')
+    (B₁ : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    {κ μ : Instance.Context}
+    (w : Instance.World κ) (u : Instance.World μ) :
+    Admits (B₂.comp B₁).sym (B₂.comp B₁).leafMap w u ↔
+      AdmitsSteps B₂ B₁ w u := by
+  constructor
+  · intro hadm t ht
+    obtain ⟨t'', htr, hmem⟩ := hadm t ht
+    change trSupport (B₂.sym.comp B₁.sym) (B₂.leafMap ∘ B₁.leafMap) t =
+      some t'' at htr
+    rw [trSupport_comp] at htr
+    obtain ⟨t', ht₁, ht₂⟩ := Option.bind_eq_some_iff.mp htr
+    exact ⟨t', t'', ht₁, ht₂, hmem⟩
+  · intro hsteps t ht
+    obtain ⟨t', t'', ht₁, ht₂, hmem⟩ := hsteps t ht
+    refine ⟨t'', ?_, hmem⟩
+    change trSupport (B₂.sym.comp B₁.sym) (B₂.leafMap ∘ B₁.leafMap) t =
+      some t''
+    rw [trSupport_comp, ht₁, Option.bind_some]
+    exact ht₂
+
+/-- Two admitted legs through an explicitly chosen intermediate world give
+the binary step predicate. The arbitrary intermediate world is input data;
+the converse `admits_comp` does not attempt to reconstruct one. -/
+theorem admits_steps_of_intermediate
+    {canon : String → String} {Pi Pi' Pi'' : RuleId → Option Rule}
+    {Gamma Gamma' Gamma'' : LeafId → Option Atom}
+    {CertOk CertOk' CertOk'' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B₂ : StructuralBridge canon Pi' Pi'' Gamma' Gamma'' CertOk' CertOk'')
+    (B₁ : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    {κ lam μ : Instance.Context}
+    {w : Instance.World κ} (v : Instance.World lam) {u : Instance.World μ}
+    (h₁ : Admits B₁.sym B₁.leafMap w v)
+    (h₂ : Admits B₂.sym B₂.leafMap v u) :
+    AdmitsSteps B₂ B₁ w u := by
+  intro t ht
+  obtain ⟨t', ht₁, hmem'⟩ := h₁ t ht
+  obtain ⟨t'', ht₂, hmem''⟩ := h₂ t' hmem'
+  exact ⟨t', t'', ht₁, ht₂, hmem''⟩
+
 /-- **T9, two-step form.** Stepwise transport along `B₁` then `B₂` is
 transport along the composed bridge: the composite's partial support map
 sends `w` to the same `w''`, the composed translated conclusion is the
@@ -474,6 +548,244 @@ theorem BridgePath.trans_eq_compose
     cases trSupport B.sym B.leafMap w with
     | none => rfl
     | some w' => simp only [Option.bind_some]; exact ih w'
+
+/-- A named direct structural bridge commutes with a chosen path sharing its
+endpoints when they induce the same atom translation and support transport.
+The support equation names the path's stepwise transport explicitly, so
+agreement is with the chosen path rather than merely with an unnamed
+composite. -/
+structure Commutes
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    (P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk') : Prop where
+  atom_eq : ∀ a, trAtom B.sym a = trAtom P.compose.sym a
+  support_eq : ∀ w, trSupport B.sym B.leafMap w = P.trans w
+
+/-- Support-map agreement exposes equality of the direct and composite leaf
+maps pointwise. This is a consequence of `Commutes`, not an additional field:
+on a leaf support, path coherence leaves only constructor injectivity. -/
+theorem Commutes.leafMap_eq
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    {P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    (hc : Commutes B P) (l : LeafId) :
+    B.leafMap l = P.compose.leafMap l := by
+  have h := hc.support_eq (.leaf l)
+  rw [P.trans_eq_compose] at h
+  simpa only [trSupport, Option.some.injEq, SupportTerm.leaf.injEq] using h
+
+/-- Atom-map agreement exposes equality of the direct and composite predicate
+maps pointwise. A nullary atom observes its predicate map without involving
+the constructor map. -/
+theorem Commutes.predMap_eq
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    {P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    (hc : Commutes B P) (p : String) :
+    B.sym.predMap p = P.compose.sym.predMap p := by
+  have h := hc.atom_eq (.atom p .nil)
+  cases hB : B.sym.predMap p <;>
+    cases hP : P.compose.sym.predMap p <;>
+    simp [hB, hP, trAtom, trTerms] at h ⊢
+  exact h
+
+/-- Support-map agreement also exposes equality of the direct and composite
+constructor maps pointwise: substitutions inside `.inst` support terms
+translate constructors without consulting a predicate map. -/
+theorem Commutes.conMap_eq
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    {P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    (hc : Commutes B P) (k : String) :
+    B.sym.conMap k = P.compose.sym.conMap k := by
+  have h := hc.support_eq
+    (.inst ⟨"r"⟩ [(⟨"X"⟩, .con k .nil)] [] [] [] .none)
+  rw [P.trans_eq_compose] at h
+  cases hB : B.sym.conMap k <;>
+    cases hP : P.compose.sym.conMap k <;>
+    simp [hB, hP, trSupport, trSupportList, trSupportDis, trSubst, trTerm,
+      trTerms] at h ⊢
+  exact h
+
+/-- A commuting direct/path pair has identical structural symbol maps. -/
+theorem Commutes.sym_eq
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    {P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    (hc : Commutes B P) :
+    B.sym = P.compose.sym := by
+  cases hB : B.sym with
+  | mk predB conB =>
+    cases hP : P.compose.sym with
+    | mk predP conP =>
+      congr
+      · funext p
+        simpa [hB, hP] using hc.predMap_eq p
+      · funext k
+        simpa [hB, hP] using hc.conMap_eq k
+
+/-- A direct bridge commutes with a chosen path exactly when its symbol and
+leaf maps equal those of the path composite. -/
+theorem Commutes.of_maps_eq
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk'}
+    {P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk'} :
+    Commutes B P ↔
+      (B.sym = P.compose.sym ∧ B.leafMap = P.compose.leafMap) := by
+  constructor
+  · intro hc
+    exact ⟨hc.sym_eq, funext hc.leafMap_eq⟩
+  · rintro ⟨sym_eq, leafMap_eq⟩
+    constructor
+    · intro a
+      rw [sym_eq]
+    · intro w
+      rw [sym_eq, leafMap_eq]
+      exact (P.trans_eq_compose w).symm
+
+/-- A checked source support translated stepwise along a commuting path has
+exactly the same final support term under the direct bridge. Both symbol maps
+translate its conclusion to the same atom, which is checked in their common
+target environment with the source obligation list unchanged. -/
+theorem direct_transport_agrees
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    (P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    (hc : Commutes B P)
+    {w w' : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk w C O)
+    (hw : P.trans w = some w') :
+    trSupport B.sym B.leafMap w = some w' ∧
+      ∃ C', trAtom B.sym C = some C' ∧
+        trAtom P.compose.sym C = some C' ∧
+        HasSupport canon Pi' Gamma' CertOk' w' C' O := by
+  have hwB : trSupport B.sym B.leafMap w = some w' := by
+    rw [hc.support_eq]
+    exact hw
+  have hwP :
+      trSupport P.compose.sym P.compose.leafMap w = some w' := by
+    rw [← P.trans_eq_compose]
+    exact hw
+  obtain ⟨C', hCP, htarget⟩ := support_transport P.compose h hwP
+  refine ⟨hwB, C', ?_, hCP, htarget⟩
+  rw [hc.atom_eq]
+  exact hCP
+
+/-- The common target policy pins translation of every source rule: the
+direct bridge and path composite cannot choose different translated rules at
+the same retained rule identifier. This consequence does not provide global
+atom or support commutation. -/
+theorem commutes_on_rules
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    (P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    {rn : RuleId} {r : Rule} (h : Pi rn = some r) :
+    trRule B.sym r = trRule P.compose.sym r := by
+  obtain ⟨rB, hrB, htargetB⟩ := B.rule_ok rn r h
+  obtain ⟨rP, hrP, htargetP⟩ := P.compose.rule_ok rn r h
+  rw [hrB, hrP]
+  exact htargetB.symm.trans htargetP
+
+/-- Once the direct and composite leaf maps agree at an admitted source leaf,
+the common target evidence environment pins their translations of that
+leaf's atom. This local consequence does not replace either global equation
+required by `Commutes`. -/
+theorem commutes_on_leaves
+    {canon : String → String} {Pi Pi' : RuleId → Option Rule}
+    {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk CertOk' :
+      BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (B : StructuralBridge canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    (P : BridgePath canon Pi Pi' Gamma Gamma' CertOk CertOk')
+    {l : LeafId} {p : Atom}
+    (hleaf : B.leafMap l = P.compose.leafMap l)
+    (h : Gamma l = some p) :
+    trAtom B.sym p = trAtom P.compose.sym p := by
+  obtain ⟨pB, hpB, htargetB⟩ := B.leaf_ok l p h
+  obtain ⟨pP, hpP, htargetP⟩ := P.compose.leaf_ok l p h
+  rw [hpB, hpP]
+  rw [hleaf] at htargetB
+  exact htargetB.symm.trans htargetP
+
+/-! ### Direct/path applicability and accepted edges -/
+
+/-- A commuting direct bridge and path induce the same checker-tied
+applicability conjunct. The proof uses only support-map coherence: this does
+not identify PW0's arbitrary candidate relations. -/
+theorem admits_iff_of_commutes
+    {κ μ : Instance.Context}
+    {B : StructuralBridge κ.canon κ.policy.ruleLookup μ.policy.ruleLookup
+      κ.Gamma μ.Gamma κ.CertOk μ.CertOk}
+    {P : BridgePath κ.canon κ.policy.ruleLookup μ.policy.ruleLookup
+      κ.Gamma μ.Gamma κ.CertOk μ.CertOk}
+    (hc : Commutes B P) (w : Instance.World κ) (u : Instance.World μ) :
+    Admits B.sym B.leafMap w u ↔
+      Admits P.compose.sym P.compose.leafMap w u := by
+  constructor
+  · intro hadm t ht
+    obtain ⟨t', htr, hmem⟩ := hadm t ht
+    refine ⟨t', ?_, hmem⟩
+    rw [← P.trans_eq_compose, ← hc.support_eq]
+    exact htr
+  · intro hadm t ht
+    obtain ⟨t', htr, hmem⟩ := hadm t ht
+    refine ⟨t', ?_, hmem⟩
+    rw [← P.trans_eq_compose] at htr
+    rw [← hc.support_eq] at htr
+    exact htr
+
+/-- The accepted edge relation for an exact bridge: literally the
+intersection of a caller-supplied candidate relation with the bridge's
+checker-tied applicability judgment. This instantiates PW0 `Frame.A` when
+`R` is the bridge candidate relation and `Admits` supplies `Frame.accept`. -/
+def Accepted
+    {κ μ : Instance.Context}
+    (R : Instance.World κ → Instance.World μ → Prop)
+    (m : SymMap) (lm : LeafId → LeafId)
+    (w : Instance.World κ) (u : Instance.World μ) : Prop :=
+  R w u ∧ Admits m lm w u
+
+/-- Full accepted edges agree between a direct bridge and a commuting path
+only when the caller also supplies coherence of their candidate relations.
+`Commutes` accounts for the `Admits` conjunct; it cannot determine arbitrary
+PW0 candidate relations. -/
+theorem accepted_iff_of_commutes
+    {κ μ : Instance.Context}
+    {B : StructuralBridge κ.canon κ.policy.ruleLookup μ.policy.ruleLookup
+      κ.Gamma μ.Gamma κ.CertOk μ.CertOk}
+    {P : BridgePath κ.canon κ.policy.ruleLookup μ.policy.ruleLookup
+      κ.Gamma μ.Gamma κ.CertOk μ.CertOk}
+    (hc : Commutes B P)
+    (Rdirect Rpath : Instance.World κ → Instance.World μ → Prop)
+    (w : Instance.World κ) (u : Instance.World μ)
+    (hR : Rdirect w u ↔ Rpath w u) :
+    Accepted Rdirect B.sym B.leafMap w u ↔
+      Accepted Rpath P.compose.sym P.compose.leafMap w u := by
+  exact and_congr hR (admits_iff_of_commutes hc w u)
 
 /-- **T9, path transport.** A checked source support transports along any
 chosen path of exact structural bridges whose stepwise translation is

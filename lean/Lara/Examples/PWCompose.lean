@@ -1,8 +1,10 @@
 /-
-# PW-T9 foundation witnesses
+# PW-T9 witnesses
 
-Executable examples for two-edge structural paths, certificate composition,
-mid-path vocabulary failure, and the non-empty translation lifts.
+Executable examples for exact path composition, direct/path commuting
+triangles (positive two- and three-edge, plus isolated negative triangles),
+checker applicability and accepted-edge separation, certificate composition,
+mid-path vocabulary failure, and non-empty translation lifts.
 -/
 
 import Lara.PW.Compose
@@ -87,6 +89,14 @@ def pathRen :
     BridgePath id piRenSrc piRenTgt2 gammaRenSrc gammaRenTgt2 certRen certRen :=
   .cons bridgeRen (.cons bridgeRen2 .nil)
 
+/-- The named direct source-to-final bridge has exactly the two-edge path's
+symbol and leaf maps. Its contract is the already-proved binary composite
+contract. -/
+def bridgeRenDirect :
+    StructuralBridge id piRenSrc piRenTgt2 gammaRenSrc gammaRenTgt2
+      certRen certRen :=
+  bridgeRen2.comp bridgeRen
+
 /-- The support term after both concrete leaf renames. -/
 def wRenTgt2 : SupportTerm :=
   .inst rnRen [] [.leaf (leafMapRen2 (leafMapRen lRen))] [] [] .none
@@ -114,6 +124,359 @@ theorem ren_path_transport :
       ren2_conclusion]
   cases hC'
   exact h
+
+/-- The named direct renaming bridge commutes with the chosen live path. -/
+theorem ren_path_commutes : Commutes bridgeRenDirect pathRen :=
+  Commutes.of_maps_eq.mpr
+    ⟨by
+      change ren2Sym.comp renSym =
+        (SymMap.id.comp ren2Sym).comp renSym
+      rw [SymMap.id_comp],
+    rfl⟩
+
+/-- The commuting triangle makes direct and stepwise transport agree on the
+live derivation: both translations conclude `p_rr`, and the common result
+checks in the twice-renamed target environment. -/
+theorem ren_direct_transport_agrees :
+    trSupport bridgeRenDirect.sym bridgeRenDirect.leafMap wRen =
+        some wRenTgt2 ∧
+      trAtom bridgeRenDirect.sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) ∧
+      trAtom pathRen.compose.sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) ∧
+      HasSupport id piRenTgt2 gammaRenTgt2 certRen wRenTgt2
+        (.atom "p_rr" .nil) [] := by
+  obtain ⟨hw, C', hdirect, hpath, hchecked⟩ :=
+    direct_transport_agrees bridgeRenDirect pathRen ren_path_commutes
+      hasSupport_ren ren_path_trans.1
+  have htarget :
+      trAtom bridgeRenDirect.sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) := rfl
+  rw [hdirect] at htarget
+  have hC : C' = .atom "p_rr" .nil := Option.some.inj htarget
+  cases hC
+  exact ⟨hw, hdirect, hpath, hchecked⟩
+
+/-! ### Length-three and theorem-level composition witnesses -/
+
+/-- The live renaming route extended by a reflexive edge at its final
+environment. The constructor shape intentionally records three edges. -/
+def pathRen3 :
+    BridgePath id piRenSrc piRenTgt2 gammaRenSrc gammaRenTgt2 certRen certRen :=
+  .cons bridgeRen
+    (.cons bridgeRen2
+      (.cons
+        (StructuralBridge.refl id piRenTgt2 gammaRenTgt2 certRen)
+        .nil))
+
+/-- The direct two-rename bridge commutes with the three-edge route whose
+last edge is reflexive. -/
+theorem ren_path3_commutes : Commutes bridgeRenDirect pathRen3 := by
+  apply Commutes.of_maps_eq.mpr
+  constructor
+  · change bridgeRen2.sym.comp bridgeRen.sym =
+      ((SymMap.id.comp SymMap.id).comp bridgeRen2.sym).comp bridgeRen.sym
+    rw [SymMap.id_comp, SymMap.id_comp]
+  · rfl
+
+/-- Direct and three-step transport agree on the live support and translated
+claim, including the common checked target judgment. -/
+theorem ren_path3_transport_agrees :
+    pathRen3.trans wRen = some wRenTgt2 ∧
+      trSupport bridgeRenDirect.sym bridgeRenDirect.leafMap wRen =
+        some wRenTgt2 ∧
+      trAtom bridgeRenDirect.sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) ∧
+      trAtom pathRen3.compose.sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) ∧
+      HasSupport id piRenTgt2 gammaRenTgt2 certRen wRenTgt2
+        (.atom "p_rr" .nil) [] := by
+  have hpath : pathRen3.trans wRen = some wRenTgt2 := rfl
+  obtain ⟨hdirect, C', hdirectClaim, hpathClaim, hchecked⟩ :=
+    direct_transport_agrees bridgeRenDirect pathRen3 ren_path3_commutes
+      hasSupport_ren hpath
+  have htarget :
+      trAtom bridgeRenDirect.sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) := rfl
+  rw [hdirectClaim] at htarget
+  have hC : C' = .atom "p_rr" .nil := Option.some.inj htarget
+  cases hC
+  exact ⟨hpath, hdirect, hdirectClaim, hpathClaim, hchecked⟩
+
+/-- `support_transport_comp` exposes both live translations and both checked
+judgments instead of hiding the intermediate environment. -/
+theorem ren_support_transport_comp :
+    trSupport bridgeRen.sym bridgeRen.leafMap wRen = some wRenTgt ∧
+      trSupport bridgeRen2.sym bridgeRen2.leafMap wRenTgt =
+        some wRenTgt2 ∧
+      trSupport (bridgeRen2.comp bridgeRen).sym
+          (bridgeRen2.comp bridgeRen).leafMap wRen =
+        some wRenTgt2 ∧
+      trAtom bridgeRen.sym (.atom "p" .nil) =
+        some (.atom "p_r" .nil) ∧
+      trAtom bridgeRen2.sym (.atom "p_r" .nil) =
+        some (.atom "p_rr" .nil) ∧
+      trAtom (bridgeRen2.comp bridgeRen).sym (.atom "p" .nil) =
+        some (.atom "p_rr" .nil) ∧
+      HasSupport id piRenTgt gammaRenTgt certRen wRenTgt
+          (.atom "p_r" .nil) [] ∧
+      HasSupport id piRenTgt2 gammaRenTgt2 certRen wRenTgt2
+        (.atom "p_rr" .nil) [] := by
+  have hw₁ :
+      trSupport bridgeRen.sym bridgeRen.leafMap wRen = some wRenTgt := rfl
+  have hw₂ :
+      trSupport bridgeRen2.sym bridgeRen2.leafMap wRenTgt =
+        some wRenTgt2 := rfl
+  obtain ⟨hcomp, C', C'', hC₁, hC₂, hCcomp, hmid, hfinal⟩ :=
+    support_transport_comp bridgeRen2 bridgeRen hasSupport_ren hw₁ hw₂
+  have hC' : C' = .atom "p_r" .nil := by
+    apply Option.some.inj
+    exact hC₁.symm.trans rfl
+  subst C'
+  have hC'' : C'' = .atom "p_rr" .nil := by
+    apply Option.some.inj
+    exact hC₂.symm.trans rfl
+  subst C''
+  exact ⟨hw₁, hw₂, hcomp, hC₁, hC₂, hCcomp, hmid, hfinal⟩
+
+/-- The common target policy makes direct and path-composite translations of
+the live source rule equal. -/
+theorem ren_commutes_on_rule :
+    piRenSrc rnRen = some ruleRen ∧
+      trRule bridgeRenDirect.sym ruleRen =
+        trRule pathRen.compose.sym ruleRen := by
+  have hsrc : piRenSrc rnRen = some ruleRen := by
+    simp [piRenSrc]
+  exact ⟨hsrc, commutes_on_rules bridgeRenDirect pathRen hsrc⟩
+
+/-- The admitted source leaf and its known map equality make direct and
+path-composite translations of the live evidence atom equal. -/
+theorem ren_commutes_on_leaf :
+    gammaRenSrc lRen = some (.atom "e" .nil) ∧
+      bridgeRenDirect.leafMap lRen = pathRen.compose.leafMap lRen ∧
+      trAtom bridgeRenDirect.sym (.atom "e" .nil) =
+        trAtom pathRen.compose.sym (.atom "e" .nil) := by
+  have hsrc : gammaRenSrc lRen = some (.atom "e" .nil) := by
+    simp [gammaRenSrc]
+  have hleaf :
+      bridgeRenDirect.leafMap lRen = pathRen.compose.leafMap lRen :=
+    ren_path_commutes.leafMap_eq lRen
+  exact
+    ⟨hsrc, hleaf,
+      commutes_on_leaves bridgeRenDirect pathRen hleaf hsrc⟩
+
+/-- The live rename exercises the predicate-map and full symbol-map equalities
+extracted from `Commutes`. -/
+theorem ren_commutes_on_symbol_maps :
+    bridgeRenDirect.sym.predMap "p" = pathRen.compose.sym.predMap "p" ∧
+      bridgeRenDirect.sym.predMap "e" = pathRen.compose.sym.predMap "e" ∧
+      bridgeRenDirect.sym = pathRen.compose.sym :=
+  ⟨ren_path_commutes.predMap_eq "p", ren_path_commutes.predMap_eq "e",
+    ren_path_commutes.sym_eq⟩
+
+/-! ### Concrete applicability and accepted-edge witnesses -/
+
+/-- The identity structural bridge over the existing T7 checking context. -/
+def bridgeIdT7 :
+    StructuralBridge ctxT7.canon ctxT7.policy.ruleLookup
+      ctxT7.policy.ruleLookup ctxT7.Gamma ctxT7.Gamma
+      ctxT7.CertOk ctxT7.CertOk :=
+  .refl ctxT7.canon ctxT7.policy.ruleLookup ctxT7.Gamma ctxT7.CertOk
+
+/-- Two explicit identity edges over the existing T7 checking context. -/
+def pathIdT7 :
+    BridgePath ctxT7.canon ctxT7.policy.ruleLookup ctxT7.policy.ruleLookup
+      ctxT7.Gamma ctxT7.Gamma ctxT7.CertOk ctxT7.CertOk :=
+  .cons bridgeIdT7 (.cons bridgeIdT7 .nil)
+
+/-- The target T7 world admits itself under identity translation. -/
+theorem admitsSelfT7 :
+    Admits bridgeIdT7.sym bridgeIdT7.leafMap wT7tgt wT7tgt := by
+  intro t ht
+  refine ⟨t, ?_, ht⟩
+  simpa [bridgeIdT7, StructuralBridge.refl] using trSupport_id t
+
+/-- The chosen middle world and both admitted identity legs instantiate
+`admits_steps_of_intermediate`. -/
+theorem t7_admits_steps_of_intermediate :
+    Admits bridgeIdT7.sym bridgeIdT7.leafMap wT7src wT7tgt ∧
+      Admits bridgeIdT7.sym bridgeIdT7.leafMap wT7tgt wT7tgt ∧
+      AdmitsSteps bridgeIdT7 bridgeIdT7 wT7src wT7tgt := by
+  have hsrc :
+      Admits bridgeIdT7.sym bridgeIdT7.leafMap wT7src wT7tgt := by
+    simpa [bridgeIdT7, StructuralBridge.refl] using admitsIdT7
+  exact
+    ⟨hsrc, admitsSelfT7,
+      admits_steps_of_intermediate bridgeIdT7 bridgeIdT7 wT7tgt
+        hsrc admitsSelfT7⟩
+
+/-- Composite applicability is exactly the explicit two-step predicate for
+the two T7 identity bridges. -/
+theorem t7_admits_comp_iff :
+    Admits (bridgeIdT7.comp bridgeIdT7).sym
+        (bridgeIdT7.comp bridgeIdT7).leafMap wT7src wT7tgt ↔
+      AdmitsSteps bridgeIdT7 bridgeIdT7 wT7src wT7tgt := by
+  exact admits_comp bridgeIdT7 bridgeIdT7 wT7src wT7tgt
+
+/-- The reverse direction of `admits_comp` gives an inhabited composite
+applicability judgment. -/
+theorem t7_admits_composite :
+    Admits (bridgeIdT7.comp bridgeIdT7).sym
+      (bridgeIdT7.comp bridgeIdT7).leafMap wT7src wT7tgt := by
+  exact t7_admits_comp_iff.mpr t7_admits_steps_of_intermediate.2.2
+
+/-- The direct identity edge commutes with the explicit two-edge identity
+path. -/
+theorem t7_identity_path_commutes : Commutes bridgeIdT7 pathIdT7 := by
+  apply Commutes.of_maps_eq.mpr
+  constructor
+  · change SymMap.id = (SymMap.id.comp SymMap.id).comp SymMap.id
+    rw [SymMap.id_comp, SymMap.id_comp]
+  · rfl
+
+/-- Direct and path applicability are equivalent at the existing T7 source
+and target worlds. -/
+theorem t7_admits_iff_of_commutes :
+    Admits bridgeIdT7.sym bridgeIdT7.leafMap wT7src wT7tgt ↔
+      Admits pathIdT7.compose.sym pathIdT7.compose.leafMap wT7src wT7tgt := by
+  exact
+    admits_iff_of_commutes t7_identity_path_commutes wT7src wT7tgt
+
+/-- The caller-owned direct candidate relation used by the positive acceptance
+witness. It is independent of checker-tied applicability. -/
+def candidateDirectT7 :
+    Instance.World ctxT7 → Instance.World ctxT7 → Prop :=
+  fun _ _ => True
+
+/-- The matching path candidate relation used by the positive equivalence. -/
+def candidatePathT7 :
+    Instance.World ctxT7 → Instance.World ctxT7 → Prop :=
+  fun _ _ => True
+
+/-- Candidate-relation coherence is supplied independently of bridge
+commutation. -/
+theorem t7_candidate_relations_agree :
+    candidateDirectT7 wT7src wT7tgt ↔ candidatePathT7 wT7src wT7tgt := by
+  simp [candidateDirectT7, candidatePathT7]
+
+/-- `accepted_iff_of_commutes` combines the separately supplied candidate
+clause with path applicability; the right side displays `R ∧ Admits`
+explicitly. -/
+theorem t7_accepted_iff_of_commutes :
+    Accepted candidateDirectT7 bridgeIdT7.sym bridgeIdT7.leafMap
+        wT7src wT7tgt ↔
+      candidatePathT7 wT7src wT7tgt ∧
+        Admits pathIdT7.compose.sym pathIdT7.compose.leafMap
+          wT7src wT7tgt := by
+  change
+    Accepted candidateDirectT7 bridgeIdT7.sym bridgeIdT7.leafMap
+        wT7src wT7tgt ↔
+      Accepted candidatePathT7 pathIdT7.compose.sym
+        pathIdT7.compose.leafMap wT7src wT7tgt
+  exact
+    accepted_iff_of_commutes t7_identity_path_commutes
+      candidateDirectT7 candidatePathT7 wT7src wT7tgt
+      t7_candidate_relations_agree
+
+/-- Both accepted sides are inhabited: candidate truth and applicability are
+proved independently before being combined. -/
+theorem t7_accepted_inhabited :
+    Accepted candidateDirectT7 bridgeIdT7.sym bridgeIdT7.leafMap
+        wT7src wT7tgt ∧
+      Accepted candidatePathT7 pathIdT7.compose.sym pathIdT7.compose.leafMap
+        wT7src wT7tgt := by
+  have hsrc :
+      Admits bridgeIdT7.sym bridgeIdT7.leafMap wT7src wT7tgt := by
+    simpa [bridgeIdT7, StructuralBridge.refl] using admitsIdT7
+  refine ⟨⟨?_, hsrc⟩, ⟨?_, t7_admits_iff_of_commutes.mp hsrc⟩⟩
+  · simp [candidateDirectT7]
+  · simp [candidatePathT7]
+
+/-- A commuting path does not make caller-owned candidate relations agree:
+applicability holds on both routes, but a false path relation still prevents
+acceptance. -/
+def candidatePathFalseT7 :
+    Instance.World ctxT7 → Instance.World ctxT7 → Prop :=
+  fun _ _ => False
+
+theorem t7_accepted_needs_candidate_coherence :
+    Commutes bridgeIdT7 pathIdT7 ∧
+      Accepted candidateDirectT7 bridgeIdT7.sym bridgeIdT7.leafMap
+        wT7src wT7tgt ∧
+      ¬ Accepted candidatePathFalseT7 pathIdT7.compose.sym
+        pathIdT7.compose.leafMap wT7src wT7tgt := by
+  refine ⟨t7_identity_path_commutes, t7_accepted_inhabited.1, ?_⟩
+  intro h
+  exact h.1
+
+/-! ### Failing path triangles isolate the content of `Commutes` -/
+
+/-- The first admitted leaf in the twin-leaf fixture. -/
+def lA : LeafId := ⟨"tw-a"⟩
+
+/-- The second admitted leaf in the twin-leaf fixture. -/
+def lB : LeafId := ⟨"tw-b"⟩
+
+/-- Two leaves carrying the same non-vacuous evidence atom. -/
+def gammaTwin : LeafId → Option Atom :=
+  fun l =>
+    if l = lA then some (.atom "e" .nil)
+    else if l = lB then some (.atom "e" .nil)
+    else none
+
+/-- The empty policy isolates evidence-leaf behavior. -/
+def piEmpty : RuleId → Option Rule := fun _ => none
+
+/-- A contract-valid endobridge that swaps the equally typed twin leaves. -/
+def bridgeSwap :
+    StructuralBridge id piEmpty piEmpty gammaTwin gammaTwin certRen certRen where
+  sym := SymMap.id
+  leafMap := fun l => if l = lA then lB else if l = lB then lA else l
+  leaf_ok := fun l p h => by
+    unfold gammaTwin at h ⊢
+    by_cases ha : l = lA
+    · rw [if_pos ha] at h
+      cases h
+      exact ⟨_, trAtom_id _, by simp [ha, lA, lB]⟩
+    · rw [if_neg ha] at h
+      by_cases hb : l = lB
+      · rw [if_pos hb] at h
+        cases h
+        exact ⟨_, trAtom_id _, by simp [hb, lA, lB]⟩
+      · rw [if_neg hb] at h
+        exact nomatch h
+  rule_ok := fun _ _ h => nomatch h
+  cert_ok := fun _ _ _ _ _ _ _ _ _ h => h.elim
+
+/-- The competing twin-leaf route consists of two explicit identity edges. -/
+def twinIdentityPath :
+    BridgePath id piEmpty piEmpty gammaTwin gammaTwin certRen certRen :=
+  .cons (StructuralBridge.refl id piEmpty gammaTwin certRen)
+    (.cons (StructuralBridge.refl id piEmpty gammaTwin certRen) .nil)
+
+/-- The leaf witness isolates the support-map equation required by
+`Commutes`: both routes succeed and check, but choose different leaves. -/
+theorem direct_ne_composed_support :
+    twinIdentityPath.trans (.leaf lA) = some (.leaf lA) ∧
+      trSupport bridgeSwap.sym bridgeSwap.leafMap (.leaf lA) =
+        some (.leaf lB) ∧
+      (SupportTerm.leaf lB) ≠ .leaf lA ∧
+      HasSupport id piEmpty gammaTwin certRen (.leaf lA)
+        (.atom "e" .nil) [] ∧
+      HasSupport id piEmpty gammaTwin certRen (.leaf lB)
+        (.atom "e" .nil) [] ∧
+      ¬ Commutes bridgeSwap twinIdentityPath := by
+  refine ⟨rfl, ?_, by decide, .leaf ?_, .leaf ?_, ?_⟩
+  · simp [trSupport, bridgeSwap, lA, lB]
+  · simp [gammaTwin]
+  · simp [gammaTwin, lA, lB]
+  · intro hc
+    have h := hc.support_eq (.leaf lA)
+    change some (SupportTerm.leaf lB) = some (SupportTerm.leaf lA) at h
+    have hne : (some (SupportTerm.leaf lB) : Option SupportTerm) ≠
+        some (SupportTerm.leaf lA) := by decide
+    exact hne h
+
 
 /-! ### Non-vacuous certificate composition -/
 
@@ -206,6 +569,59 @@ def gammaGapEmpty : LeafId → Option Atom := fun _ => none
 def certGapEmpty : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun _ _ _ _ _ => False
 
+/-- A direct symbol map that changes only predicate translation. Constructor
+translation remains the identity used by the competing path. -/
+def claimOnlySym : SymMap :=
+  { predMap := fun s => if s = "e" then some "e2" else some s
+  , conMap := some }
+
+/-- A vacuous-environment bridge whose leaf and constructor maps are identity;
+only its predicate map differs from the competing path. -/
+def claimOnlyBridge :
+    StructuralBridge id piGapEmpty piGapEmpty gammaGapEmpty gammaGapEmpty
+      certGapEmpty certGapEmpty where
+  sym := claimOnlySym
+  leafMap := id
+  leaf_ok := fun _ _ h => by simp [gammaGapEmpty] at h
+  rule_ok := fun _ _ h => by simp [piGapEmpty] at h
+  cert_ok := fun _ _ _ _ _ _ _ _ _ h => h.elim
+
+/-- The competing claim route consists of two explicit identity edges. -/
+def claimIdentityPath :
+    BridgePath id piGapEmpty piGapEmpty gammaGapEmpty gammaGapEmpty
+      certGapEmpty certGapEmpty :=
+  .cons
+    (StructuralBridge.refl id piGapEmpty gammaGapEmpty certGapEmpty)
+    (.cons
+      (StructuralBridge.refl id piGapEmpty gammaGapEmpty certGapEmpty) .nil)
+
+/-- The negative claim triangle isolates `Commutes.atom_eq`: leaf maps and
+constructor maps agree, a constructor-bearing support translates identically,
+and only predicate translation differs. -/
+theorem direct_ne_composed_claim :
+    claimOnlyBridge.leafMap = claimIdentityPath.compose.leafMap ∧
+      claimOnlyBridge.sym.conMap = claimIdentityPath.compose.sym.conMap ∧
+      trSupport claimOnlyBridge.sym claimOnlyBridge.leafMap
+        (.inst ⟨"r"⟩ [(⟨"X"⟩, .con "k" .nil)] [] [] [] .none) =
+        some (.inst ⟨"r"⟩ [(⟨"X"⟩, .con "k" .nil)] [] [] [] .none) ∧
+      claimIdentityPath.trans
+        (.inst ⟨"r"⟩ [(⟨"X"⟩, .con "k" .nil)] [] [] [] .none) =
+        some (.inst ⟨"r"⟩ [(⟨"X"⟩, .con "k" .nil)] [] [] [] .none) ∧
+      trAtom claimOnlyBridge.sym (.atom "e" .nil) =
+        some (.atom "e2" .nil) ∧
+      trAtom claimIdentityPath.compose.sym (.atom "e" .nil) =
+        some (.atom "e" .nil) ∧
+      ¬ Commutes claimOnlyBridge claimIdentityPath := by
+  refine ⟨rfl, ?_, rfl, rfl, rfl, rfl, ?_⟩
+  · funext k
+    rfl
+  · intro hc
+    have h := hc.atom_eq (.atom "e" .nil)
+    change some (Atom.atom "e2" .nil) = some (Atom.atom "e" .nil) at h
+    have hne : (some (Atom.atom "e2" .nil) : Option Atom) ≠
+        some (Atom.atom "e" .nil) := by decide
+    exact hne h
+
 /-- A vacuous structural edge carrying T6's real first renaming map. -/
 def gapBridgeRen :
     StructuralBridge id piGapEmpty piGapEmpty gammaGapEmpty gammaGapEmpty
@@ -235,6 +651,161 @@ def gapBridgeDrop :
   leaf_ok := fun _ _ h => by simp [gammaGapEmpty] at h
   rule_ok := fun _ _ h => by simp [piGapEmpty] at h
   cert_ok := fun _ _ _ _ _ _ _ _ _ h => h.elim
+
+/-- First applicability edge: rename the constructor carried by a checked
+substitution from `gap-src` to `gap-mid`. -/
+def gapConFirstSym : SymMap :=
+  { predMap := some
+  , conMap := fun k => if k = "gap-src" then some "gap-mid" else some k }
+
+/-- Second applicability edge: deliberately omit the first edge's constructor
+image from its vocabulary. -/
+def gapConDropSym : SymMap :=
+  { predMap := some
+  , conMap := fun k => if k = "gap-mid" then none else some k }
+
+
+/-- Minimal checked rule whose substitution carries the constructor used by
+the applicability-gap witness. -/
+def gapAppRuleId : RuleId := ⟨"gap-app"⟩
+def gapAppVar : VarId := ⟨"X"⟩
+def gapAppRule : Rule :=
+  { mode := .defeasible
+  , params := [gapAppVar]
+  , premises := []
+  , concl := ⟨⟨"gap-p"⟩, .cons (.var gapAppVar) .nil⟩
+  , questions := []
+  , allowTrusted := false
+  , certifiers := [] }
+
+def gapAppSigma : Lara.Sigma.Sigma :=
+  { sorts := ["GapItem"]
+  , cons :=
+      [ ⟨⟨"gap-src"⟩, [], .decl "GapItem"⟩
+      , ⟨⟨"gap-mid"⟩, [], .decl "GapItem"⟩ ]
+  , preds := [⟨⟨"gap-p"⟩, [.decl "GapItem"]⟩] }
+
+def gapAppPolicy : Lara.Policy.Policy :=
+  { rules := [⟨gapAppRuleId, gapAppRule⟩]
+  , defeat := ⟨[], []⟩ }
+
+def gapAppSupport : SupportTerm :=
+  .inst gapAppRuleId [(gapAppVar, .con "gap-src" .nil)] [] [] [] .none
+
+def gapAppAtom : Atom :=
+  .atom "gap-p" (.cons (.con "gap-src" .nil) .nil)
+
+def gapAppRegistry : BackendRegistry id := fun _ => none
+
+def gapAppUnit : Lara.Unit :=
+  { sigma := gapAppSigma
+  , policy := gapAppPolicy
+  , args := [gapAppSupport]
+  , atts := [] }
+
+def gapAppUnitCheck :=
+  Lara.Check.Unit.checkUnit gammaGapEmpty gapAppRegistry [gapAppAtom] gapAppUnit
+
+theorem gapAppUnit_accepted : gapAppUnitCheck.isOk = true := by decide
+
+def gapAppAccepted :
+    Lara.Unit.CheckedUnit id gammaGapEmpty (certOkOf gapAppRegistry) :=
+  gapAppUnitCheck.toOption.get (by decide)
+
+def gapAppContext : Instance.Context :=
+  { canon := id
+  , Gamma := gammaGapEmpty
+  , CertOk := certOkOf gapAppRegistry
+  , sigma := gapAppSigma
+  , policy := gapAppPolicy }
+
+/-- The first applicability bridge uses the checked world's actual policy,
+evidence environment, and certificate relation at both endpoints. -/
+def gapConFirstBridge :
+    StructuralBridge gapAppContext.canon
+      gapAppContext.policy.ruleLookup gapAppContext.policy.ruleLookup
+      gapAppContext.Gamma gapAppContext.Gamma
+      gapAppContext.CertOk gapAppContext.CertOk where
+  sym := gapConFirstSym
+  leafMap := id
+  leaf_ok := fun _ _ h => by
+    simp [gapAppContext, gammaGapEmpty] at h
+  rule_ok := fun rn r h => by
+    by_cases hrn : rn = gapAppRuleId
+    · subst rn
+      simp [gapAppContext, gapAppPolicy, Lara.Policy.Policy.ruleLookup,
+        Lara.Policy.lookupRuleDecl] at h
+      subst r
+      refine ⟨gapAppRule, rfl, ?_⟩
+      simp [gapAppContext, gapAppPolicy, Lara.Policy.Policy.ruleLookup,
+        Lara.Policy.lookupRuleDecl]
+    · have hcontra : gapAppRuleId ≠ rn := fun heq => hrn heq.symm
+      simp [gapAppContext, gapAppPolicy, Lara.Policy.Policy.ruleLookup,
+        Lara.Policy.lookupRuleDecl, hcontra] at h
+  cert_ok := fun _ _ _ _ _ _ _ _ _ h => by
+    simp [gapAppContext, gapAppRegistry, certOkOf] at h
+
+/-- The second applicability bridge is tied to the same checked context while
+omitting the first edge's constructor image. -/
+def gapConDropBridge :
+    StructuralBridge gapAppContext.canon
+      gapAppContext.policy.ruleLookup gapAppContext.policy.ruleLookup
+      gapAppContext.Gamma gapAppContext.Gamma
+      gapAppContext.CertOk gapAppContext.CertOk where
+  sym := gapConDropSym
+  leafMap := id
+  leaf_ok := fun _ _ h => by
+    simp [gapAppContext, gammaGapEmpty] at h
+  rule_ok := fun rn r h => by
+    by_cases hrn : rn = gapAppRuleId
+    · subst rn
+      simp [gapAppContext, gapAppPolicy, Lara.Policy.Policy.ruleLookup,
+        Lara.Policy.lookupRuleDecl] at h
+      subst r
+      refine ⟨gapAppRule, rfl, ?_⟩
+      simp [gapAppContext, gapAppPolicy, Lara.Policy.Policy.ruleLookup,
+        Lara.Policy.lookupRuleDecl]
+    · have hcontra : gapAppRuleId ≠ rn := fun heq => hrn heq.symm
+      simp [gapAppContext, gapAppPolicy, Lara.Policy.Policy.ruleLookup,
+        Lara.Policy.lookupRuleDecl, hcontra] at h
+  cert_ok := fun _ _ _ _ _ _ _ _ _ h => by
+    simp [gapAppContext, gapAppRegistry, certOkOf] at h
+
+def gapAppWorld : Instance.World gapAppContext :=
+  { unit := gapAppAccepted, sigma_eq := rfl, policy_eq := rfl }
+
+def gapAppSupportMid : SupportTerm :=
+  .inst gapAppRuleId [(gapAppVar, .con "gap-mid" .nil)] [] [] [] .none
+
+/-- Exact applicability fails when the first edge translates a checked
+constructor-bearing support and the second edge omits that constructor image.
+The explicit step predicate and the composite `Admits` judgment fail together.
+-/
+theorem gap_admits_comp_fails :
+    trSupport gapConFirstBridge.sym gapConFirstBridge.leafMap gapAppSupport =
+        some gapAppSupportMid ∧
+      trSupport gapConDropBridge.sym gapConDropBridge.leafMap gapAppSupportMid =
+        none ∧
+      ¬ AdmitsSteps gapConDropBridge gapConFirstBridge gapAppWorld gapAppWorld ∧
+      ¬ Admits (gapConDropBridge.comp gapConFirstBridge).sym
+        (gapConDropBridge.comp gapConFirstBridge).leafMap
+        gapAppWorld gapAppWorld := by
+  have hnotSteps :
+      ¬ AdmitsSteps gapConDropBridge gapConFirstBridge
+        gapAppWorld gapAppWorld := by
+    intro hsteps
+    obtain ⟨t', t'', ht₁, ht₂, _⟩ :=
+      hsteps gapAppSupport (by decide)
+    change some gapAppSupportMid = some t' at ht₁
+    have ht' : t' = gapAppSupportMid := (Option.some.inj ht₁).symm
+    subst t'
+    change none = some t'' at ht₂
+    exact nomatch ht₂
+  refine ⟨rfl, rfl, hnotSteps, ?_⟩
+  intro hadm
+  exact hnotSteps
+    ((admits_comp gapConDropBridge gapConFirstBridge
+      gapAppWorld gapAppWorld).mp hadm)
 
 /-- A typed two-edge path whose gap occurs only after the first edge succeeds. -/
 def gapPath :
