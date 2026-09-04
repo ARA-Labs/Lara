@@ -83,6 +83,9 @@ import Lara.Examples.PW
 import Lara.Examples.PWStructural
 import Lara.PW.Compose
 import Lara.Examples.PWCompose
+import Lara.PW.AFBisim
+import Lara.PW.Status
+import Lara.Examples.PWStatus
 
 open Lara
 
@@ -2380,6 +2383,78 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.Compose.mid_path_support_undefined
 #print axioms Lara.Examples.PW.Compose.trQuestions_nonempty_computes
 #print axioms Lara.Examples.PW.Compose.trSupportDis_nonempty_computes
+
+/-! ### PW-T8 — conditional status preservation (issue #193) -/
+-- The definitions `AttackBisim`, `SupportCorr`, `AFIso`, `AFIso.graph`,
+-- `SymMap.Injective`, `Corr`, `StatusBridge` have no standalone rows; the
+-- theorem rows below audit them transitively. Every theorem declaration in
+-- the three PW-T8 modules is gated directly.
+
+-- Generic layer (Lara.PW.AFBisim).
+#print axioms Lara.PW.AttackBisim.symm
+#print axioms Lara.PW.directIn_bisim
+#print axioms Lara.PW.directOut_bisim
+#print axioms Lara.PW.directIn_iff_of_bisim
+#print axioms Lara.PW.directOut_iff_of_bisim
+#print axioms Lara.PW.labelC_of_bisim
+#print axioms Lara.PW.statusC_congr
+#print axioms Lara.PW.statusC_of_bisim
+#print axioms Lara.PW.AFIso.toBisim
+#print axioms Lara.PW.labelC_of_iso
+#print axioms Lara.PW.statusC_of_iso
+#print axioms Lara.PW.supportCorr_of_image
+
+-- Lara instantiation (Lara.PW.Status).
+#print axioms Lara.PW.SymMap.id_injective
+#print axioms Lara.PW.trTerm_inj
+#print axioms Lara.PW.trTerms_inj
+#print axioms Lara.PW.trAtom_inj
+#print axioms Lara.PW.equiv_tr_reflect
+#print axioms Lara.PW.corr_lt
+#print axioms Lara.PW.StatusBridge.bisim
+#print axioms Lara.PW.corr_conclusion
+#print axioms Lara.PW.claimSupport_corr
+#print axioms Lara.PW.status_transport_of_corr
+#print axioms Lara.PW.status_transport
+#print axioms Lara.PW.srcStatus_transport
+#print axioms Lara.PW.sat_status_iff_box
+#print axioms Lara.PW.sat_status_iff_dia
+#print axioms Lara.PW.sat_status_iff_box_src
+#print axioms Lara.PW.SymMap.Injective.comp
+#print axioms Lara.PW.corr_comp_iff
+#print axioms Lara.PW.StatusBridge.comp
+
+-- PW-T8 examples (Lara.Examples.PWStatus).
+#print axioms Lara.Examples.PW.Status.t7_forth
+#print axioms Lara.Examples.PW.Status.t7_l2_mem
+#print axioms Lara.Examples.PW.Status.t7_unmatched
+#print axioms Lara.Examples.PW.Status.t7_not_statusBridge
+#print axioms Lara.Examples.PW.Status.t7_not_statusBridge_of_flip
+#print axioms Lara.Examples.PW.Status.t7_forward_hom_insufficient
+#print axioms Lara.Examples.PW.Status.unitS1_accepted
+#print axioms Lara.Examples.PW.Status.unitS2_accepted
+#print axioms Lara.Examples.PW.Status.unitR1_accepted
+#print axioms Lara.Examples.PW.Status.unitR2_accepted
+#print axioms Lara.Examples.PW.Status.symR_injective
+#print axioms Lara.Examples.PW.Status.s1_r1_statusBridge
+#print axioms Lara.Examples.PW.Status.s2_r2_statusBridge
+#print axioms Lara.Examples.PW.Status.t8_justified_preserved
+#print axioms Lara.Examples.PW.Status.t8_justified_cells
+#print axioms Lara.Examples.PW.Status.t8_defeated_preserved
+#print axioms Lara.Examples.PW.Status.t8_defeated_cells
+#print axioms Lara.Examples.PW.Status.t8_gap_preserved
+#print axioms Lara.Examples.PW.Status.t8_gap_cells
+#print axioms Lara.Examples.PW.Status.t8_renamed
+#print axioms Lara.Examples.PW.Status.unitS3_accepted
+#print axioms Lara.Examples.PW.Status.unitR3_accepted
+#print axioms Lara.Examples.PW.Status.s3_corr_diag
+#print axioms Lara.Examples.PW.Status.s3_r3_statusBridge
+#print axioms Lara.Examples.PW.Status.t8_contested_preserved
+#print axioms Lara.Examples.PW.Status.t8_contested_cells
+#print axioms Lara.Examples.PW.Status.r_edge_accepted
+#print axioms Lara.Examples.PW.Status.r_all_bridged
+#print axioms Lara.Examples.PW.Status.t8_box_defeated_r
+#print axioms Lara.Examples.PW.Status.t8_box_defeated_r_holds
 
 /-! ### Theory M4 — the fragment/linking context calculus (issue #187)
 

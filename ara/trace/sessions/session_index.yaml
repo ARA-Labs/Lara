@@ -549,3 +549,10 @@ sessions:
   events_count: 4
   claims_touched: []
   open_threads: 4
+- id: 2026-09-04_004
+  date: '2026-09-04'
+  summary: 'PW-T8 mechanized and delivered as PR #240: total attack bisimulation preserves grounded status, StatusBridge instantiates it at structural bridges, status_transport preserves all four statuses with modal collapse and T9 composition; T7 recorded as a forward homomorphism failing matched. Implemented without cleared eng review; pre-flight compilation found 12 plan defects. C50 created; C47/C48 boundaries discharged; issues #238/#239 filed.'
+  turn_count: 1
+  events_count: 11
+  claims_touched: [C50, C47, C48]
+  open_threads: 4

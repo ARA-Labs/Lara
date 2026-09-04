@@ -1127,6 +1127,86 @@ stable key.
 
 ---
 
+## PW-T8 conditional status preservation (issue #193)
+
+Tracker #189. The frozen hypotheses, interpretation, and limitations live in
+`docs/theory-pw-t8-status-preservation.md`; this section is the declaration
+index. Every *theorem* row is intended for the final `lean/AxCheck.lean` gate
+(sorry-free, standard trio, no `native_decide`). Definition rows are audited
+transitively through the gated theorems stated over them.
+
+No paper display cites these yet. The rows exist so that later status,
+robust-justification, and approximation-bridge displays can cite a stable
+key.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| Total attack bisimulation between finite frameworks, with its converse | `PW.AttackBisim` (fields `dom`, `left_total`, `right_total`, `forth`, `back`); `PW.AttackBisim.symm` | `Lara/PW/AFBisim.lean` |
+| Attack forth condition (source attacker matched by a related target attacker) | `PW.AttackBisim.forth`; at a bridge `PW.StatusBridge.forth` | `Lara/PW/AFBisim.lean`, `Lara/PW/Status.lean` |
+| Attack back condition (target attacker matched by a related source attacker; no unmatched target attacker) | `PW.AttackBisim.back`; at a bridge `PW.StatusBridge.back` | `Lara/PW/AFBisim.lean`, `Lara/PW/Status.lean` |
+| Declarative grounded judgments transfer along a bisimulation | `PW.directIn_bisim`, `PW.directOut_bisim`; iff forms `PW.directIn_iff_of_bisim`, `PW.directOut_iff_of_bisim` | `Lara/PW/AFBisim.lean` |
+| Grounded label invariance under bisimulation | `PW.labelC_of_bisim` | `Lara/PW/AFBisim.lean` |
+| Support-set correspondence (complete-support index sets correspond both ways) and the status congruence | `PW.SupportCorr`; `PW.statusC_congr` | `Lara/PW/AFBisim.lean` |
+| Status invariance under bisimulation — all four statuses at once, none read as a label | `PW.statusC_of_bisim` | `Lara/PW/AFBisim.lean` |
+| AF isomorphism (the design's bijection preserving and reflecting attack; `inj` recorded, never consumed) and its graph | `PW.AFIso` (fields `maps`, `inj`, `surj`, `attack_iff`); `PW.AFIso.graph` | `Lara/PW/AFBisim.lean` |
+| An AF isomorphism is a total attack bisimulation | `PW.AFIso.toBisim` | `Lara/PW/AFBisim.lean` |
+| Labels and status along an isomorphism | `PW.labelC_of_iso`, `PW.statusC_of_iso` | `Lara/PW/AFBisim.lean` |
+| "Maps the complete support set for `c` onto the complete support set for `τ(c)`" yields the correspondence | `PW.supportCorr_of_image` | `Lara/PW/AFBisim.lean` |
+| Injective translation (injectivity-where-defined on both partial namespaces), the identity, and closure under Kleisli composition | `PW.SymMap.Injective`; `PW.SymMap.id_injective`, `PW.SymMap.Injective.comp` | `Lara/PW/Status.lean` |
+| Injectivity on lifted terms, term lists, and atoms | `PW.trTerm_inj`, `PW.trTerms_inj`, `PW.trAtom_inj` | `Lara/PW/Status.lean` |
+| `≡` reflects along an injective translation (converse of `PW.equiv_tr`) | `PW.equiv_tr_reflect` | `Lara/PW/Status.lean` |
+| Argument correspondence induced by a translation (source argument `i` transports to target argument `j`) and its range bound | `PW.Corr`; `PW.corr_lt` | `Lara/PW/Status.lean` |
+| **Status-preserving bridge** — the T8 hypotheses: left-total (`Admits`), right-total (no unmatched target argument), attack forth, attack back | `PW.StatusBridge` (fields `admits`, `matched`, `forth`, `back`) | `Lara/PW/Status.lean` |
+| The status-preserving bridge is a total attack bisimulation of the two compiled frameworks | `PW.StatusBridge.bisim` | `Lara/PW/Status.lean` |
+| Translated conclusion at corresponding indices | `PW.corr_conclusion` | `Lara/PW/Status.lean` |
+| Support-set correspondence derived for every translatable query | `PW.claimSupport_corr` | `Lara/PW/Status.lean` |
+| Status preservation from a supplied support-set correspondence (non-injective bridges) | `PW.status_transport_of_corr` | `Lara/PW/Status.lean` |
+| **T8 — conditional status preservation** (`cmpStatus v (τ c) = cmpStatus w c`) | `PW.status_transport` | `Lara/PW/Status.lean` |
+| T8 at the source observation (T1 on both sides) | `PW.srcStatus_transport` | `Lara/PW/Status.lean` |
+| RobustlyJustified collapse: `Comparable ∧ [b]Justified(τ c)` reduces to the local atom, at every status | `PW.sat_status_iff_box`; under the source valuation `PW.sat_status_iff_box_src` | `Lara/PW/Status.lean` |
+| PossiblyJustified collapse: `Translatable ∧ ⟨b⟩Justified(τ c)` reduces to the local atom, at every status | `PW.sat_status_iff_dia` | `Lara/PW/Status.lean` |
+| Composite argument correspondence factors through the chosen intermediate world | `PW.corr_comp_iff` | `Lara/PW/Status.lean` |
+| Status-preserving bridges compose along the T9 composite (legs in path order, first leg first); pathwise status is then `Eq.trans` of per-edge T8 | `PW.StatusBridge.comp` | `Lara/PW/Status.lean` |
+| Forward attack homomorphism is insufficient: T7 satisfies `Admits` and `forth`, and status flips | `Examples.PW.Status.t7_forth`, `t7_forward_hom_insufficient` | `Lara/Examples/PWStatus.lean` |
+| The T7 target fails `matched` at `leaf l2`, directly and by T8's contrapositive | `Examples.PW.Status.t7_l2_mem`, `t7_unmatched`, `t7_not_statusBridge`, `t7_not_statusBridge_of_flip` | `Lara/Examples/PWStatus.lean` |
+| Source context over the empty registry and its accepted worlds | `Examples.PW.Status.regEmpty`, `ctxS`, `wS1`, `wS2`; `unitS1_accepted`, `unitS2_accepted` | `Lara/Examples/PWStatus.lean` |
+| Renamed context, vocabulary, policy, and its accepted worlds | `Examples.PW.Status.pR`, `qR`, `sR`, `ΓR`, `sigmaR`, `polR`, `ctxR`, `wR1`, `wR2`; `unitR1_accepted`, `unitR2_accepted` | `Lara/Examples/PWStatus.lean` |
+| Renaming translation, leaf map, and structural bridge off the identity | `Examples.PW.Status.symR`, `leafMapR`, `bridgeR`; `symR_injective` | `Lara/Examples/PWStatus.lean` |
+| Status-preserving bridges between the renamed worlds (`forth`/`back` on a real compiled edge) | `Examples.PW.Status.s1_r1_statusBridge`, `s2_r2_statusBridge` | `Lara/Examples/PWStatus.lean` |
+| `justified`, `defeated`, and `gap` transport, each with both cells evaluated | `Examples.PW.Status.t8_justified_preserved`, `t8_justified_cells`, `t8_defeated_preserved`, `t8_defeated_cells`, `t8_gap_preserved`, `t8_gap_cells` | `Lara/Examples/PWStatus.lean` |
+| `contested` transport, with both cells evaluated | `Examples.PW.Status.polS3`, `ctxS3`, `wS3`, `polR3`, `ctxR3`, `wR3`, `bridgeR3`; `unitS3_accepted`, `unitR3_accepted`, `s3_corr_diag`, `s3_r3_statusBridge`; `t8_contested_preserved`, `t8_contested_cells` | `Lara/Examples/PWStatus.lean` |
+| The transported claim is genuinely renamed | `Examples.PW.Status.t8_renamed` | `Lara/Examples/PWStatus.lean` |
+| Two-context bridge data, its accepted edge, every successor bridged, and the inhabited `[b]` cell at `defeated` | `Examples.PW.Status.bridgeDataR`; `r_edge_accepted`, `r_all_bridged`, `t8_box_defeated_r`, `t8_box_defeated_r_holds` | `Lara/Examples/PWStatus.lean` |
+
+**Not X** notes:
+
+- `PW.AttackBisim` is **not** an isomorphism, and `PW.AFIso` is **not** the
+  primitive. `AFIso.toBisim` consumes `maps`, `surj`, and `attack_iff` only;
+  `inj` is recorded because it is what "isomorphism" means and is consumed
+  by no proof. A surjective bounded morphism already suffices.
+- `PW.StatusBridge.forth`/`back` are **not** conditions on declared attacks.
+  They are index-level clauses on the compiled edge decider `Compile.edgeB`;
+  deriving them from a correspondence of the programs' `atts` is deferred
+  (freeze record §9 limitation 1). They also carry **no** `b ∈ F.args`
+  premise, so an instance recovers in-rangeness itself via
+  `(Compile.edgeB_faithful P).ranged`.
+- `PW.SymMap.Injective` is **not** `Function.Injective` on the partial
+  fields. It is injectivity-where-defined; total injectivity would force all
+  out-of-vocabulary symbols to be equal.
+- `PW.status_transport` is **not** a strengthening of T6. It takes
+  `StatusBridge` and `SymMap.Injective` as additional hypotheses;
+  `Examples.PW.t7_t6_boundary` still shows `Admits` alone flips status.
+- `PW.claimSupport_corr` is **not** an assumed correspondence. The support-set
+  correspondence is derived from the contract and the hypotheses for every
+  translatable query; only `status_transport_of_corr` takes one as input.
+- `PW.StatusBridge.comp` is **not** a path-indexed status theorem, and none
+  is declared. Statuses are values, so pathwise status is `Eq.trans` of
+  per-edge `status_transport`; the composition theorem is about the
+  hypotheses. Its legs are in *path* order (`h₁` then `h₂`), unlike
+  `StructuralBridge.comp B₂ B₁`.
+- `PW.sat_status_iff_box` is **not** specific to `justified`. It holds at
+  every `Status`; the executable cell happens to be at `defeated`.
+
 ## M4 Part A: fragment/linking calculus and contextual representation independence (issue #187)
 
 Tracker #180. The design freeze is `docs/theory-m4-context-calculus-decision.md`;

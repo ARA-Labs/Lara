@@ -1,0 +1,159 @@
+session:
+  id: "2026-09-04_004"
+  date: "2026-09-04"
+  started: "2026-09-04T13:10"
+  last_turn: "2026-09-04T13:10"
+  turn_count: 1
+  summary: >
+    PW-T8 mechanized and delivered as PR #240: grounded status is invariant
+    under a total attack bisimulation, StatusBridge instantiates it at
+    structural bridges, status_transport preserves all four statuses, the
+    modal reading collapses, and hypotheses compose along T9. T7 is recorded
+    as a forward attack homomorphism failing matched; all four statuses
+    transport off the identity. Implemented without a cleared eng review;
+    pre-flight compilation found 12 plan defects. Issues #238/#239 filed.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N302"
+    routing: direct
+    provenance: user-revised
+    summary: "Implement without cleared eng review; pre-flight compile every plan block instead."
+  - turn: 1
+    type: experiment
+    id: "N303"
+    routing: direct
+    provenance: ai-executed
+    summary: "Pre-flight found 12 defect sites in 5 of 7 Lean tasks; 2 anticipated; no statement altered."
+  - turn: 1
+    type: decision
+    id: "N304"
+    routing: direct
+    provenance: user
+    summary: "Total attack bisimulation is the T8 primitive; AF isomorphism derived; forth/back on edgeB."
+  - turn: 1
+    type: experiment
+    id: "N305"
+    routing: direct
+    provenance: ai-executed
+    summary: "T8 passes 143-job build, 60-declaration coverage, 2058-report audit, empty discipline diff."
+  - turn: 1
+    type: decision
+    id: "N306"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Contested cell kept; attack derivation #238 and StatusBridge decider #239 deferred; plan retired."
+  - turn: 1
+    type: observation
+    id: "O132"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Pre-flight compilation of plan Lean blocks as a dispatch heuristic."
+  - turn: 1
+    type: observation
+    id: "O133"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Plan-flagged pitfalls anti-correlated with actual failures."
+  - turn: 1
+    type: observation
+    id: "O134"
+    routing: staged
+    provenance: ai-executed
+    summary: "Policy.WellFormed permits symmetric contraries in rule-free policies."
+  - turn: 1
+    type: observation
+    id: "O135"
+    routing: staged
+    provenance: ai-executed
+    summary: "Classical.choice provenance in PW-T8 is Grounded.labelC_spec; bisimulation core axiom-free."
+  - turn: 1
+    type: observation
+    id: "O136"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Path-order vs composition-order convention split between T8 and T9 comp operators."
+  - turn: 1
+    type: claim
+    id: "C50"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "T8: grounded status preserved under a total attack bisimulation; isomorphism's injectivity unused."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Executed the PW-T8 plan via /implement with per-task spec and quality
+      reviews; pre-compiled every plan Lean block; created AFBisim.lean,
+      Status.lean, Examples/PWStatus.lean; wired Lara.lean, AxCheck.lean, CI;
+      wrote the freeze record, name-map section, T6/T9 pointers; filed issues
+      #238/#239; retired the plan; pushed and opened PR #240; wrote this ARA
+      closeout.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/AFBisim.lean"
+      - "lean/Lara/PW/Status.lean"
+      - "lean/Lara/Examples/PWStatus.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - ".github/workflows/ci.yml"
+      - "docs/theory-pw-t8-status-preservation.md"
+      - "docs/paper-lean-name-map.md"
+      - "docs/theory-pw-t6-structural-transport.md"
+      - "docs/theory-pw-t9-path-composition.md"
+      - "plans/2026-09-04-theory-pw-t8-status-preservation.md (deleted)"
+      - "ara/evidence/proofs/pw_t8_status_preservation.md"
+      - "ara/evidence/README.md"
+      - "ara/logic/claims.md"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/sessions/2026-09-04_004.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+
+claims_touched:
+  - id: C50
+    action: created
+    turn: 1
+  - id: C47
+    action: revised
+    turn: 1
+  - id: C48
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C47
+    field: Conditions
+    before: "Untested boundary: whether the gap persists under non-identity translations, across contexts with different signatures, or for status transitions other than justified-to-defeated."
+    after: "The other side of the boundary is now T8 (C50): under the additional StatusBridge hypotheses — matched and attack forth/back — status is preserved, and the T7 edge fails matched at leaf l2; justified, defeated, gap, and contested transport off the identity across contexts with disjoint signatures. Untested boundary: status behaviour under non-injective (merging) translations."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "PR #240 discharges the boundary this claim recorded; the separation itself is unchanged and remains supported."
+  - turn: 1
+    entry: C48
+    field: Conditions
+    before: "Untested boundary: edge-indexed (world-dependent or ambiguous) translation, partial leaf maps, bridges renaming question vocabulary, and attack correspondence (T8, #193)."
+    after: "Untested boundary: edge-indexed (world-dependent or ambiguous) translation, partial leaf maps, and bridges renaming question vocabulary. Attack correspondence is now a separate T8 theorem package (C50; `Lara.PW.Status`; `ara/evidence/proofs/pw_t8_status_preservation.md`), not a remaining boundary of this T6 claim."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Mirrors the earlier T9 discharge wording; T6 limitation 3 carries the pointer in docs."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User chose "Skip review, implement anyway" for the un-reviewed plan and
+      later "All three" for creating issues, pushing, and opening the PR. The
+      agent pre-compiled every plan Lean block; 12 defects, none in a flagged
+      spot, one undecidable-in-principle decide.
+
+open_threads:
+  - "PR #240 awaits review and merge."
+  - "Issue #238: derive StatusBridge.forth/back from declared-attack transport."
+  - "Issue #239: executable StatusBridge checker with a soundness theorem."
+  - "Possible follow-up: widen claimSupport_corr to take AttackBisim instead of StatusBridge (interface change, declined in-PR)."
+
+ai_suggestions_pending:
+  - "O132 (pre-flight compilation as a dispatch heuristic) awaits user affirmation or artifact commitment."

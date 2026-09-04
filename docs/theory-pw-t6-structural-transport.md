@@ -199,7 +199,9 @@ These are design commitments, not oversights; each has a named home.
 3. **Attacks do not transport.** The contract preserves nothing about attack
    structure — deliberately, since basic support checking does not read
    attacks. Attack correspondence is exactly the additional hypothesis T8
-   (#193) must introduce.
+   (#193) must introduce. Discharged by T8 (#193): the attack correspondence is
+   `PW.StatusBridge` (`forth`/`back`/`matched`); see
+   docs/theory-pw-t8-status-preservation.md.
 4. **No composition.** Transport along a path of structural bridges, and the
    commuting-triangle conditions for equating a composite with a direct
    bridge, are T9 (#190). `trSupport` composes as a function, but nothing

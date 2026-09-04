@@ -7896,3 +7896,115 @@ tree:
     - "lean/AxCheck.lean"
   status: resolved
   also_depends_on: [N300]
+
+- id: N302
+  type: decision
+  title: "Implement the PW-T8 plan without a cleared engineering review, with pre-flight compilation in its place"
+  provenance: user-revised
+  timestamp: "2026-09-04T13:10"
+  choice: >
+    The user chose to implement plan 8a77787 despite no cleared engineering
+    review. In its place every plan Lean block was compiled in scratch before
+    its implementer was dispatched, and each task still passed an independent
+    spec-compliance review and a code-quality review before commit.
+  alternatives:
+    - "Run /plan-eng-review first — recommended by the agent, declined by the user."
+    - "Implement task-by-task and let implementers discover defects mid-loop — rejected as the costlier path."
+  evidence:
+    - "plans/2026-09-04-theory-pw-t8-status-preservation.md at 8a77787 (retired in 5637540)"
+    - "ara/evidence/proofs/pw_t8_status_preservation.md §Process record"
+  status: resolved
+  also_depends_on: [N293]
+
+- id: N303
+  type: experiment
+  title: "Pre-flight compilation of the PW-T8 plan's Lean blocks"
+  provenance: ai-executed
+  timestamp: "2026-09-04T13:10"
+  description: >
+    Compiled each task's plan Lean blocks in scratch files against the pinned
+    toolchain (Lean 4.32.0) before dispatch, repairing proof scripts only.
+  result: >
+    12 defect sites across 5 of 7 Lean tasks (Task 2: 1; Task 4: 2; Task 5: 3;
+    Task 7: 6), only 2 anticipated by the plan; every pitfall the plan flagged
+    compiled as written. Defects: over-applied List.not_mem_nil; two
+    dependent-motive rewrite failures through CheckedNode's type; a world
+    binder rejected under semireducible BridgeData.frame; show/rw failing on
+    the same unfolding; nested-if split; string-literal disequality; Decidable
+    synthesis on interleaved bounded binders; Option.some.inj direction; a
+    decide over ∀ t : SupportTerm (undecidable in principle); an unused simp
+    argument producing a linter warning; a modal-cell statement needing an
+    explicit context index. No theorem statement was altered by any fix.
+  evidence:
+    - "ara/evidence/proofs/pw_t8_status_preservation.md §Process record"
+    - "https://github.com/ARA-Labs/lara/pull/240"
+  status: resolved
+  also_depends_on: [N302]
+
+- id: N304
+  type: decision
+  title: "Make the total attack bisimulation the T8 primitive and derive the design's AF isomorphism"
+  provenance: user
+  timestamp: "2026-09-04T13:10"
+  choice: >
+    The plan freezes AttackBisim (dom, left_total, right_total, forth, back)
+    as the generic notion and proves the design's AF isomorphism as a corollary
+    (AFIso.toBisim). At a structural bridge the relation is Corr, and the T8
+    hypotheses StatusBridge are Admits, matched, and forth/back on the compiled
+    edge decider; the support-set correspondence is derived, not assumed,
+    needing SymMap.Injective for the reflection half.
+  alternatives:
+    - "Prove only the isomorphism route — rejected: the same induction is needed and the injectivity half is never consumed."
+    - "State forth/back on declared attacks — deferred to issue #238; T8's design statement is the AF-level correspondence."
+  evidence:
+    - "lean/Lara/PW/AFBisim.lean"
+    - "lean/Lara/PW/Status.lean"
+    - "docs/theory-pw-t8-status-preservation.md §1"
+  status: resolved
+  also_depends_on: [N302]
+
+- id: N305
+  type: experiment
+  title: "PW-T8 mechanized: status_transport and its witnesses pass every gate"
+  provenance: ai-executed
+  timestamp: "2026-09-04T13:10"
+  description: >
+    Built AFBisim.lean, Status.lean, and Examples/PWStatus.lean per the plan,
+    wired them into Lara.lean, AxCheck.lean, and the CI coverage list, and ran
+    the build, targeted coverage, axiom audit, wrapper-discipline diff, and a
+    hypothesis-necessity negative check.
+  result: >
+    lake build completed successfully with 143 jobs; AxCheck coverage passed
+    for 60 declarations; the axiom audit passed with 2058 reports of which 60
+    are PW-T8, all within propext/Classical.choice/Quot.sound; the discipline
+    diff over the nine frozen modules is empty; removing hSB or hinj from
+    status_transport leaves an unfillable goal. justified, defeated, gap, and
+    contested each transport off the identity; the T7 identity edge fails
+    matched at leaf l2.
+  evidence:
+    - "ara/evidence/proofs/pw_t8_status_preservation.md"
+    - "https://github.com/ARA-Labs/lara/pull/240"
+  status: resolved
+  also_depends_on: [N303, N304]
+
+- id: N306
+  type: decision
+  title: "Close out PW-T8: keep the executable contested cell, defer attack derivation and a StatusBridge decider"
+  provenance: ai-suggested
+  timestamp: "2026-09-04T13:10"
+  choice: >
+    The plan's optional contested cell landed because checkUnit accepts
+    symmetric contraries, so all four statuses have an executable cell.
+    Deriving forth/back from declared-attack transport is issue #238; an
+    executable StatusBridge checker with a soundness theorem is issue #239.
+    The freeze record, name map, and T6/T9 limitation pointers are committed
+    and the plan file retired.
+  alternatives:
+    - "Record contested as covered by the theorem only — not needed; the cell is executable."
+    - "Widen claimSupport_corr to take AttackBisim instead of StatusBridge — declined as an interface change to the approved spec; noted for follow-up."
+  evidence:
+    - "https://github.com/ARA-Labs/lara/issues/238"
+    - "https://github.com/ARA-Labs/lara/issues/239"
+    - "docs/theory-pw-t8-status-preservation.md §9"
+  status: resolved
+  also_depends_on: [N305]

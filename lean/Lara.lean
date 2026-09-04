@@ -247,6 +247,25 @@
 --     comparison-level incomparability, never a local status; grounded-status
 --     preservation is the T8 boundary (#193), while approximation bridges
 --     remain tracker #189 — Lara.PW.Compose and Lara.Examples.PWCompose.
+--   * PW-T8 conditional status preservation (issue #193, tracker #189):
+--     grounded labelling and four-state claim status over an abstract AF are
+--     invariant under a total attack bisimulation, with the design's AF
+--     isomorphism as a corollary whose injectivity half no proof consumes —
+--     Lara.PW.AFBisim. At a structural bridge the bisimulation is the
+--     bridge-induced index relation between compiled arguments; the T8
+--     hypotheses `StatusBridge` are T6's `Admits`, its converse `matched`,
+--     and attack forth/back on the compiled edge decider; complete-support
+--     sets correspond for every translatable query through T6 transport and
+--     `≡`-reflection along an injective translation; `status_transport`
+--     then preserves `gap`/`justified`/`contested`/`defeated` at once, and
+--     the modal reading collapses `RobustlyJustified`/`PossiblyJustified`
+--     to the local status. Status bridges compose along the T9 composite —
+--     Lara.PW.Status. The T7 identity edge is a forward attack homomorphism
+--     that fails `matched`; one renaming translation transports `justified`,
+--     `defeated`, `gap`, and `contested` off the identity, and one `[b]`
+--     cell instantiates the modal reading — Lara.Examples.PWStatus.
+--     Neither T6 nor T9 is strengthened: every bridge-level result takes
+--     `StatusBridge` (or an explicit `SupportCorr`) as an extra hypothesis.
 --   * the fragment/linking context calculus and contextual representation
 --     independence (theory M4 part A, issue #187): fragments with import/export
 --     interfaces, a witnessed link guard, linking that saturates cross-boundary
@@ -324,3 +343,6 @@ import Lara.Examples.PW
 import Lara.Examples.PWStructural
 import Lara.PW.Compose
 import Lara.Examples.PWCompose
+import Lara.PW.AFBisim
+import Lara.PW.Status
+import Lara.Examples.PWStatus

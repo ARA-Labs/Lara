@@ -2852,3 +2852,93 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O132
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-suggested
+  content: >
+    Compiling every Lean block of an implementation plan in scratch before
+    dispatching its implementer converts mid-loop proof stalls into known
+    fixes; on PW-T8 it found 12 defect sites across 5 of 7 tasks, 10 of them
+    unflagged by the plan.
+  context: >
+    The plan skipped engineering review at the user's choice; pre-flight
+    compilation stood in for it during /implement.
+  potential_type: heuristic
+  bound_to: [N302, N303]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O133
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-suggested
+  content: >
+    A plan's self-flagged pitfalls were anti-correlated with its actual
+    failures: every flagged risk (generalize motive, trTerm.eq_def,
+    Option.bind_eq_some spelling, empty-registry acceptance) compiled as
+    written, while all 12 real defects sat in unflagged proof steps.
+  context: >
+    Observed across the PW-T8 pre-flight; single plan, so a regularity not a
+    law.
+  potential_type: heuristic
+  bound_to: [N303]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O134
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-executed
+  content: >
+    Policy.WellFormed does not forbid symmetric contraries: it constrains only
+    strict-reachable rule conclusions, so a rule-free policy declaring p and q
+    mutual contraries is accepted by checkUnit, and both arguments come out
+    grounded-undec (status contested).
+  context: >
+    Enabled the optional PW-T8 contested cell (unitS3_accepted,
+    t8_contested_cells).
+  potential_type: constraint
+  bound_to: [N305, N306]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O135
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-executed
+  content: >
+    In the PW-T8 rows Classical.choice enters only via Grounded.labelC_spec;
+    the bisimulation core (AttackBisim.symm, directIn/Out_bisim, the iff
+    forms, AFIso.toBisim, supportCorr_of_image) is axiom-free, and
+    statusC_congr needs only propext and Quot.sound.
+  context: >
+    Established by #print axioms during Task 9's quality review, correcting a
+    draft that blamed by_cases (a real Decidable instance exists).
+  potential_type: concept
+  bound_to: [N305]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O136
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-suggested
+  content: >
+    Composition operators split by convention: StatusBridge.comp h₁ h₂ and
+    SymMap.Injective.comp h₁ h₂ take legs in path order (first leg first),
+    while T9's StructuralBridge.comp B₂ B₁ and SymMap.comp m₂ m₁ take
+    function-composition order.
+  context: >
+    Recorded in docs/theory-pw-t8-status-preservation.md §6 and the Status.lean
+    header; a reader cue, not a theorem.
+  potential_type: concept
+  bound_to: [N304]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
