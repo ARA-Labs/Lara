@@ -81,6 +81,8 @@ import Lara.PW.Translation
 import Lara.PW.Structural
 import Lara.Examples.PW
 import Lara.Examples.PWStructural
+import Lara.PW.Compose
+import Lara.Examples.PWCompose
 
 open Lara
 
@@ -2274,6 +2276,47 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.cert_support_renamed
 #print axioms Lara.Examples.PW.hasSupport_cert
 #print axioms Lara.Examples.PW.cert_transport
+
+/-! ### PW-T9 — structural-path composition foundation (issue #190) -/
+-- Task 1 (Lara.PW.Compose): first-leg-first Kleisli translation laws,
+-- structural-bridge composition, and coherent transport along typed paths.
+#print axioms Lara.PW.SymMap.id_comp
+#print axioms Lara.PW.SymMap.comp_id
+#print axioms Lara.PW.trTerm_comp
+#print axioms Lara.PW.trTerms_comp
+#print axioms Lara.PW.trAtom_comp
+#print axioms Lara.PW.trAtoms_comp
+#print axioms Lara.PW.trAtom_comp_none_left
+#print axioms Lara.PW.trAtom_comp_none_mid
+#print axioms Lara.PW.trPat_comp
+#print axioms Lara.PW.trPats_comp
+#print axioms Lara.PW.trAPat_comp
+#print axioms Lara.PW.trAPats_comp
+#print axioms Lara.PW.trSubst_comp
+#print axioms Lara.PW.trSupport_comp
+#print axioms Lara.PW.trSupportList_comp
+#print axioms Lara.PW.trSupportDis_comp
+#print axioms Lara.PW.trQuestion_comp
+#print axioms Lara.PW.trQuestions_comp
+#print axioms Lara.PW.trRule_comp
+#print axioms Lara.PW.support_transport_comp
+#print axioms Lara.PW.BridgePath.trans_eq_compose
+#print axioms Lara.PW.path_support_transport
+
+-- Task 2 (Lara.Examples.PWCompose): foundation witnesses for a live two-leg
+-- path, certificate composition, a mid-path vocabulary gap, and non-empty
+-- translations.
+#print axioms Lara.Examples.PW.Compose.ren2_conclusion
+#print axioms Lara.Examples.PW.Compose.ren_path_trans
+#print axioms Lara.Examples.PW.Compose.ren_path_transport
+#print axioms Lara.Examples.PW.Compose.certComp_two_live_legs
+#print axioms Lara.Examples.PW.Compose.mid_path_out_of_vocabulary
+#print axioms Lara.Examples.PW.Compose.mid_path_translationUndefined
+#print axioms Lara.Examples.PW.Compose.trSubst_nonempty_computes
+#print axioms Lara.Examples.PW.Compose.trPat_nonempty_computes
+#print axioms Lara.Examples.PW.Compose.mid_path_support_undefined
+#print axioms Lara.Examples.PW.Compose.trQuestions_nonempty_computes
+#print axioms Lara.Examples.PW.Compose.trSupportDis_nonempty_computes
 
 /-! ### Theory M4 — the fragment/linking context calculus (issue #187)
 

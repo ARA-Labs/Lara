@@ -235,6 +235,16 @@
 --     Lara.Examples.PWStructural. The theorem neither assumes nor concludes
 --     grounded status preservation (that boundary is T8, #193); the modules
 --     only import — see docs/theory-pw-t6-structural-transport.md
+--   * the PW-T9 structural-path composition foundation (issue #190, tracker
+--     #189): `SymMap` composition is Kleisli and first-leg-first
+--     (`m₂.comp m₁` applies `m₁` before `m₂`), while `BridgePath` keeps the
+--     chosen sequence of structural bridges as first-class typed data.
+--     Stepwise support transport is coherent with transport along the path's
+--     folded composite, and a translation gap after a successful first leg is
+--     comparison-level incomparability rather than a local status —
+--     Lara.PW.Compose and Lara.Examples.PWCompose. This is the composition
+--     foundation only; commuting-triangle and accepted-relation results are
+--     reserved for the stacked PR 2.
 --   * the fragment/linking context calculus and contextual representation
 --     independence (theory M4 part A, issue #187): fragments with import/export
 --     interfaces, a witnessed link guard, linking that saturates cross-boundary
@@ -310,3 +320,5 @@ import Lara.PW.Translation
 import Lara.PW.Structural
 import Lara.Examples.PW
 import Lara.Examples.PWStructural
+import Lara.PW.Compose
+import Lara.Examples.PWCompose

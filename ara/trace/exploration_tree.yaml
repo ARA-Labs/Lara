@@ -7636,3 +7636,34 @@ tree:
     - "cross-notes: issues #215 and #216 (reopening triggers)"
   status: resolved
   also_depends_on: [N277, N290]
+
+- id: N292
+  type: experiment
+  title: "Adversarial PW-T9 plan review finds path/relation theorem gaps"
+  provenance: ai-executed
+  timestamp: "2026-09-03T08:38"
+  description: >
+    Reviewed plans/2026-09-03-theory-pw-t9-path-composition.md against issue
+    #190, its canonical composition section, and the landed PW0/T6 Lean modules,
+    explicitly excluding the twelve findings already accepted by the prior
+    review. Ran a Lean 4.32 stdin probe for the equality-direction proof pattern
+    used by both free-corner lemmas.
+  result: >
+    The plan does not constrain Frame.R/Frame.accept/Frame.A and therefore does
+    not prove the required relation-composite or modal agreement; its named
+    direct-agreement theorem is binary rather than quantified over arbitrary
+    BridgePath; its mid-path incomparability witness uses raw SymMaps rather than
+    a typed bridge path; and its negative witnesses do not state the checked
+    derivations their comments claim. Lean 4.32 rejected the final proof pattern
+    in commutes_on_rules/commutes_on_leaves because the available equality has
+    the opposite orientation. The close-out task also omits the plan-file
+    deletion required by its own discipline audit.
+  evidence:
+    - "plans/2026-09-03-theory-pw-t9-path-composition.md"
+    - "lean/Lara/PW/Outer.lean:83-96"
+    - "lean/Lara/PW/Instance.lean:98-106"
+    - "lean/Lara/PW/Structural.lean:465-469"
+    - "GitHub issue ARA-Labs/lara#190 and its linked canonical Composition section"
+    - "Lean 4.32 stdin elaboration probe: opposite-orientation Option.some equality rejected"
+  status: resolved
+  also_depends_on: [N289]

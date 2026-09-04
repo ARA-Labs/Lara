@@ -2723,3 +2723,92 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O125
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A composition theorem for the outer possible-world model must compose or
+    explicitly equate the accepted world relation, not merely the checker-tied
+    support-membership predicate Admits. Equality of support translations can
+    force equality of Admits while leaving Frame.R, Frame.accept, and therefore
+    Frame.A unconstrained.
+  context: >
+    Adversarial review of the PW-T9 implementation plan against issue #190 and
+    the canonical possible-world composition design.
+  potential_type: architecture
+  bound_to: [N292]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O126
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    Making arbitrary BridgePath values first-class does not characterize
+    direct-versus-path agreement when the commuting predicate and agreement
+    theorem accept only two individual legs. The agreement API must quantify
+    over the same arbitrary path abstraction as the transport theorem, or the
+    claimed path-level result remains a binary special case.
+  context: >
+    Adversarial review of the PW-T9 implementation plan after excluding twelve
+    previously accepted review findings.
+  potential_type: architecture
+  bound_to: [N292]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O127
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A mid-path translation-gap witness over two standalone SymMap values does
+    not witness failure along a typed path of StructuralBridge values. If the
+    milestone claims path-level incomparability, the fixture must inhabit the
+    path abstraction and connect its failed translation to the comparison
+    result.
+  context: >
+    The planned gapSym example invokes trAtom on a raw composed map and then the
+    generic compare_none theorem; it constructs no BridgePath or bridge.
+  potential_type: constraint
+  bound_to: [N292]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O128
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A counterexample advertised as disagreement between checked transports must
+    contain the HasSupport judgments it claims. Computing unequal trSupport or
+    trAtom outputs alone does not establish that either output is a checked
+    derivation, even when suitable leaf typings exist elsewhere in the fixture.
+  context: >
+    The planned direct_ne_composed_support and direct_ne_composed_claim theorem
+    types contain only translation equalities and inequalities while their
+    comments and acceptance mapping claim checked transports and derivations.
+  potential_type: heuristic
+  bound_to: [N292]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O129
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A close-out invariant is not executable when it appears only in the final
+    audit prose. If a plan requires its own transient file to be deleted before
+    the PR, deletion, staging, verification, and commit must be an explicit
+    implementation step.
+  context: >
+    The PW-T9 plan says its plan file will be deleted in the PR, but Task 11 has
+    no deletion or deletion commit step.
+  potential_type: heuristic
+  bound_to: [N292]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

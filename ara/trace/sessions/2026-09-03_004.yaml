@@ -1,0 +1,78 @@
+session:
+  id: "2026-09-03_004"
+  date: "2026-09-03"
+  started: "2026-09-03T08:38"
+  last_turn: "2026-09-03T08:38"
+  turn_count: 1
+  summary: >
+    Adversarial review of the PW-T9 plan found unresolved relation/modal
+    composition, arbitrary-path agreement, path-level gap-witness,
+    checked-counterexample, proof-direction, and close-out sequencing gaps
+    beyond the twelve findings already accepted by the prior review.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N292"
+    routing: direct
+    provenance: ai-executed
+    summary: "PW-T9 plan checked against issue #190, canonical design, landed PW0/T6 code, and Lean 4.32; six new gaps found."
+  - turn: 1
+    type: observation
+    id: "O125"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Admits equality does not compose or equate the outer accepted relation Frame.A."
+  - turn: 1
+    type: observation
+    id: "O126"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Direct agreement is binary despite arbitrary BridgePath being the milestone abstraction."
+  - turn: 1
+    type: observation
+    id: "O127"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Mid-path incomparability fixture uses raw SymMaps, not a typed bridge path."
+  - turn: 1
+    type: observation
+    id: "O128"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Negative witnesses omit the checked HasSupport judgments their comments claim."
+  - turn: 1
+    type: observation
+    id: "O129"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Required plan-file deletion is absent from the close-out task."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Read the PW-T9 plan, landed PW0/T6 modules, issue #190, and the canonical
+      composition design; ran a minimal Lean 4.32 elaboration probe for the
+      suspicious equality proof.
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The researcher requested a terse outside-voice review that reports only
+      issues missed by an earlier twelve-item review.
+
+open_threads:
+  - "Decide whether T9 must compose/equate the actual accepted relation Frame.A, as issue #190 and the canonical design say."
+  - "Generalize direct agreement and its commuting predicate from two legs to arbitrary BridgePath."
+  - "Replace or relabel the raw-SymMap gap example and strengthen negative examples with checked judgments."
+  - "Fix the reversed equality proofs in commutes_on_rules and commutes_on_leaves."
+  - "Add an explicit plan-file deletion and commit step to Task 11."
+
+ai_suggestions_pending:
+  - "O125-O129 are adversarial review findings awaiting researcher adjudication."

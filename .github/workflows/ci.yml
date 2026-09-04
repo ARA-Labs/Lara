@@ -188,5 +188,7 @@ jobs:
             Lara/Context/Compose.lean \
             Lara/Context/Equivalence.lean \
             Lara/Context/Surface.lean \
-            Lara/Examples/Linking.lean
+            Lara/Examples/Linking.lean \
+            Lara/PW/Compose.lean \
+            Lara/Examples/PWCompose.lean
           lake env lean AxCheck.lean | ../scripts/check-axioms.sh
