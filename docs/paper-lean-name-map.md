@@ -1098,6 +1098,7 @@ stable key.
 | Non-vacuous certificate acceptance through two live bridge legs | `Examples.PW.Compose.certCertTgt2`, `bridgeCert2`, `certCompBridge`; `certComp_two_live_legs` | `Lara/Examples/PWCompose.lean` |
 | Real atom, support-transport, and context-tied applicability vocabulary gaps | `Examples.PW.Compose.gapSym`, `gapBridgeRen`, `gapBridgeRen2`, `gapBridgeDrop`, `gapPath`, `gapSupportPath`; `mid_path_out_of_vocabulary`, `mid_path_translationUndefined`, `mid_path_support_undefined`; `gapConFirstBridge`, `gapConDropBridge`, `gapAppContext`, `gapAppWorld`, `gap_admits_comp_fails` | `Lara/Examples/PWCompose.lean` |
 | Nonempty substitution, pattern, question-list, and discharge-list computations | `Examples.PW.Compose.substRenSrc`, `substRenTgt`, `substRenTgt2`, `patRenSrc`, `patRenTgt`, `patRenTgt2`, `questionRenSrc`, `questionRenTgt`, `questionRenTgt2`, `supportDisRenSrc`, `supportDisRenTgt`, `supportDisRenTgt2`; `trSubst_nonempty_computes`, `trPat_nonempty_computes`, `trQuestions_nonempty_computes`, `trSupportDis_nonempty_computes` | `Lara/Examples/PWCompose.lean` |
+| Focused first-leg-gap and unit-law witnesses (issue #235) | `Examples.PW.Compose.first_leg_gap_computes`, `first_leg_gap_law`, `id_comp_ren2`, `comp_id_ren2` | `Lara/Examples/PWCompose.lean` |
 
 **Not X** notes:
 

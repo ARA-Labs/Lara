@@ -945,4 +945,40 @@ theorem trSupportDis_nonempty_computes :
           (trSupportDis ren2Sym leafMapRen2) :=
   ⟨rfl, rfl, rfl, rfl⟩
 
+
+/-! ### Focused witnesses for the remaining composition laws (issue #235) -/
+
+/-- `trAtom_comp_none_left` on a concrete first-leg vocabulary gap: `q` is
+outside `renSym`'s predicate vocabulary, and the gap survives composition
+with `ren2Sym` — by computation. -/
+theorem first_leg_gap_computes :
+    trAtom renSym (.atom "q" .nil) = none ∧
+      trAtom (ren2Sym.comp renSym) (.atom "q" .nil) = none :=
+  ⟨rfl, rfl⟩
+
+/-- The same composite gap, this time *derived* by `trAtom_comp_none_left`
+from the first-leg gap, pinning the law itself on concrete data. -/
+theorem first_leg_gap_law :
+    trAtom (ren2Sym.comp renSym) (.atom "q" .nil) = none :=
+  trAtom_comp_none_left (m₂ := ren2Sym) first_leg_gap_computes.1
+
+/-- `SymMap.id_comp` at the non-identity partial map `ren2Sym`, with the
+composite's action pinned on a predicate hit, a predicate miss, a
+constructor hit, and a constructor miss. -/
+theorem id_comp_ren2 :
+    SymMap.id.comp ren2Sym = ren2Sym ∧
+      (SymMap.id.comp ren2Sym).predMap "p_r" = some "p_rr" ∧
+      (SymMap.id.comp ren2Sym).predMap "ghost" = none ∧
+      (SymMap.id.comp ren2Sym).conMap "payload" = some "payload_r" ∧
+      (SymMap.id.comp ren2Sym).conMap "ghost" = none :=
+  ⟨SymMap.id_comp ren2Sym, rfl, rfl, rfl, rfl⟩
+
+/-- `SymMap.comp_id` at the same non-identity partial map, same four pins. -/
+theorem comp_id_ren2 :
+    ren2Sym.comp SymMap.id = ren2Sym ∧
+      (ren2Sym.comp SymMap.id).predMap "p_r" = some "p_rr" ∧
+      (ren2Sym.comp SymMap.id).predMap "ghost" = none ∧
+      (ren2Sym.comp SymMap.id).conMap "payload" = some "payload_r" ∧
+      (ren2Sym.comp SymMap.id).conMap "ghost" = none :=
+  ⟨SymMap.comp_id ren2Sym, rfl, rfl, rfl, rfl⟩
 end Lara.Examples.PW.Compose

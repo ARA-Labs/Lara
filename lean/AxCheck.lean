@@ -2385,6 +2385,12 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.Compose.trQuestions_nonempty_computes
 #print axioms Lara.Examples.PW.Compose.trSupportDis_nonempty_computes
 
+-- Focused witnesses for the remaining composition laws (issue #235).
+#print axioms Lara.Examples.PW.Compose.first_leg_gap_computes
+#print axioms Lara.Examples.PW.Compose.first_leg_gap_law
+#print axioms Lara.Examples.PW.Compose.id_comp_ren2
+#print axioms Lara.Examples.PW.Compose.comp_id_ren2
+
 /-! ### PW-T8 — conditional status preservation (issue #193) -/
 -- The definitions `AttackBisim`, `SupportCorr`, `AFIso`, `AFIso.graph`,
 -- `SymMap.Injective`, `Corr`, `StatusBridge` have no standalone rows; the

@@ -109,6 +109,8 @@ conformance witnesses intended for the final `AxCheck.lean` gate.
 | Non-vacuous certificate acceptance through two live bridge legs | `Examples.PW.Compose.certCertTgt2`, `bridgeCert2`, `certCompBridge`; `certComp_two_live_legs` |
 | Real atom, support-transport, and context-tied applicability vocabulary gaps | `Examples.PW.Compose.gapSym`, `gapBridgeRen`, `gapBridgeRen2`, `gapBridgeDrop`, `gapPath`, `gapSupportPath`; `mid_path_out_of_vocabulary`, `mid_path_translationUndefined`, `mid_path_support_undefined`; `gapConFirstBridge`, `gapConDropBridge`, `gapAppContext`, `gapAppWorld`, `gap_admits_comp_fails` |
 | Nonempty lifted-map computations and their concrete inputs and outputs | `Examples.PW.Compose.substRenSrc`, `substRenTgt`, `substRenTgt2`, `patRenSrc`, `patRenTgt`, `patRenTgt2`, `questionRenSrc`, `questionRenTgt`, `questionRenTgt2`, `supportDisRenSrc`, `supportDisRenTgt`, `supportDisRenTgt2`; `trSubst_nonempty_computes`, `trPat_nonempty_computes`, `trQuestions_nonempty_computes`, `trSupportDis_nonempty_computes` |
+| First-leg atom gap witnessed both computed and via the law | `Examples.PW.Compose.first_leg_gap_computes`, `first_leg_gap_law` |
+| Unit laws pinned at a non-identity partial map | `Examples.PW.Compose.id_comp_ren2`, `comp_id_ren2` |
 
 The three-edge witness is genuinely a `BridgePath` with three `.cons`
 constructors: the two live rename edges are followed by a reflexive edge in the
