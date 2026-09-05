@@ -44,6 +44,7 @@ import Lara.Complexity.Gadget
 import Lara.Complexity.Reduction
 import Lara.Complexity
 import Lara.Examples.Complexity
+import Lara.Examples.Complexity.Realization
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
@@ -188,15 +189,15 @@ open Lara
 #print axioms Lara.Groups.usesLeafDisch_mono
 
 -- Result 11 / C01: nf/≡ carve-out.
-#print axioms equiv_iff_nf_eq
-#print axioms equiv_refl
-#print axioms equiv_symm
-#print axioms equiv_trans
-#print axioms nfTerm_idem
-#print axioms nfTerms_idem
-#print axioms nf_idem
-#print axioms equiv_nf
-#print axioms no_reorder
+#print axioms Lara.equiv_iff_nf_eq
+#print axioms Lara.equiv_refl
+#print axioms Lara.equiv_symm
+#print axioms Lara.equiv_trans
+#print axioms Lara.nfTerm_idem
+#print axioms Lara.nfTerms_idem
+#print axioms Lara.nf_idem
+#print axioms Lara.equiv_nf
+#print axioms Lara.no_reorder
 
 -- Result 12: presentation-AST codec round-trip (`parse ∘ print = id`). The two
 -- top-level theorems plus every helper round-trip lemma the module proves
@@ -2702,3 +2703,438 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Linking.cert_relabel_moves_args
 #print axioms Lara.Examples.Linking.cert_relabel_moves
 
+-- ---------------------------------------------------------------------------
+-- Ledger completion (issue #242).
+--
+-- The sections above are organized by *result*: each groups the theorems one
+-- spec result or plan task delivered. That organization left the modules
+-- below with public theorems no section claimed, because no single result
+-- owned them. `CLAUDE.md`'s rule is "every new theorem", not "every
+-- headline theorem", so they are pinned here, grouped by module, and the CI
+-- gate now runs `check-axcheck-coverage.py` over the whole `Lara/` tree
+-- rather than a named file list — the gap was invisible precisely because
+-- the gate's scope and the rule's scope had drifted apart.
+--
+-- 344 entries. Internal helpers that happen to be public
+-- (`memberOf_iff`, `map_pair_eq_zip_map`, `findDuplicate_none_nodup`) are
+-- pinned like everything else: making them `private` instead would be a
+-- semantic change to the module interface, and would create a third,
+-- undocumented visibility category. Absence from this ledger is meaningful
+-- only for public declarations — `#print axioms` cannot reach a `private`
+-- one from another module (`docs/examples-corpus-decision.md`).
+-- ---------------------------------------------------------------------------
+
+-- Lara/ND.lean (9).
+-- Result 10, remainder: the ND reference adapter's grammar, typing, and
+-- Boolean semantics beyond the headline soundness/exactness pair.
+#print axioms Lara.ND.lookup_mem
+#print axioms Lara.ND.lookup_lt
+#print axioms Lara.ND.lookup_append_lt
+#print axioms Lara.ND.lookup_append_ge
+#print axioms Lara.ND.lookup_of_lt
+#print axioms Lara.ND.lookup_none_of_ge
+#print axioms Lara.ND.depProj_zero
+#print axioms Lara.ND.depProj_append
+#print axioms Lara.ND.depProj_succ_shiftDown
+
+-- Lara/RA.lean (2).
+-- `ra@1` rational arithmetic: the cross-multiplied comparison core the
+-- relative-drop certificate is decided by.
+#print axioms Lara.RA.decodeFrac_den_pos
+#print axioms Lara.RA.dropEqWB_iff
+
+-- Lara/Grounded.lean (22).
+-- Results 5-7, remainder: the generic finite-AF grounded core — executable
+-- evaluator, least-fixed-point judgment, four-state aggregation, and
+-- conflict-freedom, all quantified over an arbitrary finite `AF`.
+#print axioms Lara.Grounded.memB_iff
+#print axioms Lara.Grounded.defendedB_iff
+#print axioms Lara.Grounded.mem_step
+#print axioms Lara.Grounded.step_subset_args
+#print axioms Lara.Grounded.step_mono
+#print axioms Lara.Grounded.iter_subset_args
+#print axioms Lara.Grounded.iter_mono
+#print axioms Lara.Grounded.directOut_iff
+#print axioms Lara.Grounded.directIn_mem_args
+#print axioms Lara.Grounded.iter_directIn
+#print axioms Lara.Grounded.filter_length_le
+#print axioms Lara.Grounded.filter_length_lt
+#print axioms Lara.Grounded.stable_succ
+#print axioms Lara.Grounded.stable_add
+#print axioms Lara.Grounded.deficit_lt
+#print axioms Lara.Grounded.deficit_iter_zero
+#print axioms Lara.Grounded.deficit_bound
+#print axioms Lara.Grounded.directIn_sound
+#print axioms Lara.Grounded.directOut_sound
+#print axioms Lara.Grounded.directOut_iff_bex
+#print axioms Lara.Grounded.attackedByIn_iff
+#print axioms Lara.Grounded.labelC_spec
+
+-- Lara/Blocked.lean (7).
+-- Spec 4.3 conservative reporting (issue #76): the quarantine deficit bounds
+-- that keep missing evidence from making a claim look stronger.
+#print axioms Lara.Blocked.any_congr
+#print axioms Lara.Blocked.closureIter_subset_args
+#print axioms Lara.Blocked.closureIter_mono
+#print axioms Lara.Blocked.cstable_succ
+#print axioms Lara.Blocked.cstable_add
+#print axioms Lara.Blocked.cdeficit_lt
+#print axioms Lara.Blocked.cdeficit_bound
+
+-- Lara/RawAttack.lean (3).
+-- Raw attack identity, remainder: endpoint-safe filtering must go through the
+-- declared argument ids, never the resolved support terms.
+#print axioms Lara.RawAttack.resolveAttacks_rebut
+#print axioms Lara.RawAttack.resolveAttacks_undercut
+#print axioms Lara.RawAttack.resolveAttacks_undermine
+
+-- Lara/Policy.lean (2).
+-- Executable policy well-formedness: the 8.1-frozen Path-B restriction.
+#print axioms Lara.Policy.patMayOverlap_of_instances
+#print axioms Lara.Policy.patsMayOverlap_of_instances
+
+-- Lara/Erase.lean (6).
+-- Result 9 (Theorem 2, Model A), remainder: the uniform injective certificate
+-- relabel and the identity node bijection it induces on the compiled AF.
+#print axioms Lara.Erase.mapAssurList_eq
+#print axioms Lara.Erase.mapAssur_inj
+#print axioms Lara.Erase.mapAssurList_inj
+#print axioms Lara.Erase.mapAssurDis_inj
+#print axioms Lara.Erase.containsBList_mapAssur
+#print axioms Lara.Erase.containsBDis_mapAssur
+
+-- Lara/EraseTransport.lean (5).
+-- Result 9, well-checkedness transport: `mapCertProg` exhibits the second
+-- `CheckedProgram`, so `backend_replacement` is non-vacuous by construction.
+#print axioms Lara.Erase.mapAssurList_length
+#print axioms Lara.Erase.mapAssurDis_length
+#print axioms Lara.Erase.mapAssurDis_keys
+#print axioms Lara.Erase.mapAssurList_getElem?_some
+#print axioms Lara.Erase.mapAssurDis_getElem?_some
+
+-- Lara/Surface/Syntax.lean (69).
+-- M5 surface calculus: the presentation AST's own laws.
+#print axioms Lara.Surface.cellObligationB_iff
+#print axioms Lara.Surface.comparisonExpansion?_sound
+#print axioms Lara.Surface.comparisonExpansion?_complete
+#print axioms Lara.Surface.propTextWellFormedB_iff
+#print axioms Lara.Surface.policyMatchesB_iff
+#print axioms Lara.Surface.RenamingSound.toComparison
+#print axioms Lara.Surface.Renaming.programValues_renameProgram
+#print axioms Lara.Surface.Renaming.valueNames_renameProgram
+#print axioms Lara.Surface.Renaming.leafIds_renameProgram
+#print axioms Lara.Surface.Renaming.argIds_renameProgram
+#print axioms Lara.Surface.Renaming.claimIds_renameProgram
+#print axioms Lara.Surface.Renaming.statusIds_renameProgram
+#print axioms Lara.Surface.Renaming.groupDecls_renameProgram
+#print axioms Lara.Surface.Renaming.ruleIds_renamePolicy
+#print axioms Lara.Surface.Renaming.premiseLabels_renameRule
+#print axioms Lara.Surface.Renaming.questionIds_renameRule
+#print axioms Lara.Surface.Renaming.comparisonDecls_renameProgram
+#print axioms Lara.Surface.Renaming.declaredLeaves_renameProgram
+#print axioms Lara.Surface.Renaming.atomFixed_of_decl
+#print axioms Lara.Surface.Renaming.lookupSurfaceSubst_rename
+#print axioms Lara.Surface.Renaming.substituteValueTerm_rename
+#print axioms Lara.Surface.Renaming.substituteValueTerms_rename
+#print axioms Lara.Surface.Renaming.substituteValueAtom_rename
+#print axioms Lara.Surface.Renaming.parseNl_renameNl
+#print axioms Lara.Surface.Renaming.nodup_map_iff_of_injective
+#print axioms Lara.Surface.Renaming.valueBindingsWellFormedB_rename
+#print axioms Lara.Surface.Renaming.ruleById_rename
+#print axioms Lara.Surface.Renaming.comparisonExpansion?_rename
+#print axioms Lara.Surface.Renaming.comparisonsWellFormedB_rename
+#print axioms Lara.Surface.Renaming.priorPayloadsFromProgram_nil
+#print axioms Lara.Surface.Renaming.priorPayloadsFromProgram_append_one
+#print axioms Lara.Surface.Renaming.renameResidualTerm_eq_iff
+#print axioms Lara.Surface.Renaming.renameResidualTerms_eq_iff
+#print axioms Lara.Surface.Renaming.instantiateSurfaceAtom_renameResidual
+#print axioms Lara.Surface.Renaming.renameResidualAtom_eq_renameValueAtom
+#print axioms Lara.Surface.Renaming.renameResidualSupportTerm_eq_renameSupportTerm
+#print axioms Lara.Surface.Renaming.supportTermFixed_of_explicitArg
+#print axioms Lara.Surface.Renaming.declaredLeaves_renameResidual
+#print axioms Lara.Surface.Renaming.premisePatternFixed
+#print axioms Lara.Surface.Renaming.conclusionPatternFixed
+#print axioms Lara.Surface.Renaming.conclOfTerm_rename
+#print axioms Lara.Surface.Renaming.resolveReference_rename
+#print axioms Lara.Surface.Renaming.buildArgument_rename
+#print axioms Lara.Surface.Renaming.comparisonExpansionData_fixed
+#print axioms Lara.Surface.Renaming.argumentPayloadsFromProgram
+#print axioms Lara.Surface.Renaming.resolveReference_preserves_priorPayloads
+#print axioms Lara.Surface.Renaming.buildArgument_preserves_priorPayloads
+#print axioms Lara.Surface.Renaming.buildProgramArguments_rename
+#print axioms Lara.Surface.Renaming.inferredArgsWellFormedB_rename
+#print axioms Lara.Surface.Renaming.supportTermsToList_rename
+#print axioms Lara.Surface.Renaming.renameResidualSupportTerm_eq_iff
+#print axioms Lara.Surface.Renaming.labelIndex?_rename
+#print axioms Lara.Surface.Renaming.certificateResolver_rename
+#print axioms Lara.Surface.Renaming.hasSymbolicRef_renameCertPayload
+#print axioms Lara.Surface.Renaming.lowerPayload_sx_resolver_fixed
+#print axioms Lara.Surface.Renaming.opaqueDefault_node_children_contained
+#print axioms Lara.Surface.Renaming.lowerPayload_isSome_renameCertPayload
+#print axioms Lara.Surface.Renaming.namedCertificatesWellFormedB_rename
+#print axioms Lara.Surface.Renaming.collectProgramArguments_rename
+#print axioms Lara.Surface.Renaming.questionByName?_rename
+#print axioms Lara.Surface.Renaming.surfaceAttacksWellFormedB_rename
+#print axioms Lara.Surface.Renaming.policyMatchesB_rename
+#print axioms Lara.Surface.Renaming.declarationIdsNodupB_rename
+#print axioms Lara.Surface.Renaming.ruleNamespacesWellFormedB_rename
+#print axioms Lara.Surface.Renaming.canonicalPremiseLabelsB_rename
+#print axioms Lara.Surface.Renaming.statusesWellFormedB_rename
+#print axioms Lara.Surface.Renaming.groupsWellFormedB_rename
+#print axioms Lara.Surface.Renaming.supportedB_rename
+#print axioms Lara.Surface.Binding.supported_sourceOnly_rename_iff
+
+-- Lara/Surface/Binding.lean (103).
+-- M5 surface calculus: binding and typed-renaming laws. The largest single
+-- block — `GlobalRenaming` proves one transport lemma per syntactic category,
+-- and each is a theorem the ledger owes an entry.
+#print axioms Lara.Surface.Binding.substPat_compose_of_fresh
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_prop
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_question
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_leaf
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_rule
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_arg
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_argRef
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_obligation
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_source
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_group
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_measurand
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_dataset
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_premiseLabel
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_valueName
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_valueName_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_prop_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_question_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_leaf_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_rule_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_arg_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_argRef_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_obligation_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_group_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_measurand_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_dataset_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.sourceOnly_premiseLabel_fun
+#print axioms Lara.Surface.Binding.GlobalRenaming.injective
+#print axioms Lara.Surface.Binding.id_prop
+#print axioms Lara.Surface.Binding.id_question
+#print axioms Lara.Surface.Binding.id_leaf
+#print axioms Lara.Surface.Binding.id_rule
+#print axioms Lara.Surface.Binding.id_arg
+#print axioms Lara.Surface.Binding.id_argRef
+#print axioms Lara.Surface.Binding.id_obligation
+#print axioms Lara.Surface.Binding.id_source
+#print axioms Lara.Surface.Binding.id_group
+#print axioms Lara.Surface.Binding.id_measurand
+#print axioms Lara.Surface.Binding.id_dataset
+#print axioms Lara.Surface.Binding.id_premiseLabel
+#print axioms Lara.Surface.Binding.id_valueName
+#print axioms Lara.Surface.Binding.comp_prop
+#print axioms Lara.Surface.Binding.comp_question
+#print axioms Lara.Surface.Binding.comp_leaf
+#print axioms Lara.Surface.Binding.comp_rule
+#print axioms Lara.Surface.Binding.comp_arg
+#print axioms Lara.Surface.Binding.comp_argRef
+#print axioms Lara.Surface.Binding.comp_obligation
+#print axioms Lara.Surface.Binding.comp_source
+#print axioms Lara.Surface.Binding.comp_group
+#print axioms Lara.Surface.Binding.comp_measurand
+#print axioms Lara.Surface.Binding.comp_dataset
+#print axioms Lara.Surface.Binding.comp_premiseLabel
+#print axioms Lara.Surface.Binding.comp_valueName
+#print axioms Lara.Surface.Binding.id_prop_fun
+#print axioms Lara.Surface.Binding.id_question_fun
+#print axioms Lara.Surface.Binding.id_leaf_fun
+#print axioms Lara.Surface.Binding.id_rule_fun
+#print axioms Lara.Surface.Binding.id_arg_fun
+#print axioms Lara.Surface.Binding.id_argRef_fun
+#print axioms Lara.Surface.Binding.id_obligation_fun
+#print axioms Lara.Surface.Binding.id_source_fun
+#print axioms Lara.Surface.Binding.id_group_fun
+#print axioms Lara.Surface.Binding.id_measurand_fun
+#print axioms Lara.Surface.Binding.id_dataset_fun
+#print axioms Lara.Surface.Binding.id_premiseLabel_fun
+#print axioms Lara.Surface.Binding.id_valueName_fun
+#print axioms Lara.Surface.Binding.comp_prop_fun
+#print axioms Lara.Surface.Binding.comp_question_fun
+#print axioms Lara.Surface.Binding.comp_leaf_fun
+#print axioms Lara.Surface.Binding.comp_rule_fun
+#print axioms Lara.Surface.Binding.comp_arg_fun
+#print axioms Lara.Surface.Binding.comp_argRef_fun
+#print axioms Lara.Surface.Binding.comp_obligation_fun
+#print axioms Lara.Surface.Binding.comp_source_fun
+#print axioms Lara.Surface.Binding.comp_group_fun
+#print axioms Lara.Surface.Binding.comp_measurand_fun
+#print axioms Lara.Surface.Binding.comp_dataset_fun
+#print axioms Lara.Surface.Binding.comp_premiseLabel_fun
+#print axioms Lara.Surface.Binding.comp_valueName_fun
+#print axioms Lara.Surface.Binding.renameText_id
+#print axioms Lara.Surface.Binding.renameText_comp
+#print axioms Lara.Surface.Binding.renameText_injective
+#print axioms Lara.Surface.Binding.rename_question_val
+#print axioms Lara.Surface.Binding.rename_leaf_val
+#print axioms Lara.Surface.Binding.rename_rule_val
+#print axioms Lara.Surface.Binding.rename_arg_val
+#print axioms Lara.Surface.Binding.rename_argRef_val
+#print axioms Lara.Surface.Binding.rename_obligation_val
+#print axioms Lara.Surface.Binding.rename_group_val
+#print axioms Lara.Surface.Binding.rename_measurand_val
+#print axioms Lara.Surface.Binding.rename_dataset_val
+#print axioms Lara.Surface.Binding.rename_premiseLabel_val
+#print axioms Lara.Surface.Binding.rename_valueName_val
+#print axioms Lara.Surface.Binding.renameSourceRefsProgram_eq_of_fixed
+#print axioms Lara.Surface.Binding.renameSupportTerm_id
+#print axioms Lara.Surface.Binding.renameSupportTerms_id
+#print axioms Lara.Surface.Binding.renameDischarges_id
+#print axioms Lara.Surface.Binding.renameProgram_id
+#print axioms Lara.Surface.Binding.renameProgram_comp
+#print axioms Lara.Surface.Binding.renamePolicy_id
+#print axioms Lara.Surface.Binding.renamePolicy_comp
+#print axioms Lara.Surface.Binding.renameProgram_sourceOnly
+#print axioms Lara.Surface.Binding.renamePolicy_sourceOnly
+
+-- Lara/Surface/ValueBinding.lean (11).
+-- M5 surface calculus: value expansion — soundness, completeness over the
+-- reviewed well-formed fragment, idempotence, and declaration-id stability.
+#print axioms Lara.Surface.Renaming.duplicateName?_rename
+#print axioms Lara.Surface.Renaming.valueBindingErrors_rename
+#print axioms Lara.Surface.Renaming.valueBindingErrors_some_cases
+#print axioms Lara.Surface.Renaming.expandNl_rename_related
+#print axioms Lara.Surface.Renaming.substitutedDecls_rename
+#print axioms Lara.Surface.bind_ok_reduce
+#print axioms Lara.Surface.expandValues_eq_of_none_checks
+#print axioms Lara.Surface.expandValues_preserves_decl_ids
+#print axioms Lara.Surface.expandValues_fixed_point
+#print axioms Lara.Surface.Renaming.termNullaryCons_of_sortOf_some
+#print axioms Lara.Surface.expandValues_idempotent
+
+-- Lara/Surface/Comparison.lean (11).
+-- M5 surface calculus: comparison-block expansion into the generated
+-- sub-claim, strict recheck argument, and defeasible bridge.
+#print axioms Lara.Surface.generatedIdsFresh_of_ids_nodup
+#print axioms Lara.Surface.duplicateComparisonClaim?_eq_none_iff
+#print axioms Lara.Surface.expandComparisons_preserves_order
+#print axioms Lara.Surface.expandComparisons_generated_ids
+#print axioms Lara.Surface.expandComparisons_eliminates
+#print axioms Lara.Surface.Renaming.generatedIdCollisionClaim?_rename
+#print axioms Lara.Surface.Renaming.duplicateComparisonClaim?_rename
+#print axioms Lara.Surface.Renaming.generatedDecls_eraseNl
+#print axioms Lara.Surface.Renaming.generatedDecls_rename
+#print axioms Lara.Surface.Renaming.generatedDecls_reconstruction_safe
+#print axioms Lara.Surface.Renaming.generatedArgs_rename
+
+-- Lara/Surface/Check.lean (71).
+-- M5 Task 4: the independent syntax-directed surface judgment, and the
+-- sound/complete pairs relating it to the executable checker.
+#print axioms Lara.Surface.exceptIsOk_iff
+#print axioms Lara.Surface.findDuplicate_none_nodup
+#print axioms Lara.Surface.findDuplicate_none_of_nodup
+#print axioms Lara.Surface.memberOf_iff
+#print axioms Lara.Surface.map_pair_eq_zip_map
+#print axioms Lara.Surface.findsRule_sound
+#print axioms Lara.Surface.findsRule_complete
+#print axioms Lara.Surface.ruleById_sound
+#print axioms Lara.Surface.ruleById_complete
+#print axioms Lara.Surface.resolveReference_sound
+#print axioms Lara.Surface.resolveReference_complete
+#print axioms Lara.Surface.resolveReferences_sound
+#print axioms Lara.Surface.resolveReferences_complete
+#print axioms Lara.Surface.matchResolvedPremises_sound
+#print axioms Lara.Surface.matchResolvedPremises_complete
+#print axioms Lara.Surface.paramsCoveredB_iff
+#print axioms Lara.Surface.resolveNamedDischarges_sound
+#print axioms Lara.Surface.resolveNamedDischarges_complete
+#print axioms Lara.Surface.resolveImplicitPremises_sound
+#print axioms Lara.Surface.resolveImplicitPremises_complete
+#print axioms Lara.Surface.reconstructExplicitTerm_sound
+#print axioms Lara.Surface.reconstructExplicitTerms_sound
+#print axioms Lara.Surface.reconstructExplicitDischarges_sound
+#print axioms Lara.Surface.reconstructExplicitTerm_complete
+#print axioms Lara.Surface.reconstructExplicitTerms_complete
+#print axioms Lara.Surface.reconstructExplicitDischarges_complete
+#print axioms Lara.Surface.conclOfTerm_sound
+#print axioms Lara.Surface.conclOfTerm_complete
+#print axioms Lara.Surface.checksAssurance_complete
+#print axioms Lara.Surface.lowerToSupportTerm_sound
+#print axioms Lara.Surface.lowerToSupportTerms_sound
+#print axioms Lara.Surface.lowerToSupportDischarges_sound
+#print axioms Lara.Surface.lowerToSupportTerm_complete
+#print axioms Lara.Surface.lowerToSupportTerms_complete
+#print axioms Lara.Surface.lowerToSupportDischarges_complete
+#print axioms Lara.Surface.reconstructArgument_conclusion_sound
+#print axioms Lara.Surface.reconstructArgument_sound
+#print axioms Lara.Surface.reconstructArgument_complete
+#print axioms Lara.Surface.reconstructArgs_sound
+#print axioms Lara.Surface.reconstructArgs_complete
+#print axioms Lara.Surface.resolvePathCore_sound
+#print axioms Lara.Surface.resolvePathCore_complete
+#print axioms Lara.Surface.resolveSurfaceAttack_sound
+#print axioms Lara.Surface.resolveSurfaceAttack_complete
+#print axioms Lara.Surface.resolveSurfaceAttacks_sound
+#print axioms Lara.Surface.resolveSurfaceAttacks_complete
+#print axioms Lara.Surface.expandDecls_complete_independent
+#print axioms Lara.Surface.expandComparisons_complete_independent
+#print axioms Lara.Surface.expandComparisons_guards
+#print axioms Lara.Surface.AttackEndpointsDeclared.of_surfaceAttacksWellFormed
+#print axioms Lara.Surface.assembleGuards_ok
+#print axioms Lara.Surface.firstRejectedLeaf_none_of_admission
+#print axioms Lara.Surface.assembleGuards_complete
+#print axioms Lara.Surface.CoreObligations.signatureStage_none
+#print axioms Lara.Surface.semanticIdentifierChecks_complete
+#print axioms Lara.Surface.assemble_sound
+#print axioms Lara.Surface.assemble_complete
+#print axioms Lara.Surface.check_eq_of_assemble
+#print axioms Lara.Surface.Renaming.sxToSExpr_renameCertPayload
+#print axioms Lara.Surface.Renaming.lowerAssuranceCertificate_rename
+#print axioms Lara.Surface.Renaming.lowerToSupportTerm_rename
+#print axioms Lara.Surface.Renaming.lowerToSupportTerms_rename
+#print axioms Lara.Surface.Renaming.lowerToSupportDischarges_rename
+#print axioms Lara.Surface.Renaming.premiseMatches_rename
+#print axioms Lara.Surface.Renaming.reconstructExplicitTerm_rename
+#print axioms Lara.Surface.Renaming.reconstructExplicitTerms_rename
+#print axioms Lara.Surface.Renaming.reconstructExplicitDischarges_rename
+#print axioms Lara.Surface.Renaming.reconstructArgument_rename
+#print axioms Lara.Surface.Renaming.reconstructArgs_rename
+#print axioms Lara.Surface.Renaming.resolvePathCore_rename
+#print axioms Lara.Surface.Renaming.resolveSurfaceAttacks_rename
+
+-- Lara/Surface/Elaborate.lean (5).
+-- M5 Task 5: production-ordered pure presentation elaboration.
+#print axioms Lara.Surface.checksAttacks_raw_alignment
+#print axioms Lara.Surface.checksAttacks_raw_selection_alignment
+#print axioms Lara.Surface.Renaming.rawResolveAttacks_rename
+#print axioms Lara.Surface.Renaming.resolveAligned_rename
+#print axioms Lara.Surface.Renaming.validateAttackEndpoints_rename
+
+-- Lara/Surface/Correctness.lean (9).
+-- M5 surface calculus: the core-visible correctness statements over the
+-- elaborated unit.
+#print axioms Lara.Surface.Renaming.expandValues_rename_related
+#print axioms Lara.Surface.Renaming.expandComparisons_semantic_related
+#print axioms Lara.Surface.Renaming.expandValuesThenComparisons_rename_related
+#print axioms Lara.Surface.Renaming.evaluateAdmission_rename
+#print axioms Lara.Surface.Renaming.RenamingSound.coreSigma
+#print axioms Lara.Surface.Renaming.hasSupport_rename_iff
+#print axioms Lara.Surface.Renaming.hasAttack_rename_iff
+#print axioms Lara.Surface.Renaming.attackComplete_rename_iff
+#print axioms Lara.Surface.Renaming.reconstructExpandedArgs_rename
+
+-- Lara/Examples/Realizability.lean (4).
+-- M1 counterexample corpus: the frozen two-field compiler invariant is
+-- necessary but not sufficient for realizability. A separation result, so it
+-- has no cross-language differential counterpart
+-- (`docs/examples-corpus-decision.md`).
+#print axioms Lara.Examples.Realizability.swapFirstTwo_involutive
+#print axioms Lara.Examples.Realizability.nonempty_ground_covers
+#print axioms Lara.Examples.Realizability.nonempty_accepted_nodes
+#print axioms Lara.Examples.Realizability.nonemptyRetainedNode_mem
+
+-- Lara/Examples/Complexity/Realization.lean (5).
+-- M2b Task-2 restricted-class realization spike. Until issue #242 this module
+-- was an orphan: nothing imported it, so `lake build` never elaborated it and
+-- its theorems were unchecked. `Lara.lean` now imports it, which is what puts
+-- it in the build and in reach of `#print axioms`.
+#print axioms Lara.Examples.Complexity.Realization.checkUnit_path_ok
+#print axioms Lara.Examples.Complexity.Realization.checkUnit_cycle_ok
+#print axioms Lara.Examples.Complexity.Realization.checkUnit_reversedPath_rejected
+#print axioms Lara.Examples.Complexity.Realization.rawUnitOfFormula_shape
+#print axioms Lara.Examples.Complexity.Realization.rawUnitOfFormula_fixedFields

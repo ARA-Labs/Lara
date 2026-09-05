@@ -321,6 +321,10 @@ import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
 import Lara.Examples.Complexity
+-- The Task-2 restricted-class realization spike. Imported here because
+-- nothing else did: the module was outside the build entirely, so its
+-- theorems were never elaborated and could not be axiom-audited (#242).
+import Lara.Examples.Complexity.Realization
 import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics

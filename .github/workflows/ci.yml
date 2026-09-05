@@ -180,18 +180,12 @@ jobs:
           set -o pipefail
           ../scripts/test-check-axioms.sh
           python3 ../scripts/test_check_axcheck_coverage.py
+          # Whole-tree coverage (issue #242). This used to name ten files, and
+          # the narrow list was itself the defect: CLAUDE.md requires the
+          # ledger to cover every theorem, so a gate scoped to one milestone's
+          # files goes green while the rule is broken everywhere else. It hid
+          # 353 unpinned public declarations. Keep this a `find`, not a list —
+          # a new module must not be able to join the tree unaudited.
           python3 ../scripts/check-axcheck-coverage.py AxCheck.lean \
-            Lara/Invariants/Merge.lean \
-            Lara/Context/Fragment.lean \
-            Lara/Context/Link.lean \
-            Lara/Context/Merge.lean \
-            Lara/Context/Compose.lean \
-            Lara/Context/Equivalence.lean \
-            Lara/Context/Surface.lean \
-            Lara/Examples/Linking.lean \
-            Lara/PW/Compose.lean \
-            Lara/Examples/PWCompose.lean \
-            Lara/PW/AFBisim.lean \
-            Lara/PW/Status.lean \
-            Lara/Examples/PWStatus.lean
+            $(find Lara -name '*.lean' | sort)
           lake env lean AxCheck.lean | ../scripts/check-axioms.sh

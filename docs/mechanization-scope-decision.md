@@ -6,8 +6,11 @@ third `Lara.Check.CheckConfig` flag. The implementation plan that produced the
 split has since been executed and deleted, per the `plans/` rule; this record
 carries the durable half, and the cycle it fed is `m5-freeze-v5`
 (`docs/m5-freeze-checklist.md`). Companion to
-`docs/mechanization-plan.md` (what is mechanized) and the Haddock on
-`Lara.Check.CheckConfig` (the same rule, stated for readers of the code)._
+`docs/mechanization-plan.md` (what is mechanized),
+`docs/examples-corpus-decision.md` (what the Lean example corpus is for, and
+why the ledger's coverage rule is meaningful only over public declarations),
+and the Haddock on `Lara.Check.CheckConfig` (the same rule, stated for readers
+of the code)._
 
 ## The rule
 

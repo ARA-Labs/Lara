@@ -2742,7 +2742,8 @@ private theorem allForms_checked_result_is_ok :
 private def allFormsChecked :
     Lara.Unit.CheckedUnit Lara.Driver.dcanon manualAllFormsElaborated.gamma
       (Lara.Support.certOkOf surfaceEnv.registry) :=
-  allFormsCheckedResult.toOption.get (by native_decide)
+  Lara.Check.Unit.okValue
+    (Lara.Check.Unit.exists_ok_of_isOk allForms_checked_result_is_ok)
 
 /-- The independently compiled all-forms carrier computes the same five
 concrete observations. -/
@@ -2828,7 +2829,8 @@ private theorem stableNone_checked_result_is_ok :
 private def stableNoneChecked :
     Lara.Unit.CheckedUnit Lara.Driver.dcanon stableNoneOutput.gamma
       (Lara.Support.certOkOf surfaceEnv.registry) :=
-  stableNoneCheckedResult.toOption.get (by native_decide)
+  Lara.Check.Unit.okValue
+    (Lara.Check.Unit.exists_ok_of_isOk stableNone_checked_result_is_ok)
 
 /-- Stable nonexistence is preserved as the dedicated `noExtension`
 observation on both sides; it is not collapsed into a local four-state status. -/
