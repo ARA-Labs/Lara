@@ -1071,6 +1071,7 @@ stable key.
 | Substitution composition law | `PW.trSubst_comp` | `Lara/PW/Compose.lean` |
 | Support, support-list, and discharge-list composition laws | `PW.trSupport_comp`, `PW.trSupportList_comp`, `PW.trSupportDis_comp` | `Lara/PW/Compose.lean` |
 | Question and question-list composition laws | `PW.trQuestion_comp`, `PW.trQuestions_comp` | `Lara/PW/Compose.lean` |
+| Shared all-or-nothing traversal seam under the composition family (issue #234) | `PW.zipOpt`; `PW.zipOpt_bind`, `PW.trAtoms_cons`, `PW.trTerms_cons`, `PW.trTerm_con`, `PW.trPats_cons`, `PW.trAPats_cons`, `PW.trSubst_cons`, `PW.trQuestions_cons`, `PW.trSupportList_cons`, `PW.trSupportDis_cons` | `Lara/PW/Compose.lean` |
 | Rule composition law | `PW.trRule_comp` | `Lara/PW/Compose.lean` |
 | Binary exact-bridge composition | `PW.StructuralBridge.comp` | `Lara/PW/Compose.lean` |
 | Explicit two-step checker applicability and its exact composite factorization | `PW.AdmitsSteps`; `PW.admits_comp`, `PW.admits_steps_of_intermediate` | `Lara/PW/Compose.lean` |
@@ -1099,6 +1100,10 @@ stable key.
 | Real atom, support-transport, and context-tied applicability vocabulary gaps | `Examples.PW.Compose.gapSym`, `gapBridgeRen`, `gapBridgeRen2`, `gapBridgeDrop`, `gapPath`, `gapSupportPath`; `mid_path_out_of_vocabulary`, `mid_path_translationUndefined`, `mid_path_support_undefined`; `gapConFirstBridge`, `gapConDropBridge`, `gapAppContext`, `gapAppWorld`, `gap_admits_comp_fails` | `Lara/Examples/PWCompose.lean` |
 | Nonempty substitution, pattern, question-list, and discharge-list computations | `Examples.PW.Compose.substRenSrc`, `substRenTgt`, `substRenTgt2`, `patRenSrc`, `patRenTgt`, `patRenTgt2`, `questionRenSrc`, `questionRenTgt`, `questionRenTgt2`, `supportDisRenSrc`, `supportDisRenTgt`, `supportDisRenTgt2`; `trSubst_nonempty_computes`, `trPat_nonempty_computes`, `trQuestions_nonempty_computes`, `trSupportDis_nonempty_computes` | `Lara/Examples/PWCompose.lean` |
 | Focused first-leg-gap and unit-law witnesses (issue #235) | `Examples.PW.Compose.first_leg_gap_computes`, `first_leg_gap_law`, `id_comp_ren2`, `comp_id_ren2` | `Lara/Examples/PWCompose.lean` |
+<<<<<<< HEAD
+| `zipOpt` all-or-nothing computation witness (issue #234) | `Examples.PW.Compose.zipOpt_computes` | `Lara/Examples/PWCompose.lean` |
+=======
+>>>>>>> origin/main
 
 **Not X** notes:
 

@@ -2315,6 +2315,18 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.PW.trSupportDis_comp
 #print axioms Lara.PW.trQuestion_comp
 #print axioms Lara.PW.trQuestions_comp
+
+-- The shared traversal seam behind the composition family (issue #234).
+#print axioms Lara.PW.zipOpt_bind
+#print axioms Lara.PW.trAtoms_cons
+#print axioms Lara.PW.trTerms_cons
+#print axioms Lara.PW.trTerm_con
+#print axioms Lara.PW.trPats_cons
+#print axioms Lara.PW.trAPats_cons
+#print axioms Lara.PW.trSubst_cons
+#print axioms Lara.PW.trQuestions_cons
+#print axioms Lara.PW.trSupportList_cons
+#print axioms Lara.PW.trSupportDis_cons
 #print axioms Lara.PW.trRule_comp
 #print axioms Lara.PW.admits_comp
 #print axioms Lara.PW.admits_steps_of_intermediate
@@ -2390,6 +2402,7 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.Compose.first_leg_gap_law
 #print axioms Lara.Examples.PW.Compose.id_comp_ren2
 #print axioms Lara.Examples.PW.Compose.comp_id_ren2
+#print axioms Lara.Examples.PW.Compose.zipOpt_computes
 
 /-! ### PW-T8 — conditional status preservation (issue #193) -/
 -- The definitions `AttackBisim`, `SupportCorr`, `AFIso`, `AFIso.graph`,

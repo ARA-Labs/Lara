@@ -72,6 +72,85 @@ theorem SymMap.comp_id (m : SymMap) : m.comp SymMap.id = m := by
   cases m
   rfl
 
+/-! ### The shared traversal seam (issue #234) -/
+
+/-- All-or-nothing combination: the step every elementwise traversal takes. -/
+def zipOpt {α β γ : Type} (k : α → β → γ) : Option α → Option β → Option γ
+  | some a, some b => some (k a b)
+  | _, _ => none
+
+/-- The shared cons-step algebra of every `tr*_comp` list case: combining
+after both legs equals one leg, combine, then the second leg — provided the
+second leg's traversal takes the same cons step. -/
+theorem zipOpt_bind {α β γ α' β' γ' : Type}
+    (k : α → β → γ) (k' : α' → β' → γ')
+    (f : α → Option α') (fs : β → Option β') (g : γ → Option γ')
+    (hg : ∀ a b, g (k a b) = zipOpt k' (f a) (fs b))
+    (oa : Option α) (ob : Option β) :
+    zipOpt k' (oa.bind f) (ob.bind fs) = (zipOpt k oa ob).bind g := by
+  cases oa with
+  | none => cases ob <;> rfl
+  | some a =>
+    cases ob with
+    | none =>
+      simp only [Option.bind_some]
+      cases f a <;> rfl
+    | some b =>
+      simp only [Option.bind_some, zipOpt]
+      exact (hg a b).symm
+
+theorem trAtoms_cons (m : SymMap) (a : Atom) (as : List Atom) :
+    trAtoms m (a :: as) = zipOpt (· :: ·) (trAtom m a) (trAtoms m as) := by
+  cases h : trAtom m a <;> cases h' : trAtoms m as <;>
+    simp [trAtoms, zipOpt, h, h']
+
+theorem trTerms_cons (m : SymMap) (t : Term) (ts : Terms) :
+    trTerms m (.cons t ts) = zipOpt Terms.cons (trTerm m t) (trTerms m ts) := by
+  cases h : trTerm m t <;> cases h' : trTerms m ts <;>
+    simp [trTerms, zipOpt, h, h']
+
+theorem trTerm_con (m : SymMap) (k : String) (ts : Terms) :
+    trTerm m (.con k ts) = zipOpt Term.con (m.conMap k) (trTerms m ts) := by
+  cases h : m.conMap k <;> cases h' : trTerms m ts <;>
+    simp [trTerm, zipOpt, h, h']
+
+theorem trPats_cons (m : SymMap) (p : Pat) (ps : Pats) :
+    trPats m (.cons p ps) = zipOpt Pats.cons (trPat m p) (trPats m ps) := by
+  cases h : trPat m p <;> cases h' : trPats m ps <;>
+    simp [trPats, zipOpt, h, h']
+
+theorem trAPats_cons (m : SymMap) (ap : APat) (aps : List APat) :
+    trAPats m (ap :: aps) = zipOpt (· :: ·) (trAPat m ap) (trAPats m aps) := by
+  cases h : trAPat m ap <;> cases h' : trAPats m aps <;>
+    simp [trAPats, zipOpt, h, h']
+
+theorem trSubst_cons (m : SymMap) (x : VarId) (t : Term) (θ : Subst) :
+    trSubst m ((x, t) :: θ) =
+      zipOpt (fun t' θ' => (x, t') :: θ') (trTerm m t) (trSubst m θ) := by
+  cases h : trTerm m t <;> cases h' : trSubst m θ <;>
+    simp [trSubst, zipOpt, h, h']
+
+theorem trQuestions_cons (m : SymMap) (q : Question) (qs : List Question) :
+    trQuestions m (q :: qs) =
+      zipOpt (· :: ·) (trQuestion m q) (trQuestions m qs) := by
+  cases h : trQuestion m q <;> cases h' : trQuestions m qs <;>
+    simp [trQuestions, zipOpt, h, h']
+
+theorem trSupportList_cons (m : SymMap) (lm : LeafId → LeafId)
+    (w : SupportTerm) (ws : List SupportTerm) :
+    trSupportList m lm (w :: ws) =
+      zipOpt (· :: ·) (trSupport m lm w) (trSupportList m lm ws) := by
+  cases h : trSupport m lm w <;> cases h' : trSupportList m lm ws <;>
+    simp [trSupportList, zipOpt, h, h']
+
+theorem trSupportDis_cons (m : SymMap) (lm : LeafId → LeafId)
+    (q : QuestionId) (w : SupportTerm) (D : List (QuestionId × SupportTerm)) :
+    trSupportDis m lm ((q, w) :: D) =
+      zipOpt (fun w' D' => (q, w') :: D')
+        (trSupport m lm w) (trSupportDis m lm D) := by
+  cases h : trSupport m lm w <;> cases h' : trSupportDis m lm D <;>
+    simp [trSupportDis, zipOpt, h, h']
+
 mutual
   /-- `trTerm` along the composite is the Kleisli composition of the legs. -/
   theorem trTerm_comp (m₂ m₁ : SymMap) : ∀ t : Term,
@@ -79,28 +158,17 @@ mutual
     | .num _ => rfl
     | .str _ => rfl
     | .con k ts => by
-        unfold trTerm
-        rw [trTerms_comp]
+        rw [trTerm_con, trTerm_con, trTerms_comp m₂ m₁ ts]
         simp only [SymMap.comp]
-        cases hk : m₁.conMap k with
-        | none => simp
-        | some k' =>
-          cases hts : trTerms m₁ ts with
-          | none => simp
-          | some ts' => simp [trTerm]
+        exact zipOpt_bind _ _ _ _ _ (trTerm_con m₂) _ _
   /-- `trTerms` along the composite is the Kleisli composition of the legs. -/
   theorem trTerms_comp (m₂ m₁ : SymMap) : ∀ ts : Terms,
       trTerms (m₂.comp m₁) ts = (trTerms m₁ ts).bind (trTerms m₂)
     | .nil => rfl
     | .cons t ts => by
-        unfold trTerms
-        rw [trTerm_comp, trTerms_comp]
-        cases ht : trTerm m₁ t with
-        | none => simp
-        | some t' =>
-          cases hts : trTerms m₁ ts with
-          | none => simp
-          | some ts' => simp [trTerms]
+        rw [trTerms_cons, trTerms_cons, trTerm_comp m₂ m₁ t,
+          trTerms_comp m₂ m₁ ts]
+        exact zipOpt_bind _ _ _ _ _ (trTerms_cons m₂) _ _
 end
 
 /-- `trAtom` along the composite is the Kleisli composition of the legs —
@@ -123,14 +191,8 @@ theorem trAtoms_comp (m₂ m₁ : SymMap) : ∀ as : List Atom,
     trAtoms (m₂.comp m₁) as = (trAtoms m₁ as).bind (trAtoms m₂)
   | [] => rfl
   | a :: as => by
-      unfold trAtoms
-      rw [trAtom_comp, trAtoms_comp]
-      cases ha : trAtom m₁ a with
-      | none => simp
-      | some a' =>
-        cases has : trAtoms m₁ as with
-        | none => simp
-        | some as' => simp [trAtoms]
+      rw [trAtoms_cons, trAtoms_cons, trAtom_comp, trAtoms_comp m₂ m₁ as]
+      exact zipOpt_bind _ _ _ _ _ (trAtoms_cons m₂) _ _
 
 /-- A first-leg gap is a composite gap. -/
 theorem trAtom_comp_none_left {m₂ m₁ : SymMap} {a : Atom}
@@ -169,14 +231,9 @@ mutual
       trPats (m₂.comp m₁) ps = (trPats m₁ ps).bind (trPats m₂)
     | .nil => rfl
     | .cons p ps => by
-        unfold trPats
-        rw [trPat_comp, trPats_comp]
-        cases hp : trPat m₁ p with
-        | none => simp
-        | some p' =>
-          cases hps : trPats m₁ ps with
-          | none => simp
-          | some ps' => simp [trPats]
+        rw [trPats_cons, trPats_cons, trPat_comp m₂ m₁ p,
+          trPats_comp m₂ m₁ ps]
+        exact zipOpt_bind _ _ _ _ _ (trPats_cons m₂) _ _
 end
 
 /-- `trAPat` along the composite is the Kleisli composition of the legs. -/
@@ -197,28 +254,16 @@ theorem trAPats_comp (m₂ m₁ : SymMap) : ∀ aps : List APat,
     trAPats (m₂.comp m₁) aps = (trAPats m₁ aps).bind (trAPats m₂)
   | [] => rfl
   | ap :: aps => by
-      unfold trAPats
-      rw [trAPat_comp, trAPats_comp]
-      cases hap : trAPat m₁ ap with
-      | none => simp
-      | some ap' =>
-        cases haps : trAPats m₁ aps with
-        | none => simp
-        | some aps' => simp [trAPats]
+      rw [trAPats_cons, trAPats_cons, trAPat_comp, trAPats_comp m₂ m₁ aps]
+      exact zipOpt_bind _ _ _ _ _ (trAPats_cons m₂) _ _
 
 /-- `trSubst` along the composite is the Kleisli composition of the legs. -/
 theorem trSubst_comp (m₂ m₁ : SymMap) : ∀ θ : Subst,
     trSubst (m₂.comp m₁) θ = (trSubst m₁ θ).bind (trSubst m₂)
   | [] => rfl
   | (x, t) :: θ => by
-      unfold trSubst
-      rw [trTerm_comp, trSubst_comp]
-      cases ht : trTerm m₁ t with
-      | none => simp
-      | some t' =>
-        cases hθ : trSubst m₁ θ with
-        | none => simp
-        | some θ' => simp [trSubst]
+      rw [trSubst_cons, trSubst_cons, trTerm_comp, trSubst_comp m₂ m₁ θ]
+      exact zipOpt_bind _ _ _ _ _ (trSubst_cons m₂ x) _ _
 
 mutual
   /-- **The composed dependent partial support map is the Kleisli
@@ -275,21 +320,9 @@ mutual
           (trSupportList m₁ lm₁ ws).bind (trSupportList m₂ lm₂)
     | [] => rfl
     | w :: ws => by
-        unfold trSupportList
-        rw [trSupport_comp, trSupportList_comp]
-        cases hw₁ : trSupport m₁ lm₁ w with
-        | none =>
-          simp only [Option.bind_none]
-        | some w₁ =>
-          simp only [Option.bind_some]
-          cases hws₁ : trSupportList m₁ lm₁ ws with
-          | none =>
-            simp only [Option.bind_none]
-            cases hw₂ : trSupport m₂ lm₂ w₁ with
-            | none => rfl
-            | some w₂ => rfl
-          | some ws₁ =>
-            simp only [Option.bind_some, trSupportList]
+        rw [trSupportList_cons, trSupportList_cons,
+          trSupport_comp m₂ m₁ lm₂ lm₁ w, trSupportList_comp m₂ m₁ lm₂ lm₁ ws]
+        exact zipOpt_bind _ _ _ _ _ (trSupportList_cons m₂ lm₂) _ _
   /-- `trSupportDis` along the composite is the Kleisli composition. -/
   theorem trSupportDis_comp (m₂ m₁ : SymMap) (lm₂ lm₁ : LeafId → LeafId) :
       ∀ D : List (QuestionId × SupportTerm),
@@ -297,21 +330,9 @@ mutual
           (trSupportDis m₁ lm₁ D).bind (trSupportDis m₂ lm₂)
     | [] => rfl
     | (q, w) :: D => by
-        unfold trSupportDis
-        rw [trSupport_comp, trSupportDis_comp]
-        cases hw₁ : trSupport m₁ lm₁ w with
-        | none =>
-          simp only [Option.bind_none]
-        | some w₁ =>
-          simp only [Option.bind_some]
-          cases hD₁ : trSupportDis m₁ lm₁ D with
-          | none =>
-            simp only [Option.bind_none]
-            cases hw₂ : trSupport m₂ lm₂ w₁ with
-            | none => rfl
-            | some w₂ => rfl
-          | some D₁ =>
-            simp only [Option.bind_some, trSupportDis]
+        rw [trSupportDis_cons, trSupportDis_cons,
+          trSupport_comp m₂ m₁ lm₂ lm₁ w, trSupportDis_comp m₂ m₁ lm₂ lm₁ D]
+        exact zipOpt_bind _ _ _ _ _ (trSupportDis_cons m₂ lm₂ q) _ _
 end
 
 /-- `trQuestion` along the composite is the Kleisli composition of the legs. -/
@@ -329,14 +350,9 @@ theorem trQuestions_comp (m₂ m₁ : SymMap) : ∀ qs : List Question,
     trQuestions (m₂.comp m₁) qs = (trQuestions m₁ qs).bind (trQuestions m₂)
   | [] => rfl
   | q :: qs => by
-      unfold trQuestions
-      rw [trQuestion_comp, trQuestions_comp]
-      cases hq : trQuestion m₁ q with
-      | none => simp
-      | some q' =>
-        cases hqs : trQuestions m₁ qs with
-        | none => simp
-        | some qs' => simp [trQuestions]
+      rw [trQuestions_cons, trQuestions_cons, trQuestion_comp,
+        trQuestions_comp m₂ m₁ qs]
+      exact zipOpt_bind _ _ _ _ _ (trQuestions_cons m₂) _ _
 
 /-- `trRule` along the composite is the Kleisli composition of the legs:
 premises, conclusion, and answers compose; mode, parameters, the trusted

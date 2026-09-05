@@ -981,4 +981,13 @@ theorem comp_id_ren2 :
       (ren2Sym.comp SymMap.id).conMap "payload" = some "payload_r" ∧
       (ren2Sym.comp SymMap.id).conMap "ghost" = none :=
   ⟨SymMap.comp_id ren2Sym, rfl, rfl, rfl, rfl⟩
+
+/-- `zipOpt` is all-or-nothing: `some` only when both legs are `some`. All
+four cases pinned by computation (issue #234). -/
+theorem zipOpt_computes :
+    zipOpt (α := Nat) (β := Nat) (· + ·) (some 1) (some 2) = some 3 ∧
+      zipOpt (α := Nat) (β := Nat) (· + ·) (some 1) none = none ∧
+      zipOpt (α := Nat) (β := Nat) (· + ·) none (some 2) = none ∧
+      zipOpt (α := Nat) (β := Nat) (· + ·) none none = none :=
+  ⟨rfl, rfl, rfl, rfl⟩
 end Lara.Examples.PW.Compose
