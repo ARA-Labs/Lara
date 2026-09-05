@@ -87,6 +87,8 @@ import Lara.Examples.PWCompose
 import Lara.PW.AFBisim
 import Lara.PW.Status
 import Lara.Examples.PWStatus
+import Lara.PW.AttackTransport
+import Lara.Examples.PWAttack
 
 open Lara
 
@@ -3157,3 +3159,42 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Complexity.Realization.checkUnit_reversedPath_rejected
 #print axioms Lara.Examples.Complexity.Realization.rawUnitOfFormula_shape
 #print axioms Lara.Examples.Complexity.Realization.rawUnitOfFormula_fixedFields
+
+/-! ### PW-T8 — declared-attack transport (issue #238) -/
+
+-- Definitions `trAttack`, `trAttackList`, and the `AttackBridge` structure
+-- are audited transitively through the theorems below.
+#print axioms Lara.PW.trAttackList_cons
+#print axioms Lara.PW.trSupport_leaf
+#print axioms Lara.PW.trSupport_inst_inv
+#print axioms Lara.PW.trSubst_inj
+#print axioms Lara.PW.trSupport_inj
+#print axioms Lara.PW.trSupportList_inj
+#print axioms Lara.PW.trSupportDis_inj
+#print axioms Lara.PW.trSupport_eq_iff
+#print axioms Lara.PW.lookupDis_mem
+#print axioms Lara.PW.lookupDis_trSupportDis
+#print axioms Lara.PW.trSupportList_some_of_mem
+#print axioms Lara.PW.trSupportDis_some_of_mem
+#print axioms Lara.PW.trSupport_subterm
+#print axioms Lara.PW.trSupport_subterm_some
+#print axioms Lara.PW.containsB_trSupport
+#print axioms Lara.PW.containsBList_trSupport
+#print axioms Lara.PW.containsBDis_trSupport
+#print axioms Lara.PW.trAttack_source
+#print axioms Lara.PW.attackClosureB_trAttack
+#print axioms Lara.PW.coveredB_trAttack
+#print axioms Lara.PW.Contains_trSupport
+#print axioms Lara.PW.AttackOcc_trSupport
+#print axioms Lara.PW.AttackBridge.toStatusBridge
+
+-- Conformance cells: the S2/R2 AttackBridge, both negatives (eng review 2A),
+-- and the ques-position witness (eng review 7A).
+#print axioms Lara.Examples.PW.Attack.leafMapR_injective
+#print axioms Lara.Examples.PW.Attack.s2_r2_atts_transported
+#print axioms Lara.Examples.PW.Attack.s2_r2_attackBridge
+#print axioms Lara.Examples.PW.Attack.s2_r2_statusBridge_via_attacks
+#print axioms Lara.Examples.PW.Attack.gap_attack_undefined
+#print axioms Lara.Examples.PW.Attack.collapsed_containsB_breaks
+#print axioms Lara.Examples.PW.Attack.ques_position_computes
+#print axioms Lara.Examples.PW.Attack.ques_position_law

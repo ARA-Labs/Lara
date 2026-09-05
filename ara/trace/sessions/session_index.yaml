@@ -556,3 +556,10 @@ sessions:
   events_count: 11
   claims_touched: [C50, C47, C48]
   open_threads: 4
+- id: 2026-09-05_001
+  date: '2026-09-05'
+  summary: 'PW-T8/T9 follow-ups (#234, #235, #238, #239) delivered as PRs #243-#246: executable witnesses, zipOpt traversal seam, StatusBridge decider with soundness and completeness, and declared-attack transport deriving T8''s index-level clauses. T8 limitation 1 narrowed (Function.Injective lm boundary), not discharged; C50 conditions updated. Coverage 2262 → 2304; all local gates green.'
+  turn_count: 1
+  events_count: 6
+  claims_touched: [C50]
+  open_threads: 4

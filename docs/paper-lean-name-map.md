@@ -1100,10 +1100,7 @@ stable key.
 | Real atom, support-transport, and context-tied applicability vocabulary gaps | `Examples.PW.Compose.gapSym`, `gapBridgeRen`, `gapBridgeRen2`, `gapBridgeDrop`, `gapPath`, `gapSupportPath`; `mid_path_out_of_vocabulary`, `mid_path_translationUndefined`, `mid_path_support_undefined`; `gapConFirstBridge`, `gapConDropBridge`, `gapAppContext`, `gapAppWorld`, `gap_admits_comp_fails` | `Lara/Examples/PWCompose.lean` |
 | Nonempty substitution, pattern, question-list, and discharge-list computations | `Examples.PW.Compose.substRenSrc`, `substRenTgt`, `substRenTgt2`, `patRenSrc`, `patRenTgt`, `patRenTgt2`, `questionRenSrc`, `questionRenTgt`, `questionRenTgt2`, `supportDisRenSrc`, `supportDisRenTgt`, `supportDisRenTgt2`; `trSubst_nonempty_computes`, `trPat_nonempty_computes`, `trQuestions_nonempty_computes`, `trSupportDis_nonempty_computes` | `Lara/Examples/PWCompose.lean` |
 | Focused first-leg-gap and unit-law witnesses (issue #235) | `Examples.PW.Compose.first_leg_gap_computes`, `first_leg_gap_law`, `id_comp_ren2`, `comp_id_ren2` | `Lara/Examples/PWCompose.lean` |
-<<<<<<< HEAD
 | `zipOpt` all-or-nothing computation witness (issue #234) | `Examples.PW.Compose.zipOpt_computes` | `Lara/Examples/PWCompose.lean` |
-=======
->>>>>>> origin/main
 
 **Not X** notes:
 
@@ -1183,6 +1180,15 @@ key.
 | `contested` transport, with both cells evaluated | `Examples.PW.Status.polS3`, `ctxS3`, `wS3`, `polR3`, `ctxR3`, `wR3`, `bridgeR3`; `unitS3_accepted`, `unitR3_accepted`, `s3_corr_diag`, `s3_r3_statusBridge`; `t8_contested_preserved`, `t8_contested_cells` | `Lara/Examples/PWStatus.lean` |
 | The transported claim is genuinely renamed | `Examples.PW.Status.t8_renamed` | `Lara/Examples/PWStatus.lean` |
 | Two-context bridge data, its accepted edge, every successor bridged, and the inhabited `[b]` cell at `defeated` | `Examples.PW.Status.bridgeDataR`; `r_edge_accepted`, `r_all_bridged`, `t8_box_defeated_r`, `t8_box_defeated_r_holds` | `Lara/Examples/PWStatus.lean` |
+| Declared-attack translation (both stored terms translated, kind and position verbatim) and its all-or-nothing list lift through the #234 seam | `PW.trAttack`, `PW.trAttackList`; `PW.trAttackList_cons` | `Lara/PW/AttackTransport.lean` |
+| Translation injectivity on support terms (substitution helper, mutual triple, equality reflection) | `PW.trSubst_inj`, `PW.trSupport_inj`, `PW.trSupportList_inj`, `PW.trSupportDis_inj`, `PW.trSupport_eq_iff` | `Lara/PW/AttackTransport.lean` |
+| Positional navigation commutes with translation (`lookupDis` first-match, `subterm` at `prem`/`ques`; partial-map inversion and some-of-membership helpers) | `PW.trSupport_leaf`, `PW.trSupport_inst_inv`, `PW.lookupDis_mem`, `PW.lookupDis_trSupportDis`, `PW.trSupportList_some_of_mem`, `PW.trSupportDis_some_of_mem`, `PW.trSupport_subterm`, `PW.trSupport_subterm_some` | `Lara/PW/AttackTransport.lean` |
+| Containment, attack closure, and declared-edge coverage are translation-invariant under injectivity | `PW.containsB_trSupport`, `PW.containsBList_trSupport`, `PW.containsBDis_trSupport`, `PW.trAttack_source`, `PW.attackClosureB_trAttack`, `PW.coveredB_trAttack` | `Lara/PW/AttackTransport.lean` |
+| Prop-level corollaries for the two faces #238 names | `PW.Contains_trSupport`, `PW.AttackOcc_trSupport` | `Lara/PW/AttackTransport.lean` |
+| **Attack bridge** — T8's attack hypotheses restated on declared `atts` — and the derivation of the index-level clauses | `PW.AttackBridge` (fields `admits`, `matched`, `atts_eq`); `PW.AttackBridge.toStatusBridge` | `Lara/PW/AttackTransport.lean` |
+| The S2/R2 pair as an `AttackBridge` and its `StatusBridge` rederived from the source-language contract | `Examples.PW.Attack.leafMapR_injective`, `s2_r2_atts_transported`, `s2_r2_attackBridge`, `s2_r2_statusBridge_via_attacks` | `Lara/Examples/PWAttack.lean` |
+| Negatives: attack-vocabulary gap refutes `atts_eq`; collapsing leaf map breaks `containsB` commutation (the `Function.Injective lm` boundary) | `Examples.PW.Attack.gapAttack`, `collapsedMap`; `gap_attack_undefined`, `collapsed_containsB_breaks` | `Lara/Examples/PWAttack.lean` |
+| `ques`-position commutation pinned, computed and via the law | `Examples.PW.Attack.quesInstSrc`, `quesInstTgt`; `ques_position_computes`, `ques_position_law` | `Lara/Examples/PWAttack.lean` |
 
 **Not X** notes:
 

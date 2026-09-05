@@ -147,6 +147,12 @@ Instantiation at structural bridges, `Lara/PW/Status.lean`:
 | Injectivity is closed under Kleisli composition | `PW.SymMap.Injective.comp` | `Lara/PW/Status.lean` |
 | `Corr` along the composite factors through the intermediate world | `PW.corr_comp_iff` | `Lara/PW/Status.lean` |
 | Status bridges compose along the T9 composite | `PW.StatusBridge.comp` | `Lara/PW/Status.lean` |
+| Declared-attack translation and its list lift | `PW.trAttack`, `PW.trAttackList`; `PW.trAttackList_cons` | `Lara/PW/AttackTransport.lean` |
+| Translation injectivity on support terms, and equality reflection | `PW.trSubst_inj`, `PW.trSupport_inj`, `PW.trSupportList_inj`, `PW.trSupportDis_inj`, `PW.trSupport_eq_iff` | `Lara/PW/AttackTransport.lean` |
+| Positional navigation commutes with translation | `PW.lookupDis_trSupportDis`, `PW.trSupport_subterm`, `PW.trSupport_subterm_some` (helpers `PW.trSupport_leaf`, `PW.trSupport_inst_inv`, `PW.lookupDis_mem`, `PW.trSupportList_some_of_mem`, `PW.trSupportDis_some_of_mem`) | `Lara/PW/AttackTransport.lean` |
+| Containment, attack closure, and declared-edge coverage are translation-invariant under injectivity | `PW.containsB_trSupport`, `PW.containsBList_trSupport`, `PW.containsBDis_trSupport`, `PW.trAttack_source`, `PW.attackClosureB_trAttack`, `PW.coveredB_trAttack` | `Lara/PW/AttackTransport.lean` |
+| The `Contains`/`AttackOcc` Prop faces | `PW.Contains_trSupport`, `PW.AttackOcc_trSupport` | `Lara/PW/AttackTransport.lean` |
+| T8's attack hypotheses on the source language, and the index-level clauses derived | `PW.AttackBridge`; `PW.AttackBridge.toStatusBridge` | `Lara/PW/AttackTransport.lean` |
 
 `status_transport` states: for contexts `κ`, `λ` with `λ.canon = κ.canon`
 (`hcanon`, T6's shared-canonicalizer commitment), a structural bridge `B`
@@ -388,6 +394,19 @@ These are design commitments with named homes, not oversights.
    correspondence, so the clauses are stated where the design states them; a
    reader should not mistake them for structural conditions on the source
    language. Follow-up: #238.
+
+   **Narrowed by #238.** `AttackBridge` (`Lara/PW/AttackTransport.lean`)
+   states the attack hypotheses on declared `atts` via `trAttack`, and
+   `AttackBridge.toStatusBridge` derives the index-level `forth`/`back`
+   clauses from them; the commutation ladder mirrors `Erase.lean` over the
+   partial map. This route additionally assumes `Function.Injective lm`,
+   which the frozen `StatusBridge` contract does not — injectivity is
+   load-bearing because `containsB` compares subterms by
+   `decide (v = t)` (`Lara/Compile.lean:120-123`), so a collapsing leaf map
+   makes two distinct source subterms translate equal. The general,
+   injectivity-free index-level statement of limitation 1 therefore still
+   stands; #238 supplies a bridge-contract-level sufficient condition for
+   it, witnessed at `Examples.PW.Attack.*`.
 2. **`status_transport` needs an injective translation.** A merging
    translation breaks the reflection half of `claimSupport_corr` (§4).
    Non-injective bridges use `status_transport_of_corr` and supply the
