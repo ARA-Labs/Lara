@@ -110,7 +110,7 @@ other means.
 
 ## 2. Theorem table
 
-Every public theorem declared by the three modules appears below. Definition
+Every public theorem declared by the five modules appears below. Definition
 rows are included to identify the objects those theorems constrain; they are
 audited transitively through the gated theorems that mention them.
 
@@ -154,6 +154,15 @@ Instantiation at structural bridges, `Lara/PW/Status.lean`:
 | The `Contains`/`AttackOcc` Prop faces | `PW.Contains_trSupport`, `PW.AttackOcc_trSupport` | `Lara/PW/AttackTransport.lean` |
 | T8's attack hypotheses on the source language, and the index-level clauses derived | `PW.AttackBridge`; `PW.AttackBridge.toStatusBridge` | `Lara/PW/AttackTransport.lean` |
 
+Executable decider, `Lara/PW/StatusCheck.lean` (issue #239):
+
+| Result | Declaration | File |
+|---|---|---|
+| `Corr`, `Admits`, and the matched conjunct as `Bool` scans, with their Prop reflections | `PW.corrB`, `PW.admitsB`, `PW.matchedB`; `PW.corrB_iff`, `PW.admitsB_iff`, `PW.matchedB_iff` | `Lara/PW/StatusCheck.lean` |
+| `forth`/`back` as bounded scans over the two finite index ranges | `PW.forthB`, `PW.backB` | `Lara/PW/StatusCheck.lean` |
+| The `StatusBridge` decider (a four-way `&&` of the scans) | `PW.statusBridgeB` | `Lara/PW/StatusCheck.lean` |
+| The decider is sound and complete for `StatusBridge` | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete` | `Lara/PW/StatusCheck.lean` |
+
 `status_transport` states: for contexts `κ`, `λ` with `λ.canon = κ.canon`
 (`hcanon`, T6's shared-canonicalizer commitment), a structural bridge `B`
 between them, worlds `w : World κ` and `v : World λ` with
@@ -180,6 +189,16 @@ Executable witnesses, `Lara/Examples/PWStatus.lean` (namespace
 | The transported claim is genuinely renamed | `Examples.PW.Status.t8_renamed` | `Lara/Examples/PWStatus.lean` |
 | Two-context bridge data, its accepted edge, and every successor bridged | `Examples.PW.Status.bridgeDataR`; `r_edge_accepted`, `r_all_bridged` | `Lara/Examples/PWStatus.lean` |
 | The `[b]` cell at `defeated`, and its inhabitation | `Examples.PW.Status.t8_box_defeated_r`, `t8_box_defeated_r_holds` | `Lara/Examples/PWStatus.lean` |
+
+Decider conformance cells, `Lara/Examples/PWStatusCheck.lean` (namespace
+`Lara.Examples.PW.StatusCheck`, issue #239):
+
+| Witness | Declaration | File |
+|---|---|---|
+| The three positive bridges re-established by one `decide` each | `Examples.PW.StatusCheck.s1_r1_decider`, `s2_r2_decider`, `s3_r3_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| Soundness turns a decider cell back into the Prop-level bridge | `Examples.PW.StatusCheck.s2_r2_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| The T7 negative through the decider: a `false` scan, refuted via completeness | `Examples.PW.StatusCheck.t7_decider_rejects`, `t7_not_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| Isolating negatives pinning `admitsB` and `matchedB` independently (eng review, decision 6A) | `Examples.PW.StatusCheck.s2_r1_admits_fails`, `s2_r1_matched_holds`, `s1_r2_matched_fails`, `s1_r2_admits_holds` | `Lara/Examples/PWStatusCheck.lean` |
 
 The positive witnesses are off the identity: `symR` renames all three
 predicates, `leafMapR` renames every leaf, and `bridgeR` discharges `leaf_ok`
@@ -415,7 +434,11 @@ These are design commitments with named homes, not oversights.
    `StatusBridge` by hand, index by index; a `Bool` decider over the finite
    index ranges with a soundness theorem, in the `Presents`/`crossCompare`
    style of the comparison layer, would make each new cell one `decide`.
-   Follow-up: #239.
+   Follow-up: #239. Discharged by #239: `statusBridgeB` with
+   `statusBridgeB_sound`/`statusBridgeB_complete`
+   (`Lara/PW/StatusCheck.lean`); each conformance cell is now one `decide`
+   (`Lara/Examples/PWStatusCheck.lean`), and the T7 negative is refuted
+   through completeness.
 4. **T6 limitations 1, 2, and 5 are inherited.** Symbol translation remains
    bridge-global and functional, the leaf map remains total, and question
    keys remain frozen across the bridge. See

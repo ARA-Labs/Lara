@@ -1190,6 +1190,19 @@ key.
 | Negatives: attack-vocabulary gap refutes `atts_eq`; collapsing leaf map breaks `containsB` commutation (the `Function.Injective lm` boundary) | `Examples.PW.Attack.gapAttack`, `collapsedMap`; `gap_attack_undefined`, `collapsed_containsB_breaks` | `Lara/Examples/PWAttack.lean` |
 | `ques`-position commutation pinned, computed and via the law | `Examples.PW.Attack.quesInstSrc`, `quesInstTgt`; `ques_position_computes`, `ques_position_law` | `Lara/Examples/PWAttack.lean` |
 
+Executable `StatusBridge` decider (issue #239), `Lara/PW/StatusCheck.lean`
+and `Lara/Examples/PWStatusCheck.lean`:
+
+| Object | Lean declaration | File |
+|---|---|---|
+| `Corr`, `Admits`, the matched conjunct, `forth`, `back` as `Bool` scans, and the `StatusBridge` decider over them | `PW.corrB`, `PW.admitsB`, `PW.matchedB`, `PW.forthB`, `PW.backB`, `PW.statusBridgeB` | `Lara/PW/StatusCheck.lean` |
+| Bool/Prop reflection for the conjunct scans | `PW.corrB_iff`, `PW.admitsB_iff`, `PW.matchedB_iff` | `Lara/PW/StatusCheck.lean` |
+| Decider soundness and completeness | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete` | `Lara/PW/StatusCheck.lean` |
+| The three positive bridges re-established by one `decide` each | `Examples.PW.StatusCheck.s1_r1_decider`, `s2_r2_decider`, `s3_r3_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| Soundness turns a decider cell back into the Prop-level bridge | `Examples.PW.StatusCheck.s2_r2_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| The T7 negative through the decider: a `false` scan, refuted via completeness | `Examples.PW.StatusCheck.t7_decider_rejects`, `t7_not_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| Isolating negatives pinning `admitsB` and `matchedB` independently (eng review, decision 6A) | `Examples.PW.StatusCheck.s2_r1_admits_fails`, `s2_r1_matched_holds`, `s1_r2_matched_fails`, `s1_r2_admits_holds` | `Lara/Examples/PWStatusCheck.lean` |
+
 **Not X** notes:
 
 - `PW.AttackBisim` is **not** an isomorphism, and `PW.AFIso` is **not** the

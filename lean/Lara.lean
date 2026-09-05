@@ -350,5 +350,7 @@ import Lara.Examples.PWCompose
 import Lara.PW.AFBisim
 import Lara.PW.Status
 import Lara.Examples.PWStatus
+import Lara.PW.StatusCheck
+import Lara.Examples.PWStatusCheck
 import Lara.PW.AttackTransport
 import Lara.Examples.PWAttack
