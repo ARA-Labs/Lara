@@ -23,15 +23,19 @@
 --     generic ExtensionSemantics interface (declarative spec + proof-oriented
 --     reference enumerator + bundled adequacy), the carrier-bounded admissible /
 --     complete / stable / preferred / semi-stable predicates with their Bool
---     deciders, and representative-uniqueness under a nodup carrier. The
+--     deciders, and representative-uniqueness under a nodup carrier. Dung's
+--     existence result for preferred extensions is proved here too
+--     (preferred_exists, issue #196): every framework has one, with no nodup
+--     hypothesis, so preferredSem's enumeration is never empty. The
 --     pre-existing grounded status layer is shown to AGREE with the groundedSem
 --     instance (observe_grounded, groundedSem_enumerate) rather than being
 --     re-derived from it, and no theorem here is a strict generalization of one
 --     downstream; the runtime evaluator stays grounded — Lara.Semantics. The
 --     list-level powerset scan it is built on — subseqs, its characterization
 --     against the core List.Sublist relation, and one-representative-per-subset
---     under Nodup — mentions no framework and is proved separately in core
---     Lean 4, no Mathlib — Lara.Semantics.Sublists. The disagreements that make
+--     under Nodup, plus the maximal-element principle preferred_exists runs on
+--     — mentions no framework and is proved separately in core Lean 4, no
+--     Mathlib — Lara.Semantics.Sublists. The disagreements that make
 --     the interface more than an abstraction over a one-element set — stable
 --     nonexistence and the noExtension arm it forces, credulous acceptance
 --     failing to be a function, observe not factoring through profile, gap's

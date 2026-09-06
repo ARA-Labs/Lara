@@ -373,9 +373,11 @@ proof-oriented enumerator, and adequacy, and the grounded results become the
 `groundedSem` instance. The landing is additive — `Lara/Compile.lean` was not
 modified, and no result here lifts a `grounded`-indexed theorem to an arbitrary
 semantics. Every theorem row below is gated by `lean/AxCheck.lean` (sorry-free,
-standard trio); 157 declarations across the four modules are covered (67 in
-`Lara/Semantics.lean`, 7 in `Lara/Semantics/Sublists.lean`, 43 in
-`Lara/Observation.lean`, 40 in `Lara/Examples/Semantics.lean`). See
+standard trio); 157 declarations across the four modules were covered at the
+M2a landing (67 in `Lara/Semantics.lean`, 7 in `Lara/Semantics/Sublists.lean`,
+43 in `Lara/Observation.lean`, 40 in `Lara/Examples/Semantics.lean`), plus the
+five added on 2026-09-06 by issue #196 (four in `Lara/Semantics.lean`, one in
+`Lara/Semantics/Sublists.lean`). See
 `docs/theory-m2a-observation.md` for the boundary and for six corrections the
 mechanization forced on the plan.
 
@@ -385,6 +387,7 @@ mechanization forced on the plan.
 | The five instances | `Semantics.groundedSem`, `completeSem`, `preferredSem`, `stableSem`, `semiStableSem` | `Lara/Semantics.lean` |
 | The carrier-bounded extension predicates | `Semantics.Bounded`, `Admissible`, `Complete`, `Stable`, `LeastComplete`, `Preferred`, `SemiStable`, each with its `..B` decider and `..B_iff` | `Lara/Semantics.lean` |
 | Dung's fundamental lemma, and preferred ⇒ complete as a theorem | `Semantics.admissible_cons`, `Semantics.preferred_complete` | `Lara/Semantics.lean` |
+| **Dung's existence result: every framework has a preferred extension** (no `Nodup`, no Mathlib; added 2026-09-06 by issue #196) | `Semantics.preferred_exists`, scan-level form `Semantics.preferred_exists_candidate`, consumer form `Semantics.preferredSem_enumerate_ne_nil`; seed `Semantics.admissible_nil`, finiteness principle `Semantics.exists_max_length` | `Lara/Semantics.lean`, `Lara/Semantics/Sublists.lean` |
 | Sublist representation (hand-rolled: core Lean v4.32.0 has no `List.sublists`, and the project carries no Mathlib dependency today — `lean/lakefile.toml` records it as planned for result 5) | `Semantics.subseqs`, `mem_subseqs`, `sublist_ext`, `subseqs_ext`, `subseqs_nodup` | `Lara/Semantics/Sublists.lean` |
 | Representative uniqueness from `sound` alone, for any instance | `Semantics.enumerate_ext`, from `Semantics.candidates_ext` and `candidates_nodup` | `Lara/Semantics.lean` |
 | **Adequacy needs no `Nodup`** (the refutation of the plan's D4 rationale) | `Examples.Semantics.sound_holds_without_nodup` | `Lara/Examples/Semantics.lean` |
@@ -449,8 +452,9 @@ The paper must not print the credulous reading as a four-state verdict.
 cannot distinguish the two arguments. The paper must also not say that `observe`
 is determined by
 per-argument acceptance data (`observe_not_determined_by_profile`), assert the
-general non-emptiness of preferred extensions (stated in `preferredSem`'s
-docstring, never proved), state a transport hypothesising `Compile.Faithful` on
+general non-emptiness of *stable* extensions or read `preferred_exists` as
+licensing one (`stableSem_enumerate_threeCycle` refutes it), state a transport
+hypothesising `Compile.Faithful` on
 both sides (`faithful_unique` makes it contentless), or claim
 `AttackExtensional ConflictFree` (`not_attackExtensional_conflictFree`). It must
 also not claim that the table's completeness theorems rule out a missing

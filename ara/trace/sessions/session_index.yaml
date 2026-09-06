@@ -565,8 +565,8 @@ sessions:
   open_threads: 4
 - id: 2026-09-06_001
   date: '2026-09-06'
-  summary: 'Issue #231 fixture drift guards: cert_reject_mismatched_certifier pins that both acceptance judgments read (beta, hd, kappa); cert_only_assurance and cert_target_rule pin allowTrusted off with the certificate arm the only reachable assurance, source and target. Both mutations reproduced and reverted; coverage 2492 -> 2495 (PW-T6 84 -> 87), build and axiom audit green.'
-  turn_count: 1
-  events_count: 4
-  claims_touched: []
-  open_threads: 3
+  summary: 'Issue #231 fixture drift guards: cert_reject_mismatched_certifier pins that both acceptance judgments read (beta, hd, kappa); cert_only_assurance and cert_target_rule pin allowTrusted off with the certificate arm the only reachable assurance, source and target. Both mutations reproduced and reverted; coverage 2492 -> 2495 (PW-T6 84 -> 87), build and axiom audit green. Then issue #196 closed (PR #251): preferred_exists proves every framework has a preferred extension with no Nodup and no Mathlib — a longest admissible candidate meets a competitor as a sublist, not a subset — so the Mathlib dependency the issue budgeted was never needed; AxCheck rows 2495 -> 2500, coverage gate 2341 declarations, C35/C36 conditions narrowed.'
+  turn_count: 2
+  events_count: 8
+  claims_touched: [C35, C36]
+  open_threads: 4

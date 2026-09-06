@@ -2982,3 +2982,48 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O141
+  timestamp: "2026-09-06T14:25"
+  provenance: ai-suggested
+  content: >
+    A cost estimate recorded on a tracked theory issue encodes one proof
+    route, not a lower bound on the result. #196 and preferredSem's docstring
+    both budgeted `Nodup` plus a subset-implies-shorter fact — i.e. the
+    Mathlib dependency — because both had the ⊆-maximal-element argument in
+    mind; re-deriving the statement's own geometry (compare a longest
+    candidate to a competitor as a sublist of the shared carrier, not as a
+    subset) dissolved the budgeted dependency entirely and left the theorem
+    hypothesis-free. Read a budgeted dependency as a claim about the route
+    that was imagined, and re-derive before paying it.
+  context: >
+    Extracted while closing #196 (N313, N314). One instance so far; the
+    counter-case would be an issue whose budgeted cost is a property of the
+    statement rather than of the route.
+  potential_type: heuristic
+  bound_to: [N313, N314]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O142
+  timestamp: "2026-09-06T14:25"
+  provenance: ai-executed
+  content: >
+    Spiking the candidate proof answered "does this need a plan?" faster than
+    reasoning about it: the whole #196 development compiled standalone in two
+    attempts, and the axiom print settled scope, hypotheses and size before
+    any planning document could have been drafted. Same practice as O132
+    (compile a plan's Lean blocks before dispatching an implementer), applied
+    one step earlier — to the decision of whether to write the plan at all.
+  context: >
+    N314. Both slips were Lean v4.32.0 API drift (`List.not_mem_nil` takes the
+    membership proof; `List.mem_cons_self` takes no explicit arguments), not
+    defects in the mathematical argument.
+  potential_type: heuristic
+  bound_to: [N314]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

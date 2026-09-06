@@ -8061,3 +8061,59 @@ tree:
     - "ara/evidence/proofs/pw_t6_transport.md"
   status: resolved
   also_depends_on: [N311]
+
+- id: N313
+  type: decision
+  title: "Prove #196 by longest-candidate + sublist comparison, not by the maximal-element principle the issue budgeted"
+  provenance: ai-suggested
+  timestamp: "2026-09-06T14:10"
+  choice: >
+    Close #196 (general non-emptiness of preferred extensions) by taking a
+    maximum-LENGTH admissible member of `(candidates F).filter (admissibleB F)`
+    and meeting a competing admissible `T` at its canonical representative
+    `canonize F T`, where `List.Sublist.filter` places the maximum inside the
+    competitor as a *sublist* rather than as a subset; `List.Sublist.eq_of_length`
+    then forces equality. The only new machinery is `exists_max_length`, a
+    ten-line finiteness principle in `Lara/Semantics/Sublists.lean`.
+    Consequence: the theorem needs no `F.args.Nodup` hypothesis and no Mathlib,
+    so the Mathlib-dependency decision the issue expected to force was not
+    forced and stays scoped to result 5 as `lean/lakefile.toml` records.
+  alternatives:
+    - "The route #196 and preferredSem's docstring specified — a ⊆-maximal-element principle over `candidates F`, requiring `F.args.Nodup` plus a subset-implies-shorter fact. Rejected once the sublist framing compiled: `Nodup` is only needed to stop a shorter list from having the same members as a longer one, and a shared carrier already rules that out."
+    - "Take the Mathlib dependency the lakefile anticipates for result 5, and import its order/Finset machinery. Rejected: it buys nothing here and would make a core-Lean development depend on Mathlib for a result that does not need it."
+    - "State the existence result only for duplicate-free carriers, matching how `groundedSem_singleton` is stated. Rejected: the hypothesis turned out to be unnecessary, and a needless hypothesis on a headline existence theorem is a weaker paper sentence."
+  evidence:
+    - "lean/Lara/Semantics.lean: preferred_exists, preferred_exists_candidate, preferredSem_enumerate_ne_nil, admissible_nil"
+    - "lean/Lara/Semantics/Sublists.lean: exists_max_length"
+    - "https://github.com/ARA-Labs/lara/issues/196"
+    - "https://github.com/ARA-Labs/lara/pull/251"
+  status: resolved
+  also_depends_on: [N230]
+
+- id: N314
+  type: experiment
+  title: "Spike the #196 proof standalone before deciding whether it needed a plan, then verify in-tree"
+  provenance: ai-executed
+  timestamp: "2026-09-06T14:20"
+  result: >
+    The candidate proof was written first as a standalone file importing
+    Lara.Semantics and compiled with `lake env lean`. It elaborated on the
+    second attempt (two Lean v4.32.0 API slips: `List.not_mem_nil` takes the
+    membership proof, `List.mem_cons_self` takes no explicit arguments), and
+    `#print axioms Lara.Semantics.exists_preferred` reported
+    [propext, Quot.sound] — no `Nodup`, no Mathlib, ~60 lines. That sized the
+    task in minutes and settled the plan-or-not question against writing a
+    plan. After moving the proof into the module and splitting it into
+    preferred_exists_candidate / preferred_exists /
+    preferredSem_enumerate_ne_nil, whole-tree verification: lake build 148
+    jobs EXIT 0; axiom audit EXIT 0 ("Axiom audit passed.") with the five new
+    rows inside the standard trio (admissible_nil depends on no axioms); and
+    AxCheck coverage passed at 2341 covered declarations, with the audit's own
+    row count going 2495 -> 2500.
+  evidence:
+    - "lean/Lara/Semantics.lean"
+    - "lean/Lara/Semantics/Sublists.lean"
+    - "lean/AxCheck.lean"
+    - "https://github.com/ARA-Labs/lara/pull/251"
+  status: resolved
+  also_depends_on: [N313]

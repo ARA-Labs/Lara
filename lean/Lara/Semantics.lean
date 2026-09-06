@@ -625,17 +625,106 @@ finite framework always has at least one preferred extension, because the empty
 set is admissible and the finite candidate list must therefore contain a
 `⊆`-maximal admissible member.
 
-That non-emptiness is **stated, not proved here** — unlike everything else in
-this section it carries no theorem. The argument needs a maximal-element
-principle over `candidates F`, which in turn needs `Nodup` and a
-subset-implies-shorter fact that core Lean does not supply; nothing downstream of
-this module relies on it, so it was not worth the machinery.
-`preferred_exists_where_stable_does_not` is the concrete instance on the bare
-three-cycle, and establishes nothing about the general case. -/
+That non-emptiness is proved below (`preferred_exists`,
+`preferredSem_enumerate_ne_nil`), for *every* framework and with no `Nodup`
+hypothesis. `preferred_exists_where_stable_does_not` remains the concrete
+instance on the bare three-cycle: it exhibits the contrast with `stableSem`,
+whose enumeration really can be empty, and the general theorem does not replace
+it. -/
 def preferredSem : ExtensionSemantics where
   spec := Preferred
   enumerate := fun F => (candidates F).filter (preferredB F)
   sound := fun _ _ _ => by rw [mem_filter_candidates, preferredB_iff]
+
+/-! ### Non-emptiness of the preferred semantics
+
+Dung's existence result, mechanized. Every framework has a preferred extension,
+so `preferredSem`'s enumeration is never empty — the one instance-level
+non-emptiness fact this module proves, and the reason it is worth proving is
+`justified_defeated_exclusive`, whose `sem.enumerate F ≠ []` hypothesis is
+otherwise the caller's problem at every preferred-semantics call site.
+
+**Why no `Nodup`, and why no order machinery.** The textbook argument — take a
+`⊆`-maximal element of a finite non-empty family — needs a maximal-element
+principle, and "subset implies shorter" needs the carrier to be duplicate-free.
+This proof needs neither, because it never compares two sets by `⊆` at all. It
+picks a *longest* admissible candidate `S` and compares it against the canonical
+representative `canonize F T` of a competing admissible `T` as a **`List.Sublist`**:
+`S` is a sublist of `F.args` and every member of `S` lies in `T`, so
+`List.Sublist.filter` places `S` inside `F.args.filter (· ∈ T)`, which *is*
+`canonize F T`. Length-maximality then forces the two to have equal length, and
+`List.Sublist.eq_of_length` upgrades that to equality — where the subset argument
+would have needed `Nodup` to rule out a shorter list with the same members, the
+sublist argument gets it from the shared carrier. -/
+
+/-- The empty set is admissible: all three conjuncts quantify over its members.
+This is the seed of `preferred_exists` — it is what makes the admissible-candidate
+scan non-empty, and hence the only reason a maximal element exists to be found. -/
+theorem admissible_nil {F : AF} : Admissible F ([] : List Arg) :=
+  ⟨fun _ h => (List.not_mem_nil h).elim,
+   fun _ h => (List.not_mem_nil h).elim,
+   fun _ h => (List.not_mem_nil h).elim⟩
+
+/-- **Every framework has a preferred extension, and it is found in the scan.**
+No hypothesis: not `Nodup`, not non-emptiness of the carrier (the empty
+framework's preferred extension is the empty set). The `∈ candidates F` conjunct
+is what `preferredSem_enumerate_ne_nil` needs and what the proof produces anyway,
+so it is stated rather than re-derived; `preferred_exists` is the bare
+existential. See the section note for why the proof compares sublists rather than
+subsets. -/
+theorem preferred_exists_candidate (F : AF) : ∃ S ∈ candidates F, Preferred F S := by
+  -- The admissible candidates are a non-empty finite scan, since `[]` is one.
+  have hne : (candidates F).filter (admissibleB F) ≠ [] := by
+    intro h
+    have hmem : ([] : List Arg) ∈ (candidates F).filter (admissibleB F) :=
+      List.mem_filter.mpr ⟨mem_candidates.mpr (List.nil_sublist _),
+        admissibleB_iff.mpr admissible_nil⟩
+    rw [h] at hmem
+    exact (List.not_mem_nil hmem).elim
+  obtain ⟨S, hSmem, hSmax⟩ := exists_max_length _ hne
+  obtain ⟨hScand, hSadm⟩ := List.mem_filter.mp hSmem
+  refine ⟨S, hScand, admissibleB_iff.mp hSadm, ?_⟩
+  intro T hT hsub x hx
+  -- A competitor's canonical representative is an admissible candidate, so the
+  -- length-maximality of `S` applies to it.
+  have hTmem : ∀ y, y ∈ T ↔ y ∈ canonize F T := by
+    intro y
+    rw [mem_canonize]
+    exact ⟨fun hy => ⟨hT.1 y hy, hy⟩, fun hy => hy.2⟩
+  have hT' : canonize F T ∈ (candidates F).filter (admissibleB F) :=
+    List.mem_filter.mpr ⟨canonize_mem_candidates,
+      admissibleB_iff.mpr (admissible_congr hTmem hT)⟩
+  -- `S` sits inside that representative as a *sublist*, not merely as a subset:
+  -- filtering `F.args` by membership in `T` keeps all of `S`.
+  have hself : S.filter (fun a => memB a T) = S :=
+    List.filter_eq_self.mpr (fun y hy => memB_iff.mpr (hsub y hy))
+  have hsubl : S.Sublist (canonize F T) := by
+    have h := (mem_candidates.mp hScand).filter (fun a => memB a T)
+    rwa [hself] at h
+  -- Equal lengths plus the sublist relation force equality, so `T` adds nothing.
+  have heq : S = canonize F T :=
+    hsubl.eq_of_length (Nat.le_antisymm hsubl.length_le (hSmax _ hT'))
+  rw [heq]
+  exact (hTmem x).mp hx
+
+/-- **Dung's existence result** in the form the paper states it: every framework
+has at least one preferred extension. -/
+theorem preferred_exists (F : AF) : ∃ S, Preferred F S :=
+  let ⟨S, _, hS⟩ := preferred_exists_candidate F
+  ⟨S, hS⟩
+
+/-- The consumer-facing form: `preferredSem` never enumerates nothing. This is
+what discharges the `sem.enumerate F ≠ []` hypothesis of
+`justified_defeated_exclusive` at the preferred instance; `stableSem` has no
+counterpart, which is exactly the contrast
+`Examples.Semantics.preferred_exists_where_stable_does_not` exhibits. -/
+theorem preferredSem_enumerate_ne_nil (F : AF) : preferredSem.enumerate F ≠ [] := by
+  obtain ⟨S, hScand, hS⟩ := preferred_exists_candidate F
+  intro h
+  have hmem : S ∈ preferredSem.enumerate F :=
+    List.mem_filter.mpr ⟨hScand, preferredB_iff.mpr hS⟩
+  rw [h] at hmem
+  exact (List.not_mem_nil hmem).elim
 
 /-! ### Dung's fundamental lemma, and preferred ⇒ complete -/
 

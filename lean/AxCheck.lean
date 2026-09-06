@@ -1113,6 +1113,7 @@ instance covers that proof too — an instance cannot be added without one. -/
 #print axioms Lara.Semantics.subseqs_ext
 #print axioms Lara.Semantics.nodup_flatMap_pair
 #print axioms Lara.Semantics.subseqs_nodup
+#print axioms Lara.Semantics.exists_max_length
 #print axioms Lara.Semantics.mem_candidates
 #print axioms Lara.Semantics.candidates_ext
 #print axioms Lara.Semantics.candidates_nodup
@@ -1146,6 +1147,10 @@ instance covers that proof too — an instance cannot be added without one. -/
 
 #print axioms Lara.Semantics.maximalB_iff
 #print axioms Lara.Semantics.preferredB_iff
+#print axioms Lara.Semantics.admissible_nil
+#print axioms Lara.Semantics.preferred_exists_candidate
+#print axioms Lara.Semantics.preferred_exists
+#print axioms Lara.Semantics.preferredSem_enumerate_ne_nil
 #print axioms Lara.Semantics.admissible_cons
 #print axioms Lara.Semantics.preferred_complete
 

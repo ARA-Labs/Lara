@@ -11,7 +11,8 @@ here by hand.
 powerset scan; `mem_subseqs`, its characterization against `List.Sublist`; and
 the `Nodup` layer — `sublist_ext`, `subseqs_ext`, `nodup_flatMap_pair`,
 `subseqs_nodup` — which is what makes "one representative per subset" a
-theorem rather than a convention.
+theorem rather than a convention. `exists_max_length` closes the file: the
+finiteness principle that turns "the scan is finite" into a maximal *element*.
 
 **Why it is its own module.** No declaration here mentions `AF`, an extension,
 or a semantics: every one is a statement about lists or about `Bool`.
@@ -180,5 +181,39 @@ theorem subseqs_nodup : ∀ {l : List Arg}, l.Nodup → (subseqs l).Nodup
       rw [subseqs]
       exact nodup_flatMap_pair (subseqs_nodup hnd)
         (fun s hs hc => hal ((mem_subseqs.mp hs).subset hc))
+
+/-! ### A maximal element of a finite scan
+
+The finiteness principle `Lara.Semantics.preferred_exists` runs on. Core Lean has
+`List.max?` for the *value* of a maximum but nothing that hands back the element
+attaining it, and the element is the whole point: a preferred extension is a
+witness, not a number. -/
+
+/-- A non-empty list has a member of maximal length. Length — rather than an
+abstract order — because that is what the caller can compare: `⊆`-maximality
+among sublists of a common carrier follows from length-maximality through
+`List.Sublist.eq_of_length`, so no order-theoretic machinery (and no Mathlib) is
+needed. The `[a]` base case is separated from `a :: b :: t` so the recursive call
+never has to defend a `≠ []` side condition. -/
+theorem exists_max_length :
+    ∀ (l : List (List Arg)), l ≠ [] → ∃ x ∈ l, ∀ y ∈ l, y.length ≤ x.length
+  | [], h => absurd rfl h
+  | [a], _ => ⟨a, List.mem_singleton.mpr rfl, by
+      intro y hy
+      rw [List.mem_singleton.mp hy]
+      exact Nat.le_refl _⟩
+  | a :: b :: t, _ => by
+      obtain ⟨m, hm, hmax⟩ := exists_max_length (b :: t) (by simp)
+      by_cases hle : m.length ≤ a.length
+      · refine ⟨a, List.mem_cons_self, ?_⟩
+        intro y hy
+        rcases List.mem_cons.mp hy with rfl | hy
+        · exact Nat.le_refl _
+        · exact Nat.le_trans (hmax y hy) hle
+      · refine ⟨m, List.mem_cons_of_mem _ hm, ?_⟩
+        intro y hy
+        rcases List.mem_cons.mp hy with rfl | hy
+        · exact Nat.le_of_lt (Nat.lt_of_not_le hle)
+        · exact hmax y hy
 
 end Lara.Semantics

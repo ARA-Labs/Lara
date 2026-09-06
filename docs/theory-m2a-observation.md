@@ -4,6 +4,14 @@ _Status: mechanized for the POPL 2028 theory spine on 2026-08-28 (issue #185,
 tracker #180). This document records what the observation interface proves,
 what it refutes, and the six places where the plan's own prose was wrong._
 
+_Update 2026-09-06 (issue #196): the general non-emptiness of preferred
+extensions, listed below as follow-up work and as a paper must-not, is now
+proved — `Semantics.preferred_exists`, `Semantics.preferred_exists_candidate`
+and `Semantics.preferredSem_enumerate_ne_nil`, supported by
+`Semantics.admissible_nil` and `Semantics.exists_max_length`. §3, §9 and §10
+are corrected in place; the §1 landing snapshot is left as it was, since it
+records the M2a landing at `042beed` and not the current tree._
+
 The intended readers are the paper author and future M2b/M3 implementers. They
 should cite the declarations below. The executed plan was deleted by `1ed83df`
 after its durable content moved here. Section 4 quotes each defective plan
@@ -147,6 +155,13 @@ enumeration membership to `spec` goes through `sound`. An `enumerate`-phrased
 variant would prove the same exclusivity with no `Nodup` at all. The trade is
 deliberate — a property of the semantics rather than of one enumerator — and
 callers in later milestones should know it is a trade and not a necessity.
+
+The *non-emptiness* half is no longer the caller's problem at every instance.
+`preferredSem_enumerate_ne_nil` (§10, issue #196) discharges it for the
+preferred semantics unconditionally, so a preferred-instance call site of
+`justified_defeated_exclusive` supplies only `F.args.Nodup` and
+`preferredSem_specConflictFree`. `stableSem` has no counterpart and cannot
+acquire one: `stableSem_enumerate_threeCycle` refutes it.
 
 ### Source-to-framework transport
 
@@ -538,10 +553,14 @@ The paper **must not**:
   / `outSome` bits;
 - say that `observe` factors through per-argument acceptance data.
   `observe_not_determined_by_profile` refutes it;
-- assert the general non-emptiness of preferred extensions. `preferredSem`'s
-  docstring states it and explicitly declines to prove it; the concrete
-  `preferred_exists_where_stable_does_not` establishes nothing about the general
-  case;
+- assert the general non-emptiness of *stable* extensions, or read
+  `preferred_exists` as licensing one. `stableSem_enumerate_threeCycle` refutes
+  it, and that contrast is the point of
+  `preferred_exists_where_stable_does_not`. (This bullet previously forbade
+  asserting the general non-emptiness of *preferred* extensions. It was lifted
+  on 2026-09-06 by `preferred_exists`, issue #196 — the paper may now state
+  Dung's existence result for preferred extensions and cite the mechanization,
+  with no `Nodup` side condition;)
 - say that `Compile.srcStatus_iff_checked` is an instance or a special case of
   `srcObservation_iff_checked`, or rewrite the existing preservation citation to
   route through it. See §4(4). The existing citation stands unmodified;
@@ -554,13 +573,21 @@ Three items are visible from here and none is an M2a result. Each is tracked as
 a GitHub issue, per `CLAUDE.md`; this document records the decision, the issue
 records the work.
 
-- Non-emptiness of preferred extensions — [#196](https://github.com/ARA-Labs/lara/issues/196).
+- Non-emptiness of preferred extensions — [#196](https://github.com/ARA-Labs/lara/issues/196). **Closed 2026-09-06.**
 - `enumerate`-phrased `SpecConflictFree` — [#197](https://github.com/ARA-Labs/lara/issues/197).
 - A registry that would make a sixth `ExtensionSemantics` visible — [#198](https://github.com/ARA-Labs/lara/issues/198).
 
-The general non-emptiness of preferred extensions needs a maximal-element
-principle over `candidates F`, which needs `Nodup` and a subset-implies-shorter
-fact core Lean does not supply. Nothing downstream relies on it.
+The general non-emptiness of preferred extensions was expected to need a
+maximal-element principle over `candidates F`, and with it `Nodup` and a
+subset-implies-shorter fact core Lean does not supply. That sizing was wrong,
+and the correction is worth recording because it is what made the result cheap:
+the proof never compares two extensions by `⊆`. It takes a *longest* admissible
+candidate `S` and meets a competitor `T` at `canonize F T`, where
+`List.Sublist.filter` places `S` **inside** the competitor as a sublist rather
+than as a subset; `List.Sublist.eq_of_length` then closes it. `Nodup` was only
+ever needed to stop a shorter list from having the same members as a longer one,
+and a shared carrier already rules that out. No Mathlib, and no hypothesis on
+`F` at all — see `Semantics.preferred_exists` and the section note above it.
 
 An `enumerate`-phrased `SpecConflictFree` would drop `F.args.Nodup` from
 `justified_defeated_exclusive` and `observe_justified_not_all_defeated`. §3

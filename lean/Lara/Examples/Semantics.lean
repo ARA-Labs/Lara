@@ -236,9 +236,11 @@ theorem threeCycle_enumerate_nonStable :
 
 /-- **Preferred extensions exist where stable ones do not.** One theorem rather
 than two because the contrast is the content: the same framework has a preferred
-extension and no stable one. `preferredSem`'s docstring states the general
-non-emptiness fact and explicitly declines to prove it; this is the concrete
-instance, and it does not establish the general statement. -/
+extension and no stable one. The general non-emptiness fact `preferredSem`'s
+docstring states is now proved (`Semantics.preferred_exists`); this concrete
+instance is kept because the contrast with `stableSem` — which has no
+counterpart and cannot acquire one — is the content, and the general theorem
+does not supply it. -/
 theorem preferred_exists_where_stable_does_not :
     preferredSem.enumerate threeCycle ≠ [] ∧ stableSem.enumerate threeCycle = [] := by decide
 

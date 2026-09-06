@@ -2,8 +2,8 @@ session:
   id: "2026-09-06_001"
   date: "2026-09-06"
   started: "2026-09-06T12:00"
-  last_turn: "2026-09-06T12:30"
-  turn_count: 1
+  last_turn: "2026-09-06T14:30"
+  turn_count: 2
   summary: >
     Issue #231 closed: two drift guards added to the #224 strict-certificate
     fixture in Lara/Examples/PWStructural.lean. Certifier blindness is caught
@@ -13,7 +13,14 @@ session:
     ruleCertTgt. Three AxCheck rows registered; both mutations reproduced and
     reverted. Coverage 2492 -> 2495 (PW-T6 84 -> 87); build 148 jobs and the
     axiom audit green. No semantics module, corpus, or frozen contract
-    touched.
+    touched. Turn 2 reviewed the eleven open issues and closed #196 (PR #251):
+    every framework has a preferred extension (preferred_exists), proved with
+    no Nodup hypothesis and no Mathlib by comparing a longest admissible
+    candidate to canonize F T as a sublist rather than a subset — refuting the
+    issue's own cost estimate and leaving the anticipated Mathlib decision
+    unforced. AxCheck rows 2495 -> 2500 (five new declarations); the whole-tree
+    coverage gate reports 2341 covered declarations. C35 and C36 conditions
+    narrowed.
 
 events_logged:
   - turn: 1
@@ -40,6 +47,30 @@ events_logged:
     routing: staged
     provenance: ai-executed
     summary: "The three new rows are axiom-cheap: two depend on no axioms, cert_target_rule on propext alone; no nativeDecide."
+  - turn: 2
+    type: decision
+    id: "N313"
+    routing: direct
+    provenance: ai-suggested
+    summary: "#196 closed by longest-candidate + List.Sublist comparison instead of the ⊆-maximal-element route the issue budgeted; no Nodup, no Mathlib, so the anticipated dependency decision was not forced."
+  - turn: 2
+    type: experiment
+    id: "N314"
+    routing: direct
+    provenance: ai-executed
+    summary: "Proof spiked standalone (compiled on the second attempt; axioms [propext, Quot.sound]) before deciding plan-or-not, then verified in-tree: build 148 jobs, axiom audit EXIT 0, coverage 2341."
+  - turn: 2
+    type: observation
+    id: "O141"
+    routing: staged
+    provenance: ai-suggested
+    summary: "An issue's recorded cost estimate encodes one proof route, not a lower bound; re-deriving the statement's geometry dissolved #196's budgeted Mathlib dependency."
+  - turn: 2
+    type: observation
+    id: "O142"
+    routing: staged
+    provenance: ai-executed
+    summary: "Spiking the proof answered 'does this need a plan?' faster than reasoning about it — O132's practice applied one step earlier."
 
 ai_actions:
   - turn: 1
@@ -61,10 +92,68 @@ ai_actions:
       - "docs/theory-pw-t6-structural-transport.md"
       - "ara/evidence/proofs/pw_t6_transport.md"
       - "docs/paper-lean-name-map.md"
+  - turn: 2
+    action: "Reviewed the eleven open GitHub issues, grouped them by why they exist (paper must-not claims, reviewer-visible asymmetries, recorded boundaries, engineering/later-paper), and recommended #196 then #215 as the next step."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: "Proved general non-emptiness of preferred extensions: preferred_exists_candidate, preferred_exists, preferredSem_enumerate_ne_nil, admissible_nil in Semantics.lean and exists_max_length in Sublists.lean; rewrote preferredSem's docstring, which had asserted the result and declined to prove it."
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Semantics.lean"
+      - "lean/Lara/Semantics/Sublists.lean"
+      - "lean/AxCheck.lean"
+      - "lean/Lara.lean"
+  - turn: 2
+    action: "Lifted the paper must-not on preferred non-emptiness (§9), recorded the corrected sizing in §10, noted the exclusivity discharge in §3, and added the §7 name-map row."
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-m2a-observation.md"
+      - "docs/paper-lean-name-map.md"
+  - turn: 2
+    action: "Ran whole-tree lake build (148 jobs), the axiom audit over AxCheck.lean, and whole-tree AxCheck coverage; opened PR #251 on branch theory/m2a-preferred-nonempty."
+    provenance: ai-executed
+    files_changed: []
 
-claims_touched: []
+claims_touched:
+  - id: C35
+    action: revised
+    turn: 2
+  - id: C36
+    action: revised
+    turn: 2
 
-logic_revisions: []
+logic_revisions:
+  - turn: 2
+    entry: C35
+    field: Conditions
+    before: "Mutual exclusivity of the justified and defeated skeptical readings requires a non-empty extension set and conflict-freedom of every extension, which the interface does not require and which is therefore supplied per instance."
+    after: "Mutual exclusivity of the justified and defeated skeptical readings requires a non-empty extension set and conflict-freedom of every extension, which the interface does not require and which is therefore supplied per instance; at the preferred instance both halves are now discharged by theorem rather than by hypothesis (`preferredSem_specConflictFree` and `preferredSem_enumerate_ne_nil`, the latter from `preferred_exists`, #196)."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The generic statement is unchanged — the interface still requires neither. What changed is that one instance now supplies the non-emptiness half from a theorem."
+  - turn: 2
+    entry: C35
+    field: Proof
+    before: "`lean/Lara/Semantics.lean` (`observe_grounded`, `groundedSem_enumerate`, `observe_gap`, `justified_defeated_exclusive`, the five `*_specConflictFree`), …"
+    after: "`lean/Lara/Semantics.lean` (`observe_grounded`, `groundedSem_enumerate`, `observe_gap`, `justified_defeated_exclusive`, the five `*_specConflictFree`, `preferred_exists` / `preferredSem_enumerate_ne_nil`), …"
+    signal: artifact-commitment
+    provenance: ai-suggested
+  - turn: 2
+    entry: C36
+    field: Conditions
+    before: "Untested boundary: no claim is made that stable is the only semantics with conditional existence."
+    after: "Untested boundary: no claim is made that stable is the only semantics with conditional existence, but the boundary has narrowed — grounded enumerates a singleton over a duplicate-free carrier (`groundedSem_singleton`) and preferred is non-empty for every framework with no hypothesis at all (`preferred_exists`, #196), so only complete and semi-stable are unproved either way."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Status untouched at supported; the Statement and the stable witness are unchanged. Complete and semi-stable are deliberately left unproved rather than asserted."
+  - turn: 2
+    entry: C36
+    field: Proof
+    before: "…, trace N232, trace N236]"
+    after: "…, trace N232, trace N236, trace N313]"
+    signal: artifact-commitment
+    provenance: ai-suggested
 
 key_context:
   - turn: 1
@@ -74,8 +163,17 @@ key_context:
       criteria were treated literally: each mutation must break a *named
       audited* theorem, which is why both were reproduced against the built
       tree rather than argued for on inspection.
+  - turn: 2
+    excerpt: >
+      User: "check the issues, what are why? what is our next step?" then
+      "let's checkout a new branch for 196. do we need a plan? or just start
+      working". The plan-or-not question was answered by spiking the proof
+      rather than by argument — the spike compiled and printed its axioms
+      before any planning document could have been written, which is also what
+      exposed the issue's cost estimate as a description of one route.
 
 open_threads:
+  - "#215 (relational parametricity over related backends) is the recommended next step and the only route to calling the backend theorem parametricity rather than representation independence; its cost is unknown until M4 F2's acceptance-profile theorem is tried against an arbitrary relation R. Whether #216 and #217 stay follow-ups or become one theory milestone depends on that answer."
   - "Session record 2026-09-05_001 references N307-N310 and O137-O138, but exploration_tree.yaml stops at N306 and observations.yaml at O136 — those nodes were never appended. Dangling references; the researcher should decide whether to backfill them from the session record or renumber. This turn reserved those ids and started at N311/O139."
   - "O139 (mutation-blind point-mass judgments) has one application; a second fixture using the same shape, or an affirmation, would close it."
   - "PW-T6 limitations unchanged: bridge-global functional translation, total leaf map, no attack transport (T8), question keys frozen across the bridge."
@@ -83,3 +181,5 @@ open_threads:
 ai_suggestions_pending:
   - "O139 heuristic — the two-shape guard pattern for point-mass fixture judgments."
   - "O140 — the axiom profile of the #231 rows."
+  - "O141 heuristic — read a budgeted dependency on an issue as a claim about the imagined route, and re-derive before paying it."
+  - "O142 heuristic — spike the proof to answer plan-or-not."
