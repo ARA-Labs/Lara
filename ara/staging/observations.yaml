@@ -3027,3 +3027,26 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O143
+  timestamp: "2026-09-06T18:08"
+  provenance: ai-suggested
+  content: >
+    An issue filed during a close-out sweep can be moot at birth: #248 was
+    written against PR #244's tree while PR #247 — merged seven minutes
+    before the filing — had already landed both work items and even the
+    factoring the issue recorded as moot. Verifying an issue's premises
+    against HEAD (grep for the named definitions, `git log -S`) before
+    executing it costs minutes and can dissolve the entire work item.
+    Kin to O141: there the issue's cost estimate encoded one imagined route;
+    here the issue's work description encoded a superseded tree.
+  context: >
+    N315. User directed "let's do #248"; the pre-execution read of
+    StatusCheck.lean found `transportsB` and `Matched` already present,
+    which triggered the git archaeology instead of the edit.
+  potential_type: heuristic
+  bound_to: [N315]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

@@ -2,8 +2,8 @@ session:
   id: "2026-09-06_001"
   date: "2026-09-06"
   started: "2026-09-06T12:00"
-  last_turn: "2026-09-06T14:30"
-  turn_count: 2
+  last_turn: "2026-09-06T18:12"
+  turn_count: 3
   summary: >
     Issue #231 closed: two drift guards added to the #224 strict-certificate
     fixture in Lara/Examples/PWStructural.lean. Certifier blindness is caught
@@ -20,7 +20,13 @@ session:
     issue's own cost estimate and leaving the anticipated Mathlib decision
     unforced. AxCheck rows 2495 -> 2500 (five new declarations); the whole-tree
     coverage gate reports 2341 covered declarations. C35 and C36 conditions
-    narrowed.
+    narrowed. Turn 3 (new conversation) reviewed the ten open issues,
+    recommended #204 (dependency-report wiring, unblocked by #191's closure)
+    as the next real work item, then took #248 as a warm-up and found it moot
+    at birth: both PW-T8 cleanups (def Matched; the transportsB unification)
+    already landed in PR #247, merged seven minutes before the issue was
+    filed against PR #244's tree. #248 closed with the verification in its
+    closing comment; no code change, no PR.
 
 events_logged:
   - turn: 1
@@ -71,6 +77,18 @@ events_logged:
     routing: staged
     provenance: ai-executed
     summary: "Spiking the proof answered 'does this need a plan?' faster than reasoning about it — O132's practice applied one step earlier."
+  - turn: 3
+    type: decision
+    id: "N315"
+    routing: direct
+    provenance: ai-suggested
+    summary: "#248 closed as moot: both cleanups (def Matched restating the StatusBridge field; admitsB/matchedB unified on transportsB) landed in PR #247, merged 7 minutes before the issue was filed against #244's tree."
+  - turn: 3
+    type: observation
+    id: "O143"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Verify a recorded issue's premises against HEAD before executing it — a close-out-sweep issue can be moot at birth. Kin to O141 (there the cost estimate encoded one route; here the work description encoded a superseded tree)."
 
 ai_actions:
   - turn: 1
@@ -112,6 +130,14 @@ ai_actions:
       - "docs/paper-lean-name-map.md"
   - turn: 2
     action: "Ran whole-tree lake build (148 jobs), the axiom audit over AxCheck.lean, and whole-tree AxCheck coverage; opened PR #251 on branch theory/m2a-preferred-nonempty."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: "Reviewed the ten open issues and recommended #204 (surface certificate dependency reports through inferSupport/driver) as the next work item — its stated natural consumer PW-T6 (#191) closed 2026-09-03, so it is now unblocked — with #248 as an optional warm-up."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: "Verified #248 against the tree (Status.lean:185 def Matched, StatusCheck.lean transportsB routing, name-map row, AxCheck rows 3180-3192; git log -S dating both to 1a7240d) and closed the issue with the verification comment. No code change; no PR opened since there was no diff."
     provenance: ai-executed
     files_changed: []
 
@@ -171,9 +197,18 @@ key_context:
       rather than by argument — the spike compiled and printed its axioms
       before any planning document could have been written, which is also what
       exposed the issue's cost estimate as a description of one route.
+  - turn: 3
+    excerpt: >
+      User: "let's do Quick warm-up option: #248, proceed directly, record
+      ara, open pr". The pre-execution read of StatusCheck.lean found
+      transportsB and Matched already present, which redirected the turn
+      from editing to git archaeology; the user's requested PR could not
+      exist because there was no diff, so the issue was closed with the
+      verification comment instead.
 
 open_threads:
-  - "#215 (relational parametricity over related backends) is the recommended next step and the only route to calling the backend theorem parametricity rather than representation independence; its cost is unknown until M4 F2's acceptance-profile theorem is tried against an arbitrary relation R. Whether #216 and #217 stay follow-ups or become one theory milestone depends on that answer."
+  - "#204 (surface certificate dependency reports through inferSupport/driver output) is the recommended next work item — unblocked since PW-T6 (#191) closed, and the only route to a production observable for the Lean accountability results (cert_steps_accounted, certDeps_eq_union). A budgeted checker-traversal change, possibly with golden/differential regeneration."
+  - "#215 (relational parametricity over related backends) is the recommended next theory step and the only route to calling the backend theorem parametricity rather than representation independence; its cost is unknown until M4 F2's acceptance-profile theorem is tried against an arbitrary relation R. Whether #216 and #217 stay follow-ups or become one theory milestone depends on that answer."
   - "Session record 2026-09-05_001 references N307-N310 and O137-O138, but exploration_tree.yaml stops at N306 and observations.yaml at O136 — those nodes were never appended. Dangling references; the researcher should decide whether to backfill them from the session record or renumber. This turn reserved those ids and started at N311/O139."
   - "O139 (mutation-blind point-mass judgments) has one application; a second fixture using the same shape, or an affirmation, would close it."
   - "PW-T6 limitations unchanged: bridge-global functional translation, total leaf map, no attack transport (T8), question keys frozen across the bridge."
@@ -183,3 +218,5 @@ ai_suggestions_pending:
   - "O140 — the axiom profile of the #231 rows."
   - "O141 heuristic — read a budgeted dependency on an issue as a claim about the imagined route, and re-derive before paying it."
   - "O142 heuristic — spike the proof to answer plan-or-not."
+  - "O143 heuristic — verify a recorded issue's premises against HEAD before executing it; kin to O141, the two may merge if either crystallizes."
+  - "#204 as next work item — awaiting the user's direction."

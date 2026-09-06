@@ -1240,3 +1240,13 @@ entries:
     - "No dead_end node: nothing was abandoned. The issue's cost estimate was refuted, but the estimate was never an approach anyone took."
     - "The dangling N307-N310 / O137-O138 references from 2026-09-05_001 remain unbacked; this turn again reserved nothing in that range and continued at N313/O141. Still an open thread."
     - "No reader reports and no taste comments this turn."
+- turn: "2026-09-06_001#3"
+  notes:
+    - "Routed the #248 closure as decision N315, not dead_end: nothing was abandoned — the work was found already done, and the load-bearing choice (close as moot vs. execute anyway, reopening the frozen Status.lean) has real rejected alternatives."
+    - "Staged O143 rather than crystallizing: one instance, no user affirmation. Deliberately kept separate from O141 — O141 is about cost estimates encoding one imagined route, O143 about work descriptions encoding a superseded tree; noted in both places that they should merge if either crystallizes."
+    - "Considered O141 closure via this turn as a second application and rejected it: the instances are kindred but not the same observation, and no closure signal (affirmation/resolution/commitment) fired on O141 itself."
+    - "Stage 4 no-op. Near-miss considered and rejected: C50 (PW-T8 status transport) — #248's mootness changes no Statement, Condition, or Proof ref; Matched and transportsB entered the tree with PR #247, before this turn."
+    - "Noted but did not backfill: PR #247 (the #244 re-land with the review feedback incorporated) has no session-record turn of its own — it appears to have been merged outside a recorded session. Its content is now documented in N315's evidence."
+    - "The previous conversation turn (backlog review recommending #204) was correctly skipped per CLAUDE.md as routine guidance; its durable output — #204 as recommended next step — is captured this turn in open_threads rather than as its own event."
+    - "The user's requested PR was not opened: an empty diff cannot be a PR. Recorded the substitution (verification comment + issue closure) in key_context so the deviation from the literal instruction is traceable."
+    - "No reader reports and no taste comments this turn."

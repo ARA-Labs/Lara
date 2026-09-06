@@ -8117,3 +8117,32 @@ tree:
     - "https://github.com/ARA-Labs/lara/pull/251"
   status: resolved
   also_depends_on: [N313]
+
+- id: N315
+  type: decision
+  title: "Close #248 as moot: both PW-T8 cleanups already landed in the #247 re-land"
+  provenance: ai-suggested
+  timestamp: "2026-09-06T18:05"
+  choice: >
+    Close issue #248 (name the T8 `matched` clause; unify `admitsB`/`matchedB`
+    on one transport helper) without any code change, after verifying that
+    commit 1a7240d (PR #247, merged 2026-09-06 07:04 UTC — seven minutes
+    before the issue was filed at 07:11 UTC) already contains both items:
+    `def Matched` at Lara/PW/Status.lean:185 with the `StatusBridge.matched`
+    field restated through it, `matchedB_iff` reading `= true ↔ Matched`,
+    the `PW.Matched` row in docs/paper-lean-name-map.md, and
+    `transportsB`/`transportsB_iff` with both `admitsB` and `matchedB`
+    routed through them and AxCheck covering all decider theorems. The
+    issue's text describes PR #244's tree throughout — even its "moot"
+    section is inverted, since #247 landed the shared `bisimScanB` scan the
+    issue records as unnecessary.
+  alternatives:
+    - "Execute the issue as written, reopening Lara/PW/Status.lean. Rejected: every deliverable already exists verbatim in the tree; a change would reopen the frozen T8 record for zero content."
+    - "Leave the issue open with a note. Rejected: it tracks no remaining work; a closed issue with the verification in its closing comment is the accurate record."
+  evidence:
+    - "git log -S 'def Matched' — only 1a7240d introduces it; same for 'def transportsB'"
+    - "lean/Lara/PW/Status.lean:185, lean/Lara/PW/StatusCheck.lean:61-107"
+    - "lean/AxCheck.lean:3180-3192 (transportsB_iff, admitsB_iff, matchedB_iff, statusBridgeB_sound/_complete/_iff)"
+    - "https://github.com/ARA-Labs/lara/issues/248"
+  status: resolved
+  also_depends_on: [N313]
