@@ -264,6 +264,9 @@
 --     that fails `matched`; one renaming translation transports `justified`,
 --     `defeated`, `gap`, and `contested` off the identity, and one `[b]`
 --     cell instantiates the modal reading — Lara.Examples.PWStatus.
+--     `statusBridgeB` decides the hypotheses over the finite compiled index
+--     ranges (sound and complete), so a conformance cell is one `decide` —
+--     Lara.PW.StatusCheck, Lara.Examples.PWStatusCheck.
 --     Neither T6 nor T9 is strengthened: every bridge-level result takes
 --     `StatusBridge` (or an explicit `SupportCorr`) as an extra hypothesis.
 --   * the fragment/linking context calculus and contextual representation

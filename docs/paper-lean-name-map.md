@@ -1170,6 +1170,7 @@ key.
 | PossiblyJustified collapse: `Translatable ∧ ⟨b⟩Justified(τ c)` reduces to the local atom, at every status | `PW.sat_status_iff_dia` | `Lara/PW/Status.lean` |
 | Composite argument correspondence factors through the chosen intermediate world | `PW.corr_comp_iff` | `Lara/PW/Status.lean` |
 | Status-preserving bridges compose along the T9 composite (legs in path order, first leg first); pathwise status is then `Eq.trans` of per-edge T8 | `PW.StatusBridge.comp` | `Lara/PW/Status.lean` |
+| Right-totality of the translation on program arguments (the `matched` clause, named) | `PW.Matched` | `Lara/PW/Status.lean` |
 | Forward attack homomorphism is insufficient: T7 satisfies `Admits` and `forth`, and status flips | `Examples.PW.Status.t7_forth`, `t7_forward_hom_insufficient` | `Lara/Examples/PWStatus.lean` |
 | The T7 target fails `matched` at `leaf l2`, directly and by T8's contrapositive | `Examples.PW.Status.t7_l2_mem`, `t7_unmatched`, `t7_not_statusBridge`, `t7_not_statusBridge_of_flip` | `Lara/Examples/PWStatus.lean` |
 | Source context over the empty registry and its accepted worlds | `Examples.PW.Status.regEmpty`, `ctxS`, `wS1`, `wS2`; `unitS1_accepted`, `unitS2_accepted` | `Lara/Examples/PWStatus.lean` |
@@ -1195,13 +1196,16 @@ and `Lara/Examples/PWStatusCheck.lean`:
 
 | Object | Lean declaration | File |
 |---|---|---|
-| `Corr`, `Admits`, the matched conjunct, `forth`, `back` as `Bool` scans, and the `StatusBridge` decider over them | `PW.corrB`, `PW.admitsB`, `PW.matchedB`, `PW.forthB`, `PW.backB`, `PW.statusBridgeB` | `Lara/PW/StatusCheck.lean` |
-| Bool/Prop reflection for the conjunct scans | `PW.corrB_iff`, `PW.admitsB_iff`, `PW.matchedB_iff` | `Lara/PW/StatusCheck.lean` |
-| Decider soundness and completeness | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete` | `Lara/PW/StatusCheck.lean` |
+| `Corr`, `Admits`, the matched conjunct, `forth`, `back` as `Bool` scans, and the `StatusBridge` decider over them; the shared transport test | `PW.corrB`, `PW.admitsB`, `PW.matchedB`, `PW.forthB`, `PW.backB`, `PW.statusBridgeB`; `PW.transportsB` | `Lara/PW/StatusCheck.lean` |
+| Bool/Prop reflection for the conjunct scans, and the range bound of a `true` `corrB` cell | `PW.corrB_iff`, `PW.admitsB_iff`, `PW.matchedB_iff`, `PW.transportsB_iff`; `PW.corrB_lt` | `Lara/PW/StatusCheck.lean` |
+| One directed bisimulation scan over abstract index relations, sound and complete under a correlation bound and an edge-range bound; `forthB`/`backB` are its two orientations, each with named soundness and completeness | `PW.bisimScanB`, `PW.bisimScanB_sound`, `PW.bisimScanB_complete`; `PW.forthB_sound`, `PW.forthB_complete`, `PW.backB_sound`, `PW.backB_complete` | `Lara/PW/StatusCheck.lean` |
+| Decider soundness and completeness; the checker decides `StatusBridge` exactly | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete`, `PW.statusBridgeB_iff` | `Lara/PW/StatusCheck.lean` |
 | The three positive bridges re-established by one `decide` each | `Examples.PW.StatusCheck.s1_r1_decider`, `s2_r2_decider`, `s3_r3_decider` | `Lara/Examples/PWStatusCheck.lean` |
 | Soundness turns a decider cell back into the Prop-level bridge | `Examples.PW.StatusCheck.s2_r2_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
 | The T7 negative through the decider: a `false` scan, refuted via completeness | `Examples.PW.StatusCheck.t7_decider_rejects`, `t7_not_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| T7 clause by clause: `matched` and `back` fail, `admits` and `forth` hold | `Examples.PW.StatusCheck.t7_matchedB_false`, `t7_backB_false`, `t7_admits_forth_hold` | `Lara/Examples/PWStatusCheck.lean` |
 | Isolating negatives pinning `admitsB` and `matchedB` independently (eng review, decision 6A) | `Examples.PW.StatusCheck.s2_r1_admits_fails`, `s2_r1_matched_holds`, `s1_r2_matched_fails`, `s1_r2_admits_holds` | `Lara/Examples/PWStatusCheck.lean` |
+| Isolating negatives pinning `forthB` and `backB` independently | `Examples.PW.StatusCheck.forthB_discriminates`, `backB_discriminates` | `Lara/Examples/PWStatusCheck.lean` |
 
 **Not X** notes:
 

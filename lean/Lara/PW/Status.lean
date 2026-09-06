@@ -33,7 +33,8 @@ related by a structural bridge (`Lara.PW.Structural`). Four sections:
 Neither T6 nor T9 is strengthened: every theorem here takes `StatusBridge`
 (or an explicit `SupportCorr`) as an extra hypothesis, and `t7_t6_boundary`
 (`Lara.Examples.PWStructural`) remains the proof that `Admits` alone cannot
-give any of these conclusions. This module only imports.
+give any of these conclusions. The executable checker is one module up, in
+`Lara.PW.StatusCheck` (issue #239). This module only imports.
 -/
 
 import Lara.PW.Structural
@@ -178,6 +179,14 @@ theorem corr_lt {m : SymMap} {lm : LeafId → LeafId}
   obtain ⟨t, t', ht, ht', _⟩ := h
   exact ⟨(List.getElem?_eq_some_iff.mp ht).1, (List.getElem?_eq_some_iff.mp ht').1⟩
 
+/-- Right-totality of the translation on program arguments: every target
+argument *is* a transport. The converse of T6's `Admits`, and the clause the
+T7 target violates at `leaf l2` (`Lara.Examples.PW.Status.t7_unmatched`). -/
+def Matched (m : SymMap) (lm : LeafId → LeafId)
+    (w : World κ) (v : World lam) : Prop :=
+  ∀ t', t' ∈ v.unit.program.args →
+    ∃ t, t ∈ w.unit.program.args ∧ trSupport m lm t = some t'
+
 /-- **The T8 hypotheses** between two worlds under a translation `(m, lm)`.
 `admits` is T6's checker-tied applicability (every source argument
 transports into the target program — left-totality of `Corr`). `matched` is
@@ -205,8 +214,7 @@ index itself, via `(Compile.edgeB_faithful P).ranged`. -/
 structure StatusBridge (m : SymMap) (lm : LeafId → LeafId)
     (w : World κ) (v : World lam) : Prop where
   admits : Admits m lm w v
-  matched : ∀ t', t' ∈ v.unit.program.args →
-    ∃ t, t ∈ w.unit.program.args ∧ trSupport m lm t = some t'
+  matched : Matched m lm w v
   forth : ∀ i j k, Corr m lm w v i j → edgeB w.unit.program k i = true →
     ∃ k', Corr m lm w v k k' ∧ edgeB v.unit.program k' j = true
   back : ∀ i j k', Corr m lm w v i j → edgeB v.unit.program k' j = true →

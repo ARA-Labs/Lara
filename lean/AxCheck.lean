@@ -3166,10 +3166,19 @@ F3 adds the surface corollary. -/
 
 -- Deciders are definitions (audited transitively through their theorems).
 #print axioms Lara.PW.corrB_iff
+#print axioms Lara.PW.transportsB_iff
 #print axioms Lara.PW.admitsB_iff
 #print axioms Lara.PW.matchedB_iff
+#print axioms Lara.PW.corrB_lt
+#print axioms Lara.PW.bisimScanB_sound
+#print axioms Lara.PW.bisimScanB_complete
+#print axioms Lara.PW.forthB_sound
+#print axioms Lara.PW.forthB_complete
+#print axioms Lara.PW.backB_sound
+#print axioms Lara.PW.backB_complete
 #print axioms Lara.PW.statusBridgeB_sound
 #print axioms Lara.PW.statusBridgeB_complete
+#print axioms Lara.PW.statusBridgeB_iff
 
 -- Conformance cells.
 #print axioms Lara.Examples.PW.StatusCheck.s1_r1_decider
@@ -3179,11 +3188,21 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.PW.StatusCheck.t7_decider_rejects
 #print axioms Lara.Examples.PW.StatusCheck.t7_not_statusBridge_via_decider
 
+-- T7, clause by clause.
+#print axioms Lara.Examples.PW.StatusCheck.t7_matchedB_false
+#print axioms Lara.Examples.PW.StatusCheck.t7_admits_forth_hold
+#print axioms Lara.Examples.PW.StatusCheck.t7_backB_false
+
 -- Isolating negatives for the admits/matched conjuncts (eng review, 6A).
 #print axioms Lara.Examples.PW.StatusCheck.s2_r1_admits_fails
 #print axioms Lara.Examples.PW.StatusCheck.s2_r1_matched_holds
 #print axioms Lara.Examples.PW.StatusCheck.s1_r2_matched_fails
 #print axioms Lara.Examples.PW.StatusCheck.s1_r2_admits_holds
+
+-- Isolating negatives for the directed scans.
+#print axioms Lara.Examples.PW.StatusCheck.forthB_discriminates
+#print axioms Lara.Examples.PW.StatusCheck.backB_discriminates
+
 /-! ### PW-T8 — declared-attack transport (issue #238) -/
 
 -- Definitions `trAttack`, `trAttackList`, and the `AttackBridge` structure

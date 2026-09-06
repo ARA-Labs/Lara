@@ -158,10 +158,21 @@ Executable decider, `Lara/PW/StatusCheck.lean` (issue #239):
 
 | Result | Declaration | File |
 |---|---|---|
-| `Corr`, `Admits`, and the matched conjunct as `Bool` scans, with their Prop reflections | `PW.corrB`, `PW.admitsB`, `PW.matchedB`; `PW.corrB_iff`, `PW.admitsB_iff`, `PW.matchedB_iff` | `Lara/PW/StatusCheck.lean` |
-| `forth`/`back` as bounded scans over the two finite index ranges | `PW.forthB`, `PW.backB` | `Lara/PW/StatusCheck.lean` |
+| `Corr`, `Admits`, and the matched conjunct as `Bool` scans over the shared transport test, with their Prop reflections | `PW.corrB`, `PW.admitsB`, `PW.matchedB`; `PW.transportsB`; `PW.corrB_iff`, `PW.admitsB_iff`, `PW.matchedB_iff`, `PW.transportsB_iff` | `Lara/PW/StatusCheck.lean` |
+| `forth`/`back` as one directed bisimulation scan at the two orientations, with the range bound of a `true` `corrB` cell | `PW.bisimScanB`; `PW.forthB`, `PW.backB`; `PW.corrB_lt` | `Lara/PW/StatusCheck.lean` |
+| The scan is sound and complete, once generically and once per orientation | `PW.bisimScanB_sound`, `PW.bisimScanB_complete`; `PW.forthB_sound`, `PW.forthB_complete`, `PW.backB_sound`, `PW.backB_complete` | `Lara/PW/StatusCheck.lean` |
 | The `StatusBridge` decider (a four-way `&&` of the scans) | `PW.statusBridgeB` | `Lara/PW/StatusCheck.lean` |
-| The decider is sound and complete for `StatusBridge` | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete` | `Lara/PW/StatusCheck.lean` |
+| The decider decides `StatusBridge` exactly | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete`, `PW.statusBridgeB_iff` | `Lara/PW/StatusCheck.lean` |
+
+Two shape decisions, recorded from the executed checker plan (#239). A
+`Decidable (StatusBridge …)` instance was rejected: `StatusBridge`
+quantifies unboundedly over `Nat`, so it is not decidable as stated — a
+`Bool` checker with a sound/complete pair is the correct shape, matching
+`edgeB`/`edgeB_faithful`. And `StatusBridge.back` is `StatusBridge.forth`
+with the two sides swapped, so the directed scan, its soundness, and its
+completeness are written once over abstract `Nat → Nat → Bool` relations
+(`bisimScanB`) and instantiated at the two orientations, rather than
+duplicating ~40 lines of mirrored tactic proof.
 
 `status_transport` states: for contexts `κ`, `λ` with `λ.canon = κ.canon`
 (`hcanon`, T6's shared-canonicalizer commitment), a structural bridge `B`
@@ -198,7 +209,9 @@ Decider conformance cells, `Lara/Examples/PWStatusCheck.lean` (namespace
 | The three positive bridges re-established by one `decide` each | `Examples.PW.StatusCheck.s1_r1_decider`, `s2_r2_decider`, `s3_r3_decider` | `Lara/Examples/PWStatusCheck.lean` |
 | Soundness turns a decider cell back into the Prop-level bridge | `Examples.PW.StatusCheck.s2_r2_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
 | The T7 negative through the decider: a `false` scan, refuted via completeness | `Examples.PW.StatusCheck.t7_decider_rejects`, `t7_not_statusBridge_via_decider` | `Lara/Examples/PWStatusCheck.lean` |
+| T7 clause by clause: `matched` and `back` fail, `admits` and `forth` hold | `Examples.PW.StatusCheck.t7_matchedB_false`, `t7_backB_false`, `t7_admits_forth_hold` | `Lara/Examples/PWStatusCheck.lean` |
 | Isolating negatives pinning `admitsB` and `matchedB` independently (eng review, decision 6A) | `Examples.PW.StatusCheck.s2_r1_admits_fails`, `s2_r1_matched_holds`, `s1_r2_matched_fails`, `s1_r2_admits_holds` | `Lara/Examples/PWStatusCheck.lean` |
+| Isolating negatives pinning `forthB` and `backB` independently | `Examples.PW.StatusCheck.forthB_discriminates`, `backB_discriminates` | `Lara/Examples/PWStatusCheck.lean` |
 
 The positive witnesses are off the identity: `symR` renames all three
 predicates, `leafMapR` renames every leaf, and `bridgeR` discharges `leaf_ok`
@@ -231,7 +244,11 @@ The boundary has two ends, both at the live T7 fixtures:
 The field the T7 edge fails is `matched`, at `leaf l2`: the target's
 attacker is in the target program (`t7_l2_mem`) and is the transport of no
 source argument (`t7_unmatched`), so `t7_not_statusBridge` refutes
-`StatusBridge` directly at that field. `t7_not_statusBridge_of_flip` recovers
+`StatusBridge` directly at that field. The hand refutation needs no other
+clause, but the executable checker records a second failure: `back` also
+fails (`t7_backB_false`) — the target's `1 → 0` attack has no counterpart
+across the identity correlation, the source program having no attacks at
+all. `t7_not_statusBridge_of_flip` recovers
 the same refutation from the flip alone, by running `status_transport` at the
 identity bridge and contradicting the two evaluated cells: T8's contrapositive
 reads a status flip as proof that some hypothesis fails, without naming
