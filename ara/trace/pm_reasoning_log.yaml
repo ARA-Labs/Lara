@@ -1219,3 +1219,13 @@ entries:
     - "Considered and rejected a dead_end node for the 12 plan defects: none abandoned an approach; they are repairs, recorded in N303's result."
     - "No reader reports arrived; the GitHub PR is ordinary review, not a structured ARA report."
     - "No staged observation marked stale: O128/O129 are promoted; nothing idle for 3+ days remains unpromoted."
+- turn: "2026-09-06_001#1"
+  notes:
+    - "Routed the guard design as decision N311 rather than a bare experiment: the load-bearing choice is writing ruleCertTgt independently of ruleCert, which has a real rejected alternative (record-update syntax would inherit the mutation and keep the rfl equation green)."
+    - "Routed the two mutation runs as experiment N312 and put the failing declaration names and line numbers in its result — the issue's acceptance criteria are about which named audited theorem breaks, so the identification is the finding."
+    - "Did NOT log a dead_end for either mutation: they are deliberate probes reverted immediately, not abandoned approaches."
+    - "Staged O139 as a heuristic rather than crystallizing: one application (this fixture), no user affirmation, and nothing downstream depends on the pattern yet."
+    - "Did NOT revise C48 or C49 at Stage 4. Near-miss considered and rejected: #231 adds regression coverage over the existing T6 contract, changes no Statement, no Conditions clause, and no boundary either claim records; the T6 contract and its limitations are untouched."
+    - "Appended new dated verification text to the docs/evidence rather than silently replacing the count history — the 1707/78 and 1713/84 figures stay in place at their commits, with 2495/87 as the current state."
+    - "Consistency pass found dangling references: session 2026-09-05_001 logs N307-N310 and O137-O138 that were never appended to exploration_tree.yaml (stops at N306) or observations.yaml (stops at O136). Did not backfill them — reconstructing another session's nodes from summaries is not this turn's record. Reserved the ids, started at N311/O139, and raised it as an open thread for the researcher."
+    - "No reader reports and no taste comments this turn; the work was issue execution."

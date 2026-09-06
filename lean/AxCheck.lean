@@ -2293,6 +2293,12 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.cert_support_renamed
 #print axioms Lara.Examples.PW.hasSupport_cert
 #print axioms Lara.Examples.PW.cert_transport
+-- #231: the fixture's drift guards — the acceptance judgments read the
+-- certifier triple on both sides, and the certificate arm is the only
+-- reachable assurance (`allowTrusted` pinned off, source and target).
+#print axioms Lara.Examples.PW.cert_reject_mismatched_certifier
+#print axioms Lara.Examples.PW.cert_target_rule
+#print axioms Lara.Examples.PW.cert_only_assurance
 
 /-! ### PW-T9 — structural-path composition (issue #190) -/
 -- The definitions `StructuralBridge.comp`, `AdmitsSteps`, `BridgePath`,

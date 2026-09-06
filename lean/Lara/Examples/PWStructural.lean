@@ -34,6 +34,14 @@ acceptance at `([e], p)` is carried to acceptance at `([e_r], p_r)`. The
 transported derivation then runs the `AssuranceOk.cert` arm off the
 identity, with the frozen `(β, hd, κ)` triple preserved verbatim.
 
+**The strict fixture's drift guards (#231).** The transport theorem runs at
+one certifier triple and one encoded step, so on its own it survives two
+mutations that would make the paragraph above false. Both are closed:
+`cert_reject_mismatched_certifier` pins that each component of `(β, hd, κ)`
+is read on each side, and `cert_only_assurance` (with `cert_target_rule`)
+pins `allowTrusted` off in both environments, leaving the certificate arm the
+only reachable assurance.
+
 **The domain negative.** The renaming is partial: the source-only claim `q`
 has no translation, and the executable comparison reports exactly
 `translationUndefined` — the bridge-domain arm of PW0's `gap` separation,
@@ -483,6 +491,87 @@ theorem cert_transport :
   rw [ren_conclusion] at hC'
   cases hC'
   exact h
+
+/-! ### Fixture drift guards (#231)
+
+`cert_transport` runs through both certificate judgments and the strict
+rule's `AssuranceOk.cert` arm, but it does so at exactly one certifier triple
+and one encoded step, so it stays green under two mutations that make the
+prose above false: dropping `(β, hd, κ)` from the acceptance judgments
+(certifier-blind acceptance) and flipping `allowTrusted` on (a second
+reachable assurance). The theorems below fail under exactly those mutations.
+-/
+
+/-- A backend that is not the fixture's allowlisted one. -/
+def βOther : BackendId := ⟨"smt", 2⟩
+
+/-- A theory digest that is not the fixture's allowlisted one. -/
+def hdOther : Digest := ⟨"th-other"⟩
+
+/-- A certificate reference that is not the one the fixture submits. -/
+def κOther : CertRef := ⟨.atom "cert-other"⟩
+
+/-- **Both acceptance judgments read the certifier triple.** Each of the
+three frozen components is load-bearing on each side: with the side's own
+encoded step held fixed, mismatching exactly one of `β`, `hd`, `κ` is
+rejected. A judgment that ignored `(β, hd, κ)` — acceptance as a predicate on
+the encoded step alone — would satisfy all six applications here and break
+this theorem, while `cert_accept_translated`, `cert_reject_untranslated`, and
+`cert_transport` all stayed green. -/
+theorem cert_reject_mismatched_certifier :
+    ¬ certCertSrc βOther hdRen κRen [.atom "e" .nil] (.atom "p" .nil) ∧
+      ¬ certCertSrc βRen hdOther κRen [.atom "e" .nil] (.atom "p" .nil) ∧
+      ¬ certCertSrc βRen hdRen κOther [.atom "e" .nil] (.atom "p" .nil) ∧
+      ¬ certCertTgt βOther hdRen κRen [.atom "e_r" .nil] (.atom "p_r" .nil) ∧
+      ¬ certCertTgt βRen hdOther κRen [.atom "e_r" .nil] (.atom "p_r" .nil) ∧
+      ¬ certCertTgt βRen hdRen κOther [.atom "e_r" .nil]
+          (.atom "p_r" .nil) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rintro ⟨h, _, _, _, _⟩; exact absurd h (by decide)
+  · rintro ⟨_, h, _, _, _⟩; exact absurd h (by decide)
+  · rintro ⟨_, _, h, _, _⟩; exact absurd h (by decide)
+  · rintro ⟨h, _, _, _, _⟩; exact absurd h (by decide)
+  · rintro ⟨_, h, _, _, _⟩; exact absurd h (by decide)
+  · rintro ⟨_, _, h, _, _⟩; exact absurd h (by decide)
+
+/-- The target rule of the strict example, written out rather than derived
+from `ruleCert`: strict, the renamed premise and conclusion, the *same* live
+allowlist, `allowTrusted` still off. Stating it independently is what makes
+`cert_target_rule` a drift guard on `ruleCert` itself. -/
+def ruleCertTgt : Rule :=
+  { mode := .strict, params := [], premises := [⟨⟨"e_r"⟩, .nil⟩]
+  , concl := ⟨⟨"p_r"⟩, .nil⟩, questions := [], allowTrusted := false
+  , certifiers := [(βRen, hdRen)] }
+
+/-- The target policy carries exactly that rule: `trRule` renames the premise
+and the conclusion and carries the mode, the allowlist, and `allowTrusted`
+verbatim. Any edit to `ruleCert`'s mode, allowlist, or `allowTrusted` flag
+breaks this equation. -/
+theorem cert_target_rule : piCertTgt rnCert = some ruleCertTgt := rfl
+
+/-- **The certificate arm is the only reachable assurance, on both sides.**
+`allowTrusted` is off and the rule is strict, so neither `.trusted` (which
+needs the flag) nor `.none` (which needs a defeasible rule) can satisfy
+`AssuranceOk` at the fixture's encoded step in either environment. Flipping
+`ruleCert.allowTrusted` to `true` breaks this theorem — the `.trusted` arm
+becomes reachable and the pinned flag equation becomes false — where
+`hasSupport_cert` and `cert_transport`, which build and transport the `.cert`
+arm, would not notice. -/
+theorem cert_only_assurance :
+    ruleCert.allowTrusted = false ∧ ruleCertTgt.allowTrusted = false ∧
+      ¬ AssuranceOk certCertSrc ruleCert [.atom "e" .nil] (.atom "p" .nil)
+          .trusted ∧
+      ¬ AssuranceOk certCertSrc ruleCert [.atom "e" .nil] (.atom "p" .nil)
+          .none ∧
+      ¬ AssuranceOk certCertTgt ruleCertTgt [.atom "e_r" .nil]
+          (.atom "p_r" .nil) .trusted ∧
+      ¬ AssuranceOk certCertTgt ruleCertTgt [.atom "e_r" .nil]
+          (.atom "p_r" .nil) .none := by
+  refine ⟨rfl, rfl, ?_, ?_, ?_, ?_⟩
+  · intro h; cases h with | trusted _ ht => exact absurd ht (by decide)
+  · intro h; cases h with | defeasible hm => exact absurd hm (by decide)
+  · intro h; cases h with | trusted _ ht => exact absurd ht (by decide)
+  · intro h; cases h with | defeasible hm => exact absurd hm (by decide)
 
 /-! ### The domain negative -/
 

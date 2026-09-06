@@ -8008,3 +8008,56 @@ tree:
     - "docs/theory-pw-t8-status-preservation.md §9"
   status: resolved
   also_depends_on: [N305]
+
+- id: N311
+  type: decision
+  title: "Guard the strict-certificate fixture by off-point negatives plus an independently written target rule"
+  provenance: ai-suggested
+  timestamp: "2026-09-06T12:00"
+  choice: >
+    Issue #231's two guards are written so that each named mutation makes a
+    theorem *false*, not merely harder to prove. Certifier blindness is
+    caught by cert_reject_mismatched_certifier: six negatives that hold the
+    side's own encoded step fixed and mismatch exactly one of the frozen
+    (beta, hd, kappa) components, on both certCertSrc and certCertTgt. The
+    allowTrusted flip is caught by cert_only_assurance (the flag pinned off
+    and AssuranceOk refuted at .trusted and .none, source and target) and by
+    cert_target_rule, whose target rule ruleCertTgt is spelled out
+    independently of ruleCert so that piCertTgt rnCert = some ruleCertTgt
+    holds by rfl and breaks under any drift in ruleCert's mode, allowlist, or
+    trusted flag.
+  alternatives:
+    - "Derive ruleCertTgt from ruleCert with record-update syntax — rejected: the derived rule inherits the mutation, so the rfl equation would stay green under exactly the drift the guard exists to catch."
+    - "Guard only the source judgment — rejected: bridgeCert.cert_ok's obligation is on the target side, so a certifier-blind target judgment would discharge cert_ok vacuously."
+    - "Leave the coverage to a Haskell property test — rejected: the fixture is Lean-only and the repo's mechanization discipline puts provable-now facts in the Lean development."
+  evidence:
+    - "lean/Lara/Examples/PWStructural.lean: cert_reject_mismatched_certifier, ruleCertTgt, cert_target_rule, cert_only_assurance"
+    - "lean/AxCheck.lean: three #231 audit rows"
+    - "https://github.com/ARA-Labs/lara/issues/231"
+  status: resolved
+  also_depends_on: [N298]
+
+- id: N312
+  type: experiment
+  title: "Mutation-test both #231 guards, then re-verify the pinned build and axiom audit"
+  provenance: ai-executed
+  timestamp: "2026-09-06T12:20"
+  result: >
+    Each guard was checked against the mutation it exists to catch by editing
+    the fixture and rebuilding. Mutation A (both acceptance judgments made
+    certifier-blind, the triple conjuncts replaced by reflexive equations)
+    failed all six components of cert_reject_mismatched_certifier at
+    PWStructural.lean:522-527, and additionally broke bridgeCert.cert_ok's
+    subst. Mutation B (ruleCert.allowTrusted := true) failed cert_target_rule
+    and the pinned flag equation inside cert_only_assurance. Both mutations
+    were reverted. On the restored tree: lake build completed successfully
+    (148 jobs, EXIT 0) and the axiom audit passed (EXIT 0) with no sorryAx,
+    ofReduceBool, or nativeDecide and only propext / Classical.choice /
+    Quot.sound. Audited declarations 2492 -> 2495; PW-T6 rows 84 -> 87.
+  evidence:
+    - "lean/Lara/Examples/PWStructural.lean"
+    - "lean/AxCheck.lean"
+    - "docs/theory-pw-t6-structural-transport.md §7"
+    - "ara/evidence/proofs/pw_t6_transport.md"
+  status: resolved
+  also_depends_on: [N311]

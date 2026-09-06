@@ -67,31 +67,54 @@ the `AssuranceOk.cert` arm with the frozen `(β, hd, κ)` triple carried verbati
 examples are the conformance evidence that the frozen contract is
 inhabitable off the identity.
 
-## Verification (2026-09-03, with the #224 strict-certificate witness)
+Two mutations of the strict fixture would leave `cert_transport` green while
+making its prose false; #231 closes both.
+`cert_reject_mismatched_certifier` pins that each of the three frozen
+components is load-bearing on each side — with the side's own encoded step
+held fixed, mismatching exactly one of `β`, `hd`, `κ` is refused — so
+certifier-blind acceptance breaks a named audited theorem.
+`cert_only_assurance` pins `allowTrusted` off and proves that neither
+`.trusted` (which needs the flag) nor `.none` (which needs a defeasible rule)
+can satisfy `AssuranceOk` at the fixture's encoded step, source and target,
+so the certificate arm is the only reachable assurance;
+`cert_target_rule` ties the target half down by stating the translated rule
+independently of `ruleCert` and holding by `rfl`.
+
+## Verification (2026-09-06, with the #231 drift guards)
 
 ```
 $ cd lean && lake build
-Build completed successfully (130 jobs).                        EXIT: 0
+Build completed successfully (148 jobs).                        EXIT: 0
 
 $ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
 Axiom audit passed.                                             EXIT: 0
 ```
 
-1713 audited declarations across the library, of which 84 are PW-T6 — every
+2495 audited declarations across the library, of which 87 are PW-T6 — every
 theorem the three modules declare, together with the translation and bridge
 definitions those theorems are stated over. The two structures (`SymMap`,
 `StructuralBridge`) and the renaming-example fixtures are audited
 transitively, through the gated theorems that mention them: `#print axioms`
 reports the whole dependency set, and the repo-wide convention is that
 example fixtures are gated through their theorems rather than registered
-separately. No `sorryAx`, no
-`ofReduceBool`, nothing outside `propext` / `Classical.choice` / `Quot.sound`.
+separately. No `sorryAx`, no `ofReduceBool`, no `nativeDecide`, nothing
+outside `propext` / `Classical.choice` / `Quot.sound`.
 The original landing's `git diff main` (PR #223, verified 2026-09-02 at 1707
 declarations, 78 PW-T6) was pure insertion, 2142 lines over 7 files, the only
 Lean files touched outside the three new modules being the two roots
-`Lara.lean` and `AxCheck.lean`; the #224 follow-up adds the
+`Lara.lean` and `AxCheck.lean`; the #224 follow-up added the
 strict-certificate fixtures to `Lara/Examples/PWStructural.lean` and their
-six audit rows, again touching no semantics module.
+six audit rows (verified 2026-09-03 at 1713 declarations, 84 PW-T6); the #231
+follow-up adds three drift guards to the same fixture module and their three
+audit rows. Neither follow-up touches a semantics module.
+
+Each guard was checked against the mutation it exists to catch, by mutating
+the fixture and rebuilding: making both acceptance judgments ignore
+`(β, hd, κ)` fails all six components of
+`cert_reject_mismatched_certifier`; setting `ruleCert.allowTrusted := true`
+fails `cert_target_rule` and the pinned flag equation inside
+`cert_only_assurance`. Both mutations were reverted and the full build and
+audit re-run green.
 
 ## Boundary
 

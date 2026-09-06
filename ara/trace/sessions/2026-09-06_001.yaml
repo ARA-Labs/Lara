@@ -1,0 +1,85 @@
+session:
+  id: "2026-09-06_001"
+  date: "2026-09-06"
+  started: "2026-09-06T12:00"
+  last_turn: "2026-09-06T12:30"
+  turn_count: 1
+  summary: >
+    Issue #231 closed: two drift guards added to the #224 strict-certificate
+    fixture in Lara/Examples/PWStructural.lean. Certifier blindness is caught
+    by cert_reject_mismatched_certifier (six off-point negatives varying one
+    of beta/hd/kappa on each side); the allowTrusted flip is caught by
+    cert_only_assurance and by cert_target_rule over an independently written
+    ruleCertTgt. Three AxCheck rows registered; both mutations reproduced and
+    reverted. Coverage 2492 -> 2495 (PW-T6 84 -> 87); build 148 jobs and the
+    axiom audit green. No semantics module, corpus, or frozen contract
+    touched.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N311"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Guards written so each named mutation makes a theorem false: off-point certifier negatives on both judgments, plus an independently written ruleCertTgt tied down by a rfl equation."
+  - turn: 1
+    type: experiment
+    id: "N312"
+    routing: direct
+    provenance: ai-executed
+    summary: "Both mutations reproduced (A fails cert_reject_mismatched_certifier's six components; B fails cert_target_rule and cert_only_assurance's pinned flag), reverted, then 148-job build and axiom audit re-run green."
+  - turn: 1
+    type: observation
+    id: "O139"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Point-mass fixture judgments applied only at their own witness point are mutation-blind; closing that needs off-point negatives plus an independently written mirror under a rfl equation."
+  - turn: 1
+    type: observation
+    id: "O140"
+    routing: staged
+    provenance: ai-executed
+    summary: "The three new rows are axiom-cheap: two depend on no axioms, cert_target_rule on propext alone; no nativeDecide."
+
+ai_actions:
+  - turn: 1
+    action: "Added the #231 drift guards (betaOther/hdOther/kappaOther, cert_reject_mismatched_certifier, ruleCertTgt, cert_target_rule, cert_only_assurance) and a module-header paragraph describing them."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples/PWStructural.lean"]
+  - turn: 1
+    action: "Registered three #231 audit rows in the PW-T6 Task 3 block."
+    provenance: ai-executed
+    files_changed: ["lean/AxCheck.lean"]
+  - turn: 1
+    action: "Ran the two mutation tests, reverted both, and re-ran lake build (148 jobs) and the axiom audit (both EXIT 0)."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 1
+    action: "Moved the PW-T6 audit counts together to 2495 total / 87 PW-T6, dated the verification blocks 2026-09-06, recorded the mutation results, and added the guard rows to the name map."
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-pw-t6-structural-transport.md"
+      - "ara/evidence/proofs/pw_t6_transport.md"
+      - "docs/paper-lean-name-map.md"
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User: "let's do #231 — fixture drift guards, this is directly, proceed,
+      record ara via /research-manager, and open pr". Issue #231's acceptance
+      criteria were treated literally: each mutation must break a *named
+      audited* theorem, which is why both were reproduced against the built
+      tree rather than argued for on inspection.
+
+open_threads:
+  - "Session record 2026-09-05_001 references N307-N310 and O137-O138, but exploration_tree.yaml stops at N306 and observations.yaml at O136 — those nodes were never appended. Dangling references; the researcher should decide whether to backfill them from the session record or renumber. This turn reserved those ids and started at N311/O139."
+  - "O139 (mutation-blind point-mass judgments) has one application; a second fixture using the same shape, or an affirmation, would close it."
+  - "PW-T6 limitations unchanged: bridge-global functional translation, total leaf map, no attack transport (T8), question keys frozen across the bridge."
+
+ai_suggestions_pending:
+  - "O139 heuristic — the two-shape guard pattern for point-mass fixture judgments."
+  - "O140 — the axiom profile of the #231 rows."

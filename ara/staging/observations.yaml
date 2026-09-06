@@ -2942,3 +2942,43 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O139
+  timestamp: "2026-09-06T12:20"
+  provenance: ai-suggested
+  content: >
+    A point-mass fixture judgment that is only ever applied at its own
+    witness point is mutation-blind: the positive theorem stays green when
+    the judgment is widened to ignore an argument. Closing that gap takes two
+    shapes together — off-point negatives that vary exactly one argument with
+    the rest held fixed, and an independently written mirror of the derived
+    object tied down by a rfl equation, so drift in the source object cannot
+    propagate into its own guard.
+  context: >
+    Extracted while writing #231's guards over the #224 strict-certificate
+    fixture; validated by two mutation runs (N312), not yet applied to any
+    other fixture.
+  potential_type: heuristic
+  bound_to: [N311, N312]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O140
+  timestamp: "2026-09-06T12:20"
+  provenance: ai-executed
+  content: >
+    Both #231 guards are axiom-cheap: cert_reject_mismatched_certifier and
+    cert_only_assurance depend on no axioms at all, and cert_target_rule on
+    propext alone — decide over the derived DecidableEq instances and
+    constructor inversion, with no nativeDecide anywhere.
+  context: >
+    Read off the AxCheck output for the three new rows during the #231
+    verification run.
+  potential_type: concept
+  bound_to: [N312]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

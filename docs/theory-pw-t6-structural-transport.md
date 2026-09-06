@@ -72,6 +72,7 @@ does not consume.
 | Renaming instance | `Examples.PW.bridgeRen`, `hasSupport_ren`, `ren_transport` |
 | Strict-certificate renaming instance | `Examples.PW.bridgeCert`, `hasSupport_cert`, `cert_transport` |
 | Contract clauses exercised off the identity | `Examples.PW.ren_leaf_translated`, `ren_support_renamed`, `cert_accept_translated`, `cert_reject_untranslated`, `cert_support_renamed` |
+| Strict-fixture drift guards (#231) | `Examples.PW.cert_reject_mismatched_certifier`, `cert_target_rule`, `cert_only_assurance` |
 | Translation-domain negative | `Examples.PW.ren_out_of_vocabulary`, `ren_translationUndefined` |
 
 The renaming instance discharges `rule_ok` and `leaf_ok` under a translation
@@ -88,6 +89,23 @@ the `AssuranceOk.cert` arm off the identity, the frozen `(β, hd, κ)` triple
 carried verbatim. Soundness is carried by `support_transport`, not by these
 examples; they are the conformance evidence that all three contract clauses
 are inhabitable off the identity.
+
+Because `cert_transport` exercises the strict fixture at exactly one certifier
+triple and one encoded step, two mutations of the fixture would leave it green
+while making the prose above false. #231 closes both. Dropping `(β, hd, κ)`
+from either acceptance judgment — acceptance as a predicate on the encoded
+step alone — is rejected by `cert_reject_mismatched_certifier`, which pins
+that mismatching exactly one of the three components, with the side's own
+encoded step held fixed, is refused on both sides. Flipping
+`ruleCert.allowTrusted` on is rejected by `cert_only_assurance`, which pins
+the flag off and proves that neither `.trusted` (which needs the flag) nor
+`.none` (which needs a defeasible rule) can satisfy `AssuranceOk` at the
+fixture's encoded step, in the source *and* in the target environment — so the
+certificate arm is the only reachable assurance, which is what makes
+`cert_ok` load-bearing. `cert_target_rule` is what ties the target half down:
+the target rule is written out independently of `ruleCert` and the equation
+`piCertTgt rnCert = some ruleCertTgt` holds by `rfl`, so any drift in
+`ruleCert`'s mode, allowlist, or trusted flag breaks it.
 
 `support_transport` states: under the contract, if
 `HasSupport canon Pi Gamma CertOk w C O` and `trSupport sym leafMap w = some
@@ -156,17 +174,17 @@ preservation — is now exhibited *through* the T6 machinery itself. T8 (#193)
 must therefore quantify over the target's attackers; nothing in this
 milestone's theorem set can be strengthened into T8 without new hypotheses.
 
-## 7. Verification (2026-09-03, with the #224 strict-certificate witness)
+## 7. Verification (2026-09-06, with the #231 drift guards)
 
 ```
 $ cd lean && lake build
-Build completed successfully (130 jobs).                        EXIT: 0
+Build completed successfully (148 jobs).                        EXIT: 0
 
 $ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
 Axiom audit passed.                                             EXIT: 0
 ```
 
-1713 audited declarations across the library, of which 84 are PW-T6 — every
+2495 audited declarations across the library, of which 87 are PW-T6 — every
 theorem the three modules declare, together with the translation and bridge
 definitions those theorems are stated over. The two structures (`SymMap`,
 `StructuralBridge`) and the renaming-example fixtures are audited
@@ -174,13 +192,24 @@ transitively, through the gated theorems that mention them: `#print axioms`
 reports the whole dependency set, and the repo-wide convention is that
 example fixtures are gated through their theorems rather than registered
 separately. No `sorryAx`, no
-`ofReduceBool`, nothing outside `propext` / `Classical.choice` /
-`Quot.sound`. The original landing (PR #223, verified 2026-09-02 at 1707
-declarations, 78 PW-T6) touched only the three new modules, the two roots
-(`Lara.lean`, `AxCheck.lean`), and the two docs — no existing semantics
-module (the PW0 gate-1 discipline, carried forward); the #224 follow-up adds
-the strict-certificate fixtures to `Lara/Examples/PWStructural.lean` and
-their six audit rows, again touching no semantics module.
+`ofReduceBool`, no `nativeDecide`, nothing outside `propext` /
+`Classical.choice` / `Quot.sound`. The original landing (PR #223, verified
+2026-09-02 at 1707 declarations, 78 PW-T6) touched only the three new
+modules, the two roots (`Lara.lean`, `AxCheck.lean`), and the two docs — no
+existing semantics module (the PW0 gate-1 discipline, carried forward); the
+#224 follow-up added the strict-certificate fixtures to
+`Lara/Examples/PWStructural.lean` and their six audit rows (verified
+2026-09-03 at 1713 declarations, 84 PW-T6), and the #231 follow-up adds the
+three drift guards to the same fixture module and their three audit rows.
+Neither follow-up touches a semantics module.
+
+Both guards were checked against the mutation each exists to catch, by
+mutating the fixture and rebuilding. Making both acceptance judgments ignore
+`(β, hd, κ)` fails all six components of
+`cert_reject_mismatched_certifier`; setting `ruleCert.allowTrusted := true`
+fails `cert_target_rule` and the pinned flag equation inside
+`cert_only_assurance`. Both mutations were reverted and the full build and
+audit re-run green.
 
 ## 8. Known limitations of the frozen contract
 
