@@ -243,15 +243,19 @@ this context" must not be read as "this artifact". Nothing pins the program.
 
 ## 5. What PW0 deliberately does not contain
 
+Read as of PW0. The first three rows have since landed — T6 (#191), T8 (#193),
+and T9 (#190) — and tracker #189 is closed; `docs/theory-pw-closeout.md` is the
+spike index and the home of everything the tracker deferred.
+
 | Absent | Home |
 |---|---|
 | Structural bridges, T6 (exact checked-support transport) | **#191**, gated by the #192 exit decision on tracker #189 |
 | T8 (conditional status preservation) | **#193** |
 | T9 (exact structural-path composition) | **#190** |
-| T10 and beyond | tracker #189 deferred-work list |
-| Approximation bridges | tracker #189 |
-| Epistemic relations, dynamic update operators, hybrid/named-world operators | tracker #189 |
-| Global scenarios | tracker #189 |
+| T10 and beyond | `docs/theory-pw-closeout.md` §3 (moved there when tracker #189 closed) |
+| Approximation bridges | `docs/theory-pw-closeout.md` §3 |
+| Epistemic relations, dynamic update operators, hybrid/named-world operators | `docs/theory-pw-closeout.md` §3 |
+| Global scenarios | `docs/theory-pw-closeout.md` §3 |
 | Surface syntax for the outer language | M5 surface layer (#188) |
 | Well-sortedness refinement of `Query_κ` | M5 surface layer (#188); limitation 2 above |
 | Sensitivity predicates (`WorldSensitive`, `ContextSensitive`) | In the design doc but **not** in #192's Work list — excluded as YAGNI |
