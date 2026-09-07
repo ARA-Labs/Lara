@@ -432,26 +432,37 @@ theorem transport_ruleLookup (certificate : Cert) (coreAssur : Lara.Support.Assu
     (transportElaborated certificate coreAssur).unit.policy.ruleLookup ⟨"r-cert"⟩
       = some (toCoreRule transportRule) := rfl
 
-/-- **The certified argument is supported.** Parameterised over the registry
-and the acceptance fact, so both programs use it. -/
-theorem transport_hasSupport
+/-- The same lookup, stated at the core policy itself rather than through an
+elaboration. `(transportElaborated _ _).unit.policy` *is* `toCorePolicy
+transportPolicy`, so this is the elaboration-free form the link fixture below
+needs — a link reads its rules off `F.policy`, not off an `Elaborated`. -/
+theorem transportCorePolicy_ruleLookup :
+    (toCorePolicy transportPolicy).ruleLookup ⟨"r-cert"⟩
+      = some (toCoreRule transportRule) := rfl
+
+/-- **The certified argument is supported**, under any Γ that declares `l-p`.
+Parameterised over the registry, the acceptance fact, and Γ, so that both
+programs use it and so that the link fixture below — whose Γ is `linkGamma`,
+not `Elaborated.gamma` — can use it too. -/
+theorem transport_hasSupport_of_gamma
     {reg : Lara.Support.BackendRegistry (fun source => source)}
-    (certificate : Cert) (coreAssur : Lara.Support.Assurance)
+    {Gamma : Lara.Support.LeafId → Option Lara.Atom}
+    (coreAssur : Lara.Support.Assurance)
     {β : Lara.Support.BackendId} {digest : Lara.Support.Digest}
     {κ : Lara.Support.CertRef}
+    (hgamma : Gamma ⟨"l-p"⟩ = some (.atom "p" .nil))
     (hassur : coreAssur = .cert β digest κ)
     (hallow : (β, digest) ∈ (toCoreRule transportRule).certifiers)
     (hacc : Lara.Support.certOkOf reg β digest κ [.atom "p" .nil] (.atom "q" .nil)) :
     Lara.Support.HasSupport (fun source => source)
-      (transportElaborated certificate coreAssur).unit.policy.ruleLookup
-      (transportElaborated certificate coreAssur).gamma
+      (toCorePolicy transportPolicy).ruleLookup Gamma
       (Lara.Support.certOkOf reg) (transportCore coreAssur)
       (.atom "q" .nil) [] := by
   subst hassur
   refine Lara.Support.HasSupport.inst
     (As := [.atom "p" .nil]) (Cs := [.atom "p" .nil]) (Os := [[]])
     (DCs := []) (DOs := [])
-    { rule := transport_ruleLookup certificate _
+    { rule := transportCorePolicy_ruleLookup
       θNodup := by decide
       θDom := by intro x; simp [transportRule, toCoreRule]
       prems := by decide
@@ -483,9 +494,28 @@ theorem transport_hasSupport
     | zero =>
         simp only [List.getElem?_cons_zero, Option.some.injEq] at hw hA hO
         subst hw; subst hA; subst hO
-        exact .leaf (transport_gamma_leafP certificate _)
+        exact .leaf hgamma
     | succ n => simp at hw
   · intro j q w A O hj; simp at hj
+
+/-- **The certified argument is supported**, in the elaboration-facing form the
+`CoreObligations` fields below want. A thin specialization of
+`transport_hasSupport_of_gamma` at `Elaborated.gamma`. -/
+theorem transport_hasSupport
+    {reg : Lara.Support.BackendRegistry (fun source => source)}
+    (certificate : Cert) (coreAssur : Lara.Support.Assurance)
+    {β : Lara.Support.BackendId} {digest : Lara.Support.Digest}
+    {κ : Lara.Support.CertRef}
+    (hassur : coreAssur = .cert β digest κ)
+    (hallow : (β, digest) ∈ (toCoreRule transportRule).certifiers)
+    (hacc : Lara.Support.certOkOf reg β digest κ [.atom "p" .nil] (.atom "q" .nil)) :
+    Lara.Support.HasSupport (fun source => source)
+      (transportElaborated certificate coreAssur).unit.policy.ruleLookup
+      (transportElaborated certificate coreAssur).gamma
+      (Lara.Support.certOkOf reg) (transportCore coreAssur)
+      (.atom "q" .nil) [] :=
+  transport_hasSupport_of_gamma coreAssur
+    (transport_gamma_leafP certificate coreAssur) hassur hallow hacc
 
 /-! ### The core obligations
 
@@ -718,5 +748,269 @@ theorem transport_relabel_moves_cert :
 
 /-- The two surface payloads are two payloads, not one cited twice. -/
 theorem transport_payloads_differ : wrappedPayload ≠ kernelPayload := by decide
+
+/-! ### The link shape (#255)
+
+`Lara.Context.surface_directAF_link` is the stronger sibling of
+`surface_directAF_relabel`: rather than taking the argument and attack
+correspondence as hypotheses, it *derives* them from `link_relabel_commutes`,
+given that the two elaborated units are the two sides of one link. Witnessing
+it therefore means exhibiting a context `C` and a fragment `F` with
+
+* `output₁.unit = linkedUnit registryEx C F` and
+* `output₂.unit = linkedUnit registryWrapped C (mapAssurFrag certSwap F)`,
+
+together with `Admissible registryEx C F` and `FixesContext certSwap C`.
+
+**How the split is forced.** The elaborated unit of this fixture declares
+exactly one core argument (`transport_args_kernel`), so the *fragment* owns
+that argument and the *context* owns none: `linkedUnit`'s argument field is
+`dedupList (C.frame.args ++ F.args)`, and any context material would show up in
+the unit. What the context does own is the evidence leaf `l-p`, which the
+fragment imports — so R-L2 (unsatisfied imports) is live and the link is a real
+one at the interface, while being degenerate at the argument level.
+
+**Two limitations, on the record rather than discovered later.**
+
+* `FixesContext certSwap linkCtx` holds because `linkCtx.frame.args = []`, so
+  this witness does not exercise a relabel that has to *avoid* a context's own
+  certificates. `Examples.Linking.cert_congruence_witness` is the core-level
+  witness where the context carries material.
+* The fixture declares no attacks (`atts := []`, inherited from
+  `transportElaborated`), so the attack half of `link_relabel_commutes` is
+  discharged on empty lists and `crossAtts` saturates to nothing. That is the
+  same degeneracy issue **#258** records for `surface_directAF_relabel`; an
+  attack-bearing surface fixture is its job, not this one's.
+-/
+
+/-- Saturation from an empty target cache emits nothing: the inner
+`List.filterMap` is over `[]` for every source. -/
+private theorem crossAttsFrom_nil_targets {canon : String → String}
+    {dp : Lara.Attack.DefeatPolicy}
+    {Pi : Lara.Support.RuleId → Option Lara.Support.Rule} :
+    ∀ sources : List (Lara.Support.SupportTerm × Lara.Atom),
+      Lara.Context.crossAttsFrom canon dp Pi sources [] = []
+  | [] => rfl
+  | _ :: sources => crossAttsFrom_nil_targets sources
+
+/-- **A context with no arguments saturates to nothing.** Both directions of
+`crossAtts` read the context's conclusion cache, which is empty when the
+context declares no arguments — so neither the context-onto-fragment nor the
+fragment-onto-context pass emits an attack. This is what lets `linkedUnit`
+reduce here without evaluating `conclusionOf`, which would need `inferSupport`
+to run through `certOkOf` on the `nd` core. -/
+theorem crossAtts_of_ctx_args_nil {canon : String → String}
+    {reg : Lara.Support.BackendRegistry canon}
+    {Gamma : Lara.Support.LeafId → Option Lara.Atom}
+    {C : Lara.Context.Context} {F : Lara.Context.Fragment}
+    (hargs : C.frame.args = []) :
+    Lara.Context.crossAtts reg Gamma C F = [] := by
+  show Lara.Context.crossAttsFrom canon F.policy.defeat F.policy.ruleLookup
+        (Lara.Context.conclusionCache F.policy.ruleLookup Gamma reg C.frame.args)
+        (Lara.Context.conclusionCache F.policy.ruleLookup Gamma reg F.args)
+      ++ Lara.Context.crossAttsFrom canon F.policy.defeat F.policy.ruleLookup
+        (Lara.Context.conclusionCache F.policy.ruleLookup Gamma reg F.args)
+        (Lara.Context.conclusionCache F.policy.ruleLookup Gamma reg C.frame.args)
+      = []
+  rw [hargs]
+  exact crossAttsFrom_nil_targets _
+
+/-- **The linked unit of an argument-free, attack-free context** is the
+fragment's own material, deduplicated. -/
+theorem linkedUnit_of_empty_ctx {canon : String → String}
+    {reg : Lara.Support.BackendRegistry canon}
+    {C : Lara.Context.Context} {F : Lara.Context.Fragment}
+    (hargs : C.frame.args = []) (hatts : C.frame.atts = []) :
+    Lara.Context.linkedUnit reg C F =
+      { sigma := F.sigma
+      , policy := F.policy
+      , args := Lara.Context.dedupList F.args
+      , atts := F.atts } := by
+  have hcross :=
+    crossAtts_of_ctx_args_nil (reg := reg) (Gamma := Lara.Context.linkGamma C F)
+      (F := F) hargs
+  simp only [Lara.Context.linkedUnit, hargs, hatts, hcross,
+    List.nil_append, List.append_nil]
+
+/-! #### The two sides -/
+
+/-- **The context**: it declares the evidence leaf `l-p` and asserts nothing.
+Σ, the policy and the ground list are the fixture's; the argument and attack
+lists are empty because the elaborated unit has room for exactly the
+fragment's one argument. -/
+def linkCtx : Lara.Context.Context :=
+  ⟨{ sigma     := transportSigma
+   , policy    := toCorePolicy transportPolicy
+   , gammaFrag := [(⟨"l-p"⟩, .atom "p" .nil)]
+   , ground    := [.atom "p" .nil]
+   , args      := []
+   , atts      := []
+   , imports   := Lara.Context.Interface.closed
+   , exports   := [] }⟩
+
+/-- **The fragment**: the certified argument, importing the leaf the context
+declares and exporting the conclusion `q`. Parameterised by its lowered
+assurance, exactly as `transportCore` is, so that the relabeled side is the
+same definition at `wrappedCoreAssur`. -/
+def linkFrag (coreAssur : Lara.Support.Assurance) : Lara.Context.Fragment :=
+  { sigma     := transportSigma
+  , policy    := toCorePolicy transportPolicy
+  , gammaFrag := []
+  , ground    := [.atom "q" .nil]
+  , args      := [transportCore coreAssur]
+  , atts      := []
+  , imports   := ⟨[⟨"l-p"⟩]⟩
+  , exports   := [.atom "q" .nil] }
+
+/-- **The relabeled fragment is the fragment at the relabeled assurance.**
+`mapAssurFrag` touches only `args` and `atts`, and `mapAssur certSwap` on this
+argument moves exactly its assurance — which is `transport_certSwap_image`. -/
+theorem linkFrag_relabel :
+    Lara.Context.mapAssurFrag certSwap (linkFrag kernelCoreAssur)
+      = linkFrag wrappedCoreAssur := rfl
+
+/-- The linked Γ declares `l-p`, which is the one thing the fragment's support
+derivation reads out of it. -/
+theorem linkGamma_leafP (F : Lara.Context.Fragment) (hgamma : F.gammaFrag = []) :
+    Lara.Context.linkGamma linkCtx F ⟨"l-p"⟩ = some (.atom "p" .nil) := by
+  simp [Lara.Context.linkGamma, linkCtx, hgamma, Lara.Admission.buildGamma]
+
+/-! #### The two elaborated units are the two sides of this link -/
+
+/-- **Program 1's unit is the link.** -/
+theorem transport_unit_is_link :
+    (transportElaborated kernelCert kernelCoreAssur).unit
+      = Lara.Context.linkedUnit transportEnv.registry linkCtx
+          (linkFrag kernelCoreAssur) := by
+  rw [linkedUnit_of_empty_ctx (C := linkCtx) rfl rfl]
+  rfl
+
+/-- **Program 2's unit is the same link with the fragment relabeled.** -/
+theorem transport_unit_wrapped_is_link :
+    (transportElaborated wrappedCert wrappedCoreAssur).unit
+      = Lara.Context.linkedUnit transportEnvWrapped.registry linkCtx
+          (Lara.Context.mapAssurFrag certSwap (linkFrag kernelCoreAssur)) := by
+  rw [linkFrag_relabel, linkedUnit_of_empty_ctx (C := linkCtx) rfl rfl]
+  rfl
+
+/-! #### Admissibility
+
+The two `SideOk` derivations mirror `Examples.Linking.certSideOk_ctx` /
+`certSideOk_frag`: the context side is vacuous, and the fragment side is the
+one certified argument plus the observation that `q` does not contrary-match
+itself under a policy with no contraries. -/
+
+theorem linkSideOk_ctx {reg : Lara.Support.BackendRegistry (fun source => source)}
+    (F : Lara.Context.Fragment) :
+    Lara.Context.SideOk (fun source => source) reg
+      (Lara.Context.linkGamma linkCtx F) (toCorePolicy transportPolicy)
+      linkCtx.frame.args linkCtx.frame.atts where
+  support := by intro w hw; simp [linkCtx] at hw
+  typed := by intro k hk; simp [linkCtx] at hk
+  source_declared := by intro k hk; simp [linkCtx] at hk
+  target_declared := by intro k hk; simp [linkCtx] at hk
+  attack_complete := by
+    intro source hs _ _ _ _ _ _ _ _
+    simp [linkCtx] at hs
+
+theorem linkSideOk_frag {reg : Lara.Support.BackendRegistry (fun source => source)}
+    (coreAssur : Lara.Support.Assurance)
+    {β : Lara.Support.BackendId} {digest : Lara.Support.Digest}
+    {κ : Lara.Support.CertRef}
+    (hassur : coreAssur = .cert β digest κ)
+    (hallow : (β, digest) ∈ (toCoreRule transportRule).certifiers)
+    (hacc : Lara.Support.certOkOf reg β digest κ [.atom "p" .nil] (.atom "q" .nil)) :
+    Lara.Context.SideOk (fun source => source) reg
+      (Lara.Context.linkGamma linkCtx (linkFrag coreAssur))
+      (toCorePolicy transportPolicy)
+      (linkFrag coreAssur).args (linkFrag coreAssur).atts where
+  support := by
+    intro w hw
+    have hwc : w = transportCore coreAssur := by simpa [linkFrag] using hw
+    exact ⟨.atom "q" .nil, hwc ▸ transport_hasSupport_of_gamma coreAssur
+      (linkGamma_leafP (linkFrag coreAssur) rfl) hassur hallow hacc⟩
+  typed := by intro k hk; simp [linkFrag] at hk
+  source_declared := by intro k hk; simp [linkFrag] at hk
+  target_declared := by intro k hk; simp [linkFrag] at hk
+  attack_complete := by
+    intro source hs target ht Cs Ct hsSup htSup hcm _
+    exfalso
+    have hsup := transport_hasSupport_of_gamma coreAssur
+      (linkGamma_leafP (linkFrag coreAssur) rfl) hassur hallow hacc
+    have hsEq : source = transportCore coreAssur := by simpa [linkFrag] using hs
+    have htEq : target = transportCore coreAssur := by simpa [linkFrag] using ht
+    subst hsEq; subst htEq
+    have h1 : Cs = .atom "q" .nil := (Lara.Support.hasSupport_unique hsSup hsup).1
+    have h2 : Ct = .atom "q" .nil := (Lara.Support.hasSupport_unique htSup hsup).1
+    subst h1; subst h2
+    exact absurd ((Lara.Attack.contraryMatchB_iff (fun source => source)
+      (toCorePolicy transportPolicy).defeat (.atom "q" .nil) (.atom "q" .nil)).mpr hcm)
+      (by decide)
+
+/-- **The context is admissible for the fragment**, under the registry that
+accepts the kernel certificate. Discharging this genuinely needs
+`transport_cert_accepted`: the fragment's only argument carries a certificate. -/
+theorem transportLink_admissible :
+    Lara.Context.Admissible registryEx linkCtx (linkFrag kernelCoreAssur) where
+  guard := by decide
+  ctx := linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur)
+  frag := linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
+    transport_cert_accepted
+  signature :=
+    Lara.Context.signatureStage_link (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide)
+  scope := by decide
+  ruleIds := by decide
+  policy := Lara.Policy.firstViolation_none_iff.mp (by decide)
+
+/-! #### The instantiation
+
+`Lara.Context.surface_directAF_link`, applied to this pair. The conclusion
+coincides with `surfaceTransport_directAF_eq`'s — both corollaries end at the
+same framework equality — but the route is the link one: the argument and
+attack correspondence is *derived* from `link_relabel_commutes` here rather
+than supplied. -/
+
+/-- **The M4 link corollary, witnessed.** Two accepted surface programs whose
+elaborated units are the two sides of one link — a fragment and its `certSwap`
+relabeling, in one admissible context — present the same framework. -/
+theorem surfaceTransport_link_directAF_eq :
+    Lara.Surface.directAF transport_checks_wrapped
+      = Lara.Surface.directAF transport_checks_kernel := by
+  obtain ⟨acc₁, hchecked₁⟩ := transport_checkUnit_kernel
+  obtain ⟨acc₂, hchecked₂⟩ := transport_checkUnit_wrapped
+  exact Lara.Context.surface_directAF_link
+    (C := linkCtx) (F := linkFrag kernelCoreAssur)
+    transport_checks_kernel hchecked₁ transport_checks_wrapped hchecked₂
+    certSwap_injective certSwap_preserving transportLink_admissible ⟨rfl, rfl⟩
+    transport_unit_is_link transport_unit_wrapped_is_link
+
+/-! #### Non-vacuity of the link witness
+
+The same guards `surfaceTransport_relabel_moves` /
+`surfaceTransport_inputs_differ` carry for the relabel corollary, restated at
+the fragment: without them `f = id` would satisfy every hypothesis of
+`surfaceTransport_link_directAF_eq` and the witness would be a tautology. -/
+
+/-- **The relabel actually moved the fragment's declared material.** Mirrors
+`Examples.Linking.cert_relabel_moves_args`. -/
+theorem surfaceTransport_link_relabel_moves_args :
+    (Lara.Context.mapAssurFrag certSwap (linkFrag kernelCoreAssur)).args
+      ≠ (linkFrag kernelCoreAssur).args := by decide
+
+/-- **The relabel is not the identity on this fragment.** -/
+theorem surfaceTransport_link_relabel_moves :
+    Lara.Context.mapAssurFrag certSwap (linkFrag kernelCoreAssur)
+      ≠ linkFrag kernelCoreAssur :=
+  fun h => surfaceTransport_link_relabel_moves_args
+    (congrArg Lara.Context.Fragment.args h)
+
+/-- **The link is a link**: the fragment imports a leaf it does not declare,
+and the context is what supplies it. Without this the "context" would be inert
+and the instance would say nothing about linking. -/
+theorem surfaceTransport_link_imports_nonempty :
+    (linkFrag kernelCoreAssur).imports.leaves ≠ [] ∧
+      (linkFrag kernelCoreAssur).imports.leaves = linkCtx.frame.declared := by
+  constructor <;> decide
 
 end Lara.Examples.SurfaceTransport

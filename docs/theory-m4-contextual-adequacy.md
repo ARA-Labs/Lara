@@ -197,8 +197,42 @@ what `SurfaceTransport` implements:
   applies to program 1; `certSwap_preserving` carries program 2.
 
 The corollary and its instance are both sorry-free and inside the standard trio.
-What remains uninstantiated is the stronger sibling `surface_directAF_link`,
-filed as issue **#255**.
+
+### The link corollary, witnessed
+
+The stronger sibling `surface_directAF_link` is witnessed by
+**`Lara.Examples.SurfaceTransport.surfaceTransport_link_directAF_eq`** (issue
+**#255**), on the same fixture. It does not take the argument and attack
+correspondence as hypotheses; it *derives* them from `link_relabel_commutes`,
+so the work is exhibiting a context and a fragment for which
+
+* `output₁.unit = linkedUnit registryEx linkCtx (linkFrag kernelCoreAssur)`
+  (`transport_unit_is_link`) and
+* `output₂.unit = linkedUnit registryWrapped linkCtx (mapAssurFrag certSwap
+  (linkFrag kernelCoreAssur))` (`transport_unit_wrapped_is_link`),
+
+plus `transportLink_admissible : Admissible registryEx linkCtx (linkFrag
+kernelCoreAssur)` and `FixesContext certSwap linkCtx`.
+
+The split is forced rather than chosen. The elaborated unit declares exactly
+one core argument, and `linkedUnit`'s argument field is `dedupList (C.frame.args
+++ F.args)`, so the fragment owns that argument and the context owns none. What
+the context does own is the evidence leaf `l-p`, which the fragment imports —
+R-L2 is live (`surfaceTransport_link_imports_nonempty`), so the link is real at
+the interface. Non-vacuity is guarded by
+`surfaceTransport_link_relabel_moves_args` and
+`surfaceTransport_link_relabel_moves`, restating at the fragment what
+`surfaceTransport_relabel_moves` states at the unit.
+
+**Two degeneracies, on the record.** `FixesContext` holds because the context's
+argument list is empty, so this witness does not exercise a relabel that has to
+*avoid* a context's own certificates —
+`Examples.Linking.cert_congruence_witness` is the core-level witness where the
+context carries material. And the fixture declares no attacks, so the attack
+half of `link_relabel_commutes` is discharged on empty lists and `crossAtts`
+saturates to nothing (`crossAtts_of_ctx_args_nil`). An attack-bearing surface
+fixture is issue **#258**, which covers the same gap for
+`surface_directAF_relabel`.
 
 ## 5. The M3 debt: partially discharged
 

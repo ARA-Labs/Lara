@@ -1317,5 +1317,18 @@ audited through the gated theorems that mention them.
   constructors. Non-vacuity is guarded by `surfaceTransport_relabel_moves`
   (`output₂.unit.args ≠ output₁.unit.args`) and `surfaceTransport_inputs_differ`
   (`input₂ ≠ input₁`), without which `f = id` would satisfy every hypothesis.
-- `surface_directAF_link`, the stronger sibling, still has **no worked
-  instance** — issue #255.
+- `surface_directAF_link`, the stronger sibling, is witnessed by
+  `Lara.Examples.SurfaceTransport.surfaceTransport_link_directAF_eq`
+  (`lean/Lara/Examples/SurfaceTransport.lean`, issue #255), on the same
+  fixture. The two elaborated units are exhibited as the two sides of one link
+  (`transport_unit_is_link`, `transport_unit_wrapped_is_link`) over
+  `linkCtx`/`linkFrag`, with `transportLink_admissible` supplying the
+  admissible context; the argument and attack correspondence is then *derived*
+  from `link_relabel_commutes` rather than assumed. Non-vacuity:
+  `surfaceTransport_link_relabel_moves_args`,
+  `surfaceTransport_link_relabel_moves`, and
+  `surfaceTransport_link_imports_nonempty` (the fragment genuinely imports the
+  leaf the context declares). Two degeneracies are deliberate and recorded in
+  `docs/theory-m4-contextual-adequacy.md` §4: the context declares no arguments
+  (so `FixesContext` is trivial) and the fixture declares no attacks (so the
+  edge half is empty — issue #258).
