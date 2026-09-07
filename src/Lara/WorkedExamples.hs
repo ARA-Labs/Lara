@@ -51,6 +51,7 @@ workedExamples =
   , ("examples/S6", "ord-named-v1.policy.lara")
   , ("examples/S7", "ord-labeled-v1.policy.lara")
   , ("examples/S8", "strict-v1.policy.lara")
+  , ("examples/S9", "insp-v1.policy.lara")
   , ("examples/agreement-map", "agreement-v1.policy.lara")
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")

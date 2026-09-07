@@ -8366,3 +8366,177 @@ tree:
     - "https://github.com/ARA-Labs/lara/issues/258"
   status: open
   also_depends_on: [N318]
+
+- id: N322
+  type: decision
+  title: "insp@1 certifies the closed-world step over declared inventories, not byte-faithfulness"
+  provenance: ai-executed
+  timestamp: "2026-09-07T15:40"
+  choice: >
+    Ship the §5.2 static code-inspection adapter as a closed four-predicate
+    family — code_absent / code_present / code_unique /
+    code_planned_not_shipped — over premises carrying a declared exhaustive
+    inventory inv(Src, finding(f1, ... no_findings)). The certified content is
+    the inference from an exhaustive enumeration to a structural conclusion:
+    a negative existential over code is not an observation but a closed-world
+    step, and that step is deductive where the enumeration is not. What the
+    adapter removes from the trusted base is narrow and real — the step from
+    an enumeration to a conclusion no longer rests on a trusted policy rule —
+    and it asserts nothing about whether the inspection covered the module or
+    read the right version.
+  alternatives:
+    - >
+      Certify over source bytes directly. Rejected: that is lara-evidence@0.1
+      (byte-level evidence admission), explicitly out of v0.1 by spec §4.3 and
+      gated under #78. Building it into a strict backend would move a
+      defeasible measurement into the TCB by the back door. The split taken
+      keeps the backend owning the inference and the leaf layer owning the
+      observation, so evidence admission later strengthens the leaf without
+      touching the adapter.
+    - >
+      One premise per finding plus a separate exhaustiveness premise. Rejected:
+      the certificate's slot count would vary with the size of the enumeration,
+      so it is not a flat SlotSchema and Lara.Elaborate.CertSlots could not
+      lower symbolic (prem name) references for it. The enumeration belongs in
+      one premise because it is one observation.
+    - >
+      Spell the diff member code_diff. Rejected on the §4.5 naming taste
+      already settled for the scheme vocabulary — the reader is a
+      Python-literate domain researcher, so code_planned_not_shipped wins.
+  evidence:
+    - "src/Lara/Strict/Insp.hs"
+    - "lean/Lara/Insp.lean"
+    - "docs/insp1-code-inspection-decision.md §2, §5"
+    - "docs/spec.md §5.2 item 3"
+    - "m0/annotations/rebench-rust_codecontests.yaml: C09 (scheme plan_vs_shipped_diff)"
+    - "m0/annotation-summary.md: 'code_inspection (+plan_vs_shipped_diff) | 3'"
+    - "https://github.com/ARA-Labs/lara/pull/267"
+  status: resolved
+
+- id: N323
+  type: decision
+  title: "Sigma's fixed constructor arity forces the inventory to be a cons spine, not a variadic node"
+  provenance: ai-executed
+  timestamp: "2026-09-07T15:45"
+  choice: >
+    Encode the enumeration as three reserved fixed-arity source constructors —
+    inv/2, finding/2, no_findings/0 — rather than a variadic inv(U, f1, ..., fn).
+    A variadic constructor is not declarable in Sigma at all: spec §2 fixes each
+    constructor's arity, so a unit's signature would need one inv per length and
+    the R2 sort checker could not check it. The design constraint came from the
+    signature layer, not from the backend.
+  alternatives:
+    - >
+      Recover the findings by scanning the premise for all nullary constructors
+      other than the source. Rejected as too implicit — it would make an
+      unrelated constant in the premise silently become a finding.
+  evidence:
+    - "docs/spec.md §2 (constructor arity)"
+    - "examples/S9/insp-v1.policy.lara (con inv/finding/no_findings declarations)"
+    - "src/Lara/Strict/Insp.hs: Con table, parseFindings"
+    - "lean/Lara/Insp.lean: Con, parseFindings, termInvNodes"
+  status: resolved
+  also_depends_on: [N322]
+
+- id: N324
+  type: decision
+  title: "The contrary pair belongs on the defeasible bridge, and which family needs one is decided by shared-ground-truth vs declared-premise"
+  provenance: ai-executed
+  timestamp: "2026-09-07T15:50"
+  choice: >
+    Declare no contrary pair on insp@1's raw inspection atoms, and record that
+    a policy admitting a rival inspection must carry the conflict on the
+    defeasible bridge's conclusions instead. Two Lean theorems fix both halves:
+    inspModels_excl_of_same_entry (two arguments reading the same inspection
+    leaf cannot both be backed for opposite polarities) and
+    inspModels_absent_present_sat (two arguments reading different leaves can).
+    The second is what distinguishes this family from ord@1, whose
+    ordModels_excl_of_lt makes exclusivity a theorem because comparison goals
+    are decided against a shared ground truth. Spec §8.1 Path B then forces the
+    placement: a strict-reachable conclusion may not overlap either side of a
+    contrary declaration, so a policy making code_absent/code_present strict
+    conclusions AND declaring them contrary is an R12 rejection.
+  alternatives:
+    - >
+      Declare the contrary pair on code_absent/code_present in insp-v1.
+      Rejected: it is an R12 compile-time rejection under Path B, since
+      absence_recheck's conclusion pattern is strict-reachable.
+    - >
+      Say nothing about contraries, as ord@1's policy does. Rejected because
+      the reason differs: ord@1 declares none because it cannot conflict, and
+      insp@1 declares none because this policy has no rival argument. Leaving
+      the two silences indistinguishable would make the next policy author read
+      the wrong lesson off S9.
+  evidence:
+    - "lean/Lara/Insp.lean: inspModels_excl_of_same_entry, inspModels_absent_present_sat"
+    - "lean/Lara/Ord.lean: ordModels_excl_of_lt"
+    - "test/InspSpec.hs: prop_inspContraryCoAcceptable"
+    - "examples/S9/insp-v1.policy.lara (WELL-FORMEDNESS note)"
+    - "docs/spec.md §8.1 Path B, R12"
+    - "docs/insp1-code-inspection-decision.md §4"
+  status: resolved
+  also_depends_on: [N322]
+
+- id: N325
+  type: dead_end
+  title: "The S9 mutation base was built and verified, then reverted: it collides with a frozen input"
+  provenance: ai-executed
+  timestamp: "2026-09-07T16:20"
+  hypothesis: >
+    Issue #260 asked for property, golden, AND mutation conformance evidence,
+    so adding "S9" to Lara.Mutate.mutationBases and regenerating would be an
+    additive step inside the issue's budget — the same shape as adding a worked
+    example or a corpus fixture.
+  failure_mode: >
+    It generated cleanly — 568 mutants, 27 new (22 verdict anchors + 5 codec
+    negatives), every one passing the generator's verified-by-construction
+    gate, with cert-payload-tamper reducing (inspectdiff (prem 0) (prem 1)) to
+    (inspectdiff (prem 0)) and cert-theory-swap retargeting the insp@1 digest,
+    so both operators genuinely bit on the new replay. cabal test,
+    gen-mutants --check, and differential.sh (647/0) were all green. The
+    collision is not with any gate: fixtures/mutants/ is frozen input row 1 of
+    docs/m5-freeze-checklist.md, so 541 -> 568 grows the measured input set
+    601 -> 628 and requires an m5-freeze-v5 -> v6 re-cut plus a full axis-(c)
+    measurement re-run. #260 budgeted neither. Reverted; suite regenerated back
+    to 541 with an empty tracked diff.
+  lesson: >
+    A conformance leg named in an issue is not automatically inside that
+    issue's budget. Three of this repository's evidence surfaces are ordinary
+    (properties, wire fixtures, worked examples) and one is frozen (the seeded
+    mutation suite), and the difference is invisible from the issue text — it
+    lives in the freeze checklist's row table. Check which evidence surfaces
+    are frozen inputs BEFORE building the evidence, not after it passes. The
+    cost was budgeted into #266 rather than discovered by a reviewer, and the
+    same gap applies to ord@1, which is why #266 proposes batching S2 with S9
+    into one re-cut instead of two.
+  evidence:
+    - "docs/m5-freeze-checklist.md: frozen inputs row 1, post-v5 addendum"
+    - "https://github.com/ARA-Labs/lara/issues/266"
+    - "src/Lara/Mutate.hs: mutationBases"
+  status: resolved
+  also_depends_on: [N322]
+
+- id: N326
+  type: experiment
+  title: "Local gate sweep for insp@1: differential 620 -> 625, axiom audit trio-clean, frozen inputs unmoved"
+  provenance: ai-executed
+  timestamp: "2026-09-07T16:40"
+  result: >
+    cabal build all and cabal test all PASS. lake build 152 jobs PASS.
+    lake env lean AxCheck.lean | check-axioms.sh -> "Axiom audit passed." with
+    17 Lara.Insp rows, every one inside {propext, Classical.choice, Quot.sound}
+    and no sorryAx or ofReduceBool. check-axcheck-coverage.py PASS over
+    Insp.lean and Driver.lean (18 declarations). scripts/differential.sh
+    625 pass / 0 fail, up from a clean-tree baseline of 620 — +1 examples/S9
+    anchor and +4 fixtures/corpus/insp-*.sexp anchors, so both drivers agree
+    byte-for-byte on the new backend including the premise-only guard, which
+    the two sides reach by different routes. negative 56/0 unchanged. Surface
+    conformance 25 cases, presentation parity 78 rows, semantics goldens,
+    update goldens, update differential 37 decisions, backend-deps golden: all
+    PASS. gen-mutants --check: 541 mutants, unchanged. check_ara_source_spans:
+    PASS 58 quotations, up from 5 pre-existing failures on the clean tree.
+  evidence:
+    - "https://github.com/ARA-Labs/lara/pull/267 (gate table)"
+    - "docs/m5-freeze-checklist.md post-v5 addendum (620 -> 625)"
+  status: resolved
+  also_depends_on: [N322, N323, N324, N325]

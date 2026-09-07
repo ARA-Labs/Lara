@@ -3166,3 +3166,51 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O149
+  timestamp: "2026-09-07T16:20"
+  provenance: ai-executed
+  content: >
+    A repository's evidence surfaces are not uniformly cheap to extend. Here three are ordinary
+    (QuickCheck properties, hand-authored wire fixtures, worked examples) and one is a frozen
+    measurement input (the seeded mutation suite), so adding the same kind of coverage costs
+    nothing on three of them and a freeze-tag re-cut plus a full measurement re-run on the
+    fourth. Nothing in an issue's text distinguishes them; the distinction lives in the freeze
+    checklist's frozen-inputs row table. The check belongs before the evidence is built, not
+    after it passes its gates.
+  context: >
+    Issue #260 asked for property/golden/mutation evidence for insp@1. The mutation base was
+    implemented and fully verified (568 mutants, 27 new, all passing the generator's own gate,
+    differential 647/0) before the collision with m5-freeze-checklist.md row 1 was noticed, and
+    was then reverted. Cost budgeted into #266 rather than left for a reviewer to find.
+  potential_type: heuristic
+  bound_to: [N325]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O150
+  timestamp: "2026-09-07T15:50"
+  provenance: ai-suggested
+  content: >
+    Whether a strict backend's goal family needs a declared contrary pair is decided by WHAT its
+    goals are settled against. A family settled against data carried in the goal itself — ord@1's
+    two numerals — cannot have two conflicting members accepted, so exclusivity is a theorem and
+    a contrary declaration would add nothing. A family settled against a value the PREMISE
+    supplies — insp@1's declared inventory — can, because two units may declare different
+    premises for the same subject, so the conflict is real and only the attack layer can carry
+    it. Under Path B the placement is then forced rather than chosen: a strict-reachable
+    conclusion may not overlap a contrary side, so the conflict must sit on a defeasible bridge's
+    conclusions one layer up.
+  context: >
+    Established while shipping insp@1 (#260, PR #267) and mechanized in both directions:
+    Lara.Insp.inspModels_excl_of_same_entry and inspModels_absent_present_sat against
+    Lara.Ord.ordModels_excl_of_lt. Crystallized the same turn via artifact commitment — the
+    layering of examples/S9/insp-v1.policy.lara exists because of it.
+  potential_type: claim
+  bound_to: [N324, N322]
+  promoted: true
+  promoted_to: "logic/claims.md:C51"
+  crystallized_via: artifact-commitment
+  stale: false

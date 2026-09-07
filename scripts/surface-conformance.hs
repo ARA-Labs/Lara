@@ -39,6 +39,7 @@ import qualified Lara.Prop as P
 import qualified Lara.Semantics as Semantics
 import qualified Lara.Sigma as Sigma
 import qualified Lara.Strict as Strict
+import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
@@ -625,7 +626,11 @@ buildCertOk theories cert premises conclusion =
     table = [(Strict.TheoryDigest digest, propositions)
             | (TheoryDigest digest, propositions) <- theories]
     registry = Strict.mkRegistry
-      [ND.mkNDBackend table, RA.mkRABackend table, Ord.mkOrdBackend table]
+      [ ND.mkNDBackend table
+      , RA.mkRABackend table
+      , Ord.mkOrdBackend table
+      , Insp.mkInspBackend table
+      ]
 
 observeText :: (AF -> [[Int]]) -> AF -> Grounded.Claim -> String
 observeText enumerate framework claim

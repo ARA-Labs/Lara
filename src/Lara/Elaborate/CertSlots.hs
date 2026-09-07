@@ -45,6 +45,7 @@ import Lara.Strict (SExpr (..))
 import qualified Lara.Strict as Strict
 import Lara.Syntax (isIdentStart)
 import Lara.Strict.Cell (SlotSchema (..), Tag (TPrem), parseCanonicalNat, tagToString)
+import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
 
@@ -75,8 +76,12 @@ data SlotRefError
 -- | Every declared flat premise-reference schema: the closed table this
 -- pass consults. A backend\@version absent here has no schema, and its
 -- payloads pass through 'lowerCertPayload' byte-identical.
+--
+-- A backend may declare __more than one__ schema: @insp\@1@'s two family
+-- shapes have distinct head keywords and arities, and 'matchSchema' selects on
+-- both, so the two entries can never both match one payload.
 slotSchemas :: [SlotSchema]
-slotSchemas = [Ord.slotSchema, RA.slotSchema]
+slotSchemas = [Insp.slotSchemaOne, Insp.slotSchemaDiff, Ord.slotSchema, RA.slotSchema]
 
 -- | Lower one certificate's symbolic premise references to canonical
 -- numeric slots, per the rules in the module header. On success the payload

@@ -226,6 +226,36 @@ corpusGoldens =
         ++ " (num 0.05)) justified)))"
     )
   , ("fixtures/corpus/ra-premise-only-reject.sexp", "(verdict reject R13)")
+  , -- @insp\@1@ replay anchors (issue #260), hand-authored for the same reason
+    -- the @ord\@1@ four are: they pin certificate shapes @scripts/gen-corpus.hs@
+    -- has no vocabulary for.
+    --
+    -- The premise-only pair isolates the guard on the value it most needs to
+    -- protect. Both units declare the same one-entry theory carrying an
+    -- inventory that would have satisfied the goal, and differ only in whether
+    -- the certificate cites slot 1 (@== nPrem@, the theory entry — reject) or
+    -- slot 0 (the premise — accept). Free-context indexing would have accepted
+    -- both, which would let an artifact self-supply the closed-world premise
+    -- \"I inspected everything and found nothing\" without any leaf or
+    -- admission check ever seeing it.
+    ( "fixtures/corpus/insp-premise-only-accept.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom code_absent (con m) (con f)) justified)))"
+    )
+  , ("fixtures/corpus/insp-premise-only-reject.sexp", "(verdict reject R13)")
+  , -- The closed-world step itself, on the wire: an exhaustive inspection that
+    -- enumerated /nothing/ — @inv(m, no_findings)@ — certifies the absence.
+    -- This is the arm that makes @insp\@1@ a strict step rather than a
+    -- measurement, so it gets a standing anchor rather than living only in the
+    -- property suite.
+    ( "fixtures/corpus/insp-empty-inventory-accept.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom code_absent (con m) (con f)) justified)))"
+    )
+  , -- Arity is part of the family: a one-inventory @(inspect (prem 0))@ payload
+    -- under a two-inventory @code_planned_not_shipped@ goal is a rejection, not
+    -- a re-interpretation of the certificate against the goal it was handed.
+    ("fixtures/corpus/insp-arity-mismatch-reject.sexp", "(verdict reject R13)")
   ]
     ++ workedExampleGoldens
 
@@ -362,6 +392,20 @@ workedExampleGoldens =
     ( "examples/S8/example.core.sexp"
     , "(verdict accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom holds (con safety_invariant) (con D)) justified)))"
+    )
+  , -- S9 (issue #260): the @insp\@1@ static code-inspection example. Both
+    -- certificate arities appear — a1's two-inventory @(inspectdiff …)@ and
+    -- a3's one-inventory @(inspect …)@ negative existential — under one
+    -- defeasible bridge (a2). All three arguments are unattacked, so the
+    -- strict layer's own claims (c2/c3) are queried alongside the bridge's
+    -- (c1) and the anchor pins all three statuses.
+    ( "examples/S9/example.core.sexp"
+    , "(verdict accept (labels (0 in) (1 in) (2 in)) (edges)"
+        ++ " (statuses"
+        ++ " (status (atom implementation_gap (con solver_module) (con repair_pass)) justified)"
+        ++ " (status (atom code_planned_not_shipped (con plan_notes) (con solver_module)"
+        ++ " (con repair_pass)) justified)"
+        ++ " (status (atom code_absent (con solver_module) (con repair_pass)) justified)))"
     )
   , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;

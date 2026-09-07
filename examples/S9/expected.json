@@ -1,0 +1,57 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "insp-v1",
+    "backends": [
+      "insp@1"
+    ],
+    "theories": [
+      "sha256:insp-v1-theory-0"
+    ],
+    "artifact": "sha256:9090909090909090909090909090909090909090909090909090909090909090"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "implementation_gap(solver_module, repair_pass)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "code_planned_not_shipped(plan_notes, solver_module, repair_pass)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "code_absent(solver_module, repair_pass)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a3",
+        "index": 1,
+        "label": "in"
+      },
+      {
+        "arg": "a2",
+        "index": 2,
+        "label": "in"
+      }
+    ]
+  }
+}

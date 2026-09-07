@@ -39,8 +39,8 @@ kernel and `@0.10` adds source-authored formula annotations for them, again
 without a core or wire change), and the deterministic evaluation corpus is frozen at tag
 `m5-freeze-v5` (`m5-freeze-checklist.md`). Layers added beyond the M3 spine:
 `Lara.Admission` (the `.lara` source-boundary admission judgment,
-`policy-admission-calculus-decision.md`), the `ord@1` and `ra@1` strict backends
-beside `nd@1`, `Lara.Mutate` + `Lara.Measure` (the seeded mutation suite and the
+`policy-admission-calculus-decision.md`), the `ord@1`, `ra@1`, and `insp@1`
+strict backends beside `nd@1`, `Lara.Mutate` + `Lara.Measure` (the seeded mutation suite and the
 axis-(c) harness), `Lara.ClaimSupport` + `Lara.BindingAudit` (reporting and the
 blinded audit pipeline), and the cross-language presentation-parity guard
 (`scripts/check-presentation-parity.sh`).

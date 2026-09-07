@@ -191,6 +191,7 @@ CI runs both, including the `AxCheck.lean` axiom audit, on every push.
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |
 | [`docs/strict-backend-decision.md`](docs/strict-backend-decision.md) | The backend-parametric strict-certificate interface and its proof obligations |
+| [`docs/ord1-corpus-extension-decision.md`](docs/ord1-corpus-extension-decision.md), [`docs/insp1-code-inspection-decision.md`](docs/insp1-code-inspection-decision.md) | What an accepted `ord@1` / `insp@1` step certifies — and, for `insp@1`, why the closed-world step is the certified content and why its family needs a declared contrary pair |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
 | [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and a dated snapshot (checking a corpus unit costs ~200 µs; one pass over all 564 harness records, under 200 ms) |

@@ -114,6 +114,7 @@ import Lara.SupportTerm
   )
 import qualified Lara.Strict as St
 import Lara.Strict.Deps (CertDep, certDeps, encodeCertDeps)
+import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
@@ -402,7 +403,12 @@ buildCertOk theories cert as c = case cert of
           Left reason -> CertRejected reason
   where
     registry =
-      St.mkRegistry [ND.mkNDBackend table, RA.mkRABackend table, Ord.mkOrdBackend table]
+      St.mkRegistry
+        [ ND.mkNDBackend table
+        , RA.mkRABackend table
+        , Ord.mkOrdBackend table
+        , Insp.mkInspBackend table
+        ]
     table = [(toStrictDigest d, ps) | (d, ps) <- theories]
 
 toStrictDigest :: TheoryDigest -> St.TheoryDigest

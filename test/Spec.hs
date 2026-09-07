@@ -41,6 +41,7 @@ import MeasureSpec (measureSpecProps)
 import MutationSpec (mutationSpecProps)
 import NDNamedSpec (ndNamedSpecProps)
 import PropSpec (propSpecProps)
+import InspSpec (inspSpecProps)
 import OrdSpec (ordSpecProps)
 import RASpec (raSpecProps)
 import ReportingSpec (reportingSpecProps)
@@ -205,6 +206,7 @@ main = do
         ++ [run name act | (name, act) <- strictSpecProps]
         ++ [run name act | (name, act) <- raSpecProps]
         ++ [run name act | (name, act) <- ordSpecProps]
+        ++ [run name act | (name, act) <- inspSpecProps]
         ++ [run name act | (name, act) <- replaySpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
         ++ [run name act | (name, act) <- valueBindingSpecProps]

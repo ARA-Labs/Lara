@@ -13,6 +13,12 @@
 -- slot-reference sub-grammar has exactly one home: the @\"prem\"@ spelling
 -- lives in this module's 'Tag' table and nowhere else.
 --
+-- The numeral and cell machinery is rational-arithmetic-specific; the slot
+-- sub-grammar and 'SlotSchema' are not. @insp\@1@ ("Lara.Strict.Insp")
+-- certifies structural facts about source with no numbers in sight and still
+-- imports 'decodeSlot' and 'SlotSchema', because \"which premise slot does
+-- this certificate cite\" is a seam-wide question, not an arithmetic one.
+--
 -- == Where the shared stages sit: the @ord\@1@ rejection funnel
 --
 -- The funnel of the ordered-comparison backend that consumes these helpers,

@@ -203,9 +203,25 @@ Other hypotheses of the theorem, all carried by `Unit.CheckedUnit`
 The interface is `Lara.Strict.Backend` (`lean/Lara/Strict.lean:77`), one core
 per registered `(name, version)` identity, indexed by the source
 canonicalizer, operating on the explicit full context `Γ = Δ ++ T` (premises
-then digest-resolved theory *data*). Two registered instances discharge every
-law: ND (`Strict.ndBackend`, `Strict.lean:759`) and RA (`RA.raBackend`,
-`RA.lean:450`).
+then digest-resolved theory *data*). The table below works the laws through two
+registered instances — ND (`Strict.ndBackend`, `Strict.lean:759`) and RA
+(`RA.raBackend`, `RA.lean:450`) — chosen as the two extremes: ND's recursive
+de Bruijn proof terms with a non-identity encoding, and RA's flat
+slots-plus-witness certificate over the identity encoding.
+
+Two further registered instances discharge the same four laws and are omitted
+from the table only because they add no new *shape* of discharge, not because
+they are exempt: `ord@1` (`Ord.ordBackend`, `Ord.lean`; `ordReplay_iff`,
+`ordSound`, `ordUses_covers`/`_valid`/`_account`) and `insp@1`
+(`Insp.inspBackend`, `Insp.lean:595`; `inspReplay_iff` :344, `inspSound` :403,
+`inspUses_covers` :421, `inspUses_valid` :438, `inspUses_account` :461). Both
+follow RA's column pattern — identity encoding, so B2 is `equiv_iff_nf_eq`;
+decode-then-decide replay, so B1 is a case split; and slot-naming
+certificates, so B4 falls out of the lookups `checkB` performs. `insp@1`'s
+consequence relation `inspModels` (:321) is the one that is not arithmetic:
+it is membership and non-membership in a *declared exhaustive enumeration*, so
+the paper should introduce it as the closed-world instance of `models_beta`
+rather than as a third numeric checker.
 
 | Law | Interface (Strict.lean) | ND discharge | RA discharge |
 |---|---|---|---|

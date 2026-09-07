@@ -291,6 +291,7 @@ import Lara.Strict
 import Lara.Cell
 import Lara.RA
 import Lara.Ord
+import Lara.Insp
 import Lara.Comparison
 import Lara.CertSlots
 import Lara.Grounded

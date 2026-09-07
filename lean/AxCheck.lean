@@ -18,6 +18,7 @@ import Lara.Strict
 import Lara.Cell
 import Lara.RA
 import Lara.Ord
+import Lara.Insp
 import Lara.Comparison
 import Lara.CertSlots
 import Lara.Grounded
@@ -444,6 +445,30 @@ open Lara
 #print axioms Lara.Ord.le_le_iff_eq
 #print axioms Lara.Ord.ordModels_relHolds
 #print axioms Lara.Ord.ordModels_excl_of_lt
+
+-- Issue #260: the static code-inspection domain-checker backend `insp@1` —
+-- the full `Backend` instantiation (replay adequacy, certificate soundness,
+-- and the three obligation-4 laws), plus the domain theory: the closed-world
+-- step itself, the diff decomposition, and the two halves of the
+-- contrary-pair argument (exclusive at a shared inspection leaf, jointly
+-- satisfiable across two).
+#print axioms Lara.Insp.inspBackend
+#print axioms Lara.Insp.inspReplay_iff
+#print axioms Lara.Insp.inspSound
+#print axioms Lara.Insp.inspUses_covers
+#print axioms Lara.Insp.inspUses_valid
+#print axioms Lara.Insp.inspUses_account
+#print axioms Lara.Insp.checkB_one_extract
+#print axioms Lara.Insp.checkB_diff_extract
+#print axioms Lara.Insp.relHoldsB_iff
+#print axioms Lara.Insp.relHolds_absent_of_nil
+#print axioms Lara.Insp.relHolds_present_of_unique
+#print axioms Lara.Insp.relHolds_polarity_excl
+#print axioms Lara.Insp.relHolds_unique_absent_excl
+#print axioms Lara.Insp.inspModels_diff_halves
+#print axioms Lara.Insp.inspModels_one_witness
+#print axioms Lara.Insp.inspModels_excl_of_same_entry
+#print axioms Lara.Insp.inspModels_absent_present_sat
 
 -- Named certificate premise slots (lara-syntax@0.6, #105): the presentation
 -- pass's payload-rewrite math over an abstract resolver.  The identity

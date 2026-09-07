@@ -35,11 +35,25 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > changing `lara-core@0.2`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
 > semantics. Byte-level `lara-evidence@0.1` verification remains gated under issue #78.
 
+> **Portfolio completion (2026-09-07, issue #260).** The §5.2 portfolio is now shipped in full:
+> `insp@1` (static code inspection, `Lara.Strict.Insp`; §9 result 10 discharged in
+> `lean/Lara/Insp.lean`) joins `ra@1` and `ord@1` as the third optional adapter, closing the
+> designed-but-unshipped clause the #256 amendment below recorded. LP remains non-shipping — the
+> C14 flip criterion is unchanged and unmet. What an accepted `insp@1` step certifies, and why its
+> family needs a declared contrary pair where `ord@1`'s does not, is recorded in
+> `insp1-code-inspection-decision.md`. No corpus regeneration or freeze-tag bump is owed: the
+> adapter is additive at the registry, no existing unit selects it, and no corpus, wire, or
+> replay-identity bytes change. A mutation base for `S9` is deliberately **not** included: it would
+> grow the seeded suite 541 → 568, and `fixtures/mutants/` is frozen input row 1 of
+> `m5-freeze-checklist.md`, so it costs a v5 → v6 re-cut plus a full axis-(c) re-run that #260 did
+> not budget. Tracked in issue #266; the mutant bytes are unchanged here.
+
 > **Portfolio and wire amendment (2026-09-07, issue #256).** Two stale claims are corrected. (1) The
 > §5.2 shipped-adapter clause of the M0-frozen blockquote above is amended: v0.1 ships `ra@1`
 > (rational-arithmetic/table-recheck) and `ord@1` (ordered comparison, PR #83) as the optional
 > adapters beside the §5.1 reference backend `nd@1`; the static code-inspection checker stays in the
-> portfolio as designed-but-unshipped (issue #260). LP remains non-shipping. (2) The wire encoding is
+> portfolio as designed-but-unshipped (issue #260 — since **shipped**, see the amendment above).
+> LP remains non-shipping. (2) The wire encoding is
 > the S-expression codec of `Lara.Wire` (§1.1 TCB row 1, §10.1 R14) — there is deliberately no JSON
 > checker-input codec in the TCB; `Lara.Json` is the future untrusted LLM-producer surface (issue
 > #30). See §5.2 and `m1-freeze-checklist.md` for the row updates. No corpus regeneration or
@@ -92,7 +106,7 @@ trusted code before it is believed. The M1 freeze fixes this boundary (open ques
 | 3 | Static checker: leaf admission, policy instantiation, critical-question discharge, support-term typing | `Lara.Policy`, `Lara.SupportTerm` | §9 results 1, 3 |
 | 4 | §8.1 policy well-formedness validator (strict-reachable `contrary` check) | `Lara.Policy` | §8.1 restriction; §9 result 7 |
 | 5 | Typed-attack checker (positional rebut / undercut / undermine) | `Lara.Attack` | §9 results 1, 4 |
-| 6 | Strict-backend registry `R` and each shipped adapter | `Lara.Strict`, `Lara.Strict.{ND,RA,Ord}` | §9 results 2, 8, 10 (frozen carve-out 2 for the seam + ND; `ra@1`/`ord@1` discharge r10 in `lean/Lara/{RA,Ord}.lean`) |
+| 6 | Strict-backend registry `R` and each shipped adapter | `Lara.Strict`, `Lara.Strict.{ND,RA,Ord,Insp}` | §9 results 2, 8, 10 (frozen carve-out 2 for the seam + ND; `ra@1`/`ord@1`/`insp@1` discharge r10 in `lean/Lara/{RA,Ord,Insp}.lean`) |
 | 7 | Compiler `compile(P) = AF` with subargument closure | `Lara.Compile` | §9 result 4 |
 | 8 | Status engine: grounded labelling + four-state aggregation | `Lara.Grounded` | §9 results 5, 6, 7 |
 | 9 | Diagnostics / located rejection | `Lara.Diagnostics` | §1; §10 |
@@ -756,11 +770,12 @@ The corpus study (M0, C14, `m0/annotation-summary.md`) measured which strict ste
 actually demand: of 60 sampled claims, 35 identified a domain-checker call, 21 none, 3 LP, 1
 reference-nd. The 35 domain-checker calls are **overwhelmingly arithmetic re-checks of reported
 tables** — deltas, ratios, aggregations, inequalities — plus a few code inspectors. The v0.1 optional
-adapter portfolio is therefore sized to that demand. It ships the rational-arithmetic half — the
-table-recheck checker and, added beside it under PR #83, the ordered-comparison checker `ord@1`
-whose beats-claim shape is the most common in the ML-methodology literature — while the static
-code-inspection checker the study also counted stays portfolio-designed but unshipped (amended
-2026-09-07, issue #256; header note):
+adapter portfolio is therefore sized to that demand, and as of issue #260 it ships **all three**
+members: the rational-arithmetic half — the table-recheck checker and, added beside it under PR
+#83, the ordered-comparison checker `ord@1` whose beats-claim shape is the most common in the
+ML-methodology literature — and the static code-inspection checker `insp@1` the study also counted
+(shipped 2026-09-07, issue #260; header note. It was portfolio-designed but unshipped between the
+#256 amendment and #260):
 
 1. a **rational-arithmetic / table-recheck checker** — certifies that a reported cell stands in a
    declared arithmetic relation to other cells (delta, ratio, aggregation, inequality). This
@@ -782,10 +797,24 @@ code-inspection checker the study also counted stays portfolio-designed but unsh
    exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S4 carry
    the demonstration.
 3. a **static code-inspection checker** — certifies structural facts about referenced source
-   (plan-vs-shipped diffs, negative existentials over code). The corpus study reserved a place for
-   it ("a few code inspectors"), but it is **designed and unshipped** at v0.1: building it is
-   tracked in issue #260, and while it stays unshipped it carries no §9 result-10 obligation (r10
-   binds shipped adapters only).
+   (plan-vs-shipped diffs, negative existentials over code) as a closed four-predicate family —
+   `code_absent`, `code_present`, `code_unique`, `code_planned_not_shipped` — over **declared
+   exhaustive inventories** `inv(Src, finding(f₁, … no_findings))`. The certified content is the
+   **closed-world step**: a negative existential over code is not an observation but an inference
+   from an exhaustive enumeration, and that inference is what the replay discharges. It does not
+   assert that any inventory is faithful to the bytes — byte-level evidence admission is not part
+   of v0.1 (§4.3), so an inventory is an *evidence declared* leaf and stays defeasible, which is
+   why `rebench-rust_codecontests` C09 remains a `gap`. Slots are premise-only, and here that guard
+   protects the closed-world premise itself: a self-supplied theory entry could otherwise assert
+   "I inspected everything and found nothing". Unlike the `ord@1` family this one *does* need a
+   declared contrary pair — inspection goals are decided against a declared inventory rather than a
+   shared ground truth, so `code_absent` / `code_present` are co-acceptable
+   (`inspModels_absent_present_sat`); by §8.1 Path B that conflict must be carried on a defeasible
+   bridge's conclusions, since a strict-reachable pattern may not overlap a `contrary` side.
+   Shipped as **`insp@1`** (issue #260; `Lara.Strict.Insp`; §9 result 10 discharged in
+   `lean/Lara/Insp.lean`; `docs/insp1-code-inspection-decision.md`). No corpus unit exercises it —
+   a corpus extension is deferred to `corpus-v2` with the `ord@1` units; the worked example S9
+   carries the demonstration against C09's shape.
 
 **LP answers no observed corpus demand** (3 calls, all speculative) and is not part of the shipping
 portfolio. It may still be *registered* as an optional backend — its `t:F`, application, sum, positive

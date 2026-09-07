@@ -25,14 +25,14 @@ Design decisions (documented, faithful to the mechanized development):
 * `canon := Lara.canonNum`. Numeric literals therefore use the same identity
   relation as the Haskell production driver; identifier canonicalization remains
   the separate `canonId = id` extension point.
-* The backend registry is built from the wire `theories` section over the three
+* The backend registry is built from the wire `theories` section over the four
   implemented backend cores — `nd@1` (`Lara.Strict.ndBackend`, digests resolving
-  to ND-encoded theory data), `ra@1` and `ord@1` (`Lara.RA.raBackend` /
-  `Lara.Ord.ordBackend`, known digests resolving to the **empty** theory because
-  both are premise-only). See `buildRegistry` for why the two resolutions
-  differ. Units that reference any other backend fall through to a certificate
-  rejection, which is the honest behaviour given only these three are
-  mechanized.
+  to ND-encoded theory data), and `ra@1`, `ord@1`, `insp@1` (`Lara.RA.raBackend`
+  / `Lara.Ord.ordBackend` / `Lara.Insp.inspBackend`, known digests resolving to
+  the **empty** theory because all three are premise-only). See `buildRegistry`
+  for why the two resolutions differ. Units that reference any other backend
+  fall through to a certificate rejection, which is the honest behaviour given
+  only these four are mechanized.
 * The verdict is printed followed by a single `\n`, matching the Haskell
   CLI's `putStrLn`: both drivers' stdout is `printSExpr (encodeVerdict v)`
   plus one newline, so differential comparison is byte equality.
@@ -46,6 +46,7 @@ import Lara.Groups
 import Lara.Strict
 import Lara.RA
 import Lara.Ord
+import Lara.Insp
 
 namespace Lara.Driver
 
@@ -734,22 +735,26 @@ def raBackendId : BackendId := ⟨"ra", 1⟩
 /-- The ordered-comparison backend identity, `ord@1`. -/
 def ordBackendId : BackendId := ⟨"ord", 1⟩
 
-/-- Backend registry built from the wire `theories` section over the fixed
-`nd@1` / `ra@1` / `ord@1` triple, mirroring the Haskell `buildCertOk`: each
-fixed core, with each declared digest resolving to that digest's core-encoded
-theory data.
+/-- The static code-inspection backend identity, `insp@1`. -/
+def inspBackendId : BackendId := ⟨"insp", 1⟩
 
-The two rational-arithmetic backends are the exception, and deliberately so: a
-*known* `ra@1` or `ord@1` digest resolves to the **empty** theory rather than
-to the declared entries (an unknown digest still fails to resolve, which is a
-rejection).  Both are premise-only by design (`Lara.Ord` §2.2; the seam-wide
-decision extending it to `ra@1`), and this is what keeps the two sides in exact
-agreement: each Haskell adapter rejects any certificate slot at or beyond the
-premise count, while the abstract `Backend` core is handed only `Γ = Δ ++ T`
-and never learns `Δ.length`.  Resolving to `[]` makes `Γ = Δ`, so "names a
-premise" and "is in range of `Γ`" coincide and both sides accept exactly the
-same certificates — including on a unit that declares a non-empty wire theory,
-where the Haskell side rejects those slots outright.
+/-- Backend registry built from the wire `theories` section over the fixed
+`nd@1` / `ra@1` / `ord@1` / `insp@1` quadruple, mirroring the Haskell
+`buildCertOk`: each fixed core, with each declared digest resolving to that
+digest's core-encoded theory data.
+
+The three premise-only backends are the exception, and deliberately so: a
+*known* `ra@1`, `ord@1`, or `insp@1` digest resolves to the **empty** theory
+rather than to the declared entries (an unknown digest still fails to resolve,
+which is a rejection).  All three are premise-only by design (`Lara.Ord` §2.2;
+the seam-wide decision extending it to `ra@1`, and `Lara.Insp`, where the value
+the guard protects is the closed-world premise itself), and this is what keeps
+the two sides in exact agreement: each Haskell adapter rejects any certificate
+slot at or beyond the premise count, while the abstract `Backend` core is
+handed only `Γ = Δ ++ T` and never learns `Δ.length`.  Resolving to `[]` makes
+`Γ = Δ`, so "names a premise" and "is in range of `Γ`" coincide and both sides
+accept exactly the same certificates — including on a unit that declares a
+non-empty wire theory, where the Haskell side rejects those slots outright.
 
 Only `nd@1` still resolves a digest to its declared entries, because its
 consulted context genuinely is `Δ ++ T`: an `nd@1` certificate's de Bruijn free
@@ -770,6 +775,12 @@ def buildRegistry (theories : List (Digest × List Atom)) : BackendRegistry dcan
                | none => none }
     else if β = ordBackendId then
       some { core := Lara.Ord.ordBackend dcanon
+             resolveTheory := fun h =>
+               match theories.find? (fun t => decide (t.1 = h)) with
+               | some _ => some []
+               | none => none }
+    else if β = inspBackendId then
+      some { core := Lara.Insp.inspBackend dcanon
              resolveTheory := fun h =>
                match theories.find? (fun t => decide (t.1 = h)) with
                | some _ => some []
@@ -1025,7 +1036,8 @@ def firstDuplicateBackend : List (String × String) →
 
 /-- The supported backend selections, mirroring `Lara.Replay.supportedBackends`. -/
 def supportedBackends : List (String × String) :=
-  [backendPair ndBackendId, backendPair raBackendId, backendPair ordBackendId]
+  [backendPair ndBackendId, backendPair raBackendId, backendPair ordBackendId,
+    backendPair inspBackendId]
 
 def firstUnknownBackend : List (String × String) → Option (String × String)
   | [] => none

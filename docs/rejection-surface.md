@@ -84,7 +84,8 @@ slots by construction, so the value-mismatch wording above is the one a `compari
 ### 1.2 The certificate premise-slot rejections (`lara-syntax@0.6`, `@0.8`)
 
 Since `lara-syntax@0.6` (grammar Appendix E), the declared premise-reference
-positions of an `ord@1`/`ra@1` certificate payload are lowered at elaboration.
+positions of an `ord@1`/`ra@1`/`insp@1` certificate payload are lowered at
+elaboration.
 A spelling-level slot mistake there, such as a malformed numeral `(prem 007)`
 or `(prem -1)`, or a symbolic name that fails to resolve, rejects at the source
 boundary (`ElabError`, exit 2, the `CertSlot*` family of grammar Appendix E.5,
@@ -231,7 +232,8 @@ slot *i* was, so the reader decoded it by hand against the policy declarations.
 
 Since #130 the reason line is followed by one line per slot. **Both doors carry
 it**, which is the point: `lara-syntax@0.6`'s named slots fix slot mistakes for
-`ord@1`/`ra@1` authors at authoring time on the `.lara` door, and do nothing for
+`ord@1`/`ra@1`/`insp@1` authors at authoring time on the `.lara` door, and do
+nothing for
 numeric certificates, `nd@1` proof terms, or third-party `.sexp` artifacts —
 all of which still die as positional rejections. Two readings exist:
 
@@ -371,7 +373,7 @@ reproduce the class shown.
 | R10 attack-position | attack position undefined, or wrong occurrence kind for the attack kind | `examples/R3` | `lara check examples/R3/example.lara` → `reject R10` |
 | R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut | `fixtures/mutants/A--unlicensed-attack-0.sexp` | `reject R11` |
 | R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
-| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. Since #130 the reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
+| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. Since #130 the reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
 | R14 codec | wire program fails to decode: malformed S-expression, unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
 One class is not individually anchored above, because it is a source-boundary rejection rather

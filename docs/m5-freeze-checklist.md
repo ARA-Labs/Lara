@@ -253,6 +253,31 @@ correct for the tree they describe.
 series keeps its legacy `m5-` name. It does; see the note at the top of this
 file for the decision and its cost._
 
+_**Post-v5 movement, still `m5-freeze-v5` (the `insp@1` backend, issue #260,
+2026-09-07).** The measured inputs are untouched: rows 1 and 2 hold their v5
+SHAs exactly (`fixtures/mutants/` = `9c174f4…`, `corpus-units/` = `cadb5fa…`),
+the 11 measured worked-example goldens are byte-identical, and
+`measurements/frozen/` holds `bef2bd1…` — the axis-(c) numbers remain the
+numbers of record and no re-run is owed. Row 3's tree moved additively and
+outside the measured set: worked example **S9** (the static code-inspection
+demonstration, both certificate arities under one defeasible bridge) was added
+with its co-located `insp-v1` policy and derived goldens. The differential gate
+row rose **620 → 625**: +1 S9 anchor and +4 hand-authored
+`fixtures/corpus/insp-*.sexp` replay anchors. Registering a fourth backend
+changed **zero** frozen bytes — no frozen unit selects `insp@1`, the registry is
+keyed by `(name, version)`, and `Lara.Replay.supportedBackends` only widens.
+
+**The one deferral, stated as a cost rather than discovered as one.** Adding
+`S9` to `Lara.Mutate.mutationBases` would give `insp@1` genuine mutation
+coverage — the certificate-tampering operators would run against its payloads
+and theory digests instead of only `nd@1`'s. It was built and verified (27
+mutants, all passing the generator's verified-by-construction gate) and then
+**reverted**, because it grows the seeded suite **541 → 568** and
+`fixtures/mutants/` is frozen input row 1: that is a v5 → v6 re-cut plus a full
+axis-(c) re-run, which issue #260 did not budget. Issue #266 tracks it to ride
+the next freeze cycle. `ord@1` shipped under the same constraint and likewise
+has no mutation base._
+
 ## What T5 is (and is not)
 
 **T5 definition of done** (tracker #48): commit the fixture set, corpus sample,

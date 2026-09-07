@@ -2,11 +2,11 @@ session:
   id: "2026-09-07_001"
   date: "2026-09-07"
   started: "2026-09-07T10:30"
-  last_turn: "2026-09-07T12:30"
-  turn_count: 1
+  last_turn: "2026-09-07T17:10"
+  turn_count: 2
   summary: >
-    Issue #227 closed by PR #257: Lara/Examples/SurfaceTransport.lean witnesses
-    Lara.Context.surface_directAF_relabel unconditionally
+    Turn 1 — issue #227 closed by PR #257: Lara/Examples/SurfaceTransport.lean
+    witnesses Lara.Context.surface_directAF_relabel unconditionally
     (surfaceTransport_directAF_eq) on two accepted surface programs differing in
     one nd@1 certificate related by certSwap, with 34 theorems all inside the
     standard trio and no native_decide. Code review then found the module was
@@ -19,6 +19,23 @@ session:
     it. Two follow-ups filed: #258 (the witnessed pair is edge-free, so
     coveredB_relabel runs on an empty attack set) and #259 (a CI closure check;
     this was the second occurrence of the #242 failure mode).
+
+    Turn 2 — issue #260 closed by PR #267: the §5.2 optional adapter portfolio
+    is complete. insp@1 (Lara.Strict.Insp, lean/Lara/Insp.lean) ships the static
+    code-inspection checker as a closed four-predicate family over declared
+    exhaustive inventories, certifying the CLOSED-WORLD STEP — a negative
+    existential over code follows deductively from an exhaustive enumeration —
+    and never the enumeration's faithfulness to bytes, which stays a defeasible
+    leaf under the gated evidence-admission work (#78). §9 result 10 discharged
+    in Lean (17 theorems, trio-clean); evidence is 23 property groups, four wire
+    anchors, and worked example S9 built as corpus unit C09's shape plus the one
+    leaf C09 lacks. Two theorems fix the contrary question in both directions
+    and crystallized C51; C27 gained its third and sharpest instance. The
+    requested mutation leg was built, fully verified, and REVERTED on finding it
+    collides with frozen input row 1 of the evaluation-corpus freeze — that cost
+    is measured and filed as #266 rather than discovered downstream. differential
+    620 → 625 with 0 fail; every other local gate green, and the ARA span checker
+    went from 5 pre-existing failures to PASS.
 
 events_logged:
   - turn: 1
@@ -64,6 +81,49 @@ events_logged:
     provenance: ai-suggested
     summary: "Crystallized via artifact-commitment into constraints.md — the fixture that landed is what the axiom-discipline constraint forced."
 
+  - turn: 2
+    type: decision
+    id: "N322"
+    routing: direct
+    provenance: ai-executed
+    summary: "insp@1 ships certifying the closed-world step over declared inventories; byte-faithfulness stays a defeasible leaf (that is evidence-admission #78, not a backend)."
+  - turn: 2
+    type: decision
+    id: "N323"
+    routing: direct
+    provenance: ai-executed
+    summary: "Sigma's fixed constructor arity forces the inventory to be an inv/finding/no_findings cons spine; a variadic inv is not declarable at all."
+  - turn: 2
+    type: decision
+    id: "N324"
+    routing: direct
+    provenance: ai-executed
+    summary: "No contrary pair on the raw inspection atoms; Path B forces any such conflict onto the defeasible bridge. Both halves mechanized against ord@1's exclusivity theorem."
+  - turn: 2
+    type: dead_end
+    id: "N325"
+    routing: direct
+    provenance: ai-executed
+    summary: "S9 mutation base built and fully verified (568 mutants, 27 new), then reverted: fixtures/mutants/ is frozen input row 1, so it costs a v5->v6 re-cut plus an axis-(c) re-run. Budgeted into #266."
+  - turn: 2
+    type: experiment
+    id: "N326"
+    routing: direct
+    provenance: ai-executed
+    summary: "Local gate sweep: differential 620->625 with 0 fail, axiom audit trio-clean over 17 Insp rows, frozen inputs unmoved, ARA span checker repaired from 5 failures to PASS."
+  - turn: 2
+    type: observation
+    id: "O149"
+    routing: staged
+    provenance: ai-executed
+    summary: "Evidence surfaces are not uniformly cheap: three are ordinary, one is a frozen measurement input, and the issue text does not distinguish them. Check the freeze rows before building the evidence."
+  - turn: 2
+    type: observation
+    id: "O150"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Crystallized into C51 via artifact-commitment: what a backend's goals are settled against decides whether its family needs a contrary pair, and Path B then fixes where the conflict lives."
+
 ai_actions:
   - turn: 1
     action: >
@@ -90,10 +150,105 @@ ai_actions:
     provenance: ai-executed
     files_changed: []
 
+  - turn: 2
+    action: >
+      Read #260, then the ord@1 shipped-backend pattern end to end (adapter,
+      Lean r10 module, wire fixtures, worked example, registry wiring) before
+      designing anything, and read the two corpus annotations the issue names
+      (rebench-triton_cumsum C05, rebench-rust_codecontests C09) so the goal
+      family is fixed against measured demand rather than invented demand.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: >
+      Implemented the adapter and registered it on both doors: Lara.Strict.Insp
+      with a closed four-predicate family and two wire keywords, wired into
+      buildCertOk, Replay.supportedBackends, Elaborate.CertSlots.slotSchemas
+      (first backend to declare two flat schemas), the cabal module list, and
+      the surface-conformance registry.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Strict/Insp.hs"
+      - "src/Lara/Driver/Internal.hs"
+      - "src/Lara/Replay.hs"
+      - "src/Lara/Elaborate/CertSlots.hs"
+      - "src/Lara/Strict/Cell.hs"
+      - "scripts/surface-conformance.hs"
+      - "lara.cabal"
+  - turn: 2
+    action: >
+      Discharged spec §9 result 10 in Lean — enc_iff, replayFull_iff, soundFull
+      and the three obligation-4 laws — plus the domain theory: the closed-world
+      lemma, the diff decomposition, and the two contrary-pair theorems. Pinned
+      all 17 in AxCheck.lean and registered the core in buildRegistry with the
+      empty-theory resolution the premise-only guard needs.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Insp.lean"
+      - "lean/Lara.lean"
+      - "lean/Lara/Driver.lean"
+      - "lean/AxCheck.lean"
+  - turn: 2
+    action: >
+      Built the conformance evidence: 23 QuickCheck property groups, four
+      hand-authored wire anchors, and worked example S9 (corpus unit C09's shape
+      plus the version-match leaf C09 lacks), all registered as differential
+      anchors.
+    provenance: ai-executed
+    files_changed:
+      - "test/InspSpec.hs"
+      - "test/Spec.hs"
+      - "test/DifferentialSpec.hs"
+      - "fixtures/corpus/insp-premise-only-accept.sexp"
+      - "fixtures/corpus/insp-premise-only-reject.sexp"
+      - "fixtures/corpus/insp-empty-inventory-accept.sexp"
+      - "fixtures/corpus/insp-arity-mismatch-reject.sexp"
+      - "examples/S9/example.lara"
+      - "examples/S9/insp-v1.policy.lara"
+      - "examples/S9/example.core.sexp"
+      - "examples/S9/expected.json"
+      - "src/Lara/WorkedExamples.hs"
+  - turn: 2
+    action: >
+      Added and fully verified the S9 mutation base (27 mutants), then reverted
+      it on finding the collision with frozen input row 1, filed #266 with the
+      measured cost, and recorded the deferral in three documents rather than
+      leaving it for review to find.
+    provenance: ai-executed
+    files_changed:
+      - "docs/m5-freeze-checklist.md"
+      - "docs/m1-freeze-checklist.md"
+      - "docs/insp1-code-inspection-decision.md"
+  - turn: 2
+    action: >
+      Wrote the design record, amended the specification and both freeze
+      checklists, and opened PR #267 against #260. Repaired seven stale
+      docs/spec.md line citations in ara/logic/claims.md — five were already
+      failing check_ara_source_spans.py before this branch and the §5.2 edits
+      shifted two more, so the gate now passes at 58 quotations.
+    provenance: ai-executed
+    files_changed:
+      - "docs/insp1-code-inspection-decision.md"
+      - "docs/spec.md"
+      - "docs/m1-freeze-checklist.md"
+      - "docs/m5-freeze-checklist.md"
+      - "docs/paper-lean-name-map.md"
+      - "docs/engineering-plan.md"
+      - "docs/rejection-surface.md"
+      - "README.md"
+      - "examples/README.md"
+      - "ara/logic/claims.md"
+
 claims_touched:
   - id: C47
     action: revised
     turn: 1
+  - id: C51
+    action: created
+    turn: 2
+  - id: C27
+    action: revised
+    turn: 2
 
 logic_revisions:
   - turn: 1
@@ -125,6 +280,73 @@ logic_revisions:
       PR #257 merged code that depends on exactly this constraint — the fixture
       exists in the shape it does because native_decide is banned from the audit.
 
+  - turn: 2
+    entry: C51
+    field: "new claim"
+    before: "(absent — O150 staged and crystallized the same turn)"
+    after: >
+      Whether a strict backend's goal family needs a declared contrary pair is
+      decided by what its goals are settled against (goal-carried data =>
+      exclusivity is a theorem; premise-supplied value => real conflict), and
+      Path B then forces the conflict onto a defeasible bridge's conclusions
+      rather than the strict step's. Status testing.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      The layering of examples/S9/insp-v1.policy.lara exists because of this,
+      and both halves are mechanized (inspModels_absent_present_sat,
+      inspModels_excl_of_same_entry, against ordModels_excl_of_lt). Crystallized
+      at testing, not supported: artifact commitment alone does not reach
+      supported and there was no verbal affirmation this turn.
+  - turn: 2
+    entry: C27
+    field: Conditions
+    before: >
+      ... The seam-wide question of whether ra@1 should adopt the same guard is
+      resolved in favour of parity — ra@1 now refuses theory-entry slots exactly
+      as ord@1 does, so both rational-arithmetic backends carry the same
+      trusted-base sentence, and nd@1 is the sole remaining backend that indexes
+      free context (deliberately: its de Bruijn free variables are meant to
+      reach theory axioms). That resolution is an instance of this claim, not a
+      counterexample to it ...
+    after: >
+      ... ra@1 refuses theory-entry slots exactly as ord@1 does, and insp@1
+      shipped with the same guard from the outset, so all three premise-only
+      backends carry one trusted-base sentence and nd@1 is the sole remaining
+      backend that indexes free context ... insp@1 is the sharpest instance —
+      the value its guard protects is the closed-world premise itself, so
+      without it a self-supplied theory entry could assert "I inspected
+      everything and found nothing" and be certified against, with no leaf, no
+      provenance, and nothing for an attack to land on.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      Third instance landed this turn. Status untouched (already supported); the
+      wording "both rational-arithmetic backends" had become an undercount, and
+      the claim's stakes sentence is stronger with the instance where the
+      protected value is the premise the conclusion rests on.
+  - turn: 2
+    entry: C27
+    field: "Falsification, Proof, Tags"
+    before: "ord@1 *or* ra@1 certificate accepted while citing ...; Proof listed two adapters and two fixture pairs; Tags: ... ord1, ra1"
+    after: "ord@1, ra@1, *or* insp@1 ...; Proof lists three adapters, three fixture pairs, prop_inspTheorySlotRejected and trace N322; Tags: ... ord1, ra1, insp1"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Consistency with the Conditions revision above; no change to what the claim asserts."
+  - turn: 2
+    entry: "ara/logic/claims.md (7 Sources spans, C01/C03/C09/C13 area)"
+    field: Sources
+    before: "docs/spec.md:274-275, 965-966, 990-991, 1159-1160, 1154-1155, 823, 1221"
+    after: "docs/spec.md:301-302, 1022-1023, 1047-1048, 1216-1217, 1211-1212, 880, 1278"
+    signal: dependency-change
+    provenance: ai-suggested
+    note: >
+      Consistency pass only — every quotation still matches its source verbatim;
+      only the line numbers had drifted. Five were already failing
+      scripts/check_ara_source_spans.py on the clean tree before this branch;
+      the §5.2 amendment shifted two more. Gate now PASS at 58 quotations. No
+      Statement, Conditions, or Status touched.
+
 key_context:
   - turn: 1
     excerpt: >
@@ -139,6 +361,23 @@ key_context:
       having no attacks "would not make the relabel any more genuine" is true of
       the relabel, which the two guards do pin down, but is not a claim about
       the AF equality being witnessed.
+  - turn: 2
+    excerpt: >
+      User: "let's resolve it. do it directly and open the pr" — full delegation
+      on #260, so every design choice this turn is ai-executed with no
+      affirmation signal available. That is why C51 crystallized at testing
+      rather than supported, and why the S9 mutation deferral was written up as
+      a measured cost in three documents plus an issue rather than raised as a
+      question mid-task.
+  - turn: 2
+    excerpt: >
+      The design turn: "static code inspection" sounds like a measurement, and a
+      measurement is not a strict step. What makes it strict is that a negative
+      existential over code follows deductively from an exhaustive enumeration —
+      so the backend certifies the closed-world step and never the enumeration's
+      faithfulness. rebench-rust_codecontests/C09 is the proof this is not a
+      dodge: its coverage half is met, its version half is not, and it stays a
+      gap. S9 is C09 plus the one leaf C09 lacks.
 
 open_threads:
   - "#258 — an attack-bearing witness so coveredB_relabel is exercised on a non-empty attack set."
@@ -146,7 +385,12 @@ open_threads:
   - "#255 — surface_directAF_link, the other half of the §4 gap, still uninstantiated."
   - "PR #257 awaiting re-review; approval not yet given."
   - "Cross-model pass on the Lean proofs never happened — codex exec was at its usage limit until Sep 8."
+  - "#266 — S9 (and S2) as mutation bases at the next evaluation-corpus freeze re-cut; the work is done and reverted, the cost is measured."
+  - "PR #267 awaiting review."
+  - "No corpus unit exercises insp@1, exactly as none exercises ord@1; both wait on the deferred corpus-v2 extension."
 
 ai_suggestions_pending:
   - "O147 — the wiped-cache rule for build-dependent gates. Staged; would become a heuristic if a second instance shows the rule catching something."
   - "O148 — guards on an input relabel vs non-degeneracy of the witnessed conclusion. Staged pending #258."
+  - "O149 — check which evidence surfaces are frozen inputs before building the evidence. Staged; one instance."
+  - "C51 at testing — would reach supported on a third backend instance, or on the user affirming the criterion."

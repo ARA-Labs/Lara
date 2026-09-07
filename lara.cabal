@@ -35,6 +35,7 @@ library
                       Lara.Strict
                       Lara.Strict.Cell
                       Lara.Strict.Deps
+                      Lara.Strict.Insp
                       Lara.Strict.ND
                       Lara.Strict.ND.Internal
                       Lara.Strict.Ord
@@ -161,6 +162,7 @@ test-suite lara-test
                       StrictSpec
                       RASpec
                       OrdSpec
+                      InspSpec
                       WireSpec
                       SyntaxSpec
                       ThetaInferenceSpec

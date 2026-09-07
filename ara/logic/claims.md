@@ -16,7 +16,7 @@ the result is stated but not yet proved or mechanized._
   ground-substituted away before a proposition forms). If the corpus needs AC predicates or binders,
   the normal form extends with argument sorting / de Bruijn indexing and the same properties must be
   re-established (the documented flip criterion), so the claim is bounded to the v0.1 atom language.
-- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:274-275 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
+- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:303-304 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
 - **Status**: supported
 - **Falsification criteria**: Exhibit two propositions the corpus treats as the same claim that
   `nf`/`≡` separates (or vice versa) without the AC/binder extension applying — i.e. a support
@@ -36,7 +36,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds under a policy-declared `contrary` relation (not classical negation) and the
   ASPIC+ restriction that strict rules are unattackable; positions are paths of premise indices and
   question names.
-- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:965-966 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:990-991 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
+- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:1024-1025 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:1049-1050 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A defeat pattern the corpus annotators find that cannot be typed as an
   attack on a root / internal-rule / leaf position (e.g. a genuine attack on something other than
@@ -154,7 +154,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Non-monotonicity is at the *consequence level*, across extensions of the input
   framework; for a *fixed* framework the internal transfer operator is monotone over a finite-height
   lattice, so grounded evaluation is still deterministic and terminating (no contradiction).
-- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← docs/spec.md:1159-1160 «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
+- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← docs/spec.md:1218-1219 «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
 - **Status**: supported
 - **Falsification criteria**: A monotonic consequence relation that reproduces LARA's grounded claim
   acceptance under all framework extensions (i.e. never needs to retract) — its existence would refute
@@ -175,7 +175,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds because `Args` is finite and the operator is monotone on the subset lattice;
   `contested` = grounded `undec`, which is broader than mutual defeat (even/odd cycles,
   undec-propagation) and must be explained by the responsible SCC in the report.
-- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:1154-1155 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
+- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:1213-1214 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
 - **Status**: supported
 - **Provenance**: ai-suggested
 - **Falsification criteria**: A finite compiled framework on which grounded iteration fails to
@@ -203,7 +203,7 @@ the result is stated but not yet proved or mechanized._
   strict-certificate theory dependencies are reported separately via each backend's `uses` function.
 - **Conditions**: Holds for checked support terms; every leaf in `leaves(w)` must be declared in the
   admitted context `Γ`, and backend dependencies (`certDeps`) are unioned in from accepted certificates.
-- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:823 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
+- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:882 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A checked support term whose actual load-bearing leaf set differs from
   `leaves(w)`, or a strict certificate whose consulted theory/premise dependency is not returned by
@@ -234,7 +234,7 @@ the result is stated but not yet proved or mechanized._
   all four rationality postulates at the cost of structuring the contrary relation. The v0.1
   executable `mayOverlap` check is conservative for non-linear patterns: it may reject a safe policy
   but cannot accept two patterns with canonically equivalent ground instances.
-- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:1221 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
+- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:1280 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A Path-B-well-formed policy under which two contrary claims are both
   labelled `justified` by grounded semantics — refuting consistency (spec §9 result 7); or corpus
@@ -592,14 +592,15 @@ the result is stated but not yet proved or mechanized._
 
 ## C27: A certificate's provenance guarantee must be enforced by the backend that claims it, not inherited from the seam
 - **Statement**: When a checker resolves a certificate's referenced data from a table the artifact itself supplies, and the preflight validates only that table's identity and ordering rather than its content, then any backend whose soundness story asserts that cited values trace to independently-admitted evidence must enforce that restriction inside its own decoder and replay. The guarantee cannot be inherited from the seam, because the seam's admission layer never inspected the self-supplied entries; and it cannot be assumed away by declaring the table empty, because emptiness of a registered theory is a convention of the registration site, not a property the artifact is prevented from violating.
-- **Conditions**: Holds for LARA's raw `.sexp` door, where `buildCertOk` builds the strict-backend theory table from the unit's own wire `theories` section and replay preflight checks digest canonical order and duplicates only. Does not apply to the `.lara` policy door, which pins theory content via the elaborator's `registryOf`. Scope is provenance/accountability, not deductive soundness: `ra@1` cited free-context slots without the restriction and was still sound, because it never claimed premise-backing. The seam-wide question of whether `ra@1` should adopt the same guard is **resolved in favour of parity** — `ra@1` now refuses theory-entry slots exactly as `ord@1` does, so both rational-arithmetic backends carry the same trusted-base sentence, and `nd@1` is the sole remaining backend that indexes free context (deliberately: its de Bruijn free variables are meant to reach theory axioms). That resolution is an instance of this claim, not a counterexample to it: parity was obtained by moving the guard *into each backend's own decoder and replay*, not by hardening the seam.
+- **Conditions**: Holds for LARA's raw `.sexp` door, where `buildCertOk` builds the strict-backend theory table from the unit's own wire `theories` section and replay preflight checks digest canonical order and duplicates only. Does not apply to the `.lara` policy door, which pins theory content via the elaborator's `registryOf`. Scope is provenance/accountability, not deductive soundness: `ra@1` cited free-context slots without the restriction and was still sound, because it never claimed premise-backing. The seam-wide question of whether `ra@1` should adopt the same guard is **resolved in favour of parity** — `ra@1` refuses theory-entry slots exactly as `ord@1` does, and `insp@1` shipped with the same guard from the outset, so all three premise-only backends carry one trusted-base sentence and `nd@1` is the sole remaining backend that indexes free context (deliberately: its de Bruijn free variables are meant to reach theory axioms). That resolution is an instance of this claim, not a counterexample to it: parity was obtained by moving the guard *into each backend's own decoder and replay*, not by hardening the seam. `insp@1` is the sharpest instance — the value its guard protects is the closed-world premise itself, so without it a self-supplied theory entry could assert "I inspected everything and found nothing" and be certified against, with no leaf, no provenance, and nothing for an attack to land on.
 - **Sources**: []
 - **Status**: supported
 - **Provenance**: ai-suggested
-- **Falsification**: Exhibit a raw-door path on which an artifact-supplied theory entry is content-validated before a backend consults it, or an `ord@1` *or* `ra@1` certificate accepted while citing a value that reaches the checker without passing the leaf/admission layer.
-- **Proof**: [src/Lara/Strict/Ord.hs and src/Lara/Strict/RA.hs (premise-only slot resolution in both), src/Lara/Driver/Internal.hs buildCertOk, src/Lara/Replay.hs preflight, fixtures/corpus/ord-premise-only-{reject,accept}.sexp and ra-premise-only-{reject,accept}.sexp (each reject twin's theory entry carries the value the goal needs, so free-context indexing would have accepted), lean/Lara/Driver.lean buildRegistry, lean/Lara/Examples.lean ord_/ra_ replay_context_is_premises and models_context_is_premises (AxCheck-covered), trace N123 N125]
+- **Falsification**: Exhibit a raw-door path on which an artifact-supplied theory entry is content-validated before a backend consults it, or an `ord@1`, `ra@1`, *or* `insp@1` certificate accepted while citing a value that reaches the checker without passing the leaf/admission layer.
+- **Proof**: [src/Lara/Strict/Ord.hs, src/Lara/Strict/RA.hs and src/Lara/Strict/Insp.hs (premise-only slot resolution in all three), src/Lara/Driver/Internal.hs buildCertOk, src/Lara/Replay.hs preflight, fixtures/corpus/ord-premise-only-{reject,accept}.sexp, ra-premise-only-{reject,accept}.sexp and insp-premise-only-{reject,accept}.sexp (each reject twin's theory entry carries the value the goal needs, so free-context indexing would have accepted), test/InspSpec.hs prop_inspTheorySlotRejected, lean/Lara/Driver.lean buildRegistry, lean/Lara/Examples.lean ord_/ra_ replay_context_is_premises and models_context_is_premises (AxCheck-covered), trace N123 N125 N322]
 - **Dependencies**: []
-- **Tags**: strict-backend, provenance, trusted-base, raw-door, ord1, ra1
+- **Tags**: strict-backend, provenance, trusted-base, raw-door, ord1, ra1, insp1
+- **Last revised**: 2026-09-07 (2026-09-07_001#2)
 
 ## C28: An unenforced rejection class does not stay merely unexercised — its documented content drifts undetectably
 - **Statement**: A specification class with no executable enforcement accumulates falsehoods that survive review, because nothing can contradict them. The failure is not the absence of coverage; it is that the *description* of the class becomes unfalsifiable and then wrong — including triggers that are unsatisfiable by construction, and coverage prose that asserts exercise where there is none.
@@ -880,3 +881,14 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: [C47, C48]
 - **Tags**: PW-T8, possible-world, status-preservation, bisimulation, structural-bridge, T7-boundary, modal-collapse, composition, mechanized
 - **Last revised**: 2026-09-05 (2026-09-05_001#1)
+
+## C51: Whether a strict backend's goal family needs a declared contrary pair is decided by what its goals are settled against — and Path B then fixes where the conflict may live
+- **Statement**: For a certificate-checked strict backend, intra-family exclusivity is a theorem exactly when the family's goals are settled against data the goal itself carries; when they are settled against a value a premise supplies, two accepted instances can conflict, because two units may declare different premises about the same subject. The first kind needs no `contrary` declaration and gains nothing from one; the second has a genuine conflict that only the attack layer can carry. The placement of that conflict is then not a design choice: under a strict-reachability restriction on `contrary` (Path B), a strict conclusion pattern may not overlap either side of a declared pair, so the conflict must be lifted to the conclusions of a defeasible bridge one layer above the certified step.
+- **Conditions**: Established over two shipped adapters of one seam — `ord@1`, whose `num_lt`/`num_le` goals carry both compared numerals, and `insp@1`, whose `code_absent`/`code_present` goals are settled against an inventory the cited premise declares. Both directions are mechanized. The untested boundary is a *mixed* family, some of whose members are goal-settled and some premise-settled; nothing here says such a family must split, only that its two halves would answer this question differently. The Path B half is conditional on that restriction being in force — under Path A (contrary as a total involutive contradictory map with strict rules closed under transposition) the placement argument does not apply.
+- **Sources**: [`exclusivity is a theorem for ord@1` ← lean/Lara/Ord.lean «theorem ordModels_excl_of_lt {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `co-acceptability for insp@1` ← lean/Lara/Insp.lean «theorem inspModels_absent_present_sat {φ ψ : Lara.Atom} {src feat : Lara.Term}» [result]; `exclusivity only at a shared premise` ← lean/Lara/Insp.lean «theorem inspModels_excl_of_same_entry {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `Path B forbids the overlap` ← docs/spec.md:1287 «rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-reachable set,» [input]]
+- **Status**: testing
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit a registered backend whose goals are settled entirely against data carried in the goal and for which two conflicting family members are nonetheless both accepted (refuting the first half); or a backend whose goals are settled against a premise-supplied value and for which conflicting members are provably never co-accepted without an extra restriction on the premises (refuting the second). Separately, exhibit a policy that carries such a conflict as a contrary on the strict conclusions themselves and is accepted by the §8.1 validator — that would refute the placement half.
+- **Proof**: [lean/Lara/Insp.lean `inspModels_excl_of_same_entry`, `inspModels_absent_present_sat`, `relHolds_polarity_excl`; lean/Lara/Ord.lean `ordModels_excl_of_lt`, `lt_excl_lt`, `lt_excl_le`; test/InspSpec.hs `prop_inspContraryCoAcceptable`; examples/S9/insp-v1.policy.lara (WELL-FORMEDNESS note and the bridge layering it forces); docs/insp1-code-inspection-decision.md §4; docs/spec.md §8.1; trace N324]
+- **Dependencies**: [C27]
+- **Tags**: strict-backend, contrary, path-b, R12, insp1, ord1, mechanized

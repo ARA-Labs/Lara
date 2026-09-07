@@ -43,7 +43,7 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 4 | Reference scheme vocabulary (9 families) | §4.5 | **Frozen** | none (C13); spellings revisitable until `empirical-v1` ships | schema instances, no new theorem |
 | 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12; duplicate rule IDs and R12 run before program checking | §9 r7/C09 ✅ for the Lean reference PL (`Lara.Policy`, `Lara.Check.Unit`, `Lara.Consistency`; #18 implementation) |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
-| 7 | Shipped adapter portfolio (`ra@1` + `ord@1`; code-inspection designed-unshipped; LP non-shipping) — **amended 2026-09-07 (#256)** | §5.2 | **Frozen** | C14; `ord@1` added under PR #83; code-inspection build deferred to #260 | §9 r10 per shipped adapter — ND ✅ (`lean/Lara/{Strict,ND}.lean`); `ra@1`/`ord@1` ✅ (`lean/Lara/{RA,Ord}.lean`); unshipped code-inspection carries no r10 obligation |
+| 7 | Shipped adapter portfolio (`ra@1` + `ord@1` + `insp@1`; LP non-shipping) — **amended 2026-09-07 (#256), completed 2026-09-07 (#260)** | §5.2 | **Frozen** | C14; `ord@1` added under PR #83; `insp@1` (static code inspection) shipped under #260 | §9 r10 per shipped adapter — ND ✅ (`lean/Lara/{Strict,ND}.lean`); `ra@1`/`ord@1`/`insp@1` ✅ (`lean/Lara/{RA,Ord,Insp}.lean`) |
 | 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.inferSupport`), and the `certDeps` layer over `Backend.uses` landed (#46) | §9 r1 support/program checker ✅; r3 both halves ✅; r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
@@ -119,10 +119,10 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    ids or certificate-erased skeleton. Payload-different programs therefore lack the node bijection
    needed to state the promised AF isomorphism faithfully. Add argument identity plus `eraseCert`
    at the compile boundary, then prove checking transport, graph isomorphism, and status equality.
-5. **Shipped-adapter obligations (r10) — done for the shipped set**: `ra@1` and `ord@1`
-   discharge the same soundness/dependency obligations as ND (`lean/Lara/RA.lean`,
-   `lean/Lara/Ord.lean`). The code-inspection adapter is designed-but-unshipped (amendment #256)
-   and carries no r10 obligation until shipped; its build is tracked in issue #260.
+5. **Shipped-adapter obligations (r10) — done, portfolio complete**: `ra@1`, `ord@1`, and
+   `insp@1` each discharge the same soundness/dependency obligations as ND (`lean/Lara/RA.lean`,
+   `lean/Lara/Ord.lean`, `lean/Lara/Insp.lean`). Issue #260 closed the last designed-but-unshipped
+   portfolio item, so no adapter now carries an outstanding r10 debt.
 6. **r12 codec round-trip — resolved**: the presentation half (`parse ∘ print`,
    `lean/Lara/Presentation.lean` at `lara-syntax@0.10`) and the wire-decode boundary (`WireSpec`)
    landed with `Lara.Syntax`/`Lara.Wire`; there is no JSON codec in the TCB — `Lara.Json` is the
@@ -211,12 +211,32 @@ Rows 7 and 13 and M2 backlog items 5–6 above are amended to match the Haskell 
 
 - **Shipped portfolio.** v0.1 ships `ra@1` (rational-arithmetic/table-recheck) and `ord@1`
   (ordered comparison, PR #83) beside the §5.1 reference backend `nd@1`. The static code-inspection
-  checker remains portfolio-designed — the C14 study counted a few code inspectors — but is
-  **unshipped**; its build is tracked in issue #260, and until shipped it carries no §9 r10
-  obligation. Row 7's r10 debt is discharged for the shipped set (`lean/Lara/{RA,Ord}.lean`).
+  checker remained portfolio-designed but **unshipped** at the time of this amendment, with its
+  build tracked in issue #260; that issue has since landed — see the #260 amendment below.
 - **Wire wording.** The M1-era spec named JSON as the wire encoding; the implementation
   deliberately ships a single S-expression codec (`Lara.Wire`, the N11 differential anchor).
   Spec §1/§1.1/§2.1/§3.2/§4.1/§9 r12/§10.1 R14 and `docs/rejection-surface.md` now name that
   codec; `Lara.Json` is tracked as the future LLM-producer surface (issue #30). No corpus
   regeneration or freeze-tag bump is owed: the amendment is prose-only and no byte reaches the
   corpus, the wire, or replay identity.
+
+### Amendment (2026-09-07, issue #260): the portfolio is complete
+
+Row 7 and M2 backlog item 5 are amended again: the third §5.2 portfolio member ships.
+
+- **`insp@1`** (static code inspection, `Lara.Strict.Insp`) is registered beside `nd@1`, `ra@1`,
+  and `ord@1` in the fixed backend registry. It certifies structural facts about referenced source
+  — `code_absent`, `code_present`, `code_unique`, `code_planned_not_shipped` — over declared
+  exhaustive inventories; the certified content is the closed-world step from an enumeration to a
+  negative existential, never the faithfulness of the enumeration itself. Design record:
+  `docs/insp1-code-inspection-decision.md`.
+- **r10 is discharged** for it in `lean/Lara/Insp.lean` (`enc_iff`, `inspReplay_iff`, `inspSound`,
+  and the obligation-4 laws), pinned in `lean/AxCheck.lean` inside the standard axiom trio. No
+  shipped adapter now carries an outstanding r10 debt.
+- **Conformance evidence** is `test/InspSpec.hs`, four hand-authored wire anchors under
+  `fixtures/corpus/insp-*.sexp`, and the worked example `examples/S9` (both certificate arities
+  under one defeasible bridge). A mutation base for `S9` is *not* included: it would grow the
+  seeded suite 541 → 568 and so cost an evaluation-corpus freeze-tag bump, which #260 did not
+  budget — tracked in issue #266; see the `m5-freeze-checklist.md` post-v5 addendum.
+- **No freeze-tag bump or corpus regeneration is owed.** The adapter is additive at the registry,
+  no existing unit selects it, and no corpus, wire, mutant, or replay-identity bytes change.

@@ -23,6 +23,7 @@ import Data.List (find, sortBy)
 
 import Lara.AST
 import qualified Lara.Strict as Strict
+import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
@@ -169,7 +170,7 @@ supportedBackends =
   [ ( BackendId (Strict.backendName b)
     , show (Strict.backendVersion b)
     )
-  | b <- [ND.ndBackendId, RA.raBackendId, Ord.ordBackendId]
+  | b <- [ND.ndBackendId, RA.raBackendId, Ord.ordBackendId, Insp.inspBackendId]
   ]
 
 firstUnselectedCertificate
