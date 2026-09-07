@@ -1341,8 +1341,25 @@ audited through the gated theorems that mention them.
   `surfaceTransport_link_relabel_moves_args`,
   `surfaceTransport_link_relabel_moves`, and
   `surfaceTransport_link_imports_nonempty` (the fragment genuinely imports the
-  leaf the context declares). Two degeneracies are deliberate and recorded in
-  `docs/theory-m4-contextual-adequacy.md` §4: the context declares no arguments
-  (so `FixesContext` is trivial) and the fixture declares no attacks (so the
-  edge half is empty — the attack-bearing case is the sibling
-  `SurfaceTransportAttack` fixture, issue #258).
+  leaf the context declares). Two degeneracies of *that* fixture are recorded in
+  `docs/theory-m4-contextual-adequacy.md` §4 and each has its own sibling: the
+  context declares no arguments (so `FixesContext` is trivial) and the fixture
+  declares no attacks (so the edge half is empty — the attack-bearing case is
+  `SurfaceTransportAttack`, issue #258).
+- The context-bearing link witness is
+  `Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_directAF_eq`
+  (`lean/Lara/Examples/SurfaceTransportContext.lean`, issue #264): the same
+  `surface_directAF_link` over a context with a **non-empty** `C.frame.args`.
+  The elaborated unit declares two core arguments split across the boundary —
+  the context owns a plain defeasible `p ⊢ n` with `.none`, which `certSwap`
+  fixes, and the fragment owns the #227 certified `p ⊢ q`, which `certSwap`
+  moves — so `contextLink_fixesContext` is an equation over material the
+  relabel could have touched. Guards:
+  `surfaceTransportContext_ctx_args_nonempty` (`C.frame.args ≠ []` and the
+  context's argument survives into the linked unit) and
+  `surfaceTransportContext_fixes_is_substantive` (the same `certSwap` fixes the
+  context's argument and moves the fragment's). `linkedUnit_of_empty_ctx` is
+  unavailable here — a context argument makes `crossAtts` build both conclusion
+  caches, through `certOkOf` on the kernel-opaque `nd` core — so the saturation
+  is collapsed instead by `crossAtts_of_no_contraries`, which reads
+  `contraryMatchB`'s `dp.contraries.any …` guard rather than the caches.

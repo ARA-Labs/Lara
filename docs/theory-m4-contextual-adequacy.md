@@ -257,15 +257,55 @@ the interface. Non-vacuity is guarded by
 `surfaceTransport_link_relabel_moves`, restating at the fragment what
 `surfaceTransport_relabel_moves` states at the unit.
 
-**Two degeneracies, on the record.** `FixesContext` holds because the context's
-argument list is empty, so this witness does not exercise a relabel that has to
-*avoid* a context's own certificates —
-`Examples.Linking.cert_congruence_witness` is the core-level witness where the
-context carries material. And the fixture declares no attacks, so the attack
-half of `link_relabel_commutes` is discharged on empty lists and `crossAtts`
-saturates to nothing (`crossAtts_of_ctx_args_nil`). The attack-bearing surface
-fixture is `Lara/Examples/SurfaceTransportAttack.lean` (issue **#258**), which
-closes the same gap for `surface_directAF_relabel` above.
+**Two degeneracies, both since closed.** On the fixture above `FixesContext`
+holds because the context's argument list is empty, so *that* witness does not
+exercise a relabel which has to *avoid* a context's own certificates; and the
+fixture declares no attacks, so the attack half of `link_relabel_commutes` is
+discharged on empty lists and `crossAtts` saturates to nothing
+(`crossAtts_of_ctx_args_nil`). Each has its own witness now, and each is a
+separate fixture because closing both at once buys nothing either issue asks
+for:
+
+* the attack-bearing fixture is `Lara/Examples/SurfaceTransportAttack.lean`
+  (issue **#258**), which closes the edge-free gap for
+  `surface_directAF_relabel` above; and
+* the context-bearing fixture is the one described next (issue **#264**).
+
+### The link corollary over a context that carries material
+
+**`Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_directAF_eq`**
+(issue **#264**) instantiates the same `surface_directAF_link` with a
+**non-empty** `C.frame.args`. The elaborated unit declares two core arguments
+and the link splits them across the boundary:
+
+* the context owns `a-ctx`, a plain defeasible `p ⊢ n` carrying `.none`, which
+  `certSwap` fixes; and
+* the fragment owns `a-cert`, the #227 certified `p ⊢ q`, which `certSwap`
+  moves.
+
+So `contextLink_fixesContext` is an equation over material the relabel could
+have touched, and `surfaceTransportContext_fixes_is_substantive` records both
+halves in one statement: the same `certSwap` is the identity on the context's
+argument and is *not* the identity on the fragment's.
+`surfaceTransportContext_ctx_args_nonempty` is the regression guard — it pins
+`C.frame.args ≠ []` and that the context's argument survives into the linked
+unit rather than being deduped away.
+
+One lemma had to be replaced rather than reused. `linkedUnit_of_empty_ctx`
+collapses the cross-boundary saturation *because* the context has no arguments,
+which is exactly the degeneracy being removed; and with a context argument
+present, `crossAtts` builds both conclusion caches, where `conclusionCache`
+calls `Check.inferSupport` through `certOkOf` on the `nd` core — which does not
+reduce in the kernel. The replacement (`crossAtts_of_no_contraries`) reads the
+saturation's *emission guard* instead of its caches: `crossAttsFrom` emits
+nothing unless `contraryMatchB` holds, and `contraryMatchB` is
+`dp.contraries.any …`, so a policy declaring no contrary saturates to nothing
+whatever the caches contain. That is a statement about the policy rather than
+about the argument lists, so it survives the context gaining material.
+
+This fixture declares no attacks, which is the #258 degeneracy and not this
+one's to close; the no-contraries route above is precisely what keeps it
+`native_decide`-free.
 
 ## 5. The M3 debt: partially discharged
 
@@ -461,4 +501,6 @@ witnessed, §2). **#222** was closed without change: the list helpers it named
 never landed in `Lara/Context/Compose.lean`. **#227** (a `native_decide`-free
 surface fixture, §4) landed as `Lara/Examples/SurfaceTransport.lean`, and
 **#258** (the same witness with a non-empty attack set, §4) as
-`Lara/Examples/SurfaceTransportAttack.lean`.
+`Lara/Examples/SurfaceTransportAttack.lean`. **#264** (the link witness over a
+context that declares an argument of its own, §4) landed as
+`Lara/Examples/SurfaceTransportContext.lean`.

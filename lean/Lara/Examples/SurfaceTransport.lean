@@ -770,17 +770,21 @@ the unit. What the context does own is the evidence leaf `l-p`, which the
 fragment imports — so R-L2 (unsatisfied imports) is live and the link is a real
 one at the interface, while being degenerate at the argument level.
 
-**Two limitations, on the record rather than discovered later.**
+**Two limitations, on the record rather than discovered later.** Both have
+since been closed, each by its own fixture.
 
 * `FixesContext certSwap linkCtx` holds because `linkCtx.frame.args = []`, so
   this witness does not exercise a relabel that has to *avoid* a context's own
   certificates. `Examples.Linking.cert_congruence_witness` is the core-level
-  witness where the context carries material.
+  witness where the context carries material, and
+  `Lara.Examples.SurfaceTransportContext` (issue **#264**) is the surface-level
+  one: it splits a two-argument unit across the boundary so the context owns a
+  plain defeasible argument the relabel must fix.
 * The fixture declares no attacks (`atts := []`, inherited from
   `transportElaborated`), so the attack half of `link_relabel_commutes` is
   discharged on empty lists and `crossAtts` saturates to nothing. That is the
-  same degeneracy issue **#258** records for `surface_directAF_relabel`; an
-  attack-bearing surface fixture is its job, not this one's.
+  same degeneracy issue **#258** records for `surface_directAF_relabel`; the
+  attack-bearing surface fixture is `Lara.Examples.SurfaceTransportAttack`.
 -/
 
 /-- Saturation from an empty target cache emits nothing: the inner

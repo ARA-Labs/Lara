@@ -351,6 +351,8 @@ import Lara.Examples.Linking
 import Lara.Examples.SurfaceTransport
 -- The #258 attack-bearing surface-transport witness, for the same reason.
 import Lara.Examples.SurfaceTransportAttack
+-- The #264 context-bearing surface-link witness, for the same reason.
+import Lara.Examples.SurfaceTransportContext
 import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare

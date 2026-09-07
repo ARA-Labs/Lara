@@ -55,6 +55,7 @@ import Lara.Semantics.Sublists
 import Lara.Examples.Semantics
 import Lara.Examples.SurfaceTransport
 import Lara.Examples.SurfaceTransportAttack
+import Lara.Examples.SurfaceTransportContext
 import Lara.Update
 import Lara.Examples.Update
 import Lara.Invariants.Merge
@@ -3358,3 +3359,56 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_edge
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_relabel_moves
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_inputs_differ
+
+/-! ### The context-bearing surface link fixture (#264)
+
+`SurfaceTransport.surfaceTransport_link_directAF_eq` discharges `FixesContext`
+on an empty context argument list, so the one hypothesis distinguishing a
+link-respecting relabel from an arbitrary one was witnessed only degenerately.
+This fixture splits a two-argument unit across the boundary — the context owns
+a plain defeasible argument, the fragment the certified one — so the relabel
+has material it must fix and material it does move. The saturation lemmas at
+the head of the block are what replace `linkedUnit_of_empty_ctx`, which the
+context's own arguments make unavailable. -/
+#print axioms Lara.Examples.SurfaceTransportContext.contraryMatchB_of_no_contraries
+#print axioms Lara.Examples.SurfaceTransportContext.crossAttsFrom_of_no_contraries
+#print axioms Lara.Examples.SurfaceTransportContext.crossAtts_of_no_contraries
+#print axioms Lara.Examples.SurfaceTransportContext.linkedUnit_of_no_contraries
+#print axioms Lara.Examples.SurfaceTransportContext.contextPolicy_no_contraries
+#print axioms Lara.Examples.SurfaceTransportContext.context_supported
+#print axioms Lara.Examples.SurfaceTransportContext.context_supported_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_freshness
+#print axioms Lara.Examples.SurfaceTransportContext.context_freshness_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_checksArgument_ctx
+#print axioms Lara.Examples.SurfaceTransportContext.context_checksArgument_cert
+#print axioms Lara.Examples.SurfaceTransportContext.context_checksProgram_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_checksProgram_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_expansions
+#print axioms Lara.Examples.SurfaceTransportContext.contextCorePolicy_ruleLookup_cert
+#print axioms Lara.Examples.SurfaceTransportContext.contextCorePolicy_ruleLookup_ctx
+#print axioms Lara.Examples.SurfaceTransportContext.context_gamma_leafP
+#print axioms Lara.Examples.SurfaceTransportContext.context_hasSupport_ctx
+#print axioms Lara.Examples.SurfaceTransportContext.context_hasSupport_cert
+#print axioms Lara.Examples.SurfaceTransportContext.context_args_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_args_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_coreObligations_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_coreObligations_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_checks_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_checks_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_checkUnit_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_checkUnit_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.linkFrag_relabel
+#print axioms Lara.Examples.SurfaceTransportContext.linkGamma_leafP
+#print axioms Lara.Examples.SurfaceTransportContext.context_unit_is_link
+#print axioms Lara.Examples.SurfaceTransportContext.context_unit_wrapped_is_link
+#print axioms Lara.Examples.SurfaceTransportContext.linkSideOk_ctx
+#print axioms Lara.Examples.SurfaceTransportContext.linkSideOk_frag
+#print axioms Lara.Examples.SurfaceTransportContext.contextLink_admissible
+#print axioms Lara.Examples.SurfaceTransportContext.contextLink_fixesContext
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_directAF_eq
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_ctx_args_nonempty
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_fixes_is_substantive
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_relabel_moves_args
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_relabel_moves
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_imports_nonempty
+#print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_inputs_differ
