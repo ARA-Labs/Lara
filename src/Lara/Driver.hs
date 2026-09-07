@@ -24,6 +24,9 @@ module Lara.Driver
   , runCheckLocated
   , runCheckLocatedWith
   , runCheckLocatedReported
+  , unitCertDeps
+  , runCheckDeps
+  , renderCertDeps
   ) where
 
 import Lara.Driver.Internal
@@ -47,5 +50,8 @@ import Lara.Driver.Internal
   , runCheckLocated
   , runCheckLocatedWith
   , runCheckLocatedReported
+  , unitCertDeps
+  , runCheckDeps
+  , renderCertDeps
   , supportUsesLeaf
   )

@@ -831,6 +831,34 @@ hidden.
 `O` is the set of unresolved mandatory obligations, collected across the term (an open hole in a
 subterm propagates). A complete graph node requires `O = empty`.
 
+**How the report is surfaced (#204).** `certDeps(w)` is mechanized in
+`lean/Lara/Support.lean` (`cert_steps_accounted`, `certDeps_eq_union`) and mirrored in
+`Lara.Strict.Deps`. Since #204 the shipped checker hands it to a consumer: the driver runs the
+collector over each argument of the *accepted, checked* unit (`Lara.Driver.unitCertDeps`, reached
+through `runCheckDeps` and `Lara.Elaborate.sourceResultCertDeps`), and the `lara deps <file>`
+subcommand prints it. Three decisions are frozen with it, and the reasons are on the definitions
+themselves:
+
+- **The report is not in the verdict.** `lara check`'s stdout is the frozen wire verdict and the N11
+  differential anchor against `lean/Lara/Driver.lean` (`scripts/differential.sh`, 620 anchors);
+  widening it would move that anchor and every corpus golden, and would oblige the Lean driver to
+  render a report it has no encoder for. The report rides on its own subcommand instead.
+- **One collector, not two.** The driver calls `Lara.Strict.Deps.certDeps` rather than fusing
+  collection into `inferSupport`'s traversal. A fused collector would be a second implementation of
+  the same accounting, owing its own agreement argument against Lean; calling the mirror means the
+  shipped text is produced by the artifact `scripts/check-backend-deps-golden.sh` already pins
+  against the Lean witness. The cost is one extra replay per accepted certificate node, and only
+  when a caller demands the report — the oracle is a pure function, so the second application cannot
+  disagree with the first.
+- **Only an accepted unit has a report.** The accounting ranges over checked terms; on a rejected
+  one the collector would emit whatever the accepted steps beneath the refused node cited, which
+  reads as an audit of evidence the verdict does not rest on. `lara deps` therefore prints nothing
+  on stdout and exits 1 for a rejection, and the report is taken over the *checked* (§4.3-pruned)
+  unit, not the declared one.
+
+Design note D9 in `Lara.SupportTerm` is unchanged by this: the acceptance projection stays a `Bool`
+and no checked-graph decision may consult dependency data.
+
 ### 6.1 Support-term typing rules (v0.1-frozen)
 
 The judgment above is defined by two syntax-directed rules, so it is decidable (§9 result 1).

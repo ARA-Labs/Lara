@@ -57,6 +57,7 @@ module Lara.Elaborate
   , prepareSource
   , SourceResult
   , runSourceCheck
+  , sourceResultCertDeps
   , sourceResultVerdict
   , sourceResultAudit
   , sourceResultDiagnostics
@@ -107,6 +108,7 @@ import Lara.Diagnostics
   , Stage (..)
   )
 import Lara.Driver.Internal (runCheckReported, slotMappingLines)
+import Lara.Strict.Deps (CertDep)
 import Lara.SupportTerm (SlotSource)
 import Lara.Elaborate.Internal
   ( ElabError (..)
@@ -189,12 +191,13 @@ data SourceResult = SourceResult
   [SlotSource]
   [(ArgId, [AuthoredSlot])]
   [AuthoredFormula]
+  [(ArgId, [CertDep])]
 
 sourceResultVerdict :: SourceResult -> Verdict
-sourceResultVerdict (SourceResult verdict _ _ _ _ _ _ _ _ _) = verdict
+sourceResultVerdict (SourceResult verdict _ _ _ _ _ _ _ _ _ _) = verdict
 
 sourceResultAudit :: SourceResult -> AdmissionAudit
-sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _ _) = audit
+sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _ _ _) = audit
 
 -- | The @stderr@ lines this result's rejection warrants, in the raw driver's
 -- established precedence: a replay-preflight R13
@@ -209,7 +212,7 @@ sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _ _) = audit
 -- verdict, so a line here can never explain a rejection this result did not
 -- make.
 sourceResultDiagnostics :: SourceResult -> [String]
-sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _ _) = diagnostics
+sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _ _ _) = diagnostics
 
 -- | The located rejection that produced this result's verdict, from the /same/
 -- decision path ("Lara.Driver.Internal".@runCheckReported@): its class, failing
@@ -221,7 +224,7 @@ sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _ _) = diagnosti
 -- rather than in a message line — so an R1 on a pruned source would print an
 -- empty diagnostic.
 sourceResultLocatedRejection :: SourceResult -> Maybe LocatedRejection
-sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _ _) = located
+sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _ _ _) = located
 
 -- | The argument ids of the __checked__ (post-prune) program, in the order the
 -- checker indexed them.  A 'LocatedRejection' constituent names arguments by
@@ -231,14 +234,14 @@ sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _ _) = located
 -- checked 'Unit' is deliberately not, so a caller still cannot rebuild a
 -- policy-pruned envelope and re-run it without the blocked-status overlay.
 sourceResultCheckedArgIds :: SourceResult -> [ArgId]
-sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _ _ _ _) = argIds
+sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _ _ _ _ _) = argIds
 
 -- | Every argument this source's @comparison@ blocks generated, tied back to
 -- the block that minted it (plan D5).  Empty for a program that authors no
 -- @comparison@ — which is every raw @.sexp@ input, and every @lara-syntax\@0.2@
 -- program.
 sourceResultGeneratedArgs :: SourceResult -> [GeneratedArg]
-sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _) = generated
+sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _ _) = generated
 
 -- | The __structural__ premise-slot mapping of a checker-side R13 (#130): what
 -- the checked term put in each slot the refused certificate cites, read off the
@@ -250,7 +253,7 @@ sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _) = generated
 -- authored one so a caller can tell the two apart rather than parsing them back
 -- out of a rendered line.
 sourceResultSlotSources :: SourceResult -> [SlotSource]
-sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _) = slots
+sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _ _) = slots
 
 -- | The __authored__ premise-slot spelling of every checked argument (#130),
 -- keyed by argument id: the leaf, prior-argument, and premise-label names the
@@ -261,7 +264,7 @@ sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _) = slots
 -- no rule-instance arguments — which is every raw @.sexp@ input, since a wire
 -- program has no authored names to recover.
 sourceResultAuthoredSlots :: SourceResult -> [(ArgId, [AuthoredSlot])]
-sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _) = authored
+sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _ _) = authored
 
 -- | The __authored__ spelling of every formula this source can name (#148):
 -- the @lara-syntax\@0.10@ @(prop TEXT)@ annotations of its @nd\@1@ payloads,
@@ -273,7 +276,7 @@ sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _) = authored
 -- of the program rather than of the verdict. Empty for a raw @.sexp@ input,
 -- which has no authored spellings to recover.
 sourceResultAuthoredFormulas :: SourceResult -> [AuthoredFormula]
-sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas) = formulas
+sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas _) = formulas
 
 -- | The validated raw core envelope bound into this source result, unless
 -- policy admission removed source material. Duplicate-group quarantine is
@@ -283,9 +286,25 @@ sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas) = formula
 -- fail closed rather than recompute the declared envelope through
 -- 'Lara.Driver.runCheck'.
 sourceResultCheckInput :: SourceResult -> Either AdmissionAudit CheckInput
-sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _)
+sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _ _)
   | admissionAuditHasPolicyQuarantine audit = Left audit
   | otherwise = Right checkInput
+
+-- | The certificate dependency report of the unit this source result accepted,
+-- keyed by the checked unit's argument ids (\#204).
+--
+-- @[]@ on rejection. On acceptance the ids are exactly
+-- 'sourceResultCheckedArgIds' — both read the same checked unit — so the report
+-- and the argument list beside it index each other without a join.
+--
+-- This is the @.lara@ door's half of the report; the raw wire door reaches the
+-- same pair through 'Lara.Driver.runCheckDeps'. The two differ only in which
+-- prune produced the checked unit: this one carries the source-boundary prune
+-- (policy admission included), the raw one the ordinary group-only prune. That
+-- is the same asymmetry 'sourceResultCheckInput' already documents, and it is
+-- why the source door cannot simply be routed through the raw entry point.
+sourceResultCertDeps :: SourceResult -> [(ArgId, [CertDep])]
+sourceResultCertDeps (SourceResult _ _ _ _ _ _ _ _ _ _ deps) = deps
 
 -- | Validate and lower one presentation source.  Structural elaboration sees
 -- every declared leaf; admission is considered only after elaboration and
@@ -334,7 +353,7 @@ prepareSource program policy = do
 runSourceCheck :: SourceCheckInput -> SourceResult
 runSourceCheck (SourceCheckInput program policy declared _ finalPrune audit checkInput generated) =
   let checked = pruneChecked finalPrune
-      (verdict, located, diagnostics, slots) =
+      (verdict, located, diagnostics, slots, deps) =
         runCheckReported fullConfig checkInput finalPrune
    in SourceResult
         verdict
@@ -350,6 +369,7 @@ runSourceCheck (SourceCheckInput program policy declared _ finalPrune audit chec
         -- policy prune removed can still be named by a rejection reason, and
         -- an entry the reason never mentions costs nothing (#148).
         (authoredFormulaMap program declared)
+        deps
 
 -- ---------------------------------------------------------------------------
 -- The author-facing layer (plan D5, eng review 2A)

@@ -20,7 +20,7 @@
 --     dependencies.
 module StrictSpec (strictSpecProps) where
 
-import Data.List (isPrefixOf, nub, sort)
+import Data.List (isPrefixOf, nub)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -59,7 +59,7 @@ import Lara.Strict.ND.Internal (AtomId (..))
 import qualified Lara.AST as A
 import qualified Lara.Strict.Cell as Cell
 import qualified Lara.Strict.Ord as OrdB
-import Lara.Strict.Deps (CertDep (..), certDeps)
+import Lara.Strict.Deps (CertDep (..), certDeps, encodeCertDeps)
 import Lara.Driver (buildCertOk)
 import Lara.SupportTerm
   ( CertOk
@@ -933,91 +933,17 @@ prop_dupBackendDepsCollected =
 -- multiplicity reconciliation as an artifact rather than an argument.
 -- ---------------------------------------------------------------------------
 
--- | Escape and quote one string for the golden encoding: backslash, double
--- quote, newline and tab become their two-character escapes; everything else
--- is passed through. Mirrors @quoteGolden@ in the Lean witness.
-quoteGolden :: String -> String
-quoteGolden s = '"' : concatMap esc s ++ "\""
-  where
-    esc '\\' = "\\\\"
-    esc '"' = "\\\""
-    esc '\n' = "\\n"
-    esc '\t' = "\\t"
-    esc c = [c]
-
--- | Encode a ground term. Mirrors @encodeTermGolden@ in the Lean witness.
-encodeTermGolden :: Term -> String
-encodeTermGolden t = case t of
-  TNum s -> "(num " ++ quoteGolden s ++ ")"
-  TStr s -> "(str " ++ quoteGolden s ++ ")"
-  TCon (FunSym k) ts -> "(con " ++ quoteGolden k ++ encodeTermsGolden ts ++ ")"
-
--- | Encode an argument list, each element preceded by a single space.
-encodeTermsGolden :: [Term] -> String
-encodeTermsGolden = concatMap ((' ' :) . encodeTermGolden)
-
--- | Encode a ground proposition. Mirrors @encodeAtomGolden@ in the Lean
--- witness (Lean's @Atom@ is this @Prop@).
-encodeAtomGolden :: Prop -> String
-encodeAtomGolden (Prop (Pred p) ts) =
-  "(atom " ++ quoteGolden p ++ encodeTermsGolden ts ++ ")"
-
--- | Encode one dependency as its golden line. The grammar, shared verbatim
--- with @encodeCertDepGolden@ in @lean\/Lara\/Examples\/BackendComposition.lean@:
+-- | The canonical encoding is the library's since \#204
+-- ("Lara.Strict.Deps".'encodeCertDeps'), not a copy defined here. It moved
+-- because the shipped @lara deps@ report and this golden must be the /same/
+-- text: a report format defined separately from the one
+-- @scripts\/check-backend-deps-golden.sh@ diffs against Lean would be a format
+-- nothing pins. The alias keeps this section's prose reading as it did.
 --
--- @
---   line   ::= "premise " nat " " atom
---            | "theory " qstr " " nat " " qstr " " nat
---   atom   ::= "(atom " qstr terms ")"
---   terms  ::= { " " term }
---   term   ::= "(num " qstr ")" | "(str " qstr ")" | "(con " qstr terms ")"
---   qstr   ::= '"' { char | "\\\\" | "\\\"" | "\\n" | "\\t" } '"'
--- @
---
--- The @theory@ line's two naturals are the backend /version/ and the theory
--- /entry index/; its two quoted strings are the backend name and the theory
--- digest. __Nothing is dropped__: every field of both 'CertDep' constructors is
--- encoded, including the premise slot's resolved atom in full ground form. The
--- premise\/theory asymmetry is 'CertDep''s own (design note D7 in
--- "Lara.Strict.Deps") — a premise dependency genuinely carries no backend
--- identity — not an omission made to force the two languages to agree.
-encodeCertDepGolden :: CertDep -> String
-encodeCertDepGolden d = case d of
-  CertPremise i atom -> "premise " ++ show i ++ " " ++ encodeAtomGolden atom
-  CertTheory (BackendId name version) (TheoryDigest digest) t ->
-    "theory "
-      ++ quoteGolden name
-      ++ " "
-      ++ show version
-      ++ " "
-      ++ quoteGolden digest
-      ++ " "
-      ++ show t
-
--- | The canonical encoding of a whole dependency collection.
---
--- __Sort order.__ Lines are emitted __sorted ascending by the encoded line
--- text__, compared as a sequence of Unicode code points ('Data.List.sort' on
--- 'String', which is exactly the @charListLtGolden@ order the Lean encoder
--- spells out), and __deduplicated__. The order is on the /text/, not on the
--- slot number: slot @10@ sorts before slot @2@. That is deliberate — the order
--- is a canonicalization device, not a semantic ranking.
---
--- __Why deduplicated.__ Lean's per-node report is a @List Nat@
--- (@Backend.uses@); a Haskell adapter reports a 'Set' 'Dependency'. A
--- certificate naming the same slot twice — @(ordcmp (prem 0) (prem 0))@ — is a
--- two-element list in Lean and a one-element set here. The two languages agree
--- as /collections/, which is what every accountability statement is about, so
--- multiplicity is deliberately outside this contract and both encoders
--- canonicalize it away. This is not just an argument: 'dupTerm' carries
--- exactly such a certificate, so 'prop_dupBackendDepsCollected' and Lean's
--- @depsDupTerm_certDeps@ pin the two pre-dedup multiplicities while the
--- golden pins the reconciled text both sides emit.
---
--- The result ends in a newline so it compares equal to the committed file as
--- read, and to @IO.println@'s output on the Lean side.
+-- Its grammar, sort order and dedup rule — and why each is what it is — are
+-- documented on 'encodeCertDep' and 'encodeCertDeps'.
 encodeCertDepsGolden :: [CertDep] -> String
-encodeCertDepsGolden = unlines . sort . nub . map encodeCertDepGolden
+encodeCertDepsGolden = encodeCertDeps
 
 -- | The Haskell collector's answer on the two golden vectors, concatenated
 -- and encoded canonically, equals the committed golden that Lean emits. This

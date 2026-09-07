@@ -1081,6 +1081,97 @@ prop_cliLaraDanglingAttack = once $ ioProperty $
         , "rebut missing a"
         ]
 
+-- ---------------------------------------------------------------------------
+-- @lara deps@: the certificate dependency report (#204)
+-- ---------------------------------------------------------------------------
+
+-- | The report of an accepted @ord\@1@ comparison program, exactly.
+--
+-- This is the property \#204 was opened for: before it, @certDeps@ was proved
+-- in Lean and mirrored in Haskell but no shipped consumer could reach a report,
+-- so nothing at this level could be asserted at all. S5's two arguments each
+-- compare the same pair of reported cells, and the report names the cells —
+-- resolved atoms, not slot indices — which is what makes it an audit of the
+-- evidence rather than a restatement of the certificate.
+prop_cliDepsAcceptS5 :: Property
+prop_cliDepsAcceptS5 = once $ ioProperty $ do
+  (code, out, err) <- runLara ["deps", "examples/S5/example.lara"]
+  let cell sys score =
+        "(atom \"reports\" (con \"exp1\") (con \"score_cell\" (con \"" ++ sys
+          ++ "\") (con \"perplexity\") (con \"wikitext103\") (num \"" ++ score ++ "\")))"
+      argBlock a =
+        "argument " ++ a ++ "\n"
+          ++ "  premise 0 " ++ cell "sys_new" "28.4" ++ "\n"
+          ++ "  premise 1 " ++ cell "sys_base" "31.6" ++ "\n"
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitSuccess)
+      , counterexample "stdout bytes" (out === (argBlock "a1" ++ argBlock "a2"))
+      , counterexample "stderr empty" (err === "")
+      ]
+
+-- | The two doors agree. S8's @.lara@ artifact and its committed
+-- @example.core.sexp@ elaborate to the same unit, so they must produce the same
+-- report — the same thin-shell property 'prop_cliLaraAcceptS1' asserts for the
+-- verdict, now for the report beside it. It also covers the @nd\@1@ backend and
+-- the source-authored @(prop …)@ formulas of @lara-syntax\@0.10@, whose lowered
+-- atom is what a premise line prints.
+prop_cliDepsDoorsAgree :: Property
+prop_cliDepsDoorsAgree = once $ ioProperty $ do
+  (codeL, outL, errL) <- runLara ["deps", "examples/S8/example.lara"]
+  (codeS, outS, errS) <- runLara ["deps", "examples/S8/example.core.sexp"]
+  pure $
+    conjoin
+      [ counterexample "exit codes" ((codeL, codeS) === (ExitSuccess, ExitSuccess))
+      , counterexample "doors agree" (outL === outS)
+      , counterexample "stdout bytes" $
+          outL
+            === ("argument a1\n"
+              ++ "  premise 0 (atom \"holds\" (con \"safety_invariant\") (con \"D\"))\n")
+      , counterexample "stderr empty" ((errL, errS) === ("", ""))
+      ]
+
+-- | An accepted program whose arguments cite nothing still lists them: E1 has
+-- one checked argument and no strict certificates, so its report is one header
+-- with no lines under it. \"Consulted nothing\" and \"not in the report\" are
+-- different facts and the rendering keeps them apart.
+prop_cliDepsAcceptEmpty :: Property
+prop_cliDepsAcceptEmpty = once $ ioProperty $ do
+  (code, out, err) <- runLara ["deps", "examples/E1/example.lara"]
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitSuccess)
+      , counterexample "stdout bytes" (out === "argument a1\n")
+      , counterexample "stderr empty" (err === "")
+      ]
+
+-- | A rejected input gets no report: nothing on stdout, exit 1, and one stderr
+-- line pointing at @lara check@ for the reason. Asserting stdout is /empty/ is
+-- the point — a partial report over a refused term would read as an audit of
+-- evidence the checker did not accept.
+prop_cliDepsReject :: Property
+prop_cliDepsReject = once $ ioProperty $ do
+  (code, out, err) <- runLara ["deps", "fixtures/missing-self-edge.sexp"]
+  pure $
+    conjoin
+      [ counterexample "exit code" (code === ExitFailure 1)
+      , counterexample "stdout empty" (out === "")
+      , counterexample "stderr names the file" ("missing-self-edge.sexp" `isInfixOf` err)
+      , counterexample "stderr points at check" ("lara check" `isInfixOf` err)
+      ]
+
+-- | @deps@ shares @check@'s decode boundary: a codec error is exit 2 with
+-- nothing on stdout, not a rejection.
+prop_cliDepsCodecError :: Property
+prop_cliDepsCodecError = once $ ioProperty $
+  withTempSexp "(not-a-check-input)" $ \path -> do
+    (code, out, _) <- runLara ["deps", path]
+    pure $
+      conjoin
+        [ counterexample "exit code" (code === ExitFailure 2)
+        , counterexample "stdout empty" (out === "")
+        ]
+
 cliSpecProps :: [(String, IO Result)]
 cliSpecProps =
   [ ("cli accept exit 0 + bytes", quickCheckResult prop_cliAccept)
@@ -1113,4 +1204,9 @@ cliSpecProps =
   , ("cli .lara R8 exact first-leaf diagnostic", quickCheckResult prop_cliAdmissionR8)
   , ("cli .lara accepted quarantine verdict+audit", quickCheckResult prop_cliAcceptedQuarantineAudit)
   , ("cli .lara admission precedence invalid>R8>R13>R9>core", quickCheckResult prop_cliAdmissionPrecedenceMatrix)
+  , ("cli deps S5 ord@1 report bytes (#204)", quickCheckResult prop_cliDepsAcceptS5)
+  , ("cli deps both doors agree on S8 (#204)", quickCheckResult prop_cliDepsDoorsAgree)
+  , ("cli deps lists an argument citing nothing (#204)", quickCheckResult prop_cliDepsAcceptEmpty)
+  , ("cli deps rejection exit 1, no report (#204)", quickCheckResult prop_cliDepsReject)
+  , ("cli deps codec error exit 2 (#204)", quickCheckResult prop_cliDepsCodecError)
   ]

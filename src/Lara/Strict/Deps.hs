@@ -58,18 +58,43 @@
 -- a theory dependency names an entry of a digest-addressed table that only the
 -- backend can resolve, so it must say which backend and which digest.
 --
--- == The honest boundary
+-- == Where the report surfaces (\#204)
 --
 -- Production 'Lara.SupportTerm.inferSupport' still reads only the acceptance
--- projection 'Lara.SupportTerm.certAccepted'. Retaining the report makes this
--- accounting /possible/ on the shipped path; /surfacing/ it to shipped
--- consumers — the verdict, the audit record, the CLI — is deliberately out of
--- scope here and is tracked as issue #204.
+-- projection 'Lara.SupportTerm.certAccepted' — that is design note D9 and it is
+-- unchanged: no checked-graph decision may consult dependency data. What
+-- changed with \#204 is that the /report/ now has a shipped consumer. The
+-- driver runs this collector over the accepted unit's arguments
+-- ("Lara.Driver".'Lara.Driver.unitCertDeps', reached through
+-- 'Lara.Driver.runCheckDeps' and the @lara deps@ subcommand), so the
+-- accountability result @certDeps@ mechanizes — Lean @cert_steps_accounted@ and
+-- @certDeps_eq_union@ — has a production observable.
+--
+-- __The collector is not re-implemented on that path.__ The driver calls this
+-- function, not a fused copy inside 'Lara.SupportTerm.inferSupport'. A fused
+-- collector would be a /second/ implementation of the same accounting, owing
+-- its own agreement argument against Lean; calling this one means the text a
+-- consumer reads is produced by the very mirror that
+-- @scripts\/check-backend-deps-golden.sh@ pins against the Lean witness, byte
+-- for byte. The cost is that an accepted certificate node is replayed once more
+-- when — and only when — a caller demands the report; the oracle is a pure
+-- function, so the second application cannot disagree with the first (the same
+-- argument 'Lara.SupportTerm.assuranceError' already relies on).
+--
+-- The verdict is not widened. @lara check@'s @stdout@ is the frozen wire
+-- verdict and a differential anchor against the Lean driver
+-- (@scripts\/differential.sh@); the report rides on its own subcommand instead,
+-- so no anchor, golden, or freeze tag moves. That decision is recorded in
+-- @docs\/spec.md@ §6.
 module Lara.Strict.Deps
   ( CertDep (..)
   , certDeps
+    -- * Canonical rendering (the cross-language golden encoding)
+  , encodeCertDep
+  , encodeCertDeps
   ) where
 
+import Data.List (nub, sort)
 import qualified Data.Set as Set
 
 import Lara.AST
@@ -81,7 +106,7 @@ import Lara.AST
   , SupportTerm (..)
   , TheoryDigest (..)
   )
-import Lara.Prop (Prop)
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import qualified Lara.Strict as St
 import Lara.SupportTerm (CertOk, CertOutcome (..), instAPat, instAPats)
 
@@ -163,3 +188,97 @@ certDeps certOk pI = go
 
     digestOf cert = case certTheory cert of
       TheoryDigest s -> St.TheoryDigest s
+
+-- ---------------------------------------------------------------------------
+-- Canonical rendering (the cross-language golden encoding)
+-- ---------------------------------------------------------------------------
+
+-- | Escape and quote one string: backslash, double quote, newline and tab
+-- become their two-character escapes; everything else is passed through.
+-- Mirrors @quoteGolden@ in the Lean witness.
+quoteEnc :: String -> String
+quoteEnc s = '"' : concatMap esc s ++ "\""
+  where
+    esc '\\' = "\\\\"
+    esc '"' = "\\\""
+    esc '\n' = "\\n"
+    esc '\t' = "\\t"
+    esc c = [c]
+
+-- | Encode a ground term. Mirrors @encodeTermGolden@ in the Lean witness.
+encodeTermEnc :: Term -> String
+encodeTermEnc t = case t of
+  TNum s -> "(num " ++ quoteEnc s ++ ")"
+  TStr s -> "(str " ++ quoteEnc s ++ ")"
+  TCon (FunSym k) ts -> "(con " ++ quoteEnc k ++ encodeTermsEnc ts ++ ")"
+
+-- | Encode an argument list, each element preceded by a single space.
+encodeTermsEnc :: [Term] -> String
+encodeTermsEnc = concatMap ((' ' :) . encodeTermEnc)
+
+-- | Encode a ground proposition. Mirrors @encodeAtomGolden@ in the Lean witness
+-- (Lean's @Atom@ is this 'Prop').
+encodeAtomEnc :: Prop -> String
+encodeAtomEnc (Prop (Pred p) ts) =
+  "(atom " ++ quoteEnc p ++ encodeTermsEnc ts ++ ")"
+
+-- | Encode one dependency as its canonical line. The grammar, shared verbatim
+-- with @encodeCertDepGolden@ in @lean\/Lara\/Examples\/BackendComposition.lean@:
+--
+-- @
+--   line   ::= "premise " nat " " atom
+--            | "theory " qstr " " nat " " qstr " " nat
+--   atom   ::= "(atom " qstr terms ")"
+--   terms  ::= { " " term }
+--   term   ::= "(num " qstr ")" | "(str " qstr ")" | "(con " qstr terms ")"
+--   qstr   ::= '"' { char | "\\\\" | "\\\"" | "\\n" | "\\t" } '"'
+-- @
+--
+-- The @theory@ line's two naturals are the backend /version/ and the theory
+-- /entry index/; its two quoted strings are the backend name and the theory
+-- digest. __Nothing is dropped__: every field of both 'CertDep' constructors is
+-- encoded, including the premise slot's resolved atom in full ground form. The
+-- premise\/theory asymmetry is 'CertDep''s own (design note D7 above) — a
+-- premise dependency genuinely carries no backend identity — not an omission
+-- made to force the two languages to agree.
+--
+-- This encoding was the @test\/StrictSpec.hs@ golden encoder before \#204. It is
+-- in the library now because the shipped @lara deps@ report and the
+-- cross-language golden must be the /same/ text: a report format defined
+-- separately from the one @scripts\/check-backend-deps-golden.sh@ diffs against
+-- Lean would be a format nothing pins.
+encodeCertDep :: CertDep -> String
+encodeCertDep d = case d of
+  CertPremise i atom -> "premise " ++ show i ++ " " ++ encodeAtomEnc atom
+  CertTheory (St.BackendId name version) (St.TheoryDigest digest) t ->
+    "theory "
+      ++ quoteEnc name
+      ++ " "
+      ++ show version
+      ++ " "
+      ++ quoteEnc digest
+      ++ " "
+      ++ show t
+
+-- | The canonical encoding of a whole dependency collection.
+--
+-- __Sort order.__ Lines are emitted __sorted ascending by the encoded line
+-- text__, compared as a sequence of Unicode code points ('Data.List.sort' on
+-- 'String', which is exactly the @charListLtGolden@ order the Lean encoder
+-- spells out), and __deduplicated__. The order is on the /text/, not on the
+-- slot number: slot @10@ sorts before slot @2@. That is deliberate — the order
+-- is a canonicalization device, not a semantic ranking.
+--
+-- __Why deduplicated.__ Lean's per-node report is a @List Nat@
+-- (@Backend.uses@); a Haskell adapter reports a 'Data.Set.Set'
+-- 'Lara.Strict.Dependency'. A certificate naming the same slot twice —
+-- @(ordcmp (prem 0) (prem 0))@ — is a two-element list in Lean and a
+-- one-element set here. The two languages agree as /collections/, which is what
+-- every accountability statement is about, so multiplicity is deliberately
+-- outside this contract and both encoders canonicalize it away.
+--
+-- The result ends in a newline so it compares equal to the committed golden as
+-- read, and to @IO.println@'s output on the Lean side. An empty collection
+-- encodes to the empty string, not to a blank line.
+encodeCertDeps :: [CertDep] -> String
+encodeCertDeps = unlines . sort . nub . map encodeCertDep

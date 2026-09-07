@@ -168,6 +168,7 @@ developed on GHC 9.14.1 / cabal 3.16):
 ```sh
 cabal build all                      # library + CLI
 cabal run lara -- check <file.lara>  # check an artifact
+cabal run lara -- deps <file.lara>   # what evidence an accepted artifact cites
 cabal test                           # property suite
 ```
 

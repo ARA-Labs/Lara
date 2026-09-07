@@ -3029,6 +3029,81 @@ observations:
   stale: false
 
 - id: O143
+  timestamp: "2026-09-06T16:15"
+  provenance: ai-suggested
+  content: >
+    When a mechanized definition already has a language mirror pinned by a
+    cross-language golden, the cheapest way to give it a production observable
+    is to call that mirror from the shipped path — not to reimplement it where
+    the production traversal happens to be. Reuse makes the shipped output the
+    same artifact the golden pins; a fused reimplementation would owe its own
+    agreement argument against the mechanization, adding a drift surface the
+    accountability claim then has to carry. The price paid instead is
+    recomputation, which is safe exactly when the recomputed oracle is a pure
+    function of arguments the checker already fixed.
+  context: >
+    N315. Issue #204's first phrasing was to fuse collection into
+    `inferSupport`'s traversal; the landed design calls
+    `Lara.Strict.Deps.certDeps` from `Lara.Driver.unitCertDeps` instead. The
+    same purity argument `assuranceError` uses for re-asking the oracle on the
+    rejection path is what licenses the extra replay here.
+  potential_type: heuristic
+  bound_to: [N315]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O144
+  timestamp: "2026-09-06T16:20"
+  provenance: ai-suggested
+  content: >
+    A frozen byte-level output is a design constraint on where a *new*
+    observable may appear, not merely on how the old one is formatted. Because
+    `lara check`'s stdout is a differential anchor against a second
+    mechanized implementation, any report added to it would have to be
+    reproduced by that implementation as well — so the cost of widening the
+    verdict is a second encoder in the other language, not a golden
+    regeneration. Giving the new observable its own subcommand converts an
+    obligation on the mechanization into an additive change with no anchor,
+    golden, or freeze-tag movement.
+  context: >
+    N315/N316. `scripts/differential.sh` byte-compares Haskell and Lean driver
+    stdout on 620 anchors; the Lean driver has no `CertDep` encoder outside
+    `Lara/Examples/BackendComposition.lean`, which is a witness module, not a
+    driver. After the change the differential is unchanged at pass=620 fail=0.
+  potential_type: heuristic
+  bound_to: [N315, N316]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O145
+  timestamp: "2026-09-06T16:35"
+  provenance: ai-suggested
+  content: >
+    An accountability report inherits the scope of the theorem it realizes, so
+    the shipped command must refuse to answer outside it. `certDeps` is
+    accounted only over checked terms (Lean `cert_node_accounted`); run on a
+    rejected term the collector still walks past the refused node and emits
+    what the accepted steps beneath it cited. That output is not wrong so much
+    as unmoored — it reads as an audit of evidence the verdict does not rest
+    on. The same scoping argument picks the *checked* (quarantine-pruned) unit
+    over the declared one.
+  context: >
+    N315. `lara deps` therefore prints nothing on stdout and exits 1 on a
+    rejection, and `unitCertDeps` documents both conditions as an input
+    contract met at its single call site (`runCheckReported`'s accepting
+    branch).
+  potential_type: heuristic
+  bound_to: [N315]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O146
   timestamp: "2026-09-06T18:08"
   provenance: ai-suggested
   content: >
@@ -3041,11 +3116,11 @@ observations:
     Kin to O141: there the issue's cost estimate encoded one imagined route;
     here the issue's work description encoded a superseded tree.
   context: >
-    N315. User directed "let's do #248"; the pre-execution read of
+    N317. User directed "let's do #248"; the pre-execution read of
     StatusCheck.lean found `transportsB` and `Matched` already present,
     which triggered the git archaeology instead of the edit.
   potential_type: heuristic
-  bound_to: [N315]
+  bound_to: [N317]
   promoted: false
   promoted_to: null
   crystallized_via: null

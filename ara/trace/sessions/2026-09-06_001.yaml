@@ -3,7 +3,7 @@ session:
   date: "2026-09-06"
   started: "2026-09-06T12:00"
   last_turn: "2026-09-06T18:12"
-  turn_count: 3
+  turn_count: 4
   summary: >
     Issue #231 closed: two drift guards added to the #224 strict-certificate
     fixture in Lara/Examples/PWStructural.lean. Certifier blindness is caught
@@ -20,13 +20,23 @@ session:
     issue's own cost estimate and leaving the anticipated Mathlib decision
     unforced. AxCheck rows 2495 -> 2500 (five new declarations); the whole-tree
     coverage gate reports 2341 covered declarations. C35 and C36 conditions
-    narrowed. Turn 3 (new conversation) reviewed the ten open issues,
-    recommended #204 (dependency-report wiring, unblocked by #191's closure)
-    as the next real work item, then took #248 as a warm-up and found it moot
-    at birth: both PW-T8 cleanups (def Matched; the transportsB unification)
-    already landed in PR #247, merged seven minutes before the issue was
-    filed against PR #244's tree. #248 closed with the verification in its
-    closing comment; no code change, no PR.
+    narrowed. Turn 3 closed #204: the certificate dependency report now has a
+    shipped consumer. The driver runs the existing `certDeps` mirror over the
+    accepted, checked unit (`Lara.Driver.unitCertDeps`), the report rides out
+    of the same single pass as the verdict, and a new `lara deps` subcommand
+    prints it on both doors -- deliberately beside the verdict rather than
+    inside it, so the N11 differential anchor and every corpus golden stay
+    put. The golden encoder moved from `test/StrictSpec.hs` into the library,
+    making the shipped report text the artifact the cross-language golden
+    already pins. All local gates green (differential 620/0, deps golden PASS,
+    148-job Lean build, axiom audit passed). C42 conditions narrowed. Turn 4
+    (new conversation, running from the same post-turn-2 state) reviewed the
+    ten open issues, recommended #204 as the next real work item unaware it
+    was concurrently done in turn 3, then took #248 as a warm-up and found it
+    moot at birth: both PW-T8 cleanups (def Matched; the transportsB
+    unification) already landed in PR #247, merged seven minutes before the
+    issue was filed against PR #244's tree. #248 closed with the verification
+    in its closing comment; no code change, no PR.
 
 events_logged:
   - turn: 1
@@ -81,11 +91,41 @@ events_logged:
     type: decision
     id: "N315"
     routing: direct
-    provenance: ai-suggested
-    summary: "#248 closed as moot: both cleanups (def Matched restating the StatusBridge field; admitsB/matchedB unified on transportsB) landed in PR #247, merged 7 minutes before the issue was filed against #244's tree."
+    provenance: user
+    summary: "#204 surfaced by calling the pinned certDeps mirror from the driver and giving the report its own `lara deps` subcommand, rather than fusing a collector into inferSupport or widening the frozen verdict."
+  - turn: 3
+    type: experiment
+    id: "N316"
+    routing: direct
+    provenance: ai-executed
+    summary: "Report verified over examples/ (S5's ord@1 arguments name the two compared cells; both doors byte-agree on S8) and nothing frozen moved: differential 620/0, negatives 56/0, deps golden PASS, 148-job build, axiom audit passed."
   - turn: 3
     type: observation
     id: "O143"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Call the pinned mirror from the shipped path instead of reimplementing it where the production traversal is; reuse buys the golden, recomputation is the price and is safe under oracle purity."
+  - turn: 3
+    type: observation
+    id: "O144"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A frozen differential anchor prices a new observable in the *other* language's encoder, not in golden regeneration — which is why the report got its own subcommand."
+  - turn: 3
+    type: observation
+    id: "O145"
+    routing: staged
+    provenance: ai-suggested
+    summary: "An accountability report inherits the scope of the theorem it realizes: accepted-and-checked only, so `lara deps` refuses to answer on a rejection."
+  - turn: 4
+    type: decision
+    id: "N317"
+    routing: direct
+    provenance: ai-suggested
+    summary: "#248 closed as moot: both cleanups (def Matched restating the StatusBridge field; admitsB/matchedB unified on transportsB) landed in PR #247, merged 7 minutes before the issue was filed against #244's tree."
+  - turn: 4
+    type: observation
+    id: "O146"
     routing: staged
     provenance: ai-suggested
     summary: "Verify a recorded issue's premises against HEAD before executing it — a close-out-sweep issue can be moot at birth. Kin to O141 (there the cost estimate encoded one route; here the work description encoded a superseded tree)."
@@ -133,10 +173,42 @@ ai_actions:
     provenance: ai-executed
     files_changed: []
   - turn: 3
-    action: "Reviewed the ten open issues and recommended #204 (surface certificate dependency reports through inferSupport/driver) as the next work item — its stated natural consumer PW-T6 (#191) closed 2026-09-03, so it is now unblocked — with #248 as an optional warm-up."
+    action: "Triaged the ten open issues into four groups (gated future-work, post-PLDI, recorded boundaries, actionable) and recommended #204 as the next step: its named gating milestone PW-T6 had closed, and it was the only issue where a proved Lean theorem had no production consumer."
     provenance: ai-executed
     files_changed: []
   - turn: 3
+    action: "Promoted the golden CertDep encoder from the test suite into the library (encodeCertDep / encodeCertDeps) and rewrote the module's honest-boundary section to say where the report now surfaces; StrictSpec aliases the library function and keeps the golden as the drift guard."
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Strict/Deps.hs"
+      - "test/StrictSpec.hs"
+  - turn: 3
+    action: "Added unitCertDeps / runCheckDeps / renderCertDeps and widened runCheckReported to carry the report as a fifth, lazily built component; threaded it to the source door as sourceResultCertDeps."
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Driver/Internal.hs"
+      - "src/Lara/Driver.hs"
+      - "src/Lara/Elaborate.hs"
+  - turn: 3
+    action: "Added the `lara deps` subcommand on both doors, factoring the .lara boundary handling into a shared loadSource so check and deps cannot drift on which inputs are exit-2 failures."
+    provenance: ai-executed
+    files_changed: ["app/Main.hs"]
+  - turn: 3
+    action: "Added five CliSpec cases (S5 report bytes, both doors agree on S8, an argument citing nothing, rejection exit 1 with empty stdout, codec error exit 2) and recorded the three frozen decisions in spec section 6; README quick start gained the deps line."
+    provenance: ai-executed
+    files_changed:
+      - "test/CliSpec.hs"
+      - "docs/spec.md"
+      - "README.md"
+  - turn: 3
+    action: "Ran cabal build all, cabal test lara-test, lake build, the axiom audit, check-backend-deps-golden.sh, differential.sh, admission-differential.sh and walking-skeleton-golden.sh; all green. Opened a PR on branch feat/204-surface-cert-deps."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
+    action: "Reviewed the ten open issues and recommended #204 (surface certificate dependency reports through inferSupport/driver) as the next work item — its stated natural consumer PW-T6 (#191) closed 2026-09-03, so it is now unblocked — with #248 as an optional warm-up."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
     action: "Verified #248 against the tree (Status.lean:185 def Matched, StatusCheck.lean transportsB routing, name-map row, AxCheck rows 3180-3192; git log -S dating both to 1a7240d) and closed the issue with the verification comment. No code change; no PR opened since there was no diff."
     provenance: ai-executed
     files_changed: []
@@ -148,6 +220,9 @@ claims_touched:
   - id: C36
     action: revised
     turn: 2
+  - id: C42
+    action: revised
+    turn: 3
 
 logic_revisions:
   - turn: 2
@@ -180,6 +255,21 @@ logic_revisions:
     after: "…, trace N232, trace N236, trace N313]"
     signal: artifact-commitment
     provenance: ai-suggested
+  - turn: 3
+    entry: C42
+    field: Conditions
+    before: "Arises where a checker reaches a subsystem through a lower-level entry point than the sealed constructor — here the production oracle calls the backend directly rather than through the sealing function, so the sealed judgment is only ever built by tests. The failure is invisible to component-level tests, which exercise the sealing function, and to end-to-end acceptance tests, which do not observe the discarded value. Detected by locating the constructor's call sites in shipped code specifically."
+    after: "Arises where a checker reaches a subsystem through a lower-level entry point than the sealed constructor — here the production oracle calls the backend directly rather than through the sealing function, so the sealed judgment is only ever built by tests. The failure is invisible to component-level tests, which exercise the sealing function, and to end-to-end acceptance tests, which do not observe the discarded value. Detected by locating the constructor's call sites in shipped code specifically. Repair takes two independent steps and the first does not imply the second: B0 (#182) stopped the discard by retaining the report in `CertOutcome`, after which the accounting was *possible* on the shipped path but still had no consumer; #204 added one (`Lara.Driver.unitCertDeps`, the `lara deps` subcommand). Between them the claim held in a weaker form — the value was computed and retained and still unobservable."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Statement and status untouched — the general lesson is unaffected by its instance being repaired. What the turn established is that the repair is two steps, which the claim's own history now shows and which its prior wording collapsed."
+  - turn: 3
+    entry: C42
+    field: Proof
+    before: "[`src/Lara/Driver/Internal.hs` (`buildCertOk`), `src/Lara/SupportTerm.hs` (`CertOutcome`, `certAccepted`), `src/Lara/Strict/Deps.hs`, `test/StrictSpec.hs` (`prop_mixedBackendDepsCollected`), issue #204, trace N247]"
+    after: "[`src/Lara/Driver/Internal.hs` (`buildCertOk`, `unitCertDeps`, `runCheckDeps`), `src/Lara/SupportTerm.hs` (`CertOutcome`, `certAccepted`), `src/Lara/Strict/Deps.hs`, `test/StrictSpec.hs` (`prop_mixedBackendDepsCollected`), `test/CliSpec.hs` (`prop_cliDepsAcceptS5`, `prop_cliDepsDoorsAgree`), issue #204, trace N247, N315, N316]"
+    signal: artifact-commitment
+    provenance: ai-suggested
 
 key_context:
   - turn: 1
@@ -199,6 +289,16 @@ key_context:
       exposed the issue's cost estimate as a description of one route.
   - turn: 3
     excerpt: >
+      User: "check the remaining issues, what is the next step" then "checkout
+      a new branch, let's do #204, it doesn't seem complex, just proceed,
+      record ara, and open an pr". #204 was recommended on the ground that its
+      own named gating milestone (PW-T6 #191, "the natural consumer and
+      probably the right milestone to do this in") had closed, and that it was
+      the only open issue where a proved theorem had zero production
+      observable — verified before recommending, by finding
+      `Lara.Strict.Deps` imported nowhere outside `test/StrictSpec.hs`.
+  - turn: 4
+    excerpt: >
       User: "let's do Quick warm-up option: #248, proceed directly, record
       ara, open pr". The pre-execution read of StatusCheck.lean found
       transportsB and Matched already present, which redirected the turn
@@ -207,16 +307,18 @@ key_context:
       verification comment instead.
 
 open_threads:
-  - "#204 (surface certificate dependency reports through inferSupport/driver output) is the recommended next work item — unblocked since PW-T6 (#191) closed, and the only route to a production observable for the Lean accountability results (cert_steps_accounted, certDeps_eq_union). A budgeted checker-traversal change, possibly with golden/differential regeneration."
+  - "#204's issue text asked for the reports to reach 'the verdict, the audit record, the CLI' (Deps.hs's pre-repair boundary note). The CLI now has them; the verdict deliberately does not, and no audit-record consumer was built. If the audit record should carry the report, that is a separate decision about the audit format, not leftover #204 work."
   - "#215 (relational parametricity over related backends) is the recommended next theory step and the only route to calling the backend theorem parametricity rather than representation independence; its cost is unknown until M4 F2's acceptance-profile theorem is tried against an arbitrary relation R. Whether #216 and #217 stay follow-ups or become one theory milestone depends on that answer."
   - "Session record 2026-09-05_001 references N307-N310 and O137-O138, but exploration_tree.yaml stops at N306 and observations.yaml at O136 — those nodes were never appended. Dangling references; the researcher should decide whether to backfill them from the session record or renumber. This turn reserved those ids and started at N311/O139."
   - "O139 (mutation-blind point-mass judgments) has one application; a second fixture using the same shape, or an affirmation, would close it."
   - "PW-T6 limitations unchanged: bridge-global functional translation, total leaf map, no attack transport (T8), question keys frozen across the bridge."
 
 ai_suggestions_pending:
+  - "O143 heuristic — call the pinned mirror from the shipped path rather than reimplementing the accounting at the production traversal."
+  - "O144 heuristic — a frozen differential anchor prices a new observable in the other language's encoder."
+  - "O145 heuristic — an accountability report inherits its theorem's scope; refuse to answer outside it."
   - "O139 heuristic — the two-shape guard pattern for point-mass fixture judgments."
   - "O140 — the axiom profile of the #231 rows."
   - "O141 heuristic — read a budgeted dependency on an issue as a claim about the imagined route, and re-derive before paying it."
   - "O142 heuristic — spike the proof to answer plan-or-not."
-  - "O143 heuristic — verify a recorded issue's premises against HEAD before executing it; kin to O141, the two may merge if either crystallizes."
-  - "#204 as next work item — awaiting the user's direction."
+  - "O146 heuristic — verify a recorded issue's premises against HEAD before executing it; kin to O141, the two may merge if either crystallizes."

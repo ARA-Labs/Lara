@@ -40,12 +40,17 @@ module Lara.Driver.Internal
   , runCheckLocatedReported
   , runCheckWithPrune
   , runCheckReported
+    -- * Certificate dependency reports (#204)
+  , unitCertDeps
+  , runCheckDeps
+  , renderCertDeps
   ) where
 
 import Data.List (intercalate)
 
 import Lara.AST
-  ( BackendId (..)
+  ( ArgId (..)
+  , BackendId (..)
   , Cert (..)
   , certRefVersion
   , DupGroup (..)
@@ -97,6 +102,7 @@ import Lara.Diagnostics
   , rejectionOf
   )
 import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
+import Lara.Policy (lookupRule)
 import Lara.Runtime (runtimeAF)
 import Lara.Prop (Prop)
 import Lara.SupportTerm
@@ -107,6 +113,7 @@ import Lara.SupportTerm
   , SlotSource (..)
   )
 import qualified Lara.Strict as St
+import Lara.Strict.Deps (CertDep, certDeps, encodeCertDeps)
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
@@ -157,7 +164,7 @@ runCheckLocatedReported
   -> CheckInput
   -> (Verdict, Maybe LocatedRejection, [String])
 runCheckLocatedReported cfg input =
-  let (verdict, located, diagnostics, slots) =
+  let (verdict, located, diagnostics, slots, _) =
         runCheckReported cfg input (prune (inputUnit input))
    in (verdict, located, diagnostics ++ slotMappingLines slots)
 
@@ -171,23 +178,32 @@ runCheckLocatedReported cfg input =
 -- @
 runCheckWithPrune :: CheckConfig -> CheckInput -> Prune -> (Verdict, Maybe LocatedRejection)
 runCheckWithPrune cfg input pruned =
-  let (verdict, located, _, _) = runCheckReported cfg input pruned
+  let (verdict, located, _, _, _) = runCheckReported cfg input pruned
    in (verdict, located)
 
--- | 'runCheckWithPrune' plus the @stderr@ lines the rejection warrants, all
--- from __one__ pass: the verdict, its located rejection, and its diagnostics
--- are three readings of the same decision, so a diagnostic can never explain a
--- rejection the driver did not make.
+-- | 'runCheckWithPrune' plus the @stderr@ lines the rejection warrants and the
+-- accepted unit's certificate dependency report, all from __one__ pass: the
+-- verdict, its located rejection, its diagnostics, and its report are four
+-- readings of the same decision, so a diagnostic can never explain a rejection
+-- the driver did not make and a report can never describe a unit the driver did
+-- not accept.
 --
 -- That single-pass property is the whole reason this exists. The alternative —
 -- computing diagnostics from the input in a second traversal — either re-runs
 -- the checker (doubling the work the E1 bench measures) or reconstructs the
 -- decision independently and risks disagreeing with it.
+--
+-- __The report costs nothing unless demanded__ (\#204). The fifth component is
+-- built lazily from the accepted unit, so a caller that only wants the verdict
+-- — every caller before \#204, including @lara check@ and the E1 bench — never
+-- forces 'unitCertDeps' and never replays a certificate for it. It is @[]@ on
+-- every rejecting path, which is not an approximation: a rejected unit has no
+-- accepted checked term for the accounting to range over.
 runCheckReported
   :: CheckConfig
   -> CheckInput
   -> Prune
-  -> (Verdict, Maybe LocatedRejection, [String], [SlotSource])
+  -> (Verdict, Maybe LocatedRejection, [String], [SlotSource], [(ArgId, [CertDep])])
 runCheckReported cfg input pruned =
   let replayId = inputReplayId input
       verdict outcome = Verdict replayId outcome
@@ -197,12 +213,14 @@ runCheckReported cfg input pruned =
           , Just (LocatedRejection (RejectClass R13) StageReplayPreflight (replayFailureConstituent failure))
           , [replayFailureMessage failure]
           , []
+          , []
           )
         Nothing
           | groupConflictRejectPrune pruned ->
               ( verdict (Reject (RejectClass R9))
               , Just (LocatedRejection (RejectClass R9) StageGroupBoundary (groupConflictConstituent pruned))
               , maybe [] (: []) (groupConflictMessageWithPrune pruned)
+              , []
               , []
               )
           | otherwise ->
@@ -213,8 +231,15 @@ runCheckReported cfg input pruned =
                       , Just (locate err)
                       , maybe [] (: []) (backendRejectionMessage err)
                       , backendRejectionSlots err
+                      , []
                       )
-                    Right accepted -> (verdict (buildAccept pruned accepted), Nothing, [], [])
+                    Right accepted ->
+                      ( verdict (buildAccept pruned accepted)
+                      , Nothing
+                      , []
+                      , []
+                      , unitCertDeps checked
+                      )
 
 -- | The one @stderr@ line explaining a __checker-side__ R13: the registered
 -- backend replayed the certificate and refused it, and this is the reason it
@@ -412,3 +437,85 @@ buildAccept pruned accepted =
     publicStatus p
       | p `elem` blocked = EvidenceBlocked
       | otherwise = Published
+
+-- ---------------------------------------------------------------------------
+-- Certificate dependency reports (#204)
+-- ---------------------------------------------------------------------------
+
+-- | The certificate dependency report of a unit, argument by argument: for each
+-- declared argument, every slot its accepted certificates consulted
+-- ("Lara.Strict.Deps".'certDeps', the Haskell mirror of Lean @certDeps@).
+--
+-- __Input contract.__ @unit@ must be one 'Lara.Check.checkUnit' accepted, and
+-- must be the /checked/ unit — @pruneChecked@'s reduced program, not the
+-- declared one. Both conditions are met at the single call site
+-- ('runCheckReported'\'s accepting branch), and both matter:
+--
+-- * On an accepted unit every certificate node's oracle call succeeds, which is
+--   the case Lean's @cert_node_accounted@ covers and the only case in which the
+--   Haskell collector and the mechanized one coincide (see the totality note in
+--   "Lara.Strict.Deps"). Run on a rejected unit this would silently report the
+--   accepted prefix of a term the checker refused.
+-- * The checked unit is the one whose arguments the checker actually inferred
+--   support for; a §4.3 quarantine can drop an argument from it. Reporting over
+--   the declared unit would account for evidence the verdict does not rest on.
+--   This is the same declared\/checked distinction 'buildAccept' makes, and the
+--   argument ids here are exactly 'Lara.Elaborate.sourceResultCheckedArgIds'.
+--
+-- The oracle and the rule lookup are rebuilt from the same unit fields the
+-- checker was handed — @unitTheories@ through 'buildCertOk' and @unitRules@
+-- through 'Lara.Policy.lookupRule' — so the collector asks the questions the
+-- checker asked, of the same registry.
+unitCertDeps :: Unit -> [(ArgId, [CertDep])]
+unitCertDeps unit =
+  [ (i, certDeps certOk pI w) | (i, w) <- unitArgs unit ]
+  where
+    certOk = buildCertOk (unitTheories unit)
+    pI = lookupRule (unitRules unit)
+
+-- | The verdict of a wire check-input paired with its certificate dependency
+-- report — the raw @.sexp@ door's report entry point, and the shipped consumer
+-- \#204 was about.
+--
+-- The report is @[]@ on rejection, and on acceptance it is the report of the
+-- unit /this very call/ accepted: both come out of the one
+-- 'runCheckReported' pass, so the report cannot describe a different unit than
+-- the verdict beside it. The source door reaches the same pair through
+-- 'Lara.Elaborate.sourceResultCertDeps', which carries the source-boundary
+-- prune rather than the group-only one.
+--
+-- __Why this is a separate entry point and not a wider verdict.__ @lara check@'s
+-- @stdout@ is the frozen wire verdict and the N11 differential anchor:
+-- @scripts\/differential.sh@ byte-compares it against @lean\/Lara\/Driver.lean@
+-- on every anchor, and the corpus goldens pin it. Widening it would move both,
+-- and would oblige the Lean driver to render a report it has no encoder for.
+-- The report therefore rides beside the verdict, never inside it.
+runCheckDeps :: CheckConfig -> CheckInput -> (Verdict, [(ArgId, [CertDep])])
+runCheckDeps cfg input =
+  let (verdict, _, _, _, deps) =
+        runCheckReported cfg input (prune (inputUnit input))
+   in (verdict, deps)
+
+-- | Render an argument-keyed report as text: one @argument \<id\>@ header per
+-- argument, then that argument's dependency lines in
+-- "Lara.Strict.Deps".'encodeCertDeps' canonical order, each indented by two
+-- spaces.
+--
+-- __Arguments with no certificate dependencies are still listed__, with a
+-- header and no lines under it. A strict-mode argument that consulted nothing
+-- and an argument that is not in the report at all are different facts, and a
+-- reader auditing what evidence a verdict rests on needs to tell them apart.
+--
+-- The dependency lines themselves are the cross-language golden encoding
+-- unchanged — the same bytes @scripts\/check-backend-deps-golden.sh@ diffs
+-- against the Lean witness. Only the argument headers are added here, and they
+-- are outside that contract: the golden pins the /encoding of a dependency/,
+-- not the framing of a report.
+renderCertDeps :: [(ArgId, [CertDep])] -> String
+renderCertDeps report =
+  concat
+    [ "argument " ++ i ++ "\n" ++ indent (encodeCertDeps deps)
+    | (ArgId i, deps) <- report
+    ]
+  where
+    indent = unlines . map ("  " ++) . lines

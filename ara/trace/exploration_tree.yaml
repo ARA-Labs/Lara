@@ -8120,6 +8120,94 @@ tree:
 
 - id: N315
   type: decision
+  title: "Surface certDeps through a separate `lara deps` subcommand, reusing the mirror rather than fusing a collector into inferSupport (#204)"
+  provenance: user
+  timestamp: "2026-09-06T16:10"
+  choice: >
+    Issue #204 phrased the work as "carry dependency reports through the
+    checker's own traversal (or an enriched variant the existing API
+    projects)". Two sub-decisions departed from that first phrasing, both
+    deliberately.
+
+    (1) WHERE THE COLLECTOR LIVES. The driver calls the existing
+    `Lara.Strict.Deps.certDeps` over the accepted, checked unit
+    (`Lara.Driver.unitCertDeps`) instead of fusing collection into
+    `inferSupport`'s traversal. `certDeps` is the Haskell mirror of Lean's
+    `certDeps` and is pinned against the Lean witness byte-for-byte by
+    `scripts/check-backend-deps-golden.sh`; a fused collector would be a
+    second implementation of the same accounting, owing its own agreement
+    argument. Reusing the mirror makes the shipped text the artifact the
+    golden already pins. The cost is one extra certificate replay per accepted
+    node, on demand only — the oracle is a pure function, so the second
+    application cannot disagree with the first (the same argument
+    `assuranceError` already relies on).
+
+    (2) WHERE THE REPORT COMES OUT. Not in the verdict. `lara check`'s stdout
+    is the N11 differential anchor against `lean/Lara/Driver.lean` and is
+    pinned by the corpus goldens; widening it would move both and would oblige
+    the Lean driver to render a report it has no encoder for. The report rides
+    on its own `lara deps` subcommand instead, so no anchor, golden, or
+    freeze tag moves.
+
+    Two further design points followed. The report is carried as a fifth,
+    lazily built component of `runCheckReported`, so it comes out of the same
+    single pass as the verdict (it cannot describe a unit the driver did not
+    accept) and costs nothing for callers that do not demand it. And it is
+    taken over the *checked* (§4.3-pruned) unit and only on acceptance: the
+    accounting ranges over checked terms, so a rejected term's partial report
+    would read as an audit of evidence the verdict does not rest on. Design
+    note D9 is untouched — the acceptance projection stays a `Bool`.
+  alternatives:
+    - "Fuse collection into `inferSupport` (the issue's first phrasing): one traversal, no second replay, but a second implementation of the accounting to keep in agreement with Lean, and it forces `CertDep` up into `Lara.SupportTerm` or splits resolution across modules."
+    - "Widen the wire verdict with the report: one command, but moves the N11 differential anchor and the corpus goldens, and requires a Lean-side encoder that does not exist."
+    - "Emit the report on stderr behind a `lara check --deps` flag: leaves stdout alone, but overloads the diagnostic channel and makes the report awkward to consume."
+    - "Wire only the raw `.sexp` door and leave `.lara` unserved: smaller diff, but the two doors would disagree on what an accepted artifact reports."
+  evidence:
+    - "src/Lara/Driver/Internal.hs"
+    - "src/Lara/Strict/Deps.hs"
+    - "app/Main.hs"
+    - "docs/spec.md"
+  status: resolved
+  also_depends_on: [N247]
+
+- id: N316
+  type: experiment
+  title: "Verify that the report reaches a consumer and that no frozen output moved (#204)"
+  provenance: ai-executed
+  timestamp: "2026-09-06T16:40"
+  result: >
+    The observable exists and is specific. Over `examples/`, `lara deps`
+    reports on all sixteen accepted artifacts and exits 1 on the four R-series
+    rejections; S1-S8 carry 1-4 dependency lines each and A/B/E1-E5/agreement-map
+    carry none (no strict certificates). S5's two `ord@1` comparison arguments
+    each report `premise 0` and `premise 1` resolved to the two compared cells
+    in full ground form — the evidence audit, not a restatement of slot
+    indices. Both doors agree: `deps examples/S8/example.lara` and
+    `deps examples/S8/example.core.sexp` produce identical bytes.
+
+    Nothing frozen moved. `scripts/differential.sh` pass=620 fail=0 and
+    negative pass=56 fail=0, so `lara check` stdout is byte-identical to the
+    Lean driver on every anchor. `scripts/check-backend-deps-golden.sh` PASS
+    after the golden encoder moved from `test/StrictSpec.hs` into the library,
+    so the shipped report text is the same artifact the cross-language golden
+    pins. Also green: `cabal build all` clean, `cabal test lara-test` PASS
+    with five new `cli deps` cases, `scripts/admission-differential.sh`
+    pass=20 fail=0 expected=20, `test/walking-skeleton-golden.sh` PASS.
+
+    Lean was rebuilt and audited although untouched (`lake build` 148 jobs;
+    "Axiom audit passed."), confirming the change added no mechanization debt:
+    it surfaces an existing mechanized definition rather than introducing a
+    new one, and the unit-level lift is a `map` over `unitArgs`.
+  evidence:
+    - "test/CliSpec.hs"
+    - "scripts/differential.sh"
+    - "scripts/check-backend-deps-golden.sh"
+    - "https://github.com/ARA-Labs/lara/issues/204"
+  status: resolved
+  also_depends_on: [N315]
+
+- id: N317
+  type: decision
   title: "Close #248 as moot: both PW-T8 cleanups already landed in the #247 re-land"
   provenance: ai-suggested
   timestamp: "2026-09-06T18:05"
