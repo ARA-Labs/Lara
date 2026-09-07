@@ -43,13 +43,13 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 4 | Reference scheme vocabulary (9 families) | §4.5 | **Frozen** | none (C13); spellings revisitable until `empirical-v1` ships | schema instances, no new theorem |
 | 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12; duplicate rule IDs and R12 run before program checking | §9 r7/C09 ✅ for the Lean reference PL (`Lara.Policy`, `Lara.Check.Unit`, `Lara.Consistency`; #18 implementation) |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
-| 7 | Shipped adapter portfolio (arithmetic-recheck, code-inspection; LP non-shipping) | §5.2 | **Frozen** | none (C14); per-adapter soundness is M2/M3 | §9 r10 per shipped adapter — **pending** |
+| 7 | Shipped adapter portfolio (`ra@1` + `ord@1`; code-inspection designed-unshipped; LP non-shipping) — **amended 2026-09-07 (#256)** | §5.2 | **Frozen** | C14; `ord@1` added under PR #83; code-inspection build deferred to #260 | §9 r10 per shipped adapter — ND ✅ (`lean/Lara/{Strict,ND}.lean`); `ra@1`/`ord@1` ✅ (`lean/Lara/{RA,Ord}.lean`); unshipped code-inspection carries no r10 obligation |
 | 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.inferSupport`), and the `certDeps` layer over `Backend.uses` landed (#46) | §9 r1 support/program checker ✅; r3 both halves ✅; r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
 | 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅ (#17); r7 attack completeness ✅ (#18); r9 pending |
 | 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅ (#17 closed); r7/C09 computed-complete-claim consistency ✅ for the Lean reference PL (#18 implementation) |
-| 13 | Abstract syntax + JSON wire schema, **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 (with M3 codec) |
+| 13 | Abstract syntax + wire schema (S-expression codec `Lara.Wire`; JSON producer surface is #30 — **amended 2026-09-07 (#256)**), **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 — presentation half ✅ (`parse ∘ print` at `lara-syntax@0.10`, spec §2.1); wire-decode boundary ✅ (`WireSpec` malformed-input matrix) |
 | 14 | Specified rejection behavior (located, per rejection class) | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
 
 ## M0 conditions the freeze must absorb
@@ -119,9 +119,14 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    ids or certificate-erased skeleton. Payload-different programs therefore lack the node bijection
    needed to state the promised AF isomorphism faithfully. Add argument identity plus `eraseCert`
    at the compile boundary, then prove checking transport, graph isomorphism, and status equality.
-5. **Shipped-adapter obligations (r10)**: arithmetic-recheck and code-inspection adapters
-   discharge the same soundness/dependency obligations as ND (with their M3 implementations).
-6. **r12 codec round-trip**: once `Lara.Json`/`Lara.Syntax` exist (M3 boundary layer).
+5. **Shipped-adapter obligations (r10) — done for the shipped set**: `ra@1` and `ord@1`
+   discharge the same soundness/dependency obligations as ND (`lean/Lara/RA.lean`,
+   `lean/Lara/Ord.lean`). The code-inspection adapter is designed-but-unshipped (amendment #256)
+   and carries no r10 obligation until shipped; its build is tracked in issue #260.
+6. **r12 codec round-trip — resolved**: the presentation half (`parse ∘ print`,
+   `lean/Lara/Presentation.lean` at `lara-syntax@0.10`) and the wire-decode boundary (`WireSpec`)
+   landed with `Lara.Syntax`/`Lara.Wire`; there is no JSON codec in the TCB — `Lara.Json` is the
+   #30 LLM-producer surface.
 
 Issue #18 does **not** claim Path A, a production Haskell checker,
 NL-to-structure validation, full `holes(P,p)`, or `incompleteAlternative`
@@ -199,3 +204,19 @@ pattern equality did not align with instance-level `ContraryMatch`; `wf(Pi)` now
 conservative pattern-overlap check with a proved ground-instance soundness bridge. The exact model
 blockers for the remaining r7 theorem and r9 are recorded above rather than deferred on queue order
 alone._
+
+### Amendment (2026-09-07, issue #256): shipped-adapter portfolio and wire wording
+
+Rows 7 and 13 and M2 backlog items 5–6 above are amended to match the Haskell tree:
+
+- **Shipped portfolio.** v0.1 ships `ra@1` (rational-arithmetic/table-recheck) and `ord@1`
+  (ordered comparison, PR #83) beside the §5.1 reference backend `nd@1`. The static code-inspection
+  checker remains portfolio-designed — the C14 study counted a few code inspectors — but is
+  **unshipped**; its build is tracked in issue #260, and until shipped it carries no §9 r10
+  obligation. Row 7's r10 debt is discharged for the shipped set (`lean/Lara/{RA,Ord}.lean`).
+- **Wire wording.** The M1-era spec named JSON as the wire encoding; the implementation
+  deliberately ships a single S-expression codec (`Lara.Wire`, the N11 differential anchor).
+  Spec §1/§1.1/§2.1/§3.2/§4.1/§9 r12/§10.1 R14 and `docs/rejection-surface.md` now name that
+  codec; `Lara.Json` is tracked as the future LLM-producer surface (issue #30). No corpus
+  regeneration or freeze-tag bump is owed: the amendment is prose-only and no byte reaches the
+  corpus, the wire, or replay identity.

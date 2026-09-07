@@ -178,9 +178,10 @@ ground-instance level. It lands with `Lara.Policy` (layer 3), not later.
 These plug the untrusted producer into the checker and must **not** drive the trusted design, so
 they come after layers 1–8:
 
-- `Lara.Json` — producer/checker wire codec (spec §1); can track `SupportTerm` early.
+- `Lara.Json` — untrusted LLM-producer surface over the Unit IR (issue #30); the checker-input wire
+  codec is `Lara.Wire`'s S-expressions (spec §1), and JSON is not a TCB codec.
 - `Lara.Syntax` — presentation parser + canonical printer; codec round-trip to α-equivalent AST
-  (spec §9 result 10).
+  (spec §9 result 12).
 - **Untrusted Python/LLM elaborator** (Phase E) — explicitly last. It performs the six logged
   lowering tasks (spec §11) and may never define policy rules or logical schemas at runtime.
 

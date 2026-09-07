@@ -35,6 +35,17 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > changing `lara-core@0.2`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
 > semantics. Byte-level `lara-evidence@0.1` verification remains gated under issue #78.
 
+> **Portfolio and wire amendment (2026-09-07, issue #256).** Two stale claims are corrected. (1) The
+> §5.2 shipped-adapter clause of the M0-frozen blockquote above is amended: v0.1 ships `ra@1`
+> (rational-arithmetic/table-recheck) and `ord@1` (ordered comparison, PR #83) as the optional
+> adapters beside the §5.1 reference backend `nd@1`; the static code-inspection checker stays in the
+> portfolio as designed-but-unshipped (issue #260). LP remains non-shipping. (2) The wire encoding is
+> the S-expression codec of `Lara.Wire` (§1.1 TCB row 1, §10.1 R14) — there is deliberately no JSON
+> checker-input codec in the TCB; `Lara.Json` is the future untrusted LLM-producer surface (issue
+> #30). See §5.2 and `m1-freeze-checklist.md` for the row updates. No corpus regeneration or
+> freeze-tag bump is owed: prose-only, with no byte change to the corpus, the wire, or replay
+> identity.
+
 ## 1. Scope and guarantee
 
 LARA is a small language of proof-carrying, policy-relative claim support. A program declares:
@@ -58,8 +69,11 @@ search exhaustively for every possible argument. Acceptance means:
 "Complete" means complete relative to the selected claim-support policy: all premises and critical
 questions required by an instantiated scheme are discharged or reported as holes.
 
-JSON is the producer/checker wire encoding. The syntax below is the canonical presentation syntax
-for the paper, examples, debugging, and reports. Both map to one abstract syntax. LARA does not need
+The producer/checker wire encoding is the canonical S-expression codec of `Lara.Wire` (§1.1 TCB
+row 1, §10.1 R14) — there is deliberately no JSON checker-input codec in the TCB. The syntax below
+is the canonical presentation syntax for the paper, examples, debugging, and reports. Both map to
+one abstract syntax. A JSON surface (`Lara.Json`) is planned only as an untrusted LLM-producer front
+end (issue #30), never as a trusted codec. LARA does not need
 a tactic DSL, IDE, package manager, or standard library for the initial contribution.
 
 ### 1.1 Trusted computing base and mechanization host
@@ -73,12 +87,12 @@ trusted code before it is believed. The M1 freeze fixes this boundary (open ques
 
 | # | Component | Module (M3 target) | Discharges |
 | --- | --- | --- | --- |
-| 1 | Decode boundary: presentation parser + JSON decoder into the abstract syntax | `Lara.Syntax`, `Lara.Json` | §9 result 12 (codec round-trip) |
+| 1 | Decode boundary: presentation parser + wire decoder into the abstract syntax | `Lara.Syntax`, `Lara.Wire` | §9 result 12 (codec round-trip) |
 | 2 | Proposition normalizer `nf` and identity `≡` | `Lara.Prop` | §9 result 11 (frozen carve-out 1) |
 | 3 | Static checker: leaf admission, policy instantiation, critical-question discharge, support-term typing | `Lara.Policy`, `Lara.SupportTerm` | §9 results 1, 3 |
 | 4 | §8.1 policy well-formedness validator (strict-reachable `contrary` check) | `Lara.Policy` | §8.1 restriction; §9 result 7 |
 | 5 | Typed-attack checker (positional rebut / undercut / undermine) | `Lara.Attack` | §9 results 1, 4 |
-| 6 | Strict-backend registry `R` and each shipped adapter | `Lara.Strict`, `Lara.Strict.ND`, arithmetic-recheck, code-inspection | §9 results 2, 8, 10 (frozen carve-out 2 for the seam + ND) |
+| 6 | Strict-backend registry `R` and each shipped adapter | `Lara.Strict`, `Lara.Strict.{ND,RA,Ord}` | §9 results 2, 8, 10 (frozen carve-out 2 for the seam + ND; `ra@1`/`ord@1` discharge r10 in `lean/Lara/{RA,Ord}.lean`) |
 | 7 | Compiler `compile(P) = AF` with subargument closure | `Lara.Compile` | §9 result 4 |
 | 8 | Status engine: grounded labelling + four-state aggregation | `Lara.Grounded` | §9 results 5, 6, 7 |
 | 9 | Diagnostics / located rejection | `Lara.Diagnostics` | §1; §10 |
@@ -140,7 +154,8 @@ and policy-allowlisted theory digests are part of replay identity.
 ### 2.1 Versioning and replay identity (v0.1-frozen)
 
 The language surface is itself versioned: **`lara-core@0.2`** names the abstract syntax, the
-static judgments (§6.1, §7.1, §8, §8.1), and the JSON wire schema, as frozen by M1. The
+static judgments (§6.1, §7.1, §8, §8.1), and the wire schema — the S-expression codec of
+`Lara.Wire` (§1) — as frozen by M1. The
 presentation syntax is versioned separately (**`lara-syntax@0.10`**) because it may evolve against
 a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
 Presentation syntax versions live in `docs/lara-surface-grammar.md`; this specification pins the
@@ -248,7 +263,7 @@ grow.
 ### 3.2 Proposition normalization and the identity relation `≡`
 
 `≡` is the trusted-base equality on propositions, so its definition is deliberately minimal. It
-operates on **abstract syntax**, not surface text: the presentation and JSON front ends both decode
+operates on **abstract syntax**, not surface text: the presentation and wire front ends both decode
 to one AST (Section 1), so whitespace, field order, and encoding differences are gone before `≡` is
 applied. Propositions are **ground first-order atoms** (Section 3) — there are no bound variables at
 the proposition level (rule parameters are ground-substituted away in an instance, Section 4.1), so
@@ -397,7 +412,7 @@ and declared exceptions is among its parameters `X1, ..., Xm`, and every symbol 
 `Sigma` arity. Patterns may be non-linear.
 
 A substitution `theta` maps each parameter of the instantiated rule to a ground term; instances
-are always ground. There is no unification in the trusted checker: the abstract syntax and JSON
+are always ground. There is no unification in the trusted checker: the abstract syntax and the wire format
 carry `theta` explicitly, and instance checking is substitution application plus syntactic
 identity — premise `i` checks iff `concl(w_i) = P_i theta`, and the instance concludes
 `C theta`.
@@ -741,7 +756,11 @@ The corpus study (M0, C14, `m0/annotation-summary.md`) measured which strict ste
 actually demand: of 60 sampled claims, 35 identified a domain-checker call, 21 none, 3 LP, 1
 reference-nd. The 35 domain-checker calls are **overwhelmingly arithmetic re-checks of reported
 tables** — deltas, ratios, aggregations, inequalities — plus a few code inspectors. The v0.1 optional
-adapter portfolio is therefore sized to that demand and leads with two checkers:
+adapter portfolio is therefore sized to that demand. It ships the rational-arithmetic half — the
+table-recheck checker and, added beside it under PR #83, the ordered-comparison checker `ord@1`
+whose beats-claim shape is the most common in the ML-methodology literature — while the static
+code-inspection checker the study also counted stays portfolio-designed but unshipped (amended
+2026-09-07, issue #256; header note):
 
 1. a **rational-arithmetic / table-recheck checker** — certifies that a reported cell stands in a
    declared arithmetic relation to other cells (delta, ratio, aggregation, inequality). This
@@ -754,8 +773,19 @@ adapter portfolio is therefore sized to that demand and leads with two checkers:
    declared theory dependency, since source propositions are ground atoms. The corpus brackets the
    reference backend from both sides: below it, arithmetic re-checks; above it, derivations beyond
    its strength correctly left attested (stochastic-interpolants' measure-theoretic step).
-2. a **static code-inspection checker** — certifies structural facts about referenced source
-   (plan-vs-shipped diffs, negative existentials over code).
+   Shipped as **`ra@1`** (`Lara.Strict.RA`; §9 result 10 discharged in `lean/Lara/RA.lean`).
+2. an **ordered-comparison checker** — certifies `num_lt(A, B)` / `num_le(A, B)` between two
+   numeric literals by exact rational arithmetic. Its slots are premise-only: each cited numeral
+   must trace to a consulted premise slot, so a certificate can never cite a self-supplied theory
+   entry as measured evidence (`docs/ord1-corpus-extension-decision.md`). Shipped as **`ord@1`**
+   (PR #83; `Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
+   exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S4 carry
+   the demonstration.
+3. a **static code-inspection checker** — certifies structural facts about referenced source
+   (plan-vs-shipped diffs, negative existentials over code). The corpus study reserved a place for
+   it ("a few code inspectors"), but it is **designed and unshipped** at v0.1: building it is
+   tracked in issue #260, and while it stays unshipped it carries no §9 result-10 obligation (r10
+   binds shipped adapters only).
 
 **LP answers no observed corpus demand** (3 calls, all speculative) and is not part of the shipping
 portfolio. It may still be *registered* as an optional backend — its `t:F`, application, sum, positive
@@ -1394,7 +1424,7 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    with `c.formal`. *(Identity level mechanized in `lean/Lara/Prop.lean`; relational layer in
    `lean/Lara/Support.lean` `Supports`/`supports_resp_equiv`; executable
    support inference and adequacy are in `lean/Lara/Check/`.)*
-12. Presentation/JSON codec round-trip to alpha-equivalent abstract syntax.
+12. Presentation and wire codec round-trip to alpha-equivalent abstract syntax.
 
 Core results 1-9 and the reference-adapter result 10 should be mechanized in a proof assistant.
 Additional adapter soundness may be imported from a separately verified checker only with an
@@ -1489,7 +1519,7 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |
 | **R12** policy-wf | a rule pattern variable occurs outside the rule's declared parameters (§4.1); or a `contrary` side may overlap a strict-reachable pattern at the instance level (Path B validator) | the policy, naming the scope violation or rule + pair | §4.1, §8.1 |
 | **R13** backend | certificate replay rejects; unknown backend or version; theory digest not allowlisted | the certified instance | §5 |
-| **R14** codec | wire program fails to decode to the abstract syntax: malformed JSON, unknown fields per `lara-core@0.2`, presentation parse error | the wire location | §1, §2.1 |
+| **R14** codec | wire program fails to decode to the abstract syntax: malformed S-expression, unknown fields per `lara-core@0.2`, presentation parse error | the wire location | §1, §2.1 |
 
 Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
 the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack
