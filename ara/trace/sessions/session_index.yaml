@@ -570,3 +570,10 @@ sessions:
   events_count: 15
   claims_touched: [C35, C36, C42]
   open_threads: 5
+- id: 2026-09-07_001
+  date: '2026-09-07'
+  summary: 'Issue #227 closed (PR #257): SurfaceTransport witnesses surface_directAF_relabel unconditionally with 34 trio-clean theorems and no native_decide, the escape being a kernel-form certificate payload that never reaches NDNamed.lowerFormula. Review then caught the module sitting outside the lake build closure — AxCheck.lean is not a lake target — so the PR''s green gates had run against a hand-built olean; ae5b408 adds the import and re-runs all four from a wiped .lake (149 jobs, coverage 2375, audit green). N300''s "milestone-sized" sizing refuted; O120 crystallized into constraints.md. Follow-ups #258 (edge-free witness) and #259 (CI closure check, second #242 recurrence).'
+  turn_count: 1
+  events_count: 7
+  claims_touched: []
+  open_threads: 5

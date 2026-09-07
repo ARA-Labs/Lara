@@ -1308,7 +1308,14 @@ audited through the gated theorems that mention them.
   exercise the theorems are the certificate-bearing ones
   (`cert_congruence_witness`, `cert_registry_swap_witness`), where
   `cert_relabel_moves` proves the relabel is not the identity.
-- `surface_directAF_relabel` has **no worked pair instance**: every accepted
-  surface fixture in the development is proved by `native_decide`, which M4's
-  axiom discipline bans. The corollary is proved and audited; only a concrete
-  instance is missing.
+- `surface_directAF_relabel` is witnessed by
+  `Lara.Examples.SurfaceTransport.surfaceTransport_directAF_eq`
+  (`lean/Lara/Examples/SurfaceTransport.lean`, issue #227). The fixture avoids
+  `native_decide` by authoring its `nd@1` certificate in kernel form — so
+  `lowerNamed` short-circuits past the well-founded payload pass — and by
+  hand-building `Checks` and `CoreObligations` from their relational
+  constructors. Non-vacuity is guarded by `surfaceTransport_relabel_moves`
+  (`output₂.unit.args ≠ output₁.unit.args`) and `surfaceTransport_inputs_differ`
+  (`input₂ ≠ input₁`), without which `f = id` would satisfy every hypothesis.
+- `surface_directAF_link`, the stronger sibling, still has **no worked
+  instance** — issue #255.

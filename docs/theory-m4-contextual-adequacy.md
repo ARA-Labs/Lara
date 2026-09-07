@@ -119,7 +119,7 @@ notion of backend replacement than result 9's model. Recording this is part of
 the result: the theorem is as strong as the acceptance relation it is given,
 and no stronger.
 
-## 4. The surface corollary, and the one thing it lacks
+## 4. The surface corollary, and its worked pair
 
 D1 put contexts at the core `Lara.Unit` level and promised a surface
 *corollary*. `lean/Lara/Context/Surface.lean` delivers it:
@@ -130,15 +130,75 @@ instance where the two units are the two sides of a link. Everything the
 surface layer reports off that framework agrees, for every carrier-local
 extension semantics (`Lara.Surface.observe_coherent`).
 
-**What is missing is a worked surface *pair*, and the reason is recorded rather
-than papered over.** Every accepted surface fixture in `lean/Lara/Examples/Surface.lean`
-is proved by `native_decide`, which M4's axiom discipline (D9) bans: a witness
-built on one would import `Lean.ofReduceBool` into the audit and fail
-`scripts/check-axioms.sh`. Building a `native_decide`-free accepted surface
-fixture is a separate piece of work — the surface checker's evaluation does not
-fit kernel `decide` — and it is filed as issue **#227** rather than attempted
-here. The corollary itself is sorry-free and inside the standard trio; what is
-unavailable is a concrete instance of it.
+**The worked pair is `Lara.Examples.SurfaceTransport.surfaceTransport_directAF_eq`**
+(`lean/Lara/Examples/SurfaceTransport.lean`, issue #227). Two accepted surface
+programs, differing only in one `nd@1` certificate related by
+`Examples.Linking.certSwap`, present the same framework — and the statement is
+unconditional, because the two accepted units are produced by
+`CoreObligations.checkUnit_complete` rather than assumed.
+
+Two guards keep it from being a tautology, since `f = id` would otherwise
+satisfy every hypothesis:
+
+| Guard | Statement |
+|---|---|
+| `surfaceTransport_relabel_moves` | `output₂.unit.args ≠ output₁.unit.args` |
+| `surfaceTransport_inputs_differ` | `input₂ ≠ input₁` |
+
+Getting there required not using the obvious route. Every accepted surface
+fixture in `lean/Lara/Examples/Surface.lean` is proved by `native_decide`, which
+M4's axiom discipline (D9) bans: a witness built on one would import
+`Lean.ofReduceBool` into the audit and fail `scripts/check-axioms.sh`.
+
+The obstruction is much narrower than "the surface checker's evaluation does not
+fit kernel `decide`", and locating it precisely matters, because the narrow
+version is tractable where the broad one is not.
+
+The surface *predicates* decide fine, on the full fixture:
+`Examples/Surface.lean:283` proves `Supported allFormsInput` by plain `decide`,
+and `:295` decides `comparisonsWellFormedB allFormsProgram allFormsPolicy` —
+both over the whole all-forms program, both in the axiom ledger. The
+reconstruction pass is not the problem either: `reconstructExplicitTerm` and its
+mutual partners (`lean/Lara/Surface/Check.lean:296`) compile to `brecOn`
+structural recursion, not well-founded recursion, and the kernel unfolds them.
+
+Exactly one function on the path is kernel-opaque: `Lara.NDNamed.lowerFormula`
+(`lean/Lara/NDNamed.lean:179`) and its caller `lowerNamedExpr` (`:195`) are
+`termination_by sizeOf`, so Lean compiles them to `WellFounded.Nat.fix` and
+marks them `@[irreducible]`. No `rfl` or `decide` reduces them, not even on an
+`.atom` leaf. They are reached only through certificate-payload lowering —
+`lowerAssuranceCertificate` (`Surface/Check.lean:191`) dispatches `nd@1`
+payloads to `NDNamed.lowerNamed` — which is why `reconstructArgs` (`:905`) does
+not reduce, and why an accepted fixture *carrying a certificate* cannot be
+obtained by evaluation.
+
+That dictates the fixture's shape rather than closing it off, and the shape is
+what `SurfaceTransport` implements:
+
+- **The certificate is authored in kernel form.** `lowerNamed` scans for a named
+  marker and returns the payload unchanged when there is none, so a payload
+  written as `NDNamed.encodeCert` never reaches the well-founded pass.
+  `NDNamed.lowerNamed_id_of_kernel` (`NDNamed.lean:323`) states exactly this,
+  and its `hNat` hypothesis is literally the `Env.startsIdent_nat_false` field.
+- **`Checks.program` is hand-built.** `ChecksProgram` (`:895`),
+  `ChecksDeclaration` (`:879`) and `ChecksArgument` (`:695`) are relational
+  inductives whose constructors — as `ChecksArgument`'s docstring states — never
+  mention `reconstructArgument`. The `.inferred` constructor also avoids
+  `ReconstructsExplicitTerm`, which is why the fixture's argument uses
+  `inferTheta`.
+- **`CoreObligations` is hand-built too** (`transport_coreObligations_kernel` /
+  `_wrapped`), and the `HasSupport` derivation inside its `supports` field
+  follows `Examples.Linking.certArg_checked` field for field. This is forced:
+  `certOkOf` on the `nd` core does not reduce in the kernel, so `checkUnit`
+  cannot be `decide`d on a certificate-bearing unit and
+  `CoreObligations.of_checkUnit_ok` is unusable.
+- **Registry acceptance is inherited, not replayed.** The lowered payload is
+  definitionally `Examples.slot1Cert`, so `registry_exact_digest_accepts`
+  applies to program 1; `certSwap_preserving` carries program 2.
+
+The corollary and its instance are both sorry-free and inside the standard trio.
+What remains uninstantiated is the stronger sibling `surface_directAF_link`,
+filed as issue **#255**.
 
 ## 5. The M3 debt: partially discharged
 

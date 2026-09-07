@@ -8206,6 +8206,86 @@ tree:
   status: resolved
   also_depends_on: [N315]
 
+- id: N318
+  type: decision
+  title: "#227 closed: the M4 surface corollary gets a witness, and the sizing that deferred it was wrong"
+  provenance: ai-executed
+  timestamp: "2026-09-07T10:30"
+  choice: >
+    Built Lara/Examples/SurfaceTransport.lean: two accepted surface programs
+    differing in one nd@1 certificate related by Examples.Linking.certSwap,
+    instantiating Lara.Context.surface_directAF_relabel unconditionally as
+    surfaceTransport_directAF_eq. 34 theorems, all inside the standard trio.
+    This node supersedes the sizing recorded in N300's third alternative,
+    which is now refuted rather than merely stale: that entry said a witness
+    was "milestone-sized, not a debt" because "surfaceEnv runs
+    parseSurfaceProp, canonNum, and the ND registry, none of which reduce
+    under kernel decide". The purpose-built-environment half of that
+    prediction was correct and is exactly what the fixture does. The blocker
+    half was wrong. The single kernel-opaque function is
+    NDNamed.lowerFormula / lowerNamedExpr (WellFounded.Nat.fix, @[irreducible],
+    reachable only through certificate-payload lowering); reconstructExplicitTerm
+    compiles to brecOn and the kernel unfolds it. A payload authored in kernel
+    form never reaches the well-founded pass, so lowerNamed_id_of_kernel
+    discharges the one obligation on the opaque path. The module builds in
+    485 ms, not a milestone. N281's dead_end and O120 both predate this and
+    are left as written; this node is where the correction lives.
+  alternatives:
+    - "Reduce one of the existing native_decide surface fixtures instead of authoring a new pair — rejected, and this part of N281's lesson held: D9 bans Lean.ofReduceBool from the audit, so any witness resting on Examples/Surface.lean imports it."
+    - "Make reconstructExplicitTerm structurally recursive first (issue #254) — rejected as mistaken and #254 closed as not-planned: `#print` shows it already compiles to brecOn. The plan's premise was false."
+    - "Attack the well-founded lowering pass directly, e.g. by proving reduction lemmas for lowerFormula — rejected: authoring the payload in kernel form sidesteps the pass entirely at no proof cost, since lowerNamed_id_of_kernel's hNat hypothesis is literally the Env.startsIdent_nat_false field."
+  evidence:
+    - "lean/Lara/Examples/SurfaceTransport.lean: surfaceTransport_directAF_eq, surfaceTransport_relabel_moves, surfaceTransport_inputs_differ"
+    - "lean/Lara.lean: import Lara.Examples.SurfaceTransport"
+    - "ara/evidence/proofs/m4_contextual_adequacy.md: 'The surface corollary, witnessed (#227, 2026-09-07)'"
+    - "docs/theory-m4-contextual-adequacy.md"
+    - "https://github.com/ARA-Labs/lara/pull/257"
+  status: resolved
+  also_depends_on: [N281, N300]
+
+- id: N319
+  type: dead_end
+  title: "The first gate run was contaminated: the module was outside the lake build closure"
+  provenance: ai-executed
+  timestamp: "2026-09-07T11:00"
+  hypothesis: >
+    A module carrying #print axioms entries in AxCheck.lean is audited by the
+    pinned axiom gate, so a green gate means its theorems were elaborated and
+    checked.
+  failure_mode: >
+    Lara/Examples/SurfaceTransport.lean was imported by exactly one file,
+    AxCheck.lean, which is not a lake target. Lake's lean_lib default is
+    globs := roots.map Glob.one, so the build graph is import-driven, not
+    directory-driven, and the module sat outside the import closure of all
+    four defaultTargets. `lake build` reported success (148 jobs) without ever
+    compiling it. The gate table in PR #257 was nevertheless green because a
+    reviewer agent had hand-built the olean with
+    `lake build Lara.Examples.SurfaceTransport` minutes earlier, and the audit
+    then consumed that artifact. On a clean checkout the same commands give
+    "error: object file SurfaceTransport.olean does not exist" and
+    check-axioms.sh exits 1 rather than reporting over an incomplete set.
+    Two independent worktrees hit the identical contamination, which is why
+    the review's first pass rated it minor.
+  lesson: >
+    A build cache can make a verification pass for a reason the verification
+    does not state. Gate output is evidence about the artifacts that existed
+    when it ran, not about what a clean checkout would produce, so any gate
+    whose result depends on a build must be re-run from a wiped cache before
+    it is recorded as evidence. This is the second occurrence of the failure
+    mode #242 fixed for Lara.Examples.Complexity.Realization; both times
+    `lake build` stayed green. The existing stack does catch it — the coverage
+    script is a source-text scan that catches unpinned theorems, and
+    check-axioms.sh refuses to report over Lean errors — but detection lands
+    at the wrong gate with a message that names an olean rather than a missing
+    import. Issue #259 tracks a closure check at the gate whose job it is.
+  evidence:
+    - "lean/Lara.lean:347-351 (the new import and its comment)"
+    - "lean/Lara.lean:331-334 (the #242 precedent, same failure mode)"
+    - "scripts/check-axioms.sh:43"
+    - "https://github.com/ARA-Labs/lara/issues/259"
+  status: resolved
+  also_depends_on: [N318]
+
 - id: N317
   type: decision
   title: "Close #248 as moot: both PW-T8 cleanups already landed in the #247 re-land"
@@ -8234,3 +8314,55 @@ tree:
     - "https://github.com/ARA-Labs/lara/issues/248"
   status: resolved
   also_depends_on: [N313]
+
+- id: N320
+  type: experiment
+  title: "Four M4 gates re-run from a wiped .lake after the import fix"
+  provenance: ai-executed
+  timestamp: "2026-09-07T11:40"
+  result: >
+    `git clean -xdf lean/.lake` then the plan's four pinned gates at commit
+    ae5b408. lake build: 149 jobs EXIT 0, up from 148, the one new job being
+    "[136/149] Built Lara.Examples.SurfaceTransport (485ms)" — compiled by
+    lake itself, with no hand-building, which is the check N319 failed. Wall
+    clock 2m51s for the full tree; Examples/Surface.lean remains the long pole
+    at 74s. AxCheck coverage: passed, 2375 declarations. Both audit
+    self-tests: passed (14 check-axioms cases, 2 coverage cases). Pinned axiom
+    gate: "Axiom audit passed." with 34 SurfaceTransport rows, no
+    Lean.ofReduceBool and no sorryAx anywhere in the output. The 485 ms figure
+    confirms the 0.45 s module-build measurement taken before the fix against
+    the plan's 36 s budget.
+  evidence:
+    - "ara/evidence/proofs/m4_contextual_adequacy.md: 'Gates (2026-09-07, commit ae5b408)'"
+    - "https://github.com/ARA-Labs/lara/pull/257"
+  status: resolved
+  also_depends_on: [N318, N319]
+
+- id: N321
+  type: question
+  title: "The witnessed pair is edge-free, so the corollary's edge half is only degenerately exercised"
+  provenance: ai-suggested
+  timestamp: "2026-09-07T12:10"
+  description: >
+    surface_directAF_relabel (Context/Surface.lean:60) routes through
+    checkedAF_map (:32), whose node half is a length rewrite and whose edge
+    half is discharged by `coveredB_relabel hf P₁.atts source target` (:53,
+    Erase.lean:198). This fixture sets resolvedAttacks := [] and atts := [],
+    and transportPairs is a singleton, so both sides are literally the
+    one-node no-edge framework and coveredB [] _ _ reduces to false. The
+    equality therefore holds for any two attack-free single-argument
+    programs. Nothing is unsound and every hypothesis is genuinely
+    discharged — the relabel is real and pinned by surfaceTransport_relabel_moves
+    and surfaceTransport_inputs_differ. The module's defense that no attacks
+    "would not make the relabel any more genuine" is true of the relabel but
+    is not a claim about the AF equality, which is where the empty attack set
+    bites. Open until an attack-bearing witness exercises coveredB_relabel on
+    a non-empty list. Filed as #258, alongside #255 for surface_directAF_link.
+  evidence:
+    - "lean/Lara/Examples/SurfaceTransport.lean: transportElaborated, transportPairs"
+    - "lean/Lara/Context/Surface.lean:32,53,60"
+    - "lean/Lara/Erase.lean:198"
+    - "lean/Lara/Compile.lean:441"
+    - "https://github.com/ARA-Labs/lara/issues/258"
+  status: open
+  also_depends_on: [N318]

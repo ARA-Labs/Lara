@@ -843,7 +843,7 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [`Lara.Examples.PW.t7_witness`, `t7_src_justified`, `t7_tgt_defeated`, `t7_transport_wellFormed`, `t7_support_transported`, `t7_dia_defeated`, `t7_box_defeated`, `t7_dia_defeated_src`, `t7_box_defeated_src`; `evidence/proofs/pw0_outer_model.md`; PR #221, commits 817824f and 86c5163; axiom audit 1619 declarations PASS]
 - **Dependencies**: []
 - **Tags**: PW0, possible-world, status-preservation, support-transport, T7, T8-boundary, mechanized
-- **Last revised**: 2026-09-05 (2026-09-05_001#1)
+- **Last revised**: 2026-09-07 (2026-09-07_001#1)
 
 ## C48: Checked-support transport needs only environment-parameter correspondences, and it ties the outer model's applicability judgment to the checker
 - **Statement**: Exact transport of the checked-support judgment across a structural bridge is provable from correspondences on exactly the parameters the typing judgment reads — evidence typing under a leaf renaming, policy carrying the translated rule at the same identifier, and certificate acceptance surviving translation of the encoded step — over a shared source canonicalizer, with no condition on anything the judgment does not read. Under such a bridge the obligation list transports verbatim (question keys are rule-local vocabulary the claim translation never touches), so completeness transports unconditionally; and the transport supplies the outer possible-world model's applicability judgment with a checker tie: an admitted world pair carries every complete checked source argument into the target's own accepted program with the translated conclusion. Support transport remains strictly weaker than status preservation.

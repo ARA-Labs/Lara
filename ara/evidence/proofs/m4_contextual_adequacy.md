@@ -160,3 +160,109 @@ deletions are the private lemma copies in `Lara/Update.lean`,
 `Lara/Consistency.lean`, and `Lara/Context/Link.lean` and the `DecidableEq`
 block in `Lara/Context/Fragment.lean`. No Haskell, CLI, wire, or corpus
 surface is touched, and no freeze tag moves.
+
+## The surface corollary, witnessed (#227, 2026-09-07)
+
+`Lara.Context.surface_directAF_relabel` shipped with documented hypotheses and
+no instance, because every accepted surface fixture in
+`lean/Lara/Examples/Surface.lean` is proved by `native_decide` and D9 bans
+`Lean.ofReduceBool` from the audit. `lean/Lara/Examples/SurfaceTransport.lean`
+(PR #257) closes that gap with a purpose-built pair.
+
+The headline is `surfaceTransport_directAF_eq`: two accepted surface programs
+differing only in one `nd@1` certificate related by
+`Examples.Linking.certSwap` present the same framework. The statement is
+**unconditional** — the two accepted units come from
+`CoreObligations.checkUnit_complete`, not from hypotheses.
+
+Non-vacuity, in the same spirit as `cert_relabel_moves` above:
+
+- `surfaceTransport_relabel_moves` — the relabel is **not** the identity on the
+  elaborated unit (`output₂.unit.args ≠ output₁.unit.args`).
+- `surfaceTransport_inputs_differ` — the two surface programs are two programs,
+  not one cited twice.
+- `transport_relabel_moves_cert` / `transport_payloads_differ` — the
+  certificate and the payload each genuinely move.
+
+**Scope limit (issue #258).** The witnessed pair declares no attacks:
+`transportElaborated` sets `resolvedAttacks := []`, so `checkedAF_map`'s edge
+half — `coveredB_relabel` at `lean/Lara/Erase.lean:198`, called from
+`lean/Lara/Context/Surface.lean:53` — is exercised on an empty attack list.
+Nothing is unsound and every hypothesis is discharged, but the AF equality is
+witnessed only in its degenerate one-node no-edge case. An attack-bearing
+witness is #258; `surface_directAF_link`, the other half of the §4 gap, remains
+#255.
+
+### Gates (2026-09-07, commit `ae5b408`)
+
+Run from a **wiped** build cache (`git clean -xdf lean/.lake`). The first run
+of this table was contaminated: `SurfaceTransport` was outside the lake build
+closure and the olean the audit consumed had been hand-built rather than
+produced by `lake build`. `ae5b408` adds the missing `Lara.lean` import; the
+outputs below are from the clean re-run. Verbatim.
+
+```
+$ cd lean && lake build
+✔ [136/149] Built Lara.Examples.SurfaceTransport (485ms)
+Build completed successfully (149 jobs).
+
+$ cd lean && python3 ../scripts/check-axcheck-coverage.py AxCheck.lean $(find Lara -name '*.lean' | sort)
+AxCheck coverage passed (2375 declarations).
+
+$ cd lean && ../scripts/test-check-axioms.sh && python3 ../scripts/test_check_axcheck_coverage.py
+All check-axioms tests passed.
+Ran 2 tests in 0.044s
+OK
+
+$ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
+Axiom audit passed.
+```
+
+Job count 148 → 149: the one new job is the module itself, which `lake build`
+had never compiled before this commit.
+
+### Axiom footprint
+
+34 theorems, all inside the standard trio. No `Lean.ofReduceBool`, no
+`sorryAx`. Five depend on no axioms at all; ten on `propext` alone; the
+remaining nineteen on the full trio.
+
+```
+'Lara.Examples.SurfaceTransport.kernelRef_eq_slot1' does not depend on any axioms
+'Lara.Examples.SurfaceTransport.sxToSExpr_kernelPayload' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_lower_kernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.firstNamedMarker_wrappedPayload' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_lower_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_relabel_moves_cert' does not depend on any axioms
+'Lara.Examples.SurfaceTransport.transport_payloads_differ' does not depend on any axioms
+'Lara.Examples.SurfaceTransport.transport_certSwap_image' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.theoryDigestA_lowers' does not depend on any axioms
+'Lara.Examples.SurfaceTransport.transport_cert_accepted' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_cert_accepted_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_supported' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_supported_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_freshness' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_freshness_wrapped' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_checksArgument' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_checksProgram_kernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_checksProgram_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_expansions' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_gamma_leafP' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_ruleLookup' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_hasSupport' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_cert_accepted_wrapped_raw' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_args_kernel' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_args_wrapped' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.transport_coreObligations_kernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_coreObligations_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_checks_kernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_checks_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_checkUnit_kernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.transport_checkUnit_wrapped' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.surfaceTransport_directAF_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.SurfaceTransport.surfaceTransport_relabel_moves' depends on axioms: [propext]
+'Lara.Examples.SurfaceTransport.surfaceTransport_inputs_differ' does not depend on any axioms
+```
+
+Rows with a wrapped `[propext,` in the raw output are shown joined; the audit
+script normalizes multiline reports before extracting each list.

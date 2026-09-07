@@ -269,3 +269,36 @@ to the ACL/EMNLP follow-up with #52 and #30.
   this with `gapPath`, `mid_path_out_of_vocabulary`, and
   `mid_path_translationUndefined` in
   `lean/Lara/Examples/PWCompose.lean`.
+
+## M4 axiom-discipline witness constraint (2026-09-07 — grounds: O120, N281, N318, N320)
+
+- **An axiom discipline can put a milestone's own witnesses out of reach of its
+  existing fixtures.** D9 admits only `propext`, `Classical.choice`,
+  `Quot.sound`, while every accepted surface fixture in
+  `lean/Lara/Examples/Surface.lean` is proved by `native_decide`. A witness
+  built on one would import `Lean.ofReduceBool` into the audit and fail
+  `scripts/check-axioms.sh`. The cost of a discipline is paid where a new
+  result wants to reuse old evidence, not where the discipline is adopted, so
+  a corollary can be proved, audited, and still uninstantiable from the
+  development's own examples.
+- **The escape is a purpose-built pair, not a reduction of an existing one.**
+  `lean/Lara/Examples/SurfaceTransport.lean` supplies its own environment,
+  program, and certificate rather than shrinking `Examples/Surface.lean`, and
+  `surfaceTransport_directAF_eq` witnesses
+  `Lara.Context.surface_directAF_relabel` inside the trio.
+- **What made it cheap was narrowing the opaque surface, not avoiding the
+  kernel.** The one kernel-opaque function on the path is
+  `NDNamed.lowerFormula` / `lowerNamedExpr` (`WellFounded.Nat.fix`,
+  `@[irreducible]`), reached only through certificate-payload lowering. A
+  payload authored in kernel form never reaches it, and
+  `NDNamed.lowerNamed_id_of_kernel` discharges the obligation with a hypothesis
+  that is literally the `Env.startsIdent_nat_false` field. `reconstructExplicitTerm`
+  was never the obstacle — it compiles to `brecOn` and the kernel unfolds it.
+  The earlier sizing that deferred this as "milestone-sized" (N300) rested on
+  the wrong blocker; the module builds in 485 ms. See N318.
+- **A witness that discharges every hypothesis can still be degenerate.** The
+  current pair declares no attacks, so the edge half of `checkedAF_map`
+  (`coveredB_relabel`) is exercised on an empty list and the AF equality holds
+  for any two attack-free single-argument programs. Non-vacuity guards on the
+  relabel do not establish non-degeneracy of the framework equality. Tracked
+  as issue #258; `surface_directAF_link` remains #255.

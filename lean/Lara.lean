@@ -344,6 +344,11 @@ import Lara.Invariants.Merge
 import Lara.Context.Equivalence
 import Lara.Context.Surface
 import Lara.Examples.Linking
+-- The #227 surface-transport witness. Imported here for the same reason as
+-- Lara.Examples.Complexity.Realization above: AxCheck.lean is not a lake
+-- target, so a module reachable only from it is outside `lake build` and its
+-- theorems would never be elaborated on a clean checkout.
+import Lara.Examples.SurfaceTransport
 import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare

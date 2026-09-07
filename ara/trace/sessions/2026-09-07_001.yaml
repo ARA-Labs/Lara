@@ -1,0 +1,152 @@
+session:
+  id: "2026-09-07_001"
+  date: "2026-09-07"
+  started: "2026-09-07T10:30"
+  last_turn: "2026-09-07T12:30"
+  turn_count: 1
+  summary: >
+    Issue #227 closed by PR #257: Lara/Examples/SurfaceTransport.lean witnesses
+    Lara.Context.surface_directAF_relabel unconditionally
+    (surfaceTransport_directAF_eq) on two accepted surface programs differing in
+    one nd@1 certificate related by certSwap, with 34 theorems all inside the
+    standard trio and no native_decide. Code review then found the module was
+    outside the lake build closure — imported only by AxCheck.lean, which is not
+    a lake target — so `lake build` had never compiled it and the PR's green gate
+    table had been produced against a hand-built olean. Commit ae5b408 adds the
+    Lara.lean import and re-runs all four gates from a wiped .lake: 149 jobs (up
+    from 148), coverage 2375 declarations, both self-tests green, axiom audit
+    green with 34 SurfaceTransport rows. Three citation corrections landed with
+    it. Two follow-ups filed: #258 (the witnessed pair is edge-free, so
+    coveredB_relabel runs on an empty attack set) and #259 (a CI closure check;
+    this was the second occurrence of the #242 failure mode).
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N318"
+    routing: direct
+    provenance: ai-executed
+    summary: "#227 closed with a purpose-built pair; supersedes N300's 'milestone-sized' sizing, whose blocker half was wrong — the one kernel-opaque function is NDNamed.lowerFormula, not reconstructExplicitTerm."
+  - turn: 1
+    type: dead_end
+    id: "N319"
+    routing: direct
+    provenance: ai-executed
+    summary: "First gate run was contaminated: module outside the lake build closure, audit consumed a hand-built olean. Second occurrence of the #242 failure mode."
+  - turn: 1
+    type: experiment
+    id: "N320"
+    routing: direct
+    provenance: ai-executed
+    summary: "Four gates re-run from a wiped .lake at ae5b408: 149 jobs, module built by lake itself in 485ms, coverage 2375, audit passed, no ofReduceBool or sorryAx."
+  - turn: 1
+    type: question
+    id: "N321"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Witnessed pair is edge-free; checkedAF_map's edge half exercised on an empty attack list. Open, filed as #258."
+  - turn: 1
+    type: observation
+    id: "O147"
+    routing: staged
+    provenance: ai-executed
+    summary: "A build cache can make a verification pass for a reason the verification does not state; build-dependent gates must be re-run from a wiped cache before being recorded as evidence."
+  - turn: 1
+    type: observation
+    id: "O148"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Non-vacuity guards on an input relabel do not establish non-degeneracy of the conclusion being witnessed; separate properties need separate guards."
+  - turn: 1
+    type: observation
+    id: "O120"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Crystallized via artifact-commitment into constraints.md — the fixture that landed is what the axiom-discipline constraint forced."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Verified all six review findings against the tree before implementing any
+      of them (import closure, two citation line numbers, the CoreObligations
+      attribution, the theorem count, and the edge-free scope claim), then fixed
+      the four that were code/doc changes.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara.lean"
+      - "lean/Lara/Examples/SurfaceTransport.lean"
+      - "docs/theory-m4-contextual-adequacy.md"
+  - turn: 1
+    action: >
+      Wiped lean/.lake and re-ran the four pinned gates end to end; recorded
+      verbatim output and the 34-row axiom footprint in the evidence file.
+    provenance: ai-executed
+    files_changed:
+      - "ara/evidence/proofs/m4_contextual_adequacy.md"
+  - turn: 1
+    action: >
+      Filed issues #258 and #259 and referenced both from the PR body; corrected
+      the PR's theorem count (35 -> 34) and job count (148 -> 149).
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C47
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C47
+    field: Sources
+    before: "`directionality of the conflict search` ← `lean/Lara/Check/Program.lean:279` «      if Attack.contraryMatchB canon dp» [input]"
+    after: "`directionality of the conflict search` ← `lean/Lara/Check/Program.lean:306` «      if Attack.contraryMatchB canon dp» [input]"
+    signal: dependency-change
+    provenance: ai-suggested
+    note: >
+      Consistency pass only — the quotation was intact but the code had drifted
+      27 lines, so scripts/check_ara_source_spans.py failed on a stale span.
+      Pre-existing on this branch and unrelated to #227; found because this turn
+      ran the checker over the ara/ edits. Statement, Conditions, and Status
+      untouched; the cited line still reads verbatim as quoted.
+  - turn: 1
+    entry: "constraints.md:M4 axiom-discipline witness constraint"
+    field: "new section"
+    before: "(absent — O120 was staged and unpromoted since 2026-09-02)"
+    after: >
+      Four bullets: the discipline can strand a milestone's own witnesses; the
+      escape is a purpose-built pair; what made it cheap was narrowing the
+      opaque surface (NDNamed.lowerFormula, not reconstructExplicitTerm), which
+      refutes N300's sizing; and a witness discharging every hypothesis can
+      still be degenerate (#258).
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      PR #257 merged code that depends on exactly this constraint — the fixture
+      exists in the shape it does because native_decide is banned from the audit.
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Review finding [1], the only one rated non-negotiable: "Lake's lean_lib
+      default is globs := roots.map Glob.one — the build graph is import-driven,
+      not directory-driven." Both the reviewing session and this one had a
+      hand-built SurfaceTransport.olean on disk, which is why the first pass
+      rated the finding minor.
+  - turn: 1
+    excerpt: >
+      Review finding [6], accepted without pushback: the module's defense that
+      having no attacks "would not make the relabel any more genuine" is true of
+      the relabel, which the two guards do pin down, but is not a claim about
+      the AF equality being witnessed.
+
+open_threads:
+  - "#258 — an attack-bearing witness so coveredB_relabel is exercised on a non-empty attack set."
+  - "#259 — CI check that every Lara/**/*.lean is inside the lake build closure; third occurrence otherwise likely."
+  - "#255 — surface_directAF_link, the other half of the §4 gap, still uninstantiated."
+  - "PR #257 awaiting re-review; approval not yet given."
+  - "Cross-model pass on the Lean proofs never happened — codex exec was at its usage limit until Sep 8."
+
+ai_suggestions_pending:
+  - "O147 — the wiped-cache rule for build-dependent gates. Staged; would become a heuristic if a second instance shows the rule catching something."
+  - "O148 — guards on an input relabel vs non-degeneracy of the witnessed conclusion. Staged pending #258."

@@ -53,6 +53,7 @@ import Lara.Semantics
 import Lara.Observation
 import Lara.Semantics.Sublists
 import Lara.Examples.Semantics
+import Lara.Examples.SurfaceTransport
 import Lara.Update
 import Lara.Examples.Update
 import Lara.Invariants.Merge
@@ -3252,3 +3253,45 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.PW.Attack.collapsed_containsB_breaks
 #print axioms Lara.Examples.PW.Attack.ques_position_computes
 #print axioms Lara.Examples.PW.Attack.ques_position_law
+
+/-! ### The surface transport fixture (#227)
+
+The certificate-lowering foundation for a `native_decide`-free instance of
+`Lara.Context.surface_directAF_relabel`. These are the only obligations that sit
+on the kernel-opaque `NDNamed.lowerNamed` path, so they are the ones whose axiom
+footprint matters: if any of them silently acquired `Lean.ofReduceBool`, the
+fixture would be worthless. -/
+#print axioms Lara.Examples.SurfaceTransport.kernelRef_eq_slot1
+#print axioms Lara.Examples.SurfaceTransport.sxToSExpr_kernelPayload
+#print axioms Lara.Examples.SurfaceTransport.transport_lower_kernel
+#print axioms Lara.Examples.SurfaceTransport.firstNamedMarker_wrappedPayload
+#print axioms Lara.Examples.SurfaceTransport.transport_lower_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_relabel_moves_cert
+#print axioms Lara.Examples.SurfaceTransport.transport_payloads_differ
+#print axioms Lara.Examples.SurfaceTransport.transport_certSwap_image
+#print axioms Lara.Examples.SurfaceTransport.theoryDigestA_lowers
+#print axioms Lara.Examples.SurfaceTransport.transport_cert_accepted
+#print axioms Lara.Examples.SurfaceTransport.transport_cert_accepted_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_supported
+#print axioms Lara.Examples.SurfaceTransport.transport_supported_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_freshness
+#print axioms Lara.Examples.SurfaceTransport.transport_freshness_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_checksArgument
+#print axioms Lara.Examples.SurfaceTransport.transport_checksProgram_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_checksProgram_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_expansions
+#print axioms Lara.Examples.SurfaceTransport.transport_gamma_leafP
+#print axioms Lara.Examples.SurfaceTransport.transport_ruleLookup
+#print axioms Lara.Examples.SurfaceTransport.transport_hasSupport
+#print axioms Lara.Examples.SurfaceTransport.transport_cert_accepted_wrapped_raw
+#print axioms Lara.Examples.SurfaceTransport.transport_args_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_args_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_coreObligations_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_coreObligations_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_checks_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_checks_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_checkUnit_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_checkUnit_wrapped
+#print axioms Lara.Examples.SurfaceTransport.surfaceTransport_directAF_eq
+#print axioms Lara.Examples.SurfaceTransport.surfaceTransport_relabel_moves
+#print axioms Lara.Examples.SurfaceTransport.surfaceTransport_inputs_differ

@@ -2637,9 +2637,9 @@ observations:
     issue #227 tracks a purpose-built native_decide-free surface fixture.
   potential_type: constraint
   bound_to: [N281]
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M4 axiom-discipline witness constraint"
+  crystallized_via: artifact-commitment
   stale: false
 - id: O121
   timestamp: "2026-09-02T20:40"
@@ -3121,6 +3121,47 @@ observations:
     which triggered the git archaeology instead of the edit.
   potential_type: heuristic
   bound_to: [N317]
+
+- id: O147
+  timestamp: "2026-09-07T11:00"
+  provenance: ai-executed
+  content: >
+    A build cache can make a verification pass for a reason the verification does not state. The
+    #227 module sat outside the lake build closure, so `lake build` never compiled it, yet the
+    pinned axiom gate reported green because a hand-built olean from an earlier `lake build
+    Lara.Examples.SurfaceTransport` was still on disk for the audit to consume. Two independent
+    worktrees reproduced the identical contamination. Any gate whose result depends on a build is
+    evidence about the artifacts that existed when it ran, not about a clean checkout, so it must
+    be re-run from a wiped cache before being recorded as evidence.
+  context: >
+    Code review of PR #257 caught the missing Lara.lean import; re-running the four gates after
+    `git clean -xdf lean/.lake` moved the job count 148 -> 149 and built the module in 485 ms.
+    Second occurrence of the #242 failure mode; #259 tracks a closure check in CI.
+  potential_type: heuristic
+  bound_to: [N319, N320]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O148
+  timestamp: "2026-09-07T12:10"
+  provenance: ai-suggested
+  content: >
+    A witness can discharge every hypothesis of a theorem while exercising only the degenerate
+    case of the machinery the theorem is about. surfaceTransport_directAF_eq instantiates
+    surface_directAF_relabel unconditionally and its relabel is pinned non-identity by two
+    guards, but both frameworks are the one-node no-edge AF, so checkedAF_map's edge half
+    (coveredB_relabel) runs on an empty attack list and the equality would hold for any two
+    attack-free single-argument programs. Non-vacuity guards on the *input* relabel do not
+    establish non-degeneracy of the *conclusion* being witnessed; those are separate properties
+    and need separate guards.
+  context: >
+    Raised in review of PR #257 and filed as issue #258. The module's own defense — that having
+    no attacks "would not make the relabel any more genuine" — is true of the relabel and does
+    not address the AF equality.
+  potential_type: claim
+  bound_to: [N321]
   promoted: false
   promoted_to: null
   crystallized_via: null
