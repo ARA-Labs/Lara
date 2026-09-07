@@ -145,6 +145,39 @@ satisfy every hypothesis:
 | `surfaceTransport_relabel_moves` | `output₂.unit.args ≠ output₁.unit.args` |
 | `surfaceTransport_inputs_differ` | `input₂ ≠ input₁` |
 
+**The attack-bearing pair is
+`Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_eq`**
+(`lean/Lara/Examples/SurfaceTransportAttack.lean`, issue #258). The #227 pair
+above declares no attacks, so both sides of its equality are the one-node,
+no-edge framework and `checkedAF_map`'s edge half —
+`coveredB_relabel hf P₁.atts source target`, `Context/Surface.lean:53` — is
+exercised only on `[]`. The #258 fixture declares three arguments and one
+rebut, so that call runs on a one-element list and the four attack-side
+`CoreObligations` fields (`attacksTyped`, `sourcesDeclared`,
+`targetsDeclared`, `attackComplete`) are real obligations rather than vacuous
+ones.
+
+The attack could **not** be sourced at the certified argument, and the reason
+is a policy law rather than a proof-engineering limit: `Policy.WellFormed`
+(`lean/Lara/Policy.lean:524`) forbids any declared contrary either of whose
+sides overlaps a strict-reachable conclusion pattern, and `StrictReachable`
+(`:203`) is exactly "conclusion of a declared strict rule". The certified rule
+is strict with conclusion `q`, and `HasAttack.rebut` needs a `ContraryMatch`
+between the source's and the target's conclusions — so a certified argument
+can be neither endpoint of a rebut in a well-formed policy. The fixture
+therefore makes the certificate a *premise* of both endpoints: two plain
+defeasible rules `q ⊢ s` and `q ⊢ t` over the certified argument, with
+`contrary s t`. `mapAssurAtt certSwap` consequently moves the declared attack
+and not just the argument list.
+
+Three further guards keep this one honest:
+
+| Guard | Statement |
+|---|---|
+| `surfaceTransportAttack_atts_nonempty` | `output.unit.atts ≠ []`, both sides |
+| `surfaceTransportAttack_relabel_moves_atts` | `output₂.unit.atts ≠ output₁.unit.atts` |
+| `surfaceTransportAttack_directAF_edge` | `(directAF _).attack 1 2 = true`, both sides |
+
 Getting there required not using the obvious route. Every accepted surface
 fixture in `lean/Lara/Examples/Surface.lean` is proved by `native_decide`, which
 M4's axiom discipline (D9) bans: a witness built on one would import
@@ -230,9 +263,9 @@ argument list is empty, so this witness does not exercise a relabel that has to
 `Examples.Linking.cert_congruence_witness` is the core-level witness where the
 context carries material. And the fixture declares no attacks, so the attack
 half of `link_relabel_commutes` is discharged on empty lists and `crossAtts`
-saturates to nothing (`crossAtts_of_ctx_args_nil`). An attack-bearing surface
-fixture is issue **#258**, which covers the same gap for
-`surface_directAF_relabel`.
+saturates to nothing (`crossAtts_of_ctx_args_nil`). The attack-bearing surface
+fixture is `Lara/Examples/SurfaceTransportAttack.lean` (issue **#258**), which
+closes the same gap for `surface_directAF_relabel` above.
 
 ## 5. The M3 debt: partially discharged
 
@@ -426,4 +459,6 @@ private re-proofs in `Lara/Update.lean`, `Lara/Consistency.lean`, and
 and `Context.link_cache_bridge`), and **#229** (the composition boundary is
 witnessed, §2). **#222** was closed without change: the list helpers it named
 never landed in `Lara/Context/Compose.lean`. **#227** (a `native_decide`-free
-surface fixture, §4) remains open.
+surface fixture, §4) landed as `Lara/Examples/SurfaceTransport.lean`, and
+**#258** (the same witness with a non-empty attack set, §4) as
+`Lara/Examples/SurfaceTransportAttack.lean`.

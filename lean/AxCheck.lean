@@ -54,6 +54,7 @@ import Lara.Observation
 import Lara.Semantics.Sublists
 import Lara.Examples.Semantics
 import Lara.Examples.SurfaceTransport
+import Lara.Examples.SurfaceTransportAttack
 import Lara.Update
 import Lara.Examples.Update
 import Lara.Invariants.Merge
@@ -3310,3 +3311,50 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransport.surfaceTransport_link_relabel_moves_args
 #print axioms Lara.Examples.SurfaceTransport.surfaceTransport_link_relabel_moves
 #print axioms Lara.Examples.SurfaceTransport.surfaceTransport_link_imports_nonempty
+
+/-! ### #258: the attack-bearing surface transport witness -/
+
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_supported
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_supported_wrapped
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_freshness
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_freshness_wrapped
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksArgument_cert
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksCertificate_cert
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksArgument_s
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksArgument_t
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksProgram_kernel
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksProgram_wrapped
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checksAttacks
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_expansions
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_gamma_leafP
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_ruleLookup_cert
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_ruleLookup_s
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_ruleLookup_t
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_hasSupport_cert
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_hasSupport_plain
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_concl_of_inst
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_args
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_atts
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_contraries
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_strictConclusions
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_contraryMatch
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_s_ne_t
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_s_ne_q
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_concl_cert
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_concl_s
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_concl_t
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_cert_not_attackable
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_hasAttack
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_attackComplete
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_coreObligations_kernel
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_coreObligations_wrapped
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checks_kernel
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checks_wrapped
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checkUnit_kernel
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_checkUnit_wrapped
+#print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_eq
+#print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_atts_nonempty
+#print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_relabel_moves_atts
+#print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_edge
+#print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_relabel_moves
+#print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_inputs_differ

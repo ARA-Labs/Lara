@@ -1317,6 +1317,19 @@ audited through the gated theorems that mention them.
   constructors. Non-vacuity is guarded by `surfaceTransport_relabel_moves`
   (`output₂.unit.args ≠ output₁.unit.args`) and `surfaceTransport_inputs_differ`
   (`input₂ ≠ input₁`), without which `f = id` would satisfy every hypothesis.
+- That first witness declares **no attacks**, so `checkedAF_map`'s edge half
+  (`coveredB_relabel`) runs on `[]`. The attack-bearing witness is
+  `Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_eq`
+  (`lean/Lara/Examples/SurfaceTransportAttack.lean`, issue #258): three
+  arguments and one declared rebut, so `coveredB_relabel` is applied to a
+  one-element attack list. The certified argument is a *premise* of both attack
+  endpoints rather than an endpoint itself — `Policy.WellFormed` forbids any
+  contrary overlapping a strict-reachable conclusion, and the certified rule is
+  strict — so `mapAssurAtt certSwap` moves the attack too. Guards:
+  `surfaceTransportAttack_atts_nonempty`,
+  `surfaceTransportAttack_relabel_moves_atts` and
+  `surfaceTransportAttack_directAF_edge` (`directAF.attack 1 2 = true` on both
+  sides), which together rule out a silent regression to the degenerate case.
 - `surface_directAF_link`, the stronger sibling, is witnessed by
   `Lara.Examples.SurfaceTransport.surfaceTransport_link_directAF_eq`
   (`lean/Lara/Examples/SurfaceTransport.lean`, issue #255), on the same
@@ -1331,4 +1344,5 @@ audited through the gated theorems that mention them.
   leaf the context declares). Two degeneracies are deliberate and recorded in
   `docs/theory-m4-contextual-adequacy.md` §4: the context declares no arguments
   (so `FixesContext` is trivial) and the fixture declares no attacks (so the
-  edge half is empty — issue #258).
+  edge half is empty — the attack-bearing case is the sibling
+  `SurfaceTransportAttack` fixture, issue #258).

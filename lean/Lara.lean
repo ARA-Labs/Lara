@@ -349,6 +349,8 @@ import Lara.Examples.Linking
 -- target, so a module reachable only from it is outside `lake build` and its
 -- theorems would never be elaborated on a clean checkout.
 import Lara.Examples.SurfaceTransport
+-- The #258 attack-bearing surface-transport witness, for the same reason.
+import Lara.Examples.SurfaceTransportAttack
 import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare
