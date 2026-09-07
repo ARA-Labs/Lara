@@ -3,7 +3,7 @@ session:
   date: "2026-09-07"
   started: "2026-09-07T10:30"
   last_turn: "2026-09-07T17:10"
-  turn_count: 2
+  turn_count: 3
   summary: >
     Turn 1 — issue #227 closed by PR #257: Lara/Examples/SurfaceTransport.lean
     witnesses Lara.Context.surface_directAF_relabel unconditionally
@@ -36,6 +36,28 @@ session:
     is measured and filed as #266 rather than discovered downstream. differential
     620 → 625 with 0 fail; every other local gate green, and the ARA span checker
     went from 5 pre-existing failures to PASS.
+
+    Turn 3 — issue #216 closed by PR #271, lifting M4 Part A's contextual
+    observation from the grounded labelling to an arbitrary
+    Semantics.ExtensionSemantics. What is parameterized is the PROJECTION read
+    off the linked carrier, not the semantics: Lara.Context.obsGen takes an
+    arbitrary g : StructuredAF → Atom → α where obs has Invariants.status canon,
+    so obsGen_congr proves contextual representation independence once and
+    obsSem, CtxEquivSem and the four congruence theorems are instantiations of
+    it. The generic congruence needs NO AttackExtensional hypothesis — it
+    transports along the carrier equality compileUnit_link_relabel supplies,
+    not the pointwise attack agreement Observation.observe_congr needs — which
+    refutes the cost estimate in the issue; the grounded case is recovered by
+    theorem (obsSem_grounded, and ctxEquivSem_grounded_iff as an iff whose two
+    directions each have a consumer). Non-triviality had to be authored: every
+    pre-existing M4 carrier is now PROVED to have all five semantics agree, so a
+    three-cycle where stableSem reports noExtension against groundedSem's
+    contested, and a sink where preferredSem reports defeated against
+    groundedSem's contested, were built — each with a disequality conjunct so a
+    collapse is a build failure. Lean-only and purely additive: 154 jobs exit 0,
+    coverage 37 declarations, axiom audit trio-clean, no frozen module touched.
+    C49's "generic extension semantics" untested boundary discharged and C52
+    crystallized; follow-ups #268, #269, #270.
 
 events_logged:
   - turn: 1
@@ -394,3 +416,208 @@ ai_suggestions_pending:
   - "O148 — guards on an input relabel vs non-degeneracy of the witnessed conclusion. Staged pending #258."
   - "O149 — check which evidence surfaces are frozen inputs before building the evidence. Staged; one instance."
   - "C51 at testing — would reach supported on a third backend instance, or on the user affirming the criterion."
+
+# --- turn 3 (appended) ---
+
+turn_3:
+  events_logged:
+    - turn: 3
+      type: decision
+      id: "N327"
+      routing: direct
+      provenance: ai-executed
+      summary: "Parameterize the projection, not the semantics: Outcome α + obsGen, so the congruence is proved once and the four semantics-parametric results are instantiations. Rejects the plan's own first draft (a parallel SemObservation + four copied proofs)."
+    - turn: 3
+      type: experiment
+      id: "N328"
+      routing: direct
+      provenance: ai-executed
+      summary: "obsGen_congr takes exactly backend_replacement_congruence's hypotheses — no AttackExtensional — because compileUnit_link_relabel concludes a carrier *equality*. #216's cost estimate expected otherwise. Gates at 225cac8: 154 jobs, coverage 37, audit passed, zero sorryAx/ofReduceBool."
+    - turn: 3
+      type: decision
+      id: "N329"
+      routing: direct
+      provenance: ai-executed
+      summary: "Authored a three-cycle and a sink because every pre-existing M4 carrier agrees across all five semantics — now proved, not assumed (obsSem_linking_agrees, obsSem_sym_agrees)."
+    - turn: 3
+      type: question
+      id: "N330"
+      routing: direct
+      provenance: ai-suggested
+      summary: "The observation *functions* separate; the equivalence *relations* are untouched. CtxEquiv -> CtxEquivSem sem is neither proved nor refuted. Open, filed as #268."
+    - turn: 3
+      type: question
+      id: "N331"
+      routing: direct
+      provenance: ai-suggested
+      summary: "The congruence witnesses sit at ctxEx/fragEx, where the sem quantifier is inert, and on a certificate-free fragment. Open, filed as #270 and #269."
+    - turn: 3
+      type: observation
+      id: "O151"
+      routing: crystallized
+      provenance: ai-suggested
+      summary: "Crystallized via artifact-commitment into claims.md:C52 — a family generalizes along a parameter for free exactly when its shared lemma concludes an equality rather than a pointwise agreement."
+    - turn: 3
+      type: observation
+      id: "O152"
+      routing: staged
+      provenance: ai-suggested
+      summary: "Parameterize the projection rather than the concept: proves the family once and states as a theorem what the copy form can only assert in a comment."
+    - turn: 3
+      type: observation
+      id: "O153"
+      routing: staged
+      provenance: ai-suggested
+      summary: "A generalization is non-trivial only if the pre-existing fixtures are *proved* unable to separate the parameter's instances, at the level the milestone generalizes."
+    - turn: 3
+      type: observation
+      id: "O154"
+      routing: staged
+      provenance: ai-suggested
+      summary: "Acceptance criteria enforced by eyeball are not enforced: disequality conjuncts, downstream consumers of each iff direction, regressions derived *through* the theorem they exercise."
+
+  ai_actions:
+    - turn: 3
+      action: >
+        Executed plans/2026-09-07-theory-m4-generic-observation.md end to end
+        under /implement, folding in all 18 tasks from the plan's eng review
+        (which had cleared it CLEAR (PLAN) but required the tasks be folded into
+        the body first — they had not been). The largest fold was the
+        cross-model tension-1 redesign: Outcome alpha + obsGen in place of the
+        plan's parallel SemObservation/obsSem. Also folded: Lara.Erase added to
+        the open list and `set_option autoImplicit false` on all three modules
+        (without which a bare unopened identifier elaborates into a vacuous
+        theorem that passes both gates); Linking.apS reused instead of a
+        duplicate apC; disequality conjuncts on both separations; five-way
+        agreement theorems; sem-quantified gap/incompatible/rejected witnesses;
+        the whole_program_replacement_sem docstring corrected to cite
+        Erase.checkedAF_relabel rather than appear to re-derive result 9; and
+        the m2a section-10 "three items" framing repaired rather than left
+        contradicting its own list.
+      provenance: ai-executed
+      files_changed:
+        - "lean/Lara/Invariants/Observation.lean"
+        - "lean/Lara/Context/Observation.lean"
+        - "lean/Lara/Examples/ContextSemantics.lean"
+        - "lean/Lara.lean"
+        - "lean/AxCheck.lean"
+        - "docs/theory-m4-generic-observation.md"
+        - "docs/theory-m2a-observation.md"
+        - "docs/theory-m4-contextual-adequacy.md"
+        - "plans/2026-09-07-theory-m4-generic-observation.md (deleted)"
+    - turn: 3
+      action: >
+        Ran the three gates in CI order at the landing commit: lake build 154
+        jobs exit 0; check-axcheck-coverage.py over the three new files passed
+        with 37 declarations; lake env lean AxCheck.lean piped to
+        check-axioms.sh passed. Scanned the full audit output for sorryAx and
+        ofReduceBool — zero of each. Verified by hand that all three modules
+        produce oleans under lean/.lake/build/lib/lean/ (the #259 failure mode).
+        Verified the branch diff against main touches none of the six frozen
+        modules.
+      provenance: ai-executed
+      files_changed:
+        - "ara/evidence/proofs/m4_generic_observation.md"
+    - turn: 3
+      action: >
+        Opened PR #271 (closes #216) and filed three follow-ups: #268 (relations
+        vs functions), #269 (certificate-bearing instantiation), #270
+        (Admissible for a disagreeing carrier). Deleted the executed plan per
+        CLAUDE.md after moving everything durable into
+        docs/theory-m4-generic-observation.md.
+      provenance: ai-executed
+      files_changed: []
+
+  claims_touched:
+    - id: C52
+      action: crystallized
+      turn: 3
+    - id: C49
+      action: revised
+      turn: 3
+
+  logic_revisions:
+    - turn: 3
+      entry: C49
+      field: Conditions
+      before: >
+        Holds for grounded semantics over the frozen compilation carrier, for admissible
+        contexts — the link guard passes, both sides' declared material is well-formed relative
+        to the *linked* environment, and the linked program passes the signature stage — whose
+        own assurances satisfy `FixesContext`, and for a forward-only acceptance-preservation
+        hypothesis. Admissibility supplies an accepted source and preservation supplies an
+        accepted target, so both detailed observations land in `.observed`; without it their
+        rejection outcomes need not agree. Openness is leaf-name openness only: term-level holes
+        are unrepresentable because the compile boundary forces an empty obligation set on every
+        declared argument. Untested boundary: contexts carrying assurances moved by the relabel,
+        generic extension semantics, two-way acceptance, and relational quantification over
+        related backends.
+      after: >
+        Holds over the frozen compilation carrier at **any** extension semantics — originally
+        proved for grounded only, and generalized in #216 with no additional hypothesis, because
+        what the profile-preservation argument concludes is an *equality* of compiled carriers
+        and every reader of a carrier inherits it (`obsGen_congr`,
+        `backend_replacement_congruence_sem`). Requires admissible contexts — the link guard
+        passes, both sides' declared material is well-formed relative to the *linked*
+        environment, and the linked program passes the signature stage — whose own assurances
+        satisfy `FixesContext`, and a forward-only acceptance-preservation hypothesis.
+        Admissibility supplies an accepted source and preservation supplies an accepted target,
+        so both detailed observations land in the observed arm; without it their rejection
+        outcomes need not agree. Openness is leaf-name openness only: term-level holes are
+        unrepresentable because the compile boundary forces an empty obligation set on every
+        declared argument. Untested boundary: contexts carrying assurances moved by the relabel,
+        two-way acceptance, relational quantification over related backends (#215), how the
+        *equivalence relations* at different semantics compare (#268 — the observation functions
+        are separated, the relations are not), and a semantics-parametric congruence witness at a
+        carrier where the semantics parameter is not inert (#270) or on a certificate-bearing
+        fragment (#269).
+      signal: empirical-resolution
+      provenance: ai-suggested
+      note: >
+        The "generic extension semantics" item of C49's own untested boundary was discharged this
+        turn by obsGen_congr and backend_replacement_congruence_sem. Status left at `supported` —
+        the generalization widens the claim's scope without changing the evidential standing of
+        what was already supported. Three new untested-boundary items added from N330/N331.
+    - turn: 3
+      entry: C49
+      field: Proof
+      before: "[... PR #218, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f]"
+      after: "[... PR #218, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f. Generic instance (#216): `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`, `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`; `docs/theory-m4-generic-observation.md`; PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
+      signal: empirical-resolution
+      provenance: ai-suggested
+    - turn: 3
+      entry: C49
+      field: Tags
+      before: "M4, context-calculus, backend-replacement, congruence, representation-independence, saturation, mechanized"
+      after: "M4, context-calculus, backend-replacement, congruence, representation-independence, saturation, mechanized, extension-semantics"
+      signal: terminology-drift
+      provenance: ai-suggested
+
+  key_context:
+    - turn: 3
+      excerpt: >
+        The plan carried a GSTACK REVIEW REPORT reading "ENG CLEARED — ready to implement once
+        the 18 tasks are folded into the plan body." They had not been folded: the body still
+        specified the parallel SemObservation design that tension-1 had reverted, the duplicate
+        apC that T13 removed, and #eval diagnostics that T9 had shown do not elaborate for want
+        of Repr instances. Implementing the plan as written would have reproduced two verified
+        compile failures. The 18 tasks were folded during execution instead.
+    - turn: 3
+      excerpt: >
+        The sink fixture was necessary rather than convenient: symCtx/symFrag's observed claim is
+        supported by a node *inside* the two-cycle, so every semantics accepts it in some
+        extension and rejects it in another and the skeptical reading is `contested` under all
+        five. The sink observes a node *outside* the cycle that every preferred extension
+        attacks — that asymmetry is what the separation needs.
+
+  open_threads:
+    - "#268 — does grounded CtxEquiv imply CtxEquivSem at other semantics? Needs an argument over the unbounded context quantifier; plausibly milestone-sized."
+    - "#270 — prove Admissible for cycleCtx/cycleFrag so a congruence witness sits where the sem quantifier is not inert. Mirrors Linking.admissible_split; the cyclic policy has three contrary pairs rather than one, so the SideOk obligations are larger."
+    - "#269 — instantiate the generic congruence on certCtx/certFrag, the only fixture where the relabel is a real backend swap."
+    - "#259 — CI closure check still open; the build-closure verification for these three modules was done by hand again."
+    - "PR #271 is open and unreviewed."
+
+  ai_suggestions_pending:
+    - "O152 — parameterize the projection rather than the concept (heuristic; one instance so far)."
+    - "O153 — a generalization is non-trivial only if the pre-existing fixtures are proved unable to separate, at the level generalized (heuristic)."
+    - "O154 — convert eyeball-enforced acceptance criteria into build-breaking dependencies (heuristic)."

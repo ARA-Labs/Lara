@@ -569,13 +569,24 @@ The paper **must not**:
 
 ## 10. Proposed Follow-up Work
 
-Three items are visible from here and none is an M2a result. Each is tracked as
+Four items are visible from here and none is an M2a result. Each is tracked as
 a GitHub issue, per `CLAUDE.md`; this document records the decision, the issue
 records the work.
 
 - Non-emptiness of preferred extensions — [#196](https://github.com/ARA-Labs/lara/issues/196). **Closed 2026-09-06.**
 - `enumerate`-phrased `SpecConflictFree` — [#197](https://github.com/ARA-Labs/lara/issues/197).
 - A registry that would make a sixth `ExtensionSemantics` visible — [#198](https://github.com/ARA-Labs/lara/issues/198).
+- Generic-`ExtensionSemantics` contextual equivalence —
+  [#216](https://github.com/ARA-Labs/lara/issues/216). **Landed 2026-09-07**;
+  see `docs/theory-m4-generic-observation.md`. Filed later than the three
+  above, from the M4 plan rather than from here. The M2a interface is now
+  quantified over by the *contextual* theorems and not only by the
+  framework-level ones: `Lara.Context.obsSem` and `Lara.Context.CtxEquivSem`
+  generalize M4's `obs` and `CtxEquiv`, the grounded case is recovered as a
+  theorem (`obsSem_grounded`, `ctxEquivSem_grounded_iff`), and the congruences
+  hold with no additional hypothesis. What it does **not** settle is how the
+  equivalence *relations* at different semantics compare — that is
+  [#268](https://github.com/ARA-Labs/lara/issues/268).
 
 The general non-emptiness of preferred extensions was expected to need a
 maximal-element principle over `candidates F`, and with it `Nodup` and a

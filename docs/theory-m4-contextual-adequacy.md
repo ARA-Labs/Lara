@@ -60,6 +60,18 @@ retained as *shape* witnesses only: a fragment of bare leaves has no
 certificate, so `mapAssurFrag f` is the identity on it for every `f`. They
 exercise the plumbing, not the theorem.
 
+**Stated over the grounded observation, and now also over an arbitrary one.**
+Everything above is phrased through `obs`, which reads `Invariants.status` — the
+grounded labelling and only that. `Lara.Context.Observation` (issue #216,
+`docs/theory-m4-generic-observation.md`) supplies the same results at an
+arbitrary `Semantics.ExtensionSemantics`, and does so without weakening them:
+the congruences carry no hypothesis beyond the ones stated here, because they
+transport along the carrier equality `compileUnit_link_relabel` supplies rather
+than along pointwise attack agreement. Part A's own statements are unchanged —
+nothing in this section was edited to make room — and the grounded case is
+recovered as a theorem, `obsSem_grounded`, with `ctxEquivSem_grounded_iff`
+showing the two equivalence relations coincide on the nose at `groundedSem`.
+
 ## 2. What "context" means here
 
 A `Fragment` carries Σ, the policy, its declared leaves, its ground atoms, its
@@ -354,6 +366,14 @@ So the debt is marked **partially** discharged, and term-level holes are issue
 - The result transports to the surface: two surface programs related by the
   relabel present the same framework (`surface_directAF_relabel`).
 - M3's contextual-adequacy obligation is discharged for leaf-name openness.
+- The congruence and its three companions hold **under every extension
+  semantics in the M2a interface**, with the same hypotheses and no additional
+  one (`backend_replacement_congruence_sem`, `registry_swap_congruence_sem`,
+  `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`;
+  issue #216, `docs/theory-m4-generic-observation.md`). The generalization is
+  non-trivial: `Examples.ContextSemantics.obsSem_cycle_stable_ne_grounded`
+  reaches an observation arm the grounded reading cannot reach, and
+  `obsSem_sink_preferred_ne_grounded` has two semantics answer and disagree.
 
 ### Must not claim
 
@@ -371,9 +391,18 @@ So the debt is marked **partially** discharged, and term-level holes are issue
 - **Not a new proof of result 9.** `whole_program_replacement` cites
   `Erase.backend_replacement`; the milestone's progress is the context
   quantifier.
-- **Not a statement about term-level holes** (§5), and not about any semantics
-  other than grounded — the generic-`ExtensionSemantics` version is issue
-  **#216**.
+- **Not a statement about term-level holes** (§5).
+- **Not a claim that the equivalence *relations* at different semantics
+  separate or coincide.** #216 generalized the observation *functions* and
+  separated them at concrete carriers; whether `CtxEquiv reg F₁ F₂` implies
+  `CtxEquivSem sem reg F₁ F₂` at a non-grounded `sem` is neither proved nor
+  refuted, and is issue **#268**. `ctxEquivSem_grounded_iff` settles the
+  grounded instance only.
+- **Not a claim that the semantics-parametric congruence witnesses exercise the
+  semantics parameter.** `congruence_witness_sem` and `registry_swap_witness_sem`
+  sit at `ctxEx`/`fragEx`, where all five semantics agree, so the quantifier is
+  inert there; issue **#270** is the carrier that would fix it, and **#269** the
+  certificate-bearing instantiation.
 - **Not a claim that contexts are closed under composition for *linkability*.**
   They are closed for hygiene; a composite whose halves attack each other is not
   admissible, and `Examples.Linking.hostile_composite_not_admissible` exhibits

@@ -65,6 +65,9 @@ import Lara.Context.Link
 import Lara.Context.Merge
 import Lara.Context.Compose
 import Lara.Context.Equivalence
+import Lara.Invariants.Observation
+import Lara.Context.Observation
+import Lara.Examples.ContextSemantics
 import Lara.Context.Surface
 import Lara.Examples.Linking
 import Lara.Examples.BackendComposition
@@ -2672,6 +2675,57 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.admissible_composed
 #print axioms Lara.Context.backend_replacement_congruence_composed
 #print axioms Lara.Context.whole_program_replacement
+
+-- Invariants.Observation: the semantics-parametric carrier projection (#216).
+-- `Invariants.status` reads the grounded labelling off a `StructuredAF`; these
+-- read an arbitrary `ExtensionSemantics` off the same carrier, and recover the
+-- old function at `groundedSem` with no hypothesis.
+#print axioms Lara.Invariants.observeSem_grounded
+#print axioms Lara.Invariants.observeSem_gap
+#print axioms Lara.Invariants.observeSem_of_status_gap
+
+-- Context.Observation: the generic contextual observation, its equivalence
+-- relation, and the four congruences at an arbitrary semantics (#216). The
+-- congruence is proved once over an arbitrary projection (`obsGen_congr`) and
+-- instantiated; it needs no `AttackExtensional` hypothesis, because it
+-- transports along the carrier equality `compileUnit_link_relabel` supplies.
+#print axioms Lara.Context.obsGen_incompatible
+#print axioms Lara.Context.obsGen_rejected
+#print axioms Lara.Context.obsGen_eq_of_ok
+#print axioms Lara.Context.obsGen_ext
+#print axioms Lara.Context.obsGen_congr
+#print axioms Lara.Context.obsSem_eq_of_ok
+#print axioms Lara.Context.obsSem_incompatible
+#print axioms Lara.Context.obsSem_rejected
+#print axioms Lara.Context.liftObservation_inj
+#print axioms Lara.Context.obsSem_grounded
+#print axioms Lara.Context.ctxEquivSem_grounded_iff
+#print axioms Lara.Context.backend_replacement_congruence_sem
+#print axioms Lara.Context.registry_swap_congruence_sem
+#print axioms Lara.Context.backend_replacement_congruence_composed_sem
+#print axioms Lara.Context.whole_program_replacement_sem
+
+-- Examples.ContextSemantics: the semantics parameter is not an abstraction
+-- over one instance at the context level either (#216).
+#print axioms Lara.Examples.ContextSemantics.cycle_link_ok
+#print axioms Lara.Examples.ContextSemantics.cycle_accepted
+#print axioms Lara.Examples.ContextSemantics.cycle_linked_shape
+#print axioms Lara.Examples.ContextSemantics.obsSem_cycle_stable_ne_grounded
+#print axioms Lara.Examples.ContextSemantics.sink_link_ok
+#print axioms Lara.Examples.ContextSemantics.sink_accepted
+#print axioms Lara.Examples.ContextSemantics.sink_linked_shape
+#print axioms Lara.Examples.ContextSemantics.obsSem_sink_preferred_ne_grounded
+#print axioms Lara.Examples.ContextSemantics.congruence_witness_sem
+#print axioms Lara.Examples.ContextSemantics.registry_swap_witness_sem
+#print axioms Lara.Examples.ContextSemantics.ctxEquivSem_negative
+#print axioms Lara.Examples.ContextSemantics.ctxEquivSem_grounded_negative
+#print axioms Lara.Examples.ContextSemantics.ctxEquivSem_grounded_of_ctxEquiv
+#print axioms Lara.Examples.ContextSemantics.obsSem_linking_grounded
+#print axioms Lara.Examples.ContextSemantics.obsSem_linking_agrees
+#print axioms Lara.Examples.ContextSemantics.obsSem_sym_agrees
+#print axioms Lara.Examples.ContextSemantics.obsSem_gap_uniform
+#print axioms Lara.Examples.ContextSemantics.obsSem_incompatible_id_clash
+#print axioms Lara.Examples.ContextSemantics.obsSem_rejected_signature
 
 -- Context.Surface: the surface-transport corollary (F3)
 #print axioms Lara.Context.checkedAF_map

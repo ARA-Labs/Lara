@@ -3214,3 +3214,95 @@ observations:
   promoted_to: "logic/claims.md:C51"
   crystallized_via: artifact-commitment
   stale: false
+
+- id: O151
+  timestamp: "2026-09-07T16:30"
+  provenance: ai-suggested
+  content: >
+    Generalizing an observation along a parameter is free exactly when the underlying transport
+    concludes an *equality* of the observed object rather than a pointwise agreement between two
+    observed objects. The extensionality hypothesis a pointwise-agreement transport needs is
+    precisely what an equality transport does not, so a generic result that assumed it anyway
+    would be strictly weaker than the specific result it claims to generalize — and would not
+    deserve the same name. The corollary for design: locate the single lemma the whole family of
+    results funnels through, and check whether its conclusion is an equation. If it is, the family
+    generalizes along any reader of the object with no new hypotheses.
+  context: >
+    #216 expected the generic congruence to be harder than its grounded ancestor. It is not.
+    Every M4 congruence funnels through compileUnit_link_relabel, whose conclusion is
+    `compileUnit acc₂ = compileUnit acc₁`; obsGen_congr therefore carries exactly
+    backend_replacement_congruence's hypotheses and takes no AttackExtensional, whereas
+    Observation.observe_congr does take it because its two frameworks are distinct.
+  potential_type: claim
+  bound_to: [N327, N328]
+  promoted: true
+  promoted_to: "logic/claims.md:C52"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O152
+  timestamp: "2026-09-07T16:25"
+  provenance: ai-suggested
+  content: >
+    When a family of results is to be generalized along a parameter, parameterizing the
+    *projection* (what is read off the shared intermediate object) beats parameterizing the
+    concept the parameter belongs to. The projection form proves the family once and instantiates
+    it, and it states as a theorem the fact the copy form can only assert in a comment — that the
+    family was never about the specific reading. It also avoids touching the frozen type whose
+    exact shape decide-closed fixtures depend on, since the new parametric type sits beside it
+    rather than replacing it.
+  context: >
+    Implementing #216. The plan's first draft duplicated Observation/obs into a semantics-aware
+    SemObservation/obsSem and copied four congruence proofs; eng review's outside voice built the
+    Outcome α + obsGen version against the real tree instead, and it compiled first try at ~75
+    lines with the parallel type and its compile blocker deleted.
+  potential_type: heuristic
+  bound_to: [N327]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O153
+  timestamp: "2026-09-07T16:40"
+  provenance: ai-suggested
+  content: >
+    A generalization milestone is non-trivial only if the pre-existing fixtures are *proved* to be
+    unable to separate the parameter's instances, not assumed to be. Asserting the agreement in a
+    module header is what forces promoting it to a theorem later, and until it is a theorem the
+    "we had to build new fixtures" justification is unbacked. The corresponding positive
+    obligation is that the parameter must be witnessed non-trivial at the same *level* the
+    milestone generalizes: framework-level separations do not establish that a context-level
+    observation observes anything new.
+  context: >
+    #216's carriers ctxEx/fragEx and symCtx/symFrag were believed to have all five semantics
+    agree; obsSem_linking_agrees and obsSem_sym_agrees now pin that for all five, which is what
+    justifies authoring the three-cycle and the sink. M2a had framework-level separations
+    (five_semantics_pairwise_distinct) but no context-level one existed before this turn.
+  potential_type: heuristic
+  bound_to: [N329]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O154
+  timestamp: "2026-09-07T16:45"
+  provenance: ai-suggested
+  content: >
+    An acceptance criterion enforced by a human reading a signature is not enforced. Convert each
+    into a build-breaking dependency: a separation stated as a conjunction of equalities gets a
+    disequality conjunct, so a collapse fails the build rather than leaving two values pinned
+    separately; an `iff` that must not weaken to an implication gets one downstream theorem
+    consuming each direction; a regression theorem that must be exercised rather than merely
+    stated gets a fixture derived *through* it instead of re-pinned by an independent rfl.
+  context: >
+    #216's acceptance criteria included "the separations must actually separate" and
+    "ctxEquivSem_grounded_iff must stay an iff", both originally enforceable only by eyeball.
+    Weakening the iff to an implication would otherwise keep both gates green.
+  potential_type: heuristic
+  bound_to: [N329, N328]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

@@ -8540,3 +8540,171 @@ tree:
     - "docs/m5-freeze-checklist.md post-v5 addendum (620 -> 625)"
   status: resolved
   also_depends_on: [N322, N323, N324, N325]
+
+- id: N327
+  type: decision
+  title: "Parameterize the projection, not the semantics: Outcome α + obsGen"
+  provenance: ai-executed
+  timestamp: "2026-09-07T16:20"
+  choice: >
+    Introduce `Outcome α` and
+    `obsGen (g : Invariants.StructuredAF → Atom → α)` beside the frozen
+    `Observation`/`obs`, so that what varies is the *projection read off the
+    linked carrier*, not the semantics. `obs` is `obsGen` at
+    `g := Invariants.status canon`; `obsSem sem` is *defined* as
+    `obsGen (Invariants.observeSem sem canon)`. The congruence is then proved
+    once, in `obsGen_congr`, and `backend_replacement_congruence_sem`,
+    `registry_swap_congruence_sem` and
+    `backend_replacement_congruence_composed_sem` are one-line instantiations.
+    This converts what would have been a docstring remark — that the congruence
+    was never a fact about the grounded labelling — into a proved statement.
+  alternatives:
+    - >
+      The implementation plan's own first draft: a parallel `SemObservation`
+      inductive and a parallel `obsSem`, with the four M4 congruence proofs
+      copied and one identifier changed in each. Rejected in eng review after an
+      outside voice built the `Outcome α` version against the real tree and it
+      compiled first try at ~75 lines, deleting the parallel type and the entire
+      compile blocker the draft carried.
+    - >
+      Adding a type parameter to the existing `Observation` instead of a new
+      inductive. Rejected: `Observation` is frozen M4 material with
+      `decide`-closed fixtures depending on its exact shape
+      (`Examples.Linking.obs_four_states`), and parameterizing it would edit
+      results this milestone has no reason to touch.
+  evidence:
+    - "lean/Lara/Context/Observation.lean (Outcome, obsGen, obsGen_congr)"
+    - "commit 40202bc"
+    - "ara/evidence/proofs/m4_generic_observation.md"
+    - "docs/theory-m4-generic-observation.md §2"
+  status: resolved
+  also_depends_on: []
+
+- id: N328
+  type: experiment
+  title: "The generic congruence needs no AttackExtensional hypothesis — the issue's cost estimate was wrong"
+  provenance: ai-executed
+  timestamp: "2026-09-07T16:30"
+  result: >
+    `obsGen_congr` carries exactly `backend_replacement_congruence`'s
+    hypotheses and no others — no `AttackExtensional sem.spec`, no hypothesis on
+    `sem` or on `g` at all — and typechecks with the grounded proof unchanged
+    apart from the projection identifier. The reason is structural: every M4
+    congruence funnels through `compileUnit_link_relabel`, whose conclusion is
+    `Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁`, an *equation*
+    between carriers rather than a pointwise agreement. `Observation.observe_congr`
+    needs `AttackExtensional` because it moves an observation between two
+    *distinct* frameworks agreeing pointwise; here the frameworks are equal, so
+    no such licence is needed. A generic result that assumed `AttackExtensional`
+    anyway would have been strictly weaker than its grounded ancestor. The `Nodup`
+    obligation of `ExtensionSemantics.sound` likewise discharges unconditionally,
+    by `List.nodup_range`, since `eraseAF`'s carrier is `List.range` by
+    definition — the same discharge `Lara.Observation` already makes three times.
+    Gates at commit 225cac8: `lake build` 154 jobs exit 0, coverage passed with
+    37 declarations, axiom audit passed, zero `sorryAx` and zero `ofReduceBool`.
+  evidence:
+    - "lean/Lara/Context/Observation.lean:271 (obsGen_congr)"
+    - "lean/Lara/Context/Equivalence.lean:586 (compileUnit_link_relabel), :629"
+    - "lean/Lara/Observation.lean:406 (observe_congr, which does take hext)"
+    - "lean/Lara/Invariants/Observation.lean:90 (observeSem_grounded, no hypothesis)"
+    - "ara/evidence/proofs/m4_generic_observation.md"
+    - "https://github.com/ARA-Labs/lara/pull/271"
+  status: resolved
+  also_depends_on: [N327]
+
+- id: N329
+  type: decision
+  title: "The disagreeing fixtures had to be authored: every pre-existing M4 carrier agrees across all five semantics"
+  provenance: ai-executed
+  timestamp: "2026-09-07T16:40"
+  choice: >
+    Build two new links rather than reuse `Examples.Linking`'s. A three-cycle
+    (`p ⊣ q`, `q ⊣ s`, `s ⊣ p`; context declares `q`, fragment declares `p` and
+    `s` plus the one same-side edge, exports `p`) on which `stableSem` observes
+    `ClaimObservation.noExtension` where `groundedSem` observes `contested`; and
+    a sink (`p ⊣ q`, `q ⊣ p`, both attacking `s`; fragment exports `s`) on which
+    `groundedSem` observes `contested` and `preferredSem` observes `defeated`.
+    The agreement of the pre-existing carriers is *proved*, not assumed:
+    `obsSem_linking_agrees` and `obsSem_sym_agrees` each pin all five mechanized
+    semantics. Each separation carries a disequality conjunct so a collapse is a
+    build failure, and each carrier is pinned (`cycle_linked_shape`,
+    `sink_linked_shape`) so a fixture that stops linking is distinguishable from
+    a separation that collapsed.
+  alternatives:
+    - >
+      Reuse `symCtx`/`symFrag`, the existing two-cycle. Rejected on evidence:
+      its observed claim is supported by a node *inside* the cycle, so every
+      semantics accepts it in some extension and rejects it in another and the
+      skeptical reading is `contested` under all five. The sink observes a node
+      *outside* the cycle that every preferred extension attacks — that
+      asymmetry is what the separation needs.
+    - >
+      Ship generic definitions plus the grounded regression only. Rejected: it
+      would leave the milestone open to the question that motivated #216, one
+      level up — you generalized the observation, but did you show the
+      generalization observes anything new?
+  evidence:
+    - "lean/Lara/Examples/ContextSemantics.lean (obsSem_cycle_stable_ne_grounded, obsSem_sink_preferred_ne_grounded, obsSem_linking_agrees, obsSem_sym_agrees)"
+    - "lean/Lara/Examples/Semantics.lean:185 (stableSem_enumerate_threeCycle)"
+    - "commit 02a64fd"
+    - "ara/evidence/proofs/m4_generic_observation.md"
+  status: resolved
+  also_depends_on: [N327, N328]
+
+- id: N330
+  type: question
+  title: "The observation functions separate; the equivalence relations are untouched"
+  provenance: ai-suggested
+  timestamp: "2026-09-07T16:45"
+  description: >
+    What #216 separates are the observation *functions*, at concrete contexts
+    and fragments. It does not separate the *relations*. `CtxEquiv reg F₁ F₂`
+    quantifies over all contexts, so neither
+    `CtxEquiv reg F₁ F₂ → CtxEquivSem sem reg F₁ F₂` nor its refutation is
+    reachable by `decide`: refuting it needs two fragments provably
+    grounded-equivalent in *every* context, a universally quantified argument
+    over an unbounded context space rather than a fixture.
+    `ctxEquivSem_grounded_iff` settles only the grounded instance, where the two
+    relations coincide on the nose. This matters because the natural reading of
+    "semantics-parametric contextual equivalence" is a statement about the
+    relations, and that is precisely what is not proved. What is known beyond
+    the definition: `ctxEquivSem_negative` exhibits a pair `CtxEquivSem` is
+    false of at `stableSem`, so the relation is not trivially satisfiable. Open,
+    filed as #268.
+  evidence:
+    - "lean/Lara/Context/Observation.lean (CtxEquivSem, ctxEquivSem_grounded_iff)"
+    - "lean/Lara/Examples/ContextSemantics.lean (ctxEquivSem_negative)"
+    - "docs/theory-m4-generic-observation.md §4"
+    - "https://github.com/ARA-Labs/lara/issues/268"
+  status: open
+  also_depends_on: [N328, N329]
+
+- id: N331
+  type: question
+  title: "The congruence witnesses sit at a carrier where the semantics parameter is inert"
+  provenance: ai-suggested
+  timestamp: "2026-09-07T16:50"
+  description: >
+    `congruence_witness_sem` and `registry_swap_witness_sem` establish that the
+    headline's hypotheses are inhabited and its conclusion provable at a
+    concrete link, uniformly in `sem`. They establish nothing more. Their
+    carrier is `ctxEx`/`fragEx`, the two-node chain on which all five semantics
+    agree — proved this turn by `obsSem_linking_agrees` — so those theorems
+    would be equally provable if `ExtensionSemantics` had one inhabitant. The
+    disagreeing carriers (`cycleCtx`/`cycleFrag`, `sinkCtx`/`sinkFrag`) are
+    pinned as *links* but carry no `Admissible` instance, so the congruence
+    cannot be applied there. So the milestone proves the congruence holds at
+    every semantics, and separately proves the semantics disagree, but never at
+    the same carrier. Compounding it, `fragEx` carries no certificate, so
+    `mapAssurFrag f` is the identity on it for every `f` — the same
+    shape-witness caveat `docs/theory-m4-contextual-adequacy.md` §1 records for
+    the grounded `congruence_witness`. Filed as #270 (an admissible disagreeing
+    carrier) and #269 (a certificate-bearing instantiation).
+  evidence:
+    - "lean/Lara/Examples/ContextSemantics.lean (congruence_witness_sem, registry_swap_witness_sem and their recorded limitations)"
+    - "lean/Lara/Examples/Linking.lean:345 (admissible_split)"
+    - "docs/theory-m4-generic-observation.md §6"
+    - "https://github.com/ARA-Labs/lara/issues/270"
+    - "https://github.com/ARA-Labs/lara/issues/269"
+  status: open
+  also_depends_on: [N329]

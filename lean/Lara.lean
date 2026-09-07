@@ -281,6 +281,21 @@
 --     relabel of a fragment's certificates is unobservable in every admissible
 --     context, with the acceptance-profile generalization over two registries.
 --     Not parametricity, not full abstraction — Lara.Context.*
+--   * the same contextual observation at an arbitrary M2a extension semantics
+--     (issue #216): `obsGen` parameterizes the *projection* read off the linked
+--     carrier, so `obsGen_congr` proves the congruence once for every reading
+--     at once and `obsSem` / `CtxEquivSem` are instantiations of it rather than
+--     a second development. The generic congruences carry *no* additional
+--     hypothesis — in particular no `AttackExtensional` — because they
+--     transport along the carrier equality `compileUnit_link_relabel` supplies
+--     rather than along pointwise attack agreement. The grounded case is
+--     recovered as a theorem, not by editing the grounded definitions
+--     (`obsSem_grounded`, and `ctxEquivSem_grounded_iff` as an `iff`, so no M4
+--     statement moves). Context-level separations witness that the semantics
+--     parameter is not an abstraction over one instance: a linked three-cycle
+--     where `stableSem` reports `noExtension` and a sink where `preferredSem`
+--     and `groundedSem` disagree — Lara.Invariants.Observation,
+--     Lara.Context.Observation, Lara.Examples.ContextSemantics.
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -342,9 +357,12 @@ import Lara.Context.Link
 import Lara.Context.Merge
 import Lara.Context.Compose
 import Lara.Invariants.Merge
+import Lara.Invariants.Observation
 import Lara.Context.Equivalence
+import Lara.Context.Observation
 import Lara.Context.Surface
 import Lara.Examples.Linking
+import Lara.Examples.ContextSemantics
 -- The #227 surface-transport witness. Imported here for the same reason as
 -- Lara.Examples.Complexity.Realization above: AxCheck.lean is not a lake
 -- target, so a module reachable only from it is outside `lake build` and its
