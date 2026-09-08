@@ -32,18 +32,28 @@ It is now closed. The new declarations:
 | `Invariants.observeSem` | `Lara/Invariants/Observation.lean` | `Invariants.status` at an arbitrary `sem` |
 | `Invariants.observeSem_grounded` | ″ | the grounded instance is `status`, no hypothesis |
 | `Invariants.observeSem_gap`, `observeSem_of_status_gap` | ″ | `gap` is semantics-independent at the carrier |
-| `Context.Outcome α`, `Context.obsGen` | `Lara/Context/Observation.lean` | `Observation`/`obs` with the *projection* left open |
+| `Context.ObservationOf α` | `Lara/Context/Fragment.lean` | `Observation` with its payload left open; `Observation` is an abbreviation of it at `Grounded.Status` |
+| `Context.obsGen`, `obsGen_incompatible`, `obsGen_rejected`, `obsGen_eq_of_ok` | `Lara/Context/Equivalence.lean` | `obs` with the *projection* left open, and its three link arms |
+| `Context.obs_eq_obsGen` | ″ | `obs` **is** `obsGen` at the grounded projection, by `rfl` |
 | `Context.obsGen_congr` | ″ | contextual representation independence, for every projection at once |
-| `Context.obsSem`, `Context.CtxEquivSem` | ″ | the semantics-parametric instances |
+| `Context.obsSem`, `Context.CtxEquivSem` | `Lara/Context/Observation.lean` | the semantics-parametric instances |
 | `Context.obsSem_grounded`, `ctxEquivSem_grounded_iff` | ″ | the grounded regressions |
 | `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`, `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem` | ″ | the four M4 congruences at an arbitrary `sem` |
 | `Examples.ContextSemantics.*` | `Lara/Examples/ContextSemantics.lean` | the fixtures that make the parameter non-trivial at the context level |
 
-Every existing declaration is untouched. `Lara/Context/Fragment.lean`,
-`Lara/Context/Equivalence.lean`, `Lara/Invariants.lean`, `Lara/Observation.lean`,
-`Lara/Semantics.lean` and `Lara/Grounded.lean` are byte-for-byte unchanged on
-this branch; the only edits outside the three new modules are import lines and
-the M4 index comment in `lean/Lara.lean`, and the pin block in `lean/AxCheck.lean`.
+Every existing *statement* is untouched. `obs`, `CtxEquiv`, `obs_eq_of_ok`,
+`backend_replacement_congruence`, `registry_swap_congruence`,
+`backend_replacement_congruence_composed` and `whole_program_replacement` keep
+their names, their types and their implicit-argument order, and
+`Lara/Invariants.lean`, `Lara/Observation.lean`, `Lara/Semantics.lean` and
+`Lara/Grounded.lean` are byte-for-byte unchanged.
+
+One grounded *definition* did change shape, and §2 explains why:
+`Lara/Context/Fragment.lean`'s `Observation` inductive became the payload-generic
+`ObservationOf α`, with `Observation` an abbreviation of it. Alongside it
+`Lara/Context/Equivalence.lean` gained the projection layer, which turned the
+*proofs* of `obs_eq_of_ok` and `backend_replacement_congruence` into one-line
+corollaries. Neither edit changes what any existing theorem says.
 
 ### The generalization lattice
 
@@ -78,7 +88,7 @@ is the **projection**:
 
 ```lean
 def obsGen {α : Type} (g : Invariants.StructuredAF → Atom → α) {canon : String → String}
-    (reg : BackendRegistry canon) (C : Context) (F : Fragment) : Outcome α
+    (reg : BackendRegistry canon) (C : Context) (F : Fragment) : ObservationOf α
 ```
 
 `obs` is `obsGen` at `g := Invariants.status canon`; `obsSem sem` is *defined* as
@@ -91,15 +101,51 @@ a theorem rather than as a remark, the fact §3 explains: the congruence was nev
 a fact about the grounded labelling. A development that copied the proof four
 times would have the same theorems and would leave that fact as a comment.
 
-The one piece of machinery the redesign did **not** remove is `liftObservation`.
-`obsSem groundedSem reg C F` lives in `Outcome ClaimObservation` while
-`obs reg C F` lives in `Observation`, so the statement "the grounded instance is
-the old observation" cannot be an equation between them as they stand.
+### Why the projection layer sits in the grounded modules
+
+`obsGen` mentions no semantics and needs no import `Equivalence.lean` did not
+already have. It is therefore placed **beside the theorems it generalizes**,
+not beside the semantics that instantiate it, and the payload-generic
+`ObservationOf α` replaced `Fragment.lean`'s three-armed `Observation` inductive
+rather than being introduced as a second type next to it. Two things follow, and
+neither is available under the alternative:
+
+1. **`obs` is `obsGen` at the grounded projection — as a theorem, by `rfl`.**
+   The sentence "`obs` is `obsGen` at `g := Invariants.status canon`" is the
+   design premise of this whole milestone, and with two distinct result types it
+   could only be *asserted in prose*: `obs : Observation` and `obsGen g : Outcome
+   α` are not comparable, so no equation between them typechecks. With one type
+   the premise is `Lara.Context.obs_eq_obsGen`, and it closes by `rfl`. A design
+   premise that the kernel checks is worth more than one a reader has to take on
+   trust.
+2. **The grounded theorems are corollaries, not copies.** `obs_eq_of_ok` is
+   `obsGen_eq_of_ok _ hlink h` and `backend_replacement_congruence` is
+   `obsGen_congr _ hf hpres hadm hfix`, each a single line. Under the two-type
+   design `obsGen_congr` was `backend_replacement_congruence`'s proof transcribed
+   with `Invariants.status canon` replaced by `g` — the same `obtain`/`rw`/
+   `congrArg` script standing twice in the tree, so that a change to the
+   argument would have had to be made in both places or silently hold in only
+   one.
+
+The cost is that this is not a purely additive change: `Fragment.lean` and
+`Equivalence.lean` are edited. No existing statement moves — every grounded
+theorem keeps its name, its type and its implicit-argument order, and
+`Examples/Linking.lean`'s `congruence_witness` and `registry_swap_witness`
+compile unchanged, which is the load-bearing check that it did.
+
+### Why `liftObservation` still exists
+
+Unifying the container did **not** remove `liftObservation`, because the two
+*payloads* still differ. `obsSem groundedSem reg C F` lives in
+`ObservationOf ClaimObservation` while `obs reg C F` lives in
+`ObservationOf Grounded.Status`, so the statement "the grounded instance is the
+old observation" is still not an equation between them as they stand.
 `liftObservation` is the injection that makes them comparable and
 `liftObservation_inj` is what the forward direction of §3's `iff` needs. It is
-bookkeeping forced by the two result types and carries no mathematical content
-beyond the injectivity of `List.map` over a constructor. Recording that here so
-it is not mistaken for a design element.
+bookkeeping forced by `Grounded.Status` against `ClaimObservation` — not by the
+container, which is now shared — and it carries no mathematical content beyond
+the injectivity of `List.map` over a constructor. Recording that here so it is
+not mistaken for a design element.
 
 ---
 
@@ -111,7 +157,7 @@ expected otherwise.
 Every M4 congruence funnels through one carrier-equality lemma:
 
 ```lean
--- lean/Lara/Context/Equivalence.lean:586
+-- lean/Lara/Context/Equivalence.lean:712
 theorem compileUnit_link_relabel … : Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁
 ```
 
@@ -134,7 +180,7 @@ cannot distinguish them — whatever the projection is:
                             |
                             |  F.exports.map (fun p => g G p)   -- any g whatsoever
                             v
-                      Outcome.observed …
+                      ObservationOf.observed …
 ```
 
 So `obsGen_congr` is `backend_replacement_congruence`'s proof with
@@ -250,7 +296,7 @@ declares `p` and `s` and the `s ⊣ p` edge, exports `p`) is the sharper of the 
 `observeSem_grounded` always returns `ClaimObservation.observed _`, and
 `liftObservation` only produces that constructor. So this does not merely show
 `obsSem` taking two values — it shows `obsSem` inhabiting an arm of
-`Outcome ClaimObservation` that `liftObservation ∘ obs` cannot inhabit. The
+`ObservationOf ClaimObservation` that `liftObservation ∘ obs` cannot inhabit. The
 widening of the observed payload from `Grounded.Status` to `ClaimObservation` is
 therefore forced by a fixture of this development, not only by
 `Semantics.observe`'s signature.

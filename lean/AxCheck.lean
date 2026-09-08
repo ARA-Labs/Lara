@@ -2656,10 +2656,18 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.checkUnit_map
 #print axioms Lara.Context.nodes_conclusion_map
 #print axioms Lara.Context.compileUnit_map
+-- The projection layer (#216): `obsGen` is `obs` with the per-export reading
+-- left open, so `obs_eq_of_ok` and `backend_replacement_congruence` below are
+-- one-line corollaries of it. Rationale in docs/theory-m4-generic-observation.md §2.
+#print axioms Lara.Context.obsGen_incompatible
+#print axioms Lara.Context.obsGen_rejected
+#print axioms Lara.Context.obsGen_eq_of_ok
+#print axioms Lara.Context.obs_eq_obsGen
 #print axioms Lara.Context.obs_eq_of_ok
 #print axioms Lara.Context.exists_accepted_of_admissible
 #print axioms Lara.Context.exists_accepted_relabel
 #print axioms Lara.Context.compileUnit_link_relabel
+#print axioms Lara.Context.obsGen_congr
 #print axioms Lara.Context.backend_replacement_congruence
 #print axioms Lara.Context.mapAssur_id
 #print axioms Lara.Context.mapAssurList_id
@@ -2684,16 +2692,12 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Invariants.observeSem_gap
 #print axioms Lara.Invariants.observeSem_of_status_gap
 
--- Context.Observation: the generic contextual observation, its equivalence
--- relation, and the four congruences at an arbitrary semantics (#216). The
--- congruence is proved once over an arbitrary projection (`obsGen_congr`) and
--- instantiated; it needs no `AttackExtensional` hypothesis, because it
--- transports along the carrier equality `compileUnit_link_relabel` supplies.
-#print axioms Lara.Context.obsGen_incompatible
-#print axioms Lara.Context.obsGen_rejected
-#print axioms Lara.Context.obsGen_eq_of_ok
-#print axioms Lara.Context.obsGen_ext
-#print axioms Lara.Context.obsGen_congr
+-- Context.Observation: the semantics layer (#216) — the observation at an
+-- arbitrary `ExtensionSemantics`, its equivalence relation, the grounded
+-- regression, and the four congruences. Each congruence is `obsGen_congr`
+-- (pinned above, in the Context.Equivalence block) instantiated at one
+-- projection; none needs an `AttackExtensional` hypothesis, because they
+-- transport along the carrier equality `compileUnit_link_relabel` supplies.
 #print axioms Lara.Context.obsSem_eq_of_ok
 #print axioms Lara.Context.obsSem_incompatible
 #print axioms Lara.Context.obsSem_rejected

@@ -424,14 +424,33 @@ def fragmentAF {canon : String → String} (reg : BackendRegistry canon)
 
 /-! ### Observation (D4) -/
 
-/-- The externally visible result of placing a fragment in a context.
-Incompatibility and whole-unit rejection are distinct outcomes rather than two
-spellings of a missing status list. -/
-inductive Observation where
-  | incompatible : LinkFault → Observation
-  | rejected : Check.Unit.UnitError → Observation
-  | observed : List Grounded.Status → Observation
+/-- **The externally visible result of placing a fragment in a context**, with
+the observed payload left open. Incompatibility and whole-unit rejection are
+distinct outcomes rather than two spellings of a missing status list: collapsing
+either into "no observations" would make a fragment that cannot be linked
+indistinguishable from one that links and exports nothing.
+
+The payload is a parameter because the D4 four-state reading is one reading of
+the carrier among many. `obs` fixes it at `Grounded.Status`; `Lara.Context.obsSem`
+fixes it at `Lara.Semantics.ClaimObservation`. Both are `Lara.Context.obsGen` at
+a projection, and `Lara.Context.obs_eq_obsGen` says so by `rfl`. -/
+inductive ObservationOf (α : Type) where
+  /-- the link guard fired: the interfaces are incompatible -/
+  | incompatible : LinkFault → ObservationOf α
+  /-- the link is compatible but the merged unit failed the whole-unit checker -/
+  | rejected : Check.Unit.UnitError → ObservationOf α
+  /-- the accepted link's exported conclusions, under the caller's projection -/
+  | observed : List α → ObservationOf α
 deriving DecidableEq
+
+/-- **The frozen D4 observation**: the generic one at the grounded four-state
+status.
+
+Kept as an abbreviation rather than a distinct type so that `obs` needs no
+change and `Lara.Context.obs_eq_obsGen` holds by `rfl` — the D4 shape is not
+being renegotiated here, only exhibited as one reading of a carrier that was
+already semantics-free. -/
+abbrev Observation := ObservationOf Grounded.Status
 
 /-- The status of every exported conclusion of a linked program, read off the
 **linked** unit's checked-node cache through the M1 carrier. Guard faults retain

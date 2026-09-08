@@ -243,3 +243,95 @@ neither consumer is redundant.
 - [#270](https://github.com/ARA-Labs/lara/issues/270) — prove `Admissible` for a
   disagreeing carrier, so a congruence witness sits where the `sem` quantifier is
   not inert.
+
+---
+
+## Follow-up: the unified type (commit eb6e955)
+
+Everything above records PR #271 as it merged, and is left as it stands. A later
+commit on the same branch, `eb6e955`, replaced the two-type design that section
+describes. What follows is the delta; where the two disagree, this section is the
+landed state.
+
+### What changed
+
+| Before (#271) | After (eb6e955) |
+|---|---|
+| `Observation` (frozen inductive) **and** `Outcome α` beside it | one `ObservationOf α`; `abbrev Observation := ObservationOf Grounded.Status`; `Outcome` deleted |
+| `obsGen`, `obsGen_*`, `obsGen_congr` in `Context/Observation.lean` | in `Context/Equivalence.lean`, beside the theorems they generalize |
+| `obs_eq_of_ok`, `backend_replacement_congruence` carry proof bodies; `obsGen_congr` is a second copy of the same script | both are one-line corollaries: `obsGen_eq_of_ok _ hlink h`, `obsGen_congr _ hf hpres hadm hfix` |
+| "`obs` is `obsGen` at `g := Invariants.status canon`" asserted in prose | `Lara.Context.obs_eq_obsGen`, closing by `rfl`, pinned in `AxCheck.lean` |
+| `Context/Fragment.lean`, `Context/Equivalence.lean` unmodified | both modified; **no statement changed** |
+
+### The premise that became a theorem
+
+```lean
+theorem obs_eq_obsGen {canon : String → String} (reg : BackendRegistry canon)
+    (C : Context) (F : Fragment) :
+    obs reg C F = obsGen (Invariants.status canon) reg C F := rfl
+```
+
+This does not typecheck under the two-type design: `obs : Observation` and
+`obsGen g : Outcome α` are different types, so no equation between them is
+well-formed. The sentence it now proves is the milestone's design premise, and
+`docs/theory-m4-generic-observation.md:81` asserted it in prose.
+
+### What it cost the fixtures — nothing
+
+`abbrev` is definitionally transparent, so `decide` reduces through it.
+`lean/Lara/Examples/Linking.lean` was **not edited** and its `decide`-closed
+`congruence_witness` (`:676`) and `registry_swap_witness` (`:670`) compile
+unchanged. The signature-level diff of `Context/Equivalence.lean` is purely
+additive — every existing theorem keeps its name, type and implicit-argument
+order:
+
+```
+$ git diff d250d52 -- lean/Lara/Context/Equivalence.lean | grep -E "^[-+]theorem|^[-+]def "
++def obsGen {α : Type} (g : Invariants.StructuredAF → Atom → α)
++theorem obsGen_incompatible {α : Type} (g : Invariants.StructuredAF → Atom → α)
++theorem obsGen_rejected {α : Type} (g : Invariants.StructuredAF → Atom → α)
++theorem obsGen_eq_of_ok {α : Type} (g : Invariants.StructuredAF → Atom → α)
++theorem obsGen_ext {α : Type} {g₁ g₂ : Invariants.StructuredAF → Atom → α}
++theorem obs_eq_obsGen {canon : String → String} (reg : BackendRegistry canon)
++theorem obsGen_congr {α : Type} (g : Invariants.StructuredAF → Atom → α)
+```
+
+### Correction to the sizing above
+
+The duplication removed was **two** proof bodies, not three. `registry_swap_congruence`
+was already derived from `backend_replacement_congruence` at `d250d52`
+(`git show d250d52:lean/Lara/Context/Equivalence.lean`, `:686`), so the plan's T1
+finding ("three proof bodies duplicated across two modules") overcounted by one.
+
+### Gate transcript
+
+Run from `/home/yfhe/ara/lara`, `PATH="$HOME/.elan/bin:$PATH"`, at commit `eb6e955`.
+
+```
+$ cd lean && lake build Lara
+Build completed successfully (100 jobs).
+
+$ (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axioms.sh)
+Axiom audit passed.
+
+$ scripts/check-axcheck-coverage.py lean/AxCheck.lean \
+    lean/Lara/Context/Equivalence.lean lean/Lara/Context/Observation.lean \
+    lean/Lara/Context/Fragment.lean lean/Lara/Examples/ContextSemantics.lean \
+    lean/Lara/Invariants/Observation.lean
+AxCheck coverage passed (90 declarations).
+```
+
+Axiom profile of the new and relocated theorems, all in the standard trio:
+
+```
+'Lara.Context.obs_eq_obsGen' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Context.obsGen_eq_of_ok' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Context.obsGen_congr' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Context.obs_eq_of_ok' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Context.backend_replacement_congruence' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Context.registry_swap_congruence' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+The job count differs from the 154 recorded above because that run was from a cold
+`.lake` in a worktree carrying `AxCheck.lean`'s dependencies; this one is `lake build
+Lara` against the library root on a warm cache. Both are full builds of their target.

@@ -68,9 +68,19 @@ arbitrary `Semantics.ExtensionSemantics`, and does so without weakening them:
 the congruences carry no hypothesis beyond the ones stated here, because they
 transport along the carrier equality `compileUnit_link_relabel` supplies rather
 than along pointwise attack agreement. Part A's own statements are unchanged —
-nothing in this section was edited to make room — and the grounded case is
-recovered as a theorem, `obsSem_grounded`, with `ctxEquivSem_grounded_iff`
-showing the two equivalence relations coincide on the nose at `groundedSem`.
+every theorem in this section keeps its name, its type and its
+implicit-argument order — and the grounded case is recovered as a theorem,
+`obsSem_grounded`, with `ctxEquivSem_grounded_iff` showing the two equivalence
+relations coincide on the nose at `groundedSem`.
+
+One Part A *definition* was reshaped to carry the parameter — `Observation`
+became an abbreviation of a payload-generic `ObservationOf α` — and two Part A
+*proofs* became one-line corollaries of the projection-generic
+`obsGen_eq_of_ok` / `obsGen_congr` that now sit beside them in
+`Lara/Context/Equivalence.lean`. No statement changed. `obs` itself is unchanged, and
+`Lara.Context.obs_eq_obsGen` records by `rfl` that it is the projection-generic
+observation at the grounded reading. See `docs/theory-m4-generic-observation.md`
+§2.
 
 ## 2. What "context" means here
 

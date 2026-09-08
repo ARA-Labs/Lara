@@ -2,8 +2,8 @@ session:
   id: "2026-09-07_001"
   date: "2026-09-07"
   started: "2026-09-07T10:30"
-  last_turn: "2026-09-07T17:10"
-  turn_count: 3
+  last_turn: "2026-09-07T22:10"
+  turn_count: 5
   summary: >
     Turn 1 — issue #227 closed by PR #257: Lara/Examples/SurfaceTransport.lean
     witnesses Lara.Context.surface_directAF_relabel unconditionally
@@ -621,3 +621,264 @@ turn_3:
     - "O152 — parameterize the projection rather than the concept (heuristic; one instance so far)."
     - "O153 — a generalization is non-trivial only if the pre-existing fixtures are proved unable to separate, at the level generalized (heuristic)."
     - "O154 — convert eyeball-enforced acceptance criteria into build-breaking dependencies (heuristic)."
+
+# --- turn 4 (appended) ---
+
+turn_4:
+  events_logged:
+    - turn: 4
+      type: pivot
+      id: "N332"
+      routing: direct
+      provenance: user
+      summary: "#216 found already merged (PR #271 = this session's turn 3); plan rescoped to its one unexecuted part, the §2A refactor"
+    - turn: 4
+      type: decision
+      id: "N333"
+      routing: direct
+      provenance: user
+      summary: "One payload-generic ObservationOf α; Outcome deleted; obsGen family moved into Equivalence.lean beside the theorems it generalizes"
+    - turn: 4
+      type: experiment
+      id: "N334"
+      routing: direct
+      provenance: ai-executed
+      summary: "obs_eq_obsGen closes by rfl; the type replacement cost no decide-closed fixture; 100 jobs, axiom trio, coverage 90"
+    - turn: 4
+      type: decision
+      id: "N335"
+      routing: direct
+      provenance: ai-suggested
+      summary: "CONFLICT flagged: N334 contradicts O152's 'sits beside rather than replaces' rationale; left unresolved for the researcher"
+    - turn: 4
+      type: observation
+      id: "O155"
+      routing: staged
+      provenance: ai-executed
+      summary: "replace-and-abbreviate dominates sit-beside when the generic and specific types would be structurally identical"
+    - turn: 4
+      type: observation
+      id: "O156"
+      routing: staged
+      provenance: ai-executed
+      summary: "repair file:line citations by resolving the declaration name, never by applying a line delta"
+
+  ai_actions:
+    - turn: 4
+      action: >
+        Rebased the branch onto origin/main and landed the §2A refactor as commit eb6e955.
+        Executed plan deleted per CLAUDE.md.
+      provenance: ai-executed
+      files_changed:
+        - "lean/Lara/Context/Fragment.lean"
+        - "lean/Lara/Context/Equivalence.lean"
+        - "lean/Lara/Context/Observation.lean"
+        - "lean/Lara/Examples/ContextSemantics.lean"
+        - "lean/AxCheck.lean"
+        - "lean/Lara.lean"
+        - "docs/theory-m4-generic-observation.md"
+        - "docs/theory-m4-contextual-adequacy.md"
+        - "plans/2026-09-07-theory-m4-generic-ctxequiv.md (deleted)"
+    - turn: 4
+      action: >
+        Ran two independent review stages. Spec review PASSed (a)-(g) and FAILed (h): 7 citation
+        sites re-numbered with the wrong delta. Quality review PASSed with 6 must-fix docstring
+        corrections, five of them inverted by the move — the corollary described as the theorem
+        and the theorem as the copy. Both sets fixed and re-verified.
+      provenance: ai-executed
+      files_changed:
+        - "lean/Lara/Context/Equivalence.lean"
+        - "lean/Lara/Context/Observation.lean"
+        - "lean/Lara/Examples/ContextSemantics.lean"
+        - "docs/theory-m4-generic-observation.md"
+        - "docs/theory-m4-contextual-adequacy.md"
+    - turn: 4
+      action: >
+        Audited all 66 cross-file file:line citations by resolving each to the declaration it
+        names; repaired the 23 Context ones with a name-based resolver, re-run after the last
+        edit. The 10 that remain unresolved are all pre-existing and outside this branch's files.
+      provenance: ai-executed
+      files_changed: []
+    - turn: 4
+      action: >
+        Appended the landed state to the evidence file rather than rewriting it, evidence/ being
+        append-only: '## Follow-up: the unified type (commit eb6e955)'.
+      provenance: ai-executed
+      files_changed: ["ara/evidence/proofs/m4_generic_observation.md"]
+
+  claims_touched:
+    - id: C52
+      action: revised
+      turn: 4
+    - id: C49
+      action: revised
+      turn: 4
+
+  logic_revisions:
+    - turn: 4
+      entry: C52
+      field: Statement
+      before: "The design corollary is to parameterize the *reader* rather than the concept the parameter belongs to — that proves the family once and turns the observation itself into a theorem rather than a comment."
+      after: "The design corollary is to parameterize the *reader* rather than the concept the parameter belongs to — that proves the family once and turns the observation itself into a theorem rather than a comment. Parameterizing the reader is necessary but not sufficient for that last part: the generic and specific result types must be the *same* type, or the collapse relating them is not even well-formed and the premise stays a comment after all."
+      signal: empirical-resolution
+      provenance: ai-suggested
+      note: >
+        PR #271 parameterized the reader and still left the premise as prose, because
+        `obs : Observation` and `obsGen g : Outcome α` are not comparable. Commit eb6e955
+        unified the types and the same equation closes by `rfl`. The sufficiency gap is what
+        this turn measured, so the corollary is sharpened rather than merely restated.
+    - turn: 4
+      entry: C52
+      field: Conditions
+      before: "Untested boundary: this is one instance in one development, and no claim is made that the equality/pointwise dichotomy exhausts the transport forms a shared lemma can take, nor that the equality case is always reachable by design rather than by luck."
+      after: "The sufficiency refinement was established separately, by landing both forms: the reader-parameterized family was first shipped with the generic type sitting *beside* the frozen one (PR #271), where `obs = obsGen (Invariants.status canon)` does not typecheck across the two types and the premise is prose; replacing the frozen inductive with an abbreviation of the generic one (commit eb6e955) makes the same equation close by `rfl`, and cost no `decide`-closed fixture because `abbrev` is definitionally transparent. Untested boundary: [as before] ...; the replace-vs-sit-beside refinement likewise rests on this single pair of landed designs, in a language where `abbrev` is definitionally transparent."
+      signal: empirical-resolution
+      provenance: ai-suggested
+    - turn: 4
+      entry: C52
+      field: Sources
+      before: "[... `contrasting case takes the hypothesis` ← ... «does take `(hext : AttackExtensional sem.spec)`» [result]]"
+      after: "[... plus three grounded entries for the unified-type run — the unstateable-collapse quote, «Build completed successfully (100 jobs).», and the surviving-fixtures quote — all ← `ara/evidence/proofs/m4_generic_observation.md` §'Follow-up: the unified type']"
+      signal: empirical-resolution
+      provenance: ai-suggested
+    - turn: 4
+      entry: C52
+      field: Proof
+      before: "[`Lara.Context.obsGen_congr` and its four instantiations, `lean/Lara/Context/Observation.lean`; `Lara.Context.compileUnit_link_relabel`, `lean/Lara/Context/Equivalence.lean:586`; ... PR #271; trace N327, N328]"
+      after: "[`Lara.Context.obsGen_congr` and its four instantiations, `lean/Lara/Context/Equivalence.lean:801` (the instantiations in `lean/Lara/Context/Observation.lean`); `Lara.Context.obs_eq_obsGen`, `lean/Lara/Context/Equivalence.lean:682` (the collapse, by `rfl`); `Lara.Context.compileUnit_link_relabel`, `lean/Lara/Context/Equivalence.lean:729`; ... PR #271, commit eb6e955; trace N327, N328, N333, N334]"
+      signal: dependency-change
+      provenance: ai-suggested
+      note: "obsGen_congr changed module and compileUnit_link_relabel's line moved. Refs repointed; content unchanged."
+    - turn: 4
+      entry: C49
+      field: Proof
+      before: "[... PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
+      after: "[... PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified onto one observation type in commit eb6e955, which preserved every statement]"
+      signal: dependency-change
+      provenance: ai-suggested
+      note: >
+        Status and Statement untouched. The refactor preserved every C49 statement verbatim —
+        the signature-level diff of Equivalence.lean is purely additive — so only the Proof
+        pointer moves.
+
+  key_context:
+    - turn: 4
+      excerpt: >
+        The plan's coordination note had pre-registered exactly this contingency: "An
+        implementation of #216 already exists on another machine, unpushed ... If that branch
+        is pushed first, this plan becomes a review checklist against it — in particular, check
+        whether it also generalized the congruence to an arbitrary reader." It had. The note is
+        why the discovery cost one issue-status check rather than a duplicated milestone, and
+        it is the argument for writing that contingency into any plan whose work might race.
+    - turn: 4
+      excerpt: >
+        The reviews earned their cost on prose, not proofs. Moving `obsGen_congr` beside
+        `backend_replacement_congruence` inverted five docstrings that still described the
+        corollary as the theorem and the theorem as the copy — "the admissibility hypothesis is
+        inherited ... for the reason `backend_replacement_congruence` records" now read as a
+        theorem inheriting a hypothesis from its own instance. The compiler sees none of this.
+    - turn: 4
+      excerpt: >
+        Citation rot bit twice in one turn. The first repair computed a line delta and was
+        correct only against the tree state it was computed from; the docstring corrections then
+        shifted every line again and re-staled all 23. The fix that held was a name-based
+        resolver, re-run after the final edit.
+
+  open_threads:
+    - "N335 unresolved — O152's 'sits beside rather than replaces' rationale is contradicted by O155/N334. The researcher adjudicates whether O152 crystallizes with that clause dropped."
+    - "The repo carries ~66 file:line docstring citations with no gate; two review rounds this turn found rot in them, and nothing prevents the next code movement from re-introducing it. A checker resolving each citation to its named declaration would be cheap and is the natural sibling of check_ara_source_spans.py."
+    - "10 pre-existing stale citations remain, outside this branch's files: docs/theory-m0-compilation-invariants.md:73, docs/paper-lean-name-map.md (Consistency.lean:165, Unit.lean:35, Policy.lean:448), docs/mutate-module-ownership-decision.md, lean/Lara/Invariants/Observation.lean and docs/theory-m4-generic-observation.md (both → Observation.lean:545), docs/superpowers/plans/2026-07-29-verdict-replay-identity.md."
+    - "obsGen_ext has no consumer anywhere — pre-existing at d250d52, so not this branch's regression, but it should either be deleted or have its retention recorded."
+    - "PR for the §2A refactor not yet opened at the time of this record."
+
+  ai_suggestions_pending:
+    - "O155 — replace-and-abbreviate dominates sit-beside when the generic and specific types would be structurally identical (heuristic; contradicts a clause of O152, see N335)."
+    - "O156 — repair file:line citations by resolving the declaration name, never by applying a line delta (heuristic; two failures in one turn)."
+
+# --- turn 5 (appended) ---
+
+turn_5:
+  events_logged:
+    - turn: 5
+      type: decision
+      id: "N335"
+      routing: direct
+      provenance: user
+      summary: "N335 adjudicated and closed: O152's 'sits beside rather than replaces' clause dropped, the rest stands"
+    - turn: 5
+      type: decision
+      id: "N336"
+      routing: direct
+      provenance: user
+      summary: "obsGen_ext deleted as dead; citation rot given a gate rather than a note"
+
+  ai_actions:
+    - turn: 5
+      action: >
+        Deleted `Lara.Context.obsGen_ext` — no consumer anywhere, and its docstring's stated
+        intended use never materialized. Removed its AxCheck pin and its docs table mention.
+        Coverage 90 -> 89 declarations.
+      provenance: ai-executed
+      files_changed:
+        - "lean/Lara/Context/Equivalence.lean"
+        - "lean/AxCheck.lean"
+        - "docs/theory-m4-generic-observation.md"
+    - turn: 5
+      action: >
+        Added `scripts/check-lean-citations.py`, the gate O156 called for: it resolves every
+        `lean/**:NNN` citation in `lean/`, `docs/` and `scripts/` and fails when one no longer
+        lands on a declaration, with a 9-entry ALLOWLIST for citations that deliberately point
+        at a proof step, a structure field or a module header. Verified to have teeth by
+        injecting three blank lines into Equivalence.lean and confirming FAIL, then restoring.
+      provenance: ai-executed
+      files_changed: ["scripts/check-lean-citations.py"]
+    - turn: 5
+      action: >
+        Deleting obsGen_ext shifted Equivalence.lean a THIRD time and re-staled every citation
+        into it. Repaired by name, and the new gate now proves the repair rather than an audit
+        asserting it.
+      provenance: ai-executed
+      files_changed:
+        - "lean/Lara/Context/Observation.lean"
+        - "lean/Lara/Examples/ContextSemantics.lean"
+        - "docs/theory-m4-generic-observation.md"
+        - "ara/logic/claims.md"
+
+  claims_touched: []
+
+  logic_revisions:
+    - turn: 5
+      entry: C52
+      field: Proof
+      before: "[... `lean/Lara/Context/Equivalence.lean:801` ... `:682` ... `:729` ...]"
+      after: "[... `lean/Lara/Context/Equivalence.lean:784` ... `:665` ... `:712` ...]"
+      signal: dependency-change
+      provenance: ai-suggested
+      note: "Line-only repoint after the obsGen_ext deletion. No content change; now gated by check-lean-citations.py."
+
+  key_context:
+    - turn: 5
+      excerpt: >
+        The generalized repointing script over-reached and had to be partly reverted: its
+        "first declaration at or after line N" rule is right for a citation that named a
+        declaration and wrong for one that deliberately names a proof step, and its regex
+        matched the first number of a range (`Admission.lean:764-765` -> `791-765`). Both
+        classes were reverted by hand. The lesson is narrower than O156 stated: repoint by
+        name only those citations that resolved to a declaration BEFORE the edit, leave the
+        rest alone, and never match a number followed by a hyphen.
+    - turn: 5
+      excerpt: >
+        Two gates, deliberately disjoint. check_ara_source_spans.py owns ARA `Sources`
+        citations, which point at CONTENT lines and carry the matched text verbatim —
+        validating by quote is strictly stronger than resolving to a declaration.
+        check-lean-citations.py owns prose citations in lean/ and docs/. ara/trace,
+        ara/staging and ara/evidence are outside both: they are append-only records whose
+        citations describe the tree as it was, and repointing them would falsify the record.
+
+  open_threads:
+    - "PR #274 open, carrying the §2A refactor plus this follow-up."
+    - "check-lean-citations.py is not wired into CI (#225 is broken anyway) and is not run by any script other than by hand; it should join the local gate list in CONTRIBUTING or the PR template."
+    - "The 9 ALLOWLIST entries are line-pinned, so they will themselves rot when their files move; the gate reports an unused entry, which surfaces it, but does not repair it."
+
+  ai_suggestions_pending:
+    - "O156 — now partly discharged by a gate rather than a note; its content should be narrowed to the corrected rule before any crystallization."

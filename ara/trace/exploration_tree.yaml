@@ -8708,3 +8708,150 @@ tree:
     - "https://github.com/ARA-Labs/lara/issues/269"
   status: open
   also_depends_on: [N329]
+- id: N332
+  type: pivot
+  title: "#216 found already landed mid-implementation; work rescoped to the plan's unexecuted §2A refactor"
+  provenance: user
+  timestamp: "2026-09-07T20:40"
+  from: "Execute plans/2026-09-07-theory-m4-generic-ctxequiv.md end to end"
+  to: "Land only the plan's §3/Task-3/T1 refactor, the one part PR #271 did not implement"
+  trigger: >
+    Task 1 had been implemented and its spec review had passed when a check of the
+    referenced issues showed #216 CLOSED. `origin/main` was at d250d52 — turn 3's own
+    PR #271, merged 2026-09-07T23:47Z — and already carried
+    `lean/Lara/Context/Observation.lean`, `lean/Lara/Examples/ContextSemantics.lean`
+    and `docs/theory-m4-generic-observation.md`. The branch held only the two plan
+    commits and was one commit behind. The plan's own coordination note had
+    pre-registered this contingency ("If that branch is pushed first, this plan becomes
+    a review checklist against it"), so the checklist was run: Tasks 2, 4, 5, 6, 7 and
+    most of 8 were already landed — including Task 6 Step 5, the plan's one unauthored
+    and highest-risk step — while Task 1, Task 3 and finding T1 were not. Implementation
+    was stopped and the scope decision put to the researcher rather than assumed.
+  evidence:
+    - "git log HEAD..origin/main -> d250d52 'M4: contextual observation at an arbitrary ExtensionSemantics (#216) (#271)'"
+    - "gh issue view 216 -> CLOSED"
+    - "plans/2026-09-07-theory-m4-generic-ctxequiv.md, 'Coordination note'"
+  status: resolved
+  also_depends_on: [N327, N328]
+
+- id: N333
+  type: decision
+  title: "One payload-generic observation type, with the projection layer beside the theorems it generalizes"
+  provenance: user
+  timestamp: "2026-09-07T20:45"
+  choice: >
+    Replace PR #271's two-type design with the plan's §3 layering. `Fragment.lean`'s
+    `Observation` inductive becomes the payload-generic `ObservationOf α` with
+    `Observation` an abbreviation of it at `Grounded.Status`; `Lara.Context.Outcome α`
+    is deleted; `obsGen` and the `obsGen_*` lemmas move from `Context/Observation.lean`
+    into `Context/Equivalence.lean` beside the theorems they generalize, leaving
+    `Context/Observation.lean` as the semantics layer only. `obs_eq_of_ok` and
+    `backend_replacement_congruence` become one-line corollaries; a new `obs_eq_obsGen`
+    records the collapse by `rfl`.
+  alternatives:
+    - "Review-checklist only: verify the landed work, delete the executed plan, file the duplication as an issue, touch no merged code."
+    - "Abandon the branch: the work is landed; discard the two plan commits."
+  evidence:
+    - "commit eb6e955"
+    - "lean/Lara/Context/Fragment.lean (ObservationOf, Observation abbrev)"
+    - "lean/Lara/Context/Equivalence.lean (obsGen family, obs_eq_obsGen, the two corollaries)"
+    - "docs/theory-m4-generic-observation.md §2 'Why the projection layer sits in the grounded modules'"
+  status: resolved
+  also_depends_on: [N332, N327]
+
+- id: N334
+  type: experiment
+  title: "The unified type makes the milestone's design premise kernel-checked, and costs no fixture"
+  provenance: ai-executed
+  timestamp: "2026-09-07T21:05"
+  result: >
+    Two findings, both measured rather than argued.
+
+    (1) `obs_eq_obsGen : obs reg C F = obsGen (Invariants.status canon) reg C F` closes
+    by `rfl`. Under the two-type design this equation does not typecheck at all —
+    `obs : Observation` and `obsGen g : Outcome α` are different types — so the sentence
+    "`obs` is `obsGen` at `g := Invariants.status canon`", which is the milestone's whole
+    design premise and which PR #271 asserts in prose at
+    `docs/theory-m4-generic-observation.md:81`, could only be a comment. It is now a
+    theorem the kernel checks, pinned in `AxCheck.lean`.
+
+    (2) Replacing the frozen `Observation` inductive did NOT cost the `decide`-closed
+    fixtures. Every `Examples` module compiled unchanged — `Examples/Linking.lean` was not
+    touched at all and its `congruence_witness` / `registry_swap_witness` still build —
+    because an `abbrev` is definitionally transparent, so `decide` reduces through it.
+    `lake build Lara` 100 jobs; axiom audit passed with all new theorems in the standard
+    trio; AxCheck coverage 90 declarations. The signature-level diff of `Equivalence.lean`
+    is purely additive: no existing theorem changed name, type, or implicit-argument order.
+
+    The deduplication removed **two** proof bodies, not the three the plan's T1 finding
+    claimed — `registry_swap_congruence` was already a corollary of
+    `backend_replacement_congruence` before this turn.
+  evidence:
+    - "commit eb6e955"
+    - "ara/evidence/proofs/m4_generic_observation.md, 'Follow-up: the unified type (commit eb6e955)'"
+    - "lean/Lara/Context/Equivalence.lean (obs_eq_obsGen, closes by rfl)"
+    - "git show d250d52:lean/Lara/Context/Equivalence.lean (registry_swap_congruence already a corollary)"
+  status: resolved
+  also_depends_on: [N333]
+
+- id: N335
+  type: decision
+  title: "O152's 'avoids touching the frozen type' rationale is dropped; its primary content stands"
+  provenance: user
+  timestamp: "2026-09-07T21:10"
+  choice: >
+    Adjudicated by the researcher on 2026-09-07: drop the contradicted clause, keep the
+    rest. O152's primary content — parameterize the projection, not the concept — is
+    reinforced by this turn, not refuted: `obsGen` survived the refactor unchanged and is
+    still what proves the family once. What is refuted is the subsidiary rationale that
+    the parametric type must sit *beside* the frozen one to protect `decide`-closed
+    fixtures. It need not, and the cost of the second type was real: the collapse theorem
+    relating the two is not well-formed across distinct types, so the design premise stays
+    prose. O155 carries the corrected form. Superseded clause recorded here rather than
+    edited out of O152, which is append-only.
+  description: >
+    O152 (staged, turn 3) argues for parameterizing the projection and gives as one of its
+    reasons that this "avoids touching the frozen type whose exact shape decide-closed
+    fixtures depend on, since the new parametric type sits beside it rather than replacing
+    it." N334 replaced that frozen type and no `decide`-closed fixture broke, because
+    `abbrev` is definitionally transparent. O152's primary content — parameterize the
+    projection, not the concept — is untouched and was in fact reinforced this turn; only
+    the subsidiary "sits beside rather than replaces" rationale is contradicted, and with
+    it the implied cost that justified the second type. Recorded rather than silently
+    edited, per the contradiction trigger.
+  alternatives:
+    - "Revise O152 in place — rejected: staging/ is append-only."
+    - "Promote O152 with the clause dropped — rejected: no closure signal, and adjudication is the researcher's."
+  evidence:
+    - "ara/staging/observations.yaml:O152 (the contradicted clause)"
+    - "ara/staging/observations.yaml:O155 (the corrected form)"
+    - "trace N334"
+    - "commit eb6e955 (the replacement that cost no fixture)"
+  status: resolved
+  also_depends_on: [N334, N333]
+
+- id: N336
+  type: decision
+  title: "Citation rot gets a gate; obsGen_ext gets deleted"
+  provenance: user
+  timestamp: "2026-09-07T22:05"
+  choice: >
+    Two follow-ups the previous turn had recorded as needing a call, decided rather than
+    carried. (1) `Lara.Context.obsGen_ext` is deleted: no consumer anywhere, and the
+    intended use its docstring described never materialized. (2) `file:line` prose
+    citations get `scripts/check-lean-citations.py`, which resolves each to a declaration
+    and fails on rot, with an ALLOWLIST for the citations that deliberately point at a
+    proof step, a structure field or a module header. The gate is scoped to `lean/`,
+    `docs/` and `scripts/`; ARA `Sources` citations stay with
+    `scripts/check_ara_source_spans.py`, which validates them by quote, and the append-only
+    ARA records stay outside both because their citations describe the tree as it was.
+  alternatives:
+    - "Keep obsGen_ext and record its retention — rejected: nothing consumes it and no use is planned."
+    - "Leave citation rot as a noted risk — rejected: it recurred three times in two turns, twice after being 'fixed'."
+    - "Gate ara/ citations too — rejected: trace/staging/evidence are append-only, and ara/logic's Sources are already validated more strongly by quote."
+  evidence:
+    - "scripts/check-lean-citations.py (verified to FAIL on injected line drift, then PASS restored)"
+    - "Lean citations: PASS (104 citations, 9 allowlisted)"
+    - "AxCheck coverage passed (89 declarations) after the obsGen_ext pin removal"
+  status: resolved
+  also_depends_on: [N334, N335]

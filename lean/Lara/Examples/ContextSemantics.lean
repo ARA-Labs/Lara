@@ -1,7 +1,7 @@
 /-
 # Theory M4, phase F2 — the semantics parameter is not inert *at the context level*
 
-`Lara.Context.obsSem` (`lean/Lara/Context/Observation.lean:308`) quantifies over
+`Lara.Context.obsSem` (`lean/Lara/Context/Observation.lean:119`) quantifies over
 `Semantics.ExtensionSemantics`, and every theorem proved about it holds for all
 of them at once. That is exactly the shape a *vacuous* generalization would also
 have. Nothing in `Lara/Context/Observation.lean` rules out the reading that the
@@ -31,7 +31,7 @@ boundary by `linkedUnit`, not written down as a bare `Grounded.AF`:
   a constructor that *no* grounded observation can produce —
   `Invariants.observeSem_grounded` (`lean/Lara/Invariants/Observation.lean:90`)
   returns `ClaimObservation.observed _` unconditionally, and `liftObservation`
-  (`lean/Lara/Context/Observation.lean:360`) only ever emits that constructor.
+  (`lean/Lara/Context/Observation.lean:171`) only ever emits that constructor.
   So `obsSem` is visibly *wider* than `obs`, not merely differently valued on
   some input.
 * **the two-cycle with a sink** (`sinkCtx`/`sinkFrag`): `preferredSem` reports
@@ -115,7 +115,7 @@ boundary and are supplied by `crossAtts` (`lean/Lara/Context/Fragment.lean:207`)
 — the mechanism `Linking.crossAtts_nonempty`
 (`lean/Lara/Examples/Linking.lean:139`) pins. The third, `s ⊣ p`, has **both
 endpoints among the fragment's own arguments**, so the fragment must declare it
-itself: `SideOk.attack_complete` (`lean/Lara/Context/Link.lean:631`) obliges a
+itself: `SideOk.attack_complete` (`lean/Lara/Context/Link.lean:638`) obliges a
 side to cover every contrary pair internal to it, and
 `Linking.hostile_composite_not_sideOk` (`lean/Lara/Examples/Linking.lean:561`)
 is the witness that omitting such an attack really does break well-formedness.
@@ -169,7 +169,7 @@ which stopped linking is distinguishable from a separation that collapsed. -/
 theorem cycle_link_ok : linkOk cycleCtx cycleFrag = true := by decide
 
 /-- The merged unit is accepted by the executable whole-unit checker, so the
-observations below are taken on `Outcome.observed` rather than on a rejection.
+observations below are taken on `ObservationOf.observed` rather than on a rejection.
 Same role as `Linking.linked_accepted` (`lean/Lara/Examples/Linking.lean:149`). -/
 theorem cycle_accepted :
     (Check.Unit.checkUnit (linkGamma cycleCtx cycleFrag) registryEx
@@ -200,9 +200,9 @@ Why this is the sharp form. `noExtension` is a constructor the grounded reading
 provably cannot reach: `Invariants.observeSem_grounded`
 (`lean/Lara/Invariants/Observation.lean:90`) always returns
 `ClaimObservation.observed _`, and `liftObservation`
-(`lean/Lara/Context/Observation.lean:360`) only produces that constructor too.
+(`lean/Lara/Context/Observation.lean:171`) only produces that constructor too.
 So this does not merely show `obsSem` taking two values; it shows `obsSem`
-inhabiting an arm of `Outcome ClaimObservation` that `liftObservation ∘ obs`
+inhabiting an arm of `ObservationOf ClaimObservation` that `liftObservation ∘ obs`
 cannot inhabit. The widening of the observed payload from `Grounded.Status` to
 `ClaimObservation` is therefore forced by a fixture of this development, not
 only by `Semantics.observe`'s signature.
@@ -213,7 +213,7 @@ values that happen to be pinned separately.
 
 What may **not** be concluded: nothing here says the two semantics differ on any
 other carrier, and nothing here bears on `ctxEquivSem_grounded_iff`
-(`lean/Lara/Context/Observation.lean:470`), which is a statement about
+(`lean/Lara/Context/Observation.lean:281`), which is a statement about
 `groundedSem` alone. -/
 theorem obsSem_cycle_stable_ne_grounded :
     obsSem groundedSem registryEx cycleCtx cycleFrag
@@ -332,12 +332,12 @@ They are the semantics-parametric counterparts of `Linking.congruence_witness`
 (`:670`), and they reuse those witnesses' inputs verbatim:
 `Linking.admissible_split` (`:345`), `Linking.assurPreserving_onlyNd` (`:658`),
 `Linking.registryOnlyNd` (`:637`), and `fixesContext_id`
-(`lean/Lara/Context/Equivalence.lean:675`). -/
+(`lean/Lara/Context/Equivalence.lean:857`). -/
 
 /-- **The congruence, instantiated at every semantics at once.**
 
 What this establishes, precisely: the hypotheses of
-`backend_replacement_congruence_sem` (`lean/Lara/Context/Observation.lean:506`)
+`backend_replacement_congruence_sem` (`lean/Lara/Context/Observation.lean:317`)
 are inhabited, and its conclusion type-checks and is provable at a concrete
 link, uniformly in `sem`.
 
@@ -405,7 +405,7 @@ theorem ctxEquivSem_negative : ¬ CtxEquivSem stableSem registryEx fragEx silent
 
 /-! ### Both directions of `ctxEquivSem_grounded_iff` are load-bearing
 
-`ctxEquivSem_grounded_iff` (`lean/Lara/Context/Observation.lean:470`) is stated
+`ctxEquivSem_grounded_iff` (`lean/Lara/Context/Observation.lean:281`) is stated
 as an `iff`, and the milestone requires it to stay one. But nothing in the
 development consumed either direction, so weakening it to a one-way implication
 — in *either* direction — would have left `lake build` green and both axiom
@@ -441,7 +441,7 @@ theorem ctxEquivSem_grounded_of_ctxEquiv {F₁ F₂ : Fragment} (h : CtxEquiv re
 
 /-! ### The grounded regression, exercised — and the agreement it sits in -/
 
-/-- **`obsSem_grounded` (`lean/Lara/Context/Observation.lean:424`), used.**
+/-- **`obsSem_grounded` (`lean/Lara/Context/Observation.lean:235`), used.**
 
 The grounded reading of `Linking`'s acyclic fixture is derived *through* the
 regression theorem — `rw [obsSem_grounded, Linking.obs_defeated]` — rather than
@@ -559,7 +559,7 @@ The proof cannot be `decide`, precisely because `sem` is free. It runs the case
 split `obsGen` runs: the checker's rejection branch is refuted by
 `gap_accepted`, and on the accepted branch the exported claim's grounded status
 is extracted from `Linking.obs_gap` (`lean/Lara/Examples/Linking.lean:187`)
-through `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:547`) and handed to
+through `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:675`) and handed to
 `Invariants.observeSem_of_status_gap`, which is where the semantics-independence
 actually lives.
 
@@ -585,18 +585,18 @@ theorem obsSem_gap_uniform (sem : ExtensionSemantics) :
         simpa [gapFrag, fragEx] using h
       rw [obsSem_eq_of_ok sem (by decide) hchk]
       simp only [gapFrag, fragEx, List.map_cons, List.map_nil]
-      exact congrArg (fun x => Outcome.observed [x])
+      exact congrArg (fun x => ObservationOf.observed [x])
         (Invariants.observeSem_of_status_gap sem id (Invariants.compileUnit acc) pC hstatus)
 
 /-! ### The two failure arms, at every semantics
 
-Every fixture above lands on `Outcome.observed`. The grounded `Observation`
+Every fixture above lands on `ObservationOf.observed`. The grounded `Observation`
 reaches all three arms — `Linking.obs_incompatible_id_clash`
 (`lean/Lara/Examples/Linking.lean:115`) and `Linking.obs_rejected_signature`
 (`:129`) are the other two — and the semantics-parametric twins are free,
 because the link guard and the whole-unit checker both run *before* any
 projection is consulted. That is exactly the content of `obsGen_incompatible`
-and `obsGen_rejected` (`lean/Lara/Context/Observation.lean:148`, `:165`), and it
+and `obsGen_rejected` (`lean/Lara/Context/Equivalence.lean:603`, `:621`), and it
 is why these must be term proofs through `obsSem_incompatible` /
 `obsSem_rejected` rather than `decide`: with `sem` free there is nothing for
 `decide` to evaluate, and the point is that there is nothing it *needs* to

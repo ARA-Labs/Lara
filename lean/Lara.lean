@@ -288,14 +288,21 @@
 --     a second development. The generic congruences carry *no* additional
 --     hypothesis — in particular no `AttackExtensional` — because they
 --     transport along the carrier equality `compileUnit_link_relabel` supplies
---     rather than along pointwise attack agreement. The grounded case is
---     recovered as a theorem, not by editing the grounded definitions
---     (`obsSem_grounded`, and `ctxEquivSem_grounded_iff` as an `iff`, so no M4
---     statement moves). Context-level separations witness that the semantics
---     parameter is not an abstraction over one instance: a linked three-cycle
---     where `stableSem` reports `noExtension` and a sink where `preferredSem`
---     and `groundedSem` disagree — Lara.Invariants.Observation,
---     Lara.Context.Observation, Lara.Examples.ContextSemantics.
+--     rather than along pointwise attack agreement. The projection layer sits
+--     in Lara.Context.Fragment / Lara.Context.Equivalence rather than beside
+--     the semantics: `Observation` is an abbreviation of a payload-generic
+--     `ObservationOf α`, `obsGen` lives next to the theorems it generalizes,
+--     `obs_eq_obsGen` holds by `rfl`, and the grounded `obs_eq_of_ok` /
+--     `backend_replacement_congruence` are one-line corollaries rather than a
+--     second copy of the same proof. `obs`, `CtxEquiv` and every grounded
+--     statement are unchanged. The grounded case at a *semantics* is likewise
+--     recovered as a theorem (`obsSem_grounded`, and `ctxEquivSem_grounded_iff`
+--     as an `iff`, so no M4 statement moves). Context-level separations witness
+--     that the semantics parameter is not an abstraction over one instance: a
+--     linked three-cycle where `stableSem` reports `noExtension` and a sink
+--     where `preferredSem` and `groundedSem` disagree —
+--     Lara.Invariants.Observation, Lara.Context.Observation,
+--     Lara.Examples.ContextSemantics.
 -- See docs/mechanization-plan.md for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation

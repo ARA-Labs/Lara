@@ -19,6 +19,20 @@ Naming discipline (issue #187): this is **contextual representation
 independence**. It is not parametricity — that would need a relational
 quantification over related backends (issue #215) — and it is not full
 abstraction, which needs a logical relation (Part B).
+
+## The projection layer (issue #216)
+
+The module also owns the layer that leaves the *reading* of the carrier open:
+`obsGen` (`:562`) is `obs` with `Invariants.status canon` replaced by an
+arbitrary projection, and `obsGen_congr` (`:778`) is the real proof of the
+congruence — `backend_replacement_congruence` (`:817`) is that theorem
+instantiated at the grounded reading, in one line.
+
+It lives here rather than beside the semantics that instantiate it because none
+of its *statements* mentions a semantics and none needs an import this module
+did not already have. `Lara.Context.obsSem`
+(`lean/Lara/Context/Observation.lean:119`) is the instantiation the milestone
+exists for; `docs/theory-m4-generic-observation.md` §2 records the choice.
 -/
 
 import Lara.Context.Compose
@@ -538,6 +552,120 @@ structure Admissible {canon : String → String} (reg : BackendRegistry canon)
   ruleIds : (F.policy.rules.map (·.id)).Nodup
   policy : Policy.WellFormed canon F.policy
 
+/-! ### The observation, parameterized by how a claim is read
+
+`obs` is grounded-specific at exactly one point: it reads `Invariants.status`
+off the linked carrier. Every step before that read — the link guard, the
+whole-unit checker, the carrier itself — is already free of any semantics.
+These declarations make that structural fact usable by leaving the reading a
+parameter. None of these *statements* mentions a semantics; the semantics
+instance is `Lara.Context.obsSem` (`lean/Lara/Context/Observation.lean:119`).
+
+The congruence over this parameter, `obsGen_congr`, needs the relabeling
+variables and so appears in the `Headline` section below (`:778`), beside the
+grounded instance it now carries the proof for. -/
+
+/-- **The observation of a link through an arbitrary projection.** The control
+flow is `Lara.Context.obs`'s, verbatim (`lean/Lara/Context/Fragment.lean:459`):
+guard first, then the whole-unit checker on the linked unit, then — and only
+then — read the exported conclusions off the M1 carrier of the accepted unit.
+The single difference is that `obs` hard-codes `Invariants.status canon` where
+this takes `g`.
+
+`g` receives the *linked* carrier, not the fragment's own: an open fragment has
+no framework of its own (D10), and `fragmentCarrier`
+(`lean/Lara/Context/Fragment.lean:407`) is the fragment-relative substitute.
+What is projected here is always the carrier of the context-plus-fragment unit,
+which is what makes the result an *observation* in the contextual sense. -/
+def obsGen {α : Type} (g : Invariants.StructuredAF → Atom → α)
+    {canon : String → String} (reg : BackendRegistry canon)
+    (C : Context) (F : Fragment) : ObservationOf α :=
+  match linkFault C F with
+  | some fault => .incompatible fault
+  | none =>
+      match Check.Unit.checkUnit (linkGamma C F) reg (linkGround C F)
+          (linkedUnit reg C F) with
+      | .ok accepted =>
+          .observed (F.exports.map (fun p => g (Invariants.compileUnit accepted) p))
+      | .error error => .rejected error
+
+/-- **The incompatible arm is projection-independent by construction.** If the
+link guard fires, `obsGen` reports the fault for *every* `g` — the projection is
+never consulted, because `linkFault` is matched before the checker runs and long
+before any carrier exists to project.
+
+This is worth stating as a theorem rather than leaving to `decide` at each
+fixture. `decide` settles the arm for one concrete semantics at a time; this
+settles it uniformly, which is what a witness quantified over all of
+`ExtensionSemantics` needs (via `obsSem_incompatible`). Nothing here says which
+links fault — that is `linkFault`'s business, and this theorem is indifferent to
+it. -/
+theorem obsGen_incompatible {α : Type} (g : Invariants.StructuredAF → Atom → α)
+    {canon : String → String} {reg : BackendRegistry canon}
+    {C : Context} {F : Fragment} {fault : LinkFault}
+    (h : linkFault C F = some fault) :
+    obsGen g reg C F = .incompatible fault := by
+  simp only [obsGen, h]
+
+/-- **The rejected arm is projection-independent by construction.** A compatible
+link whose merged unit the whole-unit checker rejects reports that `UnitError`
+for every `g`, for the same structural reason as `obsGen_incompatible`:
+`Check.Unit.checkUnit` runs on the linked unit before `Invariants.compileUnit`
+is ever applied, so no projection can influence — or observe — the rejection.
+
+The `hlink` hypothesis is `linkFault C F = none` rather than `linkOk C F = true`
+because that is the form the definitional match needs; `obsGen_eq_of_ok` takes
+the `linkOk` spelling instead and converts, which is also the spelling its
+grounded instance `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:675`)
+exposes. -/
+theorem obsGen_rejected {α : Type} (g : Invariants.StructuredAF → Atom → α)
+    {canon : String → String} {reg : BackendRegistry canon}
+    {C : Context} {F : Fragment} {error : Check.Unit.UnitError}
+    (hlink : linkFault C F = none)
+    (h : Check.Unit.checkUnit (linkGamma C F) reg (linkGround C F)
+      (linkedUnit reg C F) = .error error) :
+    obsGen g reg C F = .rejected error := by
+  simp only [obsGen, hlink, h]
+
+/-- **An accepted link observes through its carrier**, generically. This is
+`obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:675`) with the projection
+left open — and it carries the proof that theorem used to run, `obs_eq_of_ok`
+now being this one instantiated: `linkOk` is `Option.isNone` of `linkFault`, so
+the guard hypothesis rewrites into the shape the match wants, and the two
+matches then reduce.
+
+Note the accepted unit `acc` appears in the conclusion. That is not incidental
+bookkeeping: the whole-unit checker is what produces the `CheckedUnit` whose node
+cache `Invariants.compileUnit` reads, so there is no way to state the observed
+arm without naming it. Every congruence below works by producing an `acc` on
+each side and then proving the two carriers equal. -/
+theorem obsGen_eq_of_ok {α : Type} (g : Invariants.StructuredAF → Atom → α)
+    {canon : String → String} {reg : BackendRegistry canon}
+    {C : Context} {F : Fragment}
+    {acc : Lara.Unit.CheckedUnit canon (linkGamma C F) (certOkOf reg)}
+    (hlink : linkOk C F = true)
+    (h : Check.Unit.checkUnit (linkGamma C F) reg (linkGround C F)
+      (linkedUnit reg C F) = .ok acc) :
+    obsGen g reg C F
+      = .observed (F.exports.map (fun p => g (Invariants.compileUnit acc) p)) := by
+  have hfault : linkFault C F = none := by
+    simpa only [linkOk, Option.isNone_iff_eq_none] using hlink
+  simp only [obsGen, hfault, h]
+
+/-- **The frozen `obs` is `obsGen` at the grounded projection — definitionally.**
+`rfl` rather than a proof is the point: the D4 observation is not being
+reinterpreted, it is being read at one instantiation of a parameter that was
+implicit in it all along. Everything the link contributes — the guard fault, the
+checker's rejection, the accepted carrier — is shared, and this is the equation
+that says so.
+
+Stating it requires `obs` and `obsGen` to land in the *same* type, which is why
+`ObservationOf` replaced the standalone `Observation` inductive
+(`lean/Lara/Context/Fragment.lean`) rather than being introduced beside it. -/
+theorem obs_eq_obsGen {canon : String → String} (reg : BackendRegistry canon)
+    (C : Context) (F : Fragment) :
+    obs reg C F = obsGen (Invariants.status canon) reg C F := rfl
+
 section Headline
 
 variable {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
@@ -551,10 +679,8 @@ theorem obs_eq_of_ok {reg : BackendRegistry canon}
       (linkedUnit reg C F) = .ok acc) :
     obs reg C F
       = .observed
-          (F.exports.map (fun p => Invariants.status canon (Invariants.compileUnit acc) p)) := by
-  have hfault : linkFault C F = none := by
-    simpa only [linkOk, Option.isNone_iff_eq_none] using hlink
-  simp only [obs, hfault, h]
+          (F.exports.map (fun p => Invariants.status canon (Invariants.compileUnit acc) p)) :=
+  obsGen_eq_of_ok _ hlink h
 
 /-- An admissible context yields an accepted link. -/
 theorem exists_accepted_of_admissible {reg : BackendRegistry canon}
@@ -603,6 +729,74 @@ theorem compileUnit_link_relabel
     (by rw [hsound₂.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.1]; exact hargs)
     (by rw [hsound₂.2.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.2.1]; exact hatts)
 
+/-- **Contextual representation independence, for every projection at once.**
+
+An injective, acceptance-preserving relabel of a fragment's certificates is
+unobservable in every admissible context whose own assurances the relabel fixes
+— and *whatever* is read off the resulting carrier. This is
+`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:820`) with
+`Invariants.status canon` replaced by an arbitrary `g`. It carries the proof
+that theorem used to carry; that theorem is now this one instantiated.
+
+**Why the generalization is free.** The argument produces an accepted link on
+each side and then appeals to `compileUnit_link_relabel`
+(`lean/Lara/Context/Equivalence.lean:712`), whose conclusion is
+`Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁` — an equation
+between carriers, not a pointwise agreement between them:
+
+      reg₁, F                                  reg₂, mapAssurFrag f F
+         |                                              |
+         | linkedUnit reg₁ C F                          | linkedUnit reg₂ C (mapAssurFrag f F)
+         v                                              v
+      checkUnit ... = .ok acc₁                  checkUnit ... = .ok acc₂
+         |                                              |
+         | Invariants.compileUnit                       | Invariants.compileUnit
+         \                                              /
+          \____________ compileUnit_link_relabel ______/
+                              |
+                              v
+                    one carrier  G : StructuredAF
+                              |
+                              |  F.exports.map (fun p => g G p)   -- any g whatsoever
+                              v
+                        ObservationOf.observed …
+
+Once the two sides meet at a single `G`, the projection hanging off it is
+applied to the same argument on both branches, so it cannot distinguish them.
+
+**Why there is no `AttackExtensional` hypothesis, and why there must not be.**
+`Lara.Observation.observe_congr` (`lean/Lara/Observation.lean:406`) does assume
+`AttackExtensional sem.spec`, but it is solving a different problem: it moves an
+observation between two *distinct* frameworks that merely agree pointwise on the
+carrier, and extensionality is what licenses concluding that the extensions
+agree. Here the frameworks are equal, so no such licence is needed. A generic
+statement that assumed `AttackExtensional` anyway would be strictly weaker than
+its grounded ancestor `backend_replacement_congruence`, which assumes nothing of
+the kind — and would not deserve to be called its generalization.
+
+The admissibility hypothesis is not removable, and the reason is stated here
+rather than at the grounded instance because this is now the theorem that
+carries the proof: `obsGen` reports a checker rejection separately from an
+observed list, so a forward-only acceptance hypothesis — which lets `reg₂`
+accept what `reg₁` rejects — could turn an observation into a rejection. An
+unconditional statement would need acceptance to be two-way, which is a
+different and stronger notion of backend replacement. -/
+theorem obsGen_congr {α : Type} (g : Invariants.StructuredAF → Atom → α)
+    (hf : Function.Injective f)
+    (hpres : AssurPreserving f (certOkOf reg₁) (certOkOf reg₂))
+    (hadm : Admissible reg₁ C F) (hfix : FixesContext f C) :
+    obsGen g reg₁ C F = obsGen g reg₂ C (mapAssurFrag f F) := by
+  obtain ⟨acc₁, h₁⟩ := exists_accepted_of_admissible hadm
+  obtain ⟨acc₂, h₂⟩ := exists_accepted_relabel hf hpres hadm hfix h₁
+  rw [obsGen_eq_of_ok g hadm.guard h₁,
+    obsGen_eq_of_ok g (C := C) (F := mapAssurFrag f F)
+      (by rw [linkOk_mapAssurFrag]; exact hadm.guard)
+      (by rw [linkGround_mapAssurFrag]; exact h₂)]
+  refine congrArg ObservationOf.observed ?_
+  rw [mapAssurFrag_exports]
+  exact congrArg (fun G => F.exports.map (fun p => g G p))
+    (compileUnit_link_relabel hf hpres hadm hfix h₁ h₂).symm
+
 /-- **Contextual representation independence (the M4 Part A headline).**
 
 An injective, acceptance-preserving relabel of a fragment's certificates is
@@ -621,26 +815,14 @@ hypothesis — which is why it is cited rather than re-derived
 abstraction (no logical relation — Part B).
 
 The admissibility hypothesis is not a technicality that better proof
-engineering would remove. `obs` records a checker rejection separately from an
-observed status list, and a forward-only acceptance hypothesis lets `reg₂`
-accept certificates `reg₁` rejects; an unconditional statement would therefore
-need acceptance to be two-way, which is a different (and stronger) notion of
-backend replacement. -/
+engineering would remove; `obsGen_congr` (`:778`), which now carries this
+theorem's proof, records why. -/
 theorem backend_replacement_congruence
     (hf : Function.Injective f)
     (hpres : AssurPreserving f (certOkOf reg₁) (certOkOf reg₂))
     (hadm : Admissible reg₁ C F) (hfix : FixesContext f C) :
-    obs reg₁ C F = obs reg₂ C (mapAssurFrag f F) := by
-  obtain ⟨acc₁, h₁⟩ := exists_accepted_of_admissible hadm
-  obtain ⟨acc₂, h₂⟩ := exists_accepted_relabel hf hpres hadm hfix h₁
-  rw [obs_eq_of_ok hadm.guard h₁,
-    obs_eq_of_ok (C := C) (F := mapAssurFrag f F)
-      (by rw [linkOk_mapAssurFrag]; exact hadm.guard)
-      (by rw [linkGround_mapAssurFrag]; exact h₂)]
-  refine congrArg Observation.observed ?_
-  rw [mapAssurFrag_exports]
-  exact congrArg (fun G => F.exports.map (fun p => Invariants.status canon G p))
-    (compileUnit_link_relabel hf hpres hadm hfix h₁ h₂).symm
+    obs reg₁ C F = obs reg₂ C (mapAssurFrag f F) :=
+  obsGen_congr _ hf hpres hadm hfix
 
 end Headline
 

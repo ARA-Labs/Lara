@@ -3240,6 +3240,9 @@ observations:
   crystallized_via: artifact-commitment
   stale: false
 
+# SUPERSEDED IN PART: the "avoids touching the frozen type ... sits beside it rather
+# than replacing it" clause below was adjudicated wrong on 2026-09-07 (N335, resolved).
+# The rest of O152 stands and was reinforced by that turn. O155 carries the correction.
 - id: O152
   timestamp: "2026-09-07T16:25"
   provenance: ai-suggested
@@ -3302,6 +3305,60 @@ observations:
     Weakening the iff to an implication would otherwise keep both gates green.
   potential_type: heuristic
   bound_to: [N329, N328]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O155
+  timestamp: "2026-09-07T21:05"
+  provenance: ai-executed
+  content: >
+    Generalizing a frozen inductive by *replacing* it with a parametric one plus an
+    `abbrev` at the old instance costs the existing `decide`-closed fixtures nothing,
+    because an `abbrev` is definitionally transparent and `decide` reduces through it.
+    The alternative — introducing the parametric type beside the frozen one — buys no
+    fixture safety and forfeits something real: the collapse theorem relating the two
+    (`obs = obsGen (Invariants.status canon)`) does not typecheck across two distinct
+    types, so the design premise stays prose. When the generic and specific types would
+    otherwise be structurally identical, replace-and-abbreviate dominates sit-beside.
+    # Supersedes O152's "avoids touching the frozen type ... sits beside it rather than
+    # replacing it" clause; adjudicated in N335 (resolved), O152 otherwise stands.
+  context: >
+    Landing #216's §2A refactor (commit eb6e955) after PR #271 had shipped the sit-beside
+    form. `Observation` became `abbrev Observation := ObservationOf Grounded.Status` and
+    `Outcome α` was deleted; `Examples/Linking.lean` was not edited at all and its
+    decide-closed `congruence_witness` / `registry_swap_witness` still compile.
+    `lake build Lara` 100 jobs, axiom trio held, coverage 90 declarations.
+  potential_type: heuristic
+  bound_to: [N333, N334, N335]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O156
+  timestamp: "2026-09-07T21:15"
+  provenance: ai-executed
+  content: >
+    A `file.lean:NNN` cross-reference in a docstring is a silent-rot citation: nothing
+    compiles it, so it survives any edit that shifts lines and goes on pointing at
+    whatever now sits there. Repairing a set of them by computing a line *delta* fails
+    the moment a later edit in the same session shifts lines again — the repair is
+    correct only against the tree state it was computed from. Repair by resolving each
+    citation to the declaration NAME it intends and re-reading that name's current line,
+    which is idempotent and survives further edits; then re-run the resolver after the
+    last edit, not before it.
+  context: >
+    The §2A refactor moved ~200 lines between two modules and later grew two module
+    headers. Both review stages caught citation rot: the spec review found 7 sites
+    re-numbered with the wrong delta (-202 where the true shift was -186), and after
+    fixing those, the docstring corrections shifted every line again. A name-based
+    resolver re-pointed all 23 Context citations and was re-run after the final edit;
+    an audit of all 66 cross-file citations then showed every one landing on the
+    declaration its prose names.
+  potential_type: heuristic
+  bound_to: [N333, N334]
   promoted: false
   promoted_to: null
   crystallized_via: null
