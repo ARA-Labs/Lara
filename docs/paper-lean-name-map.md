@@ -211,7 +211,7 @@ slots-plus-witness certificate over the identity encoding.
 
 Two further registered instances discharge the same four laws and are omitted
 from the table only because they add no new *shape* of discharge, not because
-they are exempt: `ord@1` (`Ord.ordBackend`, `Ord.lean`; `ordReplay_iff`,
+they are exempt: `ord@1` (`Ord.ordBackend`, `Ord.lean:362`; `ordReplay_iff`,
 `ordSound`, `ordUses_covers`/`_valid`/`_account`) and `insp@1`
 (`Insp.inspBackend`, `Insp.lean:595`; `inspReplay_iff` :344, `inspSound` :403,
 `inspUses_covers` :421, `inspUses_valid` :438, `inspUses_account` :461). Both
@@ -225,9 +225,9 @@ rather than as a third numeric checker.
 
 | Law | Interface (Strict.lean) | ND discharge | RA discharge |
 |---|---|---|---|
-| **B1** deterministic terminating replay | `Backend.replayFull` (:91) is a total Lean function — termination and determinism by construction; adequacy `replayFull_iff` (:93); caller-facing `replay` / `replay_iff` (:136, :140) | `ndReplay` (:664, decode + `ND.infer`, "no proof search"), `ndReplay_iff` (:673); uniqueness `ND.hasType_unique` (`ND.lean:861`) | `raReplay` (`RA.lean:251`, decode + `checkB`, "no search"), `raReplay_iff` (:256) |
+| **B1** deterministic terminating replay | `Backend.replayFull` (:91) is a total Lean function — termination and determinism by construction; adequacy `replayFull_iff` (:93); caller-facing `replay` / `replay_iff` (`Strict.lean:136`, :140) | `ndReplay` (:664, decode + `ND.infer`, "no proof search"), `ndReplay_iff` (:673); uniqueness `ND.hasType_unique` (`ND.lean:861`) | `raReplay` (`RA.lean:251`, decode + `checkB`, "no search"), `raReplay_iff` (:256) |
 | **B2** normalization reflection: `encode p = encode q ↔ p ≡ q` | field `enc_iff` (:83), with `p ≡ q` := `Lara.equiv canon p q` = `nf canon p = nf canon q` (`Prop.lean:103`) | `ndEnc_iff` (:642), via `encodeAtomKey_injective` (:631) and round-trip `decodeAtomKey_encodeAtomKey` (:590) | `enc := nf canon` (identity encoding), `enc_iff` = `equiv_iff_nf_eq` (`Prop.lean:111`) |
-| **B3** certificate soundness w.r.t. the backend consequence relation | field `soundFull` (:94); consequence relation = `modelsFull` (:85); derived `Backend.sound` (:145); headline **Theorem 1** `strict_step_sound` (:217) | `ND.nd_sound` (`ND.lean:396`), algorithmic side `ND.infer_sound` (`ND.lean:549`); consequence `ndModels` (:649) | `raSound` (`RA.lean:296`) via `checkB_extract` (:271); consequence `raModels` (:236) |
+| **B3** certificate soundness w.r.t. the backend consequence relation | field `soundFull` (:95); consequence relation = `modelsFull` (:85); derived `Backend.sound` (`Strict.lean:145`); headline **Theorem 1** `strict_step_sound` (:217) | `ND.nd_sound` (`ND.lean:396`), algorithmic side `ND.infer_sound` (`ND.lean:549`); consequence `ndModels` (:649) | `raSound` (`RA.lean:296`) via `checkB_extract` (`RA.lean:271`); consequence `raModels` (:236) |
 | **B4** exact dependency reporting (obligation 4, three clauses) | `uses` (:101); coverage `uses_covers` (:107); validity `uses_valid` (:113); accounting `uses_account` (:118); theory corollaries `replay_theory_covers` (:166), `replay_theory_agnostic` (:181), `uses_valid_closed` (:152) | `ndReplay_agree` (:720), `ndUses_valid` (:736), `ndUses_account` (:703); checker tie `ndUses_eq_infer_deps` (:747); operational core `ND.nd_relevance` (`ND.lean:360`), `ND.fv_in_range` (:404), `ND.infer_deps_eq_fv` (:711), `ND.infer_agree` (:799) | `raUses_covers` (`RA.lean:306`), `raUses_valid` (:320), `raUses_account` (:335) |
 
 Notes for the paper wording:
@@ -250,10 +250,10 @@ Notes for the paper wording:
 
 - Read-only audit; no Lean changes (happy path of #68).
 - `lean/AxCheck.lean` already `#print axioms`-gates every headline row:
-  `srcStatus_iff_checked` (:381), `srcIn_iff_checkedGrounded` (:379),
-  `status_preservation` (:562), `grounded_stable` (:550),
-  `contrary_claims_not_both_justified` (:600), `strict_step_sound` (:157),
-  `ndBackend` (:159), `raBackend` (:185), `ndUses_eq_infer_deps` (:217).
+  `srcStatus_iff_checked` (:704), `srcIn_iff_checkedGrounded` (:702),
+  `status_preservation` (:903), `grounded_stable` (:891),
+  `contrary_claims_not_both_justified` (:942), `strict_step_sound` (:389),
+  `ndBackend` (:391), `raBackend` (:417), `ndUses_eq_infer_deps` (:533).
 - Remaining paper-side step (P1–P3 edits in the Overleaf repo): check each
   display side-by-side against the quoted quantifiers/hypotheses above, and
   in particular ensure `thm:preservation` cites `srcStatus_iff_checked`

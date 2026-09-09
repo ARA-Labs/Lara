@@ -27,7 +27,7 @@ shape `docs/paper-lean-name-map.md` uses inside a table row — or as a line RAN
 `Compile.lean:120-123`. Both are resolved rather than skipped.
 
 A file-less citation takes its file from the declaration the prose names beside
-it, unless the block it sits in names a `*.lean` file outright, which wins; and
+it, unless the block it sits in names one `*.lean` file outright, which wins; and
 failing both, from a fully-spelled citation standing beside it in the same
 enumeration. Where none of the three determines one file the citation is skipped,
 because a mis-attributed citation is worse than an unchecked one — see
@@ -38,10 +38,20 @@ checked only for being a later line of the same file and is never rewritten: how
 long the cited block ought to be is a judgment the prose makes and this gate does
 not.
 
-Deliberate citations of a non-declaration line — a proof step, a structure field,
-a module header — are legitimate and are declared in ALLOWLIST below, each with a
-reason. Anything else must resolve to a `def`/`theorem`/`abbrev`/`inductive`/
-`structure`/`instance`/`class`.
+Three kinds of line are citable. A `def`/`theorem`/`abbrev`/`inductive`/
+`structure`/`instance`/`class` is one. A `name : type` FIELD of an open
+`structure` or `class` body is another, being a declaration of its enclosing
+structure and cited as one — `docs/paper-lean-name-map.md` cites the backend
+interface field by field. A `#print axioms Foo` command is the third: it is what
+an `AxCheck` citation means to point at, and the name it must agree with is the
+audited `Foo`, not the command. Which theorems have to BE audited is not this
+gate's business — that is `scripts/check-axcheck-coverage.py`, which reads the
+same commands to a different end; this gate only holds the pointers to them
+straight, and the two never disagree because neither rewrites what it reads.
+
+Deliberate citations of a line of none of those kinds — a proof step, a module
+header, an `open` — are legitimate and are declared in ALLOWLIST below, each with
+a reason.
 
 Usage:
     scripts/check-lean-citations.py [--repo-root PATH]
@@ -67,20 +77,47 @@ CITATION = re.compile(
     r"(?<![A-Za-z0-9_./:-])(?:(?P<path>[A-Za-z0-9_./-]*\.lean))?"
     r":(?P<start>\d+)(?:[–—-](?P<end>\d+))?(?![\d–—-])(?!:\d)"
 )
+
 # A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
-# #print axioms-gates every headline row: `srcStatus_iff_checked` (:381) `` — is
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:704) `` — is
 # not a citation but a statement of what the surrounding block is about, and
-# BLOCK subjects are what stops a file-less citation being resolved against the
-# declaration's home file when the block plainly means a different file.
+# BLOCK subjects are what a file-less citation resolves against in preference to
+# the declaration's home file, the block plainly meaning the file it names.
 BARE_FILE_MENTION = re.compile(r"(?<![A-Za-z0-9_./:-])([A-Za-z0-9_./-]*\.lean)(?!:\d)")
+MODIFIERS = r"(?:private\s+|protected\s+|noncomputable\s+|partial\s+|unsafe\s+)*"
 DECL_PREFIX = (
-    r"^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+|partial\s+|unsafe\s+)*"
+    rf"^\s*(?:@\[[^\]]*\]\s*)?{MODIFIERS}"
     r"(?:def|theorem|lemma|abbrev|inductive|structure|instance|class|opaque|axiom)\b"
 )
 DECL = re.compile(DECL_PREFIX)
 # The declared name, when the declaration has one written on the same line. An
 # anonymous `instance : Foo := ...` has none, and then no name check is possible.
 DECL_NAME = re.compile(DECL_PREFIX + r"\s+(?P<name>[^\s:({\[]+)")
+
+# A `structure`/`class` opens a body whose fields are citable in their own right:
+# `docs/paper-lean-name-map.md` cites `Strict.Backend` field by field, and a field
+# is what the prose names there, so it is indexed as a declaration of its
+# enclosing structure rather than exempted as a non-declaration.
+STRUCTURE_OPEN = re.compile(
+    rf"^(?P<indent>[ \t]*)(?:@\[[^\]]*\]\s*)?{MODIFIERS}(?:structure|class)\b"
+)
+# A field is `name : type` — never `name := value`, which is an *instance* filling
+# a field in, and never `mk ::`, which names the constructor.
+FIELD = re.compile(r"^(?P<indent>[ \t]+)(?P<name>[^\W\d][\w'!?]*)\s*:(?![=:])")
+# `#print axioms Foo` is not a declaration but is exactly what an `AxCheck.lean`
+# citation means to point at: the audit of `Foo`, not `Foo` itself. It is citable,
+# and the name it audits is what the prose beside the citation must name.
+PRINT_AXIOMS = re.compile(r"^\s*#print\s+axioms\s+(?P<name>\S+)")
+
+# Line kinds a citation may land on. `DECLARATION` and `FIELD_KIND` name things
+# `lean/` declares, so they populate the name index a file-less citation is
+# resolved through; `AUDIT` does not, because `#print axioms Lara.Grounded.foo`
+# would otherwise make `foo` look like a declaration of `AxCheck.lean` and leave
+# every citation of `foo` ambiguous between the two files.
+DECLARATION = "declaration"
+FIELD_KIND = "field"
+AUDIT = "audit"
+DECLARING_KINDS = (DECLARATION, FIELD_KIND)
 
 # The prose name attached to a citation, in the overwhelmingly common shape
 # `` `foo_bar` (`path:NNN`) ``. CITATION_LEAD is everything allowed between the
@@ -109,7 +146,6 @@ BARE_FILE_CARRY = re.compile(
 # Keyed by the RESOLVED "lean/path:line"; the value is why it is exempt.
 ALLOWLIST: dict[str, str] = {
     "lean/Lara/Erase.lean:267": "cites the one-rewrite proof step itself, which is the point being made",
-    "lean/Lara/Context/Link.lean:631": "cites the `attack_complete` structure field, not the structure",
     "lean/Lara/Observation.lean:545": "cites the prose paragraph on List.nodup_range, not a declaration",
     "lean/Lara/Consistency.lean:42": "pre-existing: cites a proof step inside statusC_justified_iff",
     "lean/Lara/Consistency.lean:165": "pre-existing: cites a continuation line of a theorem statement",
@@ -126,14 +162,8 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Check/Unit.lean:132": "cites `checkUnit`'s `ground : List Atom` parameter, not the function",
     "lean/Lara/Check/Unit.lean:151": "cites the `sigma := unit.sigma` retention line quoted verbatim beside it",
     "lean/Lara/Check/Unit.lean:243": "cites `checkUnit_complete`'s `Nodup` premise, not the theorem",
-    "lean/Lara/Unit.lean:193": "cites the `attack_complete` structure field, not the structure",
-    "lean/Lara/Unit.lean:198": "cites the `nodes_terms` structure field, not the structure",
-    "lean/Lara/Unit.lean:204": "cites the `args_well_sorted` structure field, not the structure",
     "lean/Lara/Compile.lean:407": "cites `ConflictAttackable`'s `.leaf` arm, which is the arm being quoted",
-    "lean/Lara/Compile.lean:478": "cites the `CheckedProgram.nodup` structure field, not the structure",
-    "lean/Lara/Compile.lean:480": "cites the `CheckedProgram.complete` structure field, not the structure",
     "lean/Lara/Compile.lean:606": "quotes issue #68's stale reference verbatim, as the reference being corrected",
-    "lean/Lara/Realizability.lean:167": "cites the `compiled_iso` structure field, not the structure",
     "lean/Lara/Attack.lean:85": "cites the `ContraryMatch` docstring's quantified-variable sentence",
     "lean/Lara/Attack.lean:550": "cites `HasAttack.rebut`'s `r.mode = .defeasible` hypothesis, not the inductive",
     # Range starts. A range is resolved at its first line only, so what is
@@ -211,6 +241,65 @@ def declaration_name(line: str) -> str | None:
     return match.group("name") if match else None
 
 
+def citation_targets(text: str) -> dict[int, tuple[str, str | None]]:
+    """Every line of one Lean file a citation may land on, as `kind, name`.
+
+    Three kinds qualify. A DECLARATION is any `def`/`theorem`/... line, named
+    when the name is written on it. A FIELD_KIND is a `name : type` line in an
+    open `structure`/`class` body: a field is a declaration of its enclosing
+    structure and the prose cites it as one. An AUDIT is a `#print axioms Foo`
+    line, whose name is the audited `Foo` and not the command.
+
+    Fields are recognized positionally — a structure body runs until the file
+    returns to the indentation the `structure` keyword sits at, and every field
+    of one structure shares the indentation of its first — so a continuation of a
+    field's type, indented further, is not read as a second field. Comment lines
+    are skipped, because a docstring sentence that happens to read `slot: index`
+    is prose and not a field.
+    """
+    targets: dict[int, tuple[str, str | None]] = {}
+    depth = 0  # nesting of `/- ... -/`, which `/--` docstrings open too
+    open_indent: int | None = None  # indent of the `structure` keyword, if open
+    body_indent: int | None = None  # indent shared by that structure's fields
+    for lineno, line in enumerate(text.split("\n"), 1):
+        commented = depth > 0
+        scan = 0
+        while scan < len(line) - 1:
+            pair = line[scan : scan + 2]
+            if pair == "/-":
+                depth += 1
+                scan += 2
+            elif pair == "-/":
+                depth = max(0, depth - 1)
+                scan += 2
+            elif depth == 0 and pair == "--":
+                break
+            else:
+                scan += 1
+        stripped = line.strip()
+        if commented or not stripped or stripped.startswith("--"):
+            continue
+        indent = len(line) - len(line.lstrip())
+        if open_indent is not None and indent <= open_indent:
+            open_indent = body_indent = None
+        if DECL.match(line):
+            targets[lineno] = (DECLARATION, declaration_name(line))
+            opening = STRUCTURE_OPEN.match(line)
+            open_indent = len(opening.group("indent")) if opening else None
+            body_indent = None
+            continue
+        if open_indent is not None:
+            field = FIELD.match(line)
+            if field is not None and body_indent in (None, len(field.group("indent"))):
+                body_indent = len(field.group("indent"))
+                targets[lineno] = (FIELD_KIND, field.group("name"))
+            continue
+        audit = PRINT_AXIOMS.match(line)
+        if audit is not None:
+            targets[lineno] = (AUDIT, audit.group("name"))
+    return targets
+
+
 def prose_name_for(prefix: str, suffix: str) -> str | None:
     """The declaration name the prose attaches to a citation, when there is one.
 
@@ -254,6 +343,10 @@ def build_declaration_index(repo_root: Path) -> dict[str, list[tuple[str, str]]]
     freer qualification, exactly as `names_agree` does. A bare `` `foo` (:256) ``
     citation names no file, so this index is how the file is recovered: `foo` is
     looked up, and the citation resolves only when every hit is in one file.
+
+    Structure fields are declared names here too — `` `enc_iff` (:83) `` names
+    `Strict.Backend`'s field and nothing else — while `#print axioms` lines are
+    not; see `citation_targets`.
     """
     index: dict[str, list[tuple[str, str]]] = defaultdict(list)
     base = repo_root / "lean"
@@ -267,9 +360,8 @@ def build_declaration_index(repo_root: Path) -> dict[str, list[tuple[str, str]]]
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        for line in text.split("\n"):
-            name = declaration_name(line)
-            if name is not None:
+        for kind, name in citation_targets(text).values():
+            if kind in DECLARING_KINDS and name is not None:
                 index[name.split(".")[-1]].append((name, relative.as_posix()))
     return index
 
@@ -323,6 +415,7 @@ def check_repo(repo_root: Path) -> tuple[int, set[str], list[str]]:
     index = build_lean_index(repo_root)
     decl_index = build_declaration_index(repo_root)
     contents: dict[str, list[str]] = {}
+    targets_of: dict[str, dict[int, tuple[str, str | None]]] = {}
     errors: list[str] = []
     checked = 0
     used_allowlist: set[str] = set()
@@ -334,6 +427,11 @@ def check_repo(repo_root: Path) -> tuple[int, set[str], list[str]]:
             )
         return contents[target]
 
+    def file_targets(target: str) -> dict[int, tuple[str, str | None]]:
+        if target not in targets_of:
+            targets_of[target] = citation_targets("\n".join(file_lines(target)))
+        return targets_of[target]
+
     def bare_target(
         prose: str | None,
         subjects: set[str],
@@ -342,12 +440,17 @@ def check_repo(repo_root: Path) -> tuple[int, set[str], list[str]]:
     ) -> str | None:
         """The file a file-less `:NNN` citation refers to, or None to skip it.
 
-        The prose name comes first because it is exact: `` `raReplay_iff` (:256) ``
-        says which declaration is meant, and one declaration lives in one file.
-        `subjects` overrides it, because a block that names a file outright —
-        `` `lean/AxCheck.lean` ... `srcStatus_iff_checked` (:381) `` — is citing
-        THAT file's line 381, not the line where the named theorem is proved. The
-        carry is the last resort, for the shapes that attach no name at all —
+        The prose name comes first because it is exact: a backticked name beside
+        the citation says which declaration is meant, and one declaration lives
+        in one file.
+
+        A block that names exactly one file outright overrides it, because such a
+        block is citing a line of THAT file and not the line where the named
+        theorem is proved — the `AxCheck` shape, whose citations point at the
+        `#print axioms` commands and not at the proofs they audit. A block naming
+        two files determines nothing and only vetoes.
+
+        The carry is the last resort, for the shapes that attach no name at all —
         `` (`Linking.lean:43` and `:47`) `` — and is narrow on purpose.
 
         None of the three applying means the file is genuinely undetermined, and
@@ -357,6 +460,8 @@ def check_repo(repo_root: Path) -> tuple[int, set[str], list[str]]:
             named = file_declaring(decl_index, prose)
             if named is not None and (not subjects or named in subjects):
                 return named
+        if len(subjects) == 1:
+            return next(iter(subjects))
         if carry is not None and len(gap) <= 60:
             if BARE_FILE_CARRY.match(gap.replace("`", "")):
                 return carry[0]
@@ -434,13 +539,14 @@ def check_repo(repo_root: Path) -> tuple[int, set[str], list[str]]:
                         continue
                 if exempt:
                     continue
-                if not DECL.match(lines_of[num - 1]):
+                landed = file_targets(target).get(num)
+                if landed is None:
                     errors.append(
                         f"{where} cites {key}, which is not a declaration "
                         f"(add to ALLOWLIST in {Path(__file__).name} if deliberate)"
                     )
                     continue
-                declared = declaration_name(lines_of[num - 1])
+                declared = landed[1]
                 if prose is None or declared is None:
                     continue
                 if not names_agree(prose, declared):
