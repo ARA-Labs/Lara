@@ -777,10 +777,10 @@ private theorem quartic_compile_nodes (k : Nat) :
       = (quarticLeaves k).map QuarticLeaf.atom := by
   have hsound := Check.Unit.checkUnit_sound (quartic_checkUnit_ok k)
   have hpol : (quarticAccepted k).policy = m2bPolicy :=
-    hsound.2.2.2.2.2.1
+    hsound.policy_eq
   have hterms : (quarticAccepted k).nodes.map (·.term) = quarticArgs k := by
     rw [(quarticAccepted k).nodes_terms]
-    exact hsound.2.2.2.2.2.2.2.2.1
+    exact hsound.args_eq
   show (quarticAccepted k).nodes.map (·.conclusion) = _
   have hlen : (quarticAccepted k).nodes.length = (quarticLeaves k).length := by
     have h := congrArg List.length hterms
@@ -922,9 +922,9 @@ private theorem quartic_compile_attack (k : Nat) (i j : Nat) :
       = quarticAttack k i j := by
   have hsound := Check.Unit.checkUnit_sound (quartic_checkUnit_ok k)
   have hargs : (quarticAccepted k).program.args = quarticArgs k :=
-    hsound.2.2.2.2.2.2.2.2.1
+    hsound.args_eq
   have hatts : (quarticAccepted k).program.atts = quarticAtts k :=
-    hsound.2.2.2.2.2.2.2.2.2.1
+    hsound.atts_eq
   show Compile.edgeB (quarticAccepted k).program i j = _
   unfold Compile.edgeB
   rw [hargs, hatts, quarticArgs]
@@ -1014,7 +1014,7 @@ theorem quarticEmpty_checkUnit_ok :
 
 private theorem quarticEmpty_nodes : quarticEmptyAccepted.nodes = [] := by
   have hargs : quarticEmptyAccepted.program.args = ([] : List SupportTerm) :=
-    (Check.Unit.checkUnit_sound quarticEmpty_checkUnit_ok).2.2.2.2.2.2.2.2.1
+    (Check.Unit.checkUnit_sound quarticEmpty_checkUnit_ok).args_eq
   have hterms := quarticEmptyAccepted.nodes_terms
   rw [hargs] at hterms
   exact List.map_eq_nil_iff.mp hterms
@@ -1039,7 +1039,7 @@ def quarticEmptyIso :
       show Compile.edgeB quarticEmptyAccepted.program i j = false
       unfold Compile.edgeB
       rw [(Check.Unit.checkUnit_sound
-        quarticEmpty_checkUnit_ok).2.2.2.2.2.2.2.2.1]
+        quarticEmpty_checkUnit_ok).args_eq]
       rfl
     rw [h]
     simp [Realizability.Equiv.refl, quarticAF]
@@ -1060,10 +1060,10 @@ theorem quartic_realizable (k : Nat) :
                accepted := quarticEmptyAccepted
                checked := quarticEmpty_checkUnit_ok
                sigma_eq :=
-                 (Check.Unit.checkUnit_sound quarticEmpty_checkUnit_ok).1
+                 (Check.Unit.checkUnit_sound quarticEmpty_checkUnit_ok).sigma_eq
                policy_eq :=
                  (Check.Unit.checkUnit_sound
-                   quarticEmpty_checkUnit_ok).2.2.2.2.2.1
+                   quarticEmpty_checkUnit_ok).policy_eq
                ground_covers := fun _ hw => nomatch hw
                compiled_iso := quarticEmptyIso }⟩
   | succ k =>
@@ -1073,10 +1073,10 @@ theorem quartic_realizable (k : Nat) :
                accepted := quarticAccepted k
                checked := quartic_checkUnit_ok k
                sigma_eq :=
-                 (Check.Unit.checkUnit_sound (quartic_checkUnit_ok k)).1
+                 (Check.Unit.checkUnit_sound (quartic_checkUnit_ok k)).sigma_eq
                policy_eq :=
                  (Check.Unit.checkUnit_sound
-                   (quartic_checkUnit_ok k)).2.2.2.2.2.1
+                   (quartic_checkUnit_ok k)).policy_eq
                ground_covers := quarticGround_covers k
                compiled_iso := quarticIso k }⟩
 

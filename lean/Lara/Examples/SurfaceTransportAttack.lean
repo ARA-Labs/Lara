@@ -932,8 +932,8 @@ theorem surfaceTransportAttack_directAF_eq :
   refine Lara.Context.surface_directAF_relabel
     attack_checks_kernel hchecked₁ attack_checks_wrapped hchecked₂
     certSwap_injective ?_ ?_
-  · rw [hs₂.2.2.2.2.2.2.2.2.1, hs₁.2.2.2.2.2.2.2.2.1]; rfl
-  · rw [hs₂.2.2.2.2.2.2.2.2.2.1, hs₁.2.2.2.2.2.2.2.2.2.1]; rfl
+  · rw [hs₂.args_eq, hs₁.args_eq]; rfl
+  · rw [hs₂.atts_eq, hs₁.atts_eq]; rfl
 
 /-! ### Non-vacuity
 
@@ -980,4 +980,3 @@ theorem surfaceTransportAttack_inputs_differ :
     attackInputWrapped ≠ attackInput := by decide
 
 end Lara.Examples.SurfaceTransportAttack
-

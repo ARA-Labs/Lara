@@ -4,24 +4,24 @@
 `Lara.Context.Equivalence` proves contextual representation independence over
 the **grounded** labelling: `Lara.Context.obs` (`lean/Lara/Context/Fragment.lean:459`)
 reads `Invariants.status` off the linked carrier, and
-`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:820`) says
+`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:831`) says
 an injective, acceptance-preserving relabel does not change it. M2a had already
 made the choice of argumentation semantics a parameter
 (`Lara.Semantics.ExtensionSemantics`), so that asymmetry — a parametric
 framework layer sitting under a grounded-only context layer — was an artefact of
 the order the milestones landed in, not a fact about the theory. This module,
 together with the projection layer it instantiates
-(`lean/Lara/Context/Equivalence.lean:580`), closes it.
+(`lean/Lara/Context/Equivalence.lean:591`), closes it.
 
 ### What is parameterized, and where that parameter lives
 
 The obvious move is to duplicate `Observation` and `obs` once per semantics-aware
 variant and re-run the congruence proof on the copy. That is rejected here. What
 is parameterized instead is the **projection**: `Lara.Context.obsGen`
-(`lean/Lara/Context/Equivalence.lean:580`) takes an arbitrary
+(`lean/Lara/Context/Equivalence.lean:591`) takes an arbitrary
 `g : Invariants.StructuredAF → Atom → α` where `obs` has
 `Invariants.status canon`, and `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:784`) proves the congruence once, for every
+(`lean/Lara/Context/Equivalence.lean:795`) proves the congruence once, for every
 `g` at once. `obsSem` is then a *definition*, not a second development:
 
     obsSem sem reg C F  =  obsGen (Invariants.observeSem sem canon) reg C F
@@ -29,7 +29,7 @@ is parameterized instead is the **projection**: `Lara.Context.obsGen`
 and every semantics-parametric congruence below is a one-line instantiation of
 `obsGen_congr`. The reason this works is stated in `obsGen_congr`'s docstring and
 is worth naming here too: every M4 congruence routes through
-`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:712`), which
+`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:723`), which
 concludes that the two links present the *same* `StructuredAF`. Once the carrier
 is literally equal, nothing that reads a function off it can tell the two sides
 apart, whatever that function is.
@@ -39,7 +39,7 @@ semantics and needs no import `Equivalence.lean` did not already have, so it sit
 beside the theorems it generalizes. That placement is what lets the grounded
 `obs_eq_of_ok` and `backend_replacement_congruence` be *one-line corollaries*
 rather than a second copy of the same proof, and it is what makes
-`Lara.Context.obs_eq_obsGen` (`lean/Lara/Context/Equivalence.lean:665`)
+`Lara.Context.obs_eq_obsGen` (`lean/Lara/Context/Equivalence.lean:676`)
 statable at all — `obs` and `obsGen` must land in the same type for `obs = obsGen
 (Invariants.status canon)` to typecheck, which is why `Fragment.lean` now carries
 the payload-generic `ObservationOf α` with `Observation` an abbreviation of it,
@@ -77,7 +77,7 @@ mathematical content beyond the injectivity of `List.map` over a constructor.
               |  quantify over all contexts
               v                                                   v
     Lara.Context.CtxEquiv          ---generalized by--->  Lara.Context.CtxEquivSem
-    (Lara/Context/Equivalence.lean:530)                   (this module)
+    (Lara/Context/Equivalence.lean:541)                   (this module)
 
 Each `--->` arrow is witnessed by a theorem here or in the module named beside
 it: `Invariants.observeSem_grounded`, `obsSem_grounded`, and
@@ -99,7 +99,7 @@ open Lara.Support Lara.Attack Lara.Compile Lara.Check Lara.Erase Lara.Semantics
 /-! ### The semantics-parametric instance
 
 The projection layer this instantiates is one level down, in
-`lean/Lara/Context/Equivalence.lean:580`. This is the projection the milestone
+`lean/Lara/Context/Equivalence.lean:591`. This is the projection the milestone
 exists for: `Invariants.observeSem sem canon`
 (`lean/Lara/Invariants/Observation.lean:67`), which runs `Semantics.observe` at
 the supplied `sem` on the erased carrier. -/
@@ -251,7 +251,7 @@ theorem obsSem_grounded {canon : String → String} (reg : BackendRegistry canon
 
 /-- **Contextual equivalence of two fragments under one registry, observed at
 `sem`.** The generic companion of `CtxEquiv`
-(`lean/Lara/Context/Equivalence.lean:530`): every context must produce the same
+(`lean/Lara/Context/Equivalence.lean:541`): every context must produce the same
 detailed outcome, with incompatible links, checker rejections and observed
 `ClaimObservation` lists all remaining distinct.
 
@@ -303,7 +303,7 @@ variable {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
 
 /-- **Contextual representation independence at an arbitrary semantics.** The
 semantics-parametric form of `backend_replacement_congruence`
-(`lean/Lara/Context/Equivalence.lean:820`), and the milestone's headline.
+(`lean/Lara/Context/Equivalence.lean:831`), and the milestone's headline.
 
 Its entire proof is `obsGen_congr` at `g := Invariants.observeSem sem canon`.
 That brevity is the point: the congruence was never a fact about the grounded
@@ -325,7 +325,7 @@ theorem backend_replacement_congruence_sem (sem : ExtensionSemantics)
 No relabel and no injectivity: if every assurance the first registry accepts the
 second accepts too, the *same* fragment reads the same way in every admissible
 context, under every extension semantics. The semantics-parametric form of
-`registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:879`), obtained
+`registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:890`), obtained
 the same way — instantiate the congruence at `f := id` and cancel `mapAssurFrag`.
 
 The hypothesis `hpres` is stated **globally**, over every rule and every
@@ -337,7 +337,7 @@ the weaker one is not what is proved here.
 
 The global reading is a property of this statement, not an open gap. The
 occurrence-local hypothesis is proved by
-`backend_replacement_parametricity_local_sem` (`Parametricity.lean:1783`), whose
+`backend_replacement_parametricity_local_sem` (`Parametricity.lean:1788`), whose
 relation is inhabited only at `occurrences F`. It is a **trade, not a
 strengthening**: it adds `hC` and `hA`, requiring the context's own occurrences
 to lie inside `occurrences F`, which this theorem does not require. Neither
@@ -361,14 +361,14 @@ variable {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
 /-- **Congruence at an arbitrary semantics is stable under embedding into a
 larger context.** The semantics-parametric form of
 `backend_replacement_congruence_composed`
-(`lean/Lara/Context/Equivalence.lean:971`), with the same reading: the
+(`lean/Lara/Context/Equivalence.lean:982`), with the same reading: the
 quantifier over contexts already ranged over composites, since `composedContext`
 produces a `Context`; what composition buys is that the quantifier is *closed*,
-and `fixesContext_composed` (`lean/Lara/Context/Equivalence.lean:907`) is what
+and `fixesContext_composed` (`lean/Lara/Context/Equivalence.lean:918`) is what
 discharges the composite's `FixesContext` obligation from the two halves.
 
 The composite's `Admissible` hypothesis is assumed here rather than assembled;
-`admissible_composed` (`lean/Lara/Context/Equivalence.lean:927`) is the lemma
+`admissible_composed` (`lean/Lara/Context/Equivalence.lean:938`) is the lemma
 that builds it from the halves plus their cross-coverage, and it applies to this
 statement unchanged because admissibility mentions no semantics. -/
 theorem backend_replacement_congruence_composed_sem (sem : ExtensionSemantics)
@@ -384,7 +384,7 @@ theorem backend_replacement_congruence_composed_sem (sem : ExtensionSemantics)
 /-- **Result 9's whole-program statement, at an arbitrary semantics.**
 
 Its grounded twin `whole_program_replacement`
-(`lean/Lara/Context/Equivalence.lean:987`) exists to record that it *cites*
+(`lean/Lara/Context/Equivalence.lean:998`) exists to record that it *cites*
 `Erase.backend_replacement` (`lean/Lara/Erase.lean:259`) rather than re-deriving
 it. The analogous fact here is slightly different and worth stating precisely:
 there is no generic ancestor to cite, because `Erase.backend_replacement` is

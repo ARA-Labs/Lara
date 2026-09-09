@@ -1515,8 +1515,9 @@ theorem source_justified_nonpromotion
       exact heq.symm
     have hpruneAtts : r.prune.keptAttacks = declared.resolved :=
       hatts.trans hselected
-    obtain ⟨_, _, _, _, _, _, _, _, hprogramArgs, hprogramAtts, _, _⟩ :=
-      Lara.Check.Unit.checkUnit_sound hcheck
+    have hsound := Lara.Check.Unit.checkUnit_sound hcheck
+    have hprogramArgs := hsound.args_eq
+    have hprogramAtts := hsound.atts_eq
     rw [hpruneArgs] at hprogramArgs
     rw [hpruneAtts] at hprogramAtts
     have haf : Compile.checkedAF accepted.program =

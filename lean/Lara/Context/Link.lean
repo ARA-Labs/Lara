@@ -337,9 +337,9 @@ theorem link_cache_bridge {canon : String → String} {reg : BackendRegistry can
   obtain ⟨-, hunit, -⟩ := link_some_inv hlink
   have hsound := Check.Unit.checkUnit_sound hcheck
   have hpol : checked.policy = F.policy := by
-    rw [hsound.2.2.2.2.2.1, hunit]; rfl
+    rw [hsound.policy_eq, hunit]; rfl
   have hargs : checked.program.args = dedupList (C.frame.args ++ F.args) := by
-    rw [hsound.2.2.2.2.2.2.2.2.1, hunit]; rfl
+    rw [hsound.args_eq, hunit]; rfl
   have hsub : ∀ v ∈ side, v ∈ checked.program.args := by
     intro v hv
     rw [hargs, mem_dedupList, List.mem_append]

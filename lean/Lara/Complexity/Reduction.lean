@@ -579,10 +579,10 @@ private theorem compile_reduce_nodes (φ : Formula3) :
       (reduceCode φ).nodes := by
   have hsound := Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)
   have hpol : (acceptedUnitOfFormula φ).policy = m2bPolicy :=
-    hsound.2.2.2.2.2.1
+    hsound.policy_eq
   have hterms : (acceptedUnitOfFormula φ).nodes.map (·.term) =
       (gadgetNodes φ).map GadgetNode.arg := by
-    rw [(acceptedUnitOfFormula φ).nodes_terms, hsound.2.2.2.2.2.2.2.2.1]
+    rw [(acceptedUnitOfFormula φ).nodes_terms, hsound.args_eq]
     exact formulaArguments_eq_gadget φ
   show (acceptedUnitOfFormula φ).nodes.map (·.conclusion) =
     (gadgetNodes φ).map GadgetNode.conclusion
@@ -632,11 +632,11 @@ private theorem compile_reduce_attack (φ : Formula3) (i j : Nat) :
   have hsound := Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)
   have hargs : (acceptedUnitOfFormula φ).program.args =
       (gadgetNodes φ).map GadgetNode.arg :=
-    (hsound.2.2.2.2.2.2.2.2.1 :
+    (hsound.args_eq :
         (acceptedUnitOfFormula φ).program.args = formulaArguments φ).trans
       (formulaArguments_eq_gadget φ)
   have hatts : (acceptedUnitOfFormula φ).program.atts = formulaAttacks φ :=
-    hsound.2.2.2.2.2.2.2.2.2.1
+    hsound.atts_eq
   show Lara.Compile.edgeB (acceptedUnitOfFormula φ).program i j = _
   rw [decode_attack]
   unfold Lara.Compile.edgeB
@@ -680,9 +680,9 @@ theorem reduce_realizable (φ : Formula3) : M2bPromise (reduceCode φ) :=
      raw := rawUnitOfFormula φ
      accepted := acceptedUnitOfFormula φ
      checked := checkUnit_formula_ok φ
-     sigma_eq := (Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)).1
+     sigma_eq := (Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)).sigma_eq
      policy_eq :=
-       (Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)).2.2.2.2.2.1
+       (Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)).policy_eq
      ground_covers := groundOfFormula_covers φ
      compiled_iso := reduceIso φ }⟩
 

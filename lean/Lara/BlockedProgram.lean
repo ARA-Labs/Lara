@@ -690,8 +690,9 @@ theorem checked_production_justified_nonpromotion_of_not_blocked
     Grounded.statusC (declaredAF declared declAtts)
       (liftClaim (retainedIndices keep declared) (completeClaimFor accepted p)) =
         .justified := by
-  obtain ⟨_, _, _, _, _, _, _, _, hargs, hatts, _, _⟩ :=
-    Lara.Check.Unit.checkUnit_sound hcheck
+  have hsound := Lara.Check.Unit.checkUnit_sound hcheck
+  have hargs := hsound.args_eq
+  have hatts := hsound.atts_eq
   exact production_justified_nonpromotion_of_not_blocked
     accepted keep declared declAtts (selectAligned keepAttack rawAtts declAtts)
       queries p hargs hatts

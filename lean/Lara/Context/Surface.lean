@@ -104,9 +104,9 @@ theorem surface_directAF_link
   obtain ⟨hargs, hatts⟩ :=
     link_relabel_commutes hf hpres hfix.args hfix.atts hadm.ctx.support hadm.frag.support
   refine surface_directAF_relabel hsurface₁ hchecked₁ hsurface₂ hchecked₂ hf ?_ ?_
-  · rw [hsound₂.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.1, hunit₁, hunit₂]
+  · rw [hsound₂.args_eq, hsound₁.args_eq, hunit₁, hunit₂]
     exact hargs
-  · rw [hsound₂.2.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.2.1, hunit₁, hunit₂]
+  · rw [hsound₂.atts_eq, hsound₁.atts_eq, hunit₁, hunit₂]
     exact hatts
 
 end Lara.Context

@@ -93,7 +93,7 @@ rather than asserting it.
 
 `Compile.AttackComplete` (`Compile.lean:515`) is an **all-pairs** condition over
 the declared arguments, and it is a *premise* of
-`Check.Unit.checkUnit_complete` (`Check/Unit.lean:227`, premise at `:242`). A `link` that merely
+`Check.Unit.checkUnit_complete` (`Check/Unit.lean:236`, premise at `:251`). A `link` that merely
 concatenated `C.atts ++ F.atts` would leave every cross-boundary contrary
 conflict uncovered, `hattackComplete` would be unsatisfiable on exactly the
 interesting links, and the calculus would only ever accept programs whose two

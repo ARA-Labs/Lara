@@ -157,7 +157,7 @@ expected otherwise.
 Every M4 congruence funnels through one carrier-equality lemma:
 
 ```lean
--- lean/Lara/Context/Equivalence.lean:712
+-- lean/Lara/Context/Equivalence.lean:723
 theorem compileUnit_link_relabel … : Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁
 ```
 

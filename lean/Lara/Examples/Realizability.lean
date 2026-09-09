@@ -226,9 +226,9 @@ def nonemptySwappedRealization :
   accepted := Lara.Examples.acceptedUnitEx
   checked := Lara.Examples.rawUnitCheck_ok
   sigma_eq := (Check.Unit.checkUnit_sound
-    Lara.Examples.rawUnitCheck_ok).1
+    Lara.Examples.rawUnitCheck_ok).sigma_eq
   policy_eq := (Check.Unit.checkUnit_sound
-    Lara.Examples.rawUnitCheck_ok).2.2.2.2.2.1
+    Lara.Examples.rawUnitCheck_ok).policy_eq
   ground_covers := nonempty_ground_covers
   compiled_iso := nonemptySwapIso
 

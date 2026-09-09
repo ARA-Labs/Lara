@@ -2626,9 +2626,19 @@ theorem CoreObligations.of_checkUnit_ok
       (Support.certOkOf env.registry)}
     (hchecked : Check.Unit.checkUnit output.gamma env.registry output.ground
       output.unit = .ok checked) : CoreObligations env output := by
-  obtain ⟨sigmaEq, sigmaWf, policySorted, groundSorted, argsSorted,
-    policyEq, ruleIds, policyWf, argumentsEq, attacksEq,
-    attackComplete, nodeTerms⟩ := Check.Unit.checkUnit_sound hchecked
+  have hsound := Check.Unit.checkUnit_sound hchecked
+  have sigmaEq := hsound.sigma_eq
+  have sigmaWf := hsound.sigma_wf
+  have policySorted := hsound.policy_sorted
+  have groundSorted := hsound.ground_sorted
+  have argsSorted := hsound.args_sorted
+  have policyEq := hsound.policy_eq
+  have ruleIds := hsound.ruleIds_nodup
+  have policyWf := hsound.policy_wf
+  have argumentsEq := hsound.args_eq
+  have attacksEq := hsound.atts_eq
+  have attackComplete := hsound.attack_complete
+  have nodeTerms := hsound.nodes_terms
   refine
     { sigmaWellFormed := ?_
       policyWellSorted := ?_

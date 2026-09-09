@@ -61,11 +61,11 @@ theorem checkUnit_path_ok :
 
 private theorem acceptedPath_args :
     acceptedPathUnit.program.args = pathRawUnit.args :=
-  (Check.Unit.checkUnit_sound checkUnit_path_ok).2.2.2.2.2.2.2.2.1
+  (Check.Unit.checkUnit_sound checkUnit_path_ok).args_eq
 
 private theorem acceptedPath_atts :
     acceptedPathUnit.program.atts = pathRawUnit.atts :=
-  (Check.Unit.checkUnit_sound checkUnit_path_ok).2.2.2.2.2.2.2.2.2.1
+  (Check.Unit.checkUnit_sound checkUnit_path_ok).atts_eq
 
 /-- The hand-written structured carrier for `0 -> 1 -> 2`. -/
 def directedPathCarrier : Lara.Invariants.StructuredAF :=
@@ -142,11 +142,11 @@ theorem checkUnit_cycle_ok :
 
 private theorem acceptedCycle_args :
     acceptedCycleUnit.program.args = cycleRawUnit.args :=
-  (Check.Unit.checkUnit_sound checkUnit_cycle_ok).2.2.2.2.2.2.2.2.1
+  (Check.Unit.checkUnit_sound checkUnit_cycle_ok).args_eq
 
 private theorem acceptedCycle_atts :
     acceptedCycleUnit.program.atts = cycleRawUnit.atts :=
-  (Check.Unit.checkUnit_sound checkUnit_cycle_ok).2.2.2.2.2.2.2.2.2.1
+  (Check.Unit.checkUnit_sound checkUnit_cycle_ok).atts_eq
 
 /-- The hand-written two-cycle carrier. -/
 def twoCycleCarrier : Lara.Invariants.StructuredAF :=

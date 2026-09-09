@@ -1125,7 +1125,7 @@ theorem nodup_rel (hR : RelInj R) :
 
 /-- **Acceptance transports along a partial-bijective, acceptance-preserving
 certificate relation.** The relational `checkUnit_map`
-(`lean/Lara/Context/Equivalence.lean:395`). -/
+(`lean/Lara/Context/Equivalence.lean:401`). -/
 theorem checkUnit_rel {ground : List Atom}
     {unit₁ unit₂ : Lara.Unit}
     {accepted₁ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₁)}
@@ -1136,8 +1136,13 @@ theorem checkUnit_rel {ground : List Atom}
     (hatts : Forall₂ (RelAtt R) unit₁.atts unit₂.atts)
     (h₁ : Check.Unit.checkUnit Gamma reg₁ ground unit₁ = .ok accepted₁) :
     ∃ accepted₂, Check.Unit.checkUnit Gamma reg₂ ground unit₂ = .ok accepted₂ := by
-  obtain ⟨-, -, -, -, -, hpolEq, hruleIds, hpolWf, hargsEq, hattsEq,
-    hattackComplete, -⟩ := Check.Unit.checkUnit_sound h₁
+  have hsound := Check.Unit.checkUnit_sound h₁
+  have hpolEq := hsound.policy_eq
+  have hruleIds := hsound.ruleIds_nodup
+  have hpolWf := hsound.policy_wf
+  have hargsEq := hsound.args_eq
+  have hattsEq := hsound.atts_eq
+  have hattackComplete := hsound.attack_complete
   have hscope : Policy.firstOutOfScope? unit₂.policy = none := by
     rw [hpolicy, ← hpolEq]; exact accepted₁.scopes_wf
   refine Check.Unit.checkUnit_complete
@@ -1382,7 +1387,7 @@ theorem nodes_conclusion_rel
           exact congrArg some (hasSupport_unique hvb hva).1
 
 /-- **The two accepted units present the same carrier.** The relational
-`compileUnit_map` (`lean/Lara/Context/Equivalence.lean:500`). This is where the
+`compileUnit_map` (`lean/Lara/Context/Equivalence.lean:511`). This is where the
 relation is erased: from here down both branches run one and the same
 framework. -/
 theorem compileUnit_rel
@@ -1419,7 +1424,7 @@ end Carrier
 /-! ### The headline
 
 Proved once over an arbitrary projection `g`, exactly as `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:784`) is, so that the semantics-parametric
+(`lean/Lara/Context/Equivalence.lean:795`) is, so that the semantics-parametric
 form is an instantiation rather than a second proof.
 
 One bookkeeping difference from the functional development is worth naming.
@@ -1452,7 +1457,7 @@ theorem exists_accepted_rel (hR : RelInj R)
     hR hpres hF.sigma hF.policy hargs hatts h₁
 
 /-- **The two links present the same carrier.** The relational
-`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:712`). -/
+`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:723`). -/
 theorem compileUnit_link_rel (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hadm : Admissible reg₁ C F₁) (hF : RelFrag R F₁ F₂)
@@ -1472,9 +1477,9 @@ theorem compileUnit_link_rel (hR : RelInj R)
   have hsound₁ := Check.Unit.checkUnit_sound h₁
   have hsound₂ := Check.Unit.checkUnit_sound h₂
   exact compileUnit_rel hR hpres
-    (by rw [hsound₁.2.2.2.2.2.1, hsound₂.2.2.2.2.2.1]; exact hF.policy)
-    (by rw [hsound₂.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.1]; exact hargs)
-    (by rw [hsound₂.2.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.2.1]; exact hatts)
+    (by rw [hsound₁.policy_eq, hsound₂.policy_eq]; exact hF.policy)
+    (by rw [hsound₂.args_eq, hsound₁.args_eq]; exact hargs)
+    (by rw [hsound₂.atts_eq, hsound₁.atts_eq]; exact hatts)
 
 /-- **Relational parametricity over related backends, for every projection at
 once (#215).**
@@ -1482,7 +1487,7 @@ once (#215).**
 Two fragments related by a partial-bijective, acceptance-preserving relation `R`
 on certificates are indistinguishable in every admissible context that `R` fixes
 — whatever is read off the resulting carrier. This is `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:784`) with the *function* `f` replaced by a
+(`lean/Lara/Context/Equivalence.lean:795`) with the *function* `f` replaced by a
 *relation*, which is the quantifier #187's acceptance criterion names.
 
 **Read the strength honestly.** `RelInj` makes `R` a partial injection;
@@ -1736,7 +1741,7 @@ only over the fragment's own certificate occurrences (#215).**
 Compare `backend_replacement_congruence`, whose `AssurPreserving f` obliges
 every rule and every assurance *in the type*. This obliges only the assurances
 `F` carries. That gap is what the docstrings of `registry_swap_congruence`
-(`Context/Equivalence.lean:879`) and `registry_swap_congruence_sem`
+(`Context/Equivalence.lean:890`) and `registry_swap_congruence_sem`
 (`Context/Observation.lean:345`) record as the hypothesis they do not carry, and
 it is the reason the relational form is more than a restatement.
 

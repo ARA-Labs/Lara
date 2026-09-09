@@ -168,6 +168,26 @@ def checkUnit {canon : String → String}
                         rw [hargs]
                         exact signatureStage_args hsignature }
 
+/-- The facts supplied by successful unit checking. Named projections keep
+clients independent of the order in which these obligations are recorded. -/
+structure CheckUnitSound (canon : String → String)
+    (Gamma : LeafId → Option Atom) (reg : BackendRegistry canon)
+    (ground : List Atom) (unit : Lara.Unit)
+    (accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)) : Prop where
+  sigma_eq : accepted.sigma = unit.sigma
+  sigma_wf : Sigma.sigmaWellFormed accepted.sigma = true
+  policy_sorted : Lara.policyWellSorted accepted.sigma accepted.policy = true
+  ground_sorted : Lara.groundWellSorted accepted.sigma ground = true
+  args_sorted : Lara.argsWellSorted accepted.sigma accepted.policy accepted.program.args = true
+  policy_eq : accepted.policy = unit.policy
+  ruleIds_nodup : (accepted.policy.rules.map (·.id)).Nodup
+  policy_wf : Policy.WellFormed canon accepted.policy
+  args_eq : accepted.program.args = unit.args
+  atts_eq : accepted.program.atts = unit.atts
+  attack_complete : Compile.AttackComplete canon accepted.policy.ruleLookup Gamma
+    (certOkOf reg) accepted.policy.defeat accepted.program.args accepted.program.atts
+  nodes_terms : accepted.nodes.map (·.term) = accepted.program.args
+
 /-- Successful executable acceptance exposes every field of `CheckedUnit` by
 its public name, together with exact correspondence to the raw declaration
 lists supplied to the checker. -/
@@ -176,20 +196,7 @@ theorem checkUnit_sound {canon : String → String}
     {ground : List Atom} {unit : Lara.Unit}
     {accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
     (h : checkUnit Gamma reg ground unit = .ok accepted) :
-    accepted.sigma = unit.sigma ∧
-    Sigma.sigmaWellFormed accepted.sigma = true ∧
-    Lara.policyWellSorted accepted.sigma accepted.policy = true ∧
-    Lara.groundWellSorted accepted.sigma ground = true ∧
-    Lara.argsWellSorted accepted.sigma accepted.policy accepted.program.args = true ∧
-    accepted.policy = unit.policy ∧
-    (accepted.policy.rules.map (·.id)).Nodup ∧
-    Policy.WellFormed canon accepted.policy ∧
-    accepted.program.args = unit.args ∧
-    accepted.program.atts = unit.atts ∧
-    Compile.AttackComplete canon accepted.policy.ruleLookup Gamma
-      (certOkOf reg) accepted.policy.defeat
-      accepted.program.args accepted.program.atts ∧
-    accepted.nodes.map (·.term) = accepted.program.args := by
+    CheckUnitSound canon Gamma reg ground unit accepted := by
   unfold checkUnit at h
   split at h
   · contradiction
@@ -208,18 +215,20 @@ theorem checkUnit_sound {canon : String → String}
               exact programAcceptance.arguments_eq
             have hacc := Except.ok.inj h
             subst hacc
-            refine ⟨rfl, signatureStage_sigma_wf hsignature,
-              signatureStage_policy hsignature, signatureStage_ground hsignature,
-              ?_, rfl, ?_, ?_, ?_, ?_, ?_, ?_⟩
-            · rw [hargsEq]; exact signatureStage_args hsignature
-            · exact
-                (Policy.firstDuplicateRuleId?_none_iff unit.policy.rules).mp
-                  (by assumption)
-            · exact (Policy.firstViolation_none_iff).mp (by assumption)
-            · exact programAcceptance.arguments_eq
-            · exact programAcceptance.attacks_eq
-            · exact programAcceptance.attack_complete
-            · exact programAcceptance.nodes_terms
+            exact {
+              sigma_eq := rfl
+              sigma_wf := signatureStage_sigma_wf hsignature
+              policy_sorted := signatureStage_policy hsignature
+              ground_sorted := signatureStage_ground hsignature
+              args_sorted := by rw [hargsEq]; exact signatureStage_args hsignature
+              policy_eq := rfl
+              ruleIds_nodup :=
+                (Policy.firstDuplicateRuleId?_none_iff unit.policy.rules).mp (by assumption)
+              policy_wf := (Policy.firstViolation_none_iff).mp (by assumption)
+              args_eq := programAcceptance.arguments_eq
+              atts_eq := programAcceptance.attacks_eq
+              attack_complete := programAcceptance.attack_complete
+              nodes_terms := programAcceptance.nodes_terms }
 
 /-- Exact completeness of the unit checker.  The premises are precisely the
 raw policy and detailed-program obligations checked in the public fixed
@@ -471,7 +480,10 @@ theorem checkUnit_wellSorted {canon : String → String}
     (∀ a ∈ ground, Sigma.WellSorted accepted.sigma a) ∧
     (∀ w ∈ accepted.program.args,
       Lara.AllInstancesWellSorted accepted.sigma accepted.policy.ruleLookup w) := by
-  obtain ⟨_, hwf, _, hground, hargs, _, _, _, _, _, _, _⟩ := checkUnit_sound h
+  have hs := checkUnit_sound h
+  have hwf := hs.sigma_wf
+  have hground := hs.ground_sorted
+  have hargs := hs.args_sorted
   refine ⟨hwf, ?_, ?_⟩
   · intro a ha
     unfold Lara.groundWellSorted at hground

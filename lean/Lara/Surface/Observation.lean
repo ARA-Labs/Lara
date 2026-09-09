@@ -168,8 +168,9 @@ theorem direct_compiled_agree {env : Env canon} {input : Input}
     directAF hsurface = Compile.checkedAF checked.program := by
   rcases hsurface.program with
     ⟨pairs, _, _, _, _, _, hids, hargs, _, _⟩
-  rcases Check.Unit.checkUnit_sound hchecked with
-    ⟨_, _, _, _, _, _, _, _, hcheckedArgs, hcheckedAttacks, _, _⟩
+  have hcheckedSound := Check.Unit.checkUnit_sound hchecked
+  have hcheckedArgs := hcheckedSound.args_eq
+  have hcheckedAttacks := hcheckedSound.atts_eq
   have hlength : output.argIds.length = output.unit.args.length := by
     rw [← hids, ← hargs, List.length_map, List.length_map]
   apply af_eq

@@ -186,7 +186,7 @@ theorem computed_self_claim_result7 :
             Grounded.Status.justified) := by
   apply Lara.Consistency.contrary_claims_not_both_justified
   have hpolicy :=
-    (checkUnit_sound covered_self_edge_check_ok).2.2.2.2.2.1
+    (checkUnit_sound covered_self_edge_check_ok).policy_eq
   change acceptedSelfEdgeUnit.policy = selfConflictPolicy at hpolicy
   rw [hpolicy]
   exact ⟨(apA, apA), by simp [selfConflictPolicy], [], pA, pA,

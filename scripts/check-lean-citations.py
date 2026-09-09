@@ -125,7 +125,7 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Context/Surface.lean:53": "cites the `coveredB_relabel` proof step, which is the step being exercised",
     "lean/Lara/Check/Unit.lean:132": "cites `checkUnit`'s `ground : List Atom` parameter, not the function",
     "lean/Lara/Check/Unit.lean:151": "cites the `sigma := unit.sigma` retention line quoted verbatim beside it",
-    "lean/Lara/Check/Unit.lean:234": "cites `checkUnit_complete`'s `Nodup` premise, not the theorem",
+    "lean/Lara/Check/Unit.lean:243": "cites `checkUnit_complete`'s `Nodup` premise, not the theorem",
     "lean/Lara/Unit.lean:193": "cites the `attack_complete` structure field, not the structure",
     "lean/Lara/Unit.lean:198": "cites the `nodes_terms` structure field, not the structure",
     "lean/Lara/Unit.lean:204": "cites the `args_well_sorted` structure field, not the structure",

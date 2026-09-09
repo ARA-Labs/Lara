@@ -425,7 +425,7 @@ They are the semantics-parametric counterparts of `Linking.congruence_witness`
 (`:670`). The first now uses `cycle_admissible` on the three-cycle. The
 registry-swap witness retains `Linking.admissible_split` (`:345`),
 `Linking.assurPreserving_onlyNd` (`:658`) and `Linking.registryOnlyNd` (`:637`).
-Both use `fixesContext_id` (`lean/Lara/Context/Equivalence.lean:857`). -/
+Both use `fixesContext_id` (`lean/Lara/Context/Equivalence.lean:868`). -/
 
 /-- **Congruence at every semantics on the linked three-cycle.**
 `cycle_admissible` supplies the premises at the very carrier where
@@ -667,7 +667,7 @@ The proof cannot be `decide`, precisely because `sem` is free. It runs the case
 split `obsGen` runs: the checker's rejection branch is refuted by
 `gap_accepted`, and on the accepted branch the exported claim's grounded status
 is extracted from `Linking.obs_gap` (`lean/Lara/Examples/Linking.lean:187`)
-through `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:675`) and handed to
+through `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:686`) and handed to
 `Invariants.observeSem_of_status_gap`, which is where the semantics-independence
 actually lives.
 
@@ -704,7 +704,7 @@ reaches all three arms — `Linking.obs_incompatible_id_clash`
 (`:129`) are the other two — and the semantics-parametric twins are free,
 because the link guard and the whole-unit checker both run *before* any
 projection is consulted. That is exactly the content of `obsGen_incompatible`
-and `obsGen_rejected` (`lean/Lara/Context/Equivalence.lean:603`, `:621`), and it
+and `obsGen_rejected` (`lean/Lara/Context/Equivalence.lean:614`, `:632`), and it
 is why these must be term proofs through `obsSem_incompatible` /
 `obsSem_rejected` rather than `decide`: with `sem` free there is nothing for
 `decide` to evaluate, and the point is that there is nothing it *needs* to

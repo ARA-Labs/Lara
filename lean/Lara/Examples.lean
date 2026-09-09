@@ -2091,8 +2091,8 @@ theorem checked_unit_retained_alignment :
     acceptedUnitEx.nodes.map (·.term) = acceptedUnitEx.program.args ∧
     acceptedUnitEx.nodes.map (·.conclusion) = [pB, pA] := by
   refine ⟨
-    (checkUnit_sound rawUnitCheck_ok).2.2.2.2.2.2.2.2.1,
-    (checkUnit_sound rawUnitCheck_ok).2.2.2.2.2.2.2.2.2.1,
+    (checkUnit_sound rawUnitCheck_ok).args_eq,
+    (checkUnit_sound rawUnitCheck_ok).atts_eq,
     acceptedUnitEx.nodes_terms,
     ?_⟩
   decide

@@ -6200,10 +6200,15 @@ theorem checkUnit_ok_rename
         .ok renamedChecked ∧
       CheckedUnitRelated (canon := canon) (gamma := gamma)
         (registry := env.registry) ρg checked renamedChecked := by
-  obtain ⟨sourceSigmaEq, _, _, _, _, sourcePolicyEq, sourceRuleIds,
-    sourcePolicyWf, sourceArgumentsEq, sourceAttacksEq,
-    sourceAttackComplete, sourceNodeTerms⟩ :=
-      Lara.Check.Unit.checkUnit_sound h
+  have sourceSound := Lara.Check.Unit.checkUnit_sound h
+  have sourceSigmaEq := sourceSound.sigma_eq
+  have sourcePolicyEq := sourceSound.policy_eq
+  have sourceRuleIds := sourceSound.ruleIds_nodup
+  have sourcePolicyWf := sourceSound.policy_wf
+  have sourceArgumentsEq := sourceSound.args_eq
+  have sourceAttacksEq := sourceSound.atts_eq
+  have sourceAttackComplete := sourceSound.attack_complete
+  have sourceNodeTerms := sourceSound.nodes_terms
   have rawPolicySorted :
       Lara.policyWellSorted unit.sigma unit.policy = true := by
     exact Lara.Check.Unit.signatureStage_policy
@@ -6316,9 +6321,12 @@ theorem checkUnit_ok_rename
       targetRuleIds targetPolicyWf targetArgumentsNodup targetSupport
       targetTyped targetSourceDeclared targetTargetDeclared
       targetAttackComplete
-  obtain ⟨targetSigmaEq, _, _, _, _, targetPolicyEq, _, _,
-    targetArgumentsEq, targetAttacksEq, _, targetNodeTerms⟩ :=
-      Lara.Check.Unit.checkUnit_sound renamedCheck
+  have targetSound := Lara.Check.Unit.checkUnit_sound renamedCheck
+  have targetSigmaEq := targetSound.sigma_eq
+  have targetPolicyEq := targetSound.policy_eq
+  have targetArgumentsEq := targetSound.args_eq
+  have targetAttacksEq := targetSound.atts_eq
+  have targetNodeTerms := targetSound.nodes_terms
   have sigmaRelated : renamedChecked.sigma = checked.sigma :=
     targetSigmaEq.trans sourceSigmaEq.symm
   have policyRelated :
@@ -6384,9 +6392,14 @@ private theorem checkUnit_ok_reflect
         .ok renamedChecked) :
     ∃ checked,
       Lara.Check.Unit.checkUnit gamma env.registry ground unit = .ok checked := by
-  obtain ⟨targetSigmaEq, _, _, _, _, targetPolicyEq, targetRuleIds,
-    targetPolicyWf, targetArgumentsEq, targetAttacksEq,
-    targetAttackComplete, _⟩ := Lara.Check.Unit.checkUnit_sound h
+  have targetSound := Lara.Check.Unit.checkUnit_sound h
+  have targetSigmaEq := targetSound.sigma_eq
+  have targetPolicyEq := targetSound.policy_eq
+  have targetRuleIds := targetSound.ruleIds_nodup
+  have targetPolicyWf := targetSound.policy_wf
+  have targetArgumentsEq := targetSound.args_eq
+  have targetAttacksEq := targetSound.atts_eq
+  have targetAttackComplete := targetSound.attack_complete
   have rawTargetPolicySorted :
       Lara.policyWellSorted unit.sigma (renameCorePolicy ρg unit.policy) = true := by
     exact Lara.Check.Unit.signatureStage_policy

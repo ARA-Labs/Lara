@@ -23,9 +23,9 @@ abstraction, which needs a logical relation (Part B).
 ## The projection layer (issue #216)
 
 The module also owns the layer that leaves the *reading* of the carrier open:
-`obsGen` (`:580`) is `obs` with `Invariants.status canon` replaced by an
-arbitrary projection, and `obsGen_congr` (`:784`) is the real proof of the
-congruence — `backend_replacement_congruence` (`:820`) is that theorem
+`obsGen` (`:591`) is `obs` with `Invariants.status canon` replaced by an
+arbitrary projection, and `obsGen_congr` (`:795`) is the real proof of the
+congruence — `backend_replacement_congruence` (`:831`) is that theorem
 instantiated at the grounded reading, in one line.
 
 It lives here rather than beside the semantics that instantiate it because none
@@ -380,8 +380,14 @@ theorem signatureStage_of_ok {ground : List Atom} {unit : Lara.Unit}
     {accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
     (h : Check.Unit.checkUnit Gamma reg ground unit = .ok accepted) :
     Check.Unit.signatureStage ground unit = none := by
-  obtain ⟨hsigma, hwf, hpol, hground, hargs, hpolicy, -, -, hargsEq, -, -, -⟩ :=
-    Check.Unit.checkUnit_sound h
+  have hsound := Check.Unit.checkUnit_sound h
+  have hsigma := hsound.sigma_eq
+  have hwf := hsound.sigma_wf
+  have hpol := hsound.policy_sorted
+  have hground := hsound.ground_sorted
+  have hargs := hsound.args_sorted
+  have hpolicy := hsound.policy_eq
+  have hargsEq := hsound.args_eq
   rw [Check.Unit.signatureStage, if_neg (by rw [← hsigma, hwf]; simp),
     if_neg (by rw [← hsigma, ← hpolicy, hpol]; simp),
     if_neg (by rw [← hsigma, hground]; simp),
@@ -401,8 +407,13 @@ theorem checkUnit_map {ground : List Atom} {unit₁ unit₂ : Lara.Unit}
     (hatts : unit₂.atts = unit₁.atts.map (mapAssurAtt f))
     (h₁ : Check.Unit.checkUnit Gamma reg₁ ground unit₁ = .ok accepted₁) :
     ∃ accepted₂, Check.Unit.checkUnit Gamma reg₂ ground unit₂ = .ok accepted₂ := by
-  obtain ⟨-, -, -, -, -, hpolEq, hruleIds, hpolWf, hargsEq, hattsEq,
-    hattackComplete, -⟩ := Check.Unit.checkUnit_sound h₁
+  have hsound := Check.Unit.checkUnit_sound h₁
+  have hpolEq := hsound.policy_eq
+  have hruleIds := hsound.ruleIds_nodup
+  have hpolWf := hsound.policy_wf
+  have hargsEq := hsound.args_eq
+  have hattsEq := hsound.atts_eq
+  have hattackComplete := hsound.attack_complete
   have hscope : Policy.firstOutOfScope? unit₂.policy = none := by
     rw [hpolicy, ← hpolEq]; exact accepted₁.scopes_wf
   refine Check.Unit.checkUnit_complete
@@ -616,7 +627,7 @@ is ever applied, so no projection can influence — or observe — the rejection
 The `hlink` hypothesis is `linkFault C F = none` rather than `linkOk C F = true`
 because that is the form the definitional match needs; `obsGen_eq_of_ok` takes
 the `linkOk` spelling instead and converts, which is also the spelling its
-grounded instance `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:675`)
+grounded instance `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:686`)
 exposes. -/
 theorem obsGen_rejected {α : Type} (g : Invariants.StructuredAF → Atom → α)
     {canon : String → String} {reg : BackendRegistry canon}
@@ -628,7 +639,7 @@ theorem obsGen_rejected {α : Type} (g : Invariants.StructuredAF → Atom → α
   simp only [obsGen, hlink, h]
 
 /-- **An accepted link observes through its carrier**, generically. This is
-`obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:675`) with the projection
+`obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:686`) with the projection
 left open — and it carries the proof that theorem used to run, `obs_eq_of_ok`
 now being this one instantiated: `linkOk` is `Option.isNone` of `linkFault`, so
 the guard hypothesis rewrites into the shape the match wants, and the two
@@ -725,22 +736,22 @@ theorem compileUnit_link_relabel
   have hsound₁ := Check.Unit.checkUnit_sound h₁
   have hsound₂ := Check.Unit.checkUnit_sound h₂
   exact compileUnit_map hf hpres
-    (by rw [hsound₁.2.2.2.2.2.1, hsound₂.2.2.2.2.2.1]; rfl)
-    (by rw [hsound₂.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.1]; exact hargs)
-    (by rw [hsound₂.2.2.2.2.2.2.2.2.2.1, hsound₁.2.2.2.2.2.2.2.2.2.1]; exact hatts)
+    (by rw [hsound₁.policy_eq, hsound₂.policy_eq]; rfl)
+    (by rw [hsound₂.args_eq, hsound₁.args_eq]; exact hargs)
+    (by rw [hsound₂.atts_eq, hsound₁.atts_eq]; exact hatts)
 
 /-- **Contextual representation independence, for every projection at once.**
 
 An injective, acceptance-preserving relabel of a fragment's certificates is
 unobservable in every admissible context whose own assurances the relabel fixes
 — and *whatever* is read off the resulting carrier. This is
-`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:820`) with
+`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:831`) with
 `Invariants.status canon` replaced by an arbitrary `g`. It carries the proof
 that theorem used to carry; that theorem is now this one instantiated.
 
 **Why the generalization is free.** The argument produces an accepted link on
 each side and then appeals to `compileUnit_link_relabel`
-(`lean/Lara/Context/Equivalence.lean:712`), whose conclusion is
+(`lean/Lara/Context/Equivalence.lean:723`), whose conclusion is
 `Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁` — an equation
 between carriers, not a pointwise agreement between them:
 
@@ -815,7 +826,7 @@ hypothesis — which is why it is cited rather than re-derived
 abstraction (no logical relation — Part B).
 
 The admissibility hypothesis is not a technicality that better proof
-engineering would remove; `obsGen_congr` (`:784`), which now carries this
+engineering would remove; `obsGen_congr` (`:795`), which now carries this
 theorem's proof, records why. -/
 theorem backend_replacement_congruence
     (hf : Function.Injective f)
@@ -869,7 +880,7 @@ of *this* theorem, not a gap in the development: a display of this result must
 say "agrees globally", not "agrees on the fragment's occurrences".
 
 The occurrence-local hypothesis is a separate theorem rather than a missing one.
-`backend_replacement_parametricity_local` (`Parametricity.lean:1751`) and its
+`backend_replacement_parametricity_local` (`Parametricity.lean:1756`) and its
 companion `backend_replacement_parametricity_local_sem` oblige acceptance only
 for `α ∈ occurrences F`, by replacing the relabel function with a relation
 inhabited exactly there. They are a **trade, not a strengthening**: they add

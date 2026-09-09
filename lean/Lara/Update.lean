@@ -816,9 +816,14 @@ theorem applyUpdate_addAttack_ok {canon : String → String}
       (RawAttack.resolveAttacks_length σ.argsRaw oldDeclared.resolve_eq)]
     simp [RawAttack.selectAligned, hkeepRaw]
   have holdSound := Check.Unit.checkUnit_sound holdCheck
-  rcases holdSound with
-    ⟨hsigmaEq, hsigmaWf, hpolicySorted, hgroundSorted, hargsSorted,
-      hpolicyEq, _, _, hprogramArgs, hprogramAttacks, _, _⟩
+  have hsigmaEq := holdSound.sigma_eq
+  have hsigmaWf := holdSound.sigma_wf
+  have hpolicySorted := holdSound.policy_sorted
+  have hgroundSorted := holdSound.ground_sorted
+  have hargsSorted := holdSound.args_sorted
+  have hpolicyEq := holdSound.policy_eq
+  have hprogramArgs := holdSound.args_eq
+  have hprogramAttacks := holdSound.atts_eq
   have hprogramArgs' :
       oldChecked.program.args = oldAdmission.prune.keptArgs.map (·.2) := by
     simpa [prunedUnit] using hprogramArgs
@@ -1058,9 +1063,14 @@ theorem applyUpdate_addInstance_ok {canon : String → String}
     rw [hkeptIdsEq, ← holdPrune]
     simp [hsourceNe, htargetNe]
   have holdSound := Check.Unit.checkUnit_sound holdCheck
-  rcases holdSound with
-    ⟨hsigmaEq, hsigmaWf, hpolicySorted, hgroundSorted, hargsSorted,
-      hpolicyEq, _, _, hprogramArgs, hprogramAttacks, _, _⟩
+  have hsigmaEq := holdSound.sigma_eq
+  have hsigmaWf := holdSound.sigma_wf
+  have hpolicySorted := holdSound.policy_sorted
+  have hgroundSorted := holdSound.ground_sorted
+  have hargsSorted := holdSound.args_sorted
+  have hpolicyEq := holdSound.policy_eq
+  have hprogramArgs := holdSound.args_eq
+  have hprogramAttacks := holdSound.atts_eq
   have hprogramArgs' :
       oldChecked.program.args = oldAdmission.prune.keptArgs.map (·.2) := by
     simpa [prunedUnit] using hprogramArgs
@@ -1300,9 +1310,14 @@ theorem applyUpdate_addLeaf_ok {canon : String → String}
     simp only [Admission.buildPrune]
     rw [hpolicySeed, hgroupSeed]
   have holdSound := Check.Unit.checkUnit_sound holdCheck
-  rcases holdSound with
-    ⟨hsigmaEq, hsigmaWf, hpolicySorted, hgroundSorted, hargsSorted,
-      hpolicyEq, _, _, hprogramArgs, hprogramAttacks, _, _⟩
+  have hsigmaEq := holdSound.sigma_eq
+  have hsigmaWf := holdSound.sigma_wf
+  have hpolicySorted := holdSound.policy_sorted
+  have hgroundSorted := holdSound.ground_sorted
+  have hargsSorted := holdSound.args_sorted
+  have hpolicyEq := holdSound.policy_eq
+  have hprogramArgs := holdSound.args_eq
+  have hprogramAttacks := holdSound.atts_eq
   have hprogramArgs' :
       oldChecked.program.args = oldAdmission.prune.keptArgs.map (·.2) := by
     simpa [prunedUnit] using hprogramArgs
@@ -1552,9 +1567,14 @@ theorem applyUpdate_tighten_ok {canon : String → String}
     simpa [admission, holdPrune, Admission.buildPrune] using
       hgammaRetained row hrowZero l hl
   have holdSound := Check.Unit.checkUnit_sound holdCheck
-  rcases holdSound with
-    ⟨hsigmaEq, hsigmaWf, hpolicySorted, hgroundSorted, hargsSorted,
-      hpolicyEq, _, _, hprogramArgs, hprogramAttacks, _, _⟩
+  have hsigmaEq := holdSound.sigma_eq
+  have hsigmaWf := holdSound.sigma_wf
+  have hpolicySorted := holdSound.policy_sorted
+  have hgroundSorted := holdSound.ground_sorted
+  have hargsSorted := holdSound.args_sorted
+  have hpolicyEq := holdSound.policy_eq
+  have hprogramArgs := holdSound.args_eq
+  have hprogramAttacks := holdSound.atts_eq
   have hprogramArgs' :
       oldChecked.program.args = oldAdmission.prune.keptArgs.map (·.2) := by
     simpa [prunedUnit] using hprogramArgs
@@ -2046,8 +2066,9 @@ private theorem noPruneTransport {canon : String → String}
   have hpruneAtts :
       run.admission.prune.keptAttacks = run.declared.resolved :=
     hattsDef.trans hselected
-  obtain ⟨_, _, _, _, _, _, _, _, hprogramArgs, hprogramAtts, _, _⟩ :=
-    Check.Unit.checkUnit_sound run.check_ok
+  have hsound := Check.Unit.checkUnit_sound run.check_ok
+  have hprogramArgs := hsound.args_eq
+  have hprogramAtts := hsound.atts_eq
   rw [hpruneArgs] at hprogramArgs
   rw [hpruneAtts] at hprogramAtts
   have haf :
@@ -2109,8 +2130,7 @@ theorem checkedArgs_eq_raw_of_clean {canon : String → String}
     {reg : BackendRegistry canon} {state : SourceState}
     (run : AcceptedRun reg state) (hclean : CleanBase run) :
     run.checked.program.args = state.argsRaw.map (·.2) := by
-  obtain ⟨_, _, _, _, _, _, _, _, hargs, _, _, _⟩ :=
-    Check.Unit.checkUnit_sound run.check_ok
+  have hargs := (Check.Unit.checkUnit_sound run.check_ok).args_eq
   rw [keptArgs_eq_raw_of_clean run hclean] at hargs
   exact hargs
 
@@ -2169,8 +2189,7 @@ theorem blockedQueriesForRun_eq_nil_of_empty_closure {canon : String → String}
     rfl
   have hargs : run.checked.program.args =
       run.admission.prune.keptArgs.map (·.2) := by
-    obtain ⟨_, _, _, _, _, _, _, _, hprogramArgs, _, _, _⟩ :=
-      Check.Unit.checkUnit_sound run.check_ok
+    have hprogramArgs := (Check.Unit.checkUnit_sound run.check_ok).args_eq
     exact hprogramArgs
   have hretainedLength :
       (BlockedProgram.retainedIndices run.admission.prune.keep
@@ -2238,8 +2257,9 @@ private theorem checked_policy_args_of_acceptance {canon : String → String}
       , args := admission.prune.keptArgs.map (·.2)
       , atts := admission.prune.keptAttacks } = .ok checked := by
     simpa only [checkAccepted, checkedGamma, prunedUnit] using hcheck
-  obtain ⟨_, _, _, _, _, hpolicy, _, _, hargs, _, _, _⟩ :=
-    Check.Unit.checkUnit_sound hsound
+  have hcheckSound := Check.Unit.checkUnit_sound hsound
+  have hpolicy := hcheckSound.policy_eq
+  have hargs := hcheckSound.args_eq
   exact ⟨hpolicy, hargs⟩
 
 private theorem checked_atts_of_acceptance {canon : String → String}
@@ -2256,8 +2276,7 @@ private theorem checked_atts_of_acceptance {canon : String → String}
       , args := admission.prune.keptArgs.map (·.2)
       , atts := admission.prune.keptAttacks } = .ok checked := by
     simpa only [checkAccepted, checkedGamma, prunedUnit] using hcheck
-  obtain ⟨_, _, _, _, _, _, _, _, _, hatts, _, _⟩ :=
-    Check.Unit.checkUnit_sound hsound
+  have hatts := (Check.Unit.checkUnit_sound hsound).atts_eq
   exact hatts
 /-- If an exact admission run prunes no arguments, endpoint alignment also
 prunes no attacks and the checked framework is the declared framework. -/
@@ -3079,8 +3098,9 @@ theorem tighten_public_defeated_not_contested {canon : String → String}
           source.argsRaw := by
     rw [targetRun.prune_eq, BlockedProgram.retainedArguments_eq_filter]
     rfl
-  obtain ⟨_, _, _, _, _, _, _, _, htargetArgs0, htargetAtts, _, _⟩ :=
-    Check.Unit.checkUnit_sound targetRun.check_ok
+  have htargetSound := Check.Unit.checkUnit_sound targetRun.check_ok
+  have htargetArgs0 := htargetSound.args_eq
+  have htargetAtts := htargetSound.atts_eq
   have htargetArgs :
       targetRun.checked.program.args =
         (BlockedProgram.retainedArguments targetRun.admission.prune.keep

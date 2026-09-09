@@ -178,8 +178,7 @@ theorem node_conclusion_wellSorted
     Sigma.WellSorted sigma node.conclusion := by
   obtain ⟨_, hground, hinstances⟩ :=
     Check.Unit.checkUnit_wellSorted R.checked
-  obtain ⟨_, _, _, _, _, _, _, _, hargs, _, _, _⟩ :=
-    Check.Unit.checkUnit_sound R.checked
+  have hargs := (Check.Unit.checkUnit_sound R.checked).args_eq
   have hterm : node.term ∈ R.accepted.program.args := by
     have hmapped : node.term ∈ R.accepted.nodes.map (·.term) :=
       List.mem_map.mpr ⟨node, hnode, rfl⟩
