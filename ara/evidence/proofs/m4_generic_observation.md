@@ -335,3 +335,11 @@ Axiom profile of the new and relocated theorems, all in the standard trio:
 The job count differs from the 154 recorded above because that run was from a cold
 `.lake` in a worktree carrying `AxCheck.lean`'s dependencies; this one is `lake build
 Lara` against the library root on a warm cache. Both are full builds of their target.
+
+## Follow-up: admissible three-cycle (#270, 2026-09-08)
+
+The historical open-work list above records #271 as it merged. #270 is now
+resolved by `cycle_admissible`, and `congruence_witness_sem` uses that cycle.
+The same carrier separates grounded and stable observations. The leaf-only
+limitation and #269 remain. See `m4_cycle_admissibility.md` for the proof and
+verification record.

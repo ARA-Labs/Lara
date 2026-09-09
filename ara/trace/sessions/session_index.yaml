@@ -584,3 +584,12 @@ sessions:
   events_count: 8
   claims_touched: [C49, C52, C53, C54]
   open_threads: 6
+
+- id: 2026-09-08_002
+  date: '2026-09-08'
+  summary: '#270: admissibility and generic congruence on the semantics-separating cycle.'
+  turn_count: 1
+  events_count: 1
+  claims_touched:
+  - C49
+  open_threads: 1

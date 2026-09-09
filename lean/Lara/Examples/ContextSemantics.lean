@@ -61,27 +61,24 @@ neither of which contains the cycle on its own. Nothing here re-proves a
 property of Dung frameworks; what is checked is that the pipeline delivers the
 carrier the separation needs, and that `obsSem` reads it.
 
-### The inert witnesses, named as such
+### Congruence at a carrier where the semantics disagree
 
-`congruence_witness_sem`, `registry_swap_witness_sem` and
-`obsSem_linking_agrees` all sit at `ctxEx`/`fragEx`, where the semantics agree.
-The first two are quantified over `sem`, and that quantifier is **inert** there:
-they witness that the congruence hypotheses are inhabited and that the
-semantics-parametric plumbing type-checks, not that the parameter does any work.
-The honest reading of each is written into its own docstring rather than left to
-this header.
+`cycle_admissible` supplies the hypotheses for `congruence_witness_sem` on
+`cycleCtx`/`cycleFrag`. The same carrier separates grounded and stable
+observations in `obsSem_cycle_stable_ne_grounded`: the congruence is now
+instantiated where changing semantics changes what is observed.
+`registry_swap_witness_sem` remains on `ctxEx`/`fragEx`, where all five
+semantics agree. Both fragments contain only leaves, so neither witness
+exercises a certificate replacement.
 
 ### Proof budget
 
-Everything closes by `decide`, `rfl`, or a short term, except
-`obsSem_gap_uniform` (a case split on the checker) and the two failure-arm
-theorems (which must go through `obsSem_incompatible` / `obsSem_rejected`, since
-`decide` cannot close a goal with a free `sem`). `native_decide` is not used
-anywhere and must not be: it depends on `Lean.ofReduceBool`, which is outside
-the standard axiom trio the `AxCheck.lean` gate enforces.
-
-This module is purely additive. It changes no existing declaration, and the only
-edit it makes outside itself is one import line in `lean/Lara.lean`.
+The cycle's `SideOk` proofs use support uniqueness and an explicit case split
+on the fragment's two arguments. Its sole internal contrary pair is covered by
+the declared undermine attack. The other concrete checks close by `decide`,
+`rfl`, or short terms; the semantics-uniform failure arms use the general
+observation theorems. `native_decide` is not used: its `Lean.ofReduceBool` axiom
+is outside the standard trio enforced by `AxCheck.lean`.
 -/
 
 import Lara.Examples
@@ -167,6 +164,95 @@ def cycleFrag : Fragment :=
 /-- The link guard passes. Pinned before the observations so that a fixture
 which stopped linking is distinguishable from a separation that collapsed. -/
 theorem cycle_link_ok : linkOk cycleCtx cycleFrag = true := by decide
+
+private theorem cycle_leaf_checked (reg : BackendRegistry id) (l : LeafId) (p : Atom)
+    (h : linkGamma cycleCtx cycleFrag l = some p) :
+    HasSupport id cyclePolicy.ruleLookup (linkGamma cycleCtx cycleFrag)
+      (certOkOf reg) (.leaf l) p [] := .leaf h
+
+/-- The singleton context has no internal contrary pair. -/
+theorem cycle_sideOk_ctx (reg : BackendRegistry id) :
+    SideOk id reg (linkGamma cycleCtx cycleFrag) cyclePolicy
+      cycleCtx.frame.args cycleCtx.frame.atts where
+  support := by
+    intro w hw
+    have hw2 : w = .leaf l2 := by simpa [cycleCtx, ctxFrame] using hw
+    exact ⟨pB, hw2 ▸ cycle_leaf_checked reg l2 pB (by decide)⟩
+  typed := by intro k hk; simp [cycleCtx, ctxFrame] at hk
+  source_declared := by intro k hk; simp [cycleCtx, ctxFrame] at hk
+  target_declared := by intro k hk; simp [cycleCtx, ctxFrame] at hk
+  attack_complete := by
+    intro source hs target ht Cs Ct hsSup htSup hcm _
+    have hsEq : source = .leaf l2 := by simpa [cycleCtx, ctxFrame] using hs
+    have htEq : target = .leaf l2 := by simpa [cycleCtx, ctxFrame] using ht
+    subst hsEq; subst htEq
+    have h1 : Cs = pB :=
+      (Support.hasSupport_unique hsSup (cycle_leaf_checked reg l2 pB (by decide))).1
+    have h2 : Ct = pB :=
+      (Support.hasSupport_unique htSup (cycle_leaf_checked reg l2 pB (by decide))).1
+    subst h1; subst h2
+    exact absurd ((contraryMatchB_iff id cyclePolicy.defeat pB pB).mpr hcm) (by decide)
+
+/-- The fragment declares the sole internal conflict, from `s` to `p`. -/
+theorem cycle_sideOk_frag (reg : BackendRegistry id) :
+    SideOk id reg (linkGamma cycleCtx cycleFrag) cyclePolicy
+      cycleFrag.args cycleFrag.atts where
+  support := by
+    intro w hw
+    have hw' : w = .leaf l1 ∨ w = .leaf l3 := by simpa [cycleFrag] using hw
+    rcases hw' with rfl | rfl
+    · exact ⟨pA, cycle_leaf_checked reg l1 pA (by decide)⟩
+    · exact ⟨pC, cycle_leaf_checked reg l3 pC (by decide)⟩
+  typed := by
+    intro k hk
+    have hk' : k = .undermine (.leaf l3) (.leaf l1) [] := by
+      simpa [cycleFrag] using hk
+    subst hk'
+    exact .undermine (cycle_leaf_checked reg l3 pC (by decide)) rfl (by decide)
+      ((contraryMatchB_iff id cyclePolicy.defeat pC pA).mp (by decide))
+  source_declared := by intro k hk; simp [cycleFrag] at hk; subst k; simp [Attack.source, cycleFrag]
+  target_declared := by intro k hk; simp [cycleFrag] at hk; subst k; simp [Attack.target, cycleFrag]
+  attack_complete := by
+    intro source hs target ht Cs Ct hsSup htSup hcm _
+    have hs' : source = .leaf l1 ∨ source = .leaf l3 := by simpa [cycleFrag] using hs
+    have ht' : target = .leaf l1 ∨ target = .leaf l3 := by simpa [cycleFrag] using ht
+    rcases hs' with rfl | rfl <;> rcases ht' with rfl | rfl
+    · have h1 : Cs = pA :=
+        (Support.hasSupport_unique hsSup (cycle_leaf_checked reg l1 pA (by decide))).1
+      have h2 : Ct = pA :=
+        (Support.hasSupport_unique htSup (cycle_leaf_checked reg l1 pA (by decide))).1
+      subst h1; subst h2
+      exact absurd ((contraryMatchB_iff id cyclePolicy.defeat pA pA).mpr hcm) (by decide)
+    · have h1 : Cs = pA :=
+        (Support.hasSupport_unique hsSup (cycle_leaf_checked reg l1 pA (by decide))).1
+      have h2 : Ct = pC :=
+        (Support.hasSupport_unique htSup (cycle_leaf_checked reg l3 pC (by decide))).1
+      subst h1; subst h2
+      exact absurd ((contraryMatchB_iff id cyclePolicy.defeat pA pC).mpr hcm) (by decide)
+    · have h1 : Cs = pC :=
+        (Support.hasSupport_unique hsSup (cycle_leaf_checked reg l3 pC (by decide))).1
+      have h2 : Ct = pA :=
+        (Support.hasSupport_unique htSup (cycle_leaf_checked reg l1 pA (by decide))).1
+      subst h1; subst h2
+      exact ⟨.undermine (.leaf l3) (.leaf l1) [], by simp [cycleFrag], rfl, .leaf l1, rfl, [], rfl⟩
+    · have h1 : Cs = pC :=
+        (Support.hasSupport_unique hsSup (cycle_leaf_checked reg l3 pC (by decide))).1
+      have h2 : Ct = pC :=
+        (Support.hasSupport_unique htSup (cycle_leaf_checked reg l3 pC (by decide))).1
+      subst h1; subst h2
+      exact absurd ((contraryMatchB_iff id cyclePolicy.defeat pC pC).mpr hcm) (by decide)
+
+/-- The three-cycle is admissible against every registry; it contains only leaves. -/
+theorem cycle_admissible (reg : BackendRegistry id) : Admissible reg cycleCtx cycleFrag where
+  guard := cycle_link_ok
+  ctx := cycle_sideOk_ctx reg
+  frag := cycle_sideOk_frag reg
+  signature :=
+    signatureStage_link (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide)
+  scope := by decide
+  ruleIds := by decide
+  policy := Policy.firstViolation_none_iff.mp (by decide)
 
 /-- The merged unit is accepted by the executable whole-unit checker, so the
 observations below are taken on `ObservationOf.observed` rather than on a rejection.
@@ -329,47 +415,33 @@ Without these, `backend_replacement_congruence_sem` and
 known to hold of anything, and `CtxEquivSem` would have no witness of any kind.
 They are the semantics-parametric counterparts of `Linking.congruence_witness`
 (`lean/Lara/Examples/Linking.lean:676`) and `Linking.registry_swap_witness`
-(`:670`), and they reuse those witnesses' inputs verbatim:
-`Linking.admissible_split` (`:345`), `Linking.assurPreserving_onlyNd` (`:658`),
-`Linking.registryOnlyNd` (`:637`), and `fixesContext_id`
-(`lean/Lara/Context/Equivalence.lean:857`). -/
+(`:670`). The first now uses `cycle_admissible` on the three-cycle. The
+registry-swap witness retains `Linking.admissible_split` (`:345`),
+`Linking.assurPreserving_onlyNd` (`:658`) and `Linking.registryOnlyNd` (`:637`).
+Both use `fixesContext_id` (`lean/Lara/Context/Equivalence.lean:857`). -/
 
-/-- **The congruence, instantiated at every semantics at once.**
+/-- **Congruence at every semantics on the linked three-cycle.**
+`cycle_admissible` supplies the premises at the very carrier where
+`obsSem_cycle_stable_ne_grounded` proves that grounded and stable observations
+differ. The semantics parameter therefore changes the observed value here.
 
-What this establishes, precisely: the hypotheses of
-`backend_replacement_congruence_sem` (`lean/Lara/Context/Observation.lean:317`)
-are inhabited, and its conclusion type-checks and is provable at a concrete
-link, uniformly in `sem`.
-
-What it does **not** establish, and must not be read as establishing. The `sem`
-quantifier is **inert here**. The carrier is `ctxEx`/`fragEx`, the two-node
-chain on which all five semantics agree (`obsSem_linking_agrees` below) — so
-this theorem would be equally provable if `ExtensionSemantics` had
-one inhabitant. The theorems that make the parameter non-trivial are
-`obsSem_cycle_stable_ne_grounded` and `obsSem_sink_preferred_ne_grounded`, not
-this one.
-
-The assurance-free caveat that `docs/theory-m4-contextual-adequacy.md` §1
-records for `Linking.congruence_witness` applies here unchanged and for the same
-reason: `fragEx` is a fragment of bare leaves carrying no certificate, so
-`mapAssurFrag id` — indeed `mapAssurFrag f` for *every* `f` — is the identity on
-it. This is a shape witness. The fixture that exercises a real backend swap is
-`Linking.cert_congruence_witness` (`lean/Lara/Examples/Linking.lean:1025`), and
-it is grounded-only; no semantics-parametric counterpart of it is claimed
-here. -/
+The assurance-free limitation remains: `cycleFrag` consists of bare leaves,
+so `mapAssurFrag f` is the identity on it for every `f`. This witnesses
+congruence on a semantics-separating carrier, not a real certificate swap;
+the semantics-parametric certificate-bearing instance remains #269. -/
 theorem congruence_witness_sem (sem : ExtensionSemantics) :
-    obsSem sem registryEx ctxEx fragEx
-      = obsSem sem registryEx ctxEx (mapAssurFrag id fragEx) :=
+    obsSem sem registryEx cycleCtx cycleFrag
+      = obsSem sem registryEx cycleCtx (mapAssurFrag id cycleFrag) :=
   backend_replacement_congruence_sem sem (fun _ _ h => h) (fun _ _ _ _ h => h)
-    (admissible_split registryEx) (fixesContext_id ctxEx)
+    (cycle_admissible registryEx) (fixesContext_id cycleCtx)
 
 /-- **D6, at every semantics at once.** Two genuinely different registries —
 `Linking.registryOnlyNd_ne_registryEx` (`lean/Lara/Examples/Linking.lean:645`)
 proves they differ — read the same fragment the same way, under every extension
 semantics.
 
-The same two caveats as `congruence_witness_sem` apply verbatim: the `sem`
-quantifier is inert at this carrier, and the fragment carries no certificate, so
+Here the `sem` quantifier is inert: all five semantics agree at this carrier.
+The fragment also carries no certificate, so
 the acceptance-profile hypothesis is discharged against material that has no
 assurance to preserve. The certificate-bearing grounded counterpart is
 `Linking.cert_registry_swap_witness` (`lean/Lara/Examples/Linking.lean:909`). -/

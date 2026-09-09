@@ -2818,6 +2818,9 @@ F3 adds the surface corollary. -/
 
 -- Examples.ContextSemantics: the semantics parameter is not an abstraction
 -- over one instance at the context level either (#216).
+#print axioms Lara.Examples.ContextSemantics.cycle_sideOk_ctx
+#print axioms Lara.Examples.ContextSemantics.cycle_sideOk_frag
+#print axioms Lara.Examples.ContextSemantics.cycle_admissible
 #print axioms Lara.Examples.ContextSemantics.cycle_link_ok
 #print axioms Lara.Examples.ContextSemantics.cycle_accepted
 #print axioms Lara.Examples.ContextSemantics.cycle_linked_shape

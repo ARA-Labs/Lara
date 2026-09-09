@@ -8974,3 +8974,15 @@ tree:
     - "https://github.com/ARA-Labs/lara/issues/277"
   status: open
   also_depends_on: [N339, N331]
+
+- id: N342
+  type: experiment
+  title: Congruence on an admissible semantics-separating cycle (#270)
+  provenance: ai-executed
+  timestamp: 2026-09-08T22:45
+  parent: N341
+  result: cycle_admissible holds for every registry. congruence_witness_sem now uses this carrier,
+    where grounded and stable observations differ. Certificate replacement remains unexercised.
+  evidence:
+  - ara/evidence/proofs/m4_cycle_admissibility.md
+  status: resolved

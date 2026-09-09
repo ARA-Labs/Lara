@@ -416,11 +416,11 @@ So the debt is marked **partially** discharged, and term-level holes are issue
   `CtxEquivSem sem reg F₁ F₂` at a non-grounded `sem` is neither proved nor
   refuted, and is issue **#268**. `ctxEquivSem_grounded_iff` settles the
   grounded instance only.
-- **Not a claim that the semantics-parametric congruence witnesses exercise the
-  semantics parameter.** `congruence_witness_sem` and `registry_swap_witness_sem`
-  sit at `ctxEx`/`fragEx`, where all five semantics agree, so the quantifier is
-  inert there; issue **#270** is the carrier that would fix it, and **#269** the
-  certificate-bearing instantiation.
+- **Not a certificate-bearing semantics-parametric witness.** #270 moves
+  `congruence_witness_sem` to the admissible three-cycle, where grounded and
+  stable observations differ. `registry_swap_witness_sem` remains on the
+  chain where all five semantics agree. Both fragments contain only leaves;
+  **#269** remains the certificate-bearing instantiation.
 - **Not a claim that contexts are closed under composition for *linkability*.**
   They are closed for hygiene; a composite whose halves attack each other is not
   admissible, and `Examples.Linking.hostile_composite_not_admissible` exhibits

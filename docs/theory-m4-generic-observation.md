@@ -256,13 +256,12 @@ What *is* known about `CtxEquivSem` beyond its definition:
 non-grounded instance, so it is not merely `Linking.ctxEquiv_negative` transported
 through the `iff`.
 
-Also open, and filed:
-[#269](https://github.com/ARA-Labs/lara/issues/269) (instantiate the generic
-congruence on the certificate-bearing `certCtx`/`certFrag` pair) and
-[#270](https://github.com/ARA-Labs/lara/issues/270) (prove
-`Admissible registryEx cycleCtx cycleFrag`, so the congruence witness sits at a
-carrier where the semantics parameter is not inert). §6 explains why those two
-gaps matter.
+The certificate-bearing instantiation remains open as
+[#269](https://github.com/ARA-Labs/lara/issues/269). The admissible disagreeing
+carrier requested in [#270](https://github.com/ARA-Labs/lara/issues/270) is now
+proved: `cycle_admissible` establishes `Admissible reg cycleCtx cycleFrag` for
+every registry, and `congruence_witness_sem` uses it. §6 records the remaining
+limitation.
 
 ---
 
@@ -352,25 +351,27 @@ instances, because the theorems they instantiate are:
 
 ---
 
-## 6. The limitation the witnesses carry
+## 6. Congruence on the three-cycle and the remaining limitation
 
-`congruence_witness_sem` and `registry_swap_witness_sem` establish that the
-headline's hypotheses are inhabited and its conclusion provable at a concrete
-link, uniformly in `sem`. They establish nothing more, and the modules say so.
+`congruence_witness_sem` now instantiates the generic congruence on
+`cycleCtx`/`cycleFrag`. `cycle_admissible` proves both sides well-formed against
+any registry. The context has no internal contrary pair; the fragment's only
+internal pair, `s ⊣ p`, is covered by its declared undermine attack. Support
+uniqueness reduces attack completeness to the four pairs of fragment arguments.
 
-The `sem` quantifier is **inert** at their carrier: `ctxEx`/`fragEx` is the
-two-node chain on which all five semantics agree, so those theorems would be
-equally provable if `ExtensionSemantics` had one inhabitant. The theorems that
-make the parameter non-trivial are the two separations, not these.
+This is the same carrier where `obsSem_cycle_stable_ne_grounded` separates the
+observations: grounded reports `observed contested`, while stable reports
+`noExtension`. Thus the congruence holds uniformly in `sem` at a carrier where
+the choice of semantics changes the observed value. This closes #270.
 
-The assurance-free caveat that `docs/theory-m4-contextual-adequacy.md` §1 records
-for `Linking.congruence_witness` applies unchanged: `fragEx` carries no
-certificate, so `mapAssurFrag f` is the identity on it for *every* `f`. These are
-shape witnesses. The fixture that exercises a real backend swap is
-`Linking.cert_congruence_witness`, and it is grounded-only; no
-semantics-parametric counterpart of it is claimed. Both gaps are filed —
-#269 for the certificate-bearing instantiation, #270 for an admissible
-disagreeing carrier.
+`registry_swap_witness_sem` still uses the two-node `ctxEx`/`fragEx` chain,
+where all five semantics agree. Its semantics quantifier remains inert.
+
+The assurance-free caveat from `docs/theory-m4-contextual-adequacy.md` §1 still
+applies to both witnesses: `cycleFrag` and `fragEx` carry no certificates, so
+`mapAssurFrag f` is the identity on them for every `f`. Neither exercises a real
+certificate replacement. `Linking.cert_congruence_witness` does, but is
+grounded-only; its semantics-parametric counterpart remains #269.
 
 ---
 
@@ -430,8 +431,9 @@ disagreeing carrier.
   concrete context and fragment (§4). The natural reading of
   "semantics-parametric contextual equivalence" as a statement about the relations
   is exactly what is **not** proved — #268.
-- **Not a claim that the congruence witnesses exercise the semantics parameter.**
-  They sit at a carrier where it is inert (§6).
+- **Not a certificate-bearing semantics-parametric congruence witness.**
+  The three-cycle witness exercises the semantics parameter but contains no
+  certificate; #269 remains open (§6).
 - **Not a runtime consequence.** The Haskell evaluator stays grounded; this
   milestone moves no conformance vector, no corpus, and no performance number.
 

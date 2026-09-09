@@ -1327,3 +1327,10 @@ entries:
     - "N338 routed as `experiment` rather than `decision`: it records the answer to a question #215 posed about itself and the gates that answer produced, not a choice among alternatives. N337/N339/N340 are decisions; N341 is an open `question`, not a dead_end, because nothing was tried and abandoned."
     - "Near-miss considered and rejected: the naming decision (N337) is user-provenance and explicit, but it affirms a NAME, not a claim's content — so it did not upgrade any staged observation's provenance and did not count as verbal affirmation for crystallization. The user affirmed what to call the result, not that the result holds."
     - "Did not record a taste comment: the turn carried no evaluative reaction from the researcher beyond the naming selection, which is a decision rather than a reaction to a claim."
+
+- turn: 2026-09-08_002#1
+  notes:
+  - 'Recorded the mechanized result as N342, linked to C49 through its evidence file. Removed only
+    the now-closed #270 boundary; no status or statement upgrade.'
+  - 'No new general claim or heuristic was inferred from this finite proof. Kept #269 open and preserved
+    the earlier evidence record with a dated follow-up.'
