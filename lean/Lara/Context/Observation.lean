@@ -77,7 +77,7 @@ mathematical content beyond the injectivity of `List.map` over a constructor.
               |  quantify over all contexts
               v                                                   v
     Lara.Context.CtxEquiv          ---generalized by--->  Lara.Context.CtxEquivSem
-    (Lara/Context/Equivalence.lean:516)                   (this module)
+    (Lara/Context/Equivalence.lean:530)                   (this module)
 
 Each `--->` arrow is witnessed by a theorem here or in the module named beside
 it: `Invariants.observeSem_grounded`, `obsSem_grounded`, and

@@ -115,7 +115,7 @@ boundary and are supplied by `crossAtts` (`lean/Lara/Context/Fragment.lean:207`)
 — the mechanism `Linking.crossAtts_nonempty`
 (`lean/Lara/Examples/Linking.lean:139`) pins. The third, `s ⊣ p`, has **both
 endpoints among the fragment's own arguments**, so the fragment must declare it
-itself: `SideOk.attack_complete` (`lean/Lara/Context/Link.lean:638`) obliges a
+itself: `SideOk.attack_complete` (`lean/Lara/Context/Link.lean:631`) obliges a
 side to cover every contrary pair internal to it, and
 `Linking.hostile_composite_not_sideOk` (`lean/Lara/Examples/Linking.lean:561`)
 is the witness that omitting such an attack really does break well-formedness.

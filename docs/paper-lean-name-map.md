@@ -26,13 +26,13 @@ status preservation is
 >     SrcStatus P c s ↔ s = Grounded.statusC (checkedAF P) c
 > ```
 
-**Not** `Lara.Grounded.status_preservation` (`Grounded.lean:607`). That lemma
+**Not** `Lara.Grounded.status_preservation` (`Grounded.lean:635`). That lemma
 is framework-level only: it proves `statusDirect F c = statusC F c` over a
 *single* abstract `F : AF` — both sides read the same `F.attack`, so it never
 exercises `compile`. Its own docstring says so, pointing at the file-level
 scope note. (The scope note referenced in #68 as "Compile.lean:606" actually
-lives in `Grounded.lean`: the module header at `Grounded.lean:7–20` and the
-`status_preservation` docstring at `Grounded.lean:601–606`.) The paper may
+lives in `Grounded.lean`: the module header at `Grounded.lean:7–13` and the
+`status_preservation` docstring at `Grounded.lean:629–634`.) The paper may
 cite `status_preservation` only as the abstract-AF core of the equivalence,
 never as the headline preservation theorem.
 
@@ -92,7 +92,7 @@ declared checked term", certified by `Faithful` and discharged by
 | Argument-level bridge (oracle-free, vs executable grounded) | `Compile.srcIn_iff_checkedGrounded` | `Compile.lean:885` |
 | Status functionality | `Compile.srcStatus_unique` | `Compile.lean:828` |
 | **Headline: status preservation (two-sided, oracle-free)** | `Compile.srcStatus_iff_checked` | `Compile.lean:900` |
-| Abstract-AF core only (do not cite as headline) | `Grounded.status_preservation` | `Grounded.lean:607` |
+| Abstract-AF core only (do not cite as headline) | `Grounded.status_preservation` | `Grounded.lean:635` |
 
 ---
 
@@ -147,7 +147,7 @@ The rationality theorem is
 > ```
 
 Scope the paper must keep: the claims are `completeClaimFor`
-(`Consistency.lean:84`) — computed from the accepted unit's retained checked
+(`Consistency.lean:72`) — computed from the accepted unit's retained checked
 nodes; the statement does **not** quantify over arbitrary caller-supplied
 claims, and holes are definitionally empty here.
 
@@ -163,7 +163,7 @@ def WellFormed (canon : String → String) (P : Policy) : Prop :=
       aPatMayOverlap canon p ab.2 = false
 ```
 
-with (`Policy.lean:201`), **verbatim**:
+with (`Policy.lean:203`), **verbatim**:
 
 ```lean
 inductive StrictReachable (P : Policy) : APat → Prop where
@@ -177,24 +177,24 @@ Reading the paper must transcribe exactly:
 - **Strict-reachable = conclusion pattern of a declared strict rule.** This
   is the finite presentation of the spec's least set; closure under the
   premises-to-conclusion chain step is `strictReachable_closed`
-  (`Policy.lean:209`), and the list form is `strictReachable_iff_mem`
-  (`Policy.lean:220`).
+  (`Policy.lean:211`), and the list form is `strictReachable_iff_mem`
+  (`Policy.lean:222`).
 - **Overlap is a conservative unifiability check** (`aPatMayOverlap`,
   variables as wildcards, one-sided guarantee — can reject a safe policy,
-  cannot accept overlapping ground instances; `Policy.lean:234–259` notes).
-- Decidability / executable check: `wfB` (`Policy.lean:444`), adequacy
-  `wfB_iff` (`Policy.lean:620`), `decideWellFormed` (`Policy.lean:657`).
+  cannot accept overlapping ground instances; `Policy.lean:236–247` notes).
+- Decidability / executable check: `wfB` (`Policy.lean:520`), adequacy
+  `wfB_iff` (`Policy.lean:696`), `decideWellFormed` (`Policy.lean:733`).
 - Where the hypothesis bites in the proof: `wellFormed_no_strict_contrary_right`
-  (`Policy.lean:642`) via `wellFormed_contrary_target_attackable`
+  (`Policy.lean:718`) via `wellFormed_contrary_target_attackable`
   (`Consistency.lean:42`, Path B: a contrary target cannot be a strict-rule
   root, hence is conflict-attackable).
 
 Other hypotheses of the theorem, all carried by `Unit.CheckedUnit`
-(`Unit.lean:30`): `ruleIds_nodup`, the `program : CheckedProgram` invariants
+(`Lara/Unit.lean:174`): `ruleIds_nodup`, the `program : CheckedProgram` invariants
 (§1 above), `attack_complete : Compile.AttackComplete …`
 (`Compile.lean:515`), and the retained node cache `nodes` with
 `nodes_terms`. The contrary hypothesis is `Attack.ContraryMatch`
-(`Attack.lean:85`), the implicitly-universally-quantified `contrary` of §4.1.
+(`Lara/Attack.lean:86`), the implicitly-universally-quantified `contrary` of §4.1.
 
 ---
 
@@ -205,7 +205,7 @@ per registered `(name, version)` identity, indexed by the source
 canonicalizer, operating on the explicit full context `Γ = Δ ++ T` (premises
 then digest-resolved theory *data*). The table below works the laws through two
 registered instances — ND (`Strict.ndBackend`, `Strict.lean:759`) and RA
-(`RA.raBackend`, `RA.lean:450`) — chosen as the two extremes: ND's recursive
+(`RA.raBackend`, `RA.lean:358`) — chosen as the two extremes: ND's recursive
 de Bruijn proof terms with a non-identity encoding, and RA's flat
 slots-plus-witness certificate over the identity encoding.
 
@@ -225,10 +225,10 @@ rather than as a third numeric checker.
 
 | Law | Interface (Strict.lean) | ND discharge | RA discharge |
 |---|---|---|---|
-| **B1** deterministic terminating replay | `Backend.replayFull` (:91) is a total Lean function — termination and determinism by construction; adequacy `replayFull_iff` (:93); caller-facing `replay` / `replay_iff` (:136, :140) | `ndReplay` (:664, decode + `ND.infer`, "no proof search"), `ndReplay_iff` (:673); uniqueness `ND.hasType_unique` (`ND.lean:861`) | `raReplay` (`RA.lean:341`, decode + `checkB`, "no search"), `raReplay_iff` (:346) |
-| **B2** normalization reflection: `encode p = encode q ↔ p ≡ q` | field `enc_iff` (:83), with `p ≡ q` := `Lara.equiv canon p q` = `nf canon p = nf canon q` (`Prop.lean:70`) | `ndEnc_iff` (:642), via `encodeAtomKey_injective` (:631) and round-trip `decodeAtomKey_encodeAtomKey` (:590) | `enc := nf canon` (identity encoding), `enc_iff` = `equiv_iff_nf_eq` (`Prop.lean:78`) |
-| **B3** certificate soundness w.r.t. the backend consequence relation | field `soundFull` (:94); consequence relation = `modelsFull` (:85); derived `Backend.sound` (:145); headline **Theorem 1** `strict_step_sound` (:217) | `ND.nd_sound` (`ND.lean:396`), algorithmic side `ND.infer_sound` (`ND.lean:549`); consequence `ndModels` (:649) | `raSound` (`RA.lean:386`) via `checkB_extract` (:361); consequence `raModels` (:326) |
-| **B4** exact dependency reporting (obligation 4, three clauses) | `uses` (:101); coverage `uses_covers` (:107); validity `uses_valid` (:113); accounting `uses_account` (:118); theory corollaries `replay_theory_covers` (:166), `replay_theory_agnostic` (:181), `uses_valid_closed` (:152) | `ndReplay_agree` (:720), `ndUses_valid` (:736), `ndUses_account` (:703); checker tie `ndUses_eq_infer_deps` (:747); operational core `ND.nd_relevance` (`ND.lean:360`), `ND.fv_in_range` (:404), `ND.infer_deps_eq_fv` (:711), `ND.infer_agree` (:799) | `raUses_covers` (`RA.lean:396`), `raUses_valid` (:417), `raUses_account` (:432) |
+| **B1** deterministic terminating replay | `Backend.replayFull` (:91) is a total Lean function — termination and determinism by construction; adequacy `replayFull_iff` (:93); caller-facing `replay` / `replay_iff` (:136, :140) | `ndReplay` (:664, decode + `ND.infer`, "no proof search"), `ndReplay_iff` (:673); uniqueness `ND.hasType_unique` (`ND.lean:861`) | `raReplay` (`RA.lean:251`, decode + `checkB`, "no search"), `raReplay_iff` (:256) |
+| **B2** normalization reflection: `encode p = encode q ↔ p ≡ q` | field `enc_iff` (:83), with `p ≡ q` := `Lara.equiv canon p q` = `nf canon p = nf canon q` (`Prop.lean:103`) | `ndEnc_iff` (:642), via `encodeAtomKey_injective` (:631) and round-trip `decodeAtomKey_encodeAtomKey` (:590) | `enc := nf canon` (identity encoding), `enc_iff` = `equiv_iff_nf_eq` (`Prop.lean:111`) |
+| **B3** certificate soundness w.r.t. the backend consequence relation | field `soundFull` (:94); consequence relation = `modelsFull` (:85); derived `Backend.sound` (:145); headline **Theorem 1** `strict_step_sound` (:217) | `ND.nd_sound` (`ND.lean:396`), algorithmic side `ND.infer_sound` (`ND.lean:549`); consequence `ndModels` (:649) | `raSound` (`RA.lean:296`) via `checkB_extract` (:271); consequence `raModels` (:236) |
+| **B4** exact dependency reporting (obligation 4, three clauses) | `uses` (:101); coverage `uses_covers` (:107); validity `uses_valid` (:113); accounting `uses_account` (:118); theory corollaries `replay_theory_covers` (:166), `replay_theory_agnostic` (:181), `uses_valid_closed` (:152) | `ndReplay_agree` (:720), `ndUses_valid` (:736), `ndUses_account` (:703); checker tie `ndUses_eq_infer_deps` (:747); operational core `ND.nd_relevance` (`ND.lean:360`), `ND.fv_in_range` (:404), `ND.infer_deps_eq_fv` (:711), `ND.infer_agree` (:799) | `raUses_covers` (`RA.lean:306`), `raUses_valid` (:320), `raUses_account` (:335) |
 
 Notes for the paper wording:
 

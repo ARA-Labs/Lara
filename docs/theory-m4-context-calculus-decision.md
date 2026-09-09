@@ -182,7 +182,7 @@ Option Grounded.AF`. "Checked fragment" always means *relative to an import
 environment*.
 
 `Realizability.Realizable` is explicitly **not** the construction target for
-any later phase: its `compiled_iso` (`Realizability.lean:167`) targets a
+any later phase: its `compiled_iso` (`Lara/Realizability.lean:167`) targets a
 *given* `StructuredAF`, which in a context construction is precisely the
 unknown.
 
@@ -207,9 +207,9 @@ types at all, every compiled AF is edgeless, and no context can force an import
 label — so a `logrel_complete` without a hypothesis is *false*. It is worse
 than that degenerate case: `Compile.ConflictAttackable` is unconditionally
 `True` on leaves (`Compile.lean:407`) while `HasAttack.rebut` requires
-`r.mode = .defeasible` (`Attack.lean:548`), so a purely symmetric contrary
+`r.mode = .defeasible` (`Lara/Attack.lean:549`), so a purely symmetric contrary
 table can force only `{in, undec}`. Contraries are also *patterns* with
-universally quantified variables (`Attack.lean:85`), so a "fresh" atom on the
+universally quantified variables (`Lara/Attack.lean:85`), so a "fresh" atom on the
 same predicate still matches and causes collateral attacks.
 
 **`LabelExpressive` (sketch only — defined and discharged in Part B, if Part B
@@ -289,7 +289,7 @@ they are kept here because the record explains *why* F0 chose to defer.
 **PROCEED.** The F0 definitions compile, and the three obligations F1 must
 discharge each have an identified route through existing machinery:
 
-- `link_attackComplete` — `contraryMatchB_iff` (`Attack.lean:505`) and
+- `link_attackComplete` — `contraryMatchB_iff` (`Lara/Attack.lean:506`) and
   `conflictAttackableB_iff` (`Compile.lean:420`) invert the two Boolean guards;
   `inferSupport_complete` puts every complete argument in the cache, so no
   forced pair is missed.

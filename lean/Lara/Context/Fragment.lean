@@ -52,7 +52,7 @@ open Lara.Support Lara.Attack Lara.Compile
 
 /-! ### Structural merge
 
-`SupportTerm` equality is structural (`Lara/Support.lean:351`), and
+`SupportTerm` equality is structural (`Lara/Support.lean:353`), and
 `Compile.CheckedProgram.nodup` models `Args(P)` as a *set*. Linking therefore
 merges structurally identical arguments instead of rejecting the link:
 rejecting a cross-boundary term collision would make contextual equivalence
