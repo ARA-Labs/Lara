@@ -9034,3 +9034,16 @@ tree:
   - lean/Lara/Context/FiniteExtension.lean
   - ara/evidence/proofs/m4_finite_extension_279.md
   status: resolved
+
+- id: N275_observational_collapse
+  type: experiment
+  title: Accepted observation changes under certificate collapse (#275)
+  provenance: ai-executed
+  timestamp: 2026-09-09T18:16
+  parent: N341
+  result: All parametricity premises except RelInj hold. The same exported claim is
+    justified before collapse and defeated afterward; both links are accepted. The
+    relation is functional but non-injective.
+  evidence:
+  - ara/evidence/proofs/m4_certificate_collapse.md
+  status: resolved

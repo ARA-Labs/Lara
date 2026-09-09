@@ -1357,3 +1357,12 @@ entries:
     hypothesis status and ai-suggested provenance.
   - No new generalized heuristic inferred. Earlier trace and evidence remain historical;
     this follow-up supplies the corrected current claim.
+
+- turn: 2026-09-09_001#275
+  notes:
+  - Recorded the concrete Lean witness directly as N275_observational_collapse. Updated
+    C53/C54 boundaries and evidence, without changing claim status or inferring a
+    general heuristic.
+  - 'Preserved historical N341: its non-functional wording is corrected by the new
+    functional-but-non-injective witness, not by rewriting the trace. No staged item
+    received a new closure signal.'

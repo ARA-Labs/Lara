@@ -6,7 +6,8 @@ freeze-tag bump, no Haskell change.
 Modules: `lean/Lara/ListRel.lean`, `lean/Lara/Context/Parametricity.lean`.
 The original #215 edits outside those two were import lines in `lean/Lara.lean` and the
 pin block in `lean/AxCheck.lean`. #279 adds `Context/FiniteExtension.lean` and
-corrects the extension argument below. Every pre-existing Lean declaration is
+corrects the extension argument below; #275 adds `Examples/CertificateCollapse.lean`
+(§3.2). Every pre-existing Lean declaration is
 untouched — in particular `backend_replacement_congruence` keeps its name, its
 statement and its proof.
 
@@ -139,6 +140,42 @@ uniqueness is free. A relation supplies no such image, so the occurrence has to
 be produced (`attackOcc_rel_exists`) and then pinned to the one the caller
 already holds — which is exactly `relTerm_inj`, i.e. `RelInj`. Every call site
 already carries `RelInj`, so nothing downstream weakens.
+
+---
+
+### 3.2 The observation-level witness (#275)
+
+`lean/Lara/Examples/CertificateCollapse.lean` uses a context that declares the
+premise and attacker leaves but contributes no arguments. The fragment has two
+syntactically distinct defeasible wrappers with the same conclusion `p`, each
+containing a strict certificate for `q`, and a leaf concluding `s`. One explicit
+undercut targets the first wrapper at its root. The contrary table is empty:
+`SideOk.attack_complete` covers all contrary pairs, but does not require all
+possible exception attacks to be declared. `source_sideOk` and `admissible`
+prove the complete source-side burden.
+
+The certificates share backend identity and digest and differ in payload. A
+fixture-only ND adapter interprets every payload as the same free-slot proof;
+`replaySlot_eq` identifies its directly decoded replay with ND replay, and all
+soundness and dependency obligations come from the ND backend. This bypasses
+opaque decimal parsing during kernel reduction without adding an axiom. It
+neither changes the production decoder nor asserts that production ND accepts
+`rejectCert`. Both observations use this same sound fixture registry.
+
+`collapse` keeps backend identity and digest fixed and replaces each certificate
+payload with `slot1Cert`. Thus `preserving` holds for arbitrary rules, preserving
+their certifier authorization as well as acceptance. The relation is
+`graphOf collapse`; `related`, `fixes_context`, and `not_relInj` discharge its
+structural premises and exhibit its failure of equality reflection.
+
+Before collapse, the second wrapper is unattacked and justifies `p`. After
+collapse, structural deduplication merges it with the attacked first wrapper,
+and `p` is defeated. `linked_shape` pins the argument lists; `accepted` pins
+both checker successes; `observations` proves both values and their inequality
+by `decide`. The bundled `relInj_observationally_necessary` states exactly the
+other premises plus the negated observation equality. The witness concerns the
+interaction of structural merging and attack coverage; it does not isolate
+coverage as the sole mechanism, nor establish a minimal replacement hypothesis.
 
 ---
 
@@ -375,12 +412,12 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   `backend_replacement_congruence` exactly. Nothing in
   `Lara.Context.Equivalence` is now stated more generally than what is proved
   here.
-- `RelInj` is *forced by the coverage decider*, not by the proof strategy —
-  `relInj_necessary` is the witness at that level: it is `coveredB_rel`'s
-  hypotheses minus `hR` with the conclusion negated, so no proof of
-  `coveredB_rel` can drop it. The **observational** separation — two fragments
-  related by a non-functional `R` whose `obs` differ — is not yet witnessed;
-  that upgrade is **#275**. See "Must not claim" below.
+- `RelInj` cannot be dropped from the observational theorem. The original
+  `relInj_necessary` witnesses coverage failure; the fragment-level
+  `Examples.CertificateCollapse.relInj_observationally_necessary` now supplies
+  every other premise of `backend_replacement_parametricity` and negates its
+  conclusion. Both links are accepted and the same export changes from
+  `justified` to `defeated`. See §3.2 for the fixture and its limits.
 
 ### Must not claim
 
@@ -399,10 +436,11 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   forward-only acceptance hypothesis lets `reg₂` accept what `reg₁` rejects.
 - **Not local to `F` alone.** See §6: `RelFixesContext` plus `RelInj` pin `R` to
   the identity on the context's occurrences too.
-- **Not a witnessed observational separation.** `relInj_necessary` is a
-  separation at the level of the *coverage decider*, on two hand-built terms. No
-  fixture exhibits two fragments related by a genuinely non-functional `R` whose
-  observations differ. Deferred: **#275**.
+- **Not a claim that every non-injective relation separates observations.**
+  The fixture refutes deleting `RelInj` wholesale. Its relation is the graph of
+  a non-injective function: it violates equality reflection, not single-valuedness.
+  It does not establish necessity of each half of `RelInj` separately or prove
+  that no weaker, carrier-specific hypothesis could suffice.
 - **Not arbitrary relations, even across the completed family.** #277 adds
   composed and whole-program companions (§8); each keeps `RelInj`. The original
   functional APIs remain unchanged.

@@ -2,9 +2,10 @@ session:
   id: 2026-09-09_001
   date: '2026-09-09'
   started: 2026-09-09T06:56
-  last_turn: 2026-09-09T06:56
-  turn_count: 1
-  summary: '#273: accepted fragments separated by stable semantic payloads.'
+  last_turn: 2026-09-09T18:16
+  turn_count: 2
+  summary: '#273: accepted fragments separated by stable semantic payloads. #275:
+    certificate collapse separates accepted grounded observations.'
 events_logged:
 - turn: 1
   type: experiment
@@ -12,6 +13,13 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: Empty context separates accepted cycle and singleton with identical exports.
+- turn: '275'
+  type: experiment
+  id: N275_observational_collapse
+  routing: direct
+  provenance: ai-executed
+  summary: Certificate collapse changes accepted grounded observation; full missing-premise
+    witness proved.
 ai_actions:
 - turn: 1
   action: Added semantic negative fixtures and proofs, axiom coverage, and documentation.
@@ -20,10 +28,58 @@ ai_actions:
   - lean/Lara/Examples/ContextSemantics.lean
   - lean/AxCheck.lean
   - docs/theory-m4-generic-observation.md
-claims_touched: []
+- turn: '275'
+  action: Implemented fixture, sound ND adapter, admissibility and relation bundle;
+    completed build, axiom audit, coverage and independent review.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Examples/CertificateCollapse.lean
+  - lean/AxCheck.lean
+  - docs/theory-m4-relational-parametricity.md
+claims_touched:
+- id: C53
+  action: revised
+  turn: '275'
+- id: C54
+  action: revised
+  turn: '275'
 key_context:
 - turn: 1
-  excerpt: User requested direct implementation and a PR for issue 273 after dependency 270 landed.
+  excerpt: User requested direct implementation and a PR for issue 273 after dependency
+    270 landed.
 open_threads:
 - '#268: whether grounded contextual equivalence implies equivalence at other semantics.'
 ai_suggestions_pending: []
+logic_revisions:
+- turn: '275'
+  entry: C53
+  field: Conditions
+  before: 'Untested boundary: no fixture exhibits two fragments related by a genuinely
+    non-functional relation whose observations differ (#275), so the gap is shown
+    non-empty by construction of the localized hypothesis rather than by a separating
+    witness;'
+  after: 'The observational necessity of keeping an equality-reflection hypothesis
+    is now witnessed by `Examples.CertificateCollapse.relInj_observationally_necessary`
+    (#275): a functional but non-injective relation satisfies all other premises and
+    changes an accepted grounded observation. This does not separate the relational
+    theorem''s strength from its functional counterpart. Untested boundary:'
+  signal: artifact-commitment
+  provenance: ai-suggested
+- turn: '275'
+  entry: C54
+  field: Conditions
+  before: and `relInj_necessary` as the negated-`coveredB_rel` witness.
+  after: and `relInj_necessary` as the negated-`coveredB_rel` witness. `Examples.CertificateCollapse.relInj_observationally_necessary`
+    additionally witnesses that removing `RelInj` from the observation theorem permits
+    an accepted export to change from justified to defeated; the graph of the collapse
+    remains single-valued, so this does not establish necessity of each half separately.
+  signal: artifact-commitment
+  provenance: ai-suggested
+- turn: '275'
+  entry: C54
+  field: Proof
+  before: 'trace N337, N339; issue #215]'
+  after: 'trace N337, N339, N275_observational_collapse; `ara/evidence/proofs/m4_certificate_collapse.md`;
+    issue #215, #275]'
+  signal: artifact-commitment
+  provenance: ai-suggested

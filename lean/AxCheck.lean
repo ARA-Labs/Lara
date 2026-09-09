@@ -73,6 +73,7 @@ import Lara.Context.FiniteExtension
 import Lara.Examples.ContextSemantics
 import Lara.Context.Surface
 import Lara.Examples.Linking
+import Lara.Examples.CertificateCollapse
 import Lara.Examples.BackendComposition
 import Lara.Surface.Syntax
 import Lara.Surface.Binding
@@ -2833,6 +2834,20 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.relFixesContext_occRel
 #print axioms Lara.Context.backend_replacement_parametricity_local
 #print axioms Lara.Context.backend_replacement_parametricity_local_sem
+
+-- #275: a collapsing relation changes an accepted grounded observation.
+#print axioms Lara.Examples.CertificateCollapse.replaySlot_eq
+#print axioms Lara.Examples.CertificateCollapse.observations
+#print axioms Lara.Examples.CertificateCollapse.preserving
+#print axioms Lara.Examples.CertificateCollapse.not_relInj
+#print axioms Lara.Examples.CertificateCollapse.related
+#print axioms Lara.Examples.CertificateCollapse.fixes_context
+#print axioms Lara.Examples.CertificateCollapse.source_support
+#print axioms Lara.Examples.CertificateCollapse.source_sideOk
+#print axioms Lara.Examples.CertificateCollapse.admissible
+#print axioms Lara.Examples.CertificateCollapse.accepted
+#print axioms Lara.Examples.CertificateCollapse.linked_shape
+#print axioms Lara.Examples.CertificateCollapse.relInj_observationally_necessary
 
 -- Examples.ContextSemantics: the semantics parameter is not an abstraction
 -- over one instance at the context level either (#216).

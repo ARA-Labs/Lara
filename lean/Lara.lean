@@ -373,6 +373,7 @@ import Lara.Context.FiniteExtension
 import Lara.Context.Surface
 import Lara.Examples.Linking
 import Lara.Examples.ContextSemantics
+import Lara.Examples.CertificateCollapse
 -- The #227 surface-transport witness. Imported here for the same reason as
 -- Lara.Examples.Complexity.Realization above: AxCheck.lean is not a lake
 -- target, so a module reachable only from it is outside `lake build` and its
