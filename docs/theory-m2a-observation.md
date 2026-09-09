@@ -596,9 +596,11 @@ records the work.
   framework-level ones: `Lara.Context.obsSem` and `Lara.Context.CtxEquivSem`
   generalize M4's `obs` and `CtxEquiv`, the grounded case is recovered as a
   theorem (`obsSem_grounded`, `ctxEquivSem_grounded_iff`), and the congruences
-  hold with no additional hypothesis. What it does **not** settle is how the
-  equivalence *relations* at different semantics compare — that is
-  [#268](https://github.com/ARA-Labs/lara/issues/268).
+  hold with no additional hypothesis. Follow-up
+  [#268](https://github.com/ARA-Labs/lara/issues/268) refutes grounded equivalence
+  implying equivalence at every semantics permitted by the open interface, using
+  an adequate singleton-selector family. This does not separate the standard
+  non-grounded instances; see the M4 document for the exact all-context proof.
 
 The general non-emptiness of preferred extensions was expected to need a
 maximal-element principle over `candidates F`, and with it `Nodup` and a

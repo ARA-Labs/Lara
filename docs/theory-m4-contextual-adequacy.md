@@ -410,12 +410,12 @@ So the debt is marked **partially** discharged, and term-level holes are issue
   `Erase.backend_replacement`; the milestone's progress is the context
   quantifier.
 - **Not a statement about term-level holes** (§5).
-- **Not a claim that the equivalence *relations* at different semantics
-  separate or coincide.** #216 generalized the observation *functions* and
-  separated them at concrete carriers; whether `CtxEquiv reg F₁ F₂` implies
-  `CtxEquivSem sem reg F₁ F₂` at a non-grounded `sem` is neither proved nor
-  refuted, and is issue **#268**. `ctxEquivSem_grounded_iff` settles the
-  grounded instance only.
+- **No unrestricted implication between equivalence relations.** #268 now
+  refutes grounded `CtxEquiv` implying `CtxEquivSem sem` for every semantics
+  allowed by the interface: `Examples.ContextualSeparation.counterexample`
+  combines an all-context grounded proof with a selector-semantics distinction.
+  This does not separate the standard non-grounded instances; the grounded
+  instance still coincides by `ctxEquivSem_grounded_iff`.
 - **Not a certificate-bearing semantics-parametric witness.** #270 moves
   `congruence_witness_sem` to the admissible three-cycle, where grounded and
   stable observations differ. `registry_swap_witness_sem` remains on the

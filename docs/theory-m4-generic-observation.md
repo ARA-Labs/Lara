@@ -232,7 +232,7 @@ Read the scope narrowly. This settles the **grounded instance** and nothing else
 It does not say — and must not be cited as saying — that `CtxEquiv reg F₁ F₂`
 implies `CtxEquivSem sem reg F₁ F₂` at any other semantics.
 
-### The boundary: functions separate, relations are open
+### The boundary: function witnesses and the all-context counterexample
 
 The separations this milestone proves are between observation **functions** at a
 concrete context and fragment:
@@ -243,13 +243,33 @@ concrete context and fragment:
 * `obsSem_sink_preferred_ne_grounded` — on a linked sink, `groundedSem` observes
   `contested` and `preferredSem` observes `defeated`.
 
-They do **not** separate the observation **relations**. `CtxEquiv` quantifies over
-*all* contexts, so neither `CtxEquiv reg F₁ F₂ → CtxEquivSem sem reg F₁ F₂` nor
-its refutation is reachable by `decide`: refuting it needs two fragments provably
-grounded-equivalent in *every* context, which is a universally quantified argument
-over an unbounded context space, not a fixture. Whether the implication holds is
-**not proved and not refuted** here. It is filed as
-[#268](https://github.com/ARA-Labs/lara/issues/268).
+Those witnesses do **not** separate the observation **relations**. A relation
+counterexample requires two fragments grounded-equivalent in *every* context,
+not just one grounded-indistinguishable fixture. The unbounded context quantifier
+prevents the fixture-style `decide` proof; it is not an undecidability theorem.
+
+Follow-up **#268** supplies the missing universal argument in
+`Lara.Examples.ContextualSeparation`. The two fragments share every field except
+the single exported atom. Both own leaf support, and the fixed policy permits no
+attacks. Their link guards and checker inputs are identical, so every incompatible
+or rejected observation agrees. For any accepted context, both exported atoms
+have unattacked checked support and are grounded-justified. This proves
+`grounded_ctxEquiv` over **all** contexts, including failing ones.
+
+The adequate semantics family `singletonSem a` retains exactly the carrier
+sublists equal to `[a]`. At a concrete accepted empty context, selecting one
+supporting position distinguishes the exported atoms. The theorem
+`singleton_not_ctxEquivSem` uses that context; `counterexample` packages the
+existential witness and `grounded_does_not_imply_semantic` refutes the implication
+quantified over arbitrary `ExtensionSemantics`.
+
+**Scope:** the interface requires an adequate enumerator, not that its extensions
+are complete, maximal, or invariant under argument renaming. The selector is a
+valid instance of that interface. This refutes the unrestricted implication;
+it does not prove separation at complete, preferred, stable, or semi-stable
+semantics, nor an implication restricted to identical export lists. The current
+`CtxEquiv` definition imposes no identical-exports premise. The grounded
+instance still coincides by `ctxEquivSem_grounded_iff`.
 
 What *is* known about `CtxEquivSem` beyond its definition:
 `ctxEquivSem_negative` exhibits a pair it is false of at `stableSem` — a
@@ -266,7 +286,8 @@ identical exports `[pA]`. Both links pass the guard and whole-unit checker
 payloads `noExtension` and `observed justified`, and proves their disequality.
 `obsSem_semantic_negative_grounded` also pins the cycle's grounded payload to
 `observed contested`, so the semantics choice matters at this witness. This
-closes #273 without settling the all-context equivalence implication in #268.
+closes #273; the separate all-context argument above resolves the unrestricted
+implication from #268.
 
 The certificate-bearing instantiations requested in
 [#269](https://github.com/ARA-Labs/lara/issues/269) are now proved as
@@ -457,11 +478,10 @@ carrier; the three-cycle supplies semantics separation separately.
 - **Not full abstraction.** No logical relation. M4 Part B was descoped on
   2026-09-03 (`docs/theory-m4-contextual-adequacy.md` §7), so the issue's `LogRel`
   conjunct is vacuous and was not attempted.
-- **Not a claim that the equivalence *relations* separate or coincide at any
-  non-grounded instance.** The separations are between observation functions at a
-  concrete context and fragment (§4). The natural reading of
-  "semantics-parametric contextual equivalence" as a statement about the relations
-  is exactly what is **not** proved — #268.
+- **The relation counterexample has an explicit scope.** #268 refutes grounded
+  equivalence implying equivalence at *every* `ExtensionSemantics`, using the
+  adequate singleton-selector family and an all-context grounded proof (§4).
+  It makes no separation claim for the four standard non-grounded semantics.
 - **Not a single witness combining a genuine certificate relabel with semantics
   separation.** The certified witnesses exercise a real certificate uniformly
   in `sem`; the three-cycle exercises semantics separation with bare leaves (§6).

@@ -71,6 +71,7 @@ import Lara.ListRel
 import Lara.Context.Parametricity
 import Lara.Context.FiniteExtension
 import Lara.Examples.ContextSemantics
+import Lara.Examples.ContextualSeparation
 import Lara.Context.Surface
 import Lara.Examples.Linking
 import Lara.Examples.CertificateCollapse
@@ -3678,3 +3679,12 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Context.mem_occursList_iff
 #print axioms Lara.Context.mem_occurrences_iff
 #print axioms Lara.Context.occurrences_composed
+
+-- #268: an all-context grounded equivalence separated by an adequate selector.
+#print axioms Lara.Examples.ContextualSeparation.grounded_ctxEquiv
+#print axioms Lara.Examples.ContextualSeparation.separating_link_ok
+#print axioms Lara.Examples.ContextualSeparation.separating_accepted
+#print axioms Lara.Examples.ContextualSeparation.separating_observations
+#print axioms Lara.Examples.ContextualSeparation.singleton_not_ctxEquivSem
+#print axioms Lara.Examples.ContextualSeparation.counterexample
+#print axioms Lara.Examples.ContextualSeparation.grounded_does_not_imply_semantic
