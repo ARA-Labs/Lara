@@ -409,17 +409,24 @@ The table also makes §4(3) visible: the only `noExtension` cells are
 (semantics, framework) pair reports `gap` on `claimNoSupport` with `|E| = 0`,
 because the `gap` guard is tested first.
 
-**The limit of the completeness guarantee, stated precisely.** Adding a
-constructor to one of the three sum types breaks its label map and its object
-map, which are total matches, and `allSemantics_complete`,
-`allFrameworks_complete`, `allClaims_complete` break the hand-written order
-lists too — so a dropped row is a compile error. What no mechanism here can
-catch is a sixth `ExtensionSemantics` declared in another module: nothing
-enumerates the instances of a structure, so such a semantics would simply not
-appear and the table would be five rows out of six with no complaint. The
-guarantee is over this module's declared vocabulary, not over the interface —
-a *constructor* guarantee, not an *instance* guarantee. That limit is tracked as
-[#198](https://github.com/ARA-Labs/lara/issues/198).
+**Registry and coverage guarantee (#198).** The semantics vocabulary now lives
+in `Lara.Semantics.Registry`; the table consumes that registry through compatible
+aliases. Its total label/object maps and `allSemantics_complete` ensure every
+registered constructor appears. Framework and claim completeness stay local to
+the example module.
+
+`scripts/check-semantics-registry.py` adds the missing declaration check: it
+discovers Lean modules from the repository tree and inspects their elaborated
+environments, including modules outside the library root's imports. Every named,
+closed declaration of type `ExtensionSemantics` must be referenced by the central
+registry's object map. The audit derives the registered names from that map;
+there is no second handwritten inventory. A value alias is a separate declaration
+and must be registered too.
+
+This is a repository build guarantee, not enumeration of all inhabitants of an
+open structure. Parameterized semantics families, local values, and external
+modules outside the audited repository remain outside the finite table. The
+semantics interface and its universally quantified theorems remain open.
 
 ## 6. The Haskell Conformance Mirror
 
@@ -580,7 +587,7 @@ records the work.
 
 - Non-emptiness of preferred extensions — [#196](https://github.com/ARA-Labs/lara/issues/196). **Closed 2026-09-06.**
 - Enumeration-based conflict freedom — [#197](https://github.com/ARA-Labs/lara/issues/197). Implemented alongside the compatible spec-based API; see §3.
-- A registry that would make a sixth `ExtensionSemantics` visible — [#198](https://github.com/ARA-Labs/lara/issues/198).
+- Central registry and declaration audit — [#198](https://github.com/ARA-Labs/lara/issues/198). Implemented; see §5.
 - Generic-`ExtensionSemantics` contextual equivalence —
   [#216](https://github.com/ARA-Labs/lara/issues/216). **Landed 2026-09-07**;
   see `docs/theory-m4-generic-observation.md`. Filed later than the three
@@ -610,7 +617,6 @@ replacing the spec-level property. This preserves the original abstraction
 trade-off for clients that reason about alternative adequate enumerators, while
 clients of the concrete enumeration can use the weaker assumptions directly.
 
-Nothing enumerates the instances of a structure, so a sixth `ExtensionSemantics`
-declared elsewhere would be invisible to the observation table's completeness
-theorems. Closing that would need a registry the interface does not currently
-have.
+The registry audit now rejects an unregistered named closed semantics declared
+in another repository module. This replaces the former silent omission with a
+build failure; it does not close the mathematical `ExtensionSemantics` interface.

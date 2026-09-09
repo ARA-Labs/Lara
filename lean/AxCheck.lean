@@ -1334,6 +1334,7 @@ matches, so a new constructor breaks them. The three order lists are hand-writte
 literals and are not checked that way; these theorems are that check, and without
 them a new constructor would silently drop a table row. -/
 
+#print axioms Lara.Semantics.Registry.allSemantics_complete
 #print axioms Lara.Examples.Semantics.allSemantics_complete
 #print axioms Lara.Examples.Semantics.allFrameworks_complete
 #print axioms Lara.Examples.Semantics.allClaims_complete

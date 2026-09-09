@@ -91,7 +91,7 @@ one. That correction is written up at `twoCycle_extensions`, since a wrong
 argument is worth keeping visible next to its fix.
 -/
 
-import Lara.Semantics
+import Lara.Semantics.Registry
 import Lara.Observation
 import Lara.Examples
 
@@ -786,35 +786,23 @@ table; the table is what shows the whole grid at once.
 `ExtensionSemantics` deliberately carries no name field — an instance is a
 specification, an enumerator and an adequacy proof, and a `String` in the record
 would be data no theorem could use. The row labels therefore come from closed sum
-types declared here (`CLAUDE.md`: a fixed vocabulary is a sum type, not string
-literals), each with exactly one spelling table and exactly one mapping to the
+types (`CLAUDE.md`: a fixed vocabulary is a sum type, not string literals), each with exactly one spelling table and exactly one mapping to the
 object it names.
 
-Be precise about what that buys. Adding a *constructor* to one of the three sum
-types breaks its `..Label` and its object map, which are total matches, and
-`allSemantics_complete` / `allFrameworks_complete` / `allClaims_complete` break
-the hand-written order lists too — so a new row cannot be silently dropped. What
-no mechanism here can catch is a sixth `ExtensionSemantics` defined in another
-module: nothing enumerates the instances of a structure, so such a semantics
-simply would not appear, and the table would be five rows out of six with no
-complaint. The guarantee is over this module's declared vocabulary, not over the
-interface. -/
+The semantics vocabulary is owned by `Lara.Semantics.Registry`; the names here
+are compatibility aliases. Total object/label maps and the completeness theorem
+cover the closed vocabulary. The repository environment audit additionally
+rejects named closed `ExtensionSemantics` declarations absent from that registry,
+including declarations in modules outside the root import graph. Generic
+parameters and local values remain outside this finite repository inventory. -/
 
-/-- The five extension semantics of `Lara.Semantics`, as a closed sum type.
-Appending `Sem` to a constructor name gives the Lean identifier of the instance:
-`groundedSem`, `completeSem`, `preferredSem`, `stableSem`, `semiStableSem`. -/
-inductive SemanticsName where
-  /-- `Semantics.groundedSem` -/
-  | grounded
-  /-- `Semantics.completeSem` -/
-  | complete
-  /-- `Semantics.preferredSem` -/
-  | preferred
-  /-- `Semantics.stableSem` -/
-  | stable
-  /-- `Semantics.semiStableSem` -/
-  | semiStable
-deriving DecidableEq, Repr
+/-- Compatibility alias for the core registry's closed vocabulary. -/
+abbrev SemanticsName := Lara.Semantics.Registry.SemanticsName
+
+namespace SemanticsName
+export Lara.Semantics.Registry.SemanticsName
+  (grounded complete preferred stable semiStable)
+end SemanticsName
 
 /-- The six table frameworks of this module, as a closed sum type. Constructor
 names are the `def` names verbatim. -/
@@ -846,36 +834,18 @@ inductive ClaimName where
   | claimNoSupport
 deriving DecidableEq, Repr
 
-/-- The one place a semantics' printed spelling is written. -/
-def semanticsLabel : SemanticsName → String
-  | .grounded   => "grounded"
-  | .complete   => "complete"
-  | .preferred  => "preferred"
-  | .stable     => "stable"
-  | .semiStable => "semiStable"
+/-- Compatibility alias for the core registry's spelling table. -/
+abbrev semanticsLabel := Lara.Semantics.Registry.semanticsLabel
 
-/-- The one place a name is mapped to its instance. Every table cell reads the
-semantics through this function, so no row can name one instance and evaluate
-another. -/
-def semanticsInstance : SemanticsName → ExtensionSemantics
-  | .grounded   => groundedSem
-  | .complete   => completeSem
-  | .preferred  => preferredSem
-  | .stable     => stableSem
-  | .semiStable => semiStableSem
+/-- Compatibility alias for the core registry's object map. -/
+abbrev semanticsInstance := Lara.Semantics.Registry.semanticsInstance
 
-/-- Row order for the semantics axis, in the order the module introduces them:
-the singleton instance first, then the four that can disagree with it. -/
-def allSemantics : List SemanticsName :=
-  [.grounded, .complete, .preferred, .stable, .semiStable]
+/-- Compatibility alias for the core registry's row order. -/
+abbrev allSemantics := Lara.Semantics.Registry.allSemantics
 
-/-- **`allSemantics` lists every constructor.** `semanticsLabel` and
-`semanticsInstance` are total matches, so a new constructor breaks them; a
-hand-written list is not checked that way and would silently drop a table row.
-This theorem is the check. `cases` before `decide` is required: there is no
-`Decidable` instance for the quantifier itself, only for each instantiation. -/
-theorem allSemantics_complete : ∀ s : SemanticsName, s ∈ allSemantics := by
-  intro s; cases s <;> decide
+/-- The core registry lists every supported semantics constructor. -/
+theorem allSemantics_complete : ∀ s : SemanticsName, s ∈ allSemantics :=
+  Lara.Semantics.Registry.allSemantics_complete
 
 /-- The one place a framework's printed spelling is written. -/
 def frameworkLabel : FrameworkName → String

@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential ara-source-spans
+.PHONY: build test bench bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans
 
 build:
 	cabal build all
@@ -29,6 +29,9 @@ surface-conformance-gate-test:
 
 # Lean-emitted extension-semantics goldens must match the checked-in Haskell
 # conformance table byte for byte.
+semantics-registry:
+	python3 scripts/check-semantics-registry.py
+
 semantics-goldens:
 	bash scripts/check-semantics-goldens.sh
 

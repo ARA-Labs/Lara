@@ -422,6 +422,8 @@ mechanization forced on the plan.
 | The five `SpecConflictFree` discharges | `Semantics.groundedSem_specConflictFree`, `completeSem_specConflictFree`, `preferredSem_specConflictFree`, `stableSem_specConflictFree`, `semiStableSem_specConflictFree` | `Lara/Semantics.lean` |
 | Exclusivity without a duplicate-free carrier (#197) | `Semantics.EnumerateConflictFree`, `justified_defeated_exclusive_of_enumerate`, `observe_justified_not_all_defeated_of_enumerate`; compatibility bridge `specConflictFree_enumerateConflictFree` | `Lara/Semantics.lean` |
 | Unconditional enumeration conflict-freedom | `Semantics.groundedSem_enumerateConflictFree`, `completeSem_enumerateConflictFree`, `preferredSem_enumerateConflictFree`, `stableSem_enumerateConflictFree`, `semiStableSem_enumerateConflictFree` | `Lara/Semantics.lean` |
+| Registered semantics vocabulary and exhaustive order (#198) | `Semantics.Registry.SemanticsName`, `semanticsLabel`, `semanticsInstance`, `allSemantics`, `allSemantics_complete`; old example-qualified names remain available | `Lara/Semantics/Registry.lean` |
+| Repository coverage of named closed semantics | Declaration inventory compared with registry object-map references; every source module audited independently | `SemanticsRegistryAudit.lean`, `scripts/check-semantics-registry.py` |
 | Carrier-locality of a specification | `Observation.AttackExtensional`, `Observation.attackExtensional_of_imp`, and its seven instances `attackExtensional_bounded`, `attackExtensional_admissible`, `attackExtensional_complete`, `attackExtensional_leastComplete`, `attackExtensional_preferred`, `attackExtensional_stable`, `attackExtensional_semiStable` | `Lara/Observation.lean` |
 | **`AttackExtensional ConflictFree` is false** | `Observation.not_attackExtensional_conflictFree`; positive contrast `Observation.admissible_transports_on_junk`; correct decomposition `Observation.conflictFree_congr_af` | `Lara/Observation.lean` |
 | Observation transport, and the support bound it needs | `Observation.observe_congr`; necessity by `Observation.not_observe_congr_of_unbounded_support`, `observe_congr_needs_support_bound` | `Lara/Observation.lean` |
@@ -475,10 +477,12 @@ licensing one (`stableSem_enumerate_threeCycle` refutes it), state a transport
 hypothesising `Compile.Faithful` on
 both sides (`faithful_unique` makes it contentless), or claim
 `AttackExtensional ConflictFree` (`not_attackExtensional_conflictFree`). It must
-also not claim that the table's completeness theorems rule out a missing
-semantics: they catch a dropped constructor, and nothing enumerates the
-instances of a structure, so a sixth `ExtensionSemantics` declared elsewhere
-would be invisible.
+also not claim that a finite table enumerates every value of the open
+`ExtensionSemantics` structure. The core registry's completeness theorem catches
+omitted constructors; the repository declaration audit additionally rejects
+unregistered named closed semantics, including declarations in modules outside
+the library root's imports. Parameterized families, local values, and modules
+outside the audited repository are outside that finite coverage guarantee.
 
 The Haskell mirror (`src/Lara/Semantics.hs`, `test/SemanticsSpec.hs`) is
 conformance evidence, not soundness. The goldens agreeing is evidence about

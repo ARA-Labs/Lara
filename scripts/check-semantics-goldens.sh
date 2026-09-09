@@ -10,6 +10,9 @@ trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 cd "$repo_root"
 
+# A new named semantics must enter the registry before a table can claim coverage.
+python3 scripts/check-semantics-registry.py
+
 if ! (cd lean && lake build Lara.Examples.Semantics) > "$tmp_dir/lake-build.log" 2>&1; then
   echo "semantics goldens: FAIL: lake build Lara.Examples.Semantics" >&2
   cat "$tmp_dir/lake-build.log" >&2

@@ -590,7 +590,7 @@ All five are listed rather than a representative three because this module's
 header asserts the agreement, and an asserted fact with no proof behind it is
 exactly what `Lara.Examples.Semantics`'s header records having had to promote to
 theorems after the fact. `Examples.Semantics.allSemantics_complete`
-(`lean/Lara/Examples/Semantics.lean:877`) is what makes "all five" a closed
+(`lean/Lara/Examples/Semantics.lean:847`) is what makes "all five" a closed
 list. -/
 theorem obsSem_linking_agrees :
     obsSem groundedSem registryEx ctxEx fragEx
