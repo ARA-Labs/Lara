@@ -283,17 +283,12 @@ theorem relTerms_length {R : Assurance → Assurance → Prop}
 The single-valued half is the surprising one — a predicate named `Inj` is also
 secretly a function — and it is what the strength argument starts from.
 
-**The rest of that argument is informal, and this module does not mechanize
-it.** The claim is that `RelFrag R F₁ F₂` always exhibits *some* total injective
-`f` with `F₂ = mapAssurFrag f F₁`, so the relational theorem is stronger than
-the functional one only because no such extension need satisfy `AssurPreserving`
-globally. Single-valuedness (`relInj_functional`) gives the *partial* function;
-extending a partial injection on `Assurance` to a total injective one is a
-separate construction that no lemma here supplies. Treat it as the prose
-argument it is — `docs/theory-m4-relational-parametricity.md` §4 states it in
-full and flags the same gap, and #279 tracks mechanizing it. Nothing proved in
-this module depends on it: it is the *motivation* for
-`backend_replacement_parametricity_local`, not a premise of any theorem. -/
+**The finite realization step is proved in `Context/FiniteExtension.lean`.**
+`relFrag_exists_injective_fixesContext` constructs a total injective map
+realizing the fragment and fixing the context. It extends only the finite
+occurrence restriction of `R`, not all of `R`: the unrestricted assertion is
+false (`not_every_relInj_has_total_extension`). Global `AssurPreserving` remains
+a separate obligation; see `docs/theory-m4-relational-parametricity.md` §4. -/
 
 theorem relInj_functional {R : Assurance → Assurance → Prop} (hR : RelInj R)
     {α β₁ β₂ : Assurance} (h₁ : R α β₁) (h₂ : R α β₂) : β₁ = β₂ :=
@@ -1453,8 +1448,8 @@ not arbitrary relations but a **localized acceptance hypothesis**:
 `RelPreserving R` obliges only the pairs `R` relates, where `AssurPreserving f`
 obliges every assurance in the type — the gap
 `registry_swap_congruence`'s docstring records.
-`backend_replacement_parametricity_local` is the instance that shows the gap is
-non-empty.
+`backend_replacement_parametricity_local` instantiates that localized obligation;
+it does not by itself witness failure of all globally preserving realizations.
 
 **Not full abstraction.** `RelTerm` lifts a relation on certificates
 structurally; it is not a logical relation over the contrary-visible occurrence
@@ -1552,14 +1547,13 @@ It is the witness that `RelPreserving` localizes: instantiated at `occRel F`,
 the acceptance obligation ranges over `F`'s certificate occurrences and nothing
 else, where `AssurPreserving f` ranges over the whole type.
 
-**This is where the milestone's mathematical content lives.** `relInj_functional`
-shows `RelInj R` makes `R` a partial *function*, so `RelFrag R F₁ F₂` always
-exhibits some total injective `f` with `F₂ = mapAssurFrag f F₁` — and every
-conclusion `backend_replacement_parametricity` reaches would already be
-reachable through `backend_replacement_congruence`, **except** that such an `f`
-must satisfy `AssurPreserving f` globally and no such extension need exist.
-`backend_replacement_parametricity_local` is what demonstrates that gap is
-non-empty. -/
+The acceptance scope is the distinction. The finite structural realization is
+proved by `relFrag_exists_injective_fixesContext` in `Context/FiniteExtension.lean`:
+it realizes the fragment and fixes the context using one total injection.
+It does not extend every pair of an arbitrary infinite `R`, and does not
+establish global `AssurPreserving`. `backend_replacement_parametricity_local`
+instantiates the localized obligation; it is not itself a counterexample to
+existence of a globally acceptance-preserving realization. -/
 
 mutual
   /-- Every assurance a support term carries. -/

@@ -869,7 +869,7 @@ of *this* theorem, not a gap in the development: a display of this result must
 say "agrees globally", not "agrees on the fragment's occurrences".
 
 The occurrence-local hypothesis is a separate theorem rather than a missing one.
-`backend_replacement_parametricity_local` (`Parametricity.lean:1692`) and its
+`backend_replacement_parametricity_local` (`Parametricity.lean:1686`) and its
 companion `backend_replacement_parametricity_local_sem` oblige acceptance only
 for `α ∈ occurrences F`, by replacing the relabel function with a relation
 inhabited exactly there. They are a **trade, not a strengthening**: they add

@@ -1348,3 +1348,12 @@ entries:
   - "Revised C49's explicit #277 boundary and proof pointer; preserved its statement and status."
   - "Did not revise C53/C54: neither arbitrary-relation separation nor total-injection extension was investigated."
   - "Used an issue-specific session/node under concurrent branch coordination to avoid identifier collisions."
+
+- turn: 2026-09-09_issue279#1
+  notes:
+  - Recorded a pivot with a concrete kernel-checked counterexample, not a merely abandoned
+    proof attempt.
+  - Corrected C53 scope and evidence under the authorized theory correction; retained
+    hypothesis status and ai-suggested provenance.
+  - No new generalized heuristic inferred. Earlier trace and evidence remain historical;
+    this follow-up supplies the corrected current claim.

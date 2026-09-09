@@ -369,6 +369,7 @@ import Lara.Invariants.Observation
 import Lara.Context.Equivalence
 import Lara.Context.Observation
 import Lara.Context.Parametricity
+import Lara.Context.FiniteExtension
 import Lara.Context.Surface
 import Lara.Examples.Linking
 import Lara.Examples.ContextSemantics

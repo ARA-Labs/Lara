@@ -4,8 +4,9 @@
 freeze-tag bump, no Haskell change.
 
 Modules: `lean/Lara/ListRel.lean`, `lean/Lara/Context/Parametricity.lean`.
-The only edits outside those two are import lines in `lean/Lara.lean` and the
-pin block in `lean/AxCheck.lean`. Every pre-existing Lean declaration is
+The original #215 edits outside those two were import lines in `lean/Lara.lean` and the
+pin block in `lean/AxCheck.lean`. #279 adds `Context/FiniteExtension.lean` and
+corrects the extension argument below. Every pre-existing Lean declaration is
 untouched — in particular `backend_replacement_congruence` keeps its name, its
 statement and its proof.
 
@@ -146,27 +147,44 @@ already carries `RelInj`, so nothing downstream weakens.
 This section is the milestone's justification. It is not obvious and it is
 easy to overstate, so it is stated in full.
 
-`relInj_functional` shows that `RelInj R` makes `R` a partial **function** as
-well as injective. Consequently `RelFrag R F₁ F₂` always exhibits *some* total
-injective `f` with `F₂ = mapAssurFrag f F₁` — extend `R` off its domain
-arbitrarily and injectively. So every conclusion
-`backend_replacement_parametricity` reaches is **already reachable** through the
-existing `backend_replacement_congruence` …
+The structural step is now mechanized in
+`lean/Lara/Context/FiniteExtension.lean` (#279):
 
-> **This step is prose, not proof.** `relInj_functional` is mechanized and gives
-> the *partial* function; the extension of a partial injection on `Assurance` to
-> a total injective one is a separate construction that no lemma in this
-> development supplies. The argument is stated here because it is what motivates
-> `backend_replacement_parametricity_local`, and it is flagged rather than
-> mechanized because nothing proved depends on it — no theorem takes it as a
-> premise. Mechanizing it is **#279**.
+```lean
+theorem relFrag_exists_injective_fixesContext
+    (hR : RelInj R) (hF : RelFrag R F₁ F₂) (hC : RelFixesContext R C) :
+    ∃ f : Assurance → Assurance, Function.Injective f ∧
+      F₂ = mapAssurFrag f F₁ ∧ FixesContext f C
+```
 
-… **except** that such an extension `f` must also satisfy `AssurPreserving f`
-**globally**, and no such extension need exist. If `certOkOf reg₂` accepts
-nothing outside `R`'s range, then any accepted `α` off `R`'s domain has no valid
-image, and there is no total injective `f` making the functional theorem apply.
+`relFrag_exists_injective` gives the fragment-only version.
+`exists_total_injective_extension_on` proves the underlying construction:
+for any finite list `xs`, some total injection agrees with every pair of `R`
+whose source lies in `xs`. Induction starts at the identity and composes with
+an output swap for each new constraint. Partial functionality and injectivity
+ensure that the swap preserves previously required pairs. Instantiating `xs`
+with `occurrences F₁ ++ occurrences C.frame` realizes both finite structures.
+No enumeration of `Assurance`, decidability of `R`, or Mathlib is needed;
+classical choice handles the existential case split.
 
-That gap — and nothing else — is what the relational form buys.
+**Extending all of an arbitrary `R` is false, even on this countably infinite
+type.** The proposed statement in #279 confused finite realization with an
+unrestricted extension. `not_every_relInj_has_total_extension` mechanizes the
+counterexample: `shiftAssurance` increments every certificate's backend
+version, fixing `none` and `trusted`. It is injective and misses certificates
+with version zero. Its inverse graph `R a b := a = shiftAssurance b` satisfies
+`RelInj` and already maps onto the entire type. An injective total extension
+would have no unused image for a version-zero certificate.
+
+The finite theorem discharges the **structural** obligations of functional
+congruence, including the context requirement. It supplies no proof of global
+`AssurPreserving f`. If a realizing map also has that property, the original
+`backend_replacement_congruence` applies after rewriting by the realization
+equation. The remaining distinction is therefore acceptance scope, not a
+structural obstruction to realizing finite related material. We do not infer
+an acceptance-preserving extension from finite injective realizability, nor
+claim that the local theorem itself witnesses nonexistence of every such map.
+
 `RelPreserving R` is *conditioned on `R α β`*: it obliges only the pairs `R`
 actually relates, where `AssurPreserving f` obliges every rule and every
 assurance in the type. The gap is exactly the one the codebase already flagged,
@@ -180,7 +198,7 @@ twice, in the docstrings of `registry_swap_congruence`
 > fragment's occurrences" — the two are different hypotheses and the weaker one
 > is not what is proved here.
 
-**The gap is demonstrated, not merely named.** `occRel F` is the identity
+**The localized obligation has a concrete theorem instance.** `occRel F` is the identity
 relation restricted to `occurrences F`, the assurances the fragment actually
 carries; `relInj_occRel` and `relFrag_occRel` discharge the two side
 conditions, and
@@ -388,12 +406,11 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
 - **Not arbitrary relations, even across the completed family.** #277 adds
   composed and whole-program companions (§8); each keeps `RelInj`. The original
   functional APIs remain unchanged.
-- **Not a fully mechanized strength argument.** §4's step from
-  "`R` is a partial function" to "some *total injective* `f` realizes it" is
-  prose; `relInj_functional` gives only the partial function. Nothing proved
-  depends on it — it motivates
-  `backend_replacement_parametricity_local` rather than premising any theorem —
-  but it is not a mechanized fact. Deferred: **#279**.
+- **Not an extension of all pairs of an arbitrary relation.** #279 proves
+  finite realization, including context fixing, and refutes the unrestricted
+  extension statement on `Assurance`. Global acceptance preservation remains
+  an independent hypothesis; no strict-separation witness for its failure is
+  supplied by this finite realization theorem.
 - **Not a Haskell-side result.** No checker, CLI, wire or corpus surface moves.
 
 ---

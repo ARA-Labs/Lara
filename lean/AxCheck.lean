@@ -69,6 +69,7 @@ import Lara.Invariants.Observation
 import Lara.Context.Observation
 import Lara.ListRel
 import Lara.Context.Parametricity
+import Lara.Context.FiniteExtension
 import Lara.Examples.ContextSemantics
 import Lara.Context.Surface
 import Lara.Examples.Linking
@@ -2732,6 +2733,23 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.relInj_necessary
 #print axioms Lara.Context.relTerms_iff_forall₂
 #print axioms Lara.Context.relTerms_length
+
+-- Finite realization and unrestricted-extension counterexample (#279).
+#print axioms Lara.Context.swapAssurance_involutive
+#print axioms Lara.Context.swapAssurance_injective
+#print axioms Lara.Context.exists_total_injective_extension_on
+#print axioms Lara.Context.relTerm_eq_mapAssur
+#print axioms Lara.Context.relTerms_eq_mapAssurList
+#print axioms Lara.Context.relDis_eq_mapAssurDis
+#print axioms Lara.Context.relAtt_eq_mapAssurAtt
+#print axioms Lara.Context.relAtts_eq_map
+#print axioms Lara.Context.relFrag_eq_mapAssurFrag
+#print axioms Lara.Context.relFrag_exists_injective
+#print axioms Lara.Context.relFrag_exists_injective_fixesContext
+#print axioms Lara.Context.shiftAssurance_injective
+#print axioms Lara.Context.shiftAssurance_ne_zero
+#print axioms Lara.Context.not_every_relInj_has_total_extension
+
 #print axioms Lara.Context.relInj_functional
 #print axioms Lara.Context.relInj_injective
 #print axioms Lara.Context.relTerm_graphOf

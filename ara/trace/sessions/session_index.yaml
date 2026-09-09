@@ -609,3 +609,13 @@ sessions:
   events_count: 1
   claims_touched: [C49]
   open_threads: 0
+
+- id: 2026-09-09_issue279
+  date: '2026-09-09'
+  summary: '#279: finite injective realization with context fixing; unrestricted extension
+    refuted.'
+  turn_count: 1
+  events_count: 1
+  claims_touched:
+  - C53
+  open_threads: 0

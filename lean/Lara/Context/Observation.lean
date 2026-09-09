@@ -337,7 +337,7 @@ the weaker one is not what is proved here.
 
 The global reading is a property of this statement, not an open gap. The
 occurrence-local hypothesis is proved by
-`backend_replacement_parametricity_local_sem` (`Parametricity.lean:1726`), whose
+`backend_replacement_parametricity_local_sem` (`Parametricity.lean:1720`), whose
 relation is inhabited only at `occurrences F`. It is a **trade, not a
 strengthening**: it adds `hC` and `hA`, requiring the context's own occurrences
 to lie inside `occurrences F`, which this theorem does not require. Neither

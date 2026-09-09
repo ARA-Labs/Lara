@@ -9019,3 +9019,18 @@ tree:
   - ara/evidence/proofs/m4_relational_family_277.md
   - docs/theory-m4-relational-parametricity.md
   status: resolved
+
+- id: N279-extension
+  type: pivot
+  title: Replace unrestricted relation extension with finite realization (#279)
+  provenance: ai-executed
+  timestamp: '2026-09-09'
+  parent: N338
+  from: Extend every pair of an arbitrary partial injection on Assurance.
+  to: Extend only fragment/context occurrence pairs; mechanize impossibility of unrestricted extension.
+  trigger: Inverse graph of the injective certificate-version shift exhausts the codomain while omitting
+    a source certificate.
+  evidence:
+  - lean/Lara/Context/FiniteExtension.lean
+  - ara/evidence/proofs/m4_finite_extension_279.md
+  status: resolved
