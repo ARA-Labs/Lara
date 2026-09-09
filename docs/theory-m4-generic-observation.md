@@ -268,8 +268,9 @@ payloads `noExtension` and `observed justified`, and proves their disequality.
 `observed contested`, so the semantics choice matters at this witness. This
 closes #273 without settling the all-context equivalence implication in #268.
 
-The certificate-bearing instantiation remains open as
-[#269](https://github.com/ARA-Labs/lara/issues/269). The admissible disagreeing
+The certificate-bearing instantiations requested in
+[#269](https://github.com/ARA-Labs/lara/issues/269) are now proved as
+`cert_congruence_witness_sem` and `cert_registry_swap_witness_sem`. The admissible disagreeing
 carrier requested in [#270](https://github.com/ARA-Labs/lara/issues/270) is now
 proved: `cycle_admissible` establishes `Admissible reg cycleCtx cycleFrag` for
 every registry, and `congruence_witness_sem` uses it. §6 records the remaining
@@ -363,7 +364,7 @@ instances, because the theorems they instantiate are:
 
 ---
 
-## 6. Congruence on the three-cycle and the remaining limitation
+## 6. Congruence on the three-cycle and a certified fragment
 
 `congruence_witness_sem` now instantiates the generic congruence on
 `cycleCtx`/`cycleFrag`. `cycle_admissible` proves both sides well-formed against
@@ -382,8 +383,26 @@ where all five semantics agree. Its semantics quantifier remains inert.
 The assurance-free caveat from `docs/theory-m4-contextual-adequacy.md` §1 still
 applies to both witnesses: `cycleFrag` and `fragEx` carry no certificates, so
 `mapAssurFrag f` is the identity on them for every `f`. Neither exercises a real
-certificate replacement. `Linking.cert_congruence_witness` does, but is
-grounded-only; its semantics-parametric counterpart remains #269.
+certificate replacement.
+
+`cert_congruence_witness_sem` now instantiates
+`backend_replacement_congruence_sem` on `Linking.certCtx`/`certFrag` with
+`certSwap` and `registryWrapped`. It reuses `certSwap_injective`,
+`certSwap_preserving`, `certAdmissible`, and the grounded witness's fixed-context
+proof unchanged. In particular, the certificate-dependent admissibility proof
+transfers directly: it requires no premise about semantics.
+`Linking.cert_relabel_moves` proves this relabel actually changes the fragment.
+
+`cert_registry_swap_witness_sem` instantiates `registry_swap_congruence_sem` on
+the same certified carrier, from `registryEx` to `registryPlus`, using the
+same global assurance-preservation argument as `Linking.cert_registry_swap_witness`
+and the same `certAdmissible`. This is the D6 form: the certificate stays
+unchanged while the registry accepts strictly more.
+
+Both theorems quantify over arbitrary `sem : ExtensionSemantics` and are pinned
+in `AxCheck.lean`. This closes #269's certificate-bearing witness gap. It does
+not establish that the semantics quantifier is non-inert at this certified
+carrier; the three-cycle supplies semantics separation separately.
 
 ---
 
@@ -443,9 +462,9 @@ grounded-only; its semantics-parametric counterpart remains #269.
   concrete context and fragment (§4). The natural reading of
   "semantics-parametric contextual equivalence" as a statement about the relations
   is exactly what is **not** proved — #268.
-- **Not a certificate-bearing semantics-parametric congruence witness.**
-  The three-cycle witness exercises the semantics parameter but contains no
-  certificate; #269 remains open (§6).
+- **Not a single witness combining a genuine certificate relabel with semantics
+  separation.** The certified witnesses exercise a real certificate uniformly
+  in `sem`; the three-cycle exercises semantics separation with bare leaves (§6).
 - **Not a runtime consequence.** The Haskell evaluator stays grounded; this
   milestone moves no conformance vector, no corpus, and no performance number.
 

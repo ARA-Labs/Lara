@@ -71,6 +71,13 @@ instantiated where changing semantics changes what is observed.
 semantics agree. Both fragments contain only leaves, so neither witness
 exercises a certificate replacement.
 
+`cert_congruence_witness_sem` and `cert_registry_swap_witness_sem` instead
+reuse `Linking.certCtx`/`certFrag` and its certificate-dependent admissibility
+proof. The former genuinely relabels the certificate (`Linking.cert_relabel_moves`);
+the latter preserves it while enlarging the registry's acceptance profile.
+These witnesses exercise certificate replacement uniformly in `sem`, but do
+not establish that changing semantics changes the observation at this carrier.
+
 ### Proof budget
 
 The cycle's `SideOk` proofs use support uniqueness and an explicit case split
@@ -428,7 +435,7 @@ differ. The semantics parameter therefore changes the observed value here.
 The assurance-free limitation remains: `cycleFrag` consists of bare leaves,
 so `mapAssurFrag f` is the identity on it for every `f`. This witnesses
 congruence on a semantics-separating carrier, not a real certificate swap;
-the semantics-parametric certificate-bearing instance remains #269. -/
+`cert_congruence_witness_sem` below supplies the certificate-bearing instance. -/
 theorem congruence_witness_sem (sem : ExtensionSemantics) :
     obsSem sem registryEx cycleCtx cycleFrag
       = obsSem sem registryEx cycleCtx (mapAssurFrag id cycleFrag) :=
@@ -449,6 +456,35 @@ theorem registry_swap_witness_sem (sem : ExtensionSemantics) :
     obsSem sem registryOnlyNd ctxEx fragEx = obsSem sem registryEx ctxEx fragEx :=
   registry_swap_congruence_sem sem assurPreserving_onlyNd
     (admissible_split registryOnlyNd)
+
+/-! ### Certificate-bearing congruences, at every semantics -/
+
+/-- **A real backend swap, uniformly in semantics.** This reuses the grounded
+witness's certificate-dependent `certAdmissible`, injectivity, acceptance
+preservation, and fixed-context proof without any semantics-specific premise.
+`Linking.cert_relabel_moves` proves that the fragment actually changes. This
+does not establish a separation between semantics at the certified carrier. -/
+theorem cert_congruence_witness_sem (sem : ExtensionSemantics) :
+    obsSem sem registryEx certCtx certFrag
+      = obsSem sem registryWrapped certCtx (mapAssurFrag certSwap certFrag) :=
+  backend_replacement_congruence_sem sem certSwap_injective certSwap_preserving
+    certAdmissible ⟨rfl, rfl⟩
+
+/-- **D6 on a real certificate, uniformly in semantics.** As in the grounded
+`Linking.cert_registry_swap_witness`, the alias registry accepts strictly more
+and the fragment stays unchanged. The global acceptance-preservation proof and
+certificate-dependent admissibility transfer without a premise on `sem`.
+This does not establish that the semantics parameter is non-inert here. -/
+theorem cert_registry_swap_witness_sem (sem : ExtensionSemantics) :
+    obsSem sem registryEx certCtx certFrag = obsSem sem registryPlus certCtx certFrag :=
+  registry_swap_congruence_sem sem
+    (by
+      intro r As A α h
+      cases h with
+      | defeasible hm => exact .defeasible hm
+      | trusted hm ht => exact .trusted hm ht
+      | cert hm hallow hacc => exact .cert hm hallow (certOk_plus_le _ _ _ _ _ hacc))
+    certAdmissible
 
 /-! ### `CtxEquivSem` is false of something -/
 

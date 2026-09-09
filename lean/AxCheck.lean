@@ -2831,6 +2831,8 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.ContextSemantics.obsSem_sink_preferred_ne_grounded
 #print axioms Lara.Examples.ContextSemantics.congruence_witness_sem
 #print axioms Lara.Examples.ContextSemantics.registry_swap_witness_sem
+#print axioms Lara.Examples.ContextSemantics.cert_congruence_witness_sem
+#print axioms Lara.Examples.ContextSemantics.cert_registry_swap_witness_sem
 #print axioms Lara.Examples.ContextSemantics.ctxEquivSem_negative
 #print axioms Lara.Examples.ContextSemantics.ctxEquivSem_grounded_negative
 #print axioms Lara.Examples.ContextSemantics.ctxEquivSem_grounded_of_ctxEquiv
