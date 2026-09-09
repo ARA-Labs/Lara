@@ -83,6 +83,8 @@ the semantics-parametric form is an instantiation and not a second proof.
 | `exists_accepted_rel` | `exists_accepted_relabel` (`lean/Lara/Context/Equivalence.lean:694`) | both |
 | `compileUnit_link_rel` | `compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:712`) | both |
 | `obsGen_parametricity` | `obsGen_congr` (`lean/Lara/Context/Equivalence.lean:784`) | both |
+| `backend_replacement_parametricity_local` | `registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:879`) | `R := occRel F`, so both are discharged internally — a **trade**, not a strengthening: acceptance weakens to `occurrences F`, but `hC`/`hA` are new (§6) |
+| `backend_replacement_parametricity_local_sem` | `registry_swap_congruence_sem` (`lean/Lara/Context/Observation.lean:345`) | ″ |
 
 `Lara.Forall₂` (`lean/Lara/ListRel.lean`) is the pointwise list relation the
 development consumes. **Core Lean 4.32.0 has no `List.Forall₂`** — it is a
@@ -169,8 +171,8 @@ That gap — and nothing else — is what the relational form buys.
 actually relates, where `AssurPreserving f` obliges every rule and every
 assurance in the type. The gap is exactly the one the codebase already flagged,
 twice, in the docstrings of `registry_swap_congruence`
-(`lean/Lara/Context/Equivalence.lean:868`) and `registry_swap_congruence_sem`
-(`lean/Lara/Context/Observation.lean:337`):
+(`lean/Lara/Context/Equivalence.lean:879`) and `registry_swap_congruence_sem`
+(`lean/Lara/Context/Observation.lean:345`):
 
 > The hypothesis `hpres` is stated **globally**, over every rule and every
 > assurance, rather than over `F`'s certificate occurrences. […] A display of
@@ -321,7 +323,8 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
 - The acceptance hypothesis can be **localized to the fragment's own
   certificate occurrences** (`backend_replacement_parametricity_local`,
   `_local_sem`) — the localization the docstrings of `registry_swap_congruence`
-  and `registry_swap_congruence_sem` record as not proved. State the trade, not
+  and `registry_swap_congruence_sem` name as the hypothesis they do not
+  themselves carry, and point at by name (#276). State the trade, not
   a pure upgrade: the localized theorem is **not** strictly stronger than
   `registry_swap_congruence`. It weakens the acceptance hypothesis to
   `α ∈ occurrences F` but **adds** `hC` and `hA`, requiring the context's own
@@ -370,9 +373,6 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   `backend_replacement_congruence_composed_sem` and
   `whole_program_replacement_sem`. For those the original boundary stands
   unchanged. Deferred: **#277**.
-- **Not reflected in the two existing docstrings.** `registry_swap_congruence`
-  and `registry_swap_congruence_sem` still describe the global-hypothesis gap as
-  open, with no pointer to the theorems that close it. Deferred: **#276**.
 - **Not a fully mechanized strength argument.** §4's step from
   "`R` is a partial function" to "some *total injective* `f` realizes it" is
   prose; `relInj_functional` gives only the partial function. Nothing proved

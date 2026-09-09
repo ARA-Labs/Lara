@@ -325,15 +325,23 @@ theorem backend_replacement_congruence_sem (sem : ExtensionSemantics)
 No relabel and no injectivity: if every assurance the first registry accepts the
 second accepts too, the *same* fragment reads the same way in every admissible
 context, under every extension semantics. The semantics-parametric form of
-`registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:868`), obtained
+`registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:879`), obtained
 the same way — instantiate the congruence at `f := id` and cancel `mapAssurFrag`.
 
 The hypothesis `hpres` is stated **globally**, over every rule and every
 assurance, rather than over `F`'s certificate occurrences. That is inherited
 from `hasSupport_mapAssur`, which carries the derivations across and quantifies
-globally. A display of this result must therefore say "agrees globally", not
+globally. A display of *this* result must therefore say "agrees globally", not
 "agrees on the fragment's occurrences" — the two are different hypotheses and
-the weaker one is not what is proved here. -/
+the weaker one is not what is proved here.
+
+The global reading is a property of this statement, not an open gap. The
+occurrence-local hypothesis is proved by
+`backend_replacement_parametricity_local_sem` (`Parametricity.lean:1726`), whose
+relation is inhabited only at `occurrences F`. It is a **trade, not a
+strengthening**: it adds `hC` and `hA`, requiring the context's own occurrences
+to lie inside `occurrences F`, which this theorem does not require. Neither
+implies the other. -/
 theorem registry_swap_congruence_sem (sem : ExtensionSemantics)
     (hpres : ∀ (r : Rule) (As : List Atom) (A : Atom) (α : Assurance),
       AssuranceOk (certOkOf reg₁) r As A α → AssuranceOk (certOkOf reg₂) r As A α)
@@ -353,14 +361,14 @@ variable {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
 /-- **Congruence at an arbitrary semantics is stable under embedding into a
 larger context.** The semantics-parametric form of
 `backend_replacement_congruence_composed`
-(`lean/Lara/Context/Equivalence.lean:960`), with the same reading: the
+(`lean/Lara/Context/Equivalence.lean:971`), with the same reading: the
 quantifier over contexts already ranged over composites, since `composedContext`
 produces a `Context`; what composition buys is that the quantifier is *closed*,
-and `fixesContext_composed` (`lean/Lara/Context/Equivalence.lean:896`) is what
+and `fixesContext_composed` (`lean/Lara/Context/Equivalence.lean:907`) is what
 discharges the composite's `FixesContext` obligation from the two halves.
 
 The composite's `Admissible` hypothesis is assumed here rather than assembled;
-`admissible_composed` (`lean/Lara/Context/Equivalence.lean:916`) is the lemma
+`admissible_composed` (`lean/Lara/Context/Equivalence.lean:927`) is the lemma
 that builds it from the halves plus their cross-coverage, and it applies to this
 statement unchanged because admissibility mentions no semantics. -/
 theorem backend_replacement_congruence_composed_sem (sem : ExtensionSemantics)
@@ -376,7 +384,7 @@ theorem backend_replacement_congruence_composed_sem (sem : ExtensionSemantics)
 /-- **Result 9's whole-program statement, at an arbitrary semantics.**
 
 Its grounded twin `whole_program_replacement`
-(`lean/Lara/Context/Equivalence.lean:976`) exists to record that it *cites*
+(`lean/Lara/Context/Equivalence.lean:987`) exists to record that it *cites*
 `Erase.backend_replacement` (`lean/Lara/Erase.lean:259`) rather than re-deriving
 it. The analogous fact here is slightly different and worth stating precisely:
 there is no generic ancestor to cite, because `Erase.backend_replacement` is

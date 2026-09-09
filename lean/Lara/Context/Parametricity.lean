@@ -210,8 +210,8 @@ The quantifier is guarded by `R α β`, and that guard is the point: where
 `AssurPreserving f` obliges every assurance in the type, this obliges only the
 pairs `R` actually relates. A relation inhabited exactly at a fragment's
 certificate occurrences therefore yields a hypothesis about exactly those
-occurrences — the localization `registry_swap_congruence`'s docstring records as
-not currently proved. -/
+occurrences — the localization `registry_swap_congruence`'s docstring names as
+the hypothesis it does not itself carry. -/
 def RelPreserving (R : Assurance → Assurance → Prop)
     (CertOk₁ CertOk₂ : BackendId → Digest → CertRef → List Atom → Atom → Prop) : Prop :=
   ∀ (r : Rule) (As : List Atom) (C : Atom) (α β : Assurance),
@@ -1677,9 +1677,9 @@ only over the fragment's own certificate occurrences (#215).**
 Compare `backend_replacement_congruence`, whose `AssurPreserving f` obliges
 every rule and every assurance *in the type*. This obliges only the assurances
 `F` carries. That gap is what the docstrings of `registry_swap_congruence`
-(`Context/Equivalence.lean:868`) and `registry_swap_congruence_sem`
-(`Context/Observation.lean:337`) record as not currently proved, and it is the
-reason the relational form is more than a restatement.
+(`Context/Equivalence.lean:879`) and `registry_swap_congruence_sem`
+(`Context/Observation.lean:345`) record as the hypothesis they do not carry, and
+it is the reason the relational form is more than a restatement.
 
 **This is a trade, not a strict strengthening.** `hlocal` is weaker than
 `registry_swap_congruence`'s global `hpres`, but `hC` and `hA` are new: they
@@ -1707,7 +1707,7 @@ theorem backend_replacement_parametricity_local
 /-- **The occurrence-local congruence at an arbitrary extension semantics
 (#215).** The companion of `backend_replacement_parametricity_local` for
 `obsSem`, and the localized counterpart of `registry_swap_congruence_sem`
-(`lean/Lara/Context/Observation.lean:337`), whose own docstring records that its
+(`lean/Lara/Context/Observation.lean:345`), whose own docstring records that its
 acceptance hypothesis is stated globally rather than over the fragment's
 occurrences. As at the grounded reading, this is a trade and not a strict
 strengthening: `hC`/`hA` are new obligations that

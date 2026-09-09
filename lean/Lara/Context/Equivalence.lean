@@ -860,11 +860,22 @@ theorem fixesContext_id (C : Context) : FixesContext id C :=
 
 /-- **The acceptance-profile generalization (D6).** No relabel and no
 injectivity: if every assurance the first registry accepts the second accepts
-too, the *same* fragment reads the same way in every admissible context. The
-hypothesis is stated globally rather than over `F`'s certificate occurrences —
-`hasSupport_mapAssur`, which carries the derivations across, quantifies over
-every rule and assurance — so a display of this result must say "agrees
-globally", not "agrees on the fragment's occurrences". -/
+too, the *same* fragment reads the same way in every admissible context.
+
+`hpres` is stated **globally**, over every rule and every assurance, rather than
+over `F`'s certificate occurrences — `hasSupport_mapAssur`, which carries the
+derivations across, quantifies over every rule and assurance. That is a property
+of *this* theorem, not a gap in the development: a display of this result must
+say "agrees globally", not "agrees on the fragment's occurrences".
+
+The occurrence-local hypothesis is a separate theorem rather than a missing one.
+`backend_replacement_parametricity_local` (`Parametricity.lean:1692`) and its
+companion `backend_replacement_parametricity_local_sem` oblige acceptance only
+for `α ∈ occurrences F`, by replacing the relabel function with a relation
+inhabited exactly there. They are a **trade, not a strengthening**: they add
+`hC` and `hA`, requiring the *context's* own occurrences to lie inside
+`occurrences F`, which this theorem does not require. Neither implies the other,
+so this statement's global reading stands. -/
 theorem registry_swap_congruence {canon : String → String}
     {reg₁ reg₂ : BackendRegistry canon} {C : Context} {F : Fragment}
     (hpres : ∀ (r : Rule) (As : List Atom) (A : Atom) (α : Assurance),
