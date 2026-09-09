@@ -1238,11 +1238,19 @@ exclusivity result with its five per-instance hypothesis discharges. -/
 
 #print axioms Lara.Semantics.justified_defeated_exclusive
 #print axioms Lara.Semantics.observe_justified_not_all_defeated
+#print axioms Lara.Semantics.specConflictFree_enumerateConflictFree
+#print axioms Lara.Semantics.justified_defeated_exclusive_of_enumerate
+#print axioms Lara.Semantics.observe_justified_not_all_defeated_of_enumerate
 #print axioms Lara.Semantics.completeSem_specConflictFree
 #print axioms Lara.Semantics.stableSem_specConflictFree
 #print axioms Lara.Semantics.preferredSem_specConflictFree
 #print axioms Lara.Semantics.semiStableSem_specConflictFree
 #print axioms Lara.Semantics.groundedSem_specConflictFree
+#print axioms Lara.Semantics.completeSem_enumerateConflictFree
+#print axioms Lara.Semantics.stableSem_enumerateConflictFree
+#print axioms Lara.Semantics.preferredSem_enumerateConflictFree
+#print axioms Lara.Semantics.semiStableSem_enumerateConflictFree
+#print axioms Lara.Semantics.groundedSem_enumerateConflictFree
 
 /-! ### M2a — concrete witnesses (`Lara.Examples.Semantics`)
 

@@ -150,18 +150,23 @@ consumer-facing form: when `observe` reports `justified`, the `defeated` guard
 it never reached is genuinely false.
 
 `SpecConflictFree` is phrased over `spec` rather than `enumerate`, which is the
-only reason `F.args.Nodup` appears in these two theorems: crossing from
-enumeration membership to `spec` goes through `sound`. An `enumerate`-phrased
-variant would prove the same exclusivity with no `Nodup` at all. The trade is
-deliberate — a property of the semantics rather than of one enumerator — and
-callers in later milestones should know it is a trade and not a necessity.
+only reason `F.args.Nodup` appears in those compatibility theorems: crossing from
+enumeration membership to `spec` goes through `sound`.
 
-The *non-emptiness* half is no longer the caller's problem at every instance.
-`preferredSem_enumerate_ne_nil` (§10, issue #196) discharges it for the
-preferred semantics unconditionally, so a preferred-instance call site of
-`justified_defeated_exclusive` supplies only `F.args.Nodup` and
-`preferredSem_specConflictFree`. `stableSem` has no counterpart and cannot
-acquire one: `stableSem_enumerate_threeCycle` refutes it.
+Issue #197 adds `EnumerateConflictFree sem F`, requiring conflict-freedom of
+exactly the extensions returned by `sem.enumerate F`. The theorems
+`justified_defeated_exclusive_of_enumerate` and
+`observe_justified_not_all_defeated_of_enumerate` prove the same conclusions
+without `Nodup`. Each of the five instances has an unconditional
+`*_enumerateConflictFree` discharge, proved from its actual enumerator. The
+old theorems retain their signatures and delegate through
+`specConflictFree_enumerateConflictFree`; this bridge alone needs `Nodup`.
+
+The *non-emptiness* half is also discharged for preferred semantics:
+`preferredSem_enumerate_ne_nil` (§10, issue #196) holds for every framework.
+Together with `preferredSem_enumerateConflictFree`, it makes exclusivity at
+preferred semantics unconditional in the carrier. `stableSem` has no
+non-emptiness counterpart: `stableSem_enumerate_threeCycle` refutes it.
 
 ### Source-to-framework transport
 
@@ -574,7 +579,7 @@ a GitHub issue, per `CLAUDE.md`; this document records the decision, the issue
 records the work.
 
 - Non-emptiness of preferred extensions — [#196](https://github.com/ARA-Labs/lara/issues/196). **Closed 2026-09-06.**
-- `enumerate`-phrased `SpecConflictFree` — [#197](https://github.com/ARA-Labs/lara/issues/197).
+- Enumeration-based conflict freedom — [#197](https://github.com/ARA-Labs/lara/issues/197). Implemented alongside the compatible spec-based API; see §3.
 - A registry that would make a sixth `ExtensionSemantics` visible — [#198](https://github.com/ARA-Labs/lara/issues/198).
 - Generic-`ExtensionSemantics` contextual equivalence —
   [#216](https://github.com/ARA-Labs/lara/issues/216). **Landed 2026-09-07**;
@@ -600,10 +605,10 @@ ever needed to stop a shorter list from having the same members as a longer one,
 and a shared carrier already rules that out. No Mathlib, and no hypothesis on
 `F` at all — see `Semantics.preferred_exists` and the section note above it.
 
-An `enumerate`-phrased `SpecConflictFree` would drop `F.args.Nodup` from
-`justified_defeated_exclusive` and `observe_justified_not_all_defeated`. §3
-records why the `spec` phrasing was kept; a later milestone that finds the
-hypothesis costly should read that trade before changing the definition.
+The enumeration-based API now removes the incidental `Nodup` hypothesis without
+replacing the spec-level property. This preserves the original abstraction
+trade-off for clients that reason about alternative adequate enumerators, while
+clients of the concrete enumeration can use the weaker assumptions directly.
 
 Nothing enumerates the instances of a structure, so a sixth `ExtensionSemantics`
 declared elsewhere would be invisible to the observation table's completeness

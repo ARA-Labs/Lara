@@ -1480,16 +1480,55 @@ and nothing else to inherit the exclusivity result.
 downstream callers.** Because the condition is about `sem.spec`, a proof holding
 `E ∈ sem.enumerate F` must cross to `sem.spec F E` through `sem.sound F hnd`,
 which binds `F.args.Nodup` — and that is the *only* reason `F.args.Nodup` appears
-in `justified_defeated_exclusive` and `observe_justified_not_all_defeated`. An
-`enumerate`-phrased variant (`∀ E ∈ sem.enumerate F, ConflictFree F E`) proves the
-same exclusivity with no `Nodup` hypothesis at all. The `spec` phrasing is kept
-deliberately: it is a property of the *semantics* rather than of its enumerator,
-so it stays true of any other adequate enumerator for the same `spec`, and each of
-the five discharges remains a single projection. Callers in later milestones
-should expect to supply `Nodup`, and should know it is this trade and not a
-mathematical necessity. -/
+in `justified_defeated_exclusive` and `observe_justified_not_all_defeated`.
+`EnumerateConflictFree` supplies the enumerator-phrased API: its exclusivity
+theorems need no `Nodup`, and each of the five concrete enumerators discharges it
+directly. The `spec` phrasing remains useful because it is a property of the
+*semantics* rather than of its enumerator, so it stays true of any other adequate
+enumerator for the same `spec`; `specConflictFree_enumerateConflictFree` bridges
+the two APIs when `Nodup` is available. -/
 def SpecConflictFree (sem : ExtensionSemantics) (F : AF) : Prop :=
   ∀ S, sem.spec F S → ConflictFree F S
+
+/-- Every extension produced by the semantics' actual enumerator is
+conflict-free. Unlike `SpecConflictFree`, this property can be consumed without
+crossing through `ExtensionSemantics.sound`, so it requires no carrier `Nodup`
+hypothesis. -/
+def EnumerateConflictFree (sem : ExtensionSemantics) (F : AF) : Prop :=
+  ∀ E ∈ sem.enumerate F, ConflictFree F E
+
+/-- A conflict-free declarative specification makes the corresponding
+enumeration conflict-free over a duplicate-free carrier. The `Nodup` hypothesis
+is used only by the adequacy bridge. -/
+theorem specConflictFree_enumerateConflictFree (sem : ExtensionSemantics) {F : AF}
+    (hnd : F.args.Nodup) (hcf : SpecConflictFree sem F) :
+    EnumerateConflictFree sem F := by
+  intro E hE
+  exact hcf E ((sem.sound F hnd E).mp hE).2
+
+/-- Enumeration-level exclusivity: a nonempty conflict-free enumeration cannot
+skeptically accept and skeptically defeat the same claim. -/
+theorem justified_defeated_exclusive_of_enumerate (sem : ExtensionSemantics) {F : AF}
+    (hcf : EnumerateConflictFree sem F) (c : Grounded.Claim)
+    (hne : sem.enumerate F ≠ []) :
+    ¬ ((sem.enumerate F).all (fun E => claimAcceptedB E c) = true ∧
+        (sem.enumerate F).all (fun E => claimDefeatedB F E c) = true) := by
+  rintro ⟨hacc, hdef⟩
+  have hex : ∃ E, E ∈ sem.enumerate F := by
+    cases hL : sem.enumerate F with
+    | nil => exact absurd hL hne
+    | cons E rest => exact ⟨E, List.mem_cons_self⟩
+  obtain ⟨E, hE⟩ := hex
+  have hcfE : ConflictFree F E := hcf E hE
+  obtain ⟨a, ha, haE⟩ :=
+    List.any_eq_true.mp (show c.support.any (fun x => memB x E) = true from
+      List.all_eq_true.mp hacc E hE)
+  obtain ⟨b, hb, hba⟩ :=
+    List.any_eq_true.mp (show E.any (fun b => F.attack b a) = true from
+      List.all_eq_true.mp
+        (show c.support.all (fun x => attackedByB F E x) = true from
+          List.all_eq_true.mp hdef E hE) a ha)
+  exact hcfE b hb a (memB_iff.mp haE) hba
 
 /-- **Exclusivity is not free.** With at least one extension present and every
 extension conflict-free, a claim cannot be both skeptically accepted and
@@ -1507,33 +1546,15 @@ theorem justified_defeated_exclusive (sem : ExtensionSemantics) {F : AF}
     (hnd : F.args.Nodup) (hcf : SpecConflictFree sem F) (c : Grounded.Claim)
     (hne : sem.enumerate F ≠ []) :
     ¬ ((sem.enumerate F).all (fun E => claimAcceptedB E c) = true ∧
-        (sem.enumerate F).all (fun E => claimDefeatedB F E c) = true) := by
-  rintro ⟨hacc, hdef⟩
-  have hex : ∃ E, E ∈ sem.enumerate F := by
-    cases hL : sem.enumerate F with
-    | nil => exact absurd hL hne
-    | cons E rest => exact ⟨E, List.mem_cons_self⟩
-  obtain ⟨E, hE⟩ := hex
-  have hcfE : ConflictFree F E := hcf E ((sem.sound F hnd E).mp hE).2
-  obtain ⟨a, ha, haE⟩ :=
-    List.any_eq_true.mp (show c.support.any (fun x => memB x E) = true from
-      List.all_eq_true.mp hacc E hE)
-  obtain ⟨b, hb, hba⟩ :=
-    List.any_eq_true.mp (show E.any (fun b => F.attack b a) = true from
-      List.all_eq_true.mp
-        (show c.support.all (fun x => attackedByB F E x) = true from
-          List.all_eq_true.mp hdef E hE) a ha)
-  exact hcfE b hb a (memB_iff.mp haE) hba
+        (sem.enumerate F).all (fun E => claimDefeatedB F E c) = true) :=
+  justified_defeated_exclusive_of_enumerate sem
+    (specConflictFree_enumerateConflictFree sem hnd hcf) c hne
 
-/-- **The priority order in `observe` is not hiding a tie.** When `observe`
-reports `justified` under a conflict-free semantics, the `defeated` guard it never
-reached is genuinely false, so the verdict does not depend on which guard was
-tested first. This is the consumer-facing form of `justified_defeated_exclusive`;
-its enumeration-non-emptiness hypothesis is not passed in because the proof case
-splits on `observe`'s own enumeration guard and reads it off the negative branch,
-so this theorem depends on no other result about `observe`. -/
-theorem observe_justified_not_all_defeated (sem : ExtensionSemantics) {F : AF}
-    (hnd : F.args.Nodup) (hcf : SpecConflictFree sem F) (c : Grounded.Claim)
+/-- Observation-level enumeration theorem: a justified result makes the
+skeptical-defeat guard false whenever every enumerated extension is
+conflict-free. -/
+theorem observe_justified_not_all_defeated_of_enumerate (sem : ExtensionSemantics) {F : AF}
+    (hcf : EnumerateConflictFree sem F) (c : Grounded.Claim)
     (hj : observe sem F c = ClaimObservation.observed Status.justified) :
     ¬ ((sem.enumerate F).all (fun E => claimDefeatedB F E c) = true) := by
   intro hdef
@@ -1546,9 +1567,22 @@ theorem observe_justified_not_all_defeated (sem : ExtensionSemantics) {F : AF}
     · rw [if_neg h0] at hj
       have hne : sem.enumerate F ≠ [] := fun hc => h0 (List.isEmpty_iff.mpr hc)
       by_cases hacc : (sem.enumerate F).all (fun E => claimAcceptedB E c) = true
-      · exact justified_defeated_exclusive sem hnd hcf c hne ⟨hacc, hdef⟩
+      · exact justified_defeated_exclusive_of_enumerate sem hcf c hne ⟨hacc, hdef⟩
       · rw [if_neg hacc, if_pos hdef] at hj
         exact absurd hj (by decide)
+
+/-- **The priority order in `observe` is not hiding a tie.** When `observe`
+reports `justified` under a conflict-free semantics, the `defeated` guard it never
+reached is genuinely false, so the verdict does not depend on which guard was
+tested first. This compatibility theorem preserves the original spec-level API
+and delegates through `specConflictFree_enumerateConflictFree` to
+`observe_justified_not_all_defeated_of_enumerate`. -/
+theorem observe_justified_not_all_defeated (sem : ExtensionSemantics) {F : AF}
+    (hnd : F.args.Nodup) (hcf : SpecConflictFree sem F) (c : Grounded.Claim)
+    (hj : observe sem F c = ClaimObservation.observed Status.justified) :
+    ¬ ((sem.enumerate F).all (fun E => claimDefeatedB F E c) = true) :=
+  observe_justified_not_all_defeated_of_enumerate sem
+    (specConflictFree_enumerateConflictFree sem hnd hcf) c hj
 
 /-! ### Discharging `SpecConflictFree` for the five instances
 
@@ -1589,5 +1623,32 @@ needs beyond `F.args.Nodup` to apply to the instance the runtime actually
 evaluates. -/
 theorem groundedSem_specConflictFree {F : AF} : SpecConflictFree groundedSem F :=
   fun _ hS => hS.1.1.2.1
+
+/-! ### Discharging `EnumerateConflictFree` for the five instances -/
+
+theorem completeSem_enumerateConflictFree {F : AF} :
+    EnumerateConflictFree completeSem F := by
+  intro E hE
+  exact (completeB_iff.mp (mem_filter_candidates.mp hE).2).1.2.1
+
+theorem stableSem_enumerateConflictFree {F : AF} :
+    EnumerateConflictFree stableSem F := by
+  intro E hE
+  exact (stableB_iff.mp (mem_filter_candidates.mp hE).2).2.1
+
+theorem preferredSem_enumerateConflictFree {F : AF} :
+    EnumerateConflictFree preferredSem F := by
+  intro E hE
+  exact (preferredB_iff.mp (mem_filter_candidates.mp hE).2).1.2.1
+
+theorem semiStableSem_enumerateConflictFree {F : AF} :
+    EnumerateConflictFree semiStableSem F := by
+  intro E hE
+  exact (semiStableB_iff.mp (mem_filter_candidates.mp hE).2).1.1.2.1
+
+theorem groundedSem_enumerateConflictFree {F : AF} :
+    EnumerateConflictFree groundedSem F := by
+  intro E hE
+  exact (leastCompleteB_iff.mp (mem_filter_candidates.mp hE).2).1.1.2.1
 
 end Lara.Semantics
