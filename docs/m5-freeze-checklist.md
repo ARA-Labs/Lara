@@ -1,5 +1,130 @@
 # M5 freeze checklist — evaluation corpus (deterministic scope)
 
+## Current snapshot: evaluation freeze v6 — issue #266
+
+Recorded 2026-09-09. The committed `measurements/frozen/` snapshot now describes
+**595 mutants + 60 corpus units = 655 measured inputs**. It was measured from
+clean input commit `bc888a5d4b60438565bcf0922a8a3f04cfc645b8` (`git-dirty: false`).
+The publication tag **`m5-freeze-v6` is pending merge**: cut an annotated tag on
+the eventual merge commit after verifying the anchors and gates below, following
+the v3–v5 procedure. The latest published tag remains `m5-freeze-v5`; its
+numbers and reproduction recipe are preserved in the historical record below.
+
+### Scope and additive class deltas
+
+Issue #266 adds S9 (`insp@1`) and batches S2 (`ord@1`) into the same freeze.
+Each adds 27 verified mutants: 22 verdict anchors and 5 codec negatives.
+The seed remains `20260801`; the checker and operators are unchanged.
+A byte comparison against parent `08ebe6a` verified **all 541 old mutant files
+and all 541 old manifest rows unchanged**. Only 54 mutant files are added;
+`MANIFEST.tsv` and the generated `README.md` are the only existing mutation-suite
+files modified. All 601 pre-existing report rows retain identical deterministic
+columns 1–15, and every old ablation row is unchanged. Corpus inputs,
+claim-support TSV, and the binding-audit worklist remain byte-identical.
+
+| Outcome | v5 | Added | v6 |
+| --- | ---: | ---: | ---: |
+| `reject-R1` | 63 | +8 | 71 |
+| `reject-R12` | 40 | +4 | 44 |
+| `reject-R3` | 19 | +2 | 21 |
+| `reject-R4` | 30 | +4 | 34 |
+| `reject-R7` | 20 | +4 | 24 |
+| `reject-R13` | 43 | +6 | 49 |
+| `reject-R11` | 19 | +2 | 21 |
+| `reject-R9` | 19 | +2 | 21 |
+| `reject-R2` | 113 | +12 | 125 |
+| `codec-reject` | 47 | +10 | 57 |
+
+All other outcome counts are unchanged. The new certificate cases cover the
+backend payload decoder (R13) and certificate theory allowlist (R7).
+`cert-payload-tamper` writes `mut_corrupt`; it does **not** drop a slot.
+For S9 it corrupts an `inspect` certificate, while `cert-theory-swap` changes
+an `inspectdiff` certificate's digest. These are not measurements of every
+inspection semantic guard or of well-formed false certificates. The existing
+backend properties and Lean proofs remain the evidence for those obligations.
+`MutationSpec.prop_backendCertificateCoverage` now requires measured certificate
+mutants for both backends and replays them to their specified R7/R13 outcomes.
+
+### Frozen inputs and deterministic outputs
+
+| Input | Count | Git tree SHA |
+| --- | --- | --- |
+| `fixtures/mutants/` | 595 (538 verdict/status anchors + 57 codec negatives) | `e68a33bf80de8535d64c9483d24626ee0d8c5959` |
+| `corpus-units/` | 60 measured units | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` |
+| `examples/` | 11 historically measured examples plus additive demonstrators; S2/S9 now feed mutations | `046c0981e575b6efd944e217dd4b2572855459b2` |
+
+| Output | SHA-256 |
+| --- | --- |
+| `report.tsv`, `cut -f1-15` | `32aa22cdcbe159d460124c932911848dc776723b7b73c6063755cef3261f7262` |
+| `ablation.tsv`, full | `df25144c687e831fb4401eb4ad4f25373e8e987611e69e6aaed82dfabc86e01f` |
+
+Environment: GHC **9.10.3**, Lean **4.32.0** (commit `8c9756b28d64dab099da31a4c09229a9e6a2ef35`),
+Linux/x86_64. The two report timing columns remain machine-dependent and are
+excluded from the deterministic hash. These timings must not be interpreted as
+a performance change relative to the v5 macOS/ARM run. Claim-support is
+Haskell-only and intentionally records an empty Lean-version field.
+
+### Measured results
+
+| Metric | v6 result |
+| --- | --- |
+| Class match | 655 / 655 |
+| Haskell–Lean agreement | 655 / 655 |
+| Location match and primary | 480 / 480 each (175 not applicable) |
+| Corpus replay | 60 / 60 |
+| Load-bearing strict steps with checked certificates | 1 / 1 |
+| `no-cq` missed rejections | 18, all `reject-IncompleteArgument` |
+| `no-typed` missed rejections | 37: 11 R10 + 21 R11 + 5 MissingConflict |
+| `no-conflict-scan` missed rejections | 5, all MissingConflict |
+
+`no-typed` grows 35 → 37 solely from the two new `unlicensed-attack` mutants;
+no ablation configuration changed. Location agreement remains a construction
+and harness check, not an independent localization-accuracy estimate.
+
+### Verification and reproduction
+
+| Gate | Result on the v6 input tree |
+| --- | --- |
+| `cabal build all` / `cabal test all --test-show-details=direct` | pass |
+| `cabal exec -- runghc scripts/gen-mutants.hs --check` | 595 mutants byte-identical |
+| `bash scripts/differential.sh` | 669 verdict anchors, 66 codec negatives; zero failures |
+| `bash scripts/admission-differential.sh` | 20 / 20 |
+| `bash scripts/test-replay-tamper.sh` | both tamper classes detected |
+| `cd lean && lake build` | pass (existing linter warnings) |
+| `lake env lean AxCheck.lean` piped through `check-axioms.sh` with `pipefail` | pass; standard axiom trio only |
+| `python3 -m unittest scripts/test_freeze_bundle.py -v` | 4 / 4 |
+| `make presentation-parity` | 78 rows |
+
+The positive differential grows 625 → 669 and the negative 56 → 66, exactly
+44 verdict additions and 10 codec additions. These are fresh local checks;
+CI status belongs to the PR, not this measurement record.
+
+Reproduce from the clean input commit now, or from `m5-freeze-v6` once published:
+
+```sh
+git checkout bc888a5d4b60438565bcf0922a8a3f04cfc645b8
+cabal build all
+(cd lean && lake build)
+cabal exec -- runghc scripts/gen-mutants.hs --check
+bash scripts/differential.sh
+ELAN_TOOLCHAIN=leanprover/lean4:v4.32.0 make measure
+cabal exec -- runghc scripts/claim-support.hs
+cut -f1-15 measurements/report.tsv | sha256sum
+sha256sum measurements/ablation.tsv
+```
+
+Pinning `ELAN_TOOLCHAIN` makes the measurement harness's root-directory
+`lean --version` agree with the driver built under `lean/lean-toolchain`, even
+when the machine's default toolchain differs. Freeze publication verifies all
+three input tree SHAs and both deterministic output hashes above; do not move
+an old tag or replace an anchor merely to match an unexplained difference.
+
+## Historical record: v1–v5
+
+Everything below describes the previous freezes, including the then-current v5
+snapshot, counts, and commands. It is retained as provenance, not as a description
+of the current `measurements/frozen/` contents.
+
 _Operational record for milestone **M5 — evaluation corpus** task **T5 (freeze
 protocol)** (`plans/research-proposal.md` §7, tracker #48). Companion to the M1
 analogue (`docs/m1-freeze-checklist.md`). This file freezes the fixture

@@ -179,14 +179,17 @@ question above statable and testable, and because the diff member decomposes int
 - **Golden**: four hand-authored wire anchors under `fixtures/corpus/insp-*.sexp`, plus the worked
   example `examples/S9`. All five are byte-compared across both drivers by
   `scripts/differential.sh`.
-- **Mutation**: *not* in this cycle, and deliberately. Adding `S9` to
-  `Lara.Mutate.mutationBases` grows the seeded suite 541 → 568, and
-  `fixtures/mutants/` is frozen input row 1 of `m5-freeze-checklist.md` — so it costs a
-  freeze-tag bump (v5 → v6) and a re-run of the axis-(c) measurement harness, which issue #260 did
-  not budget. It was built and verified (all 27 mutants pass the generator's
-  verified-by-construction gate, including `cert-payload-tamper` and `cert-theory-swap` against
-  `insp@1` payloads) and then reverted; the work is tracked in issue #266 to ride the next freeze
-  cycle. `ord@1` shipped under the same constraint and has no mutation base either.
+- **Mutation**: issue #266's v6 refresh adds S9 and S2 (`ord@1`) together:
+  27 verified mutants each, growing the seeded suite 541 → 595 and the measured
+  input set 601 → 655. All previous mutant bytes are unchanged. S9's
+  `cert-payload-tamper` replaces an `inspect` payload with `mut_corrupt` (R13);
+  `cert-theory-swap` changes an `inspectdiff` theory digest (R7 allowlist rejection,
+  before backend replay). This covers decoder and allowlist rejection, not every
+  semantic recheck branch. `MutationSpec.prop_backendCertificateCoverage` pins
+  both backends' measured certificate cases. The clean measurement snapshot,
+  class deltas, hashes, and v6 publication procedure are recorded in
+  `m5-freeze-checklist.md`. The original S9-only trial in #260 was reverted to
+  avoid an unbudgeted freeze cycle; this combined refresh resolves that deferral.
 
 ## 7. What this does not settle
 

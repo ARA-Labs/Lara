@@ -5,7 +5,7 @@ GENERATED — do not edit. Regenerate with:
     cabal exec -- runghc scripts/gen-mutants.hs
 
 Every file is derived from the committed worked-example anchors
-(`examples/<NAME>/example.core.sexp`, bases: A B E1 E2 E3 E4 E5 S1)
+(`examples/<NAME>/example.core.sexp`, bases: A B E1 E2 E3 E4 E5 S1 S2 S9)
 and the 60 committed corpus-unit anchors
 (`corpus-units/<artifact>/<claim_id>/unit.core.sexp`, base label
 `<artifact>.<claim_id>`), by the seeded operators of `Lara.Mutate` (seed 20260801),
@@ -18,7 +18,7 @@ exit 2 with no verdict AND the per-operator stderr diagnostic pinned in the
 manifest's hs-diagnostic and lean-diagnostic columns, so a deleted codec
 check cannot stay green via a different downstream failure).
 
-Total mutants: 541
+Total mutants: 595
 
 | expected outcome | mutants |
 | --- | --- |
@@ -28,36 +28,36 @@ Total mutants: 541
 | `accept-evidence-blocked` | 9 |
 | `accept-gap` | 9 |
 | `accept-justified` | 9 |
-| `codec-reject` | 47 |
+| `codec-reject` | 57 |
 | `reject-IncompleteArgument` | 18 |
 | `reject-MissingConflict` | 5 |
-| `reject-R1` | 63 |
+| `reject-R1` | 71 |
 | `reject-R10` | 11 |
-| `reject-R11` | 19 |
-| `reject-R12` | 40 |
-| `reject-R13` | 43 |
-| `reject-R2` | 113 |
-| `reject-R3` | 19 |
-| `reject-R4` | 30 |
+| `reject-R11` | 21 |
+| `reject-R12` | 44 |
+| `reject-R13` | 49 |
+| `reject-R2` | 125 |
+| `reject-R3` | 21 |
+| `reject-R4` | 34 |
 | `reject-R5` | 18 |
 | `reject-R6` | 18 |
-| `reject-R7` | 20 |
-| `reject-R9` | 19 |
+| `reject-R7` | 24 |
+| `reject-R9` | 21 |
 
 | mutation family | mutants |
 | --- | --- |
 | `accept-verdict` | 54 |
-| `bad-attack-targets` | 35 |
-| `certificate-tampering` | 63 |
-| `codec-corruption` | 47 |
+| `bad-attack-targets` | 37 |
+| `certificate-tampering` | 73 |
+| `codec-corruption` | 57 |
 | `cycles` | 4 |
-| `data-integrity` | 19 |
-| `hidden-policy-extension` | 59 |
-| `localization` | 31 |
+| `data-integrity` | 21 |
+| `hidden-policy-extension` | 65 |
+| `localization` | 35 |
 | `open-obligations` | 54 |
-| `signature` | 113 |
-| `undeclared-leaves` | 25 |
-| `wrong-formulas` | 37 |
+| `signature` | 125 |
+| `undeclared-leaves` | 29 |
+| `wrong-formulas` | 41 |
 
 ## Corpus sweep (uniform derived-applicability, B = 12)
 

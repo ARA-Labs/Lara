@@ -233,6 +233,60 @@ malformed/S1--codec-core-version-0.sexp	S1	codec-corruption	codec-core-version	c
 malformed/S1--codec-replay-order-0.sexp	S1	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order	-
 malformed/S1--codec-theory-mismatch-0.sexp	S1	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories	-
 malformed/S1--codec-truncate-0.sexp	S1	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list	-
+S2--undeclared-leaf-0.sexp	S2	undeclared-leaves	undeclared-leaf	reject-R1			arg:0
+S2--undeclared-leaf-1.sexp	S2	undeclared-leaves	undeclared-leaf	reject-R1			arg:1
+S2--hidden-rule-0.sexp	S2	hidden-policy-extension	hidden-rule	reject-R1			arg:1
+S2--hidden-contrary-0.sexp	S2	hidden-policy-extension	hidden-contrary	reject-R12			policy
+S2--wrong-subst-domain-0.sexp	S2	wrong-formulas	wrong-subst-domain	reject-R3			arg:1
+S2--wrong-premise-0.sexp	S2	wrong-formulas	wrong-premise	reject-R4			arg:0
+S2--trusted-assurance-0.sexp	S2	certificate-tampering	trusted-assurance	reject-R7			arg:1
+S2--cert-theory-swap-0.sexp	S2	certificate-tampering	cert-theory-swap	reject-R7			arg:1
+S2--cert-payload-tamper-0.sexp	S2	certificate-tampering	cert-payload-tamper	reject-R13			arg:1
+S2--unlicensed-attack-0.sexp	S2	bad-attack-targets	unlicensed-attack	reject-R11			attack:0
+S2--group-conflict-0.sexp	S2	data-integrity	group-conflict	reject-R9			group:mut_g
+S2--retract-rule-0.sexp	S2	localization	retract-rule	reject-R1			arg:1
+S2--twin-support-defect-0.sexp	S2	localization	twin-support-defect	reject-R4			arg:0,arg:1
+S2--undeclared-pred-0.sexp	S2	signature	undeclared-pred	reject-R2			policy
+S2--wrong-pred-arity-0.sexp	S2	signature	wrong-pred-arity	reject-R2			policy
+S2--wrong-arg-sort-0.sexp	S2	signature	wrong-arg-sort	reject-R2			policy
+S2--wrong-arg-sort-1.sexp	S2	signature	wrong-arg-sort	reject-R2			policy
+S2--undeclared-con-0.sexp	S2	signature	undeclared-con	reject-R2			policy
+S2--wrong-theta-sort-0.sexp	S2	signature	wrong-theta-sort	reject-R2			policy
+S2--out-of-scope-var-0.sexp	S2	hidden-policy-extension	out-of-scope-var	reject-R12			policy
+S2--duplicate-backend-0.sexp	S2	certificate-tampering	duplicate-backend	reject-R13			replay
+S2--unknown-backend-0.sexp	S2	certificate-tampering	unknown-backend	reject-R13			replay
+malformed/S2--codec-junk-section-0.sexp	S2	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input	-
+malformed/S2--codec-core-version-0.sexp	S2	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version	-
+malformed/S2--codec-replay-order-0.sexp	S2	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order	-
+malformed/S2--codec-theory-mismatch-0.sexp	S2	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories	-
+malformed/S2--codec-truncate-0.sexp	S2	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list	-
+S9--undeclared-leaf-0.sexp	S9	undeclared-leaves	undeclared-leaf	reject-R1			arg:2
+S9--undeclared-leaf-1.sexp	S9	undeclared-leaves	undeclared-leaf	reject-R1			arg:0
+S9--hidden-rule-0.sexp	S9	hidden-policy-extension	hidden-rule	reject-R1			arg:1
+S9--hidden-contrary-0.sexp	S9	hidden-policy-extension	hidden-contrary	reject-R12			policy
+S9--wrong-subst-domain-0.sexp	S9	wrong-formulas	wrong-subst-domain	reject-R3			arg:2
+S9--wrong-premise-0.sexp	S9	wrong-formulas	wrong-premise	reject-R4			arg:2
+S9--trusted-assurance-0.sexp	S9	certificate-tampering	trusted-assurance	reject-R7			arg:2
+S9--cert-theory-swap-0.sexp	S9	certificate-tampering	cert-theory-swap	reject-R7			arg:0
+S9--cert-payload-tamper-0.sexp	S9	certificate-tampering	cert-payload-tamper	reject-R13			arg:1
+S9--unlicensed-attack-0.sexp	S9	bad-attack-targets	unlicensed-attack	reject-R11			attack:0
+S9--group-conflict-0.sexp	S9	data-integrity	group-conflict	reject-R9			group:mut_g
+S9--retract-rule-0.sexp	S9	localization	retract-rule	reject-R1			arg:2
+S9--twin-support-defect-0.sexp	S9	localization	twin-support-defect	reject-R4			arg:0,arg:2
+S9--undeclared-pred-0.sexp	S9	signature	undeclared-pred	reject-R2			policy
+S9--wrong-pred-arity-0.sexp	S9	signature	wrong-pred-arity	reject-R2			policy
+S9--wrong-arg-sort-0.sexp	S9	signature	wrong-arg-sort	reject-R2			policy
+S9--wrong-arg-sort-1.sexp	S9	signature	wrong-arg-sort	reject-R2			policy
+S9--undeclared-con-0.sexp	S9	signature	undeclared-con	reject-R2			policy
+S9--wrong-theta-sort-0.sexp	S9	signature	wrong-theta-sort	reject-R2			policy
+S9--out-of-scope-var-0.sexp	S9	hidden-policy-extension	out-of-scope-var	reject-R12			policy
+S9--duplicate-backend-0.sexp	S9	certificate-tampering	duplicate-backend	reject-R13			replay
+S9--unknown-backend-0.sexp	S9	certificate-tampering	unknown-backend	reject-R13			replay
+malformed/S9--codec-junk-section-0.sexp	S9	codec-corruption	codec-junk-section	codec-reject	wrong number of fields for check-input	check-input: malformed check input	-
+malformed/S9--codec-core-version-0.sexp	S9	codec-corruption	codec-core-version	codec-reject	unsupported core version	unsupported core version	-
+malformed/S9--codec-replay-order-0.sexp	S9	codec-corruption	codec-replay-order	codec-reject	replay-id core: expected (core	replay-id: wrong field order	-
+malformed/S9--codec-theory-mismatch-0.sexp	S9	codec-corruption	codec-theory-mismatch	codec-reject	theory identity does not match replay identity	replay theories differ from unit theories	-
+malformed/S9--codec-truncate-0.sexp	S9	codec-corruption	codec-truncate	codec-reject	unclosed list	unclosed list	-
 cycle-rebut-6.sexp	-	cycles	rebut-cycle	accept-all-contested			-
 cycle-rebut-2.sexp	-	cycles	rebut-cycle	accept-all-contested			-
 cycle-rebut-4.sexp	-	cycles	rebut-cycle	accept-all-contested			-

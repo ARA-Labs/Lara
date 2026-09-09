@@ -1,19 +1,19 @@
 {
   "environment": {
-    "git-rev": "89c25ef898e0c85de1715c832164463d39e52e89",
+    "git-rev": "bc888a5d4b60438565bcf0922a8a3f04cfc645b8",
     "git-dirty": false,
-    "ghc": "9.14.1",
-    "lean": "Lean (version 4.32.0, arm64-apple-darwin24.6.0, commit 8c9756b28d64dab099da31a4c09229a9e6a2ef35, Release)",
-    "os": "darwin",
-    "cpu": "aarch64"
+    "ghc": "9.10.3",
+    "lean": "Lean (version 4.32.0, x86_64-unknown-linux-gnu, commit 8c9756b28d64dab099da31a4c09229a9e6a2ef35, Release)",
+    "os": "linux",
+    "cpu": "x86_64"
   },
   "ablations": [
     {
       "ablation": "no-cq",
       "aggregate": {
-        "count": 601,
+        "count": 655,
         "missed-rejects": 18,
-        "unchanged": 583,
+        "unchanged": 637,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -52,10 +52,10 @@
             "unchanged": 18
           },
           "codec-reject": {
-            "total": 47,
+            "total": 57,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 47
+            "unchanged": 57
           },
           "reject-IncompleteArgument": {
             "total": 18,
@@ -75,10 +75,10 @@
             "unchanged": 5
           },
           "reject-R1": {
-            "total": 63,
+            "total": 71,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 63
+            "unchanged": 71
           },
           "reject-R10": {
             "total": 11,
@@ -87,40 +87,40 @@
             "unchanged": 11
           },
           "reject-R11": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           },
           "reject-R12": {
-            "total": 40,
+            "total": 44,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 40
+            "unchanged": 44
           },
           "reject-R13": {
-            "total": 43,
+            "total": 49,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 43
+            "unchanged": 49
           },
           "reject-R2": {
-            "total": 113,
+            "total": 125,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 113
+            "unchanged": 125
           },
           "reject-R3": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           },
           "reject-R4": {
-            "total": 30,
+            "total": 34,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 30
+            "unchanged": 34
           },
           "reject-R5": {
             "total": 18,
@@ -135,16 +135,16 @@
             "unchanged": 18
           },
           "reject-R7": {
-            "total": 20,
+            "total": 24,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 20
+            "unchanged": 24
           },
           "reject-R9": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           }
         }
       },
@@ -2482,6 +2482,546 @@
         {
           "input": "fixtures/mutants/malformed/S1--codec-truncate-0.sexp",
           "base": "S1",
+          "family": "codec-corruption",
+          "operator": "codec-truncate",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-leaf-0.sexp",
+          "base": "S2",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-leaf-1.sexp",
+          "base": "S2",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--hidden-rule-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--hidden-contrary-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-contrary",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-subst-domain-0.sexp",
+          "base": "S2",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-premise-0.sexp",
+          "base": "S2",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--trusted-assurance-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "trusted-assurance",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--cert-theory-swap-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--cert-payload-tamper-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--unlicensed-attack-0.sexp",
+          "base": "S2",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--group-conflict-0.sexp",
+          "base": "S2",
+          "family": "data-integrity",
+          "operator": "group-conflict",
+          "expected": "reject-R9",
+          "full-actual": "reject-R9",
+          "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--retract-rule-0.sexp",
+          "base": "S2",
+          "family": "localization",
+          "operator": "retract-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--twin-support-defect-0.sexp",
+          "base": "S2",
+          "family": "localization",
+          "operator": "twin-support-defect",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-pred-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-pred-arity-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-arg-sort-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-arg-sort-1.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-con-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-theta-sort-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--out-of-scope-var-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--duplicate-backend-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "duplicate-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--unknown-backend-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "unknown-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-junk-section-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-junk-section",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-core-version-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-core-version",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-replay-order-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-replay-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-theory-mismatch-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-theory-mismatch",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-truncate-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-truncate",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-leaf-0.sexp",
+          "base": "S9",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-leaf-1.sexp",
+          "base": "S9",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--hidden-rule-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--hidden-contrary-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-contrary",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-subst-domain-0.sexp",
+          "base": "S9",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-premise-0.sexp",
+          "base": "S9",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--trusted-assurance-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "trusted-assurance",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--cert-theory-swap-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--cert-payload-tamper-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--unlicensed-attack-0.sexp",
+          "base": "S9",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--group-conflict-0.sexp",
+          "base": "S9",
+          "family": "data-integrity",
+          "operator": "group-conflict",
+          "expected": "reject-R9",
+          "full-actual": "reject-R9",
+          "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--retract-rule-0.sexp",
+          "base": "S9",
+          "family": "localization",
+          "operator": "retract-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--twin-support-defect-0.sexp",
+          "base": "S9",
+          "family": "localization",
+          "operator": "twin-support-defect",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-pred-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-pred-arity-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-arg-sort-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-arg-sort-1.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-con-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-theta-sort-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--out-of-scope-var-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--duplicate-backend-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "duplicate-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--unknown-backend-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "unknown-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-junk-section-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-junk-section",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-core-version-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-core-version",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-replay-order-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-replay-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-theory-mismatch-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-theory-mismatch",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-truncate-0.sexp",
+          "base": "S9",
           "family": "codec-corruption",
           "operator": "codec-truncate",
           "expected": "codec-reject",
@@ -6164,9 +6704,9 @@
     {
       "ablation": "no-typed",
       "aggregate": {
-        "count": 601,
-        "missed-rejects": 35,
-        "unchanged": 566,
+        "count": 655,
+        "missed-rejects": 37,
+        "unchanged": 618,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -6205,10 +6745,10 @@
             "unchanged": 18
           },
           "codec-reject": {
-            "total": 47,
+            "total": 57,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 47
+            "unchanged": 57
           },
           "reject-IncompleteArgument": {
             "total": 18,
@@ -6226,10 +6766,10 @@
             "unchanged": 0
           },
           "reject-R1": {
-            "total": 63,
+            "total": 71,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 63
+            "unchanged": 71
           },
           "reject-R10": {
             "total": 11,
@@ -6242,45 +6782,45 @@
             "unchanged": 0
           },
           "reject-R11": {
-            "total": 19,
-            "missed-rejects": 19,
+            "total": 21,
+            "missed-rejects": 21,
             "missed-accept-classes": {
-              "accept-all-contested": 11,
+              "accept-all-contested": 12,
               "accept-defeated": 4,
               "accept-gap": 1,
-              "accept-other": 3
+              "accept-other": 4
             },
             "unchanged": 0
           },
           "reject-R12": {
-            "total": 40,
+            "total": 44,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 40
+            "unchanged": 44
           },
           "reject-R13": {
-            "total": 43,
+            "total": 49,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 43
+            "unchanged": 49
           },
           "reject-R2": {
-            "total": 113,
+            "total": 125,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 113
+            "unchanged": 125
           },
           "reject-R3": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           },
           "reject-R4": {
-            "total": 30,
+            "total": 34,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 30
+            "unchanged": 34
           },
           "reject-R5": {
             "total": 18,
@@ -6295,16 +6835,16 @@
             "unchanged": 18
           },
           "reject-R7": {
-            "total": 20,
+            "total": 24,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 20
+            "unchanged": 24
           },
           "reject-R9": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           }
         }
       },
@@ -8642,6 +9182,546 @@
         {
           "input": "fixtures/mutants/malformed/S1--codec-truncate-0.sexp",
           "base": "S1",
+          "family": "codec-corruption",
+          "operator": "codec-truncate",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-leaf-0.sexp",
+          "base": "S2",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-leaf-1.sexp",
+          "base": "S2",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--hidden-rule-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--hidden-contrary-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-contrary",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-subst-domain-0.sexp",
+          "base": "S2",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-premise-0.sexp",
+          "base": "S2",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--trusted-assurance-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "trusted-assurance",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--cert-theory-swap-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--cert-payload-tamper-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--unlicensed-attack-0.sexp",
+          "base": "S2",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-all-contested",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/S2--group-conflict-0.sexp",
+          "base": "S2",
+          "family": "data-integrity",
+          "operator": "group-conflict",
+          "expected": "reject-R9",
+          "full-actual": "reject-R9",
+          "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--retract-rule-0.sexp",
+          "base": "S2",
+          "family": "localization",
+          "operator": "retract-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--twin-support-defect-0.sexp",
+          "base": "S2",
+          "family": "localization",
+          "operator": "twin-support-defect",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-pred-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-pred-arity-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-arg-sort-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-arg-sort-1.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-con-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-theta-sort-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--out-of-scope-var-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--duplicate-backend-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "duplicate-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--unknown-backend-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "unknown-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-junk-section-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-junk-section",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-core-version-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-core-version",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-replay-order-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-replay-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-theory-mismatch-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-theory-mismatch",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-truncate-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-truncate",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-leaf-0.sexp",
+          "base": "S9",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-leaf-1.sexp",
+          "base": "S9",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--hidden-rule-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--hidden-contrary-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-contrary",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-subst-domain-0.sexp",
+          "base": "S9",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-premise-0.sexp",
+          "base": "S9",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--trusted-assurance-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "trusted-assurance",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--cert-theory-swap-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--cert-payload-tamper-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--unlicensed-attack-0.sexp",
+          "base": "S9",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "accept-other",
+          "missed-reject": true
+        },
+        {
+          "input": "fixtures/mutants/S9--group-conflict-0.sexp",
+          "base": "S9",
+          "family": "data-integrity",
+          "operator": "group-conflict",
+          "expected": "reject-R9",
+          "full-actual": "reject-R9",
+          "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--retract-rule-0.sexp",
+          "base": "S9",
+          "family": "localization",
+          "operator": "retract-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--twin-support-defect-0.sexp",
+          "base": "S9",
+          "family": "localization",
+          "operator": "twin-support-defect",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-pred-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-pred-arity-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-arg-sort-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-arg-sort-1.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-con-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-theta-sort-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--out-of-scope-var-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--duplicate-backend-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "duplicate-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--unknown-backend-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "unknown-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-junk-section-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-junk-section",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-core-version-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-core-version",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-replay-order-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-replay-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-theory-mismatch-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-theory-mismatch",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-truncate-0.sexp",
+          "base": "S9",
           "family": "codec-corruption",
           "operator": "codec-truncate",
           "expected": "codec-reject",
@@ -12324,9 +13404,9 @@
     {
       "ablation": "no-conflict-scan",
       "aggregate": {
-        "count": 601,
+        "count": 655,
         "missed-rejects": 5,
-        "unchanged": 596,
+        "unchanged": 650,
         "by-expected": {
           "accept-all-contested": {
             "total": 4,
@@ -12365,10 +13445,10 @@
             "unchanged": 18
           },
           "codec-reject": {
-            "total": 47,
+            "total": 57,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 47
+            "unchanged": 57
           },
           "reject-IncompleteArgument": {
             "total": 18,
@@ -12386,10 +13466,10 @@
             "unchanged": 0
           },
           "reject-R1": {
-            "total": 63,
+            "total": 71,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 63
+            "unchanged": 71
           },
           "reject-R10": {
             "total": 11,
@@ -12398,40 +13478,40 @@
             "unchanged": 11
           },
           "reject-R11": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           },
           "reject-R12": {
-            "total": 40,
+            "total": 44,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 40
+            "unchanged": 44
           },
           "reject-R13": {
-            "total": 43,
+            "total": 49,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 43
+            "unchanged": 49
           },
           "reject-R2": {
-            "total": 113,
+            "total": 125,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 113
+            "unchanged": 125
           },
           "reject-R3": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           },
           "reject-R4": {
-            "total": 30,
+            "total": 34,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 30
+            "unchanged": 34
           },
           "reject-R5": {
             "total": 18,
@@ -12446,16 +13526,16 @@
             "unchanged": 18
           },
           "reject-R7": {
-            "total": 20,
+            "total": 24,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 20
+            "unchanged": 24
           },
           "reject-R9": {
-            "total": 19,
+            "total": 21,
             "missed-rejects": 0,
             "missed-accept-classes": {},
-            "unchanged": 19
+            "unchanged": 21
           }
         }
       },
@@ -14793,6 +15873,546 @@
         {
           "input": "fixtures/mutants/malformed/S1--codec-truncate-0.sexp",
           "base": "S1",
+          "family": "codec-corruption",
+          "operator": "codec-truncate",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-leaf-0.sexp",
+          "base": "S2",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-leaf-1.sexp",
+          "base": "S2",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--hidden-rule-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--hidden-contrary-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-contrary",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-subst-domain-0.sexp",
+          "base": "S2",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-premise-0.sexp",
+          "base": "S2",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--trusted-assurance-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "trusted-assurance",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--cert-theory-swap-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--cert-payload-tamper-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--unlicensed-attack-0.sexp",
+          "base": "S2",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--group-conflict-0.sexp",
+          "base": "S2",
+          "family": "data-integrity",
+          "operator": "group-conflict",
+          "expected": "reject-R9",
+          "full-actual": "reject-R9",
+          "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--retract-rule-0.sexp",
+          "base": "S2",
+          "family": "localization",
+          "operator": "retract-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--twin-support-defect-0.sexp",
+          "base": "S2",
+          "family": "localization",
+          "operator": "twin-support-defect",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-pred-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-pred-arity-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-arg-sort-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-arg-sort-1.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--undeclared-con-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--wrong-theta-sort-0.sexp",
+          "base": "S2",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--out-of-scope-var-0.sexp",
+          "base": "S2",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--duplicate-backend-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "duplicate-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S2--unknown-backend-0.sexp",
+          "base": "S2",
+          "family": "certificate-tampering",
+          "operator": "unknown-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-junk-section-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-junk-section",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-core-version-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-core-version",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-replay-order-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-replay-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-theory-mismatch-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-theory-mismatch",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S2--codec-truncate-0.sexp",
+          "base": "S2",
+          "family": "codec-corruption",
+          "operator": "codec-truncate",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-leaf-0.sexp",
+          "base": "S9",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-leaf-1.sexp",
+          "base": "S9",
+          "family": "undeclared-leaves",
+          "operator": "undeclared-leaf",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--hidden-rule-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--hidden-contrary-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "hidden-contrary",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-subst-domain-0.sexp",
+          "base": "S9",
+          "family": "wrong-formulas",
+          "operator": "wrong-subst-domain",
+          "expected": "reject-R3",
+          "full-actual": "reject-R3",
+          "ablation-actual": "reject-R3",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-premise-0.sexp",
+          "base": "S9",
+          "family": "wrong-formulas",
+          "operator": "wrong-premise",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--trusted-assurance-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "trusted-assurance",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--cert-theory-swap-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "cert-theory-swap",
+          "expected": "reject-R7",
+          "full-actual": "reject-R7",
+          "ablation-actual": "reject-R7",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--cert-payload-tamper-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "cert-payload-tamper",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--unlicensed-attack-0.sexp",
+          "base": "S9",
+          "family": "bad-attack-targets",
+          "operator": "unlicensed-attack",
+          "expected": "reject-R11",
+          "full-actual": "reject-R11",
+          "ablation-actual": "reject-R11",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--group-conflict-0.sexp",
+          "base": "S9",
+          "family": "data-integrity",
+          "operator": "group-conflict",
+          "expected": "reject-R9",
+          "full-actual": "reject-R9",
+          "ablation-actual": "reject-R9",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--retract-rule-0.sexp",
+          "base": "S9",
+          "family": "localization",
+          "operator": "retract-rule",
+          "expected": "reject-R1",
+          "full-actual": "reject-R1",
+          "ablation-actual": "reject-R1",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--twin-support-defect-0.sexp",
+          "base": "S9",
+          "family": "localization",
+          "operator": "twin-support-defect",
+          "expected": "reject-R4",
+          "full-actual": "reject-R4",
+          "ablation-actual": "reject-R4",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-pred-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "undeclared-pred",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-pred-arity-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-pred-arity",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-arg-sort-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-arg-sort-1.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-arg-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--undeclared-con-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "undeclared-con",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--wrong-theta-sort-0.sexp",
+          "base": "S9",
+          "family": "signature",
+          "operator": "wrong-theta-sort",
+          "expected": "reject-R2",
+          "full-actual": "reject-R2",
+          "ablation-actual": "reject-R2",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--out-of-scope-var-0.sexp",
+          "base": "S9",
+          "family": "hidden-policy-extension",
+          "operator": "out-of-scope-var",
+          "expected": "reject-R12",
+          "full-actual": "reject-R12",
+          "ablation-actual": "reject-R12",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--duplicate-backend-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "duplicate-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/S9--unknown-backend-0.sexp",
+          "base": "S9",
+          "family": "certificate-tampering",
+          "operator": "unknown-backend",
+          "expected": "reject-R13",
+          "full-actual": "reject-R13",
+          "ablation-actual": "reject-R13",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-junk-section-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-junk-section",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-core-version-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-core-version",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-replay-order-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-replay-order",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-theory-mismatch-0.sexp",
+          "base": "S9",
+          "family": "codec-corruption",
+          "operator": "codec-theory-mismatch",
+          "expected": "codec-reject",
+          "full-actual": "codec-fail",
+          "ablation-actual": "codec-fail",
+          "missed-reject": false
+        },
+        {
+          "input": "fixtures/mutants/malformed/S9--codec-truncate-0.sexp",
+          "base": "S9",
           "family": "codec-corruption",
           "operator": "codec-truncate",
           "expected": "codec-reject",

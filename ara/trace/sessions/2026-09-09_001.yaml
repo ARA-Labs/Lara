@@ -2,11 +2,11 @@ session:
   id: 2026-09-09_001
   date: '2026-09-09'
   started: 2026-09-09T06:56
-  last_turn: 2026-09-09T21:55
-  turn_count: 3
+  last_turn: 2026-09-09T22:47
+  turn_count: 4
   summary: '#273: accepted fragments separated by stable semantic payloads. #275: certificate collapse
     separates accepted grounded observations. Implemented #281/#197/#198/#268/#217 and opened stacked
-    PRs #296–#300.'
+    PRs #296–#300. #266: refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot.'
 events_logged:
 - turn: 1
   type: experiment
@@ -50,6 +50,13 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: '#217: Typed CQ holes and contextual substitution; PR #300 opened.'
+- turn: 4
+  type: experiment
+  id: N266_v6
+  routing: direct
+  provenance: ai-executed
+  summary: Completed S2/S9 mutation generation and clean v6 measurement snapshot; 655/655 class match
+    and agreement.
 ai_actions:
 - turn: 1
   action: Added semantic negative fixtures and proofs, axiom coverage, and documentation.
@@ -79,6 +86,16 @@ ai_actions:
   - lean/Lara/Context/Holes.lean
   - lean/Lara/Examples/TermHoles.lean
   - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
+- turn: 4
+  action: Added measured backend regression, regenerated corpus, ran verification and clean measurements,
+    updated freeze documentation.
+  provenance: ai-executed
+  files_changed:
+  - src/Lara/Mutate.hs
+  - test/MutationSpec.hs
+  - fixtures/mutants/
+  - measurements/frozen/
+  - docs/m5-freeze-checklist.md
 claims_touched:
 - id: C53
   action: revised
@@ -92,12 +109,18 @@ claims_touched:
 - id: C49
   action: revised
   turn: 3
+- id: C24
+  action: revised
+  turn: 4
 key_context:
 - turn: 1
   excerpt: User requested direct implementation and a PR for issue 273 after dependency 270 landed.
 - turn: 3
   excerpt: 'User: "you do all in order, and open the prs". Order preserved; all five PRs opened, none
     merged.'
+- turn: 4
+  excerpt: 'User requested a new branch, direct resolution of #266, and a PR after the combined S2/S9
+    approach was proposed.'
 open_threads:
 - 'PRs #296–#300 await review/merge; no requested implementation remains.'
 ai_suggestions_pending: []
@@ -268,3 +291,53 @@ logic_revisions:
   signal: artifact-commitment
   provenance: ai-suggested
   note: Checked proof/API additions on the PR stack; existing statement and status retained.
+
+- turn: 4
+  entry: C24
+  field: Conditions
+  before: 'Seeded single-defect mutation corpus; ablation cells `noCQConfig` / `noTypedConfig` of `Lara.Check.CheckConfig`,
+    each removing exactly one rejection arm. The surgical+monotone property is mechanically checked (`AblationSpec`,
+    10 pure properties). Untested boundary: the discriminating form over human-authored NATURAL defects
+    — where the missed-defect rate is a discovery, not a construction — is deferred to #52 (ACL/EMNLP
+    follow-up); this claim says nothing about that regime.'
+  after: 'Seeded mutation corpus; ablation cells `noCQConfig`, `noTypedConfig`, and `noConflictScanConfig`
+    of `Lara.Check.CheckConfig`. Each disables its documented obligations; `noTypedConfig` disables both
+    typed attacks and conflict-scan completeness, so it maps to R10/R11/MissingConflict together. Surgicality
+    and monotonicity are checked by `AblationSpec`. Untested boundary: human-authored natural defects,
+    deferred to #52; no claim about naturally occurring defect rates.'
+  signal: dependency-change
+  provenance: ai-executed
+  note: Refresh current evidence after the v6 snapshot replaces the previously cited frozen outputs; preserve
+    claim statement/status.
+- turn: 4
+  entry: C24
+  field: Sources
+  before: '["18 ← measurements/frozen/ablation.json «\"ablation\": \"no-cq\", \"aggregate\": {\"count\":
+    418, \"missed-rejects\": 18, \"unchanged\": 400» [result]", "18/18 ← measurements/frozen/ablation.json
+    «\"reject-IncompleteArgument\": {\"total\": 18, \"missed-rejects\": 18, \"missed-accept-classes\":
+    {...}, \"unchanged\": 0}» [result]", "30 ← measurements/frozen/ablation.json «\"ablation\": \"no-typed\",
+    \"aggregate\": {\"count\": 418, \"missed-rejects\": 30, \"unchanged\": 388» [result]", "11+19 ← measurements/frozen/ablation.json
+    «\"reject-R10\": {\"total\": 11, \"missed-rejects\": 11 ... \"reject-R11\": {\"total\": 19, \"missed-rejects\":
+    19» [result]"]'
+  after: '["18/637 ← ara/evidence/results/backend_mutation_v6.md «no-cq: count=655; missed-rejects=18;
+    unchanged=637; missed classes: reject-IncompleteArgument=18.» [result]", "37/618 ← ara/evidence/results/backend_mutation_v6.md
+    «no-typed: count=655; missed-rejects=37; unchanged=618; missed classes: reject-MissingConflict=5,
+    reject-R10=11, reject-R11=21.» [result]", "5/650 ← ara/evidence/results/backend_mutation_v6.md «no-conflict-scan:
+    count=655; missed-rejects=5; unchanged=650; missed classes: reject-MissingConflict=5.» [result]"]'
+  signal: dependency-change
+  provenance: ai-executed
+  note: Refresh current evidence after the v6 snapshot replaces the previously cited frozen outputs; preserve
+    claim statement/status.
+- turn: 4
+  entry: C24
+  field: Proof
+  before: '[measurements/frozen/ablation.{json,tsv} (post-freeze run: no-cq missed-rejects 18 all reject-IncompleteArgument
+    / unchanged 400; no-typed missed-rejects 30 = R10 11 + R11 19 / unchanged 388), test/AblationSpec.hs
+    (surgical-flip, monotonicity, partition-totality, conflict-scan gating — 10 pure properties), trace
+    N97 (T6 execution, PR #53 merged)]'
+  after: '[`measurements/frozen/ablation.{json,tsv}` (clean bc888a5 v6 run), `ara/evidence/results/backend_mutation_v6.md`,
+    `test/AblationSpec.hs`, trace N266_v6; historical T6 execution remains recorded in N97]'
+  signal: dependency-change
+  provenance: ai-executed
+  note: Refresh current evidence after the v6 snapshot replaces the previously cited frozen outputs; preserve
+    claim statement/status.

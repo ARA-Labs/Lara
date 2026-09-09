@@ -1382,3 +1382,12 @@ entries:
     not blanket endorsement of a generalized claim. Its time-specific assessment remains historical.'
   - 'Preserved the #268 standard-semantics/identical-export scope and the #217 core-filling/full-abstraction
     limits; no claim of merged PRs or remote CI success.'
+
+- turn: 2026-09-09_001#4
+  notes:
+  - Recorded the measured regeneration directly as N266_v6 with clean-revision evidence; no new generalized
+    claim inferred.
+  - Updated C24 evidence references because the frozen snapshot was replaced; retained statement/status
+    and preserved exact before/after in the session.
+  - 'No new closure signal for staged interpretations, including O149: this completes its tracked work
+    but does not adopt its generalized heuristic.'

@@ -38,6 +38,7 @@ import Data.Maybe (mapMaybe)
 import Lara.AST
   ( ArgId (..)
   , Assurance (..)
+  , BackendId (..)
   , Attack (..)
   , Cert (..)
   , DupGroup (..)
@@ -52,6 +53,7 @@ import Lara.AST
   , Status (..)
   , Step (..)
   , SupportTerm (..)
+  , TheoryDigest (..)
   , Unit (..)
   )
 import Lara.Blocked (prune, pruneChecked, retainedAttackIndices, retainedIndices)
@@ -91,7 +93,7 @@ import Lara.Mutate.Suite
 import Lara.Prop (Prop (..))
 import Lara.Replay (CheckInput, inputReplayId, inputUnit, mkCheckInput)
 import Lara.Sigma (declarePred)
-import Lara.Strict (SExpr)
+import Lara.Strict (SExpr (..))
 import qualified Lara.Strict.RA as RA
 import Lara.Wire
   ( Outcome (..)
@@ -1277,6 +1279,50 @@ prop_certWrongFractionDecodes = once $ ioProperty $ do
         ]
     isLeftE = either (const True) (const False)
 
+-- | Missing a backend's worked-example base used to leave every mutation
+-- property green while its certificate rejection paths were absent (#266).
+-- Read the measured manifest and replay its actual files, requiring a corrupt
+-- certificate for each backend/operator pair rather than just a base name.
+prop_backendCertificateCoverage :: Property
+prop_backendCertificateCoverage = once $ ioProperty $ do
+  rows <- readManifest
+  checks <- sequence
+    [ checkPair rows base backend op expected
+    | (base, backend) <- [("S2", BackendId "ord"), ("S9", BackendId "insp")]
+    , (op, expected) <- [(OpCertTheorySwap, R7), (OpCertPayloadTamper, R13)]
+    ]
+  pure (conjoin checks)
+  where
+    checkPair rows base backend op expected = do
+      let selected = [r | r <- rows, rowBase r == base, rowOp r == opName op]
+      checks <- mapM (checkFile backend op expected) selected
+      pure $ counterexample (base ++ "/" ++ opName op) $ conjoin
+        [ counterexample "no measured certificate mutant" (not (null selected))
+        , conjoin checks
+        ]
+    checkFile backend op expected row = do
+      bytes <- readFile (suiteRoot ++ "/" ++ rowPath row)
+      pure $ counterexample (rowPath row) $ case decodeCheckInputFile bytes of
+        Left err -> counterexample (show err) False
+        Right input -> conjoin
+          [ rowExpected row === ExpectClass expected
+          , verdictOutcome (runCheck input) === Reject (RejectClass expected)
+          , counterexample "missing corrupt certificate for the intended backend" $
+              any (isTarget backend op)
+                (concatMap (certsOf . snd) (unitArgs (inputUnit input)))
+          ]
+    isTarget backend op c =
+      certBackend c == backend && certVersion c == 1
+        && case op of
+          OpCertTheorySwap -> certTheory c == TheoryDigest "sha256:mut"
+          OpCertPayloadTamper -> certPayload c == SAtom "mut_corrupt"
+          _ -> False
+    certsOf t = case t of
+      SLeaf _ -> []
+      SRule _ _ ws d _ a ->
+        [c | AssuranceCert c <- [a]]
+          ++ concatMap certsOf ws ++ concatMap (certsOf . snd) d
+
 -- | Every certificate payload carried anywhere in a support term, in traversal
 -- order. Local to this module: "Lara.Mutate.Sites.Nav" is library-internal.
 certPayloadsOf :: SupportTerm -> [SExpr]
@@ -1307,4 +1353,5 @@ mutationSpecProps =
   , ("mutation suite: drop-covering-attack site is the pair the checker reports", quickCheckResult prop_conflictSiteMatchesChecker)
   , ("mutation suite: drop-covering-attack maps sites through the quarantine prune", quickCheckResult prop_conflictSiteQuarantiningBase)
   , ("mutation suite: cert-wrong-fraction decodes cleanly and is refused on value", quickCheckResult prop_certWrongFractionDecodes)
+  , ("mutation suite: ord/insp certificate rejection coverage", quickCheckResult prop_backendCertificateCoverage)
   ]

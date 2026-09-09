@@ -598,10 +598,11 @@ sessions:
   date: '2026-09-09'
   summary: '#273: accepted fragments separated by stable semantic payloads. #275: certificate collapse
     separates accepted grounded observations. Implemented #281/#197/#198/#268/#217 and opened stacked
-    PRs #296–#300.'
-  turn_count: 3
-  events_count: 7
+    PRs #296–#300. #266: refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot.'
+  turn_count: 4
+  events_count: 8
   claims_touched:
+  - C24
   - C35
   - C49
   - C53

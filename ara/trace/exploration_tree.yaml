@@ -9112,3 +9112,22 @@ tree:
   - https://github.com/ARA-Labs/lara/pull/300
   - git:9ba73dd
   status: resolved
+
+- id: N266_v6
+  type: experiment
+  title: Measured ord/insp mutation coverage in evaluation freeze v6
+  provenance: ai-executed
+  timestamp: 2026-09-09T22:47
+  result: 'Added S2 and S9: 27 mutants each; 595 mutants and 655 total measurement records. All 541 old
+    mutant bytes and 601 old deterministic report rows unchanged. Class match and Haskell–Lean agreement
+    655/655; location match/primary 480/480; replay 60/60. Ablation misses 18/37/5. Clean bc888a5 input
+    revision; v6 tag awaits merge.'
+  evidence:
+  - ara/evidence/results/backend_mutation_v6.md
+  - docs/m5-freeze-checklist.md
+  - measurements/frozen/report.json
+  - measurements/frozen/ablation.json
+  - git:bc888a5
+  status: resolved
+  also_depends_on:
+  - N325

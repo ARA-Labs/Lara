@@ -58,3 +58,5 @@ spec §10 is a worked-example sketch, catalogued as worked example E3 in `docs/w
 not a data figure.
 
 [proofs/m4_finite_extension_279.md](proofs/m4_finite_extension_279.md) records the finite realization and the unrestricted-extension counterexample correcting C53.
+
+- [Backend mutation v6](results/backend_mutation_v6.md): #266 clean S2/S9 corpus refresh, additive deltas, and measured ablations.

@@ -392,7 +392,7 @@ mutationSeed = 20260801
 -- reject and are excluded: a second defect would make the specified class
 -- ambiguous.
 mutationBases :: [String]
-mutationBases = ["A", "B", "E1", "E2", "E3", "E4", "E5", "S1"]
+mutationBases = ["A", "B", "E1", "E2", "E3", "E4", "E5", "S1", "S2", "S9"]
 
 
 mutantFileName :: String -> MutationOp -> Int -> String
