@@ -1,0 +1,29 @@
+session:
+  id: 2026-09-09_001
+  date: '2026-09-09'
+  started: 2026-09-09T06:56
+  last_turn: 2026-09-09T06:56
+  turn_count: 1
+  summary: '#273: accepted fragments separated by stable semantic payloads.'
+events_logged:
+- turn: 1
+  type: experiment
+  id: N343
+  routing: direct
+  provenance: ai-executed
+  summary: Empty context separates accepted cycle and singleton with identical exports.
+ai_actions:
+- turn: 1
+  action: Added semantic negative fixtures and proofs, axiom coverage, and documentation.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Examples/ContextSemantics.lean
+  - lean/AxCheck.lean
+  - docs/theory-m4-generic-observation.md
+claims_touched: []
+key_context:
+- turn: 1
+  excerpt: User requested direct implementation and a PR for issue 273 after dependency 270 landed.
+open_threads:
+- '#268: whether grounded contextual equivalence implies equivalence at other semantics.'
+ai_suggestions_pending: []

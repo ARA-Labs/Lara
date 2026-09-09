@@ -8986,3 +8986,19 @@ tree:
   evidence:
   - ara/evidence/proofs/m4_cycle_admissibility.md
   status: resolved
+
+- id: N343
+  type: experiment
+  title: Accepted fragments separated by stable semantic payloads (#273)
+  provenance: ai-executed
+  timestamp: 2026-09-09T06:56
+  parent: N342
+  result: >
+    ctxEquivSem_semantic_negative refutes stable contextual equivalence using an
+    empty context and two accepted fragments with the same export. The complete
+    cycle yields noExtension and the singleton yields observed justified. The
+    cycle yields observed contested at grounded semantics. The all-context
+    implication in #268 remains open.
+  evidence:
+  - ara/evidence/proofs/m4_semantic_negative.md
+  status: resolved

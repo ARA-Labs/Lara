@@ -343,3 +343,11 @@ resolved by `cycle_admissible`, and `congruence_witness_sem` uses that cycle.
 The same carrier separates grounded and stable observations. The leaf-only
 limitation and #269 remain. See `m4_cycle_admissibility.md` for the proof and
 verification record.
+
+## Follow-up: accepted semantic negative (#273, 2026-09-09)
+
+`ctxEquivSem_semantic_negative` separates two fragments with identical exports
+whose links both pass the checker: stable reads the complete cycle as
+`noExtension` and a singleton as `observed justified`. The cycle also disagrees
+with its grounded reading in this empty context. See `m4_semantic_negative.md`.
+The equivalence-relation implication in #268 remains open.

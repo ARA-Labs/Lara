@@ -695,4 +695,77 @@ theorem obsSem_rejected_signature (sem : ExtensionSemantics) :
       = .rejected (.signature .malformedSigma) :=
   obsSem_rejected sem (by decide) rfl
 
+/-! ### A semantic negative with both links accepted (#273)
+
+Move the complete three-cycle into one fragment and use an empty context, so
+there is no extra context argument. Compare it with a singleton supporting the
+same export under the same policy. Both pass the guard and checker; stable
+semantics distinguishes their payloads, not a failure arm or export interface.
+This is a non-triviality witness, not a separation of equivalence relations
+across semantics (the unbounded-context question in #268). -/
+
+/-- Empty context under the existing cyclic policy. -/
+def semanticNegativeCtx : Lara.Context.Context :=
+  ⟨{ cycleCtx.frame with gammaFrag := [], ground := [], args := [], atts := [] }⟩
+
+/-- The complete carrier of #270, now entirely inside the fragment. -/
+def fullCycleFrag : Fragment :=
+  { cycleFrag with
+    gammaFrag := cycleCtx.frame.gammaFrag ++ cycleFrag.gammaFrag
+    ground := cycleCtx.frame.ground ++ cycleFrag.ground
+    args := (linkedUnit registryEx cycleCtx cycleFrag).args
+    atts := (linkedUnit registryEx cycleCtx cycleFrag).atts }
+
+/-- A single unattacked argument for the very same exported claim. -/
+def singletonCycleFrag : Fragment := { fragEx with policy := cyclePolicy }
+
+/-- The comparison keeps the export interface fixed. -/
+theorem semantic_negative_exports :
+    fullCycleFrag.exports = [pA] ∧ singletonCycleFrag.exports = [pA] := by decide
+
+/-- Neither observation can separate at the link guard. -/
+theorem semantic_negative_link_ok :
+    linkOk semanticNegativeCtx fullCycleFrag = true ∧
+      linkOk semanticNegativeCtx singletonCycleFrag = true := by decide
+
+/-- Both linked units reach the semantic projection. -/
+theorem semantic_negative_accepted :
+    (Check.Unit.checkUnit (linkGamma semanticNegativeCtx fullCycleFrag) registryEx
+      (linkGround semanticNegativeCtx fullCycleFrag)
+      (linkedUnit registryEx semanticNegativeCtx fullCycleFrag)).isOk = true ∧
+    (Check.Unit.checkUnit (linkGamma semanticNegativeCtx singletonCycleFrag) registryEx
+      (linkGround semanticNegativeCtx singletonCycleFrag)
+      (linkedUnit registryEx semanticNegativeCtx singletonCycleFrag)).isOk = true := by decide
+
+/-- Moving the cycle preserves its nodes and directed edges exactly. -/
+theorem semantic_negative_cycle_shape :
+    (linkedUnit registryEx semanticNegativeCtx fullCycleFrag).args =
+      (linkedUnit registryEx cycleCtx cycleFrag).args ∧
+    (linkedUnit registryEx semanticNegativeCtx fullCycleFrag).atts =
+      (linkedUnit registryEx cycleCtx cycleFrag).atts := by decide
+
+/-- Stable semantics finds no extension of the cycle, but justifies the
+singleton's export. Both outer constructors are `observed`. -/
+theorem obsSem_semantic_negative :
+    obsSem stableSem registryEx semanticNegativeCtx fullCycleFrag =
+      .observed [ClaimObservation.noExtension] ∧
+    obsSem stableSem registryEx semanticNegativeCtx singletonCycleFrag =
+      .observed [ClaimObservation.observed Grounded.Status.justified] ∧
+    obsSem stableSem registryEx semanticNegativeCtx fullCycleFrag ≠
+      obsSem stableSem registryEx semanticNegativeCtx singletonCycleFrag := by decide
+
+/-- The cycle's payload changes with semantics at this same context, too. -/
+theorem obsSem_semantic_negative_grounded :
+    obsSem groundedSem registryEx semanticNegativeCtx fullCycleFrag =
+      .observed [ClaimObservation.observed Grounded.Status.contested] ∧
+    obsSem groundedSem registryEx semanticNegativeCtx fullCycleFrag ≠
+      obsSem stableSem registryEx semanticNegativeCtx fullCycleFrag := by decide
+
+/-- Two accepted fragments with identical exports are contextually inequivalent
+because stable semantics reads their carriers differently. -/
+theorem ctxEquivSem_semantic_negative :
+    ¬ CtxEquivSem stableSem registryEx fullCycleFrag singletonCycleFrag := by
+  intro h
+  exact obsSem_semantic_negative.2.2 (h semanticNegativeCtx)
+
 end Lara.Examples.ContextSemantics

@@ -256,6 +256,18 @@ What *is* known about `CtxEquivSem` beyond its definition:
 non-grounded instance, so it is not merely `Linking.ctxEquiv_negative` transported
 through the `iff`.
 
+`ctxEquivSem_semantic_negative` strengthens the evidence requested in
+[#273](https://github.com/ARA-Labs/lara/issues/273): an empty context distinguishes
+`fullCycleFrag` from `singletonCycleFrag` under the same cyclic policy, with
+identical exports `[pA]`. Both links pass the guard and whole-unit checker
+(`semantic_negative_link_ok`, `semantic_negative_accepted`). The former reuses
+#270's complete directed cycle; the latter supplies one unattacked argument.
+`obsSem_semantic_negative` pins both outer constructors to `.observed`, with
+payloads `noExtension` and `observed justified`, and proves their disequality.
+`obsSem_semantic_negative_grounded` also pins the cycle's grounded payload to
+`observed contested`, so the semantics choice matters at this witness. This
+closes #273 without settling the all-context equivalence implication in #268.
+
 The certificate-bearing instantiation remains open as
 [#269](https://github.com/ARA-Labs/lara/issues/269). The admissible disagreeing
 carrier requested in [#270](https://github.com/ARA-Labs/lara/issues/270) is now

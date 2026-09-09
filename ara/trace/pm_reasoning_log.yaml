@@ -1334,3 +1334,10 @@ entries:
     the now-closed #270 boundary; no status or statement upgrade.'
   - 'No new general claim or heuristic was inferred from this finite proof. Kept #269 open and preserved
     the earlier evidence record with a dated follow-up.'
+
+- turn: 2026-09-09_001#1
+  notes:
+  - 'Recorded the finite mechanized witness as N343, extending N342. No general
+    claim or heuristic was inferred and no existing claim status was changed.'
+  - 'Kept #268 separate: one distinguishing context refutes contextual equivalence,
+    but does not establish grounded equivalence over all contexts.'

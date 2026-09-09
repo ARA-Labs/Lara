@@ -593,3 +593,11 @@ sessions:
   claims_touched:
   - C49
   open_threads: 1
+
+- id: 2026-09-09_001
+  date: '2026-09-09'
+  summary: '#273: accepted fragments separated by stable semantic payloads.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 1

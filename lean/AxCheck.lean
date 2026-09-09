@@ -3605,3 +3605,12 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_relabel_moves
 #print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_imports_nonempty
 #print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_inputs_differ
+
+-- #273: accepted fragments separated by their semantic payloads.
+#print axioms Lara.Examples.ContextSemantics.semantic_negative_exports
+#print axioms Lara.Examples.ContextSemantics.semantic_negative_link_ok
+#print axioms Lara.Examples.ContextSemantics.semantic_negative_accepted
+#print axioms Lara.Examples.ContextSemantics.semantic_negative_cycle_shape
+#print axioms Lara.Examples.ContextSemantics.obsSem_semantic_negative
+#print axioms Lara.Examples.ContextSemantics.obsSem_semantic_negative_grounded
+#print axioms Lara.Examples.ContextSemantics.ctxEquivSem_semantic_negative
