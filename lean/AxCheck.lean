@@ -67,6 +67,8 @@ import Lara.Context.Compose
 import Lara.Context.Equivalence
 import Lara.Invariants.Observation
 import Lara.Context.Observation
+import Lara.ListRel
+import Lara.Context.Parametricity
 import Lara.Examples.ContextSemantics
 import Lara.Context.Surface
 import Lara.Examples.Linking
@@ -2708,6 +2710,108 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.registry_swap_congruence_sem
 #print axioms Lara.Context.backend_replacement_congruence_composed_sem
 #print axioms Lara.Context.whole_program_replacement_sem
+
+-- ListRel: pointwise list relations. Core Lean 4.32.0 has no `List.Forall₂`;
+-- this is the local replacement the #215 relational development consumes.
+#print axioms Lara.Forall₂.length_eq
+#print axioms Lara.Forall₂.of_same
+#print axioms Lara.Forall₂.of_map_right
+#print axioms Lara.Forall₂.append
+#print axioms Lara.Forall₂.getElem?_right
+#print axioms Lara.Forall₂.getElem?_left
+#print axioms Lara.Forall₂.getElem?_none
+#print axioms Lara.Forall₂.mem_right
+#print axioms Lara.Forall₂.mem_left
+
+-- Context.Parametricity: the relational form of the M4 congruence (#215).
+-- `R` replaces the function `f`; `RelInj` is what the structural merge and the
+-- coverage decider force on it, and `relInj_necessary` witnesses that.
+#print axioms Lara.Context.relInj_necessary
+#print axioms Lara.Context.relTerms_iff_forall₂
+#print axioms Lara.Context.relTerms_length
+#print axioms Lara.Context.relInj_functional
+#print axioms Lara.Context.relInj_injective
+#print axioms Lara.Context.relTerm_graphOf
+#print axioms Lara.Context.relTerms_graphOf
+#print axioms Lara.Context.relDis_graphOf
+#print axioms Lara.Context.relAtt_graphOf
+#print axioms Lara.Context.relFrag_graphOf
+#print axioms Lara.Context.relInj_graphOf
+#print axioms Lara.Context.relPreserving_graphOf
+#print axioms Lara.Context.relFixesContext_graphOf
+#print axioms Lara.Context.relTerm_inj
+#print axioms Lara.Context.relTerms_inj
+#print axioms Lara.Context.relDis_inj
+#print axioms Lara.Context.relAtt_source_inj
+#print axioms Lara.Context.relDis_length
+#print axioms Lara.Context.relDis_keys
+#print axioms Lara.Context.relTerms_getElem?_right
+#print axioms Lara.Context.relTerms_getElem?_left
+#print axioms Lara.Context.relDis_getElem?_right
+#print axioms Lara.Context.relDis_lookup
+#print axioms Lara.Context.relTerm_subterm
+#print axioms Lara.Context.hasSupport_rel
+#print axioms Lara.Context.hasAttack_rel
+#print axioms Lara.Context.conflictAttackableB_rel
+#print axioms Lara.Context.attackFor_rel
+#print axioms Lara.Context.crossAttsFrom_inner_rel
+#print axioms Lara.Context.crossAttsFrom_rel
+#print axioms Lara.Context.conclusionCache_rel
+#print axioms Lara.Context.crossAtts_rel
+#print axioms Lara.Context.dedupList_rel
+#print axioms Lara.Context.linkFault_rel
+#print axioms Lara.Context.linkOk_rel
+#print axioms Lara.Context.linkGamma_rel
+#print axioms Lara.Context.linkGround_rel
+#print axioms Lara.Context.link_rel_commutes
+#print axioms Lara.Context.termWellSorted_rel
+#print axioms Lara.Context.termsWellSorted_rel
+#print axioms Lara.Context.dischargesWellSorted_rel
+#print axioms Lara.Context.argsWellSorted_rel
+#print axioms Lara.Context.signatureStage_rel
+#print axioms Lara.Context.relAtt_source
+#print axioms Lara.Context.relAtt_target
+#print axioms Lara.Context.attackOcc_rel_exists
+#print axioms Lara.Context.attackOcc_rel
+#print axioms Lara.Context.contains_rel
+#print axioms Lara.Context.covered_rel
+#print axioms Lara.Context.conflictAttackable_rel
+#print axioms Lara.Context.attackComplete_rel
+#print axioms Lara.Context.nodup_rel
+#print axioms Lara.Context.checkUnit_rel
+#print axioms Lara.Context.relTerms_getElem?_none
+#print axioms Lara.Context.relDis_lookup_none
+#print axioms Lara.Context.relTerm_subterm_none
+#print axioms Lara.Context.containsB_rel
+#print axioms Lara.Context.containsBList_rel
+#print axioms Lara.Context.containsBDis_rel
+#print axioms Lara.Context.attackClosureB_rel
+#print axioms Lara.Context.coveredB_rel
+#print axioms Lara.Context.nodes_conclusion_rel
+#print axioms Lara.Context.compileUnit_rel
+#print axioms Lara.Context.exists_accepted_rel
+#print axioms Lara.Context.compileUnit_link_rel
+#print axioms Lara.Context.obsGen_parametricity
+#print axioms Lara.Context.backend_replacement_parametricity_sem
+#print axioms Lara.Context.backend_replacement_parametricity
+#print axioms Lara.Context.backend_replacement_congruence_of_parametricity
+#print axioms Lara.Context.congruence_correspondence
+#print axioms Lara.Context.occurs
+#print axioms Lara.Context.occursList
+#print axioms Lara.Context.occursDis
+#print axioms Lara.Context.occursAtt
+#print axioms Lara.Context.occurrences
+#print axioms Lara.Context.mem_occursList
+#print axioms Lara.Context.mem_occursAtts
+#print axioms Lara.Context.relTerm_self
+#print axioms Lara.Context.relTerms_self
+#print axioms Lara.Context.relDis_self
+#print axioms Lara.Context.relAtt_self
+#print axioms Lara.Context.relInj_occRel
+#print axioms Lara.Context.relFrag_occRel
+#print axioms Lara.Context.relFixesContext_occRel
+#print axioms Lara.Context.backend_replacement_parametricity_local
+#print axioms Lara.Context.backend_replacement_parametricity_local_sem
 
 -- Examples.ContextSemantics: the semantics parameter is not an abstraction
 -- over one instance at the context level either (#216).

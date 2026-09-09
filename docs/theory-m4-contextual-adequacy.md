@@ -387,9 +387,17 @@ So the debt is marked **partially** discharged, and term-level holes are issue
 
 ### Must not claim
 
-- **Not parametricity.** There is no relational quantification over related
-  backends. #187's acceptance criterion reserves the word for that; the
-  relational form is issue **#215**.
+- **Not parametricity.** *This* theorem quantifies over a function
+  `f : Assurance → Assurance`, not a relation. The relational form is
+  `Context.backend_replacement_parametricity`
+  (`docs/theory-m4-relational-parametricity.md`, #215); it is a separate
+  theorem, and `backend_replacement_congruence` keeps its own name and its own
+  simpler hypotheses. The relational form is itself bounded: it requires the
+  relation to be a partial bijection on certificates (`RelInj`), so it is not
+  parametricity over arbitrary relations either. Of the four M4 congruences,
+  two have relational companions and two
+  (`backend_replacement_congruence_composed_sem`,
+  `whole_program_replacement_sem`) have none.
 - **Not full abstraction.** No logical relation is defined anywhere in Part A,
   and neither direction of a soundness/completeness pair is proved. Part B is
   descoped (§7).
@@ -498,10 +506,15 @@ A future attempt should start here, not from scratch:
   by *both* fragments. Positive witness: `m2bPolicy`'s asymmetry
   (`Complexity/Context.lean`). Negative witness: `emptyDefeat`, seeded by
   `Examples/Realizability.lean`'s `oneSelfEdge_not_realizable`.
-- **Reopening triggers.** Committing to **#215** (relational parametricity
-  over related backends) or **#216** (generic-`ExtensionSemantics` contextual
-  equivalence) — both want roughly this relation, and either would amortize
-  the G1 freeze. Absent such a consumer, the descope stands.
+- **Reopening triggers.** #215 (relational parametricity) landed without
+  reopening this gate: `RelTerm` lifts a relation on *certificates*
+  structurally and is not the interface relation G1 would freeze, so it
+  amortized nothing here. #216 likewise: it generalized the observation
+  *functions* over `sem` and the payload over `α`, and defined no relation
+  between fragments at all — `LogRel` appears nowhere in `lean/`, as
+  `docs/theory-m4-generic-observation.md` §7 records. Absent a consumer that
+  needs a relation over the contrary-visible occurrence profile, the descope
+  stands.
 
 **#187 is closed on Part A** with this boundary recorded; reopening goes
 through a fresh issue citing this section and answering G0's interface

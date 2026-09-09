@@ -8855,3 +8855,122 @@ tree:
     - "AxCheck coverage passed (89 declarations) after the obsGen_ext pin removal"
   status: resolved
   also_depends_on: [N334, N335]
+
+- id: N337
+  type: decision
+  title: "Keep the word *parametricity* for a result bounded by a partial-bijection side condition"
+  provenance: user
+  timestamp: "2026-09-08T10:05"
+  choice: >
+    Ship the #215 theorems under the `parametricity` name
+    (`obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`),
+    and amend `docs/theory-m4-contextual-adequacy.md` §6 / `theory-m4-generic-observation.md`
+    §7's "Not parametricity" bullets to say the relational form exists but is bounded by
+    `RelInj`, rather than deleting them. Surfaced to the user before any doc was written,
+    because the plan flagged it as the one judgement the proof cannot settle: #187's
+    acceptance criterion asks for a relational quantifier, and `RelInj` forces the relation
+    to be a partial bijection, so the result is parametricity over partial-bijective
+    certificate relations rather than over arbitrary ones.
+  alternatives:
+    - "Fall back to `backend_replacement_relational`, leaving the `Not parametricity` bullet standing unamended — more conservative, reserves the word until the RelInj bound is lifted."
+  evidence:
+    - "docs/theory-m4-relational-parametricity.md §7"
+    - "lean/Lara/Context/Parametricity.lean (relInj_necessary, relInj_functional, relInj_injective)"
+  status: resolved
+  also_depends_on: [N331]
+
+- id: N338
+  type: experiment
+  title: "#215's sizing question answered: the grounded fixpoint needs nothing from the equality"
+  provenance: ai-executed
+  timestamp: "2026-09-08T12:40"
+  result: >
+    #215 stated its own risk as "if the grounded fixpoint argument needs the equality it is
+    not cheap". It does not. `compileUnit_rel` concludes an EQUATION between `StructuredAF`s,
+    not a pointwise agreement, so `Grounded.statusC` and `Semantics.observe` are applied to
+    one and the same framework on both branches and the relation is erased before any
+    semantics runs. No grounded-labelling lemma, no `AttackExtensional` hypothesis and no new
+    fixpoint machinery appears anywhere in the 1710-line development. This is a second
+    instance of the mechanism C52 names, reached along a different axis: #216 generalized the
+    family along the *reader*, #215 generalizes it along the *relating structure*, and both
+    are free for the same reason — the shared lemma concludes an equality.
+  evidence:
+    - "lean/Lara/Context/Parametricity.lean (compileUnit_rel, obsGen_parametricity)"
+    - "ara/evidence/proofs/m4_relational_parametricity.md"
+    - "docs/theory-m4-relational-parametricity.md §5"
+  status: resolved
+  also_depends_on: [N331]
+
+- id: N339
+  type: decision
+  title: "Ship the occurrence-local instance, or the milestone proves nothing new"
+  provenance: ai-executed
+  timestamp: "2026-09-08T14:10"
+  choice: >
+    Build `occRel F` — the identity restricted to `occurrences F` — and derive
+    `backend_replacement_parametricity_local` and `_local_sem` from it. The plan's eng review
+    had already established why this is not optional polish: `relInj_functional` shows
+    `RelInj R` makes `R` a partial FUNCTION as well as injective, so `RelFrag R F₁ F₂` always
+    exhibits some total injective `f` with `F₂ = mapAssurFrag f F₁`, and every conclusion the
+    relational theorem reaches is already reachable through the existing
+    `backend_replacement_congruence` — EXCEPT that such an `f` must satisfy `AssurPreserving f`
+    globally and no such extension need exist. The localized hypothesis is therefore the
+    milestone's entire mathematical content, and without an instance the PR would ship a
+    quantifier shape and demonstrate nothing.
+  alternatives:
+    - "Ship only the graphOf-instantiated theorems — rejected: relPreserving_graphOf collapses RelPreserving back to the global AssurPreserving, so every instance would run through the very hypothesis the result claims to weaken."
+  evidence:
+    - "lean/Lara/Context/Parametricity.lean (occRel, relFrag_occRel, backend_replacement_parametricity_local, backend_replacement_parametricity_local_sem)"
+    - "lean/Lara/Context/Equivalence.lean:686 (registry_swap_congruence's docstring recording the global-hypothesis gap)"
+    - "docs/theory-m4-relational-parametricity.md §4"
+  status: resolved
+  also_depends_on: [N338]
+
+- id: N340
+  type: decision
+  title: "Guard the upgrade-not-fork property with a theorem instead of a review note"
+  provenance: ai-executed
+  timestamp: "2026-09-08T14:30"
+  choice: >
+    Keep `congruence_correspondence` in the shipped module — a named theorem asserting that
+    `backend_replacement_congruence` applied to its four hypotheses equals
+    `backend_replacement_congruence_of_parametricity` applied to the same four, proved by
+    `rfl`. Both sides are proofs of the same `Prop`, so `rfl` holds by proof irrelevance;
+    what it checks is that the two STATEMENTS coincide, since the equation is ill-typed
+    otherwise. Naming it rather than leaving it an anonymous `example` also puts it under
+    `check-axcheck-coverage.py`, so it cannot be silently dropped. Without it, a later change
+    to `RelFrag`, `graphOf`, or any of the eight bridge lemmas could leave the corollary
+    restating something weaker than the original with `lake build`, `check-axioms.sh` and the
+    coverage script all still green.
+  alternatives:
+    - "Verify the correspondence once by eye during review and delete the check — rejected; the same failure family as O154's eyeball-enforced acceptance criteria."
+  evidence:
+    - "lean/Lara/Context/Parametricity.lean (congruence_correspondence)"
+    - "ara/evidence/proofs/m4_relational_parametricity.md"
+  status: resolved
+  also_depends_on: [N339]
+
+- id: N341
+  type: question
+  title: "The relational form is still not witnessed by an observational separation"
+  provenance: ai-suggested
+  timestamp: "2026-09-08T15:20"
+  description: >
+    `relInj_necessary` witnesses that a collapsing relation changes a `coveredB` verdict — at
+    the level of the coverage DECIDER, on two hand-built terms. That is enough to show
+    `RelInj` is forced by the theorem rather than by the proof strategy, but it is not an
+    observational separation: no fixture exhibits two fragments related by a genuinely
+    non-functional `R` with differing `obs`. The same shape of gap #270/#269 record for
+    #216's witnesses. Filed as #275. Two of the four M4 congruences
+    (`backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`) also
+    still have no relational form — filed as #277 — and the two `registry_swap_congruence`
+    docstrings still describe the global-hypothesis gap as open with no pointer to the
+    theorems that close it — filed as #276.
+  evidence:
+    - "lean/Lara/Context/Parametricity.lean (relInj_necessary)"
+    - "docs/theory-m4-relational-parametricity.md §7"
+    - "https://github.com/ARA-Labs/lara/issues/275"
+    - "https://github.com/ARA-Labs/lara/issues/276"
+    - "https://github.com/ARA-Labs/lara/issues/277"
+  status: open
+  also_depends_on: [N339, N331]

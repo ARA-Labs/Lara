@@ -3363,3 +3363,74 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O157
+  timestamp: "2026-09-08T13:15"
+  provenance: ai-executed
+  content: >
+    Replacing a computed image by a relation costs a side condition exactly at the lemmas whose
+    functional originals got uniqueness for free. `attackOcc_mapAssurAtt` and `contains_mapAssur`
+    take no injectivity hypothesis because they may write the image occurrence as `mapAssur f t`,
+    which is unique by construction. Their relational forms cannot: the occurrence has to be
+    produced existentially and then pinned to the one the caller already holds, which is exactly
+    equality reflection. So the diagnostic for "where will relationalizing cost a hypothesis" is
+    not "where does the proof use injectivity" but "where does the functional statement name a
+    computed image in its conclusion".
+  context: >
+    Found while relationalizing Task 9 of the #215 plan, whose stated forms for `attackOcc_rel`
+    and `contains_rel` omitted `RelInj`. Both are unprovable as stated; both consumers already
+    carry `RelInj`, so nothing downstream weakened.
+  potential_type: heuristic
+  bound_to: [N338, N339]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O158
+  timestamp: "2026-09-08T14:35"
+  provenance: ai-executed
+  content: >
+    A propositional equality that was definitional in the functional development becomes
+    load-bearing bookkeeping in the relational one, and it surfaces in TYPES rather than in
+    proofs. `linkGamma C (mapAssurFrag f F)` is definitionally `linkGamma C F`, so the functional
+    statements name one Gamma throughout; relationally `linkGamma C F₂ = linkGamma C F₁` is only
+    propositional, and the accepted unit's TYPE mentions Gamma — so the two link-level lemmas
+    must `revert` the accepted unit and rewrite Gamma before doing any work. The same cause makes
+    the four `link*_rel` lemmas honest rewrites where their functional originals are `rfl`.
+    The general shape: when a transformation is replaced by a relation, every place the original
+    was definitionally transparent becomes a rewrite, and the ones that appear in dependent
+    positions are the expensive ones.
+  context: >
+    Encountered writing `exists_accepted_rel` and `compileUnit_link_rel` for #215. The plan
+    anticipated the `link*_rel` half ("budget for that; it is the main place where 'just mirror
+    the original' is not literally true") but not the dependent-type half.
+  potential_type: heuristic
+  bound_to: [N338]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O159
+  timestamp: "2026-09-08T14:50"
+  provenance: ai-executed
+  content: >
+    A planned theorem can collapse into one already shipped, and the check is to compare
+    signatures rather than intentions. Task 11c's `registry_swap_parametricity` was specified as
+    the occurrence-local companion of `registry_swap_congruence`; written out, it is
+    character-for-character `backend_replacement_parametricity_local`, because
+    `registry_swap_congruence` differs from `backend_replacement_congruence` only by moving no
+    material and the occurrence-local form already moves no material. The useful residue was at
+    the other level entirely: `backend_replacement_parametricity_local_sem` (obsSem, not obs) is
+    genuinely distinct and is what the generic-observation doc actually needed.
+  context: >
+    #215 Task 11c. The plan itself anticipated this ("if this is definitionally identical to
+    Task 11b's theorem, say so in one line and keep only one of the two names"), which is why
+    the collapse was caught rather than shipped as a duplicate.
+  potential_type: heuristic
+  bound_to: [N339]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

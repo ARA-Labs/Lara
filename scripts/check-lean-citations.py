@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
-"""Validate `lean/**/*.lean:NNN` cross-references in docstrings, docs and the ARA.
+"""Validate `lean/**/*.lean:NNN` cross-references in docstrings, docs and scripts.
 
 A `path:line` citation in prose is a silent-rot reference: nothing compiles it, so
 it survives any edit that shifts lines and goes on pointing at whatever now sits
 there. This gate resolves every such citation and fails when one no longer lands
 on a declaration.
+
+`ara/` is deliberately NOT searched; see the comment on SEARCH_ROOTS below for
+the two reasons, and `scripts/check_ara_source_spans.py` for the gate that does
+cover it.
+
+**Two known blind spots (#282).** The citation must be written with the `lean/`
+prefix or this gate never sees it, and a citation that lands on the *wrong*
+declaration still passes because only declaration-hood is checked, not the name
+the surrounding prose gives.
 
 Deliberate citations of a non-declaration line — a proof step, a structure field,
 a module header — are legitimate and are declared in ALLOWLIST below, each with a
@@ -43,6 +52,9 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Policy.lean:448": "pre-existing: cites a docstring opening, not the declaration below it",
     "lean/Lara/Admission.lean:764": "pre-existing: cites a proof step",
     "lean/Lara/Driver.lean:1": "cites the module header block",
+    "lean/Lara/Support.lean:60": "cites the module header's Forall₂ design bullet, not a declaration",
+    "lean/Lara/Context/Observation.lean:97": "cites the `open` line itself, which is what the comparison is about",
+    "lean/Lara/Context/Equivalence.lean:43": "cites the `open` line itself, which is what the comparison is about",
 }
 
 SEARCH_ROOTS = ("lean", "docs", "scripts", "README.md", "CLAUDE.md")
