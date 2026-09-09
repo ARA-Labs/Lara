@@ -9002,3 +9002,20 @@ tree:
   evidence:
   - ara/evidence/proofs/m4_semantic_negative.md
   status: resolved
+
+- id: N277001
+  type: decision
+  title: Complete the relational congruence family while preserving checked-program premises
+  provenance: ai-executed
+  timestamp: "2026-09-09T18:12"
+  parent: N341
+  choice: >
+    Use obsGen_parametricity for composed and closed-link union instances.
+    Use checkedAF_rel for the already-checked whole-program companion, since
+    adding contextual admissibility would weaken the existing contract.
+  alternatives:
+  - Route the checked-program theorem through contextual acceptance, adding unnecessary premises.
+  evidence:
+  - ara/evidence/proofs/m4_relational_family_277.md
+  - docs/theory-m4-relational-parametricity.md
+  status: resolved

@@ -1341,3 +1341,10 @@ entries:
     claim or heuristic was inferred and no existing claim status was changed.'
   - 'Kept #268 separate: one distinguishing context refutes contextual equivalence,
     but does not establish grounded equivalence over all contexts.'
+
+- turn: "2026-09-09_277#1"
+  notes:
+  - "Recorded N277001 as a decision grounded by checked proofs, not a new general research claim."
+  - "Revised C49's explicit #277 boundary and proof pointer; preserved its statement and status."
+  - "Did not revise C53/C54: neither arbitrary-relation separation nor total-injection extension was investigated."
+  - "Used an issue-specific session/node under concurrent branch coordination to avoid identifier collisions."

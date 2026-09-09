@@ -3616,3 +3616,23 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ContextSemantics.obsSem_semantic_negative
 #print axioms Lara.Examples.ContextSemantics.obsSem_semantic_negative_grounded
 #print axioms Lara.Examples.ContextSemantics.ctxEquivSem_semantic_negative
+
+-- Issue #277: composed and whole-program relational companions.
+#print axioms Lara.Context.relFixesContext_composed
+#print axioms Lara.Context.obsGen_parametricity_composed
+#print axioms Lara.Context.backend_replacement_parametricity_composed_sem
+#print axioms Lara.Context.backend_replacement_parametricity_composed
+#print axioms Lara.Context.edgeB_rel
+#print axioms Lara.Context.checkedAF_rel
+#print axioms Lara.Context.whole_program_parametricity_sem
+#print axioms Lara.Context.whole_program_parametricity
+#print axioms Lara.Context.mem_closedOccurrences
+#print axioms Lara.Context.relInj_closedOccRel
+#print axioms Lara.Context.relFrag_closedOccRel
+#print axioms Lara.Context.relFixesContext_closedOccRel
+#print axioms Lara.Context.obsGen_parametricity_closed_local
+#print axioms Lara.Context.whole_program_parametricity_local_sem
+#print axioms Lara.Context.whole_program_parametricity_local
+#print axioms Lara.Context.mem_occursList_iff
+#print axioms Lara.Context.mem_occurrences_iff
+#print axioms Lara.Context.occurrences_composed

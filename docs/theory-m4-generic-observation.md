@@ -432,28 +432,28 @@ carrier; the three-cycle supplies semantics separation separately.
 
 ### Must not claim
 
-- **Not parametricity, for two of the four.** `backend_replacement_congruence_sem`
-  and `registry_swap_congruence_sem` now have relational companions —
-  `Context.backend_replacement_parametricity_sem` and
-  `Context.backend_replacement_parametricity_local_sem` (#215,
-  `docs/theory-m4-relational-parametricity.md`). Both are bounded: `RelInj`
-  requires the certificate relation to be a partial bijection, so neither is
-  parametricity over arbitrary relations. **`backend_replacement_congruence_composed_sem`
-  and `whole_program_replacement_sem` have no relational form** — for those two
-  the original boundary stands unchanged, and #187 reserves the word. Nothing
-  in *this* module changed: the companions live in
-  `lean/Lara/Context/Parametricity.lean`.
-  `backend_replacement_parametricity_local_sem` is additionally a **trade**, not
-  a strengthening: it weakens the acceptance hypothesis to `α ∈ occurrences F`
-  but adds `hC` and `hA`, which require the *context's* own occurrences to lie
-  inside `occurrences F`. Neither it nor `registry_swap_congruence_sem` implies
-  the other, so "strictly stronger" is never the honest phrase. There is no
-  `registry_swap_parametricity`: written out it is character-for-character
-  `backend_replacement_parametricity_local`, so only one name ships, and the two
-  `registry_swap_*` docstrings do not yet point at it (**#276**). The remaining
-  open work on the relational side is **#275** (an observational witness for
-  `RelInj`), **#277** (relational forms for the other two congruences), and
-  **#279** (the total-injective-extension step).
+- **Not parametricity over arbitrary relations.** All four functional
+  congruences now have relational companions in
+  `lean/Lara/Context/Parametricity.lean` (#215, #277):
+
+  | Functional theorem | Relational companion |
+  |---|---|
+  | `backend_replacement_congruence_sem` | `backend_replacement_parametricity_sem` |
+  | `registry_swap_congruence_sem` | `backend_replacement_parametricity_local_sem` |
+  | `backend_replacement_congruence_composed_sem` | `backend_replacement_parametricity_composed_sem` |
+  | `whole_program_replacement_sem` | `whole_program_parametricity_sem` |
+
+  `RelInj` still restricts the relation to a partial bijection. The
+  fragment-local registry companion remains a trade: it weakens acceptance to
+  `occurrences F` but adds the two context-containment hypotheses. The new
+  `whole_program_parametricity_local_sem` instead obliges acceptance on
+  `closedOccurrences C F`, the union of both sides, without containment.
+  The checked-program companion uses `checkedAF_rel` without `Admissible` or
+  `RelPreserving`, preserving the original whole-program contract; the composed
+  and closed-link companions factor through `obsGen_parametricity`.
+  See `docs/theory-m4-relational-parametricity.md` §8 for this distinction.
+  Remaining work: **#275** (observational `RelInj` witness) and **#279**
+  (the total-injective-extension step).
 - **Not full abstraction.** No logical relation. M4 Part B was descoped on
   2026-09-03 (`docs/theory-m4-contextual-adequacy.md` §7), so the issue's `LogRel`
   conjunct is vacuous and was not attempted.

@@ -84,6 +84,26 @@ profile, and nothing here reopens the full-abstraction gate descoped in
               └─► backend_replacement_congruence_of_parametricity  (the
                     └─► congruence_correspondence   functional theorem,
                                                     via graphOf)
+
+  Composition (#277): dedupList_rel + the two RelFixesContext hypotheses
+      ──► relFixesContext_composed
+      ──► obsGen_parametricity_composed (obsGen_parametricity at the composite)
+        ├─► backend_replacement_parametricity_composed_sem
+        └─► backend_replacement_parametricity_composed
+      admissible_composed supplies admissibility from the halves unchanged.
+
+  Closed-link union (#277): occurrences_composed + mem_closedOccurrences
+      closedOccRel ──► relInj_closedOccRel, relFrag_closedOccRel,
+                      relFixesContext_closedOccRel
+      ──► obsGen_parametricity_closed_local (instance of obsGen_parametricity)
+        ├─► whole_program_parametricity_local_sem
+        └─► whole_program_parametricity_local
+
+  Already-checked whole programs (#277), a separate carrier route:
+      coveredB_rel ──► edgeB_rel ──► checkedAF_rel
+        ├─► whole_program_parametricity_sem
+        └─► whole_program_parametricity
+      Neither admissibility nor acceptance transport is needed on this route.
 ```
 
 **Diagram maintenance is part of the change.** If a lemma is added to or removed
@@ -1736,5 +1756,238 @@ theorem backend_replacement_parametricity_local_sem (sem : ExtensionSemantics)
   backend_replacement_parametricity_sem sem (relInj_occRel F)
     (by rintro r As Cc α β ⟨rfl, hmem⟩ hok; exact hlocal r As Cc α hmem hok)
     hadm (relFrag_occRel F) (relFixesContext_occRel hC hA)
+
+/-! ### Composition and whole programs (#277)
+
+The composed form factors through `obsGen_parametricity`. Its admissibility
+can be assembled unchanged with `admissible_composed`, including both directed
+cross-coverage obligations. The checked-program form instead factors through
+`checkedAF_rel`: checked programs need no contextual admissibility or
+acceptance-preservation hypothesis. The closed-link occurrence instance below
+records the context/fragment union that the contextual route actually needs. -/
+
+/-- A partial-bijective relation fixing both contexts fixes their composite.
+Argument deduplication uses the same relational merge lemma as linking. -/
+theorem relFixesContext_composed {R : Assurance → Assurance → Prop}
+    {C D : Context} (hR : RelInj R)
+    (hC : RelFixesContext R C) (hD : RelFixesContext R D) :
+    RelFixesContext R (composedContext C D) where
+  args := dedupList_rel hR (Forall₂.append hC.args hD.args)
+  atts := Forall₂.append hC.atts hD.atts
+
+/-- Relational congruence under composition, for any carrier projection.
+Use `admissible_composed` to discharge `hadm` from the two sides. -/
+theorem obsGen_parametricity_composed {α : Type}
+    (g : Invariants.StructuredAF → Atom → α)
+    {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
+    {R : Assurance → Assurance → Prop} {C D : Context} {F₁ F₂ : Fragment}
+    (hR : RelInj R)
+    (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
+    (hadm : Admissible reg₁ (composedContext C D) F₁) (hF : RelFrag R F₁ F₂)
+    (hC : RelFixesContext R C) (hD : RelFixesContext R D) :
+    obsGen g reg₁ (composedContext C D) F₁ = obsGen g reg₂ (composedContext C D) F₂ :=
+  obsGen_parametricity g hR hpres hadm hF (relFixesContext_composed hR hC hD)
+
+/-- The composed relational companion at an arbitrary extension semantics. -/
+theorem backend_replacement_parametricity_composed_sem (sem : ExtensionSemantics)
+    {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
+    {R : Assurance → Assurance → Prop} {C D : Context} {F₁ F₂ : Fragment}
+    (hR : RelInj R)
+    (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
+    (hadm : Admissible reg₁ (composedContext C D) F₁) (hF : RelFrag R F₁ F₂)
+    (hC : RelFixesContext R C) (hD : RelFixesContext R D) :
+    obsSem sem reg₁ (composedContext C D) F₁ = obsSem sem reg₂ (composedContext C D) F₂ :=
+  obsGen_parametricity_composed _ hR hpres hadm hF hC hD
+
+/-- The composed relational companion at the frozen grounded reading. -/
+theorem backend_replacement_parametricity_composed
+    {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
+    {R : Assurance → Assurance → Prop} {C D : Context} {F₁ F₂ : Fragment}
+    (hR : RelInj R)
+    (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
+    (hadm : Admissible reg₁ (composedContext C D) F₁) (hF : RelFrag R F₁ F₂)
+    (hC : RelFixesContext R C) (hD : RelFixesContext R D) :
+    obs reg₁ (composedContext C D) F₁ = obs reg₂ (composedContext C D) F₂ :=
+  obsGen_parametricity_composed _ hR hpres hadm hF hC hD
+
+section CheckedRel
+variable {canon : String → String} {Pi : RuleId → Option Rule}
+  {Gamma : LeafId → Option Atom}
+  {CertOk₁ CertOk₂ : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+  {dp : DefeatPolicy} {R : Assurance → Assurance → Prop}
+  {P₁ : CheckedProgram canon Pi Gamma CertOk₁ dp}
+  {P₂ : CheckedProgram canon Pi Gamma CertOk₂ dp}
+
+/-- Relationally related checked programs have identical edge deciders.
+Checking is already witnessed on both sides; no acceptance transport is needed. -/
+theorem edgeB_rel (hR : RelInj R)
+    (hargs : Forall₂ (RelTerm R) P₁.args P₂.args)
+    (hatts : Forall₂ (RelAtt R) P₁.atts P₂.atts) :
+    ∀ i j, edgeB P₁ i j = edgeB P₂ i j := by
+  intro i j
+  simp only [edgeB]
+  cases hs : P₁.args[i]? with
+  | none => rw [Forall₂.getElem?_none hargs hs]
+  | some source₁ =>
+      obtain ⟨source₂, hs₂, hrels⟩ := Forall₂.getElem?_left hargs hs
+      rw [hs₂]
+      cases ht : P₁.args[j]? with
+      | none => rw [Forall₂.getElem?_none hargs ht]
+      | some target₁ =>
+          obtain ⟨target₂, ht₂, hrelt⟩ := Forall₂.getElem?_left hargs ht
+          rw [ht₂]
+          exact (coveredB_rel hR hatts hrels hrelt).symm
+
+/-- The relational companion of `Erase.checkedAF_relabel`. -/
+theorem checkedAF_rel (hR : RelInj R)
+    (hargs : Forall₂ (RelTerm R) P₁.args P₂.args)
+    (hatts : Forall₂ (RelAtt R) P₁.atts P₂.atts) :
+    checkedAF P₁ = checkedAF P₂ := by
+  simp only [checkedAF, toAF]
+  congr 1
+  · rw [Forall₂.length_eq hargs]
+  · funext i j; exact edgeB_rel hR hargs hatts i j
+
+/-- The whole checked-program relational companion, for any semantics.
+Unlike a contextual corollary, this preserves the existing API's absence of
+`Admissible` and `RelPreserving` premises. -/
+theorem whole_program_parametricity_sem (sem : ExtensionSemantics)
+    (hR : RelInj R)
+    (hargs : Forall₂ (RelTerm R) P₁.args P₂.args)
+    (hatts : Forall₂ (RelAtt R) P₁.atts P₂.atts)
+    (c : Grounded.Claim) :
+    Semantics.observe sem (checkedAF P₁) c = Semantics.observe sem (checkedAF P₂) c := by
+  rw [checkedAF_rel hR hargs hatts]
+
+/-- The whole checked-program relational companion at the grounded reading. -/
+theorem whole_program_parametricity (hR : RelInj R)
+    (hargs : Forall₂ (RelTerm R) P₁.args P₂.args)
+    (hatts : Forall₂ (RelAtt R) P₁.atts P₂.atts)
+    (c : Grounded.Claim) :
+    Grounded.statusC (checkedAF P₁) c = Grounded.statusC (checkedAF P₂) c := by
+  rw [checkedAF_rel hR hargs hatts]
+end CheckedRel
+
+/-- List occurrence membership exposes the term that carries the assurance. -/
+theorem mem_occursList_iff {a : Assurance} {ws : List SupportTerm} :
+    a ∈ occursList ws ↔ ∃ w ∈ ws, a ∈ occurs w := by
+  induction ws with
+  | nil => simp [occursList]
+  | cons w ws ih => simp [occursList, ih]
+
+/-- Fragment occurrences come from a declared argument or attack. -/
+theorem mem_occurrences_iff {a : Assurance} {F : Fragment} :
+    a ∈ occurrences F ↔
+      (∃ w ∈ F.args, a ∈ occurs w) ∨ (∃ k ∈ F.atts, a ∈ occursAtt k) := by
+  simp only [occurrences, List.mem_append, mem_occursList_iff]
+  apply or_congr Iff.rfl
+  constructor
+  · intro h
+    obtain ⟨xs, hxs, ha⟩ := List.mem_flatten.mp h
+    obtain ⟨k, hk, rfl⟩ := List.mem_map.mp hxs
+    exact ⟨k, hk, ha⟩
+  · rintro ⟨k, hk, ha⟩
+    exact mem_occursAtts hk ha
+
+/-- Context composition takes the union of occurrences, despite deduplicating
+arguments. This is a membership statement, not list equality. -/
+theorem occurrences_composed {a : Assurance} {C D : Context} :
+    a ∈ occurrences (composedContext C D).frame ↔
+      a ∈ occurrences C.frame ∨ a ∈ occurrences D.frame := by
+  simp only [mem_occurrences_iff, composed_args, composed_atts]
+  constructor
+  · rintro (⟨w, hw | hw, ha⟩ | ⟨k, hk | hk, ha⟩)
+    · exact .inl (.inl ⟨w, hw, ha⟩)
+    · exact .inr (.inl ⟨w, hw, ha⟩)
+    · exact .inl (.inr ⟨k, hk, ha⟩)
+    · exact .inr (.inr ⟨k, hk, ha⟩)
+  · rintro ((⟨w, hw, ha⟩ | ⟨k, hk, ha⟩) | (⟨w, hw, ha⟩ | ⟨k, hk, ha⟩))
+    · exact .inl ⟨w, .inl hw, ha⟩
+    · exact .inr ⟨k, .inl hk, ha⟩
+    · exact .inl ⟨w, .inr hw, ha⟩
+    · exact .inr ⟨k, .inr hk, ha⟩
+
+/-- Occurrences declared on both sides of a closed link. Concatenation represents
+set union by membership; repeated occurrences are intentionally retained. -/
+def closedOccurrences (C : Context) (F : Fragment) : List Assurance :=
+  occurrences C.frame ++ occurrences F
+
+/-- Closing a link requires both sides' occurrences, not fragment containment. -/
+theorem mem_closedOccurrences {C : Context} {F : Fragment} {α : Assurance} :
+    α ∈ closedOccurrences C F ↔ α ∈ occurrences C.frame ∨ α ∈ occurrences F :=
+  List.mem_append
+
+/-- The identity restricted to the closed link's occurrence union. -/
+def closedOccRel (C : Context) (F : Fragment) : Assurance → Assurance → Prop :=
+  fun α β => α = β ∧ α ∈ closedOccurrences C F
+
+theorem relInj_closedOccRel (C : Context) (F : Fragment) :
+    RelInj (closedOccRel C F) := by
+  rintro α₁ α₂ β₁ β₂ ⟨rfl, _⟩ ⟨rfl, _⟩
+  exact Iff.rfl
+
+/-- The fragment is self-related without context-containment assumptions. -/
+theorem relFrag_closedOccRel (C : Context) (F : Fragment) :
+    RelFrag (closedOccRel C F) F F where
+  sigma := rfl
+  policy := rfl
+  gammaFrag := rfl
+  ground := rfl
+  imports := rfl
+  exports := rfl
+  args := Forall₂.of_same (fun _ hw => relTerm_self (fun _ hα =>
+    ⟨rfl, mem_closedOccurrences.mpr (.inr (List.mem_append.mpr
+      (.inl (mem_occursList hw hα))))⟩))
+  atts := Forall₂.of_same (fun _ hk => relAtt_self (fun _ hα =>
+    ⟨rfl, mem_closedOccurrences.mpr (.inr (List.mem_append.mpr
+      (.inr (mem_occursAtts hk hα))))⟩))
+
+/-- The context's own occurrences are included by construction. -/
+theorem relFixesContext_closedOccRel (C : Context) (F : Fragment) :
+    RelFixesContext (closedOccRel C F) C where
+  args := Forall₂.of_same (fun _ hw => relTerm_self (fun _ hα =>
+    ⟨rfl, mem_closedOccurrences.mpr (.inl (List.mem_append.mpr
+      (.inl (mem_occursList hw hα))))⟩))
+  atts := Forall₂.of_same (fun _ hk => relAtt_self (fun _ hα =>
+    ⟨rfl, mem_closedOccurrences.mpr (.inl (List.mem_append.mpr
+      (.inr (mem_occursAtts hk hα))))⟩))
+
+/-- The closed-link occurrence-local theorem, through the generic choke point.
+Acceptance is required on the union of both sides; unlike the fragment-only
+local theorem this adds no context-containment premises. -/
+theorem obsGen_parametricity_closed_local {α : Type}
+    (g : Invariants.StructuredAF → Atom → α)
+    {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
+    {C : Context} {F : Fragment}
+    (hlocal : ∀ (r : Rule) (As : List Atom) (Cc : Atom) (a : Assurance),
+      a ∈ closedOccurrences C F →
+      AssuranceOk (certOkOf reg₁) r As Cc a → AssuranceOk (certOkOf reg₂) r As Cc a)
+    (hadm : Admissible reg₁ C F) :
+    obsGen g reg₁ C F = obsGen g reg₂ C F :=
+  obsGen_parametricity g (relInj_closedOccRel C F)
+    (by rintro r As Cc a b ⟨rfl, hmem⟩ hok; exact hlocal r As Cc a hmem hok)
+    hadm (relFrag_closedOccRel C F) (relFixesContext_closedOccRel C F)
+
+/-- Closed-link occurrence locality at any extension semantics. -/
+theorem whole_program_parametricity_local_sem (sem : ExtensionSemantics)
+    {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
+    {C : Context} {F : Fragment}
+    (hlocal : ∀ (r : Rule) (As : List Atom) (Cc : Atom) (a : Assurance),
+      a ∈ closedOccurrences C F →
+      AssuranceOk (certOkOf reg₁) r As Cc a → AssuranceOk (certOkOf reg₂) r As Cc a)
+    (hadm : Admissible reg₁ C F) :
+    obsSem sem reg₁ C F = obsSem sem reg₂ C F :=
+  obsGen_parametricity_closed_local _ hlocal hadm
+
+/-- Closed-link occurrence locality at the grounded reading. -/
+theorem whole_program_parametricity_local
+    {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
+    {C : Context} {F : Fragment}
+    (hlocal : ∀ (r : Rule) (As : List Atom) (Cc : Atom) (a : Assurance),
+      a ∈ closedOccurrences C F →
+      AssuranceOk (certOkOf reg₁) r As Cc a → AssuranceOk (certOkOf reg₂) r As Cc a)
+    (hadm : Admissible reg₁ C F) :
+    obs reg₁ C F = obs reg₂ C F :=
+  obsGen_parametricity_closed_local _ hlocal hadm
 
 end Lara.Context

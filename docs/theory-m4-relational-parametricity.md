@@ -281,6 +281,26 @@ The chain, with the erasure point marked (the same diagram is embedded in
               └─► backend_replacement_congruence_of_parametricity  (the
                     └─► congruence_correspondence   functional theorem,
                                                     via graphOf)
+  Composition (#277): dedupList_rel + the two RelFixesContext hypotheses
+      ──► relFixesContext_composed
+      ──► obsGen_parametricity_composed (obsGen_parametricity at the composite)
+        ├─► backend_replacement_parametricity_composed_sem
+        └─► backend_replacement_parametricity_composed
+      admissible_composed supplies admissibility from the halves unchanged.
+
+  Closed-link union (#277): occurrences_composed + mem_closedOccurrences
+      closedOccRel ──► relInj_closedOccRel, relFrag_closedOccRel,
+                      relFixesContext_closedOccRel
+      ──► obsGen_parametricity_closed_local (instance of obsGen_parametricity)
+        ├─► whole_program_parametricity_local_sem
+        └─► whole_program_parametricity_local
+
+  Already-checked whole programs (#277), a separate carrier route:
+      coveredB_rel ──► edgeB_rel ──► checkedAF_rel
+        ├─► whole_program_parametricity_sem
+        └─► whole_program_parametricity
+      Neither admissibility nor acceptance transport is needed on this route.
+
 ```
 
 One bookkeeping difference from the functional development is worth recording.
@@ -365,14 +385,9 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   separation at the level of the *coverage decider*, on two hand-built terms. No
   fixture exhibits two fragments related by a genuinely non-functional `R` whose
   observations differ. Deferred: **#275**.
-- **Not a family-wide result.** `docs/theory-m4-generic-observation.md:41`
-  records four M4 congruences at an arbitrary `sem`. Two now have relational
-  companions (`backend_replacement_congruence_sem` →
-  `backend_replacement_parametricity_sem`; `registry_swap_congruence_sem` →
-  `backend_replacement_parametricity_local_sem`). Two do **not**:
-  `backend_replacement_congruence_composed_sem` and
-  `whole_program_replacement_sem`. For those the original boundary stands
-  unchanged. Deferred: **#277**.
+- **Not arbitrary relations, even across the completed family.** #277 adds
+  composed and whole-program companions (§8); each keeps `RelInj`. The original
+  functional APIs remain unchanged.
 - **Not a fully mechanized strength argument.** §4's step from
   "`R` is a partial function" to "some *total injective* `f` realizes it" is
   prose; `relInj_functional` gives only the partial function. Nothing proved
@@ -399,3 +414,55 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   auto-bind as an implicit of unknown type and elaborate into a **vacuous**
   theorem that builds clean and passes both CI gates. Neither gate can see that;
   this option is the only thing that can.
+
+
+## 8. Composed and whole-program companions (#277)
+
+All four semantics-parametric M4 congruences now have relational companions:
+
+| Functional | Relational |
+|---|---|
+| `backend_replacement_congruence_sem` | `backend_replacement_parametricity_sem` |
+| `registry_swap_congruence_sem` | `backend_replacement_parametricity_local_sem` |
+| `backend_replacement_congruence_composed_sem` | `backend_replacement_parametricity_composed_sem` |
+| `whole_program_replacement_sem` | `whole_program_parametricity_sem` |
+
+`relFixesContext_composed` combines the two relational fixed-context premises.
+It uses `dedupList_rel` on the appended argument lists and `Forall₂.append` on
+attacks. `obsGen_parametricity_composed` then instantiates the single contextual
+root, with grounded and arbitrary-semantics wrappers. `admissible_composed`
+applies unchanged: its two side checks, directed cross-coverage obligations,
+fragment check and guard/checker hypotheses establish the composite's
+admissibility independently of the chosen semantics.
+
+The issue suggested factoring both companions through `obsGen_parametricity`,
+but inspecting the existing whole-program API reveals a different contract.
+`whole_program_replacement_sem` takes two already checked programs and observes
+`checkedAF`, with no context or admissibility. Its actual relational companion
+therefore follows `coveredB_rel → edgeB_rel → checkedAF_rel` and rewrites the
+framework. It requires `RelInj` and pointwise related argument/attack lists,
+but no `RelPreserving`: both programs already carry validity evidence. Routing
+it through contextual acceptance would add premises absent from the original.
+`whole_program_parametricity` supplies the grounded wrapper. Neither route
+needs `AttackExtensional` because each establishes carrier equality.
+
+For the closed-link reading, `closedOccurrences C F` is the concatenation of
+`occurrences C.frame` and `occurrences F`, representing union by membership.
+`mem_closedOccurrences` proves that union statement; `occurrences_composed`
+proves that context composition also takes union by membership, despite argument
+deduplication. These are declared occurrences, including assurances nested in
+attack terms; no claim of list equality or duplicate elimination is made.
+
+`closedOccRel C F` restricts identity to that union. Its injectivity, related
+fragment, and fixed context are proved without the fragment-only theorem's
+containment assumptions. `obsGen_parametricity_closed_local` factors through
+`obsGen_parametricity`, and `whole_program_parametricity_local_sem` and its
+grounded twin instantiate it. This local form moves no material, and still
+requires admissibility of the original link. It localizes acceptance to the
+whole closed link, whereas the older local form localizes to the fragment at
+the cost of context containment. Neither claim should be silently substituted
+for the other.
+
+All added theorems are pinned in `AxCheck.lean`. Validation for this addition:
+full `lake build`, whole-tree AxCheck coverage, the standard-trio axiom audit,
+`make ara-source-spans`, and `git diff --check`. No corpus or freeze changes.

@@ -601,3 +601,11 @@ sessions:
   events_count: 1
   claims_touched: []
   open_threads: 1
+
+- id: 2026-09-09_277
+  date: "2026-09-09"
+  summary: "#277: completed relational congruence family."
+  turn_count: 1
+  events_count: 1
+  claims_touched: [C49]
+  open_threads: 0
