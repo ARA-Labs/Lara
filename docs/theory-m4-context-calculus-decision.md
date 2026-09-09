@@ -160,7 +160,7 @@ Grounded only. Generalizing the observation to an arbitrary
 without carrier-boundedness, and importing that discipline generically would
 enlarge M4 rather than close it.
 
-## 6. Openness is leaf-name openness only (D12)
+## 6. Original D12: leaf-name openness
 
 `docs/theory-m3-source-updates.md` names "holes" among the retained
 obligations. A **term-level** hole — an argument with unresolved
@@ -171,8 +171,16 @@ declared argument, and discharges live *inside* the term (`D : List (QuestionId
 × SupportTerm)`), not in a name environment a context could extend.
 `Grounded.Claim.holes` is likewise never read by the observation of §5.
 
-Consequence for the closeout: M3's contextual-adequacy debt is discharged
-**partially**. Term-level holes are issue #217.
+Consequence for the original closeout: M3's contextual-adequacy debt was
+discharged **partially**, with term-level holes retained as #217.
+
+**Follow-up (#217):** the additive `Lara.Context.Holes` layer now represents
+named CQ-answer templates and proves typed substitution before this complete
+program boundary. It preserves D12's original calculus through a closed
+embedding; it does not weaken `CheckedProgram.complete`. See
+`docs/theory-term-level-holes.md` for source erasure, typed fillings, attack
+instantiation, composition, and backend transport. The separately gated
+full-abstraction work remains outside this result.
 
 Consequence for the carrier: an open fragment has **no** `CheckedProgram`
 (D10). A fragment mentioning an imported leaf has no `HasSupport` derivation

@@ -374,6 +374,8 @@ import Lara.Context.Surface
 import Lara.Examples.Linking
 import Lara.Examples.ContextSemantics
 import Lara.Examples.ContextualSeparation
+import Lara.Context.Holes.Transport
+import Lara.Examples.TermHoles
 import Lara.Examples.CertificateCollapse
 -- The #227 surface-transport witness. Imported here for the same reason as
 -- Lara.Examples.Complexity.Realization above: AxCheck.lean is not a lake

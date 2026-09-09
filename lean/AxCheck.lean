@@ -72,6 +72,8 @@ import Lara.Context.Parametricity
 import Lara.Context.FiniteExtension
 import Lara.Examples.ContextSemantics
 import Lara.Examples.ContextualSeparation
+import Lara.Context.Holes.Transport
+import Lara.Examples.TermHoles
 import Lara.Context.Surface
 import Lara.Examples.Linking
 import Lara.Examples.CertificateCollapse
@@ -3688,3 +3690,138 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ContextualSeparation.singleton_not_ctxEquivSem
 #print axioms Lara.Examples.ContextualSeparation.counterexample
 #print axioms Lara.Examples.ContextualSeparation.grounded_does_not_imply_semantic
+
+-- #217: typed CQ substitution, contextual integration and transport.
+
+-- lean/Lara/Context/Holes/Assurance.lean
+#print axioms Lara.Context.Holes.lookupFilling_map
+#print axioms Lara.Context.Holes.mapFilling_keys
+#print axioms Lara.Context.Holes.firstDuplicate_map
+#print axioms Lara.Context.Holes.instantiateAux_map
+#print axioms Lara.Context.Holes.instantiateAnswer_map
+#print axioms Lara.Context.Holes.instantiateList_map
+#print axioms Lara.Context.Holes.instantiateDis_map
+#print axioms Lara.Context.Holes.instantiate_map
+#print axioms Lara.Context.Holes.relTemplates_iff_forall₂
+#print axioms Lara.Context.Holes.lookupFilling_rel
+#print axioms Lara.Context.Holes.instantiateAux_rel
+#print axioms Lara.Context.Holes.instantiateAnswer_rel
+#print axioms Lara.Context.Holes.instantiateList_rel
+#print axioms Lara.Context.Holes.instantiateDis_rel
+
+-- lean/Lara/Context/Holes/Link.lean
+#print axioms Lara.Context.Holes.instantiateList_core
+#print axioms Lara.Context.Holes.instantiateAttack_closed
+#print axioms Lara.Context.Holes.instantiateAttacks_closed
+#print axioms Lara.Context.Holes.instantiateFragment_closed
+#print axioms Lara.Context.Holes.obsGen_closed
+#print axioms Lara.Context.Holes.obs_closed
+#print axioms Lara.Context.Holes.obsSem_closed
+#print axioms Lara.Context.Holes.instantiateFragment_inv
+#print axioms Lara.Context.Holes.obsGen_of_instantiate
+#print axioms Lara.Context.Holes.ctxEquiv_closed_iff
+#print axioms Lara.Context.Holes.ctxEquivSem_closed_iff
+#print axioms Lara.Context.Holes.mem_instantiateList
+#print axioms Lara.Context.Holes.substAttack_append
+#print axioms Lara.Context.Holes.substFragment_append
+#print axioms Lara.Context.Holes.instantiateAux_subst
+#print axioms Lara.Context.Holes.instantiateAnswer_subst
+#print axioms Lara.Context.Holes.instantiateList_subst
+#print axioms Lara.Context.Holes.instantiateDis_subst
+#print axioms Lara.Context.Holes.instantiateAttack_subst
+#print axioms Lara.Context.Holes.instantiateAttacks_subst
+#print axioms Lara.Context.Holes.instantiateFragment_subst
+#print axioms Lara.Context.Holes.compose_eq_some
+#print axioms Lara.Context.Holes.composed_filling_assoc
+#print axioms Lara.Context.Holes.composed_subst_assoc
+#print axioms Lara.Context.Holes.compose_assoc_defined
+#print axioms Lara.Context.Holes.composed_frame_material_assoc
+#print axioms Lara.Context.Holes.composed_context_assoc
+
+-- lean/Lara/Context/Holes/Syntax.lean
+#print axioms Lara.Context.Holes.firstDuplicate_none_iff
+#print axioms Lara.Context.Holes.instantiate_eq_aux
+#print axioms Lara.Context.Holes.instantiate_core
+#print axioms Lara.Context.Holes.eraseOpen_core
+#print axioms Lara.Context.Holes.lookupFilling_append
+#print axioms Lara.Context.Holes.subst_append
+#print axioms Lara.Context.Holes.substAnswer_append
+#print axioms Lara.Context.Holes.substList_append
+#print axioms Lara.Context.Holes.substDis_append
+#print axioms Lara.Context.Holes.fillingNodup_append
+
+-- lean/Lara/Context/Holes/Template.lean
+#print axioms Lara.Context.Holes.InstMeta.toInstSide
+#print axioms Lara.Context.Holes.InstMeta.ofInstSide
+#print axioms Lara.Context.Holes.InstMeta.answers_equiv
+#print axioms Lara.Context.Holes.instantiateList_supported
+#print axioms Lara.Context.Holes.instantiateDis_supported
+#print axioms Lara.Context.Holes.instantiateAux_hasSupport
+#print axioms Lara.Context.Holes.instantiateAnswer_hasSupport
+#print axioms Lara.Context.Holes.instantiate_hasSupport
+#print axioms Lara.Context.Holes.eraseList_length
+#print axioms Lara.Context.Holes.eraseDis_keys_perm
+#print axioms Lara.Context.Holes.eraseDis_keys_mem
+#print axioms Lara.Context.Holes.eraseList_supported
+#print axioms Lara.Context.Holes.eraseDis_supported
+#print axioms Lara.Context.Holes.InstMeta.eraseOpen
+#print axioms Lara.Context.Holes.eraseOpen_hasSupport
+
+-- lean/Lara/Context/Holes/Transport.lean
+#print axioms Lara.Context.Holes.instantiateAttack_map
+#print axioms Lara.Context.Holes.instantiateAttacks_map
+#print axioms Lara.Context.Holes.instantiateFragment_map
+#print axioms Lara.Context.Holes.obsGen_congr
+#print axioms Lara.Context.Holes.backend_replacement_congruence_sem
+#print axioms Lara.Context.Holes.backend_replacement_congruence
+#print axioms Lara.Context.Holes.instantiateAttack_rel
+#print axioms Lara.Context.Holes.instantiateAttacks_rel
+#print axioms Lara.Context.Holes.instantiateFragment_rel
+#print axioms Lara.Context.Holes.obsGen_parametricity
+#print axioms Lara.Context.Holes.backend_replacement_parametricity_sem
+#print axioms Lara.Context.Holes.backend_replacement_parametricity
+
+-- lean/Lara/Context/Holes.lean
+#print axioms Lara.Context.Holes.instantiated_support
+#print axioms Lara.Context.Holes.sideOk_of_typed
+#print axioms Lara.Context.Holes.link_attackComplete
+#print axioms Lara.Context.Holes.link_checked
+#print axioms Lara.Context.Holes.obsGen_eq_of_ok
+
+-- lean/Lara/Examples/TermHoles.lean
+#print axioms Lara.Examples.TermHoles.source_support
+#print axioms Lara.Examples.TermHoles.source_obligations_nonempty
+#print axioms Lara.Examples.TermHoles.erase_nested
+#print axioms Lara.Examples.TermHoles.instantiate_nested
+#print axioms Lara.Examples.TermHoles.fillings_nodup
+#print axioms Lara.Examples.TermHoles.fillings_disjoint
+#print axioms Lara.Examples.TermHoles.sequential_substitution
+#print axioms Lara.Examples.TermHoles.sequential_instantiation
+#print axioms Lara.Examples.TermHoles.missing_binding
+#print axioms Lara.Examples.TermHoles.duplicate_binding
+#print axioms Lara.Examples.TermHoles.template_typed
+#print axioms Lara.Examples.TermHoles.fillings_typed
+#print axioms Lara.Examples.TermHoles.erased_source_typed
+#print axioms Lara.Examples.TermHoles.filled_support
+#print axioms Lara.Examples.TermHoles.filled_attack_typed
+#print axioms Lara.Examples.TermHoles.linked_gamma
+#print axioms Lara.Examples.TermHoles.closed_link_accepted
+#print axioms Lara.Examples.TermHoles.attack_endpoint_discharge
+#print axioms Lara.Examples.TermHoles.wrong_answer_instantiates
+#print axioms Lara.Examples.TermHoles.wrong_answer_rejected
+#print axioms Lara.Examples.TermHoles.fragment_instantiated
+#print axioms Lara.Examples.TermHoles.attack_instantiated
+#print axioms Lara.Examples.TermHoles.hole_observation
+#print axioms Lara.Examples.TermHoles.hole_missing
+#print axioms Lara.Examples.TermHoles.hole_duplicate
+#print axioms Lara.Examples.TermHoles.hole_wrong_answer
+#print axioms Lara.Examples.TermHoles.fragment_sequential
+#print axioms Lara.Examples.TermHoles.contexts_compose
+#print axioms Lara.Examples.TermHoles.composed_observation
+#print axioms Lara.Examples.TermHoles.certificate_filling_typed
+#print axioms Lara.Examples.TermHoles.certificate_frame_fixed
+#print axioms Lara.Examples.TermHoles.typed_link_checked
+#print axioms Lara.Examples.TermHoles.certificate_filling_moves
+#print axioms Lara.Examples.TermHoles.certificate_context_not_fixed
+#print axioms Lara.Examples.TermHoles.functional_transport_sem
+#print axioms Lara.Examples.TermHoles.relational_transport_sem

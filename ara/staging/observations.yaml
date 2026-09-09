@@ -3434,3 +3434,26 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O160
+  timestamp: "2026-09-09"
+  provenance: ai-suggested
+  content: >
+    Lean backlog assessment: #281 can replace checkUnit_sound's conjunction with
+    named Prop fields across its consumers; #197 can add an enumerate-based
+    conflict-freedom theorem while retaining the spec-based wrapper. #198 needs
+    an enforced registration boundary, since a registry alone cannot discover
+    arbitrary ExtensionSemantics values. #217 requires a substitution calculus
+    and transport proofs. #268 remains a proof-or-counterexample task; failure
+    of decide on all contexts is not an undecidability result.
+  context: >
+    User asked whether all five issues can be resolved directly. Read
+    lean/Lara/Check/Unit.lean, lean/Lara/Context/{Fragment,Equivalence,Parametricity}.lean,
+    lean/Lara/Semantics.lean and the M2a/M4 theory documents. Feasibility assessment
+    only; no implementation or new proof, and no user adoption of this proposal.
+  potential_type: architecture
+  bound_to: []
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

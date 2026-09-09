@@ -9047,3 +9047,68 @@ tree:
   evidence:
   - ara/evidence/proofs/m4_certificate_collapse.md
   status: resolved
+
+- id: N277002
+  type: experiment
+  title: Named checker soundness facts
+  provenance: ai-executed
+  timestamp: 2026-09-09T21:55
+  result: checkUnit_sound now returns CheckUnitSound with named fields; all consumers migrated; checker
+    and propositions unchanged.
+  evidence:
+  - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
+  - https://github.com/ARA-Labs/lara/pull/296
+  - git:aa5168d
+  status: resolved
+- id: N277003
+  type: experiment
+  title: Enumeration conflict-freedom removes incidental Nodup
+  provenance: ai-executed
+  timestamp: 2026-09-09T21:55
+  result: Enumeration-based exclusivity and concrete instance discharges require no Nodup; spec-based
+    theorem signatures remain as wrappers.
+  evidence:
+  - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
+  - https://github.com/ARA-Labs/lara/pull/297
+  - git:5f38b2f
+  status: resolved
+- id: N277004
+  type: experiment
+  title: Central semantics registry with declaration coverage
+  provenance: ai-executed
+  timestamp: 2026-09-09T21:55
+  result: The table consumes a central registry; an elaborated-environment audit rejects unregistered
+    named closed repository semantics, including unimported modules. Parameterized families and local
+    values remain outside the finite inventory.
+  evidence:
+  - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
+  - https://github.com/ARA-Labs/lara/pull/298
+  - git:d1d0e73
+  status: resolved
+- id: N277005
+  type: experiment
+  title: Refute unrestricted transfer of grounded contextual equivalence
+  provenance: ai-executed
+  timestamp: 2026-09-09T21:55
+  result: A proof over every context equates grounded observations for fragments differing only in export;
+    an adequate positional singleton selector distinguishes them in an accepted context. Standard-semantics
+    and identical-export restrictions are not resolved by this witness.
+  evidence:
+  - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
+  - https://github.com/ARA-Labs/lara/pull/299
+  - git:8bc580f
+  status: resolved
+- id: N277006
+  type: experiment
+  title: Typed CQ holes and contextual substitution
+  provenance: ai-executed
+  timestamp: 2026-09-09T21:55
+  result: Independent template typing and equivalent typed fillings derive core support; erasure derives
+    open source support. Instantiated arguments and attack endpoints enter the old checked linker. Conservative
+    embedding, composition and backend transport are proved; fixing contexts includes filling certificates.
+    Nested fixtures include a typed attack, errors and positive transport applications.
+  evidence:
+  - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
+  - https://github.com/ARA-Labs/lara/pull/300
+  - git:9ba73dd
+  status: resolved

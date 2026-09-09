@@ -1366,3 +1366,19 @@ entries:
   - 'Preserved historical N341: its non-functional wording is corrected by the new
     functional-but-non-injective witness, not by rewriting the trace. No staged item
     received a new closure signal.'
+
+- turn: "2026-09-09_backlog-assessment"
+  notes:
+  - "Staged O160 as an unadopted scope assessment; no implementation decision or mathematical resolution occurred."
+  - "No closure signal or logic revision: the all-context implication remains open."
+
+- turn: 2026-09-09_001#3
+  notes:
+  - Recorded the actual checked changes and opened PRs directly as journey facts N277002–N277006; did
+    not infer a new generalized claim from one implementation.
+  - Reconciled C35 and C49 boundaries against the code and proof evidence; preserved their statements/status
+    and recorded exact before/after in the session.
+  - 'Kept mixed feasibility observation O160 staged: execution authorization is recorded as direction,
+    not blanket endorsement of a generalized claim. Its time-specific assessment remains historical.'
+  - 'Preserved the #268 standard-semantics/identical-export scope and the #217 core-filling/full-abstraction
+    limits; no claim of merged PRs or remote CI success.'

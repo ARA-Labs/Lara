@@ -329,21 +329,30 @@ This fixture declares no attacks, which is the #258 degeneracy and not this
 one's to close; the no-contraries route above is precisely what keeps it
 `native_decide`-free.
 
-## 5. The M3 debt: partially discharged
+## 5. The M3 term-hole remainder (#217)
 
-`docs/theory-m3-source-updates.md` retains "contextual adequacy" and names
-"holes" among its obligations. Part A discharges contextual adequacy for
-**leaf-name openness** — the only openness this calculus can express.
+Part A originally supplied only **leaf-name openness**. An unresolved mandatory
+critical question cannot cross `Compile.CheckedProgram.complete`
+(`Compile.lean:480`), and its discharge lives inside a support term rather than
+in a name environment. Merely extending Γ therefore cannot provide it.
 
-A **term-level** hole (an argument with unresolved critical-question
-obligations that the context discharges) is unrepresentable, and not by choice:
-`Compile.CheckedProgram.complete` (`Compile.lean:480`) forces an empty
-obligation set on every declared argument, and discharges live inside the term
-(`D : List (QuestionId × SupportTerm)`), not in a name environment a context
-could extend. `Grounded.Claim.holes` is likewise never read by the observation.
+The additive `Lara.Context.Holes` calculus now supplies the term-level remainder.
+Named holes occur in CQ answer positions, recursively within premise and answer
+templates. A context supplies independently typed core terms; typed substitution
+produces a complete argument before the unchanged checker/compiler boundary.
+Arguments and attack endpoints are instantiated together. The extension proves
+source-erasure typing, typed substitution, conservative embedding of the old
+calculus, guarded composition, and functional/relational observation transport.
 
-So the debt is marked **partially** discharged, and term-level holes are issue
-**#217**.
+`Examples.TermHoles` has repeated local question names at nested nodes with
+distinct hole identifiers, nonempty source obligations, typed closure and checked
+acceptance, missing/duplicate/wrong-answer rejection, and a real attack whose
+endpoint includes a substituted discharge. See `docs/theory-term-level-holes.md`
+for the exact scope and theorem map.
+
+This closes **#217**, not the separately gated full-abstraction work in §7.
+`Grounded.Claim.holes` and the frozen observation are unchanged; unresolved named
+holes are rejected before the old observation runs.
 
 ## 6. Paper claim boundary
 
@@ -409,7 +418,9 @@ So the debt is marked **partially** discharged, and term-level holes are issue
 - **Not a new proof of result 9.** `whole_program_replacement` cites
   `Erase.backend_replacement`; the milestone's progress is the context
   quantifier.
-- **Not a statement about term-level holes** (§5).
+- **The original Part A theorem is about leaf-name openness.** Term-level CQ
+  holes now have their own substitution and transport theorems (§5); they do
+  not alter the original theorem statements or assert full abstraction.
 - **No unrestricted implication between equivalence relations.** #268 now
   refutes grounded `CtxEquiv` implying `CtxEquivSem sem` for every semantics
   allowed by the interface: `Examples.ContextualSeparation.counterexample`

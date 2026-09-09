@@ -321,13 +321,19 @@ replacement a congruence: an injective, acceptance-preserving relabel of a
 fragment's certificates is unobservable in every admissible context whose own
 assurances it fixes (`Lara.Context.backend_replacement_congruence`;
 `docs/theory-m4-contextual-adequacy.md`). Two pieces of the sentence above
-remain open. **Holes**: M4's openness is leaf-name openness only — a term-level
-hole is unrepresentable, because `Compile.CheckedProgram.complete` forces an
-empty obligation set on every declared argument and discharges live inside the
-term rather than in a name environment (issue **#217**). **Full abstraction**:
-Part B — a logical relation with soundness and completeness — is gated and was
-not entered; the two obstructions are recorded in
-`docs/theory-m4-contextual-adequacy.md` §7.
+were left open by that milestone. **Holes (#217)** are now supplied by the
+additive `Lara.Context.Holes` calculus: named CQ-answer templates, typed context
+fillings, substitution into arguments and attack endpoints, checked linking,
+composition, and functional/relational backend transport. The original complete
+program boundary remains intact: substitution closes mandatory obligations before
+compilation. `Examples.TermHoles` proves a genuinely open source judgment and
+substitution-derived closure, with nested holes and a typed substituted attack;
+see `docs/theory-term-level-holes.md`.
+
+**Full abstraction** remains separate: Part B — a logical relation with soundness
+and completeness — is gated and was not entered; the two obstructions remain in
+`docs/theory-m4-contextual-adequacy.md` §7. Closing the term-hole obligation does
+not establish that independently defined logical relation.
 
 Run the maintained checks from the repository root:
 
