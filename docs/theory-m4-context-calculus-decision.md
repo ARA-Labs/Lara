@@ -207,7 +207,7 @@ types at all, every compiled AF is edgeless, and no context can force an import
 label — so a `logrel_complete` without a hypothesis is *false*. It is worse
 than that degenerate case: `Compile.ConflictAttackable` is unconditionally
 `True` on leaves (`Compile.lean:407`) while `HasAttack.rebut` requires
-`r.mode = .defeasible` (`Lara/Attack.lean:549`), so a purely symmetric contrary
+`r.mode = .defeasible` (`Lara/Attack.lean:550`), so a purely symmetric contrary
 table can force only `{in, undec}`. Contraries are also *patterns* with
 universally quantified variables (`Lara/Attack.lean:85`), so a "fresh" atom on the
 same predicate still matches and causes collateral attacks.

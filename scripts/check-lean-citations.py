@@ -100,7 +100,7 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Compile.lean:606": "quotes issue #68's stale reference verbatim, as the reference being corrected",
     "lean/Lara/Realizability.lean:167": "cites the `compiled_iso` structure field, not the structure",
     "lean/Lara/Attack.lean:85": "cites the `ContraryMatch` docstring's quantified-variable sentence",
-    "lean/Lara/Attack.lean:549": "cites `HasAttack.rebut`'s `r.mode = .defeasible` hypothesis, not the inductive",
+    "lean/Lara/Attack.lean:550": "cites `HasAttack.rebut`'s `r.mode = .defeasible` hypothesis, not the inductive",
 }
 
 SEARCH_ROOTS = ("lean", "docs", "scripts", "README.md", "CLAUDE.md")

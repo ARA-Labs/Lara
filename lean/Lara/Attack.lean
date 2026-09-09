@@ -520,6 +520,7 @@ inductive Attack where
   | rebut     : SupportTerm → SupportTerm → Attack
   | undercut  : SupportTerm → SupportTerm → Pos → Attack
   | undermine : SupportTerm → SupportTerm → Pos → Attack
+  deriving DecidableEq
 
 def Attack.source : Attack → SupportTerm
   | .rebut w _ => w

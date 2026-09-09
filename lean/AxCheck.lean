@@ -637,6 +637,9 @@ open Lara
 #print axioms Lara.Attack.emptySubstCanonAgrees
 #print axioms Lara.Attack.contraryMatchDecl_iff
 #print axioms Lara.Attack.contraryMatchB_iff
+-- The derived `DecidableEq Attack` (#272) enters the kernel computation of every
+-- `by decide` over an attack-mentioning statement, so it is pinned here too.
+#print axioms Lara.Attack.instDecidableEqAttack
 
 -- Exact executable positional attack checking, including finite exception
 -- selection and cached-source/public adequacy.

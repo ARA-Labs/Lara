@@ -137,13 +137,13 @@ exactly the undermine `Lara.Examples.kAtk` — the attack the whole-program
 fixture had to declare by hand. -/
 
 theorem crossAtts_nonempty :
-    crossAtts registryEx (linkGamma ctxEx fragEx) ctxEx fragEx = [kAtk] := by rfl
+    crossAtts registryEx (linkGamma ctxEx fragEx) ctxEx fragEx = [kAtk] := by decide
 
 theorem linked_atts :
-    (linkedUnit registryEx ctxEx fragEx).atts = [kAtk] := by rfl
+    (linkedUnit registryEx ctxEx fragEx).atts = [kAtk] := by decide
 
 theorem linked_args :
-    (linkedUnit registryEx ctxEx fragEx).args = [.leaf l2, .leaf l1] := by rfl
+    (linkedUnit registryEx ctxEx fragEx).args = [.leaf l2, .leaf l1] := by decide
 
 /-- The linked program is accepted by the executable checker. -/
 theorem linked_accepted :

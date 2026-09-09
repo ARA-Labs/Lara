@@ -33,12 +33,12 @@ theorem leafMapR_injective : Function.Injective leafMapR := by
     (by rw [← String.toList_append, ← String.toList_append, h]))
 
 /-- The R2 declared attacks are exactly the transports of S2's.
-**`rfl`, not `decide`** — `Lara.Attack.Attack` has no `deriving DecidableEq`
-(`Lara/Attack.lean:519`), so `Decidable (trAttackList … = some …)` cannot be
+**`decide`, not `rfl`** — `Lara.Attack.Attack` derives `DecidableEq`
+(`Lara/Attack.lean:519`), so `Decidable (trAttackList … = some …)` is
 synthesized. -/
 theorem s2_r2_atts_transported :
     trAttackList symR leafMapR wS2.unit.program.atts =
-      some wR2.unit.program.atts := by rfl
+      some wR2.unit.program.atts := by decide
 
 /-- The S2/R2 pair as an `AttackBridge` (source-language clauses only). The
 `admits`/`matched` fields reuse the frozen T8 witness's components
