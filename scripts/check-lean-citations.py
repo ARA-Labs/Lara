@@ -22,6 +22,22 @@ declaration is anonymous, only declaration-hood is checked.
 the two reasons, and `scripts/check_ara_source_spans.py` for the gate that does
 cover it.
 
+A citation may also be written with no file at all — the bare `` `foo` (:256) ``
+shape `docs/paper-lean-name-map.md` uses inside a table row — or as a line RANGE,
+`Compile.lean:120-123`. Both are resolved rather than skipped.
+
+A file-less citation takes its file from the declaration the prose names beside
+it, unless the block it sits in names a `*.lean` file outright, which wins; and
+failing both, from a fully-spelled citation standing beside it in the same
+enumeration. Where none of the three determines one file the citation is skipped,
+because a mis-attributed citation is worse than an unchecked one — see
+`bare_target`.
+
+A range is resolved at its START line, exactly as a single line is. Its end is
+checked only for being a later line of the same file and is never rewritten: how
+long the cited block ought to be is a judgment the prose makes and this gate does
+not.
+
 Deliberate citations of a non-declaration line — a proof step, a structure field,
 a module header — are legitimate and are declared in ALLOWLIST below, each with a
 reason. Anything else must resolve to a `def`/`theorem`/`abbrev`/`inductive`/
@@ -39,16 +55,24 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-# A trailing dash means a line RANGE (`Admission.lean:764-765`, or the en-dash
-# spelling `Grounded.lean:601–606`); the range's end is prose, not a second
-# citation, so ranges are skipped entirely rather than half-rewritten by a
-# careless consumer of this pattern. A trailing `:column` is a Lean *diagnostic*
-# (`AxCheck.lean:3:14`, quoted in `scripts/test-check-axioms.sh` fixtures), not a
-# citation, and is skipped for the same reason: nobody maintains it as a pointer.
-# The lookbehind keeps a partial path from matching inside a longer one.
-PATH_AND_LINE = re.compile(
-    r"(?<![A-Za-z0-9_./-])([A-Za-z0-9_./-]*\.lean):(\d+)(?![\d–—-])(?!:\d)"
+# A citation is `path:line`, `path:start-end` (the en-dash spelling
+# `Grounded.lean:629–634` is equally common), or the bare `:line` / `:start-end`
+# that names no file and is resolved by BARE_FILE_CARRY below. A trailing
+# `:column` is a Lean *diagnostic* (`AxCheck.lean:3:14`, quoted in
+# `scripts/test-check-axioms.sh` fixtures), not a citation, and is skipped: nobody
+# maintains it as a pointer. The lookbehind keeps a partial path from matching
+# inside a longer one, and keeps the `:14` of a diagnostic from being read as a
+# bare citation.
+CITATION = re.compile(
+    r"(?<![A-Za-z0-9_./:-])(?:(?P<path>[A-Za-z0-9_./-]*\.lean))?"
+    r":(?P<start>\d+)(?:[–—-](?P<end>\d+))?(?![\d–—-])(?!:\d)"
 )
+# A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:381) `` — is
+# not a citation but a statement of what the surrounding block is about, and
+# BLOCK subjects are what stops a file-less citation being resolved against the
+# declaration's home file when the block plainly means a different file.
+BARE_FILE_MENTION = re.compile(r"(?<![A-Za-z0-9_./:-])([A-Za-z0-9_./-]*\.lean)(?!:\d)")
 DECL_PREFIX = (
     r"^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+|partial\s+|unsafe\s+)*"
     r"(?:def|theorem|lemma|abbrev|inductive|structure|instance|class|opaque|axiom)\b"
@@ -69,6 +93,17 @@ NAME_JOINER = re.compile(r"(?:[\s/,;]|\band\b|\bor\b)+$")
 # name is attached to this one citation. Both spellings of that shape — a second
 # name before, a second line after — suppress the name check rather than guessing.
 MULTI_LINE_REFERENCE = re.compile(r"^`?\s*(?:,|;|/|and\b|or\b)\s*`?:\d+")
+
+# The text a bare `:NNN` may be separated from the fully-spelled citation whose
+# file it borrows: `` (`RA.lean:251`, `:256`) `` and
+# `` (`Insp.lean:595`; `inspReplay_iff` :344) `` carry, and anything with a
+# bracket, a pipe, a dash or a second clause of prose in it does not. The carry is
+# only the fallback, used where the prose names no declaration this gate can
+# locate, so it is deliberately narrow: one enumeration, at most one intervening
+# name. Backticks are stripped before matching, being pure decoration here.
+BARE_FILE_CARRY = re.compile(
+    r"^[\s,;/]*(?:(?:and|or)\s+)?(?:[A-Za-z_][\w.']*\s*)?(?:(?:and|or)\s+)?[\s,;/]*$"
+)
 
 # Citations that deliberately point at something other than a declaration.
 # Keyed by the RESOLVED "lean/path:line"; the value is why it is exempt.
@@ -101,6 +136,16 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Realizability.lean:167": "cites the `compiled_iso` structure field, not the structure",
     "lean/Lara/Attack.lean:85": "cites the `ContraryMatch` docstring's quantified-variable sentence",
     "lean/Lara/Attack.lean:550": "cites `HasAttack.rebut`'s `r.mode = .defeasible` hypothesis, not the inductive",
+    # Range starts. A range is resolved at its first line only, so what is
+    # exempted here is that line: the block's opening, not its extent.
+    "lean/Lara/Compile.lean:43": "cites the module header's identical-terms-identical-edges paragraph, which is the claim being made",
+    "lean/Lara/Compile.lean:632": "cites `edgeB_iff`'s `DisNodup` discharge steps, quoted as the pattern to follow",
+    "lean/Lara/Compile.lean:668": "cites the `mutual` block opening `SrcIn`/`SrcOut`, which is what makes the judgment mutual",
+    "lean/Lara/Examples.lean:368": "cites the `ord@1` registry-behaviour comment, which says in words what the citation quotes",
+    "lean/Lara/Grounded.lean:7": "cites the module header's scope paragraph",
+    "lean/Lara/Grounded.lean:629": "cites the `status_preservation` docstring, not the theorem below it",
+    "lean/Lara/Policy.lean:236": "cites the conservative instance-overlap section comment, not a declaration",
+    "lean/Lara/Update.lean:281": "cites the sufficient-condition-preservation section comment, which names the Γ-weakening lemmas",
 }
 
 SEARCH_ROOTS = ("lean", "docs", "scripts", "README.md", "CLAUDE.md")
@@ -202,59 +247,200 @@ def names_agree(prose: str, declared: str) -> bool:
     return prose_parts[-shared:] == declared_parts[-shared:]
 
 
+def build_declaration_index(repo_root: Path) -> dict[str, list[tuple[str, str]]]:
+    """Map every declared name in `lean/` to the (name, file) pairs declaring it.
+
+    Keyed by the name's last dotted component so a lookup can accept the prose's
+    freer qualification, exactly as `names_agree` does. A bare `` `foo` (:256) ``
+    citation names no file, so this index is how the file is recovered: `foo` is
+    looked up, and the citation resolves only when every hit is in one file.
+    """
+    index: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    base = repo_root / "lean"
+    if not base.is_dir():
+        return index
+    for path in sorted(base.rglob("*.lean")):
+        relative = path.relative_to(repo_root)
+        if any(part in SKIP_DIRS for part in relative.parts):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        for line in text.split("\n"):
+            name = declaration_name(line)
+            if name is not None:
+                index[name.split(".")[-1]].append((name, relative.as_posix()))
+    return index
+
+
+def file_declaring(
+    decl_index: dict[str, list[tuple[str, str]]], prose: str
+) -> str | None:
+    """The one `lean/` file declaring `prose`, or None when that is not unique."""
+    hits = {
+        relative
+        for declared, relative in decl_index.get(prose.split(".")[-1], [])
+        if names_agree(prose, declared)
+    }
+    return hits.pop() if len(hits) == 1 else None
+
+
+def block_subjects(text: str, index: dict[str, list[str]]) -> list[set[str]]:
+    """Per line of `text`, the `lean/` files its block names without a line number.
+
+    A block is a run of non-blank lines, except that a markdown table row is a
+    block of its own: a table's columns each speak about a different file, so what
+    one row is about says nothing about the next. Only file names that resolve
+    unambiguously count; an unresolvable one names nothing.
+    """
+    lines = text.split("\n")
+    subjects: list[set[str]] = [set() for _ in lines]
+    start = 0
+    while start < len(lines):
+        if not lines[start].strip():
+            start += 1
+            continue
+        stop = start + 1
+        if not lines[start].lstrip().startswith("|"):
+            while stop < len(lines) and lines[stop].strip():
+                if lines[stop].lstrip().startswith("|"):
+                    break
+                stop += 1
+        named: set[str] = set()
+        for line in lines[start:stop]:
+            for match in BARE_FILE_MENTION.finditer(line):
+                candidates = index.get(match.group(1), [])
+                if len(candidates) == 1:
+                    named.add(candidates[0])
+        for offset in range(start, stop):
+            subjects[offset] = named
+        start = stop
+    return subjects
+
+
 def check_repo(repo_root: Path) -> tuple[int, set[str], list[str]]:
     index = build_lean_index(repo_root)
+    decl_index = build_declaration_index(repo_root)
     contents: dict[str, list[str]] = {}
     errors: list[str] = []
     checked = 0
     used_allowlist: set[str] = set()
+
+    def file_lines(target: str) -> list[str]:
+        if target not in contents:
+            contents[target] = (
+                (repo_root / target).read_text(encoding="utf-8").split("\n")
+            )
+        return contents[target]
+
+    def bare_target(
+        prose: str | None,
+        subjects: set[str],
+        carry: tuple[str, int] | None,
+        gap: str,
+    ) -> str | None:
+        """The file a file-less `:NNN` citation refers to, or None to skip it.
+
+        The prose name comes first because it is exact: `` `raReplay_iff` (:256) ``
+        says which declaration is meant, and one declaration lives in one file.
+        `subjects` overrides it, because a block that names a file outright —
+        `` `lean/AxCheck.lean` ... `srcStatus_iff_checked` (:381) `` — is citing
+        THAT file's line 381, not the line where the named theorem is proved. The
+        carry is the last resort, for the shapes that attach no name at all —
+        `` (`Linking.lean:43` and `:47`) `` — and is narrow on purpose.
+
+        None of the three applying means the file is genuinely undetermined, and
+        an undetermined citation is skipped rather than guessed at.
+        """
+        if prose is not None:
+            named = file_declaring(decl_index, prose)
+            if named is not None and (not subjects or named in subjects):
+                return named
+        if carry is not None and len(gap) <= 60:
+            if BARE_FILE_CARRY.match(gap.replace("`", "")):
+                return carry[0]
+        return None
 
     for source in iter_files(repo_root):
         try:
             text = source.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        if ".lean:" not in text:
-            continue
         rel_source = source.relative_to(repo_root)
+        subjects = block_subjects(text, index)
         for lineno, line in enumerate(text.split("\n"), 1):
-            for match in PATH_AND_LINE.finditer(line):
-                cited, num = match.group(1), int(match.group(2))
+            # The file a bare citation may borrow, and the offset the citation
+            # that supplied it ended at. Reset per line: the carry is an
+            # enumeration-local reading, and an enumeration does not wrap.
+            carry: tuple[str, int] | None = None
+            for match in CITATION.finditer(line):
                 where = f"{rel_source}:{lineno}"
-                candidates = index.get(cited, [])
-                if not candidates:
-                    errors.append(f"{where} cites missing file {cited}")
-                    continue
-                if len(candidates) > 1:
-                    errors.append(
-                        f"{where} cites {cited}:{num}, an ambiguous suffix matching "
-                        f"{' and '.join(candidates)}; lengthen the path in the prose"
-                    )
-                    continue
-                target = candidates[0]
-                if target not in contents:
-                    contents[target] = (
-                        (repo_root / target).read_text(encoding="utf-8").split("\n")
-                    )
-                lines = contents[target]
+                num = int(match.group("start"))
+                last = match.group("end")
+                prose = prose_name_for(line[: match.start()], line[match.end() :])
+                cited = match.group("path")
+                if cited is None:
+                    gap = line[carry[1] : match.start()] if carry else ""
+                    target = bare_target(prose, subjects[lineno - 1], carry, gap)
+                    if target is None:
+                        continue
+                else:
+                    candidates = index.get(cited, [])
+                    if not candidates:
+                        errors.append(f"{where} cites missing file {cited}")
+                        carry = None
+                        continue
+                    if len(candidates) > 1:
+                        errors.append(
+                            f"{where} cites {cited}:{num}, an ambiguous suffix matching "
+                            f"{' and '.join(candidates)}; lengthen the path in the prose"
+                        )
+                        carry = None
+                        continue
+                    target = candidates[0]
+                carry = (target, match.end())
+
+                lines_of = file_lines(target)
                 key = f"{target}:{num}"
+                span = key if last is None else f"{key}-{last}"
                 checked += 1
-                if key in ALLOWLIST:
-                    used_allowlist.add(key)
-                    continue
-                if num > len(lines):
+                if num > len(lines_of):
                     errors.append(
-                        f"{where} cites {key}, past end of file ({len(lines)} lines)"
+                        f"{where} cites {span}, past end of file "
+                        f"({len(lines_of)} lines)"
                     )
                     continue
-                if not DECL.match(lines[num - 1]):
+                # Marked before the range checks below, which are about the end
+                # and so do not stop the start from being a deliberate exemption.
+                exempt = key in ALLOWLIST
+                if exempt:
+                    used_allowlist.add(key)
+                # A range's end is prose — the gate does not claim to know how
+                # long the cited block ought to be — so it is checked only for
+                # being a later line of the same file, never rewritten.
+                if last is not None:
+                    if int(last) <= num:
+                        errors.append(
+                            f"{where} cites {span}, whose range ends at or before "
+                            f"its start"
+                        )
+                        continue
+                    if int(last) > len(lines_of):
+                        errors.append(
+                            f"{where} cites {span}, whose range ends past end of "
+                            f"file ({len(lines_of)} lines)"
+                        )
+                        continue
+                if exempt:
+                    continue
+                if not DECL.match(lines_of[num - 1]):
                     errors.append(
                         f"{where} cites {key}, which is not a declaration "
                         f"(add to ALLOWLIST in {Path(__file__).name} if deliberate)"
                     )
                     continue
-                prose = prose_name_for(line[: match.start()], line[match.end() :])
-                declared = declaration_name(lines[num - 1])
+                declared = declaration_name(lines_of[num - 1])
                 if prose is None or declared is None:
                     continue
                 if not names_agree(prose, declared):

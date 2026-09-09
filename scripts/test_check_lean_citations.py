@@ -99,12 +99,85 @@ class CitationTests(unittest.TestCase):
         )
         self.assertEqual(errors, [])
 
-    def test_line_ranges_are_skipped(self) -> None:
+    def test_a_line_range_is_resolved_at_its_start(self) -> None:
         checked, _, errors = self.check(
-            "Blocks at `Widget.lean:8-9` and `Widget.lean:8–10` are prose.\n"
+            "Blocks at `Widget.lean:7-8` and `Widget.lean:7–10` hold it.\n"
         )
-        self.assertEqual(checked, 0)
         self.assertEqual(errors, [])
+        self.assertEqual(checked, 2)
+
+    def test_a_line_range_starting_off_a_declaration_is_an_error(self) -> None:
+        _, _, errors = self.check("The field block `Widget.lean:8-9`.\n")
+        self.assertEqual(len(errors), 1)
+        self.assertIn("is not a declaration", errors[0])
+
+    def test_a_backwards_line_range_is_an_error(self) -> None:
+        _, _, errors = self.check("The block `Widget.lean:5-3`.\n")
+        self.assertEqual(len(errors), 1)
+        self.assertIn("ends at or before its start", errors[0])
+
+    def test_a_line_range_ending_past_the_file_is_an_error(self) -> None:
+        _, _, errors = self.check("The block `Widget.lean:3-400`.\n")
+        self.assertEqual(len(errors), 1)
+        self.assertIn("ends past end of file", errors[0])
+
+    def test_a_range_end_is_checked_even_when_its_start_is_allowlisted(self) -> None:
+        _, used, errors = self.check(
+            "The `size` field block (`Widget.lean:8-400`).\n",
+            allowlist={"lean/Lara/Widget.lean:8": "cites the `size` field"},
+        )
+        self.assertEqual(used, {"lean/Lara/Widget.lean:8"})
+        self.assertEqual(len(errors), 1)
+        self.assertIn("ends past end of file", errors[0])
+
+    def test_a_bare_citation_resolves_through_the_name_beside_it(self) -> None:
+        checked, _, errors = self.check("The `widget_ok` (:3) statement.\n")
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+
+    def test_a_bare_citation_off_its_declaration_is_an_error(self) -> None:
+        _, _, errors = self.check("The `widget_ok` (:5) statement.\n")
+        self.assertEqual(len(errors), 1)
+        self.assertIn("names `widget_ok`", errors[0])
+        self.assertIn("lean/Lara/Widget.lean:5 declares `widgetCount`", errors[0])
+
+    def test_a_bare_citation_carries_the_file_of_its_neighbour(self) -> None:
+        checked, _, errors = self.check(
+            "The pair (`Widget.lean:3` and `:5`) is complete.\n"
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 2)
+
+    def test_a_bare_citation_does_not_carry_across_prose(self) -> None:
+        checked, _, errors = self.check(
+            "`Widget.lean:3` sits above; `gadgetry` was moved to `:5`.\n"
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+
+    def test_a_bare_citation_naming_nothing_is_skipped(self) -> None:
+        checked, _, errors = self.check("The `Widget.lean` layer, at (:3).\n")
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 0)
+
+    def test_a_block_naming_a_file_outright_overrides_the_name(self) -> None:
+        checked, _, errors = self.check(
+            "`Lara/Check/Widget.lean` collects them; `widget_ok` (:3) is one.\n",
+            second_widget=True,
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 0)
+
+    def test_a_table_row_is_a_block_of_its_own(self) -> None:
+        checked, _, errors = self.check(
+            "| file | note |\n"
+            "| --- | --- |\n"
+            "| `Lara/Check/Widget.lean` | the checked layer |\n"
+            "| `widget_ok` (:3) | the statement |\n",
+            second_widget=True,
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
 
     def test_lean_diagnostic_locations_are_not_citations(self) -> None:
         checked, _, errors = self.check('Lean says "Widget.lean:9:14: error".\n')

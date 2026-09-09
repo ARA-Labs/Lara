@@ -58,7 +58,7 @@ enforced by the guard. `canon` and the registry are *parameters* of `link`,
 invocation, so it cannot supply a different registry, and "registry mismatch"
 is unrepresentable rather than rejected. Γ is **not** fixed: it is exactly what
 the two sides contribute, and `Lara.Update`'s Γ-extension transport
-(`Update.lean:283-365`) carries derivations into the linked Γ.
+(`Lara/Update.lean:281-286`) carries derivations into the linked Γ.
 
 ## 3. Rejection classes (D3)
 

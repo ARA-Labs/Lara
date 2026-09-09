@@ -23,9 +23,9 @@ abstraction, which needs a logical relation (Part B).
 ## The projection layer (issue #216)
 
 The module also owns the layer that leaves the *reading* of the carrier open:
-`obsGen` (`:562`) is `obs` with `Invariants.status canon` replaced by an
-arbitrary projection, and `obsGen_congr` (`:778`) is the real proof of the
-congruence — `backend_replacement_congruence` (`:817`) is that theorem
+`obsGen` (`:580`) is `obs` with `Invariants.status canon` replaced by an
+arbitrary projection, and `obsGen_congr` (`:784`) is the real proof of the
+congruence — `backend_replacement_congruence` (`:820`) is that theorem
 instantiated at the grounded reading, in one line.
 
 It lives here rather than beside the semantics that instantiate it because none
@@ -562,7 +562,7 @@ parameter. None of these *statements* mentions a semantics; the semantics
 instance is `Lara.Context.obsSem` (`lean/Lara/Context/Observation.lean:119`).
 
 The congruence over this parameter, `obsGen_congr`, needs the relabeling
-variables and so appears in the `Headline` section below (`:778`), beside the
+variables and so appears in the `Headline` section below (`:784`), beside the
 grounded instance it now carries the proof for. -/
 
 /-- **The observation of a link through an arbitrary projection.** The control
@@ -815,7 +815,7 @@ hypothesis — which is why it is cited rather than re-derived
 abstraction (no logical relation — Part B).
 
 The admissibility hypothesis is not a technicality that better proof
-engineering would remove; `obsGen_congr` (`:778`), which now carries this
+engineering would remove; `obsGen_congr` (`:784`), which now carries this
 theorem's proof, records why. -/
 theorem backend_replacement_congruence
     (hf : Function.Injective f)

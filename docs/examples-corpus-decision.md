@@ -55,12 +55,12 @@ separation morpheme in the name — `not`, `no`, `ne`, `non`, `never`, `fails`,
 `rejected`, `counter`, `strictly`, `absent`, `excluded`, `weaker`. Named
 instances, all in `Lara/Examples/Semantics.lean`:
 
-- `agreesOnArgs_strictly_weaker_than_faithful` (`:770`) — the weaker relation
+- `agreesOnArgs_strictly_weaker_than_faithful` (`:772`) — the weaker relation
   does *not* imply faithfulness, so the transport theorems may not be restated
   over it.
-- `observe_not_determined_by_profile` (`:364`) — two semantics agreeing on the
+- `observe_not_determined_by_profile` (`:366`) — two semantics agreeing on the
   acceptance profile can still be separated by observation.
-- `not_faithful_eJunk` (`:753`) — an exhibited non-faithful compilation.
+- `not_faithful_eJunk` (`:755`) — an exhibited non-faithful compilation.
 
 Reproduce the count from `lean/`:
 
