@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans
+.PHONY: build test bench bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans map-check map-conformance
 
 build:
 	cabal build all
@@ -56,6 +56,38 @@ update-differential:
 # the cited source span.
 ara-source-spans:
 	python3 scripts/check_ara_source_spans.py
+
+# Check one multi-artifact map (#303). PHONY on purpose: a map is a RECHECK, not
+# a build, so this must run every time it is invoked — GNU Make guarantees that
+# for a phony target, and a map has no output file whose timestamp could stand
+# in for its members'. That matters because an edit which preserves a member's
+# mtime still changes the verdict; nothing here is cached, pinned, or compared
+# against a previous run.
+#
+#   make map-check                                  # the shipped D3 map
+#   make map-check MAP=path/to/other.laramap
+#   make map-check OUT=/tmp/map.verdict.sexp        # write the verdict instead
+#
+# With OUT set, `lara check --out` atomically replaces that file on success
+# only; a refused map exits nonzero, Make stops, and the previous file is left
+# exactly as it was. OUT's directory must already exist — the temporary that
+# becomes it is created there, and nothing here creates directories. OUT is the
+# same "where the output goes" variable `bench` below takes, declared there.
+# `@` and `-v0` keep the recipe line and cabal's build log off stdout, so
+# `make map-check > verdict.sexp` writes the VERDICT rather than the verdict
+# preceded by a build log. That redirect is not the documented way to capture a
+# verdict — OUT= is, and it bypasses stdout entirely — but it is the obvious
+# thing to try, and a target whose stdout is not the artifact is a trap for
+# anyone who tries it. Errors still reach stderr and still stop Make.
+MAP ?= examples/agreement-map-multi/map.laramap
+map-check:
+	@cabal run -v0 exe:lara -- check "$(MAP)" $(if $(OUT),--out "$(OUT)",)
+
+# Both drivers must agree on every committed map anchor, and the Lean decoder
+# must refuse every malformed envelope. The map's counterpart of
+# scripts/differential.sh; CI runs the same script.
+map-conformance:
+	bash scripts/check-map-conformance.sh
 
 # E1 checker-performance bench (issue #69): measures the production checker
 # on the frozen corpus units and the manifest-discovered harness, prints the

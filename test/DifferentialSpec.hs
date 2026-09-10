@@ -261,7 +261,8 @@ corpusGoldens =
 
 -- | The worked-example anchors (M4a Task A2, strict-cert S1, the @ord\@1@
 -- comparison-plus-bridge example S2, the M5 reinstatement/contested pair
--- E4/E5, the D3 agreement-map, and the three D1 rebuttal-replay rounds
+-- E4/E5, the D3 agreement-map together with the four members of its
+-- multi-artifact twin, and the three D1 rebuttal-replay rounds
 -- round0–round2). The authoritative list is this binding itself — no count is
 -- repeated in prose, so it cannot drift. Each
 -- @examples/<NAME>/
@@ -417,6 +418,30 @@ workedExampleGoldens =
         ++ " (status (atom not_better (con apt) (con cofi) (con accuracy) (con roberta_mnli_s60)) contested)"
         ++ " (status (atom better (con magnitude_pruning) (con dense_baseline) (con accuracy) (con bert_glue_s50)) justified)"
         ++ " (status (atom not_better (con magnitude_pruning) (con dense_baseline) (con accuracy) (con llama_openllm_s90)) justified)))"
+    )
+  , -- The same D3 demonstration as four INDEPENDENTLY CHECKABLE members
+    -- (#303, examples/agreement-map-multi/). Each one alone is an unattacked
+    -- support argument and a justified claim: the two rebut edges above belong
+    -- to the composite and are generated there by cross-member saturation, and
+    -- no member declares or could declare them. These four anchors are the
+    -- solo half; the composite's own bytes are pinned by
+    -- examples/agreement-map-multi/map.verdict.sexp and compared across the two
+    -- drivers by scripts/check-map-conformance.sh, not here.
+    ( "examples/agreement-map-multi/paper-a/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom better (con apt) (con cofi) (con accuracy) (con roberta_mnli_s60)) justified)))"
+    )
+  , ( "examples/agreement-map-multi/paper-b/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom not_better (con apt) (con cofi) (con accuracy) (con roberta_mnli_s60)) justified)))"
+    )
+  , ( "examples/agreement-map-multi/paper-c/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom better (con magnitude_pruning) (con dense_baseline) (con accuracy) (con bert_glue_s50)) justified)))"
+    )
+  , ( "examples/agreement-map-multi/paper-d/example.core.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom not_better (con magnitude_pruning) (con dense_baseline) (con accuracy) (con llama_openllm_s90)) justified)))"
     )
   , ( "examples/rebuttal-replay/round0/example.core.sexp"
     , "(verdict accept (labels (0 in) (1 in)) (edges)"

@@ -47,6 +47,7 @@ library
                       Lara.Replay
                       Lara.Syntax
                       Lara.Elaborate
+                      Lara.Source.Load
                       Lara.Elaborate.Internal
                       Lara.Elaborate.Error
                       Lara.Elaborate.CertSlots
@@ -63,6 +64,14 @@ library
                       Lara.ConstantSpec
                       Lara.Kernel
                       Lara.Wire
+                      Lara.Map.Types
+                      Lara.Map.Wire
+                      Lara.Map.Load
+                      Lara.Map.Load.Internal
+                      Lara.Map.Qualify
+                      Lara.Map.Qualify.Internal
+                      Lara.Map.Link
+                      Lara.Map.Driver
                       Lara.Policy
                       Lara.SupportTerm
                       Lara.SupportTerm.Internal
@@ -143,6 +152,21 @@ executable surface-conformance
                     , text
     default-language: GHC2021
 
+-- The Haskell half of the envelope's cross-decoder differential, built here
+-- rather than as a `lara` subcommand for the reason surface-conformance is: it
+-- is a harness door, not a CLI the frontend contract owes anyone. See
+-- scripts/map-envelope-differential.hs.
+executable map-envelope-differential
+    import:           warnings
+    hs-source-dirs:   scripts
+    main-is:          map-envelope-differential.hs
+    build-depends:    base >=4 && <5
+                    , containers
+                    , directory
+                    , filepath
+                    , lara
+    default-language: GHC2021
+
 test-suite lara-test
     import:           warnings
     type:             exitcode-stdio-1.0
@@ -164,6 +188,11 @@ test-suite lara-test
                       OrdSpec
                       InspSpec
                       WireSpec
+                      MapWireSpec
+                      MapLoadSpec
+                      MapLinkSpec
+                      MapSpec
+                      MapExampleSpec
                       SyntaxSpec
                       ThetaInferenceSpec
                       CertSlotsSpec

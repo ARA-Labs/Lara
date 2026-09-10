@@ -173,6 +173,18 @@ nothing knocks `d1` down). Run 1 of the same example
 external validity: no complete support argument for `c1` can be declared, and
 the verdict reports **gap**, naming the missing piece.
 
+One artifact is one paper, and a **map** is several of them. A `.laramap`
+manifest names independently authored, independently checkable `.lara` members
+by path and alias; `lara check` on it rereads and rechecks every member, links
+them into one framework, *generates* the cross-paper attacks their declared
+contraries license, and prints one composite verdict with per-member claim
+statuses. [`examples/agreement-map-multi/`](examples/agreement-map-multi/) is the
+worked case — four "papers" that each stand alone as `justified`, two of which
+become `contested` the moment they are read together, and two of which do not
+because their experimental settings differ. No member declares an edge; none
+could. The contract is in
+[`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md).
+
 More worked examples, each a self-contained directory with its surface
 artifact, co-located policy, derived wire anchor, and expected verdict, are
 indexed in [`examples/README.md`](examples/README.md). For a prose-first
@@ -229,11 +241,16 @@ Haskell checker (GHC + cabal via [ghcup](https://www.haskell.org/ghcup/);
 developed on GHC 9.14.1 / cabal 3.16):
 
 ```sh
-cabal build all                      # library + CLI
-cabal run lara -- check <file.lara>  # check an artifact
-cabal run lara -- deps <file.lara>   # what evidence an accepted artifact cites
-cabal test                           # property suite
+cabal build all                          # library + CLI
+cabal run lara -- check <file.lara>      # check an artifact
+cabal run lara -- check <file.laramap>   # check a map of several artifacts
+cabal run lara -- deps <file.lara>       # what evidence an accepted artifact cites
+cabal test                               # property suite
 ```
+
+`check` takes an optional `--out <path>`, which writes the verdict to a file
+instead of stdout — atomically, and only when the check accepts, so a failed run
+leaves the previous file intact. `make map-check` is the same thing for a map.
 
 Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 [`lean/lean-toolchain`](lean/lean-toolchain)):
@@ -275,12 +292,13 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |
 | [`docs/strict-backend-decision.md`](docs/strict-backend-decision.md) | The backend-parametric strict-certificate interface and its proof obligations |
 | [`docs/ord1-corpus-extension-decision.md`](docs/ord1-corpus-extension-decision.md), [`docs/insp1-code-inspection-decision.md`](docs/insp1-code-inspection-decision.md) | What an accepted `ord@1` / `insp@1` step certifies — and, for `insp@1`, why the closed-world step is the certified content and why its family needs a declared contrary pair |
+| [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md) | The `.laramap` **map**: what composing independently checkable artifacts means, the manifest and composite-verdict grammars, why a map is a recheck rather than a build, and what v1 refuses |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
 | [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and a dated snapshot (checking a corpus unit costs ~200 µs; one pass over all 564 harness records, under 200 ms) |
 | [`docs/engineering-plan.md`](docs/engineering-plan.md) | Milestone roadmap and the module dependency graph (open follow-ups are tracked as GitHub issues) |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The M0 semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
-| [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example) |
+| [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |
 
 ## Repository layout
 

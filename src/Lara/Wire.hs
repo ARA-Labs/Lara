@@ -133,6 +133,16 @@ module Lara.Wire
   , encodeCheckInput
   , decodeCheckInputFile
   , decodeCheckInputFileBS
+    -- * The shared @\<atom\>@ production
+    --
+    -- | Additive exports (issue #303): the multi-artifact map's composite verdict
+    -- ("Lara.Map.Wire") reports statuses against propositions, and there must
+    -- be exactly one @\<atom\>@ syntax for a 'Prop' across every LARA grammar
+    -- — a second spelling would be a second thing to keep in step with
+    -- @lean/Lara/Driver.lean@. Nothing else about this codec changes: the
+    -- production was already here, and no existing byte moves.
+  , encodeAtom
+  , decodeAtomSExpr
     -- * Verdict codec
   , PublicStatus (..)
   , conditionalStatus
@@ -600,6 +610,12 @@ headedFields ctx what t e = case e of
     ok (name, fs)
   _ -> werr ctx ("malformed " ++ what ++ ": " ++ show e)
 
+-- | A proposition in the @\<atom\>@ form: @(atom PRED \<term\>*)@.
+--
+-- Exported so that a grammar layered above @lara-core\@0.2@ — the
+-- @map-verdict\@1@ composite verdict of "Lara.Map.Wire" — can carry
+-- propositions in /this/ syntax instead of inventing a second one. The bytes
+-- are unchanged; only the visibility is new.
 encodeAtom :: Prop -> SExpr
 encodeAtom (Prop (Pred p) ts) = tagged TAtom (SAtom p : map encodeTerm ts)
 
@@ -611,6 +627,13 @@ decodeAtom e = do
       p <- atomText "atom" h
       Prop (Pred p) <$> mapM decodeTerm ts
     [] -> werr "atom" ("malformed atom: " ++ show e)
+
+-- | 'decodeAtom' at the public boundary: the dual of 'encodeAtom' for a caller
+-- outside this module, which cannot name the internal 'Decode' monad. A thin
+-- @runDecode@ wrapper, so the located 'WireError' a nested atom produces is
+-- exactly the one the core decoder would have produced.
+decodeAtomSExpr :: SExpr -> Either WireError Prop
+decodeAtomSExpr = runDecode . decodeAtom
 
 encodeAPat :: AtomPat -> SExpr
 encodeAPat (AtomPat (Pred p) ps) = tagged TApat (SAtom p : map encodePat ps)

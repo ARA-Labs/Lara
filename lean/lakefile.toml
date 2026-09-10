@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver", "presentation-shape", "surface-conformance"]
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance"]
 
 # Mechanized reference semantics for the LARA claim-support calculus.
 # No Mathlib dependency yet: the frozen nf/≡ carve-out (spec §9 result 11) is
@@ -15,6 +15,15 @@ name = "Lara"
 [[lean_exe]]
 name = "lara-driver"
 root = "Lara.DriverMain"
+
+# The multi-artifact map driver (issue #303 — the Lean side of
+# scripts/check-map-conformance.sh). Reads one `map-check-input@1` parity
+# envelope, performs the qualification, merge, cross-member saturation, check
+# and grounded evaluation itself, and prints `map-verdict@1` bytes that must
+# equal `lara check <map.laramap>`'s.
+[[lean_exe]]
+name = "lara-map-driver"
+root = "Lara.Map.DriverMain"
 
 # The admission differential driver (metatheory plan Task 3 — the Lean side
 # of scripts/admission-differential.sh). Reads one test-only fixture under

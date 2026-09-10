@@ -1,0 +1,69 @@
+# Paper C of the D3 agreement map (issue #64), as an INDEPENDENTLY CHECKABLE
+# artifact (#303).
+#
+# Magnitude pruning against the dense baseline, measured at BERT/GLUE 50%
+# sparsity. On its own this artifact accepts and its single claim `c_low` is
+# **justified**.
+#
+# It is still **justified** under `../map.laramap`, and that is the demonstrated
+# feature. Paper D reads, in prose, as a flat contradiction of this paper — but
+# D measured `llama_openllm_s90` where this one measured `bert_glue_s50`, and
+# the contrary pattern requires the SAME setting index on both sides. So no
+# contrary instance forms, the saturation generates no edge between `pc` and
+# `pd`, and neither claim is contested. The calculus refuses to manufacture a
+# disagreement the atoms do not license.
+#
+# The `binding` rationale below describes only this paper's own measured
+# setting. The assertion that C's and D's settings are DELIBERATELY distinct —
+# and that their systems are nonetheless identical — is a cross-paper claim, so
+# it is map-owned and lives in `../map.laramap`'s `alignments`, together with
+# the open comparability question `q_comparability`.
+#
+# The paper contents and the declared `artifact` identity are illustrative
+# reconstructions, as everywhere in `examples/`: `sha256:cccc...` is a
+# placeholder identity the author declares, not a checksum of these bytes.
+#
+# Write-up: docs/demos/d3-agreement-map.md.
+
+artifact paper_c_bert_glue at sha256:cccc...
+policy agreement-v1
+use backends [nd@1]
+
+claim c_low
+  nl      = "Magnitude pruning matches the dense baseline in accuracy on BERT GLUE at 50% sparsity (pruning is near-lossless)"
+  formal  = better(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50)
+  binding = { author = carol, audit-status = reviewed,
+              rationale = "A3: setting index D = bert_glue_s50 is this paper's own measured setting; the map manifest records the deliberate non-identity with the 90%-sparsity setting" }
+
+leaf c_e1 : reports(paperC_exp1, compares(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperC/table_3.csv#row=glue-50]
+
+leaf c_e2 : matched_setup(magnitude_pruning, dense_baseline, paperC_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=5-setup]
+
+leaf c_e3 : valid_measurement(accuracy, paperC_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=5-metrics]
+
+leaf c_e4 : variance_reported(paperC_exp1)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperC/table_3.csv#col=stddev]
+
+leaf c_e5 : scope_matched(magnitude_pruning, accuracy, bert_glue_s50)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=5-scope]
+
+arg pc : supports(c_low) by controlled_comparison(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50, paperC_exp1)
+  discharge baseline_parity      with c_e2
+  discharge measurement_validity with c_e3
+  discharge variance_reported    with c_e4
+  discharge scope_match          with c_e5
+
+status c_low

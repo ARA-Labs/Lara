@@ -1,0 +1,53 @@
+# A member declaring ONE CLAIM NAME TWICE. It checks perfectly well on its own:
+# the .lara frontend guards a repeated leaf, arg or group id and says nothing
+# about a repeated claim id, and a solo verdict reports statuses by proposition
+# rather than by name, so the two rows are simply the same query asked twice.
+#
+# A map cannot be so relaxed -- (member alias, claim name) is the handle its
+# statuses section is keyed by -- so `lara check` refuses it at exit 2 and no
+# envelope is produced. That is the point of the anchor: before this was
+# refused, `lara check` exited 0 with the same handle twice AND `lara map-input`
+# emitted an envelope that both decoders then rejected, so the two drivers
+# disagreed 0 against 2.
+
+# A member claiming the method improves accuracy on D, justified on its own.
+artifact paper_pos at sha256:pos...
+policy empirical-v1
+use backends [nd@1]
+
+claim c_pos
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+claim c_pos
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf a_e1 : reports(paperA_exp1, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperA/table_2.csv#row=mean]
+
+leaf a_e2 : randomized(paperA_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4]
+
+leaf a_e3 : powered(paperA_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4]
+
+leaf a_e4 : generalizes(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=5]
+
+arg pa : supports(c_pos) by controlled_experiment(M, accuracy, D, paperA_exp1)
+  discharge randomization     with a_e2
+  discharge adequate_power    with a_e3
+  discharge external_validity with a_e4
+
+status c_pos

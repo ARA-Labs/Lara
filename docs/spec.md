@@ -60,6 +60,17 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > freeze-tag bump is owed: prose-only, with no byte change to the corpus, the wire, or replay
 > identity.
 
+> **Multi-artifact composition (2026-09-10, issue #303).** A new versioned layer sits *above* the
+> frozen core: `lara-map@1` declares a flat map of independently checkable `.lara` members under one
+> shared policy, and `map-verdict@1` reports the composite result (§12). It is **additive and
+> versioned separately**: it changes no §2.1 replay identity, no `lara-core@0.2` unit or verdict
+> byte, no `Lara.Wire` tag-table entry, no §8 four-state semantics, no §10.1 rejection class, and no
+> frozen corpus or mutant input. The only edit inside the core is two additive exports of an existing
+> `Lara.Wire` production — `encodeAtom`, plus a new `decodeAtomSExpr` wrapper over the existing
+> decoder — so that a composite verdict spells a proposition in the one `<atom>` syntax instead of
+> inventing a second; no existing byte moves. Map failures carry their own versioned error sum and
+> its own exit-code split, and never classify a map fault as an R-class. **No corpus regeneration and
+> no freeze-tag bump is owed:** no corpus, mutant, wire, or replay-identity byte changes.
 ## 0. How to read this specification (non-normative)
 
 This section is a reader's guide, not part of the frozen language definition;
@@ -1626,3 +1637,36 @@ Checker acceptance establishes structural validity only. Faithfulness of all six
 against human annotations. If the optional LP adapter is selected, Artemov realization applies only
 when an already-formal strict S4 theorem is translated into that adapter; it is not a guarantee for
 this lowering process.
+
+## 12. Multi-artifact composition (versioned extension)
+
+**Scope.** One flat map of closed `.lara` members — no nesting and no member imports — checked under
+one shared policy that the map itself declares, so no member is privileged. Members are named by
+local path and are **reread and rechecked on every invocation**: there is no pin, no lockfile, no
+cache, and no member checksum in the manifest. The identity a map reports for a member is that
+member's own declared `artifact` digest (§2.1), carried through unchanged. Composition adds nothing
+to the calculus — members are merged into one unit, cross-member attacks are completed from declared
+contraries, and that unit goes through the ordinary §8 pipeline, so a map can accept nothing a
+hand-written equivalent unit would not.
+
+**Two versioned schemas**, versioned independently of `lara-core@0.2`: `lara-map@1`, the declarative
+manifest; and `map-verdict@1`, the composite verdict, whose leading `(scope map)` marker keeps it
+distinguishable from a §10 `(verdict …)`, and whose statuses are the plain §8 four-state ones — a
+map refuses any member carrying a nonempty §4.3 admission or group-pruning audit, so
+`evidence-blocked` is unreachable by construction.
+
+**Errors.** Map failures use their own versioned error sum with its own two-exit-code split
+(ill-formed map vs. checked-and-rejected map). No map fault is classified as a §10.1 R-code; where a
+map verdict or diagnostic names one, it is quoting a member's or the linked unit's own core
+rejection unchanged.
+
+**Cost.** No corpus regeneration and no freeze-tag bump is owed. The layer is strictly additive above
+`lara-core@0.2`: it introduces two new schemas of its own and changes no corpus unit, mutant, wire,
+replay-identity, or golden byte, and no `Lara.Wire` encoder. The only core-side edit is two additive
+exports of an existing `Lara.Wire` production (§5's `<atom>` form), so `fixtures/`, `corpus/`,
+`corpus-units/`, and the differential goldens are bit-identical across this change.
+
+`docs/multi-artifact-composition-decision.md` is authoritative for this section and carries the
+detail that would rot if duplicated here: the two grammars, the shared-contract equality rules,
+member-alias qualification, diagnostic precedence, deterministic output ordering, and the complete
+list of what v1 refuses.

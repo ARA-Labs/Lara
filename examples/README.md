@@ -49,6 +49,21 @@ asserts each stays in sync with its `.lara` source.
   per-claim statuses plus the gap / incomplete-alternative reporting. Schema:
   `{ "verdict-class", "located-diagnostic" }`.
 
+`agreement-map-multi/` is a **map** (issue #303), not an example directory. Like
+`rebuttal-replay/` and `running-example/`, it is a container: it holds four
+ordinary example directories (`paper-a/` … `paper-d/`, each registered in
+`Lara.WorkedExamples` like any other) rather than an `example.lara` of its own.
+What makes it a map is what it holds *in addition* — the `map.laramap` manifest
+that composes those four members, and the two derived map anchors,
+`map.core.sexp` (the `map-check-input@1` parity envelope) and `map.verdict.sexp`
+(the golden `map-verdict@1` composite). Neither is a wire check-input envelope,
+so neither is `scripts/differential.sh`'s: `map.core.sexp` is what
+`scripts/check-map-conformance.sh` hands the Lean `lara-map-driver` in order to
+compare the two drivers, and `map.verdict.sexp` is a golden pinned by
+`test/MapExampleSpec.hs`. Run the map with
+`cabal run exe:lara -- check examples/agreement-map-multi/map.laramap`, or
+`make map-check`.
+
 | Directory | Witnesses | Attack kinds | Statuses | Key point |
 | --- | --- | --- | --- | --- |
 | `A/empirical-v1.policy.lara` | the shared trusted policy both examples check against | declares all contraries + the one exception | — | cross-paper attack can only form through the *same* declared `contrary` relation |
@@ -65,6 +80,8 @@ asserts each stays in sync with its `.lara` source.
 | `S9/example.lara` | the `insp@1` static code-inspection backend: a plan-vs-shipped diff over two declared exhaustive inventories (`(inspectdiff (prem 0) (prem 1))`) plus the pure negative existential over one (`(inspect (prem 0))`), under a defeasible bridge (policy `insp-v1`) | — | **justified** (`implementation_gap`, `code_planned_not_shipped`, `code_absent`) | what a code inspection can and cannot certify. The strict step discharges the *closed-world inference* — given an exhaustive enumeration, absence follows — and nothing about whether the enumeration is faithful to the bytes. S9 is the corpus unit `rebench-rust_codecontests/C09` with the one leaf C09 lacks: C09's `version_match` CQ has no honest discharging leaf, so it is a `gap`; supply the attestation and the same shape is `justified`. Read the two together and the difference is exactly the half no certificate supplies |
 | `E4/example.lara` | reinstatement — three claims justified **while attacked** (policy `empirical-v2`) | rebut + undermine + undercut, each defended | **justified** ×3 (under attack) + **defeated** | defense is policy vocabulary (an exception, a one-directional contrary, a withheld edge), not a new mechanism |
 | `E5/example.lara` | contested beyond rebut + gap amid attacks (policy `empirical-v2`) | undermine 2-cycle + undercut 2-cycle | **contested** ×2 + **gap** | `contested` is any-kind undec, not a rebut artifact; `gap` is missing support, orthogonal to conflict |
+| `agreement-map/example.lara` | four "papers" in **one** file: a same-setting disagreement beside a setting mismatch (policy `agreement-v1`) | rebut (mutual, declared by hand) | **contested** ×2 + **justified** ×2 | atom identity, not prose, decides whether papers disagree — the single difference of a setting index flips `contested ×2` to `justified ×2` |
+| `agreement-map-multi/` | the **same** demonstration as four independently checkable artifacts under one `map.laramap` (issue #303) | rebut (mutual, **generated** by cross-member saturation) | **contested** ×2 + **justified** ×2 | a member cannot name another member's argument, so the two edges the single-file version writes by hand are here *derived*. Each `paper-*/` alone is `justified`; the composite reproduces the single-file oracle's labels, edges and statuses |
 
 ## Relationship to the planned E-series (`docs/worked-examples-plan.md`)
 

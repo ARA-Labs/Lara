@@ -1,0 +1,22 @@
+; A map whose members disagree with the manifest's SHARED CONTRACT: the manifest
+; selects the `ra@1` backend and both members declare `use backends [nd@1]`.
+; Every member is individually fine and checks on its own; what fails is the
+; agreement, so this is a REJECTION (exit 1), not an ill-formed map.
+;
+; It is a `pre-boundary` anchor for scripts/check-map-conformance.sh: the map
+; stops at the loading stage, so no checked-boundary envelope exists and there
+; is nothing to hand the Lean driver. What the harness can compare is that
+; `lara check` and `lara map-input` agree the map never got that far, and that
+; neither printed a verdict.
+;
+; The backend selection is the field chosen because it needs no second policy
+; file: the members' own `empirical-v1.policy.lara` is unchanged and shared, so
+; the only difference in the whole tree is this one line.
+(lara-map@1
+  (policy empirical-v1 ../agreement/empirical-v1.policy.lara)
+  (backends (backend ra 1))
+  (members
+    (member paper_pos ../agreement/pos.lara)
+    (member paper_neg ../agreement/neg.lara))
+  (alignments)
+  (questions))

@@ -12,6 +12,30 @@
 --   validates a 'CheckInput' from the real source metadata, then runs the same
 --   'Lara.Driver.runCheck' path. The CLI is a thin shell, so the @.lara@
 --   verdict bytes equal the in-process source construction + checker bytes.
+-- * @lara check \<file.laramap\>@ (\#303) reads a multi-artifact /map/
+--   manifest, rereads and rechecks every member it names, links them into one
+--   unit, checks that unit, evaluates the declared alignments, and prints one
+--   @map-verdict\@1@ composite S-expression on @stdout@
+--   ('Lara.Map.Driver.runMap'). The @(scope map)@ marker leads those bytes, so
+--   no consumer can mistake them for a solo @(verdict …)@. A map failure
+--   prints /nothing/ on @stdout@ and exactly one line on @stderr@
+--   ('Lara.Map.Types.renderMapError'), and its exit code is the same 2-or-1
+--   split the other doors use, decided in one place
+--   ('Lara.Map.Types.mapErrorExitCode'): an ill-formed map exits @2@, a map
+--   that was understood and rejected exits @1@.
+-- * @lara map-input \<file.laramap\>@ (\#303) prints the map's
+--   @map-check-input\@1@ __cross-driver parity envelope__ on @stdout@ instead
+--   of its verdict: the same checked-boundary members the verdict was computed
+--   from, spelled so that @lean\/Lara\/Map\/Driver.lean@ can reconstruct the
+--   linking itself and its verdict can be byte-compared against this driver's
+--   ('Lara.Map.Driver.mapCheckInput', @scripts\/check-map-conformance.sh@).
+--   It is a __separate subcommand precisely so that @lara check@'s @stdout@
+--   does not move__, for the same reason @lara deps@ is one. It stops at the
+--   same stage @lara check@ does for every /boundary/ failure — the manifest,
+--   the members, and the coordinate resolution — so every envelope it prints
+--   is one that decodes; what it does not do is link, check, or evaluate an
+--   alignment, because those are exactly the decisions the envelope exists to
+--   have made twice.
 -- * @lara deps \<file.sexp|file.lara\>@ (\#204) runs the same two doors and
 --   prints the /accepted/ unit's certificate dependency report on @stdout@
 --   instead of its verdict: one @argument \<id\>@ header per checked argument,
@@ -43,6 +67,23 @@
 -- The verdict is printed with a single trailing newline via 'putStrLn' —
 -- 'printSExpr' emits no newline, so both drivers' stdout is @printSExpr
 -- (encodeVerdict v)@ plus one @\\n@ and differential comparison is byte equality.
+--
+-- * @lara check \<file\> --out \<path\>@ (\#303) sends those same bytes to
+--   @path@ instead of @stdout@, through 'Lara.AtomicWrite.atomicWriteFile', so
+--   a @Makefile@ rule can name a verdict file as its output ('Sink'). It is a
+--   __product file, not a stdout redirect__: @path@ is replaced when and only
+--   when the check __accepts__, and every nonzero exit /of the check/ leaves
+--   the previous @path@ exactly as it was and behaves precisely as it does
+--   without the flag — a rejected solo unit still prints its
+--   @(verdict … reject …)@ on @stdout@, a refused map still prints its one
+--   @stderr@ line and no verdict. A caller that wants a rejection's bytes in a
+--   file uses the default form and redirects.
+--
+--   A failed /write/ is the one exit the flag adds, and the one case where the
+--   two forms differ in more than destination: without @--out@ that same run
+--   would have exited @0@ with a verdict on @stdout@. It exits @2@ instead,
+--   and 'emitAccepted' has its exit code, its effect on the destination's
+--   permissions, and its behaviour at a symlink.
 module Main (main) where
 
 import Control.Exception (IOException, evaluate, try)
@@ -50,10 +91,11 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitWith)
-import System.FilePath (takeDirectory, takeExtension, (</>), (<.>))
+import System.FilePath (takeExtension)
 import System.IO (hPutStrLn, stderr)
 
-import Lara.AST (ArgId, PolicyId (..), programPolicy)
+import Lara.AST (ArgId)
+import Lara.AtomicWrite (atomicWriteFile)
 import Lara.Admission
   ( admissionAuditIsEmpty
   , renderAdmissionAudit
@@ -63,16 +105,32 @@ import Lara.Check (fullConfig)
 import Lara.Driver (renderCertDeps, runCheckDeps, runCheckLocatedReported)
 import Lara.Elaborate
   ( PreparedSource (..)
-  , prepareSource
-  , renderSourceInvalid
   , runSourceCheck
   , sourceResultAudit
   , sourceResultAuthorDiagnostics
   , sourceResultCertDeps
   , sourceResultVerdict
   )
+import Lara.Map.Driver
+  ( encodeMapCheckInput
+  , mapCheckInput
+  , resolveReferences
+  , runMap
+  )
+import Lara.Map.Load (loadMap)
+import Lara.Map.Types
+  ( MapBoundaryError (MBWire)
+  , MapError (MapBoundary)
+  , mapErrorExitCode
+  , renderMapError
+  )
+import Lara.Map.Wire (encodeMapVerdict)
+import Lara.Source.Load
+  ( loadSource
+  , loadedPrepared
+  , renderSourceLoadError
+  )
 import Lara.Strict.Deps (CertDep)
-import qualified Lara.Syntax as Syntax
 import Lara.Wire
   ( Outcome (..)
   , Verdict (..)
@@ -86,25 +144,62 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    ["check", file] -> check file
+    ["check", file] -> check file ToStdout
+    ["check", file, "--out", out] -> check file (ToFile out)
     ["deps", file] -> deps file
+    ["map-input", file] -> mapInput file
     _ -> usage >> exitWith (ExitFailure 2)
 
 usage :: IO ()
-usage = hPutStrLn stderr "usage: lara (check|deps) <file.sexp|file.lara>"
+usage = do
+  hPutStrLn
+    stderr
+    "usage: lara (check|deps|map-input) <file.sexp|file.lara|file.laramap>"
+  hPutStrLn
+    stderr
+    "       lara check <file> --out <path>   (write the accepted verdict to <path>)"
 
--- | Dispatch on the artifact extension: a @.lara@ path runs the presentation
--- pipeline (parse + co-located policy + elaborate); everything else (including
--- @.sexp@) runs the frozen wire check-input path.
-check :: FilePath -> IO ()
-check file
-  | takeExtension file == ".lara" = checkLara file
-  | otherwise = checkSexp file
+-- | Dispatch on the artifact extension: a @.laramap@ path runs the map
+-- pipeline (#303), a @.lara@ path the presentation pipeline (parse +
+-- co-located policy + elaborate); everything else (including @.sexp@) runs the
+-- frozen wire check-input path.
+--
+-- The @.laramap@ arm is /explicit/ and sits first, but the fall-through arm is
+-- unchanged and is what keeps every legacy and unknown extension on the wire
+-- door: a @.json@, a @.txt@ or an extensionless file still reaches 'checkSexp'
+-- and is decided there — an unreadable path as a read failure, readable bytes
+-- as a located codec error, exit @2@ either way — exactly as it did before the
+-- map door existed.
+check :: FilePath -> Sink -> IO ()
+check file sink
+  | takeExtension file == ".laramap" = checkMapFile file sink
+  | takeExtension file == ".lara" = checkLara file sink
+  | otherwise = checkSexp file sink
+
+-- | A @.laramap@ has __no dependency report__, and gets a named refusal rather
+-- than the wire door's codec error.
+--
+-- The refusal is not a new outcome: a map manifest is not a check-input
+-- envelope, so this path already exited @2@ with nothing on @stdout@ — what
+-- changes is only that the line names the map door instead of blaming the
+-- manifest for failing to be a @check-input\@1@. The report itself is defined
+-- per /accepted unit/ and a map is a set of them, so what a map's report would
+-- even mean is an open question this increment deliberately does not answer.
+depsMap :: FilePath -> IO ()
+depsMap file =
+  die2
+    ( "lara: "
+        ++ file
+        ++ " is a map manifest; there is no dependency report for a map"
+        ++ " (run 'lara check' on it, or 'lara deps' on one of its members)"
+    )
 
 -- | @lara deps@ (#204): the same two doors, reporting the accepted unit's
--- certificate dependencies instead of its verdict.
+-- certificate dependencies instead of its verdict — plus a third arm that
+-- declines, because a map has no such report ('depsMap').
 deps :: FilePath -> IO ()
 deps file
+  | takeExtension file == ".laramap" = depsMap file
   | takeExtension file == ".lara" = depsLara file
   | otherwise = depsSexp file
 
@@ -112,8 +207,8 @@ deps file
 -- The frozen @.sexp@ check-input path
 -- ---------------------------------------------------------------------------
 
-checkSexp :: FilePath -> IO ()
-checkSexp file = do
+checkSexp :: FilePath -> Sink -> IO ()
+checkSexp file sink = do
   contentsOrError <- readFileBytesEither file
   case contentsOrError of
     Left err -> do
@@ -130,7 +225,7 @@ checkSexp file = do
           -- than the one on stdout.
           let (verdict, _, diagnostics) = runCheckLocatedReported fullConfig input
           mapM_ (hPutStrLn stderr) diagnostics
-          emitVerdict verdict
+          emitVerdict sink verdict
 
 -- ---------------------------------------------------------------------------
 -- The @.lara@ presentation path (M4a Task A1)
@@ -141,9 +236,9 @@ checkSexp file = do
 -- failure exits @2@ with a located message on @stderr@ and nothing on @stdout@,
 -- mirroring the @.sexp@ codec error; accept\/reject follow the shared verdict
 -- convention.
-checkLara :: FilePath -> IO ()
-checkLara file = do
-  prepared <- loadSource file
+checkLara :: FilePath -> Sink -> IO ()
+checkLara file sink = do
+  prepared <- loadPrepared file
   case prepared of
     SourceRejected rejection -> do
       hPutStrLn stderr ("lara: " ++ renderAdmissionRejection rejection)
@@ -163,7 +258,7 @@ checkLara file = do
           | not (admissionAuditIsEmpty audit) ->
               hPutStrLn stderr ("lara: " ++ renderAdmissionAudit audit)
         _ -> pure ()
-      emitVerdict verdict
+      emitVerdict sink verdict
 
 -- | Parse a @.lara@ program and its co-located policy and validate the source,
 -- or exit @2@ with one located @stderr@ line. Shared by @lara check@ and
@@ -171,45 +266,77 @@ checkLara file = do
 -- decode-boundary failures: a program\/policy parse error, a missing or
 -- unreadable policy file, and a 'Lara.Elaborate.SourceInvalid' are all exit
 -- @2@, in this order.
-loadSource :: FilePath -> IO PreparedSource
-loadSource file = do
-  progTextOrError <- readFileEither file
-  case progTextOrError of
-    Left err -> die2 ("lara: cannot read " ++ file ++ ": " ++ show err)
-    Right progText ->
-      case Syntax.parseProgram progText of
-        Left pe -> die2 (locatedParseError file pe)
-        Right prog -> do
-          let policyPath = resolvePolicyPath file (programPolicy prog)
-          polTextOrError <- readFileEither policyPath
-          case polTextOrError of
-            Left err -> die2 ("lara: cannot read policy " ++ policyPath ++ ": " ++ show err)
-            Right polText ->
-              case Syntax.parsePolicy polText of
-                Left pe -> die2 (locatedParseError policyPath pe)
-                Right pol ->
-                  case prepareSource prog pol of
-                    Left invalid -> die2 ("lara: source invalid: " ++ renderSourceInvalid invalid)
-                    Right prepared -> pure prepared
+--
+-- The four steps themselves live in "Lara.Source.Load", which the map loader
+-- shares; what stays here is the CLI shell around them — the @lara: @ prefix,
+-- the @stderr@ channel, and the exit code. 'renderSourceLoadError' carries no
+-- prefix of its own, so these bytes are exactly what they were when the steps
+-- lived in this file.
+loadPrepared :: FilePath -> IO PreparedSource
+loadPrepared file = do
+  loaded <- loadSource file
+  case loaded of
+    Left err -> die2 ("lara: " ++ renderSourceLoadError err)
+    Right source -> pure (loadedPrepared source)
 
--- | Co-located policy resolution (D-Arch-2): read @\<policyId\>.policy.lara@ from
--- the /same directory/ as the artifact. E.g. @examples\/A-…​.lara@ declaring
--- @policy empirical-v1@ resolves to @examples\/empirical-v1.policy.lara@.
-resolvePolicyPath :: FilePath -> PolicyId -> FilePath
-resolvePolicyPath artifact (PolicyId pid) =
-  takeDirectory artifact </> pid <.> "policy" <.> "lara"
+-- ---------------------------------------------------------------------------
+-- The @.laramap@ multi-artifact map path (#303)
+-- ---------------------------------------------------------------------------
 
--- | Render a "Lara.Syntax".'Syntax.ParseError' as one located @stderr@ line.
-locatedParseError :: FilePath -> Syntax.ParseError -> String
-locatedParseError path pe =
-  "lara: parse error at "
-    ++ path
-    ++ ":"
-    ++ show (Syntax.peLine pe)
-    ++ ":"
-    ++ show (Syntax.peCol pe)
-    ++ ": "
-    ++ Syntax.peReason pe
+-- | Run a map and print its composite verdict.
+--
+-- The whole operation lives in 'Lara.Map.Driver.runMap'; what stays here is
+-- the CLI shell around it, exactly as 'loadPrepared' is the shell around the
+-- @.lara@ source seam: the @stderr@ channel, the single line, and the exit
+-- code. The 2-or-1 split is not decided here either — 'mapErrorExitCode' is
+-- the one place it lives, so this door cannot disagree with an in-process
+-- caller about whether a given map was ill-formed or rejected.
+--
+-- One 'hPutStrLn' is the whole diagnostic and @stdout@ stays empty:
+-- 'renderMapError' is the single place a map's lines live, and it folds the
+-- newlines out of the free-text payloads it carries from outside (a codec
+-- context and message, a filesystem error, a member's own exit-2 text, an
+-- admission-audit summary, a link-boundary reason).
+checkMapFile :: FilePath -> Sink -> IO ()
+checkMapFile file sink = do
+  outcome <- runMap file
+  case outcome of
+    Left err -> do
+      hPutStrLn stderr ("lara: " ++ renderMapError err)
+      exitWith (ExitFailure (mapErrorExitCode err))
+    Right verdict -> emitAccepted sink (printSExpr (encodeMapVerdict verdict))
+
+-- | @lara map-input@ (#303): print the map's cross-driver parity envelope.
+--
+-- Stops where the /boundary/ stages stop and no later: the manifest, the
+-- members, and coordinate resolution all run, so an envelope that is printed
+-- is one that decodes, while linking, checking and alignment evaluation are
+-- left undone because those are the decisions the envelope exists to have made
+-- independently by a second implementation. A map that fails a boundary stage
+-- therefore exits @2@ here with the same line @lara check@ would print, and a
+-- map whose /link/ or /alignment/ is what fails still prints its envelope and
+-- exits @0@ — which is the case that matters, since it is exactly the input
+-- the Lean driver must be given in order to refuse it too.
+mapInput :: FilePath -> IO ()
+mapInput file = do
+  loaded <- loadMap file
+  case loaded >>= envelopeOf of
+    Left err -> do
+      hPutStrLn stderr ("lara: " ++ renderMapError err)
+      exitWith (ExitFailure (mapErrorExitCode err))
+    Right input -> putStrLn (printSExpr (encodeMapCheckInput input))
+  where
+    -- Resolve first, so an unresolvable alignment gets its own located map
+    -- diagnostic (MBUnknownAlias, MBUnknownClaim, MBCoordinateOutOfRange)
+    -- rather than the envelope constructor's flatter codec message. The
+    -- constructor re-checks the same conditions, which is what makes this
+    -- ordering a preference about the message rather than a load-bearing
+    -- convention.
+    envelopeOf members = do
+      _ <- resolveReferences members
+      case mapCheckInput members of
+        Left err -> Left (MapBoundary (MBWire err))
+        Right input -> Right input
 
 -- ---------------------------------------------------------------------------
 -- The @lara deps@ report path (#204)
@@ -234,7 +361,7 @@ depsSexp file = do
 -- reported as a rejection here — the same exit @1@ 'checkLara' gives it.
 depsLara :: FilePath -> IO ()
 depsLara file = do
-  prepared <- loadSource file
+  prepared <- loadPrepared file
   case prepared of
     SourceRejected _ -> emitReport file Nothing
     SourceAccepted input -> do
@@ -261,7 +388,7 @@ depsLara file = do
 -- this door points at it instead of duplicating its diagnostic precedence.
 emitReport :: FilePath -> Maybe [(ArgId, [CertDep])] -> IO ()
 emitReport file report = case report of
-  Just deps -> putStr (renderCertDeps deps)
+  Just certDeps -> putStr (renderCertDeps certDeps)
   Nothing -> do
     hPutStrLn
       stderr
@@ -280,26 +407,79 @@ acceptedReport outcome report = case outcome of
 -- Shared helpers
 -- ---------------------------------------------------------------------------
 
--- | Print the verdict on @stdout@ (one trailing newline) and set the exit code:
--- accept ⇒ @0@ (fall through), reject ⇒ @1@.
-emitVerdict :: Verdict -> IO ()
-emitVerdict verdict = do
-  putStrLn (printSExpr (encodeVerdict verdict))
+-- | Where an /accepted/ verdict goes: @stdout@ by default, or the file named by
+-- @lara check … --out \<path\>@.
+--
+-- Only an accepted verdict is ever routed, which is what makes this a closed
+-- two-constructor choice rather than a general output redirection: no failing
+-- path in this module consults a 'Sink' at all. A rejection prints its verdict
+-- on @stdout@ and a boundary failure prints one line on @stderr@, each exactly
+-- as it does without the flag.
+data Sink = ToStdout | ToFile FilePath
+
+-- | Emit accepted verdict bytes — one trailing newline either way, so a file
+-- written here holds exactly the bytes the default form prints.
+--
+-- The file replacement is 'Lara.AtomicWrite.atomicWriteFile': a same-directory
+-- temporary is populated and renamed over the destination, so a reader either
+-- sees the old bytes or the new ones and never a partial write. A write that
+-- fails — an unwritable directory, a destination that is a directory — exits
+-- @2@ with one located @stderr@ line, and the previous destination is left
+-- intact: this is a filesystem-boundary failure of the /command/, not a
+-- statement about the artifact, so it takes the same exit code an unreadable
+-- input does rather than @1@'s "understood and rejected" meaning. Nothing is
+-- printed on @stdout@ in that case, because the verdict's one destination was
+-- the file that could not be written.
+--
+-- __Two consequences of that helper that a @--out@ caller does not choose.__
+-- 'Lara.AtomicWrite.atomicWriteWith' was written for /generated repository
+-- artifacts/ and is reused here unchanged against an arbitrary user-named
+-- path, so:
+--
+-- * __the destination's permissions become @0644@__, whatever they were. The
+--   helper sets that mode on its temporary before the rename, so a @0600@
+--   destination comes back @0644@ — a widening — and a restrictive @umask@ is
+--   ignored for a freshly created one. Do not point @--out@ at a path whose
+--   mode matters.
+-- * __a symlink destination is replaced, not followed__. @rename(2)@ acts on
+--   the link itself, so @--out@ at a symlink leaves it a regular file and the
+--   link's former target untouched. This is ordinary POSIX behaviour, and it
+--   is worth stating because it silently breaks a link a @make map-check
+--   OUT=@ user set up on purpose.
+--
+-- Neither is a bug in the helper and neither is changed here: narrowing them
+-- would mean either a second write path or altering a function
+-- "Lara.BindingAudit" and @scripts\/claim-support.hs@ already depend on for
+-- exactly the generated-artifact behaviour it has. They are recorded so the
+-- contract is the whole contract.
+emitAccepted :: Sink -> String -> IO ()
+emitAccepted ToStdout bytes = putStrLn bytes
+emitAccepted (ToFile path) bytes = do
+  written <- try (atomicWriteFile path (bytes ++ "\n"))
+  case written of
+    Left err -> die2 ("lara: cannot write " ++ path ++ ": " ++ show (err :: IOException))
+    Right () -> pure ()
+
+-- | Emit the verdict and set the exit code: accept ⇒ @0@ (fall through, through
+-- the 'Sink'), reject ⇒ @1@.
+--
+-- A rejection goes to @stdout@ whatever the 'Sink' says, and no file is
+-- touched. That is the whole of @--out@'s "only on success" rule on this door:
+-- an @--out@ file keeps its previous contents across a failed run, and the
+-- rejecting bytes are still where they have always been.
+emitVerdict :: Sink -> Verdict -> IO ()
+emitVerdict sink verdict =
   case verdictOutcome verdict of
-    Accept{} -> pure ()
-    Reject{} -> exitWith (ExitFailure 1)
+    Accept{} -> emitAccepted sink bytes
+    Reject{} -> putStrLn bytes >> exitWith (ExitFailure 1)
+  where
+    bytes = printSExpr (encodeVerdict verdict)
 
--- | Read a file, forcing the read inside 'try' so an IO failure is caught here.
-readFileEither :: FilePath -> IO (Either IOException String)
-readFileEither file = try $ do
-  contents <- readFile file
-  _ <- evaluate (length contents)
-  pure contents
-
--- | Read a file as raw bytes, for the @.sexp@ codec path. Unlike
--- 'readFileEither' this does no locale decoding, so invalid UTF-8 reaches the
--- wire parser and becomes a located R14 codec error (exit @2@) instead of an
--- IO-level read failure — the same outcome class, through the codec channel.
+-- | Read a file as raw bytes, for the @.sexp@ codec path. Unlike the text read
+-- "Lara.Source.Load" performs on the @.lara@ door, this does no locale
+-- decoding, so invalid UTF-8 reaches the wire parser and becomes a located R14
+-- codec error (exit @2@) instead of an IO-level read failure — the same outcome
+-- class, through the codec channel.
 readFileBytesEither :: FilePath -> IO (Either IOException ByteString)
 readFileBytesEither file = try $ do
   contents <- B.readFile file
@@ -309,6 +489,6 @@ readFileBytesEither file = try $ do
 -- | Emit a located message on @stderr@ and exit @2@ (the decode\/boundary code).
 --
 -- The return type is @IO a@, not @IO ()@: this never returns, so it is usable
--- as an arm of a @case@ whose other arms produce a value ('loadSource').
+-- as an arm of a @case@ whose other arms produce a value ('loadPrepared').
 die2 :: String -> IO a
 die2 msg = hPutStrLn stderr msg >> exitWith (ExitFailure 2)

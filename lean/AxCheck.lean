@@ -32,10 +32,13 @@ import Lara.Attack
 import Lara.Compile
 import Lara.Erase
 import Lara.EraseTransport
+import Lara.Map.Qualify
+import Lara.Map.Link
 import Lara.Policy
 import Lara.Sigma
 import Lara.Check
 import Lara.Driver
+import Lara.Map.Driver
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
 import Lara.Invariants
@@ -115,6 +118,12 @@ open Lara
 -- The closed wire keyword vocabulary is injective, as required by the Haskell
 -- Map-backed reverse lookup.
 #print axioms Lara.Driver.tagToString_injective
+
+-- The same, for the multi-artifact map's own keyword table (issue #303). Both
+-- Haskell map tables derive their reverse lookup by enumerating their tag type,
+-- so a spelling collision would break the inverse silently rather than failing
+-- to compile.
+#print axioms Lara.Map.Driver.mtagToString_injective
 
 -- Result 13 (the many-sorted signature, `lara-core@0.2` / issue #89).
 -- (a) decidability without classical input: the executable check IS the
@@ -3830,6 +3839,74 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.TermHoles.functional_transport_sem
 #print axioms Lara.Examples.TermHoles.relational_transport_sem
 
+-- Multi-artifact maps (issue #303): member-alias qualification and the
+-- N-member linking fold.
+#print axioms Lara.Map.qualifiedKey_inj
+#print axioms Lara.Map.qualifyLeaf_injective
+#print axioms Lara.Map.qualifyLeaf_ne_of_alias_ne
+#print axioms Lara.Map.mapLeafList_eq
+#print axioms Lara.Map.mapLeafDis_eq
+#print axioms Lara.Map.mapLeafAtt_source
+#print axioms Lara.Map.mapLeafAtt_target
+#print axioms Lara.Map.mapLeaf_inj
+#print axioms Lara.Map.mapLeafList_inj
+#print axioms Lara.Map.mapLeafDis_inj
+#print axioms Lara.Map.mapLeaf_injective
+#print axioms Lara.Map.mapLeaf_eq_iff
+#print axioms Lara.Map.lookupDis_mapLeafDis
+#print axioms Lara.Map.mapLeaf_subterm
+#print axioms Lara.Map.containsB_mapLeaf
+#print axioms Lara.Map.containsBList_mapLeaf
+#print axioms Lara.Map.containsBDis_mapLeaf
+#print axioms Lara.Map.attackClosureB_mapLeaf
+#print axioms Lara.Map.coveredB_mapLeaf
+#print axioms Lara.Map.mapLeafList_length
+#print axioms Lara.Map.mapLeafDis_length
+#print axioms Lara.Map.mapLeafDis_keys
+#print axioms Lara.Map.mapLeafList_getElem?_some
+#print axioms Lara.Map.mapLeafDis_getElem?_some
+#print axioms Lara.Map.hasSupport_mapLeaf
+#print axioms Lara.Map.hasAttack_mapLeaf
+#print axioms Lara.Map.mapLeafProg_args
+#print axioms Lara.Map.mapLeafProg_atts
+#print axioms Lara.Map.edgeB_mapLeaf
+#print axioms Lara.Map.checkedAF_mapLeaf
+#print axioms Lara.Map.labelC_mapLeaf
+#print axioms Lara.Map.statusC_mapLeaf
+#print axioms Lara.Map.statusC_mapLeafProg
+#print axioms Lara.Map.buildGamma_qualifyGamma
+#print axioms Lara.Map.qualifyGamma_disjoint
+#print axioms Lara.Map.sideGamma_linkStep
+#print axioms Lara.Map.linkStep_sideOk
+#print axioms Lara.Map.linkMembers_sideOk
+#print axioms Lara.Map.firstShared?_nil
+#print axioms Lara.Map.linkOk_closedTail
+#print axioms Lara.Map.sideOk_closedTail
+#print axioms Lara.Map.linkMembers_checked
+#print axioms Lara.Map.linkStep_declared
+#print axioms Lara.Map.linkMembers_declared
+#print axioms Lara.Map.qualifyFragment_declared
+#print axioms Lara.Map.qualifiedBy_qualifyFragment
+#print axioms Lara.Map.foldHygiene_of_distinct_aliases
+#print axioms Lara.Map.foldHygiene_emptyMap
+#print axioms Lara.Map.linkStep_declared_nodup
+#print axioms Lara.Map.linkMembers_declared_nodup
+#print axioms Lara.Map.qualifyFragment_declared_nodup
+#print axioms Lara.Map.foldHygiene_two_aliases_of_one_member
+-- The premises of `linkMembers_checked` exhibited holding together at a
+-- concrete map, which is what makes that theorem non-vacuous rather than merely
+-- true (PR #315 review).
+#print axioms Lara.Map.memberP_foldHygiene
+#print axioms Lara.Map.memberP_sideOk
+#print axioms Lara.Map.unitPolicyEx_wellFormed
+#print axioms Lara.Map.soloMap_linkMembers_checked
+#print axioms Lara.Map.contestedMap_extends
+#print axioms Lara.Map.contestedMap_atts
+#print axioms Lara.Map.soloMap_accepted
+#print axioms Lara.Map.contestedMap_accepted
+#print axioms Lara.Map.soloMap_status
+#print axioms Lara.Map.contestedMap_status
+#print axioms Lara.Map.linkMembers_status_not_preserved
 /-! ### PW — the `Query_κ` well-sortedness refinement (issue #307) -/
 
 -- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:

@@ -1,0 +1,31 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "agreement-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:dddd..."
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "not_better(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "pd",
+        "index": 0,
+        "label": "in"
+      }
+    ]
+  }
+}

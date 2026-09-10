@@ -3474,6 +3474,7 @@ observations:
   crystallized_via: null
   stale: false
 
+
 - id: O162
   timestamp: 2026-09-09T20:10-07:00
   provenance: ai-suggested
@@ -3619,3 +3620,27 @@ observations:
   crystallized_via: null
   stale: false
 
+- id: O168
+  timestamp: "2026-09-09T23:25"
+  provenance: ai-suggested
+  content: >
+    Issue #303 can use a flat content-pinned map and ordinary full source/link
+    checking, with Make as an optional command wrapper. The draft separates
+    source digests from declared paper identities, requires actual shared
+    policy/signature/theory identity, qualifies leaf references, and reuses
+    the existing Lean saturation/linking results. R12 is policy-pattern-level
+    in the current implementation, not dependent on newly added member claims.
+    Proposed v1 rejects nonempty admission/pruning audits rather than losing
+    their source semantics. These are review proposals, not adopted decisions.
+  context: >
+    User requested review of #303, assessment of Makefile-style builds, and a
+    draft plan. Grounding: src/Lara/Replay.hs, src/Lara/Policy.hs,
+    src/Lara/Elaborate.hs, lean/Lara/Context/Fragment.lean,
+    lean/Lara/Context/Link.lean, and
+    plans/2026-09-09-multi-artifact-build.md. No implementation or experiment.
+  potential_type: architecture
+  bound_to: []
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

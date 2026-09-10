@@ -16,7 +16,7 @@ the result is stated but not yet proved or mechanized._
   ground-substituted away before a proposition forms). If the corpus needs AC predicates or binders,
   the normal form extends with argument sorting / de Bruijn indexing and the same properties must be
   re-established (the documented flip criterion), so the claim is bounded to the v0.1 atom language.
-- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:350 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
+- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:361 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
 - **Status**: supported
 - **Falsification criteria**: Exhibit two propositions the corpus treats as the same claim that
   `nf`/`≡` separates (or vice versa) without the AC/binder extension applying — i.e. a support
@@ -36,7 +36,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds under a policy-declared `contrary` relation (not classical negation) and the
   ASPIC+ restriction that strict rules are unattackable; positions are paths of premise indices and
   question names.
-- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:1071 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:1096 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
+- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← docs/spec.md:1082 «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← docs/spec.md:1107 «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A defeat pattern the corpus annotators find that cannot be typed as an
   attack on a root / internal-rule / leaf position (e.g. a genuine attack on something other than
@@ -154,17 +154,21 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Non-monotonicity is at the *consequence level*, across extensions of the input
   framework; for a *fixed* framework the internal transfer operator is monotone over a finite-height
   lattice, so grounded evaluation is still deterministic and terminating (no contradiction).
-- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← docs/spec.md:1265 «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
+- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← docs/spec.md:1276 «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
 - **Status**: supported
 - **Falsification criteria**: A monotonic consequence relation that reproduces LARA's grounded claim
   acceptance under all framework extensions (i.e. never needs to retract) — its existence would refute
   Proposition 8.
-- **Proof**: [E06]
+- **Proof**: [E06; lean/Lara/Map/Link.lean:linkMembers_status_not_preserved — a mechanized
+  concrete accepted witness: two maps, both accepted by `Check.Unit.checkUnit`, whose shared
+  claim atom is `justified` in the one-member map and `defeated` after a contrary member is
+  added; gated at lean/AxCheck.lean:3898 and clean under the standard axiom trio]
 - **Evidence basis**: Proposition 8 (strict-backend-decision §6) proves that no monotonic relation
   represents acceptance under framework extension; spec §8 gives the monotone-operator-on-finite-lattice
   construction that keeps evaluation deterministic. Grounded engine (`Lara.Grounded`) is spec-only.
 - **Dependencies**: C04
 - **Tags**: non-monotonic, defeat, grounded-semantics, the-differentiator
+- **Last revised**: 2026-09-10 (2026-09-10_001#2)
 
 ## C07: Grounded four-state status is deterministic and terminating; cycles yield undecided, not nontermination
 - **Statement**: Compiling to a finite Dung framework and taking the least fixed point of Dung's
@@ -175,7 +179,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds because `Args` is finite and the operator is monotone on the subset lattice;
   `contested` = grounded `undec`, which is broader than mutual defeat (even/odd cycles,
   undec-propagation) and must be explained by the responsible SCC in the report.
-- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:1260-1261 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
+- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← docs/spec.md:1271-1272 «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
 - **Status**: supported
 - **Provenance**: ai-suggested
 - **Falsification criteria**: A finite compiled framework on which grounded iteration fails to
@@ -203,7 +207,7 @@ the result is stated but not yet proved or mechanized._
   strict-certificate theory dependencies are reported separately via each backend's `uses` function.
 - **Conditions**: Holds for checked support terms; every leaf in `leaves(w)` must be declared in the
   admitted context `Γ`, and backend dependencies (`certDeps`) are unioned in from accepted certificates.
-- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:929 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
+- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← docs/spec.md:940 «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A checked support term whose actual load-bearing leaf set differs from
   `leaves(w)`, or a strict certificate whose consulted theory/premise dependency is not returned by
@@ -234,7 +238,7 @@ the result is stated but not yet proved or mechanized._
   all four rationality postulates at the cost of structuring the contrary relation. The v0.1
   executable `mayOverlap` check is conservative for non-linear patterns: it may reject a safe policy
   but cannot accept two patterns with canonically equivalent ground instances.
-- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:1327 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
+- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← docs/spec.md:1338 «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A Path-B-well-formed policy under which two contrary claims are both
   labelled `justified` by grounded semantics — refuting consistency (spec §9 result 7); or corpus
@@ -886,7 +890,7 @@ the result is stated but not yet proved or mechanized._
 ## C51: Whether a strict backend's goal family needs a declared contrary pair is decided by what its goals are settled against — and Path B then fixes where the conflict may live
 - **Statement**: For a certificate-checked strict backend, intra-family exclusivity is a theorem exactly when the family's goals are settled against data the goal itself carries; when they are settled against a value a premise supplies, two accepted instances can conflict, because two units may declare different premises about the same subject. The first kind needs no `contrary` declaration and gains nothing from one; the second has a genuine conflict that only the attack layer can carry. The placement of that conflict is then not a design choice: under a strict-reachability restriction on `contrary` (Path B), a strict conclusion pattern may not overlap either side of a declared pair, so the conflict must be lifted to the conclusions of a defeasible bridge one layer above the certified step.
 - **Conditions**: Established over two shipped adapters of one seam — `ord@1`, whose `num_lt`/`num_le` goals carry both compared numerals, and `insp@1`, whose `code_absent`/`code_present` goals are settled against an inventory the cited premise declares. Both directions are mechanized. The untested boundary is a *mixed* family, some of whose members are goal-settled and some premise-settled; nothing here says such a family must split, only that its two halves would answer this question differently. The Path B half is conditional on that restriction being in force — under Path A (contrary as a total involutive contradictory map with strict rules closed under transposition) the placement argument does not apply.
-- **Sources**: [`exclusivity is a theorem for ord@1` ← lean/Lara/Ord.lean «theorem ordModels_excl_of_lt {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `co-acceptability for insp@1` ← lean/Lara/Insp.lean «theorem inspModels_absent_present_sat {φ ψ : Lara.Atom} {src feat : Lara.Term}» [result]; `exclusivity only at a shared premise` ← lean/Lara/Insp.lean «theorem inspModels_excl_of_same_entry {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `Path B forbids the overlap` ← docs/spec.md:1334 «rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-reachable set,» [input]]
+- **Sources**: [`exclusivity is a theorem for ord@1` ← lean/Lara/Ord.lean «theorem ordModels_excl_of_lt {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `co-acceptability for insp@1` ← lean/Lara/Insp.lean «theorem inspModels_absent_present_sat {φ ψ : Lara.Atom} {src feat : Lara.Term}» [result]; `exclusivity only at a shared premise` ← lean/Lara/Insp.lean «theorem inspModels_excl_of_same_entry {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `Path B forbids the overlap` ← docs/spec.md:1345 «rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-reachable set,» [input]]
 - **Status**: testing
 - **Provenance**: ai-suggested
 - **Falsification**: Exhibit a registered backend whose goals are settled entirely against data carried in the goal and for which two conflicting family members are nonetheless both accepted (refuting the first half); or a backend whose goals are settled against a premise-supplied value and for which conflicting members are provably never co-accepted without an extra restriction on the premises (refuting the second). Separately, exhibit a policy that carries such a conflict as a contrary on the strict conclusions themselves and is accepted by the §8.1 validator — that would refute the placement half.
@@ -939,3 +943,36 @@ the result is stated but not yet proved or mechanized._
 - **Proof**: [`Lara.PW.Sorted.cmpStatus_gap_iff_not_addresses`, `not_gap_of_addresses`, `notPosable_world_independent`, `report_ne_observed_iff_gap`, `sortedWorld_of_nodes`, `lean/Lara/PW/Sorted.lean`; `Lara.Grounded.statusC_gap_iff`, `lean/Lara/Grounded.lean`; `Compile.CheckedNode.valid` and `Unit.CheckedUnit.nodes_terms` (every retained argument is complete), `lean/Lara/Compile.lean`, `lean/Lara/Unit.lean`; the three-report witness `Lara.Examples.PWSorted.reports_distinct`, `split_not_change`, `lean/Lara/Examples/PWSorted.lean`; `ara/evidence/proofs/pw_sorted_queries_307.md`; `docs/theory-pw-sorted-queries.md` §4; `docs/theory-pw0-outer-model.md` limitation 2; trace N307_sorted, N307_gap_collapse, N307_sorted_world; issue #307, PR #311]
 - **Dependencies**: []
 - **Tags**: PW, layering, wrapper-discipline, negative-result, limitation-narrowing, mechanized, M5
+
+## C56: Independently checkable artifacts compose without a composition semantics — the cross-artifact conflict edges are derived from the shared policy, not authored
+
+- **Statement**: When separately authored artifacts are checked under one shared policy, the
+  conflicts *between* them need not be declared by anyone: qualifying each artifact's local
+  identities and then saturating the merged unit against the policy's own contrary relation
+  derives exactly the cross-artifact attacks the checker would otherwise report missing. The
+  composed verdict therefore agrees with what a single hand-written unit over the same material
+  yields, and composition adds no argumentation semantics — it is a renaming, a merge, and the
+  ordinary checker.
+- **Conditions**: Holds for a flat map of closed artifacts under one structurally identical
+  policy, where every member passes the ordinary source checker alone and carries no admission
+  or group-pruning audit. Identity is shared where meaning is shared: propositions, predicates,
+  rule and question identifiers are *not* qualified, which is what makes a cross-artifact
+  conflict detectable at all — qualifying them would make every map trivially conflict-free.
+  Untested boundary: a policy with a premise-less rule, which is the case that both makes the
+  structural merge reachable and is absent from every policy shipped here.
+- **Sources**: ["(labels (0 undec) (1 undec) (2 in) ← examples/agreement-map-multi/map.verdict.sexp «(labels (0 undec) (1 undec) (2 in)» [result]", "(edges (0 1) (1 0)) ← examples/agreement-map-multi/map.verdict.sexp «(edges (0 1) (1 0)) (statuses» [result]", "1032 bytes agreeing across both drivers ← scripts/check-map-conformance.sh «tree test/fixtures/map/, and the shipped D3 example examples/agreement-map-multi/» [input]"]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit two artifacts, individually accepted under one shared policy, whose
+  merged-and-saturated unit is rejected by the ordinary checker, or whose composed statuses differ
+  from those of a hand-written unit containing the same leaves, arguments and declared attacks.
+  A composition that required an authored cross-artifact edge to reach the right answer would
+  refute the derivation half.
+- **Proof**: [trace/exploration_tree.yaml:N303_d3_split — four solo-justified members compose to
+  contested/contested/justified/justified, reproducing examples/agreement-map/expected.json;
+  test/MapExampleSpec.hs — prop_compositeMatchesLegacyOracle reads the legacy artifact's own
+  verdict live rather than a transcription; lean/Lara/Map/Link.lean:linkMembers_checked — the
+  finite-member fold instantiates Lara.Context.link_checked rather than restating the semantics]
+- **Dependencies**: [C06]
+- **Tags**: composition, linking, saturation, grounded-semantics, multi-artifact
+

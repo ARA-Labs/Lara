@@ -1401,6 +1401,9 @@ entries:
   - 'Preserved C49/C53/C54: copying violates context-fixing, so it does not contradict existing transport
     results. No universal collapse theorem or proof phase.'
   - No existing staged observation receives a new closure signal from this bounded spike.
+  - "Staged O168 as an unapproved architecture proposal; drafting a plan is not user adoption or implementation commitment."
+  - "No experiment, theorem, or generalized claim added; preserved existing logic and unrelated staged observations."
+  - "The Make recommendation is orchestration scope; the source-admission restriction is explicit and awaits review."
 
 - turn: "2026-09-09_issue307#1"
   notes:
@@ -1476,4 +1479,30 @@ entries:
       Staged O165/O166/O167 rather than crystallizing. All three are ai-suggested
       generalizations of repairs the reviewer prompted; the user's "address all"
       adopts the repairs, not the generalized readings.
+
+
+- turn: 2026-09-10_001#1
+  notes:
+  - Recorded the explicit no-hashing decision directly as N303_path_linking.
+  - 'O168 remains historical and unpromoted: the user rejected its content-pinning
+    component, without endorsing the rest of its mixed proposal.'
+  - No new experiment, theorem, or generalized claim; no implementation authorization
+    inferred.
+- turn: 2026-09-10_001#2
+  notes:
+  - 'Crystallized C56 on artifact-commitment (six commits depend on it) reinforced by
+    empirical resolution (the D3 composite run). Provenance stays ai-suggested: the user
+    directed the implementation, not the generalization.'
+  - 'Did NOT create a second non-monotonicity claim for linkMembers_status_not_preserved.
+    C06 already states it; the mechanized witness is evidence FOR C06, so it went into
+    C06.Proof and C06 stayed supported rather than being re-derived.'
+  - 'Routed the two cross-driver divergences (duplicate claim name, empty member path) as
+    detail inside N303_parity rather than as dead_end nodes: they were defects found and
+    fixed within the increment, not abandoned hypotheses.'
+  - 'Considered and rejected a claim about review efficacy (two stages caught defects no
+    gate could): it is an observation about this session process, not about the artifact
+    under study, and would not be falsifiable as a research claim.'
+  - 'C56 Conditions names the untested boundary (a policy with a premise-less rule) because
+    that single absence is what makes both the structural merge and MRLinkRejected
+    unreachable - two open threads sharing one cause.'
 

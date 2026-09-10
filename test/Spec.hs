@@ -54,6 +54,11 @@ import SurfaceConformanceSpec (surfaceConformanceSpecProps)
 import SyntaxSpec (syntaxSpecProps)
 import ValueBindingsSpec (valueBindingSpecProps)
 import WireSpec (wireSpecProps)
+import MapWireSpec (mapWireSpecProps)
+import MapLoadSpec (mapLoadSpecProps)
+import MapLinkSpec (mapLinkSpecProps)
+import MapSpec (mapSpecProps)
+import MapExampleSpec (mapExampleSpecProps)
 import UpdateSpec (updateSpecProps)
 import ThetaInferenceSpec (thetaInferenceSpecProps)
 import WorkedExamplesSpec (workedExamplesSpecProps)
@@ -209,6 +214,11 @@ main = do
         ++ [run name act | (name, act) <- inspSpecProps]
         ++ [run name act | (name, act) <- replaySpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
+        ++ [run name act | (name, act) <- mapWireSpecProps]
+        ++ [run name act | (name, act) <- mapLoadSpecProps]
+        ++ [run name act | (name, act) <- mapLinkSpecProps]
+        ++ [run name act | (name, act) <- mapSpecProps]
+        ++ [run name act | (name, act) <- mapExampleSpecProps]
         ++ [run name act | (name, act) <- valueBindingSpecProps]
         ++ [run name act | (name, act) <- syntaxSpecProps]
         ++ [run name act | (name, act) <- elaborateSpecProps]

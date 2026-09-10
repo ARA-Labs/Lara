@@ -254,10 +254,10 @@ Notes for the paper wording:
 
 - Read-only audit; no Lean changes (happy path of #68).
 - `lean/AxCheck.lean` already `#print axioms`-gates every headline row:
-  `srcStatus_iff_checked` (:708), `srcIn_iff_checkedGrounded` (:706),
-  `status_preservation` (:907), `grounded_stable` (:895),
-  `contrary_claims_not_both_justified` (:946), `strict_step_sound` (:393),
-  `ndBackend` (:395), `raBackend` (:421), `ndUses_eq_infer_deps` (:537).
+  `srcStatus_iff_checked` (:717), `srcIn_iff_checkedGrounded` (:715),
+  `status_preservation` (:916), `grounded_stable` (:904),
+  `contrary_claims_not_both_justified` (:955), `strict_step_sound` (:402),
+  `ndBackend` (:404), `raBackend` (:430), `ndUses_eq_infer_deps` (:546).
 - Remaining paper-side step (P1–P3 edits in the Overleaf repo): check each
   display side-by-side against the quoted quantifiers/hypotheses above, and
   in particular ensure `thm:preservation` cites `srcStatus_iff_checked`

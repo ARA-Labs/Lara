@@ -15,6 +15,14 @@
 -- artifact is always @example.lara@; only the policy basename varies, because
 -- it must match the @policy \<name\>@ header the artifact declares.
 --
+-- A directory listed here is a __solo__ artifact and is registered for exactly
+-- the solo guarantees the two consumers give it. Four of them
+-- (@examples\/agreement-map-multi\/paper-{a,b,c,d}@) are additionally the
+-- members of a map, but the map itself is composed one level up by
+-- @examples\/agreement-map-multi\/map.laramap@, which is not a worked-example
+-- directory and is not in this list: its own anchors are the map gate's
+-- (@scripts\/check-map-conformance.sh@), not this registry's.
+--
 -- This module is deliberately data-only: it names files, so it depends on
 -- nothing in the checker core and cannot drag a surface concern into it.
 module Lara.WorkedExamples
@@ -53,6 +61,10 @@ workedExamples =
   , ("examples/S8", "strict-v1.policy.lara")
   , ("examples/S9", "insp-v1.policy.lara")
   , ("examples/agreement-map", "agreement-v1.policy.lara")
+  , ("examples/agreement-map-multi/paper-a", "agreement-v1.policy.lara")
+  , ("examples/agreement-map-multi/paper-b", "agreement-v1.policy.lara")
+  , ("examples/agreement-map-multi/paper-c", "agreement-v1.policy.lara")
+  , ("examples/agreement-map-multi/paper-d", "agreement-v1.policy.lara")
   , ("examples/rebuttal-replay/round0", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")

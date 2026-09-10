@@ -641,3 +641,14 @@ sessions:
   - C55
   - H18
   open_threads: 5
+
+- id: 2026-09-10_001
+  date: '2026-09-10'
+  summary: '#303: path-based linking chosen, then the multi-artifact map implemented
+    and landed in six commits.'
+  turn_count: 2
+  events_count: 4
+  claims_touched:
+  - C56
+  - C06
+  open_threads: 5

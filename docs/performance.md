@@ -79,6 +79,15 @@ manifest-discovered harness. Its protocols are deliberately aligned with
   path. **No cross-driver ratio may be derived from it.**
 - **The harness sweep** pre-reads every manifest input, then times one full
   in-memory pass (decode + check + render, or the codec-failure path).
+- **The multi-artifact map is not measured here.** A `.laramap` run is a
+  different shape of work — reading and parsing several `.lara` sources from
+  disk, checking each, then linking and checking again — and folding it into
+  this bench's rows would make a kernel number mean something else. A small
+  __in-process__ end-to-end figure for the shipped four-member map is recorded
+  beside the demo it belongs to, in
+  [`demos/d3-agreement-map.md`](demos/d3-agreement-map.md), measured on a
+  different machine and under its own protocol; it is not comparable with the
+  rows below and there is no committed harness that regenerates it (issue #319).
 
 ## Current Native Snapshot
 

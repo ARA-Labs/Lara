@@ -145,6 +145,13 @@ jobs:
       - name: Haskell-Lean semantic admission differential (test fixtures)
         run: bash scripts/admission-differential.sh
 
+      # The map's own differential (#303). Separate from the wire one above
+      # because the two drivers are handed different files: the Haskell side
+      # reads a `.laramap` manifest and rechecks its members from disk, and the
+      # Lean side reads the `map-check-input@1` parity envelope derived from it.
+      - name: Haskell-Lean map conformance (map fixtures)
+        run: bash scripts/check-map-conformance.sh
+
   lean:
     name: Lean (lake build)
     runs-on: ubuntu-latest

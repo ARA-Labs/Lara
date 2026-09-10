@@ -3,7 +3,8 @@
 #
 # Runs every fixture under fixtures/**/*.sexp (excluding the deliberately
 # malformed envelopes of fixtures/malformed/), every worked-example anchor
-# under examples/**/*.core.sexp, every replay-bundle anchor under
+# under examples/**/*.core.sexp (excluding the map anchors named map.core.sexp
+# and map.verdict.sexp — see the exclusion note below), every replay-bundle anchor under
 # bundles/**/*.core.sexp, and every T2 corpus-unit anchor under
 # corpus-units/**/unit.core.sexp (a *.sexp glob covers all four; the
 # corpus-unit set itself is pinned manifest-exact by test/CorpusUnitsSpec.hs,
@@ -97,15 +98,28 @@ for root in fixtures examples bundles corpus-units; do
   fi
 
   root_anchor_list="$tmp_dir/anchors.$root"
-  # The deliberately malformed envelopes of fixtures/malformed/ are the
-  # negative half below, not byte-parity anchors. The whole generated mutant
-  # suite (fixtures/mutants/) is excluded from globbing entirely: it is
-  # discovered manifest-driven below, so an absent or half-written suite
-  # fails loudly instead of shrinking the anchor set (PR #49 review). The
-  # source admission fixtures (fixtures/admission/) are NOT wire check-input
-  # envelopes: they belong to scripts/admission-differential.sh alone.
+  # Four FAMILIES are excluded, each because it has its own harness: the
+  # deliberately malformed envelopes of fixtures/malformed/ are the negative
+  # half below; the generated mutant suite (fixtures/mutants/) is discovered
+  # manifest-driven, so an absent or half-written suite fails loudly instead of
+  # shrinking the anchor set (PR #49 review); the source admission fixtures
+  # (fixtures/admission/) belong to scripts/admission-differential.sh; and a
+  # map's two committed artifacts are a map-check-input@1 parity envelope and a
+  # map-verdict@1 composite golden, which scripts/check-map-conformance.sh and
+  # test/MapSpec.hs own.
+  #
+  # Why the exclusions are not the safeguard. This positive half treats "both
+  # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these
+  # roots that is not a check-input@1 envelope decode-fails on both drivers and
+  # is counted as an agreeing byte-parity anchor. Excluding the map's two
+  # filenames fixed the two files that existed and does nothing about the next
+  # one to arrive under a third name. So the discovered set is pinned against
+  # fixtures/ANCHORS.tsv below, exactly as the mutant half pins itself against
+  # its own manifest: a stray unlisted file is a setup failure, never a free
+  # pass.
   if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" \
-      -not -path "$root/admission/*" -print >"$root_anchor_list"; then
+      -not -path "$root/admission/*" -not -name 'map.core.sexp' -not -name 'map.verdict.sexp' \
+      -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"
     exit 2
   fi
@@ -114,6 +128,38 @@ for root in fixtures examples bundles corpus-units; do
     exit 2
   fi
 done
+
+# ---------------------------------------------------------------------------
+# Pin the globbed anchor set against its committed manifest. See the note in
+# the discovery loop for why a filename exclusion is not enough.
+# ---------------------------------------------------------------------------
+anchor_manifest="fixtures/ANCHORS.tsv"
+if [ ! -f "$anchor_manifest" ]; then
+  echo "FAIL: anchor manifest not found: $anchor_manifest (regenerate with scripts/gen-anchor-manifest.sh)"
+  exit 2
+fi
+anchor_listed="$tmp_dir/anchors.listed"
+anchor_discovered="$tmp_dir/anchors.discovered"
+if ! grep -v '^#' "$anchor_manifest" | grep -v '^[[:space:]]*$' | LC_ALL=C sort >"$anchor_listed"; then
+  echo "FAIL: could not read anchor manifest: $anchor_manifest"
+  exit 2
+fi
+if [ ! -s "$anchor_listed" ]; then
+  echo "FAIL: anchor manifest lists no anchors: $anchor_manifest"
+  exit 2
+fi
+if ! cat "$tmp_dir"/anchors.fixtures "$tmp_dir"/anchors.examples   "$tmp_dir"/anchors.bundles "$tmp_dir"/anchors.corpus-units   | LC_ALL=C sort >"$anchor_discovered"; then
+  echo "FAIL: could not enumerate discovered anchors"
+  exit 2
+fi
+if ! cmp -s "$anchor_listed" "$anchor_discovered"; then
+  echo "FAIL: anchor manifest and discovered *.sexp files disagree (regenerate with scripts/gen-anchor-manifest.sh)"
+  echo "  only in manifest:"
+  comm -23 "$anchor_listed" "$anchor_discovered" | sed 's/^/    /'
+  echo "  only on disk:"
+  comm -13 "$anchor_listed" "$anchor_discovered" | sed 's/^/    /'
+  exit 2
+fi
 
 # ---------------------------------------------------------------------------
 # Mutant suite (fixtures/mutants/, M5 tracker #48 T1): manifest-driven
