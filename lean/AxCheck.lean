@@ -105,6 +105,10 @@ import Lara.PW.StatusCheck
 import Lara.Examples.PWStatusCheck
 import Lara.PW.AttackTransport
 import Lara.Examples.PWAttack
+import Lara.PW.Sorted
+import Lara.Examples.PWSorted
+import Lara.PW.Surface
+import Lara.Examples.PWSurface
 
 open Lara
 
@@ -3825,3 +3829,191 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.TermHoles.certificate_context_not_fixed
 #print axioms Lara.Examples.TermHoles.functional_transport_sem
 #print axioms Lara.Examples.TermHoles.relational_transport_sem
+
+/-! ### PW — the `Query_κ` well-sortedness refinement (issue #307) -/
+
+-- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:
+--    no fault IS well-sortedness, each of the two faults is pinned to exactly
+--    its condition, a fault names the atom's own head predicate
+--    (`queryFault_pred`; the total classifier behind it is private, since it
+--    is only meaningful under the gate), and the two exhaust ill-formedness.
+--    `pose` is the sanctioned decision procedure and does not rewrite the
+--    authored claim.
+#print axioms Lara.PW.Sorted.queryFault_eq_none_iff
+#print axioms Lara.PW.Sorted.queryFault_pred
+#print axioms Lara.PW.Sorted.not_wellSorted_of_lookupPred_none
+#print axioms Lara.PW.Sorted.queryFault_undeclaredPredicate_iff
+#print axioms Lara.PW.Sorted.queryFault_illSortedArguments_iff
+#print axioms Lara.PW.Sorted.not_wellSorted_iff_exists_fault
+#print axioms Lara.PW.Sorted.pose_ok_iff
+#print axioms Lara.PW.Sorted.pose_error_iff
+#print axioms Lara.PW.Sorted.pose_ok_val
+#print axioms Lara.PW.Sorted.pose_val_self
+#print axioms Lara.PW.Sorted.query_no_fault
+
+-- 2. What a `gap` still means. `Grounded.statusC_gap_iff` at the world: the
+--    compiled observation gaps exactly when the world declares no complete
+--    argument concluding the claim, so "posed but unsupported" is not a fourth
+--    gap cause but a theorem-level collapse into the third. The refined
+--    `report` splits the remaining conditions, each constructor pinned, and
+--    `report_ne_observed_iff_gap` proves the split moves no PW0 answer.
+#print axioms Lara.PW.Sorted.addresses_iff
+#print axioms Lara.PW.Sorted.cmpStatus_gap_iff_not_addresses
+#print axioms Lara.PW.Sorted.srcStatus_gap_iff_not_addresses
+#print axioms Lara.PW.Sorted.not_gap_of_addresses
+#print axioms Lara.PW.Sorted.status_of_addresses
+#print axioms Lara.PW.Sorted.report_observed_iff
+#print axioms Lara.PW.Sorted.report_unaddressed_iff
+#print axioms Lara.PW.Sorted.report_outOfVocabulary_iff
+#print axioms Lara.PW.Sorted.report_illSorted_iff
+#print axioms Lara.PW.Sorted.sortedWorld_of_nodes
+#print axioms Lara.PW.Sorted.report_ne_observed_iff_gap
+
+-- 3. Posing across a bridge. The refined executable comparison adds one guard
+--    before PW0's three; each fault is pinned and *located* — `vocabFault` is
+--    `trAtom`'s own traversal reporting the first symbol the bridge cannot
+--    carry, and `vocabFault_eq_none_iff` proves the scan is exactly `trAtom`'s
+--    domain condition. No fault carries a `Status`, PW0's
+--    `translationUndefined` is unreachable past the new guard
+--    (`crossComparePosed_ne_translationUndefined`), and
+--    `notPosable_world_independent` is the load-bearing one: a posing fault is
+--    a statement about the two signatures and the bridge, never about a world.
+#print axioms Lara.PW.Sorted.vocabFaultTerm_eq_none_iff
+#print axioms Lara.PW.Sorted.vocabFaultTerms_eq_none_iff
+#print axioms Lara.PW.Sorted.vocabFault_eq_none_iff
+#print axioms Lara.PW.Sorted.vocabFault_isSome_of_trAtom_none
+#print axioms Lara.PW.Sorted.trQueryFault_ne_sourceQuery
+#print axioms Lara.PW.Sorted.trQueryFault_eq_none_iff
+#print axioms Lara.PW.Sorted.notPosable_ne_compared
+#print axioms Lara.PW.Sorted.crossComparePosed_sourceQuery_iff
+#print axioms Lara.PW.Sorted.crossComparePosed_bridgeVocabulary_iff
+#print axioms Lara.PW.Sorted.crossComparePosed_targetQuery_iff
+#print axioms Lara.PW.Sorted.crossComparePosed_compared
+#print axioms Lara.PW.Sorted.crossCompare_some_ne_translationUndefined
+#print axioms Lara.PW.Sorted.crossComparePosed_ne_translationUndefined
+#print axioms Lara.PW.Sorted.notPosable_world_independent
+
+-- 4. The sorted frame: T4 and the valuation coherence again at the refined
+--    query set, and `sat_erase` — the conservativity theorem proving the
+--    refinement changes no answer PW0 could already give.
+#print axioms Lara.PW.Sorted.sat_src_iff_cmp
+#print axioms Lara.PW.Sorted.cmpVal_functional
+#print axioms Lara.PW.Sorted.cmpVal_total
+#print axioms Lara.PW.Sorted.srcVal_functional
+#print axioms Lara.PW.Sorted.srcVal_total
+#print axioms Lara.PW.Sorted.sat_erase
+#print axioms Lara.PW.Sorted.sat_erase_src
+
+-- 5. The witnesses: one world at which PW0 reports `gap` three times for three
+--    different reasons, and the three reports that replace it; the three
+--    posing faults at a bridge, including the sharpened form of
+--    `overlap_translationUndefined`; and the erasure instantiated.
+#print axioms Lara.Examples.PWSorted.pw0_gap_p
+#print axioms Lara.Examples.PWSorted.pw0_gap_s
+#print axioms Lara.Examples.PWSorted.pw0_gap_illSorted
+#print axioms Lara.Examples.PWSorted.pw0_justified_q
+#print axioms Lara.Examples.PWSorted.report_p
+#print axioms Lara.Examples.PWSorted.report_s
+#print axioms Lara.Examples.PWSorted.report_illSorted
+#print axioms Lara.Examples.PWSorted.report_q
+#print axioms Lara.Examples.PWSorted.reports_distinct
+#print axioms Lara.Examples.PWSorted.split_not_change
+#print axioms Lara.Examples.PWSorted.sortedWorld_wOverlap
+#print axioms Lara.Examples.PWSorted.sorted_r_sourceQuery
+#print axioms Lara.Examples.PWSorted.sorted_qz_sourceQuery
+#print axioms Lara.Examples.PWSorted.sorted_q_bridgeVocabulary
+#print axioms Lara.Examples.PWSorted.sorted_s_targetQuery
+#print axioms Lara.Examples.PWSorted.sorted_t_targetIllSorted
+#print axioms Lara.Examples.PWSorted.sorted_t_bridgeVocabulary_con
+#print axioms Lara.Examples.PWSorted.bridge_and_target_faults_distinct
+#print axioms Lara.Examples.PWSorted.sorted_q_compared
+#print axioms Lara.Examples.PWSorted.trQuery_q
+#print axioms Lara.Examples.PWSorted.sorted_dia_q
+#print axioms Lara.Examples.PWSorted.sorted_dia_q_erased
+#print axioms Lara.Examples.PWSorted.sorted_dia_q_src
+
+/-! ### PW — surface syntax for the outer language (issue #307) -/
+
+-- 6. The declared maps, and the one clause the elaborator decides. `ruleOkB`
+--    is a genuine decider for `StructuralBridge.rule_ok` because a policy
+--    carries its rules as a finite list; `leaf_ok` and `cert_ok` cannot be
+--    decided and stay declared premises. `Clause.mem_all` is what makes the
+--    completeness check quantify over the clause *type* rather than over a
+--    hand-maintained list.
+#print axioms Lara.PW.Surface.Clause.mem_all
+#print axioms Lara.PW.Surface.leafMapOf_nil
+#print axioms Lara.PW.Surface.leafMapOf_cons_self
+#print axioms Lara.PW.Surface.leafMapOf_cons_other
+#print axioms Lara.PW.Surface.predMapOf_eq_none
+#print axioms Lara.PW.Surface.ruleOkB_iff
+#print axioms Lara.PW.Surface.bridgeError?_eq_none_iff
+#print axioms Lara.PW.Surface.find?_missing_none_iff
+
+-- 7. Bridge declarations, in the M5 shape: independent judgment, executable
+--    decider, sound/complete/deterministic, then preservation (a derivable
+--    declaration *is* T6's contract) and reflection.
+--    `elabBridge_support_transport` is where `BridgeEnv.canon_shared` becomes
+--    load-bearing: the transported support is a judgment of the target
+--    context's own environment.
+#print axioms Lara.PW.Surface.elabBridge_sound
+#print axioms Lara.PW.Surface.elabBridge_complete
+#print axioms Lara.PW.Surface.elaboratesBridge_deterministic
+#print axioms Lara.PW.Surface.elabBridge_preserves
+#print axioms Lara.PW.Surface.elabBridge_support_transport
+#print axioms Lara.PW.Surface.elabBridge_reflects
+#print axioms Lara.PW.Surface.elabBridge_of_no_rules
+
+-- 8. Posed modal queries. The surface form is untyped and `PW.Form` is
+--    intrinsically typed, so elaboration is a typing pass: names identify
+--    frame indices (`ctxName_inj`), status atoms are posed by `Sorted.pose`,
+--    and the round trip proves the pass renames nothing.
+#print axioms Lara.PW.Surface.Naming.ctxName_inj
+#print axioms Lara.PW.Surface.Naming.bridgeName_inj
+#print axioms Lara.PW.Surface.formError?_eq_none_iff
+#print axioms Lara.PW.Surface.elabForm_sound
+#print axioms Lara.PW.Surface.elabForm_complete
+#print axioms Lara.PW.Surface.elaborates_deterministic
+#print axioms Lara.PW.Surface.elaborates_preserves
+#print axioms Lara.PW.Surface.elaborates_reflects
+#print axioms Lara.PW.Surface.elabForm_unelab
+#print axioms Lara.PW.Surface.elabPosed_ok_iff
+
+-- 9. The surface witnesses: a bridge declaration whose rule clause is
+--    non-vacuous (one positive cell and one per failure mode of `ruleOkB`),
+--    whose `BridgeObligations` are *discharged* rather than assumed, and
+--    across which `elabBridge_support_transport` actually carries a checked
+--    support; and a posed query whose ill-sorted variant is a *typing error at
+--    authoring time* — the fixture that joins the two halves of #307.
+#print axioms Lara.Examples.PWSurface.rule_clause_holds
+#print axioms Lara.Examples.PWSurface.rule_clause_fails
+#print axioms Lara.Examples.PWSurface.rule_clause_fails_mistranslated
+#print axioms Lara.Examples.PWSurface.rule_clause_fails_untranslatable
+#print axioms Lara.Examples.PWSurface.leafMap_declared
+#print axioms Lara.Examples.PWSurface.leafMap_undeclared
+#print axioms Lara.Examples.PWSurface.predMap_declared_after_con
+#print axioms Lara.Examples.PWSurface.conMap_declared
+#print axioms Lara.Examples.PWSurface.conMap_undeclared
+#print axioms Lara.Examples.PWSurface.trAtom_renames_con
+#print axioms Lara.Examples.PWSurface.elaborates_declOK
+#print axioms Lara.Examples.PWSurface.elabBridge_declOK
+#print axioms Lara.Examples.PWSurface.elabBridge_missingClause
+#print axioms Lara.Examples.PWSurface.elabBridge_ruleClauseFails
+#print axioms Lara.Examples.PWSurface.elabBridge_ruleClauseFails_mistranslated
+#print axioms Lara.Examples.PWSurface.elabBridge_nameMismatch
+#print axioms Lara.Examples.PWSurface.elabBridge_sourceMismatch
+#print axioms Lara.Examples.PWSurface.elabBridge_targetMismatch
+#print axioms Lara.Examples.PWSurface.obligations_declOK
+#print axioms Lara.Examples.PWSurface.structuralBridge_declOK
+#print axioms Lara.Examples.PWSurface.trSupport_wDecl
+#print axioms Lara.Examples.PWSurface.hasSupport_wDecl
+#print axioms Lara.Examples.PWSurface.support_transport_declOK
+#print axioms Lara.Examples.PWSurface.elaborates_surfaceQuery
+#print axioms Lara.Examples.PWSurface.elabForm_surfaceQuery
+#print axioms Lara.Examples.PWSurface.unelab_surfaceQuery
+#print axioms Lara.Examples.PWSurface.elab_illSorted
+#print axioms Lara.Examples.PWSurface.elab_outOfVocabulary
+#print axioms Lara.Examples.PWSurface.elab_unknownBridge
+#print axioms Lara.Examples.PWSurface.elab_sourceMismatch
+#print axioms Lara.Examples.PWSurface.elabPosed_surfaceQuery
+#print axioms Lara.Examples.PWSurface.elabPosed_unknownContext
+#print axioms Lara.Examples.PWSurface.surfaceQuery_holds

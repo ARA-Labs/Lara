@@ -1401,3 +1401,79 @@ entries:
   - 'Preserved C49/C53/C54: copying violates context-fixing, so it does not contradict existing transport
     results. No universal collapse theorem or proof phase.'
   - No existing staged observation receives a new closure signal from this bounded spike.
+
+- turn: "2026-09-09_issue307#1"
+  notes:
+    - >-
+      Skipped turn 1 (issue-tracker survey). CLAUDE.md puts routine next-step
+      guidance below the ARA threshold, and nothing in it was a feature, design,
+      theory change, or experiment.
+- turn: "2026-09-09_issue307#2"
+  notes:
+    - >-
+      Routed the abandoned four-way gap split as a dead_end (N307_gap_collapse)
+      rather than folding it into N307_sorted's result. The hypothesis was
+      explicit, it failed for a nameable reason, and the lesson is the load-bearing
+      output of the turn — burying it in an experiment's result would lose exactly
+      the part a future reader needs.
+    - >-
+      Crystallized O162 → C55 via artifact-commitment, not empirical-resolution:
+      the finding is a mechanized theorem plus three documents that depend on it,
+      but no experiment resolved. Status left at hypothesis per the rule that
+      artifact commitment alone does not reach supported, matching the convention
+      C53/C54 set for newly crystallized mechanized results.
+    - >-
+      Did NOT treat "let's do both halves of 307, do it directly and open the pr"
+      as verbal affirmation of any interpretive content. It adopts the scheduling
+      decision, which is a journey fact and went direct as N307_schedule; the
+      interpretive findings did not exist when it was said.
+    - >-
+      Left O163 and O164 staged. Both are one-instance design readings with no
+      closure signal — the user has not seen them, and the code committing to them
+      is the same single instance that produced them, so artifact commitment would
+      be circular here in a way it is not for O162 (whose content is a theorem
+      about the code, not a design preference expressed by it).
+    - >-
+      C55's Conditions record the SortedWorld side condition as evidence against
+      its own first half, rather than only as a caveat. A claim whose static/dynamic
+      dichotomy needed a non-automatic hypothesis to stay sound is weaker than one
+      that did not, and the Conditions field is where that has to show.
+    - >-
+      No contradiction trigger fired. The finding narrows a limitation the PW0
+      record states; it does not contradict any crystallized entry, and the PW0
+      record is a doc rather than a logic-layer entry, so it was edited directly
+      as part of the turn's work rather than through Stage 4.
+- turn: "2026-09-09_issue307#3"
+  notes:
+    - >-
+      Routed the vacuous-obligations finding as a dead_end, not an observation:
+      a hypothesis was held (stating the premise is the honest shape), it failed
+      for a nameable reason, and the lesson is transferable. The fact that a
+      reviewer found it rather than the author does not change its type.
+    - >-
+      Crystallized O163 → H18 via artifact-commitment. The signal is this turn's
+      merge, not last turn's: BridgeEnv gained name/sourceName/targetName because
+      a CtxId is a decidable-equality newtype, which is the observation's own
+      test applied to a field that had been left unread. Widened H18's Rationale
+      past O163's clause-only wording to cover declared identifiers, since that
+      is what the merge actually depends on.
+    - >-
+      Did NOT crystallize O164 (second constructor plus erasure). No signal this
+      turn — nothing in the review touched sat_erase or the frame builder, and
+      the topic is not abandoned either, since half 1 is still live.
+    - >-
+      Did NOT treat the PR review as a reader-report. It is cross-agent feedback,
+      but it targets the Lean development and the docs, not a crystallized
+      logic/ entry, and it arrived as a GitHub review rather than in the
+      contradiction_report shape. Routed its findings as ordinary events.
+    - >-
+      Considered flipping C55 (wrapper separates exactly the conditions decided
+      before the local judgment runs) and rejected it. The review neither
+      confirms nor contradicts C55; making bridgeVocabulary located sharpens
+      *how* a pre-judgment condition is reported, not *which* conditions
+      separate. Status stays hypothesis.
+    - >-
+      Staged O165/O166/O167 rather than crystallizing. All three are ai-suggested
+      generalizations of repairs the reviewer prompted; the user's "address all"
+      adopts the repairs, not the generalized readings.
+

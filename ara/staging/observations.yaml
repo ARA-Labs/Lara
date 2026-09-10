@@ -3473,3 +3473,149 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O162
+  timestamp: 2026-09-09T20:10-07:00
+  provenance: ai-suggested
+  content: >-
+    A wrapper layer built over an unchanged local judgment can only separate
+    reporting conditions that are decidable *before* the local judgment runs.
+    Refining the query type removed the two vocabulary-level conditions from
+    PW0's `gap` because well-sortedness is decided at the signature; the two
+    remaining conditions stayed collapsed because the local status function is a
+    total function of a projection that discards the distinction. Separating them
+    requires editing the local layer, which the wrapper's own discipline forbids.
+  context: >-
+    Issue 307 half 1. Discovered mid-work: the planned four-way `gap` split does
+    not exist, because `Grounded.statusC_gap_iff` plus the completeness of every
+    retained node makes "posed but unsupported" unreachable as a gap. Recorded as
+    a dead end (N307_gap_collapse) and written into three documents so no display
+    can claim closure.
+  potential_type: claim
+  bound_to:
+  - N307_sorted
+  - N307_gap_collapse
+  promoted: true
+  promoted_to: logic/claims.md:C55
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O163
+  timestamp: 2026-09-09T20:10-07:00
+  provenance: ai-suggested
+  content: >-
+    Which clauses of a contract an elaborator can check is decided by the
+    *representation* of the environment component each clause reads, not by the
+    clause's logical shape. T6's three clauses have the same universally
+    quantified form, yet `rule_ok` is decidable (a `Policy` carries its rules as a
+    finite list) while `leaf_ok`, `cert_ok` and the shared canonicalizer are not
+    (a function, an arbitrary `Prop`, and function equality). The design move is
+    to decide the checkable one and *name* the rest as declared premises rather
+    than pretending the elaborator verifies the contract.
+  context: >-
+    Issue 307 half 2. Drove `ruleOkB`/`ruleOkB_iff`,
+    `BridgeObligations`, and `BridgeEnv.canon_shared` being a field rather than a
+    check. Generalized reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N307_surface
+  - N307_clause_checkability
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H18"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O164
+  timestamp: 2026-09-09T20:10-07:00
+  provenance: ai-suggested
+  content: >-
+    A refinement of a frozen contract can leave the contract literally unedited by
+    being built as a *second constructor* over the same components plus an
+    erasure theorem between the two — here `SortedBridgeData.frame` beside
+    `BridgeData.frame`, related by `sat_erase`. The erasure is what converts "we
+    did not break it" from an assertion into a theorem, and it is cheap when the
+    two builders share every field the semantics reads.
+  context: >-
+    Issue 307 half 1. Chosen over editing `Frame.Query`/`Frame.translate` in
+    place, which would have invalidated every PW0/T6/T8/T9 statement. Generalized
+    reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N307_sorted
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O165
+  timestamp: 2026-09-10T09:30-07:00
+  provenance: ai-suggested
+  content: >-
+    A theorem whose premise is the property being exhibited proves nothing about
+    that property, and nothing in the type distinguishes a vacuous premise from a
+    satisfiable one. The failure is invisible to every gate the repository runs —
+    it builds, it is axiom-clean, it is AxCheck-covered — because vacuity is a
+    property of the fixture, not of the proof. The detection move is to try to
+    prove the *negation* of the premise at the fixture, which is cheap when the
+    fixture is concrete and decidable.
+  context: >-
+    #311 review. `structuralBridge_declOK` took `BridgeObligations` as a
+    hypothesis over a fixture whose shared `Gamma` ranges outside the declared
+    symbol map; the reviewer compiled `¬ BridgeObligations …` against the branch.
+    Generalized reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N311_vacuous_obligations
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O166
+  timestamp: 2026-09-10T09:30-07:00
+  provenance: ai-suggested
+  content: >-
+    The M5 discipline's "independent judgment" has two distinct readings, and only
+    the weaker one is usually checked. A judgment can avoid naming the *elaborator*
+    and still name the *decider* — a field defined as `decider … = true` — in which
+    case the sound/complete pair reduces on the substantive clause to bookkeeping
+    over whatever scan surrounds it, and the real content lives entirely in the
+    decider's own `_iff` lemma. Stating the clause semantically and routing
+    sound/complete through that `_iff` restores the intended reading at no proof
+    cost, because the `_iff` already exists.
+  context: >-
+    #311 review. Applied to `ElaboratesBridge.rule_ok` (was `ruleOkB … = true`,
+    now T6's clause) and `Elaborates.status` (was `pose … = .ok q`, now
+    `q.val = c`). Generalized reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N311_located_and_independent
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O167
+  timestamp: 2026-09-10T09:30-07:00
+  provenance: ai-suggested
+  content: >-
+    A located error report can be retrofitted onto a partial function whose `none`
+    carries no reason, without weakening any definedness theorem, by adding a
+    parallel scan over the same traversal and proving the scan's `none` equivalent
+    to the function's domain condition. The equivalence is what lets the fault
+    constructor carry a payload while the `X = none ↔ ∃ y, f x = some y` lemmas
+    keep their shape. Whether the retrofit is worth it tracks how likely the fault
+    is to reach an author, not how deep the traversal is.
+  context: >-
+    #311 review. `PosingFault.bridgeVocabulary` was the one unlocated arm in a
+    module whose stated discipline is that faults are located; a surface-declared
+    bridge always has a finite vocabulary (`predMapOf_eq_none`), which makes it
+    the fault most likely to be hit. Generalized reading not yet adopted.
+  potential_type: heuristic
+  bound_to:
+  - N311_located_and_independent
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+

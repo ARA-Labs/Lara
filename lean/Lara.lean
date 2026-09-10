@@ -273,6 +273,39 @@
 --     Lara.PW.StatusCheck, Lara.Examples.PWStatusCheck.
 --     Neither T6 nor T9 is strengthened: every bridge-level result takes
 --     `StatusBridge` (or an explicit `SupportCorr`) as an extra hypothesis.
+--   * sorted queries and the outer language's surface (issue #307, scheduled
+--     once M5 landed out of the docs/theory-pw0-outer-model.md §5 non-goal
+--     rows and the docs/theory-pw-closeout.md §3 surface-syntax row):
+--     `Query_κ` refines from all of `Atom` to well-sorted claims over `Σ_κ`,
+--     reusing the existing `Sigma` judgment rather than a second one, so an
+--     out-of-vocabulary or ill-sorted claim is not a query and `pose` names
+--     which of the two conditions stopped it — before any world is consulted,
+--     which `notPosable_world_independent` proves. What remains of PW0's
+--     four-way `gap` conflation is one condition and it is a theorem: the
+--     world declares no complete argument concluding the claim
+--     (`cmpStatus_gap_iff_not_addresses`, `Grounded.statusC_gap_iff` at the
+--     world), and "posed but unsupported" cannot gap at all because every
+--     retained argument is complete (`not_gap_of_addresses`). The refined
+--     `report` partitions PW0's answer without moving any other
+--     (`report_ne_observed_iff_gap`), and `sat_erase` proves the sorted model
+--     and PW0's satisfy the same formulas, so nothing PW0 froze is edited —
+--     Lara.PW.Sorted, Lara.Examples.PWSorted, whose headline fixture is one
+--     world reporting `gap` three times for three different reasons.
+--     On top of it the outer language gains authoring forms: a bridge
+--     declaration and an untyped modal query, elaborated in the M5 shape
+--     (independent judgment, executable decider, sound/complete/deterministic,
+--     preservation, reflection). Elaborating a query is a genuine typing pass
+--     — `PW.Form` is intrinsically typed and the surface is not — and its
+--     status-atom case IS `Sorted.pose`, which is where the two halves meet.
+--     Exactly one of T6's three clauses is decidable from the declared
+--     policies (`ruleOkB_iff`); `leaf_ok`, `cert_ok` and the shared
+--     canonicalizer are functions or arbitrary Props and stay declared
+--     premises, so `elabBridge_support_transport` carries T6 to a
+--     surface-authored bridge only against them. Both are *discharged* at the
+--     fixture (`obligations_declOK`), so `bridgeDeclOK` is a real
+--     `StructuralBridge` at a concrete declaration and
+--     `support_transport_declOK` transports a checked support across it —
+--     Lara.PW.Surface, Lara.Examples.PWSurface.
 --   * the fragment/linking context calculus and contextual representation
 --     independence (theory M4 part A, issue #187): fragments with import/export
 --     interfaces, a witnessed link guard, linking that saturates cross-boundary
@@ -403,3 +436,7 @@ import Lara.PW.StatusCheck
 import Lara.Examples.PWStatusCheck
 import Lara.PW.AttackTransport
 import Lara.Examples.PWAttack
+import Lara.PW.Sorted
+import Lara.Examples.PWSorted
+import Lara.PW.Surface
+import Lara.Examples.PWSurface

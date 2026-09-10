@@ -203,3 +203,25 @@
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium
 - **Code ref**: ["CLAUDE.md", "docs/theory-pw-t9-path-composition.md"]
+
+## H18: Decide which contract clauses to check by the representation of what each reads, not by its logical shape
+- **Rationale**: Clauses of one contract can share a universally quantified
+  shape and still differ absolutely in checkability, because what decides it is
+  how the environment component each clause reads is *represented*. T6's
+  `rule_ok` quantifies over all `RuleId` yet is decidable, because a `Policy`
+  carries its rules as a finite list; `leaf_ok` reads `Gamma`, a function on all
+  of `LeafId`, `cert_ok` reads an arbitrary `Prop`, and the shared canonicalizer
+  is function equality — none decidable. Apply the test to every field a
+  declaration writes down, not only to the clauses: a context or bridge
+  *identifier* is a newtype with decidable equality, so it belongs on the checked
+  side, and leaving it unread is what lets a declaration elaborate identically
+  against any environment. Then name the undecidable remainder as declared
+  premises rather than letting the elaborator's success suggest the whole
+  contract was verified — and discharge those premises at least once, at a
+  fixture, so the contract is known to be inhabited.
+- **Sources**: [`the decidable clause and why` ← `lean/Lara/PW/Surface.lean:43` «a finite `List RuleDecl` — so `ruleOkB` decides it and `ruleOkB_iff` proves» [input]; `the undecidable remainder, as a field` ← `lean/Lara/PW/Surface.lean:339` «canon_shared : source.canon = target.canon» [input]; `identifiers moved to the checked side` ← `lean/Lara/PW/Surface.lean:325` «name : BridgeId» [input]; `the premises discharged at a fixture` ← `lean/Lara/Examples/PWSurface.lean:317` «structuralBridgeOf envOK declOK _ elaborates_declOK obligations_declOK» [result]]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: medium
+- **Code ref**: ["lean/Lara/PW/Surface.lean", "lean/Lara/Examples/PWSurface.lean"]
+

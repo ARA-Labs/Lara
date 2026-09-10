@@ -240,6 +240,24 @@ layer separates only the bridge-domain case, and reports it as
 `overlap_translationUndefined` fixes for the source-only claim `s`. The rest
 waits on the M5 well-sortedness refinement.
 
+_Narrowed, not closed, by #307 (`docs/theory-pw-sorted-queries.md`)._ Refining
+`Query_κ` to well-sorted claims over `Σ_κ` removes the two Σ-level conditions:
+an out-of-vocabulary or ill-sorted atom is not a query, so `PW.Sorted.pose`
+reports it — naming which — before any world is consulted, and
+`PW.Sorted.notPosable_world_independent` proves that verdict depends on no
+world at all. `translationUndefined` is likewise split, into *outside the
+bridge's symbol map* and *the target field cannot state this*. The remaining
+two conditions **coincide in this model, by theorem**: every argument an
+accepted unit retains is complete, and `Grounded.statusC` gaps exactly on empty
+complete support, so `PW.Sorted.cmpStatus_gap_iff_not_addresses` reads the
+residual `gap` off one precise condition — the world declares no complete
+argument concluding the claim — and `PW.Sorted.not_gap_of_addresses` says
+nothing else produces one. Separating an incomplete attempt from an absent one
+would need `holes(P, p)` at the instance layer, which
+`Consistency.completeClaimFor` deliberately does not compute. So the count goes
+from four conflated conditions to two reported ones plus a proved collapse, and
+no display may call this limitation closed.
+
 **3. `Context` fixes the checking environment, not a scientific state.** A
 `Context` is (Σ, Policy, Registry) plus the checker parameters; two worlds of
 one context may differ in program, admitted evidence, declared supports, and
@@ -262,8 +280,8 @@ spike index and the home of everything the tracker deferred.
 | Approximation bridges | `docs/theory-pw-closeout.md` §3 |
 | Epistemic relations, dynamic update operators, hybrid/named-world operators | `docs/theory-pw-closeout.md` §3 |
 | Global scenarios | `docs/theory-pw-closeout.md` §3 |
-| Surface syntax for the outer language | M5 surface layer (#188) |
-| Well-sortedness refinement of `Query_κ` | M5 surface layer (#188); limitation 2 above |
+| Surface syntax for the outer language | **Landed** (#307) — `docs/theory-pw-sorted-queries.md` |
+| Well-sortedness refinement of `Query_κ` | **Landed** (#307) — `docs/theory-pw-sorted-queries.md`; limitation 2 above |
 | Sensitivity predicates (`WorldSensitive`, `ContextSensitive`) | In the design doc but **not** in #192's Work list — excluded as YAGNI |
 | Stronger modal laws (T, 4, B, D, 5) | Not posited; they belong only to bridges whose accepted relations satisfy the corresponding relational laws. All five are refuted on PW0-legal frames: `sat_T_fails`, `sat_D_fails`, `sat_B_fails`, `sat_5_fails` (two-world frame), `sat_4_fails` (three-world chain) |
 

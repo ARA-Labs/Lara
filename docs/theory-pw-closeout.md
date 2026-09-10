@@ -6,6 +6,14 @@ document is the spike's index and the durable home for the work the tracker
 deferred, so the deferral survives the tracker's closure. It records no new
 result: each frozen contract keeps its own document._
 
+_Updated 2026-09-09: the deferrals this document and
+`docs/theory-pw0-outer-model.md` §5 were holding for the M5 surface machinery
+were scheduled and landed as #307 — the `Query_κ` well-sortedness refinement
+(a `docs/theory-pw0-outer-model.md` §5 non-goal row) and the outer language's
+surface syntax (the §3 row below, which mentioned the refinement in prose).
+Their frozen contract is `docs/theory-pw-sorted-queries.md`, listed in §1
+below. Everything else in §3 stands._
+
 _What the wrapper is, in one sentence: an outer model that treats each
 checking context (its vocabulary, policy, setting) as a world, so that
 support and status established in one world can be transported to another
@@ -23,9 +31,10 @@ deliberately not built.
 | T6 — exact checked-support transport | #191 | #223, #230 (off-identity `cert_ok` witness, #224) | `Lara/PW/{Structural,Translation}.lean`, `Lara/Examples/PWStructural.lean` | `docs/theory-pw-t6-structural-transport.md` |
 | T8 — conditional status preservation | #193 | #240; #244 (decider, #239); #246 (`AttackBridge`, #238) | `Lara/PW/{Status,AFBisim,StatusCheck,AttackTransport}.lean`, `Lara/Examples/{PWStatus,PWStatusCheck,PWAttack}.lean` | `docs/theory-pw-t8-status-preservation.md` |
 | T9 — exact structural-path composition | #190 | #233, #236; #243 (executable witnesses, #235); #245 (traversal seam, #234) | `Lara/PW/Compose.lean`, `Lara/Examples/PWCompose.lean` | `docs/theory-pw-t9-path-composition.md` |
+| Sorted queries and the outer surface — `Query_κ` well-sortedness, the refined `gap` report, bridge and query authoring forms | #307 | #311 | `Lara/PW/{Sorted,Surface}.lean`, `Lara/Examples/{PWSorted,PWSurface}.lean` | `docs/theory-pw-sorted-queries.md` |
 
-Stable declaration names for all four are in `docs/paper-lean-name-map.md`
-§§PW0, PW-T6, PW-T8, PW-T9.
+Stable declaration names for all five are in `docs/paper-lean-name-map.md`
+§§PW0, PW-T6, PW-T8, PW-T9, PW-sorted.
 
 ## 2. Gate record
 
@@ -42,8 +51,9 @@ small enough to make T6 feasible"* — was sized in `docs/theory-pw0-outer-model
 
 ## 3. Deferred work (moved here from tracker #189)
 
-Nothing below is scheduled. This is the list the tracker carried; it lives
-here now because a closed issue is a poor home for a standing decision.
+Nothing below is scheduled except where struck through. This is the list the
+tracker carried; it lives here now because a closed issue is a poor home for a
+standing decision.
 
 | Deferred | Condition for scheduling |
 |---|---|
@@ -53,7 +63,7 @@ here now because a closed issue is a poor home for a standing decision.
 | Dynamic modal update operators | None set. |
 | Hybrid / named-world operators | None set. |
 | Global scenarios | None set. |
-| Surface syntax for the outer language | None set; the outer language stays Lean-side. `Query_κ` well-sortedness is the M5-side refinement noted in `docs/theory-pw0-outer-model.md` limitation 2. |
+| ~~Surface syntax for the outer language~~ | This row recorded **no scheduling condition**. The condition it was really waiting on — M5's sorting machinery (#188) — landed, and the row was then **scheduled and landed as #307**, together with the `Query_κ` well-sortedness refinement it mentioned in prose (a `docs/theory-pw0-outer-model.md` §5 row, not a row of this table). Both are in `docs/theory-pw-sorted-queries.md`. Note what did *not* land: the outer language still has no concrete parser or wire format, and no Haskell runtime to conform against — the surface is a structured AST plus a verified elaboration, the same cut `Lara.Surface` makes. That gap is now tracked as #314, and the unjoined declaration↔`Naming` bridge link as #313. |
 
 Also standing from the tracker, and unchanged: do not weaken a failed theorem
 into a definitional restatement, and do not move any of the above into the core

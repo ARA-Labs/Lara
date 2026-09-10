@@ -9158,3 +9158,240 @@ tree:
   - N305_g0_checks
   - docs/theory-m4-g0-interface-spike.md
   status: resolved
+- id: N307_schedule
+  type: decision
+  title: >-
+    Schedule both halves of issue 307 out of the PW close-out's deferred list
+  provenance: user
+  timestamp: 2026-09-09T20:10-07:00
+  choice: >-
+    Execute both halves of issue 307 directly and open the PR — the `Query_κ`
+    well-sortedness refinement and the outer language's surface syntax.
+  alternatives:
+  - >-
+    Half 1 only — the substantive half; half 2 was marked optional and
+    gate-separately on the issue
+  - >-
+    Issue 306 (docs-only paper-display pointers) first
+  - >-
+    Leave both deferred
+  evidence:
+  - docs/theory-pw-closeout.md
+  - docs/theory-pw0-outer-model.md
+  status: resolved
+- id: N307_sorted
+  type: experiment
+  title: >-
+    Mechanize the Query_κ well-sortedness refinement
+  provenance: ai-executed
+  timestamp: 2026-09-09T20:10-07:00
+  parent: N307_schedule
+  result: >-
+    Queries refine to `{c : Atom // Sigma.WellSorted sg c}`, reusing result 13's
+    judgment. The two query faults are the two arms of `Sigma.wsAtom` and exhaust
+    ill-formedness. `notPosable_world_independent` proves a posing fault consults
+    no world — the same verdict for any candidate list, acceptance predicate and
+    status function. `translationUndefined` splits into `bridgeVocabulary` and
+    `targetQuery`. `sat_erase` proves the sorted model and PW0's satisfy the same
+    formulas, so nothing PW0 froze needed editing. Witness — one world at which
+    PW0 reports `gap` three times for three reasons, and three pairwise-distinct
+    refined reports (`reports_distinct`), all three still PW0 gaps
+    (`split_not_change`).
+  evidence:
+  - ara/evidence/proofs/pw_sorted_queries_307.md
+  - docs/theory-pw-sorted-queries.md
+  - lean/Lara/PW/Sorted.lean
+  - lean/Lara/Examples/PWSorted.lean
+  status: resolved
+- id: N307_gap_collapse
+  type: dead_end
+  title: >-
+    The planned four-way split of PW0's gap report
+  provenance: ai-executed
+  timestamp: 2026-09-09T20:10-07:00
+  parent: N307_sorted
+  hypothesis: >-
+    PW0 limitation 2 names four conditions `gap` conflates — out of vocabulary,
+    ill-sorted, not posed, posed but unsupported — so the refinement should
+    report four distinguishable outcomes.
+  failure_mode: >-
+    Two of the four are not separable at the outer layer.
+    `Grounded.statusC_gap_iff` already proves `statusC` gaps exactly on empty
+    complete support, and every argument an accepted unit retains is complete
+    (`Compile.CheckedNode.valid` carries the empty obligation list;
+    `Unit.CheckedUnit.nodes_terms` ties nodes to `program.args`). So an addressed
+    claim cannot gap at all, and "posed but unsupported" surfaces as
+    `defeated`/`contested` rather than as a fourth gap cause.
+  lesson: >-
+    Limitation 2 is narrowed, not closed — four conflated conditions become two
+    reported ones plus a proved collapse. Separating an incomplete attempt from
+    an absent one needs `holes(P, p)` at the instance layer, which
+    `Consistency.completeClaimFor` deliberately does not compute (N17 point 1),
+    and computing it is a change to the *local* layer, which the wrapper's gate-1
+    discipline forbids. The negative was written into three places — the new
+    theory record, the PW0 record's limitation 2, and the name map's Not X notes
+    — so a paper display cannot quietly claim closure.
+  evidence:
+  - ara/evidence/proofs/pw_sorted_queries_307.md
+  - docs/theory-pw-sorted-queries.md
+  - docs/theory-pw0-outer-model.md
+  status: resolved
+- id: N307_sorted_world
+  type: decision
+  title: >-
+    State SortedWorld as an explicit hypothesis rather than deriving it
+  provenance: ai-suggested
+  timestamp: 2026-09-09T20:10-07:00
+  parent: N307_sorted
+  choice: >-
+    `report_ne_observed_iff_gap` takes `SortedWorld` as a hypothesis. `Gamma` is a
+    checker parameter, so an admitted evidence leaf can carry an atom outside
+    `Σ_κ`; at such a world an ill-sorted atom could be `justified` and the
+    refinement would change an answer rather than split one.
+    `sortedWorld_of_nodes` discharges it from a finite node check when
+    `canon = id`.
+  alternatives:
+  - >-
+    State the theorem unconditionally — unsound, since Gamma is unconstrained
+  - >-
+    Constrain `Context` to carry a Σ-well-sorted Gamma — edits PW0's frozen
+    `Context`
+  evidence:
+  - lean/Lara/PW/Sorted.lean
+  - ara/evidence/proofs/pw_sorted_queries_307.md
+  status: resolved
+- id: N307_surface
+  type: experiment
+  title: >-
+    Mechanize the outer language's surface, in the M5 shape
+  provenance: ai-executed
+  timestamp: 2026-09-09T20:10-07:00
+  parent: N307_schedule
+  also_depends_on:
+  - N307_sorted
+  result: >-
+    Two authoring forms — a bridge declaration and an untyped modal query — each
+    with an independent syntax-directed judgment, an executable decider,
+    sound/complete/deterministic, preservation and reflection. Elaborating a
+    query is a genuine typing pass (`PW.Form` is intrinsically typed, `SForm` is
+    not) and its status-atom case IS `Sorted.pose`, which is where the two halves
+    meet. Exactly one of T6's three clauses is decidable from the declared
+    policies (`ruleOkB_iff`); `leaf_ok`, `cert_ok` and the shared canonicalizer
+    are functions or arbitrary Props and stay declared premises, so
+    `elabBridge_support_transport` carries T6 to a surface-authored bridge only
+    against them. No parser and no wire format — the input is a structured AST,
+    the same cut `Lara.Surface` makes.
+  evidence:
+  - ara/evidence/proofs/pw_sorted_queries_307.md
+  - docs/theory-pw-sorted-queries.md
+  - lean/Lara/PW/Surface.lean
+  - lean/Lara/Examples/PWSurface.lean
+  status: resolved
+- id: N307_clause_checkability
+  type: decision
+  title: >-
+    Decide the one checkable clause; declare the other three as premises
+  provenance: ai-suggested
+  timestamp: 2026-09-09T20:10-07:00
+  parent: N307_surface
+  choice: >-
+    `ruleOkB` decides `StructuralBridge.rule_ok` because `Policy` carries its
+    rules as a finite `List RuleDecl`; `leaf_ok`, `cert_ok` and the shared
+    canonicalizer read functions or an arbitrary `Prop` and become named declared
+    premises (`BridgeObligations`, `BridgeEnv.canon_shared`) rather than checks
+    the elaborator pretends to perform.
+  alternatives:
+  - >-
+    Check all three — impossible, since function equality and an arbitrary Prop
+    are undecidable
+  - >-
+    Declare all three — discards the one real check a declared symbol map buys
+  evidence:
+  - lean/Lara/PW/Surface.lean
+  - ara/evidence/proofs/pw_sorted_queries_307.md
+  status: resolved
+- id: N311_vacuous_obligations
+  type: dead_end
+  title: >-
+    Stating a bridge's undecidable clauses as a hypothesis over the shared
+    fixture Gamma
+  provenance: ai-executed
+  timestamp: 2026-09-10T09:30-07:00
+  parent: N307_surface
+  also_depends_on:
+  - N307_clause_checkability
+  hypothesis: >-
+    The two T6 clauses the elaborator cannot decide can be exhibited by a theorem
+    that takes `BridgeObligations` as a premise over the existing `Examples.PW`
+    fixture, whose two contexts share `Gamma := ΓEx`. Stating the premise rather
+    than discharging it was defended in the docstring as "the honest shape — a
+    caller with a different `Gamma` owes a different proof".
+  failure_mode: >-
+    The premise is unsatisfiable at that fixture, so the theorem is vacuous while
+    reading as evidence. `ΓEx l3 = s()`, and the declaration renames only `p` and
+    `q`, so `trAtom` on the leaf's atom is `none` and no witness can satisfy
+    `leaf_ok`; `l1` fails independently because the renamed leaf `l2` carries
+    `q()` where the translated `p()` is required. No `StructuralBridge` was
+    exhibited anywhere in the PR, and `elabBridge_support_transport` was never
+    instantiated — while the theory record presented both as established. Found
+    by the #311 reviewer, who compiled `¬ BridgeObligations …` against the branch.
+  lesson: >-
+    A theorem that takes a contract as a *hypothesis* is not evidence the contract
+    is inhabited, and at the type level a vacuous premise is indistinguishable
+    from a discharged one. Where a fixture exists to show a construction fires, it
+    must discharge the premise, not assume it. The repair was a `Gamma` pair
+    *inside* the declared vocabulary, so `obligations_declOK` is a proof and
+    `bridgeDeclOK` a real `StructuralBridge`; the same fixture then instantiates
+    the transport theorem.
+  status: resolved
+- id: N311_located_and_independent
+  type: decision
+  title: >-
+    Locate every fault and state each judgment independently of its own decider
+  provenance: ai-executed
+  timestamp: 2026-09-10T09:30-07:00
+  parent: N307_surface
+  also_depends_on:
+  - N311_vacuous_obligations
+  choice: >-
+    Three changes taken together, all from the #311 review. (1) Every reported
+    fault names its symbol: `PosingFault.bridgeVocabulary` carries an
+    `OutOfVocabulary`, computed by `vocabFault` — `trAtom`'s own traversal —
+    with `vocabFault_eq_none_iff` proving the scan is exactly `trAtom`'s domain
+    condition, so no definedness theorem weakens. (2) Each independent judgment
+    states its clause semantically rather than as its decider's success:
+    `ElaboratesBridge.rule_ok` is T6's clause verbatim and `Elaborates.status` is
+    `q.val = c`, with `ruleOkB_iff` and `pose_ok_val`/`pose_val_self` bridging to
+    the executables — so sound/complete carry content instead of being bookkeeping
+    over the remaining scan. (3) Data a declaration writes down is read:
+    `BridgeEnv` carries `name`/`sourceName`/`targetName` and `elabBridge` checks
+    them, with a `BridgeError` arm and a witness each.
+  alternatives:
+  - >-
+    Soften the docstrings instead — say the judgment is independent of the
+    *elaborator* only, and that context resolution is the caller's
+  - >-
+    Drop `BridgeDecl.id`/`.source`/`.target` as inert fields
+  - >-
+    Leave `bridgeVocabulary` unlocated, since `trAtom` returns a bare `none`
+  evidence:
+  - lean/Lara/PW/Sorted.lean
+  - lean/Lara/PW/Surface.lean
+  - ara/evidence/proofs/pw_sorted_queries_307.md
+  status: resolved
+- id: N311_unjoined_halves
+  type: question
+  title: >-
+    A declared bridge cannot yet be named by a posed query
+  provenance: ai-executed
+  timestamp: 2026-09-10T09:30-07:00
+  parent: N311_located_and_independent
+  description: >-
+    `BridgeDecl.id` is now checked against `BridgeEnv.name`, but nothing relates a
+    declared `BridgeId` to `Naming.bridgeOf` on the query side, so no theorem says
+    the bridge a posed query travels along is the bridge a declaration declared.
+    The two authoring forms meet at the status-atom level (`Sorted.pose`) and not
+    at the bridge level. Opened as issue 313; the missing concrete parser and wire
+    format, previously recorded only as a doc table cell, opened as issue 314.
+  status: open
+

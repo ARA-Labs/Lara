@@ -626,3 +626,18 @@ sessions:
   claims_touched:
   - C53
   open_threads: 0
+
+- id: 2026-09-09_issue307
+  date: '2026-09-09'
+  summary: >-
+    Issue 307, both halves: Query_κ well-sortedness and the outer language's
+    surface. PW0 limitation 2 narrowed, not closed — two of its four conflated
+    conditions coincide by theorem. PR 311's review then found the bridge fixture's
+    obligations vacuous; discharged, every fault located, judgments stated
+    independently of their deciders.
+  turn_count: 3
+  events_count: 17
+  claims_touched:
+  - C55
+  - H18
+  open_threads: 5

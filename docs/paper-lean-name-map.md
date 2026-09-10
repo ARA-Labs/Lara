@@ -254,10 +254,10 @@ Notes for the paper wording:
 
 - Read-only audit; no Lean changes (happy path of #68).
 - `lean/AxCheck.lean` already `#print axioms`-gates every headline row:
-  `srcStatus_iff_checked` (:704), `srcIn_iff_checkedGrounded` (:702),
-  `status_preservation` (:903), `grounded_stable` (:891),
-  `contrary_claims_not_both_justified` (:942), `strict_step_sound` (:389),
-  `ndBackend` (:391), `raBackend` (:417), `ndUses_eq_infer_deps` (:533).
+  `srcStatus_iff_checked` (:708), `srcIn_iff_checkedGrounded` (:706),
+  `status_preservation` (:907), `grounded_stable` (:895),
+  `contrary_claims_not_both_justified` (:946), `strict_step_sound` (:393),
+  `ndBackend` (:395), `raBackend` (:421), `ndUses_eq_infer_deps` (:537).
 - Remaining paper-side step (P1–P3 edits in the Overleaf repo): check each
   display side-by-side against the quoted quantifiers/hypotheses above, and
   in particular ensure `thm:preservation` cites `srcStatus_iff_checked`
@@ -1266,6 +1266,112 @@ and `Lara/Examples/PWStatusCheck.lean`:
   `StructuralBridge.comp B₂ B₁`.
 - `PW.sat_status_iff_box` is **not** specific to `justified`. It holds at
   every `Status`; the executable cell happens to be at `defeated`.
+
+## PW-sorted queries and the outer surface (issue #307)
+
+Tracker #189's two remaining deferrals — the `docs/theory-pw0-outer-model.md`
+§5 `Query_κ` well-sortedness row and the `docs/theory-pw-closeout.md` §3
+surface-syntax row — scheduled once M5 (#188) landed. The frozen contract, the
+theorem table, and the one limitation this could **not** remove live in
+`docs/theory-pw-sorted-queries.md`; this section is the declaration index.
+Every *theorem* row is `lean/AxCheck.lean`-gated (sorry-free, standard trio, no
+`native_decide`). Rows naming `Query`, `pose`, `Report`, `SortedBridgeData`,
+`SForm`, `BridgeDecl`, and the `elab*` functions name *definitions*,
+transitively audited through the gated theorems that mention them.
+
+No paper display cites these yet. The rows exist so that any display refining
+`docs/theory-pw0-outer-model.md` limitation 2, or claiming an authoring form
+for the outer language, can cite a stable key — and so that a display which
+calls limitation 2 *closed* can be caught against the **Not X** notes below.
+
+| Object | Lean declaration | File |
+|---|---|---|
+| A query of a context (`Query_κ` refined to well-sorted claims over `Σ_κ`) | `PW.Sorted.Query` | `Lara/PW/Sorted.lean` |
+| The two query faults, and the located report | `PW.Sorted.QueryFault` (`undeclaredPredicate`, `illSortedArguments`), `PW.Sorted.queryFault` | `Lara/PW/Sorted.lean` |
+| No fault is exactly well-sortedness | `PW.Sorted.queryFault_eq_none_iff` | `Lara/PW/Sorted.lean` |
+| Each fault pinned to exactly its condition | `PW.Sorted.queryFault_undeclaredPredicate_iff`, `PW.Sorted.queryFault_illSortedArguments_iff` | `Lara/PW/Sorted.lean` |
+| A fault is located at the atom's own head predicate | `PW.Sorted.queryFault_pred` | `Lara/PW/Sorted.lean` |
+| The two faults exhaust ill-formedness | `PW.Sorted.not_wellSorted_iff_exists_fault` | `Lara/PW/Sorted.lean` |
+| The sanctioned query constructor, and its laws | `PW.Sorted.pose`; `pose_ok_iff`, `pose_error_iff`, `pose_ok_val`, `pose_val_self`, `query_no_fault` | `Lara/PW/Sorted.lean` |
+| The world addresses a claim (it declares a complete argument concluding it) | `PW.Sorted.Addresses`; `PW.Sorted.addresses_iff` | `Lara/PW/Sorted.lean` |
+| **What a `gap` means, exactly** | `PW.Sorted.cmpStatus_gap_iff_not_addresses`; source side `PW.Sorted.srcStatus_gap_iff_not_addresses` | `Lara/PW/Sorted.lean` |
+| An addressed claim never gaps; it gets a substantive status | `PW.Sorted.not_gap_of_addresses`, `PW.Sorted.status_of_addresses` | `Lara/PW/Sorted.lean` |
+| The refined report and its four pinned constructors | `PW.Sorted.Report`, `PW.Sorted.report`; `report_observed_iff`, `report_unaddressed_iff`, `report_outOfVocabulary_iff`, `report_illSorted_iff` | `Lara/PW/Sorted.lean` |
+| The world-level hypothesis the refinement needs, and its finite discharge | `PW.Sorted.SortedWorld`, `PW.Sorted.sortedWorld_of_nodes` | `Lara/PW/Sorted.lean` |
+| **The refinement splits PW0's `gap` and moves no other answer** | `PW.Sorted.report_ne_observed_iff_gap` | `Lara/PW/Sorted.lean` |
+| The bridge-level posing faults, and the typed bridge translation | `PW.Sorted.PosingFault`, `PW.Sorted.trQuery`, `PW.Sorted.trQueryFault`; `trQueryFault_eq_none_iff`, `trQueryFault_ne_sourceQuery` | `Lara/PW/Sorted.lean` |
+| The vocabulary fault's located symbol, and that the scan is exactly `trAtom`'s domain condition | `PW.Sorted.OutOfVocabulary` (`pred`, `con`), `PW.Sorted.vocabFault`, `vocabFaultTerm`, `vocabFaultTerms`; `vocabFault_eq_none_iff`, `vocabFault_isSome_of_trAtom_none`, `vocabFaultTerm_eq_none_iff`, `vocabFaultTerms_eq_none_iff` | `Lara/PW/Sorted.lean` |
+| PW0's `translationUndefined` is unreachable past the new guard | `PW.Sorted.crossComparePosed_ne_translationUndefined`, `PW.Sorted.crossCompare_some_ne_translationUndefined` | `Lara/PW/Sorted.lean` |
+| The refined executable comparison (one guard before PW0's three) | `PW.Sorted.SortedResult`, `PW.Sorted.crossComparePosed` | `Lara/PW/Sorted.lean` |
+| Each bridge fault pinned; no fault carries a status | `PW.Sorted.crossComparePosed_sourceQuery_iff`, `_bridgeVocabulary_iff`, `_targetQuery_iff`, `PW.Sorted.notPosable_ne_compared` | `Lara/PW/Sorted.lean` |
+| **A posing fault consults no world** | `PW.Sorted.notPosable_world_independent` | `Lara/PW/Sorted.lean` |
+| Where PW0 answered, the refined interface returns PW0's answer | `PW.Sorted.crossComparePosed_compared` | `Lara/PW/Sorted.lean` |
+| The sorted frame, its valuations, and T4 at it | `PW.Sorted.SortedBridgeData`, `PW.Sorted.SortedBridgeData.frame`, `PW.Sorted.srcVal`/`cmpVal`; `sat_src_iff_cmp`, `cmpVal_functional`, `cmpVal_total`, `srcVal_functional`, `srcVal_total` | `Lara/PW/Sorted.lean` |
+| **Conservativity over PW0** (the two models satisfy the same formulas) | `PW.Sorted.SortedBridgeData.erase`, `PW.Sorted.eraseForm`; `PW.Sorted.sat_erase`, `PW.Sorted.sat_erase_src` | `Lara/PW/Sorted.lean` |
+| The outer surface AST | `PW.Surface.CtxId`, `BridgeId`, `SymEntry`, `LeafEntry`, `Clause` (+ `Clause.text`, `Clause.all`, `Clause.mem_all`), `BridgeDecl`, `SForm`, `Posed` | `Lara/PW/Surface.lean` |
+| The maps a declaration denotes, and their laws | `PW.Surface.predMapOf`, `conMapOf`, `symMapOf`, `leafMapOf`; `leafMapOf_nil`, `leafMapOf_cons_self`, `leafMapOf_cons_other`, `predMapOf_eq_none` | `Lara/PW/Surface.lean` |
+| **The one T6 clause the elaborator decides** | `PW.Surface.ruleOkB`; `PW.Surface.ruleOkB_iff` | `Lara/PW/Surface.lean` |
+| The two clauses it cannot decide, named | `PW.Surface.BridgeObligations` (fields `leaf_ok`, `cert_ok`) | `Lara/PW/Surface.lean` |
+| The declared environment, carrying the bridge and context names and the undecidable canonicalizer agreement | `PW.Surface.BridgeEnv` (fields `name`, `sourceName`, `targetName`, `canon_shared`) | `Lara/PW/Surface.lean` |
+| Bridge elaboration: independent judgment, decider, and the M5 trio | `PW.Surface.ElaboratesBridge`, `PW.Surface.elabBridge`, `PW.Surface.Bridge`, `PW.Surface.BridgeError`; `elabBridge_sound`, `elabBridge_complete`, `elaboratesBridge_deterministic`, `find?_missing_none_iff`, `bridgeError?_eq_none_iff`, `elabBridge_of_no_rules` | `Lara/PW/Surface.lean` |
+| **Preservation — a surface bridge is a `StructuralBridge`** | `PW.Surface.structuralBridgeOf`, `PW.Surface.elabBridge_preserves` | `Lara/PW/Surface.lean` |
+| **T6 at a surface-authored bridge**, concluding in the target's own judgment | `PW.Surface.elabBridge_support_transport` | `Lara/PW/Surface.lean` |
+| Bridge reflection | `PW.Surface.elabBridge_reflects` | `Lara/PW/Surface.lean` |
+| The naming of a sorted frame, and that names identify indices | `PW.Surface.Naming`; `PW.Surface.Naming.ctxName_inj`, `PW.Surface.Naming.bridgeName_inj` | `Lara/PW/Surface.lean` |
+| Query elaboration: independent judgment, decider, and the M5 trio | `PW.Surface.Elaborates`, `PW.Surface.elabForm`, `PW.Surface.FormError`; `elabForm_sound`, `elabForm_complete`, `elaborates_deterministic`, `formError?_eq_none_iff` | `Lara/PW/Surface.lean` |
+| **Preservation — the typing pass renames nothing** (round trip) | `PW.Surface.unelab`; `PW.Surface.elaborates_preserves` | `Lara/PW/Surface.lean` |
+| Query reflection, and the other round trip | `PW.Surface.elaborates_reflects`, `PW.Surface.elabForm_unelab` | `Lara/PW/Surface.lean` |
+| Posing a query in a named context | `PW.Surface.elabPosed`; `PW.Surface.elabPosed_ok_iff` | `Lara/PW/Surface.lean` |
+| **The headline witness: one world, three PW0 `gap`s, three different reports** | `Examples.PWSorted.pw0_gap_p`, `pw0_gap_s`, `pw0_gap_illSorted`, `pw0_justified_q`, `report_p`, `report_s`, `report_illSorted`, `report_q`, `reports_distinct`, `split_not_change`, `sortedWorld_wOverlap` | `Lara/Examples/PWSorted.lean` |
+| The three bridge posing faults, and the sharpened `translationUndefined` | `Examples.PWSorted.sorted_r_sourceQuery`, `sorted_qz_sourceQuery`, `sorted_q_bridgeVocabulary`, `sorted_s_targetQuery`, `sorted_t_targetIllSorted`, `sorted_t_bridgeVocabulary_con`, `bridge_and_target_faults_distinct`, `sorted_q_compared` | `Lara/Examples/PWSorted.lean` |
+| The sorted frame instantiated, and the erasure exercised | `Examples.PWSorted.bridgeSorted`, `trQuery_q`, `sorted_dia_q`, `sorted_dia_q_erased`, `sorted_dia_q_src` | `Lara/Examples/PWSorted.lean` |
+| A declared bridge whose rule clause is non-vacuous, with one cell per failure mode | `Examples.PWSurface.rule_clause_holds`, `rule_clause_fails`, `rule_clause_fails_mistranslated`, `rule_clause_fails_untranslatable`, `elaborates_declOK`, `elabBridge_declOK`, `elabBridge_missingClause`, `elabBridge_ruleClauseFails`, `elabBridge_ruleClauseFails_mistranslated`, `elabBridge_nameMismatch`, `elabBridge_sourceMismatch`, `elabBridge_targetMismatch` | `Lara/Examples/PWSurface.lean` |
+| The declared maps in both namespaces | `Examples.PWSurface.leafMap_declared`, `leafMap_undeclared`, `predMap_declared_after_con`, `conMap_declared`, `conMap_undeclared`, `trAtom_renames_con` | `Lara/Examples/PWSurface.lean` |
+| **The declaration exhibited as a `StructuralBridge`, with the obligations discharged, and T6 transported across it** | `Examples.PWSurface.obligations_declOK`, `bridgeDeclOK`, `structuralBridge_declOK`, `trSupport_wDecl`, `hasSupport_wDecl`, `support_transport_declOK` | `Lara/Examples/PWSurface.lean` |
+| A posed query, its round trip, and its typing errors | `Examples.PWSurface.naming`, `elaborates_surfaceQuery`, `elabForm_surfaceQuery`, `unelab_surfaceQuery`, `elabPosed_surfaceQuery`, `elabPosed_unknownContext`, `surfaceQuery_holds`, `elab_illSorted`, `elab_outOfVocabulary`, `elab_unknownBridge`, `elab_sourceMismatch` | `Lara/Examples/PWSurface.lean` |
+
+**Not X** notes:
+
+- This does **not** close PW0 limitation 2. Four conflated conditions become
+  two *reported* ones plus a proved collapse: "not posed" and "posed but
+  unsupported" coincide because every argument an accepted unit retains is
+  complete (`Compile.CheckedNode.valid` carries the empty obligation list) and
+  `Grounded.statusC` gaps exactly on empty complete support
+  (`Grounded.statusC_gap_iff`). A display must say *narrowed*, not *closed*.
+  Separating an incomplete attempt from an absent one needs `holes(P, p)` at
+  the instance layer, which `Consistency.completeClaimFor` deliberately does
+  not compute.
+- `PW.Sorted.report_ne_observed_iff_gap` is **not** unconditional. `Gamma` is a
+  checker parameter, so an admitted evidence leaf can carry an atom outside
+  `Σ_κ`; `SortedWorld` is the missing condition and is a hypothesis, not a
+  theorem. `sortedWorld_of_nodes` discharges it only when `canon = id`.
+- Nothing PW0 froze was edited. `PW.Frame`, `PW.Sat`, `PW.crossCompare`,
+  `PW.CrossResult` and `PW.IncomparabilityReason` are unchanged; the
+  refinement is a second frame builder (`SortedBridgeData.frame`) and an
+  earlier guard (`crossComparePosed`), related to PW0 by `sat_erase`.
+- `PW.Sorted.trQuery` is **not** edge-dependent translation. It is
+  bridge-global, exactly as `Frame.translate` was; PW0 limitation 3 and T6
+  limitation 1 stand unchanged.
+- The surface is **not** a concrete syntax. There is no parser, no wire format,
+  and no Haskell runtime to conform against: the input is a structured AST and
+  the theorem begins after concrete parsing, the same cut `Lara.Surface` makes
+  (`docs/theory-m5-surface-calculus.md`, "Motivation and Trusted Boundary").
+  Tracked as #314.
+- The two authoring forms are **not** joined at the bridge level. `BridgeEnv`
+  carries the bridge and context names, so `BridgeDecl.id`/`.source`/`.target`
+  are checked against the environment a declaration is elaborated in; but
+  nothing relates a declared `BridgeId` to `Naming.bridgeOf`, so no theorem
+  says the bridge a posed query names is the bridge a declaration declared.
+  The halves meet at the status-atom level (`Sorted.pose`). Tracked as #313.
+- `PW.Surface.elabBridge` does **not** verify T6's contract. It decides one
+  clause of three. `leaf_ok`, `cert_ok` and the canonicalizer agreement are
+  undecidable — `Gamma` and `canon` are functions, `CertOk` is an arbitrary
+  `Prop` — and are declared premises (`BridgeObligations`, `BridgeEnv`). A
+  display claiming a *checked* bridge must say which clause.
+- `StructuralBridge.refl` is **not** in the surface's image.
+  `PW.SymMap.id` is total and no finite entry list is
+  (`PW.Surface.predMapOf_eq_none`), so a surface-declared bridge always carries
+  a finite, explicitly written vocabulary.
 
 ## M4 Part A: fragment/linking calculus and contextual representation independence (issue #187)
 
