@@ -2,11 +2,11 @@ session:
   id: 2026-09-09_001
   date: '2026-09-09'
   started: 2026-09-09T06:56
-  last_turn: 2026-09-09T22:47
-  turn_count: 4
+  last_turn: 2026-09-10T01:03
+  turn_count: 5
   summary: '#273: accepted fragments separated by stable semantic payloads. #275: certificate collapse
     separates accepted grounded observations. Implemented #281/#197/#198/#268/#217 and opened stacked
-    PRs #296–#300. #266: refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot.'
+    PRs #296–#300. #266: refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot. #305: G0 copying separation; re-descoped.'
 events_logged:
 - turn: 1
   type: experiment
@@ -57,6 +57,24 @@ events_logged:
   provenance: ai-executed
   summary: Completed S2/S9 mutation generation and clean v6 measurement snapshot; 655/655 class match
     and agreement.
+- turn: 5
+  type: experiment
+  id: N305_g0_checks
+  routing: direct
+  provenance: ai-executed
+  summary: Test the M4 occurrence interface against hidden feedback and copying
+- turn: 5
+  type: decision
+  id: N305_g0_exit
+  routing: direct
+  provenance: ai-suggested
+  summary: Close the G0 spike with the re-descoped exit
+- turn: 5
+  type: observation
+  id: O161
+  routing: staged
+  provenance: ai-suggested
+  summary: Mixed term identity may be required by a context interface.
 ai_actions:
 - turn: 1
   action: Added semantic negative fixtures and proofs, axiom coverage, and documentation.
@@ -96,6 +114,15 @@ ai_actions:
   - fixtures/mutants/
   - measurements/frozen/
   - docs/m5-freeze-checklist.md
+- turn: 5
+  action: Created branch, read issues and Lean sources, ran finite checks, wrote the G0 exit with reproducible
+    input.
+  provenance: ai-executed
+  files_changed:
+  - docs/theory-m4-g0-interface-spike.md
+  - docs/theory-m4-contextual-adequacy.md
+  - docs/README.md
+  - ara/evidence/results/m4_g0_interface_spike.md
 claims_touched:
 - id: C53
   action: revised
@@ -121,6 +148,9 @@ key_context:
 - turn: 4
   excerpt: 'User requested a new branch, direct resolution of #266, and a PR after the combined S2/S9
     approach was proposed.'
+- turn: 5
+  excerpt: 'User scoped #305 to G0, both recorded obstructions and collapse risk; no proof phases before
+    a written exit.'
 open_threads:
 - 'PRs #296–#300 await review/merge; no requested implementation remains.'
 ai_suggestions_pending: []

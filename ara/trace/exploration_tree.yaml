@@ -9131,3 +9131,30 @@ tree:
   status: resolved
   also_depends_on:
   - N325
+
+- id: N305_g0_checks
+  type: experiment
+  title: Test the M4 occurrence interface against hidden feedback and copying
+  provenance: ai-executed
+  timestamp: 2026-09-09T18:03-07:00
+  result: 'All five checks returned true. A common copying context separates accepted certificate variants:
+    defeated versus justified. Hidden-node feedback changes an export; empty-defeat and closure checks
+    delimit the interpretation.'
+  evidence:
+  - ara/evidence/results/m4_g0_interface_spike.md
+  - docs/theory-m4-g0-interface-spike.md
+  status: resolved
+- id: N305_g0_exit
+  type: decision
+  title: Close the G0 spike with the re-descoped exit
+  provenance: ai-suggested
+  timestamp: 2026-09-09T18:03-07:00
+  parent: N305_g0_checks
+  choice: Re-descoped; no G1 freeze or soundness/completeness work.
+  alternatives:
+  - Interface fixed
+  - Characterization instead
+  evidence:
+  - N305_g0_checks
+  - docs/theory-m4-g0-interface-spike.md
+  status: resolved

@@ -537,6 +537,15 @@ A future attempt should start here, not from scratch:
 through a fresh issue citing this section and answering G0's interface
 question first.
 
+### G0 follow-up (#305, 2026-09-09)
+
+The fresh issue ran the interface gate after #215 and #216 landed. The
+[written G0 spike](theory-m4-g0-interface-spike.md) records **re-descoped**:
+an occurrence-profile candidate loses cross-boundary term identity, and a
+same-context copying check distinguishes two accepted certificate variants.
+The spike does not establish a decorated-identity characterization of
+`CtxEquiv`; the soundness and completeness phases remain unentered.
+
 ## 8. Verification
 
 ```sh

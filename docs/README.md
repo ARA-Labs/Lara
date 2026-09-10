@@ -94,6 +94,8 @@ above.**
   with follow-ons
   [`theory-m4-generic-observation.md`](theory-m4-generic-observation.md),
   [`theory-m4-relational-parametricity.md`](theory-m4-relational-parametricity.md),
+  [`theory-m4-g0-interface-spike.md`](theory-m4-g0-interface-spike.md)
+  (Part B gate: re-descoped),
   and [`theory-term-level-holes.md`](theory-term-level-holes.md),
   [`theory-m5-surface-calculus.md`](theory-m5-surface-calculus.md), plus the
   side milestone

@@ -3457,3 +3457,19 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O161
+  timestamp: 2026-09-09T18:03-07:00
+  provenance: ai-suggested
+  content: An occurrence profile preserving identity only inside a fragment can miss observations caused
+    by a context copying an exact term. A candidate interface may need mixed equality and containment
+    against context material. This finite separation establishes no universal decorated-identity characterization.
+  context: 'G0 #305; same-context-copy calculation in docs/theory-m4-g0-interface-spike.md. Generalized
+    interpretation remains unadopted.'
+  potential_type: constraint
+  bound_to:
+  - N305_g0_checks
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

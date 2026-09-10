@@ -1391,3 +1391,13 @@ entries:
     and preserved exact before/after in the session.
   - 'No new closure signal for staged interpretations, including O149: this completes its tracked work
     but does not adopt its generalized heuristic.'
+
+- turn: 2026-09-09_001#5
+  notes:
+  - Recorded finite outputs directly; staged O161 without promotion because the user has not endorsed
+    the generalized interpretation.
+  - Re-descoping is the AI-selected permitted G0 exit, not a new maintainer endorsement or remote issue
+    closure.
+  - 'Preserved C49/C53/C54: copying violates context-fixing, so it does not contradict existing transport
+    results. No universal collapse theorem or proof phase.'
+  - No existing staged observation receives a new closure signal from this bounded spike.

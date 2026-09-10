@@ -264,6 +264,8 @@ while the claim it serves is defeated — see [`examples/S4/`](examples/S4/).
 
 ## Documentation
 
+Start with the [documentation index](docs/README.md) for reading paths and theory records.
+
 | Document | What it covers |
 | --- | --- |
 | [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen at M1; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
