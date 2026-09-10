@@ -7,6 +7,13 @@ post-PLDI, blocked on the corpus inventory gate below plus explicit researcher
 approval. Nothing here is part of the frozen `lara-core@0.1` specification,
 and `docs/spec.md` intentionally does not specify this layer._
 
+Vocabulary for cold readers: a *leaf* is a declared piece of evidence; a
+support *scheme* and its *critical questions* decide whether an admitted leaf
+may support a claim; and a claim's *grounded status* is the checker's final
+per-claim verdict (spec §0 has the full vocabulary). This layer, if ever
+built, would sit before all of that: it would certify that a leaf's bytes
+really are the output of a named checker, and nothing more.
+
 ## 1. What this layer would be, and what it is not
 
 Byte-level evidence admission is a deterministic judgment *before* the
@@ -69,8 +76,7 @@ around the frozen opaque source carrier and canonical multi-cause audit of
 `docs/policy-admission-calculus-decision.md`: byte-level quarantine
 contributes one more seed to the existing single combined prune, and public
 reporting reuses the directed `evidence-blocked` rule already frozen in
-`docs/spec.md` §4.3. The archival pseudocode in
-`plans/2026-08-04-rit-informed-evidence-admission.md` Task 1 (which passes
+`docs/spec.md` §4.3. The original sketch's Task 1 pseudocode (which passed
 `Q`, retained structures, and `affectedRoots` independently) is superseded on
 this point.
 
@@ -145,9 +151,10 @@ work — an acceptable outcome, not a failure):
 
 The gated implementation tasks (abstract calculus mechanization, `tsv-row@1`,
 integration, and the promotion-gate evaluation) are enumerated in
-`plans/2026-08-04-rit-informed-evidence-admission.md` Tasks 3–5 and 7 and in
-issue #78. Task 5 in particular changes replay identity and combined-report
-bytes — an M5-scale refreeze that must not happen inside the PLDI window.
+`docs/evidence-admission-gated-tasks.md` and in issue #78, which closed
+2026-08-26 as not planned. Task 5 in particular changes replay identity and
+combined-report bytes — an M5-scale refreeze that must not happen inside the
+PLDI window.
 
 ## 8. Versioning
 

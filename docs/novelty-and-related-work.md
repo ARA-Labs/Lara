@@ -1,9 +1,8 @@
 # Novelty and related work: the delta LARA must defend
 
-_The novelty-defense artifact. Consolidates the deltas scattered across `gap-resolution.md`,
-`comparison-rit-lara.md`, and `../plans/popl-research-review.md` §7 into one place, so the paper's
-related-work section and the "why is this new?" rebuttal are on record before M0. Written
-2026-07-21._
+_The novelty-defense artifact. Consolidates the deltas scattered across `gap-resolution.md` and
+`comparison-rit-lara.md` into one place, so the paper's related-work section and the "why is this
+new?" rebuttal are on record before M0. Written 2026-07-21._
 
 ## 0. The framing rule (read first)
 
@@ -11,8 +10,7 @@ related-work section and the "why is this new?" rebuttal are on record before M0
 to desk rejection: Micropublications, AIF, nanopublications, and — most sharply — EG-VAR all
 formalize scientific claims and their evidence. A reviewer who knows any of these stops reading at
 that sentence. The space is *populated*; the contribution is a precise **delta within it**, not the
-discovery of an empty field (`popl-research-review.md` §2 #12: composition alone is a weak novelty
-claim).
+discovery of an empty field — composition alone is a weak novelty claim.
 
 ## 1. The one-sentence novelty claim
 
@@ -52,7 +50,7 @@ name and pre-empt:
 
 ### 3.1 EG-VAR proximity (the sharpest)
 
-EG-VAR (2026) is "very close" (`popl-research-review.md` §7 #15): tool-attested empirical claims,
+EG-VAR (2026) is "very close": tool-attested empirical claims,
 kernel-checked. It can genuinely narrow the contribution — but note the venue is the **ICML 2026
 TAIGR workshop** (single-author, n=120 single-substrate eval), not a peer-reviewed conference paper,
 and its own limitations (App. M.1) concede the trust boundary its title overclaims. See
@@ -70,17 +68,16 @@ State this delta **early and explicitly** in related work; it is a strength, not
 
 ### 3.2 "Composition of mature parts"
 
-Dung + ASPIC+ + proof-certificate backends + PCC all exist; "we glued them" is the weak-novelty objection
-(`popl-research-review.md` §2 #12). **Defense — a theorem specific to the combination:** a typed
-compilation from claim-support programs to structured argumentation that **preserves dependency
-provenance, attack targets, open obligations, and claim status** — a property none of the parts
-provides individually. The evaluation then shows the abstraction catches and *localizes* real
-claim-support failures a holistic reviewer cannot (`research-proposal.md:400`). Composition is the method;
-the theorem + localization is the contribution.
+Dung + ASPIC+ + proof-certificate backends + PCC all exist; "we glued them" is the weak-novelty
+objection. **Defense — a theorem specific to the combination:** a typed compilation from
+claim-support programs to structured argumentation that **preserves dependency provenance, attack
+targets, open obligations, and claim status** — a property none of the parts provides individually.
+The evaluation then shows the abstraction catches and *localizes* real claim-support failures a
+holistic reviewer cannot. Composition is the method; the theorem + localization is the contribution.
 
 ## 4. Positioning (where to anchor the paper)
 
-Per `research-proposal.md` §9, anchor in this order:
+Anchor in this order:
 
 1. **Structured argumentation** (Dung, ASPIC+, schemes/CQs) — the semantic center.
 2. **Proof certificates / PCC** (Necula, Miller; natural deduction and optional LP adapters) — the
@@ -94,7 +91,7 @@ Backend replacement and strict-certificate soundness are the core strict metathe
 is **supporting metatheory for an optional adapter**, never the novelty and never the guarantee behind
 NL lowering. Leading with modal/JL depth moves LARA onto ground Pandžić already occupies — the
 opposite of a novelty argument; the design keeps modal logic off the critical path deliberately
-(`research-proposal.md` §3, Steps 1–3).
+(structured argumentation is the outer frame; the strict-certificate interface is isolated behind it).
 
 ## 5. Sentences to use, and to avoid
 
@@ -107,7 +104,7 @@ opposite of a novelty argument; the design keeps modal logic off the critical pa
 **Avoid:**
 - "no prior work formalizes research claims" (false — Micropublications, AIF, EG-VAR).
 - "LARA is Lean for science" / "modal logic for research" (invites Pandžić and EG-VAR objections;
-  obscures the defeasible + graph-semantics contribution — see `../plans/research-proposal.md` §3.1).
+  obscures the defeasible + graph-semantics contribution).
 - any novelty claim resting on composition alone.
 
 ## Sources

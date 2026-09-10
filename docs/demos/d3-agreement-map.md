@@ -6,6 +6,11 @@ Draftable into #60 (M7 paper package), sections T1/T3. The checked artifact is
 `test/WorkedExamplesSpec.hs` (`prop_agreementMap`, plus freshness, expected-json,
 coverage, and the byte-differential through both drivers).
 
+_A demo write-up (2026-08-02). The question it answers: when several papers
+on one topic appear to disagree, which disagreements are real? The paragraph
+above locates the checked artifact and its pinned tests; the demo itself
+starts below._
+
 ## What this demo shows
 
 When several same-topic papers appear to disagree, LARA distinguishes two

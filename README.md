@@ -4,34 +4,73 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![spec](https://img.shields.io/badge/spec-v0.1%20frozen-brightgreen.svg)](docs/spec.md)
 
-LARA is a small language of proof-carrying, policy-relative **claim support** —
-a calculus for research claims in the way a proof assistant's kernel is a
-calculus for proofs. A LARA program lowers a research artifact into a checkable
-**claim-support graph**: for each claim it reports whether the argument from
-declared evidence is **justified**, **gap**, **defeated**, or **contested** —
-and why. Acceptance is a certificate check against a fixed policy, not a search
-for truth: every dependency, open obligation, and attack is explicit, and the
-reported status is the grounded result for the compiled graph.
+LARA is a small language for writing down the **argument behind a research
+claim**: the evidence, the reasoning steps, and the caveats. A program can
+then check the argument automatically.
+
+Think of a proof assistant like Lean or Isabelle: you write a mathematical
+proof in a formal language, and a small trusted checker confirms every step
+follows the rules. LARA plays the same role for the arguments in empirical
+research. Those arguments are a different kind of reasoning: evidence can be
+undermined, conclusions can be rebutted, sometimes by the paper's own
+limitations section. Math proofs are all-or-nothing; research arguments can be
+strong, incomplete, or overturned, and LARA's verdicts reflect that. For each
+claim the checker reports one of four statuses, and why:
+
+- **justified** — the claim has a complete supporting argument that survives
+  every declared attack;
+- **gap** — the argument is incomplete, and the checker names exactly which
+  piece is missing;
+- **defeated** — an argument existed, but something also declared in the file
+  knocks it down;
+- **contested** — support and attack are in a standoff, so neither side wins.
+
+In more technical terms: LARA is a proof-carrying, policy-relative calculus of
+claim support. A LARA program lowers a research artifact into a checkable
+claim-support graph; acceptance is a certificate check against a fixed policy,
+and the reported status is the grounded result for the compiled graph
+([spec](docs/spec.md)).
 
 ## Why LARA
 
-Research claims — in papers, agent-generated experiment reports,
-[ARAs](https://github.com/ARA-Labs/Agent-Native-Research-Artifact) — rest on
-*defeasible* empirical arguments: evidence can be undermined, inference rules
-undercut, conclusions rebutted, sometimes by the same artifact's own
-limitations section. Today that support structure lives in prose, so nothing
-can check it, diff it, or replay it — and as more research is produced by LLM
-agents, the gap between "claims made" and "claims whose support anyone can
-audit" widens.
+Behind a claim like "our method improves accuracy" sits a structure: an
+experiment produced some numbers, the numbers support the claim through a
+reasoning step ("we ran a controlled experiment"), and caveats may weaken it
+("but we only tested on one dataset"). Today that structure lives in prose:
+in papers, agent-generated experiment reports,
+[ARAs](https://github.com/ARA-Labs/Agent-Native-Research-Artifact). A human
+reviewer reconstructs it in their head, and no tool can check it, diff it, or
+replay it. As more research is produced by LLM agents, the gap between "claims
+made" and "claims whose support anyone can audit" widens.
 
-LARA makes the support structure explicit, typed, and replayable. An untrusted
-producer (human or LLM) submits a program; a small trusted checker validates
-it. The checker does not establish empirical truth — it establishes that the
-argument is well formed, complete relative to the declared policy, and yields
-the reported status ([spec §1](docs/spec.md)). When claims, evidence, and dead
-ends are explicit objects, the *support* of each claim becomes something a
-small trusted kernel can type, compile, and audit — that is how research
-knowledge compounds.
+LARA gives that structure a written, machine-readable form. In a `.lara` file
+you declare:
+
+- **Claims** — the statements the artifact makes, each in both natural
+  language and a formal spelling.
+- **Evidence** — the concrete facts you have, each pointing at its source
+  (a CSV row, a section of a PDF).
+- **Arguments** — which evidence supports which claim, and by what kind of
+  reasoning.
+- **Attacks** — things that undermine an argument, including the artifact's
+  own limitations.
+
+An untrusted producer (human or LLM) writes the file; a small trusted checker
+validates it. Two things the checker deliberately does **not** do:
+
+- **It does not judge whether the evidence is true.** If the file says "the
+  experiment reported 0.74," LARA takes that as given, while recording where
+  the number came from. What it checks is whether the argument built on the
+  evidence is well formed, complete relative to the declared policy, and
+  actually yields the reported status. It audits reasoning, not reality.
+- **It does not search for missing pieces or guess.** Everything is what the
+  producer wrote down; the value is that "what you wrote down" is now
+  something a machine can check, and honest incompleteness (**gap**) is a
+  located, first-class outcome rather than a rejection.
+
+When claims, evidence, and dead ends are explicit objects, the *support* of
+each claim becomes something a small trusted kernel can type, compile, and
+audit. That is how research knowledge compounds.
 
 ## Example
 
@@ -78,10 +117,8 @@ leaf e4 : distribution_shift(M, accuracy, D)
 # (leaves e1, e2, e3, e6 — the effect observation and the three
 #  critical-question discharges — elided; see the full file.)
 
-# A strict step: the ord@1 backend re-checks 0.71 < 0.74 exactly. The
-# certificate cites its premise slots by leaf NAME — `(prem base)`, not
-# `(prem 0)` — and elaboration lowers the names to the byte-identical
-# numeric payload (lara-syntax@0.6).
+# A strict step: the ord@1 backend re-checks 0.71 < 0.74 exactly,
+# from a certificate that cites its premises by leaf name.
 arg s1 : supports(c2) by lt_recheck from [base, ours]
   assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
 
@@ -100,14 +137,24 @@ status c1
 status c2
 ```
 
-Check it:
+Arguments come in two strengths. A *defeasible* step like `a1` ("the
+experiment suggests the method works") must answer every critical question its
+reasoning scheme requires (was it randomized, was the sample adequate, does
+it generalize), either with a declared piece of evidence or by admitting the
+answer is missing. A *strict* step like `s1` ("0.71 is less than 0.74") must
+instead carry a certificate that a small dedicated backend re-checks from
+scratch: the checker does not trust the author's arithmetic, it redoes it.
+
+Check the file:
 
 ```sh
 cabal run lara -- check examples/running-example/run2/example.lara
 ```
 
-The verdict is one S-expression carrying the replay identity, the grounded
-labelling, and each requested status (wrapped here):
+The verdict is one S-expression carrying the replay identity (the exact
+versions and hashes of everything involved, so anyone can re-run the check and
+confirm the same result), the argument labelling, and each requested status
+(wrapped here):
 
 ```text
 (verdict (replay-id (core lara-core@0.2) (policy empirical-v3)
@@ -119,38 +166,12 @@ labelling, and each requested status (wrapped here):
 ```
 
 The certified arithmetic stands on its own (`c2` **justified**: `s1` is strict
-and unattacked) while the empirical claim is defeated (`c1`: the undercut `d1`
-is *in* and puts `a1` *out* in the grounded labelling). Run 1
-of the same example ([`run1/`](examples/running-example/run1/)) omits the leaf
-that discharges external validity: no complete support argument for `c1` can
-be declared, and the verdict reports **gap** — honest incompleteness is a
-located, first-class outcome, not a rejection.
-
-A source name that resolves to no premise, or ambiguously, is a located
-error — never a guess. Since `lara-syntax@0.7` that is one policy across all
-three places an argument body names a source: inferred θ references,
-certificate premise slots, and discharge targets ([grammar
-Appendix F](docs/lara-surface-grammar.md)). The `lara-syntax@0.6` named-slot
-spelling itself is specified in [grammar Appendix E](docs/lara-surface-grammar.md);
-[`examples/S6/`](examples/S6/) is its standing byte-identity witness (the
-committed wire bytes are re-proved equal to the numeric spelling's on every CI
-run). Since `lara-syntax@0.8` a certificate may also cite the **premise label**
-the rule declares for a slot ([grammar Appendix G](docs/lara-surface-grammar.md)),
-which names the slot rather than the term filling it and so stays unambiguous
-where a leaf name cannot — when one leaf feeds two premises;
-[`examples/S7/`](examples/S7/) works that case. For a program where certified
-arithmetic genuinely feeds a defeasible
-claim — and survives while the claim it serves is defeated — see
-[`examples/S4/`](examples/S4/).
-
-Since `lara-syntax@0.9`, an `nd@1` certificate may also use named binders and
-premise references while retaining the numeric de Bruijn kernel
-([grammar Appendix H](docs/lara-surface-grammar.md)), and since
-`lara-syntax@0.10` its formula annotations may be authored as source
-propositions — `(prop "holds(safety_invariant, D)")` — which the elaborator
-lowers to the frozen `(atom KEY)` encoding (grammar Appendix I, closing
-[#144](https://github.com/ARA-Labs/lara/issues/144));
-[`examples/S8/`](examples/S8/) is the byte-identity witness.
+and unattacked) while the empirical claim is **defeated** (`c1`: the paper's
+own limitations note, `d1`, undermines the experiment argument `a1` and
+nothing knocks `d1` down). Run 1 of the same example
+([`run1/`](examples/running-example/run1/)) omits the leaf that discharges
+external validity: no complete support argument for `c1` can be declared, and
+the verdict reports **gap**, naming the missing piece.
 
 More worked examples, each a self-contained directory with its surface
 artifact, co-located policy, derived wire anchor, and expected verdict, are
@@ -159,6 +180,48 @@ reading, the demo write-ups reconstruct checked artifacts as a
 [paper/review/rebuttal exchange](docs/demos/d1-rebuttal-replay.md),
 [mechanical review comments](docs/demos/d2-mechanical-reviewer.md), and
 [cross-paper abstract excerpts](docs/demos/d3-agreement-map.md).
+
+## How checking works
+
+`lara check` goes through four stages:
+
+1. **Read and translate.** The human-friendly file is parsed and lowered
+   (*elaborated*) into a small fixed core format. Every name must resolve to
+   exactly one thing; a name that matches nothing, or matches two things, is a
+   located error, never a guess.
+2. **Check the pieces are well formed.** Each claim, leaf, and argument step
+   is checked against the declared **policy**, the rulebook the artifact
+   opts into. A policy lists the accepted reasoning schemes and, for each,
+   the critical questions that must be answered before the reasoning counts.
+   Strict steps have their certificates re-verified by the declared backends.
+3. **Build the graph of attacks.** The checker assembles the whole argument:
+   nodes are argument steps, edges are attacks (this limitations note
+   undercuts that experiment's reasoning, this counter-evidence rebuts that
+   conclusion). Attacks are computed from the formal content, not from prose:
+   two statements clash only when the policy declares them contraries and
+   they are about literally the same things.
+4. **Settle who wins.** One fixed, deterministic rule (the *grounded
+   semantics*) decides which arguments stand: an unattacked argument stands;
+   an argument stands if every attack on it comes from an argument that has
+   itself been knocked down; an unbreakable standoff leaves both sides
+   unsettled. There is no judgment call: same file, same answer, every
+   time, which is what makes verdicts replayable. Each claim then gets its
+   status: justified, gap, defeated, or contested.
+
+## More than one paper
+
+The same machinery extends to a set of papers on one topic: write the rival
+papers' claims, evidence, and arguments under one shared policy and check
+whether they actually attack each other. Because attacks are computed from
+formal content, LARA distinguishes a **genuine disagreement** (two papers
+measured the same thing and concluded contraries, so both claims come out
+contested) from an **apparent one** (the slogans contradict, but the
+experiments measured different models, benchmarks, or settings, so no attack
+forms, and the checker names the bridging experiment that would connect
+them). The worked demo is the
+[cross-paper agreement map](docs/demos/d3-agreement-map.md); first-class
+multi-file composition is planned in
+[#303](https://github.com/ARA-Labs/lara/issues/303).
 
 ## Quick start
 
@@ -180,6 +243,24 @@ cd lean && lake build
 ```
 
 CI runs both, including the `AxCheck.lean` axiom audit, on every push.
+
+## Syntax versions
+
+The `.lara` surface syntax is versioned (current: `lara-syntax@0.10`) and each
+version's additions are specified as appendices of the
+[surface grammar](docs/lara-surface-grammar.md). The invariant across all of
+them: a source name that resolves to no target, or ambiguously, is a located
+error, with one policy for inferred references, certificate premise slots,
+and discharge targets alike (Appendix F). Certificates may cite premises by leaf
+name (Appendix E; [`examples/S6/`](examples/S6/) is the standing
+byte-identity witness) or by the rule's declared premise label, which stays
+unambiguous when one leaf feeds two premises (Appendix G;
+[`examples/S7/`](examples/S7/)). `nd@1` proof terms may use named binders over
+the numeric de Bruijn kernel (Appendix H), and their formula annotations may
+be authored as source propositions that the elaborator lowers to the frozen
+atom encoding (Appendix I; [`examples/S8/`](examples/S8/)). For a program
+where certified arithmetic genuinely feeds a defeasible claim — and survives
+while the claim it serves is defeated — see [`examples/S4/`](examples/S4/).
 
 ## Documentation
 
@@ -214,14 +295,15 @@ ara/                this project's own Agent-Native Research Artifact
 
 ## Trust and status
 
-The trusted computing base is deliberately small and enumerated in
-[spec §1.1](docs/spec.md). Soundness is carried by the Lean proofs, not the
-tests: each definition is ported to Lean 4 and proved as it freezes —
-`sorry`-free, within the standard axiom trio — and the Haskell and Lean
-drivers are differential-tested byte-for-byte on every example, corpus unit,
-and generated mutant. Property, golden, mutation, and differential tests are
-conformance evidence for the Haskell checker, never a substitute for the
-theorems (spec §9).
+The part of LARA you have to trust (the trusted computing base) is
+deliberately small and enumerated in [spec §1.1](docs/spec.md). Soundness is
+carried by the Lean proofs, not the tests: each definition is ported to Lean 4
+and proved as it freezes, `sorry`-free and within the standard axiom trio, and
+the Haskell and Lean drivers are differential-tested byte-for-byte on every
+example, corpus unit, and generated mutant. Property, golden, mutation, and
+differential tests are conformance evidence for the Haskell checker, never a
+substitute for the theorems (spec §9). So the tool that judges arguments has
+its own argument for correctness.
 
 Milestones M1–M5 are complete: the frozen core (`lara-core@0.2`), the
 mechanized reference semantics, the production compiler/checker, the

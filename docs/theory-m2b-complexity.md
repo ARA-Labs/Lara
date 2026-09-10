@@ -1,5 +1,12 @@
 # M2b restricted-class complexity — decision record
 
+_The headline, before the provenance: M2b closes the mechanized groundwork
+for a hardness claim about the restricted program class. It provides a
+family-wide realization theorem (every formula's reduction target is a
+genuinely checked unit) with polynomially bounded cost accounting. The complexity-class claim
+itself (e.g. NP-completeness) is deliberately **not** proved in Lean; the
+exact mechanized/paper split is the boundary recorded below._
+
 Issue #209 (parent tracker #180; successor to the closed #181).
 Branch `theory/m2b-realization-closure`. Gate history:
 [`docs/theory-m2b-complexity-spike.md`](theory-m2b-complexity-spike.md).

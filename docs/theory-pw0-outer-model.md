@@ -5,6 +5,12 @@ _Status: mechanized for the possible-world semantics spike on 2026-09-02
 proved, what it deliberately left out, and the three limitations of the frozen
 contract that its successors inherit._
 
+_The spike's motivating question: when two artifacts check in different
+contexts — different vocabularies, policies, settings — what can be compared
+or transported between them, and under what declared bridge? The outer model
+wraps unchanged local judgments in a frame of worlds to make that question
+statable. `theory-pw-closeout.md` indexes the four PW records._
+
 The intended readers are the paper author, whoever takes the exit decision on
 #192, and whoever implements T6 (#191). They should cite the declarations below
 rather than re-deriving them; `docs/paper-lean-name-map.md` §PW0 carries the

@@ -9,6 +9,11 @@ to `docs/m5-freeze-checklist.md` (the freeze the generators feed) and the root
 module Haddock in `src/Lara/Mutate.hs` (the same graph, stated for readers of the
 code)._
 
+Background for cold readers: `Lara.Mutate` generates *mutants* (deliberately
+broken variants of valid corpus units) so the evaluation can measure that the
+checker rejects each seeded defect with the right rejection class at the right
+location. This record fixes which of its seven modules owns what.
+
 ## The namespace
 
 `A → B` is an import inside the `Lara.Mutate` namespace.

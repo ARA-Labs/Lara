@@ -15,6 +15,13 @@ marker vocabulary gains `(prop _)`). Updated 2026-08-25: mutation-suite counts
 refreshed to the `m5-freeze-v5` suite (541 mutants, #156); the accept half is
 unchanged at 58, since all 37 added mutants are rejects._
 
+The dated updates above are maintenance history; skip them on a first read.
+The content starts here, with the distinction the whole note turns on: a
+malformed program is *rejected* outright, while a well-formed program whose
+claim merely lacks standing support is *accepted* and reported as
+unsupported. Those are different doors, and conflating them is the most
+common misreading of the checker.
+
 ## 1. Two doors, two failure modes
 
 LARA has two entry points, and the same kind of defect surfaces differently depending on which one a

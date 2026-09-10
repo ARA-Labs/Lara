@@ -9,6 +9,10 @@ The intended readers are the paper author, whoever takes decisions on tracker
 declarations below rather than reconstructing the contract from implementation
 details; `docs/paper-lean-name-map.md` §PW-T9 carries the stable keys.
 
+_Part of the possible-world spike (comparing artifacts across differing
+contexts); start from `theory-pw-closeout.md` for the subseries index — T9
+composes the bridges T6 transports along._
+
 T9 adds composition over the exact structural layer frozen by T6. Its core is
 `Lara/PW/Compose.lean`; executable conformance witnesses are in
 `Lara/Examples/PWCompose.lean`. It does not change the checker, compilation,

@@ -5,6 +5,14 @@
 > novelty delta against each neighbor is a separate document:
 > [`novelty-and-related-work.md`](novelty-and-related-work.md).
 
+Three terms of art, for readers who have not met them: an *argumentation
+framework* (Dung) is a directed graph whose nodes are arguments and whose
+edges are attacks; the *grounded labelling* is the deterministic
+least-fixed-point rule that decides which nodes stand, are defeated, or are
+left unsettled; and *defeasible* reasoning is reasoning that holds by default
+but can be overturned by further information, the ordinary condition of
+empirical argument, in contrast to mathematical proof.
+
 LARA sits at the junction of four established lines of work:
 
 - **Abstract argumentation** (Dung 1995) is the *semantic target*: a

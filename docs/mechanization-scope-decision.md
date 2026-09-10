@@ -12,6 +12,13 @@ why the ledger's coverage rule is meaningful only over public declarations),
 and the Haddock on `Lara.Check.CheckConfig` (the same rule, stated for readers
 of the code)._
 
+Background for cold readers: the Lean development (`lean/`) restates the
+frozen checker semantics and proves its metatheory; `Lara.Check.CheckConfig`
+is a Haskell-side switch box that lets the M5 evaluation *ablate*
+(selectively disable) checker stages to measure each stage's contribution.
+The rule below says the Lean side deliberately knows nothing about those
+switches: it mechanizes only the full, un-ablated semantics.
+
 ## The rule
 
 **The Lean development mechanizes the frozen semantics — `fullConfig` alone.**

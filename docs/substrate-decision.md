@@ -3,6 +3,12 @@
 _Status: settled for Phases 0–2. Recorded 2026-07-20; strict-core description amended 2026-07-21 by
 `strict-backend-decision.md`._
 
+The trust boundary in one sentence: everything whose failure could make the
+checker wrongly accept an argument (the core) is Haskell and trusted;
+everything that merely *produces* candidate programs (including all LLM
+tooling) is Python and untrusted, because its output is re-checked by the
+core before it is believed.
+
 ## Decision
 
 - **Trusted core** (claim-support checker, strict-backend registry and selected adapters,

@@ -5,6 +5,17 @@ The machine-checked companion to the Haskell checker (`../src/`) and the spec
 `lean-toolchain`). Architecture, prover choice, and per-result plan:
 `../docs/mechanization-plan.md`.
 
+What "mechanized" means here: each frozen definition of the spec is restated
+in Lean 4 and its metatheory proved, so the claims below are machine-checked
+theorems, not tested behavior. The Haskell checker is production code; the
+Lean development is the reference that says the *rules themselves* are sound,
+and a second driver that must agree with Haskell byte-for-byte on every
+example and corpus unit (`../scripts/differential.sh`). Proofs are
+`sorry`-free and stay within Lean's three standard axioms (`propext`,
+`Classical.choice`, `Quot.sound`); CI's `AxCheck.lean` audits this on every
+push. In the table, ✅ means the spec result is fully proved and ◐ means a
+stated, deliberate part of it is proved with the remainder recorded.
+
 ## Status
 
 | Spec §9 result | Content | Lean status |

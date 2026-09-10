@@ -7,6 +7,11 @@ what F0 froze, why each choice is forced by the existing carrier rather than
 chosen for convenience, what F0 deliberately did not do, and the gate outcome
 that releases the theorem phases._
 
+The theorem this milestone aims at, in plain terms: relabeling how a backend
+marks its certificates — without changing what it accepts — cannot be
+observed by any surrounding program; no admissible context can tell the
+original fragment and the relabeled one apart.
+
 F0 is a design freeze, not a theorem phase. Its deliverable is a set of
 **compiling Lean definitions** (`lean/Lara/Context/Fragment.lean`) plus this
 record. Nothing here is proved; the obligations these definitions create are

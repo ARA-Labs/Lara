@@ -2,9 +2,13 @@
 
 _The six worked examples the paper and test suite require, with a coverage matrix over every claim
 status and every attack type. Expands `spec.md` §10 (which currently has one incomplete example) to
-the target set of `research-proposal.md` §7 M6 ("at least five worked cases spanning every
-status/attack kind") and `popl-research-review.md` §5 Phase B ("three complete + three rejected
-examples"). Anchored in the real corpus shapes catalogued in `corpus-map.md`._
+"at least five worked cases spanning every status/attack kind" and "three complete + three rejected
+examples". Anchored in the real corpus shapes catalogued in `corpus-map.md`._
+
+_This is the historical design plan; the authoritative catalogue of what
+exists now is `../examples/README.md`. A worked example is a self-contained
+directory: a surface `.lara` artifact, its co-located policy, and its pinned
+expected verdict._
 
 _**What actually shipped (2026-08-19; augmented 2026-08-22).** This plan
 specifies the E/R series. The
@@ -21,8 +25,8 @@ kinds, and statuses, is `../examples/README.md`._
 
 For a calculus paper, worked examples are not illustration — they are the primary way a reviewer
 checks that the abstraction *captures the phenomenon it claims to*. LARA claims to localize
-claim-support failures that proof terms or abstract argument graphs cannot (`research-proposal.md` §4
-"the composite bet"). Each example must make one such capability legible, and the set together must
+claim-support failures that proof terms or abstract argument graphs cannot ("the composite bet").
+Each example must make one such capability legible, and the set together must
 **exercise every status and every attack constructor** so no corner of the calculus is unwitnessed.
 
 Two hard requirements:
@@ -93,7 +97,7 @@ reviewers see the abstraction on a claim they can recognize:
   rules out an *alternative explanation* — it compiles to **no edge**, not an attack. E3 must include
   N04-as-non-attack alongside a *constructed* conflicting-measurement dead-end that *is* a typed
   `rebut`, so the example directly shows the differentiator: "a dead end is not automatically a
-  defeater" (`research-proposal.md` §5 differentiator).
+  defeater."
 
 The constructed conflicts in E3 (needed to exercise undercut/undermine/contested) are clearly labeled
 as synthetic extensions of the real artifact — honesty about what is real vs. constructed is itself a
@@ -114,7 +118,7 @@ E1 with `external_validity` left as an **open mandatory obligation** (`open exte
 `lara-syntax@0.7`, grammar Appendix F.3 — a hole carries one name, the question it leaves open).
 Expected: the incomplete argument is excluded from the AF (`spec.md` §4.4, §8), no complete
 alternative exists, so `status C01 = gap` with located obligation `external_validity`. This is the corrected
-definition of `gap` as an explicit hole, *not* underivability (`popl-research-review.md` §2 #4).
+definition of `gap` as an explicit hole, *not* underivability.
 
 **Note — resolve the open definitional point first.** `spec.md` §8 leaves open what happens when a
 hole coexists with a complete alternative. E2 as written has *no* alternative, so it is unaffected;
@@ -136,7 +140,7 @@ The centerpiece. Three claim roots on the shared C01/C02 evidence base:
   (survives all attacks), so all four statuses appear in one graph.
 
 Expected golden output enumerates every argument's grounded label, the responsible SCC for the
-contested claim (`popl-research-review.md` §6 diagnostic obligation), and the four claim statuses.
+contested claim (a diagnostic obligation), and the four claim statuses.
 
 ### R1 — `undeclared-leaf` (rejected)
 
@@ -158,8 +162,8 @@ enforced, not just proved.
 An attack attempts to **rebut or undercut a strict rule**. Expected: rejected — strict rules are
 deductively valid and unattackable (`spec.md` §7; ASPIC+ strict rules are unnamed). Diagnostic names
 the attack, the target position, and that the target's rule is strict. Witnesses that attack
-construction is inside the trust boundary (`popl-research-review.md` §2 #5): the checker refuses an
-ill-typed edge rather than compiling it.
+construction is inside the trust boundary: the checker refuses an ill-typed edge rather than
+compiling it.
 
 ## 4. Deliverables and sequencing
 
@@ -176,13 +180,16 @@ ill-typed edge rather than compiling it.
   six *specifications* now (this doc); implement E1 with the vertical slice; complete the rest as the
   layers land.
 - **Paper mapping.** E3 is the figure that carries the contribution (the differentiator). E1/E2 are
-  the pipeline walkthrough. R1–R3 are the "the checker actually refuses bad input" evidence. This
-  matches the five headline items in `popl-research-review.md` §9.
+  the pipeline walkthrough. R1–R3 are the "the checker actually refuses bad input" evidence. Together
+  these match the venue calibration's five headline items: a novel typed claim-support calculus, a
+  semantics-preserving compilation into structured argumentation, mechanized accountability and
+  status theorems, an implementation with replayable diagnostics, and an evaluation showing
+  localization on real research artifacts.
 
 ## 5. Relationship to the full evaluation
 
 These six are **worked examples**, not the evaluation corpus. The stratified corpus study (M0) and
-the four-axis evaluation (`research-proposal.md` §5) are separate and larger. The worked examples
+the four-axis evaluation are separate and larger. The worked examples
 prove the calculus *works and is legible*; the corpus proves it *covers reality*. Per the current
 decision, quantitative benchmarking is out of scope for the first submission — which raises the bar
 on these examples plus the metatheory to carry the empirical weight, so E3's differentiator and the

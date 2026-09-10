@@ -4,6 +4,11 @@ _Scratch note for the lead to fold into the `ara/` artifact. Records what the M3
 production-checker milestone delivered, the numeric-literal caveat, and why R2 /
 R8 / R9 / R14 have no `checkUnit` golden by design._
 
+_Written 2026-07-27. Context: M3 was the production-checker milestone, the
+Haskell implementation of the frozen checking pipeline, from policy admission
+through grounded status, each module the executable mirror of its Lean
+counterpart._
+
 ## What M3 delivered
 
 The production-checker spine and the N11 differential anchor, each Haskell module

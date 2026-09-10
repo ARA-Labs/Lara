@@ -8,6 +8,11 @@ the "delete the duplicate test suite" refactor is not attempted again.
 Companion to `docs/mechanization-scope-decision.md` (what the Lean development
 mechanizes) and `docs/mechanization-plan.md` (how)._
 
+Two terms used throughout: a *differential emitter* is a Lean program that
+prints checker output so it can be compared byte-for-byte against the Haskell
+checker's output on the same input; "the gates" are the CI checks that fail on
+any disagreement.
+
 ## The rule
 
 **`Examples/` is the shared fixture corpus the differential emitters run on,

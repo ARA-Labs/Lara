@@ -6,6 +6,14 @@ LP-specific strict-witness interface in `spec.md` Section 5,
 `gap-resolution.md`. LP remains an optional adapter; it is no longer a foundation of the source
 calculus._
 
+Background for cold readers: LARA arguments come in two strengths.
+*Defeasible* steps hold by default and can be attacked; *strict* steps have
+their conclusions re-verified mechanically. This record decides how
+strict steps are verified: not by building any proof system into the source
+language, but through one small seam where an opaque certificate is handed to
+a registered, versioned external checker (a *backend*). The two judgments
+below are the before and after of that replacement.
+
 ## 1. Decision
 
 The source language has one claim-support calculus and one small seam for strict certificates. A

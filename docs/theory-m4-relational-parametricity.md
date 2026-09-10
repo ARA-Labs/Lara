@@ -3,6 +3,13 @@
 **Landed 2026-09-08.** Lean-only, purely additive. No corpus regeneration, no
 freeze-tag bump, no Haskell change.
 
+_Extends Theory M4 Part A (`theory-m4-contextual-adequacy.md`). What the
+relational form buys over the earlier function-quantified theorem, in one
+sentence: instead of requiring one concrete relabeling function between two
+fragments' certificates, it only requires *any* relation under which the
+fragments' assurances correspond — so unobservability follows for whole
+families of backend variations at once._
+
 Modules: `lean/Lara/ListRel.lean`, `lean/Lara/Context/Parametricity.lean`.
 The original #215 edits outside those two were import lines in `lean/Lara.lean` and the
 pin block in `lean/AxCheck.lean`. #279 adds `Context/FiniteExtension.lean` and

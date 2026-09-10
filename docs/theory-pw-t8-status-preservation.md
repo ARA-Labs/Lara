@@ -4,6 +4,10 @@ _Status: mechanized on 2026-09-04 (issue #193, tracker #189). This document
 records the status-preservation hypotheses frozen by T8, the consequences it
 proves, and the boundary it leaves to later work._
 
+_Part of the possible-world spike (comparing artifacts across differing
+contexts); start from `theory-pw-closeout.md` for the subseries index — T8
+layers over T6 and T9._
+
 The intended readers are the paper author, whoever takes decisions on tracker
 #189, and anyone extending or citing structural bridges to status. They should
 cite the declarations below rather than reconstructing the hypotheses from

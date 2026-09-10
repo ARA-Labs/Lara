@@ -1,8 +1,8 @@
 # Related Work
 
-_Typed dependency graph. Anchored per `plans/popl-research-review.md` §9 and `docs/novelty-and-related-work.md`:
-structured argumentation is the semantic center; proof-certificates/PCC is the trust architecture;
-semantic publishing is the application domain; autoformalization is the measured-residual-risk framing._
+_Typed dependency graph. Anchored per `docs/novelty-and-related-work.md`: structured argumentation is
+the semantic center; proof-certificates/PCC is the trust architecture; semantic publishing is the
+application domain; autoformalization is the measured-residual-risk framing._
 
 ## RW01: Dung 1995, "On the Acceptability of Arguments and its Fundamental Role in Nonmonotonic Reasoning…"
 - **DOI**: 10.1016/0004-3702(94)00041-X

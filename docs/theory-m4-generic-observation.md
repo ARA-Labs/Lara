@@ -7,6 +7,11 @@ freeze-tag bump, no Haskell change — the runtime evaluator stays grounded, per
 Modules: `lean/Lara/Invariants/Observation.lean`,
 `lean/Lara/Context/Observation.lean`, `lean/Lara/Examples/ContextSemantics.lean`.
 
+_The gap this closes, in one sentence: M2a made the argumentation semantics a
+parameter, but the M4 contextual theorems were still stated only at the
+grounded instance — this issue restates them over an arbitrary
+`ExtensionSemantics`, removing the asymmetry._
+
 ---
 
 ## 1. What this closes

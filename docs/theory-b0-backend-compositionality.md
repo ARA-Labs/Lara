@@ -1,5 +1,11 @@
 # B0 Heterogeneous Backend Compositionality
 
+_Status: settled record (2026-08-29). For cold readers: a *backend* is one of
+the external checkers that re-verify strict certificates (`nd@1`, `ra@1`,
+`ord@1`, `insp@1`); when one program mixes several, the proofs need a
+firewall guaranteeing no backend's acceptance can leak influence into
+another's._
+
 Milestone B0 (issue #182, tracker #180). This record holds what B0 froze: the
 occurrence vocabulary, the firewall theorem, the two accounting laws, the
 claim boundary the paper must respect, and the scope decisions taken along the

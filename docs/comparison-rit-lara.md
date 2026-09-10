@@ -10,6 +10,11 @@ _Update 2026-08-05: `policy-admission-calculus-decision.md` freezes the repair d
 Its runtime program and companion Lean metatheory program are separate from the byte-level
 `lara-evidence@0.1` work under issue #78, which remains gated._
 
+For cold readers: `rit` is a sibling project, a Lean-kernel-based research
+integrity tool that attests numeric facts extracted from experiment logs
+(sha256-pinned) and aggregates them through an AND/OR claim DAG. This note
+compares it against LARA and answers what each should borrow from the other.
+
 ## 1. Answer first
 
 Yes. The most useful idea LARA should borrow is **executable grounding for evidence leaves**:

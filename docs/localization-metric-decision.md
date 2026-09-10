@@ -7,6 +7,13 @@ implementation detail. Companion
 to `src/Lara/Diagnostics.hs` (the shared location vocabulary) and
 `docs/m5-freeze-checklist.md` (the frozen headline this changes)._
 
+_Status: settled, as part of the `m5-freeze-v5` batch._ Background for cold
+readers: the mutation benchmark seeds known defects (*mutants*) into valid
+corpus units, recording each seeded site in a manifest; `location_match` is
+the benchmark column scoring whether the checker's rejection points at a
+seeded site. This record decides what that column means once a mutant can
+carry more than one defect.
+
 ## The problem being fixed
 
 `location_match` today is `==` on `Constituent`: the checker's reported

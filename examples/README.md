@@ -1,5 +1,14 @@
 # Worked examples — the "unit of argumentation is not the paper" pair
 
+**New here? A suggested order.** Read the [README](../README.md)'s running
+example first, then `A/` (one paper honestly attacking its own headline
+claim), then `B/` (two papers with contrary conclusions). After those, the
+S-series walks the strict-certificate machinery one feature at a time, and
+E4/E5 exercise the defeat semantics (reinstatement, contested, gap). The demo
+write-ups in [`docs/demos/`](../docs/demos/) present checked artifacts as
+ordinary research prose — a rebuttal exchange, mechanical review comments, a
+cross-paper agreement map — and are the gentlest entry of all.
+
 These two examples answer a specific design question: *if one paper cannot rebut itself, how does
 the framework work in practice — should we lift to paper + reviews, or to multiple papers?*
 

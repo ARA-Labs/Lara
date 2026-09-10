@@ -6,6 +6,11 @@ document is the spike's index and the durable home for the work the tracker
 deferred, so the deferral survives the tracker's closure. It records no new
 result: each frozen contract keeps its own document._
 
+_What the wrapper is, in one sentence: an outer model that treats each
+checking context (its vocabulary, policy, setting) as a world, so that
+support and status established in one world can be transported to another
+only along an explicitly declared, checked bridge._
+
 **Audience:** anyone asking what the possible-world wrapper delivered, whether
 a possible-world extension is scheduled, or why an idea they have in mind was
 deliberately not built.

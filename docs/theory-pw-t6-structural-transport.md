@@ -5,6 +5,10 @@ records what T6 froze, what it proved, why its obligations clause is exact
 rather than conditional, and the limitations its successors T8 (#193) and T9
 (#190) inherit._
 
+_Part of the possible-world spike (comparing artifacts across differing
+contexts); start from `theory-pw-closeout.md` for the subseries index and
+`theory-pw0-outer-model.md` for the model this builds on._
+
 The intended readers are the paper author, whoever takes decisions on tracker
 #189, and whoever implements T8/T9. They should cite the declarations below
 rather than re-deriving them; `docs/paper-lean-name-map.md` §PW-T6 carries the

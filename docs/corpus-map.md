@@ -1,15 +1,22 @@
 # ARA → LARA corpus map and M0 annotation guide
 
-_The M0 kickoff artifact (`../plans/research-proposal.md` §7; `engineering-plan.md` §2). Fixes the
+_The M0 kickoff artifact (`engineering-plan.md` §2). Fixes the
 source corpus, the field-level lowering map from an ARA to a LARA program, and the annotation schema
 for the semantic corpus study. Written 2026-07-21 after inspecting the two upstream repos._
+
+_Status: completed M0 record. The study it guided is summarized in
+`../m0/annotation-summary.md`; the vocabulary it froze now lives in the spec.
+For cold readers: an ARA (Agent-Native Research Artifact) is a structured
+research artifact carrying claims, experiments, evidence, and an exploration
+trace; a LARA program is the checkable claim-support form this map lowers
+one into._
 
 ## 1. Source repositories
 
 | Repo | Role for LARA |
 | --- | --- |
 | [`ARA-Labs/Agent-Native-Research-Artifact`](https://github.com/ARA-Labs/Agent-Native-Research-Artifact) | The ARA **format definition + tooling**. Defines the four-layer anatomy; ships worked examples (`resnet-ara-example`, `the-ara-of-ara`); contains the **`rigor-reviewer` skill** — our named baseline. |
-| [`AmberLJC/ara-paperbench`](https://github.com/AmberLJC/ara-paperbench) | The **corpus**. 32 ARAs, schema-uniform, each `artifacts/<benchmark>/<name>/`. This is the "30-paper corpus" the proposal reuses (`research-proposal.md:395`). |
+| [`AmberLJC/ara-paperbench`](https://github.com/AmberLJC/ara-paperbench) | The **corpus**. 32 ARAs, schema-uniform, each `artifacts/<benchmark>/<name>/`. This is the "30-paper corpus" the proposal reuses. |
 
 **The task.** Each corpus artifact is converted into a LARA program: its claims become claim roots,
 its experiments/evidence become leaves and inference-scheme instances, and its exploration trace becomes
@@ -22,9 +29,9 @@ freezes, so the frozen v0.1 constructs actually cover the corpus.
 Quality, D3 Scope Calibration, D4 Argument Coherence, D5 Exploration Integrity, D6 Methodological
 Rigor — and emits `level2_report.json` with an accept/reject recommendation. It "does NOT execute
 code, fetch URLs, or consult external sources" and is explicitly "not a bug detector." That is the
-holistic, unauditable judgment LARA improves on (`research-proposal.md:74`): a score that cannot
-point to *which* premise is missing or *which* dead end kills a claim. It is a complementary
-qualitative baseline, **not** a status-accuracy baseline (`research-proposal.md:382`).
+holistic, unauditable judgment LARA improves on: a score that cannot point to *which* premise is
+missing or *which* dead end kills a claim. It is a complementary qualitative baseline, **not** a
+status-accuracy baseline.
 
 ## 2. Corpus inventory
 
@@ -68,8 +75,8 @@ Not every dead end is an attack. Resnet node **N04 "Vanishing-gradient hypothesi
 `dead_end` whose `why_failed` rules out an *alternative explanation* of the degradation result — it
 does **not** rebut, undercut, or undermine C01/C02, so it compiles to **no edge**. Contrast a dead
 end that reports a *conflicting measurement* on the same claim, which would be a typed `rebut`.
-Making this call per dead-end node is the core M0 judgment and the exact capability
-`research-proposal.md:400` says a holistic reviewer cannot produce. **Expect most dead ends to be
+Making this call per dead-end node is the core M0 judgment and the exact capability a holistic
+reviewer cannot produce. **Expect most dead ends to be
 non-attacks** (rejected alternatives); that ratio is itself a reportable M0 finding justifying typed
 edges over "dead end = defeater."
 
@@ -78,23 +85,23 @@ edges over "dead end = defeater."
 Per sampled claim, annotate:
 
 1. **Claim type** — descriptive | comparative | causal | generalization | negative-result |
-   implementation/behavioral (feeds open question §8 #2: which rule schemes).
+   implementation/behavioral (feeds open question #2: which rule schemes).
 2. **Proposition shape** — the `formal` atom's predicate/arity as it would appear in `Sigma`
    (feeds `Lara.Prop` and whether the Phase-0 opaque-identifier nullary case suffices).
 3. **Inference scheme + premises** — which scheme the experiment instantiates; strict vs defeasible
-   (feeds §8 #2 strict/defeasible split).
+   (feeds open question #2's strict/defeasible split).
 4. **Strict certifier/theory** — for each proposed strict step, record the smallest plausible
    certifier: reference natural deduction, a named domain checker, optional LP, or none
    (`trusted-policy`); identify any required background theory.
 5. **Critical questions** — from Setup/Procedure/Baselines: randomization, power, baselines,
    external validity, etc. Mark each mandatory vs optional, and whether an unmet one is a *gap*
    (question) or a *defeater* (exception) — spec §4.2.
-6. **Leaf granularity** — one atom per (experiment, claim), or per result-cell? (feeds §8 #5).
+6. **Leaf granularity** — one atom per (experiment, claim), or per result-cell? (feeds open question #5).
 7. **Attack candidates** — walk the exploration tree; for each `dead_end`, decide rebut / undercut /
    undermine / **none**, with the target position and the `contrary` pair it needs.
 8. **Holes** — required premises or critical questions the artifact leaves open.
 
-### Process (from `popl-research-review.md` §5 Phase A)
+### Process
 
 - Sample 50–100 claims stratified by the six claim types above, drawing first from `paperbench`.
 - Double-annotate ≥20–30%; adjudicate and record disagreements.

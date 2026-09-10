@@ -8,6 +8,18 @@ in what `examples/A/example.lara`, `examples/B/example.lara`,
 and `examples/A/empirical-v1.policy.lara` actually write, and in the abstract syntax
 of `src/Lara/AST.hs`._
 
+**How to read this document (non-normative).** This is the contract for the
+concrete `.lara` syntax: what the parser accepts, what the printer emits, and
+how each surface form lowers to the abstract syntax the checker consumes. Its
+audience is implementers of the parser/printer/elaborator and readers writing
+or reviewing `.lara` files by hand. The main body defines the grammar; the
+appendices (D–I) each specify one later, additive surface version, and the
+version paragraphs below record what changed when. If you are new to LARA,
+read the [README](../README.md) and a worked example
+([`examples/README.md`](../examples/README.md)) first; this document assumes
+you already know what a claim, leaf, argument, and policy are (spec §0 has
+the one-paragraph vocabulary).
+
 Historical A0.5 baseline (the status below predates later additive surface
 versions):
 

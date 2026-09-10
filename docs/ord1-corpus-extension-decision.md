@@ -6,6 +6,14 @@ _Resolves the tracked follow-up "Corpus extension exercising `ord@1` end-to-end"
 docstring). Updated 2026-08-19: absorbed the factivity paragraph from the
 retired `ord@1` implementation plan and refreshed the freeze-tag reference._
 
+The verdict up front: `ord@1` is the strict backend that re-checks ordered
+numeric comparisons (e.g. `0.71 < 0.74`) from a certificate. This record
+decides that extending the frozen evaluation corpus with `ord@1`-exercising
+units is **deferred**: the S-series worked examples carry that evidence for
+now, and the trigger for revisiting is recorded below. Most of the document
+is the prerequisite for that call: stating precisely what an accepted `ord@1`
+step does and does not certify.
+
 ## What an accepted `ord@1` step certifies (the factivity firewall)
 
 An accepted certificate discharges the comparison **relative to the premise

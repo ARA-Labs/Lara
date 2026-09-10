@@ -6,14 +6,20 @@ here are what M1 (#184), M2a (#185), M2b (#181), M3 (#186) and the possible-worl
 wrapper (#192) quantify over. Changing any of them after this point invalidates a
 downstream theorem statement, not just a proof._
 
+_One definition up front, since everything below builds on it: a
+conclusion-labelled argumentation framework is the compiler's output, a
+finite directed graph of arguments and attack edges in which each node also
+carries the proposition it concludes, so claim statuses can be read off the
+graph._
+
 Canonical scope: [M0 in the theory-depth plan](https://github.com/EYH0602/lara-paper/blob/main/plan/theory-depth-plan.md#m0-extract-compilation-invariants).
 That plan lives in the `lara-paper` repository, not here; issues #180–#184 cite
 the same URL.
 
 The `theory-` prefix is load-bearing: this M0 belongs to the open POPL 2028
-theory spine (tracker #180), not to the closed engineering spine of
-`plans/research-proposal.md` §7, whose M0 was the semantic corpus study
-(`docs/corpus-map.md`) and whose milestone documents are the unprefixed
+theory spine (tracker #180), not to the closed engineering spine (tracker #48),
+whose M0 was the semantic corpus study (`docs/corpus-map.md`) and whose
+milestone documents are the unprefixed
 `docs/m1-freeze-checklist.md`, `docs/m3-closeout-notes.md`,
 `docs/m4a-checklist.md`, and `docs/m5-freeze-checklist.md`. The two series
 share numbers and nothing else.

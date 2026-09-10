@@ -4,6 +4,14 @@ _Status: frozen runtime-source contract, 2026-08-05. This decision is the prose
 contract for the policy-admission runtime program and its companion Lean
 metatheory program. It adds no construct to `lara-core@0.1`._
 
+Background for cold readers: a *leaf* is a declared piece of evidence, and the
+policy's admission rows say which kinds of leaf (by kind and provenance) an
+artifact may rely on. This record fixes the filtering layer that applies those
+rows at the `.lara` source boundary: it decides, deterministically, which
+declared leaves reach the core checker and which are *quarantined* (set aside
+as inadmissible, which is not the same as declared false). It filters inputs;
+it changes nothing about the calculus or the four statuses behind it.
+
 ## 1. Boundary and non-goals
 
 Policy admission is a deterministic judgment at the `.lara` source boundary.

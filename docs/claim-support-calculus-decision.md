@@ -5,6 +5,14 @@ _Status: settled for language v0.1. Recorded 2026-07-20; amended 2026-07-21 by
 + LP sub-fragment as separate source systems); `spec.md` Sections 3–7 now reflect one claim-support
 calculus with a backend-parametric strict-certificate interface._
 
+In plain terms, this record fixes the shape of an *argument* in LARA: one term
+language in which every argument (whether a strict, certificate-checked step
+or a defeasible, overridable one) is the same kind of object, so the checker
+needs only one typing judgment. The strict-certificate interface the terms
+plug into is specified separately in `strict-backend-decision.md`; spec §0 has
+the one-paragraph vocabulary (claims, leaves, schemes, attacks) this record
+assumes.
+
 ## Decision
 
 1. **One syntactic category.** Every argument is a **support term**

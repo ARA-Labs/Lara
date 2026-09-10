@@ -1,13 +1,17 @@
 # M1 freeze checklist — frozen language v0.1
 
-_Operational tracker for milestone **M1 — frozen language v0.1** (`plans/research-proposal.md` §7).
+_Operational tracker for milestone **M1 — frozen language v0.1**.
 Companion to `engineering-plan.md` (module dependency graph) and `spec.md` (the contract). This file
 records, component by component, what is already frozen, what still needs a lock before the v0.1 tag,
 and the mechanization obligation each frozen definition triggers._
 
+_Status: completed historical record. The v0.1 freeze this file tracked was
+locked on 2026-07-22; rows that read like open work are preserved as written
+at the time and are not live tasks._
+
 ## What M1 is (and is not)
 
-**M1 definition of done** (`research-proposal.md` §7): a versioned freeze of the *whole* language —
+**M1 definition of done**: a versioned freeze of the *whole* language —
 concrete/abstract syntax and JSON, static judgments, policy language, typed attacks, holes, AF
 compilation, claim aggregation, and specified rejection behavior; the strict-chain `contrary`
 well-formedness check (spec §8.1, Path B) and the proposition normalization `nf`/`≡` (spec §3.2) are

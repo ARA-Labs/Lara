@@ -7,7 +7,7 @@
   "this evidence supports this claim" is only ever *declared*, never *checked*. Prior
   claim-formalization systems (Micropublications, AIF, nanopublications) are representation models: a
   support edge is asserted, with no status computation, no located defeat, no soundness theorem.
-- **Evidence**: `docs/novelty-and-related-work.md` §2 delta table; `plans/research-proposal.md` §1.
+- **Evidence**: `docs/novelty-and-related-work.md` §2 delta table.
 - **Implication**: There is room for a *checked* claim-support object with a computed, replayable
   status — distinct from a representation format.
 
@@ -23,7 +23,9 @@
 - **Statement**: Recent autoformalization work reports compile success far above faithfulness — e.g.
   "Beyond Compilation" reports 89.5% compile vs 60.5% faithfulness, a ~29-point gap; over half of
   miniF2F v1 formal statements were misaligned with their informal text until manually re-aligned.
-- **Evidence**: `docs/gap-resolution.md` (Gap 2, autoformalization faithfulness); `plans/popl-research-review.md` §2 #10.
+- **Evidence**: `docs/gap-resolution.md` (Gap 2, autoformalization faithfulness); the LLM risk is not
+  confined to leaves — it also chooses the proposition, inference scheme, attack type/target, and
+  what to omit, so every untrusted boundary must be measured separately.
 - **Implication**: An LLM that produces formalizations cannot be trusted as the source of validity;
   every untrusted boundary (proposition, leaf, scheme, backend/theory, attack) must be measured
   separately, and the checker must be the sole arbiter of structure.
@@ -32,7 +34,9 @@
 - **Statement**: `supported(E, C)` does not entail `C`. A bridge from evidence to an empirical claim
   is a non-logical, usually defeasible inference scheme; treating it as deductive certifies a hidden
   axiom. A recorded dead end can retract a prior conclusion — a non-monotonic phenomenon.
-- **Evidence**: `plans/popl-research-review.md` §2 #3, #4; `docs/comparison-rit-lara.md` §5.
+- **Evidence**: empirical support is not deductive implication — the evidence→claim bridge must be a
+  named, defeasible inference scheme open to undercutting, not a hidden axiom, and a missing
+  certificate is not a proof of underivability, only an explicit gap; `docs/comparison-rit-lara.md` §5.
 - **Implication**: The core cannot be a monotonic proof system; it needs a defeasible layer with
   typed defeat and a non-monotonic acceptance semantics.
 

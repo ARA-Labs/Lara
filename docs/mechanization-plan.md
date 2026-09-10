@@ -1,16 +1,21 @@
 # LARA mechanization plan
 
 _How the metatheory gets machine-checked, and how the mechanized model stays tied to the Haskell
-checker. Expands `engineering-plan.md` §4 (the parallel mechanization track) and `research-proposal.md`
-§4 with a concrete architecture. The theorem list is `spec.md` §9 (results 1–12); the review's
-restatement is `../plans/popl-research-review.md` §4._
+checker. Expands `engineering-plan.md` §4 (the parallel mechanization track) with a concrete
+architecture. The theorem list is `spec.md` §9 (results 1–12)._
+
+_The goal in one line: machine-check spec §9's twelve results in Lean 4 and
+keep the mechanized model tied to the Haskell checker by byte-exact
+differential testing. The per-result status table lives in
+`../lean/README.md`; this document is the plan and rationale that produced
+it. §0 below is venue motivation, not a prerequisite; skip to §1 for the
+architecture._
 
 ## 0. Why mechanize at all (POPL calibration)
 
 The POPL 2027+ call strongly encourages submission-time proof scripts when mechanized proofs are a
-main contribution (`popl-research-review.md` §1, §4). For LARA, one of the five headline
-contributions is a *semantics-preserving compilation* into structured argumentation
-(`popl-research-review.md` §9 item 2). A paper proof of that is acceptable; a machine-checked one is
+main contribution. For LARA, one of the five headline contributions is a *semantics-preserving
+compilation* into structured argumentation. A paper proof of that is acceptable; a machine-checked one is
 the difference between "principled language result" and "trust the appendix." Property tests are
 **conformance evidence, not soundness** (`spec.md` §9 closing note) — the mechanized theorems carry
 soundness. Plan the project around a mechanized language result, not a checker demo.
@@ -70,7 +75,7 @@ only if the LP adapter ships (gated by corpus open question §8 #1).
 
 ## 2. Prover choice
 
-**Default: Lean 4** (`research-proposal.md` §8 #8 leaves Lean-vs-Rocq open until M1; Lean 4 is the
+**Default: Lean 4** (open question #8 left Lean-vs-Rocq open until M1; Lean 4 is the
 default, Rocq if a collaborator's expertise dominates). Rationale:
 
 - Mathlib has the order-theory / fixpoint infrastructure for result 5 (complete lattices, monotone
@@ -82,13 +87,13 @@ default, Rocq if a collaborator's expertise dominates). Rationale:
 Decide before M1 freeze (`spec.md` §9 note: core 1–9 + reference-adapter 10 must be mechanized). Do
 **not** start proving until M1 freezes the definitions — a theorem about the model does not transfer
 to the Haskell checker without the conformance argument, and re-proving after a definition churn is
-the main way a mechanization track blows its schedule (`research-proposal.md` risk table).
+the main way a mechanization track blows its schedule.
 
 ## 3. Architecture: one shared core, two implementations, a differential anchor
 
 This is the load-bearing decision. The Haskell checker and the Lean model are **separate
-developments sharing one serialized first-order core AST** (`research-proposal.md` §4). That shared
-serialization is the differential-testing anchor.
+developments sharing one serialized first-order core AST**. That shared serialization is the
+differential-testing anchor.
 
 ```
                     hand-written / elaborator-emitted
@@ -285,7 +290,7 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
 ## 6. Sequencing and artifact hygiene
 
 - **Gate.** Mechanization starts at **M1 freeze**, runs parallel to the Haskell compiler (M3)
-  (`engineering-plan.md` §6, `research-proposal.md` §8 #8 decides Lean/Rocq before M1). The two
+  (`engineering-plan.md` §6; open question #8 decided Lean/Rocq before M1). The two
   carve-outs (`nf`/`≡`, the ND adapter) can be *ported* to the prover early since they are already
   frozen — a low-risk warm-up that also seeds result 10/11. **Done for `nf`/`≡` (result 11):** the
   Lean 4 development lives in `../lean/` (Lake project, toolchain pinned to v4.32.0);
@@ -294,8 +299,8 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
   prover choice** (open question §8 #8 resolved). The ND adapter (result 10),
   executable support/attack/program checkers (result 1), and the source-vs-compiled
   bridge (result 6, `Faithful` now discharged by the checker-built `edgeB`) are now mechanized.
-- **Anonymizable from day one** (`popl-research-review.md` Phase C). No author-identifying paths,
-  comments, or repo metadata in the proof development.
+- **Anonymizable from day one.** No author-identifying paths, comments, or repo metadata in the
+  proof development.
 - **No `sorry`/`admit` in main theorems** at M2 exit; a single replay command must check the whole
   development. Record every prover axiom and every backend assumption explicitly (the POPL call asks
   for non-standard axioms; the `sorry`-audit lesson from `prior-art-lessons.md` applies to proof

@@ -1,5 +1,11 @@
 # M2b restricted-class realization spike
 
+_Superseded gate history. This file preserves the go/no-go decisions that
+gated the Theory M2b complexity work; the durable result and its decision
+record live in `theory-m2b-complexity.md`. The question the spike gated: can
+the restricted program class be realized concretely enough for a hardness
+argument to go through?_
+
 ## Renewed gate decision (2026-08-31)
 
 **HARDNESS**

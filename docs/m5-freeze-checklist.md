@@ -1,5 +1,12 @@
 # M5 freeze checklist — evaluation corpus (deterministic scope)
 
+_What this is: the protocol and record for the evaluation freeze, the pinned
+inputs and measurements the paper's numbers reproduce from. A *corpus unit*
+is a checked program lowered from a real research artifact; a *mutant* is a
+unit with a known seeded defect that the checker must reject with the right
+rejection class at the right location. The section directly below is the
+current snapshot; the freeze protocol and the historical record follow it._
+
 ## Current snapshot: evaluation freeze v6 — issue #266
 
 Recorded 2026-09-09. The committed `measurements/frozen/` snapshot now describes
@@ -126,7 +133,7 @@ snapshot, counts, and commands. It is retained as provenance, not as a descripti
 of the current `measurements/frozen/` contents.
 
 _Operational record for milestone **M5 — evaluation corpus** task **T5 (freeze
-protocol)** (`plans/research-proposal.md` §7, tracker #48). Companion to the M1
+protocol)** (tracker #48). Companion to the M1
 analogue (`docs/m1-freeze-checklist.md`). This file freezes the fixture
 set, corpus sample, and generator seeds before the final measurement runs; the
 paper's axis-(c) tables are generated only from post-freeze runs against the

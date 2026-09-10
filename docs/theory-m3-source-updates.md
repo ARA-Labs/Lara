@@ -6,6 +6,12 @@ theorem-backed transition matrices. The intended reader is a maintainer checking
 what the paper may say without reconstructing the milestone from commit history.
 The Lean sources are authoritative.
 
+_Status: settled record (2026-08-29; theory spine, tracker #180). The
+question it answers, in plain terms: if you edit one declaration of a checked
+source program — add a leaf, retract an argument, change an attack — what can
+happen to each claim's status, and which transitions are provably
+impossible?_
+
 ## Frozen Source Boundary
 
 `Lara.Update.SourceState` in `lean/Lara/Update.lean` contains exactly the raw

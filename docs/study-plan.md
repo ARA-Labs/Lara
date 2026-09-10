@@ -1,9 +1,13 @@
 # LARA study plan
 
 _What to read before implementing, ordered by what it unblocks. Companion to
-`../plans/popl-research-review.md` §7–8 (the full literature map) and `../plans/lara-related-work.bib`
-(the BibTeX). This plan prioritizes by the build order in `engineering-plan.md`: M0 corpus
-annotation first, then the trusted-core modules, then evaluation. Written 2026-07-21._
+`../plans/lara-related-work.bib` (the BibTeX). This plan prioritizes by the build order in
+`engineering-plan.md`: M0 corpus annotation first, then the trusted-core modules, then evaluation.
+Written 2026-07-21._
+
+_A dated onboarding reading list for new contributors, keyed to a build order
+that has since completed (M1–M5 are closed). The readings still orient; the
+urgency ordering is historical._
 
 ## How to use this
 
@@ -99,9 +103,8 @@ before finalizing evaluation and novelty claims; read #15–17 when building the
 
 **Evidence logic** — van Benthem & Pacuit 2011 (dynamic evidence-based beliefs, `dare.uva.nl`
 record) and van Benthem, Fernández-Duque & Pacuit 2014 (doi:10.1016/j.apal.2013.07.007). This is
-Track B, the "design conscience" explicitly *not* in the kernel (spec §3;
-`research-proposal.md:88`). Read only when a policy needs graded-evidence semantics; it is not on the
-implementation path.
+Track B, the "design conscience" explicitly *not* in the kernel (spec §3). Read only when a policy
+needs graded-evidence semantics; it is not on the implementation path.
 
 ---
 

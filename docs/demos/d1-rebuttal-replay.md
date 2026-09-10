@@ -2,6 +2,13 @@
 
 Issue [#62](https://github.com/EYH0602/lara/issues/62) (tracker [#61](https://github.com/EYH0602/lara/issues/61)); case-study material for the M7 paper package [#60](https://github.com/EYH0602/lara/issues/60) (T3). This is the **paper + reviews** population size that `examples/README.md` names but no prior example exhibits.
 
+_A demo write-up (2026-08-02) for the paper package: prose around a set of
+checked, committed examples. For readers without argumentation background:
+"grounded semantics re-adjudicates the graph" means the checker re-runs its
+one deterministic settle-who-wins rule over the whole argument graph each
+time the graph changes, with no judgment call and no memory of the previous
+round's verdict._
+
 ## What the demo shows
 
 A peer-review exchange — the submitted paper, the review round, and the author's rebuttal — is **not a new calculus**. It is the *same* Dung framework at a larger population size (`examples/README.md`; spec §8, cross-framework non-monotonicity). Reviews are typed attacks on the paper's arguments; a rebuttal is new evidence leaves and counter-attacks. Grounded semantics re-adjudicates the whole graph each round, so a claim's status moves **non-monotonically** across rounds — `justified → defeated → justified` — with **no change to the trusted policy**.

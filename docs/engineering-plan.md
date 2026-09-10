@@ -1,18 +1,34 @@
 # LARA engineering plan
 
-_How the artifact gets built, in dependency order. This is the engineering companion to the
-milestone spine (`../plans/research-proposal.md` §7, M0–M7) and the phased work plan
-(`../plans/popl-research-review.md` §5, Phases A–G). Where those describe *what* and *when*, this
-describes the *module dependency graph* and the *build discipline*. The spec (`spec.md`) is the
-contract every module implements._
+_How the artifact gets built, in dependency order. This describes the *module dependency graph* and
+the *build discipline*; the spec (`spec.md`) is the contract every module implements. The milestone
+spine that drove this order — now a closed record, not a worklist — was:_
+
+| Milestone | Definition of done |
+| --- | --- |
+| M0 — semantic corpus study | 50–100 claims classified by proposition, rule, evidence, attack, gap shape, and strict-certifier/theory need; two annotators on a subset |
+| M1 — frozen language v0.1 | versioned concrete/abstract syntax and JSON, static judgments, policy language, typed attacks, holes, AF compilation, and claim aggregation |
+| M2 — mechanized reference core | Lean 4 mechanization of checker soundness, backend replacement/isolation, dependency accountability, status determinism, and compilation correctness |
+| M3 — Haskell compiler/checker | parser, elaborator, canonical printer, JSON codec, strict-backend registry + natural-deduction adapter, claim-support compiler, diagnostics, status engine, and replay bundle |
+| M4 — walking skeleton | one real claim end to end with no hand-authored certificate step |
+| M5 — evaluation corpus | gold annotations, mutation suite, baselines, ablations, and blinded held-out set frozen before final runs |
+| M6 — full evaluation | all four axes reported; at least five worked cases spanning every status/attack kind |
+| M7 — POPL package | paper, anonymized mechanization, implementation, corpus, and reproducibility scripts |
+
+M0–M5 are closed (tracker #48); M6's LLM-dependent axes (b)/(d) are deferred to the ACL/EMNLP
+follow-up (#52, #30); M7 closed 2026-08-24 (#60) because paper-writing moved to the paper repository.
+
+_If you are new to the project, start with the top-level `../README.md` and
+spec §0 instead; this is a living engineering log for contributors, and §0
+below records the current state atop a stack of dated updates._
 
 ## 0. Current state (2026-07-21; M1 update 2026-07-22; M5 update 2026-08-19; surface updates 2026-08-22/23; milestone update 2026-08-24)
 
 **Milestone update (2026-08-24): no milestone is open in this repository.** #60
 (M7, the paper package) was closed as completed — paper-writing and
 submission-package work is tracked in the paper repository, not here. The
-milestone spine in `../plans/research-proposal.md` §7 is now a record rather than
-a worklist. Remaining engineering work is the open GitHub issues, chiefly the
+milestone spine above is now a closed record, not a worklist. Remaining
+engineering work is the open GitHub issues, chiefly the
 `refreeze-batch` evaluation-suite extensions (#125 in #154, #124, and #123),
 which landed together and were frozen by the shared refreeze cycle #156 as
 **`m5-freeze-v5`** — 541 mutants + 60 corpus units = 601 measured inputs. The
@@ -106,7 +122,7 @@ eligible LP adapter only after fixed schema recognition and a soundness/conforma
 
 ## 1. The dominating constraint: corpus before calculus
 
-`research-proposal.md:454` (the order constraint) and the eight open questions in §8 make the
+The order constraint and the eight open questions it depended on (§6's decision gates) made the
 sequencing non-negotiable:
 
 > Do the corpus study before freezing the calculus, but build one hand-lowered vertical slice while
@@ -137,7 +153,7 @@ These are the only Haskell allowed to start before M0 exits. Everything else wai
 
 ## 2. M0 — semantic corpus study (the current work)
 
-Exit criteria (from `popl-research-review.md` §5 Phase A and `research-proposal.md` M0):
+Exit criteria:
 
 - 50–100 claims sampled across the 30-paper ARA corpus, stratified by claim type (descriptive,
   comparative, causal, generalization, negative-result, implementation/behavioral).
@@ -149,8 +165,8 @@ Exit criteria (from `popl-research-review.md` §5 Phase A and `research-proposal
   whole reasoning steps as opaque leaves.
 
 M0 is a **data/annotation task, not a coding task.** Its deliverable is the answer set for open
-questions §8 #2/#3/#5/#7, which unlocks the module backlog below. It has no code dependency and
-should start immediately.
+questions #2/#3/#5/#7 (§6's decision gates), which unlocks the module backlog below. It has no code
+dependency and should start immediately.
 
 ## 3. Post-corpus Haskell build order (the M3 spine)
 
@@ -169,9 +185,9 @@ whose shape M0 can change.
 | 7 | `Lara.Grounded` — least-fixpoint labelling + four-state aggregation | §8 | Compile | no |
 | 8 | `Lara.Diagnostics` — located rejection for every ill-formed construct | §1, §10 | all above | no |
 
-**The §8.1 policy validator is an early M3 target** (`research-proposal.md:447`): compute the
-strict-reachable pattern set and reject any policy whose `contrary` sides may overlap it at the
-ground-instance level. It lands with `Lara.Policy` (layer 3), not later.
+**The §8.1 policy validator is an early M3 target**: compute the strict-reachable pattern set and
+reject any policy whose `contrary` sides may overlap it at the ground-instance level. It lands with
+`Lara.Policy` (layer 3), not later.
 
 ### Boundary layers (after the core AST stabilizes)
 
@@ -192,12 +208,11 @@ LP seed behind `Lara.Strict` only if the corpus justifies a second shipped adapt
 ## 4. Mechanization track (parallel, starts at M1 freeze)
 
 `spec.md §9` lists 12 required results; core results 1–9 plus reference-adapter result 10 must be
-mechanized (Lean 4 default,
-`research-proposal.md:461`; open question §8 #8 decides Lean vs Rocq before M1 freezes). Engineering
-implications:
+mechanized (Lean 4 default; open question #8, §6's decision gates, decided Lean vs Rocq before M1
+freezes). Engineering implications:
 
-- It is a **separate development sharing one first-order core AST** with the Haskell checker
-  (`research-proposal.md:258`) — that shared serialized core is the differential-testing anchor.
+- It is a **separate development sharing one first-order core AST** with the Haskell checker — that
+  shared serialized core is the differential-testing anchor.
 - Design `Lara.SupportTerm`'s AST from day one to serialize into the Lean/Rocq model, so the same
   core programs and verdicts cross-check both implementations.
 - Do not start mechanizing until M1 freezes the definitions; a theorem about the model does not
@@ -209,8 +224,8 @@ implications:
 - **Property tests** (QuickCheck, already wired) per layer for the algebraic laws — e.g. `≡`
   reflexive/symmetric/transitive/linear; natural-deduction weakening; backend replacement; grounded
   labelling determinism.
-- **Golden tests**: the three complete + three rejected examples the spec requires
-  (`popl-research-review.md` §5 Phase B; spec §10 currently has one incomplete example).
+- **Golden tests**: three complete + three rejected examples covering every status and attack type
+  (spec §10 currently has one incomplete example).
 - **Mutation suite** (M3/Phase D): wrong formulas, undeclared leaves, hidden policy extension, bad
   attack targets, open obligations, cycles, codec corruption — every rejection class must be caught.
 - **Differential tests**: serialized core programs + verdicts run through both Haskell and the
@@ -224,11 +239,11 @@ Property/golden/mutation/differential tests are **conformance evidence, not soun
 | Gate | Blocks | Resolved by |
 | --- | --- | --- |
 | M0 exit (≥80% coverage) | layers 3–5 | corpus study |
-| §8 #1 optional adapter portfolio | LP/domain adapters beyond `Lara.Strict.ND` | M0 |
-| §8 #2 rule schemes | `Lara.Policy` | M0 |
-| §8 #3 defeat typing | `Lara.Attack` | M0 |
-| §8 #5 leaf granularity | `Lara.SupportTerm` leaf handling | M0 |
-| §8 #8 TCB + Lean/Rocq | mechanization track start | before M1 freeze |
-| §8 #7 behavioral routing | TL-1 (optional) | corpus sampling |
+| open question #1 — optional adapter portfolio | LP/domain adapters beyond `Lara.Strict.ND` | M0 |
+| open question #2 — rule schemes | `Lara.Policy` | M0 |
+| open question #3 — defeat typing | `Lara.Attack` | M0 |
+| open question #5 — leaf granularity | `Lara.SupportTerm` leaf handling | M0 |
+| open question #8 — TCB + Lean/Rocq | mechanization track start | before M1 freeze |
+| open question #7 — behavioral routing | TL-1 (optional) | corpus sampling |
 
 Carve-out layers 1–2 clear no gate — they are frozen and may start now.

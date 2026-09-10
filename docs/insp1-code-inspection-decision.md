@@ -6,6 +6,15 @@ family admits are allowed to live. It closes the §5.2 portfolio item that PR #2
 designed-but-unshipped; the seam contract itself is unchanged and stays in
 `strict-backend-decision.md`._
 
+Background for cold readers: strict *backends* (the adapter portfolio) are the
+small external checkers that re-verify strict argument steps from
+certificates: `ra@1` for rational arithmetic, `ord@1` for ordered
+comparison, and now `insp@1` for static code inspection. A claim like
+`code_absent` is what an artifact asserts when its argument depends on
+something *not* being in the code (for example, "the shipped implementation
+never uses the test set"), and this record fixes exactly how much of such a
+claim a certificate can carry.
+
 ## 1. Decision
 
 The v0.1 optional adapter portfolio ships a third checker beside `ra@1` and `ord@1`:

@@ -1,5 +1,11 @@
 # Term-level critical-question holes (#217)
 
+_Durable record for issue #217, landed 2026-09-09 (theory spine follow-on to
+M4). For cold readers: a *critical question* is an obligation a reasoning
+scheme imposes — "was the experiment randomized?" — that must be answered by
+an argument term in the instance's discharge map; a *hole* is a typed
+placeholder standing where such an answer term will be substituted in._
+
 The M4 fragment calculus resolves imported leaf names by extending Γ. That alone
 cannot discharge a critical question: its answer is a support term inside an
 instance's discharge map. The additive `Lara.Context.Holes` calculus represents

@@ -7,6 +7,11 @@ _This note is **policy only**. It authorizes no CNL experiment, no producer code
 and no error-message rewrite. It exists so that ease-of-use work cites a fixed
 boundary instead of re-deciding "how natural should this be?" once per feature._
 
+Two terms used below: the *TCB* (trusted computing base) is the code whose
+correctness the acceptance verdict depends on (spec §1.1), and a `.lara` file
+is the checked surface artifact; the README's running example shows what one
+looks like.
+
 ## 1. Decision
 
 Natural language meets LARA at three layers, and the three get different

@@ -5,6 +5,12 @@ amended 2026-07-21 by `strict-backend-decision.md`. Extends
 `claim-support-calculus-decision.md`. All current
 recommendations are applied to `spec.md`._
 
+For cold readers: `(Inst)` is the typing rule that instantiates an inference
+scheme into a concrete argument step, and a rule is *checkable* only when
+every one of its premises is something the checker can decide. `spec.md` is
+now the authority for the fixed rules; this document is the reasoning trail
+that got them there.
+
 Two gaps kept the instantiation rule `(Inst)` from being fully checkable:
 
 - **Gap 1 — the strict-mode witness condition was prose, not a premise.** `spec.md` said a strict

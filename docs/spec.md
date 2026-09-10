@@ -60,6 +60,53 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > freeze-tag bump is owed: prose-only, with no byte change to the corpus, the wire, or replay
 > identity.
 
+## 0. How to read this specification (non-normative)
+
+This section is a reader's guide, not part of the frozen language definition;
+nothing in it adds or changes a requirement.
+
+**Audience.** This document is written for implementers and for technically
+fluent readers, comfortable with grammars, typing rules, and inductive
+definitions, who may have little background in argumentation theory or
+programming-language metatheory. For a gentler, prose-first introduction read
+the [README](../README.md) and the demo write-ups in
+[`demos/`](demos/) before this document.
+
+**The vocabulary in one paragraph.** A LARA program declares *claims* (the
+statements whose status is requested), *leaves* (evidence: atomic facts with
+provenance), and *arguments* built from them. Arguments instantiate inference
+*schemes* drawn from a *policy* (the versioned rulebook the artifact opts
+into), and each scheme carries *critical questions*, obligations that must be
+discharged by evidence or reported as holes. A scheme is either *defeasible*
+(holds by default, can be overturned) or *strict* (its step is re-verified
+from an opaque certificate by a versioned *backend*, e.g. `nd@1` for natural
+deduction or `ord@1` for ordered comparison). Declared *attacks* — rebut
+(against a conclusion), undercut (against a rule application), undermine
+(against a premise) — connect arguments. The checker *compiles* the program
+into an argumentation framework: a finite directed graph whose nodes are
+arguments and whose edges are attacks (Dung 1995). The *grounded labelling*
+is the deterministic least-fixed-point rule that settles which nodes stand
+(*in*), are knocked down (*out*), or are stuck in a standoff (*undec*); each
+claim's four-state status of justified, gap, defeated, or contested is read
+off from it. A program that violates the rules is *rejected* with a located
+diagnostic drawn from the fixed rejection classes (§10.1).
+
+**Reading paths.**
+
+- *To understand the guarantee and what is trusted:* §1 (scope), §1.1 (the
+  TCB), then §10 (rejection behavior).
+- *To write or elaborate programs:* §2 (names, versioning), §3
+  (propositions), §4 (policies, instantiation, critical questions), §6.1
+  (support-term typing), §7.1 (attack typing). The concrete `.lara` syntax
+  lives in [`lara-surface-grammar.md`](lara-surface-grammar.md).
+- *To implement or audit a checker:* additionally §5 (strict backends), §8
+  (compilation and grounded semantics, including the §8.1 policy
+  restriction), and §9 (the mechanized results and their Lean pointers).
+
+The freeze blockquotes above record *when* each part of the definition became
+fixed and under what evidence; they matter for provenance and for proposing
+changes, and can be skipped on a first reading.
+
 ## 1. Scope and guarantee
 
 LARA is a small language of proof-carrying, policy-relative claim support. A program declares:

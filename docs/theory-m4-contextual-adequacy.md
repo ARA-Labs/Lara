@@ -8,6 +8,12 @@ theorem phases is `docs/theory-m4-context-calculus-decision.md`; the
 declaration index is `docs/paper-lean-name-map.md` §M4. Part B (full
 abstraction) is **descoped** — §7._
 
+_In plain terms: a *fragment* is a piece of a checked program, a *context* is
+a surrounding program with a hole the fragment fills, and "observation" is
+what the completed program's verdict reveals. Part A proves that relabeling a
+fragment's backend certificates — without changing what the backend
+accepts — is invisible to every admissible context._
+
 ## 1. What Part A proves
 
 **Contextual representation independence.** An injective,

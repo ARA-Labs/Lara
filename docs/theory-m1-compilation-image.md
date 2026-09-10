@@ -4,6 +4,12 @@ _Status: proved for the POPL 2028 theory spine on 2026-08-26 (issue #184,
 tracker #180). This document records the fixed-context theorem boundary after
 M1 tested and refuted the proposed sufficiency direction._
 
+_In plain terms: compilation maps checked source programs to argumentation
+frameworks, and M1 asked which frameworks are reachable that way. The
+proposed conjecture, that the candidate invariant conditions were
+*sufficient* for a framework to be in the image, turned out to be false;
+what survived is the exact fixed-context boundary recorded below._
+
 The intended readers are the paper author and future M2 implementers. They
 should cite the declarations below rather than restating the original M1
 conjecture.

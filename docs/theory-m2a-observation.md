@@ -4,6 +4,12 @@ _Status: mechanized for the POPL 2028 theory spine on 2026-08-28 (issue #185,
 tracker #180). This document records what the observation interface proves,
 what it refutes, and the six places where the plan's own prose was wrong._
 
+_In plain terms: the checker always settles arguments with the grounded rule,
+but argumentation theory has other settle-who-wins rules (other *semantics*).
+M2a makes the semantics a parameter of the observation interface, so theorems
+can be stated once for any rule instead of being welded to grounded, which
+the paper would otherwise have to caveat everywhere._
+
 _Update 2026-09-06 (issue #196): the general non-emptiness of preferred
 extensions, listed below as follow-up work and as a paper must-not, is now
 proved — `Semantics.preferred_exists`, `Semantics.preferred_exists_candidate`

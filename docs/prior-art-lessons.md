@@ -3,6 +3,11 @@
 _Firsthand reads of the closest prior systems, focused on concrete design/eval lessons for LARA
 rather than positioning (positioning lives in `novelty-and-related-work.md`). Written 2026-07-21._
 
+_Currently covered: EG-VAR (read to answer "what does a monotonic,
+attestation-based verifier of empirical claims get right and where does it
+relocate trust?"), followed by cross-system takeaways. The delta table over
+the full neighbor set is in `novelty-and-related-work.md`._
+
 ## EG-VAR (Ren 2026, ICML TAIGR workshop, arXiv:2607.12650)
 
 ### What it is (firsthand)
@@ -43,8 +48,7 @@ an honest **Abstain** with a replayable audit trail.
 2. **The Tier-1 / Tier-2 eval split corroborates LARA's four axes.** EG-VAR measures the *kernel*
    safety property in isolation (Tier 1, formalizer bypassed with gold goals), then measures the
    *formalizer* separately (Tier 2). That is exactly LARA's Axis (a) (metatheory/conformance,
-   LLM-independent) vs. Axis (b) (semantic faithfulness) separation
-   (`../plans/research-proposal.md` §5). Independent evidence the split is right, and a concrete
+   LLM-independent) vs. Axis (b) (semantic faithfulness) separation. Independent evidence the split is right, and a concrete
    template: report the checker guarantee under ideal formalization *and* the end-to-end residual
    separately; never launder one through the other.
 3. **State the trusted-lift caveat plainly, as they do.** M.1(ii) names the trusted boundary in a

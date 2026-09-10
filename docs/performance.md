@@ -1,6 +1,9 @@
 # Checker performance
 
-What the E1 bench measures, how to run it, and a dated snapshot.
+What the E1 bench measures, how to run it, and a dated snapshot. E1 is the
+checker-performance bench: it times the Haskell checker over the frozen
+evaluation corpus (the per-unit check cost and one full pass over the
+harness records) via `make bench`.
 
 The numbers below are **indicative documentation, not frozen evaluation
 numbers**. They describe one machine at one commit; re-run the bench rather
@@ -108,8 +111,23 @@ The `check + render, pre-decoded` row is the stable control: it sits downstream
 of the decode boundary, so no wire-codec change can move it. A run whose
 control row deviates markedly from ~203 µs is measuring machine load, not the
 checker, and should be discarded rather than quoted (this is what happened in
-[#118](https://github.com/ARA-Labs/lara/issues/118), and it is the acceptance
-test in [#120](https://github.com/ARA-Labs/lara/issues/120)).
+[#118](https://github.com/ARA-Labs/lara/issues/118)).
+
+**This snapshot's absolute numbers are stale and should not be cited.**
+[#120](https://github.com/ARA-Labs/lara/issues/120) (closed not planned,
+2026-08-24) found that the benchmark harness changed from interpreted
+(`cabal exec -- runghc scripts/bench.hs`, the driver that produced this
+snapshot) to compiled (`cabal run exe:lara-bench`) with no protocol line
+altered, and that the change alone moves every row — a *loaded*-machine
+compiled run beat this *quiet*-machine interpreted snapshot on every metric
+(end-to-end −22%, parse −31%, check + render pre-decoded −9.4%, check −8%).
+Load inflates timings and never deflates them, so the harness is the
+explanation, not noise. The `~203 µs` control-row reference above is
+therefore itself an interpreted-harness artifact, not a compiled-harness
+baseline; #120 also found no host available to the project reaches the
+container publication runner's quiet-window gate, so no corrected snapshot
+has been produced. Treat every number in this section as an upper bound from
+a retired harness until a fresh compiled-harness snapshot replaces it.
 
 ## Why no rendered table is committed
 

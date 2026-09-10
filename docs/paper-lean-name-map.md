@@ -1,5 +1,9 @@
 # Paper ↔ Lean name map (P1–P3 gate, issue #68)
 
+_What this is: the lookup table used when writing the paper. Every formal
+object displayed in the draft must be transcribed from a Lean declaration
+named here, and reviewers can follow each entry to the mechanized source._
+
 Rule (from #68 / the M7 paper package): every formal object displayed in the
 PLDI draft is **transcribed from the Lean development, never invented
 paper-side**. Each paper display cites its Lean declaration in a provenance

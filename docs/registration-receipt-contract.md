@@ -7,6 +7,13 @@ validator, no Git backend, no network dependency, and no Haskell or Lean
 code. Registration receipts are process metadata: they never enter `Gamma`,
 never create an attack, and never change a grounded status or claim status._
 
+Why anyone wants this: a registration receipt proves that specific content
+existed, unchanged, at a specific time; for example, that a preregistered
+analysis plan predates the results it governs. The disclaimers above mark
+where receipts may *not* reach: `Gamma` is the evidence context the checker
+reasons from, so a receipt can annotate provenance but can never itself
+become evidence, mount an attack, or move a claim's status.
+
 ## 1. The minimal receipt
 
 A registration receipt is a record issued by an external witness that fixed a
