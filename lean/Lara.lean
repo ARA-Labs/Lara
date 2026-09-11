@@ -396,6 +396,7 @@ import Lara.ListRel
 import Lara.Context.Fragment
 import Lara.Context.Link
 import Lara.Map.Qualify
+import Lara.Map.Batch
 import Lara.Map.Link
 import Lara.Context.Merge
 import Lara.Context.Compose

@@ -380,37 +380,42 @@ two computations meeting.
 
 ### End-to-end cost
 
-Recorded here rather than in [`../performance.md`](../performance.md) because a
-map is a different shape of work from the kernel bench's: it reads and parses
-several `.lara` sources from disk, checks each, then links and checks again.
-There is no cache, so this is the cost of *every* invocation, including one
-whose members have not changed.
+Measured by `make bench-map`, the map mode of the committed bench harness
+(issue #319). Its protocol, and the dated table for every accepted map anchor,
+are in [`../performance.md`](../performance.md#the-multi-artifact-map-a-separate-protocol).
+A map is a different shape of work from the kernel bench's: it reads and parses
+several `.lara` sources, checks each, then links and checks again. So it has its
+own protocol and its own table, and none of its numbers may be set beside the
+kernel rows. There is no cache across invocations, so a full pass is the cost of
+*every* `lara check <map.laramap>`, including one whose members have not
+changed.
 
-In-process, median of 200 runs per row, warm page cache, AMD EPYC 9354, GHC
-9.6.6 `-O1`, measured on the Task 5 working tree. Each member row times
-`Lara.Source.Load.loadSource` → `runSourceCheck` → `printSExpr . encodeVerdict`,
-forced; the map row times `Lara.Map.Driver.runMap` →
-`printSExpr . encodeMapVerdict`, forced — that is, the whole of what
-`lara check <map.laramap>` does after argument parsing:
+For this map at commit `ad513b5`, on an AMD EPYC 9354 with GHC 9.10.3, with
+every file pre-read and then medians over 5 sections of 100 batched passes:
 
-| Work | Median | Mean | Min |
-| --- | --- | --- | --- |
-| one member: load + parse + policy + elaborate + check + encode | 0.49–0.52 ms | 0.49–0.52 ms | 0.43–0.45 ms |
-| the legacy single-file D3 (all four papers, one artifact) | 1.13 ms | 1.13 ms | 1.03 ms |
-| the map: four members loaded, checked, linked, checked again, evaluated | **4.02 ms** | 4.04 ms | 3.75 ms |
+| Work | Median | Worst |
+| --- | --- | --- |
+| the map: four members loaded, rechecked, linked, checked again, evaluated, rendered | **2.78 ms** | 2.81 ms |
+| the same over pre-loaded members: link, linked check, evaluate, render | 0.27 ms | 0.28 ms |
 
-Roughly half the map's time is the four members' own load-and-check (4 × ≈0.5 ms
-≈ 2.0 ms); the remainder is shared-contract validation, qualification, the
-merge, cross-member saturation, the linked `checkUnit`, the grounded evaluation
-and the composite encoding. The map costs about 3.5× the single-file artifact
-that answers the same question, which buys the four members their independence.
+About nine tenths of a pass is the four members' own load and recheck.
+Qualification, the merge, cross-member saturation, the linked `checkUnit`, the
+grounded evaluation and the composite encoding together cost about 0.27 ms.
+
+An earlier version of this section quoted a hand-taken table instead: 4.02 ms
+per pass, timed around `Lara.Map.Driver.runMap` with file reads included, on GHC
+9.6.6 `-O1`, beside per-member and single-file rows. It was retired because no
+committed harness could regenerate it; the table above comes from one command.
+The two protocols differ (the harness pre-reads the files, the old timing did
+not), so the old and new figures should not be compared.
 
 **Why there is no per-command wall-clock row.** Timing the CLI was tried and the
 result is not reportable as a property of LARA. In a shell loop of 300 execs on
 the machine above, `lara check <map>` measured ≈12.4 ms per invocation and the
 same binary *with no arguments at all* measured ≈11.7 ms — a difference of
-≈0.7 ms, where the pipeline it added is 4.02 ms. The two cannot both be
-serial, so the ≈11.7 ms floor is not startup being paid before the work begins.
+≈0.7 ms, where the pipeline it added measured about 4 ms in-process at the time.
+The two cannot both be serial, so the ≈11.7 ms floor is not startup being paid
+before the work begins.
 It is per-exec overhead of the measuring environment that overlaps the child's
 execution: in the same loop `/usr/bin/true` measured ≈1.0 ms per exec, which is
 one to two orders of magnitude above a bare `fork`+`exec` and is a fact about

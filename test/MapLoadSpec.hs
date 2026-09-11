@@ -30,21 +30,16 @@
 -- recheck of current bytes and consults no staleness signal.
 module MapLoadSpec (mapLoadSpecProps) where
 
-import Control.Exception (bracket)
 import Data.List (isInfixOf, isPrefixOf, sort)
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromMaybe)
 import System.Directory
   ( createDirectoryIfMissing
   , getModificationTime
-  , getTemporaryDirectory
-  , removeDirectoryRecursive
-  , removeFile
   , setModificationTime
   )
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
-import System.IO (hClose, openTempFile)
+import System.FilePath ((</>))
 import System.Posix.Files (createSymbolicLink)
 import System.Process (readProcessWithExitCode)
 import Test.QuickCheck
@@ -86,6 +81,7 @@ import Lara.Source.Load
   , readCachedFile
   , renderSourceLoadError
   )
+import qualified Lara.TempTree as TempTree
 import Lara.Wire (encodeVerdict, printSExpr)
 
 -- ---------------------------------------------------------------------------
@@ -104,30 +100,10 @@ aliasOf name =
 -- The root is under the system temp directory, which is where the /paths
 -- resolve against the manifest/ tests get their force: the process working
 -- directory is the package root, so a member path that resolves at all can only
--- have been resolved against the manifest's own directory.
+-- have been resolved against the manifest's own directory. The directory is
+-- reserved, not derived — see "Lara.TempTree".
 withTree :: [(FilePath, String)] -> (FilePath -> IO a) -> IO a
-withTree files body = do
-  tmp <- getTemporaryDirectory
-  bracket
-    ( do
-        (marker, handle) <- openTempFile tmp "lara-map"
-        hClose handle
-        removeFile marker
-        let root = marker ++ ".d"
-        createDirectoryIfMissing True root
-        pure root
-    )
-    removeDirectoryRecursive
-    -- Building the tree happens HERE, not in @bracket@'s acquire: an exception
-    -- while writing a fixture file (a bad relative path, a full disk) would
-    -- escape an acquire that had already created the directory, and @bracket@
-    -- does not release what a failed acquire left behind. Inside the body it is
-    -- covered.
-    (\root -> mapM_ (writeInto root) files >> body root)
-  where
-    writeInto root (path, contents) = do
-      createDirectoryIfMissing True (takeDirectory (root </> path))
-      writeFile (root </> path) contents
+withTree = TempTree.withTree "lara-map"
 
 -- | The committed two-member fixture sources: @examples\/A@, @examples\/B@, and
 -- the policy file they share byte for byte.

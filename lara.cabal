@@ -177,6 +177,7 @@ test-suite lara-test
                       AdmissionSpec
                       BindingAuditSpec
                       Lara.AdmissionFixture
+                      Lara.TempTree
                       ClaimSupportSpec
                       MechReviewSpec
                       RunningExampleSpec

@@ -958,8 +958,10 @@ the result is stated but not yet proved or mechanized._
   or group-pruning audit. Identity is shared where meaning is shared: propositions, predicates,
   rule and question identifiers are *not* qualified, which is what makes a cross-artifact
   conflict detectable at all — qualifying them would make every map trivially conflict-free.
-  Untested boundary: a policy with a premise-less rule, which is the case that both makes the
-  structural merge reachable and is absent from every policy shipped here.
+  It also holds when two members declare one leaf-free argument, which a premise-less rule
+  makes possible: the merge folds the two into one argument and the map is still accepted.
+  Untested boundary: the inputs v1 refuses outright
+  (docs/multi-artifact-composition-decision.md D2).
 - **Sources**: ["(labels (0 undec) (1 undec) (2 in) ← examples/agreement-map-multi/map.verdict.sexp «(labels (0 undec) (1 undec) (2 in)» [result]", "(edges (0 1) (1 0)) ← examples/agreement-map-multi/map.verdict.sexp «(edges (0 1) (1 0)) (statuses» [result]", "1032 bytes agreeing across both drivers ← scripts/check-map-conformance.sh «tree test/fixtures/map/, and the shipped D3 example examples/agreement-map-multi/» [input]"]
 - **Status**: supported
 - **Provenance**: ai-suggested
@@ -972,7 +974,13 @@ the result is stated but not yet proved or mechanized._
   contested/contested/justified/justified, reproducing examples/agreement-map/expected.json;
   test/MapExampleSpec.hs — prop_compositeMatchesLegacyOracle reads the legacy artifact's own
   verdict live rather than a transcription; lean/Lara/Map/Link.lean:linkMembers_checked — the
-  finite-member fold instantiates Lara.Context.link_checked rather than restating the semantics]
+  finite-member fold instantiates Lara.Context.link_checked rather than restating the semantics;
+  trace/exploration_tree.yaml:N316_merge_anchor — test/fixtures/map/merge reaches the structural
+  merge through a real map and both drivers agree on it; lean/Lara/Map/Batch.lean:batch_checked
+  and lean/Lara/Map/Link.lean:batch_atts_mem_iff_fold — the batch construction both drivers run
+  is accepted and produces the fold's attacks (N321_batch_link;
+  ara/evidence/proofs/map_batch_link_321.md)]
 - **Dependencies**: [C06]
 - **Tags**: composition, linking, saturation, grounded-semantics, multi-artifact
+- **Last revised**: 2026-09-11 (2026-09-11_001#2)
 

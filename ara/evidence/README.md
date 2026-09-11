@@ -28,6 +28,7 @@ Instead, per the project's own decision, the empirical signal that grounds each 
 | File | Source | Claims | Description |
 |------|--------|--------|-------------|
 | [results/prop_layer.md](results/prop_layer.md) | `cabal build`/`cabal test` on `Lara.Prop` | C01 | Build + property-suite run record for carve-out layer 1 |
+| [results/map_bench_2026-09-11.md](results/map_bench_2026-09-11.md) | `make bench-map` at `ad513b5` (#319) | C56 (context) | First run of the committed map harness: shipped four-member map 2778.2 µs per full pass, 272.9 µs of it linking and the linked check |
 | [results/executable_nd_adapter.md](results/executable_nd_adapter.md) | Lean/Haskell ND adapter gates | C03, C05 | Exact replay adequacy, proved Atom codec inverse, shared golden vectors, and full gate results |
 | [results/strict_certificate_frontend.md](results/strict_certificate_frontend.md) | S1 `.lara` → elaborate → `nd@1` replay + both-driver differential | C03, C05 | Policy-carried theory and surface assurance reach an accepted, justified verdict; missing theory rejects R13 |
 | [results/numeric_quarantine_parity.md](results/numeric_quarantine_parity.md) | Real Haskell/Lean drivers + full regression gates | C12, C25 | Shared `canonNum` closes false-justified numeric divergence; two blocked queries retain positional byte parity |
@@ -45,6 +46,7 @@ Instead, per the project's own decision, the empirical signal that grounds each 
 | [proofs/pw_t6_transport.md](proofs/pw_t6_transport.md) | PW-T6 structural transport (#191), PR #223 | C48 | Exact checked-support transport across a structural bridge, obligations verbatim, with the checker-tied applicability judgment |
 | [proofs/m4_contextual_adequacy.md](proofs/m4_contextual_adequacy.md) | Theory M4 Part A (#187), PR #218 | C49 | Contextual representation independence: a certificate relabel commutes with linking saturation, so backend replacement is a congruence over admissible contexts |
 | [proofs/pw_t9_path_composition.md](proofs/pw_t9_path_composition.md) | PW-T9 exact structural-path composition (#190), PRs #233/#236 | C48 boundary, mechanization §11 | First-leg-first partial translation, composed structural bridges, arbitrary typed paths, direct/path triangles, explicit candidate-relation coherence, and checked positive/negative witnesses |
+| [proofs/map_batch_link_321.md](proofs/map_batch_link_321.md) | Batch link mechanization (#321), commit `bf31acc` | C56 | `batch_checked`: the drivers' one-shot linked unit is accepted; `batch_atts_mem_iff_fold`/`batch_args_mem_iff_fold`: it equals the fold; `linkedUnitOf_checked`: applied to the Lean driver's own unit |
 | [proofs/pw_t8_status_preservation.md](proofs/pw_t8_status_preservation.md) | PW-T8 conditional status preservation (#193), PR #240 | C50, C47/C48 boundary | Grounded status invariant under a total attack bisimulation; `StatusBridge` hypotheses at a structural bridge; T8 `status_transport`, its modal collapse, and composition along T9; T7 as a forward homomorphism that fails `matched`; all four statuses transported off the identity |
 
 ## Tables

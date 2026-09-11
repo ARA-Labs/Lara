@@ -3663,3 +3663,41 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O170
+  timestamp: "2026-09-11T07:40"
+  provenance: ai-suggested
+  content: >
+    An incremental link (fold one member at a time, saturating each step's boundary)
+    and a one-shot batch link (saturate every cross-member pair of the merged material)
+    produce the same attacks and arguments whenever each member is well-formed on its own
+    and identities are hygienic. The reason is that a member's derivations keep their
+    conclusions in every environment extending the member's own, so the per-step and
+    whole-map conclusion caches agree on every member argument. The equivalence needs no
+    premise beyond what acceptance already needs.
+  context: >
+    Issue #321. Proved as batch_atts_mem_iff_fold / batch_args_mem_iff_fold in
+    lean/Lara/Map/Link.lean; the generalization beyond this calculus is not tested.
+  potential_type: claim
+  bound_to: [N321_batch_link]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O171
+  timestamp: "2026-09-11T07:40"
+  provenance: ai-suggested
+  content: >
+    A multi-artifact map's per-invocation cost is dominated by rechecking its members:
+    for the shipped four-member map, linking, the linked check, evaluation and rendering
+    are about a tenth of a full pass. One machine, one run, three different maps.
+  context: >
+    Issue #319, first make bench-map run at ad513b5
+    (ara/evidence/results/map_bench_2026-09-11.md).
+  potential_type: claim
+  bound_to: [N319_map_bench]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans map-check map-conformance
+.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans map-check map-conformance
 
 build:
 	cabal build all
@@ -105,6 +105,20 @@ bench:
 	cabal build exe:lara exe:lara-bench
 	cd lean && lake build
 	cabal run exe:lara-bench -- --format=$(FORMAT) $(if $(OUT),--out $(OUT),)
+
+# Multi-artifact map bench (issue #319): a SECOND protocol, never a row of the
+# kernel table above. A map reads, parses and rechecks several members, then
+# links and checks again, so its cost scales with its member count rather than
+# with one unit's size, and folding it into `bench`'s rows would make a kernel
+# number mean something else. Every accepted conformance anchor is measured;
+# the raw record is measurements/bench-map.json (gitignored). Text or markdown
+# only, and no Lean build: nothing Lean runs.
+#
+#   make bench-map
+#   make bench-map FORMAT=markdown
+bench-map:
+	cabal build exe:lara-bench
+	cabal run exe:lara-bench -- --map --format=$(FORMAT) $(if $(OUT),--out $(OUT),)
 
 BENCH_IMAGE ?= lara-bench:$(shell git rev-parse --short=12 HEAD)
 BENCH_ARGS ?=

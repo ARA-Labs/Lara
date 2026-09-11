@@ -46,22 +46,17 @@
 -- as @cabal test@ does.
 module MapExampleSpec (mapExampleSpecProps) where
 
-import Control.Exception (bracket)
 import Control.Monad (forM, forM_)
 import Data.List (isInfixOf, isPrefixOf, isSuffixOf)
 import System.Directory
   ( createDirectoryIfMissing
   , doesDirectoryExist
   , getModificationTime
-  , getTemporaryDirectory
   , listDirectory
-  , removeDirectoryRecursive
-  , removeFile
   , setModificationTime
   )
 import System.Exit (ExitCode (..))
 import System.FilePath (takeDirectory, (</>))
-import System.IO (hClose, openTempFile)
 import System.Posix.Files
   ( accessModes
   , createSymbolicLink
@@ -91,9 +86,12 @@ import Lara.Map.Types
 import Lara.Map.Wire (encodeMapVerdict)
 import Lara.Prop (Prop)
 import Lara.Source.Load (loadSource, loadedPrepared, renderSourceLoadError)
+import Lara.Strict (SExpr (..))
+import Lara.TempTree (withTempDirectory)
 import Lara.Wire
   ( Outcome (..)
   , PublicStatus (..)
+  , parseSExpr
   , printSExpr
   , verdictOutcome
   )
@@ -157,21 +155,10 @@ runLaraIn :: Maybe FilePath -> [String] -> IO (ExitCode, String, String)
 runLaraIn workingDir args =
   readCreateProcessWithExitCode (proc laraBin args) {cwd = workingDir} ""
 
--- | Run the body over a fresh empty directory, then remove it.
+-- | Run the body over a fresh empty directory, then remove it. The directory is
+-- reserved, not derived — see "Lara.TempTree".
 withTempRoot :: (FilePath -> IO a) -> IO a
-withTempRoot body = do
-  tmp <- getTemporaryDirectory
-  bracket
-    ( do
-        (marker, handle) <- openTempFile tmp "lara-mapexample"
-        hClose handle
-        removeFile marker
-        let root = marker ++ ".d"
-        createDirectoryIfMissing True root
-        pure root
-    )
-    removeDirectoryRecursive
-    body
+withTempRoot = withTempDirectory "lara-mapexample"
 
 -- | Copy the example tree's hand-written sources into a fresh temporary
 -- directory and run the body over that copy's root. The relative layout is
@@ -360,6 +347,76 @@ prop_shippedVerdictGoldenIsFresh = once $ ioProperty $ do
   withShippedVerdict exampleManifest $ \verdict ->
     counterexample "committed map.verdict.sexp has drifted" $
       printSExpr (encodeMapVerdict verdict) ++ "\n" === golden
+
+-- | The @EXPECTED COMPOSITE VERDICT@ comment in the shipped @map.laramap@ is the
+-- verdict the map produces today (issue #320).
+--
+-- That block is the reader-facing statement of what the example demonstrates,
+-- and a comment survives every pipeline change: were the node order, a status
+-- spelling or the edge derivation to move, @map.verdict.sexp@ would be
+-- regenerated and the comment would not. So the block is written as parseable
+-- S-expressions — the verdict's own @nodes@, @labels@, @edges@ and @statuses@
+-- sections, each status row minus its @status@ tag and its proposition — and
+-- compared here against those sections as 'encodeMapVerdict' prints them for
+-- the live run. The spellings on the expected side come from the encoder, not
+-- from this test.
+prop_manifestVerdictCommentIsCurrent :: Property
+prop_manifestVerdictCommentIsCurrent = once $ ioProperty $ do
+  manifestText <- readFileStrict exampleManifest
+  case expectedVerdictBlock manifestText of
+    Left reason -> pure (counterexample (exampleManifest ++ ": " ++ reason) False)
+    Right block -> withShippedVerdict exampleManifest $ \verdict ->
+      let live = commentedSections verdict
+       in counterexample
+            ( "the EXPECTED COMPOSITE VERDICT block in "
+                ++ exampleManifest
+                ++ " no longer matches the verdict.\n  comment says: "
+                ++ unwords (map printSExpr block)
+                ++ "\n  verdict says: "
+                ++ unwords (map printSExpr live)
+            )
+            (block == live)
+
+-- | The manifest's @EXPECTED COMPOSITE VERDICT@ block, parsed: the comment lines
+-- after the banner's closing rule and before the first bare @;@, with the comment
+-- leader stripped, read as a sequence of S-expressions.
+--
+-- Every way the block can go missing or malformed is a 'Left' naming it, so the
+-- property fails loudly rather than comparing an empty list with nothing.
+expectedVerdictBlock :: String -> Either String [SExpr]
+expectedVerdictBlock text =
+  case break ("EXPECTED COMPOSITE VERDICT" `isInfixOf`) (lines text) of
+    (_, []) -> Left "no EXPECTED COMPOSITE VERDICT banner"
+    (_, _banner : rest) ->
+      let body = takeWhile (/= ";") (dropWhile ("; ---" `isPrefixOf`) rest)
+       in if null body
+            then Left "the EXPECTED COMPOSITE VERDICT block is empty"
+            else
+              if not (all (";" `isPrefixOf`) body)
+                then Left "the EXPECTED COMPOSITE VERDICT block runs past the comment"
+                else case parseSExpr ("(" ++ unlines (map (drop 1) body) ++ ")") of
+                  Left err -> Left ("the EXPECTED COMPOSITE VERDICT block does not parse: " ++ show err)
+                  Right (SList sections) -> Right sections
+                  Right other -> Left ("unexpected parse: " ++ printSExpr other)
+
+-- | The four verdict sections the manifest comment transcribes, read off the
+-- encoded verdict: @nodes@, @labels@ and @edges@ verbatim, and @statuses@ with
+-- each row cut to its @(alias claim status)@ handle and answer.
+commentedSections :: MapVerdict -> [SExpr]
+commentedSections verdict =
+  [section "nodes", section "labels", section "edges", statusHandles (section "statuses")]
+  where
+    encoded = case encodeMapVerdict verdict of
+      SList (_ : sections) -> sections
+      other -> [other]
+    section key =
+      case [s | s@(SList (SAtom k : _)) <- encoded, k == key] of
+        found : _ -> found
+        [] -> SList [SAtom ("missing section " ++ key)]
+    statusHandles (SList (headAtom : rows)) = SList (headAtom : map handle rows)
+    statusHandles other = other
+    handle (SList [_statusTag, alias, claim, _proposition, status]) = SList [alias, claim, status]
+    handle other = other
 
 -- | The committed @examples\/agreement-map-multi\/map.core.sexp@ parity envelope
 -- is what @lara map-input@ derives today.
@@ -778,6 +835,7 @@ mapExampleSpecProps =
   [ ("D3 members are solo justified", quickCheckResult prop_membersAreSoloJustified)
   , ("D3 composite matches the legacy oracle", quickCheckResult prop_compositeMatchesLegacyOracle)
   , ("D3 committed map verdict is fresh", quickCheckResult prop_shippedVerdictGoldenIsFresh)
+  , ("D3 manifest's expected-verdict comment is current", quickCheckResult prop_manifestVerdictCommentIsCurrent)
   , ("D3 committed map envelope is fresh", quickCheckResult prop_shippedEnvelopeIsFresh)
   , ("D3 cli accepts and prints the golden", quickCheckResult prop_cliShippedMapAccepts)
   , ("D3 relocated tree gives identical bytes", quickCheckResult prop_relocatedTreeGivesIdenticalBytes)

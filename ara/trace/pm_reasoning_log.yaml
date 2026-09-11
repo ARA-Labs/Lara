@@ -1507,7 +1507,7 @@ entries:
     unreachable - two open threads sharing one cause.'
 
 
-- turn: 2026-09-11_001#1
+- turn: 2026-09-11_002#1
   notes:
   - 'User scope split routed directly; runtime follow-up #322 was created before implementation.'
   - O169 staged as architecture. No generalized claim promoted solely from code/proof
@@ -1518,3 +1518,19 @@ entries:
     work rather than rewriting them.'
   - 'No unrelated observations promoted or retired: this turn provides no new closure
     evidence for their interpretations.'
+- turn: 2026-09-11_001#2
+  notes:
+  - 'Routed #317, #318 and #320 as ai_actions only: engineering hygiene with no research
+    claim. #320''s negative check is recorded in the action, not as an experiment node.'
+  - 'Routed the merge fixture, the batch mechanization and the bench as experiment nodes
+    (they produced results); the link-rejection resolution as a decision, provenance
+    ai-suggested because the AI chose proof over fixture without a user ruling.'
+  - 'Revised C56 Conditions and Proof on artifact-commitment: its named untested boundary
+    (a premise-less rule) is now tested, so keeping the sentence would make logic/ false.
+    Status stays supported; no verbal affirmation this turn, so provenance stays ai-suggested.'
+  - 'Did NOT crystallize O170 (fold = batch) into a claim: the theorem is committed, but the
+    generalization beyond this calculus has no closure signal. Default to staging.'
+  - 'Did NOT crystallize O171 (member recheck dominates map cost): one machine, one run,
+    and the three rows differ in member content as well as count.'
+  - 'Considered and rejected a new claim that MRLinkRejected is unreachable: it is a
+    consequence recorded in C56''s Proof and the decision node, not a separate mechanism.'

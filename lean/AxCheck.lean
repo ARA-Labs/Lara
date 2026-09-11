@@ -33,6 +33,7 @@ import Lara.Compile
 import Lara.Erase
 import Lara.EraseTransport
 import Lara.Map.Qualify
+import Lara.Map.Batch
 import Lara.Map.Link
 import Lara.Policy
 import Lara.Sigma
@@ -3914,6 +3915,36 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.soloMap_status
 #print axioms Lara.Map.contestedMap_status
 #print axioms Lara.Map.linkMembers_status_not_preserved
+-- The batch link the drivers run, and its agreement with the fold (issue #321).
+#print axioms Lara.Map.mem_crossPairs
+#print axioms Lara.Map.crossPairs_spec
+#print axioms Lara.Map.crossPairs_emits
+#print axioms Lara.Map.batchGamma_extends
+#print axioms Lara.Map.ownedApart_iff
+#print axioms Lara.Map.batch_checked
+#print axioms Lara.Map.mem_batchArgs
+#print axioms Lara.Map.mem_batchAtts
+#print axioms Lara.Map.batchUnit_checked
+#print axioms Lara.Map.Emits.mono
+#print axioms Lara.Map.mem_crossPairs_iff_emits
+#print axioms Lara.Map.declared_nodup_of_qualified
+#print axioms Lara.Map.linkMembers_emits
+#print axioms Lara.Map.batch_atts_mem_iff_fold
+#print axioms Lara.Map.batch_args_mem_iff_fold
+#print axioms Lara.Map.memberQ_sideOk
+#print axioms Lara.Map.contestedPairs_batchAtts
+#print axioms Lara.Map.contestedPairs_batchUnit_checked
+-- The Lean driver's linked unit is an instance of `batch_checked`.
+#print axioms Lara.Map.Driver.mem_firstOccurrences
+#print axioms Lara.Map.Driver.firstOccurrences_nodup
+#print axioms Lara.Map.Driver.mem_dedupAttacks
+#print axioms Lara.Map.Driver.mem_dedupStrings
+#print axioms Lara.Map.Driver.mem_declaredArgs
+#print axioms Lara.Map.Driver.mem_ownersOf
+#print axioms Lara.Map.Driver.crossMember_ownersOf_iff
+#print axioms Lara.Map.Driver.linkedGammaOf_eq
+#print axioms Lara.Map.Driver.mem_linkedTermsOf
+#print axioms Lara.Map.Driver.linkedUnitOf_checked
 /-! ### PW — the `Query_κ` well-sortedness refinement (issue #307) -/
 
 -- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:

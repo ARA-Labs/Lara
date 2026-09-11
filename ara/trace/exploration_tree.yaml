@@ -9506,3 +9506,88 @@ tree:
   status: resolved
   also_depends_on:
   - N313_declared_wire
+
+- id: N316_merge_anchor
+  type: experiment
+  title: The structural merge fires through a real map, and both drivers agree on it
+  provenance: ai-executed
+  timestamp: 2026-09-11T06:30
+  result: 'Added test/fixtures/map/merge under a fixture policy (convention-v1) with one
+    premise-less rule. Two members declare the same leaf-free argument; the composite
+    verdict carries (node paper_adopt conv 0) (node paper_critic conv 0), two handles on
+    one linked index. The critic''s declared rebuttals are re-pointed at the kept copy,
+    the co-owned saturation pair regenerates them and the dedupe keeps one of each, and the
+    adopter''s claim is justified alone but contested in the map. Both drivers print the
+    same 684-byte verdict; cross-driver pass 4 (was 3), 1322/1322 generated differential
+    cases agree.'
+  evidence:
+  - test/fixtures/map/merge/map.verdict.sexp
+  - test/MapLinkSpec.hs
+  - scripts/check-map-conformance.sh
+  status: resolved
+  also_depends_on:
+  - N303_parity
+
+- id: N321_batch_link
+  type: experiment
+  title: The batch link the drivers run is mechanized, and it equals the fold
+  provenance: ai-executed
+  timestamp: 2026-09-11T07:16
+  result: 'lean/Lara/Map/Batch.lean proves batch_checked: the batch linked unit is accepted,
+    stated up to membership so it covers both drivers'' merge order and attack dedupe.
+    lean/Lara/Map/Link.lean proves batch_atts_mem_iff_fold and batch_args_mem_iff_fold: the
+    batch and the fold produce the same attacks and arguments, with no premise beyond
+    batch_checked''s. Key step: a member''s argument has the same conclusion in every
+    environment extending its own. Lara.Map.Driver.linkedUnitOf_checked applies it to the
+    Lean driver''s own unit, whose generator now calls crossPairs; driver output unchanged
+    on 19 envelopes. lake build 186 jobs, AxCheck coverage 3026 declarations, axiom audit
+    passed.'
+  evidence:
+  - lean/Lara/Map/Batch.lean
+  - lean/Lara/Map/Link.lean
+  - lean/Lara/Map/Driver.lean
+  - ara/evidence/proofs/map_batch_link_321.md
+  status: resolved
+  also_depends_on:
+  - N303_parity
+
+- id: N319_map_bench
+  type: experiment
+  title: A committed harness times multi-artifact maps under their own protocol
+  provenance: ai-executed
+  timestamp: 2026-09-11T07:20
+  result: 'make bench-map (lara-bench --map) pre-reads every file through one untimed
+    loadMapWith pass, then times full passes and, separately, the link-and-check stage over
+    pre-loaded members; medians over 5 sections of 100 runs. At ad513b5 on an AMD EPYC 9354,
+    GHC 9.10.3: the shipped four-member map 2778.2 us per full pass, of which 272.9 us is
+    link + linked check + render; the three-member agreement fixture 1729.2 / 148.8 us; the
+    two-member merge fixture 630.0 / 60.8 us. The rows are three different maps, not one map
+    at three sizes. Replaced the hand-taken 4.02 ms demo figure, which no harness could
+    regenerate.'
+  evidence:
+  - ara/evidence/results/map_bench_2026-09-11.md
+  - docs/performance.md
+  - scripts/bench.hs
+  status: resolved
+  also_depends_on:
+  - N303_d3_split
+
+- id: N316_rejection_by_proof
+  type: decision
+  title: Settle the link-rejection anchor by proof instead of a fixture
+  provenance: ai-suggested
+  timestamp: 2026-09-11T07:30
+  choice: 'Issue #316 asked for a cross-driver MRLinkRejected anchor. Record it as
+    impossible rather than build one: linkedUnitOf_checked shows a map whose members each
+    pass their solo check always links to an accepted unit. The Haskell side stays covered
+    by byte-for-byte conformance with the Lean driver.'
+  alternatives:
+  - Fabricate a synthetic envelope whose linked unit fails checkUnit
+  - Leave the row open as an untested review-time argument
+  evidence:
+  - docs/multi-artifact-composition-decision.md
+  - lean/Lara/Map/Driver.lean
+  status: resolved
+  also_depends_on:
+  - N321_batch_link
+  - N316_merge_anchor

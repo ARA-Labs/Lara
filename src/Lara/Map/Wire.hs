@@ -311,15 +311,6 @@ mapKeyword context alternatives e = do
             ++ show s
         )
 
--- | The first element that occurs twice, in first-repeat order.
-firstDuplicate :: Ord a => [a] -> Maybe a
-firstDuplicate = go Set.empty
-  where
-    go _ [] = Nothing
-    go seen (x : xs)
-      | x `Set.member` seen = Just x
-      | otherwise = go (Set.insert x seen) xs
-
 -- ---------------------------------------------------------------------------
 -- Shared productions
 -- ---------------------------------------------------------------------------
@@ -367,9 +358,6 @@ decodeBackends context section = do
     decodeBackend e = do
       [backend, version] <- matchMapTagged context MTBackend 2 e
       (,) . BackendId <$> mapAtomText context backend <*> mapAtomText context version
-
-strictlyAscending :: Ord a => [a] -> Bool
-strictlyAscending xs = and (zipWith (<) xs (drop 1 xs))
 
 encodeCoord :: Coord -> SExpr
 encodeCoord coord = case coord of

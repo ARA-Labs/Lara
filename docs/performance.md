@@ -79,15 +79,14 @@ manifest-discovered harness. Its protocols are deliberately aligned with
   path. **No cross-driver ratio may be derived from it.**
 - **The harness sweep** pre-reads every manifest input, then times one full
   in-memory pass (decode + check + render, or the codec-failure path).
-- **The multi-artifact map is not measured here.** A `.laramap` run is a
-  different shape of work — reading and parsing several `.lara` sources from
-  disk, checking each, then linking and checking again — and folding it into
-  this bench's rows would make a kernel number mean something else. A small
-  __in-process__ end-to-end figure for the shipped four-member map is recorded
-  beside the demo it belongs to, in
-  [`demos/d3-agreement-map.md`](demos/d3-agreement-map.md), measured on a
-  different machine and under its own protocol; it is not comparable with the
-  rows below and there is no committed harness that regenerates it (issue #319).
+- **The multi-artifact map is measured separately, never in these rows.** A
+  `.laramap` run is a different shape of work — reading and parsing several
+  `.lara` sources, checking each, then linking and checking again — so its cost
+  scales with member count rather than with one unit's size, and folding it
+  into this bench's rows would make a kernel number mean something else.
+  `make bench-map` measures it under its own protocol and prints its own table;
+  see [The multi-artifact map](#the-multi-artifact-map-a-separate-protocol)
+  below.
 
 ## Current Native Snapshot
 
@@ -137,6 +136,77 @@ baseline; #120 also found no host available to the project reaches the
 container publication runner's quiet-window gate, so no corrected snapshot
 has been produced. Treat every number in this section as an upper bound from
 a retired harness until a fresh compiled-harness snapshot replaces it.
+
+## The multi-artifact map: a separate protocol
+
+```sh
+make bench-map                     # aligned text (default)
+make bench-map FORMAT=markdown     # markdown
+```
+
+`make bench-map` runs `lara-bench --map` (issue #319). It measures every
+**accepted** `map.laramap` conformance anchor, which are the maps
+`scripts/check-map-conformance.sh` discovers under `test/fixtures/map/` and
+`examples/agreement-map-multi/`. It writes the raw record to
+`measurements/bench-map.json`, which is gitignored. An anchor that does not
+accept has no full pass to time, so it is left out, and stderr names it with
+the one-line diagnostic and exit code `lara check` would print: 1 when the
+checker refuses the map, 2 when the map stops before the checker (a member that
+cannot be read, a manifest that no longer parses, a reference that does not
+resolve). A renamed member file therefore shows up as what it is, not as one
+more refusal. The run fails, with the same diagnostic, if the shipped map is not
+among the measured ones. Nothing Lean runs, so there is no
+Lean build step, and there is no LaTeX format: the paper typesets the kernel
+table, and a map row must never be read as one of its rows.
+
+- **Pre-read, then full passes.** One untimed pass reads the manifest, its
+  policy, every member and every member's policy into a fresh source cache
+  (`Lara.Map.Load.loadMapWith`). Each timed pass then does everything
+  `lara check <map.laramap>` does after argument parsing, over that cache: load
+  and recheck every member, qualify, merge, saturate, check the linked unit,
+  evaluate, and render the composite verdict. No timed pass reads a file's
+  bytes. Each pass still resolves paths, because `canonicalizePath` is the
+  cache key; that is the one filesystem call left in the timed work.
+- **The indented row** times the pure stage alone (`checkMap` plus rendering)
+  over members the warm-up pass has already loaded, so the difference between
+  the two rows is the cost of loading and rechecking the members.
+- **Same batching as the kernel bench:** medians over 5 sections of 100 batched
+  runs each. *Worst* is the slowest section, not the slowest input.
+- **Member count, linked nodes and edges are printed beside each figure**,
+  because those are the variables a map's cost scales with.
+
+No number from this table may be set beside the kernel table's. The two
+protocols time different work, on different inputs.
+
+### Map snapshot
+
+Measured at commit `ad513b5` on 2026-09-11 with
+`make bench-map FORMAT=markdown`. The one-minute load average was 0.6 on 128
+cores. The CPU and RAM fields were supplied through `LARA_BENCH_HOST_CPU` and
+`LARA_BENCH_HOST_RAM_BYTES`, because the environment probe reads only macOS
+`sysctl` (a Linux probe is issue #325). Like the kernel snapshot, this is
+indicative: re-run it rather than cite it.
+
+_Setting: 3 accepted map anchors; AMD EPYC 9354 32-Core Processor, 1507 GB RAM,
+linux/x86_64, GHC 9.10.3; every file pre-read by one untimed pass (paths are
+still resolved per pass); medians over 5 sections of 100 batched runs each._
+
+| | median | worst |
+| --- | ---: | ---: |
+| test/fixtures/map/agreement (3 members, 3 nodes / 2 edges, µs) | 1729.2 | 1742.6 |
+| &nbsp;&nbsp;link + check + render, members pre-loaded (µs) | 148.8 | 154.8 |
+| test/fixtures/map/merge (2 members, 2 nodes / 2 edges, µs) | 630.0 | 645.0 |
+| &nbsp;&nbsp;link + check + render, members pre-loaded (µs) | 60.8 | 62.5 |
+| examples/agreement-map-multi (4 members, 4 nodes / 2 edges, µs) | 2778.2 | 2808.1 |
+| &nbsp;&nbsp;link + check + render, members pre-loaded (µs) | 272.9 | 276.8 |
+
+In one line: **the shipped four-member map costs about 2.8 ms per full pass,
+and about nine tenths of that is loading and rechecking its members. Linking,
+the linked check, evaluation and rendering together take about 0.27 ms.** The
+three maps differ in what their members contain as well as in how many there
+are (the merge fixture's two members are far smaller than the D3 papers), so
+the rows show that cost follows the members' work. They are not a scaling
+curve.
 
 ## Why no rendered table is committed
 

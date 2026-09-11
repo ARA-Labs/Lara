@@ -35,6 +35,24 @@ distinctness alone and the other from alias distinctness *plus* each member's
 own duplicate-freedom, which the map's loader establishes per member before any
 of them becomes linkable.
 
+## The fold is not what the drivers run, and the two agree
+
+Both drivers build a map's linked unit in one batch — merge every member's
+arguments, then saturate all cross-member pairs under one cache computed in the
+whole map's environment — and neither calls `linkMembers`. `Lara.Map.Batch` is
+that construction and `Lara.Map.batch_checked` its acceptance theorem, stated up
+to membership so that it applies to the drivers' own spelling of the unit;
+`Lara.Map.Driver.linkedUnitOf_checked` instantiates it at the Lean driver's.
+This module adds the agreement (issue #321): `linkMembers_emits` characterizes
+what the fold produces by the shared `Lara.Map.Emits`, and
+`batch_atts_mem_iff_fold` / `batch_args_mem_iff_fold` show the batch produces
+the same arguments and the same attacks. It is not a reordering argument. Each
+fold step computes its caches under the environment accumulated so far and the
+batch computes one under the whole map's, so the agreement rests on a member's
+argument having one conclusion in every environment that extends its own
+(`support_between`) — which is where the members' well-formedness and the map's
+hygiene are consumed.
+
 ## No monotonicity theorem, and a witness for why
 
 There is deliberately **no** theorem here saying a member's claim keeps its
@@ -53,6 +71,7 @@ witnesses on it.
 
 import Lara.Context.Link
 import Lara.Map.Qualify
+import Lara.Map.Batch
 import Lara.Examples
 
 namespace Lara.Map
@@ -268,13 +287,18 @@ by the shared contract every member was compared against at load time.
 *fold*, where each `linkStep` saturates only the boundary between the
 accumulated side and the incoming member. Neither driver builds it that way:
 both saturate all pairs over the fully merged argument list in one pass
-(`crossMemberAttacks` on the Haskell side, inline in `linkAndEvaluate` here),
-and neither calls `linkMembers` or `linkStep`. The two coincide, because the
-union of the fold's per-step cross-boundary pairs is exactly the ordered pairs
-drawn from distinct members — but that is an argument in this comment, not a
-theorem, so nothing here transfers to the drivers' unit by proof. The drivers'
-saturation is covered by `scripts/check-map-conformance.sh`, which compares the
-bytes both of them produce. Mechanizing the equivalence is issue #321.
+(`crossMemberAttacks` on the Haskell side, `Lara.Map.Driver.generatedAttacksOf`
+on the Lean side), and neither calls `linkMembers` or `linkStep`. That batch
+construction has its own acceptance theorem, `Lara.Map.batch_checked`, proved
+directly rather than transferred from this one, and `batch_atts_mem_iff_fold` /
+`batch_args_mem_iff_fold` below show the two constructions produce the same
+arguments and the same attacks (issue #321). `Lara.Map.Driver.linkedUnitOf_checked`
+instantiates the batch theorem at the Lean driver's own linked unit. What stays
+outside the proofs is the frontend's side of the boundary — that each member is
+well-formed on its own is the solo check the Haskell loader runs, which no
+envelope byte records — and the Haskell driver itself, which
+`scripts/check-map-conformance.sh` ties to the Lean one by comparing the bytes
+both produce.
 
 `soloMap_linkMembers_checked` below discharges every premise at a concrete map,
 so this is non-vacuous. -/
@@ -473,6 +497,282 @@ theorem foldHygiene_two_aliases_of_one_member {canon : String → String}
         · exact qualifiedBy_qualifyFragment _ _
         · exact absurd hp (by simp))
 
+/-- **Distinct aliases plus each member's own duplicate-freedom make the whole
+map's declarations duplicate-free** — `Lara.Map.batch_checked`'s `hdecl`, for a
+qualified map. The cross-member half is `qualifyLeaf_ne_of_alias_ne`; the
+within-member half is the member's own `Nodup`, which the loader establishes. -/
+theorem declared_nodup_of_qualified :
+    ∀ (pairs : List (String × Fragment)), (pairs.map Prod.fst).Nodup →
+      (∀ p ∈ pairs, QualifiedBy p.1 p.2) → (∀ p ∈ pairs, p.2.declared.Nodup) →
+      (pairs.flatMap (·.2.declared)).Nodup
+  | [], _, _, _ => by simp
+  | r :: rest, haliases, hqual, hown => by
+      rw [List.map_cons, List.nodup_cons] at haliases
+      rw [List.flatMap_cons]
+      refine List.nodup_append.mpr ⟨hown r List.mem_cons_self,
+        declared_nodup_of_qualified rest haliases.2
+          (fun p hp => hqual p (List.mem_cons_of_mem _ hp))
+          (fun p hp => hown p (List.mem_cons_of_mem _ hp)), ?_⟩
+      intro a ha b hb hab
+      obtain ⟨q, hq, hbq⟩ := List.mem_flatMap.mp hb
+      obtain ⟨l₀, rfl⟩ := hqual r List.mem_cons_self a ha
+      obtain ⟨l₁, rfl⟩ := hqual q (List.mem_cons_of_mem _ hq) b hbq
+      have hne : r.1 ≠ q.1 := by
+        intro h
+        apply haliases.1
+        rw [h]
+        exact List.mem_map.mpr ⟨q, hq, rfl⟩
+      exact qualifyLeaf_ne_of_alias_ne hne l₀ l₁ hab
+
+/-! ### The fold and the batch emit the same attacks (issue #321)
+
+The drivers do not run the fold. They merge every member's arguments into one
+list and saturate all cross-member pairs at once, under one cache computed in
+the fully merged environment (`Lara.Map.Batch`). The two constructions differ in
+more than enumeration order: each `linkStep` computes its caches under the
+environment *accumulated so far*, where the batch uses the whole map's. They
+still emit the same attacks, because a member's argument has one conclusion in
+every environment that extends its own — `support_between`, which is
+`SideOk.mono_gamma`'s monotonicity plus `Support.hasSupport_unique`, and which
+is where the members' well-formedness and the map's hygiene are consumed.
+
+`linkMembers_emits` characterizes what the fold produces by the shared
+`Lara.Map.Emits`; `Lara.Map.mem_crossPairs_iff_emits` characterizes the batch
+by the same predicate; `batch_atts_mem_iff_fold` and `batch_args_mem_iff_fold`
+are the two meeting. -/
+
+/-- **A member's argument has one conclusion in every environment extending its
+own.** The step that lets a fold step's cache and the batch's cache be compared
+at all. -/
+private theorem support_between {canon : String → String} {reg : BackendRegistry canon}
+    {P : Policy.Policy} {Γ₀ Γ₁ Γ₂ : LeafId → Option Atom}
+    {args : List SupportTerm} {atts : List Attack}
+    (hown : SideOk canon reg Γ₀ P args atts)
+    (h₁ : ∀ l a, Γ₀ l = some a → Γ₁ l = some a)
+    (h₂ : ∀ l a, Γ₀ l = some a → Γ₂ l = some a)
+    {w : SupportTerm} (hw : w ∈ args) {X : Atom}
+    (h : HasSupport canon P.ruleLookup Γ₁ (certOkOf reg) w X []) :
+    HasSupport canon P.ruleLookup Γ₂ (certOkOf reg) w X [] := by
+  obtain ⟨X₀, h₀⟩ := hown.support w hw
+  have hX : X₀ = X := (hasSupport_unique (hasSupport_mono_gamma h₁ h₀) h).1
+  subst hX
+  exact hasSupport_mono_gamma h₂ h₀
+
+/-- The fold's invariant. `done` are the members folded so far and `C` the side
+accumulated from them: its environment is theirs, its arguments are theirs, and
+its attacks are their own plus what `Emits` describes among them — under the
+*whole* map's environment, which is the point. -/
+private theorem fold_emits {canon : String → String} {reg : BackendRegistry canon}
+    {P : Policy.Policy} (all : List (String × Fragment))
+    (haliases : (all.map Prod.fst).Nodup)
+    (hdecl : (all.flatMap (·.2.declared)).Nodup)
+    (hpol : ∀ p ∈ all, p.2.policy = P)
+    (hmembers : ∀ p ∈ all,
+      SideOk canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts) :
+    ∀ (todo done : List (String × Fragment)) (C : Lara.Context.Context),
+      done ++ todo = all →
+      C.frame.gammaFrag = done.flatMap (·.2.gammaFrag) →
+      (∀ w, w ∈ C.frame.args ↔ ∃ p ∈ done, w ∈ p.2.args) →
+      (∀ k, k ∈ C.frame.atts ↔
+        (∃ p ∈ done, k ∈ p.2.atts) ∨ Emits reg P (batchGamma all) done k) →
+      (∀ w, w ∈ (linkMembers reg C (todo.map Prod.snd)).frame.args ↔
+        ∃ p ∈ all, w ∈ p.2.args) ∧
+      (∀ k, k ∈ (linkMembers reg C (todo.map Prod.snd)).frame.atts ↔
+        (∃ p ∈ all, k ∈ p.2.atts) ∨ Emits reg P (batchGamma all) all k)
+  | [], done, C, hsplit, _, hargs, hatts => by
+      rw [List.append_nil] at hsplit
+      subst hsplit
+      exact ⟨hargs, hatts⟩
+  | r :: rest, done, C, hsplit, hgf, hargs, hatts => by
+      have hsplit' : (done ++ [r]) ++ rest = all := by simpa using hsplit
+      have hr : r ∈ all := hsplit ▸ List.mem_append_right _ List.mem_cons_self
+      have hstepAll : ∀ p ∈ done ++ [r], p ∈ all :=
+        fun p hp => hsplit' ▸ List.mem_append_left _ hp
+      have hP : r.2.policy = P := hpol r hr
+      have hΓs : linkGamma C r.2 = batchGamma (done ++ [r]) := by
+        simp only [linkGamma, batchGamma, hgf, List.flatMap_append, List.flatMap_cons,
+          List.flatMap_nil, List.append_nil]
+      have hdeclStep : ((done ++ [r]).flatMap (·.2.declared)).Nodup := by
+        rw [← hsplit', List.flatMap_append] at hdecl
+        exact (List.nodup_append.mp hdecl).1
+      have hne : ∀ p ∈ done, p.1 ≠ r.1 := by
+        rw [← hsplit, List.map_append] at haliases
+        intro p hp he
+        exact (List.nodup_append.mp haliases).2.2 p.1 (List.mem_map.mpr ⟨p, hp, rfl⟩)
+          r.1 (by simp) he
+      have hextStep : ∀ p ∈ done ++ [r], ∀ l a,
+          Admission.buildGamma p.2.gammaFrag l = some a → linkGamma C r.2 l = some a := by
+        intro p hp l a h
+        rw [hΓs]
+        exact batchGamma_extends hdeclStep hp l a h
+      have hextAll : ∀ p ∈ all, ∀ l a,
+          Admission.buildGamma p.2.gammaFrag l = some a → batchGamma all l = some a :=
+        fun p hp => batchGamma_extends hdecl hp
+      have toAll : ∀ p ∈ done ++ [r], ∀ w ∈ p.2.args, ∀ X,
+          HasSupport canon P.ruleLookup (linkGamma C r.2) (certOkOf reg) w X [] →
+          HasSupport canon P.ruleLookup (batchGamma all) (certOkOf reg) w X [] :=
+        fun p hp w hw _ h =>
+          support_between (hmembers p (hstepAll p hp)) (hextStep p hp)
+            (hextAll p (hstepAll p hp)) hw h
+      have toStep : ∀ p ∈ done ++ [r], ∀ w ∈ p.2.args, ∀ X,
+          HasSupport canon P.ruleLookup (batchGamma all) (certOkOf reg) w X [] →
+          HasSupport canon P.ruleLookup (linkGamma C r.2) (certOkOf reg) w X [] :=
+        fun p hp w hw _ h =>
+          support_between (hmembers p (hstepAll p hp)) (hextAll p (hstepAll p hp))
+            (hextStep p hp) hw h
+      have hrStep : r ∈ done ++ [r] := List.mem_append_right _ (List.mem_singleton_self _)
+      -- The accumulated side's cache, read in the whole map's environment.
+      have hcc : ∀ s : SupportTerm × Atom,
+          s ∈ conclusionCache P.ruleLookup (linkGamma C r.2) reg C.frame.args ↔
+            ∃ p ∈ done, s.1 ∈ p.2.args ∧
+              HasSupport canon P.ruleLookup (batchGamma all) (certOkOf reg) s.1 s.2 [] := by
+        intro s
+        show (s.1, s.2) ∈ _ ↔ _
+        rw [mem_conclusionCache]
+        constructor
+        · rintro ⟨hs, hsup⟩
+          obtain ⟨p, hp, hsp⟩ := (hargs s.1).mp hs
+          exact ⟨p, hp, hsp, toAll p (List.mem_append_left _ hp) s.1 hsp s.2 hsup⟩
+        · rintro ⟨p, hp, hsp, hsup⟩
+          exact ⟨(hargs s.1).mpr ⟨p, hp, hsp⟩,
+            toStep p (List.mem_append_left _ hp) s.1 hsp s.2 hsup⟩
+      -- The incoming member's cache, likewise.
+      have hcf : ∀ s : SupportTerm × Atom,
+          s ∈ conclusionCache P.ruleLookup (linkGamma C r.2) reg r.2.args ↔
+            s.1 ∈ r.2.args ∧
+              HasSupport canon P.ruleLookup (batchGamma all) (certOkOf reg) s.1 s.2 [] := by
+        intro s
+        show (s.1, s.2) ∈ _ ↔ _
+        rw [mem_conclusionCache]
+        constructor
+        · rintro ⟨hs, hsup⟩
+          exact ⟨hs, toAll r hrStep s.1 hs s.2 hsup⟩
+        · rintro ⟨hs, hsup⟩
+          exact ⟨hs, toStep r hrStep s.1 hs s.2 hsup⟩
+      refine fold_emits all haliases hdecl hpol hmembers rest (done ++ [r])
+        (linkStep reg C r.2) hsplit' ?_ ?_ ?_
+      · show C.frame.gammaFrag ++ r.2.gammaFrag = _
+        rw [hgf, List.flatMap_append]
+        simp
+      · intro w
+        show w ∈ dedupList (C.frame.args ++ r.2.args) ↔ _
+        rw [mem_dedupList, List.mem_append, hargs]
+        constructor
+        · rintro (⟨p, hp, hw⟩ | hw)
+          · exact ⟨p, List.mem_append_left _ hp, hw⟩
+          · exact ⟨r, hrStep, hw⟩
+        · rintro ⟨p, hp, hw⟩
+          rcases List.mem_append.mp hp with hp | hp
+          · exact Or.inl ⟨p, hp, hw⟩
+          · obtain rfl := List.mem_singleton.mp hp
+            exact Or.inr hw
+      · intro k
+        show k ∈ C.frame.atts ++ r.2.atts ++ crossAtts reg (linkGamma C r.2) C r.2 ↔ _
+        simp only [crossAtts]
+        rw [hP]
+        constructor
+        · intro hk
+          rcases List.mem_append.mp hk with hk | hk
+          · rcases List.mem_append.mp hk with hk | hk
+            · rcases (hatts k).mp hk with ⟨p, hp, hkp⟩ | hem
+              · exact Or.inl ⟨p, List.mem_append_left _ hp, hkp⟩
+              · exact Or.inr (hem.mono (fun p hp => List.mem_append_left _ hp))
+            · exact Or.inl ⟨r, hrStep, hk⟩
+          · right
+            rcases List.mem_append.mp hk with hk | hk
+            · obtain ⟨s, hs, t, ht, hcm, hca, rfl⟩ := mem_crossAttsFrom.mp hk
+              obtain ⟨p, hp, hsp, hsSup⟩ := (hcc s).mp hs
+              obtain ⟨htr, htSup⟩ := (hcf t).mp ht
+              exact ⟨p, List.mem_append_left _ hp, r, hrStep, hne p hp, s.1, hsp, t.1, htr,
+                s.2, t.2, hsSup, htSup, hcm, hca, rfl⟩
+            · obtain ⟨s, hs, t, ht, hcm, hca, rfl⟩ := mem_crossAttsFrom.mp hk
+              obtain ⟨hsr, hsSup⟩ := (hcf s).mp hs
+              obtain ⟨q, hq, htq, htSup⟩ := (hcc t).mp ht
+              exact ⟨r, hrStep, q, List.mem_append_left _ hq, fun h => hne q hq h.symm,
+                s.1, hsr, t.1, htq, s.2, t.2, hsSup, htSup, hcm, hca, rfl⟩
+        · rintro (⟨p, hp, hkp⟩ |
+            ⟨p, hp, q, hq, hpq, s, hsp, t, htq, Cs, Ct, hsSup, htSup, hcm, hca, rfl⟩)
+          · rcases List.mem_append.mp hp with hp | hp
+            · exact List.mem_append_left _
+                (List.mem_append_left _ ((hatts k).mpr (Or.inl ⟨p, hp, hkp⟩)))
+            · obtain rfl := List.mem_singleton.mp hp
+              exact List.mem_append_left _ (List.mem_append_right _ hkp)
+          · rcases List.mem_append.mp hp with hpd | hpr <;>
+              rcases List.mem_append.mp hq with hqd | hqr
+            · exact List.mem_append_left _ (List.mem_append_left _ ((hatts _).mpr
+                (Or.inr ⟨p, hpd, q, hqd, hpq, s, hsp, t, htq, Cs, Ct, hsSup, htSup, hcm,
+                  hca, rfl⟩)))
+            · obtain rfl := List.mem_singleton.mp hqr
+              exact List.mem_append_right _ (List.mem_append_left _
+                (mem_crossAttsFrom.mpr ⟨(s, Cs), (hcc (s, Cs)).mpr ⟨p, hpd, hsp, hsSup⟩,
+                  (t, Ct), (hcf (t, Ct)).mpr ⟨htq, htSup⟩, hcm, hca, rfl⟩))
+            · obtain rfl := List.mem_singleton.mp hpr
+              exact List.mem_append_right _ (List.mem_append_right _
+                (mem_crossAttsFrom.mpr ⟨(s, Cs), (hcf (s, Cs)).mpr ⟨hsp, hsSup⟩,
+                  (t, Ct), (hcc (t, Ct)).mpr ⟨q, hqd, htq, htSup⟩, hcm, hca, rfl⟩))
+            · exact absurd (by rw [List.mem_singleton.mp hpr, List.mem_singleton.mp hqr]) hpq
+
+/-- **What the fold produces, characterized.** For a map folded onto the empty
+seed, the folded side's arguments are exactly the members' arguments, and its
+attacks are exactly the members' own attacks plus the ones `Emits` describes
+under the whole map's environment.
+
+The premises are `Lara.Map.batch_checked`'s hygiene and well-formedness
+premises (pairwise-distinct aliases, duplicate-free declarations across the map,
+and each member well-formed under its own environment) plus one it does not
+take: `hpol`, that every member carries the shared policy. The fold reads each
+member's own policy at every step, which `batch_checked` never does, so the
+premise belongs to the fold; `linkMembers_checked` takes it for the same
+reason. -/
+theorem linkMembers_emits {canon : String → String} {reg : BackendRegistry canon}
+    {sg : Sigma.Sigma} {P : Policy.Policy} (pairs : List (String × Fragment))
+    (haliases : (pairs.map Prod.fst).Nodup)
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hpol : ∀ p ∈ pairs, p.2.policy = P)
+    (hmembers : ∀ p ∈ pairs,
+      SideOk canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts) :
+    (∀ w, w ∈ (linkMembers reg (emptyMap sg P) (pairs.map Prod.snd)).frame.args ↔
+      ∃ p ∈ pairs, w ∈ p.2.args) ∧
+    (∀ k, k ∈ (linkMembers reg (emptyMap sg P) (pairs.map Prod.snd)).frame.atts ↔
+      (∃ p ∈ pairs, k ∈ p.2.atts) ∨ Emits reg P (batchGamma pairs) pairs k) :=
+  fold_emits pairs haliases hdecl hpol hmembers pairs [] (emptyMap sg P) (by simp)
+    (by simp [emptyMap, closedTail])
+    (by intro w; simp [emptyMap, closedTail])
+    (by intro k; simp [emptyMap, closedTail, Emits])
+
+/-- **The batch emits exactly the fold's attacks** (issue #321): the drivers'
+all-pairs saturation over the merged arguments, with the reference
+cross-member predicate `ownedApart`, and the fold's per-step boundary
+saturation produce the same attack set. Order and multiplicity differ, and
+neither is observable to the checker, whose every premise is membership-based
+(`Lara.Map.batch_checked`). -/
+theorem batch_atts_mem_iff_fold {canon : String → String} {reg : BackendRegistry canon}
+    {sg : Sigma.Sigma} {P : Policy.Policy} (pairs : List (String × Fragment))
+    (haliases : (pairs.map Prod.fst).Nodup)
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hpol : ∀ p ∈ pairs, p.2.policy = P)
+    (hmembers : ∀ p ∈ pairs,
+      SideOk canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts)
+    (k : Attack) :
+    k ∈ batchAtts reg P (ownedApart pairs) pairs ↔
+      k ∈ (linkMembers reg (emptyMap sg P) (pairs.map Prod.snd)).frame.atts := by
+  rw [mem_batchAtts, mem_crossPairs_iff_emits (fun _ _ => ownedApart_iff)
+      (fun _ => mem_batchArgs),
+    (linkMembers_emits (sg := sg) pairs haliases hdecl hpol hmembers).2 k]
+
+/-- **The batch merges exactly the fold's arguments.** -/
+theorem batch_args_mem_iff_fold {canon : String → String} {reg : BackendRegistry canon}
+    {sg : Sigma.Sigma} {P : Policy.Policy} (pairs : List (String × Fragment))
+    (haliases : (pairs.map Prod.fst).Nodup)
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hpol : ∀ p ∈ pairs, p.2.policy = P)
+    (hmembers : ∀ p ∈ pairs,
+      SideOk canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts)
+    (w : SupportTerm) :
+    w ∈ batchArgs pairs ↔
+      w ∈ (linkMembers reg (emptyMap sg P) (pairs.map Prod.snd)).frame.args := by
+  rw [mem_batchArgs, (linkMembers_emits (sg := sg) pairs haliases hdecl hpol hmembers).1 w]
+
 /-! ### Status is not preserved when a map grows
 
 The concrete accepted witness. Two maps over the same shared contract, differing
@@ -637,6 +937,74 @@ theorem soloMap_linkMembers_checked :
       have : F = memberP := by simpa using hF
       subst this
       exact memberP_sideOk)
+    (by decide) (by decide) (by decide)
+    unitPolicyEx_wellFormed
+
+/-! ### The batch construction at a real map
+
+`contestedMap`'s two members, under two aliases, handed to the construction the
+drivers run. The batch saturation produces exactly the one attack the fold did
+(`contestedMap_atts`), and every premise of `Lara.Map.batchUnit_checked`
+discharges, so `Lara.Map.batch_checked` is known to be about something — and at
+a map that exercises the saturation, which the one-member witness above does
+not. -/
+
+/-- `memberQ` is a well-formed side under its own environment. -/
+theorem memberQ_sideOk :
+    SideOk id Lara.Examples.registryEx
+      (Admission.buildGamma memberQ.gammaFrag) Lara.Examples.unitPolicyEx
+      memberQ.args memberQ.atts where
+  support := by
+    intro w hw
+    have hw1 : w = .leaf Lara.Examples.l2 := by simpa [memberQ] using hw
+    subst hw1
+    exact ⟨Lara.Examples.pB, .leaf (by decide)⟩
+  typed := by intro k hk; simp [memberQ] at hk
+  source_declared := by intro k hk; simp [memberQ] at hk
+  target_declared := by intro k hk; simp [memberQ] at hk
+  attack_complete := by
+    intro source hs target ht Cs Ct hsSup htSup hcm _
+    exfalso
+    have hsEq : source = .leaf Lara.Examples.l2 := by simpa [memberQ] using hs
+    have htEq : target = .leaf Lara.Examples.l2 := by simpa [memberQ] using ht
+    subst hsEq; subst htEq
+    have h1 : Cs = Lara.Examples.pB :=
+      (Support.hasSupport_unique hsSup (.leaf (by decide))).1
+    have h2 : Ct = Lara.Examples.pB :=
+      (Support.hasSupport_unique htSup (.leaf (by decide))).1
+    subst h1; subst h2
+    exact absurd
+      ((contraryMatchB_iff id Lara.Examples.unitPolicyEx.defeat
+          Lara.Examples.pB Lara.Examples.pB).mpr hcm)
+      (by decide)
+
+/-- `contestedMap`'s members, under two aliases. -/
+def contestedPairs : List (String × Fragment) := [("pa", memberP), ("pb", memberQ)]
+
+/-- **The batch saturation emits exactly the fold's one attack** at this map —
+the list `contestedMap_atts` reads off the fold. -/
+theorem contestedPairs_batchAtts :
+    batchAtts Lara.Examples.registryEx Lara.Examples.unitPolicyEx
+      (ownedApart contestedPairs) contestedPairs = [Lara.Examples.kAtk] := by decide
+
+/-- **`Lara.Map.batch_checked` instantiated at a real two-member map**, every
+premise discharged. -/
+theorem contestedPairs_batchUnit_checked :
+    ∃ accepted,
+      Check.Unit.checkUnit (batchGamma contestedPairs) Lara.Examples.registryEx
+        (contestedPairs.flatMap (·.2.ground))
+        (batchUnit Lara.Examples.registryEx Lara.Examples.sigmaEx
+          Lara.Examples.unitPolicyEx (ownedApart contestedPairs) contestedPairs)
+        = .ok accepted :=
+  batchUnit_checked contestedPairs (ownedApart contestedPairs) _
+    (by decide) (by decide)
+    (by
+      intro p hp
+      simp only [contestedPairs, List.mem_cons, List.not_mem_nil, or_false] at hp
+      rcases hp with rfl | rfl
+      · exact memberP_sideOk
+      · exact memberQ_sideOk)
+    (fun p hp q hq hne s hs t ht => ownedApart_iff.mpr ⟨p, hp, q, hq, hne, hs, ht⟩)
     (by decide) (by decide) (by decide)
     unitPolicyEx_wellFormed
 

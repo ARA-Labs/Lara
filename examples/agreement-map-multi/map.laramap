@@ -87,12 +87,19 @@
 ; ---------------------------------------------------------------------------
 ; EXPECTED COMPOSITE VERDICT (human oracle; the machine one is map.verdict.sexp)
 ; ---------------------------------------------------------------------------
-;   (nodes  (node paper_a pa 0) (node paper_b pb 1)
-;           (node paper_c pc 2) (node paper_d pd 3))
-;   (labels (0 undec) (1 undec) (2 in) (3 in))
-;   (edges  (0 1) (1 0))
-;   (statuses paper_a c_pos contested,  paper_b c_neg contested,
-;             paper_c c_low justified,  paper_d c_high justified)
+;   (nodes    (node paper_a pa 0) (node paper_b pb 1)
+;             (node paper_c pc 2) (node paper_d pd 3))
+;   (labels   (0 undec) (1 undec) (2 in) (3 in))
+;   (edges    (0 1) (1 0))
+;   (statuses (paper_a c_pos contested)  (paper_b c_neg contested)
+;             (paper_c c_low justified)  (paper_d c_high justified))
+;
+; These are four sections of map.verdict.sexp exactly as printed, except that
+; each status row drops its `status` tag and its proposition. The block is
+; checked, not just transcribed: test/MapExampleSpec.hs
+; (`prop_manifestVerdictCommentIsCurrent`) parses it and compares it with the
+; verdict this map produces, so the day that verdict changes, this comment fails
+; a test instead of teaching a stale answer.
 ;
 ; Identical labels, edges and statuses to `examples/agreement-map/expected.json`
 ; under pa=0, pb=1, pc=2, pd=3. The BYTES differ and are meant to: a composite

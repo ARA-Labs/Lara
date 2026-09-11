@@ -25,6 +25,15 @@
 --   derived.
 -- * The harness sweep pre-reads every manifest input, then times one full
 --   in-memory pass (decode + check + render, or the codec failure path).
+-- * @--map@ is a second protocol with its own table, never folded into the
+--   rows above (issue #319). It measures every accepted @map.laramap@
+--   conformance anchor: one untimed pass reads the manifest, its policy, every
+--   member and every member's policy into a fresh source cache, then the timed
+--   sections run everything @lara check \<map.laramap\>@ does after argument
+--   parsing over that cache — load and recheck every member, link, check,
+--   evaluate, render — and, separately, the pure link-and-check stage over
+--   pre-loaded members. Member count is reported beside each figure, because a
+--   map's cost scales with its members rather than with one unit.
 --
 -- Timing numbers are reproducible-but-unfrozen (the @measure.hs@
 -- discipline): @measurements\/@ is gitignored and no rendered table is
@@ -39,13 +48,18 @@
 -- >  cabal exec -- runghc scripts/bench.hs --format=latex --out ../paper/tables/performance.tex
 module Main (main) where
 
-import Control.Exception (evaluate)
+import Control.Exception (IOException, evaluate, try)
 import Control.Monad (forM, forM_, replicateM, unless, when)
 import qualified Data.ByteString as B
-import Data.List (intercalate, maximumBy, nub, stripPrefix)
+import Data.List (intercalate, maximumBy, nub, sort, stripPrefix)
 import Data.Ord (comparing)
 import GHC.Clock (getMonotonicTimeNSec)
-import System.Directory (createDirectoryIfMissing, doesFileExist)
+import System.Directory
+  ( createDirectoryIfMissing
+  , doesDirectoryExist
+  , doesFileExist
+  , listDirectory
+  )
 import System.Environment (getArgs, lookupEnv)
 import System.Exit (ExitCode (..), exitFailure, exitSuccess)
 import System.IO
@@ -58,7 +72,7 @@ import System.IO
   , utf8
   , withFile
   )
-import System.FilePath ((</>))
+import System.FilePath (takeDirectory, (</>))
 import System.Info (arch, os)
 import System.Process
   ( CreateProcess (cwd)
@@ -72,10 +86,15 @@ import Lara.AST (Unit (..))
 import Lara.Check (checkUnitWith, cuNodes, cuProgram, fullConfig)
 import Lara.Driver (buildCertOk, buildGamma, groupConflictReject, quarantineUnit, runCheck)
 import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
+import Lara.Map.Driver (checkMap)
+import Lara.Map.Load (checkedMembers, loadMapWith)
+import Lara.Map.Types (MapError (..), MapVerdict (..), mapErrorExitCode, renderMapError)
+import Lara.Map.Wire (encodeMapVerdict)
 import Lara.Measure (InputMeta (..), median, parseCorpusManifest, parseMutantManifest)
 import Lara.Mutate (Expected (..))
 import Lara.Replay (inputUnit, runtimeReplayFailure)
 import Lara.Runtime (runtimeAF)
+import Lara.Source.Load (newSourceCache)
 import Lara.Wire
   ( Outcome (..)
   , Verdict (..)
@@ -106,6 +125,13 @@ main = do
   argv <- getArgs
   when ("--help" `elem` argv || "-h" `elem` argv) (putStrLn usage >> exitSuccess)
   opts <- either (\e -> die (e ++ "\n" ++ usage)) pure (parseOptions argv)
+  case optMode opts of
+    KernelMode fmt -> benchKernel fmt opts
+    MapMode fmt -> benchMaps fmt opts
+
+-- | The kernel bench: the frozen corpus units and the harness sweep.
+benchKernel :: Format -> Options -> IO ()
+benchKernel fmt opts = do
   preflightLean (optPrebuilt opts)
   mutantManifest <- readFile "fixtures/mutants/MANIFEST.tsv"
   corpusManifest <- readFile "corpus-units/MANIFEST.tsv"
@@ -119,7 +145,7 @@ main = do
   units <- mapM benchUnit corpus
   sweepNs <- benchSweep inputs
   let raw = benchJson env inputCount units sweepNs
-      table fmt = renderTable fmt env inputCount units sweepNs
+      table tableFmt = renderTable tableFmt env inputCount units sweepNs
   rawPath <- case optOutputDir opts of
     Just dir -> do
       createDirectoryIfMissing True dir
@@ -131,7 +157,7 @@ main = do
     Nothing -> do
       createDirectoryIfMissing True "measurements"
       writeFile "measurements/bench.json" raw
-      emit (optOut opts) (table (optFormat opts))
+      emit (optOut opts) (table fmt)
       pure "measurements/bench.json"
   -- Progress goes to stderr so the table itself stays pipeable on stdout.
   hPutStrLn
@@ -284,12 +310,18 @@ benchUnit im = do
 -- 'reps' times over distinct copies of the argument and divides.
 medianSection :: (a -> IO b) -> a -> IO Integer
 medianSection act x = do
-  ns <- replicateM samples $ do
+  ns <- timedSections act x
+  maybe (die "no timing samples") pure (median ns)
+
+-- | The 'samples' timed sections themselves, in nanoseconds per run: each
+-- section runs the action 'reps' times and divides.
+timedSections :: (a -> IO b) -> a -> IO [Integer]
+timedSections act x =
+  replicateM samples $ do
     t0 <- getMonotonicTimeNSec
     mapM_ act (replicate reps x)
     t1 <- getMonotonicTimeNSec
     pure (toInteger (t1 - t0) `div` toInteger reps)
-  maybe (die "no timing samples") pure (median ns)
 
 timeLean :: FilePath -> IO Integer
 timeLean path = do
@@ -369,15 +401,218 @@ captureOverride name cmd args = do
     Just "" -> die ("empty " ++ name)
     Just value -> pure value
 
+-- | A probe's trimmed stdout, or @""@ when the probe fails __or is absent__. The
+-- environment record is best-effort per platform, and @--map@ runs no Lean at
+-- all, so a machine without @lean@ (or @sysctl@) on @PATH@ records an unknown
+-- field rather than aborting the bench. A failed probe is named on stderr, so a
+-- blank or fallback field in the setting line always has a stated cause.
 capture :: String -> [String] -> IO String
 capture cmd args = do
-  (code, out, _err) <- readProcessWithExitCode cmd args ""
-  pure $ case code of
-    ExitSuccess -> trim out
-    ExitFailure _ -> ""
+  result <- try (readProcessWithExitCode cmd args "") :: IO (Either IOException (ExitCode, String, String))
+  case result of
+    Right (ExitSuccess, out, _err) -> pure (trim out)
+    Right (ExitFailure n, _, _) -> unknown ("exit " ++ show n)
+    Left err -> unknown (show err)
   where
+    unknown why = do
+      hPutStrLn
+        stderr
+        ( "bench: environment probe `" ++ unwords (cmd : args) ++ "` failed ("
+            ++ why ++ "), so the record carries a fallback for that field"
+        )
+      pure ""
     trim = f . f
     f = reverse . dropWhile (`elem` " \t\r\n")
+
+-- Map mode (issue #319) ------------------------------------------------------
+
+-- | The roots whose @map.laramap@ anchors the map mode measures: the two that
+-- @scripts\/check-map-conformance.sh@ discovers anchors under, so a map is
+-- benched exactly when it is a conformance anchor.
+mapAnchorRoots :: [FilePath]
+mapAnchorRoots = ["test/fixtures/map", "examples/agreement-map-multi"]
+
+-- | The shipped map. It must be among the measured anchors: it is the one a
+-- reader runs and the one @docs\/demos\/d3-agreement-map.md@ quotes.
+shippedMap :: FilePath
+shippedMap = "examples/agreement-map-multi/map.laramap"
+
+-- | One accepted map's measurements. Both timing lists hold one value per timed
+-- section, in nanoseconds per run (already divided by 'reps').
+data MapBench = MapBench
+  { mbPath :: FilePath
+  , mbMembers :: Int
+  , mbNodes :: Int -- ^ linked arguments: the verdict's @labels@
+  , mbEdges :: Int
+  , mbTotalNs :: [Integer] -- ^ load + member checks + link + check + evaluate + render
+  , mbLinkNs :: [Integer] -- ^ the same over pre-loaded members: link onward
+  }
+
+benchMaps :: MapFormat -> Options -> IO ()
+benchMaps fmt opts = do
+  manifests <- concat <$> mapM findManifests mapAnchorRoots
+  env <- gatherEnv
+  measured <- forM manifests $ \path -> (,) path <$> benchMap path
+  let maps = [m | (_, Right m) <- measured]
+      skipped = [(path, err) | (path, Left err) <- measured]
+  -- A map that refuses by design and one that no longer loads are both skipped,
+  -- so each is named with the diagnostic and exit code `lara check` gives it.
+  forM_ skipped $ \(path, err) ->
+    hPutStrLn stderr ("bench --map: not measured, no full pass to time: " ++ skipReason path err)
+  case lookup shippedMap skipped of
+    Just err -> die (shippedMap ++ " was not measured: " ++ skipReason shippedMap err)
+    Nothing ->
+      unless (shippedMap `elem` map mbPath maps) $
+        die (shippedMap ++ " was not measured: it is not among the discovered anchors")
+  let raw = mapBenchJson env maps
+      table mfmt = renderMapTable mfmt env maps
+  rawPath <- case optOutputDir opts of
+    Just dir -> do
+      createDirectoryIfMissing True dir
+      writeFile (dir </> "bench-map.json") raw
+      emit (Just (dir </> "performance-map.txt")) (table MapText)
+      emit (Just (dir </> "performance-map.md")) (table MapMarkdown)
+      pure (dir </> "bench-map.json")
+    Nothing -> do
+      createDirectoryIfMissing True "measurements"
+      writeFile "measurements/bench-map.json" raw
+      emit (optOut opts) (table fmt)
+      pure "measurements/bench-map.json"
+  hPutStrLn
+    stderr
+    ( "bench --map: " ++ show (length maps) ++ " accepted map anchors measured"
+        ++ ( if null skipped
+               then ""
+               else "; " ++ show (length skipped) ++ " not measured, each named above"
+           )
+        ++ "; raw record in " ++ rawPath
+        ++ maybe "" ("; table written to " ++) (optOut opts)
+        ++ maybe "" ("; all formats written to " ++) (optOutputDir opts)
+    )
+
+-- | Every @map.laramap@ under a directory, in sorted path order. A missing root
+-- is an error rather than an empty result, so a renamed fixture tree cannot
+-- quietly shrink the table.
+findManifests :: FilePath -> IO [FilePath]
+findManifests root = do
+  present <- doesDirectoryExist root
+  unless present (die ("map anchor root is not a directory: " ++ root))
+  go root
+  where
+    go dir = do
+      entries <- sort <$> listDirectory dir
+      fmap concat . forM entries $ \entry -> do
+        let path = dir </> entry
+        isDir <- doesDirectoryExist path
+        if isDir then go path else pure [path | entry == "map.laramap"]
+
+-- | Measure one map, or return the 'MapError' it stops at when it does not
+-- accept.
+--
+-- The pre-read is one untimed pass through a fresh source cache
+-- ('Lara.Map.Load.loadMapWith'): it reads the manifest, its policy, every member
+-- and every member's policy, and every timed pass reuses that cache, so no
+-- timed pass reads a file's bytes. What a timed pass still asks of the
+-- filesystem is to resolve each path, because the cache is keyed by
+-- 'System.Directory.canonicalizePath' — which the table's setting line states
+-- rather than hides. The link section runs over members the warm-up pass has
+-- already loaded and forced, so it times the pure stage and nothing before it.
+benchMap :: FilePath -> IO (Either MapError MapBench)
+benchMap path = do
+  cache <- newSourceCache
+  warm <- loadMapWith cache path
+  case warm of
+    Left err -> pure (Left err)
+    Right loaded -> case checkMap loaded of
+      Left err -> pure (Left err)
+      Right verdict -> do
+        _ <- evaluate (length (renderVerdict verdict))
+        total <- timedSections (\p -> loadMapWith cache p >>= evaluate . outcomeLength) path
+        link <- timedSections (evaluate . outcomeLength . Right) loaded
+        pure
+          ( Right
+              MapBench
+                { mbPath = path
+                , mbMembers = length (checkedMembers loaded)
+                , mbNodes = length (mvLabels verdict)
+                , mbEdges = length (mvEdges verdict)
+                , mbTotalNs = total
+                , mbLinkNs = link
+                }
+          )
+  where
+    renderVerdict = printSExpr . encodeMapVerdict
+    outcomeLength loadedOrError =
+      either (length . renderMapError) (length . renderVerdict) (loadedOrError >>= checkMap)
+
+-- | Why a map was not measured, on one line: whether the checker refused it or
+-- it stopped before the checker, the exit code @lara check@ gives it, and the
+-- diagnostic it prints.
+skipReason :: FilePath -> MapError -> String
+skipReason path err =
+  path ++ ": " ++ kind ++ " (exit " ++ show (mapErrorExitCode err) ++ "): " ++ renderMapError err
+  where
+    kind = case err of
+      MapReject _ -> "the checker refuses it"
+      MapBoundary _ -> "it stops before the checker"
+
+mapCaptionLines :: [String]
+mapCaptionLines =
+  [ "Multi-artifact map performance: its own protocol, never comparable with the"
+  , "kernel table. A map row is one full pass of what `lara check <map.laramap>`"
+  , "does after argument parsing (load and recheck every member, link, check,"
+  , "evaluate, render) over files already in the run's source cache; the indented"
+  , "row is the link-and-check stage alone. Worst is the slowest timed section."
+  ]
+
+mapSettingLine :: Env -> [MapBench] -> String
+mapSettingLine env maps =
+  show (length maps) ++ " accepted map anchors; "
+    ++ envCpuModel env ++ ", " ++ ramGb env ++ " GB RAM, "
+    ++ envOsArch env ++ ", GHC " ++ envGhc env
+    ++ "; every file pre-read by one untimed pass (paths are still resolved per"
+    ++ " pass); medians over " ++ show samples ++ " sections of "
+    ++ show reps ++ " batched runs each."
+
+mapRows :: [MapBench] -> [Row]
+mapRows = concatMap rowsFor
+  where
+    rowsFor m =
+      [ Row (Label 0 (takeDirectory (mbPath m)) (Just (shape m)) Micro)
+          (Num (us1 (medianOf (mbTotalNs m))))
+          (Num (us1 (maximum (mbTotalNs m))))
+      , Row (Label 1 "link + check + render, members pre-loaded" Nothing Micro)
+          (Num (us1 (medianOf (mbLinkNs m))))
+          (Num (us1 (maximum (mbLinkNs m))))
+      ]
+    shape m =
+      show (mbMembers m) ++ " members, "
+        ++ show (mbNodes m) ++ " nodes / " ++ show (mbEdges m) ++ " edges"
+
+renderMapTable :: MapFormat -> Env -> [MapBench] -> String
+renderMapTable fmt env maps = case fmt of
+  MapMarkdown -> markdownTable mapCaptionLines setting rows
+  MapText -> textTable mapCaptionLines setting rows
+  where
+    rows = mapRows maps
+    setting = mapSettingLine env maps
+
+mapBenchJson :: Env -> [MapBench] -> String
+mapBenchJson env maps =
+  unlines $
+    ["{"]
+      ++ envJsonLines env
+      ++ ["  \"maps\": ["]
+      ++ [ "    {\"path\": " ++ jsonString (mbPath m)
+             ++ ", \"members\": " ++ show (mbMembers m)
+             ++ ", \"nodes\": " ++ show (mbNodes m)
+             ++ ", \"edges\": " ++ show (mbEdges m)
+             ++ ", \"total_ns\": " ++ show (mbTotalNs m)
+             ++ ", \"link_ns\": " ++ show (mbLinkNs m)
+             ++ "}" ++ (if index == length maps then "" else ",")
+         | (index, m) <- zip [1 :: Int ..] maps
+         ]
+      ++ ["  ]", "}"]
 
 -- Statistics helpers ---------------------------------------------------------
 
@@ -406,22 +641,13 @@ showFixed1 x =
 benchJson :: Env -> Int -> [UnitBench] -> Integer -> String
 benchJson env inputCount units sweepNs =
   unlines $
-    [ "{"
-    , "  \"environment\": {"
-    , "    \"cpu\": " ++ jstr (envCpuModel env) ++ ","
-    , "    \"ram_bytes\": " ++ maybe "null" show (envRamBytes env) ++ ","
-    , "    \"os_arch\": " ++ jstr (envOsArch env) ++ ","
-    , "    \"ghc\": " ++ jstr (envGhc env) ++ ","
-    , "    \"lean\": " ++ jstr (envLean env) ++ ","
-    , "    \"git_rev\": " ++ jstr (envGitRev env) ++ ","
-    , "    \"reps\": " ++ show reps ++ ","
-    , "    \"samples\": " ++ show samples
-    , "  },"
-    , "  \"sweep_records\": " ++ show inputCount ++ ","
-    , "  \"sweep_ns\": " ++ show sweepNs ++ ","
-    , "  \"units\": ["
-    ]
-      ++ [ "    {\"base\": " ++ jstr (ubBase u)
+    ["{"]
+      ++ envJsonLines env
+      ++ [ "  \"sweep_records\": " ++ show inputCount ++ ","
+         , "  \"sweep_ns\": " ++ show sweepNs ++ ","
+         , "  \"units\": ["
+         ]
+      ++ [ "    {\"base\": " ++ jsonString (ubBase u)
              ++ ", \"total_ns\": " ++ show (ubTotalNs u)
              ++ ", \"kernel_ns\": " ++ show (ubKernelNs u)
              ++ ", \"parse_ns\": " ++ show (ubParseNs u)
@@ -436,8 +662,25 @@ benchJson env inputCount units sweepNs =
          | u <- units
          ]
       ++ ["  ]", "}"]
+
+-- | The raw record's @environment@ object, shared by both modes' records.
+envJsonLines :: Env -> [String]
+envJsonLines env =
+  [ "  \"environment\": {"
+  , "    \"cpu\": " ++ jsonString (envCpuModel env) ++ ","
+  , "    \"ram_bytes\": " ++ maybe "null" show (envRamBytes env) ++ ","
+  , "    \"os_arch\": " ++ jsonString (envOsArch env) ++ ","
+  , "    \"ghc\": " ++ jsonString (envGhc env) ++ ","
+  , "    \"lean\": " ++ jsonString (envLean env) ++ ","
+  , "    \"git_rev\": " ++ jsonString (envGitRev env) ++ ","
+  , "    \"reps\": " ++ show reps ++ ","
+  , "    \"samples\": " ++ show samples
+  , "  },"
+  ]
+
+jsonString :: String -> String
+jsonString s = "\"" ++ concatMap esc s ++ "\""
   where
-    jstr s = "\"" ++ concatMap esc s ++ "\""
     esc '"' = "\\\""
     esc '\\' = "\\\\"
     esc c = [c]
@@ -447,12 +690,14 @@ benchJson env inputCount units sweepNs =
 settingLine :: Env -> Int -> String
 settingLine env inputCount =
   show inputCount ++ "-record harness; "
-    ++ envCpuModel env ++ ", " ++ ramGb ++ " GB RAM, "
+    ++ envCpuModel env ++ ", " ++ ramGb env ++ " GB RAM, "
     ++ envOsArch env ++ ", GHC " ++ envGhc env ++ ", " ++ envLean env
     ++ "; medians over " ++ show samples ++ " sections of "
     ++ show reps ++ " batched runs each."
-  where
-    ramGb = maybe "?" (\b -> show (b `div` (1024 * 1024 * 1024))) (envRamBytes env)
+
+-- | Installed memory in whole GiB, or @?@ when the platform did not say.
+ramGb :: Env -> String
+ramGb env = maybe "?" (\b -> show (b `div` (1024 * 1024 * 1024))) (envRamBytes env)
 
 -- | The table's content, independent of how it is spelled.
 benchRows :: Int -> [UnitBench] -> Integer -> [Row]
@@ -507,8 +752,8 @@ benchRows inputCount units sweepNs =
 renderTable :: Format -> Env -> Int -> [UnitBench] -> Integer -> String
 renderTable fmt env inputCount units sweepNs = case fmt of
   FmtLatex -> latexTable env setting rows
-  FmtMarkdown -> markdownTable setting rows
-  FmtText -> textTable setting rows
+  FmtMarkdown -> markdownTable captionLines setting rows
+  FmtText -> textTable captionLines setting rows
   where
     rows = benchRows inputCount units sweepNs
     setting = settingLine env inputCount
@@ -562,10 +807,10 @@ captionLines =
   , "need not sum exactly."
   ]
 
-markdownTable :: String -> [Row] -> String
-markdownTable setting rows =
+markdownTable :: [String] -> String -> [Row] -> String
+markdownTable caption setting rows =
   unlines $
-    captionLines
+    caption
       ++ [ ""
          , "_Setting: " ++ setting ++ "_"
          , ""
@@ -578,10 +823,10 @@ markdownRow :: PlainRow -> String
 markdownRow PlainRule = "| | | |"
 markdownRow (PlainCells l m w) = "| " ++ l ++ " | " ++ m ++ " | " ++ w ++ " |"
 
-textTable :: String -> [Row] -> String
-textTable setting rows =
+textTable :: [String] -> String -> [Row] -> String
+textTable caption setting rows =
   unlines $
-    captionLines
+    caption
       ++ [ "Setting: " ++ setting
          , ""
          , line (PlainCells "" "median" "worst")
@@ -664,17 +909,38 @@ data Row
 -- Options --------------------------------------------------------------------
 
 data Options = Options
-  { optFormat :: Format
+  { optMode :: Mode
   , optOut :: Maybe FilePath -- ^ 'Nothing' prints to stdout
   , optPrebuilt :: Bool
   , optOutputDir :: Maybe FilePath
   }
 
+-- | Which bench runs, in which format. The map bench has no LaTeX format, so
+-- @--map --format=latex@ is refused while the arguments are parsed, and the map
+-- renderer has no LaTeX case to reach.
+data Mode
+  = KernelMode Format
+  | MapMode MapFormat -- ^ @--map@: the map anchors instead (issue #319)
+
+-- | The formats the map table prints in: 'Format' less LaTeX.
+data MapFormat = MapText | MapMarkdown
+
+-- | The map format for a requested 'Format', or why there is none.
+mapFormatOf :: Format -> Either String MapFormat
+mapFormatOf FmtText = Right MapText
+mapFormatOf FmtMarkdown = Right MapMarkdown
+mapFormatOf FmtLatex =
+  Left
+    ( "--map prints text or markdown only: the paper typesets the kernel table, "
+        ++ "and a map row must never be read as one of its rows"
+    )
+
 parseOptions :: [String] -> Either String Options
-parseOptions = go (Options FmtText Nothing False Nothing)
+parseOptions = go (Options (KernelMode FmtText) Nothing False Nothing)
   where
     go acc [] = Right acc
     go acc (a : rest)
+      | a == "--map" = withMap acc rest
       | Just v <- stripPrefix "--format=" a = withFormat acc v rest
       | a == "--format", (v : rest') <- rest = withFormat acc v rest'
       | a == "--format" = Left "--format needs a value"
@@ -686,8 +952,15 @@ parseOptions = go (Options FmtText Nothing False Nothing)
       | a == "--output-dir", (v : rest') <- rest = withOutputDir acc v rest'
       | a == "--output-dir" = Left "--output-dir needs a path"
       | otherwise = Left ("unknown argument " ++ show a)
+    -- @--map@ and @--format@ may come in either order, so each rebuilds the mode
+    -- from what the other has already set.
+    withMap acc rest = case optMode acc of
+      MapMode _ -> go acc rest
+      KernelMode f -> mapFormatOf f >>= \m -> go acc {optMode = MapMode m} rest
     withFormat acc v rest = case parseFormat v of
-      Just f -> go acc {optFormat = f} rest
+      Just f -> case optMode acc of
+        KernelMode _ -> go acc {optMode = KernelMode f} rest
+        MapMode _ -> mapFormatOf f >>= \m -> go acc {optMode = MapMode m} rest
       Nothing ->
         Left
           ( "unknown format " ++ show v ++ " (expected "
@@ -705,11 +978,14 @@ parseOptions = go (Options FmtText Nothing False Nothing)
 usage :: String
 usage =
   "usage: bench.hs [--format=" ++ intercalate "|" (map formatName everyFormat)
-    ++ "] [--out PATH] [--prebuilt] [--output-dir DIR]\n"
+    ++ "] [--out PATH] [--prebuilt] [--output-dir DIR] [--map]\n"
     ++ "  the table goes to stdout unless --out names a file;\n"
     ++ "  --output-dir writes bench.json plus text, markdown, and LaTeX tables;\n"
     ++ "  --prebuilt requires the existing Lean driver and runs no build;\n"
-    ++ "  the default raw record is measurements/bench.json (gitignored)."
+    ++ "  the default raw record is measurements/bench.json (gitignored).\n"
+    ++ "  --map measures the multi-artifact map anchors instead, under their own\n"
+    ++ "  protocol and in their own table (text or markdown; no Lean driver runs);\n"
+    ++ "  its raw record is measurements/bench-map.json."
 
 -- | Write the rendered table, forcing UTF-8 so the micro sign survives a
 -- non-UTF-8 locale.

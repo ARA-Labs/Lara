@@ -106,11 +106,15 @@ module Lara.Map.Types
   , MapError (..)
   , renderMapError
   , mapErrorExitCode
+    -- * List predicates the map codecs share
+  , firstDuplicate
+  , strictlyAscending
   ) where
 
 import Data.Char (isAlphaNum, isAscii, isDigit, ord)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Set as Set
 
 import Lara.AST
   ( ArgId
@@ -479,13 +483,13 @@ mkMapManifest
   -> [MapQuestion]
   -> Either MapWireError MapManifest
 mkMapManifest policy policyPath backends members alignments questions
-  | not (strictlyAscendingT backends) =
+  | not (strictlyAscending backends) =
       Left
         ( MapWireError
             "map backends"
             "backends must be duplicate-free and ascending by (id, version)"
         )
-  | Just duplicate <- firstDuplicateT (map memberAlias (NE.toList members)) =
+  | Just duplicate <- firstDuplicate (map memberAlias (NE.toList members)) =
       Left (MapWireError "map members" ("duplicate member alias " ++ aliasText duplicate))
   | any mixedSelector alignments =
       Left
@@ -511,27 +515,41 @@ mkMapManifest policy policyPath backends members alignments questions
 
 -- | Whether two coordinates select the same kind of target.
 --
--- A fact about the frozen 'Coord' type, so it lives beside it — and it is now
--- the __only__ copy. The map codecs each carried their own, which is what issue
--- #317 records; that part of #317 is closed here rather than deferred, because
--- adding a fourth copy for the smart constructors would have made the problem
--- worse than the issue describes. `firstDuplicate` and `strictlyAscending`
--- remain triplicated and remain #317's subject.
+-- A fact about the frozen 'Coord' type, so it lives beside it, and it is the
+-- only copy: the manifest codec, the envelope codec and the smart constructors
+-- all read this one (issue #317).
 sameSelectorKind :: Coord -> Coord -> Bool
 sameSelectorKind CoordWhole CoordWhole = True
 sameSelectorKind (CoordArg _) (CoordArg _) = True
 sameSelectorKind _ _ = False
 
-strictlyAscendingT :: Ord a => [a] -> Bool
-strictlyAscendingT xs = and (zipWith (<) xs (drop 1 xs))
+-- ---------------------------------------------------------------------------
+-- List predicates the map codecs share
+-- ---------------------------------------------------------------------------
 
-firstDuplicateT :: Ord a => [a] -> Maybe a
-firstDuplicateT = go []
+-- | The first element that occurs twice, in first-repeat order: the earliest
+-- position at which an element equal to an earlier one appears decides the
+-- answer, so @[a, b, b, a]@ reports @b@, and a three-way repeat reports its
+-- element once.
+--
+-- The single copy for the whole map pipeline — "Lara.Map.Wire",
+-- "Lara.Map.Driver", "Lara.Map.Load" and 'mkMapManifest' all call it. They used
+-- to carry one each, which nothing asserted agreed (issue #317); a decoder that
+-- accepts what its sibling refuses is the failure that would have surfaced.
+-- Not to be confused with @Lara.Check.firstDuplicate@, which scans a unit's
+-- /support terms/ and reports index pairs.
+firstDuplicate :: Ord a => [a] -> Maybe a
+firstDuplicate = go Set.empty
   where
     go _ [] = Nothing
     go seen (x : xs)
-      | x `elem` seen = Just x
-      | otherwise = go (x : seen) xs
+      | x `Set.member` seen = Just x
+      | otherwise = go (Set.insert x seen) xs
+
+-- | Whether a list is strictly ascending — equivalently, duplicate-free and
+-- sorted — so that a section it guards has exactly one spelling.
+strictlyAscending :: Ord a => [a] -> Bool
+strictlyAscending xs = and (zipWith (<) xs (drop 1 xs))
 
 -- ---------------------------------------------------------------------------
 -- The composite verdict

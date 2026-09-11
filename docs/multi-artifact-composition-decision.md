@@ -414,14 +414,18 @@ makes a status ambiguous.
 `MRMemberAdmissionStop`, `MRMemberRejected`, `MRAlignmentFalse`,
 `MRLinkRejected`, `MRLinkBoundary`.
 
-### `MRLinkRejected` has no fixture, and why that is the honest outcome
+### `MRLinkRejected` has no fixture, because it cannot happen
 
-No anchor under `test/fixtures/map/` exercises `MRLinkRejected`, because under
-the policies this repository ships a link appears unable to introduce a
-`checkUnit` failure the members did not already have. The argument was checked
-against the real call path rather than assumed, and it is worth writing down
-because the alternative — a synthetic anchor built to fill the row — would test
-the fabrication and not the system.
+No anchor under `test/fixtures/map/` exercises `MRLinkRejected`, and none can
+be built: when every member of a map passes its own check, the linked unit is
+always accepted. This used to be a review-time argument, and it is now a
+theorem for the Lean driver (issue #321). `Lara.Map.Driver.linkedUnitOf_checked`
+proves that the unit `linkAndEvaluate` builds is accepted by `checkUnit`
+whenever each member is well-formed on its own and the aliases and leaf
+identities are unique. The envelope decoder enforces the uniqueness, and the
+frontend's solo check establishes the rest. A synthetic anchor built to fill
+the row would therefore test the fabrication and not the system. The two
+paragraphs below are the informal version of the proof.
 
 **Generated attacks always type.** `crossMemberAttacks` emits `attackFor`'s
 shape for an ordered pair only when the two conclusions contrary-match and the
@@ -447,21 +451,27 @@ missing-conflict scan is satisfied because a same-member pair is unchanged from
 the member's own accepted unit and a cross-member pair is exactly what the
 saturation covers.
 
-**This is a review-time argument, not a proof.** It rests on the saturation's
-emission condition and the attack checker's acceptance condition being the same
-condition; a change to either that let them come apart would make
-`MRLinkRejected` reachable, and would deserve an anchor at that point. The
-constructor is kept because it is `checkUnit`'s answer and a map must be able to
-report it, not because anything is expected to produce it.
+**What the proof covers, and what it does not.** It covers the Lean driver's
+construction exactly, up to the order in which arguments and attacks are
+listed. It takes three things as premises instead of deriving them from bytes:
+each member's solo check (no envelope byte records that it passed), the shared
+policy's scope and well-formedness, and the signature stage of the linked unit.
+The Haskell driver's `MRLinkRejected` is covered by
+`scripts/check-map-conformance.sh`, which compares its output with the Lean
+driver's byte for byte, and not by the proof. Were the saturation's emission
+condition and the attack checker's acceptance condition ever to come apart, the
+proof would stop compiling. The constructor is kept because it is
+`checkUnit`'s answer and a map must be able to report it, not because anything
+is expected to produce it.
 
-**It is a *different* unreachable region from D12's structural merge, and the
-two should not be read as one.** Both are "no shipped policy reaches this", but
-D12's rests on leaf qualification confining a term collision to a single member,
-so that only a premise-less rule could make the merge fire, whereas this one
-rests on the saturation and the checker agreeing. Making the merge reachable
-would not by itself make a link rejection reachable: a co-owned term paired with
-itself still yields an attack that types by the argument above. They are
-neighbours, not a shared root.
+**D12's structural merge used to be the other region no shipped map reached,
+and the two were easy to read as one.** They have different roots. The merge
+was unreachable because leaf qualification confines a term collision to a
+single member, so only a premise-less rule can make it fire. A link rejection is
+unreachable because the saturation and the checker agree. The merge is now
+reached by `test/fixtures/map/merge/`, and that map still links and is
+accepted, as the theorem says it must: a co-owned term still yields attacks
+that type.
 
 ### Three constructors that look foldable and are not
 
@@ -603,18 +613,25 @@ to them; D3's second list is what it leaves alone. Two consequences of that
 split were discovered while implementing it, and both are recorded here because
 each looks like a defect until the reason is stated.
 
-**The structural merge is unreachable under today's policies, and is implemented
-anyway.** D8 says structurally identical support terms from different members are
-merged into one linked argument. Under leaf qualification a term that *mentions a
-leaf* can only collide with a term of the same member — and a member's own unit
-has already passed `firstDuplicate`. So the merge can only fire on a **leaf-free**
-term, i.e. an instance of a premise-less rule, which neither `empirical-v1` nor
-`agreement-v1` has. It is implemented, exported as `Lara.Map.Link.mergeArguments`,
-and tested directly on synthesized terms rather than through a map. Deleting it
-would make the linked unit's freedom from duplicate arguments depend on a property
-of the *policy* rather than of the linker, and it is what forces attack endpoints
-to be re-pointed at a term's canonical identity — a correctness requirement the
-moment such a policy exists.
+**The structural merge is unreachable under the shipped policies, and is
+implemented anyway.** D8 says structurally identical support terms from different
+members are merged into one linked argument. Under leaf qualification a term that
+*mentions a leaf* can only collide with a term of the same member — and a member's
+own unit has already passed `firstDuplicate`. So the merge can only fire on a
+**leaf-free** term, i.e. an instance of a premise-less rule, which neither
+`empirical-v1` nor `agreement-v1` has. It is implemented, exported as
+`Lara.Map.Link.mergeArguments`, and tested two ways: directly on synthesized
+terms, and through a real map. `test/fixtures/map/merge/` runs under
+`convention-v1`, a fixture policy with one premise-less rule, and both of its
+members declare the same leaf-free argument (issue #316). That map is a
+conformance anchor like any other, so both drivers are shown to fold the two
+handles onto one index — the composite's `nodes` section carries
+`(node paper_adopt conv 0) (node paper_critic conv 0)` — and to agree on every
+byte. Deleting the merge would make the linked unit's freedom from duplicate
+arguments depend on a property of the *policy* rather than of the linker, and
+it is what forces attack endpoints to be re-pointed at a term's canonical
+identity. The fixture exercises that too: the critic's declared rebuttals name
+its own copy of the merged argument, and are re-pointed at the adopter's.
 
 D11's `MRLinkRejected` note records the other region no shipped policy reaches.
 The two are neighbours and not one argument, and the distinction matters when
@@ -730,20 +747,33 @@ with itself, which the loader establishes per member before any of them becomes
 linkable.
 
 Between them they settle qualification, the merge, the linked check and the
-grounded evaluation — **for the fold**, which is the construction those theorems
-are about and is not the one the drivers run. Both drivers build the linked unit
-by batch all-pairs cross-member saturation over the fully merged argument list
-(`crossMemberAttacks`, and its inline counterpart in the Lean driver); neither
-calls `linkMembers` or `linkStep`. The two constructions do coincide — the union
-of the fold's per-step cross-boundary pairs is exactly the set of ordered pairs
-drawn from distinct members — but that argument is made here and not mechanized,
-so the fold theorem does not transfer to the drivers' unit by proof. What covers
-the drivers' saturation is `scripts/check-map-conformance.sh`, which compares the
-bytes both of them actually produce. Mechanizing the equivalence is issue #321,
-and it is a proof-engineering task rather than a cleanup: the fold's per-step
-`conclusionCache` is computed under the accumulated environment and the batch's
-under the merged one, so the agreement needs the monotonicity fact plus the
-fold's hygiene premise.
+grounded evaluation for the fold. Neither driver runs the fold. Both build the
+linked unit in one batch, saturating every cross-member pair over the fully
+merged argument list. Since issue #321 that batch has its own theorems, in
+`lean/Lara/Map/Batch.lean` and `lean/Lara/Map/Link.lean`:
+
+- `Lara.Map.batch_checked` proves the batch unit is accepted. It is stated for
+  any duplicate-free argument list and any attack list with the right members,
+  so it holds for both drivers' merge order and attack de-duplication.
+- `batch_atts_mem_iff_fold` and `batch_args_mem_iff_fold` prove that the batch
+  and the fold produce the same attacks and the same arguments. The fold
+  computes each step's conclusions under the environment accumulated so far,
+  the batch under the whole map's. The step that reconciles them is that a
+  member's argument has the same conclusion in every environment that extends
+  the member's own, and that is where member well-formedness and alias hygiene
+  are used. The equivalence takes one premise that `batch_checked` does not:
+  every member carries the shared policy. The fold reads each member's own
+  policy at every step, so the premise belongs to the fold, and
+  `linkMembers_checked` already takes it. A real map always satisfies it,
+  because the loader compares every member to the manifest's one contract (D7).
+- `Lara.Map.Driver.linkedUnitOf_checked` applies `batch_checked` to the Lean
+  driver's own linked unit. The driver's generator now calls the same
+  `crossPairs` function the theorem is about, and its output bytes did not
+  change.
+
+Two things stay outside the proofs: each member's solo check, which no envelope
+byte records, and the Haskell driver, which `scripts/check-map-conformance.sh`
+ties to the Lean driver byte for byte.
 
 `Lara.Map.Driver` and `lean/Lara/Map/Driver.lean` have since landed too, and with
 them reference resolution (`MBUnknownAlias`, `MBUnknownClaim`,
@@ -886,39 +916,44 @@ nothing connects two independent `linkMap` runs under two alias assignments to a
 single application of `mapLeafProg`, so the end-to-end statement is carried by
 the test and the identifier-level one by the proof.
 
-What is still untested is **the interaction of the merge with a real policy**,
-for the reason D12 gives: no policy in this repository has a premise-less rule,
-so no map can reach the structural merge. That is unchanged by the driver.
+**The interaction of the merge with a real policy used to be untested**, for the
+reason D12 gives: neither shipped policy has a premise-less rule, so no shipped
+map can reach the structural merge. It is tested now. `test/fixtures/map/merge/`
+reaches the merge through `linkMap` (`MapLinkSpec`'s
+`prop_mergeFiresThroughAMap`) and through both drivers
+(`scripts/check-map-conformance.sh`), with its goldens pinned fresh beside the
+agreement map's (issue #316).
 
-**Three follow-ups recorded from the driver increment's reviews, not
-implemented.** Each is a real improvement and none blocks the increment. Each is
-tracked: issues #316, #317 and #318 respectively.
+**Three follow-ups recorded from the driver increment's reviews, since
+resolved.** Each was tracked as an issue: #316, #317 and #318 respectively.
 
-1. **Two more conformance anchors: still open** (issue #316). A cross-driver *link
-   rejection* and a map in which the structural merge fires (two members
-   sharing one linked index). This was recorded expecting Task 5's example tree
-   to supply them. It does not, and the reason is the one already given: neither
-   anchor is constructible from the policies this repository ships today — see
-   the `MRLinkRejected` note under D11 and D12's merge note. `agreement-v1`'s
-   two rules both have a nonempty `premises` list, so the merge cannot fire on
-   this tree, and the same review-time argument that keeps `MRLinkRejected`
-   unfixtured applies to it unchanged. `examples/agreement-map-multi/`
-   therefore adds a *sixth accepting* anchor to the gate rather than these two.
-   Both want a policy written for them, which is new corpus material rather
-   than a fixture edit.
+1. **Two more conformance anchors: resolved** (issue #316). The review asked for
+   a map in which the structural merge fires and for a cross-driver *link
+   rejection*. The first now exists: `test/fixtures/map/merge/` runs under a
+   fixture policy with a premise-less rule, and both drivers agree on it (see
+   D12). The second cannot exist. `linkedUnitOf_checked` proves that a map whose
+   members each pass their own check always links to an accepted unit (see the
+   `MRLinkRejected` note under D11). So the gate gained one anchor, and the
+   link-rejection row is settled by proof instead of by a fixture.
 
-2. **Three helpers are triplicated** (issue #317). `sameSelectorKind`, `firstDuplicate` and
-   `strictlyAscending` each exist in both `Lara.Map.Wire` and
-   `Lara.Map.Driver`, and `firstDuplicate` now in `Lara.Map.Load` as well. The
-   duplication was deliberate for the tag *tables* (the grammars must be free to
-   move independently) but these are not tables: `sameSelectorKind` in
-   particular is a fact about the frozen `Coord` type and belongs in
-   `Lara.Map.Types` beside it, where both codecs can read one definition without
-   coupling their vocabularies.
+2. **Three helpers were triplicated: resolved** (issue #317). `sameSelectorKind`,
+   `firstDuplicate` and `strictlyAscending` now each have exactly one
+   definition, in `Lara.Map.Types`, beside the `Coord` type the first one is
+   about. `Lara.Map.Wire`, `Lara.Map.Driver`, `Lara.Map.Load` and the
+   `mkMapManifest` smart constructor all call those. The tag *tables* stay split
+   on purpose, because the grammars must be free to move independently. These
+   three were never tables, so one definition couples no vocabulary. The copies
+   were behaviourally identical: the move changed no test outcome.
 
-3. **`withTree`'s temporary directory name is predictable** (issue #318), being
-   `openTempFile`'s path plus a fixed suffix. Pre-existing and shared with
-   `MapLoadSpec` and `MapLinkSpec`, so it is a change to all three or to none.
+3. **`withTree`'s temporary directory name was predictable: resolved** (issue
+   #318). It used to be derived from a deleted `openTempFile` marker plus a fixed
+   suffix, and `createDirectoryIfMissing` then adopted whatever was at that
+   path, a planted symlink included. The four map test modules (`MapSpec`,
+   `MapLoadSpec`, `MapLinkSpec`, and `MapExampleSpec`, which carried a fourth
+   copy) now share one helper, `test/Lara/TempTree.hs`. It reserves the directory
+   with `mkdtemp(3)`: one atomic call, mode `0700`, and it fails rather than
+   adopt an existing path. No dependency was added, because `unix` was already a
+   test-suite dependency.
 
 `Lara.Source.Load` and `Lara.Map.Load` have since landed, and between them they
 settle everything about *which bytes a map runs over*: the `.lara` source-loading
@@ -984,7 +1019,7 @@ three ways, and each registration buys something different.
   same freshness assertion, and is run through both *solo* drivers by
   `scripts/differential.sh`. That is what makes "each member stands alone" a
   checked fact rather than a claim in a header comment.
-* The **map** is a sixth anchor of `scripts/check-map-conformance.sh`, whose
+* The **map** is an anchor of `scripts/check-map-conformance.sh`, whose
   anchor discovery now spans two roots. Both drivers compute the composite
   independently and agree on its bytes.
 * The composite is compared, in `test/MapExampleSpec.hs`, against the **legacy
@@ -1010,3 +1045,24 @@ consumer can never mistake it for a solo `(verdict …)`. The paper contents and
 the declared `artifact` digests are illustrative reconstructions, as everywhere
 in `examples/`; a digest is author-declared metadata carried through unchanged,
 never a checksum of the member's bytes (D1).
+
+**The manifest's expected-verdict comment is checked, not deleted** (issue
+#320). `map.laramap` ends with an `EXPECTED COMPOSITE VERDICT` comment: the
+verdict's `nodes`, `labels`, `edges` and `statuses` sections, with each status
+row cut to its `(alias claim status)` handle. It is the first statement of the
+example's answer a reader meets, and a comment survives every change that
+regenerates `map.verdict.sexp`, so left alone it goes stale without anyone
+noticing. Two fixes were weighed:
+
+- **Rejected: delete the block and point readers at `map.verdict.sexp`.** That
+  golden is already test-checked, but it is a separate file of wire bytes, and
+  the manifest is where a reader looks first.
+- **Chosen: keep the block and check it.** `MapExampleSpec`'s
+  `prop_manifestVerdictCommentIsCurrent` parses the block and compares it with
+  the sections the live run encodes. A pipeline change that moves the verdict
+  therefore fails a test instead of leaving a wrong answer in the example.
+
+The cost is a constraint on the comment's layout. The lines between the
+banner's closing rule and the first bare `;` line must parse as S-expressions,
+and every malformed shape fails the property by name. Explanatory prose belongs
+after that bare `;` line, which the parser does not read.

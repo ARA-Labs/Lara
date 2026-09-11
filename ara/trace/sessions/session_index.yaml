@@ -653,7 +653,7 @@ sessions:
   - C06
   open_threads: 5
 
-- id: 2026-09-11_001
+- id: 2026-09-11_002
   date: '2026-09-11'
   summary: '#313/#314 implemented: checked declaration/name linkage, proved structured
     codec, and file-driven finite Lean execution; Haskell follow-up #322 opened first.'
@@ -661,3 +661,15 @@ sessions:
   events_count: 3
   claims_touched: []
   open_threads: 1
+
+- id: 2026-09-11_001
+  date: '2026-09-11'
+  summary: >-
+    Resolved the six #315 follow-ups: structural merge reached through a real map,
+    link rejection proved impossible, batch link mechanized and shown equal to the
+    fold, map bench committed with its own protocol.
+  turn_count: 2
+  events_count: 6
+  claims_touched:
+  - C56
+  open_threads: 3

@@ -57,20 +57,12 @@
 -- @cabal test@ does), the assumption "CliSpec" and "DifferentialSpec" share.
 module MapSpec (mapSpecProps, envelopeDefects, readEnvelope) where
 
-import Control.Exception (bracket)
 import Data.List (intersect, isInfixOf, isPrefixOf, isSuffixOf, nub, sort)
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromMaybe)
-import System.Directory
-  ( createDirectoryIfMissing
-  , getTemporaryDirectory
-  , listDirectory
-  , removeDirectoryRecursive
-  , removeFile
-  )
+import System.Directory (listDirectory)
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
-import System.IO (hClose, openTempFile)
+import System.FilePath ((</>))
 import System.Process (readProcessWithExitCode)
 import Test.QuickCheck
 
@@ -137,6 +129,7 @@ import Lara.Map.Types
 import Lara.Map.Wire (decodeMapVerdict, encodeMapVerdict)
 import Lara.Prop (Prop (..))
 import Lara.Source.Load (loadSource, loadedPrepared, renderSourceLoadError)
+import qualified Lara.TempTree as TempTree
 import Lara.Wire (Outcome (..), PublicStatus (..), printSExpr, verdictOutcome)
 
 -- ---------------------------------------------------------------------------
@@ -151,6 +144,11 @@ agreementDir = "test/fixtures/map/agreement"
 
 agreementManifest :: FilePath
 agreementManifest = agreementDir </> "map.laramap"
+
+-- | The map whose members share a leaf-free argument, so that the structural
+-- merge fires (issue #316). Its goldens are pinned beside the agreement map's.
+mergeDir :: FilePath
+mergeDir = "test/fixtures/map/merge"
 
 -- | The one fixture in the tree carrying @(audit-status disputed)@, and so the
 -- only place the decoder's audit-status table is exercised at all.
@@ -185,28 +183,10 @@ aliasOf name =
   fromMaybe (error ("MapSpec: malformed fixture alias " ++ show name)) (mkMemberAlias name)
 
 -- | Build a throwaway directory tree, run the body over its root, then remove
--- it. The same shape "MapLoadSpec" and "MapLinkSpec" use, and for the same
--- reason: the process working directory is the package root throughout, so a
--- member path that resolves at all can only have been resolved against the
--- manifest's own directory.
+-- it. The one shared helper ("Lara.TempTree"), which reserves the directory
+-- rather than deriving its name.
 withTree :: [(FilePath, String)] -> (FilePath -> IO a) -> IO a
-withTree files body = do
-  tmp <- getTemporaryDirectory
-  bracket
-    ( do
-        (marker, handle) <- openTempFile tmp "lara-mapdriver"
-        hClose handle
-        removeFile marker
-        let root = marker ++ ".d"
-        createDirectoryIfMissing True root
-        pure root
-    )
-    removeDirectoryRecursive
-    (\root -> mapM_ (writeInto root) files >> body root)
-  where
-    writeInto root (path, contents) = do
-      createDirectoryIfMissing True (takeDirectory (root </> path))
-      writeFile (root </> path) contents
+withTree = TempTree.withTree "lara-mapdriver"
 
 -- | The committed agreement fixture's sources, read once per test that needs
 -- them. Copied into a temporary tree rather than edited in place: no fixture in
@@ -390,12 +370,15 @@ prop_mapIsDeterministic = once $ ioProperty $ do
 -- its goldens, the harness would go on comparing two drivers over bytes neither
 -- of them would produce.
 prop_verdictGoldenIsFresh :: Property
-prop_verdictGoldenIsFresh = once $ ioProperty $ do
-  outcome <- runMap agreementManifest
-  golden <- readFile (agreementDir </> "map.verdict.sexp")
-  pure $ expectVerdict "agreement map" outcome $ \verdict ->
-    counterexample "committed map.verdict.sexp has drifted" $
-      printSExpr (encodeMapVerdict verdict) ++ "\n" === golden
+prop_verdictGoldenIsFresh = once $ ioProperty $
+  conjoin <$> mapM fresh [agreementDir, mergeDir]
+  where
+    fresh dir = do
+      outcome <- runMap (dir </> "map.laramap")
+      golden <- readFile (dir </> "map.verdict.sexp")
+      pure $ expectVerdict dir outcome $ \verdict ->
+        counterexample (dir ++ ": committed map.verdict.sexp has drifted") $
+          printSExpr (encodeMapVerdict verdict) ++ "\n" === golden
 
 -- ---------------------------------------------------------------------------
 -- The parity envelope
@@ -405,17 +388,22 @@ prop_verdictGoldenIsFresh = once $ ioProperty $ do
 -- byte. Same reasoning as 'prop_verdictGoldenIsFresh', and this is the half
 -- that guards the __input__ side of the cross-driver comparison.
 prop_envelopeIsFresh :: Property
-prop_envelopeIsFresh = once $ ioProperty $ do
-  loaded <- loadMap agreementManifest
-  golden <- readFile (agreementDir </> "map.core.sexp")
-  pure $ case loaded of
-    Left err -> counterexample ("agreement map did not load: " ++ renderMapError err) (property False)
-    Right members -> case mapCheckInput members of
-      Left err ->
-        counterexample ("envelope refused: " ++ mweContext err ++ ": " ++ mweMessage err) (property False)
-      Right input ->
-        counterexample "committed map.core.sexp has drifted" $
-          printSExpr (encodeMapCheckInput input) ++ "\n" === golden
+prop_envelopeIsFresh = once $ ioProperty $
+  conjoin <$> mapM fresh [agreementDir, mergeDir]
+  where
+    fresh dir = do
+      loaded <- loadMap (dir </> "map.laramap")
+      golden <- readFile (dir </> "map.core.sexp")
+      pure $ case loaded of
+        Left err -> counterexample (dir ++ " did not load: " ++ renderMapError err) (property False)
+        Right members -> case mapCheckInput members of
+          Left err ->
+            counterexample
+              (dir ++ ": envelope refused: " ++ mweContext err ++ ": " ++ mweMessage err)
+              (property False)
+          Right input ->
+            counterexample (dir ++ ": committed map.core.sexp has drifted") $
+              printSExpr (encodeMapCheckInput input) ++ "\n" === golden
 
 -- | The envelope is a faithful projection of the loaded members: same members,
 -- in the same order, each carrying the same alias, the same

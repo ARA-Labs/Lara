@@ -131,7 +131,6 @@ import qualified Data.List as List
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 
 import Lara.AST
   ( BackendId (..)
@@ -694,18 +693,6 @@ envSection context t e = case e of
 envAtomText :: String -> SExpr -> EnvDecode String
 envAtomText _ (SAtom s) = eok s
 envAtomText context e = ewerr context ("expected an atom, got " ++ show e)
-
--- | The first element that occurs twice, in first-repeat order.
-firstDuplicate :: Ord a => [a] -> Maybe a
-firstDuplicate = go Set.empty
-  where
-    go _ [] = Nothing
-    go seen (x : xs)
-      | x `Set.member` seen = Just x
-      | otherwise = go (Set.insert x seen) xs
-
-strictlyAscending :: Ord a => [a] -> Bool
-strictlyAscending xs = and (zipWith (<) xs (drop 1 xs))
 
 -- | Encode the parity envelope.
 --

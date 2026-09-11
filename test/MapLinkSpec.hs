@@ -23,8 +23,10 @@
 --     asserts the propagated edge as well as the undermine's shape);
 --   * __no handle is lost__ — the node table is a total map from every
 --     @(member alias, local argument id)@ pair to a linked index, and it stays
---     total when the structural merge folds two members' terms into one
---     ('prop_nodesAreTotalProvenance', 'prop_mergeFoldsIdenticalTerms');
+--     total when the structural merge folds two members' terms into one, both on
+--     synthesized members and through a real map whose policy has a
+--     premise-less rule ('prop_nodesAreTotalProvenance',
+--     'prop_mergeFoldsIdenticalTerms', 'prop_mergeFiresThroughAMap');
 --   * __the result is deterministic__ — linking one loaded map twice produces
 --     the same unit, nodes, labels, edges and statuses
 --     ('prop_linkIsDeterministic').
@@ -37,17 +39,9 @@
 -- "MapLoadSpec" does, and the suite runs from the package root.
 module MapLinkSpec (mapLinkSpecProps) where
 
-import Control.Exception (bracket)
 import Data.List (isInfixOf, nub, sort)
 import qualified Data.List.NonEmpty as NE
-import System.Directory
-  ( createDirectoryIfMissing
-  , getTemporaryDirectory
-  , removeDirectoryRecursive
-  , removeFile
-  )
-import System.FilePath (takeDirectory, (</>))
-import System.IO (hClose, openTempFile)
+import System.FilePath ((</>))
 import Test.QuickCheck
 
 import Lara.AST
@@ -124,34 +118,17 @@ import Lara.Diagnostics (rejectionOf)
 import Lara.Prop (Pred (..), Prop (..))
 import Lara.Policy (lookupRule)
 import Lara.Sigma (emptySigma)
+import qualified Lara.TempTree as TempTree
 
 -- ---------------------------------------------------------------------------
 -- Fixtures on disk
 -- ---------------------------------------------------------------------------
 
 -- | Build a throwaway directory tree, run the body over its root, then remove
--- it. The same shape "MapLoadSpec" uses, and for the same reason: the process
--- working directory is the package root throughout, so a member path that
--- resolves at all can only have been resolved against the manifest's own
--- directory.
+-- it. The one shared helper ("Lara.TempTree"), which reserves the directory
+-- rather than deriving its name.
 withTree :: [(FilePath, String)] -> (FilePath -> IO a) -> IO a
-withTree files body = do
-  tmp <- getTemporaryDirectory
-  bracket
-    ( do
-        (marker, handle) <- openTempFile tmp "lara-maplink"
-        hClose handle
-        removeFile marker
-        let root = marker ++ ".d"
-        createDirectoryIfMissing True root
-        pure root
-    )
-    removeDirectoryRecursive
-    (\root -> mapM_ (writeInto root) files >> body root)
-  where
-    writeInto root (path, contents) = do
-      createDirectoryIfMissing True (takeDirectory (root </> path))
-      writeFile (root </> path) contents
+withTree = TempTree.withTree "lara-maplink"
 
 -- | A @lara-map\@1@ manifest over the given member section, under the shared
 -- @empirical-v1@ contract every fixture in this module uses.
@@ -906,12 +883,12 @@ prop_nodesAreTotalProvenance = once $ ioProperty $ do
 
 -- | __The structural merge folds identical terms and keeps both handles.__
 --
--- Exercised directly on synthesized members, because it cannot be reached
--- through a real map: "Lara.Map.Qualify" renames every leaf occurrence by its
--- member's alias, so a term mentioning a leaf can only collide with a term of
--- the same member, and no policy in this repository has a premise-less rule
--- whose instances are leaf-free. The merge is implemented anyway (see
--- "Lara.Map.Link"'s header), so it is tested anyway.
+-- Exercised directly on synthesized members, where every field of the result
+-- can be spelled out. A real map reaches the merge only through a leaf-free
+-- term: "Lara.Map.Qualify" renames every leaf occurrence by its member's alias,
+-- so a term mentioning a leaf can only collide with a term of the same member.
+-- Neither shipped policy has a premise-less rule, so only the map fixture
+-- written for it does ('prop_mergeFiresThroughAMap').
 --
 -- Two members declare one shared term under different local names and one
 -- private term each. The result is three linked arguments, four handles, and the
@@ -1086,9 +1063,9 @@ synthMemberWithLeaves alias leaves =
 -- silently dropped by 'Lara.Check.resolveAttacks', so nothing downstream would
 -- notice.
 --
--- Synthesized for the same reason 'prop_mergeFoldsIdenticalTerms' is: leaf
--- qualification makes a cross-member term collision unreachable through
--- 'linkMap' under any policy in this repository.
+-- Synthesized for the same reason 'prop_mergeFoldsIdenticalTerms' is, so that
+-- each shape of re-pointing can be stated on its own;
+-- 'prop_mergeFiresThroughAMap' is the same path reached through 'linkMap'.
 prop_mergeRepointsAttackEndpoints :: Property
 prop_mergeRepointsAttackEndpoints = once $
   let shared = SLeaf (LeafId "shared")
@@ -1127,10 +1104,84 @@ prop_mergeRepointsAttackEndpoints = once $
               === Rebut (ArgId "one:x") (ArgId "one:x")
         ]
   where
-    endpointsOfAttack attack = case attack of
-      Rebut source target -> [source, target]
-      Undercut source target _ -> [source, target]
-      Undermine source target _ -> [source, target]
+    endpointsOfAttack = attackEndpoints
+
+-- | Both endpoints of an attack, whatever its kind.
+attackEndpoints :: Attack -> [ArgId]
+attackEndpoints attack = case attack of
+  Rebut source target -> [source, target]
+  Undercut source target _ -> [source, target]
+  Undermine source target _ -> [source, target]
+
+-- | __The structural merge fires through a real map__ (issue #316).
+--
+-- @test\/fixtures\/map\/merge\/@ runs under @convention-v1@, whose
+-- @community_convention@ rule has no premises, and both of its members declare
+-- an argument @conv@ by that rule on the same arguments. A leaf-free term has
+-- nothing for qualification to rename, so the two members' terms are equal and
+-- 'linkMap' is the thing that has to fold them. Everything the synthesized
+-- properties above state separately is asserted here on one linked map:
+--
+--   * two handles, @(paper_adopt, conv)@ and @(paper_critic, conv)@, name one
+--     linked index, and the unit carries two arguments for three handles;
+--   * paper_critic's declared rebuttals are re-pointed at the argument the
+--     merge kept, so every attack endpoint is a declared linked argument and
+--     paper_critic's own identity for @conv@ is declared by nobody;
+--   * the saturation's co-owned pair — @conv@, owned by both members, against
+--     @crit@, owned by paper_critic alone — generates the same two rebuttals
+--     paper_critic declared, and the dedupe leaves one copy of each;
+--   * paper_adopt's claim, justified on its own, is contested in the map.
+prop_mergeFiresThroughAMap :: Property
+prop_mergeFiresThroughAMap = once $ ioProperty $ do
+  loaded <- loadMap "test/fixtures/map/merge/map.laramap"
+  pure $ case loaded of
+    Left err -> counterexample ("merge fixture did not load: " ++ renderMapError err) (property False)
+    Right members ->
+      expectLinked "the merge map" (linkMap members) $ \linked ->
+        let unit = lmUnit linked
+            argIds = map fst (unitArgs unit)
+            criticConv =
+              [ qualifiedArgId (qaQualified arg)
+              | m <- NE.toList (checkedMembers members)
+              , aliasText (cmAlias m) == "paper_critic"
+              , arg <- qmArgs (qualifyMember (cmAlias m) (cmUnit m))
+              , qaLocal arg == asLocalArgId (ArgId "conv")
+              ]
+         in conjoin
+              [ counterexample "two handles, one linked index" $
+                  [ (aliasText (mnAlias n), mnArg n, nodeIndexInt (mnIndex n))
+                  | n <- lmNodes linked
+                  ]
+                    === [ ("paper_adopt", ArgId "conv", 0)
+                        , ("paper_critic", ArgId "conv", 0)
+                        , ("paper_critic", ArgId "crit", 1)
+                        ]
+              , counterexample "two linked arguments for three handles" $
+                  length argIds === 2
+              , counterexample "paper_critic's own identity for conv was merged away" $
+                  conjoin
+                    [ counterexample "paper_critic's qualified conv was found" (length criticConv === 1)
+                    , counterexample "and the linked unit does not declare it" $
+                        property (not (any (`elem` argIds) criticConv))
+                    ]
+              , counterexample "every attack endpoint is a declared linked argument" $
+                  property (all (`elem` argIds) (concatMap attackEndpoints (unitAttacks unit)))
+              , counterexample "the dedupe leaves one rebuttal each way" $
+                  length (unitAttacks unit) === 2
+              , counterexample "the saturation generated both, and both are in the unit" $
+                  conjoin
+                    [ length (lmGenerated linked) === 2
+                    , property (all (`elem` unitAttacks unit) (lmGenerated linked))
+                    ]
+              , counterexample "paper_adopt's solo-justified claim is contested in the map" $
+                  [ (aliasText (msAlias s), msClaim s, msStatus s)
+                  | s <- lmStatuses linked
+                  ]
+                    === [ ("paper_adopt", PropId "c_std", Contested)
+                        , ("paper_critic", PropId "c_convention", Contested)
+                        , ("paper_critic", PropId "c_objection", Contested)
+                        ]
+              ]
 
 -- | __The linked unit's argument identities are the qualified ones, and they are
 -- distinct.__
@@ -1256,6 +1307,7 @@ mapLinkSpecProps =
   , ("map nodes are total provenance", quickCheckResult prop_nodesAreTotalProvenance)
   , ("map merge folds identical terms", quickCheckResult prop_mergeFoldsIdenticalTerms)
   , ("map merge re-points attack endpoints", quickCheckResult prop_mergeRepointsAttackEndpoints)
+  , ("map merge fires through a real map", quickCheckResult prop_mergeFiresThroughAMap)
   , ("map linked argument ids are qualified", quickCheckResult prop_linkedArgumentIdsAreQualified)
   , ("map linking is deterministic", quickCheckResult prop_linkIsDeterministic)
   , ("map labels and edges are well-formed", quickCheckResult prop_labelsAndEdgesAreWellFormed)

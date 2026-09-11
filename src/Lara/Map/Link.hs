@@ -59,20 +59,25 @@
 -- alias, a term that mentions a leaf can only collide with a term of the /same/
 -- member — and a member's own unit has already been through
 -- 'Lara.Check.firstDuplicate'. The merge therefore fires only on __leaf-free__
--- terms (an instance of a premise-less rule), which the policies in this
--- repository do not have. It is implemented, exported, and tested directly on
--- synthesized terms regardless: the alternative is a linked unit whose
--- well-formedness silently depends on a property of the policy, and the
--- endpoint re-pointing it forces ('renameTable') is needed for correctness the
--- moment such a policy exists.
+-- terms (an instance of a premise-less rule). Neither shipped policy
+-- (@empirical-v1@, @agreement-v1@) has one. The map fixture
+-- @test\/fixtures\/map\/merge\/@ is written under a policy that does
+-- (@convention-v1@), so the merge, the endpoint re-pointing it forces
+-- ('renameTable') and the co-owned saturation pair below are exercised through
+-- 'linkMap' and compared across both drivers, as well as directly on
+-- synthesized terms (issue #316). It would be implemented regardless: the
+-- alternative is a linked unit whose well-formedness silently depends on a
+-- property of the policy.
 --
 -- The merge is also the one thing that makes \"cross-member only\" less than
 -- literal. Once a term co-owned by members A and B is one linked argument, a
 -- pair whose source and target are both /also/ owned by A alone can satisfy
 -- 'crossMember' — from A's point of view a within-member attack it never
 -- declared. That is forced rather than wrong: the two members' terms are now one
--- node, so covering B's copy necessarily covers A's. Like the merge itself it is
--- unreachable under the policies this repository ships.
+-- node, so covering B's copy necessarily covers A's. The merge fixture reaches
+-- exactly this case: its co-owned argument against the critic's own objection
+-- generates the rebuttals the critic already declared, and the attack dedupe
+-- folds them together.
 --
 -- == Determinism
 --
@@ -104,17 +109,17 @@ module Lara.Map.Link
   , lmStatuses
   , lmGenerated
     -- * The structural merge, exposed for direct testing
-    -- | Exported under one rationale: leaf qualification makes a cross-member
-    -- term collision unreachable through 'linkMap' under any policy in this
-    -- repository (see the module header), so the merge and the endpoint
-    -- re-pointing it forces can only be exercised on synthesized members.
+    -- | Exported so that the merge and the endpoint re-pointing it forces can be
+    -- exercised shape by shape on synthesized members. Through 'linkMap' they
+    -- are reached only by a leaf-free term (see the module header).
   , LinkedArg (..)
   , mergeArguments
   , renameTable
   , repoint
-    -- * The structural failure arms, exposed for the same reason
-    -- | Each of these refuses a condition 'linkMap' cannot reach, for the
-    -- reason above. That makes them a missing __tripwire__ rather than a
+    -- * The structural failure arms, exposed for direct testing
+    -- | Each of these refuses a condition 'linkMap' cannot reach: after
+    -- qualification no two members share a leaf or argument identity, and the
+    -- loader has already compared every member to one contract. That makes them a missing __tripwire__ rather than a
     -- hidden bug — and a tripwire nothing can break is one nothing would
     -- notice the day the saturation and the attack checker come apart, which
     -- is exactly when the decision record says an anchor should exist. Driving
@@ -538,10 +543,10 @@ linkedArguments = go []
 -- channel; 'linkMap' converts each through 'Lara.Map.Types.mkNodeIndex', which
 -- is where a fabricated index would otherwise have to be invented.
 --
--- Exported so the merge can be exercised directly on synthesized terms: leaf
--- qualification makes a cross-member term collision unreachable through
--- 'linkMap' under any policy in this repository (see the module header), and a
--- merge nothing can reach is a merge nothing tests.
+-- Exported so the merge can be exercised directly on synthesized terms, where
+-- each shape can be stated on its own. Through 'linkMap' it is reached only by
+-- a leaf-free term (see the module header), which the map fixture
+-- @test\/fixtures\/map\/merge\/@ supplies.
 mergeArguments :: [QualifiedMember] -> ([LinkedArg], [(MemberAlias, LocalArgId, Int)])
 mergeArguments qualified = (linkedArgs, handles)
   where
@@ -584,7 +589,7 @@ mergeArguments qualified = (linkedArgs, handles)
 -- merge folds its term onto an earlier member's argument.
 --
 -- Identity everywhere the merge did not fire, which is everywhere under the
--- policies this repository ships (see the module header).
+-- shipped policies: neither has a premise-less rule (see the module header).
 renameTable :: [LinkedArg] -> [QualifiedMember] -> [(ArgId, ArgId)]
 renameTable linkedArgs qualified =
   [ (qualifiedArgId (qaQualified arg), canonical)
@@ -683,7 +688,8 @@ conclusionCache pI gamma certOk args =
 -- built, so the phrase is exact only while the merge is inactive. Once one term
 -- is co-owned, a pair whose two sides are also both owned by one member
 -- satisfies it — see the module header, where the case and its justification are
--- stated in full. Unreachable under the policies this repository ships.
+-- stated in full. Reached only when the merge fires, which the shipped policies
+-- never make it do; @test\/fixtures\/map\/merge\/@ does.
 crossMemberAttacks :: SharedSections -> [ConclusionEntry] -> [Attack]
 crossMemberAttacks shared cache =
   [ attackFor (ceArg source) (ceArg target)
@@ -714,10 +720,10 @@ crossMemberAttacks shared cache =
 --     would leave a genuine cross-boundary conflict uncovered and the linked
 --     unit would be rejected for a missing conflict.
 --
--- Both are unreachable under the policies this repository ships, for the reason
--- the module header gives. The second is the one that makes \"only cross-member
--- pairs are generated\" less than literal; 'crossMemberAttacks' says so at its
--- own site.
+-- Neither arises under the shipped policies, for the reason the module header
+-- gives; @test\/fixtures\/map\/merge\/@ reaches the second. The second is the
+-- one that makes \"only cross-member pairs are generated\" less than literal;
+-- 'crossMemberAttacks' says so at its own site.
 crossMember :: [MemberAlias] -> [MemberAlias] -> Bool
 crossMember sources targets =
   or [source /= target | source <- sources, target <- targets]

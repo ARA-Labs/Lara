@@ -1,0 +1,31 @@
+# A member that invokes the same convention as paper_adopt — the same rule on
+# the same arguments, so after qualification the same leaf-free support term —
+# and then objects to it from its own evidence. It declares both rebuttals of
+# the pair it contains, as its own solo check requires.
+artifact paper_critic at sha256:critic...
+policy convention-v1
+use backends [nd@1]
+
+claim c_convention
+  nl      = "By convention, accuracy is the standard metric for GLUE"
+  formal  = standard_metric(accuracy, glue)
+  binding = { author = carol, audit-status = reviewed }
+
+claim c_objection
+  nl      = "Accuracy is not the standard metric for GLUE"
+  formal  = not_standard_metric(accuracy, glue)
+  binding = { author = carol, audit-status = reviewed }
+
+leaf k_e1 : reports(exp_k, effect(accuracy, glue, misleading))
+  kind       = observed
+  provenance = user
+  refs       = [critic.pdf#sec=3]
+
+arg conv : supports(c_convention) by community_convention(accuracy, glue)
+arg crit : supports(c_objection) by metric_critique(accuracy, glue, exp_k)
+
+rebut crit conv
+rebut conv crit
+
+status c_convention
+status c_objection

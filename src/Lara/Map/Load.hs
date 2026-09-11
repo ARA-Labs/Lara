@@ -68,6 +68,7 @@
 module Lara.Map.Load
   ( -- * Loading a map's members
     loadMap
+  , loadMapWith
     -- * The checked members
   , CheckedMembers
   , checkedManifest
@@ -85,7 +86,6 @@ import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import System.FilePath (takeDirectory, (</>))
 
 import Lara.AST
@@ -129,6 +129,7 @@ import Lara.Map.Types
   , MapRejectError (..)
   , MemberAlias
   , declaredPathText
+  , firstDuplicate
   )
 import Lara.Map.Wire (decodeMapManifestText)
 import Lara.Prop (Prop)
@@ -319,11 +320,26 @@ reject = MapLoad . pure . Left . MapReject
 -- @CFPolicyStructure@ already has, which the first point has settled. See
 -- 'elaboratedContractFailure' for why they are checked regardless.
 loadMap :: FilePath -> IO (Either MapError CheckedMembers)
-loadMap manifestPath = runMapLoad $ do
+loadMap manifestPath = do
   -- One cache for the whole invocation: the manifest, its policy, every member,
   -- and every member's policy are read through it, so a file two of them name
   -- is read once and both see the same bytes.
-  cache <- liftLoad newSourceCache
+  cache <- newSourceCache
+  loadMapWith cache manifestPath
+
+-- | 'loadMap' through a caller-owned cache, the map's counterpart of
+-- 'Lara.Source.Load.loadSourceWith'.
+--
+-- The CLI never calls this: every @lara check \<map.laramap\>@ makes a fresh
+-- cache through 'loadMap', and nothing in the production path shares one across
+-- invocations, which is what keeps a map a recheck of current bytes (D1). It
+-- exists for the one caller that needs the opposite: the map mode of
+-- @scripts\/bench.hs@ (issue #319) warms a cache with one untimed pass, so that
+-- its timed passes measure loading, checking and linking rather than disk
+-- reads. A cache handed in here must not outlive the files it read; a caller
+-- reusing one across edits would be reading stale bytes by construction.
+loadMapWith :: SourceCache -> FilePath -> IO (Either MapError CheckedMembers)
+loadMapWith cache manifestPath = runMapLoad $ do
   manifest <- readManifest cache manifestPath
   let baseDir = takeDirectory manifestPath
   contract <- readContractPolicy cache baseDir manifest
@@ -532,15 +548,6 @@ readMemberSource alias cache path = do
 -- one would report a status for a claim the author did not write.
 memberClaims :: Program -> [(PropId, Prop)]
 memberClaims program = [(claimId claim, claimFormal claim) | DeclClaim claim <- programDecls program]
-
--- | The first element that occurs twice, in first-repeat order.
-firstDuplicate :: Ord a => [a] -> Maybe a
-firstDuplicate = go Set.empty
-  where
-    go _ [] = Nothing
-    go seen (x : xs)
-      | x `Set.member` seen = Just x
-      | otherwise = go (Set.insert x seen) xs
 
 -- ---------------------------------------------------------------------------
 -- The shared contract

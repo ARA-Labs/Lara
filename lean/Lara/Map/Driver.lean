@@ -61,6 +61,7 @@ not: an ordering bug must be visible in the bytes rather than tidied away.
 
 import Lara.Driver
 import Lara.Map.Qualify
+import Lara.Map.Batch
 import Lara.Context.Fragment
 
 namespace Lara.Map.Driver
@@ -587,6 +588,314 @@ a singleton and this is alias inequality. -/
 def crossMember (sources targets : List String) : Bool :=
   sources.any (fun s => targets.any (fun t => s != t))
 
+/-! ### The linked unit
+
+The three pieces `linkAndEvaluate` checks, named so that theorems can be stated
+about exactly what the driver runs. -/
+
+/-- The linked argument list: every declared term once, in first-declaration
+order. -/
+def linkedTermsOf (qualified : List QualifiedMember) : List SupportTerm :=
+  firstOccurrences ((declaredArgs qualified).map (·.2.2)) []
+
+/-- The linked leaf environment: every member's qualified leaves, in member
+order. -/
+def linkedGammaOf (qualified : List QualifiedMember) : LeafId → Option Atom :=
+  buildGamma (qualified.flatMap (·.leaves))
+
+/-- **The cross-member saturation**: `Lara.Map.crossPairs`, the batch generator
+`Lara.Map.batch_checked` is proved about, over the conclusion cache of the
+linked terms, with the owner-based `crossMember` as its cross-member predicate.
+
+The cache holds the linked arguments that are complete checked support. A term
+that fails to infer, or retains an open critical-question obligation,
+contributes none: `checkUnit` runs afterwards and rejects the linked unit for
+exactly those terms, so skipping them here only avoids emitting an attack whose
+endpoint the checker is about to refuse. -/
+def generatedAttacksOf (shared : Decoded) (qualified : List QualifiedMember) :
+    List Attack :=
+  Lara.Map.crossPairs dcanon shared.policy.defeat shared.policy.ruleLookup
+    (fun s t => crossMember (ownersOf (declaredArgs qualified) s)
+      (ownersOf (declaredArgs qualified) t))
+    (Lara.Context.conclusionCache shared.policy.ruleLookup (linkedGammaOf qualified)
+      (buildRegistry shared.theories) (linkedTermsOf qualified))
+
+/-- **The linked unit**: the shared contract, the merged arguments, and the
+members' transported attacks followed by the generated ones, each once. -/
+def linkedUnitOf (shared : Decoded) (qualified : List QualifiedMember) : Lara.Unit :=
+  { sigma := shared.sigma
+  , policy := shared.policy
+  , args := linkedTermsOf qualified
+  , atts := dedupAttacks (qualified.flatMap (·.atts) ++ generatedAttacksOf shared qualified) [] }
+
+/-! ### What the linked unit is proved to be
+
+The driver's own bookkeeping, related to `Lara.Map.Batch`'s vocabulary: the
+merge and the attack dedupe keep exactly the declared elements, the owner lists
+decide "declared by two differently aliased members", and a qualified member
+read as a `Fragment` makes the driver's unit an instance of
+`Lara.Map.batch_checked`. -/
+
+theorem mem_firstOccurrences :
+    ∀ (ws seen : List SupportTerm) (w : SupportTerm),
+      w ∈ firstOccurrences ws seen ↔ w ∈ ws ∧ w ∉ seen
+  | [], _, _ => by simp [firstOccurrences]
+  | v :: rest, seen, w => by
+      by_cases hv : v ∈ seen
+      · have hc : seen.contains v = true := List.contains_iff_mem.mpr hv
+        simp only [firstOccurrences, hc, if_true]
+        rw [mem_firstOccurrences rest seen w]
+        constructor
+        · rintro ⟨hw, hns⟩; exact ⟨List.mem_cons_of_mem _ hw, hns⟩
+        · rintro ⟨hw, hns⟩
+          rcases List.mem_cons.mp hw with rfl | hw
+          · exact absurd hv hns
+          · exact ⟨hw, hns⟩
+      · have hc : seen.contains v = false := by
+          cases h : seen.contains v
+          · rfl
+          · exact absurd (List.contains_iff_mem.mp h) hv
+        simp only [firstOccurrences, hc, Bool.false_eq_true, if_false, List.mem_cons]
+        rw [mem_firstOccurrences rest (v :: seen) w]
+        simp only [List.mem_cons, not_or]
+        constructor
+        · rintro (rfl | ⟨hw, -, hns⟩)
+          · exact ⟨Or.inl rfl, hv⟩
+          · exact ⟨Or.inr hw, hns⟩
+        · rintro ⟨rfl | hw, hns⟩
+          · exact Or.inl rfl
+          · by_cases hwv : w = v
+            · exact Or.inl hwv
+            · exact Or.inr ⟨hw, hwv, hns⟩
+
+theorem firstOccurrences_nodup :
+    ∀ (ws seen : List SupportTerm), (firstOccurrences ws seen).Nodup
+  | [], _ => by simp [firstOccurrences]
+  | v :: rest, seen => by
+      by_cases hv : seen.contains v = true
+      · simp only [firstOccurrences, hv, if_true]
+        exact firstOccurrences_nodup rest seen
+      · simp only [firstOccurrences, hv]
+        refine List.nodup_cons.mpr ⟨?_, firstOccurrences_nodup rest (v :: seen)⟩
+        intro h
+        exact ((mem_firstOccurrences rest (v :: seen) v).mp h).2 List.mem_cons_self
+
+theorem mem_dedupAttacks :
+    ∀ (ks seen : List Attack) (k : Attack),
+      k ∈ dedupAttacks ks seen ↔ k ∈ ks ∧ k ∉ seen
+  | [], _, _ => by simp [dedupAttacks]
+  | v :: rest, seen, k => by
+      by_cases hv : v ∈ seen
+      · have hc : seen.contains v = true := List.contains_iff_mem.mpr hv
+        simp only [dedupAttacks, hc, if_true]
+        rw [mem_dedupAttacks rest seen k]
+        constructor
+        · rintro ⟨hk, hns⟩; exact ⟨List.mem_cons_of_mem _ hk, hns⟩
+        · rintro ⟨hk, hns⟩
+          rcases List.mem_cons.mp hk with rfl | hk
+          · exact absurd hv hns
+          · exact ⟨hk, hns⟩
+      · have hc : seen.contains v = false := by
+          cases h : seen.contains v
+          · rfl
+          · exact absurd (List.contains_iff_mem.mp h) hv
+        simp only [dedupAttacks, hc, Bool.false_eq_true, if_false, List.mem_cons]
+        rw [mem_dedupAttacks rest (v :: seen) k]
+        simp only [List.mem_cons, not_or]
+        constructor
+        · rintro (rfl | ⟨hk, -, hns⟩)
+          · exact ⟨Or.inl rfl, hv⟩
+          · exact ⟨Or.inr hk, hns⟩
+        · rintro ⟨rfl | hk, hns⟩
+          · exact Or.inl rfl
+          · by_cases hkv : k = v
+            · exact Or.inl hkv
+            · exact Or.inr ⟨hk, hkv, hns⟩
+
+theorem mem_dedupStrings :
+    ∀ (xs seen : List String) (x : String),
+      x ∈ dedupStrings xs seen ↔ x ∈ xs ∧ x ∉ seen
+  | [], _, _ => by simp [dedupStrings]
+  | v :: rest, seen, x => by
+      by_cases hv : v ∈ seen
+      · have hc : seen.contains v = true := List.contains_iff_mem.mpr hv
+        simp only [dedupStrings, hc, if_true]
+        rw [mem_dedupStrings rest seen x]
+        constructor
+        · rintro ⟨hx, hns⟩; exact ⟨List.mem_cons_of_mem _ hx, hns⟩
+        · rintro ⟨hx, hns⟩
+          rcases List.mem_cons.mp hx with rfl | hx
+          · exact absurd hv hns
+          · exact ⟨hx, hns⟩
+      · have hc : seen.contains v = false := by
+          cases h : seen.contains v
+          · rfl
+          · exact absurd (List.contains_iff_mem.mp h) hv
+        simp only [dedupStrings, hc, Bool.false_eq_true, if_false, List.mem_cons]
+        rw [mem_dedupStrings rest (v :: seen) x]
+        simp only [List.mem_cons, not_or]
+        constructor
+        · rintro (rfl | ⟨hx, -, hns⟩)
+          · exact ⟨Or.inl rfl, hv⟩
+          · exact ⟨Or.inr hx, hns⟩
+        · rintro ⟨rfl | hx, hns⟩
+          · exact Or.inl rfl
+          · by_cases hxv : x = v
+            · exact Or.inl hxv
+            · exact Or.inr ⟨hx, hxv, hns⟩
+
+theorem mem_declaredArgs {ms : List QualifiedMember} {d : MemberAlias × ArgId × SupportTerm} :
+    d ∈ declaredArgs ms ↔ ∃ m ∈ ms, ∃ a ∈ m.args, d = (m.memberAlias, a.1, a.2) := by
+  simp only [declaredArgs, List.mem_flatMap, List.mem_map]
+  constructor
+  · rintro ⟨m, hm, a, ha, rfl⟩; exact ⟨m, hm, a, ha, rfl⟩
+  · rintro ⟨m, hm, a, ha, rfl⟩; exact ⟨m, hm, a, ha, rfl⟩
+
+/-- The owners of a term are exactly the aliases of the members that declared
+it. -/
+theorem mem_ownersOf {declared : List (MemberAlias × ArgId × SupportTerm)}
+    {w : SupportTerm} {a : String} :
+    a ∈ ownersOf declared w ↔ ∃ d ∈ declared, d.1.val = a ∧ d.2.2 = w := by
+  rw [ownersOf, mem_dedupStrings]
+  simp only [List.not_mem_nil, not_false_eq_true, and_true, List.mem_filterMap]
+  constructor
+  · rintro ⟨d, hd, hres⟩
+    by_cases hw : (d.2.2 == w) = true
+    · rw [if_pos hw] at hres
+      exact ⟨d, hd, Option.some.inj hres, beq_iff_eq.mp hw⟩
+    · rw [if_neg hw] at hres; exact absurd hres (by simp)
+  · rintro ⟨d, hd, rfl, rfl⟩
+    exact ⟨d, hd, by simp⟩
+
+/-- **The driver's cross-member predicate decides "declared by two differently
+aliased members"** — the predicate `Lara.Map.batch_checked` needs of `cross`,
+read off the driver's own owner lists. -/
+theorem crossMember_ownersOf_iff (declared : List (MemberAlias × ArgId × SupportTerm))
+    (s t : SupportTerm) :
+    crossMember (ownersOf declared s) (ownersOf declared t) = true ↔
+      ∃ d ∈ declared, ∃ e ∈ declared, d.1.val ≠ e.1.val ∧ d.2.2 = s ∧ e.2.2 = t := by
+  simp only [crossMember, List.any_eq_true, bne_iff_ne]
+  constructor
+  · rintro ⟨a, ha, b, hb, hab⟩
+    obtain ⟨d, hd, rfl, rfl⟩ := mem_ownersOf.mp ha
+    obtain ⟨e, he, rfl, rfl⟩ := mem_ownersOf.mp hb
+    exact ⟨d, hd, e, he, hab, rfl, rfl⟩
+  · rintro ⟨d, hd, e, he, hne, rfl, rfl⟩
+    exact ⟨d.1.val, mem_ownersOf.mpr ⟨d, hd, rfl, rfl⟩,
+      e.1.val, mem_ownersOf.mpr ⟨e, he, rfl, rfl⟩, hne⟩
+
+/-- A qualified member read as a linking fragment under the shared contract: its
+qualified leaves, its qualified argument terms, and its transported attacks. -/
+def QualifiedMember.fragment (shared : Decoded) (m : QualifiedMember) :
+    Lara.Context.Fragment :=
+  { sigma := shared.sigma
+  , policy := shared.policy
+  , gammaFrag := m.leaves
+  , ground := m.leaves.map (·.2)
+  , args := m.args.map (·.2)
+  , atts := m.atts
+  , imports := Lara.Context.Interface.closed
+  , exports := [] }
+
+/-- The map's members as the `(alias, fragment)` pairs `Lara.Map.Batch` is
+stated over. -/
+def memberPairs (shared : Decoded) (qualified : List QualifiedMember) :
+    List (String × Lara.Context.Fragment) :=
+  qualified.map fun m => (m.memberAlias.val, m.fragment shared)
+
+/-- The driver's linked environment is the batch environment of its members. -/
+theorem linkedGammaOf_eq (shared : Decoded) (qualified : List QualifiedMember) :
+    linkedGammaOf qualified = Lara.Map.batchGamma (memberPairs shared qualified) := by
+  simp only [linkedGammaOf, Lara.Map.batchGamma, memberPairs, List.flatMap_map,
+    QualifiedMember.fragment]
+  rfl
+
+/-- The driver's linked terms are exactly its members' arguments. -/
+theorem mem_linkedTermsOf (shared : Decoded) (qualified : List QualifiedMember)
+    (w : SupportTerm) :
+    w ∈ linkedTermsOf qualified ↔ ∃ p ∈ memberPairs shared qualified, w ∈ p.2.args := by
+  rw [linkedTermsOf, mem_firstOccurrences]
+  constructor
+  · rintro ⟨hw, -⟩
+    obtain ⟨d, hd, rfl⟩ := List.mem_map.mp hw
+    obtain ⟨m, hm, a, ha, rfl⟩ := mem_declaredArgs.mp hd
+    exact ⟨(m.memberAlias.val, m.fragment shared), List.mem_map.mpr ⟨m, hm, rfl⟩,
+      List.mem_map.mpr ⟨a, ha, rfl⟩⟩
+  · rintro ⟨p, hp, hw⟩
+    obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hp
+    obtain ⟨a, ha, rfl⟩ := List.mem_map.mp hw
+    exact ⟨List.mem_map.mpr ⟨(m.memberAlias, a.1, a.2),
+      mem_declaredArgs.mpr ⟨m, hm, a, ha, rfl⟩, rfl⟩, List.not_mem_nil⟩
+
+/-- **The Lean driver's linked unit is accepted** whenever its members are
+well-formed on their own (issue #321).
+
+`Lara.Map.batch_checked` instantiated at `linkedUnitOf` — the unit
+`linkAndEvaluate` hands to `checkUnit`, in the driver's own spelling: its
+first-occurrence merge, its attack dedupe, its owner-based cross-member
+predicate. Of the premises, `haliases` and `hleaves` are what `decodeMapInput`
+enforces (unique aliases, and per-member unique leaves under the injective
+`Lara.Map.qualifyLeaf`); the four checker premises are the shared contract's;
+and `hmembers` is each member well-formed under its own environment, which is
+the solo check the frontend ran and which no envelope byte records. So a map
+whose members check on their own cannot reach `.linkRejected` here. -/
+theorem linkedUnitOf_checked (shared : Decoded) (qualified : List QualifiedMember)
+    (ground : List Atom)
+    (haliases : (qualified.map (·.memberAlias.val)).Nodup)
+    (hleaves : (qualified.flatMap (fun m => m.leaves.map (·.1))).Nodup)
+    (hmembers : ∀ m ∈ qualified,
+      Lara.Context.SideOk dcanon (buildRegistry shared.theories)
+        (Admission.buildGamma m.leaves) shared.policy (m.args.map (·.2)) m.atts)
+    (hsignature : signatureStage ground (linkedUnitOf shared qualified) = none)
+    (hscope : Policy.firstOutOfScope? shared.policy = none)
+    (hruleIds : (shared.policy.rules.map (·.id)).Nodup)
+    (hpolicyWf : Policy.WellFormed dcanon shared.policy) :
+    ∃ accepted, checkUnit (linkedGammaOf qualified) (buildRegistry shared.theories) ground
+      (linkedUnitOf shared qualified) = .ok accepted := by
+  have hgen : generatedAttacksOf shared qualified =
+      Lara.Map.crossPairs dcanon shared.policy.defeat shared.policy.ruleLookup
+        (fun s t => crossMember (ownersOf (declaredArgs qualified) s)
+          (ownersOf (declaredArgs qualified) t))
+        (Lara.Context.conclusionCache shared.policy.ruleLookup
+          (Lara.Map.batchGamma (memberPairs shared qualified))
+          (buildRegistry shared.theories) (linkedTermsOf qualified)) := by
+    rw [generatedAttacksOf, linkedGammaOf_eq shared qualified]
+  rw [linkedGammaOf_eq shared qualified]
+  refine Lara.Map.batch_checked (memberPairs shared qualified)
+    (fun s t => crossMember (ownersOf (declaredArgs qualified) s)
+      (ownersOf (declaredArgs qualified) t))
+    (linkedTermsOf qualified)
+    (dedupAttacks (qualified.flatMap (·.atts) ++ generatedAttacksOf shared qualified) [])
+    ground ?_ ?_ ?_ ?_ (firstOccurrences_nodup _ _) (mem_linkedTermsOf shared qualified)
+    ?_ hsignature hscope hruleIds hpolicyWf
+  · simpa [memberPairs, List.map_map, Function.comp_def] using haliases
+  · simpa [memberPairs, List.flatMap_map, QualifiedMember.fragment,
+      Lara.Context.Fragment.declared] using hleaves
+  · intro p hp
+    obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hp
+    exact hmembers m hm
+  · intro p hp q hq hne s hs t ht
+    obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hp
+    obtain ⟨m', hm', rfl⟩ := List.mem_map.mp hq
+    obtain ⟨a, ha, rfl⟩ := List.mem_map.mp hs
+    obtain ⟨b, hb, rfl⟩ := List.mem_map.mp ht
+    exact (crossMember_ownersOf_iff _ _ _).mpr
+      ⟨(m.memberAlias, a.1, a.2), mem_declaredArgs.mpr ⟨m, hm, a, ha, rfl⟩,
+       (m'.memberAlias, b.1, b.2), mem_declaredArgs.mpr ⟨m', hm', b, hb, rfl⟩,
+       hne, rfl, rfl⟩
+  · intro k
+    rw [mem_dedupAttacks, hgen]
+    simp only [List.not_mem_nil, not_false_eq_true, and_true, List.mem_append,
+      List.mem_flatMap]
+    constructor
+    · rintro (⟨m, hm, hk⟩ | hk)
+      · exact Or.inl ⟨_, List.mem_map.mpr ⟨m, hm, rfl⟩, hk⟩
+      · exact Or.inr hk
+    · rintro (⟨p, hp, hk⟩ | hk)
+      · obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hp
+        exact Or.inl ⟨m, hm, hk⟩
+      · exact Or.inr hk
+
 /-! ### The linked map -/
 
 /-- One `(member alias, local argument id)` handle and the linked index it
@@ -741,6 +1050,12 @@ declared alignments. Nothing is asserted: the linked unit is an ordinary unit
 and goes through the ordinary checker, so this driver cannot accept anything a
 hand-written equivalent unit would not.
 
+The linked unit is `linkedUnitOf`, and its cross-member saturation is
+`generatedAttacksOf` — `Lara.Map.crossPairs`, the batch generator
+`Lara.Map.batch_checked` is proved about. So `linkedUnitOf_checked` is a theorem
+about the exact value checked below: a map whose members are well-formed on
+their own never reaches `.linkRejected` (issue #321).
+
 The duplicate-leaf guard here is defensive and cannot fire, which is a change
 from how it started: `decodeMemberIn` now refuses a member whose own leaf ids
 repeat, and two *different* members cannot collide because aliases are unique by
@@ -775,7 +1090,7 @@ def linkAndEvaluate (input : MapIn) : Except String (Except MapReject LinkedOut)
       .ok (.error (.linkBoundary ("two members declare the leaf identity " ++ dup)))
   | none => do
   let declared := declaredArgs qualified
-  let linkedTerms := firstOccurrences (declared.map (·.2.2)) []
+  let linkedTerms := linkedTermsOf qualified
   -- One node per declared `(member alias, local argument id)`, naming the linked
   -- position its term became. `findIdx?` never misses: `linkedTerms` is the
   -- distinct terms of this very list, so every declared term either is a first
@@ -787,34 +1102,14 @@ def linkAndEvaluate (input : MapIn) : Except String (Except MapReject LinkedOut)
     declared.filterMap (fun d =>
       (linkedTerms.findIdx? (fun w => w == d.2.2)).map (fun i =>
         { memberAlias := d.1, argId := d.2.1, index := i }))
-  let gamma := buildGamma leaves
+  let gamma := linkedGammaOf qualified
   let reg := buildRegistry shared.theories
-  let pI := shared.policy.ruleLookup
-  let dp := shared.policy.defeat
-  -- The conclusions of the linked arguments that are complete checked support.
-  -- A term that fails to infer, or retains an open critical-question
-  -- obligation, contributes none: `checkUnit` runs afterwards and rejects the
-  -- linked unit for exactly those terms, so skipping them here only avoids
-  -- emitting an attack whose endpoint the checker is about to refuse.
-  let cache : List (Nat × SupportTerm × Atom) :=
-    (linkedTerms.zipIdx).filterMap (fun p =>
-      (Lara.Context.conclusionOf pI gamma reg p.1).map (fun c => (p.2, p.1, c)))
-  let generated : List Attack :=
-    cache.flatMap (fun s =>
-      cache.filterMap (fun t =>
-        if crossMember (ownersOf declared s.2.1) (ownersOf declared t.2.1)
-            && contraryMatchB dcanon dp s.2.2 t.2.2
-            && conflictAttackableB pI t.2.1 then
-          some (Lara.Context.attackFor s.2.1 t.2.1)
-        else none))
-  let transported := qualified.flatMap (·.atts)
   let queries := dedupAtoms (qualified.flatMap (·.queries)) []
   let ground := leaves.map (·.2) ++ shared.theories.flatMap (·.2) ++ queries
-  let unit : Lara.Unit :=
-    { sigma := shared.sigma
-    , policy := shared.policy
-    , args := linkedTerms
-    , atts := dedupAttacks (transported ++ generated) [] }
+  -- The linked unit, with its cross-member saturation computed by the shared
+  -- batch generator (`generatedAttacksOf`), so `linkedUnitOf_checked` is a
+  -- theorem about exactly this value.
+  let unit := linkedUnitOf shared qualified
   match checkUnit gamma reg ground unit with
   | .error err => .ok (.error (.linkRejected (rejectWire err)))
   | .ok accepted =>
