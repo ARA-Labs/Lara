@@ -57,6 +57,18 @@ cd lean
 lake build
 ```
 
+The outer possible-world example reads declared bridges and modal queries from
+an S-expression file:
+
+```sh
+.lake/build/bin/pw-example ../fixtures/pw/declared.sexp
+python3 ../scripts/check-pw-example.py
+```
+
+Its fixed host, grammar, and proof boundary are documented in
+[the outer wire contract](../docs/theory-pw-declared-wire.md). Haskell outer
+execution follows in #322.
+
 ## Check the proofs are real
 
 ```sh

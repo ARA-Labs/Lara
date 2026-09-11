@@ -3644,3 +3644,22 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O169
+  timestamp: 2026-09-11T00:14-07:00
+  provenance: ai-suggested
+  content: Deriving both frame bridge indices and name resolution from one checked
+    declaration registry prevents an authored modal name from selecting a different
+    map than its declaration. The proof must retain membership in the original loaded
+    declaration list, rather than only reasserting agreement between independently
+    supplied environments.
+  context: '#313/#314 implemented: load_declarations and elabPosed_declared compose
+    the loader and modal elaborator; generalized design lesson remains unendorsed.'
+  potential_type: architecture
+  bound_to:
+  - N313_declared_wire
+  - N314_file_execution
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

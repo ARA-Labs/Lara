@@ -31,10 +31,10 @@ authored claim rather than `Sorted.pose … = .ok q`. `ruleOkB_iff` and
 `Sorted.pose_ok_val` / `pose_val_self` are what bridge the two, so
 sound/complete carry content on both sides.
 
-**What is not yet joined.** A `BridgeDecl` names a bridge, and `Naming` names
-the bridges of a sorted frame, but nothing links the two: a declared bridge
-cannot yet be named by a posed query. The halves meet at the status-atom level
-(`Sorted.pose`) and not at the bridge level. Issue #313.
+**Joining the authoring forms.** `Lara.PW.Declared` builds a sorted frame and
+its `Naming` from checked declarations. Its `elabPosed_declared` theorem links
+every nested modal name to the original declaration and its symbol map (#313).
+`Lara.PW.Wire` supplies concrete input and structured round trips (#314).
 
 **What the elaborator can and cannot check.** T6's contract has three clauses,
 and they are not alike:
@@ -314,12 +314,12 @@ declaration reading `src → tgt` would elaborate identically against any
 environment — so "T6 at a surface-authored bridge" would really be "T6 at
 whatever environment the caller supplied".
 
-Resolution itself is still the caller's: this environment is what a resolver
-*produced*, and the elaborator checks the declaration against it. What is not
-yet linked is the declared `BridgeId` and a `Naming.bridgeOf` on the query
-side, so a declared bridge cannot yet be named by a posed query — the two
-halves join at the status-atom level (`Sorted.pose`) and not at the bridge
-level. Tracked as issue #313. -/
+Resolution itself is the caller's: this environment is what a resolver
+*produced*, and the elaborator checks the declaration against it. The checked
+loader in `Lara.PW.Declared` constructs this environment from resolved contexts
+and derives `Naming.bridgeOf` from its registry of checked declarations.
+Its `elabPosed_declared` theorem joins the two authoring forms at every modal
+occurrence (#313). Low-level callers may still use `BridgeEnv` directly. -/
 structure BridgeEnv where
   /-- the name this environment is the bridge for -/
   name : BridgeId

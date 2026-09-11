@@ -1,0 +1,59 @@
+session:
+  id: 2026-09-11_001
+  date: '2026-09-11'
+  started: 2026-09-11T00:14-07:00
+  last_turn: 2026-09-11T00:14-07:00
+  turn_count: 1
+  summary: '#313/#314 implemented: checked declaration/name linkage, proved structured
+    codec, and file-driven finite Lean execution; Haskell follow-up #322 opened first.'
+events_logged:
+- turn: 1
+  type: decision
+  id: N313_declared_wire
+  routing: direct
+  provenance: user
+  summary: Join declared bridges and concrete authoring before the Haskell runtime
+- turn: 1
+  type: experiment
+  id: N314_file_execution
+  routing: direct
+  provenance: ai-executed
+  summary: File-authored maps determine comparison while modal operands retain their
+    target meaning
+- turn: 1
+  type: observation
+  id: O169
+  routing: staged
+  provenance: ai-suggested
+  summary: Registry-derived resolution as an architecture lesson; not promoted.
+ai_actions:
+- turn: 1
+  action: 'Created #322, branched feat/pw-declared-wire, implemented the checked registry,
+    outer wire codec, finite evaluator, example executable, fixtures, CI gate and
+    durable docs; independently reviewed and verified.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/PW/Declared.lean
+  - lean/Lara/PW/Wire.lean
+  - lean/Lara/PW/Finite.lean
+  - lean/Lara/PW/ExampleMain.lean
+  - lean/Lara/Examples/PWDeclared.lean
+  - lean/Lara/Examples/PWWire.lean
+  - lean/Lara/Examples/PWFinite.lean
+  - lean/Lara/Examples/PWFileHost.lean
+  - scripts/check-pw-example.py
+  - fixtures/pw/declared.sexp
+  - docs/theory-pw-declared-wire.md
+claims_touched: []
+logic_revisions: []
+key_context:
+- turn: 1
+  excerpt: User explicitly chose combined environment + codec + file-driven example
+    now, full Haskell outer runtime + differential gate later; requested new branch,
+    completed checks, research-manager record, and PR.
+open_threads:
+- '#322: Haskell outer runtime, configurable finite execution, and Lean differential
+  conformance.'
+ai_suggestions_pending:
+- O169 remains staged; implementation authorization does not endorse the generalized
+  architecture lesson.

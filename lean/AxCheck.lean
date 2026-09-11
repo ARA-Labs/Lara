@@ -112,6 +112,13 @@ import Lara.PW.Sorted
 import Lara.Examples.PWSorted
 import Lara.PW.Surface
 import Lara.Examples.PWSurface
+import Lara.PW.Declared
+import Lara.PW.Wire
+import Lara.PW.Finite
+import Lara.Examples.PWDeclared
+import Lara.Examples.PWWire
+import Lara.Examples.PWFinite
+import Lara.Examples.PWFileHost
 
 open Lara
 
@@ -4094,3 +4101,56 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.PWSurface.elabPosed_surfaceQuery
 #print axioms Lara.Examples.PWSurface.elabPosed_unknownContext
 #print axioms Lara.Examples.PWSurface.surfaceQuery_holds
+
+/-! ### Declared outer bridges, wire round trips, and finite evaluation (#313/#314) -/
+#print axioms Lara.PW.Surface.Declared.Registry.lookup_name
+#print axioms Lara.PW.Surface.Declared.Registry.lookup_mem
+#print axioms Lara.PW.Surface.Declared.Registry.lookup_get
+#print axioms Lara.PW.Surface.Declared.Registry.lookup_isSome_of_mem
+#print axioms Lara.PW.Surface.Declared.Registry.bridges_names
+#print axioms Lara.PW.Surface.Declared.Registry.coherent
+#print axioms Lara.PW.Surface.Declared.Registry.resolved_decl
+#print axioms Lara.PW.Surface.Declared.resolve_decl
+#print axioms Lara.PW.Surface.Declared.loadInto_declarations
+#print axioms Lara.PW.Surface.Declared.load_declarations
+#print axioms Lara.PW.Surface.Declared.elaborates_resolves
+#print axioms Lara.PW.Surface.Declared.elabForm_declared
+#print axioms Lara.PW.Surface.Declared.elabPosed_declared
+#print axioms Lara.PW.Wire.Tag.parse_text
+#print axioms Lara.PW.Wire.Tag.text_injective
+#print axioms Lara.PW.Wire.head_tagged
+#print axioms Lara.PW.Wire.bind_ok
+#print axioms Lara.PW.Wire.map_ok
+#print axioms Lara.PW.Wire.decodeList_map
+#print axioms Lara.PW.Wire.decodeTerm_encode
+#print axioms Lara.PW.Wire.decodeTerms_encode
+#print axioms Lara.PW.Wire.decodeAtom_encode
+#print axioms Lara.PW.Wire.decodeStatus_encode
+#print axioms Lara.PW.Wire.decodeClause_encode
+#print axioms Lara.PW.Wire.decodeSymEntry_encode
+#print axioms Lara.PW.Wire.decodeLeafEntry_encode
+#print axioms Lara.PW.Wire.sectionItems_tagged
+#print axioms Lara.PW.Wire.decodeBridgeDecl_encode
+#print axioms Lara.PW.Wire.decodeForm_encode
+#print axioms Lara.PW.Wire.decodePosed_encode
+#print axioms Lara.PW.Wire.decodeDocument_encode
+#print axioms Lara.PW.Wire.encodeDocument_injective
+#print axioms Lara.PW.evalFinite_iff
+#print axioms Lara.Examples.PWDeclared.loaded
+#print axioms Lara.Examples.PWDeclared.duplicate_rejected
+#print axioms Lara.Examples.PWDeclared.unknown_source_rejected
+#print axioms Lara.Examples.PWDeclared.unknown_target_rejected
+#print axioms Lara.Examples.PWDeclared.clause_rejected
+#print axioms Lara.Examples.PWDeclared.rule_rejected
+#print axioms Lara.Examples.PWDeclared.name_resolves
+#print axioms Lara.Examples.PWDeclared.declared_translation
+#print axioms Lara.Examples.PWDeclared.undeclared_rejected
+#print axioms Lara.Examples.PWDeclared.context_mismatch_rejected
+#print axioms Lara.Examples.PWDeclared.nested_elaborates
+#print axioms Lara.Examples.PWDeclared.source_spelling_rejected
+#print axioms Lara.Examples.PWFinite.empty_box
+#print axioms Lara.Examples.PWFinite.empty_dia
+#print axioms Lara.Examples.PWFinite.local_and_neg
+#print axioms Lara.Examples.PWFinite.nested_modal
+#print axioms Lara.Examples.PWFinite.nested_modal_false
+#print axioms Lara.Examples.PWFileHost.evaluates_iff

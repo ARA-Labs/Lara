@@ -238,8 +238,7 @@ ones plus a proved collapse.**
 
 | Absent | Why |
 |---|---|
-| A concrete parser or wire format for the outer language | The M5 discipline: the theorem begins after concrete parsing, on a structured AST. `Lara.Surface` makes the same cut, and the outer language has no Haskell runtime to conform against. Unscheduled work, tracked as **#314** |
-| A link from a declared `BridgeId` to `Naming.bridgeOf` | The two authoring forms meet at the status-atom level (`Sorted.pose`) and not at the bridge level, so no theorem yet says the bridge a query names is the bridge a declaration declared. `BridgeEnv` now carries the bridge and context *names*, so a declaration is checked against its environment; joining the halves is a further design step, tracked as **#313** |
+| A Haskell outer runtime and differential gate | Follow-up **#322**. Concrete input and declaration/query linkage now land in **#313/#314**; see [the wire and execution contract](theory-pw-declared-wire.md). The byte parser remains a tested boundary; structured codec round trips are proved. |
 | An edit to `PW.Frame`, `PW.Sat`, `crossCompare`, or `CrossResult` | PW0's frozen contract. The refinement is a second builder and an earlier guard; `sat_erase` relates them |
 | `holes(P, p)` at the instance layer | §4 |
 | Edge-dependent (configuration) translation | Still PW0 limitation 3 / T6 limitation 1. `trQuery` is bridge-global, exactly as `Frame.translate` was |

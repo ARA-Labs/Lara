@@ -652,3 +652,12 @@ sessions:
   - C56
   - C06
   open_threads: 5
+
+- id: 2026-09-11_001
+  date: '2026-09-11'
+  summary: '#313/#314 implemented: checked declaration/name linkage, proved structured
+    codec, and file-driven finite Lean execution; Haskell follow-up #322 opened first.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: []
+  open_threads: 1

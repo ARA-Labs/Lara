@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance"]
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example"]
 
 # Mechanized reference semantics for the LARA claim-support calculus.
 # No Mathlib dependency yet: the frozen nf/≡ carve-out (spec §9 result 11) is
@@ -52,3 +52,8 @@ root = "Lara.SurfaceConformanceMain"
 [[lean_exe]]
 name = "update-preconditions"
 root = "Lara.UpdatePreconditionParityMain"
+
+# File-driven declared-bridge and modal-query example (#313/#314).
+[[lean_exe]]
+name = "pw-example"
+root = "Lara.PW.ExampleMain"

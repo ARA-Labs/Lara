@@ -442,3 +442,12 @@ import Lara.PW.Sorted
 import Lara.Examples.PWSorted
 import Lara.PW.Surface
 import Lara.Examples.PWSurface
+
+-- Declared outer bridges, concrete wire input, and finite execution (#313/#314).
+import Lara.PW.Declared
+import Lara.PW.Wire
+import Lara.PW.Finite
+import Lara.Examples.PWDeclared
+import Lara.Examples.PWWire
+import Lara.Examples.PWFinite
+import Lara.Examples.PWFileHost

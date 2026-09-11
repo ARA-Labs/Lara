@@ -9470,3 +9470,39 @@ tree:
   status: resolved
   also_depends_on:
   - N303_impl
+
+- id: N313_declared_wire
+  type: decision
+  title: Join declared bridges and concrete authoring before the Haskell runtime
+  provenance: user
+  timestamp: 2026-09-11T00:14-07:00
+  choice: 'Implement #313/#314 together on a new branch: declaration-derived naming
+    and frame maps, versioned codec, file-driven Lean execution, verification and
+    PR. Open the Haskell runtime/differential follow-up first; created as #322.'
+  alternatives:
+  - 'Implement #313 alone'
+  - Include the Haskell runtime and differential gate in this PR
+  evidence:
+  - 'User: open the new issue first, then directly proceed to our pr on a new branch,
+    finish all, $research-manager record the changes, and pr'
+  - https://github.com/ARA-Labs/lara/issues/322
+  - docs/theory-pw-declared-wire.md
+  status: resolved
+  also_depends_on:
+  - N311_located_and_independent
+- id: N314_file_execution
+  type: experiment
+  title: File-authored maps determine comparison while modal operands retain their
+    target meaning
+  provenance: ai-executed
+  timestamp: 2026-09-11T00:14-07:00
+  result: The original q-to-q declaration compares source q() as justified; q-to-p
+    compares it as gap while all three modal answers stay true. Full Lean build, whole-tree
+    axiom coverage/audit and the file-driven gate pass.
+  evidence:
+  - ara/evidence/proofs/pw_declared_wire_313_314.md
+  - ara/evidence/proofs/pw_declared_wire_verification.txt
+  - scripts/check-pw-example.py
+  status: resolved
+  also_depends_on:
+  - N313_declared_wire

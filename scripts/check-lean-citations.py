@@ -79,7 +79,7 @@ CITATION = re.compile(
 )
 
 # A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
-# #print axioms-gates every headline row: `srcStatus_iff_checked` (:717) `` — is
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:724) `` — is
 # not a citation but a statement of what the surrounding block is about, and
 # BLOCK subjects are what a file-less citation resolves against in preference to
 # the declaration's home file, the block plainly meaning the file it names.

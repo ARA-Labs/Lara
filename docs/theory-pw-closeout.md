@@ -63,7 +63,7 @@ standing decision.
 | Dynamic modal update operators | None set. |
 | Hybrid / named-world operators | None set. |
 | Global scenarios | None set. |
-| ~~Surface syntax for the outer language~~ | This row recorded **no scheduling condition**. The condition it was really waiting on — M5's sorting machinery (#188) — landed, and the row was then **scheduled and landed as #307**, together with the `Query_κ` well-sortedness refinement it mentioned in prose (a `docs/theory-pw0-outer-model.md` §5 row, not a row of this table). Both are in `docs/theory-pw-sorted-queries.md`. Note what did *not* land: the outer language still has no concrete parser or wire format, and no Haskell runtime to conform against — the surface is a structured AST plus a verified elaboration, the same cut `Lara.Surface` makes. That gap is now tracked as #314, and the unjoined declaration↔`Naming` bridge link as #313. |
+| ~~Surface syntax for the outer language~~ | This row recorded **no scheduling condition**. The condition it was really waiting on — M5's sorting machinery (#188) — landed, and the row was then **scheduled and landed as #307**, together with the `Query_κ` well-sortedness refinement it mentioned in prose (a `docs/theory-pw0-outer-model.md` §5 row, not a row of this table). Both are in `docs/theory-pw-sorted-queries.md`. The follow-up **#313/#314** now adds a concrete codec, checked declaration/query linkage, and a file-driven Lean example with proved finite evaluation. See `docs/theory-pw-declared-wire.md`. Haskell outer execution and differential conformance remain tracked separately as **#322**. |
 
 Also standing from the tracker, and unchanged: do not weaken a failed theorem
 into a definitional restatement, and do not move any of the above into the core

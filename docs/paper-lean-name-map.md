@@ -254,10 +254,10 @@ Notes for the paper wording:
 
 - Read-only audit; no Lean changes (happy path of #68).
 - `lean/AxCheck.lean` already `#print axioms`-gates every headline row:
-  `srcStatus_iff_checked` (:717), `srcIn_iff_checkedGrounded` (:715),
-  `status_preservation` (:916), `grounded_stable` (:904),
-  `contrary_claims_not_both_justified` (:955), `strict_step_sound` (:402),
-  `ndBackend` (:404), `raBackend` (:430), `ndUses_eq_infer_deps` (:546).
+  `srcStatus_iff_checked` (:724), `srcIn_iff_checkedGrounded` (:722),
+  `status_preservation` (:923), `grounded_stable` (:911),
+  `contrary_claims_not_both_justified` (:962), `strict_step_sound` (:409),
+  `ndBackend` (:411), `raBackend` (:437), `ndUses_eq_infer_deps` (:553).
 - Remaining paper-side step (P1–P3 edits in the Overleaf repo): check each
   display side-by-side against the quoted quantifiers/hypotheses above, and
   in particular ensure `thm:preservation` cites `srcStatus_iff_checked`
@@ -1352,17 +1352,13 @@ calls limitation 2 *closed* can be caught against the **Not X** notes below.
 - `PW.Sorted.trQuery` is **not** edge-dependent translation. It is
   bridge-global, exactly as `Frame.translate` was; PW0 limitation 3 and T6
   limitation 1 stand unchanged.
-- The surface is **not** a concrete syntax. There is no parser, no wire format,
-  and no Haskell runtime to conform against: the input is a structured AST and
-  the theorem begins after concrete parsing, the same cut `Lara.Surface` makes
-  (`docs/theory-m5-surface-calculus.md`, "Motivation and Trusted Boundary").
-  Tracked as #314.
-- The two authoring forms are **not** joined at the bridge level. `BridgeEnv`
-  carries the bridge and context names, so `BridgeDecl.id`/`.source`/`.target`
-  are checked against the environment a declaration is elaborated in; but
-  nothing relates a declared `BridgeId` to `Naming.bridgeOf`, so no theorem
-  says the bridge a posed query names is the bridge a declaration declared.
-  The halves meet at the status-atom level (`Sorted.pose`). Tracked as #313.
+- The concrete outer codec now exists (#314): `PW.Wire.decodeDocument_encode`
+  proves the structured AST round trip. The byte parser/printer remain tested
+  boundary code. Haskell outer execution and its differential gate are **#322**.
+- Declaration/query linkage now exists (#313):
+  `PW.Surface.Declared.elabPosed_declared` identifies the original loaded
+  declaration and its symbol map for every nested modal occurrence. The lower
+  level `Naming` and `BridgeEnv` types remain available independently.
 - `PW.Surface.elabBridge` does **not** verify T6's contract. It decides one
   clause of three. `leaf_ok`, `cert_ok` and the canonicalizer agreement are
   undecidable — `Gamma` and `canon` are functions, `CertOk` is an arbitrary
@@ -1500,3 +1496,21 @@ audited through the gated theorems that mention them.
   caches, through `certOkOf` on the kernel-opaque `nd` core — so the saturation
   is collapsed instead by `crossAtts_of_no_contraries`, which reads
   `contraryMatchB`'s `dp.contraries.any …` guard rather than the caches.
+
+### PW declared bridges, wire input, and finite execution (#313/#314)
+
+See `docs/theory-pw-declared-wire.md` for the concrete grammar and host boundary.
+
+| Contract | Lean declaration | File |
+|---|---|---|
+| Checked registry builds frame indices and naming | `PW.Surface.Declared.Registry.data`, `Registry.naming`, `Registry.coherent` | `Lara/PW/Declared.lean` |
+| Loading retains exactly the authored declarations | `PW.Surface.Declared.load_declarations` | `Lara/PW/Declared.lean` |
+| Every nested modal occurrence names its loaded declaration and map | `PW.Surface.Declared.elabForm_declared`, `elabPosed_declared` | `Lara/PW/Declared.lean` |
+| Structured codec round trip and injectivity | `PW.Wire.decodeDocument_encode`, `encodeDocument_injective` | `Lara/PW/Wire.lean` |
+| Finite evaluation agrees with abstract satisfaction | `PW.evalFinite_iff` | `Lara/PW/Finite.lean` |
+| File example's observation agrees with its declared frame | `Examples.PWFileHost.evaluates_iff` | `Lara/Examples/PWFileHost.lean` |
+
+These results do not decide the undecidable T6 obligations, and do not assume
+all abstract frames are finite. `Finite.mem_successors` is the explicit
+accepted-relation presentation premise. Primitive modalities never translate
+their operands; `PWFileHost.compareProbe` is a separate source-claim operation.

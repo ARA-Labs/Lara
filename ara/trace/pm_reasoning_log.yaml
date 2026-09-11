@@ -1506,3 +1506,15 @@ entries:
     that single absence is what makes both the structural merge and MRLinkRejected
     unreachable - two open threads sharing one cause.'
 
+
+- turn: 2026-09-11_001#1
+  notes:
+  - 'User scope split routed directly; runtime follow-up #322 was created before implementation.'
+  - O169 staged as architecture. No generalized claim promoted solely from code/proof
+    completion or user authorization to implement.
+  - 'C55 and H18 inspected: naming/codec additions do not change gap separability
+    or discharge undecidable T6 obligations; no logic revision warranted.'
+  - 'Prior trace entries about #313/#314 remain historical; appended the new closure
+    work rather than rewriting them.'
+  - 'No unrelated observations promoted or retired: this turn provides no new closure
+    evidence for their interpretations.'
