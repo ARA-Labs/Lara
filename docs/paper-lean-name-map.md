@@ -269,9 +269,13 @@ Notes for the paper wording:
 
 Issue #77 follow-on family (metatheory plan Task 2, commit `014173e`).
 Every paper display in the source-boundary paragraph and
-`figures/admissionrules.tex` is transcribed from `lean/Lara/Admission.lean`;
-every theorem row is `lean/AxCheck.lean`-gated (sorry-free, standard trio). Rows
-that name only definitions carry no independent axiom obligation.
+`figures/admissionrules.tex` is transcribed from `lean/Lara/Admission.lean`
+(the group seed from `lean/Lara/Groups.lean`); every theorem row is
+`lean/AxCheck.lean`-gated (sorry-free, standard trio). Rows that name only
+definitions carry no independent axiom obligation. The declaration index is the
+first table; the second table (#312) keys the figure's display notation, as
+restructured in paper commits `1806050` (2026-09-09) and `bd882c3`
+(2026-09-10).
 
 | Paper object | Lean declaration | File |
 |---|---|---|
@@ -291,6 +295,41 @@ that name only definitions carry no independent axiom obligation.
 | Restrictiveness | `more_restrictive_cannot_add_structure` (leaves, arguments, raw keep predicate, and retained semantic attacks); `Groups.usesLeaf_mono` | `Lara/Admission.lean`, `Lara/Groups.lean` |
 | R8 carries no checked unit | `source_reject_no_checked_unit` | `Lara/Admission.lean` |
 | Source non-promotion | `source_justified_nonpromotion` (instantiates `BlockedProgram.checked_production_justified_nonpromotion_of_not_blocked`) | `Lara/Admission.lean`, `Lara/BlockedProgram.lean` |
+
+### Figure displays (`figures/admissionrules.tex`, #312)
+
+The restructured figure displays the accepted-outcome components as
+definitions above the rules, so each display key below is the paper-side
+spelling of one Lean declaration. The figure's provenance header comment lists
+the same keys; this table is the checkable side of that comment.
+
+| Paper display | Figure meaning | Lean | Exactness |
+|---|---|---|---|
+| `decide_{Π_A}` (rules Decide / Default) | table lookup, default `admit` | `Admission.decisionFor` | total by construction; no theorem row |
+| `valid(Π_A, M, U)` | no duplicate policy key, no duplicate leaf id, metadata aligned with the declared leaf table | `firstDuplicateKey table = none`, `firstDuplicateLeafId metas = none`, `metadataLeafAligned metas leaves`; the failures are the three `SourceInvalid` constructors | `accepted_metadata_aligned` |
+| `Γ_policy` | declared leaves whose decision is `admit` | `Admission.policyAdmitted` (leaf metas), `Admission.policyAdmittedIds` (ids) | `policy_admitted_iff` |
+| `Q_pol` | declared leaves whose decision is `quarantine` | `Admission.policyQuarantineSeed`; carried as `AdmissionPrune.policySeed` | `policy_quarantined_absent` (a `Q_pol` leaf is never checked) |
+| `Q_grp` | members of inconsistent duplicate-report groups | `Groups.quarantined` (`Lara/Groups.lean`): the flattened members of the groups failing `Groups.consistentB`; carried as `AdmissionPrune.groupSeed`. `Admission.inconsistentGroups` is the same filter kept as a list of groups, consumed by the audit for its one-cause-per-group rows | `Groups.mem_quarantined_iff` |
+| `Q = Q_pol ∪ Q_grp` | the combined removal seed | `AdmissionPrune.removedSeed`, defined in `Admission.buildPrune` as `policySeed ++ groupSeed` | list append: membership is the union, and the policy-first order is the order the audit's causes follow |
+| `Γ_checked = { l declared ∣ l ∉ Q }` | the checker's leaf table | `Admission.checkedLeafTable` (`Groups.quarantineLeaves (Q_pol ++ Q_grp) leaves`), ids `Admission.checkedAdmittedIds`; equals `AdmissionPrune.checkedLeaves` by `checked_admitted_ids_eq_prune` | `checked_admitted_iff` is literally this display: declared, `∉ Q_pol`, `∉ Q_grp` |
+| prune paragraph / `audit` | removed leaves, arguments whose support tree uses one, attacks with a removed raw endpoint; the audit is the canonical projection | `Admission.buildPrune` (`removedLeaves`, `removedArgs`, `removedAttacks`; kept attacks via `RawAttack.selectAligned`), `Admission.buildAdmissionAudit` (`AdmissionAudit.leaves` with causes, `.args`, `.attacks`) | `admission_audit_exact`, `audit_leaves_nonempty` |
+| rule Reject, outcome `R8(l)` | first declared leaf whose decision is `reject` | `firstAdmissionRejection = some r`, outcome `SourceAdmission.rejected r`, constructor `AdmissionJudgment.rejected`. The Lean `AdmissionRejection` also records the leaf's kind, provenance and matched row; the figure shows only the leaf | `source_reject_no_checked_unit` |
+| rule Admit, outcome `⟨Γ_policy, Γ_checked, Q, audit⟩` | valid source and no declared leaf rejects | `AdmissionJudgment.accepted` with premise `firstAdmissionRejection table metas = none`; carrier `AdmissionResult { prune, declaredResolved, audit }`. `Γ_checked` is `prune.checkedLeaves`, `Q` is `prune.removedSeed`, `audit` is the `audit` field; `Γ_policy` is `policyAdmitted table metas`, a function of the inputs rather than a carrier field. The carrier additionally holds the kept arguments and aligned attacks that the figure describes only in prose | `evaluateAdmission_iff_judgment`, `admission_deterministic` |
+
+**Presentation note (`Γ_checked`).** The figure defines `Γ_checked` the
+Lean-faithful way, as the declared leaves minus the combined seed `Q`. That is
+`checkedLeafTable` and `checked_admitted_iff`, both unconditional: they hold
+whether or not some leaf rejects. The caption's reading
+`Γ_checked = Γ_policy \ Q_grp` is a *consequence* of the Admit premise, not a
+definition: a declared leaf outside `Q_pol` is admitted or rejected, and the
+no-reject premise leaves only admitted. Its Lean anchor is the third conjunct
+of `accepted_checked_context_exact`, which, under
+`evaluateAdmission … = .accepted r`, gives
+`l ∈ r.prune.checkedLeaves ↔ l ∈ policyAdmittedIds ∧ l ∉ Groups.quarantined`.
+A paper sentence that uses the caption wording ("policy-admitted and not
+group-quarantined") should therefore cite `accepted_checked_context_exact`, or
+both theorems; citing `checked_admitted_iff` alone matches only the figure's
+unconditional display.
 
 The paper must not claim the `.lara` parser, Haskell elaborator, or final
 public verdict are proved by the admission differential. Lean proves the
