@@ -66,8 +66,19 @@ python3 ../scripts/check-pw-example.py
 ```
 
 Its fixed host, grammar, and proof boundary are documented in
-[the outer wire contract](../docs/theory-pw-declared-wire.md). Haskell outer
-execution follows in #322.
+[the outer wire contract](../docs/theory-pw-declared-wire.md).
+
+The `pw-run` executable is the finite reference for `pw-run 1` documents,
+which also declare their worlds and candidate edges. `lara pw` is the Haskell
+runtime for the same contract, and `make pw-conformance` (from the repository
+root) requires the two to print identical bytes:
+
+```sh
+.lake/build/bin/pw-run ../fixtures/pw/run/fields.sexp
+```
+
+See [the outer runtime contract](../docs/theory-pw-outer-runtime.md) for the
+grammar, the finite model boundary, and what `Lara.PW.Run` proves.
 
 ## Check the proofs are real
 

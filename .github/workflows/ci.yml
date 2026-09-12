@@ -152,6 +152,11 @@ jobs:
       - name: Haskell-Lean map conformance (map fixtures)
         run: bash scripts/check-map-conformance.sh
 
+      # The possible-world outer runtime (#322): `lara pw` against the Lean
+      # `pw-run` reference on committed fixtures and generated mutations.
+      - name: Haskell-Lean PW outer runtime conformance
+        run: make pw-conformance
+
   lean:
     name: Lean (lake build)
     runs-on: ubuntu-latest

@@ -1534,3 +1534,36 @@ entries:
     and the three rows differ in member content as well as count.'
   - 'Considered and rejected a new claim that MRLinkRejected is unreachable: it is a
     consequence recorded in C56''s Proof and the decision node, not a separate mechanism.'
+
+- turn: 2026-09-11_002#2
+  notes:
+  - 'User scope (finish #322, PR) routed directly as N322_outer_runtime (provenance
+    user). AI design choices split into N322_finite_boundary (ai-suggested), not attributed
+    to the user.'
+  - O172 staged as heuristic. A proof-construction lesson, not a claim about Lara; code
+    completion alone is not a closure signal for a generalized lesson.
+  - 'O169 considered for artifact commitment (both runtimes derive naming from the checked
+    registry), but not promoted: the PR is not merged this turn and the user did not
+    endorse the lesson.'
+  - 'No logic/ entry references #322 or the Haskell runtime; C55/H18 are not changed
+    by an executable host. No Stage 4 revision.'
+  - Review fixes (byte-equality gate, UTF-8 stdout) folded into the N322_conformance
+    result rather than logged as a dead_end; no approach was abandoned.
+
+- turn: 2026-09-11_002#3
+  notes:
+  - 'Routed the review-found locale divergence as one experiment node (N322_review_divergence)
+    covering all three fixes, not a dead_end: the first fix was extended, not abandoned.'
+  - 'Routed the names-to-positions mechanization as an experiment, as N321_batch_link
+    was, and the ResultTag separation as an ai-suggested decision; a reviewer accepting
+    it is not a user endorsement.'
+  - Staged O173 (one locale case per text boundary) as a heuristic, ai-suggested; one
+    project, no user endorsement.
+  - 'O172 near-miss: the name-level theorems extend the index lemma it predicted, but
+    a proof building on a lesson is not a closure signal for the lesson, and the PR
+    is unmerged.'
+  - 'Turn-2 entries citing 5 fixtures / 55 cases / 20 theorems left as written (append-only);
+    turn 3 records the new counts.'
+  - 'No logic/ entry references the PW runtime (claims.md:605 cites an older numeric
+    node N322, a different id). No Stage 4 revision. #331 recorded as an ai_action
+    and open thread, not a node.'

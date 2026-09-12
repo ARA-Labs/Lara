@@ -656,11 +656,14 @@ sessions:
 - id: 2026-09-11_002
   date: '2026-09-11'
   summary: '#313/#314 implemented: checked declaration/name linkage, proved structured
-    codec, and file-driven finite Lean execution; Haskell follow-up #322 opened first.'
-  turn_count: 1
-  events_count: 3
+    codec, and file-driven finite Lean execution; then #322: Haskell lara pw runtime
+    and a finite Lean reference agreeing byte for byte, with PW.Sat adequacy proved;
+    then the PR #328 review rounds: a locale divergence fixed and the names-to-positions
+    step proved.'
+  turn_count: 3
+  events_count: 11
   claims_touched: []
-  open_threads: 1
+  open_threads: 3
 
 - id: 2026-09-11_001
   date: '2026-09-11'

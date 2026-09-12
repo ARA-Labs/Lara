@@ -1,0 +1,1 @@
+(pw-result 1 (queries (query (at n0 true)) (query (at n0 false)) (query (at n0 false))) (comparisons (comparison same n0 (atom m (num +1)) (comparable justified)) (comparison same n0 (atom m (num 2)) (comparable gap))))

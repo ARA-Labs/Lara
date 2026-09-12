@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example"]
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run"]
 
 # Mechanized reference semantics for the LARA claim-support calculus.
 # No Mathlib dependency yet: the frozen nf/≡ carve-out (spec §9 result 11) is
@@ -57,3 +57,11 @@ root = "Lara.UpdatePreconditionParityMain"
 [[lean_exe]]
 name = "pw-example"
 root = "Lara.PW.ExampleMain"
+
+# The finite executable reference for `pw-run 1` (#322) — the Lean side of
+# scripts/check-pw-conformance.py. Loads declared worlds, edges and the
+# embedded `pw-surface 1` document, and prints bytes that must equal
+# `lara pw <file>`'s.
+[[lean_exe]]
+name = "pw-run"
+root = "Lara.PW.RunMain"

@@ -48,6 +48,14 @@
 --   corpus goldens, and the Lean driver has no report encoder. A rejected input
 --   prints nothing on @stdout@, one line on @stderr@, and exits @1@.
 --
+-- * @lara pw \<run.sexp\>@ (\#322) runs a @pw-run 1@ possible-world document:
+--   it loads the declared worlds through the same checker, the bridge
+--   registry, and the candidate edges, then answers the modal queries and
+--   source-claim comparisons ("Lara.PW.Run"). It prints one @pw-result 1@ or
+--   @pw-error 1@ S-expression on @stdout@ and nothing on @stderr@, which is the
+--   contract the Lean @pw-run@ reference shares byte for byte. Its exit codes
+--   are listed at 'pwRun'.
+--
 -- * Exit codes (shared by both paths): @0@ = accept, @1@ = checker rejection
 --   (a rejection whose class alone cannot say what went wrong additionally
 --   explains itself with one 'Lara.Driver.runCheckLocatedReported' line on @stderr@: a
@@ -92,7 +100,9 @@ import qualified Data.ByteString as B
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitWith)
 import System.FilePath (takeExtension)
-import System.IO (hPutStrLn, stderr)
+import qualified GHC.Foreign
+import GHC.IO.Encoding (getFileSystemEncoding, setFileSystemEncoding)
+import System.IO (hPutStrLn, hSetEncoding, mkTextEncoding, stderr, stdout)
 
 import Lara.AST (ArgId)
 import Lara.AtomicWrite (atomicWriteFile)
@@ -125,6 +135,7 @@ import Lara.Map.Types
   , renderMapError
   )
 import Lara.Map.Wire (encodeMapVerdict)
+import Lara.PW.Run (encodeError, encodeOutcome, pwErrorExitCode, runPWFile)
 import Lara.Source.Load
   ( loadSource
   , loadedPrepared
@@ -148,6 +159,7 @@ main = do
     ["check", file, "--out", out] -> check file (ToFile out)
     ["deps", file] -> deps file
     ["map-input", file] -> mapInput file
+    ["pw", file] -> pwRun file
     _ -> usage >> exitWith (ExitFailure 2)
 
 usage :: IO ()
@@ -158,6 +170,9 @@ usage = do
   hPutStrLn
     stderr
     "       lara check <file> --out <path>   (write the accepted verdict to <path>)"
+  hPutStrLn
+    stderr
+    "       lara pw <run.sexp>               (run a pw-run 1 possible-world document)"
 
 -- | Dispatch on the artifact extension: a @.laramap@ path runs the map
 -- pipeline (#303), a @.lara@ path the presentation pipeline (parse +
@@ -337,6 +352,58 @@ mapInput file = do
       case mapCheckInput members of
         Left err -> Left (MapBoundary (MBWire err))
         Right input -> Right input
+
+-- ---------------------------------------------------------------------------
+-- The @lara pw@ possible-world path (#322)
+-- ---------------------------------------------------------------------------
+
+-- | @lara pw \<run.sexp\>@: load a @pw-run 1@ document's worlds, bridges and
+-- edges, answer its modal queries and comparisons, and print one
+-- S-expression on @stdout@ — @pw-result 1@ or @pw-error 1@ — with nothing on
+-- @stderr@. That is the contract the Lean reference @pw-run@ executable
+-- implements byte for byte (@scripts\/check-pw-conformance.py@), which is why
+-- a refusal is a structured envelope on @stdout@ rather than this CLI's usual
+-- @stderr@ line.
+--
+-- Exit codes keep the shared 2-or-1 split: @0@ for a completed run (a false
+-- modal answer or an incomparable comparison is a result), @2@ when the run
+-- file cannot be read or decoded, @1@ when a decoded run is refused — a world
+-- the checker rejects, a bridge that does not load, an edge or comparison
+-- that does not resolve, or a query that does not elaborate.
+--
+-- Every text boundary is switched to UTF-8 first, because the Lean reference
+-- uses UTF-8 for all of them whatever the locale:
+--
+-- * @stdout@: a result echoes author-chosen names, so under a non-UTF-8
+--   locale the default encoder would fail on the first non-ASCII identifier.
+--   The @\/\/ROUNDTRIP@ variant also writes back a path byte that is not
+--   UTF-8, where a strict encoder would stop mid-envelope.
+-- * The run-file argument: 'getArgs' has already decoded it with the locale's
+--   encoding. It is turned back into its original bytes with that same
+--   encoding, which round-trips, and those bytes are decoded as UTF-8. Merely
+--   switching encodings afterwards is not enough: under an 8-bit locale such
+--   as ISO-8859-1, @café@ would be decoded byte by byte and then looked up as
+--   @cafÃ©@.
+-- * File paths: a world's @(file PATH)@ is decoded text, and GHC encodes a
+--   path with the file-system encoding, which is ASCII under @LC_ALL=C@. It is
+--   switched to UTF-8, so the run file and its worlds are opened by their
+--   UTF-8 bytes.
+--
+-- The gate reruns its Unicode-name and non-ASCII path cases under @LC_ALL=C@
+-- and under an ISO-8859-1 locale.
+pwRun :: FilePath -> IO ()
+pwRun arg = do
+  utf8Roundtrip <- mkTextEncoding "UTF-8//ROUNDTRIP"
+  hSetEncoding stdout utf8Roundtrip
+  localeFs <- getFileSystemEncoding
+  file <- GHC.Foreign.withCStringLen localeFs arg (GHC.Foreign.peekCStringLen utf8Roundtrip)
+  setFileSystemEncoding utf8Roundtrip
+  result <- runPWFile file
+  case result of
+    Right outcome -> putStrLn (printSExpr (encodeOutcome outcome))
+    Left err -> do
+      putStrLn (printSExpr (encodeError err))
+      exitWith (ExitFailure (pwErrorExitCode err))
 
 -- ---------------------------------------------------------------------------
 -- The @lara deps@ report path (#204)

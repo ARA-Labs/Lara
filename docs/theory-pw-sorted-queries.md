@@ -238,7 +238,7 @@ ones plus a proved collapse.**
 
 | Absent | Why |
 |---|---|
-| A Haskell outer runtime and differential gate | Follow-up **#322**. Concrete input and declaration/query linkage now land in **#313/#314**; see [the wire and execution contract](theory-pw-declared-wire.md). The byte parser remains a tested boundary; structured codec round trips are proved. |
+| ~~A Haskell outer runtime and differential gate~~ | Landed in **#322**; see [the outer runtime contract](theory-pw-outer-runtime.md). Concrete input and declaration/query linkage landed earlier in **#313/#314** ([the wire contract](theory-pw-declared-wire.md)). The byte parser remains a tested boundary; structured codec round trips are proved. |
 | An edit to `PW.Frame`, `PW.Sat`, `crossCompare`, or `CrossResult` | PW0's frozen contract. The refinement is a second builder and an earlier guard; `sat_erase` relates them |
 | `holes(P, p)` at the instance layer | §4 |
 | Edge-dependent (configuration) translation | Still PW0 limitation 3 / T6 limitation 1. `trQuery` is bridge-global, exactly as `Frame.translate` was |

@@ -59,6 +59,7 @@ import MapLoadSpec (mapLoadSpecProps)
 import MapLinkSpec (mapLinkSpecProps)
 import MapSpec (mapSpecProps)
 import MapExampleSpec (mapExampleSpecProps)
+import PWSpec (pwSpecProps)
 import UpdateSpec (updateSpecProps)
 import ThetaInferenceSpec (thetaInferenceSpecProps)
 import WorkedExamplesSpec (workedExamplesSpecProps)
@@ -219,6 +220,7 @@ main = do
         ++ [run name act | (name, act) <- mapLinkSpecProps]
         ++ [run name act | (name, act) <- mapSpecProps]
         ++ [run name act | (name, act) <- mapExampleSpecProps]
+        ++ [run name act | (name, act) <- pwSpecProps]
         ++ [run name act | (name, act) <- valueBindingSpecProps]
         ++ [run name act | (name, act) <- syntaxSpecProps]
         ++ [run name act | (name, act) <- elaborateSpecProps]

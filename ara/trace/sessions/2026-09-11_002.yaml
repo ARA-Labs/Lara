@@ -2,10 +2,13 @@ session:
   id: 2026-09-11_002
   date: '2026-09-11'
   started: 2026-09-11T00:14-07:00
-  last_turn: 2026-09-11T00:14-07:00
-  turn_count: 1
-  summary: '#313/#314 implemented: checked declaration/name linkage, proved structured
-    codec, and file-driven finite Lean execution; Haskell follow-up #322 opened first.'
+  last_turn: 2026-09-11T12:45-07:00
+  turn_count: 3
+  summary: '#313/#314 implemented (turn 1); #322 implemented (turn 2): pw-run 1 contract,
+    Haskell lara pw runtime, and a finite Lean reference proved against PW.Sat, agreeing
+    byte for byte on 5 fixtures and 55 generated cases. Turn 3: PR #328 review rounds
+    found and fixed a locale divergence at the path/argv boundary and proved the step
+    from edge names to positions; gate at 6 fixtures, 94 cases, 107 runs.'
 events_logged:
 - turn: 1
   type: decision
@@ -26,6 +29,61 @@ events_logged:
   routing: staged
   provenance: ai-suggested
   summary: Registry-derived resolution as an architecture lesson; not promoted.
+- turn: 2
+  type: decision
+  id: N322_outer_runtime
+  routing: direct
+  provenance: user
+  summary: 'Finish #322 in one PR: Haskell runtime, Lean reference, differential gate'
+- turn: 2
+  type: decision
+  id: N322_finite_boundary
+  routing: direct
+  provenance: ai-suggested
+  summary: A run evaluates exactly its declared frame; duplicate states and group-bearing
+    worlds refused; .lara sources deferred
+- turn: 2
+  type: experiment
+  id: N322_conformance
+  routing: direct
+  provenance: ai-executed
+  summary: lara pw and Lean pw-run agree byte for byte (5 fixtures, 55 cases); review
+    fixes applied
+- turn: 2
+  type: observation
+  id: O172
+  routing: staged
+  provenance: ai-suggested
+  summary: Relation-as-computed-membership makes adequacy trivial; content moves to
+    a declared-world index lemma. Not promoted.
+- turn: 3
+  type: experiment
+  id: N322_review_divergence
+  routing: direct
+  provenance: ai-executed
+  summary: Reviews found non-ASCII path divergence under non-UTF-8 locales (world path
+    under C, then argv under ISO-8859-1); fixed with negative controls; gate 6 fixtures,
+    94 cases, 107 runs
+- turn: 3
+  type: experiment
+  id: N322_names_to_positions
+  routing: direct
+  provenance: ai-executed
+  summary: Edge resolution from names to positions and per-context id uniqueness proved;
+    19 new AxCheck pins
+- turn: 3
+  type: decision
+  id: N322_result_tag
+  routing: direct
+  provenance: ai-suggested
+  summary: ResultTag closed table per runtime, separate from the input tag tables
+- turn: 3
+  type: observation
+  id: O173
+  routing: staged
+  provenance: ai-suggested
+  summary: Each text boundary needs its own locale case; an 8-bit locale fails differently
+    from C. Not promoted.
 ai_actions:
 - turn: 1
   action: 'Created #322, branched feat/pw-declared-wire, implemented the checked registry,
@@ -44,6 +102,53 @@ ai_actions:
   - scripts/check-pw-example.py
   - fixtures/pw/declared.sexp
   - docs/theory-pw-declared-wire.md
+- turn: 2
+  action: 'Branched feat/pw-outer-runtime-322. Implemented the Lean reference (Lara.PW.Run
+    with 20 AxCheck-covered theorems, pw-run exe), the Haskell runtime (Lara.PW.{Surface,Sorted,Wire,Run},
+    lara pw), fixtures with goldens, the differential gate (make pw-conformance, CI
+    step), PWSpec, and the decision record. Renumbered 10 AxCheck line citations shifted
+    by the new import (nine in docs/paper-lean-name-map.md, one in
+    scripts/check-lean-citations.py). An independent review found no runtime divergence;
+    fixed its two gate/boundary findings.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/PW/Run.lean
+  - lean/Lara/PW/RunMain.lean
+  - lean/AxCheck.lean
+  - lean/lakefile.toml
+  - src/Lara/PW/Surface.hs
+  - src/Lara/PW/Sorted.hs
+  - src/Lara/PW/Wire.hs
+  - src/Lara/PW/Run.hs
+  - app/Main.hs
+  - test/PWSpec.hs
+  - scripts/check-pw-conformance.py
+  - fixtures/pw/run/
+  - docs/theory-pw-outer-runtime.md
+  - docs/paper-lean-name-map.md
+  - .github/workflows/ci.yml
+- turn: 3
+  action: 'Resolved the PR #328 reviews in commits 3b865cb, e4c5e67 and 676de58: rebased
+    onto main a3a2054 (O170 collision renumbered O172; this session''s record moved
+    to _002); UTF-8 file paths and run-file argument in lara pw; ResultTag in both runtimes;
+    CtxIx/WorldIx/BridgeIx in Run.hs; names-to-positions theorems (by a forked agent,
+    reviewed here); renamed.sexp and 41 new gate cases (53 to 94) with locale reruns; PWSpec
+    rule-clause and keyword properties; citations repointed after the rebase. Filed
+    #331 for the pre-existing reader nesting bound. Replied on every review thread.'
+  provenance: ai-executed
+  files_changed:
+  - app/Main.hs
+  - src/Lara/PW/Run.hs
+  - lean/Lara/PW/Run.lean
+  - lean/AxCheck.lean
+  - scripts/check-pw-conformance.py
+  - test/PWSpec.hs
+  - fixtures/pw/run/renamed.sexp
+  - docs/theory-pw-outer-runtime.md
+  - docs/paper-lean-name-map.md
+  - scripts/check-lean-citations.py
+  - ara/evidence/proofs/pw_outer_runtime_322.md
+  - ara/evidence/proofs/pw_outer_runtime_verification.txt
 claims_touched: []
 logic_revisions: []
 key_context:
@@ -51,9 +156,22 @@ key_context:
   excerpt: User explicitly chose combined environment + codec + file-driven example
     now, full Haskell outer runtime + differential gate later; requested new branch,
     completed checks, research-manager record, and PR.
+- turn: 2
+  excerpt: 'User: let''s finish https://github.com/ARA-Labs/lara/issues/322, directly
+    do it and submit a pr.'
+- turn: 3
+  excerpt: 'User: monitor the pr for incoming review comments, address all, push and
+    reply. wait for follow ups. stop the loop after the pr is approved'
 open_threads:
 - '#322: Haskell outer runtime, configurable finite execution, and Lean differential
   conformance.'
+- 'Turn 2: #322 is implemented and awaiting PR merge. Follow-ups filed: #326 (PW reading
+  of worlds with duplicate-report groups) and #327 (.lara world sources under the
+  differential).'
+- 'Turn 3: PR #328 at 676de58 awaits re-review after the locale-probe fix. #331 tracks
+  the Haskell-only nesting bound in the shared reader.'
 ai_suggestions_pending:
 - O169 remains staged; implementation authorization does not endorse the generalized
   architecture lesson.
+- O172 remains staged; the proof-construction lesson is unendorsed.
+- O173 staged; one project, reviewer-driven, no user endorsement.

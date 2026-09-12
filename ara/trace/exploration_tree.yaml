@@ -9591,3 +9591,135 @@ tree:
   also_depends_on:
   - N321_batch_link
   - N316_merge_anchor
+
+- id: N322_outer_runtime
+  type: decision
+  title: 'Finish #322 in one PR: Haskell outer runtime, finite Lean reference, differential gate'
+  provenance: user
+  timestamp: 2026-09-11T01:52-07:00
+  choice: 'Implement #322 directly and submit a PR. One pw-run 1 file declares worlds
+    (check-input envelopes), candidate edges with acceptance, and comparisons, and
+    embeds pw-surface 1 unchanged. lara pw runs it in Haskell; the Lean pw-run executable
+    is the reference.'
+  alternatives:
+  - Host (worlds/edges) and surface document as two separate files
+  - Extend the fixed-host pw-example instead of a new reference executable
+  evidence:
+  - 'User: let''s finish https://github.com/ARA-Labs/lara/issues/322, directly do it
+    and submit a pr'
+  - docs/theory-pw-outer-runtime.md
+  status: resolved
+  also_depends_on:
+  - N313_declared_wire
+  - N314_file_execution
+- id: N322_finite_boundary
+  type: decision
+  title: A run evaluates exactly the frame its file declares
+  provenance: ai-suggested
+  timestamp: 2026-09-11T01:52-07:00
+  choice: 'A context contains exactly its declared worlds; its first world fixes its
+    environment, compared in declaration order. A world is identified by its checked
+    program, so duplicate states are refused. The candidate relation is the edge list
+    and acceptance is the declared flag. Worlds declaring duplicate-report groups are
+    refused, because a Boolean status atom cannot express evidence-blocked. .lara world
+    sources are deferred, because a Haskell-only door would escape the differential.
+    Stage order: worlds, bridges, edges, queries, comparisons. Exit codes 0/1/2.'
+  alternatives:
+  - Identify worlds by declared name inside the frame (Instance.World carries no name)
+  - Read an evidence-blocked world's conditional label as its status
+  - Accept .lara world sources in Haskell only
+  evidence:
+  - lean/Lara/PW/Run.lean
+  - docs/theory-pw-outer-runtime.md
+  status: resolved
+  also_depends_on:
+  - N322_outer_runtime
+- id: N322_conformance
+  type: experiment
+  title: Haskell lara pw and Lean pw-run agree byte for byte on committed and generated runs
+  provenance: ai-executed
+  timestamp: 2026-09-11T01:52-07:00
+  result: 'scripts/check-pw-conformance.py passes: 5 fixtures, 55 cases. An independent
+    line-by-line review found no input on which the runtimes diverge. It found two gate/boundary
+    gaps, both fixed: mutation cases compared as parsed trees (now bytes), and locale-bound
+    Haskell stdout, which would crash on Unicode under LC_ALL=C (now forced UTF-8, with
+    a gate case). The fixtures reproduce the T7 witness from a file: p is justified
+    at w0 and defeated along the accepted edge.'
+  evidence:
+  - ara/evidence/proofs/pw_outer_runtime_322.md
+  - ara/evidence/proofs/pw_outer_runtime_verification.txt
+  - scripts/check-pw-conformance.py
+  - fixtures/pw/run/fields.sexp
+  status: resolved
+  also_depends_on:
+  - N322_finite_boundary
+- id: N322_review_divergence
+  type: experiment
+  title: Review found a Haskell/Lean divergence the gate missed, at the locale text boundary
+  provenance: ai-executed
+  timestamp: 2026-09-11T12:45-07:00
+  result: 'PR #328 reviews reproduced three places where lara pw and pw-run disagreed,
+    because GHC encodes paths with the locale and Lean always uses UTF-8. (1) Under
+    LC_ALL=C, a non-ASCII world path: Haskell exit 1 (world-input), Lean exit 0. Fixed
+    in 3b865cb with a UTF-8//ROUNDTRIP file-system encoding. (2) That fix switched after
+    getArgs had decoded argv, so under ISO-8859-1 a run file under café/ was looked up
+    as cafÃ©/ (a regression from 502a564), and under LC_ALL=C a missing non-ASCII path
+    crashed stdout mid-envelope. Fixed in e4c5e67: the argument is re-encoded to its
+    bytes with the startup encoding and decoded as UTF-8, and stdout is UTF-8//ROUNDTRIP.
+    (3) The gate''s ISO-8859-1 probe ran /usr/bin/locale, which Ubuntu 26.04 AppArmor
+    confines; moved in-process in 676de58. Negative controls: the world-path case fails
+    on the pre-3b865cb binary under LC_ALL=C, and 5 of 18 locale reruns fail on 3b865cb.
+    The gate now reports 6 fixtures, 94 cases, 107 runs, with reruns under LC_ALL=C
+    and a localedef-built ISO-8859-1. The same round added fault-order-within-stage,
+    every-environment-field and renamed rule-clause cases. The shared reader''s Haskell-only
+    nesting bound predates #322 and is issue #331.'
+  evidence:
+  - ara/evidence/proofs/pw_outer_runtime_322.md
+  - ara/evidence/proofs/pw_outer_runtime_verification.txt
+  - scripts/check-pw-conformance.py
+  - app/Main.hs
+  status: resolved
+  also_depends_on:
+  - N322_conformance
+- id: N322_names_to_positions
+  type: experiment
+  title: The step from declared edge names to frame positions is proved, not only tested
+  provenance: ai-executed
+  timestamp: 2026-09-11T12:45-07:00
+  result: 'Review of PR #328 noted that candidates_declared / accepts_declared are
+    stated over resolved positions while the docs claimed "exactly the file''s edges".
+    lean/Lara/PW/Run.lean now proves resolveEdges_declared (resolution relates declared
+    and resolved edges one for one), loadWorlds_nodup (world ids are unique per context,
+    from addWorld''s seen check), Model.candidates_named / accepts_named, and
+    load_candidates_named / load_accepts_named for the model loadModel returns (run''s
+    first three stages, output unchanged). With ResultTag.parse_text / text_injective,
+    19 new AxCheck pins. lake build 218 jobs, AxCheck coverage 3116 declarations, axiom
+    audit passed; all six goldens byte-identical.'
+  evidence:
+  - lean/Lara/PW/Run.lean
+  - lean/AxCheck.lean
+  - ara/evidence/proofs/pw_outer_runtime_verification.txt
+  - docs/theory-pw-outer-runtime.md
+  status: resolved
+  also_depends_on:
+  - N322_finite_boundary
+- id: N322_result_tag
+  type: decision
+  title: The result protocol's keywords get their own closed tag table
+  provenance: ai-suggested
+  timestamp: 2026-09-11T12:45-07:00
+  choice: 'Replace the string literals of pw-result / pw-error with one ResultTag sum
+    per runtime, one constructor per spelling (the query stage and the (query …) answer
+    node share one). Keep it separate from the run grammar''s RTag and the surface''s
+    STag, as Lara.Map.Wire.MapTag is from Lara.Wire.Tag, so an input-grammar edit cannot
+    change result bytes. The reviewer accepted the separation.'
+  alternatives:
+  - Reuse sTagText / rTagText for spellings the output shares with the input grammar
+  - Keep inline literals and rely on the differential gate
+  evidence:
+  - src/Lara/PW/Run.hs
+  - lean/Lara/PW/Run.lean
+  - src/Lara/Map/Wire.hs
+  status: resolved
+  also_depends_on:
+  - N322_conformance

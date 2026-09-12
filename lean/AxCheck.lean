@@ -120,6 +120,7 @@ import Lara.Examples.PWDeclared
 import Lara.Examples.PWWire
 import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
+import Lara.PW.Run
 
 open Lara
 
@@ -4185,3 +4186,42 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.PWFinite.nested_modal
 #print axioms Lara.Examples.PWFinite.nested_modal_false
 #print axioms Lara.Examples.PWFileHost.evaluates_iff
+#print axioms Lara.PW.Run.Tag.parse_text
+#print axioms Lara.PW.Run.Tag.text_injective
+#print axioms Lara.PW.Run.head_tagged
+#print axioms Lara.PW.Run.sectionItems_tagged
+#print axioms Lara.PW.Run.decodeAcceptance_encode
+#print axioms Lara.PW.Run.decodeSource_encode
+#print axioms Lara.PW.Run.decodeWorld_encode
+#print axioms Lara.PW.Run.decodeEdge_encode
+#print axioms Lara.PW.Run.decodeCompare_encode
+#print axioms Lara.PW.Run.decodeRun_encode
+#print axioms Lara.PW.Run.encodeRun_injective
+#print axioms Lara.PW.Run.distinct_append
+#print axioms Lara.PW.Run.Hosted.find_isSome
+#print axioms Lara.PW.Run.indexIn_declared
+#print axioms Lara.PW.Run.Model.evaluates_iff
+#print axioms Lara.PW.Run.Model.presents
+#print axioms Lara.PW.Run.Model.compare_mem_iff_sat
+#print axioms Lara.PW.Run.Model.index_declared
+#print axioms Lara.PW.Run.Model.candidates_declared
+#print axioms Lara.PW.Run.Model.accepts_declared
+#print axioms Lara.PW.Run.ResultTag.parse_text
+#print axioms Lara.PW.Run.ResultTag.text_injective
+#print axioms Lara.PW.Run.IdsOk.mono
+#print axioms Lara.PW.Run.extendCtx_ids
+#print axioms Lara.PW.Run.placeWorld_ids
+#print axioms Lara.PW.Run.addWorld_ids
+#print axioms Lara.PW.Run.loadWorlds_ids
+#print axioms Lara.PW.Run.loadWorlds_nodup
+#print axioms Lara.PW.Run.Hosted.entry_mem
+#print axioms Lara.PW.Run.positionIn_some
+#print axioms Lara.PW.Run.resolveEdge_declared
+#print axioms Lara.PW.Run.resolveEdges_declared
+#print axioms Lara.PW.Run.index_of_id
+#print axioms Lara.PW.Run.find?_id
+#print axioms Lara.PW.Run.Model.candidates_named
+#print axioms Lara.PW.Run.Model.accepts_named
+#print axioms Lara.PW.Run.loadModel_spec
+#print axioms Lara.PW.Run.load_candidates_named
+#print axioms Lara.PW.Run.load_accepts_named

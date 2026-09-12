@@ -254,10 +254,10 @@ Notes for the paper wording:
 
 - Read-only audit; no Lean changes (happy path of #68).
 - `lean/AxCheck.lean` already `#print axioms`-gates every headline row:
-  `srcStatus_iff_checked` (:724), `srcIn_iff_checkedGrounded` (:722),
-  `status_preservation` (:923), `grounded_stable` (:911),
-  `contrary_claims_not_both_justified` (:962), `strict_step_sound` (:409),
-  `ndBackend` (:411), `raBackend` (:437), `ndUses_eq_infer_deps` (:553).
+  `srcStatus_iff_checked` (:726), `srcIn_iff_checkedGrounded` (:724),
+  `status_preservation` (:925), `grounded_stable` (:913),
+  `contrary_claims_not_both_justified` (:964), `strict_step_sound` (:411),
+  `ndBackend` (:413), `raBackend` (:439), `ndUses_eq_infer_deps` (:555).
 - Remaining paper-side step (P1–P3 edits in the Overleaf repo): check each
   display side-by-side against the quoted quantifiers/hypotheses above, and
   in particular ensure `thm:preservation` cites `srcStatus_iff_checked`
@@ -1393,7 +1393,11 @@ calls limitation 2 *closed* can be caught against the **Not X** notes below.
   limitation 1 stand unchanged.
 - The concrete outer codec now exists (#314): `PW.Wire.decodeDocument_encode`
   proves the structured AST round trip. The byte parser/printer remain tested
-  boundary code. Haskell outer execution and its differential gate are **#322**.
+  boundary code. Haskell outer execution and its differential gate landed in
+  **#322** (`docs/theory-pw-outer-runtime.md`). `PW.Run.Model.evaluates_iff`
+  and `PW.Run.Model.compare_mem_iff_sat` connect the finite Lean reference to
+  `PW.Sat`. The Haskell runtime is conformance-tested against that reference
+  and is not itself proved.
 - Declaration/query linkage now exists (#313):
   `PW.Surface.Declared.elabPosed_declared` identifies the original loaded
   declaration and its symbol map for every nested modal occurrence. The lower

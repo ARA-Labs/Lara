@@ -5,8 +5,11 @@ from a file. A checked registry derives both the frame's bridges and query-name
 resolution from the declarations. The file-driven Lean example evaluates modal
 queries and runs source-claim comparisons through those same bridges.
 
-Haskell outer execution and the cross-language differential gate are the next
-step, tracked in [#322](https://github.com/ARA-Labs/lara/issues/322).
+Haskell outer execution and the cross-language differential gate landed in
+[#322](https://github.com/ARA-Labs/lara/issues/322). See
+[the outer runtime contract](theory-pw-outer-runtime.md): its `pw-run 1`
+files declare their own worlds and edges and embed a `pw-surface 1` document
+unchanged.
 
 ## The declaration/query guarantee
 
@@ -163,9 +166,9 @@ host's canonicalizer agreement is also a supplied proof, not a decidable check.
 The example's chosen acceptance relation does not assert T6 applicability.
 
 No changes are made to `PW.Frame`, `PW.Sat`, `crossCompare`, the T6 contract,
-the local compiler, or the corpus. No existing freeze tag is bumped. Full
-Haskell execution, configurable world loading, and differential conformance
-remain in #322.
+the local compiler, or the corpus. No existing freeze tag is bumped. Haskell
+execution, configurable world loading, and differential conformance are in
+[the outer runtime contract](theory-pw-outer-runtime.md) (#322).
 
 ## Verification
 

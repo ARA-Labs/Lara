@@ -72,6 +72,10 @@ library
                       Lara.Map.Qualify.Internal
                       Lara.Map.Link
                       Lara.Map.Driver
+                      Lara.PW.Surface
+                      Lara.PW.Sorted
+                      Lara.PW.Wire
+                      Lara.PW.Run
                       Lara.Policy
                       Lara.SupportTerm
                       Lara.SupportTerm.Internal
@@ -194,6 +198,7 @@ test-suite lara-test
                       MapLinkSpec
                       MapSpec
                       MapExampleSpec
+                      PWSpec
                       SyntaxSpec
                       ThetaInferenceSpec
                       CertSlotsSpec

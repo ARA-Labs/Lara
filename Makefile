@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans map-check map-conformance
+.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans map-check map-conformance pw-conformance
 
 build:
 	cabal build all
@@ -88,6 +88,13 @@ map-check:
 # scripts/differential.sh; CI runs the same script.
 map-conformance:
 	bash scripts/check-map-conformance.sh
+
+# The possible-world outer runtime (#322): `lara pw` and the Lean `pw-run`
+# reference must print the same bytes and exit codes on every committed
+# fixtures/pw/run/ document and on every mutation case the script generates.
+# Pass UPDATE=1 to regenerate the committed goldens (only after both agree).
+pw-conformance:
+	python3 scripts/check-pw-conformance.py $(if $(UPDATE),--update,)
 
 # E1 checker-performance bench (issue #69): measures the production checker
 # on the frozen corpus units and the manifest-discovered harness, prints the

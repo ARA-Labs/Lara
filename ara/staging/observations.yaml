@@ -3701,3 +3701,43 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O172
+  timestamp: 2026-09-11T01:52-07:00
+  provenance: ai-suggested
+  content: A proposition-valued modal semantics gets a proved executable instance
+    when the frame's relation is defined as membership in the computed candidate list
+    and acceptance as the computed test. Presents and mem_successors then hold by construction,
+    and the only remaining obligation is a separate index lemma that the frame at declared
+    worlds is the file's edges. That lemma needs world identity (distinct checked programs),
+    because Instance.World carries no name.
+  context: '#322 implemented: Model.evaluates_iff and compare_mem_iff_sat follow from
+    evalFinite_iff and mem_compare_iff_sat_dia with trivial presentation proofs; candidates_declared
+    carries the content. The generalized lesson is unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N322_finite_boundary
+  - N322_conformance
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O173
+  timestamp: 2026-09-11T12:45-07:00
+  provenance: ai-suggested
+  content: A byte-equality differential between two runtimes misses encoding divergences
+    unless each text boundary gets its own locale case on the path that reads it. Output,
+    the command-line argument, paths read from inside the input, and error details that
+    echo a path are separate boundaries, and an 8-bit locale fails differently from
+    LC_ALL=C.
+  context: 'PR #328 reviews: the first gate''s only LC_ALL=C case used inline worlds,
+    so file-path encoding diverged unseen, and the first fix handled paths but not argv,
+    passing under C while failing under ISO-8859-1. Shown on one project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N322_review_divergence
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

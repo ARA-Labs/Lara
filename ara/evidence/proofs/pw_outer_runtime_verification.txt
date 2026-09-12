@@ -1,0 +1,97 @@
+#322 verification, 2026-09-11, branch feat/pw-outer-runtime-322 (commands run from the repository root unless noted)
+
+$ (cd lean && lake build)
+Build completed successfully (214 jobs).
+
+$ (cd lean && python3 ../scripts/check-axcheck-coverage.py AxCheck.lean <all Lean modules>)
+AxCheck coverage passed (3069 declarations).
+
+$ (cd lean && lake env lean AxCheck.lean) | bash scripts/check-axioms.sh
+'Lara.PW.Run.Model.index_declared' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.PW.Run.Model.candidates_declared' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.PW.Run.Model.accepts_declared' depends on axioms: [propext, Classical.choice, Quot.sound]
+Axiom audit passed.
+
+$ python3 scripts/check-pw-conformance.py --no-build
+PW outer runtime conformance passed: 5 fixtures, 55 cases.
+
+$ python3 scripts/check-pw-example.py
+PW file-driven gate passed (24 cases).
+
+$ python3 scripts/check-lean-citations.py
+Lean citations: PASS (420 citations, 29 allowlisted)
+
+$ python3 -m unittest scripts/test_check_lean_citations.py
+Ran 32 tests in 2.236s
+OK
+
+$ python3 scripts/check_ara_source_spans.py
+ARA source spans: PASS (66 quotations)
+
+$ cabal test all --test-show-details=direct   # rerun after the final app/Main.hs edit
+Test suite lara-test: PASS
+1 of 1 test suites (1 of 1 test cases) passed.
+
+Second review round, 2026-09-11, rebased onto main a3a2054
+
+$ python3 repro_locale.py before   # fields.sexp with worlds/src-s0.sexp renamed src-sω.sexp
+haskell  LC_ALL=C        exit=1  (pw-error 1 world (world-input s0 "…: withBinaryFile: invalid argument (cannot encode character '\969')"))
+haskell  LC_ALL=C.UTF-8  exit=0  (pw-result 1 …)
+lean     LC_ALL=C        exit=0  (pw-result 1 …)
+lean     LC_ALL=C.UTF-8  exit=0  (pw-result 1 …)
+
+$ python3 repro_locale.py after    # with setFileSystemEncoding UTF-8//ROUNDTRIP in pwRun
+haskell  LC_ALL=C        exit=0  (pw-result 1 …)   # all four runs now agree
+
+$ (cd lean && lake build)
+Build completed successfully (218 jobs).
+
+$ (cd lean && python3 ../scripts/check-axcheck-coverage.py AxCheck.lean <all Lean modules>)
+AxCheck coverage passed (3116 declarations).
+
+$ (cd lean && lake env lean AxCheck.lean) > axcheck.out; bash scripts/check-axioms.sh < axcheck.out
+Axiom audit passed.   # the 19 new Lara.PW.Run pins use at most propext, Classical.choice, Quot.sound
+
+$ python3 scripts/check-pw-conformance.py
+PW outer runtime conformance passed: 6 fixtures, 94 cases.
+
+$ (negative control: the gate's non-ascii world path case against the pre-fix lara binary)
+non-ascii world path under LC_ALL=C: exit codes differ (1, 0)   # fails as expected
+
+$ python3 scripts/check-lean-citations.py
+Lean citations: PASS (420 citations, 29 allowlisted)
+
+$ make ara-source-spans
+ARA source spans: PASS (66 quotations)
+
+$ cabal test -v0 lara-test
+exit 0 (all properties pass, including pw rule clause is the rule's translation
+and pw result keywords spelled once)
+
+Re-review round, 2026-09-11 (argv decoding)
+
+$ python3 repro_argv.py r2before   # 3b865cb binary; ISO-8859-1 built with localedef -c into a private LOCPATH
+café/fields.sexp               ISO-8859-1  lara exit=2 (pw-error 1 io "…/cafÃ©/fields.sexp: … does not exist")   lean exit=0
+rün.sexp                       ISO-8859-1  lara exit=2 (pw-error 1 io "…/rÃ¼n.sexp: … does not exist")          lean exit=0
+missing does-not-exist-ω.sexp  C           lara exit=1, stdout cut off, stderr commitBuffer: cannot encode    lean exit=2
+dirω/run.sexp, missing world   C           lara exit=1, stdout cut off, stderr commitBuffer: cannot encode    lean exit=1
+café/fields.sexp               C           lara exit=0                                                         lean exit=0
+
+$ python3 repro_argv.py r2after    # argument re-encoded to its bytes, decoded as UTF-8; stdout UTF-8//ROUNDTRIP
+all five rows: lara and lean agree on exit code and envelope; stderr empty
+
+$ python3 scripts/check-pw-conformance.py --no-build
+PW outer runtime conformance passed: 6 fixtures, 94 cases, 107 runs.
+
+$ (negative control: the six locale cases and their reruns against the 3b865cb binary)
+5 of 18 runs fail: run-file path, run directory and missing world under ISO-8859-1;
+missing run file and missing world under LC_ALL=C (commitBuffer crash)
+
+$ cabal test -v0 lara-test
+exit 0
+
+$ python3 scripts/check-lean-citations.py
+Lean citations: PASS (420 citations, 29 allowlisted)
+
+$ make ara-source-spans
+ARA source spans: PASS (66 quotations)
