@@ -468,9 +468,11 @@ SOURCE_CASES = [
     # Refusals before any world is read are the same envelope from both doors.
     ('lara: run file does not decode', [('(edge e w0 w1 accepted)', '(edge e w0 w1 maybe)')], {}, 2, '(pw-error 1 wire malformed acceptance)'),
 ]
-# The two reruns above are the only test of the locale encoding `pwTextBoundary`
-# sets for .lara text, so the set is pinned the way LOCALE_CASES is: dropping an
-# `also-under` must fail the gate rather than silently retire the coverage.
+# The two reruns above are the only *cross-driver* test of the locale encoding
+# `textBoundary` sets for .lara text — since #334 that boundary is the whole
+# CLI's, and the solo door's own locale cases live in test/CliSpec.hs — so the
+# set is pinned the way LOCALE_CASES is: dropping an `also-under` must fail the
+# gate rather than silently retire the coverage.
 SOURCE_LOCALE_CASES = {'lara: non-ascii program path', 'lara: non-ascii program text'}
 
 

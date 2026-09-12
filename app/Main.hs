@@ -79,6 +79,11 @@
 --   error, a missing\/unreadable policy file, and an 'ElabError' are all
 --   decode-boundary failures and share the codec error's exit @2@.
 --
+-- * Every text boundary is UTF-8 whatever the locale ('textBoundary'): the
+--   command line, the paths this driver opens, the @.lara@\/@.laramap@ text it
+--   reads, and the @stdout@\/@stderr@ it writes. One @.lara@ file therefore
+--   names one unit under every @LC_ALL@ and on every door (\#334).
+--
 -- The verdict is printed with a single trailing newline via 'putStrLn' —
 -- 'printSExpr' emits no newline, so both drivers' stdout is @printSExpr
 -- (encodeVerdict v)@ plus one @\\n@ and differential comparison is byte equality.
@@ -161,7 +166,7 @@ import Lara.Wire
 
 main :: IO ()
 main = do
-  args <- getArgs
+  args <- textBoundary =<< getArgs
   case args of
     ["check", file] -> check file ToStdout
     ["check", file, "--out", out] -> check file (ToFile out)
@@ -383,46 +388,14 @@ mapInput file = do
 -- the checker rejects, a bridge that does not load, an edge or comparison
 -- that does not resolve, or a query that does not elaborate.
 --
--- Every text boundary is switched to UTF-8 first, because the Lean reference
--- uses UTF-8 for all of them whatever the locale:
---
--- * @stdout@: a result echoes author-chosen names, so under a non-UTF-8
---   locale the default encoder would fail on the first non-ASCII identifier.
---   The @\/\/ROUNDTRIP@ variant also writes back a path byte that is not
---   UTF-8, where a strict encoder would stop mid-envelope.
--- * The run-file argument: 'getArgs' has already decoded it with the locale's
---   encoding. It is turned back into its original bytes with that same
---   encoding, which round-trips, and those bytes are decoded as UTF-8. Merely
---   switching encodings afterwards is not enough: under an 8-bit locale such
---   as ISO-8859-1, @café@ would be decoded byte by byte and then looked up as
---   @cafÃ©@.
--- * File paths: a world's @(file PATH)@ or @(lara PATH)@ is decoded text, and
---   GHC encodes a path with the file-system encoding, which is ASCII under
---   @LC_ALL=C@. It is switched to UTF-8, so the run file and its worlds are
---   opened by their UTF-8 bytes.
--- * @.lara@ text: a @(lara PATH)@ world is read as text through the locale
---   encoding by "Lara.Source.Load". That encoding is switched to __strict__
---   UTF-8 — not the @\/\/ROUNDTRIP@ variant the three boundaries above use —
---   so a non-ASCII program elaborates to the same envelope under every locale
---   /and/ program text that is not UTF-8 is a read failure rather than a
---   surrogate-escaped decode. Strictness is the half that matters for the
---   contract: a permissive decoder would accept, as a world, a file
---   @lara check@ refuses to read at all, and because both PW doors would
---   accept it alike the conformance gate could not see the difference. The
---   loader's own read forces the contents inside a @try@, so the failure
---   arrives as the @world-input@ fault carrying the solo door's own
---   \"cannot read\" line.
---
--- The gate reruns its Unicode-name and non-ASCII path cases under @LC_ALL=C@
--- and under an ISO-8859-1 locale, and covers non-UTF-8 program text directly.
---
--- The remaining asymmetry is the solo door's: @lara check@ on a @.lara@ file
--- still reads it through the locale, so under a non-UTF-8 locale it refuses a
--- non-ASCII program these doors accept. Tracked by #334.
+-- Every text boundary was switched to UTF-8 before this ran ('textBoundary'),
+-- which is what lets the Lean reference use UTF-8 for all of them whatever the
+-- locale. That boundary is now the whole CLI's rather than these two doors'
+-- (\#334); the PW gate's locale reruns are still the case that exercises it
+-- against a second implementation.
 pwRun :: FilePath -> IO ()
 pwRun arg = do
-  file <- pwTextBoundary arg
-  result <- runPWFile file
+  result <- runPWFile arg
   case result of
     Right outcome -> putStrLn (printSExpr (encodeOutcome outcome))
     Left err -> pwRefuse err
@@ -446,28 +419,10 @@ pwRun arg = do
 -- it stops. See 'Lara.PW.Run.deriveRunFile'.
 pwInput :: FilePath -> IO ()
 pwInput arg = do
-  file <- pwTextBoundary arg
-  result <- deriveRunFile file
+  result <- deriveRunFile arg
   case result of
     Right doc -> putStrLn (printRun doc)
     Left err -> pwRefuse err
-
--- | Switch every text boundary of a PW door to UTF-8 (see 'pwRun') and return
--- the run-file argument re-decoded as UTF-8.
---
--- Two encodings, deliberately: @\/\/ROUNDTRIP@ where bytes must survive a
--- round trip through 'String' (the echoed output and the path an @open@ takes),
--- and __strict__ 'utf8' for the locale encoding, which is the one
--- "Lara.Source.Load" reads @.lara@ text through — see 'pwRun'.
-pwTextBoundary :: FilePath -> IO FilePath
-pwTextBoundary arg = do
-  utf8Roundtrip <- mkTextEncoding "UTF-8//ROUNDTRIP"
-  hSetEncoding stdout utf8Roundtrip
-  localeFs <- getFileSystemEncoding
-  file <- GHC.Foreign.withCStringLen localeFs arg (GHC.Foreign.peekCStringLen utf8Roundtrip)
-  setFileSystemEncoding utf8Roundtrip
-  setLocaleEncoding utf8
-  pure file
 
 -- | A PW door's refusal: the structured envelope on @stdout@, and the shared
 -- 2-or-1 exit code.
@@ -544,6 +499,73 @@ acceptedReport outcome report = case outcome of
 -- ---------------------------------------------------------------------------
 -- Shared helpers
 -- ---------------------------------------------------------------------------
+
+-- | Switch every text boundary of the CLI to UTF-8, and return the command
+-- line re-decoded as UTF-8.
+--
+-- __Lara source text is UTF-8 by definition__ (#334): a @.lara@ file means one
+-- thing, and what it means does not depend on @LC_ALL@. Nothing below this
+-- line consults the environment's encoding again, so @check@, @deps@,
+-- @map-input@ and the two PW doors all read the same bytes as the same
+-- program. This ran only on the PW doors until #334 ('pwRun'), which is what
+-- left @lara check@ refusing — or, under an 8-bit locale, silently
+-- mis-decoding — a non-ASCII program those doors accepted.
+--
+-- Five boundaries, and __two encodings, deliberately__: @\/\/ROUNDTRIP@ where
+-- bytes must survive a round trip through 'String', and __strict__ 'utf8' for
+-- the one boundary where a permissive decode would change what a file means.
+--
+-- * @stdout@: a verdict, a report and a PW result all echo author-chosen
+--   names, so under a non-UTF-8 locale the default encoder would fail on the
+--   first non-ASCII identifier. The @\/\/ROUNDTRIP@ variant also writes back a
+--   path byte that is not UTF-8, where a strict encoder would stop
+--   mid-envelope.
+-- * @stderr@: the same, for the door that explains itself there.
+--   'Lara.Elaborate.sourceResultAuthorDiagnostics' names the author's own
+--   claim, argument and leaf ids, and 'renderSourceLoadError' names a path, so
+--   once the program is /readable/ under @LC_ALL=C@ its diagnostic must be
+--   /printable/ too — otherwise a rejection that used to be a verdict becomes
+--   an encoding exception. Neither handle can be left to 'setLocaleEncoding'
+--   below: it does not retarget a handle that is already open, and both want
+--   the @\/\/ROUNDTRIP@ variant rather than the strict encoding the locale is
+--   being set to. Setting each explicitly also removes any dependence on
+--   /when/ GHC first forces the handle.
+-- * The command line: 'getArgs' has already decoded it with the locale's
+--   encoding. Each argument is turned back into its original bytes with that
+--   same encoding, which round-trips, and those bytes are decoded as UTF-8.
+--   Merely switching encodings afterwards is not enough: under an 8-bit locale
+--   such as ISO-8859-1, @café@ would be decoded byte by byte and then looked
+--   up as @cafÃ©@.
+-- * File paths: a path this driver reads out of a document — a PW world's
+--   @(file PATH)@ or @(lara PATH)@, a map member, a co-located policy — is
+--   decoded text, and GHC encodes a path with the file-system encoding, which
+--   is ASCII under @LC_ALL=C@. It is switched to UTF-8, so every file is
+--   opened by its UTF-8 bytes.
+-- * @.lara@ and @.laramap@ text: "Lara.Source.Load" reads both through the
+--   locale encoding. That encoding is switched to __strict__ UTF-8 — not the
+--   @\/\/ROUNDTRIP@ variant the four boundaries above use — so a non-ASCII
+--   program elaborates to the same unit under every locale /and/ program text
+--   that is not UTF-8 is a read failure rather than a surrogate-escaped
+--   decode. Strictness is the half that carries meaning: a permissive decoder
+--   would silently accept a file as a program no reader could reproduce. The
+--   loader's own read forces the contents inside a @try@, so the failure
+--   arrives as its ordinary \"cannot read\" boundary line at exit @2@.
+--
+-- The @.sexp@ door is unaffected by the last point and always was: it reads
+-- raw bytes ('readFileBytesEither') and decodes them itself.
+textBoundary :: [String] -> IO [String]
+textBoundary args = do
+  utf8Roundtrip <- mkTextEncoding "UTF-8//ROUNDTRIP"
+  hSetEncoding stdout utf8Roundtrip
+  hSetEncoding stderr utf8Roundtrip
+  localeFs <- getFileSystemEncoding
+  decoded <-
+    mapM
+      (\arg -> GHC.Foreign.withCStringLen localeFs arg (GHC.Foreign.peekCStringLen utf8Roundtrip))
+      args
+  setFileSystemEncoding utf8Roundtrip
+  setLocaleEncoding utf8
+  pure decoded
 
 -- | Where an /accepted/ verdict goes: @stdout@ by default, or the file named by
 -- @lara check … --out \<path\>@.

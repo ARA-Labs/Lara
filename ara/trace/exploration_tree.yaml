@@ -9973,3 +9973,73 @@ tree:
   also_depends_on:
   - N326_327_conformance
   - N327_lara_text_strict_utf8
+- id: N334_cli_text_boundary
+  type: decision
+  title: Lara presentation source is UTF-8 by definition; the text boundary is the
+    whole CLI's, not one door's
+  provenance: ai-executed
+  timestamp: 2026-09-12T05:54+00:00
+  choice: 'Run one textBoundary in main over the whole command line instead of
+    pwTextBoundary in the two PW doors: stdout, stderr, the arguments and the
+    file-system encoding as UTF-8//ROUNDTRIP, the locale encoding — the one
+    Lara.Source.Load reads .lara and .laramap text through — as strict utf8. So
+    check, deps, map-input and both PW doors read one file as one program under
+    every LC_ALL, and program text that is not UTF-8 is a read failure rather than
+    a surrogate-escaped decode. The decision is recorded as a property of the
+    language in docs/lara-surface-grammar.md §1 (source text is UTF-8 by
+    definition, not by environment), not only as a CLI setting.'
+  rationale: 'The converse of N327_lara_text_strict_utf8. Reading .lara through the
+    locale meant one program did not mean one thing: under LC_ALL=C a valid-UTF-8
+    non-ASCII program was refused at the read, and under ISO-8859-1 the same bytes
+    decoded byte by byte into a different unit. The output half was the cost that
+    deferred it, and it is real but smaller than budgeted: the handles are retargeted
+    beside the locale, and //ROUNDTRIP rather than strict is what keeps a path
+    argument that is not UTF-8 printable (see N334_solo_locale_gate).'
+  alternatives:
+  - 'Set the locale encoding only, leaving stdout/stderr as they were: fewer lines,
+    but a diagnostic echoing author-chosen names or a path byte that is not UTF-8
+    then leaves through an encoder that cannot write it, turning a verdict into an
+    encoding exception.'
+  - 'Keep the boundary per-door and document the asymmetry: what #327/#332 did. It
+    leaves one binary disagreeing with itself about the same bytes, which the
+    cross-driver differential cannot see because both PW doors share the boundary.'
+  evidence:
+  - app/Main.hs
+  - test/CliSpec.hs
+  - docs/lara-surface-grammar.md
+  - docs/theory-pw-outer-runtime.md
+  status: resolved
+  also_depends_on:
+  - N327_lara_text_strict_utf8
+- id: N334_solo_locale_gate
+  type: experiment
+  title: The solo door's first locale coverage, and a second bug it found
+  provenance: ai-executed
+  timestamp: 2026-09-12T05:54+00:00
+  result: 'Five cases in test/CliSpec.hs, each run under LC_ALL=C and under the
+    suite''s own locale and compared to each other as well as to pinned bytes:
+    accept (a non-ASCII policy constant leaving through stdout inside the verdict''s
+    status atom), rejection diagnostics (a non-ASCII leaf id leaving through stderr
+    three times, exit 1), the deps report, non-UTF-8 program text (exit 2 pinned to
+    the read, not the parse), and a non-UTF-8 path argument. Measured before and
+    after on the same fixtures: before, LC_ALL=C lara check on a non-ASCII program
+    printed nothing and exited 2 with "cannot decode byte sequence starting from
+    226"; after, both locales print the same verdict bytes. The path case found a
+    second, pre-existing bug under every locale — a path argument carrying byte 0xFF
+    died inside stderr''s encoder (exit 1, a GHC encoding exception, no boundary
+    line) and now exits 2 with the byte echoed back. Two harness facts recorded at
+    the site: readProcessWithExitCode decodes the child''s pipes with the suite''s
+    own locale, so the helper had to set an environment and decode UTF-8 itself, and
+    GHC''s process silently drops a lone surrogate from argv, so the bad path byte is
+    spelled by sh. Gates: cabal test all PASS; make pw-conformance 7 fixtures / 99
+    cases / 112 runs plus 1 .lara fixture / 17 source cases / 21 runs with the
+    ISO-8859-1 locale built and no reruns skipped; make map-conformance pass=4
+    pre-boundary=3 fail=0; ara-source-spans PASS (66); ara-session-index PASS (79).'
+  evidence:
+  - test/CliSpec.hs
+  - app/Main.hs
+  - scripts/check-pw-conformance.py
+  status: resolved
+  also_depends_on:
+  - N334_cli_text_boundary
+  - N322_review_divergence

@@ -2,15 +2,18 @@ session:
   id: 2026-09-12_001
   date: '2026-09-12'
   started: 2026-09-12T01:38+00:00
-  last_turn: 2026-09-12T04:20+00:00
-  turn_count: 2
+  last_turn: 2026-09-12T05:54+00:00
+  turn_count: 3
   summary: '#326 and #327 addressed together in one PR: a PW world with agreeing
     duplicate-report groups is checked as declared (Lean: empty quarantine is the
     identity, addWorld_checks_declared), a conflicting group is refused by name; .lara
     world sources are elaborated by lara pw and reach the Lean reference through the
     lara pw-input derivation door. Gate at 7 fixtures / 99 cases / 112 runs plus the
     .lara family at 1 fixture / 16 cases / 20 runs, raised to 17 / 21 in turn 2 by
-    the review fix below.'
+    the review fix below. Turn 3 settled #334, the asymmetry turn 2 deferred: the
+    text boundary became the whole CLI''s, so check, deps, map-input and both PW
+    doors read one .lara file as one program under every locale, and the solo door
+    got its first locale gate (five cases, each rerun under LC_ALL=C).'
 events_logged:
 - turn: 1
   type: decision
@@ -72,6 +75,39 @@ events_logged:
   provenance: ai-suggested
   summary: A frontend-only source form joins a two-runtime differential through a
     derivation door that prints the frontend-free document. Not promoted.
+- turn: 3
+  type: decision
+  id: N334_cli_text_boundary
+  routing: direct
+  provenance: ai-executed
+  summary: Lara presentation source is UTF-8 by definition, not by environment; one
+    textBoundary in main replaces the PW doors' pwTextBoundary, covering stdout,
+    stderr, argv, the file-system encoding (//ROUNDTRIP) and the locale encoding
+    (strict utf8)
+- turn: 3
+  type: experiment
+  id: N334_solo_locale_gate
+  routing: direct
+  provenance: ai-executed
+  summary: Five locale cases for the solo door in test/CliSpec.hs (accept, rejection
+    diagnostics, deps, non-UTF-8 program text, non-UTF-8 path argument), each rerun
+    under LC_ALL=C; found and fixed a second, pre-existing crash on a path argument
+    that is not UTF-8; cabal test all, pw-conformance (ISO-8859-1 built, nothing
+    skipped), map-conformance and both ARA gates pass
+- turn: 3
+  type: observation
+  id: O176
+  routing: staged
+  provenance: ai-suggested
+  summary: A text boundary belongs to the process, not the door; its output half is
+    retargeted with it. Not promoted.
+- turn: 3
+  type: observation
+  id: O177
+  routing: staged
+  provenance: ai-suggested
+  summary: A locale gate must decode the child's streams itself, or it tests the
+    suite's environment. Not promoted.
 ai_actions:
 - turn: 1
   action: 'Branched feat/pw-groups-and-lara-sources from main 28cae19. Lean: Groups
@@ -130,6 +166,27 @@ ai_actions:
   - docs/theory-pw-outer-runtime.md
   - ara/evidence/proofs/pw_groups_lara_sources_326_327.md
   - ara/evidence/README.md
+- turn: 3
+  action: 'Branched fix/cli-utf8-text-boundary from main 3fcdbc2 and opened PR #342
+    for #334. app/Main.hs: pwTextBoundary becomes textBoundary, called once in main
+    over getArgs, additionally retargeting stderr; pwRun/pwInput lose their own call.
+    test/CliSpec.hs: runLaraIn / runCapturingUtf8 (child environment + UTF-8 pipe
+    decoding), cLocale, writeUtf8File / writeLatin1File, withTempLaraDir fixtures
+    written as UTF-8, unicodeProgram / unicodePolicy (a non-ASCII policy constant, a
+    non-ASCII leaf id and an em dash in a string, with the result cell parameterized
+    so one spelling gives both an accept and a rejection), and five locale
+    properties. docs/lara-surface-grammar.md §1 states the UTF-8 source contract;
+    docs/theory-pw-outer-runtime.md replaces the deferred-asymmetry paragraph;
+    src/Lara/PW/Run.hs and scripts/check-pw-conformance.py follow the rename and the
+    split of coverage.'
+  provenance: ai-executed
+  files_changed:
+  - app/Main.hs
+  - test/CliSpec.hs
+  - src/Lara/PW/Run.hs
+  - scripts/check-pw-conformance.py
+  - docs/lara-surface-grammar.md
+  - docs/theory-pw-outer-runtime.md
 claims_touched: []
 logic_revisions: []
 key_context:
@@ -139,17 +196,24 @@ key_context:
 - turn: 2
   excerpt: 'User: /receiving-code-review addrss all, push and reply, stop the loop
     after the pr is approved.'
+- turn: 3
+  excerpt: 'User: can we fix https://github.com/ARA-Labs/lara/issues/334? — the issue
+    already stated the work (one locale encoding for the whole CLI, plus the output
+    side) and its cost (no corpus regeneration, no freeze-tag bump, a new gate axis
+    on a door with no locale coverage); the implementation shape was the agent''s.'
 open_threads:
 - 'PR #332 for #326/#327 on feat/pw-groups-and-lara-sources: two review rounds
   addressed, awaiting approval and merge.'
 - '#331 tracks the Haskell-only nesting bound in the shared reader.'
-- 'The lara pw doors read .lara text as strict UTF-8, so a non-UTF-8 program is a
-  world-input read failure as it is for lara check; lara check on .lara still reads
-  through the locale, so under a non-UTF-8 locale it refuses a non-ASCII program the
-  PW doors accept. Decision recorded in docs/theory-pw-outer-runtime.md §2; the
-  remaining solo-door work is tracked by #334.'
+- 'PR #342 for #334 on fix/cli-utf8-text-boundary: awaiting review. It closes the
+  asymmetry this session opened — every door now reads .lara text as strict UTF-8
+  under every locale, and the decision is recorded as a language property in
+  docs/lara-surface-grammar.md §1.'
 ai_suggestions_pending:
-- O169, O172, O173 remain staged; unendorsed.
+- O169, O172, O173 remain staged; unendorsed. O173 gained its third instance in
+  turn 3 (the argv and echoed-path boundaries again failed separately from the read
+  boundary) but the PR is unmerged and unendorsed, so it stays staged.
 - O174 staged; the identity-of-empty-edit reading is one project, ai-suggested.
 - O175 staged; the derivation-door pattern is now used twice (map-input, pw-input)
   but has no user endorsement.
+- O176, O177 staged from turn 3; both ai-suggested, neither endorsed.

@@ -135,13 +135,13 @@ from the other `lara` doors, which report failures on stderr. The output
 protocol here is structured, and the Lean reference must be able to print the
 same bytes.
 
-**The text boundary is UTF-8, and program text strictly so.** `pwTextBoundary`
-switches four boundaries before anything is read: stdout, the run-file argument,
-the file-system encoding, and the locale encoding, which is the one
-`Lara.Source.Load` reads `.lara` text through. The first three use
+**The text boundary is UTF-8, and program text strictly so.** `textBoundary`
+switches five boundaries before anything is read: stdout, stderr, the command
+line, the file-system encoding, and the locale encoding, which is the one
+`Lara.Source.Load` reads `.lara` text through. The first four use
 `UTF-8//ROUNDTRIP`, because bytes that are not UTF-8 must survive a round trip
 through `String` — a path has to be handed back to `open` as the bytes it came
-in as, and an echoed path must not stop the encoder mid-envelope. Program text
+in as, and an echoed path must not stop the encoder mid-message. Program text
 is the opposite case and uses **strict** UTF-8: a permissive decoder would turn
 a stray byte into a surrogate escape and elaborate a world from a file
 `lara check` refuses to read at all, which is precisely what §1's contract
@@ -149,14 +149,19 @@ forbids. Because both PW doors share the boundary, they would agree with each
 other while both disagreeing with the solo door, so only a direct gate case —
 not the cross-driver comparison — can see this; the gate has one.
 
-The asymmetry that remains runs the other way and is **not** fixed here:
-`lara check` on a `.lara` file still reads it through the locale, so under
-`LC_ALL=C` or ISO-8859-1 it refuses (or, on an 8-bit locale, mis-decodes) a
-non-ASCII program the PW doors read as UTF-8. Settling it means making the whole
-CLI locale-independent, whose real cost is on the *output* side — the solo
-door's diagnostics echo author-chosen names to a stderr handle GHC opened with
-the startup locale — and new locale coverage for a door that has none. Tracked
-by #334.
+**The boundary is the whole CLI's, not these two doors'** (#334). It began here,
+which left `lara check` reading `.lara` text through the locale: under
+`LC_ALL=C` it refused a non-ASCII program these doors accepted, and under an
+8-bit locale it decoded the same bytes into a *different* unit. Since #334
+`textBoundary` runs once in `main`, so `check`, `deps`, `map-input` and both PW
+doors read one file as one program under every `LC_ALL`. The output half came
+with it: once the program is readable under `LC_ALL=C`, the diagnostics that
+echo author-chosen names have to be printable too, so stderr is retargeted
+beside stdout. The solo door's own locale coverage lives in `test/CliSpec.hs`
+(accept, rejection diagnostics, `deps`, non-UTF-8 program text, and a non-UTF-8
+path argument, each rerun under the POSIX locale); the ISO-8859-1 half of the
+matrix stays here, where a locale is built with `localedef`, and now exercises
+the same shared function.
 
 Primitive `box` and `dia` evaluate their operands as written, in the target
 context; they never translate them. A comparison is the separate

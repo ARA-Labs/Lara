@@ -1620,3 +1620,24 @@ entries:
     the local driver and are unchanged by a reader that refuses conflicting groups.'
   - 'Timestamps use UTC because the shell clock reports +00:00; earlier sessions were
     recorded in -07:00.'
+- turn: 2026-09-12_001#3
+  notes:
+  - 'Routed N334_cli_text_boundary as a decision, ai-executed rather than ai-suggested:
+    the issue body already fixed the design (one locale encoding for the whole CLI plus
+    the output side) and the user asked for it by number; only the shape — one
+    textBoundary over the whole command line, stderr retargeted beside stdout — was the
+    agent''s.'
+  - 'N334_solo_locale_gate is one experiment node covering both the new CliSpec cases and
+    the gate reruns. The second bug it found (a path argument that is not UTF-8 crashed
+    inside stderr''s encoder under every locale) is recorded inside it, the way turn 1
+    recorded the anchor-manifest gap: a defect found in passing, not a hypothesis.'
+  - 'Staged O176 (a text boundary belongs to the process, not the door) and O177 (a locale
+    gate must decode the child''s streams itself) as heuristics, ai-suggested.'
+  - 'O173 near-miss, third instance: this turn separated the read boundary from the argv
+    and echoed-path boundaries again, and again each failed on its own. Still unmerged and
+    unendorsed, so left staged — consistent with turn 2''s call.'
+  - 'No Stage 4 edit: no logic/ entry states anything about source encoding or the CLI
+    text boundary (grep of claims.md for locale/UTF-8/encoding hits only the wire-reader
+    performance claim C-entry, whose Conditions argument about ASCII delimiters is
+    unaffected).'
+  - 'O169/O172 still under 3 session-days idle counting from 2026-09-11; no stale flags.'

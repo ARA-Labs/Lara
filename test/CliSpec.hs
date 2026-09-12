@@ -12,7 +12,7 @@
 -- relative paths resolve — the same assumption "DifferentialSpec" relies on.
 module CliSpec (cliSpecProps) where
 
-import Control.Exception (bracket)
+import Control.Exception (bracket, evaluate)
 import Data.List (isInfixOf, isPrefixOf)
 import System.Directory
   ( createDirectoryIfMissing
@@ -20,10 +20,29 @@ import System.Directory
   , removeDirectoryRecursive
   , removeFile
   )
+import System.Environment (getEnvironment)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
-import System.IO (hClose, hPutStr, openTempFile)
-import System.Process (readProcessWithExitCode)
+import System.IO
+  ( IOMode (WriteMode)
+  , hClose
+  , hGetContents
+  , hPutStr
+  , hSetEncoding
+  , latin1
+  , mkTextEncoding
+  , openTempFile
+  , utf8
+  , withFile
+  )
+import System.Process
+  ( CreateProcess (env, std_err, std_in, std_out)
+  , StdStream (CreatePipe)
+  , createProcess
+  , proc
+  , readProcessWithExitCode
+  , waitForProcess
+  )
 import Test.QuickCheck
 import Lara.Replay (inputReplayId)
 import Lara.Wire (decodeCheckInputFile, encodeReplayId, printSExpr)
@@ -35,6 +54,80 @@ laraBin = "lara"
 
 runLara :: [String] -> IO (ExitCode, String, String)
 runLara args = readProcessWithExitCode laraBin args ""
+
+-- | Run the binary with @overrides@ applied to the ambient environment,
+-- reading both captured streams as UTF-8 whatever locale the /test/ process
+-- itself runs under.
+--
+-- 'runLara' can do neither half. 'readProcessWithExitCode' offers no way to
+-- set the child's environment, and it decodes the pipes with the test
+-- process's own locale encoding — so a suite run under @LC_ALL=C@ would fail
+-- to read a child that correctly printed a non-ASCII name, which is precisely
+-- the run the #334 cases exist to make.
+runLaraIn :: [(String, String)] -> [String] -> IO (ExitCode, String, String)
+runLaraIn overrides args = runCapturingUtf8 overrides (proc laraBin args)
+
+-- | Spawn @spawn@ with @overrides@ applied to the ambient environment and read
+-- its two output streams as UTF-8. The shared half of 'runLaraIn'; separate
+-- because 'prop_cliLaraNonUtf8Path' cannot spell its argument in @argv@ and
+-- goes through a shell instead.
+--
+-- @UTF-8\/\/ROUNDTRIP@ is the encoding the product gives its own
+-- @stdout@\/@stderr@ (@textBoundary@ in @app\/Main.hs@), so a byte the child
+-- wrote that is not UTF-8 arrives here as the surrogate it went out as instead
+-- of stopping the decoder.
+--
+-- The two streams are drained one after the other, which is safe only because
+-- every output asserted here is a few hundred bytes: nothing can fill a pipe
+-- buffer while the other stream waits.
+runCapturingUtf8
+  :: [(String, String)] -> CreateProcess -> IO (ExitCode, String, String)
+runCapturingUtf8 overrides spawn = do
+  ambient <- getEnvironment
+  utf8Roundtrip <- mkTextEncoding "UTF-8//ROUNDTRIP"
+  let childEnv =
+        [kv | kv@(name, _) <- ambient, name `notElem` map fst overrides] ++ overrides
+      piped =
+        spawn
+          { env = Just childEnv
+          , std_in = CreatePipe
+          , std_out = CreatePipe
+          , std_err = CreatePipe
+          }
+      drain h = do
+        hSetEncoding h utf8Roundtrip
+        contents <- hGetContents h
+        _ <- evaluate (length contents)
+        pure contents
+  handles <- createProcess piped
+  case handles of
+    (Just hin, Just hout, Just herr, process) -> do
+      hClose hin
+      out <- drain hout
+      err <- drain herr
+      code <- waitForProcess process
+      pure (code, out, err)
+    _ -> error "runCapturingUtf8: createProcess withheld one of the three pipes it was asked for"
+
+-- | The POSIX locale, whose encoding is ASCII. It is the one locale present on
+-- every machine, and the one under which a non-ASCII @.lara@ file used to be
+-- unreadable to @lara check@ (#334).
+cLocale :: [(String, String)]
+cLocale = [("LC_ALL", "C"), ("LC_CTYPE", "C"), ("LANG", "C")]
+
+-- | Write a fixture as UTF-8 bytes, not as whatever the test process's locale
+-- encoding happens to be. The product reads @.lara@ text as UTF-8 under every
+-- locale, so a fixture written any other way would be testing the suite's
+-- environment rather than the driver.
+writeUtf8File :: FilePath -> String -> IO ()
+writeUtf8File path contents =
+  withFile path WriteMode $ \h -> hSetEncoding h utf8 >> hPutStr h contents
+
+-- | Write a fixture as ISO-8859-1 bytes: the same characters, in an encoding
+-- that is __not__ UTF-8 for anything above U+007F.
+writeLatin1File :: FilePath -> String -> IO ()
+writeLatin1File path contents =
+  withFile path WriteMode $ \h -> hSetEncoding h latin1 >> hPutStr h contents
 
 fixtureReplayText :: FilePath -> IO String
 fixtureReplayText path = do
@@ -74,8 +167,8 @@ withTempLaraDir art siblings k = do
         removeFile dirFile
         let dir = dirFile ++ ".d"
         createDirectoryIfMissing True dir
-        writeFile (dir </> "art.lara") art
-        mapM_ (\(nm, c) -> writeFile (dir </> nm) c) siblings
+        writeUtf8File (dir </> "art.lara") art
+        mapM_ (\(nm, c) -> writeUtf8File (dir </> nm) c) siblings
         pure dir
     )
     removeDirectoryRecursive
@@ -407,6 +500,284 @@ ltTiePolicy =
     , "  certifiers = [ (ord@1, sha256:t0) ]"
     , "theory sha256:t0 = []"
     ]
+
+-- ---------------------------------------------------------------------------
+-- The text boundary: one program means one thing under every locale (#334)
+-- ---------------------------------------------------------------------------
+
+-- | 'cmpTieProgram' with three names respelled outside ASCII and the result
+-- cell's value left open, so one spelling gives both an accepting and a
+-- rejecting run.
+--
+-- Each non-ASCII name is placed where a different encoder has to survive it:
+--
+--   * @sysω_new@ is a policy constant, so it reaches __stdout__ inside the
+--     accepted verdict's status atom;
+--   * @ëω2@ is a leaf id, so it reaches __stderr__ inside the surface-context
+--     line and the slot mapping of a rejection;
+--   * the em dash in @c1@'s @nl@ is inside a string literal, which is the
+--     lexer's other non-ASCII position.
+--
+-- @0.74@ accepts (@num_lt(0.71, 0.74)@ replays true); @0.71@ is
+-- 'ltTieProgram'\'s tie and makes the generated certificate replay false.
+unicodeProgram :: String -> String
+unicodeProgram resultScore =
+  unlines
+    [ "artifact ord_tie_demo at sha256:5353535353535353535353535353535353535353535353535353535353535353"
+    , "policy p"
+    , "use backends [ord@1]"
+    , "claim c1"
+    , "  nl      = \"sysω_new is at least as good as sys_base — ImageNet-val accuracy\""
+    , "  formal  = at_least_as_good(sysω_new, sys_base, accuracy, imagenet_val)"
+    , "  binding = { author = alice, audit-status = reviewed }"
+    , "leaf e1 : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))"
+    , "  kind       = observed"
+    , "  provenance = ai-executed"
+    , "  refs       = [evidence/tables/accuracy.md#row=sys_base]"
+    , "leaf ëω2 : reports(exp1, score_cell(sysω_new, accuracy, imagenet_val, " ++ resultScore ++ "))"
+    , "  kind       = observed"
+    , "  provenance = ai-executed"
+    , "  refs       = [evidence/tables/accuracy.md#row=sys_new]"
+    , "leaf e3 : comparison_setup(sysω_new, sys_base, accuracy, imagenet_val, "
+        ++ resultScore
+        ++ ", 0.71)"
+    , "  kind       = attested"
+    , "  provenance = user"
+    , "  refs       = [evidence/tables/accuracy.md#caption]"
+    , "comparison : at_least_as_good(sysω_new, sys_base) on accuracy @ imagenet_val"
+    , "  relation = at-least-as-good"
+    , "  recheck  = a1"
+    , "  bridge   = a2"
+    , "  result   = ëω2"
+    , "  baseline = e1"
+    , "  binding  = e3"
+    , "  claims c2"
+    , "    nl      = \"The reported baseline accuracy {cell e1} is at most the reported system accuracy {cell ëω2}\""
+    , "    binding = { author = alice, audit-status = reviewed }"
+    , "  supports c1"
+    , "status c1"
+    ]
+
+-- | 'cmpTiePolicy' with the one constant the program respells.
+unicodePolicy :: String
+unicodePolicy =
+  unlines
+    [ "policy p"
+    , "sort System, Measurand, Dataset, Experiment, Cell"
+    , "con sysω_new : System"
+    , "con sys_base : System"
+    , "con accuracy : Measurand"
+    , "con imagenet_val : Dataset"
+    , "con exp1 : Experiment"
+    , "con score_cell(System, Measurand, Dataset, Num) : Cell"
+    , "pred reports(Experiment, Cell)"
+    , "pred num_lt(Num, Num)"
+    , "pred at_least_as_good(System, System, Measurand, Dataset)"
+    , "pred comparison_setup(System, System, Measurand, Dataset, Num, Num)"
+    , "rule tie_recheck(S, B, Q, D, Exp, Sv, Bv)"
+    , "  mode       = strict"
+    , "  premises   = [ reports(Exp, score_cell(B, Q, D, Bv)),"
+    , "                 reports(Exp, score_cell(S, Q, D, Sv)) ]"
+    , "  conclusion = num_lt(Bv, Sv)"
+    , "  allow-trusted = false"
+    , "  certifiers = [ (ord@1, sha256:t0) ]"
+    , "theory sha256:t0 = []"
+    , "rule no_worse(S, B, Q, D, Sv, Bv)"
+    , "  mode       = defeasible"
+    , "  premises   = [ cmp:     num_lt(Bv, Sv),"
+    , "                 binding: comparison_setup(S, B, Q, D, Sv, Bv) ]"
+    , "  conclusion = at_least_as_good(S, B, Q, D)"
+    , "measurand accuracy : Num where higher-is-better"
+    , "comparison-scheme at-least-as-good higher-is-better"
+    , "  recheck = tie_recheck"
+    , "  bridge  = no_worse"
+    ]
+
+-- | The replay id 'unicodeProgram' and 'unicodePolicy' produce, which is the
+-- same for the accepting and the rejecting spelling: the artifact digest, the
+-- policy id, the backend and the theory are all fixed by the two files, and
+-- none of them moves with a cell value.
+unicodeReplayId :: String
+unicodeReplayId =
+  "(replay-id (core lara-core@0.2) (policy p) (backends (backend ord 1))"
+    ++ " (theories sha256:t0)"
+    ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
+
+-- | @lara check@ on a non-ASCII @.lara@ program: the same accepted verdict
+-- bytes under the POSIX locale as under the suite's own (#334).
+--
+-- This is the direction the PW doors were given in \#327\/\#332 and the solo
+-- door was not. Before 'textBoundary' covered the whole CLI, this run under
+-- @LC_ALL=C@ printed nothing and exited @2@ with a
+-- @cannot decode byte sequence@ read failure — a program that /means/
+-- something under one locale and is unreadable under another.
+--
+-- Both halves of the boundary are exercised at once: the __read__, because the
+-- program is not ASCII, and the __write__, because @sysω_new@ is carried into
+-- the verdict's status atom and so has to leave through @stdout@'s encoder.
+-- The two runs are compared to each other as well as to the pinned bytes,
+-- which is the property the pinned bytes exist to make checkable: locale
+-- independence is an equality between runs, not a fact about one run.
+--
+-- The pinned bytes also show the wire printer quoting @"sysω_new"@ where
+-- @sys_base@ needs no quotes: a symbol outside the bare-ident shape is quoted,
+-- whatever the locale, and that spelling is what a second reader parses back.
+prop_cliLaraLocaleAccept :: Property
+prop_cliLaraLocaleAccept = once $ ioProperty $
+  withTempLaraDir (unicodeProgram "0.74") [("p.policy.lara", unicodePolicy)] $ \path -> do
+    ambient <- runLaraIn [] ["check", path]
+    posix <- runLaraIn cLocale ["check", path]
+    let expected =
+          ( ExitSuccess
+          , "(verdict " ++ unicodeReplayId ++ " accept (labels (0 in) (1 in)) (edges)"
+              ++ " (statuses (status (atom at_least_as_good (con \"sysω_new\") (con sys_base)"
+              ++ " (con accuracy) (con imagenet_val)) justified)))\n"
+          , ""
+          )
+    pure $
+      conjoin
+        [ counterexample "exit code, stdout and stderr under LC_ALL=C" (posix === expected)
+        , counterexample "the suite's own locale agrees" (ambient === expected)
+        ]
+
+-- | The rejecting spelling of the same program: the diagnostics that echo the
+-- author's own non-ASCII names must be __printable__ under the POSIX locale,
+-- not merely producible (#334).
+--
+-- This is the consequence the fix has to carry. Making the program readable
+-- under @LC_ALL=C@ moves the risk downstream: @checkLara@ echoes
+-- 'Lara.Elaborate.sourceResultAuthorDiagnostics' to @stderr@, and a handle
+-- left encoding ASCII would turn this rejection into an encoding exception
+-- instead of a verdict. @textBoundary@ retargets @stderr@ beside @stdout@ for
+-- that reason, and this case is what holds it there. Three separate lines
+-- carry @ëω2@ — the surface-context line, and the slot mapping under the
+-- kernel line — and the exit code is still the ordinary @1@.
+prop_cliLaraLocaleRejectDiagnostics :: Property
+prop_cliLaraLocaleRejectDiagnostics = once $ ioProperty $
+  withTempLaraDir (unicodeProgram "0.71") [("p.policy.lara", unicodePolicy)] $ \path -> do
+    ambient <- runLaraIn [] ["check", path]
+    posix <- runLaraIn cLocale ["check", path]
+    let expected =
+          ( ExitFailure 1
+          , "(verdict " ++ unicodeReplayId ++ " reject R13)\n"
+          , "lara: comparison claiming 'c2': argument 'a1' was generated by that block \
+            \from result = 'ëω2', baseline = 'e1', on 'accuracy'\n\
+            \certificate replay: ord@1 (theory sha256:t0) rejected the certificate: \
+            \the claimed comparison does not hold: 0.71 < 0.71 is false\n\
+            \  slot 0 = leaf e1\n\
+            \  slot 1 = leaf ëω2\n"
+          )
+    pure $
+      conjoin
+        [ counterexample "exit code, stdout and stderr under LC_ALL=C" (posix === expected)
+        , counterexample "the suite's own locale agrees" (ambient === expected)
+        ]
+
+-- | @lara deps@ reads through the same seam, so it gets the same boundary: the
+-- report names the resolved atoms, and one of the constants in them is not
+-- ASCII (#334).
+prop_cliDepsLocaleAccept :: Property
+prop_cliDepsLocaleAccept = once $ ioProperty $
+  withTempLaraDir (unicodeProgram "0.74") [("p.policy.lara", unicodePolicy)] $ \path -> do
+    ambient <- runLaraIn [] ["deps", path]
+    posix <- runLaraIn cLocale ["deps", path]
+    let cell sys score =
+          "(atom \"reports\" (con \"exp1\") (con \"score_cell\" (con \"" ++ sys
+            ++ "\") (con \"accuracy\") (con \"imagenet_val\") (num \"" ++ score ++ "\")))"
+        argBlock name =
+          "argument " ++ name ++ "\n"
+            ++ "  premise 0 " ++ cell "sys_base" "0.71" ++ "\n"
+            ++ "  premise 1 " ++ cell "sysω_new" "0.74" ++ "\n"
+        expected = (ExitSuccess, argBlock "a1" ++ argBlock "a2", "")
+    pure $
+      conjoin
+        [ counterexample "exit code, stdout and stderr under LC_ALL=C" (posix === expected)
+        , counterexample "the suite's own locale agrees" (ambient === expected)
+        ]
+
+-- | 'minimalProgram' with one non-ASCII character in a comment — text that
+-- would parse, in a file whose bytes are ISO-8859-1 rather than UTF-8.
+nonUtf8Program :: String
+nonUtf8Program = "# une note résumée\n" ++ minimalProgram
+
+-- | Program text that is not UTF-8 is a __read failure__ under every locale,
+-- not a decode that happens to differ (#334).
+--
+-- This is the half strictness buys, and it is why the locale encoding is set
+-- to plain 'utf8' rather than the @\/\/ROUNDTRIP@ variant the output handles
+-- get. Under ISO-8859-1 these bytes used to decode, byte by byte, into a
+-- /different/ program than the same file names under a UTF-8 locale; under a
+-- permissive UTF-8 decoder they would decode into surrogate escapes no second
+-- reader could reproduce. Both are worse than refusing the file.
+--
+-- The message is pinned to the __read__ rather than the parse: the file's one
+-- declaration would parse, and its policy file exists, so an exit @2@ alone
+-- would not say that the bytes are what was refused.
+prop_cliLaraNonUtf8Program :: Property
+prop_cliLaraNonUtf8Program = once $ ioProperty $
+  withTempLaraDir minimalProgram [("nopolicy.policy.lara", "policy nopolicy\n")] $ \path -> do
+    writeLatin1File path nonUtf8Program
+    ambient <- runLaraIn [] ["check", path]
+    posix <- runLaraIn cLocale ["check", path]
+    let refusal (code, out, err) =
+          conjoin
+            [ counterexample "exit code" (code === ExitFailure 2)
+            , counterexample "stdout empty" (out === "")
+            , counterexample "stderr names the read" $
+                counterexample err ("lara: cannot read " `isPrefixOf` err)
+            , counterexample "stderr names the undecodable byte" $
+                counterexample err ("cannot decode byte sequence" `isInfixOf` err)
+            ]
+    pure $
+      conjoin
+        [ counterexample "under LC_ALL=C" (refusal posix)
+        , counterexample "under the suite's own locale" (refusal ambient)
+        , counterexample "the two locales agree" (posix === ambient)
+        ]
+
+-- | A path argument that is not UTF-8 reaches the boundary line rather than
+-- the encoder (#334).
+--
+-- This is why @stdout@ and @stderr@ are set @\/\/ROUNDTRIP@ rather than
+-- strict UTF-8. The argument is decoded @\/\/ROUNDTRIP@ too, so the stray
+-- byte becomes a lone surrogate, travels back through @openFile@ as the byte
+-- it was, and leaves through @stderr@ unchanged inside the driver's own
+-- exit-@2@ refusal. Before #334 the same run died inside @stderr@'s encoder —
+-- exit @1@ and a GHC encoding exception where the boundary line should have
+-- been — because the argument had been decoded into a surrogate that the
+-- handle's strict encoder could not write.
+--
+-- __The byte is spelled by a shell, not by this process.__ GHC's @process@
+-- marshals @argv@ with an encoder that silently drops a lone surrogate
+-- (@"x\xDCFFy"@ arrives as @"xy"@), so a test that built the path here would
+-- be exercising its own harness rather than the driver. @sh@ receives an
+-- all-ASCII command and two ordinary arguments and appends the byte itself.
+prop_cliLaraNonUtf8Path :: Property
+prop_cliLaraNonUtf8Path = once $ ioProperty $
+  withTempLaraDir minimalProgram [] $ \path -> do
+    let spawn =
+          proc
+            "/bin/sh"
+            [ "-c"
+            , "exec \"$0\" check \"$1$(printf '\\377').lara\""
+            , laraBin
+            , path
+            ]
+    ambient <- runCapturingUtf8 [] spawn
+    posix <- runCapturingUtf8 cLocale spawn
+    let refusal (code, out, err) =
+          conjoin
+            [ counterexample "exit code" (code === ExitFailure 2)
+            , counterexample "stdout empty" (out === "")
+            , counterexample "stderr echoes the byte back" $
+                counterexample (show err) ("\xDCFF.lara" `isInfixOf` err)
+            ]
+    pure $
+      conjoin
+        [ counterexample "under LC_ALL=C" (refusal posix)
+        , counterexample "under the suite's own locale" (refusal ambient)
+        , counterexample "the two locales agree" (posix === ambient)
+        ]
 
 -- | codec error (a well-formed file with malformed wire text): exit 2, nothing
 -- on stdout (the located message goes to stderr).
@@ -1209,4 +1580,11 @@ cliSpecProps =
   , ("cli deps lists an argument citing nothing (#204)", quickCheckResult prop_cliDepsAcceptEmpty)
   , ("cli deps rejection exit 1, no report (#204)", quickCheckResult prop_cliDepsReject)
   , ("cli deps codec error exit 2 (#204)", quickCheckResult prop_cliDepsCodecError)
+  , ("cli .lara accept is locale-independent (#334)", quickCheckResult prop_cliLaraLocaleAccept)
+  , ( "cli .lara rejection diagnostics are locale-independent (#334)"
+    , quickCheckResult prop_cliLaraLocaleRejectDiagnostics
+    )
+  , ("cli deps report is locale-independent (#334)", quickCheckResult prop_cliDepsLocaleAccept)
+  , ("cli .lara non-UTF-8 program text exit 2 (#334)", quickCheckResult prop_cliLaraNonUtf8Program)
+  , ("cli .lara non-UTF-8 path argument exit 2 (#334)", quickCheckResult prop_cliLaraNonUtf8Path)
   ]

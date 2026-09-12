@@ -112,6 +112,24 @@ otherwise disjoint.
 
 ## 1. Lexical grammar (tokenizer)
 
+**Source text is UTF-8, by definition and not by environment** (#334). A `.lara`
+or `.policy.lara` file is a sequence of UTF-8 bytes; the character stream the
+rules below run over is that byte sequence decoded as UTF-8, and bytes that are
+not valid UTF-8 are not a program. Nothing about what a file means depends on
+`LC_ALL`, `LANG`, or any other property of the machine reading it — two readers
+that disagreed on the encoding would disagree about which identifiers a file
+declares, and a symbol's identity is already its UTF-8 bytes downstream:
+`Lara.Strict.ND.encodeAtomKey` frames every predicate and function symbol by
+its UTF-8 byte length, which is the key the backend and the Lean adapter share.
+The `lara` CLI implements this by setting its own encodings once, before it
+reads anything (`textBoundary` in `app/Main.hs`); a file that is not UTF-8 is
+refused at the read, with the same exit-2 boundary line an unreadable file gets.
+
+This says nothing about which *characters* an identifier may contain — that is
+§1.3's `letter`, which is Unicode-wide — and nothing about normalization:
+nothing here applies a Unicode normal form, so two spellings of a name that
+differ only by normalization are two different names.
+
 The lexer runs in two modes. **Normal mode** is the default. **Ref-list mode** is
 entered between `[` and `]` of a `refs = [ … ]` field and nowhere else (§1.3); it
 exists solely to make `#` literal inside a source reference.

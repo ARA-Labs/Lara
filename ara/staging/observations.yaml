@@ -3831,3 +3831,46 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O176
+  timestamp: 2026-09-12T05:54+00:00
+  provenance: ai-suggested
+  content: A text boundary belongs to the process, not to the door. When two entry
+    points of one binary read the same file type, setting encodings per entry point
+    makes the binary disagree with itself about the same bytes, and a cross-driver
+    differential cannot see it because the doors that share the setting agree. The
+    boundary is set once before anything is read, and its output half — every handle
+    that will echo names or paths decoded there — is retargeted with it, or the fix
+    converts a read failure into an encoder failure one step later.
+  context: '#334: pwTextBoundary (#327/#332) covered the PW doors only, so lara check
+    refused under LC_ALL=C a non-ASCII program lara pw accepted. Moving it to main
+    settled both directions and exposed a pre-existing stderr-encoder crash on a
+    non-UTF-8 path argument. Second boundary-shaped bug on this project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N334_cli_text_boundary
+  - N334_solo_locale_gate
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O177
+  timestamp: 2026-09-12T05:54+00:00
+  provenance: ai-suggested
+  content: A gate that reruns a child process under a second locale must decode the
+    child's streams itself; a harness that captures output through its own locale
+    tests the environment the suite runs in rather than the binary. The same applies
+    to the fixtures it writes and to any byte the case needs in argv, which the
+    runtime's own process spawner may not be able to carry.
+  context: '#334: readProcessWithExitCode offers no environment and decodes pipes
+    with the test process''s locale; GHC''s process drops a lone surrogate from argv,
+    so the non-UTF-8 path byte had to be spelled by sh. Discovered while giving the
+    solo door its first locale coverage. One project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N334_solo_locale_gate
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

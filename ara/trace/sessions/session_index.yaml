@@ -684,8 +684,10 @@ sessions:
     #326 and #327 in one PR: agreeing duplicate-report groups are inert in PW worlds
     (empty quarantine proved the identity), conflicting groups refused by name; .lara
     world sources elaborated by lara pw and compared through the lara pw-input
-    derivation door. Gate 7/99/112 plus the .lara family 1/16/20.
-  turn_count: 2
-  events_count: 7
+    derivation door. Gate 7/99/112 plus the .lara family 1/16/20. Then #334: the text
+    boundary moved from the PW doors to the whole CLI, so every door reads .lara text
+    as UTF-8 under every locale, with the solo door's first locale gate (five cases).
+  turn_count: 3
+  events_count: 11
   claims_touched: []
   open_threads: 3

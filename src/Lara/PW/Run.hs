@@ -570,11 +570,13 @@ quarantineDetail audit =
 -- Paths go through GHC's file-system encoding, and @.lara@ text through the
 -- locale encoding. The Lean reference always uses UTF-8, so a caller that must
 -- agree with it on non-ASCII paths and programs under any locale sets both
--- encodings to UTF-8 first, as @lara pw@ and @lara pw-input@ do — the locale
--- one /strictly/, so that program text which is not UTF-8 is the read failure
--- @lara check@ reports and not a surrogate-escaped decode (see
--- @pwTextBoundary@ in @app\/Main.hs@). A @(file PATH)@ world needs no such
--- setting: 'readUtf8' reads its bytes and decodes them here.
+-- encodings to UTF-8 first — the locale one /strictly/, so that program text
+-- which is not UTF-8 is the read failure @lara check@ reports and not a
+-- surrogate-escaped decode. The @lara@ CLI does this once for every door
+-- (@textBoundary@ in @app\/Main.hs@), which is what makes a @(lara PATH)@
+-- world and @lara check@ on the same file agree (\#334). A @(file PATH)@
+-- world needs no such setting: 'readUtf8' reads its bytes and decodes them
+-- here.
 readRunFile :: FilePath -> IO (Either PWError (RunDoc, [WorldInput]))
 readRunFile file = do
   bytes <- readUtf8 file
