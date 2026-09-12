@@ -335,12 +335,21 @@ the result is stated but not yet proved or mechanized._
   bound's value is printed inside its own message, so moving either copy alone changes the wording
   or the column and the byte comparison goes red — but that it fails earlier and by name, and that
   it catches the constant being renamed, reformatted or deleted, which a generated case cannot.
-- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:146 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:147 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]", "673 positive anchors, 66 negative and 3 depth cases agree after the #331 bound ← trace N331_gate_controls:result «scripts/differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound pass=3 fail=0» [result]"]
+  Since #335 that remedy is no longer symmetric in kind: the Lean half of the boundary is proved,
+  not only differentialled. The reader was a `partial def`, which the kernel cannot reduce, so no
+  statement about it was dischargeable; it is now total, and `parseForm_of_maxDepth_lt` plus
+  `parseWire_nested_error` make the refusal — and, in `parseList_error_of_parseForm_error`, the
+  *position* it is reported at — unconditional on one side rather than sampled by an anchor set on
+  both. This narrows the recorded blindness for this one property only. The Haskell reader carries
+  no such proof, so the two sides are still tied by cases and by the constant check; and the
+  theorems are refusal statements, so accepting behaviour at or under the bound remains gate
+  evidence alone.
+- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:146 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:147 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]", "673 positive anchors, 66 negative and 3 depth cases agree after the #331 bound ← trace N331_gate_controls:result «scripts/differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound pass=3 fail=0» [result]", "the same 673/66/3 after the #335 reader totalization, unchanged ← ara/evidence/proofs/lean_reader_nesting_bound_335.md «`scripts/differential.sh`: `pass=673 fail=0`, `negative pass=66 fail=0`, `shared nesting bound: 10000`, `depth-bound pass=3 fail=0`» [result]"]
 - **Status**: testing
 - **Falsification criteria**: A demonstration that the shared-core differential setup cannot localize
   whether a divergence is a Haskell-checker bug or a Lean-model bug (i.e. the N+1 framing gives no
   more than oracle-free voting here) — undercutting the methodological claim.
-- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence was localized and is now a pinned production-driver regression", trace N331_gate_controls (the reader's nesting bound: a category divergence no gate had a case for, now pinned on both sides of the boundary in all three reader differentials, with negative controls and a source-level constant check)]
+- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence was localized and is now a pinned production-driver regression", trace N331_gate_controls (the reader's nesting bound: a category divergence no gate had a case for, now pinned on both sides of the boundary in all three reader differentials, with negative controls and a source-level constant check), trace N335_bound_proved via ara/evidence/proofs/lean_reader_nesting_bound_335.md (the Lean half of that boundary proved rather than sampled, the reader having been made total for the purpose)]
 - **Evidence basis**: Deep-research report (Csmith PLDI 2011 = oracle-free voting; JEST ICSE 2021 =
   N+1; Marmsoler–Brucker executable-oracle-from-Isabelle); folded into `docs/mechanization-plan.md` §3.
   The shared-core serialization, an M1 design requirement, is now realized in M3 as `Lara.Wire` with a
@@ -349,7 +358,7 @@ the result is stated but not yet proved or mechanized._
   numeric literals. The shared `canonNum` implementation and numeric fixture now pin the fix.
 - **Dependencies**: C07, C10
 - **Tags**: differential-testing, conformance, mechanization, methodology
-- **Last revised**: 2026-09-11 (2026-09-11_002#4)
+- **Last revised**: 2026-09-12 (2026-09-12_001#4)
 
 ## C13: A small fixed scheme vocabulary covers the corpus's argument shapes
 - **Statement**: The inference schemes that ARA corpus claims instantiate collapse into a small

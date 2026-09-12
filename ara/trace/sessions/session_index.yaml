@@ -687,7 +687,12 @@ sessions:
     derivation door. Gate 7/99/112 plus the .lara family 1/16/20. Then #334: the text
     boundary moved from the PW doors to the whole CLI, so every door reads .lara text
     as UTF-8 under every locale, with the solo door's first locale gate (five cases).
-  turn_count: 3
-  events_count: 11
-  claims_touched: []
-  open_threads: 3
+    Then #335: the Lean reader stopped being a partial def, which is what had made the
+    #331 nesting bound enforceable but unprovable, and the bound became five trio-clean
+    theorems — the load-bearing one locating the refusal at the post-skipSpace position.
+    Refusal behaviour unmoved; all three reader differentials pass unmodified.
+  turn_count: 4
+  events_count: 16
+  claims_touched:
+  - C12
+  open_threads: 4

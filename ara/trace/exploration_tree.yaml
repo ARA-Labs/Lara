@@ -10043,3 +10043,80 @@ tree:
   also_depends_on:
   - N334_cli_text_boundary
   - N322_review_divergence
+- id: N335_reader_totalization
+  type: decision
+  title: Totalize the wire reader by carrying the consumption proof in the result
+  provenance: ai-executed
+  timestamp: 2026-09-12T07:10+00:00
+  choice: >-
+    Lara.Driver's reader stops being a `partial def` mutual block and becomes a total
+    definition, because a `partial def` has no kernel reduction behaviour and therefore no
+    statement about its results is dischargeable — the #331 bound was enforced with no
+    theorem attachable to it. skipComment/skipSpace become well-founded on the remaining
+    input off one fact, step_input (`step` drops exactly one character); parseQuoted leaves
+    the mutual block, since it never recurses back into a form; parseForm/parseList stay
+    mutual, measured 2*|input| against 2*|input|+1, the half-step being what lets parseList
+    hand parseForm a skipSpace'd state no shorter than its own. The one real gap is
+    parseList's element loop, which recurses on parseForm's OUTPUT state: nothing outside
+    parseForm knows that state is smaller, and establishing it afterwards is circular
+    (the lemma would be about a function whose definition needs the lemma). It is closed by
+    carrying the fact in the result type — `structure Parsed (p) where ... consumed :
+    rest.input.length < p.input.length` — with parseWire re-exporting the plain
+    `Except String Sx` contract so the subtype reaches no consumer.
+  alternatives:
+  - >-
+    An explicit fuel parameter bounded by the input length. Rejected: fuel exhaustion is a
+    behaviour the Haskell reader does not have, so either the byte-for-byte contract breaks
+    or fuel sufficiency has to be proved, which is the same work with a worse definition.
+  - >-
+    Rewriting the reader as a stack machine structurally recursive on a token list.
+    Rejected: every transition consumes a token so termination is free, but the refusal
+    precedence (depth vs unclosed-list vs end-of-input) and the located column would have
+    to be re-derived rather than preserved, against a byte-for-byte contract.
+  - >-
+    Establishing consumption as a separate lemma after the definition. Rejected as
+    circular: the lemma is about a function whose definition needs it.
+  evidence:
+  - lean/Lara/Driver.lean
+  - ara/evidence/proofs/lean_reader_nesting_bound_335.md
+  status: resolved
+  also_depends_on:
+  - N331_gate_controls
+- id: N335_bound_proved
+  type: experiment
+  title: The nesting bound as five theorems, and the gates unmoved
+  provenance: ai-executed
+  timestamp: 2026-09-12T07:10+00:00
+  result: >-
+    Five theorems, all trio-clean and pinned in AxCheck.lean along with fifteen supporting
+    lemmas. parseForm_of_maxDepth_lt — past the bound the reader refuses on depth alone,
+    before it dispatches on the input. parseList_error_of_parseForm_error and
+    parseList_of_maxDepth_lt — a failed element read is reported at the POST-skipSpace
+    state, which is the reason the Haskell and Lean columns agree rather than merely
+    coincide on the cases the gates try. parseForm_nested_error — n nested lists put a form
+    at depth depth+n, and where depth+n first exceeds maxDepth the refusal fires, located n
+    columns right of where the opens began, independently of what the form is.
+    parseWire_nested_error — an input opening more than maxDepth lists before its first form
+    is refused with the depth message at line 1, column maxDepth+2. Refusal behaviour
+    unchanged and no gate modified. lake build 218 jobs; AxCheck coverage 3147 declarations;
+    axiom audit passed; differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound
+    pass=3 fail=0 (over, at, and the wide-not-deep counter-case); check-map-conformance.sh
+    differential pass=1322 fail=0, depth-bound pass=2 fail=0, cross-driver pass=4
+    pre-boundary=3; check-pw-conformance.py 7 fixtures / 101 cases / 114 runs plus 1 .lara
+    fixture / 17 cases / 21 runs, run with the pre-existing check_pw_subtree_total failure
+    on fixtures/pw/source/lara.sexp skipped (that tree arrived in #332, after the
+    assertion); Lean citations PASS (420, 29 allowlisted) after repointing nine AxCheck.lean
+    line citations by name; ARA source spans PASS (66). No corpus regeneration and no
+    freeze-tag bump, as the issue budgeted; the re-audit of proofs consuming parseWire was
+    empty, nothing outside the mutual block having consumed parseForm/parseList/parseQuoted.
+    Still outside the proofs — the Haskell reader (unchanged, tied only by the differentials
+    and the source-level constant check), printSx (still partial), and every ACCEPTING
+    behaviour, the five theorems being refusal statements.
+  evidence:
+  - lean/Lara/Driver.lean
+  - lean/AxCheck.lean
+  - ara/evidence/proofs/lean_reader_nesting_bound_335.md
+  status: resolved
+  also_depends_on:
+  - N335_reader_totalization
+  - N331_gate_controls

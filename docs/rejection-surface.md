@@ -434,6 +434,18 @@ nests anywhere near it, so the bound restricts no expressible program. `scripts/
 bound and one at the deepest form it admits, and each reads the constant out of both sources so a
 one-sided edit fails by name.
 
+**And on the Lean side it is now proved (#335).** Until then the bound was enforced but unprovable:
+`Lara.Driver`'s `parseForm`/`parseList`/`parseQuoted` were a `partial def` mutual block, which the
+kernel cannot reduce, so the gates above were the *only* evidence. The reader is now total —
+well-founded on the remaining input, with the consumption fact `parseList`'s element loop needs
+carried in the result rather than assumed — and `AxCheck.lean` pins `parseForm_of_maxDepth_lt`
+(refusal is a function of depth alone, decided before the reader dispatches on the input),
+`parseList_of_maxDepth_lt` (the refusal is located at the post-`skipSpace` position, which is what
+makes the two runtimes' columns agree rather than merely happen to agree on the cases the gates
+try) and `parseWire_nested_error` (an input opening more than `maxDepth` lists before its first form
+is refused with the depth message at line 1, column `maxDepth + 2`). No refusal behaviour changed;
+the three gates above pass unmodified.
+
 The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 541 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.

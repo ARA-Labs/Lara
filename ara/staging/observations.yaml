@@ -3874,3 +3874,75 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O178
+  timestamp: 2026-09-12T07:10+00:00
+  provenance: ai-suggested
+  content: >-
+    A `partial def` in a mechanized reference is not an undocumented implementation choice
+    but an enforcement with no theorem attachable to it: the kernel has no reduction
+    behaviour for one, so nothing about its results is dischargeable. Totality is therefore
+    a precondition for the metatheory rather than a refinement of it, and a discipline of
+    "port it and prove its metatheory" cannot be satisfied incrementally over a partial
+    definition — the redesign comes first, or the theorem does not exist to defer.
+  context: >-
+    #335: the #331 nesting bound was enforced in Lean byte-for-byte with Haskell and covered
+    by three differentials, yet AxCheck.lean was correctly empty of it because
+    parseForm/parseList/parseQuoted were partial. One project, one instance; unendorsed.
+  potential_type: claim
+  bound_to:
+  - N335_reader_totalization
+  - N335_bound_proved
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O179
+  timestamp: 2026-09-12T07:10+00:00
+  provenance: ai-suggested
+  content: >-
+    When a mutually recursive consumer loop terminates only because its callee consumes
+    input, the termination fact belongs in the callee's result TYPE, not in a lemma proved
+    afterwards. Proving it afterwards is circular — the lemma would be about a function
+    whose definition needs the lemma — and the alternatives that avoid the subtype each pay
+    in contract rather than in proof effort. Explicit fuel introduces an exhaustion
+    behaviour the reference implementation does not have; a stack machine over a token
+    stream re-derives the refusal precedence and the located column instead of preserving
+    them. The subtype's cost stays bounded because it can be hidden at the top-level entry
+    point, leaving every consumer's type unchanged.
+  context: >-
+    #335: parseList's element loop recurses on parseForm's output state. Closed by
+    `structure Parsed (p) where ... consumed : rest.input.length < p.input.length`, with
+    parseWire re-exporting `Except String Sx` so Lara.Map.Driver, Lara.PW.Wire, Lara.PW.Run
+    and Lara.AdmissionDriver were untouched. One instance; unendorsed.
+  potential_type: heuristic
+  bound_to:
+  - N335_reader_totalization
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O180
+  timestamp: 2026-09-12T07:10+00:00
+  provenance: ai-suggested
+  content: >-
+    A differential pins a shared boundary's wording tightly and its LOCATION only at the
+    cases it happens to try. A proof of where the refusal is located is what turns the
+    agreement of two implementations' columns from a coincidence over an anchor set into a
+    property of one of them. The theorem worth having is therefore not "the bound fires",
+    which the exit code already shows, but "the position reported is the post-skip state",
+    which is the half no exit-code-only family can see.
+  context: >-
+    #335: parseList_error_of_parseForm_error states the located position is the
+    post-skipSpace state parseList handed to parseForm; parseWire_nested_error pins line 1,
+    column maxDepth+2 for the whole family of over-deep inputs. Relates to C12's recorded
+    bound on gate-visible divergence. One instance; unendorsed.
+  potential_type: claim
+  bound_to:
+  - N335_bound_proved
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

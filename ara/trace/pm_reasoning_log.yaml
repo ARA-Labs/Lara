@@ -1641,3 +1641,41 @@ entries:
     performance claim C-entry, whose Conditions argument about ASCII delimiters is
     unaffected).'
   - 'O169/O172 still under 3 session-days idle counting from 2026-09-11; no stale flags.'
+- turn: 2026-09-12_001#4
+  notes:
+  - >-
+    Routed N335_reader_totalization as a decision, ai-executed: the issue named the work,
+    the blocker and the cost, and the user asked for it by number; the design that made
+    totality reachable — carrying the consumption proof in parseForm's result type — was
+    the agent's, so the rejected alternatives (fuel, a token-stream stack machine, an
+    after-the-fact lemma) are recorded on the node rather than left implicit.
+  - >-
+    N335_bound_proved is one experiment node covering both the five theorems and the gate
+    reruns, the same shape turn 3 used. Every gate number in it is a value the run printed
+    and is quoted verbatim in ara/evidence/proofs/lean_reader_nesting_bound_335.md; the
+    numbers are identical to before the rewrite, which is the point.
+  - >-
+    Recorded the pw gate's check_pw_subtree_total failure on the node and in the evidence
+    record rather than treating it as this turn's result — fixtures/pw/source arrived in
+    #332, after the assertion, so it fails on main too. Not filed as an issue here: it is
+    somebody else's open branch, and inventing a tracking item for it from this turn would
+    misattribute it.
+  - >-
+    Staged O178 (a partial def is an enforcement with no theorem attachable to it) and O180
+    (a differential pins wording tightly and location only where it samples) as claims, and
+    O179 (the termination fact belongs in the callee's result type) as a heuristic. All
+    ai-suggested, all one instance, none endorsed.
+  - >-
+    Stage 4 edit to C12, signal artifact-commitment: the clause touched is C12's own
+    recorded bound on what the differential framing can see, and the theorems landed this
+    turn narrow it for exactly one property. Wrote the narrowing with both its limits (the
+    Haskell reader carries no proof; the theorems are refusal statements only) rather than
+    a general weakening, and left Status at testing — nothing this turn bears on the
+    N+1-localization statement itself.
+  - >-
+    Near-miss considered and rejected: promoting O178 on artifact commitment. The code that
+    landed depends on the reader being total, not on the observation's generalization about
+    partial defs in mechanized references, and the PR is unmerged. Left staged.
+  - >-
+    O169/O172/O173 unchanged; O174/O175 now 1 session-day idle, O176/O177 same-day. No new
+    stale flags.

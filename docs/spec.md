@@ -1625,6 +1625,22 @@ it bounds no expressible program: it is a refusal boundary, not a grammar
 restriction, and raising it is a reader change on both sides at once rather than
 a wire-version change.
 
+**On the Lean side the bound is proved, not only differentialled (issue #335).**
+`Lara.Driver`'s reader was a `partial def` mutual block, and Lean's kernel has no
+reduction behaviour for a `partial def`, so nothing about its results was
+provable — the enforcement was real but the only evidence was the gates above. It
+is now a total definition, well-founded on the remaining input, with the
+consumption fact `parseList`'s element loop needs carried in the result
+(`Lara.Driver.Parsed`) rather than assumed. That buys three theorems, all
+trio-clean and pinned in `AxCheck.lean`: `parseForm_of_maxDepth_lt` (past the
+bound the reader refuses on depth alone, before it looks at the input),
+`parseList_of_maxDepth_lt` (the refusal is located at the post-`skipSpace`
+state, which is why the two runtimes' columns agree), and
+`parseWire_nested_error` (an input opening more than `maxDepth` lists before its
+first form is refused with the depth message at line 1, column `maxDepth + 2`).
+The refusal behaviour is unchanged — no corpus, wire, mutant or replay-identity
+byte moves, and the three gates above still pass unmodified.
+
 Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
 the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack
 cycles** are not rejection — they evaluate to `undec`/`contested` (§8). The engineering-plan

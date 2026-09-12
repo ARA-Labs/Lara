@@ -2,8 +2,8 @@ session:
   id: 2026-09-12_001
   date: '2026-09-12'
   started: 2026-09-12T01:38+00:00
-  last_turn: 2026-09-12T05:54+00:00
-  turn_count: 3
+  last_turn: 2026-09-12T07:10+00:00
+  turn_count: 4
   summary: '#326 and #327 addressed together in one PR: a PW world with agreeing
     duplicate-report groups is checked as declared (Lean: empty quarantine is the
     identity, addWorld_checks_declared), a conflicting group is refused by name; .lara
@@ -13,7 +13,15 @@ session:
     the review fix below. Turn 3 settled #334, the asymmetry turn 2 deferred: the
     text boundary became the whole CLI''s, so check, deps, map-input and both PW
     doors read one .lara file as one program under every locale, and the solo door
-    got its first locale gate (five cases, each rerun under LC_ALL=C).'
+    got its first locale gate (five cases, each rerun under LC_ALL=C). Turn 4
+    settled #335: the Lean reader''s nesting bound was enforced but unprovable,
+    parseForm/parseList/parseQuoted being a partial def mutual block, so the reader
+    was made total — well-founded on the remaining input, with the consumption fact
+    parseList''s element loop needs carried in the result type rather than proved
+    afterwards, which is circular — and five theorems landed, the load-bearing one
+    being that the refusal is located at the post-skipSpace position. No refusal
+    behaviour moved: all three reader differentials pass unmodified at their
+    existing numbers.'
 events_logged:
 - turn: 1
   type: decision
@@ -108,6 +116,54 @@ events_logged:
   provenance: ai-suggested
   summary: A locale gate must decode the child's streams itself, or it tests the
     suite's environment. Not promoted.
+- turn: 4
+  type: decision
+  id: N335_reader_totalization
+  routing: direct
+  provenance: ai-executed
+  summary: >-
+    Totalize the wire reader rather than defer the bound's metatheory. A partial def has no
+    kernel reduction behaviour, so the #331 enforcement had no theorem attachable to it;
+    the element loop's missing consumption fact is carried in the result type (Parsed)
+    because proving it afterwards is circular, and parseWire re-exports Except String Sx so
+    no consumer sees the subtype. Fuel and a token-stream stack machine were rejected for
+    paying in contract rather than in proof effort.
+- turn: 4
+  type: experiment
+  id: N335_bound_proved
+  routing: direct
+  provenance: ai-executed
+  summary: >-
+    Five theorems pinned in AxCheck.lean with fifteen supporting lemmas — the bound fires on
+    depth alone before dispatch, a failed element read is located at the post-skipSpace
+    state, and any input opening more than maxDepth lists before its first form is refused
+    at line 1 column maxDepth+2. Gates unmodified and unmoved — lake build 218 jobs, AxCheck
+    coverage 3147, axiom audit passed, differential 673/66/3, map 1322 plus 2 depth cases,
+    pw 7/101/114 plus 1/17/21. No corpus regeneration, no freeze-tag bump.
+- turn: 4
+  type: observation
+  id: O178
+  routing: staged
+  provenance: ai-suggested
+  summary: >-
+    A partial def is an enforcement with no theorem attachable to it, so totality is a
+    precondition for the metatheory rather than a refinement. Not promoted.
+- turn: 4
+  type: observation
+  id: O179
+  routing: staged
+  provenance: ai-suggested
+  summary: >-
+    A consumer loop's termination fact belongs in the callee's result type; proving it
+    afterwards is circular, and the alternatives pay in contract. Not promoted.
+- turn: 4
+  type: observation
+  id: O180
+  routing: staged
+  provenance: ai-suggested
+  summary: >-
+    A differential pins a boundary's wording tightly and its location only where it samples;
+    the position theorem is the half no exit-code-only family can see. Not promoted.
 ai_actions:
 - turn: 1
   action: 'Branched feat/pw-groups-and-lara-sources from main 28cae19. Lean: Groups
@@ -187,8 +243,84 @@ ai_actions:
   - scripts/check-pw-conformance.py
   - docs/lara-surface-grammar.md
   - docs/theory-pw-outer-runtime.md
-claims_touched: []
-logic_revisions: []
+- turn: 4
+  action: 'Branched fix/335-lean-reader-nesting-bound-proved from main 32c1628 for #335.
+    lean/Lara/Driver.lean: PState.locate split out of PState.err; step_input and the two
+    step length lemmas; skipComment and skipSpace made total (well-founded on
+    p.input.length) with skipComment_length_le / skipSpace_length_le; spanBare_length,
+    spanBare_fst_ne_nil and spanBare_snd_length_lt; depthExceededMsg; the Parsed subtype
+    with weaken and liftParsed; parseQuoted moved out of the mutual block and made total;
+    parseForm/parseList made total, measured 2*|input| against 2*|input|+1; parseWire
+    rewritten over the subtype with its own type unchanged; then the metatheory —
+    parseForm_of_maxDepth_lt, parseList_error_of_parseForm_error, parseList_of_maxDepth_lt,
+    step_of_cons, skipSpace_eq_self, isBareChar_props, startsForm and its two lemmas, opens
+    and opens_add, skipSpace_eq_self_startsForm, parseForm_nested_error,
+    parseWire_nested_error. lean/AxCheck.lean: 20 pins appended, which shifted the nine
+    AxCheck line citations in docs/paper-lean-name-map.md by 33 (repointed by name, along
+    with scripts/check-lean-citations.py''s own quoted example). docs/spec.md and
+    docs/rejection-surface.md record the proof-backed half of the #331 contract.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Driver.lean
+  - lean/AxCheck.lean
+  - docs/spec.md
+  - docs/rejection-surface.md
+  - docs/paper-lean-name-map.md
+  - scripts/check-lean-citations.py
+  - ara/evidence/proofs/lean_reader_nesting_bound_335.md
+  - ara/evidence/README.md
+claims_touched:
+- id: C12
+  action: revised
+  turn: 4
+logic_revisions:
+- turn: 4
+  entry: C12
+  field: Conditions
+  before: >-
+    ... but that it fails earlier and by name, and that it catches the constant being
+    renamed, reformatted or deleted, which a generated case cannot. [end of the #331
+    paragraph; the Conditions said nothing about the Lean side's evidence being gate-only]
+  after: >-
+    ... which a generated case cannot. Since #335 that remedy is no longer symmetric in
+    kind: the Lean half of the boundary is proved, not only differentialled. The reader was
+    a `partial def`, which the kernel cannot reduce, so no statement about it was
+    dischargeable; it is now total, and `parseForm_of_maxDepth_lt` plus
+    `parseWire_nested_error` make the refusal — and, in
+    `parseList_error_of_parseForm_error`, the *position* it is reported at — unconditional
+    on one side rather than sampled by an anchor set on both. This narrows the recorded
+    blindness for this one property only. The Haskell reader carries no such proof, so the
+    two sides are still tied by cases and by the constant check; and the theorems are
+    refusal statements, so accepting behaviour at or under the bound remains gate evidence
+    alone.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: >-
+    The clause revised is C12's own recorded bound on what the differential framing can
+    see. #335 narrows it for exactly one property, so the addition states the narrowing and
+    its two limits rather than weakening the bound generally. Status untouched — nothing
+    this turn bears on the N+1-localization statement itself.
+- turn: 4
+  entry: C12
+  field: Sources
+  before: >-
+    [four entries, the last being the #331 differential numbers from trace
+    N331_gate_controls:result]
+  after: >-
+    [five entries; the added one grounds the same 673/66/3 after the totalization, quoted
+    from ara/evidence/proofs/lean_reader_nesting_bound_335.md]
+  signal: artifact-commitment
+  provenance: ai-suggested
+- turn: 4
+  entry: C12
+  field: Proof
+  before: >-
+    [E02, the differential-harness note, trace N331_gate_controls (...)]
+  after: >-
+    [E02, the differential-harness note, trace N331_gate_controls (...), trace
+    N335_bound_proved via ara/evidence/proofs/lean_reader_nesting_bound_335.md]
+  signal: artifact-commitment
+  provenance: ai-suggested
 key_context:
 - turn: 1
   excerpt: 'User: now its time to address #326 and #327, let''s address them together,
@@ -201,10 +333,21 @@ key_context:
     already stated the work (one locale encoding for the whole CLI, plus the output
     side) and its cost (no corpus regeneration, no freeze-tag bump, a new gate axis
     on a door with no locale coverage); the implementation shape was the agent''s.'
+- turn: 4
+  excerpt: 'User: directly fix https://github.com/ARA-Labs/lara/issues/335 and pr. — the
+    issue stated the work, the blocker (a partial def has no kernel reduction behaviour)
+    and the cost (a reader rewrite plus a re-audit of proofs consuming parseWire; no corpus
+    regeneration, no freeze-tag bump). The redesign that made totality reachable — carrying
+    the consumption proof in the result type — was the agent''s.'
 open_threads:
 - 'PR #332 for #326/#327 on feat/pw-groups-and-lara-sources: two review rounds
   addressed, awaiting approval and merge.'
-- '#331 tracks the Haskell-only nesting bound in the shared reader.'
+- '#331 is closed on both sides and, since turn 4 (#335), the Lean half is proved
+  rather than only differentialled. What remains unproved there: the Haskell reader
+  carries no mechanization, printSx is still a partial def, and the theorems are
+  refusal statements — accepting behaviour at or under the bound is gate evidence
+  only.'
+- 'PR for #335 on fix/335-lean-reader-nesting-bound-proved: awaiting review.'
 - 'PR #342 for #334 on fix/cli-utf8-text-boundary: awaiting review. It closes the
   asymmetry this session opened — every door now reads .lara text as strict UTF-8
   under every locale, and the decision is recorded as a language property in
@@ -217,3 +360,4 @@ ai_suggestions_pending:
 - O175 staged; the derivation-door pattern is now used twice (map-input, pw-input)
   but has no user endorsement.
 - O176, O177 staged from turn 3; both ai-suggested, neither endorsed.
+- O178, O179, O180 staged from turn 4; all three ai-suggested, none endorsed.

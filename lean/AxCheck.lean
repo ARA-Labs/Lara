@@ -189,6 +189,39 @@ open Lara
 -- the admission model, where `retained_attack_source_retained` needs it.
 #print axioms Lara.Driver.firstDup_none_nodup
 
+-- The wire reader's nesting bound, proved rather than only differentialled
+-- (#331/#335). The reader used to be a `partial def` mutual block, about which
+-- nothing is provable; it is now total (well-founded on the remaining input,
+-- with `Parsed` carrying the consumption proof `parseList`'s element loop
+-- needs), which is what makes these statements reachable at all.
+--   * the bound fires before dispatch, on depth alone;
+--   * a failed element read is reported at the post-`skipSpace` position, which
+--     is why the Haskell and Lean columns agree;
+--   * any input nesting deeper than `maxDepth` is refused with the depth
+--     message at line 1, column `maxDepth + 2`.
+#print axioms Lara.Driver.parseForm_of_maxDepth_lt
+#print axioms Lara.Driver.parseList_error_of_parseForm_error
+#print axioms Lara.Driver.parseList_of_maxDepth_lt
+#print axioms Lara.Driver.parseForm_nested_error
+#print axioms Lara.Driver.parseWire_nested_error
+-- The consumption and position lemmas the totality argument and the located
+-- column rest on.
+#print axioms Lara.Driver.step_input
+#print axioms Lara.Driver.step_length_lt
+#print axioms Lara.Driver.step_length_le
+#print axioms Lara.Driver.step_of_cons
+#print axioms Lara.Driver.skipComment_length_le
+#print axioms Lara.Driver.skipSpace_length_le
+#print axioms Lara.Driver.skipSpace_eq_self
+#print axioms Lara.Driver.skipSpace_eq_self_startsForm
+#print axioms Lara.Driver.spanBare_length
+#print axioms Lara.Driver.spanBare_fst_ne_nil
+#print axioms Lara.Driver.spanBare_snd_length_lt
+#print axioms Lara.Driver.isBareChar_props
+#print axioms Lara.Driver.startsForm_of_isBareChar
+#print axioms Lara.Driver.startsForm_opens
+#print axioms Lara.Driver.opens_add
+
 -- Policy admission at the trusted source boundary (metatheory plan Task 2):
 -- the declarative judgment, its correspondence with the evaluator, the two
 -- context layers, the endpoint-safe prune, the canonical audit, the

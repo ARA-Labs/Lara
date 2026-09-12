@@ -167,8 +167,12 @@ structure PState where
   line : Nat
   col : Nat
 
-def PState.err (p : PState) (msg : String) : Except String α :=
-  .error ("line " ++ toString p.line ++ ", column " ++ toString p.col ++ ": " ++ msg)
+/-- The located prefix every reader diagnostic carries, split out of `PState.err`
+so the metatheory can name a message without fixing the `Except` payload type. -/
+def PState.locate (p : PState) (msg : String) : String :=
+  "line " ++ toString p.line ++ ", column " ++ toString p.col ++ ": " ++ msg
+
+def PState.err (p : PState) (msg : String) : Except String α := .error (p.locate msg)
 
 def step (p : PState) : PState :=
   match p.input with
@@ -176,19 +180,59 @@ def step (p : PState) : PState :=
   | _ :: rest => { p with input := rest, col := p.col + 1 }
   | [] => p
 
-partial def skipComment (p : PState) : PState :=
-  match p.input with
-  | '\n' :: _ => p
-  | [] => p
-  | _ => skipComment (step p)
+/-- `step` drops exactly one character, and nothing once the input is spent. The
+reader's termination arguments are all consequences of this. -/
+@[simp] theorem step_input (p : PState) : (step p).input = p.input.tail := by
+  unfold step; split <;> simp_all
 
-partial def skipSpace (p : PState) : PState :=
-  match p.input with
+theorem step_length_lt {p : PState} (h : p.input ≠ []) :
+    (step p).input.length < p.input.length := by
+  rw [step_input]
+  match hp : p.input with
+  | [] => exact absurd hp h
+  | c :: t => simp
+
+theorem step_length_le (p : PState) : (step p).input.length ≤ p.input.length := by
+  rw [step_input]
+  match hp : p.input with
+  | [] => simp
+  | c :: t => simp
+
+def skipComment (p : PState) : PState :=
+  match _h : p.input with
+  | [] => p
+  | '\n' :: _ => p
+  | _ :: _ => skipComment (step p)
+termination_by p.input.length
+decreasing_by exact step_length_lt (by simp [_h])
+
+theorem skipComment_length_le (p : PState) :
+    (skipComment p).input.length ≤ p.input.length := by
+  fun_induction skipComment p
+  · exact Nat.le_refl _
+  · exact Nat.le_refl _
+  · exact Nat.le_trans (by assumption) (step_length_le _)
+
+def skipSpace (p : PState) : PState :=
+  match _h : p.input with
+  | [] => p
   | c :: _ =>
     if c == ' ' || c == '\t' || c == '\n' || c == '\r' then skipSpace (step p)
     else if c == ';' then skipSpace (skipComment (step p))
     else p
-  | [] => p
+termination_by p.input.length
+decreasing_by
+  · exact step_length_lt (by simp [_h])
+  · exact Nat.lt_of_le_of_lt (skipComment_length_le _) (step_length_lt (by simp [_h]))
+
+theorem skipSpace_length_le (p : PState) :
+    (skipSpace p).input.length ≤ p.input.length := by
+  fun_induction skipSpace p
+  · exact Nat.le_refl _
+  · exact Nat.le_trans (by assumption) (step_length_le _)
+  · exact Nat.le_trans (by assumption)
+      (Nat.le_trans (skipComment_length_le _) (step_length_le _))
+  · exact Nat.le_refl _
 
 def spanBare : List Char → (List Char × List Char)
   | [] => ([], [])
@@ -197,6 +241,33 @@ def spanBare : List Char → (List Char × List Char)
       let (a, b) := spanBare rest
       (c :: a, b)
     else ([], c :: rest)
+
+theorem spanBare_length (l : List Char) :
+    (spanBare l).1.length + (spanBare l).2.length = l.length := by
+  induction l with
+  | nil => rfl
+  | cons c t ih =>
+    rw [spanBare]
+    split
+    · rcases hs : spanBare t with ⟨a, b⟩
+      rw [hs] at ih
+      simp at ih ⊢
+      omega
+    · simp
+
+theorem spanBare_fst_ne_nil {c : Char} {t : List Char} (h : isBareChar c = true) :
+    (spanBare (c :: t)).1 ≠ [] := by
+  rw [spanBare]
+  simp [h]
+
+/-- A bare-atom token is non-empty, so reading one strictly consumes input. -/
+theorem spanBare_snd_length_lt {c : Char} {t : List Char} (h : isBareChar c = true) :
+    (spanBare (c :: t)).2.length < (c :: t).length := by
+  have hl := spanBare_length (c :: t)
+  have hne := spanBare_fst_ne_nil (t := t) h
+  have hz : (spanBare (c :: t)).1.length ≠ 0 := fun hz =>
+    hne (List.eq_nil_of_length_eq_zero hz)
+  omega
 
 /-- Maximum S-expression nesting depth, the mirror of `Lara.Wire.maxDepth`
 (`src/Lara/Wire.hs`). Bounds reader recursion so a pathologically nested input
@@ -211,56 +282,290 @@ artifact's structural depth; `scripts/differential.sh` measures the deepest
 anchor it discovers and fails if the margin ever narrows. -/
 def maxDepth : Nat := 10000
 
+/-- The one spelling of the depth refusal, shared by the reader and its
+metatheory and textually mirroring the Haskell message (`src/Lara/Wire.hs`). -/
+def depthExceededMsg : String :=
+  "maximum S-expression nesting depth exceeded (" ++ toString maxDepth ++ ")"
+
+/-- A successful read: the form, the state after it, and the proof that at least
+one character was consumed.
+
+The proof is carried rather than established afterwards because it is what makes
+the reader's recursion well-founded: `parseList`'s element loop calls itself on
+`parseForm`'s output state, and nothing outside `parseForm` knows that state is
+smaller. Carrying it in the result is what lets the reader be a total definition
+instead of a `partial def`, and a total definition is the precondition for
+`parseForm_of_maxDepth_lt` and `parseWire_nested_error` below: Lean's kernel has
+no reduction behaviour for a `partial def`, so nothing about one is provable
+(issue #335). `parseWire` re-exports the plain `Except String Sx` contract, so
+the subtype is invisible to every consumer. -/
+structure Parsed (p : PState) where
+  sx : Sx
+  rest : PState
+  consumed : rest.input.length < p.input.length
+
+def Parsed.weaken {p q : PState} (h : q.input.length ≤ p.input.length)
+    (r : Parsed q) : Parsed p :=
+  ⟨r.sx, r.rest, Nat.lt_of_lt_of_le r.consumed h⟩
+
+def liftParsed {p q : PState} (h : q.input.length ≤ p.input.length) :
+    Except String (Parsed q) → Except String (Parsed p)
+  | .error e => .error e
+  | .ok r => .ok (r.weaken h)
+
+/-- Read the body of a string literal, `acc` holding the decoded characters in
+reverse. Separate from the `parseForm`/`parseList` block: it never recurses back
+into a form, so it terminates on the remaining input alone. -/
+def parseQuoted (p : PState) (acc : List Char) : Except String (Parsed p) :=
+  match hp : p.input with
+  | '"' :: _ =>
+      .ok ⟨.atom (String.ofList acc.reverse), step p, step_length_lt (by simp [hp])⟩
+  | '\\' :: [] => p.err "unterminated escape sequence"
+  | '\\' :: c :: _ =>
+      if c == '"' then
+        liftParsed (by simp [hp]; omega) (parseQuoted (step (step p)) ('"' :: acc))
+      else if c == '\\' then
+        liftParsed (by simp [hp]; omega) (parseQuoted (step (step p)) ('\\' :: acc))
+      else if c == 'n' then
+        liftParsed (by simp [hp]; omega) (parseQuoted (step (step p)) ('\n' :: acc))
+      else p.err ("invalid escape sequence \\" ++ String.singleton c)
+  | [] => p.err "unterminated string literal"
+  | c :: _ => liftParsed (by simp [hp]) (parseQuoted (step p) (c :: acc))
+termination_by p.input.length
+decreasing_by
+  all_goals simp [hp]
+  all_goals omega
+
 mutual
   /-- `depth` is the nesting level of the form being read: 0 for the top-level
-  form, one more for each enclosing list. -/
-  partial def parseForm (depth : Nat) (p : PState) : Except String (Sx × PState) :=
+  form, one more for each enclosing list.
+
+  Terminating measure `2 * |input|` against `parseList`'s `2 * |input| + 1`:
+  descending into a list consumes the `(`, and reading an element consumes no
+  input at the call itself but is one half-step closer than the list it sits in. -/
+  def parseForm (depth : Nat) (p : PState) : Except String (Parsed p) :=
     if maxDepth < depth then
-      p.err ("maximum S-expression nesting depth exceeded (" ++ toString maxDepth ++ ")")
+      p.err depthExceededMsg
     else
-      match p.input with
-      | '(' :: _ => parseList depth (step p) []
-      | '"' :: _ => parseQuoted (step p) []
-      | c :: _ =>
-        if isBareChar c then
-          let (tok, rest) := spanBare p.input
-          let p' := { p with input := rest, col := p.col + tok.length }
-          .ok (.atom (String.ofList tok), p')
+      match hp : p.input with
+      | '(' :: _ => liftParsed (step_length_le p) (parseList depth (step p) [])
+      | '"' :: _ => liftParsed (step_length_le p) (parseQuoted (step p) [])
+      | c :: rest =>
+        if hb : isBareChar c then
+          let s := spanBare p.input
+          .ok ⟨.atom (String.ofList s.1), { p with input := s.2, col := p.col + s.1.length },
+               by show (spanBare p.input).2.length < p.input.length
+                  rw [hp]; exact spanBare_snd_length_lt (t := rest) hb⟩
         else p.err ("unexpected character '" ++ String.singleton c ++ "'")
       | [] => p.err "unexpected end of input"
+  termination_by 2 * p.input.length
+  decreasing_by simp [hp]; omega
 
   /-- `depth` is the nesting level of the list being read, so its elements are
   read one level deeper. -/
-  partial def parseList (depth : Nat) (p : PState) (acc : List Sx) :
-      Except String (Sx × PState) :=
+  def parseList (depth : Nat) (p : PState) (acc : List Sx) :
+      Except String (Parsed p) :=
     let p' := skipSpace p
-    match p'.input with
-    | ')' :: _ => .ok (.list acc.reverse, step p')
+    match hp : p'.input with
+    | ')' :: _ =>
+        .ok ⟨.list acc.reverse, step p',
+             Nat.lt_of_lt_of_le (step_length_lt (by simp [hp])) (skipSpace_length_le p)⟩
     | [] => p'.err "unclosed list"
-    | _ => do
-        let (e, p'') ← parseForm (depth + 1) p'
-        parseList depth p'' (e :: acc)
-
-  partial def parseQuoted (p : PState) (acc : List Char) : Except String (Sx × PState) :=
-    match p.input with
-    | '"' :: _ => .ok (.atom (String.ofList acc.reverse), step p)
-    | '\\' :: [] => p.err "unterminated escape sequence"
-    | '\\' :: c :: _ =>
-        if c == '"' then parseQuoted (step (step p)) ('"' :: acc)
-        else if c == '\\' then parseQuoted (step (step p)) ('\\' :: acc)
-        else if c == 'n' then parseQuoted (step (step p)) ('\n' :: acc)
-        else p.err ("invalid escape sequence \\" ++ String.singleton c)
-    | [] => p.err "unterminated string literal"
-    | c :: _ => parseQuoted (step p) (c :: acc)
+    | _ :: _ =>
+        match parseForm (depth + 1) p' with
+        | .error e => .error e
+        | .ok r =>
+            liftParsed
+              (Nat.le_of_lt (Nat.lt_of_lt_of_le r.consumed (skipSpace_length_le p)))
+              (parseList depth r.rest (r.sx :: acc))
+  termination_by 2 * p.input.length + 1
+  decreasing_by
+    · have := skipSpace_length_le p; omega
+    · have := Nat.lt_of_lt_of_le r.consumed (skipSpace_length_le p); omega
 end
 
 /-- Parse exactly one top-level form; a second form is an error. -/
-def parseWire (input : String) : Except String Sx := do
+def parseWire (input : String) : Except String Sx :=
   let start := skipSpace { input := input.toList, line := 1, col := 1 }
-  let (e, rest) ← parseForm 0 start
-  let rest' := skipSpace rest
-  if rest'.input.isEmpty then .ok e
-  else rest'.err "expected a single S-expression, found more input"
+  match parseForm 0 start with
+  | .error e => .error e
+  | .ok r =>
+    let rest' := skipSpace r.rest
+    if rest'.input.isEmpty then .ok r.sx
+    else rest'.err "expected a single S-expression, found more input"
+
+/-! ### The nesting bound, proved (issue #335)
+
+`scripts/differential.sh`, `scripts/check-map-conformance.sh` and
+`scripts/check-pw-conformance.py` each straddle `maxDepth` with a pair of inputs,
+and `prop_envelopeNestingBound` (`test/MapSpec.hs`) exercises the Haskell side.
+Those are conformance evidence. The theorems below carry the soundness: the
+refusal is a function of the depth alone, and it is located at the post-`skipSpace`
+position — the half the differentials pin most tightly. -/
+
+/-- The bound fires before dispatch: past `maxDepth` the reader refuses on depth
+alone, whatever the remaining input is. -/
+theorem parseForm_of_maxDepth_lt {depth : Nat} (h : maxDepth < depth) (p : PState) :
+    parseForm depth p = .error (p.locate depthExceededMsg) := by
+  rw [parseForm]
+  simp [h, PState.err]
+
+/-- `parseList` reports a failed element read verbatim, at the post-`skipSpace`
+state it handed to `parseForm`. This is what makes the Haskell and Lean columns
+agree: both readers skip leading space *before* fixing the reported position. -/
+theorem parseList_error_of_parseForm_error {depth : Nat} {q : PState} {e : String}
+    (acc : List Sx) {d : Char} {tl : List Char}
+    (hd : (skipSpace q).input = d :: tl) (hne : d ≠ ')')
+    (hf : parseForm (depth + 1) (skipSpace q) = .error e) :
+    parseList depth q acc = .error e := by
+  rw [parseList]
+  split
+  case h_1 =>
+    rename_i tl' heq
+    rw [hd] at heq
+    exact absurd (List.head_eq_of_cons_eq heq) hne
+  case h_2 =>
+    rename_i heq
+    rw [hd] at heq
+    exact absurd heq (by simp)
+  case h_3 => rw [hf]
+
+/-- A list whose elements would sit past `maxDepth` is refused at the
+post-`skipSpace` position, not at the list's own position. -/
+theorem parseList_of_maxDepth_lt {depth : Nat} (h : maxDepth < depth + 1) (p : PState)
+    (acc : List Sx) {c : Char} {t : List Char}
+    (hp : (skipSpace p).input = c :: t) (hc : c ≠ ')') :
+    parseList depth p acc = .error ((skipSpace p).locate depthExceededMsg) :=
+  parseList_error_of_parseForm_error acc hp hc (parseForm_of_maxDepth_lt h _)
+
+theorem step_of_cons {p : PState} {c : Char} {t : List Char} (hp : p.input = c :: t)
+    (hc : c ≠ '\n') : step p = ⟨t, p.line, p.col + 1⟩ := by
+  -- `simp` discharges the overlapping-pattern side condition `c ≠ '\n'` from `hc`.
+  simp only [step, hp]
+
+theorem skipSpace_eq_self {p : PState} {c : Char} {t : List Char} (hp : p.input = c :: t)
+    (hws : (c == ' ' || c == '\t' || c == '\n' || c == '\r') = false)
+    (hsc : (c == ';') = false) : skipSpace p = p := by
+  rw [skipSpace]
+  split
+  · rfl
+  · rename_i c' t' hp'
+    rw [hp] at hp'
+    cases hp'
+    simp_all
+
+theorem isBareChar_props {c : Char} (hb : isBareChar c = true) :
+    (c == ' ' || c == '\t' || c == '\n' || c == '\r') = false ∧ (c == ';') = false ∧
+      c ≠ ')' ∧ c ≠ '\n' := by
+  have hb' := hb
+  simp only [isBareChar, Bool.and_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true,
+    Bool.or_eq_false_iff, beq_eq_false_iff_ne, ne_eq, Nat.ble_eq] at hb'
+  have h1 : 33 ≤ c.toNat := hb'.1.1
+  have hne : ∀ d : Char, d.toNat < 33 → ¬ (c = d) := by rintro d hd rfl; omega
+  refine ⟨?_, by simpa using hb'.2.1.1.2, hb'.2.1.1.1.2, hne '\n' (by decide)⟩
+  simp only [Bool.or_eq_false_iff, beq_eq_false_iff_ne, ne_eq]
+  and_intros
+  · exact hne ' ' (by decide)
+  · exact hne '\t' (by decide)
+  · exact hne '\n' (by decide)
+  · exact hne '\r' (by decide)
+
+/-- `u` begins a form: its first character is neither whitespace, nor a comment
+start, nor the closing paren that would end the enclosing list. These are exactly
+the conditions under which `parseList` hands `u` to `parseForm` one level down. -/
+def startsForm (u : List Char) : Prop :=
+  ∃ d tl, u = d :: tl ∧ (d == ' ' || d == '\t' || d == '\n' || d == '\r') = false ∧
+    (d == ';') = false ∧ d ≠ ')'
+
+theorem startsForm_of_isBareChar {c : Char} {t : List Char} (hb : isBareChar c = true) :
+    startsForm (c :: t) := by
+  obtain ⟨h1, h2, h3, _⟩ := isBareChar_props hb
+  exact ⟨c, t, rfl, h1, h2, h3⟩
+
+/-- `n` opening parens, the shape that drives the reader `n` levels down. -/
+def opens : Nat → List Char
+  | 0 => []
+  | n + 1 => '(' :: opens n
+
+theorem opens_add (a b : Nat) : opens (a + b) = opens a ++ opens b := by
+  induction a with
+  | zero => simp [opens]
+  | succ k ih => simp [opens, Nat.succ_add, ih]
+
+theorem startsForm_opens {k : Nat} {u : List Char} (hu : startsForm u) :
+    startsForm (opens k ++ u) := by
+  cases k with
+  | zero => simpa [opens] using hu
+  | succ j => exact ⟨'(', opens j ++ u, by simp [opens], by decide, by decide, by decide⟩
+
+theorem skipSpace_eq_self_startsForm {q : PState} {u : List Char}
+    (hu : startsForm u) (hq : q.input = u) : skipSpace q = q := by
+  obtain ⟨d, tl, hd, h1, h2, _⟩ := hu
+  exact skipSpace_eq_self (by rw [hq, hd]) h1 h2
+
+/-- `n` nested lists around a form put that form at depth `depth + n`, so the
+refusal fires exactly when `depth + n` first passes `maxDepth` — and it is
+located at the innermost position, `n` columns to the right of where the opens
+began. Neither the message nor the column depends on what the form is. -/
+theorem parseForm_nested_error {n : Nat} : ∀ {depth : Nat} {p : PState} {u : List Char},
+    depth + n = maxDepth + 1 → startsForm u → p.input = opens n ++ u →
+    parseForm depth p = .error (PState.locate ⟨u, p.line, p.col + n⟩ depthExceededMsg) := by
+  induction n with
+  | zero =>
+    intro depth p u hdepth _ hp
+    have hlt : maxDepth < depth := by omega
+    rw [parseForm_of_maxDepth_lt hlt]
+    simp [PState.locate]
+  | succ m ih =>
+    intro depth p u hdepth hu hp
+    have hnlt : ¬ maxDepth < depth := by omega
+    have hop : p.input = '(' :: (opens m ++ u) := by simpa [opens] using hp
+    have hstep : step p = ⟨opens m ++ u, p.line, p.col + 1⟩ := step_of_cons hop (by decide)
+    have hin : (step p).input = opens m ++ u := by rw [hstep]
+    have hline : (step p).line = p.line := by rw [hstep]
+    have hcol : (step p).col = p.col + 1 := by rw [hstep]
+    have hss : skipSpace (step p) = step p :=
+      skipSpace_eq_self_startsForm (startsForm_opens (k := m) hu) hin
+    have ihq := ih (depth := depth + 1) (p := step p) (u := u) (by omega) hu hin
+    obtain ⟨d, tl, hd, _, _, hdne⟩ := startsForm_opens (k := m) hu
+    have hlist : parseList depth (step p) []
+        = .error (PState.locate ⟨u, p.line, p.col + 1 + m⟩ depthExceededMsg) := by
+      refine parseList_error_of_parseForm_error [] (d := d) (tl := tl) ?_ hdne ?_
+      · rw [hss, hin, hd]
+      · rw [hss, ihq, hline, hcol]
+    rw [parseForm, if_neg hnlt]
+    split
+    case h_1 =>
+      rw [hlist]
+      simp only [liftParsed, PState.locate]
+      have : p.col + 1 + m = p.col + (m + 1) := by omega
+      rw [this]
+    case h_2 => rename_i tl' heq; rw [hop] at heq; simp at heq
+    case h_3 => rename_i d' tl' heq; rw [hop] at heq; simp at heq; exact absurd heq.1.symm d'
+    case h_4 => rename_i heq; rw [hop] at heq; simp at heq
+
+/-- Any input that opens more than `maxDepth` nested lists before its first form
+is refused, with the depth message, at line 1 column `maxDepth + 2` — the
+position of the first form that would sit one level too deep. -/
+theorem parseWire_nested_error {n : Nat} {u : List Char} (hu : startsForm u)
+    (hn : maxDepth < n) :
+    parseWire (String.ofList (opens n ++ u))
+      = .error (PState.locate ⟨opens (n - (maxDepth + 1)) ++ u, 1, maxDepth + 2⟩
+          depthExceededMsg) := by
+  obtain ⟨k, hnk⟩ : ∃ k, n = (maxDepth + 1) + k := ⟨n - (maxDepth + 1), by omega⟩
+  have hk : n - (maxDepth + 1) = k := by omega
+  have hsplit : opens n ++ u = opens (maxDepth + 1) ++ (opens k ++ u) := by
+    rw [hnk, opens_add, List.append_assoc]
+  have hu' : startsForm (opens k ++ u) := startsForm_opens hu
+  have hstart : skipSpace (⟨opens n ++ u, 1, 1⟩ : PState) = ⟨opens n ++ u, 1, 1⟩ :=
+    skipSpace_eq_self_startsForm (u := opens n ++ u)
+      (by rw [hsplit]; exact startsForm_opens hu') rfl
+  have hform := parseForm_nested_error (n := maxDepth + 1) (depth := 0)
+    (p := (⟨opens n ++ u, 1, 1⟩ : PState)) (u := opens k ++ u) (by omega) hu' (by rw [hsplit])
+  have harith : (1 : Nat) + (maxDepth + 1) = maxDepth + 2 := by omega
+  rw [parseWire, hk, String.toList_ofList, hstart, hform]
+  dsimp only
+  rw [harith]
 
 /-! ### Decode helpers -/
 
