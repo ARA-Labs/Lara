@@ -183,9 +183,10 @@ protocols time different work, on different inputs.
 Measured at commit `ad513b5` on 2026-09-11 with
 `make bench-map FORMAT=markdown`. The one-minute load average was 0.6 on 128
 cores. The CPU and RAM fields were supplied through `LARA_BENCH_HOST_CPU` and
-`LARA_BENCH_HOST_RAM_BYTES`, because the environment probe reads only macOS
-`sysctl` (a Linux probe is issue #325). Like the kernel snapshot, this is
-indicative: re-run it rather than cite it.
+`LARA_BENCH_HOST_RAM_BYTES`, because at that commit the environment probe
+read only macOS `sysctl`; the Linux probe (`/proc/cpuinfo`, `/proc/meminfo`)
+landed afterwards with issue #325, so the next snapshot needs no overrides.
+Like the kernel snapshot, this is indicative: re-run it rather than cite it.
 
 _Setting: 3 accepted map anchors; AMD EPYC 9354 32-Core Processor, 1507 GB RAM,
 linux/x86_64, GHC 9.10.3; every file pre-read by one untimed pass (paths are

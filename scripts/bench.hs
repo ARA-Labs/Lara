@@ -374,10 +374,10 @@ gatherEnv = do
   rev <- captureOverride "LARA_BENCH_GIT_REV" "git" ["rev-parse", "HEAD"]
   ghc <- captureOverride "LARA_BENCH_GHC_VERSION" "ghc" ["--numeric-version"]
   leanVer <- captureOverride "LARA_BENCH_LEAN_VERSION" "lean" ["--version"]
-  cpu <- captureOverride "LARA_BENCH_HOST_CPU" "sysctl" ["-n", "machdep.cpu.brand_string"]
+  cpu <- envOverride "LARA_BENCH_HOST_CPU" probeCpuModel
   memOverride <- lookupEnv "LARA_BENCH_HOST_RAM_BYTES"
   mem <- case memOverride of
-    Nothing -> readMaybe <$> capture "sysctl" ["-n", "hw.memsize"]
+    Nothing -> probeRamBytes
     Just raw -> case readMaybe raw of
       Just bytes | bytes >= 0 -> pure (Just bytes)
       _ -> die ("invalid LARA_BENCH_HOST_RAM_BYTES " ++ show raw)
@@ -394,12 +394,76 @@ gatherEnv = do
       }
 
 captureOverride :: String -> String -> [String] -> IO String
-captureOverride name cmd args = do
+captureOverride name cmd args = envOverride name (capture cmd args)
+
+-- | The environment variable @name@ when set, otherwise the probe. An override
+-- always wins over a probe, so a container or a CI job can pin the field the
+-- probe would get wrong, and an empty override is a mistake rather than a
+-- request for the fallback.
+envOverride :: String -> IO String -> IO String
+envOverride name probe = do
   override <- lookupEnv name
   case override of
-    Nothing -> capture cmd args
+    Nothing -> probe
     Just "" -> die ("empty " ++ name)
     Just value -> pure value
+
+-- | The host CPU model, per platform (issue #325): macOS asks @sysctl@; Linux
+-- reads the first @model name@ line of @\/proc\/cpuinfo@ and, when the kernel
+-- omits it (aarch64 kernels do), @lscpu@'s @Model name@ row. Any other platform,
+-- or every probe failing, yields @""@ and the caller records the architecture.
+probeCpuModel :: IO String
+probeCpuModel = case os of
+  "darwin" -> capture "sysctl" ["-n", "machdep.cpu.brand_string"]
+  "linux" -> do
+    cpuinfo <- readProbeFile "/proc/cpuinfo"
+    case fieldValue "model name" cpuinfo of
+      Just model -> pure model
+      Nothing -> do
+        lscpu <- capture "lscpu" []
+        case fieldValue "Model name" lscpu of
+          Just model -> pure model
+          Nothing -> probeFallback "cpu model" ("no `model name` in /proc/cpuinfo or lscpu on " ++ os) ""
+  _ -> probeFallback "cpu model" ("no probe for os " ++ show os) ""
+
+-- | Installed RAM in bytes, per platform: macOS asks @sysctl@; Linux reads
+-- @MemTotal@ from @\/proc\/meminfo@, which the kernel reports in KiB.
+probeRamBytes :: IO (Maybe Integer)
+probeRamBytes = case os of
+  "darwin" -> readMaybe <$> capture "sysctl" ["-n", "hw.memsize"]
+  "linux" -> do
+    meminfo <- readProbeFile "/proc/meminfo"
+    case memTotalBytes meminfo of
+      Just bytes -> pure (Just bytes)
+      Nothing -> probeFallback "ram" "no parsable `MemTotal: <n> kB` in /proc/meminfo" Nothing
+  _ -> probeFallback "ram" ("no probe for os " ++ show os) Nothing
+
+-- | @MemTotal@ of a @\/proc\/meminfo@ text, in bytes. The kernel prints the
+-- field in KiB under the unit @kB@; any other shape is unparsable rather than
+-- guessed at.
+memTotalBytes :: String -> Maybe Integer
+memTotalBytes meminfo = case words <$> fieldValue "MemTotal" meminfo of
+  Just [n, "kB"] -> (* 1024) <$> readMaybe n
+  _ -> Nothing
+
+-- | The trimmed value of the first @key: value@ line whose trimmed key is
+-- @key@, in the colon-separated table format @\/proc\/cpuinfo@,
+-- @\/proc\/meminfo@ and @lscpu@ share (the key may be padded with tabs before
+-- the colon, as @\/proc\/cpuinfo@ does).
+fieldValue :: String -> String -> Maybe String
+fieldValue key text =
+  case [trim (drop 1 rest) | line <- lines text, let (k, rest) = break (== ':') line, trim k == key] of
+    (value : _) | not (null value) -> Just value
+    _ -> Nothing
+
+-- | A probe file's contents, or @""@ when it cannot be read; named on stderr
+-- like a failed probe command.
+readProbeFile :: FilePath -> IO String
+readProbeFile path = do
+  result <- try (readFile path >>= \s -> length s `seq` pure s) :: IO (Either IOException String)
+  case result of
+    Right contents -> pure contents
+    Left err -> probeFallback path (show err) ""
 
 -- | A probe's trimmed stdout, or @""@ when the probe fails __or is absent__. The
 -- environment record is best-effort per platform, and @--map@ runs no Lean at
@@ -411,17 +475,25 @@ capture cmd args = do
   result <- try (readProcessWithExitCode cmd args "") :: IO (Either IOException (ExitCode, String, String))
   case result of
     Right (ExitSuccess, out, _err) -> pure (trim out)
-    Right (ExitFailure n, _, _) -> unknown ("exit " ++ show n)
-    Left err -> unknown (show err)
+    Right (ExitFailure n, _, _) -> probeFallback probe ("exit " ++ show n) ""
+    Left err -> probeFallback probe (show err) ""
   where
-    unknown why = do
-      hPutStrLn
-        stderr
-        ( "bench: environment probe `" ++ unwords (cmd : args) ++ "` failed ("
-            ++ why ++ "), so the record carries a fallback for that field"
-        )
-      pure ""
-    trim = f . f
+    probe = unwords (cmd : args)
+
+-- | Name a failed probe on stderr and return the field's fallback, so a blank
+-- or fallback field in the setting line always has a stated cause.
+probeFallback :: String -> String -> a -> IO a
+probeFallback probe why fallback = do
+  hPutStrLn
+    stderr
+    ( "bench: environment probe `" ++ probe ++ "` failed (" ++ why
+        ++ "), so the record carries a fallback for that field"
+    )
+  pure fallback
+
+trim :: String -> String
+trim = f . f
+  where
     f = reverse . dropWhile (`elem` " \t\r\n")
 
 -- Map mode (issue #319) ------------------------------------------------------
