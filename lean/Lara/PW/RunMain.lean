@@ -3,6 +3,8 @@ The Lean reference executable for `pw-run 1` (#322): `pw-run <file.sexp>`.
 
 It reads the run file, reads every `(file PATH)` world source relative to the
 run file's directory, and hands the pure `Lara.PW.Run.run` the parsed inputs.
+A `(lara PATH)` source is reported as a `world-input` fault: the reference has
+no surface parser, and the gate runs it on the document `lara pw-input` derives.
 Output is one S-expression on stdout either way — `pw-result 1` or
 `pw-error 1` — with the exit code `Error.exitCode` fixes. The Haskell
 `lara pw` door implements the same contract; `scripts/check-pw-conformance.py`
@@ -15,9 +17,13 @@ open Lara.Driver (Sx)
 open Lara.PW.Run
 
 /-- Read and parse a world source; failures stay per-world, so the pure loader
-reports them in declaration order. -/
+reports them in declaration order. A `lara` source is a presentation program,
+and this reference has no surface parser: it is reported as unreadable, and
+`lara pw-input` is the door that derives a run document with the envelope
+inline (#327). -/
 def readSource (dir : System.FilePath) : WorldSource → IO (Except String Sx)
   | .inline e => pure (.ok e)
+  | .lara p => pure (.error (p ++ ": lara sources have no Lean reader; derive an inline envelope with lara pw-input"))
   | .file p => do
     let rel : System.FilePath := p
     let path := if rel.isAbsolute then rel else dir / rel

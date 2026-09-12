@@ -1,0 +1,155 @@
+session:
+  id: 2026-09-12_001
+  date: '2026-09-12'
+  started: 2026-09-12T01:38+00:00
+  last_turn: 2026-09-12T04:20+00:00
+  turn_count: 2
+  summary: '#326 and #327 addressed together in one PR: a PW world with agreeing
+    duplicate-report groups is checked as declared (Lean: empty quarantine is the
+    identity, addWorld_checks_declared), a conflicting group is refused by name; .lara
+    world sources are elaborated by lara pw and reach the Lean reference through the
+    lara pw-input derivation door. Gate at 7 fixtures / 99 cases / 112 runs plus the
+    .lara family at 1 fixture / 16 cases / 20 runs, raised to 17 / 21 in turn 2 by
+    the review fix below.'
+events_logged:
+- turn: 1
+  type: decision
+  id: N326_consistent_groups
+  routing: direct
+  provenance: ai-suggested
+  summary: Refuse only a conflicting group, named, whatever the conflict mode; consistent
+    groups are inert and outside the context environment
+- turn: 1
+  type: decision
+  id: N327_lara_sources
+  routing: direct
+  provenance: ai-suggested
+  summary: (lara PATH) source form plus lara pw-input derivation door; pw-run version
+    stays 1
+- turn: 1
+  type: experiment
+  id: N326_327_conformance
+  routing: direct
+  provenance: ai-executed
+  summary: Both runtimes agree on 7 fixtures / 99 cases / 112 runs and on the derived
+    documents of the .lara family (1 fixture / 16 cases / 20 runs); 11 new AxCheck pins;
+    a pre-existing anchor-manifest gap found and fixed
+- turn: 2
+  type: decision
+  id: N327_lara_text_strict_utf8
+  routing: direct
+  provenance: ai-executed
+  summary: Presentation text a PW door reads is strict UTF-8, not UTF-8//ROUNDTRIP.
+    A permissive decoder turned a stray byte into a surrogate escape and elaborated a
+    world from a file lara check refuses to read, so lara pw accepted what the solo
+    door rejects. The three boundaries that must round-trip bytes (stdout, the
+    run-file argument, the file-system encoding) keep //ROUNDTRIP. Making the solo
+    door locale-independent is deferred with its cost stated (#334), because the
+    binding cost there is on the output side, not the read.
+- turn: 2
+  type: experiment
+  id: N326_327_conformance_rerun
+  routing: direct
+  provenance: ai-executed
+  summary: Gate rerun after the review fixes at 7 fixtures / 99 cases / 112 runs plus
+    1 .lara fixture / 17 source cases / 21 runs — the source family gained the direct
+    non-UTF-8 program case, which is the one the cross-driver comparison cannot see
+    because both PW doors share the boundary. cabal test all PASS, lake build 218
+    jobs, AxCheck coverage 3127 declarations, axiom audit passed, Lean citations PASS
+    (420), differential negative pass=66 fail=0. This supersedes turn 1's 16 / 20 for
+    the same gate; turn 1's numbers stand as the record of that run.
+- turn: 1
+  type: observation
+  id: O174
+  routing: staged
+  provenance: ai-suggested
+  summary: A Boolean reader of a conditional pipeline admits exactly the inputs where
+    the conditioning edit is provably the identity. Not promoted.
+- turn: 1
+  type: observation
+  id: O175
+  routing: staged
+  provenance: ai-suggested
+  summary: A frontend-only source form joins a two-runtime differential through a
+    derivation door that prints the frontend-free document. Not promoted.
+ai_actions:
+- turn: 1
+  action: 'Branched feat/pw-groups-and-lara-sources from main 28cae19. Lean: Groups
+    identity lemmas (quarantined_eq_nil, quarantineLeaves_nil, quarantineArgs_nil,
+    usesLeaf*_nil, keepArg_nil, anyConflict_eq_false_iff), WorldSource.lara, Tag.lara,
+    WorldError.groups with the group id, conflictingGroup, addWorld_decoded /
+    addWorld_quarantine_empty / addWorld_checks_declared, RunMain lara arm; 11 AxCheck
+    pins appended (no line shifts). Haskell: SourceLara / RLara in Lara.PW.Wire,
+    Lara.Elaborate.preparedCheckInput, group-conflict refusal, .lara readSource,
+    readRunFile / deriveRunFile / inlineSources, lara pw-input door with a shared UTF-8
+    text boundary that now also sets the locale encoding. Fixtures groups.sexp and
+    fixtures/pw/source/{lara.sexp,worlds/*}. Gate: group cases, a third family with
+    derivation checks and 16 source cases, derivation of every run fixture. PWSpec:
+    three new properties. docs/theory-pw-outer-runtime.md revised in place. Anchor
+    discovery excludes fixtures/pw in differential.sh and gen-anchor-manifest.sh.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Groups.lean
+  - lean/Lara/PW/Run.lean
+  - lean/Lara/PW/RunMain.lean
+  - lean/AxCheck.lean
+  - src/Lara/PW/Wire.hs
+  - src/Lara/PW/Run.hs
+  - src/Lara/Elaborate.hs
+  - app/Main.hs
+  - test/PWSpec.hs
+  - scripts/check-pw-conformance.py
+  - scripts/differential.sh
+  - scripts/gen-anchor-manifest.sh
+  - fixtures/pw/run/groups.sexp
+  - fixtures/pw/run/groups.expected
+  - fixtures/pw/source/
+  - docs/theory-pw-outer-runtime.md
+  - ara/evidence/proofs/pw_groups_lara_sources_326_327.md
+- turn: 2
+  action: 'Review resolution on PR #332 (reviewer fenfenai, two rounds). setLocaleEncoding
+    utf8 in pwTextBoundary (strict, replacing the //ROUNDTRIP variant); quarantineDetail
+    so the policy-quarantine refusal says why an audit refuses; gate case "lara: program
+    is not UTF-8"; the seven pre-envelope .lara refusals pinned to the step that stopped
+    rather than the shared world-input prefix, with tuple fragments for text on both
+    sides of an echoed path; SOURCE_LOCALE_CASES guard mirroring LOCALE_CASES; family-3
+    and addWorld docstring corrections (the Lean theorem covers leaves and args, not
+    attacks); the duplicate-id-before-source divergence between the two doors recorded
+    after reproducing it. Second round: boundary count (three, not two), the
+    quarantineDetail rationale corrected (Lara.Map.Load also turns an audit into a
+    refusal; preparedCheckInput renders nothing), two dangling Haddock links replaced by
+    code spans, and the base-owned IOError pins trimmed to the operation and reason.
+    Issue #334 opened for the solo door; docs/theory-pw-outer-runtime.md §2 records the
+    decision; the evidence record and its README row carry the new gate numbers.'
+  provenance: ai-executed
+  files_changed:
+  - app/Main.hs
+  - src/Lara/PW/Run.hs
+  - lean/Lara/PW/Run.lean
+  - scripts/check-pw-conformance.py
+  - docs/theory-pw-outer-runtime.md
+  - ara/evidence/proofs/pw_groups_lara_sources_326_327.md
+  - ara/evidence/README.md
+claims_touched: []
+logic_revisions: []
+key_context:
+- turn: 1
+  excerpt: 'User: now its time to address #326 and #327, let''s address them together,
+    direct do it and submit pr.'
+- turn: 2
+  excerpt: 'User: /receiving-code-review addrss all, push and reply, stop the loop
+    after the pr is approved.'
+open_threads:
+- 'PR #332 for #326/#327 on feat/pw-groups-and-lara-sources: two review rounds
+  addressed, awaiting approval and merge.'
+- '#331 tracks the Haskell-only nesting bound in the shared reader.'
+- 'The lara pw doors read .lara text as strict UTF-8, so a non-UTF-8 program is a
+  world-input read failure as it is for lara check; lara check on .lara still reads
+  through the locale, so under a non-UTF-8 locale it refuses a non-ASCII program the
+  PW doors accept. Decision recorded in docs/theory-pw-outer-runtime.md §2; the
+  remaining solo-door work is tracked by #334.'
+ai_suggestions_pending:
+- O169, O172, O173 remain staged; unendorsed.
+- O174 staged; the identity-of-empty-edit reading is one project, ai-suggested.
+- O175 staged; the derivation-door pattern is now used twice (map-input, pw-input)
+  but has no user endorsement.

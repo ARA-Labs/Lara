@@ -31,14 +31,25 @@ bridge declarations and posed queries use the #314 contract unchanged.
   frame's candidates and acceptance are the file's declared edges read by name.
 * `ResultTag.parse_text` / `ResultTag.text_injective` — every keyword of the
   result protocol has one spelling.
+* `addWorld_quarantine_empty` / `addWorld_checks_declared` — a world the loader
+  accepts has an empty §4.3 quarantine set, so the leaf table and argument list
+  it checks are the declared ones (#326). Consistent duplicate-report groups
+  are inert; only a conflicting group is refused.
 
 **The finite model boundary.** A context is inhabited by the worlds the file
 declares and nothing else; a bridge's candidate relation is the finite edge
 list; acceptance is the declared Boolean. `Sat` over an arbitrary frame is
 proposition-valued and is not claimed executable. A world is a check-input
 envelope accepted by `checkUnit`, so its statuses are the local checker's.
-Worlds declaring duplicate-report groups are refused: §4.3 quarantine makes
+A world whose duplicate-report groups all agree is checked as declared; a
+world with a conflicting group is refused, because §4.3 quarantine would make
 a public status conditional, which a Boolean status atom cannot say.
+
+**Sources.** A world's envelope is inline, or read from a file, or — the `lara`
+form (#327) — elaborated from a `.lara` presentation program by the Haskell
+runtime. This module has no surface parser, so the executable reports a `lara`
+source as `world-input`; `lara pw-input` derives an equivalent run document
+with every source inline, and that document is what the differential compares.
 
 **What stays explicit.** Canonicalizer agreement holds because every context
 uses the production `dcanon`. `leaf-ok` and `cert-ok` are parsed and required,
@@ -79,11 +90,15 @@ def Acceptance.isAccepted : Acceptance → Bool
   | .accepted => true
   | .rejected => false
 
-/-- Where a world's check-input envelope comes from. `file` paths are resolved
-by the executable, relative to the run file's directory. -/
+/-- Where a world's check-input envelope comes from. `file` and `lara` paths
+are resolved by the executable, relative to the run file's directory. A `lara`
+path names a presentation program to elaborate; this reference has no surface
+parser, so it can only report such a world as unreadable (`RunMain.readSource`).
+-/
 inductive WorldSource where
   | inline (input : Sx)
   | file (path : String)
+  | lara (path : String)
 
 structure WorldDecl where
   id : WorldId
@@ -116,7 +131,7 @@ structure RunDoc where
 
 /-- The run grammar's own keywords. Nested forms reuse `Wire`'s vocabulary. -/
 inductive Tag where
-  | run | worlds | world | inline | file | edges | edge | comparisons | compare
+  | run | worlds | world | inline | file | lara | edges | edge | comparisons | compare
 deriving DecidableEq, Repr
 
 def Tag.text : Tag → String
@@ -125,6 +140,7 @@ def Tag.text : Tag → String
   | .world => "world"
   | .inline => "inline"
   | .file => "file"
+  | .lara => "lara"
   | .edges => "edges"
   | .edge => "edge"
   | .comparisons => "comparisons"
@@ -136,6 +152,7 @@ def Tag.parse (s : String) : Option Tag :=
   if s = Tag.text .world then some .world else
   if s = Tag.text .inline then some .inline else
   if s = Tag.text .file then some .file else
+  if s = Tag.text .lara then some .lara else
   if s = Tag.text .edges then some .edges else
   if s = Tag.text .edge then some .edge else
   if s = Tag.text .comparisons then some .comparisons else
@@ -192,11 +209,13 @@ def decodeAcceptance : Sx → Except Wire.Error Acceptance
 def encodeSource : WorldSource → Sx
   | .inline e => tagged .inline [e]
   | .file p => tagged .file [.atom p]
+  | .lara p => tagged .lara [.atom p]
 
 def decodeSource (e : Sx) : Except Wire.Error WorldSource :=
   match head e with
   | some (.inline, [x]) => .ok (.inline x)
   | some (.file, [.atom p]) => .ok (.file p)
+  | some (.lara, [.atom p]) => .ok (.lara p)
   | _ => malformed "world-source"
 
 @[simp] theorem decodeSource_encode (s : WorldSource) :
@@ -348,8 +367,10 @@ inductive WorldError where
   | duplicateWorld (world : WorldId)
   /-- the world's source could not be read, parsed, or decoded as check-input -/
   | input (world : WorldId) (detail : String)
-  /-- the envelope declares duplicate-report groups (§4.3), unsupported here -/
-  | groups (world : WorldId)
+  /-- the envelope declares a duplicate-report group whose members disagree
+  (§4.3): quarantine would fire, or the policy would escalate to R9 — either way
+  the world is not an unconditionally checked unit. Names the first such group. -/
+  | groups (world : WorldId) (group : String)
   /-- replay preflight or the local checker rejected the world -/
   | rejected (world : WorldId) (rejection : Lara.Driver.WireRejection)
   /-- the envelope's environment differs from its context's first world -/
@@ -411,16 +432,30 @@ def placeWorld (wid : WorldId) (cname : CtxId) (env : Env) (ground : List Atom)
       let rest ← placeWorld wid cname env ground args atts cs
       pure (c :: rest)
 
-/-- Load one world, mirroring the local driver's pipeline for a group-free
-envelope: decode, replay preflight, then `checkUnit` over the environment's
-leaves, theories and the envelope's queries as its ground atoms. -/
+/-- The first declared group whose members disagree, in declaration order. -/
+def conflictingGroup (d : Lara.Driver.Decoded) : Option Groups.DupGroup :=
+  d.groups.find? (fun g => ! Groups.consistentB Lara.Driver.dcanon d.leaves g)
+
+/-- Load one world, mirroring the local driver's pipeline: decode, refuse a
+conflicting duplicate-report group, replay preflight, then `checkUnit` over the
+environment's leaves, theories and the envelope's queries as its ground atoms.
+
+With no conflicting group the local driver's §4.3 quarantine is empty
+(`Groups.quarantined_eq_nil`), so the leaf table and argument list handed to
+`checkUnit` here are exactly the ones it would check
+(`addWorld_checks_declared`). The attack list follows in fact — the local
+driver's `keepAttack` filter only drops attacks whose arguments were
+quarantined, and none were — but no theorem states that, so the citation
+covers the two the theorem names and not attacks. -/
 def addWorld (ctxs : List LoadedCtx) (seen : List WorldId) (wi : WorldInput) :
     Except WorldError (List LoadedCtx) := do
   if seen.contains wi.id then throw (.duplicateWorld wi.id)
   let e ← wi.input.mapError (.input wi.id)
   let ci ← (Lara.Driver.decodeCheckInput e).mapError (.input wi.id)
   let d := ci.decoded
-  if !d.groups.isEmpty then throw (.groups wi.id)
+  match conflictingGroup d with
+  | some g => throw (.groups wi.id g.id)
+  | none =>
   if (Lara.Driver.runtimeReplayFailure ci.replayId d.argIds d.args).isSome then
     throw (.rejected wi.id (.rejectClass .R13))
   let ground := d.leaves.map (·.2) ++ d.theories.flatMap (·.2) ++ d.queries
@@ -571,6 +606,58 @@ theorem loadWorlds_nodup {inputs : List WorldInput} {ctxs : List LoadedCtx}
     (h : loadWorlds [] [] inputs = .ok ctxs) :
     ∀ c ∈ ctxs, (c.worlds.map (·.id)).Nodup := fun c hc =>
   (loadWorlds_ids (fun _ hc => absurd hc List.not_mem_nil) h c hc).1
+
+/-! ### Accepted worlds are unquarantined (#326)
+
+The loader passes the decoded leaves, arguments and attacks to `checkUnit`
+untouched, while the local driver first applies the §4.3 quarantine. The two
+agree because the loader refuses every world with a conflicting group: for the
+worlds it accepts, the quarantine set is empty, and quarantine is the identity.
+-/
+
+/-- The decoded envelope behind a world the loader accepted: it was read,
+decoded, and none of its duplicate-report groups conflicts. -/
+theorem addWorld_decoded {ctxs ctxs' : List LoadedCtx} {seen : List WorldId} {wi : WorldInput}
+    (h : addWorld ctxs seen wi = .ok ctxs') :
+    ∃ e ci, wi.input = .ok e ∧ Lara.Driver.decodeCheckInput e = .ok ci ∧
+      ∀ g ∈ ci.decoded.groups, Groups.consistentB Lara.Driver.dcanon ci.decoded.leaves g = true := by
+  unfold addWorld at h
+  split at h
+  · nomatch h
+  · obtain ⟨e, he, h⟩ := bind_eq_ok.mp h
+    obtain ⟨ci, hci, h⟩ := bind_eq_ok.mp h
+    refine ⟨e, ci, mapError_eq_ok.mp he, mapError_eq_ok.mp hci, ?_⟩
+    simp only at h
+    split at h
+    · nomatch h
+    · rename_i hfind
+      intro g hg
+      have := List.find?_eq_none.mp hfind g hg
+      simpa [conflictingGroup] using this
+
+/-- **An accepted world's quarantine set is empty.** -/
+theorem addWorld_quarantine_empty {ctxs ctxs' : List LoadedCtx} {seen : List WorldId}
+    {wi : WorldInput} (h : addWorld ctxs seen wi = .ok ctxs') :
+    ∃ e ci, wi.input = .ok e ∧ Lara.Driver.decodeCheckInput e = .ok ci ∧
+      Groups.quarantined Lara.Driver.dcanon ci.decoded.leaves ci.decoded.groups = [] := by
+  obtain ⟨e, ci, he, hci, hcons⟩ := addWorld_decoded h
+  exact ⟨e, ci, he, hci, Groups.quarantined_eq_nil _ _ _ hcons⟩
+
+/-- **The loader checks the declared unit.** For an accepted world, the local
+driver's quarantined leaf table and argument list are the declared ones, so
+`checkUnit` sees the same program under both drivers. -/
+theorem addWorld_checks_declared {ctxs ctxs' : List LoadedCtx} {seen : List WorldId}
+    {wi : WorldInput} (h : addWorld ctxs seen wi = .ok ctxs') :
+    ∃ e ci, wi.input = .ok e ∧ Lara.Driver.decodeCheckInput e = .ok ci ∧
+      Groups.quarantineLeaves
+          (Groups.quarantined Lara.Driver.dcanon ci.decoded.leaves ci.decoded.groups)
+          ci.decoded.leaves = ci.decoded.leaves ∧
+      Groups.quarantineArgs
+          (Groups.quarantined Lara.Driver.dcanon ci.decoded.leaves ci.decoded.groups)
+          ci.decoded.argsRaw = ci.decoded.argsRaw := by
+  obtain ⟨e, ci, he, hci, hq⟩ := addWorld_quarantine_empty h
+  exact ⟨e, ci, he, hci, by rw [hq, Groups.quarantineLeaves_nil],
+    by rw [hq, Groups.quarantineArgs_nil]⟩
 
 /-! ## 4. The host a run declares -/
 
@@ -1270,7 +1357,7 @@ def encodeBridgeFault : BridgeError → Sx
 def encodeWorldError : WorldError → Sx
   | .duplicateWorld w => node .duplicateWorld [.atom w.name]
   | .input w detail => node .worldInput [.atom w.name, .atom detail]
-  | .groups w => node .worldGroups [.atom w.name]
+  | .groups w g => node .worldGroups [.atom w.name, .atom g]
   | .rejected w r => node .worldRejected
       [.atom w.name, .atom (Lara.Driver.wireRejectionString r)]
   | .environment w c => node .contextEnvironment [.atom w.name, .atom c.name]

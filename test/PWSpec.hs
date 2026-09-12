@@ -8,8 +8,13 @@
 -- @scripts\/check-pw-conformance.py@ compares the two runtimes byte for byte.
 -- Here the Haskell side is held to the same statements in-process:
 --
---   * __committed goldens__ — every @fixtures\/pw\/run\/*.sexp@ runs to its
---     @*.expected@ bytes without the CLI;
+--   * __committed goldens__ — every @fixtures\/pw\/run\/*.sexp@ and
+--     @fixtures\/pw\/source\/*.sexp@ runs to its @*.expected@ bytes without
+--     the CLI, and the document 'deriveRunFile' derives from it — every
+--     source inline — runs to the same bytes (#327);
+--   * __groups__ — a duplicate-report group whose members agree changes no
+--     answer, and a conflicting group is refused by name, under both
+--     conflict modes (#326);
 --   * __round trips__ — structured and textual, over generated documents
 --     whose names include quotes, backslashes, newlines, Unicode and the
 --     empty string;
@@ -23,7 +28,7 @@
 --     result keyword has its own spelling.
 module PWSpec (pwSpecProps) where
 
-import Data.List (isSuffixOf, nub, sort)
+import Data.List (isPrefixOf, isSuffixOf, nub, sort)
 import Data.Maybe (isJust, isNothing)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -33,6 +38,7 @@ import Test.QuickCheck
 
 import Lara.AST
   ( AtomPat (..)
+  , GroupId (..)
   , LeafId (..)
   , Mode (..)
   , Necessity (..)
@@ -114,7 +120,7 @@ genSExpr n
 genRunDoc :: Gen RunDoc
 genRunDoc =
   RunDoc
-    <$> resize 3 (listOf (WorldDecl <$> (WorldId <$> genName) <*> (CtxId <$> genName) <*> oneof [SourceInline <$> genSExpr 3, SourceFile <$> genName]))
+    <$> resize 3 (listOf (WorldDecl <$> (WorldId <$> genName) <*> (CtxId <$> genName) <*> oneof [SourceInline <$> genSExpr 3, SourceFile <$> genName, SourceLara <$> genName]))
     <*> resize 3 (listOf (EdgeDecl <$> (BridgeId <$> genName) <*> (WorldId <$> genName) <*> (WorldId <$> genName) <*> elements [Accepted, Rejected]))
     <*> resize 3 (listOf (CompareDecl <$> (BridgeId <$> genName) <*> (WorldId <$> genName) <*> genProp))
     <*> genDocument
@@ -123,23 +129,107 @@ genRunDoc =
 -- Committed goldens
 -- ---------------------------------------------------------------------------
 
-fixtureDir :: FilePath
-fixtureDir = "fixtures/pw/run"
+-- | The committed run documents: envelope worlds, and @.lara@ worlds.
+fixtureDirs :: [FilePath]
+fixtureDirs = ["fixtures/pw/run", "fixtures/pw/source"]
+
+fixturePaths :: IO [FilePath]
+fixturePaths =
+  concat
+    <$> mapM
+      (\dir -> map (dir </>) . sort . filter (".sexp" `isSuffixOf`) <$> listDirectory dir)
+      fixtureDirs
+
+renderResult :: Either PWError Outcome -> String
+renderResult = either (printSExpr . encodeError) (printSExpr . encodeOutcome)
 
 -- | Every committed run document produces its golden bytes in-process.
 prop_goldenFixtures :: Property
 prop_goldenFixtures = once $ ioProperty $ do
-  files <- sort . filter (".sexp" `isSuffixOf`) <$> listDirectory fixtureDir
+  files <- fixturePaths
   results <- mapM check files
-  pure (conjoin (counterexample "no fixtures" (not (null files)) : results))
+  pure (conjoin (counterexample "no fixtures" (length files > 1) : results))
   where
-    check file = do
-      let path = fixtureDir </> file
+    check path = do
       expected <- readFile (replaceExtension path "expected")
       outcome <- runPWFile path
-      pure $ counterexample file $ case outcome of
+      pure $ counterexample path $ case outcome of
         Left err -> counterexample (printSExpr (encodeError err)) False
         Right o -> printSExpr (encodeOutcome o) ++ "\n" === expected
+
+-- | The inputs of a document whose sources are all inline; 'Nothing' if one
+-- is not.
+inlineInputs :: RunDoc -> Maybe [WorldInput]
+inlineInputs doc = mapM input (rdWorlds doc)
+  where
+    input d = case wdSource d of
+      SourceInline e -> Just (WorldInput (wdId d) (wdContext d) (Right e))
+      _ -> Nothing
+
+-- | Derivation preserves every fixture's run (#327): the derived document
+-- has only inline sources, and running it gives the fixture's golden — the
+-- in-process half of what the gate checks across both drivers.
+prop_derivationPreservesRuns :: Property
+prop_derivationPreservesRuns = once $ ioProperty $ do
+  files <- fixturePaths
+  results <- mapM check files
+  pure (conjoin results)
+  where
+    check path = do
+      expected <- readFile (replaceExtension path "expected")
+      derived <- deriveRunFile path
+      pure $ counterexample path $ case derived of
+        Left err -> counterexample (printSExpr (encodeError err)) False
+        Right doc -> case inlineInputs doc of
+          Nothing -> counterexample "a source was not inlined" False
+          Just inputs -> renderResult (runPW doc inputs) ++ "\n" === expected
+
+-- | Run a document given as text with inline worlds only.
+runInlineText :: String -> Either PWError Outcome
+runInlineText text = do
+  doc <- either (Left . PWWire) Right (decodeText text)
+  inputs <- maybe (Left (PWIO "a source was not inline")) Right (inlineInputs doc)
+  runPW doc inputs
+
+-- | Replace @old@ by @new@, or fail loudly, so a stale fixture cannot turn a
+-- case into a rerun of the unmodified input.
+substitute :: String -> String -> String -> Either String String
+substitute old new text = case breakOn old text of
+  Nothing -> Left ("substitution target absent: " ++ old)
+  Just (before, after) -> Right (before ++ new ++ after)
+  where
+    breakOn needle hay = go "" hay
+      where
+        go _ [] = Nothing
+        go acc rest@(c : cs)
+          | needle `isPrefixOf` rest = Just (reverse acc, drop (length needle) rest)
+          | otherwise = go (c : acc) cs
+
+-- | Duplicate-report groups (#326): a group whose members agree is inert
+-- under both conflict modes, and a conflicting group refuses the world by
+-- name, whatever the mode, naming the first such group. Each variant edits
+-- the inline fixture's first world; l1 and l3 report p, l2 reports q, and l3
+-- is added to both worlds because a context's leaf table is its environment.
+prop_groupsInertOrRefused :: Property
+prop_groupsInertOrRefused = once $ ioProperty $ do
+  text <- readFile "fixtures/pw/run/inline.sexp"
+  expected <- readFile "fixtures/pw/run/inline.expected"
+  let withL3 = substitute "(leaf l2 (atom q)))" "(leaf l2 (atom q)) (leaf l3 (atom p)))" text
+        >>= substitute "(leaf l2 (atom q)))" "(leaf l2 (atom q)) (leaf l3 (atom p)))"
+      groups g = substitute "(queries (atom p))" ("(queries (atom p)) (groups " ++ g ++ ")")
+      refused g = printSExpr (encodeError (PWWorld (WorldGroups (WorldId "w0") (GroupId g))))
+      completes = (=== expected) . (++ "\n")
+      run caseName variant check = counterexample caseName $ case variant of
+        Left why -> counterexample why False
+        Right t -> check (renderResult (runInlineText t))
+  pure $
+    conjoin
+      [ run "conflict" (groups "quarantine (group g1 (l1 l2))" text) (=== refused "g1")
+      , run "conflict under reject" (groups "reject (group g1 (l1 l2))" text) (=== refused "g1")
+      , run "consistent" (withL3 >>= groups "quarantine (group g1 (l1 l3))") completes
+      , run "consistent under reject" (withL3 >>= groups "reject (group g1 (l1 l3))") completes
+      , run "first conflicting group named" (withL3 >>= groups "quarantine (group g0 (l1 l3)) (group g1 (l1 l2)) (group g2 (l2 l3))") (=== refused "g1")
+      ]
 
 -- ---------------------------------------------------------------------------
 -- Codecs
@@ -173,6 +263,8 @@ prop_malformedMatrix =
         , ("(pw-run 1 (edges) (worlds) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "worlds")
         , ("(pw-run 1 (worlds (world w c)) (edges) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "world")
         , ("(pw-run 1 (worlds (world w c (file))) (edges) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "world-source")
+        , ("(pw-run 1 (worlds (world w c (lara))) (edges) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "world-source")
+        , ("(pw-run 1 (worlds (world w c (lara (p)))) (edges) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "world-source")
         , ("(pw-run 1 (worlds) (edges (edge b w v yes)) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "acceptance")
         , ("(pw-run 1 (worlds) (edges (edge b w yes)) (comparisons) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "edge")
         , ("(pw-run 1 (worlds) (edges) (comparisons (compare b w)) (pw-surface 1 (bridges) (queries)))", CodecMalformed, "comparison")
@@ -346,6 +438,8 @@ prop_exitCodes =
 pwSpecProps :: [(String, IO Result)]
 pwSpecProps =
   [ ("pw committed run goldens", quickCheckResult prop_goldenFixtures)
+  , ("pw derivation preserves every fixture's run", quickCheckResult prop_derivationPreservesRuns)
+  , ("pw consistent groups are inert, conflicting groups refused", quickCheckResult prop_groupsInertOrRefused)
   , ("pw-run structured round trip", quickCheckResult prop_runRoundTrip)
   , ("pw-run text round trip", quickCheckResult prop_runTextRoundTrip)
   , ("pw malformed matrix names Lean's constructs", quickCheckResult prop_malformedMatrix)

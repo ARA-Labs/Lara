@@ -106,7 +106,9 @@ for root in fixtures examples bundles corpus-units; do
   # (fixtures/admission/) belong to scripts/admission-differential.sh; and a
   # map's two committed artifacts are a map-check-input@1 parity envelope and a
   # map-verdict@1 composite golden, which scripts/check-map-conformance.sh and
-  # test/MapSpec.hs own.
+  # test/MapSpec.hs own. A fifth, the possible-world fixtures (fixtures/pw/),
+  # holds pw-surface and pw-run documents and the world envelopes they name;
+  # scripts/check-pw-conformance.py and scripts/check-pw-example.py own them.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both
   # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these
@@ -118,7 +120,8 @@ for root in fixtures examples bundles corpus-units; do
   # its own manifest: a stray unlisted file is a setup failure, never a free
   # pass.
   if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" \
-      -not -path "$root/admission/*" -not -name 'map.core.sexp' -not -name 'map.verdict.sexp' \
+      -not -path "$root/admission/*" -not -path "$root/pw/*" \
+      -not -name 'map.core.sexp' -not -name 'map.verdict.sexp' \
       -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"
     exit 2

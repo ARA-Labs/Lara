@@ -10,23 +10,41 @@ output. The Lean definitions carry the proofs (`Model.evaluates_iff`,
 `Model.compare_mem_iff_sat`); this gate is the evidence that the Haskell
 runtime computes the same thing.
 
-Two families:
+Three families:
 
 1. Committed fixtures (fixtures/pw/run/*.sexp). Each fixture's stdout must
    equal its committed `*.expected` golden byte for byte, from both drivers,
    with exit 0. `--update` rewrites the goldens from the Haskell driver, and
-   only after the Lean driver has produced the same bytes.
+   only after the Lean driver has produced the same bytes. Each fixture is
+   also derived with `lara pw-input`, and the derived document — every world
+   source inline — must run to the same golden on both drivers.
 2. Mutations of those fixtures: every error stage and fault; stage order, and
    fault order within each stage; every field of a context's environment; the
-   rule clause under a renaming symbol map; map and acceptance dependence; and
-   the text boundary (quoted Unicode names, non-ASCII file paths and run
-   directories, files that are not UTF-8). For each case both drivers must
-   agree on the exit code and on stdout, and stdout must contain the fragment
-   the case names; some cases also pin stdout, or its queries section, to a
-   committed golden. Agreement is byte equality except for the three faults
-   whose last atom is runtime-specific text (a reader's syntax message, a
-   world's read or decode failure, and an unreadable run file): there that one
-   atom is masked, and every other atom, including the arity, must agree.
+   rule clause under a renaming symbol map; duplicate-report groups that agree
+   and that conflict, under both conflict modes (#326); map and acceptance
+   dependence; and the text boundary (quoted Unicode names, non-ASCII file
+   paths and run directories, files that are not UTF-8). For each case both
+   drivers must agree on the exit code and on stdout, and stdout must contain
+   the fragment the case names; some cases also pin stdout, or its queries
+   section, to a committed golden. Agreement is byte equality except for the
+   three faults whose last atom is runtime-specific text (a reader's syntax
+   message, a world's read or decode failure, and an unreadable run file):
+   there that one atom is masked, and every other atom, including the arity,
+   must agree.
+3. `.lara` world sources (fixtures/pw/source/*.sexp, #327). Only `lara pw`
+   can elaborate a `(lara PATH)` world, so this family runs `lara pw` on the
+   run file, then runs `lara pw-input` and hands the derived document to both
+   drivers: their bytes must equal `lara pw`'s on the original. The committed
+   fixture also pins that output to a golden and requires the Lean `pw-run` to
+   refuse the original file as `world-input` — that half is the committed
+   fixture's alone (`check_source_fixtures`), because it is what says the Lean
+   reference has no surface parser; the generated cases never run Lean on the
+   original, only on the derived document. They cover every way a `.lara` world
+   stops before an envelope exists (unreadable, not UTF-8, unparsable, no
+   policy, elaboration failure, admission stop, policy quarantine), a
+   conflicting group reached through elaboration, mixed inline and `.lara`
+   worlds, and non-ASCII program paths and text. When `lara pw` refuses a
+   world's source, `lara pw-input` must print the same envelope.
 
 The Unicode-name and non-ASCII path cases run again under `LC_ALL=C` and under
 an ISO-8859-1 locale, because both drivers must use UTF-8 for output, for the
@@ -49,6 +67,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / 'fixtures/pw/run'
+SOURCES = ROOT / 'fixtures/pw/source'
 LEAN = ROOT / 'lean/.lake/build/bin/pw-run'
 C_LOCALE = {'LC_ALL': 'C', 'LANG': 'C'}
 # An 8-bit locale: every argv byte decodes to some character, so a runtime that
@@ -162,7 +181,8 @@ TEXT_BOUNDARY = [C_LOCALE, LATIN1]
 
 # (name, base fixture or None, substitutions, options, exit, fragment).
 # A substitution is (old, new) or (old, new, nth). A base of None means the
-# first substitution's `new` is the whole input (text or bytes).
+# first substitution's `new` is the whole input (text or bytes). `fragment` is
+# one string stdout must contain, or a tuple of strings all of which it must.
 CASES = [
     # Wire: the run codec and the embedded pw-surface codec.
     ('syntax: trailing form', 'fields', [], {'append': '\n(extra)'}, 2, '(pw-error 1 wire syntax '),
@@ -182,7 +202,19 @@ CASES = [
     ('missing world file', 'fields', [('worlds/src-s2.sexp', 'worlds/missing.sexp')], {}, 1, '(world-input s2 '),
     ('world file syntax', 'fields', [('worlds/src-s2.sexp', 'worlds/broken.sexp')], {'worlds/broken.sexp': '(check-input'}, 1, '(world-input s2 '),
     ('world not check-input', 'inline', [('(check-input', '(check-inputs', 1)], {}, 1, '(world-input w0 '),
-    ('world with groups', 'inline', [('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l2)))', 1)], {}, 1, '(pw-error 1 world (world-groups w0))'),
+    # Duplicate-report groups (#326): a group whose members disagree is refused
+    # and named, whatever the conflict mode; a group whose members agree is
+    # inert, so the run answers exactly as without it. l1 and l3 both report
+    # p; l2 reports q. l3 is added to both worlds, since a context's leaf
+    # table is part of its environment.
+    ('world with a conflicting group', 'inline', [('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l2)))', 1)], {}, 1, '(pw-error 1 world (world-groups w0 g1))'),
+    ('world with a conflicting group under reject mode', 'inline', [('(queries (atom p))', '(queries (atom p)) (groups reject (group g1 (l1 l2)))', 1)], {}, 1, '(pw-error 1 world (world-groups w0 g1))'),
+    ('world with a consistent group', 'inline', [('(leaf l2 (atom q)))', '(leaf l2 (atom q)) (leaf l3 (atom p)))'), ('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l3)))', 1)], {'golden': 'inline'}, 0, '(pw-result 1 '),
+    ('world with a consistent group under reject mode', 'inline', [('(leaf l2 (atom q)))', '(leaf l2 (atom q)) (leaf l3 (atom p)))'), ('(queries (atom p))', '(queries (atom p)) (groups reject (group g1 (l1 l3)))', 2)], {'golden': 'inline'}, 0, '(pw-result 1 '),
+    ('first conflicting group is named', 'inline', [('(leaf l2 (atom q)))', '(leaf l2 (atom q)) (leaf l3 (atom p)))'), ('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g0 (l1 l3)) (group g1 (l1 l2)) (group g2 (l2 l3)))', 1)], {}, 1, '(pw-error 1 world (world-groups w0 g1))'),
+    # A group naming an undeclared leaf is malformed (R14) at decoding, before
+    # any group is compared.
+    ('group with an undeclared member', 'inline', [('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l9)))', 1)], {}, 1, '(world-input w0 '),
     ('replay preflight', 'inline', [('(backends (backend nd 1))', '(backends (backend zz 1))', 1)], {}, 1, '(pw-error 1 world (world-rejected w0 R13))'),
     ('checker rejection', 'inline', [('(attacks (undermine a2 a1 (pos)))', '(attacks)')], {}, 1, '(pw-error 1 world (world-rejected w1 missing-conflict))'),
     ('undeclared leaf', 'inline', [('(arg a2 (leaf l2))', '(arg a2 (leaf l9))')], {}, 1, '(pw-error 1 world (world-rejected w1 '),
@@ -246,7 +278,7 @@ CASES = [
     ('within wire: run sections before document', None, [(None, '(pw-run 1 (worlds) (edges (edge b)) (comparisons) (pw-surface 1 (bridges) (queries (pose c))))')], {}, 2, '(pw-error 1 wire malformed edge)'),
     ('within world: duplicate before reading', 'fields', [('(world s1 src (file "worlds/src-s1.sexp"))', '(world s0 src (file "worlds/missing.sexp"))')], {}, 1, '(pw-error 1 world (duplicate-world s0))'),
     ('within world: decoding before groups', 'inline', [('(check-input', '(check-inputs', 1), ('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l2)))', 1)], {}, 1, '(world-input w0 '),
-    ('within world: groups before preflight', 'inline', [('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l2)))', 1), ('(backends (backend nd 1))', '(backends (backend zz 1))', 1)], {}, 1, '(pw-error 1 world (world-groups w0))'),
+    ('within world: groups before preflight', 'inline', [('(queries (atom p))', '(queries (atom p)) (groups quarantine (group g1 (l1 l2)))', 1), ('(backends (backend nd 1))', '(backends (backend zz 1))', 1)], {}, 1, '(pw-error 1 world (world-groups w0 g1))'),
     ('within world: preflight before environment', 'inline', [('(preds (pred p (args)) (pred q (args)))', '(preds (pred p (args)) (pred q (args)) (pred r (args)))', 2), ('(backends (backend nd 1))', '(backends (backend zz 1))', 2)], {}, 1, '(pw-error 1 world (world-rejected w1 R13))'),
     ('within world: environment before checking', 'inline', [('(preds (pred p (args)) (pred q (args)))', '(preds (pred p (args)) (pred q (args)) (pred r (args)))', 2), ('(attacks (undermine a2 a1 (pos)))', '(attacks)')], {}, 1, '(pw-error 1 world (context-environment w1 c))'),
     ('within bridge: duplicate before endpoints', 'fields', [('(bridge back tgt src', '(bridge b nowhere src')], {}, 1, '(pw-error 1 bridge (duplicate-bridge b))'),
@@ -296,6 +328,95 @@ CASES = [
 LOCALE_CASES = {'quoted unicode names', 'non-ascii world path', 'non-ascii run file path',
                 'non-ascii run directory', 'missing non-ascii run file',
                 'missing world under non-ascii directory'}
+
+
+def world_text(name):
+    """A committed .lara world's text, for cases that write a variant of it."""
+    return (SOURCES / 'worlds' / name).read_text(encoding='utf-8')
+
+
+def policy_text(extra):
+    """The committed pw-lara policy under a new id, with `extra` appended."""
+    return world_text('pw-lara.policy.lara').replace('policy pw-lara', 'policy pw-variant') + extra
+
+
+# The groups.sexp fixture's w1, as an inline source: it declares the leaf
+# table w0.lara elaborates to, so it can share w0.lara's context.
+INLINE_W1 = ('(inline (check-input (replay-id (core lara-core@0.2) (policy pw-t7) (backends (backend nd 1))'
+             ' (theories) (artifact pw-groups-w1)) (unit (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))'
+             ' (policy (rules) (contraries (contrary (apat q) (apat p))) (exceptions)) (theories)'
+             ' (leaves (leaf l1 (atom p)) (leaf l2 (atom q)) (leaf l3 (atom p))) (args (arg a1 (leaf l1)) (arg a2 (leaf l2)))'
+             ' (attacks (undermine a2 a1 (pos))) (queries (atom p)) (groups reject (group g1 (l1 l3))))))')
+
+# (name, substitutions on lara.sexp, options, exit, fragment). Options are
+# those of CASES; extra keys write files under the run directory, beside the
+# copied fixtures/pw/source/worlds. Every case runs `lara pw` on the run file,
+# then `lara pw-input`: a derived document must run to `lara pw`'s bytes on
+# both drivers, and a refused derivation must print `lara pw`'s envelope.
+SOURCE_CASES = [
+    # Every way a .lara world stops before an envelope exists is world-input.
+    # Each fragment names the step that stopped, not just the fault: the seven
+    # pre-envelope refusals share one constructor, so a prefix-only assertion
+    # would let a policy-parse failure pass a source-invalid case vacuously.
+    #
+    # Two of them ("cannot read" for a missing file and for one that is not
+    # UTF-8) are told apart only by GHC's own `IOError` text, so that much is
+    # `base`-owned rather than this project's. The pins stop at the operation
+    # and reason (`openFile: does not exist`, `hGetContents: invalid argument`)
+    # and deliberately omit the parenthetical `strerror` tail, which is the
+    # part a platform or toolchain can reword with no behaviour change.
+    ('lara: missing program', [('worlds/w0.lara', 'worlds/missing.lara')], {}, 1, ('(pw-error 1 world (world-input w0 "cannot read ', 'worlds/missing.lara: openFile: does not exist')),
+    ('lara: program does not parse', [('worlds/w0.lara', 'worlds/broken.lara')], {'worlds/broken.lara': 'artifact x at'}, 1, ('(world-input w0 "parse error at ', 'worlds/broken.lara:1:14: expected an identifier"))')),
+    # Program text that is not UTF-8: the locale encoding the PW doors set is
+    # strict, so this is the same read failure `lara check` reports rather than
+    # a surrogate-escaped decode. Both PW doors agree either way, so only this
+    # direct case sees it — the cross-driver comparison cannot.
+    ('lara: program is not UTF-8', [('worlds/w0.lara', 'worlds/latin1.lara')], {'worlds/latin1.lara': b'# bad byte: \xff\n' + world_text('w0.lara').encode('utf-8')}, 1, ('(world-input w0 "cannot read ', 'worlds/latin1.lara: hGetContents: invalid argument')),
+    ('lara: policy missing', [('worlds/w0.lara', 'worlds/nopolicy.lara')], {'worlds/nopolicy.lara': world_text('w0.lara').replace('policy pw-lara', 'policy nowhere')}, 1, ('(world-input w0 "cannot read policy ', 'worlds/nowhere.policy.lara: openFile: does not exist')),
+    ('lara: source invalid', [('worlds/w0.lara', 'worlds/duplicate-leaf.lara')], {'worlds/duplicate-leaf.lara': world_text('w0.lara').replace('leaf l3 : p', 'leaf l1 : p')}, 1, '(world-input w0 "source invalid: duplicate leaf id '),
+    # An undeclared leaf reference elaborates, and is the checker's R1 on the
+    # derived envelope, exactly as on a hand-written one.
+    ('lara: undeclared leaf is the checker\'s R1', [('worlds/w0.lara', 'worlds/undeclared.lara')], {'worlds/undeclared.lara': world_text('w0.lara').replace('by leaf(l3)', 'by leaf(l9)')}, 1, '(pw-error 1 world (world-rejected w0 R1))'),
+    ('lara: admission stop', [('worlds/w0.lara', 'worlds/stop.lara')],
+     {'worlds/stop.lara': world_text('w0.lara').replace('policy pw-lara', 'policy pw-variant'),
+      'worlds/pw-variant.policy.lara': policy_text('\nadmission { (observed, user) = reject }\n')}, 1, '(world-input w0 "leaf \'l1\': kind=observed, provenance=user matched admission row (observed, user) = reject (R8)'),
+    # A policy quarantine prunes support the frozen envelope cannot express,
+    # so no envelope is derived (Lara.Elaborate.sourceResultCheckInput). The
+    # detail says that, then the audit: the audit line alone is what `lara
+    # check` prints beside an accept.
+    ('lara: policy quarantine', [('worlds/w0.lara', 'worlds/quarantined.lara')],
+     {'worlds/quarantined.lara': world_text('w0.lara').replace('policy pw-lara', 'policy pw-variant'),
+      'worlds/pw-variant.policy.lara': policy_text('\nadmission { (observed, user) = quarantine }\n')}, 1, '(world-input w0 "policy quarantine: a check-input envelope cannot express a pruned unit; admission audit: leaves [l1{policy-quarantine}'),
+    # Worlds are read in order, and the first without an envelope is reported.
+    ('lara: first unreadable world is reported', [('worlds/w0.lara', 'worlds/missing0.lara'), ('worlds/w1.lara', 'worlds/missing1.lara')], {}, 1, ('(world-input w0 "cannot read ', 'worlds/missing0.lara: openFile: does not exist')),
+    # A group conflict reached through elaboration: l1, which no argument
+    # uses, now reports q against l3's p. The derived envelope carries the
+    # group, and the loader refuses it on both drivers.
+    ('lara: conflicting group', [('worlds/w0.lara', 'worlds/conflict.lara')], {'worlds/conflict.lara': world_text('w0.lara').replace('leaf l1 : p', 'leaf l1 : q')}, 1, '(pw-error 1 world (world-groups w0 g1))'),
+    ('lara: conflicting group under reject mode', [('worlds/w0.lara', 'worlds/conflict.lara')],
+     {'worlds/conflict.lara': world_text('w0.lara').replace('leaf l1 : p', 'leaf l1 : q').replace('policy pw-lara', 'policy pw-variant'),
+      'worlds/pw-variant.policy.lara': policy_text('\nduplicate-reports = reject\n')}, 1, '(pw-error 1 world (world-groups w0 g1))'),
+    ('lara: consistent group under reject mode', [('worlds/w0.lara', 'worlds/r0.lara'), ('worlds/w1.lara', 'worlds/r1.lara')],
+     {'worlds/r0.lara': world_text('w0.lara').replace('policy pw-lara', 'policy pw-variant'),
+      'worlds/r1.lara': world_text('w1.lara').replace('policy pw-lara', 'policy pw-variant'),
+      'worlds/pw-variant.policy.lara': policy_text('\nduplicate-reports = reject\n'), 'golden': 'lara'}, 0, '(pw-result 1 '),
+    # A .lara world and an inline envelope share a context when they declare
+    # the same environment.
+    ('lara: mixed with an inline world', [('(lara "worlds/w1.lara")', INLINE_W1)], {'golden': 'lara'}, 0, '(pw-result 1 '),
+    # A checker rejection of an elaborated world is world-rejected, as for an
+    # envelope: without its undermine, w1's contrary a1 and a2 are attack-incomplete.
+    ('lara: checker rejects the elaborated world', [('worlds/w1.lara', 'worlds/rejected.lara')], {'worlds/rejected.lara': world_text('w1.lara').replace('undermine a2 a1.leaf\n', '')}, 1, '(pw-error 1 world (world-rejected w1 missing-conflict))'),
+    # The text boundary: program paths and program text are UTF-8 under every
+    # locale, as world paths are.
+    ('lara: non-ascii program path', [('worlds/w0.lara', 'worlds/w ω0.lara')], {'worlds/w ω0.lara': Copy('../source/worlds/w0.lara'), 'golden': 'lara', 'also-under': TEXT_BOUNDARY}, 0, '(pw-result 1 '),
+    ('lara: non-ascii program text', [('worlds/w0.lara', 'worlds/omega.lara')], {'worlds/omega.lara': world_text('w0.lara').replace('"p holds"', '"p holds — ω"'), 'golden': 'lara', 'also-under': TEXT_BOUNDARY}, 0, '(pw-result 1 '),
+    # Refusals before any world is read are the same envelope from both doors.
+    ('lara: run file does not decode', [('(edge e w0 w1 accepted)', '(edge e w0 w1 maybe)')], {}, 2, '(pw-error 1 wire malformed acceptance)'),
+]
+# The two reruns above are the only test of the locale encoding `pwTextBoundary`
+# sets for .lara text, so the set is pinned the way LOCALE_CASES is: dropping an
+# `also-under` must fail the gate rather than silently retire the coverage.
+SOURCE_LOCALE_CASES = {'lara: non-ascii program path', 'lara: non-ascii program text'}
 
 
 def build():
@@ -366,8 +487,38 @@ def compare_drivers(haskell, path, env=None):
     return h_code, h_out
 
 
-def golden_text(fixture):
-    return (FIXTURES / f'{fixture}.expected').read_text(encoding='utf-8')
+def golden_text(fixture, root=FIXTURES):
+    return (root / f'{fixture}.expected').read_text(encoding='utf-8')
+
+
+def source_heads(text):
+    """The head keyword of every world source in a printed run document."""
+    tree = read_sexpr(text)
+    assert tree[:2] == ['pw-run', '1'] and tree[2][0] == 'worlds', text
+    return [world[3][0] for world in tree[2][1:]]
+
+
+def derive(haskell, path, env=None):
+    """Run `lara pw-input`; on success also write the derived document beside
+    the run file and check that every world source is inline."""
+    code, out = run([haskell[0], 'pw-input'], path, env)
+    if code == 0:
+        assert all(head == 'inline' for head in source_heads(out)), out
+        derived = path.parent / 'derived.sexp'
+        derived.write_text(out, encoding='utf-8')
+        return code, out, derived
+    return code, out, None
+
+
+def check_derivation(haskell, path, code, out, env=None):
+    """The derived document runs to `lara pw`'s bytes on both drivers, or the
+    derivation is refused with `lara pw`'s own envelope."""
+    d_code, d_out, derived = derive(haskell, path, env)
+    if derived is None:
+        assert (d_code, d_out) == (code, out), ('derivation refused differently', d_out, out)
+        return
+    got, got_out = compare_drivers(haskell, derived, env)
+    assert (got, got_out) == (code, out), ('derived run differs', got_out, out)
 
 
 def check_fixtures(haskell, update):
@@ -385,16 +536,60 @@ def check_fixtures(haskell, update):
             golden.write_text(out, encoding='utf-8')
         assert golden.exists(), f'missing golden {golden} (run with --update)'
         assert golden.read_text(encoding='utf-8') == out, ('golden differs', golden, out)
+        # Derivation is the identity on meaning: with every file source
+        # inlined, both drivers still print the golden.
+        with tempfile.TemporaryDirectory(prefix='lara-pw-conf-') as tmp:
+            home = pathlib.Path(tmp)
+            shutil.copytree(FIXTURES / 'worlds', home / 'worlds')
+            shutil.copy(fixture, home / fixture.name)
+            check_derivation(haskell, home / fixture.name, code, out)
+    return len(fixtures)
+
+
+def check_source_fixtures(haskell, update):
+    """Family 3's committed fixtures: `lara pw` prints the golden, the Lean
+    reference refuses the file's first .lara world as world-input, and the
+    derived document runs to the golden on both drivers."""
+    fixtures = sorted(SOURCES.glob('*.sexp'))
+    if not fixtures:
+        print(f'FAIL: no fixtures under {SOURCES}')
+        sys.exit(2)
+    for fixture in fixtures:
+        code, out = run(haskell, fixture)
+        assert code == 0, (fixture, code, out)
+        l_code, l_out = run([str(LEAN)], fixture)
+        assert l_code == 1 and l_out.startswith('(pw-error 1 world (world-input '), ('lean on .lara sources', l_out)
+        with tempfile.TemporaryDirectory(prefix='lara-pw-conf-') as tmp:
+            home = pathlib.Path(tmp)
+            shutil.copytree(SOURCES / 'worlds', home / 'worlds')
+            shutil.copy(fixture, home / fixture.name)
+            check_derivation(haskell, home / fixture.name, code, out)
+        golden = fixture.with_suffix('.expected')
+        if update:
+            golden.write_text(out, encoding='utf-8')
+        assert golden.exists(), f'missing golden {golden} (run with --update)'
+        assert golden.read_text(encoding='utf-8') == out, ('golden differs', golden, out)
     return len(fixtures)
 
 
 def write(path, content):
     if isinstance(content, Copy):
-        shutil.copy(FIXTURES / content, path)
+        shutil.copy((FIXTURES / content).resolve(), path)
     elif isinstance(content, bytes):
         path.write_bytes(content)
     else:
         path.write_text(content, encoding='utf-8')
+
+
+def assert_fragments(fragment, out):
+    """Every fragment a case names must appear in stdout.
+
+    A tuple is how a case pins text on both sides of an echoed path: the gate
+    runs the drivers on an absolute path, so a detail's own path is absolute,
+    and only the relative tail of it is stable across the two.
+    """
+    for want in (fragment,) if isinstance(fragment, str) else fragment:
+        assert want in out, ('fragment', want, out)
 
 
 def run_case(haskell, case, env=None):
@@ -419,7 +614,7 @@ def run_case(haskell, case, env=None):
         try:
             got, out = compare_drivers(haskell, source, env)
             assert got == code, ('exit', got, code, out)
-            assert fragment in out, ('fragment', fragment, out)
+            assert_fragments(fragment, out)
             if 'golden' in options:
                 assert out == golden_text(options['golden']), ('golden', options['golden'], out)
             if 'same-queries-as' in options:
@@ -428,6 +623,47 @@ def run_case(haskell, case, env=None):
         except AssertionError as err:
             print(f'FAIL: {name}{" under " + str(env) if env else ""}: {err}')
             sys.exit(1)
+
+
+def run_source_case(haskell, case, env=None):
+    name, subs, options, code, fragment = case
+    with tempfile.TemporaryDirectory(prefix='lara-pw-conf-') as tmp:
+        home = pathlib.Path(tmp)
+        shutil.copytree(SOURCES / 'worlds', home / 'worlds')
+        text = (SOURCES / 'lara.sexp').read_text(encoding='utf-8')
+        for sub in subs:
+            text = mutate(text, *sub)
+        for rel, content in options.items():
+            if rel not in OPTIONS:
+                write(home / rel, content)
+        source = home / 'input.sexp'
+        write(source, text)
+        try:
+            got, out = run(haskell, source, env)
+            assert got == code, ('exit', got, code, out)
+            assert_fragments(fragment, out)
+            if 'golden' in options:
+                assert out == golden_text(options['golden'], SOURCES), ('golden', options['golden'], out)
+            check_derivation(haskell, source, got, out, env)
+        except AssertionError as err:
+            print(f'FAIL: {name}{" under " + str(env) if env else ""}: {err}')
+            sys.exit(1)
+
+
+def check_source_cases(haskell, latin1_ok):
+    runs = skipped = 0
+    for case in SOURCE_CASES:
+        for env in (None, *case[2].get('also-under', ())):
+            if env is LATIN1 and not latin1_ok:
+                skipped += 1
+                continue
+            run_source_case(haskell, case, env)
+            runs += 1
+    # Locale coverage for .lara program paths and program text must not vanish
+    # with a case edit, as for CASES.
+    covered = {case[0] for case in SOURCE_CASES if case[2].get('also-under') == TEXT_BOUNDARY}
+    assert covered == SOURCE_LOCALE_CASES, covered ^ SOURCE_LOCALE_CASES
+    return runs, skipped
 
 
 def check_cases(haskell, latin1_ok):
@@ -462,9 +698,12 @@ def main():
     haskell = haskell_exe()
     fixtures = check_fixtures(haskell, update)
     runs, skipped = check_cases(haskell, latin1_problem is None)
-    print(f'PW outer runtime conformance passed: {fixtures} fixtures, {len(CASES)} cases, {runs} runs.')
-    if skipped:
-        print(f'  skipped {skipped} ISO-8859-1 reruns: {latin1_problem}')
+    source_fixtures = check_source_fixtures(haskell, update)
+    source_runs, source_skipped = check_source_cases(haskell, latin1_problem is None)
+    print(f'PW outer runtime conformance passed: {fixtures} fixtures, {len(CASES)} cases, {runs} runs;'
+          f' {source_fixtures} .lara source fixtures, {len(SOURCE_CASES)} source cases, {source_runs} runs.')
+    if skipped or source_skipped:
+        print(f'  skipped {skipped + source_skipped} ISO-8859-1 reruns: {latin1_problem}')
 
 
 if __name__ == '__main__':

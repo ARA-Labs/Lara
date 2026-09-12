@@ -18,8 +18,17 @@
 -- __What stays explicit.__ Every context uses the production canonicalizer,
 -- which is how canonicalizer agreement holds. The loader decides T6's
 -- @rule-ok@ clause. @leaf-ok@ and @cert-ok@ must be listed but are never
--- proved. Worlds declaring duplicate-report groups are refused, because §4.3
--- quarantine makes a public status conditional.
+-- proved. A world whose duplicate-report groups all agree is checked as
+-- declared, because an empty §4.3 quarantine is the identity (Lean
+-- @addWorld_checks_declared@); a world with a conflicting group is refused,
+-- because quarantine would make a public status conditional.
+--
+-- __Sources (#327).__ A world's envelope is inline, in a file, or elaborated
+-- from a @.lara@ presentation program through the same steps @lara check@
+-- takes on that file alone. The Lean reference has no surface parser, so
+-- 'deriveRunFile' produces the equivalent document with every source inline;
+-- @lara pw-input@ prints it, and the differential gate compares both runtimes
+-- on that.
 module Lara.PW.Run
   ( -- * Errors
     WorldError (..)
@@ -35,6 +44,8 @@ module Lara.PW.Run
   , Outcome (..)
   , runPW
   , runPWFile
+  , deriveRunFile
+  , inlineSources
     -- * The result protocol
   , ResultTag (..)
   , resultTagText
@@ -48,9 +59,12 @@ import Data.List (find, findIndex)
 import qualified Data.Text.Encoding as TE
 import System.FilePath (takeDirectory, (</>))
 
+import Lara.Admission (AdmissionAudit, renderAdmissionAudit, renderAdmissionRejection)
 import Lara.AST
   ( Contrary
+  , DupGroup (..)
   , Exception
+  , GroupId (..)
   , LeafId
   , RejectClass (..)
   , Rejection (..)
@@ -59,10 +73,12 @@ import Lara.AST
   , TheoryDigest
   , Unit (..)
   )
+import Lara.Blocked (groupConsistent)
 import Lara.Check (CheckedUnit, checkUnitWith, cuNodes, cuProgram, fullConfig)
 import Lara.Compile (CheckedProgram)
 import Lara.Diagnostics (rejectionOf)
 import Lara.Driver (buildCertOk, buildGamma)
+import Lara.Elaborate (PreparedSource (..), preparedCheckInput)
 import Lara.Grounded (AF, completeClaimFor, statusC)
 import Lara.Prop (FunSym (..), Pred (..), Prop)
 import Lara.PW.Sorted
@@ -71,6 +87,7 @@ import Lara.PW.Wire
 import Lara.Replay (inputUnit, runtimeReplayFailure)
 import Lara.Runtime (runtimeAF)
 import Lara.Sigma (Sigma)
+import Lara.Source.Load (loadSource, loadedPrepared, renderSourceLoadError)
 import Lara.Strict (SExpr (..))
 import qualified Lara.Wire as W
 
@@ -82,7 +99,7 @@ import qualified Lara.Wire as W
 data WorldError
   = DuplicateWorld WorldId
   | WorldInputError WorldId String
-  | WorldGroups WorldId
+  | WorldGroups WorldId GroupId
   | WorldRejected WorldId Rejection
   | ContextEnvironment WorldId CtxId
   | DuplicateWorldState WorldId WorldId
@@ -236,8 +253,11 @@ placeWorld wid cname unit ctxs = case ctxs of
           else Left (ContextEnvironment wid cname)
     | otherwise -> (c :) <$> placeWorld wid cname unit cs
 
--- | Load one world: decode, refuse groups, replay preflight, then check (Lean
--- @addWorld@).
+-- | Load one world: decode, refuse a conflicting duplicate-report group, replay
+-- preflight, then check (Lean @addWorld@). The group check names the first
+-- group, in declaration order, whose members are not pairwise @≡@; whether
+-- the policy would quarantine it or escalate to R9 makes no difference here,
+-- since either way the world is not an unconditionally checked unit.
 addWorld :: [LoadedCtx] -> [WorldId] -> WorldInput -> Either WorldError [LoadedCtx]
 addWorld ctxs seen wi
   | wiId wi `elem` seen = Left (DuplicateWorld (wiId wi))
@@ -247,9 +267,9 @@ addWorld ctxs seen wi
         Left (W.WireError ctx msg) -> Left (WorldInputError (wiId wi) (ctx ++ ": " ++ msg))
         Right input -> Right input
       let unit = inputUnit input
-      if not (null (unitGroups unit))
-        then Left (WorldGroups (wiId wi))
-        else case runtimeReplayFailure input of
+      case find (not . groupConsistent unit) (unitGroups unit) of
+        Just (DupGroup g _) -> Left (WorldGroups (wiId wi) g)
+        Nothing -> case runtimeReplayFailure input of
           Just _ -> Left (WorldRejected (wiId wi) (RejectClass R13))
           Nothing -> placeWorld (wiId wi) (wiContext wi) unit ctxs
 
@@ -498,6 +518,18 @@ readUtf8 path = do
       Left err -> Left (show err)
       Right _ -> Right bs
 
+-- | Read one world source to an envelope tree, or say why it could not be.
+--
+-- A @lara@ source goes through the steps @lara check@ takes on that file alone
+-- ("Lara.Source.Load", 'Lara.Elaborate.prepareSource'), and stops where an
+-- envelope stops existing: a parse or policy failure, a source the elaborator
+-- refuses, a policy admission __stop__, or a policy __quarantine__ (whose
+-- pruned unit the frozen envelope cannot express, exactly as
+-- 'Lara.Elaborate.sourceResultCheckInput' says). Every one of those is a
+-- @world-input@ fault, so the fault set of the loader does not grow. What
+-- comes back is the envelope's own encoding, so the loader decodes a @lara@
+-- world through the same 'W.decodeCheckInput' as an inline or file one, and
+-- so the document 'deriveRunFile' prints means what this run meant.
 readSource :: FilePath -> WorldSource -> IO (Either String SExpr)
 readSource dir source = case source of
   SourceInline e -> pure (Right e)
@@ -509,15 +541,42 @@ readSource dir source = case source of
         Left (W.ParseError line col msg) ->
           Left ("line " ++ show line ++ ", column " ++ show col ++ ": " ++ msg)
         Right e -> Right e
+  SourceLara p -> do
+    loaded <- loadSource (dir </> p)
+    pure $ case loaded of
+      Left err -> Left (renderSourceLoadError err)
+      Right src -> case loadedPrepared src of
+        SourceRejected rejection -> Left (renderAdmissionRejection rejection)
+        SourceAccepted prepared -> case preparedCheckInput prepared of
+          Left audit -> Left (quarantineDetail audit)
+          Right input -> Right (W.encodeCheckInput input)
 
--- | Read a run file and every file-sourced world relative to its directory,
--- then run.
+-- | Why a policy __quarantine__ leaves no envelope, then the audit that says
+-- what was pruned.
 --
--- Paths go through GHC's file-system encoding. The Lean reference always uses
--- UTF-8, so a caller that must agree with it on non-ASCII paths under any
--- locale sets that encoding to UTF-8 first, as @lara pw@ does.
-runPWFile :: FilePath -> IO (Either PWError Outcome)
-runPWFile file = do
+-- The audit line alone is not a reason. Beside a @lara check@ accept it is an
+-- informational note, and 'Lara.Elaborate.preparedCheckInput' renders nothing
+-- — it returns the audit. This site and the map loader's
+-- @MRUnsupportedAdmission@ ("Lara.Map.Load") are the places an audit becomes a
+-- refusal, and each frames it for its own door, so the sentence that makes it
+-- one belongs at the site rather than in the renderer the solo door shares.
+quarantineDetail :: AdmissionAudit -> String
+quarantineDetail audit =
+  "policy quarantine: a check-input envelope cannot express a pruned unit; "
+    ++ renderAdmissionAudit audit
+
+-- | Read a run file and every world source relative to its directory.
+--
+-- Paths go through GHC's file-system encoding, and @.lara@ text through the
+-- locale encoding. The Lean reference always uses UTF-8, so a caller that must
+-- agree with it on non-ASCII paths and programs under any locale sets both
+-- encodings to UTF-8 first, as @lara pw@ and @lara pw-input@ do — the locale
+-- one /strictly/, so that program text which is not UTF-8 is the read failure
+-- @lara check@ reports and not a surrogate-escaped decode (see
+-- @pwTextBoundary@ in @app\/Main.hs@). A @(file PATH)@ world needs no such
+-- setting: 'readUtf8' reads its bytes and decodes them here.
+readRunFile :: FilePath -> IO (Either PWError (RunDoc, [WorldInput]))
+readRunFile file = do
   bytes <- readUtf8 file
   case bytes of
     Left err -> pure (Left (PWIO err))
@@ -528,7 +587,39 @@ runPWFile file = do
           mapM
             (\d -> WorldInput (wdId d) (wdContext d) <$> readSource (takeDirectory file) (wdSource d))
             (rdWorlds doc)
-        pure (runPW doc inputs)
+        pure (Right (doc, inputs))
+
+-- | Read a run file and its worlds, then run.
+runPWFile :: FilePath -> IO (Either PWError Outcome)
+runPWFile file = fmap (>>= uncurry runPW) (readRunFile file)
+
+-- | The self-contained run document equivalent to a run file: every world
+-- source replaced by the envelope tree it yielded, in place (#327). The
+-- derivation door of @lara pw-input@, in the style of @lara map-input@.
+--
+-- A world whose source yields no envelope is the first fault, in declaration
+-- order, as a @world-input@ envelope; 'runPWFile' on the same file reports
+-- that world too, with two exceptions. An earlier world may already have
+-- refused the run — and 'addWorld' tests @wiId wi \`elem\` seen@ /before/ it
+-- looks at 'wiInput', so a world whose ID repeats an earlier one and whose
+-- source is unreadable is @duplicate-world@ from 'runPWFile' and
+-- @world-input@ from here. Both are the same rule (the run's first refusal
+-- wins, and the two doors stop at different stages), and a run file with a
+-- repeated world ID is already refused, so no derived document depends on it.
+-- Nothing is checked: a document this prints is one both runtimes then read
+-- alike.
+deriveRunFile :: FilePath -> IO (Either PWError RunDoc)
+deriveRunFile file = fmap (>>= inlineSources) (readRunFile file)
+
+-- | Replace each world's source with the tree it was read to.
+inlineSources :: (RunDoc, [WorldInput]) -> Either PWError RunDoc
+inlineSources (doc, inputs) = do
+  worlds <- mapM inlineWorld (zip (rdWorlds doc) inputs)
+  pure doc {rdWorlds = worlds}
+  where
+    inlineWorld (d, wi) = case wiInput wi of
+      Left detail -> Left (PWWorld (WorldInputError (wiId wi) detail))
+      Right e -> Right d {wdSource = SourceInline e}
 
 -- ---------------------------------------------------------------------------
 -- The @pw-result 1@ / @pw-error 1@ protocol (Lean @encodeOutcome@ /
@@ -632,6 +723,9 @@ ctxNameS (CtxId c) = name c
 worldName :: WorldId -> SExpr
 worldName (WorldId w) = name w
 
+groupName :: GroupId -> SExpr
+groupName (GroupId g) = name g
+
 encodeQueryFault :: QueryFault -> SExpr
 encodeQueryFault f = case f of
   UndeclaredPredicate (Pred p) -> node OUndeclaredPredicate [name p]
@@ -683,7 +777,7 @@ encodeWorldError :: WorldError -> SExpr
 encodeWorldError e = case e of
   DuplicateWorld w -> node ODuplicateWorld [worldName w]
   WorldInputError w detail -> node OWorldInput [worldName w, SAtom detail]
-  WorldGroups w -> node OWorldGroups [worldName w]
+  WorldGroups w g -> node OWorldGroups [worldName w, groupName g]
   WorldRejected w r -> node OWorldRejected [worldName w, SAtom (rejectionText r)]
   ContextEnvironment w c -> node OContextEnvironment [worldName w, ctxNameS c]
   DuplicateWorldState w earlier -> node ODuplicateWorldState [worldName w, worldName earlier]

@@ -282,4 +282,63 @@ theorem conflictReject_iff (canon : String → String) (mode : GroupConflictMode
     · rintro ⟨g, hg, hcon⟩
       exact ⟨g, hg, by simpa using hcon⟩
 
+/-! ## Consistent groups are inert
+
+When every declared group is `≡`-consistent, quarantine has nothing to remove:
+the quarantine set is empty and both quarantine operations are the identity.
+This is what lets a reader that cannot report a conditional status — the PW
+outer runtime (`Lara.PW.Run`, #326) — accept a world that declares groups
+whenever none of them conflicts: the unit it checks is the declared unit, and
+the local driver would have checked the same one. -/
+
+/-- **No conflict, no quarantine.** With every declared group consistent, the
+quarantine set is empty. -/
+theorem quarantined_eq_nil (canon : String → String) (leaves : List (LeafId × Atom))
+    (groups : List DupGroup) (h : ∀ g ∈ groups, consistentB canon leaves g = true) :
+    quarantined canon leaves groups = [] := by
+  unfold quarantined
+  have hf : groups.filter (fun g => ! consistentB canon leaves g) = [] := by
+    rw [List.filter_eq_nil_iff]
+    intro g hg
+    simp [h g hg]
+  rw [hf]
+  rfl
+
+/-- `anyConflict` is false exactly when every declared group is consistent. -/
+theorem anyConflict_eq_false_iff (canon : String → String) (leaves : List (LeafId × Atom))
+    (groups : List DupGroup) :
+    anyConflict canon leaves groups = false ↔ ∀ g ∈ groups, consistentB canon leaves g = true := by
+  unfold anyConflict
+  simp [List.any_eq_false]
+
+/-- An empty quarantine set keeps every leaf. -/
+theorem quarantineLeaves_nil (leaves : List (LeafId × Atom)) :
+    quarantineLeaves [] leaves = leaves := by
+  unfold quarantineLeaves
+  simp
+
+-- No support term uses a leaf from the empty list. Mutual, like `usesLeaf`.
+mutual
+  theorem usesLeaf_nil : (t : SupportTerm) → usesLeaf [] t = false
+    | .leaf l => by simp [usesLeaf]
+    | .inst _ _ premises discharges _ _ => by
+        simp [usesLeaf, usesLeafList_nil premises, usesLeafDisch_nil discharges]
+  theorem usesLeafList_nil : (ts : List SupportTerm) → usesLeafList [] ts = false
+    | [] => by simp [usesLeafList]
+    | w :: ws => by simp [usesLeafList, usesLeaf_nil w, usesLeafList_nil ws]
+  theorem usesLeafDisch_nil : (ds : List (QuestionId × SupportTerm)) → usesLeafDisch [] ds = false
+    | [] => by simp [usesLeafDisch]
+    | d :: ds => by simp [usesLeafDisch, usesLeaf_nil d.2, usesLeafDisch_nil ds]
+end
+
+/-- With nothing quarantined, every argument is kept. -/
+theorem keepArg_nil (a : String × SupportTerm) : keepArg [] a = true := by
+  simp [keepArg, usesLeaf_nil]
+
+/-- An empty quarantine set keeps every argument. -/
+theorem quarantineArgs_nil (args : List (String × SupportTerm)) :
+    quarantineArgs [] args = args := by
+  unfold quarantineArgs
+  simp [keepArg_nil]
+
 end Lara.Groups

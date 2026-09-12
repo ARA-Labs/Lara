@@ -288,11 +288,14 @@ acceptanceText a = case a of
   Accepted -> "accepted"
   Rejected -> "rejected"
 
--- | Where a world's check-input envelope comes from; @file@ paths are relative
--- to the run file's directory.
+-- | Where a world's check-input envelope comes from; @file@ and @lara@ paths
+-- are relative to the run file's directory. A @file@ holds the envelope's
+-- bytes; a @lara@ path names a presentation program the runtime elaborates to
+-- one (#327). Both are untyped here: the loader decides what the bytes mean.
 data WorldSource
   = SourceInline SExpr
   | SourceFile String
+  | SourceLara String
   deriving (Eq, Show)
 
 data WorldDecl = WorldDecl
@@ -327,7 +330,7 @@ data RunDoc = RunDoc
 
 -- | The run grammar's own keywords (Lean @Run.Tag@).
 data RTag
-  = RRun | RWorlds | RWorld | RInline | RFile | REdges | REdge | RComparisons | RCompare
+  = RRun | RWorlds | RWorld | RInline | RFile | RLara | REdges | REdge | RComparisons | RCompare
   deriving (Eq, Show, Enum, Bounded)
 
 rTagText :: RTag -> String
@@ -337,6 +340,7 @@ rTagText t = case t of
   RWorld -> "world"
   RInline -> "inline"
   RFile -> "file"
+  RLara -> "lara"
   REdges -> "edges"
   REdge -> "edge"
   RComparisons -> "comparisons"
@@ -371,11 +375,13 @@ encodeSource :: WorldSource -> SExpr
 encodeSource s = case s of
   SourceInline e -> rTagged RInline [e]
   SourceFile p -> rTagged RFile [SAtom p]
+  SourceLara p -> rTagged RLara [SAtom p]
 
 decodeSource :: SExpr -> Either CodecError WorldSource
 decodeSource e = case rHead e of
   Just (RInline, [x]) -> Right (SourceInline x)
   Just (RFile, [SAtom p]) -> Right (SourceFile p)
+  Just (RLara, [SAtom p]) -> Right (SourceLara p)
   _ -> malformed "world-source"
 
 encodeWorld :: WorldDecl -> SExpr

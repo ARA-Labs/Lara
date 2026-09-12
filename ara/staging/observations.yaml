@@ -3741,3 +3741,41 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O174
+  timestamp: 2026-09-12T01:38+00:00
+  provenance: ai-suggested
+  content: A reader that can only report unconditional results can admit a pipeline
+    with a conditioning edit exactly on the inputs where that edit is provably the
+    identity; the proof obligation is that the edit's trigger set is empty and the edit
+    is the identity on an empty trigger set, not anything about the edited program.
+  context: '#326: PW status atoms are Boolean, §4.3 quarantine makes local status
+    conditional; accepting worlds whose groups all agree needed only quarantined_eq_nil
+    and the two *_nil identities. One project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N326_consistent_groups
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O175
+  timestamp: 2026-09-12T01:38+00:00
+  provenance: ai-suggested
+  content: A source form only one runtime can read joins a two-runtime differential
+    through a derivation door that prints the equivalent document in the shared form;
+    the gate then compares the reading runtime on the original with both on the derived
+    document, and the derived document must also be the identity on inputs both could
+    already read.
+  context: '#327 reused the lara map-input pattern (#303) as lara pw-input; the gate
+    reruns every envelope-only fixture through derivation to its golden. Second use of
+    the pattern; no user endorsement.'
+  potential_type: heuristic
+  bound_to:
+  - N327_lara_sources
+  - N326_327_conformance
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

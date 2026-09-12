@@ -1567,3 +1567,23 @@ entries:
   - 'No logic/ entry references the PW runtime (claims.md:605 cites an older numeric
     node N322, a different id). No Stage 4 revision. #331 recorded as an ai_action
     and open thread, not a node.'
+- turn: 2026-09-12_001#1
+  notes:
+  - 'Routed N326_consistent_groups and N327_lara_sources as decisions, ai-suggested: the
+    user authorized both issues ("direct do it") but the option chosen in each (refuse
+    only conflicts, naming the group; a lara source plus derivation door, version kept)
+    was the agent''s.'
+  - 'N326_327_conformance is one experiment node for both issues, since one gate run
+    and one Lean audit verified both; the anchor-manifest gap is recorded inside it
+    rather than as a dead_end (a harness defect found in passing, not a hypothesis).'
+  - 'Staged O174 (identity-of-empty-edit) and O175 (derivation door) as heuristics,
+    ai-suggested.'
+  - 'O173 near-miss: this turn added locale reruns for a new text boundary (.lara program
+    text) and the reruns did require a fix, which is evidence for the heuristic, but the
+    PR is unmerged and the user has not endorsed it; left staged.'
+  - 'O169/O172 untouched, not yet 3 session-days idle; no stale flags.'
+  - 'No logic/ entry references the PW runtime or §4.3 quarantine in PW; no Stage 4
+    revision. C-entries on quarantine non-promotion (quarantine_nonpromotion.md) concern
+    the local driver and are unchanged by a reader that refuses conflicting groups.'
+  - 'Timestamps use UTC because the shell clock reports +00:00; earlier sessions were
+    recorded in -07:00.'

@@ -65,6 +65,7 @@ module Lara.Elaborate
   , sourceResultLocatedRejection
   , sourceResultCheckedArgIds
   , sourceResultCheckInput
+  , preparedCheckInput
     -- * Surface provenance (plan D5)
   , GeneratedArg (..)
   , sourceResultGeneratedArgs
@@ -287,6 +288,16 @@ sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas _) = formu
 -- 'Lara.Driver.runCheck'.
 sourceResultCheckInput :: SourceResult -> Either AdmissionAudit CheckInput
 sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _ _)
+  | admissionAuditHasPolicyQuarantine audit = Left audit
+  | otherwise = Right checkInput
+
+-- | The same envelope, read off the prepared source __before__ it is checked,
+-- under the same rule: exportable unless policy admission removed source
+-- material. For a consumer that will run the raw checker on the envelope
+-- itself (@lara pw@'s @lara@ world sources, \#327), checking here as well would
+-- only compute a verdict nobody reads.
+preparedCheckInput :: SourceCheckInput -> Either AdmissionAudit CheckInput
+preparedCheckInput (SourceCheckInput _ _ _ _ _ audit checkInput _)
   | admissionAuditHasPolicyQuarantine audit = Left audit
   | otherwise = Right checkInput
 

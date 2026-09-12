@@ -676,3 +676,15 @@ sessions:
   claims_touched:
   - C56
   open_threads: 3
+
+- id: 2026-09-12_001
+  date: '2026-09-12'
+  summary: >-
+    #326 and #327 in one PR: agreeing duplicate-report groups are inert in PW worlds
+    (empty quarantine proved the identity), conflicting groups refused by name; .lara
+    world sources elaborated by lara pw and compared through the lara pw-input
+    derivation door. Gate 7/99/112 plus the .lara family 1/16/20.
+  turn_count: 1
+  events_count: 5
+  claims_touched: []
+  open_threads: 3

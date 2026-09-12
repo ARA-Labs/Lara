@@ -4225,3 +4225,19 @@ context's own arguments make unavailable. -/
 #print axioms Lara.PW.Run.loadModel_spec
 #print axioms Lara.PW.Run.load_candidates_named
 #print axioms Lara.PW.Run.load_accepts_named
+
+-- PW outer runtime, #326: consistent duplicate-report groups are inert. The
+-- §4.3 identities (`Lara.Groups`) and the loader theorem that rests on them:
+-- a world `addWorld` accepts has an empty quarantine set, so the leaf table
+-- and argument list it checks are the declared ones.
+#print axioms Lara.Groups.quarantined_eq_nil
+#print axioms Lara.Groups.anyConflict_eq_false_iff
+#print axioms Lara.Groups.quarantineLeaves_nil
+#print axioms Lara.Groups.usesLeaf_nil
+#print axioms Lara.Groups.usesLeafList_nil
+#print axioms Lara.Groups.usesLeafDisch_nil
+#print axioms Lara.Groups.keepArg_nil
+#print axioms Lara.Groups.quarantineArgs_nil
+#print axioms Lara.PW.Run.addWorld_decoded
+#print axioms Lara.PW.Run.addWorld_quarantine_empty
+#print axioms Lara.PW.Run.addWorld_checks_declared

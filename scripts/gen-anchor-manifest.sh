@@ -37,6 +37,7 @@ if ! find fixtures examples bundles corpus-units -name '*.sexp' \
   -not -path 'fixtures/malformed/*' \
   -not -path 'fixtures/mutants/*' \
   -not -path 'fixtures/admission/*' \
+  -not -path 'fixtures/pw/*' \
   -not -name 'map.core.sexp' \
   -not -name 'map.verdict.sexp' \
   -print | LC_ALL=C sort >"$listing"; then

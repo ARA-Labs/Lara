@@ -55,6 +55,13 @@
 --   @pw-error 1@ S-expression on @stdout@ and nothing on @stderr@, which is the
 --   contract the Lean @pw-run@ reference shares byte for byte. Its exit codes
 --   are listed at 'pwRun'.
+-- * @lara pw-input \<run.sexp\>@ (\#327) prints the run's __derived document__
+--   on @stdout@ instead of its result: the same @pw-run 1@ document with every
+--   world source replaced by the envelope it yielded, inline. It exists for
+--   the same reason @lara map-input@ does: a @(lara PATH)@ world is a
+--   presentation program only this driver can elaborate, and the derived
+--   document is what the Lean @pw-run@ reference is handed so that the two
+--   can be byte-compared ('pwInput').
 --
 -- * Exit codes (shared by both paths): @0@ = accept, @1@ = checker rejection
 --   (a rejection whose class alone cannot say what went wrong additionally
@@ -101,7 +108,7 @@ import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitWith)
 import System.FilePath (takeExtension)
 import qualified GHC.Foreign
-import GHC.IO.Encoding (getFileSystemEncoding, setFileSystemEncoding)
+import GHC.IO.Encoding (getFileSystemEncoding, setFileSystemEncoding, setLocaleEncoding, utf8)
 import System.IO (hPutStrLn, hSetEncoding, mkTextEncoding, stderr, stdout)
 
 import Lara.AST (ArgId)
@@ -135,7 +142,8 @@ import Lara.Map.Types
   , renderMapError
   )
 import Lara.Map.Wire (encodeMapVerdict)
-import Lara.PW.Run (encodeError, encodeOutcome, pwErrorExitCode, runPWFile)
+import Lara.PW.Run (PWError, deriveRunFile, encodeError, encodeOutcome, pwErrorExitCode, runPWFile)
+import Lara.PW.Wire (printRun)
 import Lara.Source.Load
   ( loadSource
   , loadedPrepared
@@ -160,6 +168,7 @@ main = do
     ["deps", file] -> deps file
     ["map-input", file] -> mapInput file
     ["pw", file] -> pwRun file
+    ["pw-input", file] -> pwInput file
     _ -> usage >> exitWith (ExitFailure 2)
 
 usage :: IO ()
@@ -173,6 +182,9 @@ usage = do
   hPutStrLn
     stderr
     "       lara pw <run.sexp>               (run a pw-run 1 possible-world document)"
+  hPutStrLn
+    stderr
+    "       lara pw-input <run.sexp>         (print the run with every world source inline)"
 
 -- | Dispatch on the artifact extension: a @.laramap@ path runs the map
 -- pipeline (#303), a @.lara@ path the presentation pipeline (parse +
@@ -384,26 +396,85 @@ mapInput file = do
 --   switching encodings afterwards is not enough: under an 8-bit locale such
 --   as ISO-8859-1, @café@ would be decoded byte by byte and then looked up as
 --   @cafÃ©@.
--- * File paths: a world's @(file PATH)@ is decoded text, and GHC encodes a
---   path with the file-system encoding, which is ASCII under @LC_ALL=C@. It is
---   switched to UTF-8, so the run file and its worlds are opened by their
---   UTF-8 bytes.
+-- * File paths: a world's @(file PATH)@ or @(lara PATH)@ is decoded text, and
+--   GHC encodes a path with the file-system encoding, which is ASCII under
+--   @LC_ALL=C@. It is switched to UTF-8, so the run file and its worlds are
+--   opened by their UTF-8 bytes.
+-- * @.lara@ text: a @(lara PATH)@ world is read as text through the locale
+--   encoding by "Lara.Source.Load". That encoding is switched to __strict__
+--   UTF-8 — not the @\/\/ROUNDTRIP@ variant the three boundaries above use —
+--   so a non-ASCII program elaborates to the same envelope under every locale
+--   /and/ program text that is not UTF-8 is a read failure rather than a
+--   surrogate-escaped decode. Strictness is the half that matters for the
+--   contract: a permissive decoder would accept, as a world, a file
+--   @lara check@ refuses to read at all, and because both PW doors would
+--   accept it alike the conformance gate could not see the difference. The
+--   loader's own read forces the contents inside a @try@, so the failure
+--   arrives as the @world-input@ fault carrying the solo door's own
+--   \"cannot read\" line.
 --
 -- The gate reruns its Unicode-name and non-ASCII path cases under @LC_ALL=C@
--- and under an ISO-8859-1 locale.
+-- and under an ISO-8859-1 locale, and covers non-UTF-8 program text directly.
+--
+-- The remaining asymmetry is the solo door's: @lara check@ on a @.lara@ file
+-- still reads it through the locale, so under a non-UTF-8 locale it refuses a
+-- non-ASCII program these doors accept. Tracked by #334.
 pwRun :: FilePath -> IO ()
 pwRun arg = do
+  file <- pwTextBoundary arg
+  result <- runPWFile file
+  case result of
+    Right outcome -> putStrLn (printSExpr (encodeOutcome outcome))
+    Left err -> pwRefuse err
+
+-- | @lara pw-input \<run.sexp\>@ (#327): print the derived document.
+--
+-- Stops where the __sources__ stop and no later: every world's source is read
+-- — a @lara@ source elaborated — and the first world without an envelope is
+-- reported exactly as @lara pw@ would report it, a @world-input@ envelope on
+-- @stdout@ at exit @1@; an unreadable or undecodable run file is the same
+-- @io@ or @wire@ envelope at exit @2@. Worlds are not checked and nothing
+-- after them runs, because those are the decisions the derived document exists
+-- to have made twice. A document this prints is therefore one both runtimes
+-- read, and @scripts\/check-pw-conformance.py@ requires @pw-run@ on it and
+-- @lara pw@ on the original to agree.
+--
+-- One run file makes the two doors report different faults, and it is one
+-- @lara pw@ refuses either way: a world whose ID repeats an earlier one and
+-- whose source cannot be read is @duplicate-world@ from @lara pw@, which tests
+-- the ID first, and @world-input@ from here, which reads every source before
+-- it stops. See 'Lara.PW.Run.deriveRunFile'.
+pwInput :: FilePath -> IO ()
+pwInput arg = do
+  file <- pwTextBoundary arg
+  result <- deriveRunFile file
+  case result of
+    Right doc -> putStrLn (printRun doc)
+    Left err -> pwRefuse err
+
+-- | Switch every text boundary of a PW door to UTF-8 (see 'pwRun') and return
+-- the run-file argument re-decoded as UTF-8.
+--
+-- Two encodings, deliberately: @\/\/ROUNDTRIP@ where bytes must survive a
+-- round trip through 'String' (the echoed output and the path an @open@ takes),
+-- and __strict__ 'utf8' for the locale encoding, which is the one
+-- "Lara.Source.Load" reads @.lara@ text through — see 'pwRun'.
+pwTextBoundary :: FilePath -> IO FilePath
+pwTextBoundary arg = do
   utf8Roundtrip <- mkTextEncoding "UTF-8//ROUNDTRIP"
   hSetEncoding stdout utf8Roundtrip
   localeFs <- getFileSystemEncoding
   file <- GHC.Foreign.withCStringLen localeFs arg (GHC.Foreign.peekCStringLen utf8Roundtrip)
   setFileSystemEncoding utf8Roundtrip
-  result <- runPWFile file
-  case result of
-    Right outcome -> putStrLn (printSExpr (encodeOutcome outcome))
-    Left err -> do
-      putStrLn (printSExpr (encodeError err))
-      exitWith (ExitFailure (pwErrorExitCode err))
+  setLocaleEncoding utf8
+  pure file
+
+-- | A PW door's refusal: the structured envelope on @stdout@, and the shared
+-- 2-or-1 exit code.
+pwRefuse :: PWError -> IO ()
+pwRefuse err = do
+  putStrLn (printSExpr (encodeError err))
+  exitWith (ExitFailure (pwErrorExitCode err))
 
 -- ---------------------------------------------------------------------------
 -- The @lara deps@ report path (#204)
