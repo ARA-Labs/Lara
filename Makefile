@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans map-check map-conformance pw-conformance
+.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance
 
 build:
 	cabal build all
@@ -56,6 +56,11 @@ update-differential:
 # the cited source span.
 ara-source-spans:
 	python3 scripts/check_ara_source_spans.py
+
+# Every session file under ara/trace/sessions/ has exactly one index row and no
+# id is listed twice (#337). Stdlib-only; reads ara/, changes nothing.
+ara-session-index:
+	python3 scripts/check_ara_session_index.py
 
 # Check one multi-artifact map (#303). PHONY on purpose: a map is a RECHECK, not
 # a build, so this must run every time it is invoked — GNU Make guarantees that

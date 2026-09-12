@@ -112,6 +112,12 @@ jobs:
       - name: ARA source quotations match cited spans
         run: make ara-source-spans
 
+      - name: ARA session-index unit tests
+        run: python3 -m unittest scripts/test_check_ara_session_index.py -v
+
+      - name: ARA session index is total and unique
+        run: make ara-session-index
+
       - name: Policy-copy authenticity (T7)
         run: |
           cmp -s \
