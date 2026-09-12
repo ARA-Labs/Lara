@@ -381,7 +381,7 @@ reproduce the class shown.
 | R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut | `fixtures/mutants/A--unlicensed-attack-0.sexp` | `reject R11` |
 | R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
 | R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. Since #130 the reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
-| R14 codec | wire program fails to decode: malformed S-expression, unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
+| R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (#331; see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
 One class is not individually anchored above, because it is a source-boundary rejection rather
 than a checker verdict:
@@ -419,6 +419,20 @@ multi-byte character on the same line reports the same column in both drivers
 valid UTF-8 also fails *inside* the codec as a located R14 rather than as an IO-level read error;
 decoding uses `decodeUtf8'`, never the lenient form, so malformed bytes are never accepted with
 substituted content.
+
+**The nesting bound is located R14 on both sides (#331).** The same differential contract covers
+*depth*. Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
+S-expression nested deeper than the `maxDepth = 10000` they share, as a located R14 codec error at
+exit 2 with the same wording and the same column, rather than exhausting the stack on either side.
+Before #331 only the Haskell reader carried the bound: the Lean driver read the over-deep form and
+refused it one layer later as a malformed envelope — the same exit code, a different refusal
+*category*, which is exactly the divergence class this document's positional contract exists to
+exclude. The bound is generated into the gates rather than committed as a fixture: an anchor at that
+depth would be ten kilobytes of parentheses, and no committed `.sexp`, `.laramap` or `.lara` tree
+nests anywhere near it, so the bound restricts no expressible program. `scripts/differential.sh`,
+`scripts/check-map-conformance.sh` and `scripts/check-pw-conformance.py` each carry a case over the
+bound and one at the deepest form it admits, and each reads the constant out of both sources so a
+one-sided edit fails by name.
 
 The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 541 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its

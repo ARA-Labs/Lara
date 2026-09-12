@@ -9723,6 +9723,124 @@ tree:
   status: resolved
   also_depends_on:
   - N322_conformance
+- id: N331_shared_bound
+  type: decision
+  title: The reader's nesting bound is one contract enforced by both runtimes, not a
+    Haskell-only boundary
+  provenance: ai-suggested
+  timestamp: 2026-09-11T19:10-07:00
+  choice: 'Issue #331 offered two resolutions for the reader''s nesting cap: thread a
+    depth counter through the Lean reader so both refuse alike, or record maxDepth = 10000
+    as a documented Haskell-only boundary and teach the gates to expect the asymmetry.
+    Chose the first. Lara.Driver.parseForm / parseList now carry a depth counter and
+    refuse at the same depth, with the same message and the same column, as
+    Lara.Wire.parseSExprBS; Lara.Wire.maxDepth is exported so gates and tests name one
+    constant. docs/spec.md §10.1 records the bound as part of R14 and as a shared
+    contract: a refusal boundary, not a grammar restriction, so raising it is a reader
+    change on both sides at once rather than a wire-version change. The reasoning: a
+    refusal CATEGORY that depends on which runtime is asked (syntax vs malformed at the
+    same exit code) is exactly the divergence class the differentials exist to catch, and
+    on the Lean side the unbounded partial recursion was also the only thing between deep
+    input and stack exhaustion. No Lean theorem accompanies it — parseWire and its mutual
+    block are partial defs with no metatheory to extend, so the conformance evidence is
+    the three differentials.'
+  alternatives:
+  - Document maxDepth as a Haskell-only boundary and have each gate treat the category
+    difference as expected
+  - Raise or remove the Haskell bound instead, relying on the runtime's stack
+  evidence:
+  - lean/Lara/Driver.lean
+  - src/Lara/Wire.hs
+  - docs/spec.md
+  status: resolved
+- id: N331_gate_controls
+  type: experiment
+  title: Both sides of the bound are pinned in every reader differential, with negative
+    controls
+  provenance: ai-executed
+  timestamp: 2026-09-11T19:10-07:00
+  result: 'Each differential gate gained a case over the bound AND one at the deepest
+    form it admits (the second stops a reader that refuses one level too early from
+    satisfying the first), plus a check that reads maxDepth out of both sources and
+    compares them before the cases run. CORRECTED in PR #333 review: the at-the-bound
+    case initially had teeth in only two of the three gates — differential.sh asserted
+    exit 2 and empty stdout there and nothing more, and its over-the-bound case asserted
+    only that the two drivers AGREE, which a pair of readers both running off the end of
+    the unclosed parens satisfies; both now assert the bound''s own message, present over
+    and absent at. The source-level constant check was also justified wrongly: raising one
+    reader''s bound alone does NOT still pass, because the bound is interpolated into its
+    own message, so each one-sided raise changes the wording or the column and the
+    behavioural comparison goes red — as this node''s own declared-but-unenforced negative
+    control already showed. It earns its place by failing earlier and by name, and by
+    catching the constant renamed, reformatted or deleted, which a generated case cannot.
+    A THIRD differential case was added in the same round, for a hole neither side had a
+    case for: every case here and in test/MapSpec.hs is `(((…)))`, where nesting depth and
+    forms-seen are numerically equal, so Lean''s `parseList depth p''''` written as
+    `parseList (depth + 1) p''''` would refuse a wide, shallow document with every case
+    still green. The new case is one level deep with maxDepth + 2 siblings, and
+    test/WireSpec.hs::prop_depthBoundCountsDepthNotForms covers the Haskell reader and its
+    hand-copied reference. The 960-file depth scan below is also mechanized now, as a
+    ceiling check inside differential.sh, because the "nests no more than 20 levels"
+    sentence is normative in a frozen spec section and nothing measured it.
+    scripts/check-pw-conformance.py compares the two depth cases byte for byte via a new
+    `exact` option that opts out of the gate''s detail masking; scripts/differential.sh
+    byte-compares the located message across drivers once each program-name prefix is
+    stripped; scripts/check-map-conformance.sh pins that the Lean map reader refuses FOR
+    THE BOUND by its own message rather than at a downstream check that also exits 2,
+    with prop_envelopeNestingBound as the Haskell half (the map envelope has no CLI
+    decode door). Both cases are GENERATED from the constant, not committed: a fixture at
+    this depth is ten kilobytes of parentheses. Negative controls: with the bound
+    declared but not enforced, the pw gate reports `column 10003: unclosed list` against
+    the Haskell `column 10002: maximum S-expression nesting depth exceeded (10000)`, and
+    differential.sh reports DEPTH MISMATCH; with the bound removed entirely the
+    source-agreement check fails first and by name. Green with the bound threaded:
+    scripts/differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound pass=3
+    fail=0; check-map-conformance 4 cross-driver, 16 negative, 1322 differential, 2
+    depth; check-pw-conformance 6 fixtures, 96 cases, 109 runs; cabal test 741
+    properties; admission-differential 20; surface conformance 25; check-pw-example 24;
+    check-lean-citations 420; ARA source spans 66; AxCheck coverage 3116 declarations and
+    the axiom audit passed. A depth scan of all 960 committed .sexp/.laramap/.lara
+    files — the roots holding any are fixtures, corpus-units, examples, test and bundles —
+    puts the deepest tree at 14 levels, so the bound bounds no expressible program: no corpus
+    regeneration and no freeze-tag bump, and nothing in docs/spec.md or the freeze
+    checklists had pinned the Lean reader''s behaviour on over-deep input.'
+  evidence:
+  - scripts/check-pw-conformance.py
+  - scripts/differential.sh
+  - scripts/check-map-conformance.sh
+  - test/MapSpec.hs
+  status: resolved
+  also_depends_on:
+  - N331_shared_bound
+- id: N331_pw_anchor_exclusion
+  type: decision
+  title: fixtures/pw/ is excluded from the check-input anchor manifest as a family owning
+    its own harness
+  provenance: ai-suggested
+  timestamp: 2026-09-11T19:10-07:00
+  choice: 'scripts/differential.sh had failed on main since #328, before reaching any
+    anchor: fixtures/pw/ arrived without an ANCHORS.tsv entry and the manifest pin
+    (correctly) refuses to treat unlisted files as free passes. Resolved by the exclusion
+    rather than the listing, in both scripts/gen-anchor-manifest.sh and the gate''s
+    discovery loop: fixtures/pw/ owns its own harness, its run and pw-surface documents
+    are not check-input@1 envelopes at all, and the world envelopes they name are already
+    checked by scripts/check-pw-conformance.py through each runtime''s own checker —
+    exactly the rationale for the four families excluded before it. Regenerating the
+    manifest after the exclusion leaves it byte-identical at 135 anchors, which is the
+    evidence that the pw fixtures were never meant to be in it. Listing them instead
+    would have made the run and surface documents pseudo-anchors counted as agreement for
+    decode-failing on both drivers, which is the state the manifest pin exists to
+    prevent.'
+  alternatives:
+  - Regenerate ANCHORS.tsv to list every fixtures/pw file as a check-input anchor
+  - 'File the breakage as its own issue and verify #331 against a locally patched manifest'
+  evidence:
+  - scripts/gen-anchor-manifest.sh
+  - scripts/differential.sh
+  - fixtures/ANCHORS.tsv
+  status: resolved
+  also_depends_on:
+  - N331_gate_controls
 - id: N326_consistent_groups
   type: decision
   title: A PW world with agreeing duplicate-report groups is checked as declared; a conflicting group is refused by name

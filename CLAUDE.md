@@ -69,6 +69,15 @@ Do not update `ara/` or run `/research-manager` for routine next-step guidance,
 PR reviews, or review/request-change resolution unless that work crosses one of
 the thresholds above.
 
+A corollary (settled on #333's review): a session record's `logic_revisions:`
+`before`/`after` is what a Stage 4 edit wrote *on that turn* — a historical
+snapshot, not a live mirror of `ara/logic/`. When review-round fixes correct
+`ara/logic/` wording without crossing a threshold above, the earlier turn's
+`logic_revisions` entry is expected to go stale relative to the now-corrected
+logic file; that staleness lives in the trace where it happened, not as a
+rewrite of the original entry. The logic file itself is always the current
+state.
+
 Route qualifying research work to the matching ARA skill:
 - At the END of a qualifying session → run `/research-manager` to capture the
   feature/design/theory change or experiment in the `ara/` artifact.

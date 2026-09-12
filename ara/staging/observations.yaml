@@ -3743,6 +3743,58 @@ observations:
   stale: false
 
 - id: O174
+  timestamp: 2026-09-11T19:10-07:00
+  provenance: ai-suggested
+  content: Exit-code agreement between two runtimes is not refusal-category agreement. A
+    cross-runtime gate that pins only the exit code and an empty stdout is satisfied by
+    two implementations that refuse the same input for different stated reasons, at
+    different stages; what makes a shared reader a checkable contract is comparing the
+    located message — bound, column and wording — across drivers on the inputs where the
+    refusal is the contract rather than a diagnostic.
+  context: '#331: the Haskell reader capped nesting at 10000 and the Lean reader had no
+    bound, so past that depth both exited 2 while one said syntax and the other malformed.
+    Every gate was blind: the byte-equality families had no case at that depth and the
+    exit-2-only families would have passed anyway. Shown on one boundary of one project;
+    unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N331_shared_bound
+  - N331_gate_controls
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O175
+  timestamp: 2026-09-11T19:10-07:00
+  provenance: ai-suggested
+  content: 'A gate whose cases are derived from a constant duplicated across two
+    implementations should also read that constant out of both sources and compare them —
+    but for diagnosis, not detection. Whether the behavioural cases catch a one-sided
+    change turns on whether the constant is observable in the output: when the refusal
+    message prints its own bound, moving one copy alone changes the wording or the column
+    and the cases go red unaided; when it does not, the stricter side''s refusal genuinely
+    masks the relaxation and only the source comparison sees it. What the source check buys
+    unconditionally is a failure that is early and named rather than an opaque output
+    mismatch, and coverage of the case no generated input can reach: the constant renamed,
+    reformatted, or deleted.'
+  context: 'Designing the #331 gates. First recorded as "the depth cases alone would have
+    survived raising only the Lean maxDepth"; the PR #333 review traced both directions and
+    showed otherwise — the bound is interpolated into its own message, so each one-sided
+    raise produces a different message or a different column on the two sides and every
+    behavioural case goes red. The negative control in the same session agrees: with the
+    Lean bound declared-but-unenforced, the behavioural cases caught it. All three gates
+    still grep the constant out of src/Lara/Wire.hs and lean/Lara/Driver.lean, on the
+    corrected rationale. One project, one constant; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N331_gate_controls
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O176
   timestamp: 2026-09-12T01:38+00:00
   provenance: ai-suggested
   content: A reader that can only report unconditional results can admit a pipeline
@@ -3760,7 +3812,7 @@ observations:
   crystallized_via: null
   stale: false
 
-- id: O175
+- id: O177
   timestamp: 2026-09-12T01:38+00:00
   provenance: ai-suggested
   content: A source form only one runtime can read joins a two-runtime differential

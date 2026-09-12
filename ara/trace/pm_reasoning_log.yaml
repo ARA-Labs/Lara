@@ -1567,6 +1567,38 @@ entries:
   - 'No logic/ entry references the PW runtime (claims.md:605 cites an older numeric
     node N322, a different id). No Stage 4 revision. #331 recorded as an ai_action
     and open thread, not a node.'
+- turn: '2026-09-11_002#4'
+  notes:
+  - >-
+    Routed the #331 resolution as a decision node rather than a bug-fix observation - the
+    issue offered two resolutions and the turn chose one, so the alternatives belong on
+    the record.
+  - >-
+    Staged O174 and O175 as heuristics (gate design, a how) rather than claims; kept both
+    unpromoted. "directly do it and pr" is a directive to implement, not an endorsement of
+    either generalized lesson - same treatment as O169/O172/O173.
+  - >-
+    Considered artifact-commitment for O175 (the constant-agreement check is committed
+    code in three gates) and rejected it - the PR is open, nothing is merged, and the
+    conservatism rule prefers leaving it staged.
+  - >-
+    Revised C12's Conditions/Proof/Sources on empirical resolution (scripts/differential.sh
+    is in its Proof refs and ran this turn) but did NOT touch Status - #331 sharpens the
+    regime the claim holds in rather than confirming or contradicting it, and a
+    testing->supported jump would need verbal affirmation in the same turn.
+  - >-
+    Did NOT open a claim about the nesting bound itself; it is a contract recorded in
+    docs/spec.md, not a falsifiable research assertion.
+  - >-
+    Appended turn 4 to 2026-09-11_002 rather than opening _003: same calendar day, and
+    _002 is today's live record (the _001/_002 split is the #328 rebase artifact noted in
+    turn 3).
+  - >-
+    Named this turn's nodes N331_shared_bound / N331_gate_controls /
+    N331_pw_anchor_exclusion, following the established N{issue}_{slug} convention
+    (N313_*, N314_*, N322_*). Note the tree ALSO carries a sequential node literally
+    called N331 from 2026-09-07, about congruence witnesses and unrelated to issue #331 -
+    distinct ids, but a reader should not read the bare N331 as the issue.
 - turn: 2026-09-12_001#1
   notes:
   - 'Routed N326_consistent_groups and N327_lara_sources as decisions, ai-suggested: the
@@ -1576,8 +1608,9 @@ entries:
   - 'N326_327_conformance is one experiment node for both issues, since one gate run
     and one Lean audit verified both; the anchor-manifest gap is recorded inside it
     rather than as a dead_end (a harness defect found in passing, not a hypothesis).'
-  - 'Staged O174 (identity-of-empty-edit) and O175 (derivation door) as heuristics,
-    ai-suggested.'
+  - 'Staged O176 (identity-of-empty-edit) and O177 (derivation door) as heuristics,
+    ai-suggested. (Renumbered from O174/O175 on merge with #331''s branch, which staged
+    its own O174/O175 first.)'
   - 'O173 near-miss: this turn added locale reruns for a new text boundary (.lara program
     text) and the reruns did require a fix, which is evidence for the heuristic, but the
     PR is unmerged and the user has not endorsed it; left staged.'

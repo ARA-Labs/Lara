@@ -711,6 +711,33 @@ prop_depthBoundIsCodecError =
             ("maximum S-expression nesting depth exceeded (" ++ show refMaxDepth ++ ")")
         )
 
+-- | The bound counts nesting DEPTH, not forms seen.
+--
+-- Every other depth case in this repository — here, in @test\/MapSpec.hs@, and
+-- in the three reader gates — is built from @(((...)))@, one element per list,
+-- where depth and total-forms-seen are numerically equal. Writing the tail
+-- recursion as @parseList (depth + 1)@ rather than @parseList depth@ (the slip
+-- the mutual threading invites) would leave every one of those cases passing
+-- while the reader refused a wide, shallow document. @docs\/spec.md@ §10.1
+-- asserts the bound "bounds no expressible program"; a list with more siblings
+-- than the bound, nested one level, is the case that says so. Both the shipped
+-- reader and 'referenceParseSExpr' — an independent hand-copy of the same
+-- threading — must admit it.
+prop_depthBoundCountsDepthNotForms :: Property
+prop_depthBoundCountsDepthNotForms =
+  once $
+    counterexample "a one-level list of more than maxDepth siblings must parse" $
+      conjoin
+        [ counterexample "parseSExprBS" $
+            parseSExprBS (TE.encodeUtf8 (T.pack wide)) === Right expected
+        , counterexample "referenceParseSExpr" $
+            referenceParseSExpr wide === Right expected
+        ]
+  where
+    n = refMaxDepth + 2
+    wide = "(" ++ concat (replicate n "a ") ++ ")"
+    expected = SList (replicate n (SAtom "a"))
+
 -- | Invalid UTF-8 now reaches the parser (the @.sexp@ reader is
 -- 'B.readFile'-based) and becomes a located codec error rather than an
 -- IO-level read failure. Both drivers already exited 2 with empty stdout on
@@ -1384,6 +1411,7 @@ wireSpecProps =
   , ("wire ByteString parser matches the reference reader on corrupted input", quickCheckResult prop_referenceParserMutated)
   , ("wire parse error positions", quickCheckResult prop_parserErrorPositions)
   , ("wire depth bound is a located codec error", quickCheckResult prop_depthBoundIsCodecError)
+  , ("wire depth bound counts depth, not forms", quickCheckResult prop_depthBoundCountsDepthNotForms)
   , ("wire invalid UTF-8 rejected closed", quickCheckResult prop_invalidUtf8Rejected)
   , ("wire unit golden vector", quickCheckResult prop_unitGoldenVector)
   , ("wire unit golden layout variants", quickCheckResult prop_unitGoldenLayoutVariants)

@@ -1606,7 +1606,24 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |
 | **R12** policy-wf | a rule pattern variable occurs outside the rule's declared parameters (§4.1); or a `contrary` side may overlap a strict-reachable pattern at the instance level (Path B validator) | the policy, naming the scope violation or rule + pair | §4.1, §8.1 |
 | **R13** backend | certificate replay rejects; unknown backend or version; theory digest not allowlisted | the certified instance | §5 |
-| **R14** codec | wire program fails to decode to the abstract syntax: malformed S-expression, unknown fields per `lara-core@0.2`, presentation parse error | the wire location | §1, §2.1 |
+| **R14** codec | wire program fails to decode to the abstract syntax: malformed S-expression, S-expression nesting deeper than the reader's bound (see below), unknown fields per `lara-core@0.2`, presentation parse error | the wire location | §1, §2.1 |
+
+**The reader's nesting bound is part of R14, and part of the shared contract.**
+Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
+S-expression nested deeper than `maxDepth = 10000` with a located R14 error. The
+bound exists so that pathologically nested input is a *decision* both runtimes
+reach and report identically, rather than stack exhaustion, which has no exit
+code to map and which a differential harness would misread as a checker
+rejection. The two readers therefore share the bound, the message and the
+column; `scripts/differential.sh`, `scripts/check-map-conformance.sh` and
+`scripts/check-pw-conformance.py` each carry a case on either side of it, and
+each reads the constant out of both sources so a one-sided change fails loudly
+(issue #331). The bound sits far above the deepest committed artifact — no
+`.sexp`, `.laramap` or `.lara` tree in the repository nests more than 20 levels,
+which `scripts/differential.sh` measures on every run rather than assuming — so
+it bounds no expressible program: it is a refusal boundary, not a grammar
+restriction, and raising it is a reader change on both sides at once rather than
+a wire-version change.
 
 Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
 the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack

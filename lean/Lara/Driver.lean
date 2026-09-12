@@ -198,27 +198,48 @@ def spanBare : List Char → (List Char × List Char)
       (c :: a, b)
     else ([], c :: rest)
 
-mutual
-  partial def parseForm (p : PState) : Except String (Sx × PState) :=
-    match p.input with
-    | '(' :: _ => parseList (step p) []
-    | '"' :: _ => parseQuoted (step p) []
-    | c :: _ =>
-      if isBareChar c then
-        let (tok, rest) := spanBare p.input
-        let p' := { p with input := rest, col := p.col + tok.length }
-        .ok (.atom (String.ofList tok), p')
-      else p.err ("unexpected character '" ++ String.singleton c ++ "'")
-    | [] => p.err "unexpected end of input"
+/-- Maximum S-expression nesting depth, the mirror of `Lara.Wire.maxDepth`
+(`src/Lara/Wire.hs`). Bounds reader recursion so a pathologically nested input
+(`(((… )))`) is a located R14 codec error at CLI exit 2 — surfacing as the
+`syntax` fault where `parseWire` feeds the PW runtime — rather than stack
+exhaustion, which the driver cannot map to an exit code and which the
+Haskell/Lean differential gates would misread.
 
-  partial def parseList (p : PState) (acc : List Sx) : Except String (Sx × PState) :=
+The two readers share the bound, the message and the column, so an over-deep
+input is refused identically by both runtimes (#331). Comfortably above any real
+artifact's structural depth; `scripts/differential.sh` measures the deepest
+anchor it discovers and fails if the margin ever narrows. -/
+def maxDepth : Nat := 10000
+
+mutual
+  /-- `depth` is the nesting level of the form being read: 0 for the top-level
+  form, one more for each enclosing list. -/
+  partial def parseForm (depth : Nat) (p : PState) : Except String (Sx × PState) :=
+    if maxDepth < depth then
+      p.err ("maximum S-expression nesting depth exceeded (" ++ toString maxDepth ++ ")")
+    else
+      match p.input with
+      | '(' :: _ => parseList depth (step p) []
+      | '"' :: _ => parseQuoted (step p) []
+      | c :: _ =>
+        if isBareChar c then
+          let (tok, rest) := spanBare p.input
+          let p' := { p with input := rest, col := p.col + tok.length }
+          .ok (.atom (String.ofList tok), p')
+        else p.err ("unexpected character '" ++ String.singleton c ++ "'")
+      | [] => p.err "unexpected end of input"
+
+  /-- `depth` is the nesting level of the list being read, so its elements are
+  read one level deeper. -/
+  partial def parseList (depth : Nat) (p : PState) (acc : List Sx) :
+      Except String (Sx × PState) :=
     let p' := skipSpace p
     match p'.input with
     | ')' :: _ => .ok (.list acc.reverse, step p')
     | [] => p'.err "unclosed list"
     | _ => do
-        let (e, p'') ← parseForm p'
-        parseList p'' (e :: acc)
+        let (e, p'') ← parseForm (depth + 1) p'
+        parseList depth p'' (e :: acc)
 
   partial def parseQuoted (p : PState) (acc : List Char) : Except String (Sx × PState) :=
     match p.input with
@@ -236,7 +257,7 @@ end
 /-- Parse exactly one top-level form; a second form is an error. -/
 def parseWire (input : String) : Except String Sx := do
   let start := skipSpace { input := input.toList, line := 1, col := 1 }
-  let (e, rest) ← parseForm start
+  let (e, rest) ← parseForm 0 start
   let rest' := skipSpace rest
   if rest'.input.isEmpty then .ok e
   else rest'.err "expected a single S-expression, found more input"

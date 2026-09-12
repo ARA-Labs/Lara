@@ -655,15 +655,16 @@ sessions:
 
 - id: 2026-09-11_002
   date: '2026-09-11'
-  summary: '#313/#314 implemented: checked declaration/name linkage, proved structured
-    codec, and file-driven finite Lean execution; then #322: Haskell lara pw runtime
-    and a finite Lean reference agreeing byte for byte, with PW.Sat adequacy proved;
-    then the PR #328 review rounds: a locale divergence fixed and the names-to-positions
-    step proved.'
-  turn_count: 3
-  events_count: 11
-  claims_touched: []
-  open_threads: 3
+  summary: >-
+    #313/#314 and #322 implemented, then the PR #328 review rounds; finally #331:
+    the shared reader's nesting bound became a two-runtime contract, pinned on both
+    sides of the boundary in all three reader differentials, and differential.sh was
+    unblocked after #328 by excluding fixtures/pw/ as a family with its own harness.
+  turn_count: 4
+  events_count: 16
+  claims_touched:
+  - C12
+  open_threads: 4
 
 - id: 2026-09-11_001
   date: '2026-09-11'

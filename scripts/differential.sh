@@ -48,12 +48,21 @@
 # these anchors the harness additionally byte-compares stderr — a Lean-side
 # regression turns red here instead of passing silently.
 #
+# Nesting bound (issue #331): a third, GENERATED family. Both readers cap
+# S-expression nesting at the same `maxDepth`, and the two cases that straddle
+# that bound are built here from the constant each reader declares in source
+# rather than committed as ten kilobytes of parentheses. Over the bound the
+# located refusal message is byte-compared across drivers (prefix stripped),
+# because the category, not just the exit code, is the contract that used to
+# differ: the Lean reader had no bound at all. See the section itself for why
+# the two constants are compared before the cases run.
+#
 # Usage:  bash scripts/differential.sh
 # Exit:   0 iff every anchor agrees (positive byte-parity AND negative
-#         exit-2/empty-stdout); 1 on any disagreement; 2 on a build/setup
-#         error or when no anchors were found (an empty corpus must never be a
-#         green pass — it means fixtures/, examples/, bundles/, or
-#         corpus-units/ moved).
+#         exit-2/empty-stdout AND both nesting-bound cases); 1 on any
+#         disagreement; 2 on a build/setup error or when no anchors were found
+#         (an empty corpus must never be a green pass — it means fixtures/,
+#         examples/, bundles/, or corpus-units/ moved).
 set -u
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -98,12 +107,20 @@ for root in fixtures examples bundles corpus-units; do
   fi
 
   root_anchor_list="$tmp_dir/anchors.$root"
-  # Four FAMILIES are excluded, each because it has its own harness: the
+  # Five FAMILIES are excluded, each because it has its own harness: the
   # deliberately malformed envelopes of fixtures/malformed/ are the negative
   # half below; the generated mutant suite (fixtures/mutants/) is discovered
   # manifest-driven, so an absent or half-written suite fails loudly instead of
   # shrinking the anchor set (PR #49 review); the source admission fixtures
-  # (fixtures/admission/) belong to scripts/admission-differential.sh; and a
+  # (fixtures/admission/) belong to scripts/admission-differential.sh; the
+  # possible-world fixtures (fixtures/pw/) have their own harnesses —
+  # fixtures/pw/run/ and its worlds/ go through both pw drivers in
+  # scripts/check-pw-conformance.py, and fixtures/pw/declared.sexp is the Lean
+  # pw-example host's fixture, exercised by scripts/check-pw-example.py; run
+  # documents and pw-surface documents are not check-input@1 envelopes at all,
+  # and the world envelopes they name are checked by each runtime's own checker.
+  # check-pw-conformance.py asserts totality over fixtures/pw/**, so a stray file
+  # there is a setup failure in that gate rather than a free pass here. And a
   # map's two committed artifacts are a map-check-input@1 parity envelope and a
   # map-verdict@1 composite golden, which scripts/check-map-conformance.sh and
   # test/MapSpec.hs own. A fifth, the possible-world fixtures (fixtures/pw/),
@@ -441,4 +458,215 @@ while IFS= read -r f; do
 done <"$negative_list"
 
 echo "negative pass=$neg_pass fail=$neg_fail"
-[ "$fail" -eq 0 ] && [ "$neg_fail" -eq 0 ] && [ "$pass" -gt 0 ] && [ "$neg_pass" -gt 0 ]
+
+# ---------------------------------------------------------------------------
+# The reader's nesting bound (issue #331): GENERATED, not committed.
+#
+# Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse
+# input nested deeper than the `maxDepth` they share, so a pathologically nested
+# file is a located codec error (exit 2) on each side rather than a stack
+# overflow on either. No committed anchor nests more than 20 levels — measured
+# below, not assumed — and one at this depth would be ten kilobytes of
+# parentheses, so the two cases are generated here from the bound each reader
+# declares in its own source.
+#
+# The two constants are read out and compared FIRST — not because the cases
+# below are blind to a one-sided change (they are not: the bound's value is
+# printed inside its own message, so raising one side alone changes either the
+# wording or the column, and the byte comparison below goes red either way), but
+# because this fails EARLIER and BY NAME instead of as an opaque message
+# mismatch, and because it catches the constant being renamed, reformatted or
+# deleted outright — which the generated cases genuinely cannot.
+#
+# Over the bound the located message IS compared, once each driver's own
+# program-name prefix is stripped — the depth, the column and the wording are
+# the shared reader's contract, and it is precisely the refusal CATEGORY that
+# used to differ: before #331 the Lean reader had no bound, read the over-deep
+# form, and refused it one layer later as a malformed envelope, at the same exit
+# code. At the bound the two diagnostics are NOT compared — the Haskell driver's
+# there prints the rejected tree, which is free to differ — but the bound's own
+# message must be absent from both, which is what stops a reader that refuses one
+# level too early from satisfying the case. A third case does the same for a wide,
+# shallow document, pinning that the counter counts DEPTH and not forms seen.
+# ---------------------------------------------------------------------------
+printf '\n== reader nesting bound (generated from maxDepth; both drivers must refuse alike)\n'
+
+hs_depth="$(sed -n 's/^maxDepth = \([0-9]\{1,\}\)$/\1/p' src/Lara/Wire.hs)"
+lean_depth="$(sed -n 's/^def maxDepth : Nat := \([0-9]\{1,\}\)$/\1/p' lean/Lara/Driver.lean)"
+if [ -z "$hs_depth" ] || [ -z "$lean_depth" ]; then
+  echo "FAIL: could not read the nesting bound from src/Lara/Wire.hs and lean/Lara/Driver.lean"
+  exit 2
+fi
+if [ "$hs_depth" != "$lean_depth" ]; then
+  echo "FAIL: the two readers declare different nesting bounds (haskell $hs_depth, lean $lean_depth)"
+  exit 2
+fi
+printf 'shared nesting bound: %s\n' "$hs_depth"
+
+# ---------------------------------------------------------------------------
+# The margin, measured rather than asserted.
+#
+# `docs/spec.md` §10.1, `src/Lara/Wire.hs` and `lean/Lara/Driver.lean` all say
+# the bound sits far above anything committed, and §10.1's sentence is normative
+# inside a frozen section. Nothing measured it: every gate reads `maxDepth` out
+# of source and none looks at the artifacts. So a depth-25 fixture could land and
+# silently falsify a frozen spec sentence. Measure it here — the scan is over
+# every committed .sexp/.laramap/.lara tree, all 960 of them, and costs
+# milliseconds — and fail above the low-water mark the spec states.
+# ---------------------------------------------------------------------------
+corpus_depth_ceiling=20
+corpus_depth_prog='
+BEGIN { maxd = 0; maxf = "-" }
+FNR == 1 { d = 0; instr = 0; esc = 0 }
+{
+  n = length($0); incomment = 0
+  for (i = 1; i <= n; i++) {
+    c = substr($0, i, 1)
+    if (esc) { esc = 0; continue }
+    if (instr) {
+      if (c == "\\") esc = 1
+      else if (c == "\"") instr = 0
+      continue
+    }
+    if (incomment) continue
+    if (c == ";") { incomment = 1; continue }
+    if (c == "\"") { instr = 1; continue }
+    if (c == "(") { d++; if (d > maxd) { maxd = d; maxf = FILENAME } }
+    else if (c == ")") d--
+  }
+}
+END { printf "%d %s\n", maxd, maxf }
+'
+# `-exec … +` may batch, so each batch reports its own maximum and the largest
+# wins. `sort -rn` orders on the leading depth field.
+# `test` is in the roots even though it holds no anchor: the sentence being
+# checked is about every committed tree, and test/fixtures/map/ is where the map
+# gate's own envelopes live — an entirely plausible place for a deep artifact.
+corpus_depth_line="$(find fixtures examples bundles corpus-units test \
+  \( -name '*.sexp' -o -name '*.laramap' -o -name '*.lara' \) \
+  -exec awk "$corpus_depth_prog" {} + | LC_ALL=C sort -rn | head -1)"
+corpus_depth="${corpus_depth_line%% *}"
+corpus_depth_file="${corpus_depth_line#* }"
+if [ -z "$corpus_depth" ]; then
+  echo "FAIL: could not measure the committed artifacts' nesting depth"
+  exit 2
+fi
+if [ "$corpus_depth" -gt "$corpus_depth_ceiling" ]; then
+  echo "FAIL: a committed artifact nests $corpus_depth levels ($corpus_depth_file),"
+  echo "  past the $corpus_depth_ceiling-level ceiling that docs/spec.md §10.1,"
+  echo "  src/Lara/Wire.hs and lean/Lara/Driver.lean all assert. Raise the ceiling"
+  echo "  here and update that sentence in all three, or shallow the artifact."
+  exit 2
+fi
+printf 'deepest committed artifact: %s levels (%s), ceiling %s\n' \
+  "$corpus_depth" "$corpus_depth_file" "$corpus_depth_ceiling"
+
+depth_dir="$tmp_dir/depth"
+if ! mkdir -p "$depth_dir"; then
+  echo "FAIL: could not create $depth_dir"
+  exit 2
+fi
+
+# n copies of one character, without spawning n processes.
+repeat_char() {
+  # A loop, not sprintf("%*s", n, ""): mawk's sprintf buffer is a fixed 8192
+  # bytes and these cases need more, so the sprintf form aborts the gate under
+  # the awk that stock Ubuntu — and CI's `ubuntu-latest` — selects by default.
+  awk -v n="$1" -v c="$2" 'BEGIN { while (i++ < n) printf "%s", c }'
+}
+
+depth_over="$depth_dir/over-the-bound.sexp"
+depth_at="$depth_dir/at-the-bound.sexp"
+depth_wide="$depth_dir/wide-not-deep.sexp"
+repeat_char "$((hs_depth + 2))" '(' >"$depth_over" || exit 2
+{
+  repeat_char "$((hs_depth + 1))" '('
+  repeat_char "$((hs_depth + 1))" ')'
+} >"$depth_at" || exit 2
+# A third case, for the counter itself. Both cases above are `(((…)))`, one
+# element per list, where nesting depth and total-forms-seen are numerically
+# equal — so is every committed anchor, none of which holds more than a couple of
+# hundred siblings, two orders of magnitude under the bound. Writing Lean's tail
+# recursion as `parseList (depth + 1) p''` rather than `parseList depth p''` (the
+# slip the mutual threading invites; Haskell's `where`-bound closure cannot
+# express it) would leave both cases above passing while the reader refused a
+# wide, shallow
+# document — falsifying docs/spec.md §10.1's "it bounds no expressible program".
+# This document nests one level and holds maxDepth + 2 siblings: both drivers
+# still exit 2, because it is not a check-input@1 envelope, but neither may
+# refuse it FOR THE BOUND.
+{
+  printf '('
+  awk -v n="$((hs_depth + 2))" 'BEGIN { while (i++ < n) printf "a " }'
+  printf ')'
+} >"$depth_wide" || exit 2
+
+depth_pass=0
+depth_fail=0
+depth_message="maximum S-expression nesting depth exceeded ($hs_depth)"
+for depth_case in "over:$depth_over" "at:$depth_at" "wide:$depth_wide"; do
+  depth_mode="${depth_case%%:*}"
+  f="${depth_case#*:}"
+  depth_why=''
+  case "$depth_mode" in
+    wide) depth_label='depth counter: wide, not deep' ;;
+    *) depth_label="depth $depth_mode the bound" ;;
+  esac
+  case_no=$((case_no + 1))
+  hs_stdout="$tmp_dir/$case_no.haskell.stdout"
+  hs_stderr="$tmp_dir/$case_no.haskell.stderr"
+  lean_stdout="$tmp_dir/$case_no.lean.stdout"
+  lean_stderr="$tmp_dir/$case_no.lean.stderr"
+
+  "$hs_bin" check "$f" >"$hs_stdout" 2>"$hs_stderr"
+  hs_exit=$?
+  "$lean_bin" "$f" >"$lean_stdout" 2>"$lean_stderr"
+  lean_exit=$?
+
+  # Over the bound the two located messages must agree byte for byte AND must be
+  # the bound's own — agreement alone is satisfied by a pair of readers that both
+  # ran off the end of the unclosed parens, and by a pair of empty stderrs. At the
+  # bound the message must be absent: the form is inside the bound, so what
+  # refuses it is the envelope decoder one layer later.
+  reason_matches=1
+  if [ "$depth_mode" = "over" ]; then
+    sed -e 's/^lara: //' "$hs_stderr" >"$tmp_dir/$case_no.haskell.reason"
+    sed -e 's/^lara-driver: //' "$lean_stderr" >"$tmp_dir/$case_no.lean.reason"
+    if ! cmp -s "$tmp_dir/$case_no.haskell.reason" "$tmp_dir/$case_no.lean.reason"; then
+      reason_matches=0
+      depth_why='the two readers refused the over-deep input differently'
+    elif ! grep -qF "$depth_message" "$hs_stderr"; then
+      reason_matches=0
+      depth_why='the two readers agree, but not on the nesting bound'
+    fi
+  elif grep -qF "$depth_message" "$hs_stderr" || grep -qF "$depth_message" "$lean_stderr"; then
+    reason_matches=0
+    if [ "$depth_mode" = "wide" ]; then
+      depth_why='the nesting bound counts forms seen, not nesting depth'
+    else
+      depth_why='the nesting bound fired one level too early'
+    fi
+  fi
+
+  if [ "$hs_exit" -eq 2 ] && [ "$lean_exit" -eq 2 ] \
+    && [ ! -s "$hs_stdout" ] && [ ! -s "$lean_stdout" ] && [ "$reason_matches" -eq 1 ]; then
+    depth_pass=$((depth_pass + 1))
+    printf '%-45s  exit 2, empty stdout\n' "$depth_label"
+  else
+    depth_fail=$((depth_fail + 1))
+    printf 'DEPTH MISMATCH [%s] (expected both exit 2 with empty stdout)\n' "$depth_label"
+    # Truncated: the Haskell driver's envelope diagnostic prints the rejected
+    # tree, which for the wide case is ten thousand atoms.
+    printf '  haskell: exit=%s stdout-bytes=%s reason=%s\n' \
+      "$hs_exit" "$(wc -c <"$hs_stdout")" "$(sed -e 's/^lara: //' "$hs_stderr" | head -1 | cut -c1-160)"
+    printf '  lean:    exit=%s stdout-bytes=%s reason=%s\n' \
+      "$lean_exit" "$(wc -c <"$lean_stdout")" "$(sed -e 's/^lara-driver: //' "$lean_stderr" | head -1 | cut -c1-160)"
+    if [ "$reason_matches" -eq 0 ]; then
+      printf '  %s\n' "$depth_why"
+    fi
+  fi
+done
+echo "depth-bound pass=$depth_pass fail=$depth_fail"
+
+[ "$fail" -eq 0 ] && [ "$neg_fail" -eq 0 ] && [ "$depth_fail" -eq 0 ] \
+  && [ "$pass" -gt 0 ] && [ "$neg_pass" -gt 0 ] && [ "$depth_pass" -eq 3 ]

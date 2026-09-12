@@ -130,7 +130,7 @@ import Lara.Map.Wire (decodeMapVerdict, encodeMapVerdict)
 import Lara.Prop (Prop (..))
 import Lara.Source.Load (loadSource, loadedPrepared, renderSourceLoadError)
 import qualified Lara.TempTree as TempTree
-import Lara.Wire (Outcome (..), PublicStatus (..), printSExpr, verdictOutcome)
+import Lara.Wire (Outcome (..), PublicStatus (..), maxDepth, printSExpr, verdictOutcome)
 
 -- ---------------------------------------------------------------------------
 -- Fixture paths and helpers
@@ -866,6 +866,50 @@ prop_envelopeMalformedMatrix = once $ ioProperty $ do
             ]
       )
 
+-- | The shared reader's nesting bound at the map's envelope door (issue #331).
+--
+-- The Haskell half of the two cases @scripts\/check-map-conformance.sh@ runs
+-- against the Lean map driver. The envelope goes through the same reader as the
+-- inner checker wire, so the bound, the column and the wording are
+-- 'maxDepth'\'s and are named from it rather than restated: one form deeper than
+-- the bound allows is a located reader refusal, and the deepest form it admits
+-- gets past the reader and is refused by the envelope decoder instead. Without
+-- the second half, a reader that refused one level too early would still satisfy
+-- the first.
+--
+-- The second half names the /stage/, not merely the absence of the bound's
+-- message: 'mweContext' is @"line L, column C"@ for a reader failure
+-- (@Lara.Map.Driver.decodeMapCheckInputText@) and @"map check-input"@ for the
+-- envelope decoder's own refusal, so asserting the latter excludes the reader
+-- failures this docstring means to exclude — @unclosed list@,
+-- @unexpected end of input@, @expected a single S-expression, found more
+-- input@ — which a message-absence check would admit.
+prop_envelopeNestingBound :: Property
+prop_envelopeNestingBound =
+  once $
+    conjoin
+      [ counterexample "one form past the bound is a located reader refusal" $
+          decodeMapCheckInputText (replicate (maxDepth + 2) '(')
+            === Left
+              ( MapWireError
+                  ("line 1, column " ++ show (maxDepth + 2))
+                  ("maximum S-expression nesting depth exceeded (" ++ show maxDepth ++ ")")
+              )
+      , counterexample "the deepest admitted form reaches the envelope decoder" $
+          case decodeMapCheckInputText
+            (replicate (maxDepth + 1) '(' ++ replicate (maxDepth + 1) ')') of
+            Right _ -> counterexample "decoded, but is not an envelope" (property False)
+            Left err ->
+              -- 'mweMessage' here interpolates @show@ of a maxDepth-deep tree.
+              counterexample (mweContext err ++ ": " ++ take 80 (mweMessage err)) $
+                conjoin
+                  [ counterexample "the bound fired one level too early" $
+                      property (not ("nesting depth" `isInfixOf` mweMessage err))
+                  , counterexample "refused by the reader, not the envelope decoder" $
+                      mweContext err === "map check-input"
+                  ]
+      ]
+
 -- | The envelope's keyword table has no spelling collision.
 --
 -- 'parseEnvTag' derives its reverse lookup from 'envTagToString' by enumerating
@@ -1522,6 +1566,7 @@ mapSpecProps =
   , ("map envelope single-defect matrix", quickCheckResult prop_envelopeMalformedMatrix)
   , ("map envelope generator round trip", quickCheckResult prop_envelopeGeneratedRoundTrips)
   , ("map envelope tag table is total", quickCheckResult prop_envTagTableTotal)
+  , ("map envelope reader nesting bound", quickCheckResult prop_envelopeNestingBound)
   , ("map member permutation permutes the report", quickCheckResult prop_memberPermutationPermutesReport)
   , ("map alias renaming preserves statuses", quickCheckResult prop_aliasRenamingPreservesStatuses)
   , ("map singleton matches solo statuses", quickCheckResult prop_singletonMapMatchesSoloStatuses)

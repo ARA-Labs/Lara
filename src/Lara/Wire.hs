@@ -117,6 +117,7 @@ module Lara.Wire
   , parseSExpr
   , parseSExprBS
   , printSExpr
+  , maxDepth
     -- * The closed tag vocabulary
   , Tag (..)
   , tagToString
@@ -291,7 +292,15 @@ skipSpace p =
 -- pathologically nested input (@(((… )))@) is a located R14 codec error (CLI
 -- exit 2) rather than a GHC stack overflow — which the CLI cannot map to an exit
 -- code, and which @scripts/differential.sh@ would otherwise misread as a checker
--- rejection (exit 1). Comfortably above any real artifact's structural depth.
+-- rejection (exit 1). Comfortably above any real artifact's structural depth:
+-- @scripts\/differential.sh@ measures the deepest committed @.sexp@\/@.laramap@\/
+-- @.lara@ tree on every run and fails if the margin ever narrows.
+--
+-- Part of the shared reader contract, not a Haskell-only boundary: Lean's
+-- @Lara.Driver.maxDepth@ carries the same value and its reader refuses at the
+-- same depth with the same message and column, so both runtimes reject an
+-- over-deep input identically (#331). Exported so the gates that pin that
+-- agreement name one constant rather than a second copy of the literal.
 maxDepth :: Int
 maxDepth = 10000
 

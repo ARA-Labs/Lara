@@ -30,7 +30,10 @@ Three families:
    three faults whose last atom is runtime-specific text (a reader's syntax
    message, a world's read or decode failure, and an unreadable run file):
    there that one atom is masked, and every other atom, including the arity,
-   must agree.
+   must agree. A case may set `exact` to demand byte equality even so. The two
+   nesting-depth cases do, because the shared reader's bound, message and
+   column are contract rather than runtime-specific text (#331), and the gate
+   additionally checks that both readers declare the same bound in source.
 3. `.lara` world sources (fixtures/pw/source/*.sexp, #327). Only `lara pw`
    can elaborate a `(lara PATH)` world, so this family runs `lara pw` on the
    run file, then runs `lara pw-input` and hands the derived document to both
@@ -60,6 +63,7 @@ Usage: python3 scripts/check-pw-conformance.py [--update] [--no-build]
 """
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -74,6 +78,38 @@ C_LOCALE = {'LC_ALL': 'C', 'LANG': 'C'}
 # decodes the run-file argument with the locale looks up the wrong bytes.
 LATIN1_LOCALES = pathlib.Path(tempfile.gettempdir()) / 'lara-pw-conf-locales'
 LATIN1 = {'LC_ALL': 'en_US.ISO-8859-1', 'LANG': 'en_US.ISO-8859-1', 'LOCPATH': str(LATIN1_LOCALES)}
+# The shared reader's nesting bound (#331). Declared here because the cases
+# build their input from it; `check_depth_bound` is what keeps this copy honest.
+MAX_DEPTH = 10000
+DEPTH_BOUND_SOURCES = (
+    (pathlib.Path('src/Lara/Wire.hs'), r'^maxDepth = ([0-9]+)$'),
+    (pathlib.Path('lean/Lara/Driver.lean'), r'^def maxDepth : Nat := ([0-9]+)$'),
+    # The spec states the value in prose, where nothing else would notice it
+    # drifting; §10.1's paragraph is normative, so it gets a keeper too.
+    (pathlib.Path('docs/spec.md'), r'`maxDepth = ([0-9]+)`'),
+)
+
+
+def check_depth_bound():
+    """Both readers must declare the same nesting bound as the cases assume.
+
+    Not because the depth cases below are blind to a one-sided change — they
+    compare the full envelope with exact=True, and the bound's value is printed
+    inside its own message, so raising either side alone goes red there. This
+    check earns its place for two other reasons: it fails first and by name
+    rather than as an envelope mismatch, and MAX_DEPTH above is a third copy of
+    the constant with no other keeper — the case generators read it, so nothing
+    else would notice it drifting from the two readers."""
+    for path, pattern in DEPTH_BOUND_SOURCES:
+        text = (ROOT / path).read_text(encoding='utf-8')
+        found = re.search(pattern, text, re.MULTILINE)
+        if found is None:
+            print(f'FAIL: no nesting bound matching {pattern!r} in {path}')
+            sys.exit(2)
+        if int(found.group(1)) != MAX_DEPTH:
+            print(f'FAIL: {path} declares a nesting bound of {found.group(1)}, '
+                  f'not {MAX_DEPTH}; update this gate and its sibling reader')
+            sys.exit(2)
 
 
 def read_sexpr(text):
@@ -123,7 +159,9 @@ def read_sexpr(text):
 def mask(tree):
     """Replace the runtime-specific final atom of the three detail-bearing
     faults. Each fault's arity is checked first, so a missing or extra atom
-    still fails instead of being truncated away."""
+    still fails instead of being truncated away.
+
+    A case that sets `exact` skips this and compares the bytes."""
     if not (isinstance(tree, list) and tree[:2] == ['pw-error', '1']):
         return tree
     stage = tree[2]
@@ -176,7 +214,8 @@ class Copy(str):
 #   golden           stdout must equal this fixture's committed golden
 #   same-queries-as  stdout's queries section must equal this fixture's golden
 #   also-under       environments to run the case under again
-OPTIONS = ('append', 'source', 'missing', 'golden', 'same-queries-as', 'also-under')
+#   exact            compare stdout byte for byte, masking no fault detail
+OPTIONS = ('append', 'source', 'missing', 'golden', 'same-queries-as', 'also-under', 'exact')
 TEXT_BOUNDARY = [C_LOCALE, LATIN1]
 
 # (name, base fixture or None, substitutions, options, exit, fragment).
@@ -187,6 +226,22 @@ CASES = [
     # Wire: the run codec and the embedded pw-surface codec.
     ('syntax: trailing form', 'fields', [], {'append': '\n(extra)'}, 2, '(pw-error 1 wire syntax '),
     ('syntax: empty input', None, [(None, '')], {}, 2, '(pw-error 1 wire syntax '),
+    # The shared reader's nesting bound: one form deeper than it allows is a
+    # located `syntax` refusal from BOTH readers, at the same column and with
+    # the same message, so the detail is compared rather than masked. Before
+    # #331 only Haskell bounded the nesting: Lean read the over-deep form and
+    # refused it one layer later as `malformed run`, the same exit code under a
+    # different category.
+    ('syntax: nesting depth exceeded', None, [(None, '(' * (MAX_DEPTH + 2))], {'exact': True}, 2,
+     '(pw-error 1 wire syntax "line 1, column ' + str(MAX_DEPTH + 2)
+     + ': maximum S-expression nesting depth exceeded (' + str(MAX_DEPTH) + ')")'),
+    # And the other side of the boundary: the deepest form the bound admits
+    # reads cleanly and is refused by the run codec, not the reader. Without
+    # this case a reader that refused one level too early would pass the case
+    # above.
+    ('nesting depth at the bound', None,
+     [(None, '(' * (MAX_DEPTH + 1) + ')' * (MAX_DEPTH + 1))], {'exact': True}, 2,
+     '(pw-error 1 wire malformed run)'),
     ('unsupported run version', None, [(None, '(pw-run 2 (worlds))')], {}, 2, '(pw-error 1 wire unsupported-version 2)'),
     ('version 01 is not 1', None, [(None, '(pw-run 01 (worlds) (edges) (comparisons) (pw-surface 1 (bridges) (queries)))')], {}, 2, 'unsupported-version 01'),
     ('unsupported surface version', 'fields', [('pw-surface 1', 'pw-surface 7')], {}, 2, '(pw-error 1 wire unsupported-version 7)'),
@@ -473,14 +528,15 @@ def haskell_exe():
     return [result.stdout.strip(), 'pw']
 
 
-def compare_drivers(haskell, path, env=None):
+def compare_drivers(haskell, path, env=None, exact=False):
     """Byte equality, except that a detail-bearing fault's final atom is
-    masked; the rest of such an envelope must still agree atom for atom."""
+    masked; the rest of such an envelope must still agree atom for atom. With
+    exact, nothing is masked and the bytes themselves must agree."""
     h_code, h_out = run(haskell, path, env)
     l_code, l_out = run([str(LEAN)], path, env)
     assert h_code == l_code, ('exit codes differ', h_code, l_code, h_out, l_out)
     h_tree, l_tree = read_sexpr(h_out), read_sexpr(l_out)
-    if mask(h_tree) == h_tree and mask(l_tree) == l_tree:
+    if exact or (mask(h_tree) == h_tree and mask(l_tree) == l_tree):
         assert h_out == l_out, ('outputs differ', h_out, l_out)
     else:
         assert mask(h_tree) == mask(l_tree), ('outputs differ', h_out, l_out)
@@ -519,6 +575,31 @@ def check_derivation(haskell, path, code, out, env=None):
         return
     got, got_out = compare_drivers(haskell, derived, env)
     assert (got, got_out) == (code, out), ('derived run differs', got_out, out)
+
+
+def check_pw_subtree_total():
+    """Every .sexp under fixtures/pw/ must be owned by a gate that runs it.
+
+    differential.sh and gen-anchor-manifest.sh exclude the whole fixtures/pw/
+    subtree from the check-input@1 anchor set and from fixtures/ANCHORS.tsv,
+    on the grounds that this family has its own harnesses. That argument only
+    holds while the family is covered end to end. The other four excluded
+    families are pinned by a manifest or discovered manifest-driven, so a stray
+    unlisted file there is a setup failure; without this assertion a new .sexp
+    at fixtures/pw/*.sexp, or under any new fixtures/pw/<subdir>/, would be
+    discovered by no gate and pinned by no manifest — the exact state the anchor
+    pin exists to prevent, relocated rather than removed.
+    """
+    root = ROOT / 'fixtures/pw'
+    owned = set(FIXTURES.glob('*.sexp'))
+    owned |= set((FIXTURES / 'worlds').glob('*.sexp'))
+    owned.add(ROOT / 'fixtures/pw/declared.sexp')  # scripts/check-pw-example.py
+    stray = sorted(p for p in root.rglob('*.sexp') if p not in owned)
+    if stray:
+        for p in stray:
+            print(f'FAIL: {p.relative_to(ROOT)} is under fixtures/pw/ but no gate '
+                  f'runs it; differential.sh excludes the whole subtree')
+        sys.exit(2)
 
 
 def check_fixtures(haskell, update):
@@ -612,7 +693,7 @@ def run_case(haskell, case, env=None):
         if not options.get('missing'):
             write(source, text)
         try:
-            got, out = compare_drivers(haskell, source, env)
+            got, out = compare_drivers(haskell, source, env, options.get('exact', False))
             assert got == code, ('exit', got, code, out)
             assert_fragments(fragment, out)
             if 'golden' in options:
@@ -689,6 +770,8 @@ def check_cases(haskell, latin1_ok):
 
 def main():
     update = '--update' in sys.argv
+    check_depth_bound()
+    check_pw_subtree_total()
     if '--no-build' not in sys.argv:
         build()
     latin1_problem = build_latin1()

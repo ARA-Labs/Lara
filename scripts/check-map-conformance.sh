@@ -73,6 +73,13 @@
 #      required to contain both decisions, because a differential over refusals
 #      alone is satisfied by two decoders that refuse everything.
 #
+#   4. the reader's nesting bound (issue #331). Both readers cap S-expression
+#      nesting at the same `maxDepth`; the two cases straddling that bound are
+#      generated from the constant each reader declares in source, and the Lean
+#      map door must refuse the over-deep one FOR THE BOUND rather than at some
+#      downstream check that also exits 2. The Haskell half is
+#      `prop_envelopeNestingBound` in test/MapSpec.hs. See the section itself.
+#
 # Regenerating a committed envelope or verdict, after editing a member or a
 # manifest (never by hand):
 #
@@ -376,6 +383,111 @@ while IFS="$(printf '\t')" read -r case_file expected label; do
 done <"$diff_dir/decisions.tsv"
 printf 'differential pass=%s fail=%s\n' "$differential_pass" "$differential_fail"
 
+# ---------------------------------------------------------------------------
+# The reader's nesting bound (issue #331): GENERATED, not committed.
+#
+# The map's envelope goes through the same two S-expression readers as the inner
+# checker wire — `Lara.Wire.parseSExpr` and `Lara.Driver.parseWire` — and both
+# cap nesting at the `maxDepth` they share, so an over-deep envelope is a located
+# codec error (exit 2) on each side rather than a stack overflow on either. The
+# two cases straddling that bound are generated from the constant each reader
+# declares in source: nothing under test/fixtures/map/ comes near that depth, and
+# a committed envelope would be ten kilobytes of parentheses.
+#
+# The constants are read out and compared first — not because the cases below are
+# blind to a one-sided change (the grep target interpolates the Haskell constant,
+# so a Lean bound moved alone stops matching), but because this fails earlier and
+# by name, and because it catches the constant being renamed, reformatted or
+# deleted outright, which the generated cases cannot.
+#
+# The Lean door is the one with a CLI here — the Haskell envelope decoder is
+# in-process, and `test/MapSpec.hs` (`prop_envelopeNestingBound`) pins its
+# located refusal at the same two depths. So this section pins that the Lean map
+# driver refuses the over-deep envelope FOR THE BOUND, by its own message, and
+# not as some downstream decode error that would also exit 2; and that the
+# deepest envelope the bound admits gets past the reader and is refused by the
+# envelope decoder instead.
+# ---------------------------------------------------------------------------
+printf '\n== reader nesting bound (generated from maxDepth; the Lean map door must refuse at the bound)\n'
+
+hs_depth="$(sed -n 's/^maxDepth = \([0-9]\{1,\}\)$/\1/p' src/Lara/Wire.hs)"
+lean_depth="$(sed -n 's/^def maxDepth : Nat := \([0-9]\{1,\}\)$/\1/p' lean/Lara/Driver.lean)"
+if [ -z "$hs_depth" ] || [ -z "$lean_depth" ]; then
+  echo "FAIL: could not read the nesting bound from src/Lara/Wire.hs and lean/Lara/Driver.lean"
+  exit 2
+fi
+if [ "$hs_depth" != "$lean_depth" ]; then
+  echo "FAIL: the two readers declare different nesting bounds (haskell $hs_depth, lean $lean_depth)"
+  exit 2
+fi
+printf 'shared nesting bound: %s\n' "$hs_depth"
+
+# n copies of one character, without spawning n processes.
+repeat_char() {
+  # A loop, not sprintf("%*s", n, ""): mawk's sprintf buffer is a fixed 8192
+  # bytes and these cases need more, so the sprintf form aborts the gate under
+  # the awk that stock Ubuntu — and CI's `ubuntu-latest` — selects by default.
+  awk -v n="$1" -v c="$2" 'BEGIN { while (i++ < n) printf "%s", c }'
+}
+
+depth_dir="$tmp_dir/depth"
+if ! mkdir -p "$depth_dir"; then
+  echo "FAIL: could not create $depth_dir"
+  exit 2
+fi
+depth_over="$depth_dir/over-the-bound.sexp"
+depth_at="$depth_dir/at-the-bound.sexp"
+repeat_char "$((hs_depth + 2))" '(' >"$depth_over" || exit 2
+{
+  repeat_char "$((hs_depth + 1))" '('
+  repeat_char "$((hs_depth + 1))" ')'
+} >"$depth_at" || exit 2
+
+depth_pass=0
+depth_fail=0
+depth_message="maximum S-expression nesting depth exceeded ($hs_depth)"
+for depth_case in "over:$depth_over" "at:$depth_at"; do
+  depth_mode="${depth_case%%:*}"
+  f="${depth_case#*:}"
+  case_no=$((case_no + 1))
+  depth_stdout="$tmp_dir/$case_no.depth.stdout"
+  depth_stderr="$tmp_dir/$case_no.depth.stderr"
+  "$lean_bin" "$f" >"$depth_stdout" 2>"$depth_stderr"
+  depth_exit=$?
+
+  # Over the bound the reader's own message must be what fired; at the bound it
+  # must NOT be — the form is inside the bound and the envelope decoder is what
+  # refuses it.
+  if grep -qF "$depth_message" "$depth_stderr"; then
+    bound_fired=1
+  else
+    bound_fired=0
+  fi
+  if [ "$depth_mode" = "over" ]; then
+    want_fired=1
+  else
+    want_fired=0
+  fi
+
+  if [ "$depth_exit" = "2" ] && [ ! -s "$depth_stdout" ] && [ "$bound_fired" = "$want_fired" ]; then
+    depth_pass=$((depth_pass + 1))
+    printf '%-45s  exit 2, empty stdout\n' "depth $depth_mode the bound"
+  else
+    depth_fail=$((depth_fail + 1))
+    printf 'DEPTH MISMATCH %s the bound: exit %s, %s stdout bytes (want exit 2, 0 bytes)\n' \
+      "$depth_mode" "$depth_exit" "$(wc -c <"$depth_stdout")"
+    if [ "$bound_fired" != "$want_fired" ]; then
+      if [ "$want_fired" = "1" ]; then
+        printf '  the nesting bound did not fire; the Lean reader refused for another reason\n'
+      else
+        printf '  the nesting bound fired one level too early\n'
+      fi
+    fi
+    printf '  lean reason: %s\n' "$(sed -e 's/^lara-map-driver: //' "$depth_stderr" | head -1 | cut -c 1-120)"
+  fi
+done
+printf 'depth-bound pass=%s fail=%s\n' "$depth_pass" "$depth_fail"
+
 printf '\nmap anchors: cross-driver pass=%s  pre-boundary=%s  fail=%s\n' \
   "$pass" "$preboundary" "$fail"
 
@@ -390,7 +502,8 @@ if [ "$pass" -eq 0 ]; then
   exit 1
 fi
 
-if [ "$fail" -eq 0 ] && [ "$negative_fail" -eq 0 ] && [ "$differential_fail" -eq 0 ]; then
+if [ "$fail" -eq 0 ] && [ "$negative_fail" -eq 0 ] && [ "$differential_fail" -eq 0 ] \
+  && [ "$depth_fail" -eq 0 ] && [ "$depth_pass" -eq 2 ]; then
   printf 'OK: both drivers agree on all %s anchors that reached the boundary' "$pass"
   if [ "$preboundary" -gt 0 ]; then
     printf ' (%s more refused pre-boundary, no envelope to compare)' "$preboundary"

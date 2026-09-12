@@ -54,7 +54,7 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅ (#17); r7 attack completeness ✅ (#18); r9 pending |
 | 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅ (#17 closed); r7/C09 computed-complete-claim consistency ✅ for the Lean reference PL (#18 implementation) |
 | 13 | Abstract syntax + wire schema (S-expression codec `Lara.Wire`; JSON producer surface is #30 — **amended 2026-09-07 (#256)**), **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 — presentation half ✅ (`parse ∘ print` at `lara-syntax@0.10`, spec §2.1); wire-decode boundary ✅ (`WireSpec` malformed-input matrix) |
-| 14 | Specified rejection behavior (located, per rejection class) | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
+| 14 | Specified rejection behavior (located, per rejection class) — **amended 2026-09-07 (#256), amended 2026-09-11 (#331)** | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
 
 ## M0 conditions the freeze must absorb
 
@@ -244,3 +244,29 @@ Row 7 and M2 backlog item 5 are amended again: the third §5.2 portfolio member 
   budget — tracked in issue #266; see the `m5-freeze-checklist.md` post-v5 addendum.
 - **No freeze-tag bump or corpus regeneration is owed.** The adapter is additive at the registry,
   no existing unit selects it, and no corpus, wire, mutant, or replay-identity bytes change.
+
+### Amendment (2026-09-11, issue #331): the reader's nesting bound is an R14 class arm
+
+Row 14 is amended: spec §10.1's **R14 codec** trigger list gains a nesting arm, and the section
+gains a contract paragraph naming the bound. `docs/rejection-surface.md` moves with it, as it did
+under #256.
+
+- **What changed.** Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
+  S-expression nested deeper than the `maxDepth = 10000` they share, as a located R14 codec error at
+  exit 2. Before #331 only the Haskell reader carried the bound; the Lean driver read the over-deep
+  form and refused it one layer later as a malformed envelope. Same exit code, different refusal
+  *category* — the divergence class the reader differentials exist to catch, and one every gate was
+  structurally blind to, because no committed anchor comes near that depth.
+- **Why it is an amendment and not a new class.** The refusal was already R14 on the Haskell side
+  and already reached R14's positional contract (`docs/rejection-surface.md` §"Where a codec error
+  is located"). What #331 froze is that the *category*, the wording and the column are shared, not
+  merely the exit code. No class was added, renamed, or removed; R1–R14 still enumerate fourteen.
+- **Rejected alternative: commit an over-deep anchor.** An anchor at `maxDepth + 2` is ten kilobytes
+  of parentheses and would pin the bound's *value* into the corpus, making any future change to it a
+  corpus regeneration. The three gates generate their cases from the constant each reader declares
+  in source instead, and compare the two constants first so a one-sided edit fails by name.
+- **No freeze-tag bump or corpus regeneration is owed.** The bound sits orders of magnitude above
+  the deepest committed artifact, so no corpus, mutant, wire, or replay-identity byte changes: every
+  existing program decodes exactly as before, and the mutation manifest (541 mutants) is untouched.
+  The spec change is prose plus one trigger-list arm; the gate changes are additive cases. Verified
+  by a depth scan over every tracked `.sexp` / `.laramap` / `.lara` file.

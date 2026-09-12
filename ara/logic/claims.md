@@ -325,12 +325,22 @@ the result is stated but not yet proved or mechanized._
   inconsistent driver identity functions (non-canonical numeric literals: `canonNum` vs the former
   Lean `canon = id`, O15), rather than a voting tie. The production Lean driver now uses `canonNum`, and the
   numeric/multi-blocked differential fixture prevents that defect from recurring.
-- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:146 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:147 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]"]
+  Bounded, as of #331, by what the anchor set reaches: the localizing power is the framing's, but a
+  divergence outside every case is invisible to it, and the gates' exit-code-only families do not
+  see a divergence in the stated *reason* at all. The reader's nesting bound was Haskell-only and
+  unseen for that reason — same exit code, different refusal category — and the remedy was both a
+  case on each side of the boundary. A source-level check that the two implementations agree on the
+  boundary's *value* was added alongside, but on review it earns its place for a narrower reason
+  than first recorded: not that the behavioural cases are blind to a one-sided relaxation — the
+  bound's value is printed inside its own message, so moving either copy alone changes the wording
+  or the column and the byte comparison goes red — but that it fails earlier and by name, and that
+  it catches the constant being renamed, reformatted or deleted, which a generated case cannot.
+- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:146 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:147 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]", "673 positive anchors, 66 negative and 3 depth cases agree after the #331 bound ← trace N331_gate_controls:result «scripts/differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound pass=3 fail=0» [result]"]
 - **Status**: testing
 - **Falsification criteria**: A demonstration that the shared-core differential setup cannot localize
   whether a divergence is a Haskell-checker bug or a Lean-model bug (i.e. the N+1 framing gives no
   more than oracle-free voting here) — undercutting the methodological claim.
-- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence was localized and is now a pinned production-driver regression"]
+- **Proof**: [E02, "scripts/differential.sh + test/DifferentialSpec.hs: corpus fixtures agree byte-exact across the Haskell and Lean drivers; the numeric-literal divergence was localized and is now a pinned production-driver regression", trace N331_gate_controls (the reader's nesting bound: a category divergence no gate had a case for, now pinned on both sides of the boundary in all three reader differentials, with negative controls and a source-level constant check)]
 - **Evidence basis**: Deep-research report (Csmith PLDI 2011 = oracle-free voting; JEST ICSE 2021 =
   N+1; Marmsoler–Brucker executable-oracle-from-Isabelle); folded into `docs/mechanization-plan.md` §3.
   The shared-core serialization, an M1 design requirement, is now realized in M3 as `Lara.Wire` with a
@@ -339,7 +349,7 @@ the result is stated but not yet proved or mechanized._
   numeric literals. The shared `canonNum` implementation and numeric fixture now pin the fix.
 - **Dependencies**: C07, C10
 - **Tags**: differential-testing, conformance, mechanization, methodology
-- **Last revised**: 2026-08-05 (2026-08-05_002)
+- **Last revised**: 2026-09-11 (2026-09-11_002#4)
 
 ## C13: A small fixed scheme vocabulary covers the corpus's argument shapes
 - **Statement**: The inference schemes that ARA corpus claims instantiate collapse into a small
