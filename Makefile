@@ -59,6 +59,8 @@ ara-source-spans:
 
 # Every session file under ara/trace/sessions/ has exactly one index row and no
 # id is listed twice (#337). Stdlib-only; reads ara/, changes nothing.
+# Needs PyYAML (the gate's one non-stdlib dependency, #338); CI runs the same
+# script under `uv run --with pyyaml`.
 ara-session-index:
 	python3 scripts/check_ara_session_index.py
 

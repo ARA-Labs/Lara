@@ -138,7 +138,7 @@ sessions:
     the weakest-link roll-up is a conditional guarantee over an untrusted (proposer-declared) edge set
     — missing-edge laundering.'
   turn_count: 7
-  events_count: 12
+  events_count: 8
   claims_touched:
   - C18
   - C19
@@ -218,7 +218,7 @@ sessions:
   claims_touched:
   - C04
   - C21
-  open_threads: 4
+  open_threads: 5
 - id: 2026-07-31_001
   date: '2026-07-31'
   summary: 'PR #45 review remediation, two rounds. R1 (N87): reproduced R9-evasion hole fixed (.lara R14
@@ -317,7 +317,7 @@ sessions:
   turn_count: 7
   events_count: 26
   claims_touched: [C26, C27]
-  open_threads: 5
+  open_threads: 7
 - id: 2026-08-08_001
   date: '2026-08-08'
   summary: 'Implemented lara-syntax@0.3, closed eight initial round-2 findings, then closed four PR #92 re-review follow-ups with red-green and mutation-effective coverage. Full local Haskell/Lean/axiom/replay/tamper/freshness/differential/admission gates passed; hosted Haskell and re-review are pending.'
@@ -338,7 +338,7 @@ sessions:
   turn_count: 7
   events_count: 22
   claims_touched: [C28, C29, C30, H13]
-  open_threads: 4
+  open_threads: 13
 - id: 2026-08-11_001
   date: '2026-08-11'
   summary: 'Merged result-12 parity, implemented and externally review-hardened #88b value bindings as lara-syntax@0.4, and pushed merge-clean PR #103 with byte-stable S2/S5 artifacts plus green local/hosted gates; reviewer re-approval remains.'
@@ -359,7 +359,7 @@ sessions:
   turn_count: 1
   events_count: 2
   claims_touched: []
-  open_threads: 2
+  open_threads: 3
 - id: 2026-08-12_003
   date: '2026-08-12'
   summary: 'Re-verified the implementation contract, corrected the intermediate 72-row ARA record with final 73-row parity, and recorded hosted run 31653193555 on ARA-append head c9c59a6 before this metadata correction commit; review handoff remains open.'
@@ -457,7 +457,7 @@ sessions:
   turn_count: 3
   events_count: 16
   claims_touched: [C37, C38, C39, C40, C41, C42, C43]
-  open_threads: 7
+  open_threads: 8
 - id: 2026-08-29_002
   date: '2026-08-29'
   summary: 'Executed the #200 stale sweep: applied the research-manager 3+-session-day rule to the staging buffer with references read from the session records, the reasoning log, timestamped tree nodes, and staged cross-citations, counting idleness in session-days. 33 of 43 unpromoted, unstale observations were flagged, ten stay live (O37 and O85 held by live CONFLICT citations in claims.md), and the 33-entry stale set is surfaced for researcher triage. Flags only — no observation, forward reference, promotion, or deletion changed, and ARA validation held at the 0-error/160-warning baseline.'
@@ -497,9 +497,9 @@ sessions:
   date: '2026-09-02'
   summary: 'PW0 possible-world outer-model gate mechanized and opened as PR #221 (merged), then — on the researcher''s directive to continue the PW track in parallel with M4 — T6 exact checked-support transport mechanized and opened as PR #223: the partial symbol translation with its two commuting facts (instAPat_tr, equiv_tr), the three-clause StructuralBridge contract over a shared canon, support_transport with the obligation list transported verbatim (completeness unconditional), target-registry occurrence replay via B0''s headline, Admits/admits_transport discharging PW0 limitation 1, the T6/T8 boundary packaged at the live T7 pair, and a genuine renaming bridge with the translationUndefined domain negative. Also in-session: crossCompare rename (N273), audit-gate hardening (N274). C47 and C48 crystallized; PW-T6 translation-form constraint crystallized from O113. Final gates: build 130 jobs, audit 1707 declarations (78 PW-T6), diff pure insertion. Then Theory M4 Part A executed end to end on the researcher''s directive (F0-F3 plus review fixes, PR #218): the fragment/linking calculus with a witnessed link guard and saturating linking, the structural merge proved inert via a generic AF node-merging morphism, context composition, and backend_replacement_congruence — a certificate relabel is unobservable in every admissible context. The plan''s unconditional phrasing was found false under forward-only acceptance; the final review found both headline witnesses vacuous and they were repaired with a certificate-bearing split and a real backend swap. C49 crystallized; #227/#228/#229 filed. Gates: build 138 jobs, 1911 audited declarations (204 M4).'
   turn_count: 5
-  events_count: 27
+  events_count: 29
   claims_touched: [C47, C48, C49]
-  open_threads: 3
+  open_threads: 5
 - id: 2026-09-03_001
   date: '2026-09-03'
   summary: 'PR #218 review remediation: detailed contextual outcomes, side/value-bearing LinkFaults, concrete rejection/composition/admissibility witnesses, and mechanically complete M4 AxCheck coverage; 138-job build and 1925-entry audit pass.'
@@ -562,7 +562,7 @@ sessions:
   turn_count: 1
   events_count: 6
   claims_touched: [C50]
-  open_threads: 4
+  open_threads: 0
 - id: 2026-09-06_001
   date: '2026-09-06'
   summary: 'Issue #231 fixture drift guards: cert_reject_mismatched_certifier pins that both acceptance judgments read (beta, hd, kappa); cert_only_assurance and cert_target_rule pin allowTrusted off with the certificate arm the only reachable assurance, source and target. Both mutations reproduced and reverted; coverage 2492 -> 2495 (PW-T6 84 -> 87), build and axiom audit green. Then issue #196 closed (PR #251): preferred_exists proves every framework has a preferred extension with no Nodup and no Mathlib — a longest admissible candidate meets a competitor as a sublist, not a subset — so the Mathlib dependency the issue budgeted was never needed; AxCheck rows 2495 -> 2500, coverage gate 2341 declarations, C35/C36 conditions narrowed. Then issue #204 closed: the certDeps report reaches a shipped consumer for the first time (Lara.Driver.unitCertDeps over the accepted checked unit, a fifth lazily built component of the single runCheckReported pass, and a lara deps subcommand on both doors). The report rides beside the verdict rather than inside it, so the N11 differential anchor and the corpus goldens do not move; the golden CertDep encoder moved from test/StrictSpec.hs into the library so the shipped text is the artifact the cross-language golden pins. differential 620/0, deps golden PASS, Lean untouched and re-audited green. C42 conditions narrowed. A parallel turn 4 (separate conversation from the same post-turn-2 state) reviewed the backlog and recommended #204 unaware it was concurrently done, then took #248 as a warm-up and found it moot at birth — both PW-T8 cleanups already in PR #247, merged 7 minutes before the issue was filed — and closed with verification, no code change.'
@@ -576,14 +576,14 @@ sessions:
   turn_count: 5
   events_count: 31
   claims_touched: [C27, C47, C51, C49, C52]
-  open_threads: 12
+  open_threads: 3
 - id: 2026-09-08_001
   date: '2026-09-08'
   summary: 'Issue #215 implemented end to end from plans/2026-09-08-theory-m4-relational-parametricity.md (16 commits, one per plan step). M4''s contextual representation-independence theorem is generalized from a function f : Assurance -> Assurance to a relation R lifted structurally through support terms, attacks and fragments: obsGen_parametricity proves it once over an arbitrary projection, and backend_replacement_parametricity{,_sem} are instantiations. #215''s own sizing question is answered no — compileUnit_rel concludes an EQUATION between StructuredAFs, so the relation is erased before any semantics runs and no fixpoint machinery, grounded-labelling lemma or AttackExtensional hypothesis appears anywhere. RelInj (partial bijection) is forced by three consumers — dedupList, coveredB, checkUnit_complete''s Nodup — and relInj_necessary witnesses it as coveredB_rel with hR deleted and the conclusion negated. The milestone''s actual content is the localization, not the quantifier: relInj_functional shows RelInj makes R a partial function, so every conclusion is already reachable via backend_replacement_congruence EXCEPT where no total injective extension satisfies AssurPreserving globally — backend_replacement_parametricity_local (and _local_sem) instantiate the guarded hypothesis at occRel F to show that gap is non-empty. congruence_correspondence typechecks by rfl, the mechanized guard that the corollary restates the functional theorem exactly rather than something weaker. Lara.Forall₂ authored locally: List.Forall₂ is a Mathlib name, absent from Lean 4.32.0. Two new modules, 1831 lines at the close of this session (1865 at the branch head, after the merge of origin/main and PR #278''s review response), sorry-free; 158 jobs, coverage 90 (2619 tree-wide), audit trio-clean, both modules verified inside the build closure. Naming (keep "parametricity") decided by the user up front; the two "Not parametricity" doc bullets amended rather than deleted, the generic-observation one scoped to the two of four congruences that actually moved. C53 and C54 crystallized; C52 hypothesis -> testing on a second instance; C49''s #215 untested boundary discharged. Follow-ups #275 (observational separation), #276 (docstring pointers), #277 (the two remaining congruences).'
   turn_count: 1
   events_count: 8
   claims_touched: [C49, C52, C53, C54]
-  open_threads: 6
+  open_threads: 9
 
 - id: 2026-09-08_002
   date: '2026-09-08'
@@ -600,7 +600,7 @@ sessions:
     separates accepted grounded observations. Implemented #281/#197/#198/#268/#217 and opened stacked
     PRs #296–#300. #266: refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot. #305: G0 copying separation; re-descoped.'
   turn_count: 5
-  events_count: 11
+  events_count: 12
   claims_touched:
   - C24
   - C35
@@ -684,7 +684,7 @@ sessions:
     (empty quarantine proved the identity), conflicting groups refused by name; .lara
     world sources elaborated by lara pw and compared through the lara pw-input
     derivation door. Gate 7/99/112 plus the .lara family 1/16/20.
-  turn_count: 1
-  events_count: 5
+  turn_count: 2
+  events_count: 7
   claims_touched: []
   open_threads: 3

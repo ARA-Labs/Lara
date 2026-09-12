@@ -46,6 +46,8 @@ side does and does not carry),
 [`mutate-module-ownership-decision.md`](mutate-module-ownership-decision.md)
 and [`localization-metric-decision.md`](localization-metric-decision.md)
 (mutation-benchmark contracts),
+[`ara-session-record-decision.md`](ara-session-record-decision.md) (the
+session-file schema and what `session_index.yaml` rows project from it),
 [`venue-decision.md`](venue-decision.md) (publication strategy).
 
 ## Plans, references, and operational notes

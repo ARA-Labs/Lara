@@ -113,10 +113,10 @@ jobs:
         run: make ara-source-spans
 
       - name: ARA session-index unit tests
-        run: python3 -m unittest scripts/test_check_ara_session_index.py -v
+        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_session_index.py -v
 
-      - name: ARA session index is total and unique
-        run: make ara-session-index
+      - name: ARA session index is total, unique, and agrees with its files
+        run: uv run --no-project --with pyyaml python scripts/check_ara_session_index.py
 
       - name: Policy-copy authenticity (T7)
         run: |
