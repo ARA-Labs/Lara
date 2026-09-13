@@ -175,6 +175,7 @@ execution, configurable world loading, and differential conformance are in
 The default `lake build` includes the executable and all proof/fixture modules.
 `AxCheck.lean` covers every new public theorem. `PWWire` runs textual codec
 boundary tests during compilation; `check-pw-example.py` runs real file inputs
-against the compiled executable and is included in the Lean CI job. It covers
+against the compiled executable and is part of `make lean-gate` (and the optional
+Lean workflow). It covers
 map-dependent results, first-match lookup, unknown and duplicate names, sorting
 failures, missing clauses, malformed/versioned input, and quoted Unicode names.

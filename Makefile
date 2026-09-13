@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry backend-deps-golden update-goldens update-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance
+.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-audit lean-gate cross-check local-gates
 
 build:
 	cabal build all
@@ -9,6 +9,51 @@ build:
 
 test:
 	cabal test all --test-show-details=direct
+
+# ---------------------------------------------------------------------------
+# Gates outside the required CI (docs/ci-scope-decision.md). The required
+# `Haskell` workflow gates the Haskell compiler only; everything below needs a Lean build. Run them locally
+# before asking for review on any change that touches lean/, a wire contract,
+# or a golden either side emits:
+#
+#   make lean-gate      # proofs, axiom audit, semantics registry
+#   make cross-check    # every Haskell-Lean conformance and differential gate
+#   make local-gates    # both, in that order
+#
+# `lean-gate` is also what the optional Lean workflow (.github/workflows/lean.yml)
+# runs on a PR carrying the `lean` label.
+
+lean-gate: lean-build pw-example axiom-audit semantics-registry semantics-registry-test
+
+cross-check: presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential differential admission-differential map-conformance pw-conformance
+
+local-gates: lean-gate cross-check
+
+lean-build:
+	cd lean && lake build
+
+pw-example:
+	python3 scripts/check-pw-example.py
+
+# `pipefail` is required, not cosmetic: without it the pipeline reports only
+# check-axioms.sh's status, so a Lean failure that still emits some reports
+# (e.g. `#print axioms` naming a renamed or deleted theorem) would be masked and
+# the audit would go green over a silently reduced set. Coverage is a `find`,
+# not a list (#242): a new module must not be able to join the tree unaudited.
+axiom-audit:
+	cd lean && bash -c 'set -eo pipefail; \
+	  ../scripts/test-check-axioms.sh; \
+	  python3 ../scripts/test_check_axcheck_coverage.py; \
+	  python3 ../scripts/check-axcheck-coverage.py AxCheck.lean $$(find Lara -name "*.lean" | sort); \
+	  lake env lean AxCheck.lean | ../scripts/check-axioms.sh'
+
+# The fixture/example/bundle wire differential and the semantic admission
+# differential over the test fixtures.
+differential:
+	bash scripts/differential.sh
+
+admission-differential:
+	bash scripts/admission-differential.sh
 
 # Cross-language presentation-AST shape parity (result 12): both runtimes emit
 # the same normalized ordered inventory, protected by compiler witnesses and
@@ -31,6 +76,9 @@ surface-conformance-gate-test:
 # conformance table byte for byte.
 semantics-registry:
 	python3 scripts/check-semantics-registry.py
+
+semantics-registry-test:
+	python3 -m unittest scripts/test_check_semantics_registry.py -v
 
 semantics-goldens:
 	bash scripts/check-semantics-goldens.sh
@@ -92,7 +140,7 @@ map-check:
 
 # Both drivers must agree on every committed map anchor, and the Lean decoder
 # must refuse every malformed envelope. The map's counterpart of
-# scripts/differential.sh; CI runs the same script.
+# scripts/differential.sh; `make cross-check` runs it.
 map-conformance:
 	bash scripts/check-map-conformance.sh
 

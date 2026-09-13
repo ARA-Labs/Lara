@@ -26,6 +26,11 @@ milestone. Keep `AxCheck.lean` covering every new theorem; proofs must stay
 the Lean proofs carry soundness, so land them alongside the code that frozen
 definitions enable.
 
+The required GitHub workflow (`Haskell`) does not build Lean or run any Haskell-Lean cross-check
+(`docs/ci-scope-decision.md`). A change that touches `lean/`, a wire contract,
+or a golden either side emits must pass `make local-gates` before review; say
+so in the PR.
+
 ## Keep the compiler core symbolic
 Keep the compiler core (checker, inference, normalization, the AST) symbolic so
 the frontend keeps maximum freedom to design the concrete syntax. Concrete,

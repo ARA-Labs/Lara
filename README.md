@@ -1,6 +1,6 @@
 # LARA
 
-[![CI](https://github.com/EYH0602/lara/actions/workflows/ci.yml/badge.svg)](https://github.com/EYH0602/lara/actions/workflows/ci.yml)
+[![Haskell](https://github.com/EYH0602/lara/actions/workflows/haskell.yml/badge.svg)](https://github.com/EYH0602/lara/actions/workflows/haskell.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![spec](https://img.shields.io/badge/spec-v0.1%20frozen-brightgreen.svg)](docs/spec.md)
 
@@ -259,7 +259,11 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 cd lean && lake build
 ```
 
-CI runs both, including the `AxCheck.lean` axiom audit, on every push.
+The required Haskell workflow gates the checker on every push. The Lean side — the build, the
+`AxCheck.lean` axiom audit, and the Haskell-Lean conformance gates — runs with
+`make lean-gate` and `make cross-check`, and on a PR in the optional Lean
+workflow when a reviewer adds the `lean` label
+([why](docs/ci-scope-decision.md)).
 
 ## Syntax versions
 

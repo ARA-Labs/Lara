@@ -797,7 +797,8 @@ and performs the qualification, the merge, the cross-member saturation,
 `checkUnit`, the grounded evaluation and the alignment assertions **itself**. It
 never reads a Haskell verdict. `lara map-input <file.laramap>` emits the
 envelope, `scripts/check-map-conformance.sh` byte-compares the two drivers'
-stdout and exit codes over `test/fixtures/map/`, and CI runs it.
+stdout and exit codes over `test/fixtures/map/`, and `make cross-check` runs it
+(no longer the required CI; see `docs/ci-scope-decision.md`).
 
 Four rulings about it, each of which looks arbitrary without its reason:
 

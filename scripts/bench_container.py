@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
 
 
-WORKFLOW = "CI"
+WORKFLOW = "Haskell"
 PLATFORM = "linux/arm64"
 DOCKERFILE = Path("containers/bench/Dockerfile")
 REQUIRED_OUTPUTS = (
