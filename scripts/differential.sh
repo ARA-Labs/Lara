@@ -115,7 +115,8 @@ for root in fixtures examples bundles corpus-units; do
   # (fixtures/admission/) belong to scripts/admission-differential.sh; the
   # possible-world fixtures (fixtures/pw/) have their own harnesses —
   # fixtures/pw/run/ and its worlds/ go through both pw drivers in
-  # scripts/check-pw-conformance.py, and fixtures/pw/declared.sexp is the Lean
+  # scripts/check-pw-conformance.py, which also runs the .lara world-source run
+  # files of fixtures/pw/source/, and fixtures/pw/declared.sexp is the Lean
   # pw-example host's fixture, exercised by scripts/check-pw-example.py; run
   # documents and pw-surface documents are not check-input@1 envelopes at all,
   # and the world envelopes they name are checked by each runtime's own checker.
@@ -123,9 +124,7 @@ for root in fixtures examples bundles corpus-units; do
   # there is a setup failure in that gate rather than a free pass here. And a
   # map's two committed artifacts are a map-check-input@1 parity envelope and a
   # map-verdict@1 composite golden, which scripts/check-map-conformance.sh and
-  # test/MapSpec.hs own. A fifth, the possible-world fixtures (fixtures/pw/),
-  # holds pw-surface and pw-run documents and the world envelopes they name;
-  # scripts/check-pw-conformance.py and scripts/check-pw-example.py own them.
+  # test/MapSpec.hs own.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both
   # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these

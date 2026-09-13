@@ -13,7 +13,8 @@
 # fixtures/mutants/ is discovered manifest-driven, fixtures/admission/ belongs to
 # scripts/admission-differential.sh, fixtures/pw/ is split between
 # scripts/check-pw-conformance.py (fixtures/pw/run/ and its worlds/, through both
-# pw drivers) and scripts/check-pw-example.py (fixtures/pw/declared.sexp, the
+# pw drivers, and the .lara world-source run files of fixtures/pw/source/) and
+# scripts/check-pw-example.py (fixtures/pw/declared.sexp, the
 # Lean pw-example host's fixture), with the former asserting totality over the
 # whole subtree; and a map's two committed artifacts are
 # map-check-input@1 and map-verdict@1 rather than check-input@1 and belong to

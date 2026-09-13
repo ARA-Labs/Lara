@@ -70,8 +70,9 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FIXTURES = ROOT / 'fixtures/pw/run'
-SOURCES = ROOT / 'fixtures/pw/source'
+PW = ROOT / 'fixtures/pw'
+FIXTURES = PW / 'run'
+SOURCES = PW / 'source'
 LEAN = ROOT / 'lean/.lake/build/bin/pw-run'
 C_LOCALE = {'LC_ALL': 'C', 'LANG': 'C'}
 # An 8-bit locale: every argv byte decodes to some character, so a runtime that
@@ -579,6 +580,20 @@ def check_derivation(haskell, path, code, out, env=None):
     assert (got, got_out) == (code, out), ('derived run differs', got_out, out)
 
 
+def pw_subtree_strays(root):
+    """The .sexp files under `root` (a fixtures/pw/ tree) that no gate runs.
+
+    Ownership mirrors each runner's own discovery, relative to `root`, so the
+    self-test in `check_pw_subtree_total` can exercise it on a scratch tree.
+    """
+    run, source = root / FIXTURES.relative_to(PW), root / SOURCES.relative_to(PW)
+    owned = set(run.glob('*.sexp'))                  # check_fixtures
+    owned |= set((run / 'worlds').glob('*.sexp'))    # the worlds those name
+    owned |= set(source.glob('*.sexp'))              # check_source_fixtures (#327)
+    owned.add(root / 'declared.sexp')                # scripts/check-pw-example.py
+    return sorted(p for p in root.rglob('*.sexp') if p not in owned)
+
+
 def check_pw_subtree_total():
     """Every .sexp under fixtures/pw/ must be owned by a gate that runs it.
 
@@ -591,12 +606,28 @@ def check_pw_subtree_total():
     at fixtures/pw/*.sexp, or under any new fixtures/pw/<subdir>/, would be
     discovered by no gate and pinned by no manifest — the exact state the anchor
     pin exists to prevent, relocated rather than removed.
+
+    The check must neither reject a family a runner does discover (#344: the
+    `.lara` source family was flagged although `check_source_fixtures` runs it)
+    nor be widened into accepting a file none discovers. So before judging the
+    committed tree it judges a scratch one: one file in every owned position
+    must pass, and a .sexp in every nearby unowned position must be flagged.
     """
-    root = ROOT / 'fixtures/pw'
-    owned = set(FIXTURES.glob('*.sexp'))
-    owned |= set((FIXTURES / 'worlds').glob('*.sexp'))
-    owned.add(ROOT / 'fixtures/pw/declared.sexp')  # scripts/check-pw-example.py
-    stray = sorted(p for p in root.rglob('*.sexp') if p not in owned)
+    owned = ('declared.sexp', 'run/a.sexp', 'run/worlds/w.sexp', 'source/a.sexp')
+    unowned = ('stray.sexp', 'new/a.sexp', 'run/nested/a.sexp',
+               'run/worlds/nested/w.sexp', 'source/worlds/w.sexp', 'source/nested/a.sexp')
+    with tempfile.TemporaryDirectory(prefix='lara-pw-conf-') as tmp:
+        scratch = pathlib.Path(tmp)
+        for rel in owned + unowned:
+            (scratch / rel).parent.mkdir(parents=True, exist_ok=True)
+            (scratch / rel).write_text('', encoding='utf-8')
+        got = {p.relative_to(scratch).as_posix() for p in pw_subtree_strays(scratch)}
+        if got != set(unowned):
+            print(f'FAIL: the fixtures/pw/ totality check is miscalibrated: '
+                  f'wrongly flagged {sorted(got - set(unowned))}, '
+                  f'missed {sorted(set(unowned) - got)}')
+            sys.exit(2)
+    stray = pw_subtree_strays(PW)
     if stray:
         for p in stray:
             print(f'FAIL: {p.relative_to(ROOT)} is under fixtures/pw/ but no gate '
