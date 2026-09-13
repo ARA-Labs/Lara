@@ -5,7 +5,8 @@ _Records the schema of the per-session trace files under
 `session_index.yaml` row must say about its file (issues #333, #337, #338;
 gate `scripts/check_ara_session_index.py`, `make ara-session-index`). Settled
 2026-09-12. The session file is authoritative; the index row is derived from
-it and is checked, never the other way round._
+it and is checked, never the other way round. The reading of
+`logic_revisions` entries as history was added 2026-09-13 (#340)._
 
 ## Why a record was needed
 
@@ -66,6 +67,46 @@ An entry is a mapping with an `id` (typically `{id, action, turn}` or
 bare form; it is accepted as "touched, action unrecorded" rather than
 rewritten with an invented action. The ids are claim (`C…`) and heuristic
 (`H…`) identifiers from `ara/logic/`; events (`N…`, `O…`) do not belong here.
+
+### `logic_revisions` entries are history, not current state
+
+An entry's `before:` / `after:` is what that turn's Stage 4 edit found and
+wrote, frozen at the moment it was written. It is **append-only**: when a later
+session revises the same field, it writes a new entry whose `before:` is the
+field as it then stands, and the earlier entry is left as it was. No reader
+should take an `after:` as the field's current wording; that lives only in
+`ara/logic/`.
+
+This was read off the artifact, not chosen. On 2026-09-13 the session files
+held 154 entries; 18 `(entry, field)` pairs were revised in more than one
+session, and in 21 of the 27 cases where a later session revised the same
+field, its `before:` did not reproduce the earlier `after:`. Most of those
+differences could be shorthand, since both sides often quote only part of the
+field (`(unchanged first sentence)`, bracketed elisions). **C12 / Conditions**
+cannot be explained that way: the `after:`
+from `2026-07-27_001` ends "… rather than a voting tie, consistent with the N+1
+frame.", while the `before:` in `2026-09-11_002` ends "… The production Lean
+driver now uses `canonNum`, and the numeric/multi-blocked differential fixture
+prevents that defect from recurring." The claim changed between the two
+sessions and nobody went back to update the July entry. Every existing
+The append-only reading is the one the artifact already follows. Adopting the
+other reading would mean going back and updating entries like this one.
+
+What follows for a correction: when the *reasoning* recorded in a past entry
+turns out to be wrong, fix it where current state lives. That means the claim
+in `ara/logic/claims.md`, the `context` of the staged observation, or a
+`CORRECTED` note on the trace node. Never edit the past entry's `after:`. A
+review-round fix that rewords `ara/logic/` without crossing the CLAUDE.md
+threshold for a new session record therefore leaves the earlier entry stale
+compared with the logic file, and that is expected. #333 followed this rule:
+turn 4 of `2026-09-11_002` keeps an `after:` for C12's Conditions whose
+reasoning the same PR later withdrew, and the correction lives in the claim.
+
+The field belongs to the ARA framework's `research-manager` schema, not to
+lara. That schema says a session record's `logic_revisions` is "the ONLY place
+the prior wording is preserved", but it does not say whether an entry may be
+edited later. Until the framework says so itself, this record is lara's
+statement of the rule.
 
 ## The projection: what a row must say
 

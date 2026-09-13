@@ -47,7 +47,8 @@ side does and does not carry),
 and [`localization-metric-decision.md`](localization-metric-decision.md)
 (mutation-benchmark contracts),
 [`ara-session-record-decision.md`](ara-session-record-decision.md) (the
-session-file schema and what `session_index.yaml` rows project from it),
+session-file schema, what `session_index.yaml` rows project from it, and why
+`logic_revisions` entries are append-only history),
 [`venue-decision.md`](venue-decision.md) (publication strategy).
 
 ## Plans, references, and operational notes

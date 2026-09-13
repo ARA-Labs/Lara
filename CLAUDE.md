@@ -81,7 +81,8 @@ snapshot, not a live mirror of `ara/logic/`. When review-round fixes correct
 `logic_revisions` entry is expected to go stale relative to the now-corrected
 logic file; that staleness lives in the trace where it happened, not as a
 rewrite of the original entry. The logic file itself is always the current
-state.
+state. The evidence and where a correction goes instead are in
+`docs/ara-session-record-decision.md`.
 
 Route qualifying research work to the matching ARA skill:
 - At the END of a qualifying session → run `/research-manager` to capture the
