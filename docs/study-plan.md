@@ -1,7 +1,7 @@
 # LARA study plan
 
 _What to read before implementing, ordered by what it unblocks. Companion to
-`../plans/lara-related-work.bib` (the BibTeX). This plan prioritizes by the build order in
+`lara-related-work.bib` (the BibTeX). This plan prioritizes by the build order in
 `engineering-plan.md`: M0 corpus annotation first, then the trusted-core modules, then evaluation.
 Written 2026-07-21._
 

@@ -109,6 +109,6 @@ opposite of a novelty argument; the design keeps modal logic off the critical pa
 
 ## Sources
 
-All in `../plans/lara-related-work.bib`. The must-explain-the-delta set: Micropublications
+All in `lara-related-work.bib`. The must-explain-the-delta set: Micropublications
 (doi:10.1186/2041-1480-5-28), AIF (arg-tech spec), EG-VAR (arXiv:2607.12650), Pandžić
 (doi:10.3233/AAC-200536, doi:10.1007/s10472-021-09765-z), ASPIC+ (doi:10.1080/19462166.2013.869766).
