@@ -696,3 +696,12 @@ sessions:
   claims_touched:
   - C12
   open_threads: 4
+
+- id: 2026-09-20_001
+  date: '2026-09-20'
+  summary: 'Issue #349: checked P1 philosophy debate and documented the axiom-relative worlds boundary;
+    executable bridge witness deferred to #350.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: []
+  open_threads: 1

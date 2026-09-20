@@ -10120,3 +10120,56 @@ tree:
   also_depends_on:
   - N335_reader_totalization
   - N331_gate_controls
+
+- id: N349_philmath
+  type: decision
+  title: Encode a non-empirical debate with scoped philosophical positions
+  provenance: ai-executed
+  timestamp: 2026-09-20T08:02+00:00
+  choice: Add P1 under philmath-v1, with assumed/attested leaves, all three attack kinds, a contested
+    set/structure pair and a defended fictionalist argument. Separate abstract-object realism from intrinsic
+    set identity; leave prose bindings unreviewed.
+  alternatives:
+  - Treat all platonism and structuralism as contraries; rejected because the positions are broader than
+    that opposition.
+  evidence:
+  - examples/P1/example.lara
+  - examples/P1/philmath-v1.policy.lara
+  - docs/demos/d4-philmath.md
+  status: resolved
+- id: N349_worlds
+  type: decision
+  title: Defer a claimed bridge failure the runtime cannot check
+  provenance: ai-executed
+  timestamp: 2026-09-20T08:02+00:00
+  choice: 'Admission can quarantine an assumed leaf, but PW refuses the pruned source before bridges;
+    leaf-ok/cert-ok remain declarations. Atomic nd@1 hypothesis reuse cannot prove the distinct triangle-sum
+    atom. Record the boundary and track an executable witness in issue #350.'
+  alternatives:
+  - Label a declared rejected edge as a mechanically detected missing-premise failure; rejected as misleading.
+  - 'Change the world carrier and proof backend in this example task; deferred with costs in #350.'
+  evidence:
+  - docs/non-empirical-worlds-decision.md
+  - test/WorkedExamplesSpec.hs
+  - https://github.com/ARA-Labs/Lara/issues/350
+  status: resolved
+  also_depends_on:
+  - N327_lara_sources
+- id: N349_checks
+  type: experiment
+  title: Check the non-empirical graph and axiom admission probe
+  provenance: ai-executed
+  timestamp: 2026-09-20T08:02+00:00
+  result: P1 accepted with two contested, three justified and two defeated claims. Removing the defending
+    undercut defeats the fictionalist argument. An admitted assumed axiom with ND hypothesis reuse is
+    justified; quarantine removes its sole support to gap and PW reports target world-input. Haskell tests
+    and every local-gates stage passed. No kernel, wire, corpus freeze or paper changes.
+  evidence:
+  - examples/P1/expected.json
+  - test/WorkedExamplesSpec.hs
+  - test/DifferentialSpec.hs
+  - ara/evidence/non_empirical_examples_349.md
+  status: resolved
+  also_depends_on:
+  - N349_philmath
+  - N349_worlds

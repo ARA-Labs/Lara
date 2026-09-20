@@ -57,7 +57,7 @@ module WorkedExamplesSpec (workedExamplesSpecProps) where
 
 import Test.QuickCheck
 
-import Data.List (sort)
+import Data.List (isInfixOf, sort)
 import qualified Data.Set as Set
 
 import Lara.AST
@@ -67,19 +67,23 @@ import Lara.AST
   , BackendId (..)
   , Cert (..)
   , Digest (..)
+  , Decl (..)
   , DupGroup (..)
   , GroupConflictMode (..)
   , GroupId (..)
   , Label (..)
   , LeafId (..)
+  , Leaf (..)
+  , LeafKind (..)
   , Policy
-  , Program
+  , Program (..)
   , PolicyId (..)
   , RejectClass (..)
   , Rejection (..)
   , RuleId (..)
   , Status (..)
   , SupportTerm (..)
+  , SurfaceAttack (..)
   , TheoryDigest (..)
   , Unit (..)
   )
@@ -107,6 +111,9 @@ import Lara.Replay
   , replayErrorMessage
   )
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
+import qualified Lara.PW.Run as PW
+import Lara.PW.Wire (WorldId (..))
+import Lara.TempTree (withTree)
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Strict (SExpr (..))
 import qualified Lara.Strict as Strict
@@ -217,6 +224,98 @@ preparedResult prog pol =
 -- ---------------------------------------------------------------------------
 -- E-series — accepted
 -- ---------------------------------------------------------------------------
+
+-- | P1's philosophy debate: a deadlock beside a defended fictionalist
+-- argument. The edge oracle makes "reinstated" stronger than merely in.
+prop_P1 :: Property
+prop_P1 = once $ ioProperty $ do
+  prog <- loadProgram "examples/P1/example.lara"
+  verdict <- runExample "examples/P1" "philmath-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("P1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} -> conjoin
+        [ verdictLabels outcome ===
+            [(0, LOut), (1, LUndec), (2, LUndec), (3, LIn), (4, LIn), (5, LOut), (6, LIn)]
+        , sort (verdictEdges outcome) === sort [(3,0), (4,0), (1,2), (2,1), (5,4), (6,5)]
+        , verdictStatuses outcome ===
+            [ (Prop (Pred p) [], Published s)
+            | (p, s) <- [("abstract_objects", Defeated), ("set_identity", Contested)
+                        , ("structural_identity", Contested), ("dispensable", Justified)
+                        , ("useful_without_truth", Justified), ("truth_required", Defeated)
+                        , ("consistency_suffices", Justified)]
+            ]
+        ]
+  let leaves = [l | DeclLeaf l <- programDecls prog]
+  pure $ conjoin
+    [ verdict
+    , counterexample "P1 must have only non-observational leaves" $
+        not (null leaves) && all ((`elem` [Attested, Assumed]) . leafKind) leaves
+    ]
+
+-- | Removing only the defender's voluntary edge defeats the fictionalist
+-- argument. This guards against calling an unattacked argument reinstated.
+prop_P1Defense :: Property
+prop_P1Defense = once $ ioProperty $ do
+  prog <- loadProgram "examples/P1/example.lara"
+  pol <- loadPolicy "examples/P1/philmath-v1.policy.lara"
+  let keep (DeclAttack (SUndercut (ArgId "a_reply") _ _)) = False
+      keep _ = True
+  pure $ case preparedResult (prog { programDecls = filter keep (programDecls prog) }) pol of
+    Left err -> counterexample err False
+    Right result -> case verdictOutcome (sourceResultVerdict result) of
+      Reject rejection -> counterexample (show rejection) False
+      outcome@Accept{} ->
+        lookup (Prop (Pred "useful_without_truth") []) (verdictStatuses outcome)
+          === Just (Published Defeated)
+
+-- | Demo 2's admission probe uses honest ND hypothesis reuse: it certifies
+-- the assumed postulate itself, not a geometric consequence of a flat atom.
+-- Quarantine removes its only support (gap) and prevents PW loading, before bridges.
+prop_axiomAdmissionBoundary :: Property
+prop_axiomAdmissionBoundary = once $ ioProperty $ do
+  let source name = unlines
+        [ "artifact axiom at sha256:axiom-probe", "policy " ++ name, "use backends [nd@1]"
+        , "claim c", "  nl = \"The parallel postulate is assumed\""
+        , "  formal = parallel_postulate()"
+        , "  binding = { author = probe, audit-status = unreviewed }"
+        , "leaf pp : parallel_postulate()", "  kind = assumed"
+        , "  provenance = ai-executed", "  refs = []"
+        , "arg a : supports(c) by citation from [pp]"
+        , "  assurance = cert(nd@1, sha256:empty, (hyp 0))", "status c"
+        ]
+      policy name action = unlines
+        [ "policy " ++ name, "pred parallel_postulate()"
+        , "admission { (assumed, ai-executed) = " ++ action ++ " }"
+        , "rule citation()", "  mode = strict", "  premises = [parallel_postulate()]"
+        , "  conclusion = parallel_postulate()", "  allow-trusted = false"
+        , "  certifiers = [(nd@1, sha256:empty)]", "theory sha256:empty = []"
+        ]
+      run = "(pw-run 1 (worlds (world src s (lara \"source.lara\")) "
+        ++ "(world tgt t (lara \"target.lara\"))) (edges) (comparisons) "
+        ++ "(pw-surface 1 (bridges) (queries)))"
+      local name action expected =
+        case (parseProgram (source name), parsePolicy (policy name action)) of
+          (Right prog, Right pol) -> case preparedResult prog pol of
+            Left err -> counterexample err False
+            Right result -> case verdictOutcome (sourceResultVerdict result) of
+              Reject rejection -> counterexample (show rejection) False
+              outcome@Accept{} -> verdictStatuses outcome ===
+                [(Prop (Pred "parallel_postulate") [], expected)]
+          parsed -> counterexample (show parsed) False
+  withTree "axiom-admission"
+    [("source.lara", source "admitted"), ("admitted.policy.lara", policy "admitted" "admit")
+    ,("target.lara", source "withheld"), ("withheld.policy.lara", policy "withheld" "quarantine")
+    ,("run.sexp", run)] $ \dir -> do
+      result <- PW.runPWFile (dir ++ "/run.sexp")
+      pure $ conjoin
+        [ local "admitted" "admit" (Published Justified)
+        , local "withheld" "quarantine" (Published Gap)
+        , case result of
+            Left (PW.PWWorld (PW.WorldInputError (WorldId "tgt") detail)) ->
+              counterexample detail ("policy quarantine" `isInfixOf` detail)
+            Left err -> counterexample (show err) False
+            Right _ -> counterexample "quarantined world unexpectedly loaded" False
+        ]
 
 -- | E1: one unattacked support argument @in@, claim justified.
 prop_E1 :: Property
@@ -990,6 +1089,9 @@ nubOrd = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
 workedExamplesSpecProps :: [(String, IO Result)]
 workedExamplesSpecProps =
   [ ("E1 justified-clean → accept, arg in, claim justified", quickCheckResult prop_E1)
+  , ("P1 non-empirical debate: contested positions and fictionalist reinstatement", quickCheckResult prop_P1)
+  , ("P1 removing the defense defeats the fictionalist argument", quickCheckResult prop_P1Defense)
+  , ("axiom admission: ND source justified, target gap, PW refuses before bridges", quickCheckResult prop_axiomAdmissionBoundary)
   , ("E2 open-gap → accept, claim gap", quickCheckResult prop_E2)
   , ("E3 defeat-suite → accept, justified+defeated+contested, all attack kinds", quickCheckResult prop_E3)
   , ("E4 reinstatement → accept, justified UNDER rebut/undermine/undercut", quickCheckResult prop_E4)

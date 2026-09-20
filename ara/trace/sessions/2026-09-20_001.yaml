@@ -1,0 +1,50 @@
+session:
+  id: 2026-09-20_001
+  date: '2026-09-20'
+  started: 2026-09-20T08:02+00:00
+  last_turn: 2026-09-20T08:02+00:00
+  turn_count: 1
+  summary: 'Issue #349: checked P1 philosophy debate and documented the axiom-relative worlds boundary;
+    executable bridge witness deferred to #350.'
+events_logged:
+- turn: 1
+  type: decision
+  id: N349_philmath
+  routing: direct
+  provenance: ai-executed
+  summary: Encode a non-empirical debate with scoped philosophical positions
+- turn: 1
+  type: decision
+  id: N349_worlds
+  routing: direct
+  provenance: ai-executed
+  summary: Defer a claimed bridge failure the runtime cannot check
+- turn: 1
+  type: experiment
+  id: N349_checks
+  routing: direct
+  provenance: ai-executed
+  summary: Check the non-empirical graph and axiom admission probe
+ai_actions:
+- turn: 1
+  action: Implemented P1, generated anchors, added verdict/freshness/differential coverage, checked sources,
+    resolved the reviewer binding wording finding, and ran the required gates.
+  provenance: ai-executed
+  files_changed:
+  - examples/P1/
+  - examples/README.md
+  - src/Lara/WorkedExamples.hs
+  - test/WorkedExamplesSpec.hs
+  - test/DifferentialSpec.hs
+  - fixtures/ANCHORS.tsv
+  - docs/demos/d4-philmath.md
+  - docs/non-empirical-worlds-decision.md
+claims_touched: []
+logic_revisions: []
+open_threads:
+- issue: https://github.com/ARA-Labs/Lara/issues/350
+  description: Choose and implement an honest executable axiom-withdrawal structural-bridge witness.
+ai_suggestions_pending: []
+key_context:
+- P1 is an illustrative authored policy, not a philosophical adjudication; bindings remain unreviewed.
+- Demo 2 is deferred for runtime/proof-path reasons, not because admission cannot quarantine assumptions.

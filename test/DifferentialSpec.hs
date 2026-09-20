@@ -314,6 +314,14 @@ workedExampleGoldens =
         ++ " (status (atom improves (con M_w) (con accuracy) (con D_w)) contested)"
         ++ " (status (atom improves (con M_g) (con accuracy) (con D_g)) gap)))"
     )
+  , ( "examples/P1/example.core.sexp"
+    , "(verdict accept (labels (0 out) (1 undec) (2 undec) (3 in) (4 in) (5 out) (6 in))"
+        ++ " (edges (1 2) (2 1) (3 0) (4 0) (5 4) (6 5))"
+        ++ " (statuses (status (atom abstract_objects) defeated)"
+        ++ " (status (atom set_identity) contested) (status (atom structural_identity) contested)"
+        ++ " (status (atom dispensable) justified) (status (atom useful_without_truth) justified)"
+        ++ " (status (atom truth_required) defeated) (status (atom consistency_suffices) justified)))"
+    )
   , ("examples/R1/example.core.sexp", "(verdict reject R1)")
   , ("examples/R2/example.core.sexp", "(verdict reject R12)")
     -- The signature negative (#89 D10). The directory is R2-sort, not R2: the

@@ -1,0 +1,67 @@
+# P1's authored debate policy, not an agreed philosophical standard.
+# All atoms name positions in the scoped reconstruction in docs/demos/d4-philmath.md.
+policy philmath-v1
+
+pred indispensable()
+pred ontological_commitment()
+pred abstract_objects()
+pred canonical_reduction()
+pred set_identity()
+pred multiple_reductions()
+pred structural_identity()
+pred field_program()
+pred scope_adequate()
+pred dispensable()
+pred conservative_use()
+pred useful_without_truth()
+pred application_needs_truth()
+pred truth_required()
+pred consistency_suffices()
+
+# Unlisted kind/provenance pairs default to admit. These explicit rows record
+# the two kinds used here; they do not verify the prose or the references.
+admission { (assumed, ai-executed) = admit, (attested, ai-executed) = admit }
+
+rule indispensability()
+  mode       = defeasible
+  premises   = [ indispensable() ]
+  conclusion = abstract_objects()
+  question commitment : ontological_commitment() (mandatory)
+
+# Indispensability alone does not pick a particular set reduction. Keep that
+# stronger proposal separate so Benacerraf's objection has the right target.
+rule set_identification()
+  mode       = defeasible
+  premises   = [ canonical_reduction() ]
+  conclusion = set_identity()
+
+rule structural_explanation()
+  mode       = defeasible
+  premises   = [ multiple_reductions() ]
+  conclusion = structural_identity()
+
+rule nominalization()
+  mode       = defeasible
+  premises   = [ field_program() ]
+  conclusion = dispensable()
+  question scope : scope_adequate() (mandatory)
+
+rule fictionalist_reading()
+  mode       = defeasible
+  premises   = [ conservative_use() ]
+  conclusion = useful_without_truth()
+
+rule truth_objection()
+  mode       = defeasible
+  premises   = [ application_needs_truth() ]
+  conclusion = truth_required()
+
+# Direction matters: dispensability attacks a premise, not a global claim
+# that every form of mathematical realism is false.
+contrary dispensable() indispensable()
+contrary set_identity() structural_identity()
+contrary structural_identity() set_identity()
+
+exception indispensability : useful_without_truth()
+exception fictionalist_reading : truth_required()
+exception truth_objection : consistency_suffices()

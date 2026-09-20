@@ -2,7 +2,10 @@
 
 **New here? A suggested order.** Read the [README](../README.md)'s running
 example first, then `A/` (one paper honestly attacking its own headline
-claim), then `B/` (two papers with contrary conclusions). After those, the
+claim), then `B/` (two papers with contrary conclusions), then `P1/` (a
+non-empirical philosophy-of-mathematics debate with contested positions and
+reinstatement). Its [D4 companion](../docs/demos/d4-philmath.md) explains the
+arguments and the limits of its authored policy. After those, the
 S-series walks the strict-certificate machinery one feature at a time, and
 E4/E5 exercise the defeat semantics (reinstatement, contested, gap). The demo
 write-ups in [`docs/demos/`](../docs/demos/) present checked artifacts as
@@ -32,7 +35,8 @@ than purported quotations.
 
 Each example is a **self-contained directory** `examples/<NAME>/` (a paper
 artifact): the surface `example.lara`, its co-located policy (`empirical-v1.policy.lara`,
-`empirical-v2.policy.lara` for E4/E5, `strict-bad-v1.policy.lara` for R2, or
+`empirical-v2.policy.lara` for E4/E5, `philmath-v1.policy.lara` for P1,
+`strict-bad-v1.policy.lara` for R2, or
 `strict-v1.policy.lara` for S1), the
 derived `example.core.sexp` wire anchor, and the derived `expected.json` golden.
 Both derived files are regenerated
@@ -69,6 +73,7 @@ compare the two drivers, and `map.verdict.sexp` is a golden pinned by
 | `A/empirical-v1.policy.lara` | the shared trusted policy both examples check against | declares all contraries + the one exception | — | cross-paper attack can only form through the *same* declared `contrary` relation |
 | `A/example.lara` | one paper attacks its own headline claim | rebut + undercut + undermine (all three), all in-paper | **defeated** | "a paper can't rebut itself" is a category error; self-attacks = the paper's honesty about its limits |
 | `B/example.lara` | two papers, contrary conclusions | rebut (mutual, a 2-cycle) | **contested** ×2 | no new calculus for corpus scale; and the attack only forms because both claims hit the *same atoms* under `≡` |
+| `P1/example.lara` | a philosophy-of-mathematics debate; every leaf is assumed or attested | undermine + rebut + undercut | **contested** ×2, **justified** ×3 (including reinstatement), **defeated** ×2 | policy supplies the subject matter; an unresolved set/structure dispute coexists with a defended fictionalist argument. The [D4 write-up](../docs/demos/d4-philmath.md) states the policy and binding caveats; the [worlds decision](../docs/non-empirical-worlds-decision.md) explains why Demo 2 is deferred. |
 | `S1/example.lara` | strict rule with an `nd@1` certificate | — | **justified** | closes the frontend certificate path: surface assurance + policy theory → elaboration → replay |
 | `S2/example.lara` | `ord@1` comparison certificate + a defeasible bridge rule, authored as one `comparison` block (policy `ord-v1`) | — | **justified** | the §3.6 layering: an accepted comparison atom is *terminal* until a rule binds it to systems and measurand. Strict arithmetic, defeasible bridge — and the author writes neither the `num_lt` argument order, the certificate slots, nor the θ vectors |
 | `S3/example.lara` | the same certificate shape at the **tie**, `relation = at-least-as-good` (policy `ord-le-v1`) | — | **justified** (`at_least_as_good`) | the family's two members separate here: `num_le` accepts on two equal cells where `num_lt` is an R13 replay rejection, so no certificate can upgrade "at least as good" to "beats". S3 is S2 with three lines changed, under a different policy — which is why the block names a *relation* and lets the policy name its own rules |

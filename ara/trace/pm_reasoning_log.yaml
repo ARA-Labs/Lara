@@ -1679,3 +1679,12 @@ entries:
   - >-
     O169/O172/O173 unchanged; O174/O175 now 1 session-day idle, O176/O177 same-day. No new
     stale flags.
+
+- turn: 2026-09-20_001#1
+  notes:
+  - Recorded concrete example/deferral decisions and test outcomes directly; no new generalized claim
+    is asserted by an illustrative debate.
+  - 'Considered C47/C48/C55: the probe exercises existing admission/export boundaries and does not revise
+    the structural transport theorems or their conditions. No logic revisions or staging promotions.'
+  - Existing unpromoted observations receive no closure signal from this independent example; no calendar-time-only
+    staleness update.
