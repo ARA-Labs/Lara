@@ -1688,3 +1688,13 @@ entries:
     the structural transport theorems or their conditions. No logic revisions or staging promotions.'
   - Existing unpromoted observations receive no closure signal from this independent example; no calendar-time-only
     staleness update.
+
+- turn: 2026-09-20_001#2
+  notes:
+  - Recorded the bounded interface decision and checked witness as journey facts. The user authorized
+    completion and PR submission; the separate Lean design choice is agent-executed.
+  - C48 already states the structural transport contract, and C47 separates support from status. This
+    example adds a concrete missing-premise witness without changing those claims or their conditions.
+    No logic revision or new generalized observation.
+  - No closure signal for earlier staged observations. Preserve the prior turn's session facts and the
+    historical deferral node; N350_scope resumes N349_worlds explicitly.

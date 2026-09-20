@@ -17,7 +17,7 @@ the vocabulary and reading paths.
 | [`lara-surface-grammar.md`](lara-surface-grammar.md) | The concrete `.lara` syntax contract, with per-version appendices |
 | [`foundations.md`](foundations.md) | The four lines of prior work LARA builds on |
 | [`novelty-and-related-work.md`](novelty-and-related-work.md) | The novelty claim and the delta table against prior art |
-| [`demos/`](demos/) | Prose-first walkthroughs of checked artifacts: a rebuttal exchange (D1), mechanical review comments (D2), a cross-paper agreement map (D3) |
+| [`demos/`](demos/) | Prose-first walkthroughs of checked artifacts: a rebuttal exchange (D1), mechanical review comments (D2), a cross-paper agreement map (D3), a philosophy debate (D4), and [axiom withdrawal](demos/d5-axiom-withdrawal.md) (D5) |
 
 ## Decision records
 
@@ -116,7 +116,7 @@ repository; those links require access to that repo.
 
 ## Subdirectories
 
-- [`demos/`](demos/) — the three prose-first demo write-ups (see entry
+- [`demos/`](demos/) — the prose-first demo write-ups (see entry
   points above).
 - `references/` — long-form reading notes on external sources feeding the
   related-work and annotation vocabulary.

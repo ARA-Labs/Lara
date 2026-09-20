@@ -11,7 +11,8 @@
 --   * __committed goldens__ — every @fixtures\/pw\/run\/*.sexp@ and
 --     @fixtures\/pw\/source\/*.sexp@ runs to its @*.expected@ bytes without
 --     the CLI, and the document 'deriveRunFile' derives from it — every
---     source inline — runs to the same bytes (#327);
+--     source inline — runs to the same bytes (#327). The @source-rejected@
+--     family pins run and derivation refusal to the same error golden (#350);
 --   * __groups__ — a duplicate-report group whose members agree changes no
 --     answer, and a conflicting group is refused by name, under both
 --     conflict modes (#326);
@@ -131,7 +132,7 @@ genRunDoc =
 
 -- | The committed run documents: envelope worlds, and @.lara@ worlds.
 fixtureDirs :: [FilePath]
-fixtureDirs = ["fixtures/pw/run", "fixtures/pw/source"]
+fixtureDirs = ["fixtures/pw/run", "fixtures/pw/source", "fixtures/pw/source-rejected"]
 
 fixturePaths :: IO [FilePath]
 fixturePaths =
@@ -153,9 +154,7 @@ prop_goldenFixtures = once $ ioProperty $ do
     check path = do
       expected <- readFile (replaceExtension path "expected")
       outcome <- runPWFile path
-      pure $ counterexample path $ case outcome of
-        Left err -> counterexample (printSExpr (encodeError err)) False
-        Right o -> printSExpr (encodeOutcome o) ++ "\n" === expected
+      pure $ counterexample path $ renderResult outcome ++ "\n" === expected
 
 -- | The inputs of a document whose sources are all inline; 'Nothing' if one
 -- is not.
@@ -168,7 +167,8 @@ inlineInputs doc = mapM input (rdWorlds doc)
 
 -- | Derivation preserves every fixture's run (#327): the derived document
 -- has only inline sources, and running it gives the fixture's golden — the
--- in-process half of what the gate checks across both drivers.
+-- in-process half of what the gate checks across both drivers. Refused source
+-- fixtures must also refuse derivation with the same committed error.
 prop_derivationPreservesRuns :: Property
 prop_derivationPreservesRuns = once $ ioProperty $ do
   files <- fixturePaths
@@ -179,7 +179,7 @@ prop_derivationPreservesRuns = once $ ioProperty $ do
       expected <- readFile (replaceExtension path "expected")
       derived <- deriveRunFile path
       pure $ counterexample path $ case derived of
-        Left err -> counterexample (printSExpr (encodeError err)) False
+        Left err -> printSExpr (encodeError err) ++ "\n" === expected
         Right doc -> case inlineInputs doc of
           Nothing -> counterexample "a source was not inlined" False
           Just inputs -> renderResult (runPW doc inputs) ++ "\n" === expected

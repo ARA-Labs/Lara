@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-audit lean-gate cross-check local-gates
+.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
 
 build:
 	cabal build all
@@ -23,7 +23,7 @@ test:
 # `lean-gate` is also what the optional Lean workflow (.github/workflows/lean.yml)
 # runs on a PR carrying the `lean` label.
 
-lean-gate: lean-build pw-example axiom-audit semantics-registry semantics-registry-test
+lean-gate: lean-build pw-example axiom-withdrawal-example axiom-audit semantics-registry semantics-registry-test
 
 cross-check: presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential differential admission-differential map-conformance pw-conformance
 
@@ -34,6 +34,9 @@ lean-build:
 
 pw-example:
 	python3 scripts/check-pw-example.py
+
+axiom-withdrawal-example:
+	python3 scripts/check-axiom-withdrawal.py
 
 # `pipefail` is required, not cosmetic: without it the pipeline reports only
 # check-axioms.sh's status, so a Lean failure that still emits some reports

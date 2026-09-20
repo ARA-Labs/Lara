@@ -699,9 +699,9 @@ sessions:
 
 - id: 2026-09-20_001
   date: '2026-09-20'
-  summary: 'Issue #349: checked P1 philosophy debate and documented the axiom-relative worlds boundary;
-    executable bridge witness deferred to #350.'
-  turn_count: 1
-  events_count: 3
+  summary: 'Issues #349 and #350: P1 philosophy debate followed by D5, a separately mechanized axiom-withdrawal
+    witness with runnable source controls and passing full gates.'
+  turn_count: 2
+  events_count: 5
   claims_touched: []
   open_threads: 1

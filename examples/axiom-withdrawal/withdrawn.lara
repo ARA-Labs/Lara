@@ -1,0 +1,20 @@
+# Axiom reuse only: no triangle theorem is claimed. See docs/demos/d5-axiom-withdrawal.md.
+artifact axiom_withdrawal at sha256:axiom-demo
+policy withdrawn
+use backends [nd@1]
+
+claim c
+  nl = "The parallel postulate is available under this admission policy"
+  formal = parallel_postulate()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "An assumed atom reused as itself, not a geometric consequence." }
+
+leaf pp : parallel_postulate()
+  kind = assumed
+  provenance = ai-executed
+  refs = []
+
+arg a : supports(c) by citation from [pp]
+  assurance = cert(nd@1, sha256:empty, (hyp 0))
+
+status c

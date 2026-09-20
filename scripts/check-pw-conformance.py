@@ -10,7 +10,7 @@ output. The Lean definitions carry the proofs (`Model.evaluates_iff`,
 `Model.compare_mem_iff_sat`); this gate is the evidence that the Haskell
 runtime computes the same thing.
 
-Three families:
+Four families:
 
 1. Committed fixtures (fixtures/pw/run/*.sexp). Each fixture's stdout must
    equal its committed `*.expected` golden byte for byte, from both drivers,
@@ -49,6 +49,12 @@ Three families:
    worlds, and non-ASCII program paths and text. When `lara pw` refuses a
    world's source, `lara pw-input` must print the same envelope.
 
+4. Refused `.lara` documents (fixtures/pw/source-rejected/*.sexp, #350).
+   Haskell's run and derivation must fail with the committed `.expected`
+   envelope. The Lean front door is pinned separately by `.lean.expected`:
+   it cannot read even an admitted .lara source. These are distinct refusal
+   stages, not a claim that the two front doors have the same parser.
+
 The Unicode-name and non-ASCII path cases run again under `LC_ALL=C` and under
 an ISO-8859-1 locale, because both drivers must use UTF-8 for output, for the
 run-file argument and for file paths whatever the locale. The ISO-8859-1
@@ -73,6 +79,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PW = ROOT / 'fixtures/pw'
 FIXTURES = PW / 'run'
 SOURCES = PW / 'source'
+REFUSED_SOURCES = PW / 'source-rejected'
 LEAN = ROOT / 'lean/.lake/build/bin/pw-run'
 C_LOCALE = {'LC_ALL': 'C', 'LANG': 'C'}
 # An 8-bit locale: every argv byte decodes to some character, so a runtime that
@@ -590,6 +597,7 @@ def pw_subtree_strays(root):
     owned = set(run.glob('*.sexp'))                  # check_fixtures
     owned |= set((run / 'worlds').glob('*.sexp'))    # the worlds those name
     owned |= set(source.glob('*.sexp'))              # check_source_fixtures (#327)
+    owned |= set((root / REFUSED_SOURCES.relative_to(PW)).glob('*.sexp'))
     owned.add(root / 'declared.sexp')                # scripts/check-pw-example.py
     return sorted(p for p in root.rglob('*.sexp') if p not in owned)
 
@@ -613,9 +621,11 @@ def check_pw_subtree_total():
     committed tree it judges a scratch one: one file in every owned position
     must pass, and a .sexp in every nearby unowned position must be flagged.
     """
-    owned = ('declared.sexp', 'run/a.sexp', 'run/worlds/w.sexp', 'source/a.sexp')
+    owned = ('declared.sexp', 'run/a.sexp', 'run/worlds/w.sexp',
+             'source/a.sexp', 'source-rejected/a.sexp')
     unowned = ('stray.sexp', 'new/a.sexp', 'run/nested/a.sexp',
-               'run/worlds/nested/w.sexp', 'source/worlds/w.sexp', 'source/nested/a.sexp')
+               'run/worlds/nested/w.sexp', 'source/worlds/w.sexp',
+               'source/nested/a.sexp', 'source-rejected/nested/a.sexp')
     with tempfile.TemporaryDirectory(prefix='lara-pw-conf-') as tmp:
         scratch = pathlib.Path(tmp)
         for rel in owned + unowned:
@@ -683,6 +693,27 @@ def check_source_fixtures(haskell, update):
             golden.write_text(out, encoding='utf-8')
         assert golden.exists(), f'missing golden {golden} (run with --update)'
         assert golden.read_text(encoding='utf-8') == out, ('golden differs', golden, out)
+    return len(fixtures)
+
+
+def check_refused_source_fixtures(haskell):
+    """Policy-pruned sources cannot produce an envelope. Pin the Haskell PW
+    and pw-input refusal to the same golden, and keep the Lean front-door
+    refusal separate: it cannot parse even the first admitted .lara world.
+    Paths in these fixtures are relative to their committed location.
+    """
+    fixtures = sorted(REFUSED_SOURCES.glob('*.sexp'))
+    assert fixtures, f'no refused source fixtures under {REFUSED_SOURCES}'
+    for fixture in fixtures:
+        code, out = run(haskell, fixture)
+        assert code == 1, (fixture, code, out)
+        assert out.startswith('(pw-error 1 world (world-input '), out
+        assert out == fixture.with_suffix('.expected').read_text(encoding='utf-8'), out
+        d_code, d_out = run([haskell[0], 'pw-input'], fixture)
+        assert (d_code, d_out) == (1, out), ('derivation must refuse', fixture, d_code, d_out)
+        l_code, l_out = run([str(LEAN)], fixture)
+        assert l_code == 1, (fixture, l_code, l_out)
+        assert l_out == fixture.with_suffix('.lean.expected').read_text(encoding='utf-8'), l_out
     return len(fixtures)
 
 
@@ -815,9 +846,11 @@ def main():
     fixtures = check_fixtures(haskell, update)
     runs, skipped = check_cases(haskell, latin1_problem is None)
     source_fixtures = check_source_fixtures(haskell, update)
+    refused_sources = check_refused_source_fixtures(haskell)
     source_runs, source_skipped = check_source_cases(haskell, latin1_problem is None)
     print(f'PW outer runtime conformance passed: {fixtures} fixtures, {len(CASES)} cases, {runs} runs;'
-          f' {source_fixtures} .lara source fixtures, {len(SOURCE_CASES)} source cases, {source_runs} runs.')
+          f' {source_fixtures} .lara source fixtures, {refused_sources} refused source fixtures,'
+          f' {len(SOURCE_CASES)} source cases, {source_runs} runs.')
     if skipped or source_skipped:
         print(f'  skipped {skipped + source_skipped} ISO-8859-1 reruns: {latin1_problem}')
 

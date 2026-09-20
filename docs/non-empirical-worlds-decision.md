@@ -6,6 +6,11 @@ triangle/parallel-postulate worlds story because today's runtime cannot
 produce the proposed *checked structural-bridge failure*. The follow-up is
 [#350](https://github.com/ARA-Labs/Lara/issues/350).
 
+Follow-up in #350: [D5](demos/d5-axiom-withdrawal.md) now supplies the
+separate executable Lean structural-contract witness and a positive transport
+control. The CLI limitations below still hold. D5 reuses the assumed
+postulate itself and makes no triangle-theorem claim.
+
 The admission table **can** withhold an assumed leaf. The obstacle is what
 happens after admission, plus the scope of the current natural-deduction
 encoding. Saying that the admission table cannot express the case would be

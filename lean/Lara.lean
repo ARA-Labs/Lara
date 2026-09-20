@@ -429,6 +429,7 @@ import Lara.PW.Instance
 import Lara.PW.Translation
 import Lara.PW.Structural
 import Lara.Examples.PW
+import Lara.Examples.AxiomWithdrawal
 import Lara.Examples.PWStructural
 import Lara.PW.Compose
 import Lara.Examples.PWCompose

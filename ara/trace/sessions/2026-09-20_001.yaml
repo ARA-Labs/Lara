@@ -2,10 +2,10 @@ session:
   id: 2026-09-20_001
   date: '2026-09-20'
   started: 2026-09-20T08:02+00:00
-  last_turn: 2026-09-20T08:02+00:00
-  turn_count: 1
-  summary: 'Issue #349: checked P1 philosophy debate and documented the axiom-relative worlds boundary;
-    executable bridge witness deferred to #350.'
+  last_turn: 2026-09-20T08:40+00:00
+  turn_count: 2
+  summary: 'Issues #349 and #350: P1 philosophy debate followed by D5, a separately mechanized axiom-withdrawal
+    witness with runnable source controls and passing full gates.'
 events_logged:
 - turn: 1
   type: decision
@@ -25,6 +25,18 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: Check the non-empirical graph and axiom admission probe
+- turn: 2
+  type: decision
+  id: N350_scope
+  routing: direct
+  provenance: ai-executed
+  summary: Use a separate Lean contract witness for axiom withdrawal
+- turn: 2
+  type: experiment
+  id: N350_witness
+  routing: direct
+  provenance: ai-executed
+  summary: Check retained transport and missing-premise contract failure
 ai_actions:
 - turn: 1
   action: Implemented P1, generated anchors, added verdict/freshness/differential coverage, checked sources,
@@ -39,12 +51,35 @@ ai_actions:
   - fixtures/ANCHORS.tsv
   - docs/demos/d4-philmath.md
   - docs/non-empirical-worlds-decision.md
+- turn: 2
+  action: Implemented the D5 sources, Lean witness and executable; added PW refusal goldens and regression
+    coverage; obtained independent review; ran the Haskell suite, all local gates, and a negative premise-retention
+    mutation.
+  provenance: ai-executed
+  files_changed:
+  - examples/axiom-withdrawal/
+  - lean/Lara/Examples/AxiomWithdrawal.lean
+  - lean/Lara/AxiomWithdrawalMain.lean
+  - lean/AxCheck.lean
+  - lean/Lara.lean
+  - lean/lakefile.toml
+  - scripts/check-axiom-withdrawal.py
+  - scripts/check-pw-conformance.py
+  - test/WorkedExamplesSpec.hs
+  - test/PWSpec.hs
+  - fixtures/pw/source-rejected/
+  - Makefile
+  - docs/demos/d5-axiom-withdrawal.md
 claims_touched: []
 logic_revisions: []
 open_threads:
 - issue: https://github.com/ARA-Labs/Lara/issues/350
-  description: Choose and implement an honest executable axiom-withdrawal structural-bridge witness.
+  description: Review and merge the submitted axiom-withdrawal demo PR; implementation and local gates
+    complete.
+  resolution: N350_witness
 ai_suggestions_pending: []
 key_context:
 - P1 is an illustrative authored policy, not a philosophical adjudication; bindings remain unreviewed.
 - Demo 2 is deferred for runtime/proof-path reasons, not because admission cannot quarantine assumptions.
+- User requested finishing the demo and submitting the PR. The chosen separate Lean witness closes the
+  implementation scope without claiming a new CLI bridge verifier or a geometric proof.

@@ -99,6 +99,7 @@ import Lara.PW.Instance
 import Lara.PW.Translation
 import Lara.PW.Structural
 import Lara.Examples.PW
+import Lara.Examples.AxiomWithdrawal
 import Lara.Examples.PWStructural
 import Lara.PW.Compose
 import Lara.Examples.PWCompose
@@ -4274,3 +4275,15 @@ context's own arguments make unavailable. -/
 #print axioms Lara.PW.Run.addWorld_decoded
 #print axioms Lara.PW.Run.addWorld_quarantine_empty
 #print axioms Lara.PW.Run.addWorld_checks_declared
+
+-- #350: admission, local statuses, and structural failure are separate facts.
+#print axioms Lara.Examples.AxiomWithdrawal.withdrawal_prunes
+#print axioms Lara.Examples.AxiomWithdrawal.rejection_stops
+#print axioms Lara.Examples.AxiomWithdrawal.certificate_depends_on_premise
+#print axioms Lara.Examples.AxiomWithdrawal.units_accepted
+#print axioms Lara.Examples.AxiomWithdrawal.local_statuses
+#print axioms Lara.Examples.AxiomWithdrawal.source_support
+#print axioms Lara.Examples.AxiomWithdrawal.retained_transport
+#print axioms Lara.Examples.AxiomWithdrawal.leafCheck_iff
+#print axioms Lara.Examples.AxiomWithdrawal.leaf_controls
+#print axioms Lara.Examples.AxiomWithdrawal.no_withdrawn_bridge

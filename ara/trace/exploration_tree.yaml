@@ -10173,3 +10173,44 @@ tree:
   also_depends_on:
   - N349_philmath
   - N349_worlds
+
+- id: N350_scope
+  type: decision
+  title: Use a separate Lean contract witness for axiom withdrawal
+  provenance: ai-executed
+  timestamp: 2026-09-20T08:40+00:00
+  choice: 'Select the separate Lean option allowed by issue #350. Reuse the assumed postulate itself through
+    the production ND backend with an empty theory; keep source rejection, contract failure, and local
+    status distinct.'
+  alternatives:
+  - Extend the PW world carrier to represent source policy pruning; not selected for this demonstration
+    because the existing Lean structural contract suffices.
+  - Claim a triangle-sum consequence from a flat postulate atom or a trusted conclusion; rejected because
+    it would not establish premise dependence.
+  evidence:
+  - docs/demos/d5-axiom-withdrawal.md
+  - lean/Lara/Examples/AxiomWithdrawal.lean
+  - https://github.com/ARA-Labs/Lara/issues/350
+  status: resolved
+  also_depends_on:
+  - N349_worlds
+- id: N350_witness
+  type: experiment
+  title: Check retained transport and missing-premise contract failure
+  provenance: ai-executed
+  timestamp: 2026-09-20T08:40+00:00
+  result: The admitted ND step is justified and transports under the retained identity bridge. Quarantine
+    removes pp and its dependent argument, producing a local gap; the finite leaf check fails and no structural
+    bridge to the empty target evidence exists. Reject stops source admission with R8. The separate PW
+    fixture pins Haskell target world-input, pw-input refusal, and the earlier Lean surface-reader refusal.
+    Haskell tests and the complete local-gates run passed; all new theorem declarations passed the axiom
+    audit. Retaining the supposedly withdrawn premise makes the negative proofs fail.
+  evidence:
+  - ara/evidence/axiom_withdrawal_350.md
+  - lean/Lara/Examples/AxiomWithdrawal.lean
+  - test/WorkedExamplesSpec.hs
+  - fixtures/pw/source-rejected/axiom-withdrawal.sexp
+  - scripts/check-pw-conformance.py
+  status: resolved
+  also_depends_on:
+  - N350_scope

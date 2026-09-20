@@ -58,6 +58,7 @@ module WorkedExamplesSpec (workedExamplesSpecProps) where
 import Test.QuickCheck
 
 import Data.List (isInfixOf, sort)
+import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 
 import Lara.AST
@@ -87,7 +88,10 @@ import Lara.AST
   , TheoryDigest (..)
   , Unit (..)
   )
-import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
+import Lara.Admission
+  ( AdmissionCause (..), admissionAuditLeaves, admissionAuditArgs
+  , admissionRejectionLeaf, renderAdmissionAudit, renderAdmissionRejection
+  )
 import Lara.Elaborate
   ( PreparedSource (..)
   , SourceResult
@@ -97,6 +101,8 @@ import Lara.Elaborate
   , registryOf
   , runSourceCheck
   , sourceResultCheckInput
+  , sourceResultCertDeps
+  , sourceResultAudit
   , sourceResultVerdict
   )
 -- The bare, admission-free lowering: this suite pins the elaborator's own
@@ -113,11 +119,11 @@ import Lara.Replay
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import qualified Lara.PW.Run as PW
 import Lara.PW.Wire (WorldId (..))
-import Lara.TempTree (withTree)
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Strict (SExpr (..))
 import qualified Lara.Strict as Strict
 import qualified Lara.Strict.ND as ND
+import Lara.Strict.Deps (CertDep (..))
 import Lara.Wire (PublicStatus (..), conditionalStatus, Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
 import Lara.WorkedExamples (workedExamples)
 import SigmaFixture (sigmaOf)
@@ -273,49 +279,46 @@ prop_P1Defense = once $ ioProperty $ do
 -- Quarantine removes its only support (gap) and prevents PW loading, before bridges.
 prop_axiomAdmissionBoundary :: Property
 prop_axiomAdmissionBoundary = once $ ioProperty $ do
-  let source name = unlines
-        [ "artifact axiom at sha256:axiom-probe", "policy " ++ name, "use backends [nd@1]"
-        , "claim c", "  nl = \"The parallel postulate is assumed\""
-        , "  formal = parallel_postulate()"
-        , "  binding = { author = probe, audit-status = unreviewed }"
-        , "leaf pp : parallel_postulate()", "  kind = assumed"
-        , "  provenance = ai-executed", "  refs = []"
-        , "arg a : supports(c) by citation from [pp]"
-        , "  assurance = cert(nd@1, sha256:empty, (hyp 0))", "status c"
-        ]
-      policy name action = unlines
-        [ "policy " ++ name, "pred parallel_postulate()"
-        , "admission { (assumed, ai-executed) = " ++ action ++ " }"
-        , "rule citation()", "  mode = strict", "  premises = [parallel_postulate()]"
-        , "  conclusion = parallel_postulate()", "  allow-trusted = false"
-        , "  certifiers = [(nd@1, sha256:empty)]", "theory sha256:empty = []"
-        ]
-      run = "(pw-run 1 (worlds (world src s (lara \"source.lara\")) "
-        ++ "(world tgt t (lara \"target.lara\"))) (edges) (comparisons) "
-        ++ "(pw-surface 1 (bridges) (queries)))"
-      local name action expected =
-        case (parseProgram (source name), parsePolicy (policy name action)) of
-          (Right prog, Right pol) -> case preparedResult prog pol of
-            Left err -> counterexample err False
-            Right result -> case verdictOutcome (sourceResultVerdict result) of
-              Reject rejection -> counterexample (show rejection) False
-              outcome@Accept{} -> verdictStatuses outcome ===
-                [(Prop (Pred "parallel_postulate") [], expected)]
-          parsed -> counterexample (show parsed) False
-  withTree "axiom-admission"
-    [("source.lara", source "admitted"), ("admitted.policy.lara", policy "admitted" "admit")
-    ,("target.lara", source "withheld"), ("withheld.policy.lara", policy "withheld" "quarantine")
-    ,("run.sexp", run)] $ \dir -> do
-      result <- PW.runPWFile (dir ++ "/run.sexp")
-      pure $ conjoin
-        [ local "admitted" "admit" (Published Justified)
-        , local "withheld" "quarantine" (Published Gap)
-        , case result of
-            Left (PW.PWWorld (PW.WorldInputError (WorldId "tgt") detail)) ->
-              counterexample detail ("policy quarantine" `isInfixOf` detail)
-            Left err -> counterexample (show err) False
-            Right _ -> counterexample "quarantined world unexpectedly loaded" False
-        ]
+  let root = "examples/axiom-withdrawal/"
+      local name expected = do
+        prog <- loadProgram (root ++ name ++ ".lara")
+        pol <- loadPolicy (root ++ name ++ ".policy.lara")
+        pure $ case preparedResult prog pol of
+          Left err -> counterexample err False
+          Right result -> case verdictOutcome (sourceResultVerdict result) of
+            Reject rejection -> counterexample (show rejection) False
+            outcome@Accept{} -> conjoin
+              [ verdictStatuses outcome ===
+                  [(Prop (Pred "parallel_postulate") [], Published expected)]
+              , counterexample "the admitted certificate must depend on premise zero only" $
+                  sourceResultCertDeps result ===
+                    (if name == "admitted"
+                     then [(ArgId "a", [CertPremise 0 (Prop (Pred "parallel_postulate") [])])]
+                     else [])
+              , counterexample "quarantine must remove pp and its dependent argument" $
+                  ( admissionAuditLeaves (sourceResultAudit result)
+                  , admissionAuditArgs (sourceResultAudit result)
+                  ) === (if name == "admitted" then ([], [])
+                         else ([(LeafId "pp", PolicyQuarantine :| [])], [ArgId "a"]))
+              ]
+  admitted <- local "admitted" Justified
+  withdrawn <- local "withdrawn" Gap
+  rejectedProg <- loadProgram (root ++ "rejected.lara")
+  rejectedPol <- loadPolicy (root ++ "rejected.policy.lara")
+  result <- PW.runPWFile "fixtures/pw/source-rejected/axiom-withdrawal.sexp"
+  pure $ conjoin
+    [ admitted
+    , withdrawn
+    , counterexample "reject must stop source admission before a verdict" $
+        case prepareSource rejectedProg rejectedPol of
+          Right (SourceRejected rejection) -> admissionRejectionLeaf rejection === LeafId "pp"
+          _ -> property False
+    , case result of
+        Left (PW.PWWorld (PW.WorldInputError (WorldId "tgt") detail)) ->
+          counterexample detail ("policy quarantine" `isInfixOf` detail)
+        Left err -> counterexample (show err) False
+        Right _ -> counterexample "quarantined world unexpectedly loaded" False
+    ]
 
 -- | E1: one unattacked support argument @in@, claim justified.
 prop_E1 :: Property
