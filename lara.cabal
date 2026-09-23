@@ -236,3 +236,17 @@ test-suite lara-test
     build-tool-depends: lara:lara
                       , lara:surface-conformance
     default-language: GHC2021
+
+-- The `>>>` examples in the library's Haddock comments, run through
+-- `cabal repl lib:lara --with-ghc=doctest` (see test/doctest/Main.hs). The
+-- build-tool dependency is what makes doctest part of the package's own
+-- build plan rather than a tool each machine installs by hand.
+test-suite lara-doctest
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test/doctest
+    main-is:          Main.hs
+    build-depends:    base >=4 && <5
+                    , process
+    build-tool-depends: doctest:doctest >=0.20
+    default-language: GHC2021

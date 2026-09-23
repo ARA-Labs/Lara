@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
+.PHONY: build test doctest docs docs-haskell docs-lean bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
 
 build:
 	cabal build all
@@ -9,6 +9,38 @@ build:
 
 test:
 	cabal test all --test-show-details=direct
+
+# The `>>>` examples in Haddock comments are executable and must stay true.
+# `lara-doctest` is a cabal test-suite whose build-tool dependency is the
+# doctest executable, so `cabal test all` (and CI) already runs it and nothing
+# has to be installed by hand; this target runs just that suite. doctest stands
+# in for GHC inside a nested `cabal repl lib:lara`, which reconfigures the
+# library in interactive mode — the next `cabal build` reconfigures it back,
+# so expect one extra configure step after a doctest run.
+doctest:
+	cabal test lara-doctest --test-show-details=direct
+
+# ---------------------------------------------------------------------------
+# API documentation, both halves. Nothing here is committed; each target prints
+# where its index.html landed.
+#
+#   make docs             # both
+#   make docs-haskell     # Haddock for the library, with hyperlinked source
+#   make docs-lean        # doc-gen4 for lean/, via the lean/docbuild side project
+#
+# The Lean docs are a separate Lake project (lean/docbuild/) so that doc-gen4's
+# own dependencies never enter lean/lakefile.toml: `lake build` for the proofs
+# stays offline. The first run clones doc-gen4 from GitHub and builds it, which
+# takes a few minutes; later runs are incremental.
+docs: docs-haskell docs-lean
+
+docs-haskell:
+	cabal haddock --haddock-hyperlink-source lib:lara
+	@echo "Haddock: $$(find dist-newstyle -path '*/doc/html/lara/index.html' | head -1)"
+
+docs-lean:
+	cd lean/docbuild && lake build Lara:docs
+	@echo "doc-gen4: lean/docbuild/.lake/build/doc/index.html"
 
 # ---------------------------------------------------------------------------
 # Gates outside the required CI (docs/ci-scope-decision.md). The required

@@ -57,6 +57,14 @@ cd lean
 lake build
 ```
 
+API documentation (doc-gen4) is built from the docstrings by a separate Lake
+project so its dependencies stay out of this one's `lakefile.toml`:
+
+```sh
+cd lean/docbuild && lake build Lara:docs     # or: make docs-lean from the repo root
+open .lake/build/doc/index.html
+```
+
 The outer possible-world example reads declared bridges and modal queries from
 an S-expression file:
 

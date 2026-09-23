@@ -9,6 +9,10 @@ durable record of one mechanized result). New to the project? Read the
 top-level [`../README.md`](../README.md) first, then [spec §0](spec.md) for
 the vocabulary and reading paths.
 
+Per-module API documentation is not in `docs/`: it is generated from the
+source comments by `make docs` (Haddock for `src/`, doc-gen4 for `lean/`), and
+the `>>>` examples inside Haddock comments are run by `make doctest`.
+
 ## Entry points
 
 | Doc | What it is |

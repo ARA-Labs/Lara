@@ -66,8 +66,14 @@ jobs:
       - name: Build
         run: cabal build all
 
+      # `all` includes lara-doctest, which runs the `>>>` examples in Haddock
+      # comments; its doctest binary comes from the cached store.
       - name: Test
         run: cabal test all --test-show-details=direct
+
+      # The API docs are generated, never committed; this keeps them buildable.
+      - name: API docs build (Haddock)
+        run: make docs-haskell
 
       - name: Elaborator unit tests
         run: uv run --no-project python -m unittest discover -s elaborator -v

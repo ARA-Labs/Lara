@@ -287,6 +287,10 @@ while the claim it serves is defeated — see [`examples/S4/`](examples/S4/).
 ## Documentation
 
 Start with the [documentation index](docs/README.md) for reading paths and theory records.
+API documentation is generated, not committed: `make docs` builds Haddock for
+the Haskell library and doc-gen4 for the Lean development and prints where each
+`index.html` landed; `make doctest` runs the `>>>` examples in Haddock
+comments (a cabal test-suite, so `make test` covers it too).
 
 | Document | What it covers |
 | --- | --- |

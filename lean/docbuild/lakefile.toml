@@ -1,0 +1,22 @@
+# API documentation build for the Lean development (`make docs`).
+#
+# A separate Lake project on purpose: doc-gen4 pulls several dependencies
+# (Cli, MD4Lean, UnicodeBasics, BibtexQuery, ...) that the proofs do not need,
+# and a `require` here keeps them out of ../lakefile.toml and ../lake-manifest.json,
+# so `lake build` in ../ stays offline and dependency-free. This is the layout
+# doc-gen4's README recommends. The toolchain is ../lean-toolchain (elan walks
+# up); keep the doc-gen4 `rev` on the same Lean version as that file.
+#
+#   cd lean/docbuild && lake build Lara:docs
+#   open .lake/build/doc/index.html
+name = "docbuild"
+reservoir = false
+
+[[require]]
+name = "lara"
+path = "../"
+
+[[require]]
+name = "doc-gen4"
+git = "https://github.com/leanprover/doc-gen4"
+rev = "v4.32.0"
