@@ -1,8 +1,9 @@
 # LARA
 
-[![Haskell](https://github.com/ARA-Labs/lara/actions/workflows/haskell.yml/badge.svg)](https://github.com/ARA-Labs/lara/actions/workflows/haskell.yml)
+[![Haskell](https://github.com/ARA-Labs/Lara/actions/workflows/haskell.yml/badge.svg)](https://github.com/ARA-Labs/Lara/actions/workflows/haskell.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![spec](https://img.shields.io/badge/spec-v0.1%20frozen-brightgreen.svg)](docs/spec.md)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.25421-b31b1b.svg)](https://arxiv.org/abs/2609.25421)
 
 LARA is a small language for writing down the **argument behind a research
 claim**: the evidence, the reasoning steps, and the caveats. A program can
@@ -30,6 +31,10 @@ claim support. A LARA program lowers a research artifact into a checkable
 claim-support graph; acceptance is a certificate check against a fixed policy,
 and the reported status is the grounded result for the compiled graph
 ([spec](docs/spec.md)).
+
+The language is described in
+[*Beyond Natural Language: An Agent-Native Language for Autonomous Science*](https://arxiv.org/abs/2609.25421)
+(arXiv:2609.25421); see [Citation](#citation) for the BibTeX entry.
 
 ## Why LARA
 
@@ -246,7 +251,7 @@ cabal build all                          # library + CLI
 cabal run lara -- check <file.lara>      # check an artifact
 cabal run lara -- check <file.laramap>   # check a map of several artifacts
 cabal run lara -- deps <file.lara>       # what evidence an accepted artifact cites
-cabal test                               # property suite
+cabal test                               # test suites (property + doctest)
 ```
 
 `check` takes an optional `--out <path>`, which writes the verdict to a file
@@ -287,14 +292,10 @@ while the claim it serves is defeated — see [`examples/S4/`](examples/S4/).
 ## Documentation
 
 Start with the [documentation index](docs/README.md) for reading paths and theory records.
-API documentation is generated, not committed: `make docs` builds Haddock for
-the Haskell library and doc-gen4 for the Lean development and prints where each
-`index.html` landed; `make doctest` runs the `>>>` examples in Haddock
-comments (a cabal test-suite, so `make test` covers it too).
 
 | Document | What it covers |
 | --- | --- |
-| [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen at M1; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
+| [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
 | [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.10`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, and source-authored `nd@1` formula annotations |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work LARA builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
@@ -305,9 +306,27 @@ comments (a cabal test-suite, so `make test` covers it too).
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
 | [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and a dated snapshot (checking a corpus unit costs ~200 µs; one pass over all 564 harness records, under 200 ms) |
-| [`docs/engineering-plan.md`](docs/engineering-plan.md) | Milestone roadmap and the module dependency graph (open follow-ups are tracked as GitHub issues) |
-| [`m0/annotation-summary.md`](m0/annotation-summary.md) | The M0 semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
+| [`docs/engineering-plan.md`](docs/engineering-plan.md) | The engineering plan: build order and the module dependency graph |
+| [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |
+
+### Building the documentation
+
+API documentation is generated, never committed. With the toolchains from
+[Quick start](#quick-start) installed:
+
+```sh
+make docs           # both halves; each target prints where its index.html landed
+make docs-haskell   # Haddock for the Haskell library, with hyperlinked source
+make docs-lean      # doc-gen4 for the Lean development (lean/docbuild)
+make doctest        # run the >>> examples in Haddock comments
+```
+
+The first `make docs-lean` clones doc-gen4 from GitHub and builds it, which
+takes a few minutes; later runs are incremental. The doctest examples are a
+cabal test-suite, so `make test` runs them too; a doctest run reconfigures the
+library in interactive mode, so expect one extra configure step on the next
+`cabal build`.
 
 ## Repository layout
 
@@ -316,16 +335,16 @@ src/, app/, test/   Haskell: parser, elaborator, checker, compiler, grounded
                     evaluator, strict backends, CLI, property suites
 lean/               Lean 4 mechanized reference semantics + second driver (spec §9)
 examples/           worked .lara examples with co-located policies and verdicts
-corpus-units/, fixtures/, measurements/   the frozen M5 evaluation corpus
+corpus-units/, fixtures/, measurements/   the frozen evaluation corpus
 scripts/            conformance gates, corpus/mutant generators, bench, replay
 bundles/, elaborator/   replay bundles and the untrusted Python elaborator
 containers/         pinned container for the performance bench
 docs/               spec, surface grammar, design decisions, plans, demos
-m0/, corpus/        the M0 semantic corpus study and its sampled ARA corpus
+m0/, corpus/        the semantic corpus study and its sampled ARA corpus
 ara/                this project's own Agent-Native Research Artifact
 ```
 
-## Trust and status
+## Trust
 
 The part of LARA you have to trust (the trusted computing base) is
 deliberately small and enumerated in [spec §1.1](docs/spec.md). Soundness is
@@ -337,14 +356,34 @@ differential tests are conformance evidence for the Haskell checker, never a
 substitute for the theorems (spec §9). So the tool that judges arguments has
 its own argument for correctness.
 
-Milestones M1–M5 are complete: the frozen core (`lara-core@0.2`), the
-mechanized reference semantics, the production compiler/checker, the
-walking-skeleton replay pipeline, and the deterministic evaluation corpus
-(the [v6 snapshot](docs/m5-freeze-checklist.md#current-snapshot-evaluation-freeze-v6--issue-266):
-595 generated mutants + 60 corpus units, 655/655 rejection-class matches,
-655/655 cross-driver agreement, 60/60 replay; `m5-freeze-v6` publication awaits
-merge). Open follow-ups are tracked as
-[GitHub issues](https://github.com/ARA-Labs/lara/issues).
+## Contributing
+
+Issues and pull requests are both welcome. Read
+[CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the verification
+gates a change must pass before review, and how this repository splits work
+between the [issue tracker](https://github.com/ARA-Labs/Lara/issues) and
+`docs/`.
+
+## Citation
+
+LARA is described in
+[*Beyond Natural Language: An Agent-Native Language for Autonomous Science*](https://arxiv.org/abs/2609.25421)
+(arXiv:2609.25421). If you use it in your work, please cite:
+
+```bibtex
+@misc{he2026lara,
+  title={Beyond Natural Language: An Agent-Native Language for Autonomous Science},
+  author={Yifeng He and Jiachen Liu},
+  year={2026},
+  eprint={2609.25421},
+  archivePrefix={arXiv},
+  primaryClass={cs.PL},
+  url={https://arxiv.org/abs/2609.25421}
+}
+```
+
+GitHub's "Cite this repository" button exports the same reference from
+[`CITATION.cff`](CITATION.cff).
 
 ## License
 

@@ -1,11 +1,10 @@
 # docs/ — what lives here and how to find it
 
 `docs/` records *decisions and contracts*; open work is tracked as GitHub
-issues, never here. Most files are one of four kinds: a **spec/contract**
+issues, never here. Most files are one of three kinds: a **spec/contract**
 (normative, frozen, versioned), a **decision record** (why something is the
-way it is, with its status and date in an italic header), a **milestone
-record** (a closed tracker preserved as history), or a **theory note** (the
-durable record of one mechanized result). New to the project? Read the
+way it is, with its status and date in an italic header), or a **theory note**
+(the durable record of one mechanized result). New to the project? Read the
 top-level [`../README.md`](../README.md) first, then [spec §0](spec.md) for
 the vocabulary and reading paths.
 
@@ -61,27 +60,17 @@ living contributor log), [`mechanization-plan.md`](mechanization-plan.md)
 (the Lean track; status table in [`../lean/README.md`](../lean/README.md)),
 [`performance.md`](performance.md) (the checker bench),
 [`rejection-surface.md`](rejection-surface.md) (what the checker refuses,
-with runnable anchors), [`corpus-map.md`](corpus-map.md) (the M0 ARA→LARA
+with runnable anchors), [`corpus-map.md`](corpus-map.md) (the ARA→LARA
 lowering map), [`prior-art-lessons.md`](prior-art-lessons.md)
 (firsthand reads of neighboring systems),
 [`worked-examples-plan.md`](worked-examples-plan.md)
 (historical; the live catalogue is
 [`../examples/README.md`](../examples/README.md)).
 
-## Milestone records (closed engineering spine)
-
-[`m1-freeze-checklist.md`](m1-freeze-checklist.md),
-[`m4a-checklist.md`](m4a-checklist.md), and
-[`m5-freeze-checklist.md`](m5-freeze-checklist.md) are the preserved trackers
-of the closed engineering milestones M1–M5 (M5's current evaluation-freeze
-snapshot lives at the top of its file and is still updated per freeze cycle).
-
 ## Theory notes — two series, one prefix
 
 The `theory-*.md` files record mechanized results, and the prefix is
-load-bearing: **`theory-m0`…`theory-m5` are the theory spine
-and are unrelated to the engineering milestones of the same numbers
-above.**
+load-bearing: **`theory-m0`…`theory-m5` are the theory spine.**
 
 - **Theory spine**, in order:
   [`theory-m0-compilation-invariants.md`](theory-m0-compilation-invariants.md)
@@ -100,9 +89,9 @@ above.**
   [`theory-m4-g0-interface-spike.md`](theory-m4-g0-interface-spike.md)
   (Part B gate: re-descoped),
   and [`theory-term-level-holes.md`](theory-term-level-holes.md),
-  [`theory-m5-surface-calculus.md`](theory-m5-surface-calculus.md), plus the
-  side milestone
-  [`theory-b0-backend-compositionality.md`](theory-b0-backend-compositionality.md).
+[`theory-m5-surface-calculus.md`](theory-m5-surface-calculus.md), plus the
+side result
+[`theory-b0-backend-compositionality.md`](theory-b0-backend-compositionality.md).
 - **Possible-world spike**: start from
   [`theory-pw-closeout.md`](theory-pw-closeout.md), the subseries index; the
   contracts are [`theory-pw0-outer-model.md`](theory-pw0-outer-model.md),
