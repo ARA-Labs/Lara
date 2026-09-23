@@ -13,10 +13,10 @@ test:
 # The `>>>` examples in Haddock comments are executable and must stay true.
 # `lara-doctest` is a cabal test-suite whose build-tool dependency is the
 # doctest executable, so `cabal test all` (and CI) already runs it and nothing
-# has to be installed by hand; this target runs just that suite. doctest stands
-# in for GHC inside a nested `cabal repl lib:lara`, which reconfigures the
-# library in interactive mode — the next `cabal build` reconfigures it back,
-# so expect one extra configure step after a doctest run.
+# has to be installed by hand; this target runs just that suite. The driver
+# exports the repl session with `cabal repl --repl-multi-file` in an isolated
+# temporary build directory, so a run leaves the project configuration
+# untouched.
 doctest:
 	cabal test lara-doctest --test-show-details=direct
 
@@ -36,6 +36,11 @@ docs: docs-haskell docs-lean
 
 docs-haskell:
 	cabal haddock --haddock-hyperlink-source lib:lara
+	# `cabal haddock` leaves the library configured in haddock mode, in
+	# which `cabal exec` stops exposing the package — runghc-based gates
+	# (walking-skeleton golden, gen-mutants) then fail on "member of the
+	# hidden package". Rebuild to restore the ordinary configuration.
+	cabal build lib:lara
 	@echo "Haddock: $$(find dist-newstyle -path '*/doc/html/lara/index.html' | head -1)"
 
 docs-lean:
