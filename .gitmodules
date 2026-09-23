@@ -4,3 +4,4 @@
 [submodule "lara-paper"]
 	path = lara-paper
 	url = https://github.com/EYH0602/lara-paper
+	branch = main
