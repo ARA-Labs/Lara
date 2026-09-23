@@ -121,10 +121,7 @@ The annotation directly answers the corpus-gated decision gates in `engineering-
 The corpus is vendored as a git submodule at `corpus/ara-paperbench`, pinned to commit
 `62e9b54b2d4efe45b97f25676a16784530dd552a` (upstream `main`, 2026-07-09). All M0 annotations
 reference artifacts at this pin; bumping the pin invalidates annotation provenance and requires
-re-checking sampled claims. The submodule URL points at the ARA-Labs mirror
-(`ARA-Labs/ara-paperbench`, forked from `AmberLJC/ara-paperbench` at the same pin) so the pin
-survives the upstream repo; provenance and digests key on `ara-paperbench@62e9b54`, not the URL.
-Fetch it with:
+re-checking sampled claims. Fetch it with:
 
 ```
 git submodule update --init --depth 1 corpus/ara-paperbench
