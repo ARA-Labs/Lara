@@ -130,7 +130,7 @@ the result is stated but not yet proved or mechanized._
   fidelity, certificate soundness, dependency accountability, closed registration, structural
   consequence laws); the ND adapter is sound but not complete for its Boolean semantics — completeness
   is deliberately not required because LARA checks submitted certificates rather than searching.
-- **Sources**: ["\"Intuitionistic natural deduction is sound but not complete for this Boolean semantics; completeness is not required because LARA checks submitted certificates rather than searching for every valid proof.\" ← docs/strict-backend-decision.md:218-219 «completeness is not required because LARA checks submitted certificates» [input]", "Theorem 4 (ND soundness) + Lemma 5 (dependency exactness) ← evidence/proofs/nd_adapter_soundness.md [result]"]
+- **Sources**: ["\"Intuitionistic natural deduction is sound but not complete for this Boolean semantics; completeness is not required because Lara checks submitted certificates rather than searching for every valid proof.\" ← docs/strict-backend-decision.md:217-219 «completeness is not required because Lara checks submitted certificates» [input]", "Theorem 4 (ND soundness) + Lemma 5 (dependency exactness) ← evidence/proofs/nd_adapter_soundness.md [result]"]
 - **Status**: supported
 - **Falsification criteria**: A well-typed natural-deduction certificate whose conclusion is not a
   Boolean consequence of its context (refuting Theorem 4), or a well-typed certificate whose true
