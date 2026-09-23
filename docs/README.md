@@ -18,7 +18,7 @@ the `>>>` examples inside Haddock comments are run by `make doctest`.
 | --- | --- |
 | [`spec.md`](spec.md) | The frozen v0.1 language specification; §0 is the reader's guide |
 | [`lara-surface-grammar.md`](lara-surface-grammar.md) | The concrete `.lara` syntax contract, with per-version appendices |
-| [`foundations.md`](foundations.md) | The four lines of prior work LARA builds on |
+| [`foundations.md`](foundations.md) | The four lines of prior work Lara builds on |
 | [`novelty-and-related-work.md`](novelty-and-related-work.md) | The novelty claim and the delta table against prior art |
 | [`demos/`](demos/) | Prose-first walkthroughs of checked artifacts: a rebuttal exchange (D1), mechanical review comments (D2), a cross-paper agreement map (D3), a philosophy debate (D4), and [axiom withdrawal](demos/d5-axiom-withdrawal.md) (D5) |
 
@@ -60,7 +60,7 @@ living contributor log), [`mechanization-plan.md`](mechanization-plan.md)
 (the Lean track; status table in [`../lean/README.md`](../lean/README.md)),
 [`performance.md`](performance.md) (the checker bench),
 [`rejection-surface.md`](rejection-surface.md) (what the checker refuses,
-with runnable anchors), [`corpus-map.md`](corpus-map.md) (the ARA→LARA
+with runnable anchors), [`corpus-map.md`](corpus-map.md) (the ARA→Lara
 lowering map), [`prior-art-lessons.md`](prior-art-lessons.md)
 (firsthand reads of neighboring systems),
 [`worked-examples-plan.md`](worked-examples-plan.md)

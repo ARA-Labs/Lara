@@ -1,4 +1,4 @@
-# The rejection surface: what LARA refuses, what it accepts-but-does-not-support
+# The rejection surface: what Lara refuses, what it accepts-but-does-not-support
 
 _Status: reference note, written 2026-08-06. Answers "what does an invalid argument look like, and
 how does the checker detect it?" — a question spread across `docs/spec.md` §10, `examples/README.md`,
@@ -24,7 +24,7 @@ common misreading of the checker.
 
 ## 1. Two doors, two failure modes
 
-LARA has two entry points, and the same kind of defect surfaces differently depending on which one a
+Lara has two entry points, and the same kind of defect surfaces differently depending on which one a
 program goes through. This is the least obvious part of the contract and was rediscovered
 empirically rather than read off a spec section (`app/Main.hs`, module header, is the authoritative
 statement).
@@ -495,7 +495,7 @@ drivers (`scripts/differential.sh`).
 ## 4. Relationship to `rit` (the question that prompted this)
 
 - **Genuine overlap.** `rit`'s refusal rule — "if a value cannot be re-derived, refuse rather than
-  guess" — corresponds to LARA's R13: a certificate whose cited cells do not support the claimed
+  guess" — corresponds to Lara's R13: a certificate whose cited cells do not support the claimed
   ordering. R13's `ord@1` rejection explains itself on stderr, e.g. (live output from
   `fixtures/corpus/ord-lt-boundary-reject.sexp`):
 
@@ -512,11 +512,11 @@ drivers (`scripts/differential.sh`).
   citing measured evidence (`ord cites premise slots only; slot names theory entry 0`).
 
 - **No overlap, and this must not be overclaimed.** `rit`'s running example — two authors reporting
-  contradictory `modded-nanogpt` speedrun numbers — compiles fine in LARA on *both* sides: each
+  contradictory `modded-nanogpt` speedrun numbers — compiles fine in Lara on *both* sides: each
   author's arithmetic is impeccable. It resolves as `contested`, and once an unrecorded batch-size
   dimension enters the setting index, the contrary pattern stops unifying and both claims stand
-  `justified` (the `examples/agreement-map` P2 mechanism). Writing "LARA rejects these too" would
-  contradict LARA's own spec — the contradiction is a defeat-calculus outcome (`contested`), not an
+  `justified` (the `examples/agreement-map` P2 mechanism). Writing "Lara rejects these too" would
+  contradict Lara's own spec — the contradiction is a defeat-calculus outcome (`contested`), not an
   R-class rejection.
 
 ## 5. One counterintuitive finding worth recording

@@ -1,4 +1,4 @@
-# Novelty and related work: the delta LARA must defend
+# Novelty and related work: the delta Lara must defend
 
 _The novelty-defense artifact. Consolidates the deltas scattered across `gap-resolution.md` into one place, so the paper's related-work section and the "why is this
 new?" rebuttal are on record before M0. Written 2026-07-21._
@@ -13,7 +13,7 @@ discovery of an empty field — composition alone is a weak novelty claim.
 
 ## 1. The one-sentence novelty claim
 
-> LARA is the first **proof-carrying language** whose programs are typed claim-support certificates —
+> Lara is the first **proof-carrying language** whose programs are typed claim-support certificates —
 > evidence leaves, strict/defeasible inference-scheme instances, critical-question obligations, and
 > typed rebut/undercut/undermine relations — that a small checker **compiles into an argumentation
 > framework and a replayable four-state claim status**, with **mechanized accountability and
@@ -29,18 +29,18 @@ any prior system combines:
 3. **mechanized** accountability, backend-replacement, and status-preservation theorems over the
    leaf and strict-certificate interfaces.
 
-## 2. The delta table (prior art → what LARA adds)
+## 2. The delta table (prior art → what Lara adds)
 
-| Prior art (in bib) | What it does | What it lacks that LARA has |
+| Prior art (in bib) | What it does | What it lacks that Lara has |
 | --- | --- | --- |
 | **Micropublications** (Clark et al. 2014) | RDF model of claims, evidence, support, challenge, attribution | A **representation model, not a checker.** Support is a *declared* relation, never checked; no status computation, no located defeat, no typed attacks, no soundness theorem. |
-| **AIF** (arg-tech) | Typed interchange vocabulary for inference, conflict, preference | An **interchange format, not a language with checking semantics.** No proof-carrying discipline, no compilation theorem, no replay. LARA reuses its "support = positional identity" idea (spec §3.1) and cites it as related, not as the mechanism. |
-| **EG-VAR** (Ren 2026; ICML TAIGR **workshop**) | Tool-attested empirical claims verified via Lean 4 kernel proofs; `mkVerified` requires an `Attested_T` runtime token, so a verified output structurally descends from a tool call (Thm 3.1) and type-checks (Thm 3.2) | **Monotonic**: attest a leaf, prove a Σ-goal, done — **no defeasible reasoning, no defeat, no argumentation layer, no critical-question completeness**; a recorded dead end cannot retract anything. By its own admission (M.1(ii)) the tools and per-source *lifts* are **trusted, not checked** ("a semantically wrong audited lift can certify a wrong formalized claim") — so despite the title's "eliminating hallucination," it relocates trust to the lift rather than removing it. LARA's non-monotonic defeat, policy-relative completeness, and four-state located status are exactly what it lacks. Its self-claim — "the **first** proof-assistant-verified architecture in Lean 4 for this setting" — bounds *our* claim: LARA must not claim first-to-formalize, only first-to-make-defeasible-and-checkable. |
-| **Pandžić** (2022, two papers) | Defeasible arguments as justification-logic terms with rebut/undercut/undermine | Pure logic, **no artifact application**; **factive** (keeps A1 globally — LARA has no support-level modality and confines factive logics behind the strict-backend interface); no policy / critical-question layer; no compilation-to-AF theorem; no evaluation. |
-| **ASPIC+** (Modgil–Prakken 2014) | Structured-argumentation framework: rules, attacks, rationality postulates | A **framework, not a language or artifact.** LARA is a concrete typed calculus that compiles to it, with a proof-carrying checker and mechanized metatheory, applied to research claim support. |
-| **Dung** (1995) | Abstract argumentation, grounded semantics | Abstract nodes/edges only; **no structure inside arguments**, no leaves, no obligations, no provenance, no source language. LARA supplies all of these and compiles down to Dung. |
-| **PCC / FPC** (Necula 1997; Miller 2015) | Untrusted-producer / checked-certificate architecture | The **architecture ancestor**, applied to machine proofs. LARA is that discipline applied to *defeasible empirical claim support* with a non-monotonic layer PCC never has. |
-| **`rit`** (sibling project) | Lean kernel + sha256-pinned facts + AND/OR claim DAG. Formal vocabulary (verified 2026-07-25 against its source): six relations over log-extracted numbers — ≤, beats-baseline, interval bounds, arithmetic entail/contradict — proved `by decide` | Monotonic proof-or-evidence attestation; **no defeasible defeat, no `gap`/`contested`/`defeated` distinction, no policy of inference schemes.** Every paper claim reaches its kernel through a **silent, unverified narrowing** ("faster" ⇒ `2875 < 3225`); LARA types and adjudicates that narrowing. Its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose aggregation LARA's grounded semantics answers. |
+| **AIF** (arg-tech) | Typed interchange vocabulary for inference, conflict, preference | An **interchange format, not a language with checking semantics.** No proof-carrying discipline, no compilation theorem, no replay. Lara reuses its "support = positional identity" idea (spec §3.1) and cites it as related, not as the mechanism. |
+| **EG-VAR** (Ren 2026; ICML TAIGR **workshop**) | Tool-attested empirical claims verified via Lean 4 kernel proofs; `mkVerified` requires an `Attested_T` runtime token, so a verified output structurally descends from a tool call (Thm 3.1) and type-checks (Thm 3.2) | **Monotonic**: attest a leaf, prove a Σ-goal, done — **no defeasible reasoning, no defeat, no argumentation layer, no critical-question completeness**; a recorded dead end cannot retract anything. By its own admission (M.1(ii)) the tools and per-source *lifts* are **trusted, not checked** ("a semantically wrong audited lift can certify a wrong formalized claim") — so despite the title's "eliminating hallucination," it relocates trust to the lift rather than removing it. Lara's non-monotonic defeat, policy-relative completeness, and four-state located status are exactly what it lacks. Its self-claim — "the **first** proof-assistant-verified architecture in Lean 4 for this setting" — bounds *our* claim: Lara must not claim first-to-formalize, only first-to-make-defeasible-and-checkable. |
+| **Pandžić** (2022, two papers) | Defeasible arguments as justification-logic terms with rebut/undercut/undermine | Pure logic, **no artifact application**; **factive** (keeps A1 globally — Lara has no support-level modality and confines factive logics behind the strict-backend interface); no policy / critical-question layer; no compilation-to-AF theorem; no evaluation. |
+| **ASPIC+** (Modgil–Prakken 2014) | Structured-argumentation framework: rules, attacks, rationality postulates | A **framework, not a language or artifact.** Lara is a concrete typed calculus that compiles to it, with a proof-carrying checker and mechanized metatheory, applied to research claim support. |
+| **Dung** (1995) | Abstract argumentation, grounded semantics | Abstract nodes/edges only; **no structure inside arguments**, no leaves, no obligations, no provenance, no source language. Lara supplies all of these and compiles down to Dung. |
+| **PCC / FPC** (Necula 1997; Miller 2015) | Untrusted-producer / checked-certificate architecture | The **architecture ancestor**, applied to machine proofs. Lara is that discipline applied to *defeasible empirical claim support* with a non-monotonic layer PCC never has. |
+| **`rit`** (sibling project) | Lean kernel + sha256-pinned facts + AND/OR claim DAG. Formal vocabulary (verified 2026-07-25 against its source): six relations over log-extracted numbers — ≤, beats-baseline, interval bounds, arithmetic entail/contradict — proved `by decide` | Monotonic proof-or-evidence attestation; **no defeasible defeat, no `gap`/`contested`/`defeated` distinction, no policy of inference schemes.** Every paper claim reaches its kernel through a **silent, unverified narrowing** ("faster" ⇒ `2875 < 3225`); Lara types and adjudicates that narrowing. Its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose aggregation Lara's grounded semantics answers. |
 
 ## 3. The two real novelty risks (and the defense for each)
 
@@ -88,7 +88,7 @@ Anchor in this order:
 
 Backend replacement and strict-certificate soundness are the core strict metatheory. LP realization
 is **supporting metatheory for an optional adapter**, never the novelty and never the guarantee behind
-NL lowering. Leading with modal/JL depth moves LARA onto ground Pandžić already occupies — the
+NL lowering. Leading with modal/JL depth moves Lara onto ground Pandžić already occupies — the
 opposite of a novelty argument; the design keeps modal logic off the critical path deliberately
 (structured argumentation is the outer frame; the strict-certificate interface is isolated behind it).
 
@@ -97,12 +97,12 @@ opposite of a novelty argument; the design keeps modal logic off the critical pa
 **Use:**
 - "the first checkable, defeasible claim-support language for research claims, with mechanized
   accountability and located four-state status."
-- "prior systems represent or attest claims; LARA compiles them to a replayable status object and
+- "prior systems represent or attest claims; Lara compiles them to a replayable status object and
   proves the compilation sound."
 
 **Avoid:**
 - "no prior work formalizes research claims" (false — Micropublications, AIF, EG-VAR).
-- "LARA is Lean for science" / "modal logic for research" (invites Pandžić and EG-VAR objections;
+- "Lara is Lean for science" / "modal logic for research" (invites Pandžić and EG-VAR objections;
   obscures the defeasible + graph-semantics contribution).
 - any novelty claim resting on composition alone.
 

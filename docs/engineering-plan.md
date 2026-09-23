@@ -1,4 +1,4 @@
-# LARA engineering plan
+# Lara engineering plan
 
 _How the artifact gets built, in dependency order. This describes the *module dependency graph* and
 the *build discipline*; the spec (`spec.md`) is the contract every module implements. The milestone
@@ -117,7 +117,7 @@ policies, support terms, typed attacks, AF compilation, grounded labelling, four
 JSON codec, parser/printer, and the untrusted elaborator — is **spec-only**. No code yet.
 
 Known defect carried in code: `ConstantSpec` accepts arbitrary `(constant, formula)` pairs. The
-existing modules are not the LARA core and do not satisfy the strict-backend contract. They become an
+existing modules are not the Lara core and do not satisfy the strict-backend contract. They become an
 eligible LP adapter only after fixed schema recognition and a soundness/conformance argument.
 
 ## 1. The dominating constraint: corpus before calculus

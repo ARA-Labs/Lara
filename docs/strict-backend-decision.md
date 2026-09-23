@@ -6,7 +6,7 @@ LP-specific strict-witness interface in `spec.md` Section 5,
 `gap-resolution.md`. LP remains an optional adapter; it is no longer a foundation of the source
 calculus._
 
-Background for cold readers: LARA arguments come in two strengths.
+Background for cold readers: Lara arguments come in two strengths.
 *Defeasible* steps hold by default and can be attacked; *strict* steps have
 their conclusions re-verified mechanically. This record decides how
 strict steps are verified: not by building any proof system into the source
@@ -216,7 +216,7 @@ For the required soundness result,
 `T ; Delta |=_ND phi` means every Boolean valuation satisfying `T` and `Delta` satisfies `phi`.
 This relation has reflexivity, cut, and weakening by its definition. Intuitionistic natural
 deduction is sound but not complete for this Boolean semantics; completeness is not required because
-LARA checks submitted certificates rather than searching for every valid proof.
+Lara checks submitted certificates rather than searching for every valid proof.
 
 Classical reasoning, arithmetic, temporal logic, or code behavior belongs in a different adapter
 with its own semantics and soundness theorem. The core does not gain a classical axiom merely because
@@ -277,7 +277,7 @@ the guarantee returns to policy-relative claim-support validity.
 For a tree mixing backends, Theorem 1 applies separately at each node, and the source checker proves
 that child and parent propositions agree under source normalization. A global semantic-consequence
 theorem would additionally require a proved interpretation between the backends' model classes.
-LARA does not assume such an interpretation merely because both adapters are registered.
+Lara does not assume such an interpretation merely because both adapters are registered.
 
 ### Theorem 2: backend replacement preserves claim status
 
@@ -355,13 +355,13 @@ indices. The checker rejects every out-of-range free index. QED.
 
 Let two evidence-labelled structures have the same Kripke frame and propositional valuation but
 different leaf identities, provenance, or source positions. Every formula of ordinary propositional
-modal logic has the same truth value in both structures, while LARA's required dependency or attack
+modal logic has the same truth value in both structures, while Lara's required dependency or attack
 report can differ.
 
 **Proof.** Induct on modal formulas. Atomic truth uses only the shared valuation; Boolean cases use
 the induction hypotheses; `box` and `diamond` use only the shared accessibility relation and the
 induction hypotheses at related worlds. Evidence labels and source positions are never inspected.
-Therefore modal truth is invariant under changing only those labels. LARA's `leaves(w)` and
+Therefore modal truth is invariant under changing only those labels. Lara's `leaves(w)` and
 positional targets inspect exactly those labels, so they are not determined by the ordinary modal
 reduct. QED.
 
@@ -376,7 +376,7 @@ permit policy-valid support for a proposition that is false in the world. Then L
 `t:p -> p` is invalid for that interpretation.
 
 **Proof.** Choose an intended source model with `w : p` accepted and `p` false; such models are
-required because LARA validates structure relative to leaves and policy rather than empirical truth.
+required because Lara validates structure relative to leaves and policy rather than empirical truth.
 The proposed interpretation makes `t:p` true and `p` false, falsifying `t:p -> p`. QED.
 
 Thus factive LP may certify a strict conditional step but cannot supply the meaning of source
@@ -384,7 +384,7 @@ support. J/J4 avoids this particular contradiction by omitting reflection.
 
 ### Proposition 8: monotonic consequence cannot represent defeat-driven retraction
 
-No monotonic consequence relation can, by itself, represent LARA claim acceptance under framework
+No monotonic consequence relation can, by itself, represent Lara claim acceptance under framework
 extension.
 
 **Proof.** Let input `X` contain a complete unattacked support for `p`, so `p` is `justified`. Extend
@@ -404,7 +404,7 @@ strict consequences can still be used behind the backend interface.
   requirement for evidence aggregation appears; only a monotonic evidence-entailment fragment may
   satisfy the strict-backend contract.
 - **Default justification logic.** Pandzic-style systems already combine justification terms and
-  defeasibility. They are a genuine alternative, not ruled out by Proposition 8. LARA chooses the
+  defeasibility. They are a genuine alternative, not ruled out by Proposition 8. Lara chooses the
   ASPIC+/Dung route because it directly supplies the required rebut/undercut/undermine structure,
   skeptical grounded status, and a small executable compilation target. The paper must defend this
   choice through the certificate-language delta and corpus fit, not by claiming default JL is
@@ -440,4 +440,4 @@ validity with empirical adequacy.
 - The evaluation reports certified versus trusted strict steps per backend. The previous single
   "LP witness fraction" becomes a backend-neutral strict-certification rate.
 - Existing LP code is retained as an experimental adapter seed, not called the trusted core of
-  LARA.
+  Lara.

@@ -1,24 +1,24 @@
-# ARA → LARA corpus map and M0 annotation guide
+# ARA → Lara corpus map and M0 annotation guide
 
 _The M0 kickoff artifact (`engineering-plan.md` §2). Fixes the
-source corpus, the field-level lowering map from an ARA to a LARA program, and the annotation schema
+source corpus, the field-level lowering map from an ARA to a Lara program, and the annotation schema
 for the semantic corpus study. Written 2026-07-21 after inspecting the two upstream repos._
 
 _Status: completed M0 record. The study it guided is summarized in
 `../m0/annotation-summary.md`; the vocabulary it froze now lives in the spec.
 For cold readers: an ARA (Agent-Native Research Artifact) is a structured
 research artifact carrying claims, experiments, evidence, and an exploration
-trace; a LARA program is the checkable claim-support form this map lowers
+trace; a Lara program is the checkable claim-support form this map lowers
 one into._
 
 ## 1. Source repositories
 
-| Repo | Role for LARA |
+| Repo | Role for Lara |
 | --- | --- |
 | [`ARA-Labs/Agent-Native-Research-Artifact`](https://github.com/ARA-Labs/Agent-Native-Research-Artifact) | The ARA **format definition + tooling**. Defines the four-layer anatomy; ships worked examples (`resnet-ara-example`, `the-ara-of-ara`); contains the **`rigor-reviewer` skill** — our named baseline. |
 | [`AmberLJC/ara-paperbench`](https://github.com/AmberLJC/ara-paperbench) | The **corpus**. 32 ARAs, schema-uniform, each `artifacts/<benchmark>/<name>/`. This is the "30-paper corpus" the proposal reuses. |
 
-**The task.** Each corpus artifact is converted into a LARA program: its claims become claim roots,
+**The task.** Each corpus artifact is converted into a Lara program: its claims become claim roots,
 its experiments/evidence become leaves and inference-scheme instances, and its exploration trace becomes
 the typed-attack (defeat) layer. M0 annotates what that conversion must produce *before* the calculus
 freezes, so the frozen v0.1 constructs actually cover the corpus.
@@ -29,7 +29,7 @@ freezes, so the frozen v0.1 constructs actually cover the corpus.
 Quality, D3 Scope Calibration, D4 Argument Coherence, D5 Exploration Integrity, D6 Methodological
 Rigor — and emits `level2_report.json` with an accept/reject recommendation. It "does NOT execute
 code, fetch URLs, or consult external sources" and is explicitly "not a bug detector." That is the
-holistic, unauditable judgment LARA improves on: a score that cannot point to *which* premise is
+holistic, unauditable judgment Lara improves on: a score that cannot point to *which* premise is
 missing or *which* dead end kills a claim. It is a complementary qualitative baseline, **not** a
 status-accuracy baseline.
 
@@ -52,10 +52,10 @@ for the map below; its `trace/exploration_tree.yaml` is the only YAML trace read
 
 ## 3. The field-level lowering map
 
-Every ARA field maps onto a LARA construct. This is the spine of both M0 annotation and the eventual
+Every ARA field maps onto a Lara construct. This is the spine of both M0 annotation and the eventual
 untrusted elaborator (spec §11).
 
-| ARA source (file → field) | LARA construct | Spec | Trust |
+| ARA source (file → field) | Lara construct | Spec | Trust |
 | --- | --- | --- | --- |
 | `logic/claims.md` → `## C0x` **Statement** | `claim c.nl` | §3.1 | verbatim copy |
 | formal content of the Statement | `claim c.formal` (atom) | §3.1 | **untrusted** (LLM), audited on faithfulness axis |

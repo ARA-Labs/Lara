@@ -36,7 +36,7 @@ Over the frozen corpus this yields **51 review comments — 48 `gap`, 3
 ## Read the verdicts as comments on papers
 
 These examples show the source prose a reviewer might read, the bounded comment
-the LARA renderer can produce, and—where useful—the fuller methodological
+the Lara renderer can produce, and—where useful—the fuller methodological
 interpretation a human reviewer could make from the paper. The renderer is not
 credited with that last step. The paper excerpts are **illustrative
 reconstructions**, not quotations. The first two are grounded in the frozen
@@ -59,7 +59,7 @@ renderer takes its `gap (no candidate)` branch. If an incomplete candidate were
 retained explicitly, the renderer would instead take `gap (incomplete
 alternative)` and name `variance_reported` directly. Both phrasings mean the
 same thing to an author: the paper has not yet supplied evidence required by the
-policy; LARA is not claiming that contrary evidence has disproved the result.
+policy; Lara is not claiming that contrary evidence has disproved the result.
 Reading the cited ablation gives the ordinary reviewer request—“report repeated
 runs and error bars”—but the current no-candidate diagnostic does not generate
 that extra sentence.
@@ -170,7 +170,7 @@ cabal test                                        # includes the freshness test
 
 ## Scope
 
-This demo shows that LARA verdicts *are expressible as* review comments. Whether
+This demo shows that Lara verdicts *are expressible as* review comments. Whether
 they *predict* human reviewer complaints (a correlation study against real
 OpenReview reviews) is an axis-(d) study deferred to future work
 (out of scope for this demo).

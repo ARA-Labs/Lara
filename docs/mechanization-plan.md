@@ -1,4 +1,4 @@
-# LARA mechanization plan
+# Lara mechanization plan
 
 _How the metatheory gets machine-checked, and how the mechanized model stays tied to the Haskell
 checker. Expands `engineering-plan.md` §4 (the parallel mechanization track) with a concrete
@@ -13,7 +13,7 @@ architecture._
 
 ## 0. Why mechanize at all
 
-For LARA, one of the five headline contributions is a *semantics-preserving
+For Lara, one of the five headline contributions is a *semantics-preserving
 compilation* into structured argumentation. A paper proof of that is acceptable; a machine-checked one is
 the difference between "principled language result" and "trust the appendix." Property tests are
 **conformance evidence, not soundness** (`spec.md` §9 closing note) — the mechanized theorems carry
@@ -25,7 +25,7 @@ mechanization from "encouraged" to "load-bearing" for this project:
 - Mechanized metatheory *can be the entire evaluation* for a language-semantics paper — e.g. *Two
   Mechanisations of WebAssembly 1.0* (Watt et al., FM 2021) ships two independent mechanised
   semantics + a type-soundness result as its substance, with no performance numbers or user studies.
-  This is exactly LARA's Axis (a) shape.
+  This is exactly Lara's Axis (a) shape.
 - **Artifact evaluation can exclude non-mechanized (paper) proofs from review** — committees
   lack the time and expertise to check them. So an un-mechanized soundness
   argument gets *no* artifact credit; only the mechanized development is checkable. This is the
@@ -136,8 +136,8 @@ right precedent:
 
 - **Csmith (PLDI 2011) is oracle-free cross-implementation *voting*** — N independent implementations
   of one spec, any disagreement flags a bug, no reference is trusted. Its transferable lesson for
-  LARA is the *single-interpretation* requirement: generated core programs must have one well-defined
-  verdict (LARA's grounded status is deterministic by result 5, so this holds by construction — no
+  Lara is the *single-interpretation* requirement: generated core programs must have one well-defined
+  verdict (Lara's grounded status is deterministic by result 5, so this holds by construction — no
   undefined behavior to quotient out). Cite Csmith for that discipline, **not** for testing against a
   reference.
 - **The correct precedent for "test the implementation against the mechanized reference" is JEST-style

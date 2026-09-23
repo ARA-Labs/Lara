@@ -1,4 +1,4 @@
-# LARA worked-examples plan
+# Lara worked-examples plan
 
 _The six worked examples the paper and test suite require, with a coverage matrix over every claim
 status and every attack type. Expands `spec.md` §10 (which currently has one incomplete example) to
@@ -24,7 +24,7 @@ kinds, and statuses, is `../examples/README.md`._
 ## 0. Why worked examples are load-bearing for this paper
 
 For a calculus paper, worked examples are not illustration — they are the primary way a reviewer
-checks that the abstraction *captures the phenomenon it claims to*. LARA claims to localize
+checks that the abstraction *captures the phenomenon it claims to*. Lara claims to localize
 claim-support failures that proof terms or abstract argument graphs cannot ("the composite bet").
 Each example must make one such capability legible, and the set together must
 **exercise every status and every attack constructor** so no corner of the calculus is unwitnessed.

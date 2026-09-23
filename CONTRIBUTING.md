@@ -1,7 +1,7 @@
-# Contributing to LARA
+# Contributing to Lara
 
 This file is the short version of how changes are made and verified here; the
-[README](README.md) covers what LARA is and how to use it.
+[README](README.md) covers what Lara is and how to use it.
 
 ## Development setup
 

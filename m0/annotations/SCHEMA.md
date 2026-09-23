@@ -51,7 +51,7 @@ claims:
         rationale: "<one sentence>"
     # 8. holes — required premises or CQs the artifact leaves open
     holes: ["<hole 1>", "..."]
-    coverage_flags: []       # anything the LARA construct vocabulary above could NOT express — be honest, this feeds the 80% exit gate
+    coverage_flags: []       # anything the Lara construct vocabulary above could NOT express — be honest, this feeds the 80% exit gate
     uncertain: false         # true + note if any judgment is a coin-flip
     note: ""
 ```

@@ -32,7 +32,7 @@ The receipt says exactly one thing: the named provider witnessed
 `registered-content-digest` as immutable at `witness-issued-at`, and
 `witness-proof` lets an auditor verify that statement against the provider.
 It says nothing about the registered content's truth, quality, or relevance.
-LARA may cite the registered object later only through the ordinary
+Lara may cite the registered object later only through the ordinary
 leaf-and-policy path; the receipt itself is never a leaf, a support term, or
 an attack.
 
@@ -57,8 +57,8 @@ first label.
 
 ## 3. Build/no-build gate
 
-No LARA event-log schema, receipt validator, or Git backend is built in this
-paper cycle. A LARA-specific protocol package is reconsidered only if
+No Lara event-log schema, receipt validator, or Git backend is built in this
+paper cycle. A Lara-specific protocol package is reconsidered only if
 evaluation identifies a workflow that existing registration services plus a
 content-digest receipt cannot express — and such a package would require its
 own threat model covering witness authenticity, key rotation, clock
@@ -68,7 +68,7 @@ semantics, history rewrite, and availability before any code is written.
 
 1. The documentation never equates local Git order with preregistration.
 2. Registration receipts remain outside the calculus and the trusted core.
-3. No goal or attempt event automatically changes a LARA claim status.
+3. No goal or attempt event automatically changes a Lara claim status.
 4. This contract adds no module, schema, or runtime dependency.
 
 Related record: `docs/evidence-admission-decision.md`

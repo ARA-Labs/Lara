@@ -69,7 +69,7 @@ per-run 2. **→ per-result-cell is the default leaf grain (75%)**.
 **Critical questions**: 249 total. Mandatory: 105 met, **68 unmet-gap (39%)**,
 3 unmet-defeater; optional: 34 met, 39 unmet-gap. The corpus systematically leaves
 mandatory CQs (seeds/variance, statistical significance, baseline completeness) unstated
-— strong support for LARA's gap-vs-defeater distinction: these must surface as *gaps*
+— strong support for Lara's gap-vs-defeater distinction: these must surface as *gaps*
 (holes), not defeat edges, or nearly every claim would be spuriously attacked.
 
 ## 3. Construct-coverage assessment (the ≥80% exit gate)

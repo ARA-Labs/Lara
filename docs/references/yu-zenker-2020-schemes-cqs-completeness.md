@@ -1,6 +1,6 @@
 # Yu & Zenker 2020 — Schemes, Critical Questions, and Complete Argument Evaluation
 
-_Reference note on argumentation-scheme evaluation, focused on what it means for LARA's
+_Reference note on argumentation-scheme evaluation, focused on what it means for Lara's
 `claim-support` AST and `undercut`/`rebut` typing. Written 2026-07-21._
 
 > **Provenance flag.** The stable machinery below (schemes, CQs, the three-way premise
@@ -85,7 +85,7 @@ Sorting the CQs by burden:
 Flattening that last CQ into "just another premise" is a category error — it would silently flip the
 burden of proof.
 
-## Why this matters for LARA
+## Why this matters for Lara
 
 1. **`undercut` vs `rebut` typing is not cosmetic** — it *is* the exception-vs-premise distinction,
    and getting it right is a *precondition* for claiming evaluation completeness. Retyping C05 as
@@ -101,7 +101,7 @@ burden of proof.
 
 - **Is exhaustive completeness achievable?** Defeasible reasoning is open-textured; new exceptions
   arise from world knowledge. "Completeness relative to an explicit structure" may be the best
-  available — decide which LARA claims.
+  available — decide which Lara claims.
 - **The premise/exception line is itself contestable** in real cases (bias can be framed either
   way), which risks reintroducing the instability the paper wants to remove.
 - **Formalization tax:** making every scheme fully explicit (premises + assumptions + exceptions +

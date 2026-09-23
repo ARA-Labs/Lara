@@ -27,7 +27,7 @@ typed rebut/undercut/undermine attacks still decide defeat.
 It is an assurance boundary, not a new argumentation semantics. The paper
 claim, if the layer is ever promoted, stays narrow:
 
-> LARA composes a deterministic evidence-admission judgment with a
+> Lara composes a deterministic evidence-admission judgment with a
 > structured-argumentation judgment. The first establishes that a leaf is the
 > exact output of a named checker over pinned bytes and a pinned mapping
 > payload; the second establishes what that leaf is permitted to support and
@@ -144,7 +144,7 @@ passes, and failing it closes the gated work unbuilt (reported as future
 work — an acceptable outcome, not a failure):
 
 - at least two independently produced artifact packages whose original
-  outputs (not hand-authored assertion files) can back LARA leaves;
+  outputs (not hand-authored assertion files) can back Lara leaves;
 - at least ten certified leaves across at least two claim families;
 - at least two closed leaf-checker families with deterministic,
   byte-addressed extraction.

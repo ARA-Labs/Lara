@@ -31,9 +31,9 @@ programs.
 > the OpenLLM average from 50.0 to 38.1, suggesting that this term is critical
 > for large-model pruning.
 
-The first two sentences have complete support under `rebuttal-v1`, so LARA
+The first two sentences have complete support under `rebuttal-v1`, so Lara
 reports them as `justified`. The ablation reports only one run. Because the
-policy requires variance for a component-ablation claim, LARA does not promote
+policy requires variance for a component-ablation claim, Lara does not promote
 the last sentence to a checked argument; it reports `gap`.
 
 ### Round 1 — excerpts from the reviews
@@ -79,10 +79,10 @@ additional attack.
 The first two responses defeat both attackers of the benchmark argument, so
 that argument is reinstated. The new seed evidence discharges the ablation's
 missing obligation. The final response adds no defense for the memory argument,
-which is how concession appears in LARA: the claim remains `defeated` without a
+which is how concession appears in Lara: the claim remains `defeated` without a
 special `concede` construct.
 
-| Natural-language move | LARA representation | Status consequence |
+| Natural-language move | Lara representation | Status consequence |
 | --- | --- | --- |
 | Paper reports a supported benchmark result | complete `benchmark_evaluation` argument `a_bench` | `c_bench`: `justified` |
 | Reviewer disputes a supporting protocol statement | `undermine d_um a_bench.protocol_fixed.leaf` | contributes to `c_bench`: `defeated` |
@@ -182,4 +182,4 @@ Each `example.lara` carries a bottom-of-file golden-oracle comment (the expected
 
 ## Scaled version (out of scope)
 
-LLM elaboration of real OpenReview threads at scale, and correlation studies of LARA verdicts vs. human reviewer complaints, are deferred future work. Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.
+LLM elaboration of real OpenReview threads at scale, and correlation studies of Lara verdicts vs. human reviewer complaints, are deferred future work. Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.

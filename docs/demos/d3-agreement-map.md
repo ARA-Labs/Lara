@@ -23,7 +23,7 @@ starts below._
 
 ## What this demo shows
 
-When several same-topic papers appear to disagree, LARA distinguishes two
+When several same-topic papers appear to disagree, Lara distinguishes two
 outcomes by **atom identity** (spec §3.2), not by prose:
 
 1. **Genuine disagreement** — two conclusions land on the *same* atoms and are a
@@ -33,7 +33,7 @@ outcomes by **atom identity** (spec §3.2), not by prose:
 2. **Setting-mismatch non-attack** — two conclusions that read as a flat
    contradiction in prose but differ in their *setting index*, so they are not a
    `contrary` instance and **no attack forms**. Both claims stand `justified`.
-   v0.1 deliberately has no cross-setting contrary, so LARA refuses to
+   v0.1 deliberately has no cross-setting contrary, so Lara refuses to
    manufacture the disagreement; the open comparability critical question
    (below) names exactly what evidence would connect them.
 
@@ -61,7 +61,7 @@ the four checked arguments in `examples/agreement-map/example.lara`.
 > protocol, we find no accuracy advantage for APT. We conclude that APT does not
 > outperform CoFi in this setting.
 
-A literature review may reasonably say that these papers disagree. LARA reaches
+A literature review may reasonably say that these papers disagree. Lara reaches
 the same result because every comparison coordinate matches: system, baseline,
 metric, and setting. Their conclusions instantiate a declared contrary pair,
 so the two arguments rebut one another and both claims become `contested`.
@@ -81,7 +81,7 @@ so the two arguments rebut one another and both claims become `contested`.
 At the slogan level—“pruning is better” versus “pruning is not better”—these
 papers sound contradictory. Their experiments do not, however, answer the same
 proposition. Model family, benchmark, and sparsity are bundled into different
-setting atoms (`bert_glue_s50` and `llama_openllm_s90`). LARA therefore creates
+setting atoms (`bert_glue_s50` and `llama_openllm_s90`). Lara therefore creates
 no rebuttal edge and leaves both claims `justified`. This does **not** mean the
 papers agree; it means that a cross-setting conclusion would require an
 additional bridging experiment or a policy that explicitly licenses such
@@ -92,7 +92,7 @@ generalization.
 | Are the systems and baselines aligned? | yes | yes at the coarse method level |
 | Are metric and experimental setting aligned? | yes: RoBERTa/MNLI, 60% sparsity | no: BERT/GLUE at 50% vs LLaMA/OpenLLM at 90% |
 | Do the conclusions instantiate one contrary pair? | yes | no |
-| LARA result | mutual rebuttal; both `contested` | no attack; both `justified` |
+| Lara result | mutual rebuttal; both `contested` | no attack; both `justified` |
 | What evidence would move the map? | evidence that defeats or privileges one same-setting result | a shared-setting bridging comparison |
 
 ## The cluster and the propositions
@@ -184,7 +184,7 @@ pd=3; all complete):
 
 ## The comparability critical question — "what would resolve the literature"
 
-The setting-mismatch non-attack is a *feature*: LARA declines to fabricate a
+The setting-mismatch non-attack is a *feature*: Lara declines to fabricate a
 disagreement the atoms do not license. But declining is not the same as claiming
 the two papers agree — it makes the gap **explicit** and names what would close
 it. The open comparability CQ for P2:
@@ -410,7 +410,7 @@ The two protocols differ (the harness pre-reads the files, the old timing did
 not), so the old and new figures should not be compared.
 
 **Why there is no per-command wall-clock row.** Timing the CLI was tried and the
-result is not reportable as a property of LARA. In a shell loop of 300 execs on
+result is not reportable as a property of Lara. In a shell loop of 300 execs on
 the machine above, `lara check <map>` measured ≈12.4 ms per invocation and the
 same binary *with no arguments at all* measured ≈11.7 ms — a difference of
 ≈0.7 ms, where the pipeline it added measured about 4 ms in-process at the time.

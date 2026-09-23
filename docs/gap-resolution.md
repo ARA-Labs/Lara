@@ -82,16 +82,16 @@ non-factive**. He keeps factivity (axiom A1, `t:F → F`) globally — the whole
 explicit analogue of modal T — and confines *defeasibility* by two other devices: the inference
 license ("warrant") is kept *out of the evidence base* so it can be attacked without inconsistency,
 and retraction happens at the *extension* layer. His `t:F` is therefore
-"factive-within-an-accepted-extension," never globally non-factive. LARA wants a genuinely
+"factive-within-an-accepted-extension," never globally non-factive. Lara wants a genuinely
 non-factive support judgment, so it must depart from him on exactly this axis.
 
-The JT-vs-J4 distinction identifies the problem but no longer defines LARA's mechanism. Factivity is
+The JT-vs-J4 distinction identifies the problem but no longer defines Lara's mechanism. Factivity is
 exactly one axiom (A1), present in JT/LP and absent in J/J4. Rather than choose one justification
-logic for every future strict domain, LARA removes the support-level modality and confines every
+logic for every future strict domain, Lara removes the support-level modality and confines every
 strict logic behind the backend interface. This also covers non-JL backends such as arithmetic
 checkers and model checkers.
 
-### How this maps onto LARA
+### How this maps onto Lara
 
 - **Source claim-support calculus.** Non-factive because its only conclusion is "`w` supports atom
   `p`"; it has no truth judgment and no elimination from support to truth.

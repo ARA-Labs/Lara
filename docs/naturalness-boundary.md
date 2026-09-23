@@ -13,7 +13,7 @@ looks like.
 
 ## 1. Decision
 
-Natural language meets LARA at three layers, and the three get different
+Natural language meets Lara at three layers, and the three get different
 answers. The split is by **trust direction**, not by convenience.
 
 | # | Layer | Direction | Policy |

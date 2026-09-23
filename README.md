@@ -1,21 +1,21 @@
-# LARA
+# Lara
 
 [![Haskell](https://github.com/ARA-Labs/Lara/actions/workflows/haskell.yml/badge.svg)](https://github.com/ARA-Labs/Lara/actions/workflows/haskell.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![spec](https://img.shields.io/badge/spec-v0.1%20frozen-brightgreen.svg)](docs/spec.md)
 [![arXiv](https://img.shields.io/badge/arXiv-2609.25421-b31b1b.svg)](https://arxiv.org/abs/2609.25421)
 
-LARA is a small language for writing down the **argument behind a research
+Lara is a small language for writing down the **argument behind a research
 claim**: the evidence, the reasoning steps, and the caveats. A program can
 then check the argument automatically.
 
 Think of a proof assistant like Lean or Isabelle: you write a mathematical
 proof in a formal language, and a small trusted checker confirms every step
-follows the rules. LARA plays the same role for the arguments in empirical
+follows the rules. Lara plays the same role for the arguments in empirical
 research. Those arguments are a different kind of reasoning: evidence can be
 undermined, conclusions can be rebutted, sometimes by the paper's own
 limitations section. Math proofs are all-or-nothing; research arguments can be
-strong, incomplete, or overturned, and LARA's verdicts reflect that. For each
+strong, incomplete, or overturned, and Lara's verdicts reflect that. For each
 claim the checker reports one of four statuses, and why:
 
 - **justified** — the claim has a complete supporting argument that survives
@@ -26,8 +26,8 @@ claim the checker reports one of four statuses, and why:
   knocks it down;
 - **contested** — support and attack are in a standoff, so neither side wins.
 
-In more technical terms: LARA is a proof-carrying, policy-relative calculus of
-claim support. A LARA program lowers a research artifact into a checkable
+In more technical terms: Lara is a proof-carrying, policy-relative calculus of
+claim support. A Lara program lowers a research artifact into a checkable
 claim-support graph; acceptance is a certificate check against a fixed policy,
 and the reported status is the grounded result for the compiled graph
 ([spec](docs/spec.md)).
@@ -36,7 +36,7 @@ The language is described in
 [*Beyond Natural Language: An Agent-Native Language for Autonomous Science*](https://arxiv.org/abs/2609.25421)
 (arXiv:2609.25421); see [Citation](#citation) for the BibTeX entry.
 
-## Why LARA
+## Why Lara
 
 Behind a claim like "our method improves accuracy" sits a structure: an
 experiment produced some numbers, the numbers support the claim through a
@@ -48,7 +48,7 @@ reviewer reconstructs it in their head, and no tool can check it, diff it, or
 replay it. As more research is produced by LLM agents, the gap between "claims
 made" and "claims whose support anyone can audit" widens.
 
-LARA gives that structure a written, machine-readable form. In a `.lara` file
+Lara gives that structure a written, machine-readable form. In a `.lara` file
 you declare:
 
 - **Claims** — the statements the artifact makes, each in both natural
@@ -64,7 +64,7 @@ An untrusted producer (human or LLM) writes the file; a small trusted checker
 validates it. Two things the checker deliberately does **not** do:
 
 - **It does not judge whether the evidence is true.** If the file says "the
-  experiment reported 0.74," LARA takes that as given, while recording where
+  experiment reported 0.74," Lara takes that as given, while recording where
   the number came from. What it checks is whether the argument built on the
   evidence is well formed, complete relative to the declared policy, and
   actually yields the reported status. It audits reasoning, not reality.
@@ -232,7 +232,7 @@ reading, the demo write-ups reconstruct checked artifacts as a
 The same machinery extends to a set of papers on one topic: write the rival
 papers' claims, evidence, and arguments under one shared policy and check
 whether they actually attack each other. Because attacks are computed from
-formal content, LARA distinguishes a **genuine disagreement** (two papers
+formal content, Lara distinguishes a **genuine disagreement** (two papers
 measured the same thing and concluded contraries, so both claims come out
 contested) from an **apparent one** (the slogans contradict, but the
 experiments measured different models, benchmarks, or settings, so no attack
@@ -297,7 +297,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | --- | --- |
 | [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
 | [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.10`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, and source-authored `nd@1` formula annotations |
-| [`docs/foundations.md`](docs/foundations.md) | The four lines of work LARA builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
+| [`docs/foundations.md`](docs/foundations.md) | The four lines of work Lara builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |
 | [`docs/strict-backend-decision.md`](docs/strict-backend-decision.md) | The backend-parametric strict-certificate interface and its proof obligations |
@@ -346,7 +346,7 @@ ara/                this project's own Agent-Native Research Artifact
 
 ## Trust
 
-The part of LARA you have to trust (the trusted computing base) is
+The part of Lara you have to trust (the trusted computing base) is
 deliberately small and enumerated in [spec §1.1](docs/spec.md). Soundness is
 carried by the Lean proofs, not the tests: each definition is ported to Lean 4
 and proved as it freezes, `sorry`-free and within the standard axiom trio, and
@@ -366,7 +366,7 @@ between the [issue tracker](https://github.com/ARA-Labs/Lara/issues) and
 
 ## Citation
 
-LARA is described in
+Lara is described in
 [*Beyond Natural Language: An Agent-Native Language for Autonomous Science*](https://arxiv.org/abs/2609.25421)
 (arXiv:2609.25421). If you use it in your work, please cite:
 
@@ -387,4 +387,4 @@ GitHub's "Cite this repository" button exports the same reference from
 
 ## License
 
-LARA is released under the [MIT license](LICENSE).
+Lara is released under the [MIT license](LICENSE).

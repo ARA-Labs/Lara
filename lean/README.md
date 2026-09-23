@@ -1,4 +1,4 @@
-# LARA mechanized reference semantics (Lean 4)
+# Lara mechanized reference semantics (Lean 4)
 
 The machine-checked companion to the Haskell checker (`../src/`) and the spec
 (`../docs/spec.md` §9). Prover: **Lean 4** (v4.32.0; toolchain pinned in

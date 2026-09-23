@@ -5,7 +5,7 @@ _Status: settled for language v0.1. Recorded 2026-07-20; amended 2026-07-21 by
 + LP sub-fragment as separate source systems); `spec.md` Sections 3–7 now reflect one claim-support
 calculus with a backend-parametric strict-certificate interface._
 
-In plain terms, this record fixes the shape of an *argument* in LARA: one term
+In plain terms, this record fixes the shape of an *argument* in Lara: one term
 language in which every argument (whether a strict, certificate-checked step
 or a defeasible, overridable one) is the same kind of object, so the checker
 needs only one typing judgment. The strict-certificate interface the terms
@@ -20,7 +20,7 @@ assumes.
    rule `r`, not separate syntax. A strict instance is the degenerate case (empty
    critical-question map, no holes) and carries either an explicit trust marker or an opaque
    certificate for a registered backend.
-2. **Proof-term traditions supply the term discipline, not LARA's axioms.** The central judgment is
+2. **Proof-term traditions supply the term discipline, not Lara's axioms.** The central judgment is
    `Σ; Π; Γ; R ⊢ w : F ▷ O`, read "w supports F with open obligations O." The leaf dependency set
    is `leaves(w)` — the frontier of the term — derived, not tracked. Backend-certificate
    dependencies are reported separately. LP's A0–A4 and realization, when used, belong only to an
@@ -40,8 +40,8 @@ assumes.
 ## Why (evidence)
 
 1. **Factivity is wrong for empirical support.** LP A1 (`t:F → F`) says justified implies true —
-   correct for mathematical proof, exactly what LARA's honesty story denies for empirical support.
-   Non-factive J/J4 motivates the source judgment, but LARA is not axiomatized as either: it avoids
+   correct for mathematical proof, exactly what Lara's honesty story denies for empirical support.
+   Non-factive J/J4 motivates the source judgment, but Lara is not axiomatized as either: it avoids
    the support-level modality entirely. Adapter opacity is the stronger firewall because it also
    covers classical provers, model checkers, and future backends.
 2. **Backend combination can destroy defeat granularity.** LP's `s + t` is the concrete example: it
@@ -64,12 +64,12 @@ assumes.
    justification logic represents defeasible arguments as object-level terms `t : F` and covers
    rebutting, undercutting, and undermining attacks (Argument & Computation 2022,
    doi:10.3233/AAC-200536; Ann. Math. Artif. Intell. 90(2–3):297–337, 2022,
-   doi:10.1007/s10472-021-09765-z). Terms-as-defeasible-arguments is therefore viable, and LARA
+   doi:10.1007/s10472-021-09765-z). Terms-as-defeasible-arguments is therefore viable, and Lara
    must not claim it as the novelty.
 
-## Delta vs. Pandžić (what LARA contributes that his logic does not)
+## Delta vs. Pandžić (what Lara contributes that his logic does not)
 
-| Pandžić (the logic) | LARA (the language and system) |
+| Pandžić (the logic) | Lara (the language and system) |
 |---|---|
 | Operator-theoretic default justification logic | A checkable certificate language with versioned policies |
 | Default rules, no completeness obligations | Scheme instances with critical-question obligations and explicit holes |

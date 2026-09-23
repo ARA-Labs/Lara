@@ -1,4 +1,4 @@
-# LARA surface grammar — frozen (`lara-syntax@0.10`)
+# Lara surface grammar — frozen (`lara-syntax@0.10`)
 
 _Task **A0.5** of M4a (tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -14,7 +14,7 @@ how each surface form lowers to the abstract syntax the checker consumes. Its
 audience is implementers of the parser/printer/elaborator and readers writing
 or reviewing `.lara` files by hand. The main body defines the grammar; the
 appendices (D–I) each specify one later, additive surface version, and the
-version paragraphs below record what changed when. If you are new to LARA,
+version paragraphs below record what changed when. If you are new to Lara,
 read the [README](../README.md) and a worked example
 ([`examples/README.md`](../examples/README.md)) first; this document assumes
 you already know what a claim, leaf, argument, and policy are (spec §0 has
@@ -137,7 +137,7 @@ exists solely to make `#` literal inside a source reference.
 ### 1.1 Whitespace and layout
 
 Whitespace (spaces, tabs) and newlines separate tokens and are otherwise
-insignificant: LARA is **not** layout-sensitive. Indentation in the examples is
+insignificant: Lara is **not** layout-sensitive. Indentation in the examples is
 cosmetic. A block (`claim`, `leaf`, `arg`, `rule`) is delimited by its header line
 and its field keywords, not by indentation. Field lines within a block may appear
 in any order unless stated otherwise; the **canonical printer** emits them in the
@@ -1722,7 +1722,7 @@ Every one of these three warts has the same shape — the surface accepts an
 author's token and then does not mean it — and an alias that keeps accepting the
 old spelling would preserve exactly the misreading each fix exists to remove.
 The usual argument against a breaking surface change is the installed base;
-LARA has none. There is no public release of `lara-syntax`, and every `.lara`
+Lara has none. There is no public release of `lara-syntax`, and every `.lara`
 source that exists is in this repository, so the migration cost is bounded,
 mechanical, and paid in the same commit as the restriction (F.5: ten spellings
 in seven of 109 tracked files). Under those conditions a compatibility alias

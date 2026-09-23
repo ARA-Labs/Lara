@@ -1,4 +1,4 @@
-# LARA language specification (v0.1 — frozen at M1)
+# Lara language specification (v0.1 — frozen at M1)
 
 _This specification is **frozen at v0.1** (M1, 2026-07-22). The language definition — TCB and
 mechanization host (§1.1), names, environment, and versioning (§2, §2.1), propositions and
@@ -84,7 +84,7 @@ programming-language metatheory. For a gentler, prose-first introduction read
 the [README](../README.md) and the demo write-ups in
 [`demos/`](demos/) before this document.
 
-**The vocabulary in one paragraph.** A LARA program declares *claims* (the
+**The vocabulary in one paragraph.** A Lara program declares *claims* (the
 statements whose status is requested), *leaves* (evidence: atomic facts with
 provenance), and *arguments* built from them. Arguments instantiate inference
 *schemes* drawn from a *policy* (the versioned rulebook the artifact opts
@@ -121,7 +121,7 @@ changes, and can be skipped on a first reading.
 
 ## 1. Scope and guarantee
 
-LARA is a small language of proof-carrying, policy-relative claim support. A program declares:
+Lara is a small language of proof-carrying, policy-relative claim support. A program declares:
 
 - artifact-scoped propositions and evidence leaves;
 - instances of strict or defeasible inference schemes;
@@ -146,7 +146,7 @@ The producer/checker wire encoding is the canonical S-expression codec of `Lara.
 row 1, §10.1 R14) — there is deliberately no JSON checker-input codec in the TCB. The syntax below
 is the canonical presentation syntax for the paper, examples, debugging, and reports. Both map to
 one abstract syntax. A JSON surface (`Lara.Json`) is planned only as an untrusted LLM-producer front
-end, never as a trusted codec. LARA does not need
+end, never as a trusted codec. Lara does not need
 a tactic DSL, IDE, package manager, or standard library for the initial contribution.
 
 ### 1.1 Trusted computing base and mechanization host
@@ -1272,7 +1272,7 @@ fixed point is therefore obtained by iteration from the empty set. Because `Args
 ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is
 deterministic and terminating; attack cycles produce `undec` labels rather than nontermination.
 
-LARA is **non-monotonic at the consequence level**, across extensions of the input framework. An
+Lara is **non-monotonic at the consequence level**, across extensions of the input framework. An
 argument may be `in` in one framework and cease to be `in` after a newly supplied, checked argument
 attacks it. Thus adding evidence or attacks can retract a claim's `justified` status even though the
 original support term remains well typed. This defeasibility is intentional for empirical reasoning,

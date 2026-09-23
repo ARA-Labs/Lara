@@ -1,7 +1,7 @@
 # Amber Liu on the future of the research-artifact format (The Startup Show, 2026)
 
 _Reference note on the ARA founder's public argument for replacing the paper-PDF as the unit of
-research knowledge — the producer-side thesis of the ecosystem LARA checks (spec §11, the ARA
+research knowledge — the producer-side thesis of the ecosystem Lara checks (spec §11, the ARA
 lowering boundary). Source: "No More Human Scientists? She quit Meta's Superintelligence Lab to
 redefine science.", The Startup Show, 19:07, https://www.youtube.com/watch?v=XTYsBTcLJeY.
 Participants: The Startup Show (host) and Amber Liu, founder of ARA
@@ -12,25 +12,25 @@ Participants: The Startup Show (host) and Amber Liu, founder of ARA
 > is therefore approximate — verify against the video before quoting verbatim in the paper.
 > Timestamps are from the caption track.
 
-## Why this matters to LARA
+## Why this matters to Lara
 
-LARA's programs are lowered *from* ARAs (spec §11); this interview is the clearest public statement
+Lara's programs are lowered *from* ARAs (spec §11); this interview is the clearest public statement
 of what the ARA side believes an artifact should carry and why. Three of Liu's positions are load
-bearing for LARA's design premises:
+bearing for Lara's design premises:
 
 1. **The artifact carries claims linked to implementations and grounded results** ([09:01]) — the
-   exact producer-side counterpart of LARA's evidence leaves with `refs`, and of the M0 default
+   exact producer-side counterpart of Lara's evidence leaves with `refs`, and of the M0 default
    per-result-cell leaf grain.
 2. **Failed attempts and the exploration trajectory are first-class content** ([09:01], [10:00]) —
    the corpus phenomena behind the M0-frozen defeat-layer conventions: the whole-trace attack walk
    and dead-end-as-support-or-attack (spec §7, C16).
-3. **Storytelling is stripped; only "dry knowledge" remains** ([09:01]) — the reason LARA can
+3. **Storytelling is stripped; only "dry knowledge" remains** ([09:01]) — the reason Lara can
    demand explicit, typed support structure at all: the artifact format is already committed to
    machine-checkable content over narrative persuasion.
 
-The interview is *motivational* context, not evidence: nothing here discharges a LARA claim, and
+The interview is *motivational* context, not evidence: nothing here discharges a Lara claim, and
 Liu's bandwidth argument ("AI scientists have infinite bandwidth") is an assumption of the
-ecosystem, not something LARA's checker relies on.
+ecosystem, not something Lara's checker relies on.
 
 ## Excerpt: the format of research artifacts
 

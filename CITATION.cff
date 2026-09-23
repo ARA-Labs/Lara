@@ -3,9 +3,9 @@
 # software itself.
 cff-version: 1.2.0
 message: >-
-  If you use LARA in your work, please cite the paper below
+  If you use Lara in your work, please cite the paper below
   (or use this repository's "Cite this repository" button).
-title: LARA
+title: Lara
 authors:
   - family-names: He
     given-names: Yifeng
@@ -17,7 +17,7 @@ date-released: '2026-09-22'
 license: MIT
 repository-code: https://github.com/ARA-Labs/Lara
 abstract: >-
-  LARA is a small language for writing down the argument behind a research
+  Lara is a small language for writing down the argument behind a research
   claim — the evidence, the reasoning steps, and the caveats — so that a
   program can check the argument automatically.
 keywords:

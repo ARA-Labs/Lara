@@ -23,7 +23,7 @@ No evidence-layer code is written before this inventory passes; failing it
 closes the work unbuilt, which is an acceptable outcome:
 
 - at least two independently produced artifact packages whose original
-  outputs (not hand-authored assertion files) can back LARA leaves;
+  outputs (not hand-authored assertion files) can back Lara leaves;
 - at least ten certified leaves across at least two claim families;
 - at least two closed leaf-checker families with deterministic,
   byte-addressed extraction.
@@ -93,7 +93,7 @@ The checker payload:
 ```
 
 Semantics: resolve `leafRefs[NAT]` to one manifest object, read it through the
-traced `readObject`, parse `TERM` and every selected cell as canonical LARA
+traced `readObject`, parse `TERM` and every selected cell as canonical Lara
 ground terms, select exactly one row whose `COLUMN` term is identical to
 `TERM` after normalization, construct `Prop PRED selectedTerms` in column
 order, and admit only if that proposition is equivalent to `leafProp`. Zero
@@ -171,8 +171,8 @@ admission is reported as bounded tooling or future work, never as novelty.
 
 ## Explicit non-goals (unchanged)
 
-- Reproduce RIT's full Claim Flow Graph inside LARA.
-- Replace LARA schemes and attacks with Lean arithmetic.
+- Reproduce RIT's full Claim Flow Graph inside Lara.
+- Replace Lara schemes and attacks with Lean arithmetic.
 - Present evidence admission as a substitute for argumentation semantics.
 - Treat quarantined evidence as false, or silently publish a status improved
   by deletion.

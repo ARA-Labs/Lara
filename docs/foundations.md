@@ -1,7 +1,7 @@
 # Theoretical foundations
 
 > Moved here from the README front page. This note records the four established
-> lines of work LARA builds on and how each one shapes the design. The precise
+> lines of work Lara builds on and how each one shapes the design. The precise
 > novelty delta against each neighbor is a separate document:
 > [`novelty-and-related-work.md`](novelty-and-related-work.md).
 
@@ -13,7 +13,7 @@ left unsettled; and *defeasible* reasoning is reasoning that holds by default
 but can be overturned by further information, the ordinary condition of
 empirical argument, in contrast to mathematical proof.
 
-LARA sits at the junction of four established lines of work:
+Lara sits at the junction of four established lines of work:
 
 - **Abstract argumentation** (Dung 1995) is the *semantic target*: a
   well-formed program compiles to a finite Dung framework, and a claim's
@@ -40,7 +40,7 @@ non-shipping backend seed; factive logics in general are confined behind the
 strict-backend interface rather than admitted into the source calculus. The
 precise delta over each neighbor (Micropublications, AIF, EG-VAR, Pandžić,
 ASPIC+, PCC) is recorded in
-[`novelty-and-related-work.md`](novelty-and-related-work.md): LARA is
+[`novelty-and-related-work.md`](novelty-and-related-work.md): Lara is
 a proof-carrying *language* whose programs are typed claim-support
 certificates, compiled into an argumentation framework with mechanized
 accountability and status-preservation theorems.
