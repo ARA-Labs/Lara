@@ -24,7 +24,7 @@ modification to `lean/Lara/Semantics.lean`, `lean/Lara/Grounded.lean`,
 
 ## Gate transcript
 
-Run from `/home/yfhe/ara/lara/.claude/worktrees/expressive-brewing-dahl`,
+Run from the repository's `.claude/worktrees/expressive-brewing-dahl` worktree,
 `PATH="$HOME/.elan/bin:$PATH"`, at commit 225cac8.
 
 ```
@@ -305,7 +305,7 @@ finding ("three proof bodies duplicated across two modules") overcounted by one.
 
 ### Gate transcript
 
-Run from `/home/yfhe/ara/lara`, `PATH="$HOME/.elan/bin:$PATH"`, at commit `eb6e955`.
+Run from the repository root, `PATH="$HOME/.elan/bin:$PATH"`, at commit `eb6e955`.
 
 ```
 $ cd lean && lake build Lara

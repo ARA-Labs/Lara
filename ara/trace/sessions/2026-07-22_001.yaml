@@ -199,7 +199,7 @@ ai_actions_turns3_10:
   - turn: 7
     action: "Saved persistent memory lara-audience-python-readability (audience principle + maintainer-collab rule at turn 8)."
     provenance: ai-executed
-    files_changed: ["~/.claude/projects/-Users-yfhe-repos-ara-lara/memory/"]
+    files_changed: ["<agent project memory directory>"]
   - turn: 9
     action: "Review walkthrough of nanogpt_chat_rl C04 certifier_note; corrected own earlier mischaracterization ('plausibly arithmetic' was in the affirmed summary, not AI-invented during spec editing)."
     provenance: ai-executed
