@@ -1,7 +1,6 @@
 # Naturalness boundary
 
-_Status: settled for language v0.1. Recorded 2026-08-25
-([#109](https://github.com/ARA-Labs/lara/issues/109))._
+_Status: settled for language v0.1. Recorded 2026-08-25._
 
 _This note is **policy only**. It authorizes no CNL experiment, no producer code,
 and no error-message rewrite. It exists so that ease-of-use work cites a fixed
@@ -74,8 +73,8 @@ Two mechanisms make that sound, and they are what any layer-2 feature inherits:
   re-checked by trusted code before it is believed."
 - **The binding audit.** Prose-to-formal agreement is confirmed by a *human*,
   not by the checker — the pipeline is `scripts/binding-audit.hs` and
-  `measurements/binding-audit/`, and executing it is tracked in
-  [#121](https://github.com/ARA-Labs/lara/issues/121).
+  `measurements/binding-audit/`, and executing it is
+  separate follow-up work.
 
 The consequence worth stating plainly, because it is the one an ease-of-use
 proposal will try to route around: **checker acceptance establishes structural
@@ -102,11 +101,9 @@ One constraint, and one clarification:
   byte-compares the two drivers' stdout and exit code. Improving a message is a
   surface change with a gate, not an unconstrained edit.
 
-Landed under this heading: [#130](https://github.com/ARA-Labs/lara/issues/130)
-(an R13 names its premise slots by source name) and
-[#148](https://github.com/ARA-Labs/lara/issues/148) (it prints the authored
-spelling of every atom it names). The residual —
-[#151](https://github.com/ARA-Labs/lara/issues/151), binder names — is recorded
+Landed under this heading: an R13 names its premise slots by source name,
+and it prints the authored spelling of every atom it names. The residual —
+binder names — is recorded
 as an honest boundary rather than closed, because the only sound fix is a
 backend-seam change; see §6.
 
@@ -154,7 +151,7 @@ faithful to the checked artifact.
 
 ## 7. Consequences
 
-- [#30](https://github.com/ARA-Labs/lara/issues/30) (`Lara.Json`, the LLM
+- `Lara.Json` (the LLM
   producer surface) is the layer-2 instance. It stays deferred; this note is
   its upstream policy, so it starts from a settled boundary rather than
   reopening one.

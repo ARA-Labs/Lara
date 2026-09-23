@@ -281,8 +281,8 @@ What *is* known about `CtxEquivSem` beyond its definition:
 non-grounded instance, so it is not merely `Linking.ctxEquiv_negative` transported
 through the `iff`.
 
-`ctxEquivSem_semantic_negative` strengthens the evidence requested in
-[#273](https://github.com/ARA-Labs/lara/issues/273): an empty context distinguishes
+`ctxEquivSem_semantic_negative` strengthens the semantic-negative
+evidence: an empty context distinguishes
 `fullCycleFrag` from `singletonCycleFrag` under the same cyclic policy, with
 identical exports `[pA]`. Both links pass the guard and whole-unit checker
 (`semantic_negative_link_ok`, `semantic_negative_accepted`). The former reuses
@@ -294,10 +294,10 @@ payloads `noExtension` and `observed justified`, and proves their disequality.
 closes #273; the separate all-context argument above resolves the unrestricted
 implication from #268.
 
-The certificate-bearing instantiations requested in
-[#269](https://github.com/ARA-Labs/lara/issues/269) are now proved as
+The requested certificate-bearing instantiations
+are now proved as
 `cert_congruence_witness_sem` and `cert_registry_swap_witness_sem`. The admissible disagreeing
-carrier requested in [#270](https://github.com/ARA-Labs/lara/issues/270) is now
+carrier is now
 proved: `cycle_admissible` establishes `Admissible reg cycleCtx cycleFrag` for
 every registry, and `congruence_witness_sem` uses it. §6 records the remaining
 limitation.

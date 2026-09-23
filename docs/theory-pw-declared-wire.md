@@ -5,8 +5,8 @@ from a file. A checked registry derives both the frame's bridges and query-name
 resolution from the declarations. The file-driven Lean example evaluates modal
 queries and runs source-claim comparisons through those same bridges.
 
-Haskell outer execution and the cross-language differential gate landed in
-[#322](https://github.com/ARA-Labs/lara/issues/322). See
+Haskell outer execution and the cross-language differential gate have
+since landed. See
 [the outer runtime contract](theory-pw-outer-runtime.md): its `pw-run 1`
 files declare their own worlds and edges and embed a `pw-surface 1` document
 unchanged.

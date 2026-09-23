@@ -1,6 +1,6 @@
 # D1 — Rebuttal replay: a paper + reviews + rebuttal as a sequence of checked programs
 
-Issue [#62](https://github.com/ARA-Labs/lara/issues/62) (tracker [#61](https://github.com/ARA-Labs/lara/issues/61)); case-study material for the M7 paper package [#60](https://github.com/ARA-Labs/lara/issues/60) (T3). This is the **paper + reviews** population size that `examples/README.md` names but no prior example exhibits.
+Case-study material for the M7 paper package (T3). This is the **paper + reviews** population size that `examples/README.md` names but no prior example exhibits.
 
 _A demo write-up (2026-08-02) for the paper package: prose around a set of
 checked, committed examples. For readers without argumentation background:

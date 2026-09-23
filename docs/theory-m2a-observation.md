@@ -591,19 +591,19 @@ Four items are visible from here and none is an M2a result. Each is tracked as
 a GitHub issue, per `CLAUDE.md`; this document records the decision, the issue
 records the work.
 
-- Non-emptiness of preferred extensions — [#196](https://github.com/ARA-Labs/lara/issues/196). **Closed 2026-09-06.**
-- Enumeration-based conflict freedom — [#197](https://github.com/ARA-Labs/lara/issues/197). Implemented alongside the compatible spec-based API; see §3.
-- Central registry and declaration audit — [#198](https://github.com/ARA-Labs/lara/issues/198). Implemented; see §5.
-- Generic-`ExtensionSemantics` contextual equivalence —
-  [#216](https://github.com/ARA-Labs/lara/issues/216). **Landed 2026-09-07**;
+- Non-emptiness of preferred extensions. **Closed 2026-09-06.**
+- Enumeration-based conflict freedom. Implemented alongside the compatible spec-based API; see §3.
+- Central registry and declaration audit. Implemented; see §5.
+- Generic-`ExtensionSemantics` contextual equivalence.
+  **Landed 2026-09-07**;
   see `docs/theory-m4-generic-observation.md`. Filed later than the three
   above, from the M4 plan rather than from here. The M2a interface is now
   quantified over by the *contextual* theorems and not only by the
   framework-level ones: `Lara.Context.obsSem` and `Lara.Context.CtxEquivSem`
   generalize M4's `obs` and `CtxEquiv`, the grounded case is recovered as a
   theorem (`obsSem_grounded`, `ctxEquivSem_grounded_iff`), and the congruences
-  hold with no additional hypothesis. Follow-up
-  [#268](https://github.com/ARA-Labs/lara/issues/268) refutes grounded equivalence
+  hold with no additional hypothesis. A follow-up
+  refutes grounded equivalence
   implying equivalence at every semantics permitted by the open interface, using
   an adequate singleton-selector family. This does not separate the standard
   non-grounded instances; see the M4 document for the exact all-context proof.

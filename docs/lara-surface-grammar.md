@@ -1662,7 +1662,7 @@ Two future-work notes were recorded here so the next design could start from the
   *Resolved at `@0.9`:* Appendix H defines this form, including the exact
   binder discipline, mode boundary, lowering arithmetic, and rejection
   surface. Formula annotation authoring was the one deliberately separate
-  follow-up ([#144](https://github.com/ARA-Labs/lara/issues/144)), resolved at
+  follow-up, resolved at
   `@0.10` by Appendix I.
 - *Rule premise labels as a second symbolic class (considered and deferred).*
   `premiseLabelIndex` already mapped a rule's declared premise labels to slot
@@ -2153,7 +2153,7 @@ canonicalNat  ::= "0" | nonZeroDigit { digit }
 `formula` is the frozen backend annotation grammar. In particular an atom is
 still `(atom KEY)`, never a bare key. Producing `KEY` from a source proposition
 is an encoding feature, not reference lowering; it was deferred to
-[#144](https://github.com/ARA-Labs/lara/issues/144) and landed at `@0.10` as
+a follow-up and landed at `@0.10` as
 Appendix I's `(prop TEXT)` presentation formula.
 
 `sourceName` deliberately uses the shipped source-name classifier, not the
@@ -2293,12 +2293,12 @@ Lowering is one-way. If lowering succeeds but `nd@1` later rejects at R13, its
 backend diagnostic describes the lowered de Bruijn term. Three parts of that
 term could in principle be mapped back to what the author wrote; two now are.
 
-- **The premise list** — the `(prem s)` references a named term cites — closed
-  at [#130](https://github.com/ARA-Labs/lara/issues/130): an R13 renders the
+- **The premise list** — the `(prem s)` references a named term cites — is
+  closed: an R13 renders the
   slot → source mapping of the refused instance, in the authored spelling on
   the `.lara` door (`docs/rejection-surface.md` §1.5).
-- **The formula annotations** closed at
-  [#148](https://github.com/ARA-Labs/lara/issues/148): the same R13 renders the
+- **The formula annotations** are also
+  closed: the same R13 renders the
   authored spelling of every atom the reason names, drawn from the `(prop
   TEXT)` annotations *and* the declared leaf propositions, because a mismatch
   names one of each (`docs/rejection-surface.md` §1.6).
@@ -2306,8 +2306,8 @@ term could in principle be mapped back to what the author wrote; two now are.
   local binder context at the failure site *inside* the adapter, which reports
   through a flat string, so no sound recovery exists from outside it. Closing
   it means giving the registered-backend seam a structured rejection — the one
-  boundary the `@0.6`–`@0.10` arc kept frozen — and is tracked separately as
-  [#151](https://github.com/ARA-Labs/lara/issues/151).
+  boundary the `@0.6`–`@0.10` arc kept frozen — and is left as
+  separate follow-up work.
 
 This residual limitation does not weaken replay; it belongs to the honest
 user-facing boundary.
@@ -2337,7 +2337,7 @@ tooling gap was closed by #144 at `@0.10` (Appendix I).
 
 ### I.1 Scope
 
-Additive over `lara-syntax@0.9`, closing [#144](https://github.com/ARA-Labs/lara/issues/144).
+Additive over `lara-syntax@0.9`.
 Appendix H left exactly one hand-hostile position in a named `nd@1` proof
 term: the formula annotation of a `lam` or `abort`, which had to be an opaque
 `(atom KEY)` whose `KEY` was produced by out-of-band tooling. `@0.10` adds a
@@ -2421,7 +2421,7 @@ remains the end-to-end byte-identity witness against its committed numeric
 `.core.sexp`, now with no out-of-band command anywhere in its provenance.
 
 The post-lowering error-attribution limitation recorded here at `@0.9` has since
-closed for formulas ([#148](https://github.com/ARA-Labs/lara/issues/148)). If a
+closed for formulas. If a
 lowered term fails replay at R13, the reason is still phrased over the numeric
 de Bruijn image with the encoded key — that much is inherent to a one-way
 lowering — but the `.lara` door now prints, beneath it, the authored spelling of
@@ -2437,5 +2437,5 @@ back exactly the `expected` side of every mismatch and left the `got` side
 opaque.
 
 What remains unmapped is the binder names — see H.5 for why that half is a seam
-change rather than a rendering one, tracked as
-[#151](https://github.com/ARA-Labs/lara/issues/151).
+change rather than a rendering one, left as
+separate follow-up work.

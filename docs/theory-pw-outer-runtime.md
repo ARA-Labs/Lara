@@ -1,6 +1,6 @@
 # PW outer runtime: `pw-run 1` and Haskell/Lean conformance
 
-Issue [#322](https://github.com/ARA-Labs/lara/issues/322) gives the
+`pw-run 1` gives the
 possible-world outer language a Haskell runtime. Before it, PW had Lean
 definitions and proofs, plus a Lean example with a fixed host
 (`docs/theory-pw-declared-wire.md`). Now an author writes one file that
@@ -16,8 +16,8 @@ cabal run -v0 exe:lara -- pw-input fixtures/pw/source/lara.sexp   # the derivati
 make pw-conformance                                         # the differential gate
 ```
 
-Issues [#326](https://github.com/ARA-Labs/lara/issues/326) and
-[#327](https://github.com/ARA-Labs/lara/issues/327) extend this record: a
+Two later additions
+extend this record: a
 world whose duplicate-report groups agree is accepted (§3), and a world may be
 a `.lara` program (§1, §2).
 
@@ -292,7 +292,7 @@ fixture. The byte reader and printer remain the tested boundary they were in
 #314, and so does the world pipeline's use of `decodeCheckInput`. Edge
 resolution's step from names to positions is proved (`resolveEdges_declared`,
 `load_candidates_named`). The reader's nesting bound is Haskell-only; that
-divergence is tracked in [#331](https://github.com/ARA-Labs/lara/issues/331).
+divergence is a known open item.
 The elaboration of a `lara` world is Haskell-only by construction: it is the
 `.lara` door's own pipeline, tested where that door is tested, and the
 differential covers its output rather than its steps.

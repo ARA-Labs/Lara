@@ -225,9 +225,8 @@ behavior. A raw `.sexp` never runs the presentation lowering, so even named-look
 atoms there remain backend decode/replay input rather than `CertNd*` source
 errors. If a successfully lowered term later fails replay, the R13 diagnostic is
 phrased over its numeric de Bruijn image; no source map restores the authored
-binder names or proposition spellings
-([#148](https://github.com/ARA-Labs/lara/issues/148)). §1.5's slot mapping is
-the premise-list half of that attribution, which #130 did close.
+binder names or proposition spellings. §1.5's slot mapping is
+the premise-list half of that attribution, which has closed.
 
 ### 1.5 The premise-slot mapping under an R13 (#130)
 
@@ -354,8 +353,8 @@ context *at the failure site inside the adapter*, which reports through a flat
 `String`, so no sound recovery exists from outside it — and a best-effort
 reconstruction could print a confidently wrong name, the failure §1.5 also
 exists to prevent. Closing it means giving the registered-backend seam a
-structured rejection, tracked as
-[#151](https://github.com/ARA-Labs/lara/issues/151).
+structured rejection, left as
+separate follow-up work.
 
 (Pinned by `test/FormulaNamesSpec.hs`: both sources of a mismatch, the
 reason-driven ordering, the shared-key precedence, the unmentioned-key and empty

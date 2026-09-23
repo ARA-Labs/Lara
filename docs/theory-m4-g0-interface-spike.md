@@ -7,14 +7,14 @@ that particular failure, but this spike does not establish a useful independent
 logical relation or a characterization of contextual equivalence. G1–G4 are
 not entered. No soundness or completeness theorem is added.
 
-This is the written exit requested by [#305](https://github.com/ARA-Labs/lara/issues/305).
-[#187](https://github.com/ARA-Labs/lara/issues/187) closed on September 3,
+This is the written exit of the G0 interface spike.
+The M4 contextual-adequacy work closed on September 3,
 2026, with Part B **descoped, not deferred**. Its
-[maintainer close-out](https://github.com/ARA-Labs/lara/issues/187#issuecomment-5522477874)
+maintainer close-out
 and [durable record, §7](theory-m4-contextual-adequacy.md#7-part-b-descoped-2026-09-03)
 authorize reconsideration through a fresh issue and an interface spike.
-[#215](https://github.com/ARA-Labs/lara/issues/215) and
-[#216](https://github.com/ARA-Labs/lara/issues/216) have since closed with their
+The relational-parametricity and generic-semantics contextual-equivalence
+work has since closed with its
 results landed. That trigger justifies running G0; it does not establish the
 interface or authorize the theorem phases. The paper's claims and commit IDs
 are reported in #305; this spike checks the implementation at `7d0f738`, not

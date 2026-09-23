@@ -118,11 +118,11 @@ edit loop or a CI step.
 The `check + render, pre-decoded` row is the stable control: it sits downstream
 of the decode boundary, so no wire-codec change can move it. A run whose
 control row deviates markedly from ~203 µs is measuring machine load, not the
-checker, and should be discarded rather than quoted (this is what happened in
-[#118](https://github.com/ARA-Labs/lara/issues/118)).
+checker, and should be discarded rather than quoted (this is what happened
+during one of the wire-codec optimizations).
 
 **This snapshot's absolute numbers are stale and should not be cited.**
-[#120](https://github.com/ARA-Labs/lara/issues/120) (closed not planned,
+A review of the harness (no fix planned,
 2026-08-24) found that the benchmark harness changed from interpreted
 (`cabal exec -- runghc scripts/bench.hs`, the driver that produced this
 snapshot) to compiled (`cabal run exe:lara-bench`) with no protocol line
@@ -216,8 +216,8 @@ and the commit that produced it. Tracking a rendered table therefore guarantees
 that, sooner or later, the copy in the tree disagrees with the code beside it.
 
 That is exactly what happened. `tables/performance.tex` was generated at
-`0aa97ef`, before the [#117](https://github.com/ARA-Labs/lara/issues/117) and
-[#118](https://github.com/ARA-Labs/lara/issues/118) wire optimizations, and
+`0aa97ef`, before the two later
+wire optimizations, and
 then sat in the repository reporting a `parse` row that no longer described the
 shipped decoder — a byte-identical hand-synced duplicate of the paper
 repository's own copy, and the stale one of the two. `measurements/` was
