@@ -1,0 +1,232 @@
+artifact	claim_id	claim_type	note
+andes	C01	descriptive	metric-adequacy claim; comparative flavor vs TTFT/TPOT
+andes	C02	comparative	
+andes	C03	comparative	
+andes	C04	comparative	
+andes	C05	causal	ablation: refiner necessity
+andes	C06	comparative	
+andes	C07	comparative	
+andes	C08	generalization	robustness-across is the content
+expbench	C01	negative-result	phase scores conceal near-zero end-to-end competence
+expbench	C02	descriptive	
+expbench	C03	descriptive	
+expbench	C04	descriptive	
+expbench	C05	descriptive	
+expbench	C06	comparative	metric-form comparison
+venn	C01	comparative	
+venn	C02	causal	component attribution under contention
+venn	C03	causal	component effect, condition-scoped
+venn	C04	descriptive	analytic complexity + empirical overhead
+venn	C05	negative-result	no adverse accuracy effect
+venn	C06	causal	dose-response of fairness knob
+adaptive-pruning	C01	comparative	relative to FT baseline
+adaptive-pruning	C02	comparative	
+adaptive-pruning	C03	comparative	
+adaptive-pruning	C04	causal	kurtosis ablation
+adaptive-pruning	C05	causal	adaptive-tuning ablation
+adaptive-pruning	C06	comparative	
+adaptive-pruning	C07	comparative	
+adaptive-pruning	C08	comparative	
+all-in-one	C01	comparative	
+all-in-one	C02	causal	attention-mask intervention
+all-in-one	C03	generalization	all arbitrary conditionals
+all-in-one	C04	generalization	capability breadth
+all-in-one	C05	descriptive	capability demonstration
+all-in-one	C06	negative-result	objective does not hurt posterior-only
+bam	C01	descriptive	analytic
+bam	C02	descriptive	analytic
+bam	C03	descriptive	analytic; special-case recovery
+bam	C04	descriptive	analytic; convergence theorem
+bam	C05	comparative	
+bam	C06	causal	batch-size dose-response, differential across methods
+bbox	C01	comparative	
+bbox	C02	comparative	
+bbox	C03	comparative	
+bbox	C04	causal	loss-component swap
+bbox	C05	generalization	plug-and-play transfer
+bbox	C06	negative-result	AI feedback equivalence / no-harm
+bbox	C07	causal	beam-size dose-response
+bbox	C08	causal	iteration dose-response
+bridging-data-gaps	C01	comparative	
+bridging-data-gaps	C02	comparative	
+bridging-data-gaps	C03	comparative	
+bridging-data-gaps	C04	causal	mechanism: gradient correction
+bridging-data-gaps	C05	causal	component ablation
+fre	C01	generalization	[adjudicated 2026-07-22, double-annotation]
+fre	C02	comparative	
+fre	C03	generalization	
+fre	C04	causal	training-mixture ablation
+fre	C05	causal	prior augmentation effect
+ftrl	C01	negative-result	vanilla fine-tuning fails
+ftrl	C02	causal	
+ftrl	C03	causal	
+ftrl	C04	causal	knowledge-retention intervention
+ftrl	C05	causal	method-FPC interaction
+ftrl	C06	negative-result	irreversibility / non-recovery
+lbcs	C01	comparative	
+lbcs	C02	comparative	
+lbcs	C03	descriptive	analytic; convergence theorem
+lbcs	C04	comparative	robustness under noise
+lbcs	C05	comparative	scales to ImageNet-1k [adjudicated 2026-07-22, double-annotation]
+lca-on-the-line	C01	generalization	law across VMs and VLMs
+lca-on-the-line	C02	generalization	extends law to constructed taxonomies
+lca-on-the-line	C03	causal	auxiliary-loss intervention
+lca-on-the-line	C04	causal	controlled simulation
+lca-on-the-line	C05	causal	prompt intervention
+mechanistic-understanding	C01	descriptive	mechanistic structure
+mechanistic-understanding	C02	causal	subtraction intervention
+mechanistic-understanding	C03	descriptive	mechanistic account of DPO
+mechanistic-understanding	C04	descriptive	
+mechanistic-understanding	C05	causal	mechanistic explanation
+mechanistic-understanding	C06	causal	reversal intervention
+pinn	C01	descriptive	necessity relation + counterexamples
+pinn	C02	descriptive	
+pinn	C03	causal	component attribution
+pinn	C04	causal	preconditioning intervention
+pinn	C05	comparative	
+pinn	C06	comparative	NNCG vs GD control
+pinn	C07	causal	analytic; theorem
+rice	C01	comparative	analytic bound comparison
+rice	C02	comparative	
+rice	C03	comparative	simplification-equivalence
+rice	C04	causal	mixing-parameter dose-response
+rice	C05	causal	exploration-bonus effect
+rice	C06	generalization	transfer to non-PPO agents
+robust-clip	C01	comparative	
+robust-clip	C02	comparative	
+robust-clip	C03	descriptive	absolute robustness capability
+robust-clip	C04	comparative	
+robust-clip	C05	comparative	
+robust-clip	C06	comparative	
+robust-clip	C07	negative-result	shared-encoder condition effect [adjudicated 2026-07-22, double-annotation]
+sample-specific-masks	C01	causal	problem diagnosis
+sample-specific-masks	C02	comparative	analytic; hypothesis-space containment
+sample-specific-masks	C03	comparative	
+sample-specific-masks	C04	comparative	
+sample-specific-masks	C05	causal	component ablation
+sample-specific-masks	C06	comparative	
+sapg	C01	negative-result	saturation: no further improvement
+sapg	C02	comparative	
+sapg	C03	causal	aggregation-scheme swap
+sapg	C04	comparative	property comparison
+sapg	C05	causal	off-policy ablation
+sapg	C06	causal	entropy-regularization effect
+self-composing-policies	C01	descriptive	analytic; parameter growth
+self-composing-policies	C02	comparative	
+self-composing-policies	C03	generalization	three-scenario breadth
+self-composing-policies	C04	comparative	
+self-composing-policies	C05	comparative	vs reference transfer
+self-expansion	C01	comparative	
+self-expansion	C02	comparative	scaling comparison
+self-expansion	C03	causal	expansion-strategy ablation
+self-expansion	C04	generalization	adapter-agnosticism
+semantic-self-consistency	C01	comparative	
+semantic-self-consistency	C02	comparative	mixed: negative on StrategyQA
+semantic-self-consistency	C03	comparative	
+semantic-self-consistency	C04	comparative	featurizer comparison
+semantic-self-consistency	C05	descriptive	correlational
+semantic-self-consistency	C06	negative-result	no correlation
+sequential-neural-score-estimation	C01	comparative	
+sequential-neural-score-estimation	C02	comparative	
+sequential-neural-score-estimation	C03	comparative	variant ranking; SNPSE-C failure component
+sequential-neural-score-estimation	C04	comparative	
+sequential-neural-score-estimation	C05	comparative	conditional ranking
+stay-on-topic-with-classifier-free-guidance	C01	causal	CFG intervention
+stay-on-topic-with-classifier-free-guidance	C02	comparative	equivalence with 2x model
+stay-on-topic-with-classifier-free-guidance	C03	causal	gamma dose-response
+stay-on-topic-with-classifier-free-guidance	C04	causal	gamma dose-response
+stay-on-topic-with-classifier-free-guidance	C05	causal	negative-prompting intervention
+stay-on-topic-with-classifier-free-guidance	C06	descriptive	mechanistic contrast; includes non-equivalence
+stochastic-interpolants	C01	descriptive	analytic
+stochastic-interpolants	C02	comparative	analytic bound
+stochastic-interpolants	C03	causal	coupling-choice substitution
+stochastic-interpolants	C04	comparative	SOTA vs I2SB
+stochastic-interpolants	C05	descriptive	qualitative mechanism
+test-time-model-adaptation	C01	comparative	
+test-time-model-adaptation	C02	comparative	
+test-time-model-adaptation	C03	comparative	
+test-time-model-adaptation	C04	negative-result	entropy-only CMA infeasible
+test-time-model-adaptation	C05	causal	fitness-function intervention
+test-time-model-adaptation	C06	comparative	
+test-time-model-adaptation	C07	comparative	
+what-will-my-model-forget	C01	comparative	
+what-will-my-model-forget	C02	causal	prior ablation
+what-will-my-model-forget	C03	negative-result	mixed: works on BART0, fails on FLAN-T5
+what-will-my-model-forget	C04	comparative	vs random replay
+what-will-my-model-forget	C05	generalization	OOD generalization
+what-will-my-model-forget	C06	comparative	
+rebench-fix_embedding	C01	negative-result	vanilla fine-tuning insufficient
+rebench-fix_embedding	C02	causal	adapter intervention + mechanism
+rebench-fix_embedding	C03	causal	unfreezing effect
+rebench-fix_embedding	C04	implementation-behavioral	bake-in procedure behavior
+rebench-fix_embedding	C05	implementation-behavioral	artifact-measured result
+rebench-fix_embedding	C06	descriptive	analytic; loss floor bound
+rebench-fix_embedding	C07	negative-result	not a scalar transform
+rebench-fix_embedding	C08	negative-result	not a sort-recoverable permutation
+rebench-fix_embedding	C09	negative-result	single-stage finetune cannot reach reference
+rebench-fix_embedding	C10	negative-result	hand-constructed upcasts fail
+rebench-fix_embedding	C11	negative-result	agent-capability observation
+rebench-fix_embedding	C12	implementation-behavioral	scorer timeout pathology
+rebench-fix_embedding	C13	implementation-behavioral	env-vs-docs discrepancy; status=hypothesis
+rebench-nanogpt_chat_rl	C01	causal	best-of-N SFT intervention
+rebench-nanogpt_chat_rl	C02	causal	delta attribution; status=untested
+rebench-nanogpt_chat_rl	C03	implementation-behavioral	train/test hyperparameter coupling
+rebench-nanogpt_chat_rl	C04	implementation-behavioral	analytic call-count property
+rebench-nanogpt_chat_rl	C05	implementation-behavioral	README-recorded result
+rebench-nanogpt_chat_rl	C06	implementation-behavioral	judge-call-bound wall clock
+rebench-nanogpt_chat_rl	C07	implementation-behavioral	rate-limit binding constraint
+rebench-nanogpt_chat_rl	C08	implementation-behavioral	last-position optimization breaks losses
+rebench-nanogpt_chat_rl	C09	causal	hyperparameters cause collapse
+rebench-nanogpt_chat_rl	C10	descriptive	cross-run pattern
+rebench-nanogpt_chat_rl	C11	negative-result	no run reached reference
+rebench-nanogpt_chat_rl	C12	descriptive	operational lesson, cross-run
+rebench-restricted_mlm	C01	descriptive	
+rebench-restricted_mlm	C02	descriptive	analytic score geometry
+rebench-restricted_mlm	C03	negative-result	unigram no better than baseline
+rebench-restricted_mlm	C04	comparative	
+rebench-restricted_mlm	C05	comparative	
+rebench-restricted_mlm	C06	causal	composite combination win
+rebench-restricted_mlm	C07	implementation-behavioral	division outside forward pass
+rebench-restricted_mlm	C08	implementation-behavioral	as_strided+einsum conv
+rebench-restricted_mlm	C09	negative-result	pathway tried and abandoned
+rebench-restricted_mlm	C10	comparative	human-vs-reference benchmark meta
+rebench-restricted_mlm	C11	descriptive	MALT win rate
+rebench-restricted_mlm	C12	descriptive	
+rebench-restricted_mlm	C13	descriptive	winning-run solution pattern
+rebench-restricted_mlm	C14	implementation-behavioral	NaN under restricted primitives
+rebench-rust_codecontests	C01	comparative	filter-then-vote vs single-sample
+rebench-rust_codecontests	C02	implementation-behavioral	
+rebench-rust_codecontests	C03	implementation-behavioral	
+rebench-rust_codecontests	C04	implementation-behavioral	
+rebench-rust_codecontests	C05	implementation-behavioral	populated but unread few-shot bank
+rebench-rust_codecontests	C06	implementation-behavioral	
+rebench-rust_codecontests	C07	implementation-behavioral	
+rebench-rust_codecontests	C08	implementation-behavioral	explored-not-shipped code path
+rebench-rust_codecontests	C09	implementation-behavioral	planned-not-implemented
+rebench-rust_codecontests	C10	implementation-behavioral	non-deterministic scoring
+rebench-rust_codecontests	C11	implementation-behavioral	invalidSubmission mechanics
+rebench-rust_codecontests	C12	negative-result	no MALT run beats reference
+rebench-rust_codecontests	C13	negative-result	strategy non-obvious to agents
+rebench-rust_codecontests	C14	descriptive	agent-strategy observation
+rebench-triton_cumsum	C01	descriptive	analytic decomposability
+rebench-triton_cumsum	C02	implementation-behavioral	exclusive-vs-inclusive correctness
+rebench-triton_cumsum	C03	negative-result	PyTorch chain cannot match reference
+rebench-triton_cumsum	C04	negative-result	torch.compile does not fuse
+rebench-triton_cumsum	C05	implementation-behavioral	reference-achieving pipeline
+rebench-triton_cumsum	C06	implementation-behavioral	CUDA-graph warmup behavior
+rebench-triton_cumsum	C07	implementation-behavioral	silent dtype promotion vs scorer
+rebench-triton_cumsum	C08	implementation-behavioral	float32 accumulator correctness bound
+rebench-triton_cumsum	C09	negative-result	bandwidth-bound performance floor [adjudicated 2026-07-22, double-annotation]
+rebench-triton_cumsum	C10	negative-result	grid=1 kernels dead end
+rebench-triton_cumsum	C11	implementation-behavioral	parity-carry correctness condition
+rebench-triton_cumsum	C12	implementation-behavioral	compile variance/overhead
+nanogpt-speedrun	C01	descriptive	
+nanogpt-speedrun	C02	negative-result	agents cannot reproduce records
+nanogpt-speedrun	C03	causal	largest-gain attribution
+nanogpt-speedrun	C04	causal	FlexAttention enables 64K
+nanogpt-speedrun	C05	causal	multiplicative compounding
+nanogpt-speedrun	C06	descriptive	failure diagnosis
+nanogpt-speedrun	C07	comparative	tree vs linear search
+nanogpt-speedrun	C08	descriptive	monotone difficulty trend
+nanogpt-speedrun	C09	negative-result	hint level has no effect
+nanogpt-speedrun	C10	causal	FP8 contribution

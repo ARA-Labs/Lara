@@ -1,0 +1,266 @@
+artifact: stay-on-topic-with-classifier-free-guidance
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 4 dead_end nodes (N07, N09, N11, N14); all classified
+claims:
+  - claim_id: C02
+    claim_type: comparative
+    proposition_shape:
+      sketch: "flop_matched_outcome(task, cfg_group(gamma1.5), vanilla_2x_group, ancova_verdict(p0.01))"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim is a per-task tally over 9 benchmarks with verdict in
+        {insignificant, favors_cfg, favors_vanilla} and a 5/2/2 split; the
+        falsification criterion ('fewer than 5/9 insignificant', 'split not even')
+        counts instances of this predicate, so a nullary atom would erase exactly
+        the structure being checked."
+    inference_scheme:
+      scheme: compute_matched_equivalence
+      strict_or_defeasible: defeasible
+      premises:
+        - "CFG requires two forward passes, so inference FLOPs per token double, making a ~2x-FLOP vanilla model the fair comparator at equal compute"
+        - "Per-model FLOPs/token are computed correctly (electra FLOP formula) for all GPT-2/Pythia/LLaMA variants"
+        - "CFG and vanilla groups are evaluated on the same 9 benchmarks with the same harness and accuracies from E01"
+        - "ANCOVA on log-FLOP vs accuracy is an adequate model of the accuracy-compute relation across the pooled model families"
+        - "Non-significance at p=0.01 can be read as practical equivalence at the achieved sample size"
+      supporting_experiments: [E01, E04]
+    strict_certifier: domain-checker(flop-accounting)
+    certifier_note: "Certifies only the deterministic sub-steps: per-model
+      inference FLOPs/token via the electra formula, the 2x FLOP factor under CFG
+      (two forward passes per token), and re-running the ANCOVA arithmetic from
+      the recorded (log-FLOP, accuracy) pairs. The equivalence reading of
+      non-significance remains defeasible and is not certified."
+    critical_questions:
+      - cq: "Are both groups evaluated on identical benchmarks with the same evaluation harness?"
+        mandatory: true
+        status: met
+        basis: "E01 setup runs all models through the EleutherAI LM Evaluation Harness on the same 9 datasets; E04 procedure step 4 pairs those accuracies with FLOP counts"
+      - cq: "Is non-significance backed by an equivalence test or power analysis, rather than read as 'matches' by default?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 procedure step 5 specifies only a significance test (ANCOVA at p=0.01); no TOST/equivalence procedure or power computation appears anywhere in E04's procedure or metrics"
+      - cq: "Is model family (architecture, training data) controlled when pooling GPT-2, Pythia, and LLaMA into CFG vs vanilla groups?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 procedure step 5 regresses log-FLOP vs accuracy for the two groups with no family covariate stated; E01 setup shows the groups span three heterogeneous families"
+      - cq: "Is the FLOP accounting method-neutral (same formula for CFG and vanilla models)?"
+        mandatory: true
+        status: met
+        basis: "E04 procedure step 4 uses one formula (electra) for all models and doubles it under CFG"
+      - cq: "Is multiplicity across the 9 per-task ANCOVA tests addressed?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E04 metrics list 'ANCOVA p-value per benchmark task' with a single fixed threshold p=0.01; no correction is stated"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "On 5 of 9 benchmark tasks, ANCOVA at p=0.01 finds no significant accuracy difference between CFG models (doubled FLOPs) and vanilla models at equal inference FLOPs"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N06", "logic/experiments.md E04", "Table 4 (ANCOVA)"]
+      - atom: "Among the 4 significant tasks, 2 favor CFG and 2 favor vanilla"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N06", "Table 4 (ANCOVA)", "Figure 11"]
+      - atom: "Per-model, per-task zero-shot accuracies at gamma=1 and gamma=1.5 across GPT-2/Pythia/LLaMA feed the FLOP-accuracy pairs"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N05", "logic/experiments.md E01", "Figure 2 (Tables 2a/2b)"]
+      - atom: "Inference FLOPs per token double under CFG (two forward passes)"
+        provenance: attested
+        refs: ["logic/experiments.md E04 procedure step 4"]
+    attack_candidates:
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "ARC-c/WinoGrande failing to improve is part of the very per-task
+          split C02 tallies (tasks favoring vanilla), not a conflicting result,
+          confound, or bad measurement against C02."
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design alternative about applying CFG to the full CoT
+          chain; it bears on C03's design space, not on any premise, scheme, or
+          conclusion of C02."
+      - node: N11
+        decision: none
+        target: "n/a"
+        rationale: "Compute-constrained omission of CodeGen-16B limits C04's code-generation
+          scope; C02's evidence uses GPT-2/Pythia/LLaMA only, so nothing C02 relies on
+          is touched."
+      - node: N14
+        decision: none
+        target: "n/a"
+        rationale: "Refuted vocabulary-overlap hypothesis concerns the CFG-vs-instruction-tuning
+          contrast (C06); it says nothing about compute-matched accuracy."
+    holes:
+      - "Equivalence is inferred from failure to reject at p=0.01 with no equivalence test or power analysis, so 'matches 2x model size' is stronger than the statistics run"
+      - "ANCOVA pools three model families without a stated family covariate; family-specific scaling could drive or mask group differences"
+      - "The '2x model size' framing is realized by regression over log-FLOPs, not by actual 2x-parameter within-family pairs; no leaf exhibits a concrete matched pair"
+    coverage_flags: []
+    uncertain: false
+    note: "Coined scheme compute_matched_equivalence: a controlled comparison whose
+      conclusion is a null finding (no difference at matched compute). The scheme
+      vocabulary accommodated it by coinage, so no coverage flag."
+
+  - claim_id: C05
+    claim_type: causal
+    proposition_shape:
+      sketch: "preference_effect(cfg_negative_prompting, gpt4all_j, dimension, gamma, pref_rate) with instances: preference_effect(..., system_prompt_following, 3, 0.75) AND preference_effect(..., user_prompt_relevance, 3, 0.52)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: "The claim conjoins a positive effect on one dimension with a null effect
+        on another at the same gamma; the falsification criteria threshold the two
+        rates separately (>=60% vs below 50%), so a nullary atom would collapse the
+        two independently checkable halves."
+    inference_scheme:
+      scheme: blind_paired_human_evaluation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Each of the 1,740 (system-prompt, user-prompt) combinations yields one vanilla and one CFG completion under identical conditions except the decoding intervention"
+        - "Evaluators judge the pair blind to condition, answering the two dimensions separately"
+        - "Random assignment of gamma from {1..6} per sample yields an unconfounded per-gamma comparison with adequate votes in the gamma=3 cell"
+        - "Aggregate preference rate is a valid measure of system-prompt following and user-prompt relevance"
+      supporting_experiments: [E05]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is the evaluation blind and pairwise against a like-for-like baseline?"
+        mandatory: true
+        status: met
+        basis: "E05 procedure step 3 presents both completions blindly; baseline is vanilla sampling (gamma=1) on the same prompt pair"
+      - cq: "Are per-gamma vote counts and evaluator counts sufficient, with variability or significance reported for the 75% and 52% figures?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E05 metrics list only 'total vote count; unique voter count'; no per-gamma sample size, confidence interval, or test is specified in the procedure"
+      - cq: "Is gamma=3 fixed in advance, or selected post hoc as the empirical peak?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E05 procedure step 5 explicitly finds the peak system-prompt preference gamma after data collection, so the 75% figure is a maximum over 6 gamma cells with no selection correction"
+      - cq: "Does 52% (approximately random) establish non-degradation of user-prompt relevance, rather than merely fail to show degradation?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E05 expected outcome states 'preference ~ 50%' as the non-degradation criterion; no equivalence bound or test is given in procedure or metrics"
+      - cq: "Are the negative and positive prompts constructed so the contrast isolates the edited system-prompt content?"
+        mandatory: false
+        status: met
+        basis: "E05 procedure step 2 fixes the negative prompt to the default system prompt and the positive prompt to the edited system prompt, so the contrast is exactly the edit"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "At gamma=3, human evaluators prefer CFG completions for system-prompt following at a 75% rate over vanilla"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N12", "logic/experiments.md E05", "Figure 5"]
+      - atom: "At gamma=3, user-prompt relevance preference is 52%, approximately random"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N12", "Figure 5"]
+      - atom: "1,740 (system-prompt, user-prompt) combinations were evaluated blindly with gamma drawn randomly from {1,2,3,4,5,6}"
+        provenance: attested
+        refs: ["logic/experiments.md E05 setup", "logic/experiments.md E05 procedure steps 1-3", "Appendix G"]
+    attack_candidates:
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "Zero-shot benchmark inconsistency at gamma=1.5 concerns C01's task
+          coverage; C05's human-preference evidence on GPT4All-J is untouched."
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "Rejected CoT design choice (upweighting the full chain) is about
+          C03's setup, not about negative prompting or the assistant evaluation."
+      - node: N11
+        decision: none
+        target: "n/a"
+        rationale: "Omission of CodeGen-16B limits C04's model-scale coverage; it names
+          no premise, scheme step, or conclusion of C05."
+      - node: N14
+        decision: none
+        target: "n/a"
+        rationale: "The failed CFG-equals-instruction-tuning vocabulary hypothesis is a
+          ruled-out alternative interpretation feeding C06; it does not conflict with
+          or weaken C05's preference result."
+    holes:
+      - "No per-gamma vote counts, confidence intervals, or significance tests for the 75% and 52% rates"
+      - "gamma=3 is chosen as the observed peak over six gamma cells with no correction for selecting the maximum"
+      - "'Without degrading user-prompt relevance' is an equivalence conclusion drawn from a point estimate near 50%, with no equivalence bound"
+      - "Evaluator recruitment, instructions, and inter-rater agreement are unspecified beyond 'custom platform built by Guillaume Sanchez'"
+    coverage_flags: []
+    uncertain: false
+    note: "Kept the causal reading: the intervention (CFG with negative prompting) is
+      randomized across samples and compared pairwise, so the scheme supports a causal
+      effect on preference even though both magnitude claims lean on unstated statistics."
+
+  - claim_id: C06
+    claim_type: descriptive
+    proposition_shape:
+      sketch: "reduces_entropy(cfg(falcon7b, gamma1.5), vanilla(falcon7b), mean(4.7), mean(5.4)) AND vocab_overlap_below(cfg(falcon7b, gamma1.5), instruct(falcon7b), top_p(0.9), 0.30)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "Two conjuncts (each arity 4) with independent falsification thresholds:
+        entropy not significantly lower kills the first; overlap >50% kills the
+        second. A nullary atom would fuse two separately refutable measurements."
+    inference_scheme:
+      scheme: cross_run_observation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Entropy H(p) is computed with the same formula at each generation step over the same 32,902 P3 samples for all conditions (vanilla, CFG, unconditional, instruct)"
+        - "Falcon-7b-Base and Falcon-7b-Instruct differ only by instruction tuning, so the base/instruct contrast isolates the tuning effect"
+        - "The P3 sample is large and varied enough for stable mean-entropy and overlap estimates"
+        - "Top-p=0.9 token-set overlap is a meaningful proxy for similarity of the induced logit distributions"
+      supporting_experiments: [E04]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Are all conditions measured on the same samples with the same entropy formula?"
+        mandatory: true
+        status: met
+        basis: "E04 procedure step 1 runs vanilla, CFG (gamma=1.5), unconditional, and Instruct on the same P3 samples, computing H(p) = -sum p_k log p_k at each step"
+      - cq: "Is 'significantly lower' entropy backed by a stated statistical test on the entropy distributions?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 procedure step 1 says only 'compare mean entropy distributions' and the metrics list 'mean logit entropy per condition'; no test for the entropy gap is named (the falsification criterion nevertheless demands significance)"
+      - cq: "Does evidence from a single model pair (Falcon-7b-Base/Instruct) support the model-general wording 'CFG reduces sampling entropy ... they are not equivalent'?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 setup lists only Falcon-7b-Base and Falcon-7b-Instruct for the entropy and overlap analyses; no second family is measured"
+      - cq: "Is the overlap measurement defined precisely enough to recompute?"
+        mandatory: false
+        status: met
+        basis: "E04 procedure step 2 defines per-sample top-p=0.9 token sets and overlap as the inner product of indicator vectors"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Falcon-7b-Base with CFG at gamma=1.5 has mean logit entropy 4.7 vs 5.4 for vanilla on P3 samples"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N13", "logic/experiments.md E04", "Figure 6a"]
+      - atom: "CFG-guided entropy is comparable to the entropy of the instruction-tuned Falcon-7b-Instruct"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N13", "Figure 6a", "section 5.1"]
+      - atom: "Top-p=0.9 vocabulary overlap between CFG and instruction-tuned outputs is below 30%"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N14", "logic/experiments.md E04 procedure step 2", "section 5.1"]
+    attack_candidates:
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "Benchmark-level non-improvement on ARC-c/WinoGrande neither conflicts
+          with nor undermines a logit-distribution measurement on Falcon-7b."
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "CoT chain-weighting design rejection is orthogonal to the entropy
+          and vocabulary-overlap analysis."
+      - node: N11
+        decision: none
+        target: "n/a"
+        rationale: "A compute-limited omission in the code-generation study touches no
+          premise or measurement behind C06."
+      - node: N14
+        decision: none
+        target: "n/a"
+        rationale: "This dead end refutes the alternative hypothesis (CFG equivalent to
+          instruction tuning in vocabulary); its failure_mode measurement (<30% overlap)
+          is the supporting evidence for C06's second conjunct, not an attack on it."
+    holes:
+      - "No statistical test is specified for the 4.7-vs-5.4 entropy gap, though the falsification criterion requires significance"
+      - "The general claim rests on one model pair (Falcon-7b-Base/Instruct); no second family is measured"
+      - "The claim asserts overlap <30% while the falsification threshold is >50%, leaving results in the 30-50% band with no stated verdict"
+    coverage_flags: []
+    uncertain: false
+    note: "N14 is the cleanest example in this artifact of a dead end that is evidence,
+      not attack: the refuted equivalence hypothesis crystallizes into C06's own
+      'not equivalent' conjunct via its recorded overlap measurement."

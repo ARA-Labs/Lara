@@ -1,0 +1,167 @@
+artifact: stochastic-interpolants
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 2 dead_end nodes (N10, N11); all classified
+claims:
+  - claim_id: C01
+    claim_type: descriptive
+    proposition_shape:
+      sketch: "unique_minimizer(velocity_cond_exp, quadratic_objective_lb, coupling_with_correct_marginals)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is universally quantified over the coupling argument ("ANY
+        joint density with the correct marginals"), and the falsification
+        criterion targets a counterexample coupling; a nullary atom would lose
+        the per-coupling instantiation that E01 checks on three coupling
+        schemes. The claim also carries a second conjunct — that the transport
+        equation (5) holds with b_t = E(I'_t|I_t=x) — which the sketch folds
+        into the minimizer predicate but the falsification criteria name
+        separately.
+    inference_scheme:
+      scheme: analytic_proof
+      strict_or_defeasible: strict
+      premises:
+        - "The joint density rho(x0,x1) has the correct marginals rho0 and rho1"
+        - "The interpolant I_t = alpha_t*x0 + beta_t*x1 is differentiable in t and I'_t is square-integrable, so the conditional expectation E(I'_t|I_t=x) exists as the L2 projection"
+        - "The quadratic objective L_b is the standard L2 regression loss, so its unique minimizer over velocity fields is the conditional expectation"
+        - "The proof of Theorem 3.1 (cited in trace N02, paper section 3.1) is valid"
+      supporting_experiments: [E01]
+    strict_certifier: domain-checker(proof-assistant)
+    certifier_note: >-
+      The strict step is Theorem 3.1's L2-projection argument (the conditional
+      expectation uniquely minimizes a quadratic loss for any coupling with
+      correct marginals) plus the derivation of the transport equation. This is
+      a deductive measure-theoretic derivation, certifiable in principle by a
+      proof assistant with measure-theoretic probability; it is beyond
+      reference-nd. The artifact only attests the theorem — no proof text or
+      mechanization is included — so today the step is attested, not certified.
+    critical_questions:
+      - cq: "Does the verification cover dependent couplings specifically, not only the independent case?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 2 defines three coupling schemes (independent, conditional-xi, data-dependent); step 4 verifies the transport equation for each; Baselines list the independent and conditional variants"
+      - cq: "Is the unique-minimizer property of the quadratic objective itself checked, rather than only the transport equation it implies?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 Procedure steps 4-5 verify only the transport equation and kinetic energy; no step fits or perturbs the objective, so the minimizer statement rests entirely on Theorem 3.1 as attested in trace N02 — unestablished within the experiment, not defeated"
+      - cq: "Is the proof of Theorem 3.1 available and checkable within the artifact, or only cited?"
+        mandatory: true
+        status: unmet-gap
+        basis: "trace N02 attests 'Theorem 3.1 proves...' with evidence pointer to section 3.1; experiments.md reproduces neither the hypotheses nor the proof, so the 'ANY coupling' scope rests on an attested external derivation"
+      - cq: "Are the theorem's regularity/integrability hypotheses stated and checked for the couplings actually used?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 Setup specifies the GMM densities and interpolant coefficients but states no integrability or regularity conditions anywhere in experiments.md"
+    leaf_granularity: per-experiment-claim
+    leaves:
+      - atom: "Theorem 3.1: b_t(x) = E(I'_t|I_t=x) uniquely minimizes the quadratic objective L_b for any coupling rho(x0,x1) with the correct marginals"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N02", "logic/claims.md C01 (Theorem 3.1, section 3.1)"]
+      - atom: "The transport equation d_t rho_t + div(b_t rho_t) = 0 holds with b_t = E(I'_t|I_t=x) for independent, conditional-xi, and data-dependent couplings on the 2D 3-mode GMM"
+        provenance: attested
+        refs: ["logic/experiments.md E01 Procedure step 4", "E01 Expected outcome"]
+      - atom: "The regression objective's validity (minimizer equals b_t) holds for all three coupling types in the GMM instance"
+        provenance: attested
+        refs: ["logic/experiments.md E01 Expected outcome"]
+    attack_candidates:
+      - node: N10
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative approach (learning the coupling jointly, Lee et al.) whose failure is an inference-time sampling bias; it presupposes rather than disputes the validity of the quadratic regression for dependent couplings, so no edge to C01."
+      - node: N11
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative coupling-construction method (mini-batch OT uninformative at scale); it concerns how to build a coupling, not whether the regression objective is valid for one, so no edge to C01."
+    holes:
+      - "The minimizer property is never directly tested by any E01 procedure step; the experiment verifies only the transport equation and kinetic energies"
+      - "Theorem 3.1's hypotheses and proof are attested via trace N02 but reproduced nowhere in the artifact, so the strict step cannot be checked from artifact contents"
+      - "Regularity/integrability conditions under which E(I'_t|I_t=x) is well-defined are unstated"
+    coverage_flags:
+      - "Universal quantification over an uncountable class ('ANY joint density with correct marginals') has no direct construct: the atom is only instantiable per coupling, and the universal itself is carried by an attested external proof that the Phase-0 vocabulary can reference but not internalize"
+    uncertain: false
+    note: >-
+      Dual-character evidence: the claim's ground is the analytic proof
+      (Theorem 3.1, trace N02), which fixes the scheme as strict analytic_proof;
+      E01's GMM check as written instantiates only a defeasible worked-instance
+      verification of the theorem's consequences (transport equation) on three
+      couplings, so it corroborates but cannot itself carry the universal scope.
+  - claim_id: C03
+    claim_type: causal
+    proposition_shape:
+      sketch: "achieves_lower_fid(dep_inpaint_coupling, uncoupled_baseline, imagenet256_inpainting, fid50k_dep=1.13, fid50k_base=1.35)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a two-condition comparison with exact FID values on both
+        sides; the falsification criterion thresholds precisely these two cells
+        (>= 1.35 for dependent, <= 1.13 for baseline), so the numeric arguments
+        are checkable structure a nullary atom would hide.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Both conditions use the same U-Net architecture, optimizer, learning-rate schedule, batch size, and 200,000 gradient steps, differing only in the coupling construction (E02 Setup, steps 1-4)"
+        - "Both conditions receive class-label conditioning (E02 steps 1 and 2), so conditioning information is matched"
+        - "FID-50k is computed with the same protocol (Inception features against the ImageNet validation set) for both conditions"
+        - "The evaluation task is the same for both conditions, so the FID gap is attributable to the coupling rather than to differing information at sampling time"
+        - "The 0.22 FID gap exceeds run-to-run variability of training and FID estimation"
+      supporting_experiments: [E02]
+    strict_certifier: lp
+    certifier_note: >-
+      Given the two FID cells as leaves, the claimed outperformance and its
+      falsification thresholds are single linear inequalities (1.13 < 1.35;
+      dep >= 1.35; base <= 1.13) certifiable by a linear-arithmetic checker.
+      Only this comparison step is strict; the FID measurements themselves and
+      the causal attribution to the coupling stay defeasible.
+    critical_questions:
+      - cq: "Is the uncoupled baseline trained under matched architecture, budget, and conditioning?"
+        mandatory: true
+        status: met
+        basis: "E02 Setup lists one U-Net spec for both systems; step 2 gives the baseline the same class-label channel; step 4 fixes one optimizer/schedule/step-count for training"
+      - cq: "Is the uncoupled baseline evaluated on the same inpainting task, with the same known-pixel treatment as the dependent model?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 step 6 specifies masked-x0 construction and per-step velocity masking only for the dependent model; how the uncoupled baseline samples at evaluation (from N(0,I)? composited with known pixels?) is unstated, so task-matching of the comparison is unestablished"
+      - cq: "Is the FID gap attributable to the coupling rather than to ground-truth pixel copying, given that output masking makes ~70% of each dependent-model output real pixels (p=0.3 masking)?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 steps 1, 5, 6: mask probability p=0.3 and zero velocity on known pixels; no procedure step separates the coupling's contribution from the compositing effect"
+      - cq: "Are seeds, repeated runs, or FID variability reported so 1.13 vs 1.35 is distinguishable from noise?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 Setup and Procedure specify a single training run per condition with no seed count or uncertainty; absence leaves the gap unestablished at reported rigor, not defeated"
+      - cq: "Is FID-50k computed with one protocol for both conditions?"
+        mandatory: true
+        status: met
+        basis: "E02 step 7 defines a single FID-50k computation on the ImageNet validation set for the pipeline; Metrics section names one metric for the experiment"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Dependent coupling inpainting model reaches FID-50k = 1.13 on ImageNet-256"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N07 (Table 2, section 4.1)", "logic/experiments.md E02", "logic/claims.md C03"]
+      - atom: "Uncoupled interpolant baseline reaches FID-50k = 1.35 on ImageNet-256"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N07 (Table 2, section 4.1)", "logic/experiments.md E02 Baselines", "logic/claims.md C03"]
+    attack_candidates:
+      - node: N10
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative (learned coupling with biased inference-time sampling) is a ruled-out design whose lesson motivates the explicit coupling C03 uses; it neither conflicts with C03's FID result nor attacks its comparison scheme or cells."
+      - node: N11
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative coupling construction (mini-batch OT uninformative at ImageNet scale) rules out a competing design for the same setting; it bears on why the designed coupling was chosen, not on the dependent-vs-uncoupled comparison, so no edge."
+    holes:
+      - "Baseline evaluation protocol is unspecified: E02 step 6 details sampling only for the dependent model, so whether the 1.35 baseline figure is unconditional generation or mask-composited inpainting is open"
+      - "The causal attribution is confounded with known-pixel compositing: output masking guarantees ~70% ground-truth pixels in every dependent-model sample, and no ablation separates this from the coupling itself"
+      - "No seeds, repetitions, or FID confidence intervals for either condition"
+      - "Internal sign inconsistency in E02 step 3: with the stated alpha_t = t, beta_t = 1-t and I_t = t*x0 + (1-t)*x1, the derivative is I'_t = x0 - x1, not the stated x1 - x0; one convention must be wrong, and the training target depends on which"
+    coverage_flags: []
+    uncertain: false
+    note: >-
+      Classified causal per sample.tsv: the claim attributes the FID improvement
+      to the data-dependent coupling. The comparison itself is clean
+      controlled_comparison in form, but two of its mandatory CQs (task
+      matching at evaluation, compositing confound) are open, so the causal
+      reading currently rests on the training-side matching alone.

@@ -1,0 +1,707 @@
+sessions:
+- id: 2026-07-21_001
+  date: '2026-07-21'
+  summary: 'M0 kickoff: corpus submodule pin, extraction pipeline (231/279), six-way typing pass, seeded
+    60-claim stratified sample.'
+  turn_count: 4
+  events_count: 7
+  claims_touched: []
+  open_threads: 5
+- id: 2026-07-22_001
+  date: '2026-07-22'
+  summary: 'M0 annotation and scheme freeze (N29-N33), then M1 complete: TCB/host, port-as-we-lock, frozen
+    support/attack/compile chain, and lara-core@0.1 (N38-N43).'
+  turn_count: 18
+  events_count: 28
+  claims_touched:
+  - C02
+  - C07
+  - C08
+  - C13
+  - C14
+  - C15
+  - C16
+  - C17
+  open_threads: 5
+- id: 2026-07-22_002
+  date: '2026-07-22'
+  summary: 'Review hardening: formal-model boundaries strengthened, adversarial Lean fixtures added,
+    CI-equivalent checks pass.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C08
+  open_threads: 2
+- id: 2026-07-23_001
+  date: '2026-07-23'
+  summary: 'CI recovery: bypassed a retired Hackage mirror and verified the complete Haskell/Lean
+    workflow.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 1
+- id: 2026-07-23_002
+  date: '2026-07-23'
+  summary: 'Re-review: five semantic/security gaps closed with exact replay, exact status, set
+    obligations, rebut fixtures, and secure Hackage metadata.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C07
+  open_threads: 2
+- id: 2026-07-24_001
+  date: '2026-07-24'
+  summary: 'Review remediation: branch rebased, §8.1 validator mechanized, docs and append-only
+    ARA history reconciled, full Lean/Haskell checks pass.'
+  turn_count: 1
+  events_count: 3
+  claims_touched:
+  - C02
+  - C09
+  open_threads: 3
+- id: 2026-07-24_002
+  date: '2026-07-24'
+  summary: 'Additional review closed the syntactic-vs-instance wf(Pi) gap with conservative overlap
+    proofs and an exact regression.'
+  turn_count: 1
+  events_count: 3
+  claims_touched:
+  - C09
+  open_threads: 2
+- id: 2026-07-24_003
+  date: '2026-07-24'
+  summary: 'README synced/restructured with purpose + theory sections; ARA-founder interview
+    transcript captured and its artifact-format discussion recorded as a reference doc; late rit-vs-lara
+    comparison discussion opened.'
+  turn_count: 8
+  events_count: 5
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-24_004
+  date: '2026-07-24'
+  summary: 'Concrete ND replay: proved UTF-8 Atom codec inverse, exact submitted-cert adequacy, fixed-theory
+    closure, and shared Lean/Haskell conformance.'
+  turn_count: 1
+  events_count: 4
+  claims_touched:
+  - C03
+  - C05
+  open_threads: 2
+- id: 2026-07-24_005
+  date: '2026-07-24'
+  summary: 'ND spec-review hardening: universal malformed-wire properties, complete constructor arity/replay
+    matrices, and 27 passing Haskell property groups.'
+  turn_count: 1
+  events_count: 1
+  claims_touched:
+  - C03
+  - C05
+  open_threads: 2
+- id: 2026-07-24_006
+  date: '2026-07-24'
+  summary: Exact contrary matcher and executable positional attack checker, with arbitrary-canon adequacy,
+    closed diagnostics, and full fixture matrix.
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-24_007
+  date: '2026-07-24'
+  summary: Proof-bearing whole-program checker with structural identity, cached attack sources, strengthened
+    endpoint boundary, and exact adequacy.
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 1
+- id: 2026-07-24_008
+  date: '2026-07-24'
+  summary: 'Closure: reviewed executable checker architecture, codegen-safe support adequacy,
+    full Lean/Haskell gates, and result-1 evidence reconciliation.'
+  turn_count: 30
+  events_count: 6
+  claims_touched:
+  - C02
+  open_threads: 4
+- id: 2026-07-24_009
+  date: '2026-07-24'
+  summary: 'Executable strict-certificate seam: symbolic wire payloads, canon-indexed replay adequacy,
+    backend-first theory resolution, and registry conformance fixtures.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-25_001
+  date: '2026-07-25'
+  summary: 'rit comparison source-verified: C18 (grounding-interface expressiveness bound), §11 addendum
+    + novelty row (d192047), the PR merged. Commit-path audit found five write-up-vs-code discrepancies
+    → C19 + §11.5, rebased onto the PR. Then C20 + §11.6: rit''s formal verification is node-level only;
+    the weakest-link roll-up is a conditional guarantee over an untrusted (proposer-declared) edge set
+    — missing-edge laundering.'
+  turn_count: 7
+  events_count: 8
+  claims_touched:
+  - C18
+  - C19
+  - C20
+  open_threads: 5
+- id: 2026-07-25_002
+  date: '2026-07-25'
+  summary: 'Review remediation: enforced Lean matrices, symbolic frame tags, corrected TCB docs,
+    and full Lean/Haskell gates.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C03
+  - C05
+  open_threads: 1
+- id: 2026-07-25_003
+  date: '2026-07-25'
+  summary: 'Conflict resolution: preserved upstream rit-comparison ARA history, reassigned branch-local
+    trace IDs, and revalidated all project gates.'
+  turn_count: 1
+  events_count: 0
+  claims_touched: []
+  open_threads: 0
+- id: 2026-07-25_004
+  date: '2026-07-25'
+  summary: 'Planned attack completeness and result-7 consistency against the merged checker,
+    edge-decider, Path-B, and grounded theorem surfaces.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 2
+- id: 2026-07-25_005
+  date: '2026-07-25'
+  summary: 'Implemented exact checked-unit attack completeness, Path-B grounded consistency,
+    computed complete-claim result 7, and full verification.'
+  turn_count: 1
+  events_count: 4
+  claims_touched:
+  - C09
+  open_threads: 4
+- id: 2026-07-27_001
+  date: '2026-07-27'
+  summary: Implemented the full M3 production checker (wire anchor + Lean driver + CLI, 7-module Haskell
+    spine, cached runtime, holes/incompleteAlternative reporting, both-drivers differential + R1-R14 mutation
+    suite); 5 commits, 19/19 byte-exact, AxCheck clean.
+  turn_count: 1
+  events_count: 4
+  claims_touched:
+  - C12
+  open_threads: 3
+- id: 2026-07-28_001
+  date: '2026-07-28'
+  summary: 'M4a end-to-end (the PR): .lara front-end (hand-rolled Lara.Syntax + pure Lara.Elaborate
+    + CLI dispatch), 8-example suite (per-example dirs + .core.sexp + expected.json), result 12 mechanized
+    in Lean over the full presentation AST. 9 commits, 32/32 both-drivers byte-exact, AxCheck clean. Example
+    A corrected (user-approved) to reach its unchanged golden.'
+  turn_count: 1
+  events_count: 10
+  claims_touched: []
+  open_threads: 4
+- id: 2026-07-29_001
+  date: '2026-07-29'
+  summary: 'Strict-cert frontend closed: lara-syntax@0.2 + S1, justified accept, R13 mutation, full suite
+    green, 33/33 both-driver agreement.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 3
+- id: 2026-07-30_001
+  date: '2026-07-30'
+  summary: 'M4 and result 9 closed; Model-A backend replacement strengthened by constructive transport
+    (the PR). Status housekeeping; stale trackers closed. Then duplicate-report groups implemented cross-layer
+    + mechanized (Lara.Groups) with §4.3 quarantine→gap / R9 escalation at the driver boundary; differential
+    41/41; the PR opened; C21 crystallized. Both M5 prerequisites now closed.'
+  turn_count: 5
+  events_count: 15
+  claims_touched:
+  - C04
+  - C21
+  open_threads: 5
+- id: 2026-07-31_001
+  date: '2026-07-31'
+  summary: 'Review remediation, two rounds. R1 (N87): reproduced R9-evasion hole fixed (.lara R14
+    parity), byte-identical R9 stderr diagnostic + differential anchor, rejectionClass total over R9,
+    coverage + provenance fixes. R2 (N88): Lean twin re-synced to Haskell dangling-member semantics (consistentB_iff
+    re-proved), validateGroups negatives, R13-over-R9 stderr pin, 3 sibling malformed fixtures (negatives
+    9/9). All gates green both rounds. N87+N88; O21+O22 staged; C21 evidence extended twice.'
+  turn_count: 2
+  events_count: 4
+  claims_touched:
+  - C21
+  open_threads: 3
+- id: 2026-08-01_001
+  date: '2026-08-01'
+  summary: 'M5 T1+T4 land (the PR merged) and T2 completes on branch: all 60 M0-sample claims lowered
+    to corpus units under corpus-v1 (9 justified/48 gap/3 defeated), differential 206/54 byte-exact; C22
+    + H06 + R7/R13 concept crystallized. Turn 3 (/implement, the PR): T1 corpus half + T3 measurement
+    harness — corpus rejection sweep + accept-verdict family grow the suite 148->340 (every reject class,
+    status, attack kind), Lara.Measure emits the axis-(c) report (400 records, all rates green,
+    location-accuracy 246/246, replay 60/60); differential 398/54; C22 Proof extended; O29/O30/O31 staged.
+    Turn 4 (/implement, the PR): T6 ablation baselines — CheckConfig (no-cq / no-typed) surgical over
+    seeded mutants (18 IncompleteArgument / 11 R10 + 19 R11 misses, zero else) and monotone; suite
+    340->358 via OpHoleObligation; differential 416/54; C23 crystallized (localization verification-style),
+    O31 -> timing-protocol constraint; O32/O33/O34 staged.'
+  turn_count: 4
+  events_count: 26
+  claims_touched:
+  - C21
+  - C22
+  - C23
+  open_threads: 5
+- id: 2026-08-02_001
+  date: '2026-08-02'
+  summary: 'M5 T5 freeze. Assessed project status (only T5 gated the paper; 4-axis eval is two papers).
+    Branch m5-t5-freeze-protocol: user reversed "land [redacted] first" → "freeze now, defer [redacted]" after the
+    manager showed the follow-up is deferred/LLM-gated with no natural-defect corpus (N98). T5 executed (N99):
+    git-tree-SHA input freeze + seed 20260801, gates green (byte-identical regen, differential 416/0+54/0,
+    cabal test PASS), post-freeze measure.hs committed under measurements/frozen/ (418 records, class-match
+    + lean_agree 418/418), docs/m5-freeze-checklist.md, tag m5-freeze-v1 deferred to merge. M5 complete →
+    pivot M7 (N100). Crystallized O32→C24 (surgical/monotone ablation) + O34→H07 (audit gate coverage);
+    staged O35. Freeze on branch 51be992; PR/push held for user. Turn 3 (separate conversation;
+    intervening turns unrecorded): the ra@1 review addressed — RASpec conformance suite
+    for ra@1 (15 properties green, commit 69264a1, N101); staged O36 (Haskell/Lean
+    parity-by-construction).'
+  turn_count: 3
+  events_count: 8
+  claims_touched:
+  - C24
+  - H07
+  open_threads: 7
+- id: 2026-08-03_001
+  date: '2026-08-03'
+  summary: 'P1-P3 gate closed: Lean name-map audit confirms the two-sided equivalence oracle-free
+    (srcStatus_iff_checked); contingency moot; audit landed via the PR; paper
+    side-by-side validation passed with comment-only fixes (Overleaf 418e423).'
+  turn_count: 2
+  events_count: 2
+  claims_touched: []
+  open_threads: 4
+- id: 2026-08-04_001
+  date: '2026-08-04'
+  summary: 'RIT audit + reviewed roadmap: evidence admission remains the narrow calculus extension; deep review adds structural quarantine pruning, conservative evidence-blocked reporting, failure-path dependency traces, abstract Lean scope, and external registration receipts; follow-up is open as the stacked chore PR; C19/O12 remains unresolved.'
+  turn_count: 5
+  events_count: 10
+  claims_touched: []
+  open_threads: 4
+- id: 2026-08-05_001
+  date: '2026-08-05'
+  summary: 'Production bridge closed and published in the PR at bd2896a: aligned retained structures, compact-to-declared AF embedding, checker-instantiated non-promotion theorem; all 10 review threads answered; gates green at 435/435 + 54/54.'
+  turn_count: 2
+  events_count: 4
+  claims_touched:
+  - C21
+  - C25
+  - H08
+  open_threads: 2
+- id: 2026-08-05_002
+  date: '2026-08-05'
+  summary: 'Closed quarantine review gaps: shared Haskell/Lean canonNum, numeric two-blocked-query production differential, .lara ArgId uniqueness, directed-tightness/rendering/mutation regressions; gates green at 436/436 + 54/54.'
+  turn_count: 1
+  events_count: 2
+  claims_touched:
+  - C12
+  - C25
+  open_threads: 1
+- id: 2026-08-05_003
+  date: '2026-08-05'
+  summary: 'Engineering review approved a split delivery: runtime conformance first; dependent raw-aligned Lean admission metatheory, source differential, and paper updates second.'
+  turn_count: 5
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-06_001
+  date: '2026-08-06'
+  summary: 'Policy admission delivered end to end (code 5d661fb, paper 16f82b9 pushed; hosted CI blocked by the GitHub Actions outage); a second review round closed the public admission bypass and hardened located rejections, R14 uniqueness, all-admit scope, and harness diagnostics (H09, H10 crystallized). A third turn engineering-reviewed the ord@1 comparison-backend plan: 12 findings all folded (family {num_lt,num_le}, premise-only certificate slots, Cell factoring in both languages, mechanized exclusivity lemmas, full pin matrix, bridge-rule fixture); C26 crystallized; verdict ENG CLEARED. A fourth turn implemented that plan end to end across Haskell, Lean, and conformance (7 commits): the ord@1 backend, the Cell factoring in both languages, adapter soundness plus mechanized intra-family exclusivity, the S2 bridge-rule worked example, and four differential fixtures. Mechanization forced one design change (N125: the premise-only guard moved into theory resolution because the abstract Backend core cannot see the premise count), and the differential anchor caught a Lean preflight-list divergence before it shipped; C27 crystallized. A fifth turn was a user review pass over that delivery: no new events (the three headline items were already N125-N127), and the offered revert of the registryEx deviation went unanswered, so it is now tracked as pending adjudication. A sixth turn resolved that deviation on user direction (ord@1 registered in registryEx with five theorems) and addressed an review of the PR: no correctness defect, but one real golden-coverage gap (closed by a new coverage property that also caught two pre-existing unpinned anchors), the Cell refactor''s byte-exact-message invariant pinned and mutation-tested, and eight documentation statements the code contradicted — chiefly three claiming an ord@1 theory emptiness guarantee that does not exist on the raw door. A seventh turn dispositioned the review''s three no-change notes: two deferred as one scoped P2 TODO (surfacing backend rejection reasons, then valuing the cell-mismatch messages), the third closed in place because the guard called dead is what keeps resolve total.'
+  turn_count: 7
+  events_count: 26
+  claims_touched: [C26, C27]
+  open_threads: 7
+- id: 2026-08-08_001
+  date: '2026-08-08'
+  summary: 'Implemented lara-syntax@0.3, closed eight initial round-2 findings, then closed four re-review follow-ups with red-green and mutation-effective coverage. Full local Haskell/Lean/axiom/replay/tamper/freshness/differential/admission gates passed; hosted Haskell and re-review are pending.'
+  turn_count: 3
+  events_count: 13
+  claims_touched: []
+  open_threads: 6
+- id: 2026-08-09_001
+  date: '2026-08-09'
+  summary: 'Implemented and review-hardened the issue Steps 1-3 tooling: deterministic 42-subject blinded packets, status-free validation, sealed-result summarization, exact input identities, and canonical reporting. Human judgments, summary generation, and paper updates remain open.'
+  turn_count: 6
+  events_count: 12
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-10_001
+  date: '2026-08-10'
+  summary: 'Implemented and review-hardened lara-core@0.2, merged the benchmark repair as the PR, published m5-freeze-v4 on f4327b4, and merged the housekeeping PR. The bounded result-12 parity closure is approved and has a source-grounded implementation plan.'
+  turn_count: 7
+  events_count: 22
+  claims_touched: [C28, C29, C30, H13]
+  open_threads: 13
+- id: 2026-08-11_001
+  date: '2026-08-11'
+  summary: 'Merged result-12 parity, implemented and externally review-hardened value bindings as lara-syntax@0.4, and pushed the merge-clean PR with byte-stable S2/S5 artifacts plus green local/hosted gates; reviewer re-approval remains.'
+  turn_count: 7
+  events_count: 14
+  claims_touched: [H13]
+  open_threads: 3
+- id: 2026-08-12_001
+  date: '2026-08-12'
+  summary: 'Recorded local verification: exact inferred syntax and stable D6 diagnostics, 72-row presentation parity, unchanged source/core and replay artifacts, and passing local differential/admission/freshness gates; hosted Haskell/Lean CI remains pending, and stays open as a separate opaque-certificate-layer design problem.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-12_002
+  date: '2026-08-12'
+  summary: 'Opened the PR for plain-argument theta inference and confirmed clean hosted Haskell/Lean CI; verification is complete pending merge, while the certificate-layer item remains a separate open design problem.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-12_003
+  date: '2026-08-12'
+  summary: 'Re-verified the implementation contract, corrected the intermediate 72-row ARA record with final 73-row parity, and recorded hosted run 31653193555 on ARA-append head c9c59a6 before this metadata correction commit; review handoff remains open.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 4
+- id: 2026-08-12_004
+  date: '2026-08-12'
+  summary: 'Approved the coordinated ARA format alignment design and committed a 12-task, three-repository implementation plan that preserves LARA provenance, evidence, narrative, and 177-node DAG semantics behind immutable strict runtime gates.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-13_001
+  date: '2026-08-13'
+  summary: 'Implemented named certificate premise slots, review-hardened the PR, then repaired a Unicode Haskell/Lean classifier divergence by parameterizing the mirror over the production lexer; all local and hosted gates green, reviewer re-approval remains.'
+  turn_count: 3
+  events_count: 10
+  claims_touched: [C31, H14]
+  open_threads: 3
+- id: 2026-08-17_001
+  date: '2026-08-17'
+  summary: 'Implemented the Map-backed parseTag lookup, proved full semantic parity, measured a 54.02% median parse reduction, and opened green the PR.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: [C32]
+  open_threads: 1
+- id: 2026-08-18_001
+  date: '2026-08-18'
+  summary: 'Resolved all five review findings: corrected the Tag cardinality to 97, clarified the Haskell/Lean table relationship, mechanized injectivity, pushed the fix, and resolved every review thread.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: [C32]
+  open_threads: 1
+- id: 2026-08-18_002
+  date: '2026-08-18'
+  summary: 'Implemented the ByteString wire parser with code-point columns, probed the invalid-UTF-8 boundary on main first, measured a 45.5% same-session median parse reduction with every gate green, withheld the regenerated table under machine load, and opened the PR (hosted CI green).'
+  turn_count: 2
+  events_count: 7
+  claims_touched: [C33]
+  open_threads: 3
+- id: 2026-08-20_001
+  date: '2026-08-20'
+  summary: 'Executed the lara-syntax@0.7 surface-strictness batch: migrated the ten affected corpus spellings alongside the restrictions, proved acceptance-preservation with an empty frozen-artifact diff across ten green gates, wrote grammar Appendix F, and closed a fall-through the issue had not named.'
+  turn_count: 1
+  events_count: 5
+  claims_touched: []
+  open_threads: 2
+- id: 2026-08-21_001
+  date: '2026-08-21'
+  summary: 'Shipped lara-syntax@0.8 premise-label certificate citation as Part A of the named-certificate-authoring plan: a third name class with a no-carve-out collision policy, byte-identity measured against the numeric twin, zero Lean re-proof owed, worked example S7, grammar Appendix G, the PR. Then split the 1209-line Lara.Mutate into seven ownership modules as one atomic output-preserving commit, verified byte-identical against a pre-split baseline of 506 checksums with the differential unmoved at 582/0 and 56/0.'
+  turn_count: 2
+  events_count: 8
+  claims_touched: [C31]
+  open_threads: 6
+- id: 2026-08-22_001
+  date: '2026-08-22'
+  summary: 'Executed lara-syntax@0.9 named nd@1 proof terms, mechanized conservativity and translation, added byte-identical S8, corrected candidate-scoped label advice in final review, passed all release gates, and opened the PR; remains the formula-annotation follow-up.'
+  turn_count: 1
+  events_count: 7
+  claims_touched: []
+  open_threads: 2
+- id: 2026-08-23_001
+  date: '2026-08-23'
+  summary: 'Executed lara-syntax@0.10 source-authored nd@1 formula annotations: (prop TEXT) reuses the surface prop production and lowers via encodeAtomKey. Nf; S8 goldens byte-unchanged; Lean lowerFormula_eq_translation added; all gates green; the PR opened.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-25_001
+  date: '2026-08-25'
+  summary: 'Resolved the review of the discriminating-localization benchmark: closed a critical hole where the composite operators never applied or verified their second rewrite (tails now derived from the mutant by reverting the head defect), pinned the report header and the two location cells apart, covered the expected-location comma guard, and corrected both documents to say location_match is 100% by construction with the discrimination living in the gate strength rather than the number. That correction contradicts C23''s untested-boundary prediction; flagged as N212 and deferred. Then executed the type refactor that review produced (OpFamily sum type; SeededSites non-empty wrapper), verified byte-neutral on the frozen corpus and landed as the PR ahead of the refreeze, and closed in favour of a paper-repository issue this repo cannot discharge. Turn 3 closed the code side: cut m5-freeze-v5 as the batch''s single regeneration cycle (504->541 mutants, 564->601 records, every class delta accounted for by the five new operators, no pre-existing byte moved, ten gates green, tag on 5dd326b) and landed the naturalness-boundary policy note as constraints.md''s newest entry. Skipped the rider and kept the series name, both defaults. Found two provenance defects in the v4 snapshot (one repaired, filed for the other) and that CI ran no job all window for account-billing reasons, leaving the freeze on local gate runs. Researcher then declared the code side complete — pivot N219 to writing.'
+  turn_count: 3
+  events_count: 15
+  claims_touched: [C23]
+  open_threads: 6
+- id: 2026-08-26_001
+  date: '2026-08-26'
+  summary: 'Theory M1 complete: fixed-policy realizability is executable and implies the frozen invariant, the empty-defeat singleton self-edge mechanizes non-sufficiency, the M0 gate retained the carrier, all focused/full gates passed, and O93 crystallized as C34.'
+  turn_count: 5
+  events_count: 16
+  claims_touched: [C34]
+  open_threads: 11
+- id: 2026-08-28_001
+  date: '2026-08-28'
+  summary: 'M2a is in review as a PR. Two external review rounds strengthened the credulous theorem, added generated grounded and carrier-bound properties, added a reinstatement framework with multi-element extensions, automated Lean-to-Haskell golden parity, corrected durable pointers and counts, removed schema-dropped fields, and tracked the stale sweep. C35 matches the quantified theorem.'
+  turn_count: 2
+  events_count: 12
+  claims_touched: [C35, C36]
+  open_threads: 7
+- id: 2026-08-29_001
+  date: '2026-08-29'
+  summary: 'Theory M3 opened as a PR (typed core/public matrices, conditional preservation, golden conformance), then theory B0 heterogeneous backend compositionality implemented across six commits: occurrence vocabulary, the backend firewall, occurrence-level accounting, a split mixed witness after S1 was re-decided on measured kernel-opacity evidence, repair of a shipped checker that discarded every dependency report, and a cross-language certDeps golden over shipped cores.'
+  turn_count: 3
+  events_count: 16
+  claims_touched: [C37, C38, C39, C40, C41, C42, C43]
+  open_threads: 8
+- id: 2026-08-29_002
+  date: '2026-08-29'
+  summary: 'Executed the stale sweep: applied the research-manager 3+-session-day rule to the staging buffer with references read from the session records, the reasoning log, timestamped tree nodes, and staged cross-citations, counting idleness in session-days. 33 of 43 unpromoted, unstale observations were flagged, ten stay live (O37 and O85 held by live CONFLICT citations in claims.md), and the 33-entry stale set is surfaced for researcher triage. Flags only — no observation, forward reference, promotion, or deletion changed, and ARA validation held at the 0-error/160-warning baseline.'
+  turn_count: 1
+  events_count: 1
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-29_003
+  date: '2026-08-29'
+  summary: 'Triaged the stale set (33 entries) plus the two the sweep held live. Closure was tested against post-staging signals only, on the ground that staging already encodes the judgement that same-turn implementation is not a commitment: O69 closes to N176 by empirical resolution, O12/O37 and O85 are blocked on the unresolved N105 and N212 adjudications, O65-O67 were already settled when their sibling O64 became H13, and 28 await verbal affirmation with their subjects listed. Also determined that O37 and O85 are correctly unpromoted — a CONFLICT marker cites an observation as a challenge, not as a premise — which closes the bookkeeping question the sweep raised and leaves the C19 and C23 adjudications as the real open item.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-30_001
+  date: '2026-08-30'
+  summary: 'M2b''s INCONCLUSIVE spike record merged and the item closed COMPLETED on it; the commissioned follow-up exists as a follow-up issue and plan PR, selecting compositional checker lemmas through checkUnit_complete toward the family-wide checkUnit_formula_ok with D7-D9 frozen and the retired post-gate tasks restated. O108 crystallized as the follow-up realization constraint via artifact commitment; implementation is blocked on the plan PR''s engineering review, and no hardness or tractability claim is made.'
+  turn_count: 8
+  events_count: 25
+  claims_touched: [C44, C45]
+  open_threads: 1
+- id: 2026-08-30_002
+  date: '2026-08-30'
+  summary: 'Selected M5 as the concurrent core track and created theory/m5-surface-calculus. The implementation plan uses the full lara-syntax@0.10 Program/Policy AST, reserves alpha-equivalence for genuine binders, keeps global/replay names distinct, requires an independent surface judgment, and evaluates formal theorems, cross-language conformance, and unchanged-core regression together.'
+  turn_count: 2
+  events_count: 5
+  claims_touched: []
+  open_threads: 3
+- id: 2026-08-31_001
+  date: '2026-08-31'
+  summary: 'The issue is implemented and the PR is review-hardened: the first review added missing AxCheck rows and closed leaf-ID spelling fixtures, corrected the quartic parameter summary and realization-transfer direction, and narrowed C44 from an unsupported asymptotic-optimality claim to the proved universal n² lower bound plus the exact n=2 cubic counterexample. Fresh Lean/Haskell/AxCheck/ARA gates pass.'
+  turn_count: 3
+  events_count: 5
+  claims_touched: [C44, C45, C46]
+  open_threads: 0
+- id: 2026-09-02_001
+  date: '2026-09-02'
+  summary: 'PW0 possible-world outer-model gate mechanized and opened as the PR (merged), then — on the researcher''s directive to continue the PW track in parallel with M4 — T6 exact checked-support transport mechanized and opened as PR The partial symbol translation with its two commuting facts (instAPat_tr, equiv_tr), the three-clause StructuralBridge contract over a shared canon, support_transport with the obligation list transported verbatim (completeness unconditional), target-registry occurrence replay via B0''s headline, Admits/admits_transport discharging PW0 limitation 1, the T6/T8 boundary packaged at the live T7 pair, and a genuine renaming bridge with the translationUndefined domain negative. Also in-session: crossCompare rename (N273), audit-gate hardening (N274). C47 and C48 crystallized; PW-T6 translation-form constraint crystallized from O113. Final gates: build 130 jobs, audit 1707 declarations (78 PW-T6), diff pure insertion. Then Theory M4 Part A executed end to end on the researcher''s directive (F0-F3 plus review fixes, the PR): the fragment/linking calculus with a witnessed link guard and saturating linking, the structural merge proved inert via a generic AF node-merging morphism, context composition, and backend_replacement_congruence — a certificate relabel is unobservable in every admissible context. The plan''s unconditional phrasing was found false under forward-only acceptance; the final review found both headline witnesses vacuous and they were repaired with a certificate-bearing split and a real backend swap. C49 crystallized; filed. Gates: build 138 jobs, 1911 audited declarations (204 M4).'
+  turn_count: 5
+  events_count: 29
+  claims_touched: [C47, C48, C49]
+  open_threads: 5
+- id: 2026-09-03_001
+  date: '2026-09-03'
+  summary: 'Review remediation: detailed contextual outcomes, side/value-bearing LinkFaults, concrete rejection/composition/admissibility witnesses, and mechanically complete M4 AxCheck coverage; 138-job build and 1925-entry audit pass.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: [C49]
+  open_threads: 1
+- id: 2026-09-03_002
+  date: '2026-09-03'
+  summary: 'Parallel-to-M4 session: CI outage diagnosed to an ARA-Labs org billing block (org-admin action, not repo work), then closed — the strict-certificate renaming bridge (bridgeCert) discharges StructuralBridge.cert_ok non-vacuously off the identity with a point-mass CertOk pair, cert_accept_translated as regression guard, and cert_transport running the transported derivation through the AssuranceOk.cert arm. Audit grows to 1712 declarations (83 PW-T6), counts moved together in doc/evidence/C48. Opened as the PR.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: [C48]
+  open_threads: 3
+- id: 2026-09-03_003
+  date: '2026-09-03'
+  summary: 'Scope closure: the M1 item closed on maintainer review; M4 Part B (full abstraction) descoped on researcher decision — the PR records the boundary in docs §7, deletes the executed plan on merge; reopening triggers cross-noted on the affected items; the previously unrecorded Part B rationale is now in the trace (N291).'
+  turn_count: 1
+  events_count: 3
+  claims_touched: []
+  open_threads: 3
+- id: 2026-09-03_004
+  date: '2026-09-03'
+  summary: 'PW-T9 implemented as a synchronized two-PR stack: the first PR freezes first-leg-first partial-translation composition together with structural-bridge composition, indexed paths, path coherence, and checked path transport; the second PR adds applicability factorization, arbitrary-path commuting triangles, accepted-edge coherence, expanded witnesses, durable docs, and final Lean audit wiring. All adversarial-review findings are resolved and the executed plan is retired.'
+  turn_count: 2
+  events_count: 13
+  claims_touched: [C48]
+  open_threads: 3
+- id: 2026-09-04_001
+  date: '2026-09-04'
+  summary: 'PW-T9 review closeout: synchronized 33/67-declaration evidence is pinned to real heads, negative-triangle records distinguish checked leaf disagreement from predicate-only structural disagreement, applicability bridges now inhabit the checked world context, and the 140-job build plus standard-axiom audit pass.'
+  turn_count: 1
+  events_count: 3
+  claims_touched: [H16]
+  open_threads: 3
+- id: 2026-09-04_002
+  date: '2026-09-04'
+  summary: 'PW-T9 provenance closeout: the first PR''s ownership now includes bridge composition, indexed paths, path coherence, and checked path transport; the second PR''s ownership begins at applicability factorization, commuting/direct-path agreement, accepted-edge separation, expanded witnesses, durable records, and final audit wiring. The corrected tree passes the 140-job build, 67-declaration targeted coverage, and standard-axiom audit.'
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 3
+- id: 2026-09-04_003
+  date: '2026-09-04'
+  summary: 'M4 Part A debt clearance: instances at their structures; generic lemmas public at Support/Attack/Admission with private copies deleted; cache bridge proved; composition non-closure witnessed; moot; re-sized as milestone work. All M4 gates pass at 14b9e34.'
+  turn_count: 1
+  events_count: 4
+  claims_touched: []
+  open_threads: 4
+- id: 2026-09-04_004
+  date: '2026-09-04'
+  summary: 'PW-T8 mechanized and delivered as a PR: total attack bisimulation preserves grounded status, StatusBridge instantiates it at structural bridges, status_transport preserves all four statuses with modal collapse and T9 composition; T7 recorded as a forward homomorphism failing matched. Implemented without cleared eng review; pre-flight compilation found 12 plan defects. C50 created; C47/C48 boundaries discharged; the issues filed.'
+  turn_count: 1
+  events_count: 11
+  claims_touched: [C50, C47, C48]
+  open_threads: 4
+- id: 2026-09-05_001
+  date: '2026-09-05'
+  summary: 'PW-T8/T9 follow-ups delivered as four PRs: executable witnesses, zipOpt traversal seam, StatusBridge decider with soundness and completeness, and declared-attack transport deriving T8''s index-level clauses. T8 limitation 1 narrowed (Function.Injective lm boundary), not discharged; C50 conditions updated. Coverage 2262 → 2304; all local gates green.'
+  turn_count: 1
+  events_count: 6
+  claims_touched: [C50]
+  open_threads: 0
+- id: 2026-09-06_001
+  date: '2026-09-06'
+  summary: 'Fixture drift guards: cert_reject_mismatched_certifier pins that both acceptance judgments read (beta, hd, kappa); cert_only_assurance and cert_target_rule pin allowTrusted off with the certificate arm the only reachable assurance, source and target. Both mutations reproduced and reverted; coverage 2492 -> 2495 (PW-T6 84 -> 87), build and axiom audit green. Then the issue closed: preferred_exists proves every framework has a preferred extension with no Nodup and no Mathlib — a longest admissible candidate meets a competitor as a sublist, not a subset — so the Mathlib dependency the issue budgeted was never needed; AxCheck rows 2495 -> 2500, coverage gate 2341 declarations, C35/C36 conditions narrowed. Then the issue closed: the certDeps report reaches a shipped consumer for the first time (Lara.Driver.unitCertDeps over the accepted checked unit, a fifth lazily built component of the single runCheckReported pass, and a lara deps subcommand on both doors). The report rides beside the verdict rather than inside it, so the N11 differential anchor and the corpus goldens do not move; the golden CertDep encoder moved from test/StrictSpec.hs into the library so the shipped text is the artifact the cross-language golden pins. Differential 620/0, deps golden PASS, Lean untouched and re-audited green. C42 conditions narrowed. A parallel turn 4 (separate conversation from the same post-turn-2 state) reviewed the backlog and recommended unaware it was concurrently done, then took as a warm-up and found it moot at birth — both PW-T8 cleanups already in the PR, merged 7 minutes before the issue was filed — and closed with verification, no code change.'
+  turn_count: 4
+  events_count: 15
+  claims_touched: [C35, C36, C42]
+  open_threads: 5
+- id: 2026-09-07_001
+  date: '2026-09-07'
+  summary: 'Closed: SurfaceTransport witnesses surface_directAF_relabel unconditionally with 34 trio-clean theorems and no native_decide, the escape being a kernel-form certificate payload that never reaches NDNamed.lowerFormula. Review then caught the module sitting outside the lake build closure — AxCheck.lean is not a lake target — so the PR''s green gates had run against a hand-built olean; ae5b408 adds the import and re-runs all four from a wiped .lake (149 jobs, coverage 2375, audit green). N300''s "milestone-sized" sizing refuted; O120 crystallized into constraints.md. Follow-ups (edge-free witness) and (CI closure check, second recurrence). Then the issue closed, completing the §5.2 adapter portfolio: insp@1 ships the static code-inspection checker as a closed four-predicate family over declared exhaustive inventories, certifying the closed-world step (a negative existential over code follows deductively from an exhaustive enumeration) and never the enumeration''s faithfulness to bytes — which is why corpus unit C09 stays a gap and why worked example S9 is C09 plus the one leaf C09 lacks. §9 r10 discharged in lean/Lara/Insp.lean (17 theorems, trio-clean); evidence is 23 property groups, four wire anchors, and S9. Two theorems settle the contrary question in both directions — exclusive at a shared inspection leaf, co-acceptable across two — which crystallized C51 and gave C27 its third and sharpest instance. The requested mutation leg was built, fully verified (568 mutants), and reverted on colliding with frozen input row 1; that cost is measured and filed. Differential 620 → 625, 0 fail; ARA span checker repaired from 5 pre-existing failures to PASS. Turn 3 executed the plan end to end: Lara.Context.obsGen parameterizes the projection read off the linked carrier rather than the semantics, so obsGen_congr proves contextual representation independence once and obsSem/CtxEquivSem plus the four congruences are instantiations of it. The generic congruence needs no AttackExtensional hypothesis - it transports along the carrier equality compileUnit_link_relabel supplies - refuting the cost estimate in the issue; the grounded case is recovered by theorem (obsSem_grounded, and ctxEquivSem_grounded_iff as an iff). Non-triviality needed new fixtures: every pre-existing M4 carrier agrees across all five semantics (now proved), so a three-cycle where stableSem reports noExtension and a sink where preferredSem and groundedSem disagree were authored, each with a disequality conjunct. 154 jobs, coverage 37, audit trio-clean. The grounded-semantics untested boundary of C49 discharged; C52 crystallized. Follow-ups (relations vs functions), (certificate-bearing instantiation), (an admissible disagreeing carrier). Turn 4 opened intending to execute the same plan from a fresh conversation and found the work already merged as the PR — turn 3''s own output. The plan had pre-registered that contingency, so its checklist was run: Tasks 2/4/5/6/7 and most of 8 were landed, including the plan''s one unauthored high-risk step; Task 1, Task 3 and finding T1 were not. Scope was put to the researcher, who chose to land them. Commit eb6e955 replaces the PR''s two-type design with one: Fragment.lean''s Observation inductive becomes the payload-generic ObservationOf alpha with Observation an abbreviation of it, Outcome is deleted, the obsGen family moves into Equivalence.lean beside the theorems it generalizes, and obs_eq_of_ok / backend_replacement_congruence become one-line corollaries. The payoff is that the milestone''s own design premise -- obs is obsGen at the grounded projection -- stops being prose and becomes obs_eq_obsGen, closing by rfl; across two distinct types the equation was not even well-formed. Replacing the frozen inductive cost no decide-closed fixture (abbrev is definitionally transparent) and no statement: the signature-level diff of Equivalence.lean is purely additive. 100 jobs, axiom trio, coverage 90. The plan file was executed and deleted. Both review stages found real defects -- 7 mis-delta''d citations and 5 docstrings whose generalization arrow the move had inverted -- and citation rot recurred mid-turn until repaired by name rather than by delta. C52 sharpened (parameterizing the reader is necessary but not sufficient); C49 Proof repointed. N335 left unresolved: the new evidence contradicts a clause of staged O152. Turn 5 settled the points turn 4 had flagged for the researcher: N335 adjudicated (O152''s ''sits beside rather than replaces'' clause dropped, the rest standing), obsGen_ext deleted as dead (coverage 90 -> 89), and citation rot given a gate — scripts/check-lean-citations.py resolves every lean/**:NNN prose citation to a declaration and fails on rot, verified by injecting line drift. Deleting obsGen_ext shifted Equivalence.lean a third time and re-staled the citations again, which is the third recurrence in two turns and the argument for the gate. A generalized repoint-by-name script over-reached — it snapped deliberate proof-line citations to the next declaration and corrupted a line range — so O156''s rule was narrowed rather than crystallized: repoint only citations that resolved to a declaration before the edit. The two citation gates are deliberately disjoint, with ARA Sources staying with check_ara_source_spans.py and the append-only ARA records outside both.'
+  turn_count: 5
+  events_count: 31
+  claims_touched: [C27, C47, C51, C49, C52]
+  open_threads: 3
+- id: 2026-09-08_001
+  date: '2026-09-08'
+  summary: 'Implemented end to end from plans/2026-09-08-theory-m4-relational-parametricity.md (16 commits, one per plan step). M4''s contextual representation-independence theorem is generalized from a function f: Assurance -> Assurance to a relation R lifted structurally through support terms, attacks and fragments: obsGen_parametricity proves it once over an arbitrary projection, and backend_replacement_parametricity{,_sem} are instantiations. The issue''s own sizing question is answered no — compileUnit_rel concludes an EQUATION between StructuredAFs, so the relation is erased before any semantics runs and no fixpoint machinery, grounded-labelling lemma or AttackExtensional hypothesis appears anywhere. RelInj (partial bijection) is forced by three consumers — dedupList, coveredB, checkUnit_complete''s Nodup — and relInj_necessary witnesses it as coveredB_rel with hR deleted and the conclusion negated. The milestone''s actual content is the localization, not the quantifier: relInj_functional shows RelInj makes R a partial function, so every conclusion is already reachable via backend_replacement_congruence EXCEPT where no total injective extension satisfies AssurPreserving globally — backend_replacement_parametricity_local (and _local_sem) instantiate the guarded hypothesis at occRel F to show that gap is non-empty. Congruence_correspondence typechecks by rfl, the mechanized guard that the corollary restates the functional theorem exactly rather than something weaker. Lara.Forall₂ authored locally: List.Forall₂ is a Mathlib name, absent from Lean 4.32.0. Two new modules, 1831 lines at the close of this session (1865 at the branch head, after the merge of origin/main and the PR''s review response), sorry-free; 158 jobs, coverage 90 (2619 tree-wide), audit trio-clean, both modules verified inside the build closure. Naming (keep "parametricity") decided by the user up front; the two "Not parametricity" doc bullets amended rather than deleted, the generic-observation one scoped to the two of four congruences that actually moved. C53 and C54 crystallized; C52 hypothesis -> testing on a second instance; C49''s untested boundary discharged. Follow-ups (observational separation), (docstring pointers), (the two remaining congruences).'
+  turn_count: 1
+  events_count: 8
+  claims_touched: [C49, C52, C53, C54]
+  open_threads: 9
+
+- id: 2026-09-08_002
+  date: '2026-09-08'
+  summary: 'Admissibility and generic congruence on the semantics-separating cycle.'
+  turn_count: 1
+  events_count: 1
+  claims_touched:
+  - C49
+  open_threads: 1
+
+- id: 2026-09-09_001
+  date: '2026-09-09'
+  summary: 'Accepted fragments separated by stable semantic payloads. Certificate collapse
+    separates accepted grounded observations. Implemented and opened stacked
+    PRs. Refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot. G0 copying separation; re-descoped.'
+  turn_count: 5
+  events_count: 12
+  claims_touched:
+  - C24
+  - C35
+  - C49
+  - C53
+  - C54
+  open_threads: 1
+
+- id: 2026-09-09_277
+  date: "2026-09-09"
+  summary: "Completed relational congruence family."
+  turn_count: 1
+  events_count: 1
+  claims_touched: [C49]
+  open_threads: 0
+
+- id: 2026-09-09_issue279
+  date: '2026-09-09'
+  summary: 'Finite injective realization with context fixing; unrestricted extension
+    refuted.'
+  turn_count: 1
+  events_count: 1
+  claims_touched:
+  - C53
+  open_threads: 0
+
+- id: 2026-09-09_issue307
+  date: '2026-09-09'
+  summary: >-
+    Issue 307, both halves: Query_κ well-sortedness and the outer language's
+    surface. PW0 limitation 2 narrowed, not closed — two of its four conflated
+    conditions coincide by theorem. PR 311's review then found the bridge fixture's
+    obligations vacuous; discharged, every fault located, judgments stated
+    independently of their deciders.
+  turn_count: 3
+  events_count: 17
+  claims_touched:
+  - C55
+  - H18
+  open_threads: 5
+
+- id: 2026-09-10_001
+  date: '2026-09-10'
+  summary: 'Path-based linking chosen, then the multi-artifact map implemented
+    and landed in six commits.'
+  turn_count: 2
+  events_count: 4
+  claims_touched:
+  - C56
+  - C06
+  open_threads: 5
+
+- id: 2026-09-11_002
+  date: '2026-09-11'
+  summary: >-
+    Implemented, then the review rounds; finally the nesting bound:
+    the shared reader's nesting bound became a two-runtime contract, pinned on both
+    sides of the boundary in all three reader differentials, and differential.sh was
+    unblocked later by excluding fixtures/pw/ as a family with its own harness.
+  turn_count: 4
+  events_count: 16
+  claims_touched:
+  - C12
+  open_threads: 4
+
+- id: 2026-09-11_001
+  date: '2026-09-11'
+  summary: >-
+    Resolved the six follow-ups: structural merge reached through a real map,
+    link rejection proved impossible, batch link mechanized and shown equal to the
+    fold, map bench committed with its own protocol.
+  turn_count: 2
+  events_count: 6
+  claims_touched:
+  - C56
+  open_threads: 3
+
+- id: 2026-09-12_001
+  date: '2026-09-12'
+  summary: >-
+    In one PR: agreeing duplicate-report groups are inert in PW worlds
+    (empty quarantine proved the identity), conflicting groups refused by name; .lara
+    world sources elaborated by lara pw and compared through the lara pw-input
+    derivation door. Gate 7/99/112 plus the .lara family 1/16/20. Then the text
+    boundary moved from the PW doors to the whole CLI, so every door reads .lara text
+    as UTF-8 under every locale, with the solo door's first locale gate (five cases).
+    Then the Lean reader stopped being a partial def, which is what had made the
+    nesting bound enforceable but unprovable, and the bound became five trio-clean
+    theorems — the load-bearing one locating the refusal at the post-skipSpace position.
+    Refusal behaviour unmoved; all three reader differentials pass unmodified.
+  turn_count: 4
+  events_count: 16
+  claims_touched:
+  - C12
+  open_threads: 4
+
+- id: 2026-09-20_001
+  date: '2026-09-20'
+  summary: 'P1 philosophy debate followed by D5, a separately mechanized axiom-withdrawal
+    witness with runnable source controls and passing full gates.'
+  turn_count: 2
+  events_count: 5
+  claims_touched: []
+  open_threads: 1

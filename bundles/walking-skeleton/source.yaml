@@ -1,0 +1,217 @@
+# Mini ARA trace — self-authored structured source for the M4b walking skeleton.
+#
+# Format: ara-mini-trace@1 (schema + controlled vocabularies pinned in
+# bundles/README.md §3). Flavor follows ara/trace/*.yaml (nested tree, typed
+# nodes, NL narratives) but this is a NEW small trace, authored for M4b.
+#
+# Abstraction ceiling (plan T6) — this file carries RESEARCH-LEVEL objects ONLY:
+# natural-language claims, evidence cells, experiment outcomes, dead-end
+# narratives, artifact refs. It contains NO formal propositions, NO scheme ids,
+# NO critical-question ids, NO discharge decisions, NO attack declarations, and
+# NO certificates. Every certificate-level construct in the emitted
+# emitted.lara (atoms, scheme instances, discharges, holes, typed attacks) is
+# DERIVED by the untrusted elaborator (elaborator/elaborate.py, task B1) from
+# this file plus the trusted policy, and logged in provenance.json. The
+# derivation rules are pinned in bundles/README.md §4 so B1 has no design
+# latitude.
+#
+# Scenario (fictional, self-contained): a small empirical study of KV-cache
+# quantization ("kv_quant") decode-latency wins across three evaluation
+# distributions. One clean win (openweb), one win that does not survive the
+# trace's own dead ends (python_code), one claim the study never finished
+# arguing (mobile_edge).
+
+meta:
+  format: ara-mini-trace@1
+  artifact:
+    id: kv_quant_suite
+    digest: "sha256:5ca1e..."
+  policy: empirical-v1
+
+tree:
+  - id: q0
+    type: question
+    title: "Does KV-cache quantization keep its decode-latency win across evaluation distributions?"
+    children:
+
+      # ---------------------------------------------------------------------
+      # Claim 1 — clean win, every methodological question answered
+      # ---------------------------------------------------------------------
+      - id: claim_ow
+        type: claim
+        text: "KV-cache quantization improves decode latency on the openweb text distribution."
+        subject: { method: kv_quant, quality: latency, distribution: openweb }
+        stance: improvement
+        author: alice
+        reviewed: true
+        children:
+
+          - id: exp_ow
+            type: experiment
+            title: "Controlled comparison, quantized vs fp16 baseline on openweb"
+            summary: >
+              Prompts were randomized across the two arms; the quantized arm
+              decoded faster on the mean cell; the win replicated on held-out
+              prompt families.
+            evidence_cells:
+              - id: cell_ow_mean
+                topic: positive-effect-report
+                what: "mean decode-latency lift of the quantized arm over the fp16 baseline"
+                value: "+12.4%"
+                recorded: run-output
+                refs:
+                  # One measurand cell reported twice (table + abstract): the
+                  # §4.3 duplicate-report situation, exercised as a
+                  # provenance-only log entry (plan T2).
+                  - evidence/ow_table1.csv#row=mean
+                  - paper.md#abstract
+              - id: cell_ow_rand
+                topic: randomization
+                what: "prompts allocated to arms by a seeded shuffle"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=4.1
+              - id: cell_ow_gen
+                topic: generalization
+                what: "the win replicates on held-out prompt families"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=5
+
+          - id: dd_ow_power
+            type: dead_end
+            title: "First power analysis reported the design underpowered"
+            narrative: >
+              The first power analysis assumed a 20 percent effect prior taken
+              from an unrelated pilot and reported the design underpowered; the
+              line was abandoned. Rerun with the openweb pilot variance
+              estimate, the design has adequate power.
+            evidence_cells:
+              - id: cell_ow_power
+                topic: power
+                what: "power analysis rerun with the pilot variance estimate"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=4.2
+
+      # ---------------------------------------------------------------------
+      # Claim 2 — argued win the trace's own replication failures undermine
+      # ---------------------------------------------------------------------
+      - id: claim_cp
+        type: claim
+        text: "KV-cache quantization improves decode latency on the python-code distribution."
+        subject: { method: kv_quant, quality: latency, distribution: python_code }
+        stance: improvement
+        author: bob
+        reviewed: true
+        children:
+
+          - id: exp_cp
+            type: experiment
+            title: "Controlled comparison, quantized vs fp16 baseline on python-code"
+            summary: >
+              Same design as the openweb comparison; the mean cell favors the
+              quantized arm and the study records randomization, power, and a
+              generalization note.
+            evidence_cells:
+              - id: cell_cp_mean
+                topic: positive-effect-report
+                what: "mean decode-latency lift of the quantized arm over the fp16 baseline"
+                value: "+11.7%"
+                recorded: run-output
+                refs:
+                  - evidence/cp_table1.csv#row=mean
+              - id: cell_cp_rand
+                topic: randomization
+                what: "prompts allocated to arms by a seeded shuffle"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=6.1
+              - id: cell_cp_power
+                topic: power
+                what: "power analysis with the python-code pilot variance estimate"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=6.2
+              - id: cell_cp_gen
+                topic: generalization
+                what: "the win is asserted to hold across python subpopulations"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=6.3
+
+          - id: dd_cp_shift
+            type: dead_end
+            title: "Weeks of failed replications traced to a stale eval harness"
+            narrative: >
+              Replication attempts of the python-code win kept failing until the
+              eval harness was found to tokenize with the previous release's
+              vocabulary: the evaluation distribution had shifted away from the
+              one the comparison was run on. The comparison does not survive
+              the shift.
+            evidence_cells:
+              - id: cell_cp_shift
+                topic: distribution-shift
+                what: "eval harness pinned the previous tokenizer release"
+                recorded: run-output
+                refs:
+                  - paper.md#sec=7-limitations
+
+          - id: exp_cp_robust
+            type: experiment
+            title: "Cross-distribution robustness check on held-out repository families"
+            summary: >
+              On code drawn from a different repository family the quantized
+              arm shows no lift; the method does not generalize across python
+              subpopulations. Recorded in the appendix as a limitation.
+            evidence_cells:
+              - id: cell_cp_genfail
+                topic: generalization-failure
+                what: "no lift on held-out repository families"
+                value: "+0.3%"
+                recorded: run-output
+                refs:
+                  - paper.md#appendix=C
+
+      # ---------------------------------------------------------------------
+      # Claim 3 — stated, partially evidenced, never argued to completion
+      # ---------------------------------------------------------------------
+      - id: claim_me
+        type: claim
+        text: "KV-cache quantization improves decode latency on the mobile-edge chat distribution."
+        subject: { method: kv_quant, quality: latency, distribution: mobile_edge }
+        stance: improvement
+        author: carol
+        reviewed: false
+        children:
+
+          - id: exp_me
+            type: experiment
+            title: "Controlled comparison, quantized vs fp16 baseline on mobile-edge"
+            summary: >
+              Early runs on the mobile-edge pool show a positive mean lift and
+              the allocation was randomized; the study stopped there.
+            evidence_cells:
+              - id: cell_me_mean
+                topic: positive-effect-report
+                what: "mean decode-latency lift of the quantized arm over the fp16 baseline"
+                value: "+9.1%"
+                recorded: run-output
+                refs:
+                  - evidence/me_table1.csv#row=mean
+              - id: cell_me_rand
+                topic: randomization
+                what: "sessions allocated to arms by a seeded shuffle"
+                recorded: paper-text
+                refs:
+                  - paper.md#sec=8.1
+
+          - id: dd_me_pool
+            type: dead_end
+            title: "Mobile-edge runner pool decommissioned mid-study"
+            narrative: >
+              The mobile-edge runner pool was decommissioned before the power
+              analysis and the external-validity follow-up could be run.
+              Neither was ever completed and no record answers them; the
+              abandonment is documented here so later readers know the
+              follow-ups were never run.

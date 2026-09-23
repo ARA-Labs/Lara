@@ -1,0 +1,291 @@
+session:
+  id: "2026-08-11_001"
+  date: "2026-08-11"
+  started: "2026-08-11T08:30"
+  last_turn: "2026-08-12T00:10"
+  turn_count: 7
+  summary: >
+    Executed, review-hardened, and merged the result-12 presentation-parity
+    closure. The researcher selected value bindings as the next milestone.
+    The lara-syntax@0.4 implementation on the PR now includes resolved external
+    review follow-up: lossless spaced directives, explicit authored-value versus
+    canonical-cell rendering, and restored evidence-derived S2/S5 comparison
+    prose. Generated core/verdict bytes remain stable; full local gates and both
+    hosted jobs pass. Named certificate slots and theta inference remain
+    separately gated, and the PR awaits reviewer re-approval.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N166"
+    routing: direct
+    provenance: ai-executed
+    summary: "Task 1 red-green: witness failed on old shape (autoImplicit pinned off), then full Lean parity port; axiom audit clean; commit ce00fbe."
+  - turn: 1
+    type: experiment
+    id: "N167"
+    routing: direct
+    provenance: ai-executed
+    summary: "68-row cross-language guard installed; 7/7 mutation classes observed incl. both tripwires and a production-AST mutation; commit 376b6dc."
+  - turn: 1
+    type: experiment
+    id: "N168"
+    routing: direct
+    provenance: ai-executed
+    summary: "Docs recalibrated; full acceptance gate green (580+56 differential, 20/20 admission, empty frozen diff); boundary intact."
+  - turn: 1
+    type: observation
+    id: "O65"
+    routing: staged
+    provenance: ai-suggested
+    summary: "General claim: witness+tripwire+inventory-diff guard fails closed on cross-language AST drift. Staged per plan directive."
+  - turn: 1
+    type: observation
+    id: "O66"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Lean desired-shape witnesses are vacuous unless autoImplicit is disabled."
+  - turn: 2
+    type: experiment
+    id: "N169"
+    routing: direct
+    provenance: ai-executed
+    summary: "Review gaps closed: alias and sum-payload anchors, selector-order checks, scoped normalization, meta-root isolation; final gates and re-review clean."
+  - turn: 2
+    type: observation
+    id: "O67"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Guard-design heuristic: anchor aliases and payload types, compare selectors, and scope non-mechanical label normalization."
+  - turn: 3
+    type: experiment
+    id: "N170"
+    routing: direct
+    provenance: ai-executed
+    summary: "Live post-merge audit: main/CI green; unblocked by the many-sorted-Σ follow-up but named cert slots remain under-specified."
+  - turn: 3
+    type: observation
+    id: "O68"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Recommended staged milestone: value bindings first; resolve opaque named-slot layering separately; update both presentation models."
+  - turn: 4
+    type: decision
+    id: "N171"
+    routing: direct
+    provenance: user
+    summary: "Selected staged surface bindings and opened feature/88b-surface-bindings."
+  - turn: 4
+    type: observation
+    id: "O68"
+    routing: crystallized
+    provenance: user-revised
+    summary: "Promoted the staged architecture recommendation via user affirmation."
+  - turn: 5
+    type: experiment
+    id: "N172"
+    routing: direct
+    provenance: ai-executed
+    summary: "Drafted and self-reviewed the complete lara-syntax@0.4 value-binding implementation and evaluation plan."
+  - turn: 6
+    type: experiment
+    id: "N173"
+    routing: direct
+    provenance: ai-executed
+    summary: "Implemented and review-hardened lara-syntax@0.4 value bindings; the PR opened with local and hosted Haskell/Lean gates green."
+  - turn: 7
+    type: experiment
+    id: "N174"
+    routing: direct
+    provenance: ai-executed
+    summary: "Resolved all review threads; parser/docs/examples hardened; byte stability and complete local/hosted gates reconfirmed."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Implemented the three plan tasks via a subagent pipeline (implementer,
+      spec reviewer, quality reviewer per task); committed ce00fbe
+      (feat(lean): close presentation AST parity) and 376b6dc (test(parity):
+      guard presentation AST shape); applied review fixes; docs closure edits
+      staged for the docs(mechanization) commit alongside this ara/ update.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Presentation.lean
+      - lean/Lara/Sigma.lean
+      - lean/Lara/PresentationParity.lean
+      - lean/PresentationParityMain.lean
+      - lean/Lara.lean
+      - lean/AxCheck.lean
+      - lean/lakefile.toml
+      - scripts/presentation-shape.hs
+      - scripts/check-presentation-parity.sh
+      - Makefile
+      - .github/workflows/ci.yml
+      - docs/mechanization-plan.md
+      - docs/spec.md
+      - docs/lara-surface-grammar.md
+      - lean/README.md
+      - TODOS.md
+      - plans/2026-08-10-sorts-in-checker.md
+  - turn: 2
+    action: >
+      Verified every review comment against the implementation; added
+      exact alias and sum-payload witnesses, declaration-derived selector
+      checks, type-scoped Lean label normalization with a red/green regression,
+      calibrated active prose, moved the parity executable under Lara, removed
+      the meta guard from the proof-library root, and ran final gates plus an
+      independent code re-review.
+    provenance: ai-executed
+    files_changed:
+      - scripts/presentation-shape.hs
+      - lean/Lara/PresentationParity.lean
+      - lean/Lara/PresentationParityMain.lean
+      - lean/Lara.lean
+      - lean/lakefile.toml
+      - scripts/check-presentation-parity.sh
+      - Makefile
+      - TODOS.md
+      - docs/spec.md
+      - docs/mechanization-plan.md
+      - docs/lara-surface-grammar.md
+      - lean/README.md
+      - plans/2026-08-10-result-12-presentation-parity.md
+
+  - turn: 3
+    action: >
+      Verified the PR's merged state and hosted checks, confirmed local main is
+      clean and synchronized, audited open issues and live plans, and compared
+      the deferred milestone against the current strict-Sigma,
+      opaque-Cert, and presentation-parity contracts.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
+    action: >
+      Created and checked out feature/88b-surface-bindings from synchronized
+      main, preserving the current five ARA record edits on the new branch.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 5
+    action: >
+      Mapped the live Haskell and Lean presentation surfaces, parser and
+      expansion order, strict-Sigma checks, constructor callsites, tests,
+      parity guard, documentation pointers, generator, and CI gates; created
+      plans/2026-08-11-lara-syntax-04-value-bindings.md and corrected its
+      one-pass brace-expansion boundary during self-review.
+    provenance: ai-executed
+    files_changed:
+      - plans/2026-08-11-lara-syntax-04-value-bindings.md
+  - turn: 6
+    action: >
+      Executed the approved value-binding plan through six implementation and
+      evaluation tasks with per-task review. Added the Haskell syntax and
+      one-pass elaboration path, the Lean mirror/codecs and 70-row parity guard,
+      migrated S2/S5 and active documentation, closed secondary-consumer test
+      gaps found by final review, ran the complete local gate, opened the PR,
+      and observed both final-head hosted jobs pass.
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/AST.hs
+      - src/Lara/Syntax.hs
+      - src/Lara/Elaborate/ValueBinding.hs
+      - src/Lara/Elaborate/Internal.hs
+      - src/Lara/Elaborate/Comparison.hs
+      - src/Lara/ClaimSupport/Load.hs
+      - src/Lara/MechReview/Load.hs
+      - test/ValueBindingsSpec.hs
+      - test/ClaimSupportSpec.hs
+      - test/MechReviewSpec.hs
+      - lean/Lara/Presentation.lean
+      - lean/AxCheck.lean
+      - scripts/presentation-shape.hs
+      - examples/S2/example.lara
+      - examples/S5/example.lara
+      - docs/lara-surface-grammar.md
+      - docs/spec.md
+      - README.md
+      - lean/README.md
+      - TODOS.md
+  - turn: 7
+    action: >
+      Verified all external the PR feedback against the current implementation;
+      added and red-green-tested lossless inline directive gaps; pinned authored
+      numeric and hand-built string rendering beside canonical evidence-cell
+      rendering; restored S2/S5 sub-claims to cell interpolation; corrected the
+      grammar and PR description; ran full local, replay, differential, Lean,
+      Python, generator, and hosted gates; replied to and resolved all threads;
+      committed and pushed 942e9ef.
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Syntax.hs
+      - test/SyntaxSpec.hs
+      - test/ValueBindingsSpec.hs
+      - docs/lara-surface-grammar.md
+      - examples/S2/example.lara
+      - examples/S5/example.lara
+claims_touched:
+  - id: H13
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: H13
+    field: Code ref
+    before: '["plans/2026-08-10-result-12-presentation-parity.md", "src/Lara/AST.hs", "lean/Lara/Presentation.lean", "TODOS.md"]'
+    after: '["scripts/check-presentation-parity.sh", "scripts/presentation-shape.hs", "lean/Lara/PresentationParity.lean", "lean/Lara/Presentation.lean", "src/Lara/AST.hs", "plans/2026-08-10-result-12-presentation-parity.md"]'
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The guard H13 prescribes now exists as code and CI gate; ref moved from plan-only to the implementation."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Plan Task 3 Step 4 directive honored: the general compiler-witness
+      drift-prevention claim stays staged (O65) pending researcher affirmation.
+      The red-run finding that Lean autoImplicit auto-binding can make a
+      desired-shape witness vacuously green (O66) is the turn's one genuinely
+      new methodological observation.
+  - turn: 2
+    excerpt: >
+      PR review demonstrated that count-only literal rows, arity-only sum
+      checks, and globally exceptional selector normalization can all preserve
+      a false PASS. The final guard closes those paths but explicitly does not
+      claim semantic verification for positional labels or same-typed swaps.
+  - turn: 3
+    excerpt: >
+      The code-side successor is D7, but not as a blind implementation of
+      the old one-line deliverable: strict Sigma now unblocks bare value
+      bindings, while named certificate slots still cross the intentionally
+      opaque Cert boundary and need an explicit design choice.
+  - turn: 4
+    excerpt: >
+      "checkout a new branch for it" affirmed the recommended staged milestone
+      direction; the working branch is feature/88b-surface-bindings.
+  - turn: 5
+    excerpt: >
+      The plan narrows to presentation-only value bindings and prose
+      interpolation: binding RHS terms are strict-Sigma validated, constructor
+      names cannot be shadowed, only nullary term occurrences substitute,
+      interpolation runs exactly once before comparison expansion, and the
+      binding table is erased before Unit. Named certificate slots and theta
+      inference remain explicit non-goals.
+  - turn: 6
+    excerpt: >
+      lara-syntax@0.4 value bindings are presentation-only sugar: all RHSs are
+      strict-Sigma validated before simultaneous non-recursive substitution;
+      natural-language directives expand once; the binding table is erased
+      before comparison lowering; secondary consumers reuse the exact semantic
+      Program; and the widened Haskell/Lean inventories compare as 70 rows.
+      S2/S5 generated core and verdict bytes remain unchanged.
+  - turn: 7
+    excerpt: >
+      Review resolution preserves two distinct authoring guarantees: value
+      references render the authored term spelling, while cell references
+      derive and canonically render the exact numeric value carried by the
+      cited evidence leaf. S2/S5 comparison sub-claims use the stronger cell
+      form; inline gaps are lexical only and round-trip raw.
+
+open_threads:
+  - "Reviewer re-approval and merge of the PR."
+  - "Named certificate slots and plain-argument theta inference remain separately gated."
+  - "O65-O67 await closure signals."

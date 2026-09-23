@@ -1,0 +1,31 @@
+# A third member about a DIFFERENT setting: same rule, other ground terms, so no
+# declared contrary instance relates it to either of the other two.
+artifact paper_other at sha256:other...
+policy empirical-v1
+use backends [nd@1]
+
+claim c_other
+  nl      = "Method M_c does not improve accuracy on distribution D_c"
+  formal  = not_improves(M_c, accuracy, D_c)
+  binding = { author = carol, audit-status = reviewed }
+
+leaf o_e1 : reports(exp_c, effect(M_c, accuracy, D_c, negligible))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperC/table_1.csv#row=mean]
+
+leaf o_e2 : randomized(exp_c)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=3]
+
+leaf o_e3 : powered(exp_c)
+  kind       = attested
+  provenance = user
+  refs       = [paperC.pdf#sec=3]
+
+arg po : supports(c_other) by null_result(M_c, accuracy, D_c, exp_c)
+  discharge randomization  with o_e2
+  discharge adequate_power with o_e3
+
+status c_other

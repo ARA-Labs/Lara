@@ -1,0 +1,71 @@
+# Corpus unit pinn/C05 — gap (an unmatched tuning budget breaks baseline parity)
+#
+# Source: m0/annotations/pinn.yaml C05 (comparative, controlled_comparison; corpus pin 62e9b54).
+# Headline: Adam+L-BFGS consistently outperforms Adam or L-BFGS alone — min L2RE 14.2x smaller
+# than Adam on convection and 6.07x smaller than L-BFGS on wave, and per (PDE, width) cell it
+# attains the lowest min loss and L2RE, with reaction at width 100 the acknowledged exception
+# (E03, Table 1).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * controlled_comparison: conclusion better(adam_lbfgs, adam, min_l2re, pinn_pdes). Nearest-
+#     competitor convention takes Adam (the tuned, closest competitor; reaction@width=100 is
+#     where Adam ties) as B; L-BFGS-alone, the two effect sizes (14.2x, 6.07x), and the reaction
+#     exception stay in nl and refs.
+#   * The mandatory baseline_parity CQ is unmet-gap: the setups are not matched on tuning
+#     effort — Adam searches 5 lrs, Adam+L-BFGS searches 5 lrs x 3 switch points = 15 configs,
+#     and L-BFGS alone is untuned (lr=1.0); selecting the best configuration per optimizer then
+#     favors the larger grid. An open mandatory obligation is an IncompleteArgument rejection,
+#     so no complete controlled_comparison is declarable — E2-style gap on empty complete
+#     support (adaptive-pruning/C03 pattern). The annotation rates this CQ unmet-GAP (not
+#     unmet-defeater) and every trace dead end is decision:none, so the tuning asymmetry is a
+#     hole, not a licensed undercut — the unit stays a gap, not defeated.
+#   * The gap here is baseline_parity, not variance: variance_reported IS met (E03 reports 5
+#     seeds, min/median/max) and measurement_validity is met (min L2RE a standard metric; the
+#     14.2x/6.07x ratios are arithmetic re-checks against Table 1). Both are kept as leaves.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact pinn at sha256:116d458ce7eb
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, not assemblable at corpus-v1's evidential bar --------------------------
+
+claim c05
+  nl      = "Adam+L-BFGS consistently outperforms Adam or L-BFGS alone: min L2RE 14.2x smaller than Adam on convection and 6.07x smaller than L-BFGS on wave, and the lowest min loss and L2RE per (PDE, width) cell, except reaction at width 100 where Adam is comparable"
+  formal  = better(adam_lbfgs, adam, min_l2re, pinn_pdes)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: Table 1's per-cell min-loss/L2RE orderings and the two ratio cells, per
+# result cell, folded into refs.
+leaf e1 : reports(e03, compares(adam_lbfgs, adam, min_l2re, pinn_pdes, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [Table-1, Figure-8, section-6.1, trace/exploration_tree.yaml#N08]
+
+leaf e2 : valid_measurement(min_l2re, e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [Table-1, logic/experiments.md#E03-Setup]
+
+leaf e3 : variance_reported(e03)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Setup, logic/experiments.md#E03-Procedure-step-6]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: matched_setup(adam_lbfgs, adam, e03) has no honest leaf — the tuning
+# budgets are asymmetric (untuned L-BFGS, 5-config Adam, 15-config Adam+L-BFGS) — and corpus-v1
+# makes baseline_parity mandatory. The claim's complete-support set is therefore empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

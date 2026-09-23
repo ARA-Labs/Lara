@@ -1,0 +1,75 @@
+# Corpus unit sample-specific-masks/C05 — justified (all mandatory CQs met)
+#
+# Source: m0/annotations/sample-specific-masks.yaml C05 (causal, component_ablation;
+# corpus pin 62e9b54). Headline: three-channel masks outperform single-channel masks, and both
+# the shared delta and the fmask are necessary — single-channel variant averages 49.70% vs full
+# SMM 52.53% across 11 datasets (GTSRB 70.7% vs 80.4%, Flowers102 30.2% vs 38.7%), only-fmask
+# (no shared delta) averages 42.59%, E05 over 3 seeds.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Bundled three-conjunct causal claim (three-channel > single-channel; delta necessary on
+#     large-data datasets; fmask necessary on feature-rich datasets). Binding conjunct is the
+#     three-channel > single-channel arm — the claim's headline and the arm with observed
+#     per-cell data (49.70 vs 52.53; GTSRB, Flowers102). The delta- and fmask-necessity arms
+#     stay in nl and refs (claim-splitting convention, M0 summary section 3(a)).
+#   * All three mandatory corpus-v1 CQs are annotated met, so this is the justified path:
+#       - single_variable: annotation CQ1 (four variants are single-component edits of the full
+#         SMM under identical hyperparameters) and CQ3 (variants cover delta / fmask / channel
+#         count).
+#       - protocol_parity: CQ1 (same hyperparameters as E03, same 11 datasets, 3 seeds).
+#       - variance_reported: CQ2 (mean +- std across 3 seeds per dataset and on the average).
+#   * The optional CQ "is the delta-fmask interaction tested beyond single-component removal?"
+#     is unmet-gap and omitted (optional, no status effect).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact sample-specific-masks at sha256:d7bd879e0d54
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim -------------------------------------------------------------------------
+
+claim c05
+  nl      = "Three-channel masks outperform single-channel masks on SMM (single-channel averages 49.70 percent vs full 52.53 percent over 11 datasets; GTSRB 70.7 vs 80.4, Flowers102 30.2 vs 38.7), and both the shared delta and the three-channel fmask are necessary (only-fmask averages 42.59 percent); every variant is a single-component edit trained with identical hyperparameters and mean +- std over 3 seeds"
+  formal  = contributes(three_channel_mask, smm, avg_accuracy)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ----------------------------------------------------------------------------
+
+# Principal premise: the E05 single-channel vs full-SMM ablation cells (49.70 vs 52.53 average,
+# GTSRB 70.7 vs 80.4, Flowers102 30.2 vs 38.7), per result cell, folded into refs.
+leaf e1 : reports(e05, ablation_effect(three_channel_mask, smm, avg_accuracy, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C05, logic/experiments.md#E05, trace/exploration_tree.yaml#N07]
+
+leaf e2 : isolated(three_channel_mask, e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Setup, logic/experiments.md#E05-Procedure-step-1]
+
+leaf e3 : matched_protocol(e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Setup]
+
+leaf e4 : variance_reported(e05)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Metrics]
+
+# --- The support argument -----------------------------------------------------------------------
+
+arg a1 : supports(c05) by component_ablation(three_channel_mask, smm, avg_accuracy, e05)
+  discharge single_variable   with e2
+  discharge protocol_parity   with e3
+  discharge variance_reported with e4
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c05 -> justified (its complete support a1 is `in`; spec section 8 aggregation)

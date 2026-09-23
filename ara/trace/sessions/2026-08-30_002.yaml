@@ -1,0 +1,126 @@
+session:
+  id: "2026-08-30_002"
+  date: "2026-08-30"
+  started: "2026-08-30T00:13"
+  last_turn: "2026-08-30T00:32"
+  turn_count: 2
+  summary: >
+    Selected M5 as the concurrent core track and created
+    theory/m5-surface-calculus. The implementation plan uses the full
+    lara-syntax@0.10 Program/Policy AST, reserves alpha-equivalence for genuine
+    binders, keeps global and replay names distinct, requires an independent
+    surface judgment, and evaluates formal theorems, cross-language
+    conformance, and unchanged-core regression together.
+
+events_logged:
+  - turn: 1
+    type: question
+    id: "N268"
+    routing: direct
+    provenance: user
+    summary: "Identify work that can proceed concurrently without competing with the active M2b effort."
+  - turn: 1
+    type: observation
+    id: "O110"
+    routing: staged
+    provenance: ai-suggested
+    summary: "M5 is the strongest core-spine concurrency candidate; PW0 is the clean future-work alternative."
+
+  - turn: 2
+    type: decision
+    id: "N269"
+    routing: direct
+    provenance: user
+    summary: "M5 formalizes the full presentation AST on theory/m5-surface-calculus."
+  - turn: 2
+    type: decision
+    id: "N270"
+    routing: direct
+    provenance: user
+    summary: "Alpha-equivalence covers genuine binders; global namespaces use typed equivariance and replay identities stay fixed."
+  - turn: 2
+    type: observation
+    id: "O110"
+    routing: crystallized
+    provenance: user-revised
+    summary: "M5 concurrency architecture committed to mechanization.md §8 and the implementation plan."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Checked main and open repository state; read the M2b, M4, M5, PW0, T6,
+      B0, observation-follow-up, preferred-existence, and dependency-report
+      issues; mapped their gates and likely ownership boundaries; ranked the
+      currently actionable tracks; validated the ARA with zero structural
+      errors and no new fixables.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_002.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+  - turn: 2
+    action: >
+      Created branch theory/m5-surface-calculus; retrieved the private canonical
+      theory-depth plan; mapped the presentation AST, production elaborator,
+      binding mirrors, checker/compiler/observation interfaces, current tests,
+      freshness gates, and settled naturalness boundary; drafted and
+      self-reviewed the full M5 implementation plan.
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-30-m5-surface-calculus.md"
+      - "ara/logic/solution/mechanization.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-30_002.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+claims_touched: []
+
+logic_revisions:
+  - turn: 2
+    entry: "logic/solution/mechanization.md:§8"
+    field: architecture
+    before: "absent"
+    after: "M5 verifies the full Program/Policy AST with independent checking, production-ordered elaboration, preservation, supported-fragment reflection, observation coherence, genuine-binder alpha laws, typed global equivariance, and cross-language conformance."
+    signal: verbal-declaration
+    provenance: user-revised
+
+key_context:
+  - turn: 1
+    excerpt: "Another contributor is working on M2b; identify a genuinely independent track rather than sharing its theory files or unsettled decision-problem contract."
+  - turn: 1
+    excerpt: >
+      Main contains the merged M0, M1, M2a, M3,
+      and B0 deliveries. The issue gates M5 on stable carrier,
+      observations, and updates; the issue does not place M5 after M2b.
+
+  - turn: 2
+    excerpt: >
+      The researcher selected the full presentation AST rather than a smaller
+      semantic core or feature-only equivalence package.
+  - turn: 2
+    excerpt: >
+      The researcher selected genuine binders only: rule parameters and named
+      nd@1 lambdas receive alpha-equivalence; global references receive typed
+      renaming laws; replay identities remain fixed.
+  - turn: 2
+    excerpt: >
+      The plan is `plans/2026-08-30-m5-surface-calculus.md` on branch
+      `theory/m5-surface-calculus`.
+
+open_threads:
+  - "Researcher review of plans/2026-08-30-m5-surface-calculus.md before implementation."
+  - "Execute the ten M5 tasks through a task-by-task development workflow."
+  - "Keep M2b modules read-only and integrate shared AxCheck additions additively."
+
+ai_suggestions_pending:
+  - >
+    Execute the plan with task-scoped implementation and review gates. The
+    recommended mode is subagent-driven development because Tasks 1–10 have
+    explicit file ownership and independently testable boundaries; inline
+    execution remains available if the researcher prefers one continuous
+    implementation session.

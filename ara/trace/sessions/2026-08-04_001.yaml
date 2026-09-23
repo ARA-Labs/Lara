@@ -1,0 +1,189 @@
+session:
+  id: "2026-08-04_001"
+  date: "2026-08-04"
+  started: "2026-08-04T23:48"
+  last_turn: "2026-08-05T02:01"
+  turn_count: 5
+  summary: >
+    Re-read the supplied rit paper and current source alongside LARA, then rewrote
+    the rit comparison. The comparison separates paper claims, CLI behavior, gated API
+    behavior, and LARA's actual presentation-to-core boundary. A follow-up executable plan classifies
+    the byte-to-leaf admission judgment as the only RIT-derived calculus extension, preserves
+    lara-core@0.1, and keeps goal/attempt history as an external protocol. Re-reading N93,
+    corpus-units/LOWERING.md, and the frozen rejection table corrected the initial hole interpretation:
+    policyAdmission is the demonstrated source defect; IncompleteArgument is a deliberate v0.1
+    rejection. A deep literature and architecture review then narrowed quarantine to structural
+    pruning plus evidence-blocked reporting, required failure-path dependency traces, kept concrete
+    hashing outside Lean, and replaced bespoke goal events with external registration receipts.
+    The C19/O12 tier-guarantee conflict remains for researcher adjudication. The PR contains the
+    earlier comparison and plan; follow-up commit d5ffa0f is open as the stacked chore PR.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N104"
+    routing: direct
+    provenance: ai-executed
+    summary: "RIT paper/source and LARA guarantee-boundary audit; comparison rewritten and reader-tested"
+  - turn: 1
+    type: observation
+    id: "O37"
+    routing: staged
+    provenance: ai-suggested
+    summary: "rit shipping empirical guarantee is L2 replay plus trusted L1, and CLI verify is report integrity"
+  - turn: 1
+    type: observation
+    id: "O38"
+    routing: staged
+    provenance: ai-suggested
+    summary: "mixed admission/hole recommendation from the comparison turn; superseded by corrected O40"
+  - turn: 1
+    type: observation
+    id: "O39"
+    routing: staged
+    provenance: ai-suggested
+    summary: "HARKing resistance requires a trusted pre-run checkpoint, not only local append-only order"
+  - turn: 1
+    type: decision
+    id: "N105"
+    routing: direct
+    provenance: ai-suggested
+    summary: "unresolved reconciliation of C19/O12 with tier-specific replay evidence"
+  - turn: 2
+    type: decision
+    id: "N106"
+    routing: direct
+    provenance: ai-suggested
+    summary: "seven-task RIT-informed roadmap separating evidence admission calculus from external history protocol"
+  - turn: 2
+    type: observation
+    id: "O40"
+    routing: staged
+    provenance: ai-suggested
+    summary: "preserve core v0.1; repair only policyAdmission now; partial alternatives require a separate v0.2 decision"
+  - turn: 4
+    type: experiment
+    id: "N107"
+    routing: direct
+    provenance: ai-executed
+    summary: "deep literature and architecture review narrowed quarantine, theorem scope, dependency tracing, and registration protocol"
+  - turn: 4
+    type: observation
+    id: "O41"
+    routing: staged
+    provenance: ai-suggested
+    summary: "quarantine requires structural pruning and a conservative evidence-blocked overlay, not a fifth core status or automatic gap"
+  - turn: 4
+    type: observation
+    id: "O42"
+    routing: staged
+    provenance: ai-suggested
+    summary: "mechanized admission should abstract from hashing and preserve exact dependency traces on checker failure"
+
+ai_actions:
+  - turn: 1
+    action: >
+      Read rit.pdf, traced the RIT CLI/API/gate/grounding/dependency paths and LARA
+      elaboration/replay/check/driver paths, rewrote the rit comparison, ran a fresh-reader
+      review, corrected its findings, and validated Markdown structure and diff whitespace.
+    provenance: ai-executed
+    files_changed:
+      - "ara/staging/observations.yaml"
+      - "ara/logic/claims.md (conflict flag only)"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 2
+    action: >
+      Re-read the frozen hole/rejection contract and N93, corrected the initial interpretation, and
+      wrote plans/2026-08-04-rit-informed-evidence-admission.md with seven executable
+      tasks, exact interfaces, theorem targets, mutation cases, smoke scenarios, transactional
+      publication, version boundaries, and paper-promotion criteria.
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-04-rit-informed-evidence-admission.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 3
+    action: >
+      Moved the implementation plan to plans/, updated every recorded path, ran Markdown/YAML checks
+      and the full Haskell/Lean/differential/replay/tamper gate, committed the reviewed artifacts as
+      440db13, pushed, and opened the PR.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 4
+    action: >
+      Researched structured and incomplete argumentation, scientific evidence graphs, PROV-O,
+      preregistration, assurance cases, and proof-carrying-data boundaries; re-checked current LARA
+      source; revised the comparison and implementation plan; and validated their explicit design
+      contracts plus diff whitespace.
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-04-rit-informed-evidence-admission.md"
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+  - turn: 5
+    action: >
+      Created worktree branch chore/rit-plan-deep-review from the PR's head, reran the full
+      Haskell/Lean/AxCheck/differential/replay/tamper gate, committed the research revisions as
+      d5ffa0f, pushed the branch, and opened the PR.
+    provenance: ai-executed
+    files_changed:
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+      - "ara/trace/sessions/2026-08-04_001.yaml"
+
+claims_touched: []
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User requested a source-grounded judgment on what LARA can borrow from rit and a full rewrite of
+      the rit comparison. The resulting recommendation preserves LARA's argumentation core:
+      rit-style checkers establish what exact bytes say; LARA decides what those checked facts may
+      support, what remains open, and what defeats the support.
+  - turn: 2
+    excerpt: >
+      User requested concrete next steps and asked whether RIT-derived ideas can contribute to the
+      calculus. The plan answers yes only for an abstract evidence-admission judgment and composition
+      theorems; manifests, extractors, receipts, and goal history remain implementation/protocol.
+      The frozen v0.1 IncompleteArgument behavior is preserved rather than bundled into the extension.
+  - turn: 3
+    excerpt: >
+      User requested that the plan live in plans/, then asked for the complete change set to be
+      committed and opened as a pull request. The PR carries the comparison, executable plan,
+      correction trace, and unresolved adjudication without changing checker behavior.
+  - turn: 4
+    excerpt: >
+      User requested a deep conceptual review of the proposed LARA additions. The review retained
+      evidence admission as a narrow calculus contribution, but required structural quarantine
+      pruning, conservative reporting, exact failure-path dependency logs, abstract theorem scope,
+      and external registration receipts instead of a bespoke local event log.
+  - turn: 5
+    excerpt: >
+      User requested that the reviewed plan be committed from a worktree and opened as a chore PR.
+      The follow-up PR is stacked on the open comparison PR so its diff contains only the follow-up research revisions.
+
+open_threads:
+  - "Researcher adjudication required for N105: narrow C19 Conditions and replace O12's K-tier wording, or provide a current enforced L1/K replay path."
+  - "N106/O40 and O39 remain AI recommendations: evidence admission, paper promotion, and the external goal/attempt protocol have not been approved or implemented."
+  - "N107/O41/O42 remain AI recommendations: the revised quarantine semantics, theorem boundary, and checker API require researcher review before implementation."
+  - "The follow-up PR is stacked on the comparison PR; after it merges, retarget the follow-up to main before merging."
+
+ai_suggestions_pending:
+  - "Enforce policyAdmission at the presentation boundary while preserving lara-core@0.1."
+  - "Mechanize and prototype a closed, deterministic byte-to-leaf checker seam with exact dependency reporting, then measure before paper promotion."
+  - "Treat goal history as HARKing-resistant only when a trusted checkpoint predates run start, outside the calculus."
+  - "Model quarantine as structural removal plus a conservative evidence-blocked source overlay; do not map it to gap or add a fifth core status."
+  - "Formalize only abstract admission/composition properties in Lean; keep hashing, parsing, extractor correctness, and registration receipts at the implementation/protocol boundary."

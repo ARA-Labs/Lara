@@ -1,0 +1,77 @@
+# S6 — named certificate premise slots worked example (lara-syntax@0.6)
+#
+# The first worked example authored in the @0.6 symbolic certificate spelling
+# (#105): an ord@1 certificate may cite a premise slot by the SOURCE NAME that
+# fills it — `(prem base_cell)` instead of `(prem 0)` — and elaboration lowers
+# the name to the byte-identical numeric payload the backend already decodes.
+# The names below are the same ones the argument's own `from […]` list uses,
+# so the certificate reads in the artifact's vocabulary instead of asking the
+# reader to count slots.
+#
+# THE COMMITTED GOLDEN IS THE STANDING BYTE-IDENTITY WITNESS FOR #105. This
+# file is the repo's living author of the symbolic spelling, and its
+# example.core.sexp was verified byte-equal to the one produced by the numeric
+# twin of this artifact (same program, certificate payload written
+# `(ordcmp (prem 0) (prem 1))`). Because the golden carries only the LOWERED
+# payload, test/WorkedExamplesSpec.hs's freshness property re-proves that
+# byte-identity on every CI run: if lowering ever produced anything but the
+# numeric spelling's bytes, this example would go stale and the suite would
+# fail. test/CertSlotsSpec.hs pins the same property as in-memory fixtures;
+# this directory pins it as committed artifact bytes.
+#
+# The argument is S2's strict leg, hand-authored. S2 writes the same
+# comparison as a `comparison` block, whose generated certificate cites its
+# slots numerically; S6 writes the `arg` and its certificate by hand, because
+# the symbolic spelling is an AUTHORING surface and only an authored
+# certificate exercises it. No defeasible bridge: S2 carries the layering
+# story, and S6's claim is deliberately the bare arithmetic, so the one
+# argument here is the whole unit.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact ord_named_demo at sha256:5656565656565656565656565656565656565656565656565656565656565656
+policy ord-named-v1
+use backends [ord@1]
+
+# --- The claim: the bare ordered comparison ----------------------------------------------------
+
+claim c1
+  nl      = "The reported baseline accuracy 0.71 is strictly below the reported system accuracy 0.74"
+  formal  = num_lt(0.71, 0.74)
+  binding = { author = alice, rationale = "Certified ordered comparison of two reported accuracy cells.", audit-status = reviewed }
+
+# --- The two measured cells the certificate consults ------------------------------------------
+# One leaf per reported cell, named for the ROLE its cell plays: these names are what the
+# certificate below cites. Their truth is observed evidence, never certified content — the
+# certificate discharges only that each cited premise's numeric literal equals the corresponding
+# goal numeral and that 0.71 < 0.74 (the factivity firewall, as in S2).
+
+leaf base_cell : reports(exp1, score_cell(sys_base, accuracy, imagenet_val, 0.71))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_base]
+
+leaf new_cell : reports(exp1, score_cell(sys_new, accuracy, imagenet_val, 0.74))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_new]
+
+# --- The argument: one strict step, certificate cited by name ---------------------------------
+# The @0.6 point, in one line: the certificate names `base_cell` and `new_cell` — the same
+# identifiers the `from […]` list resolves — rather than the 0-based slots they land in.
+# Elaboration resolves each name against this argument's own premise list and rewrites it to
+# `(prem 0)` / `(prem 1)`; the Unit, the wire encoding, and the ord@1 replay are byte-for-byte
+# those of the numeric spelling. A name that resolves to no slot, to two slots, or ambiguously
+# is a located elaboration error, never a guess (fail-closed, D2).
+
+arg a1 : supports(c1) by lt_recheck from [base_cell, new_cell]
+  assurance = cert(ord@1, sha256:ord-named-v1-theory-0, (ordcmp (prem base_cell) (prem new_cell)))
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 (the strict ord@1 comparison step), unattacked -> in (grounded).
+# Claim status:
+#   c1 -> justified (a1 is a complete argument for it, with no attackers)

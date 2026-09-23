@@ -1,0 +1,38 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
+    "artifact": "sha256:c1bb86743873"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "contributes(reward_diversity, fre_all, antmaze_total_score)",
+        "status": "defeated",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "out"
+      },
+      {
+        "arg": "d1",
+        "index": 1,
+        "label": "in"
+      }
+    ]
+  }
+}

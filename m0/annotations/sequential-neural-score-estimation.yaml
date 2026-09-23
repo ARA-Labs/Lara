@@ -1,0 +1,94 @@
+artifact: sequential-neural-score-estimation
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 3 dead_end nodes (N07, N09, N11); all classified
+claims:
+  - claim_id: C04
+    claim_type: comparative
+    proposition_shape:
+      sketch: "exceeds_valid_stat_pct(TSNPSE_VP, {TSNPE, SNVI}, pyloric, budget_leq_200k, tsnpse_final_pct=0.81)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a two-baseline comparison over a simulation-budget curve
+        on one real-world problem, anchored by an exact figure (81% valid in the
+        final round) that the falsification criterion thresholds directly (a
+        baseline reaching >= 81% at any matched budget, or TSNPSE not exceeding
+        both across all budgets <= 200k). The method (TSNPSE-VP), the two named
+        baselines, the task, the budget range, and the 0.81 value are all
+        checkable structure a nullary atom would collapse; in particular the
+        "across all budgets <= 200k" quantifier makes this a claim about a curve,
+        not a single cell.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "TSNPSE, TSNPE, and SNVI are run on the same Pyloric simulator (Prinz et al.) with the same 31 parameters, 18 summary statistics, prior, and observed data (Haddad & Marder 2021)"
+        - "The percentage of valid (non-NaN) summary statistics is compared at matched simulation budgets across the three methods"
+        - "% valid summary statistics is a meaningful proxy for how well each method concentrates proposals in the region of parameter space that yields functional simulator outputs"
+        - "TSNPSE uses VP SDE, 9 rounds, 30000 initial + 20000 per round, and the same hyperparameters as the benchmarks (no per-problem tuning)"
+        - "The observed final-round 0.81 and the baseline curves reflect the methods rather than run-to-run variability of a single seed"
+      supporting_experiments: [E04]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Are TSNPE and SNVI evaluated on the identical Pyloric setup (same simulator, parameters, summary statistics, prior, observation) as TSNPSE?"
+        mandatory: true
+        status: met
+        basis: "E04 Setup fixes one Pyloric simulator, 31 params / 18 summary stats, uniform prior, observed data from Haddad & Marder (2021); Baselines names TSNPE and SNVI as the compared methods"
+      - cq: "Is the comparison made at matched simulation budgets rather than at each method's own preferred budget?"
+        mandatory: true
+        status: met
+        basis: "E04 Procedure step 7 compares % valid statistics vs simulation budget; C04 statement and falsification criterion both frame the comparison 'at the same simulation budget' / 'for all budgets <= 200k'"
+      - cq: "Are seeds, repeated runs, or variability of the % valid statistic reported so 81% vs the baselines is distinguishable from noise?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 Setup and Procedure describe a single 9-round run with no seed count or uncertainty band; the artifact reports point percentages only, leaving the gap unestablished at reported rigor rather than defeated"
+      - cq: "Does the NaN-imputation choice (replacing invalid summary statistics with values 2 SD below the prior predictive) affect all three methods identically, so it does not bias the valid-percentage comparison?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E04 Procedure step 2 states the imputation only for the TSNPSE run; whether TSNPE and SNVI use the same invalid-output handling is unstated, so equal treatment of the metric across methods is not confirmed"
+      - cq: "Is 81% the final-round (round 9) figure, and is the < 200k budget window where TSNPSE dominates actually covered by the reported rounds?"
+        mandatory: false
+        status: met
+        basis: "E04 Setup gives 30000 + 8*20000 = 190000 total simulations (<= 200k) over 9 rounds; Expected outcome states ~81% valid in the final round and dominance for all budgets below 200k"
+    leaf_granularity: per-run
+    leaves:
+      - atom: "TSNPSE-VP reaches 81% valid summary statistics in the final (9th) round on the Pyloric problem"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N14 (Figure 4c)", "logic/experiments.md E04 Expected outcome", "logic/claims.md C04"]
+      - atom: "TSNPSE exceeds the % valid summary statistics of TSNPE at every matched simulation budget below 200k on Pyloric"
+        provenance: attested
+        refs: ["logic/experiments.md E04 Expected outcome", "logic/experiments.md E04 Baselines", "logic/claims.md C04"]
+      - atom: "TSNPSE exceeds the % valid summary statistics of SNVI at every matched simulation budget below 200k on Pyloric"
+        provenance: attested
+        refs: ["logic/experiments.md E04 Expected outcome", "logic/experiments.md E04 Baselines", "logic/claims.md C04"]
+    attack_candidates:
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative sequential design (SNPSE-A, SIR correction limited to 2 rounds); its failure motivates choosing TSNPSE but says nothing about the Pyloric valid-statistics comparison, so no edge to C04."
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative sequential design (SNPSE-B, high-variance importance-weighted loss); a ruled-out approach on benchmark tasks, unrelated to the Pyloric % valid comparison, so no edge to C04."
+      - node: N11
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative sequential design (SNPSE-C, score-space correction that fails with C2ST ~ 1); a discarded competitor on SLCP/GLU, not a conflicting result or scheme/premise attack on C04, so no edge."
+    holes:
+      - "No seeds, repetitions, or uncertainty on the % valid statistic for any of the three methods, so 81% vs the baselines rests on single runs"
+      - "Invalid-output (NaN) handling is specified only for TSNPSE; whether TSNPE and SNVI use identical imputation is unstated, leaving the metric's cross-method comparability open"
+      - "The artifact gives TSNPSE's 81% but no numeric valid-percentage values for TSNPE or SNVI; the dominance claim is read from Figure 4c curves that are attested, not tabulated in experiments.md"
+      - "Hardware unspecified and compute cost per round not reported, so 'matched simulation budget' is matched on simulation count only"
+    coverage_flags: []
+    uncertain: false
+    note: >-
+      Classified comparative per sample.tsv. The scheme is a clean
+      controlled_comparison in form — matched simulator and matched budget across
+      three methods — but the discriminating rigor questions (seed/variance and
+      equal NaN-handling across methods) are unmet gaps, so the 81%-beats-both
+      result currently rests on single-run point estimates read from a figure.
+      Both mandatory setup CQs (same problem, matched budget) are met; no dead end
+      bears on C04 (all three concern rejected sequential-correction designs
+      behind C03), so there are no typed attacks.

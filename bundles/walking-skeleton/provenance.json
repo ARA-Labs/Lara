@@ -1,0 +1,372 @@
+{
+  "format": "lara-elaborator-provenance@1",
+  "policy": "empirical-v1",
+  "source": "source.yaml",
+  "task-1-formalization": [
+    {
+      "binding": {
+        "audit-status": "reviewed",
+        "author": "alice"
+      },
+      "claim": "c_ow",
+      "formal": "improves(kv_quant, latency, openweb)",
+      "nl": "KV-cache quantization improves decode latency on the openweb text distribution.",
+      "source-node": "claim_ow"
+    },
+    {
+      "binding": {
+        "audit-status": "reviewed",
+        "author": "bob"
+      },
+      "claim": "c_cp",
+      "formal": "improves(kv_quant, latency, python_code)",
+      "nl": "KV-cache quantization improves decode latency on the python-code distribution.",
+      "source-node": "claim_cp"
+    },
+    {
+      "binding": {
+        "audit-status": "unreviewed",
+        "author": "carol"
+      },
+      "claim": "c_me",
+      "formal": "improves(kv_quant, latency, mobile_edge)",
+      "nl": "KV-cache quantization improves decode latency on the mobile-edge chat distribution.",
+      "source-node": "claim_me"
+    }
+  ],
+  "task-2-leaf-extraction": [
+    {
+      "duplicate-report": {
+        "locations": [
+          "evidence/ow_table1.csv#row=mean",
+          "paper.md#abstract"
+        ]
+      },
+      "grain": "result-cell",
+      "kind": "observed",
+      "leaf": "e_ow_mean",
+      "proposition": "reports(exp_ow, effect(kv_quant, latency, openweb, positive))",
+      "provenance": "ai-executed",
+      "refs": [
+        "evidence/ow_table1.csv#row=mean",
+        "paper.md#abstract"
+      ],
+      "source-cell": "cell_ow_mean"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_ow_rand",
+      "proposition": "randomized(exp_ow)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=4.1"
+      ],
+      "source-cell": "cell_ow_rand"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_ow_gen",
+      "proposition": "generalizes(kv_quant, latency, openweb)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=5"
+      ],
+      "source-cell": "cell_ow_gen"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_ow_power",
+      "proposition": "powered(exp_ow)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=4.2"
+      ],
+      "source-cell": "cell_ow_power"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "observed",
+      "leaf": "e_cp_mean",
+      "proposition": "reports(exp_cp, effect(kv_quant, latency, python_code, positive))",
+      "provenance": "ai-executed",
+      "refs": [
+        "evidence/cp_table1.csv#row=mean"
+      ],
+      "source-cell": "cell_cp_mean"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_cp_rand",
+      "proposition": "randomized(exp_cp)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=6.1"
+      ],
+      "source-cell": "cell_cp_rand"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_cp_power",
+      "proposition": "powered(exp_cp)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=6.2"
+      ],
+      "source-cell": "cell_cp_power"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_cp_gen",
+      "proposition": "generalizes(kv_quant, latency, python_code)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=6.3"
+      ],
+      "source-cell": "cell_cp_gen"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "observed",
+      "leaf": "e_cp_shift",
+      "proposition": "distribution_shift(kv_quant, latency, python_code)",
+      "provenance": "ai-executed",
+      "refs": [
+        "paper.md#sec=7-limitations"
+      ],
+      "source-cell": "cell_cp_shift"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "observed",
+      "leaf": "e_cp_genfail",
+      "proposition": "not_generalizes(kv_quant, latency, python_code)",
+      "provenance": "ai-executed",
+      "refs": [
+        "paper.md#appendix=C"
+      ],
+      "source-cell": "cell_cp_genfail"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "observed",
+      "leaf": "e_me_mean",
+      "proposition": "reports(exp_me, effect(kv_quant, latency, mobile_edge, positive))",
+      "provenance": "ai-executed",
+      "refs": [
+        "evidence/me_table1.csv#row=mean"
+      ],
+      "source-cell": "cell_me_mean"
+    },
+    {
+      "duplicate-report": null,
+      "grain": "result-cell",
+      "kind": "attested",
+      "leaf": "e_me_rand",
+      "proposition": "randomized(exp_me)",
+      "provenance": "user",
+      "refs": [
+        "paper.md#sec=8.1"
+      ],
+      "source-cell": "cell_me_rand"
+    }
+  ],
+  "task-3-scheme-selection": [
+    {
+      "arg": "a_ow",
+      "premise-leaves": [
+        "e_ow_mean"
+      ],
+      "rule": "controlled_experiment",
+      "source-node": "exp_ow",
+      "substitution": [
+        [
+          "M",
+          "kv_quant"
+        ],
+        [
+          "Q",
+          "latency"
+        ],
+        [
+          "D",
+          "openweb"
+        ],
+        [
+          "Exp",
+          "exp_ow"
+        ]
+      ]
+    },
+    {
+      "arg": "a_cp",
+      "premise-leaves": [
+        "e_cp_mean"
+      ],
+      "rule": "controlled_experiment",
+      "source-node": "exp_cp",
+      "substitution": [
+        [
+          "M",
+          "kv_quant"
+        ],
+        [
+          "Q",
+          "latency"
+        ],
+        [
+          "D",
+          "python_code"
+        ],
+        [
+          "Exp",
+          "exp_cp"
+        ]
+      ]
+    },
+    {
+      "arg": "a_me",
+      "premise-leaves": [
+        "e_me_mean"
+      ],
+      "rule": "controlled_experiment",
+      "source-node": "exp_me",
+      "substitution": [
+        [
+          "M",
+          "kv_quant"
+        ],
+        [
+          "Q",
+          "latency"
+        ],
+        [
+          "D",
+          "mobile_edge"
+        ],
+        [
+          "Exp",
+          "exp_me"
+        ]
+      ]
+    }
+  ],
+  "task-4-question-accounting": [
+    {
+      "arg": "a_ow",
+      "decision": "discharge",
+      "question": "randomization",
+      "source-cell": "cell_ow_rand",
+      "with": "e_ow_rand"
+    },
+    {
+      "arg": "a_ow",
+      "decision": "discharge",
+      "question": "adequate_power",
+      "source-cell": "cell_ow_power",
+      "with": "e_ow_power"
+    },
+    {
+      "arg": "a_ow",
+      "decision": "discharge",
+      "question": "external_validity",
+      "source-cell": "cell_ow_gen",
+      "with": "e_ow_gen"
+    },
+    {
+      "arg": "a_cp",
+      "decision": "discharge",
+      "question": "randomization",
+      "source-cell": "cell_cp_rand",
+      "with": "e_cp_rand"
+    },
+    {
+      "arg": "a_cp",
+      "decision": "discharge",
+      "question": "adequate_power",
+      "source-cell": "cell_cp_power",
+      "with": "e_cp_power"
+    },
+    {
+      "arg": "a_cp",
+      "decision": "discharge",
+      "question": "external_validity",
+      "source-cell": "cell_cp_gen",
+      "with": "e_cp_gen"
+    },
+    {
+      "arg": "a_me",
+      "decision": "discharge",
+      "question": "randomization",
+      "source-cell": "cell_me_rand",
+      "with": "e_me_rand"
+    },
+    {
+      "claim": "c_me",
+      "decision": "hole",
+      "lowered": "gap",
+      "question": "adequate_power",
+      "reason": "no evidence cell answers the question; the frozen frontend rejects surface holes (PEIncompleteArgument), so the incomplete argument is not emitted and the claim's complete support is empty",
+      "source-node": "dd_me_pool"
+    },
+    {
+      "claim": "c_me",
+      "decision": "hole",
+      "lowered": "gap",
+      "question": "external_validity",
+      "reason": "no evidence cell answers the question; the frozen frontend rejects surface holes (PEIncompleteArgument), so the incomplete argument is not emitted and the claim's complete support is empty",
+      "source-node": "dd_me_pool"
+    }
+  ],
+  "task-5-strict-selection": {
+    "reason": "defeasible source; Lara.Syntax forces assurance = none (T1); no strict instance is certified",
+    "status": "not-applicable"
+  },
+  "task-6-attack-extraction": [
+    {
+      "leaf": "e_ow_power",
+      "role": "support",
+      "source-node": "dd_ow_power"
+    },
+    {
+      "attack": {
+        "attacker": "d_cp_shift",
+        "kind": "undercut",
+        "target": "a_cp.rule"
+      },
+      "policy-basis": "exception controlled_experiment : distribution_shift(M, Q, D)",
+      "role": "attack",
+      "source-node": "dd_cp_shift"
+    },
+    {
+      "attack": {
+        "attacker": "d_cp_genfail",
+        "kind": "undermine",
+        "target": "a_cp.external_validity.leaf"
+      },
+      "policy-basis": "contrary generalizes(M, Q, D) not_generalizes(M, Q, D)",
+      "role": "attack",
+      "source-node": "exp_cp_robust"
+    },
+    {
+      "note": "documents unmet questions; routed to task-4 hole, never an attack (spec \u00a77)",
+      "role": "none",
+      "source-node": "dd_me_pool"
+    }
+  ]
+}

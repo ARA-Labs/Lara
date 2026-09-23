@@ -1,0 +1,27 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
+    "artifact": "sha256:1fb18ee0f3ca"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "performs(superblock_atomic_pipeline, rebench_reference, triton_cumsum_score)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

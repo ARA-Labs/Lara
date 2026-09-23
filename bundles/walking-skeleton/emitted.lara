@@ -1,0 +1,116 @@
+# emitted.lara -- machine-produced by the untrusted M4b elaborator.
+# Derived from source.yaml (ara-mini-trace@1) and the trusted policy
+# empirical-v1 (referenced by id; defined in the policy, never here),
+# per the bundle format contract, section 4; every derivation
+# is logged in provenance.json. Do not hand-edit.
+
+artifact kv_quant_suite at sha256:5ca1e...
+policy empirical-v1
+use backends [nd@1]
+
+# --- claim_ow -----------------------------------------------------------------
+
+claim c_ow
+  nl      = "KV-cache quantization improves decode latency on the openweb text distribution."
+  formal  = improves(kv_quant, latency, openweb)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf e_ow_mean : reports(exp_ow, effect(kv_quant, latency, openweb, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/ow_table1.csv#row=mean, paper.md#abstract]
+
+leaf e_ow_rand : randomized(exp_ow)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=4.1]
+
+leaf e_ow_gen : generalizes(kv_quant, latency, openweb)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=5]
+
+leaf e_ow_power : powered(exp_ow)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=4.2]
+
+arg a_ow : supports(c_ow) by controlled_experiment(kv_quant, latency, openweb, exp_ow)
+  discharge randomization     with e_ow_rand
+  discharge adequate_power    with e_ow_power
+  discharge external_validity with e_ow_gen
+
+# --- claim_cp -----------------------------------------------------------------
+
+claim c_cp
+  nl      = "KV-cache quantization improves decode latency on the python-code distribution."
+  formal  = improves(kv_quant, latency, python_code)
+  binding = { author = bob, audit-status = reviewed }
+
+leaf e_cp_mean : reports(exp_cp, effect(kv_quant, latency, python_code, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/cp_table1.csv#row=mean]
+
+leaf e_cp_rand : randomized(exp_cp)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=6.1]
+
+leaf e_cp_power : powered(exp_cp)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=6.2]
+
+leaf e_cp_gen : generalizes(kv_quant, latency, python_code)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=6.3]
+
+leaf e_cp_shift : distribution_shift(kv_quant, latency, python_code)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paper.md#sec=7-limitations]
+
+leaf e_cp_genfail : not_generalizes(kv_quant, latency, python_code)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paper.md#appendix=C]
+
+arg a_cp : supports(c_cp) by controlled_experiment(kv_quant, latency, python_code, exp_cp)
+  discharge randomization     with e_cp_rand
+  discharge adequate_power    with e_cp_power
+  discharge external_validity with e_cp_gen
+
+# --- claim_me -----------------------------------------------------------------
+
+claim c_me
+  nl      = "KV-cache quantization improves decode latency on the mobile-edge chat distribution."
+  formal  = improves(kv_quant, latency, mobile_edge)
+  binding = { author = carol, audit-status = unreviewed }
+
+leaf e_me_mean : reports(exp_me, effect(kv_quant, latency, mobile_edge, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/me_table1.csv#row=mean]
+
+leaf e_me_rand : randomized(exp_me)
+  kind       = attested
+  provenance = user
+  refs       = [paper.md#sec=8.1]
+
+# --- typed attacks (task 6) ---------------------------------------------------
+
+# dd_cp_shift
+arg d_cp_shift : challenges(external_validity(a_cp)) by leaf(e_cp_shift)
+undercut d_cp_shift a_cp.rule
+
+# exp_cp_robust
+arg d_cp_genfail : challenges(e_cp_gen) by leaf(e_cp_genfail)
+undermine d_cp_genfail a_cp.external_validity.leaf
+
+# --- status queries -----------------------------------------------------------
+
+status c_ow
+status c_cp
+status c_me

@@ -1,0 +1,52 @@
+session:
+  id: 2026-09-09_277
+  date: "2026-09-09"
+  started: "2026-09-09T18:12"
+  last_turn: "2026-09-09T18:12"
+  turn_count: 1
+  summary: "Relational composed and whole-program congruences with occurrence union."
+events_logged:
+- turn: 1
+  type: decision
+  id: N277001
+  routing: direct
+  provenance: ai-executed
+  summary: Preserve both contextual and already-checked whole-program contracts.
+ai_actions:
+- turn: 1
+  action: Added and verified relational proofs, union occurrence lemmas, documentation and axiom pins.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Context/Parametricity.lean
+  - lean/AxCheck.lean
+claims_touched:
+- id: C49
+  action: revised
+  turn: 1
+logic_revisions:
+- turn: 1
+  entry: C49
+  field: Conditions
+  before: "- **Conditions**: Holds over the frozen compilation carrier at **any** extension semantics \u2014 originally proved for grounded only, and later generalized with no additional hypothesis, because what the profile-preservation argument concludes is an *equality* of compiled carriers and every reader of a carrier inherits it (`obsGen_congr`, `backend_replacement_congruence_sem`). Requires admissible contexts \u2014 the link guard passes, both sides' declared material is well-formed relative to the *linked* environment, and the linked program passes the signature stage \u2014 whose own assurances satisfy `FixesContext`, and a forward-only acceptance-preservation hypothesis. Admissibility supplies an accepted source and preservation supplies an accepted target, so both detailed observations land in the observed arm; without it their rejection outcomes need not agree. Openness is leaf-name openness only: term-level holes are unrepresentable because the compile boundary forces an empty obligation set on every declared argument. Relational quantification over related backends is no longer an open boundary: replaced the function `f` with a relation `R` and re-derived this theorem as the `graphOf f` instance (`backend_replacement_congruence_of_parametricity`, guarded by `congruence_correspondence`), so nothing here is now stated more generally than what is proved. Untested boundary: contexts carrying assurances moved by the relabel, two-way acceptance, relational forms for the composed-context and whole-program congruences, how the *equivalence relations* at different semantics compare (\u2014 the observation functions are separated, the relations are not), and a semantics-parametric congruence witness on a certificate-bearing fragment. The disagreeing-carrier boundary is closed by `cycle_admissible` and `congruence_witness_sem`: admissibility and congruence now hold on the same cycle where grounded and stable observations differ. The fixture remains certificate-free."
+  after: "- **Conditions**: Holds over the frozen compilation carrier at **any** extension semantics \u2014 originally proved for grounded only, and later generalized with no additional hypothesis, because what the profile-preservation argument concludes is an *equality* of compiled carriers and every reader of a carrier inherits it (`obsGen_congr`, `backend_replacement_congruence_sem`). Requires admissible contexts \u2014 the link guard passes, both sides' declared material is well-formed relative to the *linked* environment, and the linked program passes the signature stage \u2014 whose own assurances satisfy `FixesContext`, and a forward-only acceptance-preservation hypothesis. Admissibility supplies an accepted source and preservation supplies an accepted target, so both detailed observations land in the observed arm; without it their rejection outcomes need not agree. Openness is leaf-name openness only: term-level holes are unrepresentable because the compile boundary forces an empty obligation set on every declared argument. Relational quantification over related backends is no longer an open boundary: replaced the function `f` with a relation `R` and re-derived this theorem as the `graphOf f` instance (`backend_replacement_congruence_of_parametricity`, guarded by `congruence_correspondence`), so nothing here is now stated more generally than what is proved. Untested boundary: contexts carrying assurances moved by the relabel, two-way acceptance, how the *equivalence relations* at different semantics compare (\u2014 the observation functions are separated, the relations are not), and a semantics-parametric congruence witness on a certificate-bearing fragment. The disagreeing-carrier boundary is closed by `cycle_admissible` and `congruence_witness_sem`: admissibility and congruence now hold on the same cycle where grounded and stable observations differ. The fixture remains certificate-free. The composed and whole-program relational boundary is closed by `backend_replacement_parametricity_composed_sem` and `whole_program_parametricity_sem`; the latter preserves the already-checked contract without adding admissibility. `whole_program_parametricity_local_sem` supplies the separate closed-link occurrence-union instance."
+  signal: empirical-resolution
+  provenance: ai-suggested
+- turn: 1
+  entry: C49
+  field: Proof
+  before: "- **Proof**: [`Lara.Context.crossAttsFrom_map`, `crossAtts_relabel`, `link_relabel_commutes`, `checkUnit_map`, `compileUnit_map`, `backend_replacement_congruence`, `registry_swap_congruence`, `link_attackComplete`, `link_checked`, `link_merge_status_eq`; witnesses `Lara.Examples.Linking.certAdmissible`, `cert_congruence_witness`, `cert_relabel_moves`, `cert_registry_swap_witness`; `ara/evidence/proofs/m4_contextual_adequacy.md`; `docs/theory-m4-contextual-adequacy.md`; the PR, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f. Generic instance: `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`, `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`; `docs/theory-m4-generic-observation.md`; the PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified onto one observation type in commit eb6e955, which preserved every statement. Relational instance: `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`, `backend_replacement_congruence_of_parametricity`, `congruence_correspondence`; `ara/evidence/proofs/m4_relational_parametricity.md`; `docs/theory-m4-relational-parametricity.md`; trace N337-N341; disagreeing-carrier instance: `Lara.Examples.ContextSemantics.cycle_admissible`, `congruence_witness_sem`, `obsSem_cycle_stable_ne_grounded`; `ara/evidence/proofs/m4_cycle_admissibility.md`]"
+  after: "- **Proof**: [`Lara.Context.crossAttsFrom_map`, `crossAtts_relabel`, `link_relabel_commutes`, `checkUnit_map`, `compileUnit_map`, `backend_replacement_congruence`, `registry_swap_congruence`, `link_attackComplete`, `link_checked`, `link_merge_status_eq`; witnesses `Lara.Examples.Linking.certAdmissible`, `cert_congruence_witness`, `cert_relabel_moves`, `cert_registry_swap_witness`; `ara/evidence/proofs/m4_contextual_adequacy.md`; `docs/theory-m4-contextual-adequacy.md`; the PR, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f. Generic instance: `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`, `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`; `docs/theory-m4-generic-observation.md`; the PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified onto one observation type in commit eb6e955, which preserved every statement. Relational instance: `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`, `backend_replacement_congruence_of_parametricity`, `congruence_correspondence`; `ara/evidence/proofs/m4_relational_parametricity.md`; `docs/theory-m4-relational-parametricity.md`; trace N337-N341; disagreeing-carrier instance: `Lara.Examples.ContextSemantics.cycle_admissible`, `congruence_witness_sem`, `obsSem_cycle_stable_ne_grounded`; `ara/evidence/proofs/m4_cycle_admissibility.md`; relational family: `ara/evidence/proofs/m4_relational_family_277.md`]"
+  signal: empirical-resolution
+  provenance: ai-suggested
+- turn: 1
+  entry: C49
+  field: Last revised
+  before: "- **Last revised**: 2026-09-08 (2026-09-08_002#1)"
+  after: "- **Last revised**: 2026-09-09 (2026-09-09_277#1)"
+  signal: empirical-resolution
+  provenance: ai-suggested
+key_context:
+- turn: 1
+  excerpt: User authorized implementation and direct PR submission for issue 277.
+open_threads: []
+ai_suggestions_pending: []

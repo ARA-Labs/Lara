@@ -1,0 +1,121 @@
+# S2 — ordered-comparison worked example (lara-syntax@0.4)
+#
+# The second strict-certificate worked example, and the first exercising the
+# ord@1 backend: the most common claim shape in ML methodology papers — "this
+# number beats that number" — carried end to end from two measured cells to a
+# comparative claim.
+#
+# The layering is the point (plan §3.6). a1 is the STRICT step: the bare
+# ordered comparison num_lt(0.71, 0.74), re-checked by ord@1 in exact rational
+# arithmetic from a certificate naming its two consulted premise slots. a2 is
+# the DEFEASIBLE bridge: it consumes that strict conclusion together with the
+# binding leaf that says which systems and measurand those two numbers belong
+# to, and concludes better(sys_new, sys_base, accuracy, imagenet_val).
+#
+# The factivity firewall, concretely: the certificate discharges ONLY that
+# each cited premise's numeric literal equals the corresponding goal numeral
+# and that 0.71 < 0.74. It asserts nothing about whether either measurement is
+# true — that stays with the defeasible observed leaves. You cannot argue with
+# the arithmetic; you argue with the measurements and with the binding.
+#
+# WHAT CHANGED AT @0.4. Six `let` bindings now name the two systems, metric,
+# dataset, and reported scores once. Every ground-term use below refers to those
+# names, and c1's prose interpolates the same four system/score values, so the
+# expanded text is byte-for-byte unchanged. The typed `on accuracy @
+# imagenet_val` selector remains explicit and unchanged: it selects the @0.3
+# comparison scheme rather than acting as a term-substitution site.
+#
+# The @0.3 `comparison` block and its layering are otherwise unchanged: it still
+# produces strict a1 and defeasible a2, and the elaborated Unit remains
+# byte-identical. @0.4 removes repeated authored ground terms without changing
+# the scientific claim, certificate, or expected verdict.
+#
+# The sub-claim c2 did NOT vanish with its declaration. Its prose, its author
+# attestation, and its id all reach the Unit and none can be machine-invented,
+# so they are declared in the block's `claims` sub-block; only its `formal` —
+# the arithmetic — is generated.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact ord_demo at sha256:5252525252525252525252525252525252525252525252525252525252525252
+policy ord-v1
+use backends [ord@1]
+
+let candidate = sys_new
+let baseline = sys_base
+let metric = accuracy
+let dataset = imagenet_val
+let candidate_score = 0.74
+let baseline_score = 0.71
+
+# --- The comparative claim the bridge rule delivers -------------------------------------------
+
+claim c1
+  nl      = "{candidate} outperforms {baseline} on ImageNet-val accuracy ({candidate_score} vs {baseline_score})"
+  formal  = better(candidate, baseline, metric, dataset)
+  binding = { author = alice, rationale = "Ordered comparison of two reported accuracy cells.", audit-status = reviewed }
+
+# --- The two measured cells the certificate consults ------------------------------------------
+# One leaf per reported cell. These carry the raw numbers; their truth is observed evidence,
+# never certified content. The bindings are the only place either number is written; the leaves
+# reuse those values, and the comparison below names the leaves and reads their values out.
+
+leaf e1 : reports(exp1, score_cell(baseline, metric, dataset, baseline_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_base]
+
+leaf e2 : reports(exp1, score_cell(candidate, metric, dataset, candidate_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/accuracy.md#row=sys_new]
+
+# The binding the bridge rule needs: which systems and measurand those two numbers belong to.
+# The bare comparison cannot say this — as a proposition num_lt(0.71, 0.74) is the same atom
+# whichever measurands produced the numbers — so the identity enters as attested evidence.
+#
+# This leaf is NEVER generated. It is an attestation with an author and a provenance tag; a
+# `comparison` block that synthesized it would manufacture evidence nobody signed, and the thing
+# examples/S4 attacks would be something the compiler invented.
+
+leaf e3 : comparison_setup(candidate, baseline, metric, dataset, candidate_score, baseline_score)
+  kind       = attested
+  provenance = user
+  refs       = [evidence/tables/accuracy.md#caption]
+
+# --- The comparison: one block, two arguments -------------------------------------------------
+# `relation` plus the measurand's declared polarity select the scheme; the scheme names the
+# strict rule (beats_recheck) and the bridge (beats_baseline). From `result`/`baseline` the
+# elaborator reads the two cells out of the named leaves — the same premiseCell helper ord@1
+# itself uses — and generates:
+#
+#   * claim c2, whose formal is num_lt(0.71, 0.74) — the goal the (strictly-better,
+#     higher-is-better) cell of the lookup table calls for, in that argument order;
+#   * arg a1, the strict step, with the ord@1 certificate and its two 0-based (prem i) slots;
+#   * arg a2, the defeasible bridge, consuming the strict conclusion plus the binding leaf.
+#
+# Both argument ids are author-declared rather than derived, and that is load-bearing: S4
+# attacks this bridge by id and position. The sub-claim derives each quoted score from the
+# exact evidence leaf that the arithmetic reads, so prose and evidence cannot drift.
+
+comparison : better(candidate, baseline) on accuracy @ imagenet_val
+  relation = strictly-better
+  recheck  = a1
+  bridge   = a2
+  result   = e2
+  baseline = e1
+  binding  = e3
+  claims c2
+    nl      = "The reported baseline accuracy {cell e1} is strictly below the reported system accuracy {cell e2}"
+    binding = { author = alice, audit-status = reviewed }
+  supports c1
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 (the strict ord@1 comparison step) and a2 (the defeasible bridge, with a1 as
+# a sub-argument), both unattacked -> in (grounded).
+# Claim status:
+#   c1 -> justified (a2 is a complete argument for it, with no attackers)

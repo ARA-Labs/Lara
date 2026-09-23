@@ -1,0 +1,400 @@
+session:
+  id: "2026-08-06_001"
+  date: "2026-08-06"
+  started: "2026-08-06T05:57"
+  last_turn: "2026-08-06T23:50"
+  turn_count: 7
+  summary: >
+    Delivered policy admission end to end: source-runtime enforcement, raw-aligned Lean
+    metatheory, exact-manifest Haskell/Lean semantic differential, review hardening,
+    ARA evidence, and corrected paper claims. Code head 5d661fb and paper head 16f82b9
+    are pushed; the PR awaits hosted CI recovery and independent re-review. A second
+    review round then closed the public admission bypass, restored located rejections on
+    policy-pruned results, made R14 argument-id uniqueness a carried Lean invariant,
+    narrowed the overstated all-admit scope claims, and stopped the differential harness
+    from deleting its own failure diagnostics. A third turn ran the full engineering
+    review of the ord@1 comparison-backend plan: 12 findings all folded -- the family
+    narrowed to {num_lt, num_le}, certificates went premise-only (closing the raw-door
+    theory back door), cell helpers factored in both languages, exclusivity lemmas
+    mechanized, the pin matrix completed, and the fixture gained a bridge rule; C26
+    crystallized.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N116"
+    routing: direct
+    provenance: ai-executed
+    summary: "Deliver the policy admission metatheory, semantic differential, and paper gates"
+  - turn: 1
+    type: decision
+    id: "N117"
+    routing: direct
+    provenance: ai-executed
+    summary: "Repair all eight independent-review findings at their source"
+  - turn: 1
+    type: decision
+    id: "N118"
+    routing: direct
+    provenance: ai-executed
+    summary: "Carry validated raw attack identity through accepted admission and close protocol gaps"
+  - turn: 1
+    type: experiment
+    id: "N119"
+    routing: direct
+    provenance: ai-executed
+    summary: "Run final compatibility gates, obtain an independent local merge-ready review, publish both repositories, and request GitHub re-review"
+  - turn: 2
+    type: decision
+    id: "N120"
+    routing: direct
+    provenance: ai-executed
+    summary: "Repair all five second-round review findings at their source"
+  - turn: 2
+    type: experiment
+    id: "N121"
+    routing: direct
+    provenance: ai-executed
+    summary: "Re-run every gate the repairs could disturb, incl. an injected-oracle check of the harness fix"
+  - turn: 2
+    type: observation
+    id: "O45"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Trusted wrapper must be the only public path to its input -> H09"
+  - turn: 2
+    type: observation
+    id: "O46"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Harness must print captured stderr on every failure branch"
+  - turn: 2
+    type: observation
+    id: "O47"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Decoder well-formedness exported as a proof, not a boolean -> H10"
+  - turn: 2
+    type: observation
+    id: "O48"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Prose must restate a theorem at the granularity it proves"
+  - turn: 3
+    type: decision
+    id: "N122"
+    routing: direct
+    provenance: user-revised
+    summary: "ord@1 goal family narrowed to {num_lt, num_le}; num_eq dropped as degenerate"
+  - turn: 3
+    type: decision
+    id: "N123"
+    routing: direct
+    provenance: user-revised
+    summary: "ord@1 certificates premise-only; raw-door theory back door closed by construction"
+  - turn: 3
+    type: decision
+    id: "N124"
+    routing: direct
+    provenance: user-revised
+    summary: "Ten-item plan hardening bundle: Cell factoring both languages, Lean registration, Dec proof core, exclusivity lemmas, full pin matrix, bridge rule"
+  - turn: 3
+    type: observation
+    id: "O49"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Raw-door strict-backend theory table is artifact-supplied; premise-backing must be backend-enforced"
+  - turn: 3
+    type: observation
+    id: "O50"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Canonical-numeral injectivity degenerates equality goals to syntactic identity -> C26"
+  - turn: 4
+    type: decision
+    id: "N125"
+    routing: direct
+    provenance: ai-executed
+    summary: "ord@1 Lean registration resolves known digests to the empty theory, so the premise-only guard agrees across both implementations"
+  - turn: 4
+    type: experiment
+    id: "N126"
+    routing: direct
+    provenance: ai-executed
+    summary: "Full conformance gate green (441/441 differential, axiom audit, suite); the N11 anchor first caught a Lean preflight-list divergence"
+  - turn: 4
+    type: decision
+    id: "N127"
+    routing: direct
+    provenance: ai-executed
+    summary: "Deliverable-5 deviation: registryEx not extended with ord@1, following the ra@1 precedent"
+  - turn: 4
+    type: observation
+    id: "O51"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A guard depending on a distinction the seam erases must move into what the seam does parameterize"
+  - turn: 4
+    type: observation
+    id: "O52"
+    routing: staged
+    provenance: ai-executed
+    summary: "A goal grammar accepts the preimage of the canonical image under nf, not the image itself"
+  - turn: 4
+    type: observation
+    id: "O49"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Raw-door artifact-supplied theory tables -> C27 via artifact-commitment"
+  - turn: 6
+    type: decision
+    id: "N128"
+    routing: direct
+    provenance: user
+    summary: "registryEx deviation reversed on user direction; ord@1 registered with five theorems"
+  - turn: 6
+    type: experiment
+    id: "N129"
+    routing: direct
+    provenance: ai-executed
+    summary: "External review: no correctness defect; one golden-coverage gap, one unpinned refactor invariant, eight comment defects"
+  - turn: 6
+    type: observation
+    id: "O53"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A differential proves agreement, not correctness — weakest where the two sides were modelled differently on purpose"
+  - turn: 6
+    type: observation
+    id: "O54"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A refactor's behaviour-preserving parameter needs its invariant asserted in the same change, mutation-tested"
+  - turn: 7
+    type: decision
+    id: "N130"
+    routing: direct
+    provenance: user
+    summary: "Two of the review's three no-change notes deferred as one scoped P2 TODO; the third answered in place (the guard is a totality guard, not dead)"
+
+ai_actions:
+  - turn: 2
+    action: >
+      Moved the admission-free lowering into Lara.Elaborate.Internal; retained the located
+      rejection and checked argument ids on SourceResult and rendered class/stage/constituent
+      for policy-pruned rejections; added the ids_nodup invariant to AlignedAttacks with the
+      decoder proof and two supporting theorems; narrowed the all-admit scope prose; and made
+      the differential harness dump both drivers' exit codes and stderr on mismatch.
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Elaborate/Internal.hs
+      - src/Lara/Elaborate.hs
+      - src/Lara/ExpectedJson.hs
+      - lara.cabal
+      - test/AdmissionSpec.hs
+      - test/ElaborateSpec.hs
+      - test/WorkedExamplesSpec.hs
+      - lean/Lara/RawAttack.lean
+      - lean/Lara/Driver.lean
+      - lean/Lara/Admission.lean
+      - lean/Lara/AdmissionDriver.lean
+      - lean/AxCheck.lean
+      - scripts/admission-differential.sh
+      - plans/2026-08-05-policy-admission-metatheory.md
+      - ara/evidence/results/policy_admission_review_round2.md
+  - turn: 1
+    action: >
+      Implemented and reviewed the shared raw-attack layer, declarative and executable
+      admission semantics, twenty-fixture differential, source-consumer hardening,
+      strengthened Lean theorems, exact evidence records, and paper corrections.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/RawAttack.lean
+      - lean/Lara/Admission.lean
+      - lean/Lara/AdmissionDriver.lean
+      - test/Lara/AdmissionFixture.hs
+      - fixtures/admission/MANIFEST
+      - scripts/admission-differential.sh
+      - src/Lara/Elaborate.hs
+      - ara/evidence/results/policy_admission_boundary.md
+      - "paper draft: src/metatheory.tex"
+      - "paper draft: tables/mechanization.tex"
+  - turn: 1
+    action: >
+      Ran the full Haskell, Lean, axiom, core differential, admission differential,
+      replay, tamper, freeze, diff, and paper build gates; committed and pushed code
+      head 5d661fb and paper head 16f82b9; updated the PR and requested re-review.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: >
+      Ran the gstack plan-eng-review pipeline on the ord@1 plan: Step 0 scope grounding
+      against Strict.hs/RA.hs/RA.lean/strict-backend-decision.md; four review sections
+      (3 architecture + 4 code-quality + 1 test + 0 performance findings); outside-voice
+      challenge (Claude subagent; Codex at usage limit) yielding 4 accepted tensions;
+      folded all 12 user-approved resolutions into the plan and appended the GSTACK
+      REVIEW REPORT; added two review-sourced TODOS.md entries.
+    provenance: ai-executed
+    files_changed:
+      - plans/2026-08-06-ord1-comparison-backend.md
+      - TODOS.md
+  - turn: 4
+    action: >
+      Implemented plans/2026-08-06-ord1-comparison-backend.md end to end in seven
+      commits (29f55df..01b4c3f): factored Lara.Strict.Cell and its Lean mirror
+      lean/Lara/Cell.lean; added the ord@1 backend src/Lara/Strict/Ord.hs with the
+      closed {num_lt,num_le} family, premise-only slots and no witness value;
+      mechanized lean/Lara/Ord.lean (Backend obligations 1-4 plus the intra-family
+      exclusivity lemmas lt_excl_lt / lt_excl_le / ordModels_excl_of_lt and
+      le_le_iff_eq); registered ord@1 at both Haskell seams and in the Lean driver;
+      added test/OrdSpec.hs (17 properties), the examples/S2 worked example with the
+      section 3.6 bridge rule, and four raw differential fixtures; extended AxCheck
+      over 21 new theorems.
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Strict/Cell.hs
+      - src/Lara/Strict/Ord.hs
+      - src/Lara/Strict/RA.hs
+      - src/Lara/Driver/Internal.hs
+      - src/Lara/Replay.hs
+      - lean/Lara/Cell.lean
+      - lean/Lara/Ord.lean
+      - lean/Lara/RA.lean
+      - lean/Lara/Driver.lean
+      - lean/AxCheck.lean
+      - test/OrdSpec.hs
+      - test/WorkedExamplesSpec.hs
+      - examples/S2/example.lara
+      - examples/S2/ord-v1.policy.lara
+      - fixtures/corpus/ord-premise-only-reject.sexp
+      - fixtures/corpus/ord-premise-only-accept.sexp
+      - fixtures/corpus/ord-le-boundary-accept.sexp
+      - fixtures/corpus/ord-lt-boundary-reject.sexp
+      - TODOS.md
+  - turn: 6
+    action: >
+      Added the ord@1 entry to Lara.Examples.registryEx with five theorems
+      (AxCheck extended), then addressed the full review: pinned the four
+      ord fixtures plus examples/S2 and the two running-example runs in
+      corpusGoldens; added prop_goldensCoverAnchors so an unpinned anchor now
+      fails cabal test; added prop_raRejectionMessages (mutation-tested) and the
+      ord-side label pin; corrected three "theory is empty by design" claims, the
+      "unreachable" label on a live security branch, buildCertOk's Haddock, C26's
+      dangling parseDecimal pointer, WorkedExamplesSpec's stale count, both funnel
+      diagrams, and two rotted line-number citations; added generated goal-numeral
+      mutation, right-slot, and premiseCell-arm coverage to OrdSpec. Re-ran all
+      four gates and pushed 82de5a2.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Examples.lean
+      - lean/AxCheck.lean
+      - test/DifferentialSpec.hs
+      - test/RASpec.hs
+      - test/OrdSpec.hs
+      - test/WorkedExamplesSpec.hs
+      - src/Lara/Strict/Ord.hs
+      - src/Lara/Strict/Cell.hs
+      - src/Lara/Driver/Internal.hs
+      - examples/S2/ord-v1.policy.lara
+      - ara/logic/claims.md
+      - plans/2026-08-06-ord1-comparison-backend.md
+      - TODOS.md
+  - turn: 7
+    action: >
+      Added the TODOS entry "Make backend rejection reasons reach the author"
+      (P2, both halves with pros/cons and the shortcut to resist) and a comment
+      in Ord.resolve recording why the i >= 0 conjunct stays and why slots stay
+      Int. Comment- and doc-only; build clean, cabal test PASS.
+    provenance: ai-executed
+    files_changed:
+      - TODOS.md
+      - src/Lara/Strict/Ord.hs
+
+claims_touched:
+  - id: C26
+    action: created
+    turn: 3
+  - id: C27
+    action: crystallized
+    turn: 4
+  - id: C26
+    action: revised
+    turn: 6
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The user directed continuation from the stable runtime source contract through all
+      remaining Lean proofs, semantic differential, paper work, final gates, ARA record,
+      push, and PR delivery.
+  - turn: 2
+    excerpt: >
+      The user relayed a five-item follow-up review (one critical, four important) and
+      directed "address all". The critical finding was that the exported elaborate ->
+      mkReplayId -> mkCheckInput -> runCheck path still accepted a source rejected as R8
+      by prepareSource.
+  - turn: 7
+    excerpt: >
+      Asked "do you think we should fix these three?" about the review's
+      no-change notes, then accepted the recommendation ("sure"): defer the
+      rejection-reason channel and the valueless assert messages as one scoped
+      TODO, and answer the Int/Nat note in place because the guard called dead
+      is what keeps resolve total.
+  - turn: 6
+    excerpt: >
+      The user directed "add the registryEx entry, commit, and then check the
+      remote review comments ... address all, replay and push", resolving the
+      N127 deviation in favour of adding the entry. The review itself found no
+      correctness defect but one real test-pinning gap and eight documentation
+      statements the code contradicts.
+  - turn: 5
+    excerpt: >
+      The user reviewed the turn-4 delivery summary and directed "record these" over the
+      three headline items (premise-only guard moved into theory resolution; the
+      differential harness catching the Lean preflight-list divergence; the
+      deliverable-5 registryEx deviation). All three were already captured in turn 4 as
+      N125, N126, N127, so no new nodes were created. The user did NOT take up the
+      standing offer to reinstate the registryEx entry, leaving N127's deviation
+      un-adjudicated rather than endorsed.
+  - turn: 4
+    excerpt: >
+      The user directed implementation of the cleared ord@1 plan with the proofs
+      mechanized, ARA updated for any changes arising from proof progress, a commit
+      per step, and a PR at the end. The load-bearing change that arose from proof
+      progress was N125: the premise-only guard is inexpressible in the abstract Lean
+      Backend core, so it moved into theory resolution.
+  - turn: 3
+    excerpt: >
+      The user ran /plan-eng-review on plans/2026-08-06-ord1-comparison-backend.md and
+      accepted all 12 review recommendations, including the outside voice's strongest
+      finding ("num_eq is dead weight" -- canonical injectivity forces num_eq(A,A)) and
+      the premise-only-slot guard closing the raw-door theory back door. Review verdict:
+      ENG CLEARED, ready to implement.
+
+logic_revisions:
+  # turn 4 crystallized O49 -> C27 (new entry, not a revision); turn 5 made no edit.
+  - turn: 6
+    entry: C26
+    field: Proof
+    before: "src/Lara/Strict/RA.hs parseDecimal (canonical-image acceptance)"
+    after: "src/Lara/Strict/Cell.hs parseDecimal (canonical-image acceptance)"
+    signal: dependency-change
+    provenance: ai-suggested
+    note: >
+      Dangling evidence pointer found by the review: this branch moved
+      parseDecimal into Lara.Strict.Cell and removed it from RA's export list,
+      so the cited symbol did not exist at the cited path from the moment C26
+      was written. Path repair only; the claim's content is unchanged and its
+      status stays supported.
+
+open_threads:
+  - "Pushed through 82de5a2 with the full review addressed; awaiting re-review from @fenfenai"
+  - "TODOS P2 'Make backend rejection reasons reach the author' now carries the two deferred review notes (the Bool-collapsed certificate oracle, and valueless cell-mismatch messages); the third note is closed — the i >= 0 guard is a totality guard, documented in place"
+  - "A Lean String-reduction lemma set (parseCanonNat/parseDecimal/splitOn on literals, the Lara.ND.decodeNat_repr treatment) would let Lara.Examples pin a concrete ord@1 numeric acceptance rather than only the resolution invariant"
+  - "Second-round repairs pushed as code head 3baca4d (5 commits); all five inline threads answered and re-review requested from @fenfenai on the PR"
+  - "GitHub Actions major outage qcvjkzcs7j74 prevented a hosted run from dispatching at head 5d661fb; rerun when service recovers"
+  - "The PR remains CHANGES_REQUESTED until @fenfenai completes the requested re-review"
+  - "TODOS.md gained two review-sourced items: seam-wide raw-door theory-content decision (ra@1 parity) and corpus extension exercising ord@1 end-to-end"
+
+ai_suggestions_pending: []
+

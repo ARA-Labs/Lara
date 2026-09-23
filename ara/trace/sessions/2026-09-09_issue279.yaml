@@ -1,0 +1,142 @@
+session:
+  id: 2026-09-09_issue279
+  date: '2026-09-09'
+  started: '2026-09-09'
+  last_turn: '2026-09-09'
+  turn_count: 1
+  summary: 'Finite injective realization with context fixing; unrestricted extension refuted.'
+events_logged:
+- turn: 1
+  type: pivot
+  id: N279-extension
+  routing: direct
+  provenance: ai-executed
+  summary: Finite occurrence agreement replaces false unrestricted extension.
+ai_actions:
+- turn: 1
+  action: Proved finite extension, structural realization, context fixing and an unrestricted-extension
+    counterexample; corrected documentation; ran build and audits.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Context/FiniteExtension.lean
+  - lean/AxCheck.lean
+  - docs/theory-m4-relational-parametricity.md
+claims_touched:
+- id: C53
+  action: revised
+  turn: 1
+logic_revisions:
+- turn: 1
+  entry: C53
+  field: scope and proof
+  before: '## C53: A relational generalization of a representation-independence theorem is stronger than
+    its functional original only where no total extension of the relation satisfies the global hypothesis
+
+    - **Statement**: Replacing a function by a relation in a representation-independence theorem does
+    not, by itself, generalize it. When the relation must reflect and preserve equality on what it relates
+    — the side condition the underlying calculus forces if it decides term equality anywhere — that condition
+    also makes the relation single-valued, i.e. a partial *function*. Any pair of related objects therefore
+    already exhibits some total injective function realizing the same transformation, and every conclusion
+    the relational theorem reaches is reachable through the functional one. The relational form gains
+    exactly one thing, and it is a property of the *hypothesis* rather than of the quantifier: because
+    the acceptance obligation is guarded by the relation, it ranges only over the pairs actually related,
+    whereas the functional hypothesis must hold of the total extension everywhere. Where no total extension
+    satisfies the global obligation, the relational theorem applies and the functional one does not. The
+    corollary for practice: a relational milestone that instantiates only at graphs of functions has proved
+    nothing new, because that instantiation collapses the guarded hypothesis back to the global one —
+    the localized instance is the deliverable, not the quantifier shape.
+
+    - **Conditions**: Established in one mechanized instance: M4''s contextual congruence, where `RelInj`
+    is forced by `dedupList`, `coveredB` and `checkUnit_complete`''s `Nodup` premise, `relInj_functional`
+    proves the single-valuedness, and `backend_replacement_parametricity_local` instantiates the guarded
+    hypothesis at `occRel F` — the identity restricted to the fragment''s own certificate occurrences.
+    The localization is bounded from below by an inherited hypothesis: `RelFixesContext` plus `RelInj`
+    pin the relation to the identity on the *context''s* occurrences too, so an assurance shared between
+    context and fragment cannot move. Untested boundary: no fixture exhibits two fragments related by
+    a genuinely non-functional relation whose observations differ, so the gap is shown non-empty
+    by construction of the localized hypothesis rather than by a separating witness; the step from `relInj_functional`''s
+    *partial* function to a *total injective* extension is prose rather than proof, and the Statement''s
+    "already reachable" clause rests on it; and no claim is made that a side condition weaker than `RelInj`
+    — one that does not force single-valuedness — is unavailable for a calculus that decides equality
+    less often.
+
+    - **Sources**: [`158-job build` ← `ara/evidence/proofs/m4_relational_parametricity.md` «Build completed
+    successfully (158 jobs).» [result]; `90-declaration coverage` ← `ara/evidence/proofs/m4_relational_parametricity.md`
+    «AxCheck coverage passed (90 declarations).» [result]; `audit outcome` ← `ara/evidence/proofs/m4_relational_parametricity.md`
+    «Axiom audit passed.» [result]; `exactness of the re-derivation` ← `ara/evidence/proofs/m4_relational_parametricity.md`
+    «`Context.congruence_correspondence` typechecks **by `rfl`**» [result]]
+
+    - **Status**: hypothesis
+
+    - **Provenance**: ai-suggested
+
+    - **Falsification**: Exhibit a relational representation-independence theorem whose side condition
+    does not force single-valuedness yet is still enough to carry an equality-deciding merge and coverage
+    decider — which would show the collapse-to-partial-function is an artefact of this calculus rather
+    than of relational lifting; or exhibit a conclusion reachable by `backend_replacement_parametricity`
+    and provably not reachable by `backend_replacement_congruence` for reasons *other* than the non-existence
+    of a globally acceptance-preserving total extension; or show that some total injective extension of
+    any `RelInj` relation always satisfies `AssurPreserving` globally, which would make the localized
+    instance vacuous and the milestone empty.
+
+    - **Proof**: [`Lara.Context.relInj_functional`, `relInj_injective`, `obsGen_parametricity`, `backend_replacement_parametricity{,_sem}`,
+    `backend_replacement_parametricity_local{,_sem}`, `backend_replacement_congruence_of_parametricity`,
+    `congruence_correspondence`, `occRel`/`relFrag_occRel`/`relInj_occRel`, all `lean/Lara/Context/Parametricity.lean`;
+    `ara/evidence/proofs/m4_relational_parametricity.md`; `docs/theory-m4-relational-parametricity.md`
+    §4, §6; trace N338, N339, N340; the issue]
+
+    - **Dependencies**: [C49]
+
+    - **Tags**: M4, parametricity, representation-independence, relational-reasoning, backend-replacement,
+    mechanized, proof-engineering'
+  after: '## C53: Finite related material has a functional realization; acceptance scope remains an independent
+    obligation
+
+    - **Statement**: A partial-injective certificate relation on finite structured material can be realized
+    by a total injective relabeling, simultaneously fixing finite related context material. Consequently
+    functional congruence''s structural premises can be discharged for the same fragments and context.
+    Relational acceptance preservation is guarded by the relation; global functional acceptance preservation
+    remains a separate obligation on the realizing map. This finite realization does not extend all pairs
+    of an arbitrary infinite relation.
+
+    - **Conditions**: Mechanized for M4 fragments and contexts under `RelInj`, `RelFrag`, and `RelFixesContext`.
+    `exists_total_injective_extension_on` restricts agreement to a finite list of source assurances; `relFrag_exists_injective_fixesContext`
+    uses the combined fragment/context occurrences. The unrestricted extension assertion is refuted on
+    `Assurance` by the inverse graph of the certificate-version shift. The occurrence-local congruence
+    instantiates guarded acceptance but is not itself a witness that every globally preserving realization
+    fails. No claim is made about calculi with weaker relational side conditions or infinite structured
+    material.
+
+    - **Sources**: [`finite realization` ← `lean/Lara/Context/FiniteExtension.lean` «theorem relFrag_exists_injective_fixesContext»
+    [result]; `unrestricted counterexample` ← `lean/Lara/Context/FiniteExtension.lean` «theorem not_every_relInj_has_total_extension»
+    [result]]
+
+    - **Status**: hypothesis
+
+    - **Provenance**: ai-suggested
+
+    - **Falsification**: Exhibit finite RelInj-related fragment and context material for which no injective
+    relabeling both realizes the target fragment and fixes the context; or show that structural realization
+    alone entails global acceptance preservation without any acceptance assumptions.
+
+    - **Proof**: [`lean/Lara/Context/FiniteExtension.lean`: `exists_total_injective_extension_on`, `relFrag_exists_injective`,
+    `relFrag_exists_injective_fixesContext`, `not_every_relInj_has_total_extension`; `lean/Lara/Context/Parametricity.lean`:
+    `backend_replacement_parametricity_local`; `ara/evidence/proofs/m4_finite_extension_279.md`; `docs/theory-m4-relational-parametricity.md`
+    §4; trace N279-extension]
+
+    - **Dependencies**: [C49]
+
+    - **Tags**: M4, parametricity, representation-independence, relational-reasoning, backend-replacement,
+    mechanized
+
+    - **Last revised**: 2026-09-09 (2026-09-09_issue279#1)'
+  signal: empirical-resolution
+  provenance: ai-suggested
+  note: Lean refutes unrestricted extension and proves the finite structural claim including context fixing;
+    no status upgrade.
+key_context:
+- turn: 1
+  excerpt: User authorized judgment on whether the extension construction was worth implementing, followed
+    by direct PR submission.
+open_threads: []
+ai_suggestions_pending: []

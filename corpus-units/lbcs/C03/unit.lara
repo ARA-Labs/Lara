@@ -1,0 +1,67 @@
+# Corpus unit lbcs/C03 — gap (an analytic theorem the artifact never discharges)
+#
+# Source: m0/annotations/lbcs.yaml C03 (descriptive, scheme dose_response; corpus pin 62e9b54).
+# Headline: Theorem 2 — under Conditions 1 (Progressable) and 2 (Stable Moving), LBCS converges
+# eps-optimally (almost surely, P_{t->inf}[f2(mt) <= f2*] = 1). The artifact's cited support is
+# an empirical search-time sweep (E03: accuracy plateaus at T>=500, coreset size keeps
+# shrinking) plus E06 joint-reduction corroboration.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Scheme divergence, recorded per the uniform-standard rule: the annotator chose
+#     dose_response (the evidence actually offered — vary T, observe plateau), but the claim IS
+#     Theorem 2, an analytic result. Per the T2 instruction it lowers through analytic_argument
+#     (conclusion holds_analytically(lbcs_eps_convergence)); the empirical T-sweep is
+#     corroboration, not a discharge of the derivation. The strict arithmetic/proof-recheck
+#     adapter that would certify Theorem 2 (a mechanized proof checker) does not exist yet, so
+#     analytic_argument stays defeasible; migration to a strict rule + certificate is future
+#     work (corpus-v1 design note; LOWERING §Scheme family map).
+#   * Both mandatory analytic CQs are unmet-gap: assumptions_established (Conditions 1-2 are
+#     never operationalized or checked — they appear only in the claim statement) and
+#     scope_licensed (the finite-T sweep, T<=2000, never bridges to the t->inf probability-1
+#     statement). Two open mandatory obligations make the argument an IncompleteArgument
+#     rejection, so no complete analytic_argument is declarable — E2-style gap on empty
+#     complete support (adaptive-pruning/C03 pattern). The optional CQs (repetition count,
+#     single dataset/model pair) are also unmet and simply omitted.
+#   * The derivation itself is not shipped: the claim's Proof field points only at empirical
+#     E03/E06, so the principal premise derives(theorem2_proof, lbcs_eps_convergence) is merely
+#     ATTESTED (the paper asserts the appendix proof), deepening the gap beyond the two CQs.
+#   * Coverage flag (kind-a, summary §3): the asymptotic almost-sure modality has no direct
+#     construct; eps, f2*, and the P=1 limit live in nl, audited on faithfulness.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact lbcs at sha256:0cc27415e6b1
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c03
+  nl      = "Theorem 2: under Conditions 1 (Progressable) and 2 (Stable Moving), LBCS converges eps-optimally, with f2(mt) reaching within eps of f2* almost surely as t -> infinity; the artifact corroborates only empirically via the E03 search-time plateau and E06 joint reduction"
+  formal  = holds_analytically(lbcs_eps_convergence)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaf is present ... ---------------------------------------------------------------
+
+# Principal premise: the paper's Theorem 2 and its appendix proof are asserted (attested); the
+# artifact ships the empirical corroboration (E03 T-sweep, E06) rather than the derivation, so
+# this leaf is attested, not observed.
+leaf e1 : derives(theorem2_proof, lbcs_eps_convergence)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C03, Theorem-2, logic/experiments.md#E03, logic/experiments.md#E06, Table-7, Table-1, trace/exploration_tree.yaml#N08, trace/exploration_tree.yaml#N12]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: assumptions_established(theorem2_proof) — Conditions 1-2 unverified —
+# and scope_licensed(lbcs_eps_convergence) — finite-T does not license the t->inf limit — are
+# both mandatory and both unmet, and derives is only attested. The complete-support set is empty.)
+
+status c03
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

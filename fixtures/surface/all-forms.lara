@@ -1,0 +1,79 @@
+artifact surface_all_forms at sha256:surface
+policy surface-policy
+use backends [nd@1, ord@1]
+let threshold = 7
+
+claim claim-main
+  nl      = "threshold {threshold}; observed {cell proof}"
+  formal  = score(threshold)
+  binding = { author = author, rationale = "surface witness", audit-status = reviewed }
+
+claim claim-pro
+  nl      = "positive verdict café"
+  formal  = verdict(1)
+  binding = { author = author, rationale = "attack source", audit-status = reviewed }
+
+leaf e : reported(system-a, quality, dataset, 7)
+  kind       = observed
+  provenance = user
+  refs       = [source/e]
+
+leaf baseline : reported(system-b, quality, dataset, 5)
+  kind       = attested
+  provenance = ai-executed
+  refs       = []
+
+leaf binding : binding(system-a, system-b, quality, dataset, 7, 5)
+  kind       = assumed
+  provenance = checker(checker, v1)
+  refs       = []
+
+leaf proof : score(7)
+  kind       = certified
+  provenance = user
+  refs       = [source/proof]
+
+leaf pass-proof : evidence(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+leaf verdict-pro : verdict(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf verdict-con : verdict(0)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-strict : supports(claim-main) by main(7)
+  assurance = cert(nd@1, sha256:theory, (app (lam h (prop "score(7)") (hyp h)) (prem evidence)))
+
+arg arg-pass-explicit : supports(claim-main) by pass(7)
+  discharge cq with proof
+
+arg arg-pass-inferred : supports(claim-main) by pass from [pass-proof]
+  discharge cq with arg-pass-explicit
+
+arg arg-pro : supports(claim-pro) by verdict-rule(1)
+
+arg arg-con : supports(claim-con) by verdict-rule(0)
+
+rebut arg-pro arg-con
+undercut arg-pro arg-pass-inferred.cq.rule
+undermine arg-pro arg-con.0.leaf
+
+comparison : better(system-a, system-b) on quality @ dataset
+  relation = strictly-better
+  recheck = comparison-recheck
+  bridge = comparison-bridge-arg
+  result = e
+  baseline = baseline
+  binding = binding
+  claims claim-comparison
+    nl = "comparison {threshold}; result {cell e}"
+    binding = { author = author, rationale = "comparison witness", audit-status = reviewed }
+
+status claim-main

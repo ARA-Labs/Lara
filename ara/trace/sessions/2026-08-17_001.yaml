@@ -1,0 +1,68 @@
+session:
+  id: "2026-08-17_001"
+  date: "2026-08-17"
+  started: "2026-08-17T23:27"
+  last_turn: "2026-08-17T23:42"
+  turn_count: 1
+  summary: "Implemented the issue's Map-backed parseTag lookup, proved semantic parity, measured a 54.02% median parse reduction, opened the PR, and confirmed both hosted CI jobs."
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N186"
+    routing: direct
+    provenance: user
+    summary: "The researcher invoked the eng-cleared plan, preserving the Map design, exhaustive injectivity obligation, separate scope, benchmark regeneration, ARA recording, and PR delivery."
+  - turn: 1
+    type: experiment
+    id: "N187"
+    routing: direct
+    provenance: ai-executed
+    summary: "The Map implementation passed all semantic gates and reduced same-session median parse time from 1264.0 to 581.2 microseconds; a focused old/new lookup benchmark measured an 83.42% reduction."
+  - turn: 1
+    type: claim
+    id: "C32"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Under the fixed protocol, the Map lookup materially reduces decode latency without an observed wire-behavior change."
+  - turn: 1
+    type: experiment
+    id: "N188"
+    routing: direct
+    provenance: ai-executed
+    summary: "The PR opened at ea450c5 and hosted Actions run 32107434809 passed the complete Haskell and Lean integration jobs."
+
+ai_actions:
+  - turn: 1
+    action: "Implemented the two code tasks with independent spec and quality reviews, ran the complete build/correctness/integration/performance matrix, and committed the final documented implementation as a7b498a"
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Wire.hs
+      - test/WireSpec.hs
+      - tables/performance.tex
+      - ara/evidence/results/parsetag_map_lookup.md
+      - ara/logic/claims.md
+      - ara/staging/observations.yaml
+      - ara/trace/exploration_tree.yaml
+      - ara/trace/sessions/2026-08-17_001.yaml
+      - ara/trace/sessions/session_index.yaml
+      - ara/evidence/README.md
+  - turn: 1
+    action: "Pushed perf/114-parsetag-map, opened the ARA-Labs/lara PR, and waited for hosted CI run 32107434809 to pass both jobs"
+    provenance: ai-executed
+
+claims_touched:
+  - id: C32
+    action: created
+    turn: 1
+
+key_context:
+  - turn: 1
+    excerpt: "Same-session median parse fell 1264.0 -> 581.2 microseconds (-54.02%); differential pass=581 fail=0 and negative pass=56 fail=0."
+  - turn: 1
+    excerpt: "The post-change check + render median moved +5.55%; a repeat reproduced the post-change values, so the result record retains the movement as noise and makes no causal claim for that untouched path."
+
+open_threads:
+  - "Do not rewrite the issue's paper paragraph until the separate parser change is also resolved."
+
+ai_suggestions_pending: []

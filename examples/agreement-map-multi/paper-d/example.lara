@@ -1,0 +1,55 @@
+# Paper D of the D3 agreement map (issue #64), as an INDEPENDENTLY CHECKABLE
+# artifact (#303).
+#
+# Magnitude pruning against the dense baseline, measured at LLaMA2-7B/OpenLLM
+# 90% sparsity. On its own this artifact accepts and its single claim `c_high`
+# is **justified**, and it stays **justified** in the map: see the note in
+# `../paper-c/example.lara` for why the prose contradiction with paper C is not
+# an atom-level conflict, and `../map.laramap` for the alignment assertions and
+# the comparability question that record it.
+#
+# The `binding` rationale below describes only this paper's own measured
+# setting; the cross-paper A3 rationale is map-owned.
+#
+# The paper contents and the declared `artifact` identity are illustrative
+# reconstructions, as everywhere in `examples/`: `sha256:dddd...` is a
+# placeholder identity the author declares, not a checksum of these bytes.
+#
+# Write-up: docs/demos/d3-agreement-map.md.
+
+artifact paper_d_llama_openllm at sha256:dddd...
+policy agreement-v1
+use backends [nd@1]
+
+claim c_high
+  nl      = "Magnitude pruning is not better than the dense baseline in accuracy on LLaMA2-7B OpenLLM at 90% sparsity (pruning is destructive)"
+  formal  = not_better(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90)
+  binding = { author = dave, audit-status = reviewed,
+              rationale = "A3: setting index D = llama_openllm_s90 is this paper's own measured setting; the map manifest records the deliberate non-identity with the 50%-sparsity setting" }
+
+leaf d_e1 : reports(paperD_exp1, compares(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperD/table_1.csv#row=openllm-90]
+
+leaf d_e2 : matched_setup(magnitude_pruning, dense_baseline, paperD_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperD.pdf#sec=2-setup]
+
+leaf d_e3 : valid_measurement(accuracy, paperD_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperD.pdf#sec=2-metrics]
+
+leaf d_e4 : powered(paperD_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperD.pdf#sec=2-power]
+
+arg pd : supports(c_high) by null_comparison(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90, paperD_exp1)
+  discharge baseline_parity      with d_e2
+  discharge measurement_validity with d_e3
+  discharge adequate_power       with d_e4
+
+status c_high

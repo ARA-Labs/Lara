@@ -1,0 +1,76 @@
+# fig:example run 2 — the external-validity question is discharged by e6,
+# so a1 is complete; the recorded dead end lowers to an undercut d1.
+#
+# Since the paper's @0.6 refresh the example also authors the artifact's one
+# deductive step in the current surface: two `let` bindings name the reported
+# accuracy scores once (@0.4), both arguments infer their instantiation from
+# plain premise references (`from […]`, @0.5), and the strict ord@1 step s1
+# carries a certificate that cites its premise slots by the leaf names that
+# fill them (`(prem base)`, @0.6). The strict step is unattacked in both runs,
+# so c2 stays justified while c1 goes gap (run 1) then defeated (run 2).
+
+artifact paper_17 at sha256:aaaa...
+policy empirical-v3
+use backends [nd@1, ord@1]
+
+let base_score = 0.71
+let ours_score = 0.74
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+claim c2
+  nl      = "The baseline accuracy {base_score} is strictly below {ours_score}"
+  formal  = num_lt(base_score, ours_score)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=mean]
+
+leaf base : reports(exp_3, score_cell(M0, accuracy, D, base_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=base]
+
+leaf ours : reports(exp_3, score_cell(M, accuracy, D, ours_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=ours]
+
+leaf e2 : randomized(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e3 : powered(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e4 : distribution_shift(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=7-limitations]
+
+arg s1 : supports(c2) by lt_recheck from [base, ours]
+  assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
+
+leaf e6 : generalizes(M, accuracy, D)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_4.csv#row=ood]
+
+arg a1 : supports(c1) by controlled_experiment from [e1]
+  discharge randomization     with e2
+  discharge adequate_power    with e3
+  discharge external_validity with e6
+
+arg d1 : challenges(external_validity(a1)) by leaf(e4)
+undercut d1 a1.rule
+
+status c1
+status c2

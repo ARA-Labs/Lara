@@ -1,0 +1,23 @@
+$ (cd lean && lake build)
+Build completed successfully (209 jobs).
+
+$ python3 scripts/check-axcheck-coverage.py lean/AxCheck.lean <all Lean modules>
+AxCheck coverage passed (3046 declarations).
+
+$ python3 scripts/check-pw-example.py
+PW file-driven gate passed (23 cases).
+
+$ python3 scripts/check-lean-citations.py
+Lean citations: PASS (420 citations, 29 allowlisted)
+
+$ python3 scripts/check_ara_source_spans.py
+ARA source spans: PASS (66 quotations)
+
+$ scripts/check-axioms.sh < complete AxCheck output
+Axiom audit passed.
+
+$ lean/.lake/build/bin/pw-example fixtures/pw/declared.sexp
+(pw-example-result 1 (queries true true true) (comparisons (comparison b (atom q) (comparable justified))))
+
+$ pw-example <same fixture with q-to-p map>
+(pw-example-result 1 (queries true true true) (comparisons (comparison b (atom q) (comparable gap))))

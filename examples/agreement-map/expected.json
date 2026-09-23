@@ -1,0 +1,67 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "agreement-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:cccc..."
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "better(apt, cofi, accuracy, roberta_mnli_s60)",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "not_better(apt, cofi, accuracy, roberta_mnli_s60)",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "better(magnitude_pruning, dense_baseline, accuracy, bert_glue_s50)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "not_better(magnitude_pruning, dense_baseline, accuracy, llama_openllm_s90)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "pa",
+        "index": 0,
+        "label": "undec"
+      },
+      {
+        "arg": "pb",
+        "index": 1,
+        "label": "undec"
+      },
+      {
+        "arg": "pc",
+        "index": 2,
+        "label": "in"
+      },
+      {
+        "arg": "pd",
+        "index": 3,
+        "label": "in"
+      }
+    ]
+  }
+}

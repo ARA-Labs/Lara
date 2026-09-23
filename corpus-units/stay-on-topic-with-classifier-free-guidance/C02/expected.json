@@ -1,0 +1,27 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
+    "artifact": "sha256:7d6532a2b09e"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "not_better(cfg, vanilla_2x_flops, zero_shot_accuracy, lm_eval_9task)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

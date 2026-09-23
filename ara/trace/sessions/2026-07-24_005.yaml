@@ -1,0 +1,39 @@
+session:
+  id: "2026-07-24_005"
+  timestamp: "2026-07-24T16:05"
+  ended: "2026-07-24T16:05"
+  summary: "Closed the ND adapter spec-review gaps with universal malformed-wire properties and a complete replay boundary matrix."
+
+events_logged:
+  - type: experiment
+    id: N51
+    provenance: ai-executed
+    summary: "Completed and verified unknown-tag, malformed-index, constructor-arity, child-failure, abort, and argument-sensitive ndEnc regression coverage."
+
+ai_actions:
+  - action: "Proved universal rejection for unknown Formula and Cert wire tags."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/ND.lean", "lean/AxCheck.lean"]
+  - action: "Added complete Lean constructor-arity and replay matrices, encoding regressions, and removed the obsolete temporary slot replay helpers."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+  - action: "Added generated unknown-tag and malformed-index properties plus complete Haskell decoder/infer fixtures."
+    provenance: ai-executed
+    files_changed: ["test/StrictSpec.hs"]
+  - action: "Updated test and adapter evidence only after the expanded 27-property suite passed."
+    provenance: ai-executed
+    files_changed: ["ara/evidence/status/test_status.md", "ara/evidence/results/executable_nd_adapter.md"]
+
+claims_touched:
+  - id: C03
+    action: confirmed
+    provenance: ai-executed
+  - id: C05
+    action: confirmed
+    provenance: ai-executed
+
+open_threads:
+  - "Backend dependency reporting still needs the future Backend.uses/certDeps field."
+  - "The complete shared core S-expression codec remains distinct from the proved source Atom key codec."
+
+ai_suggestions_pending: []

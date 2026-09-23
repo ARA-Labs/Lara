@@ -1,0 +1,36 @@
+session:
+  id: "2026-07-24_009"
+  timestamp: "2026-07-24T14:55"
+  ended: "2026-07-24T14:55"
+  summary: "Made the Lean strict-certificate and backend registry seam executable while retaining proposition-level soundness and non-factivity."
+
+events_logged:
+  - type: experiment
+    id: N48
+    provenance: ai-executed
+    summary: "Implemented symbolic certificates, replay adequacy, backend-first fixed-theory lookup, and an exact nd@1 registry matrix; full Lean verification passed."
+
+ai_actions:
+  - action: "Replaced string certificate references with the shared symbolic S-expression wire AST and proved structural equality executable through nested lists."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Certificate.lean"]
+  - action: "Indexed abstract backends by source canonicalization, separated accepts from replay, added replay adequacy, and retained strict soundness/non-factivity through the Boolean bridge."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Strict.lean"]
+  - action: "Added name+version backend identities, backend-first digest resolution, certOkBOf, and its proposition-level adequacy theorem."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Support.lean"]
+  - action: "Added success/rejection/missing/version/digest fixtures and two fixed theories proving premises precede theory forms; expanded the axiom audit."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+  - action: "Ran lake build, the standalone AxCheck audit, no-sorry scans, and diff integrity checks."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+open_threads:
+  - "Task 2 must replace the deliberately minimal ND identity fixture with the full symbolic ND decoder/replay and cross-language serializer."
+  - "The executable support checker can now consume BackendRegistry and certOkBOf without inventing a registry/checker canonicalization bridge."
+
+ai_suggestions_pending: []

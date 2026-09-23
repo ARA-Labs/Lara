@@ -1,0 +1,41 @@
+session:
+  id: "2026-07-22_002"
+  timestamp: "2026-07-22T22:08"
+  summary: "Review hardening completed across the support, attack, compile, audit, and conformance layers."
+
+events_logged:
+  - type: experiment
+    id: N34
+    provenance: ai-executed
+    summary: "Eleven review findings verified and addressed; Lean/Haskell verification passed."
+  - type: observation
+    id: O06
+    provenance: ai-suggested
+    summary: "Constructive checking depends on a decidable strict-backend replay interface."
+
+ai_actions:
+  - action: "Strengthened the Lean model and added closed adversarial examples for accounting, positions, and closure."
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Support.lean"
+      - "lean/Lara/Attack.lean"
+      - "lean/Lara/Compile.lean"
+      - "lean/Lara/Examples.lean"
+      - "lean/AxCheck.lean"
+      - "docs/spec.md"
+      - "lean/README.md"
+  - action: "Ran lake build, the standard-trio axiom audit, cabal build/test, and git diff checks."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C08
+    action: advanced
+    provenance: ai-suggested
+
+open_threads:
+  - "Strengthen Strict.Backend with decidable replay acceptance, then prove support/attack checker correspondence."
+  - "Construct the general checker-built Faithful edge oracle after the executable checker exists."
+
+ai_suggestions_pending:
+  - "O06: treat decidable backend replay as the concrete prerequisite for closing results 1 and 6."

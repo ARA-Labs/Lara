@@ -1,0 +1,33 @@
+(lara-map@1
+  (policy empirical-v1 empirical-v1.policy.lara)
+  (backends (backend nd 1))
+  (members
+    (member paper_pos pos.lara)
+    (member paper_neg neg.lara)
+    (member paper_other other.lara))
+  (alignments
+    (alignment
+      (ref paper_pos c_pos whole)
+      (ref paper_neg c_neg whole)
+      different
+      (author reviewer_r)
+      (audit-status reviewed)
+      (rationale "The two papers state opposite results about the same system, measurand and dataset."))
+    (alignment
+      (ref paper_pos c_pos (arg 0))
+      (ref paper_neg c_neg (arg 0))
+      same
+      (author reviewer_r)
+      (audit-status reviewed)
+      (rationale "Both papers name the same system in the first argument position."))
+    (alignment
+      (ref paper_neg c_neg (arg 2))
+      (ref paper_other c_other (arg 2))
+      different
+      (author reviewer_r)
+      (audit-status unreviewed)
+      (rationale "The replication and the third paper evaluate on different datasets.")))
+  (questions
+    (question q_agreement
+      (refs (ref paper_pos c_pos whole) (ref paper_neg c_neg whole))
+      (nl "Do the two papers agree about M on D?"))))

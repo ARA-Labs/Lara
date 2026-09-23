@@ -1,0 +1,27 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
+    "artifact": "sha256:73bd49c9083c"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "holds_analytically(quadratic_regression_minimizer)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

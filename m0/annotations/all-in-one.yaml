@@ -1,0 +1,289 @@
+artifact: all-in-one
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 2 dead_end nodes (N03b, N03c); no cap needed
+claims:
+  - claim_id: C01
+    claim_type: comparative
+    # 2. proposition shape
+    proposition_shape:
+      sketch: "lower_c2st_error(simformer_dense, npe, task, sim_budget)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        A comparative claim needs both methods, the task, and the budget as
+        arguments so the 3-of-4-tasks / all-budgets structure stays checkable;
+        an opaque nullary atom would collapse the majority quantifier and the
+        Gaussian-Linear exception.
+    # 3. inference scheme
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Both methods trained on the same (theta, x) pairs at each budget."
+        - "C2ST computed identically (5-fold RF, 100 trees) against the same MCMC ground truth."
+        - "Same 10 reference observations and 500-step Euler-Maruyama sampler for Simformer."
+      supporting_experiments: [E01, E06]
+    # 4. strict certifier
+    strict_certifier: none
+    certifier_note: >-
+      Empirical benchmark comparison; C2ST is algorithmic but the "outperforms"
+      conclusion is inductive, not deductive.
+    # 5. critical questions
+    critical_questions:
+      - cq: "Is a baseline (NPE) present and trained under matched conditions?"
+        mandatory: true
+        status: met
+        basis: "E01 Setup lists NPE (neural spline flow) and Procedure step 2 trains at each budget."
+      - cq: "Is the comparison at the same simulation budget for each task?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure steps 1-2 fix 10^3/10^4/10^5 across both methods."
+      - cq: "Are results reported with variance / multiple seeds to support 'outperforms'?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 Metrics report per-cell C2ST with no error bars or seed count."
+    # 6. leaf granularity
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Simformer-dense C2ST closer to 0.5 than NPE on Gaussian Mixture at all budgets"
+        provenance: observed
+        refs: ["logic/experiments.md#E01", "Fig 4a", "trace N07"]
+      - atom: "Simformer-dense C2ST closer to 0.5 than NPE on Two Moons at all budgets"
+        provenance: observed
+        refs: ["logic/experiments.md#E01", "Fig 4a"]
+      - atom: "Simformer-dense C2ST closer to 0.5 than NPE on SLCP at all budgets"
+        provenance: observed
+        refs: ["logic/experiments.md#E01", "Fig 4a"]
+      - atom: "Simformer-dense ~ NPE on Gaussian Linear except at 10^4 simulations"
+        provenance: observed
+        refs: ["logic/claims.md#C01", "Fig 4a"]
+    # 7. typed-attack candidates (walk dead_end nodes)
+    attack_candidates:
+      - node: N03b
+        decision: none
+        target: n/a
+        rationale: "Concerns posterior-only vs all-conditionals training (bears on C06), not the Simformer-vs-NPE comparison."
+      - node: N03c
+        decision: none
+        target: n/a
+        rationale: "Rules out a rejected design (exact independence via undirected masks); bears on C02, not C01."
+    # 8. holes
+    holes:
+      - "No variance / seed count reported to quantify 'outperforms'."
+      - "Hardware unspecified (E01 Setup)."
+      - "'Closer to 0.5' margin not numerically thresholded."
+    coverage_flags: []
+    uncertain: false
+    note: "E06 (eval-steps ablation) also verifies C01 and is included as supporting evidence."
+
+  - claim_id: C03
+    claim_type: generalization
+    # 2. proposition shape
+    proposition_shape:
+      sketch: "forall c in conditionals(p(theta,x)): well_calibrated(simformer, c, task)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim's force is the universal quantifier over the conditional
+        argument; a nullary atom would erase the sample-to-all-conditionals
+        structure that the falsification criterion (C2ST < 0.7) checks.
+    # 3. inference scheme
+    inference_scheme:
+      scheme: inductive_generalization
+      strict_or_defeasible: defeasible
+      premises:
+        - "100 conditionals per task are randomly sampled and representative of the conditional space."
+        - "MCMC reference samples are correct ground truth for each conditional."
+        - "Trained at 10^5 simulations across Tree, HMM, Two Moons, SLCP."
+      supporting_experiments: [E02]
+    # 4. strict certifier
+    strict_certifier: none
+    certifier_note: >-
+      Inductive generalization from a finite sample; no deductive step to certify.
+    # 5. critical questions
+    critical_questions:
+      - cq: "Do 100 randomly sampled conditionals justify the universal 'all arbitrary conditionals'?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 Procedure step 3 samples 100 conditionals; claim generalizes to all."
+      - cq: "Is the MCMC reference valid for each of the 100 conditionals?"
+        mandatory: true
+        status: met
+        basis: "E02 Setup specifies task-specific HMC / slice+MHMCMC samplers."
+      - cq: "Is the C2ST < 0.7 threshold met on every task at 10^5 sims?"
+        mandatory: true
+        status: met
+        basis: "E02 Expected outcome: all models below 0.7 at 10^5."
+    # 6. leaf granularity
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Mean C2ST over 100 conditionals < 0.7 on Tree at 10^5 sims"
+        provenance: observed
+        refs: ["logic/experiments.md#E02", "Fig 4b", "trace N09"]
+      - atom: "Mean C2ST over 100 conditionals < 0.7 on HMM at 10^5 sims"
+        provenance: observed
+        refs: ["logic/experiments.md#E02", "Fig 4b"]
+      - atom: "Mean C2ST over 100 conditionals < 0.7 on Two Moons at 10^5 sims"
+        provenance: observed
+        refs: ["logic/experiments.md#E02", "Fig 4b"]
+      - atom: "Mean C2ST over 100 conditionals < 0.7 on SLCP at 10^5 sims"
+        provenance: observed
+        refs: ["logic/experiments.md#E02", "Fig 4b"]
+    # 7. typed-attack candidates
+    attack_candidates:
+      - node: N03b
+        decision: none
+        target: n/a
+        rationale: "Rules out the specialization-is-better alternative; corroborates the all-in-one premise rather than attacking C03."
+      - node: N03c
+        decision: none
+        target: n/a
+        rationale: "Limitation of undirected masks for exact independence; the claim spans dense/undirected/directed variants, so no conflicting C2ST result."
+    # 8. holes
+    holes:
+      - "Sample-to-population gap: 100 conditionals vs 'all arbitrary conditionals'."
+      - "Calibration (expected coverage) listed as a metric but not tied to a per-task threshold."
+    coverage_flags:
+      - "Universal quantification over an effectively infinite conditional space, supported only by a finite random sample — the sample-to-'all' generalization has no native strict warrant."
+    uncertain: false
+    note: ""
+
+  - claim_id: C05
+    claim_type: descriptive
+    # 2. proposition shape
+    proposition_shape:
+      sketch: "conditions_on_interval(simformer, constraint=c(x)=x-u, scaling=s(t)=1/sigma(t)^2, retraining=false)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        The constraint function c and scaling s are load-bearing (they define
+        the guidance mechanism); a nullary atom would drop the mechanism the
+        claim actually describes and its no-retraining qualifier.
+    # 3. inference scheme
+    inference_scheme:
+      scheme: case_demonstration
+      strict_or_defeasible: defeasible
+      premises:
+        - "Guided diffusion (Algorithm 1) applied at inference with c(x)=x-u, s(t)=1/sigma(t)^2."
+        - "Constrained samples verified to satisfy the energy threshold at test time."
+        - "Constrained voltage posterior predictives remain consistent with observations."
+      supporting_experiments: [E05]
+    # 4. strict certifier
+    strict_certifier: none
+    certifier_note: >-
+      Whether samples satisfy c(x) <= 0 is a computable check, but the claim
+      (guidance enables interval conditioning) is an empirical demonstration on
+      one simulator, not a deductive result.
+    # 5. critical questions
+    critical_questions:
+      - cq: "Is the capability shown on more than one system, or only Hodgkin-Huxley?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E05 is the sole supporting experiment (single simulator)."
+      - cq: "Is a baseline (unconstrained posterior) present to show the constraint has effect?"
+        mandatory: true
+        status: met
+        basis: "E05 Baselines: unconstrained Simformer + simulator posterior predictive."
+      - cq: "Do constrained samples quantitatively satisfy the interval constraint?"
+        mandatory: true
+        status: met
+        basis: "E05 Expected outcome: energy below the 10% quantile threshold."
+    # 6. leaf granularity
+    leaf_granularity: mixed
+    leaves:
+      - atom: "Constrained posterior-predictive energy lies below the 10% quantile threshold"
+        provenance: observed
+        refs: ["logic/experiments.md#E05", "Fig 7", "trace N14"]
+      - atom: "Constrained voltage traces remain consistent with observed voltage summary statistics"
+        provenance: observed
+        refs: ["logic/experiments.md#E05", "Fig 7"]
+      - atom: "Guidance uses c(x)=x-u and s(t)=1/sigma(t)^2 (Algorithm 1), no retraining"
+        provenance: attested
+        refs: ["logic/claims.md#C05", "Algorithm 1", "trace N13"]
+    # 7. typed-attack candidates
+    attack_candidates:
+      - node: N03b
+        decision: none
+        target: n/a
+        rationale: "Concerns training-objective ablation; unrelated to guided-diffusion interval conditioning."
+      - node: N03c
+        decision: none
+        target: n/a
+        rationale: "Concerns undirected-mask independence; unrelated to C05's guidance mechanism."
+    # 8. holes
+    holes:
+      - "Single-simulator demonstration; generalization of the capability not shown."
+      - "No quantitative calibration metric reported for the guided (constrained) posterior."
+    coverage_flags: []
+    uncertain: false
+    note: ""
+
+  - claim_id: C06
+    claim_type: negative-result
+    # 2. proposition shape
+    proposition_shape:
+      sketch: "not_worse(simformer_all_conditionals, simformer_posterior_only, metric=c2st_posterior)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        A non-inferiority ('does not hurt') claim needs both training regimes
+        and the metric as arguments; a nullary atom cannot express the
+        equivalence relation the claim asserts.
+    # 3. inference scheme
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Same architecture; only the training mask differs (all-conditionals vs posterior-only)."
+        - "Posterior C2ST is comparable between the two regimes."
+        - "Posterior-only Simformer approximates the NPSE baseline."
+      supporting_experiments: [E01, E02]
+    # 4. strict certifier
+    strict_certifier: none
+    certifier_note: >-
+      Empirical equivalence/non-inferiority; no deductive certification.
+    # 5. critical questions
+    critical_questions:
+      - cq: "Is an equivalence margin / statistical criterion defined for 'similar or better'?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01/E02 Expected outcomes state 'does not meaningfully hurt' without a margin or variance."
+      - cq: "Was the posterior-only variant actually trained and measured as a comparison arm?"
+        mandatory: true
+        status: met
+        basis: "N03b dead_end and E01 baseline NPSE serve as the posterior-only reference."
+      - cq: "Does the equivalence hold across all benchmark tasks, or only some?"
+        mandatory: false
+        status: unmet-gap
+        basis: "Claim is general; E01/E02 highlight SLCP as a case where it helps."
+    # 6. leaf granularity
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "All-conditionals Simformer posterior C2ST ~ posterior-only Simformer on benchmark tasks"
+        provenance: observed
+        refs: ["logic/experiments.md#E01", "trace N09"]
+      - atom: "Posterior-only Simformer ~ NPSE baseline in posterior C2ST"
+        provenance: observed
+        refs: ["logic/experiments.md#E01", "Appendix A3"]
+      - atom: "On SLCP the all-conditionals objective helps posterior estimation"
+        provenance: observed
+        refs: ["trace N03b lesson"]
+    # 7. typed-attack candidates
+    attack_candidates:
+      - node: N03b
+        decision: none
+        target: "support of C06"
+        rationale: "Rules out the alternative (specialization is better); it establishes rather than attacks C06."
+      - node: N03c
+        decision: none
+        target: n/a
+        rationale: "About undirected-mask independence limits; unrelated to the training-objective non-inferiority claim."
+    # 8. holes
+    holes:
+      - "No equivalence margin or variance to substantiate a negative ('does not hurt') result."
+      - "Task-wise scope of the equivalence not fully enumerated."
+    coverage_flags:
+      - "Non-inferiority / equivalence ('does not hurt') is a support-for-a-negative claim; LARA's support/attack edges have no native equivalence-margin construct."
+    uncertain: false
+    note: "N03b is the confirming ablation for this claim, not a defeater."

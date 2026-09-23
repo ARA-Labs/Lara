@@ -1,0 +1,14 @@
+# A member that adopts the community convention and does nothing else. On its
+# own its one claim is justified: nothing it declares contradicts it.
+artifact paper_adopt at sha256:adopt...
+policy convention-v1
+use backends [nd@1]
+
+claim c_std
+  nl      = "Accuracy is the standard metric for GLUE"
+  formal  = standard_metric(accuracy, glue)
+  binding = { author = alice, audit-status = reviewed }
+
+arg conv : supports(c_std) by community_convention(accuracy, glue)
+
+status c_std

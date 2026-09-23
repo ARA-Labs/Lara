@@ -1,0 +1,198 @@
+artifact: rebench-restricted_mlm
+group: rebench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # 8 dead-end nodes total: typed dead_end M04-M08 plus
+                             # explored-not-shipped O05 / O_ALT_MIXER / O_ALT_GPT2; all classified
+claims:
+  - claim_id: C07
+    claim_type: implementation-behavioral
+    proposition_shape:
+      sketch: "confined_to(op(division), fn(update_inverse_stds), caller(training_loop), excluded_from(forward))"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim's checkability lives in code-site structure — which function
+        holds the division, who calls it, and that forward() normalises only by
+        multiplication with the inverse_stds buffer. A nullary atom would leave
+        nothing for a static checker to target; the conjunct
+        forward_norm_only(model, mul(inverse_stds)) rides along."
+    inference_scheme:
+      scheme: code_inspection
+      strict_or_defeasible: strict
+      premises:
+        - "The shipped files src/kernel/tao_solution.py and tao_train.py are the exact code that produced the reference score (tao_train.py:73-75 instantiates ConvMLMWithBiBigrams)"
+        - "The static call graph equals the runtime call graph (no dynamic patching): update_inverse_stds() is invoked only at tao_train.py:123, after optimizer.step, never from forward()"
+        - "The task's no-division restriction scopes to the forward/inference computation only, so a training-loop division is legal"
+      supporting_experiments: [E04, E05]
+    strict_certifier: domain-checker(forward-pass-primitive-scanner)
+    certifier_note: "An AST/op-trace scan of the shipped module would certify: (a) the
+      traced forward() of ConvMLMWithBiBigrams — including conv1d_same and the frozen
+      BiBigram pathway — contains no tensor-division/reciprocal op; (b) the one
+      training-time tensor division (the EMA toward 1/std in update_inverse_stds,
+      tao_solution.py:363-367) is reachable only from tao_train.py:123. The empirical
+      loss numbers stay outside the certified step."
+    critical_questions:
+      - cq: "Is update_inverse_stds() reachable from forward() by any path?"
+        mandatory: true
+        status: met
+        basis: "E04 method: 'inverse_stds multiplier as a normalisation analogue' with buffer 'updated outside forward via EMA' (trace O06); E05 procedure calls it every step from the loop; verified in shipped src/kernel/tao_train.py:123"
+      - cq: "Does the task's no-division rule actually scope to forward()/inference only, making a training-loop division legal?"
+        mandatory: true
+        status: unmet-gap
+        basis: "Neither experiments.md nor any artifact file quotes the task rule text; legality rests on the solution author's code comment ('this division is allowed as long as it isn't called during inference', tao_solution.py:199-203) — an interpretation, not cited rule text"
+      - cq: "Is the EMA division really the *single* use of division in the scored configuration?"
+        mandatory: true
+        status: unmet-gap
+        basis: "No exhaustive audit appears in experiments.md; the shipped file also contains init-time log-odds divisions (tao_solution.py:25,56,62,93), the unshipped cheating variant's in-forward division (:45-46, E03), and a Python-int floor division pad=(k-1)//2 inside conv1d_same (:221) executed during forward — the title survives only under a 'per-step tensor division' reading"
+      - cq: "Was the reference score (loss 4.6) produced by this exact code path?"
+        mandatory: false
+        status: met
+        basis: "E05 provenance and method: tao_train.py:73-75 instantiates ConvMLMWithBiBigrams; result loss 4.6 = the official reference (trace O07, reference: true)"
+    leaf_granularity: per-experiment-claim
+    leaves:
+      - atom: "forward() of ConvMLM / ConvMLMWithBiBigrams normalises only by multiplying activations with the precomputed inverse_stds buffer"
+        provenance: observed
+        refs: ["src/kernel/tao_solution.py:239-297", "src/kernel/tao_solution.py:300-360", "logic/experiments.md E04"]
+      - atom: "update_inverse_stds() contains the EMA division (1 / last_residual_scales) and is called only from the training loop at tao_train.py:123, after optimizer.step"
+        provenance: observed
+        refs: ["src/kernel/tao_solution.py:199-203,293-297,363-367", "src/kernel/tao_train.py:123", "trace/exploration_tree.yaml O07"]
+      - atom: "Division performed outside forward() is legal under the task restriction"
+        provenance: assumed
+        refs: ["code comment src/kernel/tao_solution.py:200", "trace/exploration_tree.yaml O07 ('where division is legal')"]
+    attack_candidates:
+      - node: O05
+        decision: none
+        target: "n/a"
+        rationale: "Superseded dense-MLP design alternative; says nothing about where division lives in the shipped model."
+      - node: O_ALT_MIXER
+        decision: none
+        target: "n/a"
+        rationale: "Unshipped alternative architecture that itself uses the same inverse_stds renormalisation pattern — corroborates rather than attacks C07."
+      - node: O_ALT_GPT2
+        decision: none
+        target: "n/a"
+        rationale: "Abandoned approximation pathway (compute cost); bears on no premise, scheme, or conclusion about division placement."
+      - node: M04
+        decision: none
+        target: "n/a"
+        rationale: "MALT blind spot about the bigram prior; unrelated to division placement."
+      - node: M05
+        decision: none
+        target: "n/a"
+        rationale: "MALT's failed in-forward reciprocal emulations corroborate C07's design rationale (M05's lesson cites C07 explicitly); a ruled-out alternative, not an attack."
+      - node: M06
+        decision: none
+        target: "n/a"
+        rationale: "Linear-attention plateau is a rejected design in a different stream; no bearing on C07."
+      - node: M07
+        decision: none
+        target: "n/a"
+        rationale: "Agent-tooling (bash timeout) failure mode; no bearing on the official code's structure."
+      - node: M08
+        decision: none
+        target: "n/a"
+        rationale: "Agent context-trim pathology; no bearing on the official code's structure."
+    holes:
+      - "The task rule's exact wording is never quoted anywhere in the artifact; the forward-only scope of the no-division rule rests solely on the solution author's comment"
+      - "'Single use of division' is literally false at file granularity (init-time divisions at tao_solution.py:25,56,62,93; cheating variant's in-forward division at :45-46; Python-int floor division inside conv1d_same at :221, which runs during forward) — the claim needs a 'runtime tensor division in the shipped per-step path' qualifier"
+      - "No experiment runs a checker or test that would fail if a division were introduced into forward(); compliance is asserted by comment, not tested"
+    coverage_flags: []
+    uncertain: false
+    note: "The substantive proposition (EMA division confined to update_inverse_stds,
+      called from the training loop; forward normalisation is multiplication only) was
+      verified directly against the shipped source during annotation; only the 'single
+      use' wording and the rule-scope premise are loose."
+
+  - claim_id: C14
+    claim_type: implementation-behavioral
+    proposition_shape:
+      sketch: "nan_at_init(run, norm_emulation(reciprocal_variant)) AND recovered_via(run, substitute(fixed_scalar | learned_scale))"
+      arity: 2
+      phase0_nullary_sufficient: false
+      note: "Instantiated over the named runs {01,06,09,11,16,19,20} of 22; the 7/22
+        rate and the per-run failure-to-recovery pairing are the checkable structure a
+        nullary atom would erase."
+    inference_scheme:
+      scheme: cross_run_observation
+      strict_or_defeasible: defeasible
+      premises:
+        - "All 22 runs' transcripts were distilled into insights.yaml with one uniform criterion for 'NaN attributable to a hand-rolled reciprocal', so the 7/22 rate is commensurate"
+        - "Per-run insights.yaml faithfully summarise what happened in each transcript"
+        - "Within each recovering run, substituting a fixed scalar residual or learned scale — holding the rest of the model fixed — is what restored training, licensing the mechanism reading"
+        - "The failure is driven by the restricted primitive set (denominator can hit zero with no legal safe-reciprocal), not by incidental hyperparameters"
+      supporting_experiments: [EM05]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Were all 22 runs scanned uniformly (same staging pipeline, same criterion) to license the 7/22 rate?"
+        mandatory: true
+        status: met
+        basis: "experiments.md MALT-stream preamble: all 22 sub-runs processed in Phases 2-3 with per-run trace_nodes/evidence_rows/insights/run_summary files; cross-run failure table in evidence/tables/malt_attempts.md"
+      - cq: "Is the run enumeration consistent across claim, trace, and evidence?"
+        mandatory: true
+        status: unmet-gap
+        basis: "M05's failure_mode and C14's own evidence line cite run_13's 'division-emulation NaN' as a concrete instance, yet run_13 is absent from the 7-run list (01,06,09,11,16,19,20) in both claims.md and the malt_attempts.md failure table — either the list or the count is off by one"
+      - cq: "Is each NaN attributed to the reciprocal emulation rather than to lr, optimizer, or init?"
+        mandatory: true
+        status: unmet-gap
+        basis: "M05 gives the mechanism (denominator can hit zero) and recovery-by-substitution for run_06/run_19, but C14's cited insight for run_16 is 'SGD divergence' — an optimizer failure — and no per-run ablation isolates the normalisation term for the remaining runs"
+      - cq: "Does the recovery pattern hold 'in every case' — is per-run recovery evidence given for all 7 runs?"
+        mandatory: false
+        status: unmet-gap
+        basis: "Only run_06/run_19-style instances are individually described (M05 failure_mode); the universal recovery statement rests on M05's aggregate lesson and the one-line failure-table note 'replacing with a fixed scalar residual cures it'"
+    leaf_granularity: mixed
+    leaves:
+      - atom: "Runs 01, 06, 09, 11, 16, 19, 20 (7 of 22) hit NaN at init when normalisation used a hand-rolled reciprocal (1/x, gate_sum**-0.5, polynomial/Taylor), and a fixed scalar residual cured it"
+        provenance: observed
+        refs: ["evidence/tables/malt_attempts.md 'Failure-mode summary' row 1", "trace/exploration_tree.yaml M05"]
+      - atom: "run_06: fixed-scale RMSNorm substitute collapses to loss ln(50257) = 10.82"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml M05 failure_mode", "run_06 insights.yaml (cited; code/rebench-pipeline/ staging not shipped in artifact)"]
+      - atom: "run_19: ReLU-attention with no working normalisation explodes to loss 7.997e30"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml M05 failure_mode", "run_19 insights.yaml (cited; not shipped in artifact)"]
+      - atom: "The official solution avoids this failure class by updating inverse_stds outside forward() (contrast anchor to C07)"
+        provenance: observed
+        refs: ["src/kernel/tao_solution.py:199-203", "src/kernel/tao_train.py:123", "trace/exploration_tree.yaml M05 lesson"]
+    attack_candidates:
+      - node: M05
+        decision: none
+        target: "n/a"
+        rationale: "M05 is the evidence base of C14 — a support relation, not an attack; the decision vocabulary has no value for dead-end-as-support (see coverage_flags)."
+      - node: M04
+        decision: none
+        target: "n/a"
+        rationale: "Bigram-prior blind spot; a different cross-run pattern with no bearing on the NaN claim."
+      - node: M06
+        decision: none
+        target: "n/a"
+        rationale: "Linear-attention plateau is a distinct failure mode (no NaN); rules out an alternative design, attacks nothing C14 relies on."
+      - node: M07
+        decision: none
+        target: "n/a"
+        rationale: "Bash-timeout interruptions affect visibility of late-training loss, not step-0 NaN detection; no premise of C14 is touched."
+      - node: M08
+        decision: none
+        target: "n/a"
+        rationale: "Context-trim replays could duplicate NaN episodes, but C14 counts runs, not episodes, and pre-trim evidence is unaffected — no attack on the 7/22 rate."
+      - node: O05
+        decision: none
+        target: "n/a"
+        rationale: "Official-stream design alternative; no bearing on MALT NaN behaviour."
+      - node: O_ALT_MIXER
+        decision: none
+        target: "n/a"
+        rationale: "Official-stream unshipped architecture; no bearing on MALT NaN behaviour."
+      - node: O_ALT_GPT2
+        decision: none
+        target: "n/a"
+        rationale: "Official-stream abandoned pathway; no bearing on MALT NaN behaviour."
+    holes:
+      - "run_13 is cited as a division-emulation-NaN instance (M05, C14 evidence line) but excluded from the 7-run enumeration — the count and the instance list are inconsistent"
+      - "run_16's cited insight is 'SGD divergence', an optimizer failure, so the reciprocal-emulation attribution for run_16 is not evidenced"
+      - "Per-run insights.yaml are cited as primary evidence but the code/rebench-pipeline/malt_outputs/ staging tree is not shipped in the artifact, so all per-run leaves are attestations, not inspectable evidence"
+      - "'Typically Taylor or polynomial reciprocals' is never quantified per run; which emulation each of the 7 runs used is unstated"
+    coverage_flags:
+      - "Dead-end-as-support: M05 (a dead_end node) is the primary supporting evidence of C14, but the typed-attack vocabulary (rebut/undercut/undermine/none) cannot express a support edge from a dead end — 'none' under-describes the relation"
+    uncertain: false
+    note: "The aggregate 7-run row is verifiable in-artifact (malt_attempts.md); the
+      per-run individuations are not, hence leaf_granularity: mixed."

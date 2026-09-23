@@ -1,0 +1,5 @@
+premise 0 (atom "cell" (con "ours") (num "28.4"))
+premise 0 (atom "cell" (con "self") (num "7.5"))
+premise 0 (atom "note" (con "quote" (str "say \"hi\"\\bye")) (con "wrap" (con "inner")))
+premise 1 (atom "cell" (con "theirs") (num "31.6"))
+theory "nd" 1 "sha256:nd0" 0

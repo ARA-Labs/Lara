@@ -1,0 +1,31 @@
+# World w1 of the pw-lara context: the same three reports, but p's support
+# rests on l1 and a q report undermines it, so p is defeated.
+artifact pw-lara-w1 at sha256:pw-lara-w1
+policy pw-lara
+use backends []
+
+claim c1
+  nl      = "p holds"
+  formal  = p
+  binding = { author = author, audit-status = reviewed }
+
+leaf l1 : p
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf l2 : q
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf l3 : p
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg a1 : supports(c1) by leaf(l1)
+arg a2 : challenges(l1) by leaf(l2)
+undermine a2 a1.leaf
+
+status c1

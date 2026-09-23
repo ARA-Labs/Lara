@@ -1,0 +1,59 @@
+policy surface-policy
+
+sort Entity
+
+con system-a : Entity
+con system-b : Entity
+con quality : Entity
+con dataset : Entity
+
+pred score(Num)
+pred evidence(Num)
+pred reported(Entity, Entity, Entity, Num)
+pred binding(Entity, Entity, Entity, Entity, Num, Num)
+pred num_lt(Num, Num)
+pred better(Entity, Entity, Entity, Entity)
+pred verdict(Num)
+
+rule main(Z)
+  mode          = strict
+  premises      = [ evidence: score(Z) ]
+  conclusion    = score(Z)
+  allow-trusted = true
+  certifiers    = [ (nd@1, sha256:theory) ]
+
+rule pass(X)
+  mode       = defeasible
+  premises   = [ support: evidence(X) ]
+  conclusion = score(X)
+  question cq : score(X) (optional)
+
+rule verdict-rule(Y)
+  mode       = defeasible
+  premises   = [ verdict(Y) ]
+  conclusion = verdict(Y)
+
+rule ord-recheck(RS, RB, RQ, RD, RRV, RBV)
+  mode          = strict
+  premises      = [ reported(RS, RQ, RD, RRV), reported(RB, RQ, RD, RBV) ]
+  conclusion    = num_lt(RBV, RRV)
+  allow-trusted = false
+  certifiers    = [ (ord@1, sha256:theory) ]
+
+rule comparison-bridge(S, B, Q, D, RV, BV)
+  mode       = defeasible
+  premises   = [ binding(S, B, Q, D, RV, BV), num_lt(BV, RV) ]
+  conclusion = better(S, B, Q, D)
+
+contrary verdict(1) verdict(0)
+exception pass : verdict(1)
+
+admission { (observed, user) = admit }
+
+theory sha256:theory = [score(1)]
+
+measurand quality : Num where higher-is-better
+
+comparison-scheme strictly-better higher-is-better
+  recheck = ord-recheck
+  bridge = comparison-bridge

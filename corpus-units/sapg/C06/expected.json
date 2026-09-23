@@ -1,0 +1,27 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "corpus-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [
+      "sha256:corpus-v1-ra-theory-0"
+    ],
+    "artifact": "sha256:f4108aa329a9"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "contributes(follower_entropy_reg, sapg, reorientation_performance)",
+        "status": "gap",
+        "complete-support": 0,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": []
+  }
+}

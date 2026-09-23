@@ -1,0 +1,77 @@
+# Corpus unit sample-specific-masks/C06 — justified (T2 exemplar: the all-CQs-met path)
+#
+# Source: m0/annotations/sample-specific-masks.yaml C06 (comparative, controlled_comparison;
+# corpus pin 62e9b54). Headline: patch-wise interpolation upsamples CNN mask outputs at lower
+# cost than bilinear/bicubic — pixel accesses 0.151e6 vs 0.602e6 vs 2.408e6, batch time
+# 0.026+-0.004 s vs 0.062+-0.001 s vs 0.195+-0.013 s (ResNet-18/50, batch 256, A100), and no
+# backprop through the upsampling step.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Nearest-competitor convention: the annotation quantifies over competitors
+#     {bilinear, bicubic}; the unit's formal atom takes the CHEAPER competitor (bilinear) as B —
+#     the binding comparison. Bicubic is dominated a fortiori under the reported ordering and
+#     stays in `nl` and the leaf refs.
+#   * All three mandatory corpus-v1 CQs are annotated met, including variance_reported (E06
+#     Metrics: stds 0.004/0.001/0.013 are far smaller than the gaps) — the rare comparison claim
+#     that clears the full bar, hence the justified exemplar.
+#   * The annotation's optional fair-comparison CQ (downstream quality preserved, E03/E05) maps
+#     onto corpus-v1's optional scope_match and is discharged.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact sample-specific-masks at sha256:d7bd879e0d54
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c06
+  nl      = "Patch-wise interpolation upsamples sample-specific masks at lower cost than bilinear (and a fortiori bicubic): 0.151e6 vs 0.602e6 pixel accesses, 0.026 s vs 0.062 s per 256-image batch on A100, and no backprop through upsampling"
+  formal  = better(patch_wise, bilinear, upsampling_cost, smm_resnet_a100)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: E06's cost comparison (pixel accesses, batch time, backprop-free), reported
+# per result cell in the annotation and folded into this leaf's refs (per-result-cell grain).
+leaf e1 : reports(e06, compares(patch_wise, bilinear, upsampling_cost, smm_resnet_a100, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C06, logic/experiments.md#E06-Metrics, logic/experiments.md#E06-Procedure-step-4]
+
+leaf e2 : matched_setup(patch_wise, bilinear, e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Setup]
+
+leaf e3 : valid_measurement(upsampling_cost, e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Metrics]
+
+leaf e4 : variance_reported(e06)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Metrics]
+
+leaf e5 : scope_matched(patch_wise, upsampling_cost, smm_resnet_a100)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03, logic/experiments.md#E05]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c06) by controlled_comparison(patch_wise, bilinear, upsampling_cost, smm_resnet_a100, e06)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  discharge variance_reported    with e4
+  discharge scope_match          with e5
+
+status c06
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c06 -> justified (its complete support a1 is `in`; spec §8 aggregation)

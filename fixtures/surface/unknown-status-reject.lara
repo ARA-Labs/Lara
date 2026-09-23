@@ -1,0 +1,10 @@
+artifact unknown_status at sha256:unknown-status
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "known claim"
+  formal  = score(7)
+  binding = { author = author, rationale = "negative", audit-status = reviewed }
+
+status no-such-claim

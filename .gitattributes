@@ -1,0 +1,3 @@
+# .sexp files are lara proof-obligation fixtures, not Common Lisp source.
+# Keep them out of GitHub's language stats.
+*.sexp linguist-detectable=false

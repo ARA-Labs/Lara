@@ -1,0 +1,184 @@
+session:
+  id: "2026-08-13_001"
+  date: "2026-08-13"
+  started: "2026-08-13T20:41"
+  last_turn: "2026-08-13T22:16"
+  turn_count: 3
+  summary: "Implemented named certificate premise slots, review-hardened the PR, then repaired a Unicode Haskell/Lean classifier divergence with an explicit production-lexer parameter; all local and hosted gates green, reviewer re-approval remains."
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N179"
+    routing: direct
+    provenance: user
+    summary: "User approved the design (D1-D10) by invoking /implement on the eng-cleared plan; commit-per-task, ARA recording, PR."
+  - turn: 1
+    type: experiment
+    id: "N180"
+    routing: direct
+    provenance: ai-executed
+    summary: "Plan executed task-by-task with two-stage subagent reviews; all close-out gates green; S6 golden byte-identical to numeric twin; the PR."
+  - turn: 1
+    type: dead_end
+    id: "N181"
+    routing: direct
+    provenance: ai-executed
+    summary: "First Lean mirror collapsed all failures to none uniformly; adversarial review showed a resolver could flip the 007 numeral-typo refusal into success; fixed with numeralTypo early-out + guard V9b."
+  - turn: 1
+    type: observation
+    id: "O72"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Premise lists not authorable + bare-SLeaf pass-through => two-candidate locate; crystallized to C31 via artifact commitment + empirical resolution."
+  - turn: 1
+    type: observation
+    id: "O73"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Candidate heuristic: mirror failure STRUCTURE under a coarser prover error model, not the failure/success partition."
+  - turn: 2
+    type: experiment
+    id: "N182"
+    routing: direct
+    provenance: ai-executed
+    summary: "Adjudicated and fixed all review findings; mutation-sensitive regressions, local gates, hosted Actions run 31769934475, replies, and thread resolutions all completed."
+  - turn: 2
+    type: observation
+    id: "O73"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Failure-structure mirroring heuristic crystallized to H14 via artifact commitment after the signed-numeral V9c fix supplied a second adversarial resolver case."
+  - turn: 3
+    type: dead_end
+    id: "N183"
+    routing: direct
+    provenance: ai-executed
+    summary: "A Lean-local source-identifier classifier was refuted by Unicode and punctuation counterexamples; duplicated character predicates cannot preserve the production lexer boundary."
+  - turn: 3
+    type: decision
+    id: "N184"
+    routing: direct
+    provenance: ai-executed
+    summary: "Parameterize the Lean mirror by the production isIdentStart decision instead of independently approximating Haskell's Unicode-aware lexer."
+  - turn: 3
+    type: experiment
+    id: "N185"
+    routing: direct
+    provenance: ai-executed
+    summary: "Red-green Unicode and invalid-start guards passed with the full local gate matrix and hosted Actions run 31772295184."
+
+
+ai_actions:
+  - turn: 1
+    action: "Implemented the 8-task plan via per-task implementer subagents with spec+quality reviews; 10 commits on feat/105-extended-name-resolution (93c3de8..1de91ff); pushed and opened the PR"
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Strict/Cell.hs
+      - src/Lara/Strict/Ord.hs
+      - src/Lara/Strict/RA.hs
+      - src/Lara/Elaborate/CertSlots.hs
+      - src/Lara/Elaborate/Error.hs
+      - src/Lara/Elaborate/Internal.hs
+      - src/Lara/AST.hs
+      - src/Lara/WorkedExamples.hs
+      - test/CertSlotsSpec.hs
+      - test/WorkedExamplesSpec.hs
+      - test/DifferentialSpec.hs
+      - test/Spec.hs
+      - lara.cabal
+      - examples/S6/
+      - examples/README.md
+      - lean/Lara/CertSlots.lean
+      - lean/Lara.lean
+      - lean/AxCheck.lean
+      - docs/lara-surface-grammar.md
+      - docs/spec.md
+      - docs/mechanization-plan.md
+      - docs/rejection-surface.md
+      - TODOS.md
+  - turn: 2
+    action: "Verified all eight the PR inline findings, implemented the confirmed fixes, added mutation-sensitive regressions and Lean V9c, committed 56f7c2b, pushed, passed hosted run 31769934475, replied in-thread, and resolved every thread"
+    provenance: ai-executed
+    files_changed:
+      - TODOS.md
+      - docs/lara-surface-grammar.md
+      - docs/rejection-surface.md
+      - lean/Lara/CertSlots.lean
+      - plans/2026-08-12-named-cert-premise-slots.md
+      - src/Lara/AST.hs
+      - src/Lara/Elaborate/CertSlots.hs
+      - src/Lara/Elaborate/Error.hs
+      - src/Lara/Elaborate/Internal.hs
+      - test/CertSlotsSpec.hs
+  - turn: 3
+    action: "Reproduced the reported é divergence, replaced the duplicated Lean classifier with an explicit startsSourceIdentifier parameter sourced from Lara.Syntax.isIdentStart, added Haskell and Lean regressions for Unicode success and illegal-start refusal, ran all applicable local gates, pushed commit 708fa7e, and passed hosted Actions run 31772295184"
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Syntax.hs
+      - src/Lara/Elaborate/CertSlots.hs
+      - test/CertSlotsSpec.hs
+      - lean/Lara/CertSlots.lean
+
+
+claims_touched:
+  - id: C31
+    action: created
+    turn: 1
+  - id: H14
+    action: crystallized
+    turn: 2
+  - id: H14
+    action: revised
+    turn: 3
+
+logic_revisions:
+  - turn: 3
+    target: H14
+    reason: "The Unicode counterexample showed that preserving refusal order is insufficient when the production lexer and prover duplicate non-equivalent character classifiers."
+    before: |
+      ## H14: Mirror refusal order, not only accepted outputs
+      - **Rationale**: A prover mirror with a coarser error type may collapse distinct
+        failure kinds, but it must preserve which refusals happen before which inputs
+        are consulted. Agreement under ordinary resolvers does not pin that order:
+        an adversarial resolver can turn a misplaced lexical refusal into success.
+        Model the early refusal explicitly and test it with a resolver that accepts
+        every candidate name. The certificate-slot mirror applies this rule to both
+        leading-zero and signed numeral-shaped references, keeping Haskell and Lean
+        aligned even though Lean represents every failure as `none`.
+      - **Status**: active
+      - **Provenance**: ai-suggested
+      - **Sensitivity**: high
+      - **Code ref**: ["src/Lara/Elaborate/CertSlots.hs", "lean/Lara/CertSlots.lean", "test/CertSlotsSpec.hs"]
+    after: |
+      ## H14: Mirror lexical refusal order through an explicit classifier
+      - **Rationale**: A prover mirror with a coarser error type may collapse distinct
+        failure kinds, but it must preserve which refusals happen before which inputs
+        are consulted. Agreement under ordinary resolvers does not pin that order:
+        an adversarial resolver can turn a misplaced lexical refusal into success.
+        When the production lexer and prover have different character libraries,
+        pass the production source-identifier classifier into the abstract mirror
+        rather than reconstructing it independently. Test both resolver-independent
+        refusal and resolver-reachable success with leading-zero, signed, legal
+        non-ASCII, and illegal-start references. The certificate-slot mirror applies
+        this rule while still representing every Lean failure as `none`.
+      - **Status**: active
+      - **Provenance**: ai-suggested
+      - **Sensitivity**: high
+      - **Code ref**: ["src/Lara/Syntax.hs", "src/Lara/Elaborate/CertSlots.hs", "lean/Lara/CertSlots.lean", "test/CertSlotsSpec.hs"]
+      - **Last revised**: 2026-08-13 (2026-08-13_001#3)
+
+key_context:
+  - turn: 1
+    excerpt: "Task 5 spec review: 'the all-digit cut can flip failure into success under a resolving rho ... lower_eq_numeric_subst positively certifies that Lean-only success' - the one real defect found across all reviews; fixed and pinned as guard V9b before commit."
+  - turn: 2
+    excerpt: "The external review's signed-numeral finding repeated N181's core mechanism: moving a lexical refusal behind resolver consultation can flip failure to success. Haskell's source-identifier boundary and Lean guard V9c now preserve the same refusal order."
+  - turn: 3
+    excerpt: "The legal é counterexample refuted the independent Lean classifier, while #x/.x refuted the numeric-looking-only fallback; explicit production-lexer classification is now part of the mirror theorem contract."
+
+open_threads:
+  - "Technical work and hosted CI complete; GitHub reviewDecision remains CHANGES_REQUESTED pending reviewer re-approval."
+  - "OV-2 follow-up recorded in TODOS: render the slot->source-premise mapping in R13 backend replay rejections."
+  - "Deferred design alternatives recorded in grammar Appendix E.7: named nd@1 de Bruijn form; rule-premise-label citations."
+
+ai_suggestions_pending: []

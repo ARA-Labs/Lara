@@ -1,0 +1,126 @@
+# P1 — a level-one philosophy-of-mathematics debate, with no observations.
+# Read docs/demos/d4-philmath.md for sources, scope and binding caveats.
+# The bindings are AI-authored interpretations, awaiting human review.
+artifact philmath_debate at sha256:p1-illustrative-snapshot
+policy philmath-v1
+use backends []
+
+claim c_realism
+  nl = "Abstract mathematical objects exist"
+  formal = abstract_objects()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "A scoped indispensability argument, not all routes to realism." }
+
+claim c_sets
+  nl = "The natural numbers are intrinsically particular sets"
+  formal = set_identity()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "A particular set identity, stronger than abstract-object realism." }
+
+claim c_structure
+  nl = "Number identity is exhausted by structural role, not intrinsic set membership"
+  formal = structural_identity()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "The anti-identification reading of Benacerraf, not every structuralism." }
+
+claim c_field
+  nl = "Mathematics is dispensable for the scientific fragment under discussion"
+  formal = dispensable()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "Field-style nominalization under the explicit scope_adequate assumption." }
+
+claim c_fiction
+  nl = "Mathematical usefulness need not require literal mathematical truth"
+  formal = useful_without_truth()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "A fictionalist reading of conservative use, not a verdict that all mathematics is false." }
+
+claim c_objection
+  nl = "Useful mathematical application requires literal mathematical truth"
+  formal = truth_required()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "An illustrative objection, not attributed to a historical author." }
+
+claim c_reply
+  nl = "For the conservative applications at issue, consistency can suffice without literal truth"
+  formal = consistency_suffices()
+  binding = { author = demo_author, audit-status = unreviewed,
+              rationale = "Field-style reply within the stated conservativity assumptions; no general consistency theorem." }
+
+leaf indispensability_premise : indispensable()
+  kind = assumed
+  provenance = ai-executed
+  refs = []
+
+leaf commitment : ontological_commitment()
+  kind = assumed
+  provenance = ai-executed
+  refs = []
+
+leaf set_proposal : canonical_reduction()
+  kind = assumed
+  provenance = ai-executed
+  refs = []
+
+leaf benacerraf : multiple_reductions()
+  kind = attested
+  provenance = ai-executed
+  refs = [https://doi.org/10.2307/2183530]
+
+leaf field : field_program()
+  kind = attested
+  provenance = ai-executed
+  refs = [https://academic.oup.com/book/26363]
+
+# This assumption does the extrapolating. Field's programme is not a
+# nominalization of all contemporary science, and the demo claims none.
+leaf scope : scope_adequate()
+  kind = assumed
+  provenance = ai-executed
+  refs = []
+
+leaf conservativity : conservative_use()
+  kind = attested
+  provenance = ai-executed
+  refs = [https://academic.oup.com/book/26363]
+
+leaf truth_assumption : application_needs_truth()
+  kind = assumed
+  provenance = ai-executed
+  refs = []
+
+leaf reply : consistency_suffices()
+  kind = attested
+  provenance = ai-executed
+  refs = [https://academic.oup.com/book/26363]
+
+arg a_realism : supports(c_realism) by indispensability from [indispensability_premise]
+  discharge commitment with commitment
+
+arg a_sets : supports(c_sets) by set_identification from [set_proposal]
+arg a_structure : supports(c_structure) by structural_explanation from [benacerraf]
+arg a_field : supports(c_field) by nominalization from [field]
+  discharge scope with scope
+arg a_fiction : supports(c_fiction) by fictionalist_reading from [conservativity]
+arg a_objection : supports(c_objection) by truth_objection from [truth_assumption]
+arg a_reply : supports(c_reply) by leaf(reply)
+
+# One premise challenge, a mutual rebuttal, and three inference challenges.
+undermine a_field a_realism.0.leaf
+rebut a_structure a_sets
+rebut a_sets a_structure
+undercut a_fiction a_realism.rule
+undercut a_objection a_fiction.rule
+undercut a_reply a_objection.rule
+
+status c_realism
+status c_sets
+status c_structure
+status c_field
+status c_fiction
+status c_objection
+status c_reply
+
+# Grounded rounds: {a_field,a_reply} in; {a_realism,a_objection} out;
+# then a_fiction in. The a_sets/a_structure cycle remains undec.
+# The defended a_fiction is the reinstatement witness.

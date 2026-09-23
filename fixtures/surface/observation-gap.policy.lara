@@ -1,0 +1,11 @@
+policy surface-policy
+
+pred score(Num)
+pred verdict(Num)
+
+rule verdict-rule(Y)
+  mode       = defeasible
+  premises   = [ verdict(Y) ]
+  conclusion = verdict(Y)
+
+admission { (observed, user) = admit }

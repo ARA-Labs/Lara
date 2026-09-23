@@ -1,0 +1,98 @@
+# Corpus unit rebench-triton_cumsum/C09 — defeated (unmet-defeater undercut path; batch: rebench)
+#
+# Source: m0/annotations/rebench-triton_cumsum.yaml C09 (negative-result, cross_run_observation;
+# corpus pin 62e9b54; claim_type adjudicated via double-annotation 2026-07-22). Headline: the
+# pure-PyTorch two-cumsum pipeline is memory-bandwidth-bound and cannot beat the reference —
+# eager variants cluster at 2.2-5.0 ms and torch.compile plateaus at 1.5-1.8 ms on H100 at N=1e8,
+# above the 0.47 reference, because each invocation moves about 1.6 GB of HBM traffic.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Negative-result, cross_run_observation -> corpus-v1 `measurement(P, S, Exp)`, lowered as a
+#     POSITIVE conclusion over the negative-content constant: holds(bandwidth_bound_floor,
+#     pytorch_two_cumsum). No null_* dual is used, so no contrary pair is instantiated and no
+#     forced rebut edges arise (attack completeness is arg-conclusion-level). Numeric floor,
+#     plateau, and 1.6 GB stay in nl and refs.
+#   * Both mandatory CQs are discharged from the paper's own basis: instrument_validity
+#     (annotation CQ3 — E06 documents the run-to-run dispersion band, so timings are valid
+#     measurements, e2) and coverage (annotation CQ1 — E06 spans all torch.compile modes, E05 four
+#     eager variant families over 22 runs, e3). CQ4 (bandwidth attribution) is optional, omitted.
+#   * The unmet-DEFEATER (annotation CQ2): the exploration-tree header filter EXCLUDES attempts
+#     scoring < 0.47, so the tree structurally cannot show a counterexample, yet claims.md C12
+#     attests one (MALT 347447 attempt 3, score 0.430 — a torch.compile run beating 0.47). This
+#     selection filter is a measurement artifact of the cross-run observation. Leaf u1 concludes
+#     the family exception measurement_artifact(P, S) (licensed by
+#     `exception measurement : measurement_artifact`); arg d1 challenges the coverage discharge and
+#     undercuts a1 at the rule. The undercutter is unattacked, so a1 is out and the claim is
+#     defeated — the artifact's own C12 defeats C09's over-strong universal 'in every run' leg.
+#   * No other mandatory CQ is independently unmet-gap (CQ1/CQ3 met, CQ4 optional-met), so the gap
+#     rule does NOT pre-empt the defeat. double_annotate=yes -> reviewed.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-triton_cumsum at sha256:1fb18ee0f3ca
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c09
+  nl      = "The pure-PyTorch two-cumsum pipeline is memory-bandwidth-bound and cannot beat the reference: eager variants cluster at 2.2-5.0 ms and torch.compile plateaus at 1.5-1.8 ms on H100 at N=1e8, above the 0.47 reference, because each invocation moves about 1.6 GB of HBM traffic"
+  formal  = holds(bandwidth_bound_floor, pytorch_two_cumsum)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: the cross-run timing clusters (eager 2.2-5.0 ms, compiled 1.5-1.8 ms) over
+# E05/E06, per trace node and table row in the annotation.
+leaf e1 : observes(malt_runs, bandwidth_bound_floor, pytorch_two_cumsum)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C09, logic/experiments.md#E05, logic/experiments.md#E06, evidence/tables/malt_attempts.md, trace/exploration_tree.yaml#N773, trace/exploration_tree.yaml#N876]
+
+# instrument_validity: the run-to-run dispersion band is documented, so timings are valid.
+leaf e2 : valid_instrument(bandwidth_bound_floor, malt_runs)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-Outcome-dispersion-band]
+
+# coverage: E06 spans all torch.compile modes; E05 four eager variant families over 22 runs.
+leaf e3 : covers_scope(malt_runs, pytorch_two_cumsum)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-modes, logic/experiments.md#E05-eager-variants]
+
+# The defeater: the tree's inclusion filter (score < 0.47 excluded) is a selection artifact that
+# hides the counterexample claims.md C12 attests (347447 attempt 3, score 0.430).
+leaf u1 : measurement_artifact(bandwidth_bound_floor, pytorch_two_cumsum)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [trace/exploration_tree.yaml#header-score-filter-below-0.47-excluded, logic/claims.md#C12, evidence/tables/malt_attempts.md#347447-attempt-3-score-0.430]
+
+# --- The support argument ----------------------------------------------------------------------
+
+# confound_control (optional) has no annotated CQ and is left OPEN, not discharged; an optional
+# open hole does not enter the obligation set, so a1 stays a complete support (the defeat below,
+# not incompleteness, is what drives the status).
+arg a1 : supports(c09) by measurement(bandwidth_bound_floor, pytorch_two_cumsum, malt_runs)
+  discharge instrument_validity with e2
+  discharge coverage            with e3
+  open      confound_control
+
+# --- The artifact's own filtered-out counterexample undercuts the universal leg -----------------
+
+# Licensed by `exception measurement : measurement_artifact(P, S)` (corpus-v1). The challenge
+# contests the coverage discharge — the observation set is selection-biased against exactly the
+# sub-reference counterexamples that falsify the 'floor above 0.47 in every run' leg.
+arg d1 : challenges(coverage(a1)) by leaf(u1)
+undercut d1 a1.rule
+
+status c09
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF (declaration order): a1, d1.
+#   d1 -> in  (leaf-rooted, unattacked)
+#   a1 -> out (undercut by d1; undercuts always succeed, spec §7)
+# Claim status:
+#   c09 -> defeated (its only support a1 is `out`; spec §8 aggregation)

@@ -1,0 +1,26 @@
+; A map whose members all load and check, and whose ALIGNMENT NAMES A CLAIM NO
+; MEMBER DECLARES. Resolution decides nothing about the members — it only asks
+; whether the manifest's coordinates name anything at all — so this is an
+; ill-formed map (exit 2), not a rejection.
+;
+; It is the second `pre-boundary` anchor for scripts/check-map-conformance.sh,
+; and the one that pins the other exit code: reference resolution runs on both
+; the `check` and the `map-input` door, before either produces anything, so the
+; two must refuse identically and neither may emit an envelope. Were the two
+; doors to disagree here, a manifest could be turned into bytes the Lean driver
+; would then be asked to reproduce a verdict for.
+(lara-map@1
+  (policy empirical-v1 ../agreement/empirical-v1.policy.lara)
+  (backends (backend nd 1))
+  (members
+    (member paper_pos ../agreement/pos.lara)
+    (member paper_neg ../agreement/neg.lara))
+  (alignments
+    (alignment
+      (ref paper_pos c_pos whole)
+      (ref paper_neg c_missing whole)
+      different
+      (author reviewer_r)
+      (audit-status unreviewed)
+      (rationale "The right-hand coordinate names a claim paper_neg does not declare.")))
+  (questions))

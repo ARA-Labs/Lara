@@ -1,0 +1,30 @@
+session:
+  id: "2026-07-23_001"
+  timestamp: "2026-07-23T00:16"
+  summary: "CI restored by bypassing a retired Hackage mirror; the full Haskell and Lean workflow passed."
+
+events_logged:
+  - type: dead_end
+    id: N35
+    provenance: ai-executed
+    summary: "HTTPS-only Hackage configuration still selected the retired Dream.io mirror."
+  - type: experiment
+    id: N36
+    provenance: ai-executed
+    summary: "Direct HTTPS index configuration passed the complete GitHub Actions workflow."
+
+ai_actions:
+  - action: "Inspected the failing Haskell job and isolated Cabal's retired Hackage mirror selection as the package-index failure."
+    provenance: ai-executed
+    files_changed: []
+  - action: "Made package-index setup explicit, selected the direct HTTPS index, added bounded retries, and verified all Haskell and Lean jobs."
+    provenance: ai-executed
+    files_changed:
+      - ".github/workflows/ci.yml"
+
+claims_touched: []
+
+open_threads:
+  - "Remove the secure-repository workaround once upstream Hackage mirror metadata no longer advertises the retired endpoint."
+
+ai_suggestions_pending: []

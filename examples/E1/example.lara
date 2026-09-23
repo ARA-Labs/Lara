@@ -1,0 +1,73 @@
+# Example E1 — justified-clean (the happy path, the vertical slice)
+#
+# Witnesses: the smallest end-to-end pipeline — one leaf-backed controlled_experiment
+# scheme instance, all three mandatory critical questions discharged by pattern-matching
+# leaves, no attacks. The single support argument is `in` under grounded semantics, so the
+# headline claim aggregates to `justified` (spec §8 priority: some support `in`).
+#
+# This is E1 of the M4a coverage matrix (docs/worked-examples-plan.md §3): status = justified,
+# attacks = none. It is the "leaf → scheme → support term → compile → grounded → aggregate"
+# walk with every corner clean, so a failure here localizes to the pipeline, not the calculus.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact resnet_c01 at sha256:e1e1...
+policy empirical-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# The principal premise of the controlled_experiment scheme (reconstructed implicitly by the
+# elaborator from `by controlled_experiment(M, accuracy, D, exp_1)`, spec §5).
+leaf e1 : reports(exp_1, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_1.csv#row=mean]
+
+# The three mandatory critical questions, each discharged by a leaf whose proposition matches
+# the policy's answer pattern exactly (randomization=randomized(Exp), adequate_power=powered(Exp),
+# external_validity=generalizes(M,Q,D)).
+leaf e2 : randomized(exp_1)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=4.1]
+
+leaf e3 : powered(exp_1)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=4.1]
+
+leaf e4 : generalizes(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=5]
+
+# --- The support argument ----------------------------------------------------------------------
+
+# A complete controlled_experiment instance: all three mandatory CQs discharged, no open holes,
+# no attacks. Its conclusion improves(M, accuracy, D) ≡ c1's formal, so it supports c1.
+arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_1)
+  discharge randomization     with e2
+  discharge adequate_power    with e3
+  discharge external_validity with e4
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# Compiled AF: one argument, unattacked.
+#   a1  -> in    (LIn; no attackers, so it is in the grounded extension)
+# Claim status:
+#   c1  -> justified   (its only support a1 is `in`; spec §8 aggregation)
+#
+# Teaching point: the happy path is boring on purpose — every critical question is answered by a
+# leaf that matches its policy pattern, so nothing attacks and nothing is left open. This is the
+# baseline the E2 gap and the E3 defeats deviate from.

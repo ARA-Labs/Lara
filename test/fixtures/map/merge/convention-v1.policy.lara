@@ -1,0 +1,39 @@
+# convention-v1 — the smallest policy with a premise-less rule.
+#
+# Leaf qualification confines a support-term collision to a single member, so a
+# map's structural merge (D8 and D12 of docs/multi-artifact-composition-decision.md)
+# can fire only on a LEAF-FREE term: an instance of a rule with no premises.
+# Neither empirical-v1 nor agreement-v1 has one, which left the merge exercised
+# only on synthesized terms. This policy exists so that a real map reaches it:
+# two members that invoke `community_convention` on the same arguments declare
+# the same support term, and the linked unit carries it once.
+#
+# It is test material for the map fixture tree, not a shipped policy, and no
+# worked example uses it.
+policy convention-v1
+
+sort Measurand, Benchmark, Experiment, Report, Direction
+con accuracy : Measurand
+con glue : Benchmark
+con exp_k : Experiment
+con misleading : Direction
+con effect(Measurand, Benchmark, Direction) : Report
+pred standard_metric(Measurand, Benchmark)
+pred not_standard_metric(Measurand, Benchmark)
+pred reports(Experiment, Report)
+
+# A community convention: nothing is observed, so there is nothing to premise.
+# Defeasible, so a contrary conclusion can rebut it.
+rule community_convention(Q, B)
+  mode       = defeasible
+  premises   = []
+  conclusion = standard_metric(Q, B)
+
+# An evidence-based objection to the convention.
+rule metric_critique(Q, B, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, effect(Q, B, misleading)) ]
+  conclusion = not_standard_metric(Q, B)
+
+contrary standard_metric(Q, B)     not_standard_metric(Q, B)
+contrary not_standard_metric(Q, B) standard_metric(Q, B)

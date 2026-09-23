@@ -1,0 +1,60 @@
+session:
+  id: "2026-08-12_004"
+  date: "2026-08-12"
+  started: "2026-08-12T20:39"
+  last_turn: "2026-08-12T20:39"
+  turn_count: 1
+  summary: >
+    Approved the coordinated ARA format alignment design and committed a
+    12-task, three-repository implementation plan that preserves LARA
+    provenance, evidence, narrative, and 177-node DAG semantics behind
+    immutable strict runtime gates.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N178"
+    routing: direct
+    provenance: user-revised
+    summary: >
+      Adopted a runtime-first three-repository cutover: widen and release
+      ara-cli, migrate the canonical example, then migrate LARA with a
+      permanent baseline-vs-current invariant verifier.
+
+ai_actions:
+  - turn: 1
+    action: >
+      Reconciled the approved specification with live source and CI contracts,
+      wrote and self-reviewed the coordinated implementation plan, and
+      committed it as d793635.
+    provenance: ai-executed
+    files_changed:
+      - docs/superpowers/plans/2026-08-12-ara-format-alignment.md
+      - ara/trace/exploration_tree.yaml
+      - ara/trace/pm_reasoning_log.yaml
+      - ara/trace/sessions/2026-08-12_004.yaml
+      - ara/trace/sessions/session_index.yaml
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The migration preserves all 177 node IDs, authored metadata and
+      narrative, evidence bodies, source references, and semantic DAG
+      reachability. Strict validation must finish with zero errors and zero
+      warnings in both canonical artifacts.
+  - turn: 1
+    excerpt: >
+      Downstream CI pins the exact reviewed ara-cli v0.1.14 release; no latest,
+      v0, global installation, moving branch, permissive allowlist, or
+      metadata-dropping compatibility path is accepted.
+
+open_threads:
+  - "Implement plan Tasks 1-4 in ara-cli and obtain review before releasing v0.1.14."
+  - "After the immutable runtime exists, migrate and strictly validate the canonical the-ara-of-ara example."
+  - "After upstream merges, migrate LARA and prove the permanent 177-node preservation contract."
+
+ai_suggestions_pending: []

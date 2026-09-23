@@ -1,0 +1,61 @@
+session:
+  id: "2026-07-24_003"
+  timestamp: "2026-07-24T21:09"
+  ended: "2026-07-24T23:55"
+  summary: "README synced with frozen v0.1, restructured proof-assistant style, purpose/theory sections added; ARA-ecosystem interview transcript retrieved for context; late-evening rit-vs-lara comparison discussion opened (new conversation, continues into 2026-07-25_001)."
+
+events_logged:
+  - type: observation
+    id: null
+    provenance: ai-executed
+    summary: "Turn 1: documentation act only — README drift closed against docs/spec.md; no new research decision, so no tree node allocated."
+  - type: decision
+    id: null
+    provenance: user
+    summary: "Turn 2: user directed the README to follow the proof-assistant-community README shape (Lean, Agda, Rocq); restructure executed, content unchanged in substance."
+  - type: observation
+    id: null
+    provenance: user
+    summary: "Turn 3: user flagged that the README stated neither the project's purpose nor its formal-theory lineage; purpose paragraph and Theoretical foundations section added from the novelty doc's own framing."
+  - type: decision
+    id: null
+    provenance: user
+    summary: "Turn 5: user directed that the interview's research-artifact-format discussion be recorded as a reference doc; docs/references/liu-2026-ara-format-interview.md created in the existing reference-note style with a caption-provenance flag and LARA-relevance framing (leaf grain, whole-trace attack walk, dead-end-as-content)."
+  - type: observation
+    id: null
+    provenance: user
+    summary: "Turn 8 (new conversation, ~23:40): user opened a rit-vs-lara comparison — framing the siblings as complementary formalizations of agent-native research artifacts, and questioning whether argumentation is expressible in dependent types; analysis (Lean-as-object-logic vs Lean-as-metatheory, Hume's-fork missing middle, shadow-AF reading of rit's collision/tier machinery) delivered from rit README + DESIGN.md; interpretive content captured next day once source-verified (see 2026-07-25_001, N46, C18, O12)."
+
+ai_actions:
+  - action: "Rewrote the README intro to state the implemented Lara.Strict seam + Lara.Strict.ND reference adapter and the M0-sized adapter portfolio (arithmetic table-recheck + code-inspection, LP non-shipping per spec §5.2), replacing the stale 'ND adapter planned / LP optional' wording."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Completed the Layout listing (Strict.hs, Strict/ND.hs, ND/Internal.hs, test/StrictSpec.hs, m0/, corpus/), expanded the trusted-base bullet to cover both implemented carve-outs, and relabeled the LP seed 'optional' → 'non-shipping' in Layout, trusted-vs-skeleton, and Status."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Restructured the README into the Lean/Agda/Rocq shape: CI/license/spec badges, feature-bullet overview, 'A taste of LARA' section using the spec §10 presentation example, 'Building from source' split (Haskell/Lean, verified CI runs both plus the AxCheck audit), a documentation link table, condensed 'Trusted computing base' section, and a License section. All prior content preserved in substance."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Committed and opened the PR (docs/readme-proof-assistant-style), then added a purpose paragraph (target domain: research artifacts; checker validates certificates, not empirical truth — spec §1) and a 'Theoretical foundations' section naming the four lineages from novelty-and-related-work.md (Dung 1995 grounded semantics; ASPIC+ structured argumentation; argumentation schemes with critical questions; PCC/LCF trust discipline; LP as non-shipping seed), plus the novelty doc row in the documentation table."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Turn 6: added an epigraph to the README purpose section — the condensed [09:01] ARA-primitive quote (claims -> implementations -> grounded results + exploration trajectory), attributed to Amber Liu and linked to the reference note carrying the caption-provenance flag, followed by a one-sentence 'LARA is the checker side of that thesis' tie-in."
+    provenance: ai-executed
+    files_changed: ["README.md"]
+  - action: "Wrote docs/references/liu-2026-ara-format-interview.md: cleaned excerpt of The Startup Show interview with Amber Liu (ARA founder) on the future of the research-artifact format, positions-distilled table, and why-it-matters-to-LARA section tying [09:01]/[10:00] to spec §11, the M0 leaf grain, and the frozen defeat-layer conventions."
+    provenance: ai-executed
+    files_changed: ["docs/references/liu-2026-ara-format-interview.md"]
+
+claims_touched: []
+
+open_threads:
+  - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
+  - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
+
+ai_suggestions_pending: []
+
+references:
+  - turn: 4
+    kind: external-media
+    what: "YouTube interview transcript: 'No More Human Scientists? She quit Meta's Superintelligence Lab to redefine science.' (The Startup Show, 19:07, youtube.com/watch?v=XTYsBTcLJeY) — the ARA founder's motivation for agent-native research artifacts: PDF/peer-review infrastructure accommodates human bandwidth; ARAs keep dry knowledge, failed attempts, and exploration trajectories for AI scientists."
+    provenance: ai-executed

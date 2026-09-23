@@ -1,0 +1,1 @@
+(pw-error 1 world (world-input src "../../../examples/axiom-withdrawal/admitted.lara: lara sources have no Lean reader; derive an inline envelope with lara pw-input"))

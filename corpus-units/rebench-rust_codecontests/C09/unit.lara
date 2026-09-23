@@ -1,0 +1,69 @@
+# Corpus unit rebench-rust_codecontests/C09 — gap (mandatory-CQ-unmet path; batch: rebench)
+#
+# Source: m0/annotations/rebench-rust_codecontests.yaml C09 (implementation-behavioral,
+# plan_vs_shipped_diff; corpus pin 62e9b54). Headline: candidate-repair was planned but not
+# implemented — notes.md:22 lists 'Try doing repair on attempts that compiled' under 'Things to
+# try now', but the shipped solve_code_contests_rust.py has no path feeding evaluator failure
+# output back to GPT-3.5 for a second attempt.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * plan_vs_shipped_diff -> corpus-v1 `code_inspection(P, Src, Insp)` (scheme-family map);
+#     conclusion code_property(rust_codecontests_solver, repair_planned_not_shipped).
+#   * path_coverage is MET: annotation CQ2 — the whole shipped module was inspected and holds no
+#     repair call site, and CQ3 confirms the only commented-out block is the python-translate
+#     path (not repair). Folded into e2.
+#   * version_match is UNMET-gap: annotation CQ1 — notes.md, the SOLE documentary basis for the
+#     'planned' half, ships nowhere in the artifact tree, so the planning-document version cannot
+#     be verified in-tree; the 'planned' half rests on citation only (attested, not defeated). A
+#     mandatory policy CQ with no honest discharging leaf is an IncompleteArgument rejection, so
+#     NO complete code_inspection(...) instance is declarable: E2-style unit, `gap` on empty
+#     support.
+#   * coverage_flag noted: the negative-existential absence ('no repair loop anywhere in the
+#     module') has no per-locus construct; it folds into the single inspected-absence premise leaf.
+#     All 7 dead ends are decision:none (N10 is C09's own documentary basis, a support not an
+#     attack).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-rust_codecontests at sha256:1aeed0ad50c4
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c09
+  nl      = "Candidate-repair was planned but not implemented: notes.md line 22 lists 'Try doing repair on attempts that compiled' under Things to try now, but the shipped solve_code_contests_rust.py has no code path feeding evaluator failure output back for a second attempt"
+  formal  = code_property(rust_codecontests_solver, repair_planned_not_shipped)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the plan-vs-shipped diff — notes.md:22/24 (planned) against the shipped
+# module's full-inspection absence of any repair path.
+leaf e1 : inspects(e08, rust_codecontests_solver, repair_planned_not_shipped)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C09, logic/experiments.md#E08, trace/exploration_tree.yaml#N10, src/kernel/solve_code_contests_rust.py]
+
+# path_coverage: the whole module was read; completion call sites are generation, vote, and the
+# commented python-translate block only — no repair identifier or failure-feedback call.
+leaf e2 : covers_paths(e08, rust_codecontests_solver)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E08, src/kernel/solve_code_contests_rust.py, logic/experiments.md#E07]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: version_matched(rust_codecontests_solver, e08) has no honest leaf —
+# notes.md, the only documentary source for the 'planned' half, is absent from the artifact, so
+# the planning document cannot be version-verified in-tree — and corpus-v1 makes version_match
+# mandatory. The claim's complete-support set is empty.)
+
+status c09
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c09 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

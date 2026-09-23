@@ -1,0 +1,304 @@
+session:
+  id: "2026-07-30_001"
+  date: "2026-07-30"
+  started: "2026-07-30T09:00"
+  last_turn: "2026-07-30T17:10"
+  turn_count: 5
+  summary: >
+    M4 closed and result 9 mechanized under Model A, then strengthened by
+    acceptance-preserving well-checkedness transport so backend replacement is
+    non-vacuous by construction. The PR merged. Turn 4 completed status
+    housekeeping: synchronized the root/Lean READMEs, TODO roadmap,
+    mechanization plan and status ledger, keynote proof ledger, and
+    Presentation.lean scope comment; closed completed trackers.
+    Next milestone M5 starts with replay identity and duplicate-report
+    groups. Result 3 backend certificate dependency accountability remains the
+    formal gap. Turn 5 implemented cross-layer (AST/surface/wire/driver +
+    Lean Lara.Groups with 6 sorry-free theorems); enforced §4.3 as a
+    driver-boundary check (R9) with quarantine→gap by drop-the-arg, escalation→
+    reject; all gates green (cabal test, lake build, check-axioms, differential
+    41/41); the PR opened. C21 crystallized. Both M5 prerequisites
+    now closed.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N75"
+    routing: direct
+    provenance: user
+    summary: "M4 closed after the PR; retire TODOS M4 section, pick result-9 mechanization as next track"
+  - turn: 1
+    type: dead_end
+    id: "N76"
+    routing: direct
+    provenance: ai-executed
+    summary: "Per-argument erase-equality does not preserve the AF — containsB keys on exact cert-payload equality"
+  - turn: 1
+    type: decision
+    id: "N77"
+    routing: direct
+    provenance: user
+    summary: "Statement model A (uniform injective relabel) chosen over shared-skeleton (B) and EraseEq+canonicity (C)"
+  - turn: 1
+    type: experiment
+    id: "N78"
+    routing: direct
+    provenance: ai-executed
+    summary: "Result 9 mechanized: lean/Lara/Erase.lean, backend_replacement, 47-job build, AxCheck 0 sorryAx/510 trio-only"
+  - turn: 1
+    type: observation
+    id: "O19"
+    routing: staged
+    provenance: ai-executed
+    summary: "Methodological concept: mechanize erasure-invariance via injective uniform relabel, not collapse-to-marker"
+  - turn: 2
+    type: decision
+    id: "N79"
+    routing: direct
+    provenance: user
+    summary: "PR review: dropped two unused companion lemmas (verified AxCheck-only refs); filed worked-example/transport follow-up"
+  - turn: 3
+    type: decision
+    id: "N80"
+    routing: direct
+    provenance: user
+    summary: "Chose transport lemma over a Haskell mapAssur conformance port (soundness layer > conformance-only duplicate)"
+  - turn: 3
+    type: experiment
+    id: "N81"
+    routing: direct
+    provenance: ai-executed
+    summary: "Transport mechanized (EraseTransport.lean): mapAssur preserves well-checkedness; backend_replacement non-vacuous by construction; 48 jobs, 516 decls, 0 sorryAx; the PR"
+
+  - turn: 4
+    type: decision
+    id: "N82"
+    routing: direct
+    provenance: user
+    summary: "Housekeeping before M5: synchronize completion status and close completed trackers"
+  - turn: 5
+    type: pivot
+    id: "N83"
+    routing: direct
+    provenance: user
+    summary: "M4/result-9 → M5 implementation: user directed 'do issue [redacted]' in a worktree"
+  - turn: 5
+    type: decision
+    id: "N84"
+    routing: direct
+    provenance: ai-executed
+    summary: "Group-consistency (R9) enforced at driver boundary (like R13), not a checkUnit stage; Unit carries groups+mode via new wire section"
+  - turn: 5
+    type: dead_end
+    id: "N85"
+    routing: direct
+    provenance: ai-executed
+    summary: "Quarantine via Gamma-removal alone → checkArguments rejects R1, not gap; must drop the dependent arguments before checkUnit"
+  - turn: 5
+    type: experiment
+    id: "N86"
+    routing: direct
+    provenance: ai-executed
+    summary: "Landed cross-layer; cabal test PASS, lake build, check-axioms clean, differential 41/41 + 5/5; the PR"
+  - turn: 5
+    type: observation
+    id: "O20"
+    routing: staged
+    provenance: ai-executed
+    summary: "Concept: three-tier rejection architecture — R9 joins R13 as a driver-boundary reject; quarantine stays off the ladder"
+  - turn: 5
+    type: claim
+    id: "C21"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Duplicate-report data conflict → gap not defeat, escalatable to R9; sibling of C16, mechanized + differential-clean"
+
+ai_actions:
+  - turn: 1
+    action: "Retired M4 backlog in TODOS.md and closed the issue"
+    provenance: ai-executed
+    files_changed: ["TODOS.md"]
+  - turn: 1
+    action: "Wrote result-9 design plan; delegated Lean implementation to a fork; independently verified build + axioms"
+    provenance: ai-executed
+    files_changed: ["plans/2026-07-30-result9-backend-replacement.md"]
+  - turn: 1
+    action: "Added lean/Lara/Erase.lean (mapAssur + 13-decl lemma chain, backend_replacement), wired into Lara.lean + AxCheck.lean"
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Erase.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 1
+    action: "Updated mechanization ledger (result 9 -> mechanized) and lean/README.md; committed as 178432e"
+    provenance: ai-executed
+    files_changed: ["ara/evidence/status/mechanization_status.md", "lean/README.md"]
+  - turn: 2
+    action: "PR review item 1: removed unused mapAssurAtt_target/mapAssurDis_eq + AxCheck line; rebuilt (47 jobs, 0 sorryAx); committed 3db1e75; opened the issue for item 2"
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Erase.lean", "lean/AxCheck.lean", "ara/evidence/status/mechanization_status.md", "ara/logic/claims.md"]
+  - turn: 3
+    action: "Delegated transport lemma to a fork; independently verified. Added lean/Lara/EraseTransport.lean (hasSupport_mapAssur, hasAttack_mapAssur, mapCertProg, backend_replacement_transport); committed e72c884; opened the PR"
+    provenance: ai-executed
+    files_changed: ["lean/Lara/EraseTransport.lean", "lean/Lara.lean", "lean/AxCheck.lean", "ara/evidence/status/mechanization_status.md", "lean/README.md"]
+
+  - turn: 4
+    action: >
+      Updated README.md, lean/README.md, TODOS.md, docs/mechanization-plan.md,
+      ara/evidence/status/mechanization_status.md, docs/slides/keynote.html, and
+      lean/Lara/Presentation.lean to reflect M3/M4/result-9/result-12 completion,
+      the remaining result-3 formal gap, and M5 prerequisites; closed
+      the GitHub issues as completed.
+    provenance: ai-executed
+    files_changed:
+      - "README.md"
+      - "lean/README.md"
+      - "TODOS.md"
+      - "docs/mechanization-plan.md"
+      - "ara/evidence/status/mechanization_status.md"
+      - "docs/slides/keynote.html"
+      - "lean/Lara/Presentation.lean"
+  - turn: 5
+    action: "Implemented duplicate-report groups end-to-end (Haskell + Lean), added differential fixtures + R9 negatives, updated grammar doc/TODOS, committed + pushed, opened the PR"
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/AST.hs"
+      - "src/Lara/Syntax.hs"
+      - "src/Lara/Wire.hs"
+      - "src/Lara/Driver.hs"
+      - "src/Lara/Elaborate.hs"
+      - "src/Lara/Negatives.hs"
+      - "lean/Lara/Groups.lean"
+      - "lean/Lara/Driver.lean"
+      - "lean/Lara/Check/Error.lean"
+      - "lean/AxCheck.lean"
+      - "scripts/gen-corpus.hs"
+      - "fixtures/corpus/{group-consistent-accept,group-conflict-quarantine,reject-r9}.sexp"
+      - "test/{CheckSpec,DifferentialSpec,WireSpec,SyntaxSpec,ReportingSpec,ReplaySpec,TestReplay,WorkedExamplesSpec}.hs"
+      - "docs/lara-surface-grammar.md; TODOS.md; plans/2026-07-30-issue-38-duplicate-report-groups.md"
+claims_touched:
+  - id: C04
+    action: revised
+    turn: 1
+  - id: C04
+    action: revised
+    turn: 3
+  - id: C21
+    action: crystallized
+    turn: 5
+
+logic_revisions:
+  - turn: 1
+    entry: C04
+    field: Statement
+    before: >
+      If two backends accept exactly the same strict instances, then after erasing certificate
+      payloads the compiled argumentation frameworks are isomorphic and every claim gets the same
+      four-state status — so which strict logic (natural deduction, LP, an arithmetic or model
+      checker) sits behind the seam is not part of claim-status semantics. This is the formal reason
+      not to make any one logic foundational.
+    after: >
+      If two well-checked programs differ only by a uniform certificate relabel — the same source
+      certified under two backends with identical strict-acceptance profiles — their compiled
+      argumentation frameworks coincide (identity node bijection) and every claim gets the same
+      four-state status, so which strict logic sits behind the seam is not part of claim-status
+      semantics. This is the formal reason not to make any one logic foundational.
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Sharpened from 'after erasing payloads ... isomorphic' to 'uniform relabel ... coincide' — the mechanized (Model A) faithful form."
+  - turn: 1
+    entry: C04
+    field: Conditions
+    before: >
+      Holds for source-identical programs differing only in strict-certificate payloads, under
+      grounded semantics; backend identity, theory, dependencies, and certificate size remain visible
+      in audit reports (only status is invariant).
+    after: >
+      Holds under grounded semantics for programs related by a uniform INJECTIVE relabel of certificate
+      payloads (a genuine backend swap); erasing every payload to a single `certified` marker is NOT an
+      isomorphism — collapsing distinct subterms can merge occurrences and add subargument-closure
+      edges, because containsB keys on exact structural equality (found while mechanizing 2026-07-30).
+      Backend identity, theory, dependencies, certificate size stay visible; only status is invariant.
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Added the injective-relabel condition and the non-injective-erasure-is-not-iso finding (dead-end N76)."
+  - turn: 1
+    entry: C04
+    field: Evidence basis
+    before: >
+      Theorem 2 (strict-backend-decision §5) proves backend replacement via structural induction,
+      eraseCert graph isomorphism, and invariance of the grounded least fixed point; it is a paper
+      proof slated for mechanization (result 9), not yet machine-checked.
+    after: >
+      Theorem 2 is now machine-checked in lean/Lara/Erase.lean (backend_replacement, checkedAF_relabel,
+      labelC_relabel) under Model A — a uniform injective certificate relabel mapAssur f. Relabeled
+      programs share a definitionally equal checkedAF (nodes are list positions, bijection is identity),
+      giving equal grounded labels and statuses. Mechanizing surfaced that the paper's non-injective
+      erase-to-`certified` form is not an isomorphism; injectivity-on-used-certs is the faithful
+      condition (dead-end N76). lake build 47 jobs; AxCheck 0 sorryAx / 510 decls, trio-only.
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Status stays 'supported' — mechanization is confirming evidence, not a demotion."
+  - turn: 3
+    entry: C04
+    field: Evidence basis
+    before: >
+      … injectivity-on-used-certs is the faithful condition (dead-end N76). lake build 47 jobs;
+      AxCheck 0 sorryAx / 510 decls, trio-only.
+    after: >
+      … injectivity-on-used-certs is the faithful condition (dead-end N76). Now non-vacuous by
+      construction — lean/Lara/EraseTransport.lean transports well-checkedness (hasSupport_mapAssur,
+      hasAttack_mapAssur, mapCertProg) under any acceptance-preserving relabel, so
+      backend_replacement_transport exhibits the second CheckedProgram rather than assuming it, and
+      Theorem 2's "accept the same strict instances" clause is discharged constructively. AxCheck
+      0 sorryAx / 516 decls, trio-only.
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Transport (N81) adds constructive non-vacuity; status stays 'supported' — new confirming evidence, not a status change."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User: "proceed, then record our attempts, result, and decisions in ara." Earlier in the turn
+      the user chose the track ("housekeeping, then mechanize result 9") and, when presented with the
+      containsB payload-sensitivity finding, selected statement Model A (uniform injective relabel)
+      over the shared-skeleton and EraseEq+canonicity alternatives.
+  - turn: 1
+    excerpt: >
+      Finding surfaced during design: edgeB -> coveredB -> attackClosureB -> containsB decides
+      occurrence by EXACT SupportTerm equality incl. cert payload, so per-arg erase-equality does not
+      preserve the AF and the doc's erase-to-marker can add closure edges. Injective uniform relabel
+      is the faithful, provable condition.
+  - turn: 4
+    excerpt: >
+      User confirmed the PR was merged, asked whether the language/compiler/type
+      checker were complete, then directed: "do house keeping first" and "update
+      our readme and docs." The resulting status language distinguishes the
+      usable M4-complete core from the remaining spec/evaluation prerequisites.
+  - turn: 5
+    excerpt: >
+      User: "go to a worktree, do issue [redacted]", then "/commit-commands:commit-push-pr".
+      The decisive design finding was that checkUnit rejects (R1) on a missing-leaf
+      reference, so quarantine cannot be modelled by Gamma-removal alone — the
+      §4.3 "quarantine is not rejection / routes to gap" semantics forced dropping
+      the dependent arguments at the driver boundary in BOTH drivers, verified
+      byte-identical by differential.sh (41/41).
+
+open_threads:
+  - "M5 — evaluation corpus (research-proposal.md §7): gold annotations, mutation suite, baselines, ablations, blinded held-out set. No plan/issue yet — the bigger-picture next step after result-9 polish."
+  - "Both scoped M5 prerequisites are now closed: duplicate-report groups (this turn, the PR) and verdict-carried replay identity. M5 corpus work itself has no plan/issue yet."
+  - "The PR is open, not merged: C21's artifact-commitment rests on the branch, not main. Revisit C21 status if the PR is revised or rejected in review."
+  - "O19 staged (methodological concept: erasure-invariance via injective relabel) — refined by N81 (forward typing transport needs only hpres, not injectivity); still awaiting a closure signal to crystallize."
+  - "O20 staged (three-tier rejection architecture / driver-boundary tier) — awaiting a closure signal or reuse."
+
+ai_suggestions_pending:
+  - "Deprioritized: a Haskell mapAssur conformance port (conformance-only, duplicates logic no runtime path uses — soundness carried by the Lean proof)."
+  - "Optional: a concrete worked example instantiating backend_replacement_transport with a specific program+f (now cheap given mapCertProg) — general non-vacuity already holds, so this is illustrative, not load-bearing."
+
+resolved_threads:
+  - turn: 4
+    thread: "Transport merge and result-9 close"
+    resolution: "Merged; the issue closed; status documents synchronized."
+  - turn: 4
+    thread: "Stale completed trackers"
+    resolution: "Closed as completed with the PR evidence."
+  - turn: 5
+    thread: "Duplicate-report groups (M5 mutation-suite spine)"
+    resolution: "Implemented cross-layer + mechanized (Lara.Groups, 6 sorry-free theorems); differential 41/41 + 5/5; the PR opened. C21 crystallized."

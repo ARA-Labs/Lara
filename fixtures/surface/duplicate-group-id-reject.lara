@@ -1,0 +1,25 @@
+artifact duplicate_group at sha256:duplicate-group
+policy surface-policy
+use backends []
+
+leaf e1 : score(1)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf e2 : score(2)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf e3 : score(3)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+group repeated-id = [e1, e2]
+group repeated-id = [e2, e3]
+
+# Production validates groups before entering the argument fold. This later
+# malformed inference makes the case adversarial for that precedence.
+arg arg-late : supports(derived-late) by pass from [missing-leaf]

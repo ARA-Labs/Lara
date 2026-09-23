@@ -1,0 +1,1123 @@
+-- | Golden verdicts for E1–E5 / R1–R3 plus strict-certificate example S1;
+-- the teaching examples A and B join them in 'examplePolicies' for the
+-- freshness and coverage properties, together with the D3 agreement-map and
+-- the three D1 rebuttal-replay rounds (round0–round2), and the two running-example
+-- runs (run1–run2). 'examplePolicies' is the authoritative list; no count is
+-- repeated in prose, so it cannot drift again.
+--
+-- Each property loads the committed @.lara@ artifact and its co-located policy
+-- with "Lara.Syntax", prepares the pair with 'prepareSource', runs the opaque
+-- carrier through 'runSourceCheck', and asserts the frozen identity-bearing verdict —
+-- exactly the in-process path @app\/Main.hs@ takes for a @.lara@ file, so these
+-- goldens pin the same bytes the CLI prints. IO lives in the test, never in the
+-- elaborator (mirrors "ElaborateSpec").
+--
+-- Coverage (docs/m4a-checklist.md §2–§3):
+--
+--   * __E1__ @justified-clean@ — 'Accept'; the single support @in@; status justified.
+--   * __E2__ @open-gap@        — 'Accept'; status gap (empty complete support).
+--   * __E3__ @defeat-suite@    — 'Accept'; justified + defeated + contested in one
+--     graph, and all three attack kinds (undercut, undermine, rebut).
+--   * __E4__ @reinstatement@   — 'Accept'; justified UNDER each attack kind
+--     (attacker defeated by an unattacked defender).
+--   * __E5__ @contested-beyond-rebut@ — 'Accept'; contested via undermine- and
+--     undercut-native 2-cycles, plus gap amid attacks.
+--   * __R1__ @undeclared-leaf@ — 'Reject' R1  (leaf not in Γ).
+--   * __R2__ @strict-contrary@ — 'Reject' R12 (policy §8.1 Path-B well-formedness).
+--   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
+--   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
+--   * __S2__ @ord-cert@ — 'Accept'; ord@1 comparison cert replay plus the
+--     defeasible bridge rule consuming it; the comparative claim is justified.
+--   * __S3__ @ord-tie@ — 'Accept'; the num_le family member at the tie, where
+--     num_lt would be an R13 replay rejection on the same two numerals; the
+--     bridge delivers at_least_as_good rather than better.
+--   * __S4__ @ord-undermined-binding@ — 'Accept'; the binding leaf is
+--     undermined, so the bridge goes out and its comparative claim is
+--     defeated, while the strict ord@1 step stays in and its bare comparison
+--     stays justified (the factivity firewall, in the grounded semantics).
+--   * __S5__ @ord-lower-is-better@ — 'Accept'; the same @strictly-better@
+--     source shape as S2 over a @lower-is-better@ measurand, so the generated
+--     goal is the flipped @num_lt(ours, theirs)@ — and ord@1 accepts it.
+--   * __S7__ @ord-labeled@ — 'Accept'; the certificates cite the rules'
+--     declared premise LABELS rather than the source names of the terms
+--     filling the slots, including the case only labels can express — one
+--     leaf filling both slots of a two-premise rule.
+--   * __S8__ @strict-binder@ — 'Accept'; a named @nd\@1@ binder carries a
+--     source-authored formula annotation and a named premise citation, so the
+--     same source name lowers to different de Bruijn indices inside and
+--     outside the binder while retaining its one free premise dependency.
+--   * __agreement-map__ @agreement-v1@ — 'Accept'; a cross-paper agreement map:
+--     a same-atom contrary pair contested via a rebut 2-cycle, and a
+--     setting-index-mismatch pair left justified (zero attacks).
+--
+-- A final __freshness__ property re-derives every @example.core.sexp@ anchor in
+-- 'examplePolicies' from its surface @.lara@ + policy and asserts the committed
+-- bytes match, guarding against surface/anchor drift.
+module WorkedExamplesSpec (workedExamplesSpecProps) where
+
+import Test.QuickCheck
+
+import Data.List (isInfixOf, sort)
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Set as Set
+
+import Lara.AST
+  ( Attack (..)
+  , ArgId (..)
+  , Assurance (..)
+  , BackendId (..)
+  , Cert (..)
+  , Digest (..)
+  , Decl (..)
+  , DupGroup (..)
+  , GroupConflictMode (..)
+  , GroupId (..)
+  , Label (..)
+  , LeafId (..)
+  , Leaf (..)
+  , LeafKind (..)
+  , Policy
+  , Program (..)
+  , PolicyId (..)
+  , RejectClass (..)
+  , Rejection (..)
+  , RuleId (..)
+  , Status (..)
+  , SupportTerm (..)
+  , SurfaceAttack (..)
+  , TheoryDigest (..)
+  , Unit (..)
+  )
+import Lara.Admission
+  ( AdmissionCause (..), admissionAuditLeaves, admissionAuditArgs
+  , admissionRejectionLeaf, renderAdmissionAudit, renderAdmissionRejection
+  )
+import Lara.Elaborate
+  ( PreparedSource (..)
+  , SourceResult
+  , elabErrorMessage
+  , prepareSource
+  , renderSourceInvalid
+  , registryOf
+  , runSourceCheck
+  , sourceResultCheckInput
+  , sourceResultCertDeps
+  , sourceResultAudit
+  , sourceResultVerdict
+  )
+-- The bare, admission-free lowering: this suite pins the elaborator's own
+-- output (the @.core.sexp@ anchors), so it is one of the sanctioned
+-- escape-hatch callers described in the "Lara.Elaborate.Internal" header.
+import Lara.Elaborate.Internal (elaborate)
+import Lara.ExpectedJson (JValue (..), expectedJson, expectedJsonValue)
+import Lara.Replay
+  ( CoreVersion (..)
+  , mkCheckInput
+  , mkReplayId
+  , replayErrorMessage
+  )
+import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
+import qualified Lara.PW.Run as PW
+import Lara.PW.Wire (WorldId (..))
+import Lara.Syntax (parsePolicy, parseProgram)
+import Lara.Strict (SExpr (..))
+import qualified Lara.Strict as Strict
+import qualified Lara.Strict.ND as ND
+import Lara.Strict.Deps (CertDep (..))
+import Lara.Wire (PublicStatus (..), conditionalStatus, Outcome (..), Verdict (..), encodeCheckInput, printSExpr)
+import Lara.WorkedExamples (workedExamples)
+import SigmaFixture (sigmaOf)
+
+-- ---------------------------------------------------------------------------
+-- Fixtures
+-- ---------------------------------------------------------------------------
+
+con :: String -> Term
+con s = TCon (FunSym s) []
+
+-- | @improves(m, accuracy, d)@ over two nullary-constant names.
+improves :: String -> String -> Prop
+improves m d = Prop (Pred "improves") [con m, con "accuracy", con d]
+
+-- | @not_improves(m, accuracy, d)@.
+notImproves :: String -> String -> Prop
+notImproves m d = Prop (Pred "not_improves") [con m, con "accuracy", con d]
+
+-- | @holds(x, d)@ over two nullary-constant names.
+holdsP :: String -> String -> Prop
+holdsP x d = Prop (Pred "holds") [con x, con d]
+
+-- | @better(s, b, q, d)@ over four nullary-constant names (agreement-map, D3).
+betterP :: String -> String -> String -> String -> Prop
+betterP s b q d = Prop (Pred "better") [con s, con b, con q, con d]
+
+-- | @at_least_as_good(s, b, q, d)@ — the weaker comparative claim the @num_le@
+-- family member licenses (S3).
+atLeastAsGoodP :: String -> String -> String -> String -> Prop
+atLeastAsGoodP s b q d =
+  Prop (Pred "at_least_as_good") [con s, con b, con q, con d]
+
+-- | A bare comparison atom over two canonical numerals — the @ord\@1@ goal
+-- shape itself, which S4 queries directly to show it surviving an attack on
+-- the claim built from it.
+numRelP :: String -> String -> String -> Prop
+numRelP rel a b = Prop (Pred rel) [TNum a, TNum b]
+
+-- | @not_better(s, b, q, d)@ (agreement-map, D3).
+notBetterP :: String -> String -> String -> String -> Prop
+notBetterP s b q d = Prop (Pred "not_better") [con s, con b, con q, con d]
+-- | The D1 rebuttal-replay benchmark claim @performs(apt, dense_baseline, openllm_avg)@.
+performsP :: Prop
+performsP = Prop (Pred "performs") [con "apt", con "dense_baseline", con "openllm_avg"]
+
+-- | The D1 rebuttal-replay ablation claim
+-- @contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)@.
+contributesP :: Prop
+contributesP =
+  Prop (Pred "contributes") [con "kurtosis_salience", con "apt_llama2_7b", con "openllm_avg"]
+
+loadProgram :: FilePath -> IO Program
+loadProgram path = do
+  src <- readFile path
+  case parseProgram src of
+    Right p -> pure p
+    Left e -> error (path ++ ": parse failed: " ++ show e)
+
+loadPolicy :: FilePath -> IO Policy
+loadPolicy path = do
+  src <- readFile path
+  case parsePolicy src of
+    Right p -> pure p
+    Left e -> error (path ++ ": parse failed: " ++ show e)
+
+-- | Every example's per-example directory paired with its co-located policy
+-- basename (the @policy <name>@ header the artifact declares). Each directory is
+-- a self-contained paper artifact: @<dir>/example.lara@, @<dir>/<policy>@, and
+-- the derived @<dir>/example.core.sexp@ anchor.
+--
+-- The list itself lives in "Lara.WorkedExamples", shared verbatim with
+-- @scripts\/gen-worked-examples.hs@: the generator /writes/ the derived files
+-- this module's freshness properties /re-derive/, so a registry entry present in
+-- one and missing from the other would silently disable exactly the check that
+-- catches drift.
+examplePolicies :: [(FilePath, FilePath)]
+examplePolicies = workedExamples
+
+-- | The shared empirical-v1 policy basename (co-located in each example's dir).
+empiricalBase :: FilePath
+empiricalBase = "empirical-v1.policy.lara"
+
+-- | Load + elaborate + run one example, handing the resulting 'Verdict' to a
+-- checker. An elaborate error fails the property loudly (these examples all
+-- elaborate; the R-series rejects are checker verdicts, not elaborate errors).
+-- @dir@ is the per-example directory; @policyBase@ its co-located policy file.
+runExample :: FilePath -> FilePath -> (Verdict -> Property) -> IO Property
+runExample dir policyBase k = do
+  prog <- loadProgram (dir ++ "/example.lara")
+  pol <- loadPolicy (dir ++ "/" ++ policyBase)
+  pure $ case preparedResult prog pol of
+    Left err -> counterexample (dir ++ ": " ++ err) False
+    Right result -> k (sourceResultVerdict result)
+
+preparedResult :: Program -> Policy -> Either String SourceResult
+preparedResult prog pol =
+  case prepareSource prog pol of
+    Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
+    Right (SourceRejected rejection) ->
+      Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceAccepted input) -> Right (runSourceCheck input)
+
+-- ---------------------------------------------------------------------------
+-- E-series — accepted
+-- ---------------------------------------------------------------------------
+
+-- | P1's philosophy debate: a deadlock beside a defended fictionalist
+-- argument. The edge oracle makes "reinstated" stronger than merely in.
+prop_P1 :: Property
+prop_P1 = once $ ioProperty $ do
+  prog <- loadProgram "examples/P1/example.lara"
+  verdict <- runExample "examples/P1" "philmath-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("P1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} -> conjoin
+        [ verdictLabels outcome ===
+            [(0, LOut), (1, LUndec), (2, LUndec), (3, LIn), (4, LIn), (5, LOut), (6, LIn)]
+        , sort (verdictEdges outcome) === sort [(3,0), (4,0), (1,2), (2,1), (5,4), (6,5)]
+        , verdictStatuses outcome ===
+            [ (Prop (Pred p) [], Published s)
+            | (p, s) <- [("abstract_objects", Defeated), ("set_identity", Contested)
+                        , ("structural_identity", Contested), ("dispensable", Justified)
+                        , ("useful_without_truth", Justified), ("truth_required", Defeated)
+                        , ("consistency_suffices", Justified)]
+            ]
+        ]
+  let leaves = [l | DeclLeaf l <- programDecls prog]
+  pure $ conjoin
+    [ verdict
+    , counterexample "P1 must have only non-observational leaves" $
+        not (null leaves) && all ((`elem` [Attested, Assumed]) . leafKind) leaves
+    ]
+
+-- | Removing only the defender's voluntary edge defeats the fictionalist
+-- argument. This guards against calling an unattacked argument reinstated.
+prop_P1Defense :: Property
+prop_P1Defense = once $ ioProperty $ do
+  prog <- loadProgram "examples/P1/example.lara"
+  pol <- loadPolicy "examples/P1/philmath-v1.policy.lara"
+  let keep (DeclAttack (SUndercut (ArgId "a_reply") _ _)) = False
+      keep _ = True
+  pure $ case preparedResult (prog { programDecls = filter keep (programDecls prog) }) pol of
+    Left err -> counterexample err False
+    Right result -> case verdictOutcome (sourceResultVerdict result) of
+      Reject rejection -> counterexample (show rejection) False
+      outcome@Accept{} ->
+        lookup (Prop (Pred "useful_without_truth") []) (verdictStatuses outcome)
+          === Just (Published Defeated)
+
+-- | Demo 2's admission probe uses honest ND hypothesis reuse: it certifies
+-- the assumed postulate itself, not a geometric consequence of a flat atom.
+-- Quarantine removes its only support (gap) and prevents PW loading, before bridges.
+prop_axiomAdmissionBoundary :: Property
+prop_axiomAdmissionBoundary = once $ ioProperty $ do
+  let root = "examples/axiom-withdrawal/"
+      local name expected = do
+        prog <- loadProgram (root ++ name ++ ".lara")
+        pol <- loadPolicy (root ++ name ++ ".policy.lara")
+        pure $ case preparedResult prog pol of
+          Left err -> counterexample err False
+          Right result -> case verdictOutcome (sourceResultVerdict result) of
+            Reject rejection -> counterexample (show rejection) False
+            outcome@Accept{} -> conjoin
+              [ verdictStatuses outcome ===
+                  [(Prop (Pred "parallel_postulate") [], Published expected)]
+              , counterexample "the admitted certificate must depend on premise zero only" $
+                  sourceResultCertDeps result ===
+                    (if name == "admitted"
+                     then [(ArgId "a", [CertPremise 0 (Prop (Pred "parallel_postulate") [])])]
+                     else [])
+              , counterexample "quarantine must remove pp and its dependent argument" $
+                  ( admissionAuditLeaves (sourceResultAudit result)
+                  , admissionAuditArgs (sourceResultAudit result)
+                  ) === (if name == "admitted" then ([], [])
+                         else ([(LeafId "pp", PolicyQuarantine :| [])], [ArgId "a"]))
+              ]
+  admitted <- local "admitted" Justified
+  withdrawn <- local "withdrawn" Gap
+  rejectedProg <- loadProgram (root ++ "rejected.lara")
+  rejectedPol <- loadPolicy (root ++ "rejected.policy.lara")
+  result <- PW.runPWFile "fixtures/pw/source-rejected/axiom-withdrawal.sexp"
+  pure $ conjoin
+    [ admitted
+    , withdrawn
+    , counterexample "reject must stop source admission before a verdict" $
+        case prepareSource rejectedProg rejectedPol of
+          Right (SourceRejected rejection) -> admissionRejectionLeaf rejection === LeafId "pp"
+          _ -> property False
+    , case result of
+        Left (PW.PWWorld (PW.WorldInputError (WorldId "tgt") detail)) ->
+          counterexample detail ("policy quarantine" `isInfixOf` detail)
+        Left err -> counterexample (show err) False
+        Right _ -> counterexample "quarantined world unexpectedly loaded" False
+    ]
+
+-- | E1: one unattacked support argument @in@, claim justified.
+prop_E1 :: Property
+prop_E1 = once $ ioProperty $
+  runExample "examples/E1" empiricalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E1 labels: a1 → in" $
+              verdictLabels outcome === [(0, LIn)]
+          , counterexample "E1 status: c1 → justified" $
+              verdictStatuses outcome === [(improves "M" "D", Published Justified)]
+          ]
+
+-- | E2: no arguments; the queried claim has empty complete support ⇒ gap.
+prop_E2 :: Property
+prop_E2 = once $ ioProperty $
+  runExample "examples/E2" empiricalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E2: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E2 labels: no arguments" $
+              verdictLabels outcome === []
+          , counterexample "E2 status: c1 → gap" $
+              verdictStatuses outcome === [(improves "M" "D", Published Gap)]
+          ]
+
+-- | E3: justified (a_j in) + defeated (a_d out, undercut+undermine) + contested
+-- (a_c/a_cn 2-cycle undec) in one graph. Arg indices are declaration order
+-- a_j=0, a_d=1, d_uc=2, d_um=3, a_c=4, a_cn=5.
+prop_E3 :: Property
+prop_E3 = once $ ioProperty $
+  runExample "examples/E3" empiricalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E3: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E3 labels: a_j in, a_d out, d_uc/d_um in, a_c/a_cn undec" $
+              verdictLabels outcome
+                === [(0, LIn), (1, LOut), (2, LIn), (3, LIn), (4, LUndec), (5, LUndec)]
+          , counterexample "E3 statuses: c_j justified, c_d defeated, c_c/c_cn contested" $
+              verdictStatuses outcome
+                === [ (improves "M_j" "D_j", Published Justified)
+                    , (improves "M_d" "D_d", Published Defeated)
+                    , (improves "M_c" "D_c", Published Contested)
+                    , (notImproves "M_c" "D_c", Published Contested)
+                    ]
+          ]
+
+-- | E4: reinstatement — three claims stay justified UNDER an attack (one per
+-- attack kind) because each attacker is itself defeated by an unattacked
+-- defender. Arg indices are declaration order a_r=0, a_rn=1, d_sr=2, a_u=3,
+-- n_ng=4, n_rm=5, a_x=6, x_shift=7, x_aud=8.
+prop_E4 :: Property
+prop_E4 = once $ ioProperty $
+  runExample "examples/E4" "empirical-v2.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E4: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E4 labels: a_r/a_u/a_x reinstated in, attackers out, defenders in" $
+              verdictLabels outcome
+                === [ (0, LIn), (1, LOut), (2, LIn)
+                    , (3, LIn), (4, LOut), (5, LIn)
+                    , (6, LIn), (7, LOut), (8, LIn)
+                    ]
+          , counterexample "E4 statuses: c_r/c_u/c_x justified under rebut/undermine/undercut, c_rn defeated" $
+              verdictStatuses outcome
+                === [ (improves "M_r" "D_r", Published Justified)
+                    , (notImproves "M_r" "D_r", Published Defeated)
+                    , (improves "M_u" "D_u", Published Justified)
+                    , (improves "M_x" "D_x", Published Justified)
+                    ]
+          ]
+
+-- | E5: contested via an undermine 2-cycle (context V) and an undercut 2-cycle
+-- (context W), plus a gap claim in a unit full of attacks (context G). Arg
+-- indices are declaration order a_v=0, m_ng=1, m_g=2, a_w=3, w_shift=4, w_aud=5.
+prop_E5 :: Property
+prop_E5 = once $ ioProperty $
+  runExample "examples/E5" "empirical-v2.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("E5: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "E5 labels: both cycles and both support args undec" $
+              verdictLabels outcome
+                === [(0, LUndec), (1, LUndec), (2, LUndec), (3, LUndec), (4, LUndec), (5, LUndec)]
+          , counterexample "E5 statuses: c_v contested (undermine), c_w contested (undercut), c_g gap" $
+              verdictStatuses outcome
+                === [ (improves "M_v" "D_v", Published Contested)
+                    , (improves "M_w" "D_w", Published Contested)
+                    , (improves "M_g" "D_g", Published Gap)
+                    ]
+          ]
+
+-- | S1: the strict nd@1 certificate replays; the certified arg is @in@ and
+-- the claim is justified.
+prop_S1 :: Property
+prop_S1 = once $ ioProperty $
+  runExample "examples/S1" "strict-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S1 labels: a1 → in" $
+              verdictLabels outcome === [(0, LIn)]
+          , counterexample "S1 status: c1 → justified" $
+              verdictStatuses outcome === [(holdsP "safety_invariant" "D", Published Justified)]
+          ]
+
+-- | S2: the strict @ord\@1@ comparison certificate replays, and the defeasible
+-- bridge rule consumes its conclusion. Both args are @in@ and the comparative
+-- claim — not the bare comparison — is the justified one, which is the whole
+-- point of the §3.6 layering: an accepted comparison atom is terminal until a
+-- policy rule binds it to the systems and measurand it is about.
+prop_S2 :: Property
+prop_S2 = once $ ioProperty $
+  runExample "examples/S2" "ord-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S2: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S2 labels: a1 (strict ord@1) and a2 (bridge) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S2 status: c1 → justified" $
+              verdictStatuses outcome
+                === [ ( betterP "sys_new" "sys_base" "accuracy" "imagenet_val"
+                      , Published Justified
+                      )
+                    ]
+          ]
+
+-- | S3: the same certificate shape as S2 over two EQUAL cells. @num_le@
+-- accepts where @num_lt@ would be an R13 replay rejection, and the bridge
+-- delivers the weaker claim the arithmetic actually licenses — the family's two
+-- members separating on exactly this input is the point of the example.
+prop_S3 :: Property
+prop_S3 = once $ ioProperty $
+  runExample "examples/S3" "ord-le-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S3: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S3 labels: a1 (strict ord@1 num_le) and a2 (bridge) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S3 status: c1 → justified (at_least_as_good, NOT better)" $
+              verdictStatuses outcome
+                === [ ( atLeastAsGoodP "sys_new" "sys_base" "accuracy" "imagenet_val"
+                      , Published Justified
+                      )
+                    ]
+          ]
+
+-- | S4: the factivity firewall under attack. An audit undermines the binding
+-- leaf that says the two cells are comparable, so the defeasible bridge goes
+-- @out@ and its comparative claim is __defeated__ — while the strict @ord\@1@
+-- step stays @in@ and its bare comparison stays __justified__.
+--
+-- Both halves are asserted together on purpose. Either alone is consistent with
+-- a checker that simply propagated the attack everywhere, or with one that
+-- ignored it; only the split shows the attack landing on the layer that made
+-- the disputed assertion and stopping at the one that did not.
+prop_S4 :: Property
+prop_S4 = once $ ioProperty $
+  runExample "examples/S4" "ord-setting-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S4: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S4 labels: a1 → in, a2 (bridge) → out, x1 (audit) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LOut), (2, LIn)]
+          , counterexample "S4 edges: x1 undermines a2" $
+              verdictEdges outcome === [(2, 1)]
+          , counterexample "S4 status: better → defeated, num_lt → justified" $
+              verdictStatuses outcome
+                === [ ( betterP "sys_new" "sys_base" "accuracy" "imagenet_val"
+                      , Published Defeated
+                      )
+                    , (numRelP "num_lt" "0.71" "0.74", Published Justified)
+                    ]
+          ]
+
+-- | S5: the same @relation = strictly-better@ source shape as S2, over a
+-- measurand its policy declares @lower-is-better@ (perplexity).
+--
+-- Two things are asserted at once, and both matter. The generated goal is the
+-- __flipped__ one — @num_lt(28.4, 31.6)@, ours below theirs, where S2's is
+-- @num_lt(0.71, 0.74)@, theirs below ours — so the polarity declaration reached
+-- the goal. And that flipped goal is what @ord\@1@ __accepts__ on replay: the
+-- strict argument is @in@, which it could not be if the elaborator had emitted a
+-- goal the backend's exact rational check disagreed with. Polarity chooses which
+-- comparison to make; the backend still decides it.
+--
+-- The bridge concludes the same @better@ predicate S2's does, on a lower-is-better
+-- metric — the comparative claim does not change spelling with the direction of
+-- the number.
+prop_S5 :: Property
+prop_S5 = once $ ioProperty $
+  runExample "examples/S5" "ord-ppl-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S5: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S5 labels: a1 (strict ord@1, flipped goal) and a2 (bridge) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S5 status: better justified, and the SUB-claim is the flipped num_lt(ours, theirs)" $
+              verdictStatuses outcome
+                === [ ( betterP "sys_new" "sys_base" "perplexity" "wikitext103"
+                      , Published Justified
+                      )
+                    , (numRelP "num_lt" "28.4" "31.6", Published Justified)
+                    ]
+          ]
+
+-- | S6 (@lara-syntax\@0.6@): the named-certificate-slot demonstrator. The
+-- authored assurance cites its premises by source name — @(ordcmp (prem
+-- base_cell) (prem new_cell))@, the same identifiers the @from […]@ list
+-- resolves — and elaboration lowers them to the numeric slots before the wire.
+-- The committed golden is the standing byte-identity witness: it
+-- carries only @(ordcmp (prem 0) (prem 1))@, so 'prop_freshness' re-proves on
+-- every run that the symbolic spelling produces the numeric spelling's bytes.
+-- Here the typed pin is the verdict: the lowered certificate must still be a
+-- certificate — @ord\@1@ replays it and the strict step is @in@, exactly as if
+-- the author had counted slots by hand.
+prop_S6 :: Property
+prop_S6 = once $ ioProperty $
+  runExample "examples/S6" "ord-named-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S6: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S6 labels: a1 (strict ord@1, named slots) → in" $
+              verdictLabels outcome === [(0, LIn)]
+          , counterexample "S6 status: the certified num_lt(0.71, 0.74) justified" $
+              verdictStatuses outcome
+                === [(numRelP "num_lt" "0.71" "0.74", Published Justified)]
+          ]
+
+-- | S7 (@lara-syntax\@0.8@): the premise-label demonstrator. Where S6
+-- cites a slot by the source name of the /term/ filling it, S7 cites the
+-- __label the rule declares for the slot__ — @(ordcmp (prem base) (prem new))@
+-- and @(ordcmp (prem left) (prem right))@ — and elaboration lowers both to the
+-- numeric slots before the wire. The committed golden carries only
+-- @(ordcmp (prem 0) (prem 1))@ twice, so 'prop_freshness' re-proves on every
+-- run that the label spelling produces the numeric spelling's bytes.
+--
+-- @a2@ is the argument the premise labels exist for: one leaf, @base_cell@,
+-- fills /both/ of @le_reflex@'s premise slots, so the @\@0.6@ leaf name is
+-- 'CertSlotMultiSlot' there and only the labels resolve. The typed pin is the
+-- verdict — the
+-- lowered certificate must still be a certificate, so @ord\@1@ replays both
+-- steps, including the tie @0.71 <= 0.71@, and both are @in@.
+prop_S7 :: Property
+prop_S7 = once $ ioProperty $
+  runExample "examples/S7" "ord-labeled-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("S7: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S7 labels: a1 (strict lt) and a2 (strict le, one leaf in both slots) → in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "S7 statuses: both certified comparisons justified" $
+              verdictStatuses outcome
+                === [ (numRelP "num_lt" "0.71" "0.74", Published Justified)
+                    , (numRelP "num_le" "0.71" "0.71", Published Justified)
+                    ]
+          ]
+
+-- | S8 (@lara-syntax\@0.10): one named @nd\@1@ binder and the same named
+-- premise on both sides of an application, with the binder's formula authored
+-- as a source proposition @(prop \"holds(safety_invariant, D)\")@ that must
+-- lower to the numeric twin's opaque atom key.  The inner premise occurrence
+-- is under one binder and therefore lowers to @(hyp 1)@, while the outer
+-- occurrence lowers to @(hyp 0)@.  Replaying the lowered redex must retain
+-- exactly premise slot zero as its dependency; the binder-local hypothesis is
+-- not a source dependency.
+prop_S8 :: Property
+prop_S8 = once $ ioProperty $ do
+  prog <- loadProgram "examples/S8/example.lara"
+  pol <- loadPolicy "examples/S8/strict-v1.policy.lara"
+  let expectedPayload =
+        SList
+          [ SAtom (ND.tagToString ND.TApp)
+          , SList
+              [ SAtom (ND.tagToString ND.TLam)
+              , SList [SAtom (ND.tagToString ND.TAtom), SAtom "1:A5:holds1:L1:228:1:C16:safety_invariant1:L1:012:1:C1:D1:L1:0"]
+              , SList [SAtom (ND.tagToString ND.THyp), SAtom "1"]
+              ]
+          , SList [SAtom (ND.tagToString ND.THyp), SAtom "0"]
+          ]
+      loweredAndDependent =
+        case elaborate (registryOf pol) prog pol of
+          Left err -> counterexample ("S8: elaborate failed " ++ elabErrorMessage err) False
+          Right unit ->
+            case unitArgs unit of
+              [(ArgId "a1", SRule {srAssurance = AssuranceCert cert})] ->
+                conjoin
+                  [ counterexample "S8 lowers named binder/premises to the numeric twin payload" $
+                      certPayload cert === expectedPayload
+                  , case
+                      Strict.strictCheck
+                        (Strict.mkRegistry [ND.mkNDBackend [(Strict.TheoryDigest "sha256:strict-v1-theory-0", [])]])
+                        ND.ndBackendId
+                        (Strict.TheoryDigest "sha256:strict-v1-theory-0")
+                        [holdsP "safety_invariant" "D"]
+                        (holdsP "safety_invariant" "D")
+                        (certPayload cert) of
+                      Right judgment ->
+                        counterexample "S8 replay depends only on its free premise slot" $
+                          Strict.sjDependencies judgment === Set.singleton (Strict.PremiseSlot 0)
+                      Left err -> counterexample ("S8: numeric-twin replay rejected " ++ show err) False
+                  ]
+              args -> counterexample ("S8: expected one certified a1, got " ++ show args) False
+  semantic <- runExample "examples/S8" "strict-v1.policy.lara" $ \verdict ->
+    case verdictOutcome verdict of
+      Reject rejection -> counterexample ("S8: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "S8 labels: the strict nd@1 redex argument is in" $
+              verdictLabels outcome === [(0, LIn)]
+          , counterexample "S8 status: holds(safety_invariant, D) is justified" $
+              verdictStatuses outcome
+                === [(holdsP "safety_invariant" "D", Published Justified)]
+          ]
+  pure $
+    conjoin
+      [ loweredAndDependent
+      , semantic
+      ]
+
+-- | agreement-map (D3): a cross-paper agreement map at real-corpus
+-- grain. The genuine-disagreement pair (P1) shares the SAME (S,B,Q,D) atoms, so
+-- @better@/@not_better@ form a contrary instance ⇒ a rebut 2-cycle ⇒ both
+-- @contested@. The setting-mismatch pair (P2) differs ONLY in the setting index
+-- D, so the contrary pattern does not unify ⇒ ZERO attacks ⇒ both @justified@.
+-- Arg indices in declaration order pa=0, pb=1, pc=2, pd=3.
+prop_agreementMap :: Property
+prop_agreementMap = once $ ioProperty $
+  runExample "examples/agreement-map" "agreement-v1.policy.lara" $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("agreement-map: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "agreement-map labels: pa/pb undec (2-cycle), pc/pd in (unattacked)" $
+              verdictLabels outcome
+                === [(0, LUndec), (1, LUndec), (2, LIn), (3, LIn)]
+          , counterexample "agreement-map statuses: P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)" $
+              verdictStatuses outcome
+                === [ (betterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Published Contested)
+                    , (notBetterP "apt" "cofi" "accuracy" "roberta_mnli_s60", Published Contested)
+                    , (betterP "magnitude_pruning" "dense_baseline" "accuracy" "bert_glue_s50", Published Justified)
+                    , (notBetterP "magnitude_pruning" "dense_baseline" "accuracy" "llama_openllm_s90", Published Justified)
+                    ]
+          ]
+
+-- ---------------------------------------------------------------------------
+-- D1 rebuttal replay — the paper+reviews trajectory
+-- ---------------------------------------------------------------------------
+
+-- | The co-located rebuttal-v1 policy basename (in each round's dir).
+rebuttalBase :: FilePath
+rebuttalBase = "rebuttal-v1.policy.lara"
+
+-- | D1 round 0 (submission): the paper alone. Both support args unattacked and @in@;
+-- the kurtosis ablation has no arg (variance CQ unmet) ⇒ gap. Arg order a_bench=0, a_meas=1.
+prop_D1Round0 :: Property
+prop_D1Round0 = once $ ioProperty $
+  runExample "examples/rebuttal-replay/round0" rebuttalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("D1 round0: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "D1 round0 labels: a_bench in, a_meas in" $
+              verdictLabels outcome === [(0, LIn), (1, LIn)]
+          , counterexample "D1 round0 statuses: c_bench/c_measure justified, c_kurt gap" $
+              verdictStatuses outcome
+                === [ (performsP, Published Justified)
+                    , (holdsP "low_memory_footprint" "apt", Published Justified)
+                    , (contributesP, Published Gap)
+                    ]
+          ]
+
+-- | D1 round 1 (reviews): three reviewer attacks. The undermine (d_um) + rebut (d_rebut) drive
+-- a_bench out; the undercut (d_meas) drives a_meas out; c_kurt stays gap. Arg order a_bench=0,
+-- a_meas=1, d_um=2, d_rebut=3, d_meas=4.
+prop_D1Round1 :: Property
+prop_D1Round1 = once $ ioProperty $
+  runExample "examples/rebuttal-replay/round1" rebuttalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("D1 round1: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "D1 round1 labels: both paper args out, three reviewer attacks in" $
+              verdictLabels outcome
+                === [(0, LOut), (1, LOut), (2, LIn), (3, LIn), (4, LIn)]
+          , counterexample "D1 round1 statuses: c_bench/c_measure defeated, c_kurt gap" $
+              verdictStatuses outcome
+                === [ (performsP, Published Defeated)
+                    , (holdsP "low_memory_footprint" "apt", Published Defeated)
+                    , (contributesP, Published Gap)
+                    ]
+          ]
+
+-- | D1 round 2 (rebuttal): the author reinstates a_bench (both reviewer attackers defeated),
+-- concedes a_meas (no defense), and discharges the c_kurt gap with variance runs. Arg order
+-- a_bench=0, a_meas=1, d_um=2, d_rebut=3, d_meas=4, a_kurt=5, r_um=6, r_rebut=7.
+prop_D1Round2 :: Property
+prop_D1Round2 = once $ ioProperty $
+  runExample "examples/rebuttal-replay/round2" rebuttalBase $ \v ->
+    case verdictOutcome v of
+      Reject rejection -> counterexample ("D1 round2: unexpected reject " ++ show rejection) False
+      outcome@Accept{} ->
+        conjoin
+          [ counterexample "D1 round2 labels: a_bench reinstated in, a_meas out, attackers out, defenders in" $
+              verdictLabels outcome
+                === [ (0, LIn), (1, LOut), (2, LOut), (3, LOut)
+                    , (4, LIn), (5, LIn), (6, LIn), (7, LIn)
+                    ]
+          , counterexample "D1 round2 statuses: c_bench justified, c_measure defeated, c_kurt justified" $
+              verdictStatuses outcome
+                === [ (performsP, Published Justified)
+                    , (holdsP "low_memory_footprint" "apt", Published Defeated)
+                    , (contributesP, Published Justified)
+                    ]
+          ]
+
+-- ---------------------------------------------------------------------------
+-- R-series — rejected with a specific class
+-- ---------------------------------------------------------------------------
+
+-- | R1: an undeclared root leaf ⇒ checker class R1.
+prop_R1 :: Property
+prop_R1 = once $ ioProperty $
+  runExample "examples/R1" empiricalBase $ \v ->
+    counterexample ("R1: expected reject R1, got " ++ show v) $
+      verdictOutcome v === Reject (RejectClass R1)
+
+-- | R2: a strict-reachable conclusion in a contrary pair ⇒ policy class R12.
+prop_R2 :: Property
+prop_R2 = once $ ioProperty $
+  runExample "examples/R2" "strict-bad-v1.policy.lara" $ \v ->
+    counterexample ("R2: expected reject R12, got " ++ show v) $
+      verdictOutcome v === Reject (RejectClass R12)
+
+-- | R3: a rebut targeting a leaf occurrence ⇒ attack-position class R10.
+prop_R3 :: Property
+prop_R3 = once $ ioProperty $
+  runExample "examples/R3" empiricalBase $ \v ->
+    counterexample ("R3: expected reject R10, got " ++ show v) $
+      verdictOutcome v === Reject (RejectClass R10)
+
+prop_replayPreflightExpectedJson :: Property
+prop_replayPreflightExpectedJson =
+  once $
+    conjoin
+      [ diagnostic duplicateInput
+          === JObject
+            [ ("kind", JString "reject")
+            , ("class", JString "R13")
+            , ("stage", JString "backend")
+            , ("constituent", JObject [("kind", JString "policy")])
+            , ("reason", JString "duplicate-selection")
+            , ("backend", JString "nd@1")
+            ]
+      , diagnostic unknownInput
+          === JObject
+            [ ("kind", JString "reject")
+            , ("class", JString "R13")
+            , ("stage", JString "backend")
+            , ("constituent", JObject [("kind", JString "policy")])
+            , ("reason", JString "unknown-selection")
+            , ("backend", JString "other@2")
+            ]
+      , diagnostic certificateInput
+          === JObject
+            [ ("kind", JString "reject")
+            , ("class", JString "R13")
+            , ("stage", JString "backend")
+            , ( "constituent"
+              , JObject
+                  [ ("kind", JString "argument")
+                  , ("id", JString "outer")
+                  , ("index", JNumber 0)
+                  ]
+              )
+            , ("reason", JString "certificate-backend-not-selected")
+            , ("backend", JString "nd@1")
+            ]
+      ]
+  where
+    empty = Unit (sigmaOf [] [] [("p", [])]) [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+    duplicateInput = preflightInput [(BackendId "nd", "1"), (BackendId "nd", "1")] empty
+    unknownInput = preflightInput [(BackendId "nd", "1"), (BackendId "other", "2")] empty
+    certificate =
+      Cert (BackendId "nd") 1 (TheoryDigest "sha256:t") (SAtom "proof")
+    certificateUnit =
+      empty
+        { unitArgs =
+            [ ( ArgId "outer"
+              , SRule (RuleId "strict") [] [] [] [] (AssuranceCert certificate)
+              )
+            ]
+        }
+    certificateInput = preflightInput [] certificateUnit
+    preflightInput backends unit =
+      let replayId =
+            either (error . replayErrorMessage) id $
+              mkReplayId
+                LaraCoreV02
+                (PolicyId "conformance-v1")
+                backends
+                []
+                (Digest "sha256:conformance-corpus-v1")
+       in either (error . replayErrorMessage) id (mkCheckInput replayId unit)
+    diagnostic input =
+      case expectedJsonValue input of
+        JObject
+          [ ("replay-id", _)
+          , ("verdict-class", JString "reject R13")
+          , ("located-diagnostic", value)
+          ] -> value
+        value -> value
+
+-- | The R9 (escalated duplicate-report-group conflict) @expected.json@ path.
+-- Like R13's preflight, an R9 boundary rejection never reaches @checkUnit@, so
+-- 'expectedJsonValue' must render it directly ('Lara.ExpectedJson' finding: the
+-- 'rejectDiag' @checkUnit@ branch would otherwise mis-locate or return @JNull@).
+-- This pins the located diagnostic and the byte-exact @message@ both drivers
+-- print on @stderr@.
+prop_groupConflictExpectedJson :: Property
+prop_groupConflictExpectedJson =
+  once $
+    r9Diagnostic groupConflictInput
+      === JObject
+        [ ("kind", JString "reject")
+        , ("class", JString "R9")
+        , ("stage", JString "group-boundary")
+        , ("constituent", JObject [("kind", JString "group"), ("id", JString "g1")])
+        , ("members", JArray [JString "e1", JString "e2"])
+        , ( "message"
+          , JString
+              ( "group 'g1': members e1, e2 report one cell with "
+                  ++ "≢ propositions and the policy escalates conflicts to reject (§4.3)"
+              )
+          )
+        ]
+  where
+    effect c = Prop (Pred "effect") [TCon (FunSym c) []]
+    empty =
+      Unit
+        (sigmaOf ["Direction"] [("up", [], "Direction"), ("down", [], "Direction")] [("effect", ["Direction"])])
+        [] [] [] [] [] [] [] [] [] QuarantineOnConflict
+    groupConflictUnit =
+      empty
+        { unitLeaves = [(LeafId "e1", effect "up"), (LeafId "e2", effect "down")]
+        , unitArgs = [(ArgId "a1", SLeaf (LeafId "e1"))]
+        , unitQueries = [effect "up"]
+        , unitGroups = [DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"]]
+        , unitGroupMode = RejectOnConflict
+        }
+    groupConflictInput =
+      let replayId =
+            either (error . replayErrorMessage) id $
+              mkReplayId
+                LaraCoreV02
+                (PolicyId "conformance-v1")
+                [(BackendId "nd", "1")]
+                []
+                (Digest "sha256:conformance-corpus-v1")
+       in either (error . replayErrorMessage) id (mkCheckInput replayId groupConflictUnit)
+    r9Diagnostic input =
+      case expectedJsonValue input of
+        JObject
+          [ ("replay-id", _)
+          , ("verdict-class", JString "reject R9")
+          , ("located-diagnostic", value)
+          ] -> value
+        value -> value
+
+-- ---------------------------------------------------------------------------
+-- Freshness — the derivation path reproduces the committed .core.sexp anchor
+-- ---------------------------------------------------------------------------
+
+-- | For every example in 'examplePolicies' — the module header's list is the
+-- authoritative one, and this comment deliberately does not restate it —
+-- re-running the full
+-- derivation path — @parseProgram@ + @parsePolicy@ + @elaborate@ + @encodeUnit@ +
+-- @printSExpr@ — on the committed @example.lara@ + co-located policy reproduces
+-- the committed @example.core.sexp@ bytes __exactly__ (matching
+-- @scripts/gen-worked-examples.hs@'s single trailing newline). This catches any
+-- drift between a hand-edited surface file and its checked-in wire anchor: a
+-- @.lara@ edit that is not regenerated fails here.
+prop_freshness :: Property
+prop_freshness = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
+  where
+    checkOne (dir, policyBase) = do
+      progText <- readFile (dir ++ "/example.lara")
+      polText <- readFile (dir ++ "/" ++ policyBase)
+      committed <- readFile (dir ++ "/example.core.sexp")
+      pure $ case (parseProgram progText, parsePolicy polText) of
+        (Right prog, Right pol) ->
+          case preparedResult prog pol of
+            Left err -> counterexample (dir ++ ": " ++ err) False
+            Right result ->
+              case sourceResultCheckInput result of
+                Left audit ->
+                  counterexample
+                    ( dir
+                        ++ ": legacy core artifacts cannot encode source admission: "
+                        ++ renderAdmissionAudit audit
+                    )
+                    False
+                Right input ->
+                  counterexample (dir ++ ": .core.sexp is stale — regenerate with scripts/gen-worked-examples.hs") $
+                    (printSExpr (encodeCheckInput input) ++ "\n") === committed
+        (pr, pp) ->
+          counterexample (dir ++ ": parse failed: " ++ show pr ++ " / " ++ show pp) (property False)
+
+-- | For every example in 'examplePolicies', re-render @expected.json@ from the elaborated
+-- 'Unit' ("Lara.ExpectedJson".@expectedJson@) and assert it equals the committed
+-- @examples\/\<NAME\>\/expected.json@ bytes exactly — the located-diagnostic
+-- freshness sibling of 'prop_freshness'. @expected.json@ is the __Haskell-only__
+-- golden (the Lean driver emits only the wire verdict), so it is outside the
+-- byte-differential but pinned here.
+prop_expectedJsonFresh :: Property
+prop_expectedJsonFresh = once (ioProperty (conjoin <$> mapM checkOne examplePolicies))
+  where
+    checkOne (dir, policyBase) = do
+      prog <- loadProgram (dir ++ "/example.lara")
+      pol <- loadPolicy (dir ++ "/" ++ policyBase)
+      committed <- readFile (dir ++ "/expected.json")
+      pure $ case preparedResult prog pol of
+        Left err -> counterexample (dir ++ ": " ++ err) False
+        Right result ->
+          case sourceResultCheckInput result of
+            Left audit ->
+              counterexample
+                ( dir
+                    ++ ": legacy core artifacts cannot encode source admission: "
+                    ++ renderAdmissionAudit audit
+                )
+                False
+            Right input ->
+              counterexample
+                (dir ++ ": expected.json is stale — regenerate with scripts/gen-worked-examples.hs")
+                (expectedJson input === committed)
+
+-- ---------------------------------------------------------------------------
+-- Coverage matrix — measured from the examples' verdicts, not asserted in prose
+-- ---------------------------------------------------------------------------
+
+-- | The attack-kind tag of a typed attack (for measured attack coverage).
+attackKind :: Attack -> String
+attackKind Rebut{} = "rebut"
+attackKind Undercut{} = "undercut"
+attackKind Undermine{} = "undermine"
+
+-- | The attacked argument of a wire attack (for measured label-cell coverage).
+attackTargetId :: Attack -> ArgId
+attackTargetId (Rebut _ u) = u
+attackTargetId (Undercut _ u _) = u
+attackTargetId (Undermine _ u _) = u
+
+-- | For one accepted example, the (attack-kind, target-label) pairs its
+-- declared attacks realize — the measured form of \"a claim can be justified
+-- while attacked\" (target in), \"contested is not a rebut artifact\" (target
+-- undec via undercut\/undermine), and E3's defeats (target out). Arg order in
+-- 'unitArgs' is label-index order, so the pairing is positional.
+attackCells :: Unit -> Outcome -> [(String, Label)]
+attackCells u outcome = case outcome of
+  Reject _ -> []
+  Accept{} ->
+    [ (attackKind k, l)
+    | k <- unitAttacks u
+    , Just i <- [lookupIndex (attackTargetId k) (map fst (unitArgs u))]
+    , Just l <- [lookup i (verdictLabels outcome)]
+    ]
+  where
+    lookupIndex x xs = lookup x (zip xs [0 :: Int ..])
+
+-- | The measured coverage of the whole suite: every accept status, every attack
+-- kind, and the three rejection classes are __read off the elaborated units and
+-- their verdicts__ (docs/worked-examples-plan.md §1, docs/m4a-checklist.md §2).
+-- This turns the coverage matrix into evidence, not a prose claim: if some cell
+-- stops being witnessed (a status vanishes, an attack kind is dropped, a reject
+-- reclassifies), this fails.
+--
+-- The suite is the §1 examples E1–E3 / R1–R3, the M5 worked cases E4/E5, the
+-- two teaching examples A and B, strict-certificate example S1, plus the D3
+-- agreement-map and the three D1 rebuttal-replay rounds round0–round2 — all
+-- every entry in 'examplePolicies'.
+prop_coverageMatrix :: Property
+prop_coverageMatrix = once $ ioProperty $ do
+  verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
+  units <- mapM loadUnit examplePolicies -- [(dir, Unit)]
+  let elabErrs = [dir ++ ": " ++ e | (dir, Left e) <- verdicts]
+      statuses = sort (nubOrd [conditionalStatus s | (_, Right (Verdict _ (Accept _ _ sts))) <- verdicts, (_, s) <- sts])
+      attackTags = sort (nubOrd [attackKind k | (_, u) <- units, k <- unitAttacks u])
+      rejects = sort (nubOrd [r | (_, Right (Verdict _ (Reject r))) <- verdicts])
+      outcomes = [(dir, o) | (dir, Right (Verdict _ o)) <- verdicts]
+      cells =
+        sort . nubOrd $
+          [ cell
+          | (dir, u) <- units
+          , Just o <- [lookup dir outcomes]
+          , cell <- attackCells u o
+          ]
+      gapAmidAttacks =
+        or
+          [ not (null (unitAttacks u)) && Published Gap `elem` map snd sts
+          | (dir, u) <- units
+          , Just (Accept _ _ sts) <- [lookup dir outcomes]
+          ]
+  pure $
+    conjoin
+      [ counterexample ("elaboration errors: " ++ show elabErrs) (null elabErrs)
+      , counterexample
+          ("status coverage incomplete — witnessed " ++ show statuses)
+          (all (`elem` statuses) [Justified, Gap, Contested, Defeated])
+      , counterexample
+          ("attack-kind coverage incomplete — witnessed " ++ show attackTags)
+          (all (`elem` attackTags) ["rebut", "undercut", "undermine"])
+      , counterexample
+          ("rejection-class coverage incomplete — witnessed " ++ show rejects)
+          (all (`elem` rejects) [RejectClass R1, RejectClass R12, RejectClass R10])
+      , -- The M5/T4 label cells: every attack kind must be witnessed with an
+        -- attacked target that survives (LIn — reinstatement, E4), one that is
+        -- defeated (LOut — E3/A), and one left undecided (LUndec — contested
+        -- beyond rebut, E5).
+        counterexample
+          ("attack-kind × target-label coverage incomplete — witnessed " ++ show cells)
+          ( all
+              (`elem` cells)
+              [ (kind, l)
+              | kind <- ["rebut", "undercut", "undermine"]
+              , l <- [LIn, LOut, LUndec]
+              ]
+          )
+      , counterexample
+          "no example witnesses a gap claim in a unit that carries attacks (E5 context G)"
+          gapAmidAttacks
+      ]
+
+-- | Load + elaborate + run one example to a labelled 'Verdict' (or its
+-- 'elabErrorMessage' on the left).
+loadVerdict :: (FilePath, FilePath) -> IO (FilePath, Either String Verdict)
+loadVerdict (dir, policyBase) = do
+  prog <- loadProgram (dir ++ "/example.lara")
+  pol <- loadPolicy (dir ++ "/" ++ policyBase)
+  pure $ (,) dir $ sourceResultVerdict <$> preparedResult prog pol
+
+-- | Load + elaborate one example to its 'Unit'.
+loadUnit :: (FilePath, FilePath) -> IO (FilePath, Unit)
+loadUnit (dir, policyBase) = do
+  prog <- loadProgram (dir ++ "/example.lara")
+  pol <- loadPolicy (dir ++ "/" ++ policyBase)
+  case elaborate (registryOf pol) prog pol of
+    Left e -> error (dir ++ ": unexpected ElabError: " ++ elabErrorMessage e)
+    Right u -> pure (dir, u)
+
+-- | Order-preserving-free dedup (small inputs).
+nubOrd :: Ord a => [a] -> [a]
+nubOrd = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
+
+-- ---------------------------------------------------------------------------
+-- Runner
+-- ---------------------------------------------------------------------------
+
+workedExamplesSpecProps :: [(String, IO Result)]
+workedExamplesSpecProps =
+  [ ("E1 justified-clean → accept, arg in, claim justified", quickCheckResult prop_E1)
+  , ("P1 non-empirical debate: contested positions and fictionalist reinstatement", quickCheckResult prop_P1)
+  , ("P1 removing the defense defeats the fictionalist argument", quickCheckResult prop_P1Defense)
+  , ("axiom admission: ND source justified, target gap, PW refuses before bridges", quickCheckResult prop_axiomAdmissionBoundary)
+  , ("E2 open-gap → accept, claim gap", quickCheckResult prop_E2)
+  , ("E3 defeat-suite → accept, justified+defeated+contested, all attack kinds", quickCheckResult prop_E3)
+  , ("E4 reinstatement → accept, justified UNDER rebut/undermine/undercut", quickCheckResult prop_E4)
+  , ("E5 contested via undermine+undercut cycles, gap amid attacks", quickCheckResult prop_E5)
+  , ("S1 strict nd@1 cert → accept, arg in, claim justified", quickCheckResult prop_S1)
+  , ("S2 strict ord@1 cert + defeasible bridge → accept, both args in, comparative claim justified", quickCheckResult prop_S2)
+  , ("S3 ord@1 num_le tie → accept, at_least_as_good justified (num_lt would reject)", quickCheckResult prop_S3)
+  , ("S4 undermined binding → bridge out, comparative claim defeated, comparison still justified", quickCheckResult prop_S4)
+  , ("S5 lower-is-better → flipped goal num_lt(28.4, 31.6), accepted by ord@1, better justified", quickCheckResult prop_S5)
+  , ("S6 named cert slots → lowered (prem 0)/(prem 1) replayed by ord@1, num_lt justified", quickCheckResult prop_S6)
+  , ("S7 premise-label cert slots → the same lowered payload, incl. one leaf filling both slots", quickCheckResult prop_S7)
+  , ("S8 named nd@1 binder/premises → numeric redex, slot 0 dependency, justified", quickCheckResult prop_S8)
+  , ("agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)", quickCheckResult prop_agreementMap)
+  , ("D1 round0 submission → accept, two justified, one gap", quickCheckResult prop_D1Round0)
+  , ("D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap", quickCheckResult prop_D1Round1)
+  , ("D1 round2 rebuttal → accept, reinstate + concede + gap discharge", quickCheckResult prop_D1Round2)
+  , ("R1 undeclared-leaf → reject R1", quickCheckResult prop_R1)
+  , ("R2 strict-contrary → reject R12", quickCheckResult prop_R2)
+  , ("R3 bad-attack-target → reject R10", quickCheckResult prop_R3)
+  , ("expected JSON reports every replay preflight reason", quickCheckResult prop_replayPreflightExpectedJson)
+  , ("expected JSON reports the escalated group-conflict (R9)", quickCheckResult prop_groupConflictExpectedJson)
+  , ("worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)", quickCheckResult prop_freshness)
+  , ("worked-example expected.json goldens are fresh (elaborate+render == committed)", quickCheckResult prop_expectedJsonFresh)
+  , ("coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10 witnessed", quickCheckResult prop_coverageMatrix)
+  ]

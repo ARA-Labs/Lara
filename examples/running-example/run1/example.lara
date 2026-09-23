@@ -1,0 +1,62 @@
+# fig:example run 1 — the mandatory external_validity question has no
+# discharging leaf, so no complete support argument can be declared for c1;
+# the evidence leaves (and the recorded dead end e4) are admitted, but the
+# claim has no assembled support: gap.
+#
+# The strict ord@1 comparison s1 is present and unattacked in this run too:
+# the certified arithmetic c2 stands on its own even while the empirical
+# claim c1 has no support. Run 2 is this program plus the e6 leaf, the
+# support argument a1, and the undercut d1.
+
+artifact paper_17 at sha256:aaaa...
+policy empirical-v3
+use backends [nd@1, ord@1]
+
+let base_score = 0.71
+let ours_score = 0.74
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+claim c2
+  nl      = "The baseline accuracy {base_score} is strictly below {ours_score}"
+  formal  = num_lt(base_score, ours_score)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=mean]
+
+leaf base : reports(exp_3, score_cell(M0, accuracy, D, base_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=base]
+
+leaf ours : reports(exp_3, score_cell(M, accuracy, D, ours_score))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=ours]
+
+leaf e2 : randomized(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e3 : powered(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e4 : distribution_shift(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=7-limitations]
+
+arg s1 : supports(c2) by lt_recheck from [base, ours]
+  assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
+
+status c1
+status c2

@@ -1,0 +1,154 @@
+session:
+  id: "2026-08-22_001"
+  date: "2026-08-22"
+  started: "2026-08-22T20:00"
+  last_turn: "2026-08-23T00:16"
+  turn_count: 1
+  summary: >
+    Executed the approved named-nd@1 plan as lara-syntax@0.9: a
+    marker-selected presentation pass lowers named binders, premises and theory
+    references to the unchanged de Bruijn kernel; independent Haskell
+    properties and Lean theorems establish conservativity and translation
+    correspondence; S8 is byte-identical to its numeric twin. Final review
+    exposed and closed the issue's rule-global partial-label advice defect. All
+    release gates are green and the PR is open; formula-annotation authoring
+    remains explicitly tracked.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N203"
+    routing: direct
+    provenance: user
+    summary: "Ship named nd@1 terms as an exact-identity, marker-selected presentation lowering to the unchanged de Bruijn kernel."
+  - turn: 1
+    type: dead_end
+    id: "N204"
+    routing: direct
+    provenance: ai-executed
+    summary: "The plan's bare formula key cannot replay under the frozen ND grammar; S8 must use `(atom KEY)`, leaving source-authored annotations."
+  - turn: 1
+    type: experiment
+    id: "N205"
+    routing: direct
+    provenance: ai-executed
+    summary: "21 vectors, independent Haskell oracles, S8 byte identity, two Lean theorems and 12 guards passed the full release matrix."
+  - turn: 1
+    type: dead_end
+    id: "N206"
+    routing: direct
+    provenance: ai-executed
+    summary: "Rule-global `any Just` advertises impossible label repair; availability must quantify over the resolver's complete matching-slot set."
+  - turn: 1
+    type: experiment
+    id: "N207"
+    routing: direct
+    provenance: ai-executed
+    summary: "Per-task review, final review/fix/re-review and fresh post-commit gates pass; the PR closes on merge."
+  - turn: 1
+    type: observation
+    id: "O82"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A binder lowering can be mechanized at the structured transformation boundary by passing external classifier/resolver decisions as data."
+  - turn: 1
+    type: observation
+    id: "O83"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Ambiguity repair advice must be valid for every actual candidate, so availability belongs at complete candidate construction."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Added Lara.Elaborate.NDNamed, dispatched only for the exact registered
+      nd@1 identity, threaded eight exact CertNd diagnostics through the real
+      elaborator, and registered the focused module and test suite.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Elaborate/NDNamed.hs"
+      - "src/Lara/Elaborate/Internal.hs"
+      - "src/Lara/Elaborate/Error.hs"
+      - "test/NDNamedSpec.hs"
+      - "lara.cabal"
+  - turn: 1
+    action: >
+      Added independent conservativity and translation oracles, exact error and
+      CLI pins, and worked example S8 with a numeric twin, committed core and
+      verdict goldens, replay-dependency and semantic checks.
+    provenance: ai-executed
+    files_changed:
+      - "test/NDNamedSpec.hs"
+      - "test/CliSpec.hs"
+      - "test/WorkedExamplesSpec.hs"
+      - "examples/S8/"
+      - "src/Lara/WorkedExamples.hs"
+  - turn: 1
+    action: >
+      Mechanized the recursive named-to-de-Bruijn lowering in Lean over
+      abstract classifier/resolver inputs, proved lowerNamed_id_of_kernel and
+      lowerNamed_eq_translation, and added twelve executable guards plus
+      AxCheck coverage.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/NDNamed.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+  - turn: 1
+    action: >
+      Wrote normative grammar Appendix H and the @0.9 rejection/engineering/
+      mechanization records, retired the executed plan, and opened follow-up
+      for source-authored formula annotations.
+    provenance: ai-executed
+    files_changed:
+      - "docs/lara-surface-grammar.md"
+      - "docs/rejection-surface.md"
+      - "docs/engineering-plan.md"
+      - "docs/mechanization-plan.md"
+      - "plans/2026-08-22-named-nd1-proof-terms.md"
+  - turn: 1
+    action: >
+      Corrected after holistic review by moving label-repair availability
+      into certSlotResolver's complete actual matching-slot set; added partial
+      and three-match regressions, swept ten minor findings, reran every release
+      gate, committed, pushed and opened the PR.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Elaborate/CertSlots.hs"
+      - "src/Lara/Elaborate/Internal.hs"
+      - "src/Lara/Elaborate/Error.hs"
+      - "test/CertSlotsSpec.hs"
+      - "docs/lara-surface-grammar.md"
+      - "docs/rejection-surface.md"
+
+claims_touched: []
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The researcher explicitly approved the reviewed plan before execution,
+      making N203 user-provenance even though implementation and the two review
+      discoveries were AI-executed.
+  - turn: 1
+    excerpt: >
+      The strongest proof boundary available is not the concrete `.lara`
+      elaborator: Lean receives a structured proof term plus the classifier and
+      resolver decisions as inputs, then proves the recursive binder arithmetic
+      and conservativity inside that boundary.
+  - turn: 1
+    excerpt: >
+      The final review's counterexample was plan-significant rather than a
+      spelling nit: optional labels are per slot, so global label presence does
+      not entail an actionable label for any ambiguous match.
+
+open_threads:
+  - "The issue remains open: define source-authored formula annotations for named nd@1 binders without changing the frozen kernel formula grammar."
+  - "The PR is open for review/merge; both close on merge."
+
+ai_suggestions_pending:
+  - "O77 - the presentation acceptance-preservation procedure now has a third release instance, but no new closure signal; it remains staged."
+  - "O78 - slot-indexed vs referent-indexed naming is reinforced by the candidate-set repair, but still lacks a closure signal."
+  - "O79 - abstract decision procedures remain the mechanization boundary; @0.9 is a second design instance, not a researcher affirmation."
+  - "O82 - structured-input/abstract-decision mechanization for binder lowering; one direct instance, staged."
+  - "O83 - ambiguity advice quantified over the complete candidate set; one direct defect/fix instance, staged."

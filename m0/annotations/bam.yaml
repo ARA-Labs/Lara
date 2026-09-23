@@ -1,0 +1,145 @@
+artifact: bam
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 2 dead_end nodes (N05, N12); all classified
+claims:
+  - claim_id: C05
+    claim_type: comparative
+    proposition_shape:
+      sketch: "converges_faster(bam, advi, metric(kl_or_rel_mean_error), unit(gradient_evals), benchmark)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: "The claim universally quantifies over four benchmark families (Gaussian,
+        sinh-arcsinh, PosteriorDB, CIFAR-10 VAE) and disjoins two metrics; a nullary
+        atom would hide the per-benchmark instances that E01-E04 individually check
+        and that the falsification criterion ('find a benchmark where...') targets."
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "BaM and ADVI are run on the same targets with the same initialization and iteration/gradient budget"
+        - "ADVI's learning rate is tuned (grid-search / pilot) so the baseline is not handicapped"
+        - "Convergence is measured in a method-neutral unit (gradient evaluations = B x iterations)"
+        - "Observed gaps are stable across random seeds"
+      supporting_experiments: [E01, E02, E03, E04]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Were baseline hyperparameters tuned as carefully as BaM's?"
+        mandatory: true
+        status: met
+        basis: "E01 procedure step 3 and E03 step 4 grid-search ADVI learning rates; E04 step 3 runs a 100-iteration pilot per batch size for both BaM and ADVI"
+      - cq: "Is the comparison unit fair across methods with different batch sizes?"
+        mandatory: true
+        status: met
+        basis: "E01 metrics define gradient evaluations = B x iterations; E04 step 8 compares a matched 3000-gradient-evaluation budget (ADVI B=10,T=300 vs BaM B=300,T=10)"
+      - cq: "Is the result stable across seeds and reported with variability?"
+        mandatory: true
+        status: met
+        basis: "E01/E02 use 10 seeds, E03 uses 5 seeds with mean +/- standard error; E04, however, evaluates a single sampled test image with no stated repetition (see holes)"
+      - cq: "Does BaM win on every claimed benchmark family under the claimed metrics?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 expected outcome: for large skew (s=1.0, 1.8) BaM reaches HIGHER forward KL than ADVI (similar reverse KL); the claim's universal reading over 'lower KL' is only saved by its disjunctive metric wording"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "On Gaussian targets (D=4..256), BaM with D-tuned batch size reaches lower forward/reverse KL than ADVI at equal gradient evaluations"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N11", "logic/experiments.md E01", "Figure 5.1"]
+      - atom: "On sinh-arcsinh targets (D=10), BaM with decaying lambda_t converges in fewer gradient evaluations than ADVI to similar reverse KL"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N11", "logic/experiments.md E02", "Figure 5.2"]
+      - atom: "On PosteriorDB models (arK, gp-pois-regr, eight-schools), BaM reaches lower relative mean error than ADVI at equal gradient evaluations"
+        provenance: attested
+        refs: ["logic/experiments.md E03"]
+      - atom: "On CIFAR-10 VAE reconstruction (D=256), BaM B=300 converges an order of magnitude faster in MSE than ADVI"
+        provenance: attested
+        refs: ["logic/experiments.md E04"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design alternative (direct Monte Carlo minimization of D) abandoned before BaM existed; it motivates the proximal construction and bears on no premise, scheme, or conclusion of C05."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Rejected hyperparameter schedule: constant lambda_t fails on non-Gaussian targets, but every experiment supporting C05 on such targets (E02, E03) already uses the decaying schedule, so the failure attacks nothing C05 relies on."
+    holes:
+      - "E04 evaluates one sampled test image with no stated seed count or variability, yet C05 cites it as supporting evidence"
+      - "The forward-KL loss to ADVI at high skew (E02) is never reconciled with the claim's 'lower KL' wording; scope should be qualified per metric"
+      - "Wallclock superiority in E04 rests on unspecified hardware ('exact hardware not specified')"
+    coverage_flags: []
+    uncertain: false
+    note: "The claim's disjunctive metric ('KL or relative mean error') makes the
+      per-benchmark cells heterogeneous; the sketch carries the metric as an argument
+      to keep each cell independently checkable."
+
+  - claim_id: C06
+    claim_type: causal
+    proposition_shape:
+      sketch: "batch_size_effect(method, direction) with instances: batch_size_effect(bam, improves) AND batch_size_effect(advi, null) AND batch_size_effect(gsm, null)"
+      arity: 2
+      phase0_nullary_sufficient: false
+      note: "The claim is a three-way contrast (positive effect for BaM, null effect
+        for ADVI and GSM); a nullary atom would collapse the contrast and make the
+        falsification criterion (either direction failing) uncheckable."
+    inference_scheme:
+      scheme: dose_response
+      strict_or_defeasible: defeasible
+      premises:
+        - "Each method is run at multiple batch-size levels on the same targets"
+        - "Other hyperparameters are re-tuned or held comparable at each batch-size level"
+        - "Convergence change is measured against gradient evaluations, so larger B is not credited for free"
+        - "The BaM improvement and the ADVI/GSM non-improvement are observed on the same benchmarks"
+      supporting_experiments: [E01, E02, E03, E04]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is batch size varied over multiple levels for BaM (dose levels)?"
+        mandatory: true
+        status: met
+        basis: "E01 runs BaM at B=2 vs D-tuned (5/15/40/150); E02 at B=5,10; E03 at B=8,32; E04 at B=10,100,300"
+      - cq: "Are ADVI and GSM actually run at multiple batch sizes in the cited experiments?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 (B=8,32) and E04 (B=10,100,300 for ADVI) vary baseline batch size, but E01 lists ADVI/GSM only at B=2 and E02 only at B=5, while E01's expected outcome still asserts 'GSM does not benefit from B>2'; the null-effect half is unsupported by E01/E02 as written"
+      - cq: "Is the batch-size effect separable from the lambda_t = BD (or BD/(t+1)) coupling, which changes the regularization strength whenever B changes?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 step 3 and E02/E03 set lambda_t as a function of B, so increasing B simultaneously increases lambda_t; only E04's per-batch-size pilot tuning breaks this confound"
+      - cq: "Is improvement measured in gradient evaluations rather than iterations?"
+        mandatory: true
+        status: met
+        basis: "E01-E03 metrics are plotted vs gradient evaluations; E04 step 8 fixes a 3000-gradient-evaluation budget"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "BaM at D-tuned batch sizes (15/40/150 for D=16/64/256) converges faster than BaM at B=2 on Gaussian targets"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N11", "logic/experiments.md E01", "Figure 5.1"]
+      - atom: "GSM does not benefit from batch sizes above 2"
+        provenance: attested
+        refs: ["logic/experiments.md E01 expected outcome", "logic/experiments.md E03 expected outcome"]
+      - atom: "ADVI shows marginal or no improvement from B=8 to B=32 (PosteriorDB) and across B=10/100/300 (CIFAR-10)"
+        provenance: attested
+        refs: ["logic/experiments.md E03", "logic/experiments.md E04"]
+      - atom: "BaM at B=10 with D=256 performs poorly while B=300 converges an order of magnitude faster (batch size must be comparable to D)"
+        provenance: attested
+        refs: ["logic/experiments.md E04 expected outcome"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Ruled-out optimization approach predating the BaM update rule; it says nothing about batch-size response of any method."
+      - node: N12
+        decision: none
+        target: "n/a"
+        rationale: "Rejected learning-rate schedule, not a batch-size result; its lesson (decaying lambda_t for non-Gaussian targets) is already incorporated into the experiments C06 cites, so it attacks no premise or inference of C06."
+    holes:
+      - "No experiment varies B while holding lambda_t fixed for BaM, so the causal attribution to batch size alone is confounded with regularization strength except in E04"
+      - "The GSM null-effect leaf rests on expected-outcome text; E01's setup lists GSM only at B=2, so the multi-batch GSM runs it summarizes are not specified"
+      - "C06 cites E01 and E02 as proof, but neither varies baseline batch size as written; only E03/E04 support the ADVI half of the contrast"
+    coverage_flags: []
+    uncertain: false
+    note: "Classified as dose_response with a cross-method contrast; the null-effect
+      halves (ADVI, GSM) are the same scheme with a flat response, expressed as
+      separate instances of the same predicate rather than a new construct."

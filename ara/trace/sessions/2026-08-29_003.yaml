@@ -1,0 +1,95 @@
+session:
+  id: "2026-08-29_003"
+  date: "2026-08-29"
+  started: "2026-08-29T17:05"
+  last_turn: "2026-08-29T17:05"
+  turn_count: 1
+  summary: >
+    Triaged the 33-entry stale set from the sweep plus the two entries the
+    sweep held live. One closes on evidence (O69 to N176 by empirical
+    resolution); 3 are blocked on unresolved contradiction nodes, 3 were already
+    settled by an earlier researcher selection, and 28 await verbal affirmation.
+    Determined that O37 and O85 are correctly unpromoted — the claims.md CONFLICT
+    markers cite them as challenges, not as premises — so the open item there is
+    the C19 and C23 adjudication, not the staging flags.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N242"
+    routing: direct
+    provenance: ai-executed
+    summary: "Triage closes on post-staging signals only; staging already encodes the judgement that same-turn implementation is not a closure signal."
+  - turn: 1
+    type: observation
+    id: "O69"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "The conditional completion claim is discharged by O70's hosted-CI result; closed to N176 rather than to a claim, since it records a task status and not a generalization."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Built a per-observation dossier (content, context, bound_to node types and
+      statuses, non-session citations, current open threads) for all 35 entries,
+      checked each against the closure-signal taxonomy, spot-checked that the
+      artifacts four candidate entries describe still exist in the tree, and
+      recorded the disposition of every entry with its blocker named.
+    provenance: ai-executed
+    files_changed:
+      - "ara/staging/observations.yaml"
+      - "ara/trace/exploration_tree.yaml"
+      - "ara/trace/pm_reasoning_log.yaml"
+      - "ara/trace/sessions/2026-08-29_003.yaml"
+      - "ara/trace/sessions/session_index.yaml"
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The discriminator is that staging already encodes a judgement. Every one of
+      these observations was staged in the same turn as the work that produced it,
+      by a manager that could have crystallized it and chose not to. So the
+      implementation landing is not the closure signal, and re-reading the same
+      evidence later cannot manufacture one — only something that happened after
+      staging counts.
+  - turn: 1
+    excerpt: >
+      O64 was promoted to H13 by verbal affirmation while its siblings O65, O66
+      and O67 were left staged, and O65 and O67 record the hold in their own
+      context. The researcher already made a selection from that batch; the
+      triage does not reopen it.
+  - turn: 1
+    excerpt: >
+      O37 and O85 are correctly `promoted: false`. C19's marker cites N104/O37 as
+      requiring adjudication and C23's cites N210/N212/O85 as contradicting its
+      untested-boundary prediction. A CONFLICT marker cites an observation as a
+      challenge to the claim, which is not the claim depending on it as a premise,
+      so no artifact commitment has fired. N105 additionally ties O12 to the same
+      C19 adjudication.
+
+open_threads:
+  - "Two adjudications gate six staged entries and two claims: N105 (C19's unqualified per-fact re-extraction clause vs O37/O12's tier-specific finding) and N212 (C23's untested-boundary prediction vs O85/N210). Both are researcher calls carried since 2026-08-04 and 2026-08-25."
+  - "28 staged observations await verbal affirmation; they are listed below with type and subject. Affirming or declining them is a single pass and needs no new evidence."
+  - "The PR (theory M3) review and hosted CI; the issue closes on merge."
+
+ai_suggestions_pending:
+  - >
+    Disposition of all 35 triaged entries. Bucket 1 closed; buckets 2 and 3 need
+    a specific decision already on the record; bucket 4 needs affirmation only.
+  - "CLOSED (1) — O69: the completion claim was conditional on hosted CI, which O70 records as passed one turn later. Closed to N176 by empirical resolution, not to a claim: it states a task status, not a generalization."
+  - "BLOCKED ON N105 / C19 (2) — O12 (architecture): rit/lara compose as engineering; N105 says it must be narrowed to distinguish L2 replay from trusted L1 values unless a source path enforcing L1/K replay is produced. O37 (claim): the tier-specific finding that forces that narrowing."
+  - "BLOCKED ON N212 / C23 (1) — O85 (claim): where ground truth is validated, not defect structure, is what caps a localization metric. Offered as the honest replacement for C23's last Statement clause; adjudication deferred since 2026-08-25."
+  - "HELD BY EARLIER SELECTION (3) — O65, O66, O67: the cross-language shape-guard batch. Sibling O64 was affirmed and became H13; O65 and O67 record in their own context that they stay staged unless explicitly affirmed. Reopening is a researcher choice, not a triage finding."
+  - >
+    AWAITING AFFIRMATION (28) — no closure signal has fired; each is an
+    AI-suggested generalization whose subject matter is complete. Listed as
+    `id (type) subject`.
+  - "Corpus and policy findings, all from work now frozen: O26 (concept) optional CQs are optional-to-satisfy, never optional-to-account-for; O27 (claim) a polished corpus is gap-dominated, not defeat-dominated; O28 (constraint) the C17 wishlist residue as finite policy-vocabulary gaps, explicitly flagged as corpus-v2 candidates; O30 (claim) the inlined policy image dominates certificate size, from numbers its own context calls fresh and unmerged; O33 (claim) ablated checkers miss by certifying justified rather than by hedging; O62 (claim) nullary constants dominate the ground vocabulary and are invisible to grepping."
+  - "Method and evidence discipline: O35 (heuristic) hash the deterministic projection, not the whole report; O53 (heuristic) a differential proves agreement, so it is weakest where the implementations were aligned deliberately; O55 (heuristic) settle vacuity by perturbation, not by argument; O57 (heuristic) a mechanization drifts from its implementation with every gate still green — note H13 already covers the mitigation, so this is the diagnosis without the remedy; O86 (heuristic) re-derive a composite fixture's expectation from the composed artifact; O88 (heuristic) provenance metadata inside a frozen artifact has no oracle. O88's second instance is the issue, which is still an open thread, so its topic is live even though its id is not."
+  - "Backend and seam design: O36 (claim) ra@1 parity holds by construction across different internal representations; O42 (architecture) quantify the admission theorem over an abstract checker registry — bound to N106, which is still status open; O46 (heuristic) print captured stderr on every failure branch; O48 (claim) restate a mechanized result at the granularity it proves; O51 (heuristic) a guard cannot depend on a distinction the seam erases; O52 (concept) a strict goal grammar accepts the preimage of the canonical image under nf; O54 (heuristic) assert the invariant a refactor claims to preserve, in the same change; O56 (claim) the direction-of-goodness contract landed three independent ways without coordination."
+  - "Presentation layer and module structure: O77 (heuristic) prove a restriction acceptance-preserving by namespace scan plus frozen-artifact pathspec diff; O78 (claim) slot-indexed naming is strictly more expressive than referent-indexed, and the gap is the non-injective case; O80 (heuristic) wire a seeded generator's key and selection rule to what refactors disturb, turning the corpus byte-diff into a free refactor gate; O81 (claim) a root that owns shared vocabulary cannot be left as a re-export facade, so the split must land atomically; O82 (heuristic) mechanize a binder transformation at its structured input; O83 (heuristic) a repair suggestion must hold for every candidate the ambiguity leaves open; O84 (heuristic) embed an existing sub-language as one opaque host token."
+  - "Constraint entries whose own context records they are not endorsed: O39 (constraint) an append-only local log does not resist HARKing without a remote anchor — marked `Recommendation is not user-approved`; O28 and O42 carry comparable holds noted above."

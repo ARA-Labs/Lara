@@ -1,0 +1,25 @@
+# S1 — strict-certificate worked example (lara-syntax@0.5)
+#
+# The first worked example exercising the frontend certificate path:
+# assurance = cert(…) parses, elaborates to AssuranceCert, and replays through
+# nd@1 (Driver.buildCertOk) to an accept verdict. See the policy file's
+# honesty note for why the certificate is hypothesis reuse.
+
+artifact paper_42 at sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+policy strict-v1
+use backends [nd@1]
+
+claim c1
+  nl      = "The safety invariant holds for deployment D"
+  formal  = holds(safety_invariant, D)
+  binding = { author = alice, rationale = "Certified citation of the audited safety invariant.", audit-status = reviewed }
+
+leaf e1 : holds(safety_invariant, D)
+  kind       = attested
+  provenance = user
+  refs       = [evidence/safety_audit.txt#section=invariants]
+
+arg a1 : supports(c1) by certified_citation from [e1]
+  assurance = cert(nd@1, sha256:strict-v1-theory-0, (hyp 0))
+
+status c1

@@ -1,0 +1,126 @@
+artifact: rebench-nanogpt_chat_rl
+group: rebench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: "capped at 15 of 40 — classified every dead end bearing on C04's subject (judge-call budget / best-of-N selection / tournament structure: N50, N53, N601, N604), then filled remaining slots in ascending node-ID order (N52, N58, N101, N103, N201, N202, N204, N206, N208, N251, N354)"
+claims:
+  - claim_id: C04
+    claim_type: implementation-behavioral
+    proposition_shape:
+      sketch: "judge_call_optimal(selection=single_elim_tournament, n_candidates=8, calls_per_prompt=7, roundrobin_calls=28, latency_rounds=3)"
+      arity: 5
+      phase0_nullary_sufficient: false
+      note: "The checkable content is exactly the arithmetic structure: 7 = N-1, 28 = N(N-1)/2, 3 = ceil(log2 8). A nullary 'tournament is optimal' atom would erase the re-checkable identities and the falsification criterion's quantification over selection rules with fewer than N-1 calls."
+    inference_scheme:
+      scheme: analytic_proof
+      strict_or_defeasible: strict
+      premises:
+        - "A single-elimination bracket on N candidates plays exactly N-1 matches: each match eliminates exactly one candidate and N-1 candidates must be eliminated."
+        - "Any selection rule that reliably identifies a pairwise-preferred winner among N candidates needs at least N-1 pairwise judge calls (every non-winner must lose at least once) — valid only if the judge behaves as a consistent comparator so 'judge-preferred winner' is well-defined."
+        - "The implementation realizes single elimination with one judge call per match and dispatches within-round matches concurrently via evaluate(..., max_workers=20) (rl_finetune_best_of_n.py:110-139), so per-prompt selection depth is ceil(log2 N) = 3 dependent rounds rather than N-1 = 7 sequential calls."
+      supporting_experiments: [E03]
+    strict_certifier: reference-nd
+    certifier_note: "The counting identities (single-elim on 8 uses 4+2+1 = 7 = N-1 calls; round-robin uses 8*7/2 = 28; depth ceil(log2 8) = 3) and the elimination lower bound (a certified winner requires >= N-1 losses, one per eliminated candidate) are small deductive derivations formalizable as an ND proof from the definition of a pairwise-selection procedure with a consistent comparator. What the certifier cannot cover: that rl_finetune_best_of_n.py:118-139 actually implements single elimination (attested code inspection) and that the judge is a consistent comparator (empirical, and doubtful — see CQ2)."
+    critical_questions:
+      - cq: "Does the recorded inspection procedure cover the tournament code path whose behavior the claim asserts?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Procedure steps 1-3 inspect only model.GPT.generate_strings_autobatch and the generation-parameter overrides (model.py:369-402, rl_finetune_best_of_n.py:91-99); no step reads the tournament loop at rl_finetune_best_of_n.py:118-139 or counts judge calls, and E03's 'Verifies' field lists only C03. The code citation in C04's Proof stands in for an inspection that no experiment records."
+      - cq: "Is the Llama-3-8b judge a consistent comparator, so that 'judge-preferred winner' is well-defined and the N-1 lower bound transfers?"
+        mandatory: true
+        status: unmet-gap
+        basis: "Nothing in E01-E04 Setup/Procedure characterizes judge determinism or transitivity; the artifact's own trace shows the judge randomizes pair order and returns nondeterministic verdicts (exploration_tree.yaml N100 approach_context, N104: bit-identical weights scored differently on the alpaca head). Under a noisy comparator the tournament selects *a* winner, and the deterministic N-1 optimality argument does not directly apply. Leaves the optimality half unestablished; nothing shown proves a cheaper reliable rule exists."
+      - cq: "Is worker parallelism sufficient at the deployed scale for rounds, not calls, to determine latency?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 Setup/Procedure: 2048 prompts per step with best_of=8, i.e. up to 2048 x 4 = 8192 first-round matches per step, dispatched through max_workers=20. E03 Metrics record 'code-path equality; no numeric metric' and Baselines: none — no timing measurement exists, and at 20 workers the round structure cannot be the binding latency unit at batch scale."
+      - cq: "Is the alternative-selection baseline (round-robin, best-of-2) characterized for the comparison implicit in 'optimal'?"
+        mandatory: false
+        status: met
+        basis: "The alternatives and their call counts are enumerated with the deltas: best-of-2 as one noisy judge call per prompt and full round-robin at 4x judge cost (exploration_tree.yaml N05 alternatives; E02 Setup describes the best-of-2 base configuration). The comparison is analytic, so an executed baseline run is not required for the counting claim."
+    leaf_granularity: per-experiment-claim
+    leaves:
+      - atom: "the shipped selection loop is a 3-round single-elimination tournament issuing one judge call per match, 7 calls per prompt at N=8"
+        provenance: attested
+        refs: ["logic/claims.md C04", "rl_finetune_best_of_n.py:118-139", "trace/exploration_tree.yaml N05"]
+      - atom: "full round-robin at N=8 would use N(N-1)/2 = 28 judge calls per prompt"
+        provenance: attested
+        refs: ["logic/claims.md C04", "trace/exploration_tree.yaml N05 alternatives"]
+      - atom: "within-round matches are dispatched in parallel via evaluate(..., max_workers=20)"
+        provenance: attested
+        refs: ["logic/claims.md C04", "rl_finetune_best_of_n.py:110-115", "trace/exploration_tree.yaml N05"]
+      - atom: "no selection rule with fewer than N-1 pairwise judge calls reliably picks a judge-preferred winner"
+        provenance: assumed
+        refs: ["logic/claims.md C04 falsification criterion (posed as an open challenge; no proof recorded in the artifact)"]
+      - atom: "per-prompt selection latency equals ceil(log2 8) = 3 judge rounds rather than 7 sequential calls"
+        provenance: assumed
+        refs: ["logic/claims.md C04 (asserted from code structure; no timing measurement anywhere in logic/experiments.md)"]
+    attack_candidates:
+      - node: N50
+        decision: none
+        target: n/a
+        rationale: "Rejected DPO design whose 3072-comparison fan-out hit 429 throttling — confirms judge calls are the scarce resource C04's tournament economizes; a failed alternative, not an edge."
+      - node: N52
+        decision: none
+        target: n/a
+        rationale: "top_p TypeError in a rejected reward-shaping design; concerns the generation API surface, not tournament call counts."
+      - node: N53
+        decision: none
+        target: n/a
+        rationale: "429 storm from ~576 back-to-back comparisons in a non-tournament MALT pipeline; bears on the judge-call-budget context (C07) but conflicts with no C04 premise about the official implementation."
+      - node: N58
+        decision: none
+        target: n/a
+        rationale: "CUDA OOM from zombie processes at scoring time; infra failure unrelated to selection-rule call counts."
+      - node: N101
+        decision: none
+        target: n/a
+        rationale: "top_p kwarg and [B,1,V] logits-shape bugs in a rejected trainer rewrite; bears on C08's forward-path claim, not on tournament selection."
+      - node: N103
+        decision: none
+        target: n/a
+        rationale: "Killed v3 continuation with 311s/step judge cost; a rejected design iteration whose lesson (judge latency dominates) concerns C06/C07, not the N-1 counting or optimality."
+      - node: N201
+        decision: none
+        target: n/a
+        rationale: "DPO compute_log_probs dimension bug; rejected implementation route, no bearing on C04."
+      - node: N202
+        decision: none
+        target: n/a
+        rationale: "requires_grad=False after from_saved_model; loader pitfall in a rejected DPO route, unrelated to selection."
+      - node: N204
+        decision: none
+        target: n/a
+        rationale: "Score-time OOM while a background trainer held GPU memory; per-attempt infra failure, no C04 bearing."
+      - node: N206
+        decision: none
+        target: n/a
+        rationale: "torch.save truncated by a kill mid-write; checkpoint-hygiene failure (feeds C12), irrelevant to judge-call optimality."
+      - node: N208
+        decision: none
+        target: n/a
+        rationale: "Zombie-CUDA-process OOM on final re-score; infra lifecycle failure, no C04 bearing."
+      - node: N251
+        decision: none
+        target: n/a
+        rationale: "Out-of-range pad token crashing nll_loss in a rejected rewrite; training-loop bug orthogonal to selection structure."
+      - node: N354
+        decision: none
+        target: n/a
+        rationale: "DPO logits[:, :-1, :] empty-tensor crash; rejected alternative objective, bears on C08's territory, not C04."
+      - node: N601
+        decision: none
+        target: n/a
+        rationale: "PPO with 4 responses/prompt killed unmonitored; its lesson (~512 judge calls per step cost minutes) supports the premise that judge calls are the resource worth minimizing rather than attacking any C04 element."
+      - node: N604
+        decision: undercut
+        target: "support of C04 (latency sub-claim: parallel dispatch => ceil(log2 N)-round latency)"
+        rationale: "A tournament-selection run on the same Replicate judge stalled completely under a 429 storm before finishing one step — evidence that when the shared judge throttles, within-round parallelism does not deliver round-bounded latency, cutting the inference from max_workers=20 dispatch to log-round latency (conditions differ from the official run, which completed; hence undercut of the support, not rebuttal of the conclusion)."
+    holes:
+      - "The optimality half is asserted only via a falsification challenge ('demonstrate a rule with fewer than N-1 calls'); the elimination lower-bound argument is left implicit and unproven in the artifact."
+      - "'Judge-preferred winner' is undefined under the actually-stochastic judge (pair-order randomization, nondeterministic verdicts per N100/N104); the N-1 lower bound presumes a consistent comparator."
+      - "No experiment records inspection of the tournament code path: E03, the only cited experiment, covers generation-parameter alignment and lists only C03 under 'Verifies' — the E03 citation in C04's Proof does not match E03's procedure."
+      - "The latency sub-claim has no timing measurement, and at deployed scale (up to 8192 first-round matches per step vs max_workers=20) plus MALT throughput evidence (C06/C07, N604), wall-clock latency is judge-throughput-bound, not round-bound."
+    coverage_flags:
+      - "Parametric scaling assertion: 'N-1 calls' and 'latency scales with ceil(log2 N) rounds' quantify over all N, but the flat pred(args) proposition vocabulary encodes only the N=8 instance; there is no construct for growth-rate/asymptotic claims as such."
+    uncertain: true
+    note: "Coin-flip judgment flagged: N604 undercut vs none. It attacks the parallelism=>round-latency link on the same judge API, but under agent-side code, 5 responses/prompt, and late-session quota exhaustion, while the official run (N07) completed; classified undercut of the latency sub-claim's support because the claim's latency assertion depends on exactly the throughput condition N604 shows can fail. All other 14 dead ends are rejected designs or infra failures — none."

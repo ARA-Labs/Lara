@@ -1,0 +1,334 @@
+session:
+  id: "2026-09-09_issue307"
+  date: "2026-09-09"
+  started: "2026-09-09T19:40-07:00"
+  last_turn: "2026-09-10T09:30-07:00"
+  turn_count: 3
+  summary: >-
+    Issue 307, both halves. Query_κ refines to well-sorted claims over Σ_κ and the
+    outer language gets bridge/query authoring forms in the M5 shape. PW0
+    limitation 2 narrows but does not close — two of its four conflated conditions
+    coincide by theorem, which the planned four-way split did not survive. Turn 3
+    answered the PR 311 review: the bridge fixture's obligations were vacuous and
+    are now discharged, every fault is located, and each judgment states its clause
+    rather than its decider's success.
+
+events_logged:
+  - turn: 1
+    type: survey
+    id: "-"
+    routing: skipped
+    provenance: ai-executed
+    summary: >-
+      Read the open issue tracker and reported what was actionable. No research
+      content; routine next-step guidance, below the ARA threshold.
+  - turn: 2
+    type: decision
+    id: "N307_schedule"
+    routing: direct
+    provenance: user
+    summary: >-
+      Do both halves of 307 directly and open the PR. Half 2 was optional on the
+      issue and gate-separately; the user took both.
+  - turn: 2
+    type: experiment
+    id: "N307_sorted"
+    routing: direct
+    provenance: ai-executed
+    summary: >-
+      Query_κ refined to well-sorted claims; posing separated from observation;
+      translationUndefined split; sat_erase relates the sorted and PW0 models.
+  - turn: 2
+    type: dead_end
+    id: "N307_gap_collapse"
+    routing: direct
+    provenance: ai-executed
+    summary: >-
+      The planned four-way split of `gap` does not exist. statusC_gap_iff plus the
+      completeness of every retained node make "posed but unsupported" unreachable
+      as a gap. Limitation 2 narrows, not closes.
+  - turn: 2
+    type: decision
+    id: "N307_sorted_world"
+    routing: direct
+    provenance: ai-suggested
+    summary: >-
+      SortedWorld stays an explicit hypothesis; Gamma is a checker parameter and can
+      admit an atom outside Σ_κ.
+  - turn: 2
+    type: experiment
+    id: "N307_surface"
+    routing: direct
+    provenance: ai-executed
+    summary: >-
+      Bridge declarations and untyped modal queries, each with an independent
+      judgment, decider, sound/complete/deterministic, preservation and reflection.
+      Query elaboration is a typing pass whose status-atom case is Sorted.pose.
+  - turn: 2
+    type: decision
+    id: "N307_clause_checkability"
+    routing: direct
+    provenance: ai-suggested
+    summary: >-
+      One of T6's three clauses decided (ruleOkB); the other two plus the shared
+      canonicalizer named as declared premises.
+  - turn: 2
+    type: observation
+    id: "O162"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: >-
+      A wrapper can separate only the conditions decided before the local judgment
+      runs. Crystallized to C55 via artifact commitment.
+  - turn: 2
+    type: observation
+    id: "O163"
+    routing: staged
+    provenance: ai-suggested
+    summary: >-
+      Clause checkability is decided by the representation of the environment
+      component the clause reads, not by the clause's logical shape.
+  - turn: 2
+    type: observation
+    id: "O164"
+    routing: staged
+    provenance: ai-suggested
+    summary: >-
+      A frozen contract is refined by a second constructor plus an erasure theorem,
+      which turns "we did not break it" into a theorem.
+  - turn: 3
+    type: dead_end
+    id: "N311_vacuous_obligations"
+    routing: direct
+    provenance: ai-executed
+    summary: >-
+      The bridge fixture's BridgeObligations premise was unsatisfiable, so the
+      theorem exhibiting T6's contract was vacuous. Repaired by a Gamma pair inside
+      the declared vocabulary; obligations now discharged and the transport theorem
+      instantiated.
+  - turn: 3
+    type: decision
+    id: "N311_located_and_independent"
+    routing: direct
+    provenance: ai-executed
+    summary: >-
+      Locate every fault (vocabFault + OutOfVocabulary), state each judgment's
+      clause semantically instead of as its decider's success, and read the
+      declaration's own identifiers by putting the names in BridgeEnv.
+  - turn: 3
+    type: question
+    id: "N311_unjoined_halves"
+    routing: direct
+    provenance: ai-executed
+    summary: >-
+      A declared BridgeId is still unrelated to Naming.bridgeOf, so a declared
+      bridge cannot be named by a posed query. Issue 313; the missing parser/wire
+      format opened as issue 314.
+  - turn: 3
+    type: observation
+    id: "O165"
+    routing: staged
+    provenance: ai-suggested
+    summary: >-
+      A premise that is the property being exhibited proves nothing, and no gate
+      detects it; the cheap test is to prove the premise's negation at the fixture.
+  - turn: 3
+    type: observation
+    id: "O166"
+    routing: staged
+    provenance: ai-suggested
+    summary: >-
+      "Independent judgment" has two readings; independence from the decider is the
+      one usually skipped, and restoring it costs nothing because the decider's
+      _iff lemma already exists.
+  - turn: 3
+    type: observation
+    id: "O167"
+    routing: staged
+    provenance: ai-suggested
+    summary: >-
+      A located report can be retrofitted onto a bare-none partial function by a
+      parallel scan proved equivalent to its domain condition.
+  - turn: 3
+    type: heuristic
+    id: "H18"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: >-
+      O163 crystallized via artifact commitment: checkability is decided by the
+      representation of what a clause reads, and the test applies to declared
+      identifiers too.
+
+claims_touched:
+  - id: C55
+    action: crystallized
+    turn: 2
+  - id: H18
+    action: crystallized
+    turn: 3
+
+ai_actions:
+  - turn: 1
+    action: >-
+      Surveyed open issues, checked for open PRs and in-flight branches, verified
+      The issue's stale lines exist and the paper repo is reachable, and reported the
+      actionable set with a recommendation.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: >-
+      Mechanized both halves of issue 307 — four new Lean modules that only import,
+      with no edit to any PW0/T6/T8/T9 declaration — plus the frozen-contract record
+      and the two updated PW records. Repointed ten
+      AxCheck.lean citations the two new imports staled, by declaration name rather
+      than line delta. Ran the local gate set from a build with the four new oleans
+      deleted first. Opened PR 311.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/PW/Sorted.lean
+      - lean/Lara/Examples/PWSorted.lean
+      - lean/Lara/PW/Surface.lean
+      - lean/Lara/Examples/PWSurface.lean
+      - lean/AxCheck.lean
+      - lean/Lara.lean
+      - docs/theory-pw-sorted-queries.md
+      - docs/theory-pw0-outer-model.md
+      - docs/theory-pw-closeout.md
+      - scripts/check-lean-citations.py
+  - turn: 3
+    action: >-
+      Addressed all 17 inline findings and the review body of PR 311. Lean:
+      discharged BridgeObligations at the fixture and instantiated
+      elabBridge_support_transport; added vocabFault/OutOfVocabulary and made
+      PosingFault.bridgeVocabulary located; added
+      crossComparePosed_ne_translationUndefined; made faultOf/faultOf_pred private;
+      added Clause.mem_all and quantified clauses_complete over the type; restated
+      ElaboratesBridge.rule_ok and Elaborates.status semantically; added
+      BridgeEnv.name/sourceName/targetName with three BridgeError arms and
+      witnesses; added Naming.ctxName_of_ctxOf. Witnesses: two more ruleOkB failure
+      modes, a .con symbol entry with conMapOf cells, a target illSortedArguments
+      cell, a constructor-namespace vocabulary cell,
+      bridge_and_target_faults_distinct restated over two crossComparePosed
+      applications, elabPosed_unknownContext. Docs: corrected the "two §3 rows"
+      claim in five places, the §3 "nothing below is scheduled" preamble, and the
+      unhedged AxCheck-gated sentence. Opened issues 313 and 314; reopened 225.
+    provenance: ai-executed
+    files_changed:
+    - lean/Lara/PW/Sorted.lean
+    - lean/Lara/PW/Surface.lean
+    - lean/Lara/Examples/PWSorted.lean
+    - lean/Lara/Examples/PWSurface.lean
+    - lean/AxCheck.lean
+    - lean/Lara.lean
+    - docs/theory-pw-sorted-queries.md
+    - docs/theory-pw-closeout.md
+    - ara/evidence/proofs/pw_sorted_queries_307.md
+  - turn: 3
+    action: >-
+      Re-ran the local gate stack from a build with the four oleans deleted
+      first: lake build 173 jobs; axiom audit trio-clean with no native_decide;
+      whole-tree AxCheck coverage 2934 declarations; check-lean-citations.py PASS
+      420/29; check_ara_source_spans.py PASS 62; the three gate self-test suites OK.
+    provenance: ai-executed
+    files_changed: []
+
+logic_revisions:
+  - turn: 2
+    entry: C55
+    field: created
+    before: "(none — new claim crystallized from O162)"
+    after: >-
+      C55: A wrapper over an unchanged local judgment can separate exactly the
+      reporting conditions decided before that judgment runs; the rest are the local
+      layer's to split. Status hypothesis, provenance ai-suggested.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >-
+      Committed artifacts depend on the finding — docs/theory-pw-sorted-queries.md
+      §4, the PW0 record's limitation 2 paragraph, and AxCheck-gated
+      not_gap_of_addresses. Status stays hypothesis: artifact commitment alone does
+      not reach supported, and no verbal affirmation of the generalized reading was
+      given.
+
+  - turn: 3
+    entry: H18
+    field: created
+    before: "(none — new heuristic crystallized from O163)"
+    after: >-
+      H18: Decide which contract clauses to check by the representation of what
+      each reads, not by its logical shape. Status active, provenance
+      ai-suggested, sensitivity medium.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >-
+      Merged code depends on exactly this reading: BridgeEnv gained
+      name/sourceName/targetName and elabBridge checks them because a CtxId is a
+      newtype with decidable equality — the representation test applied to a field
+      that had been left unread. Provenance stays ai-suggested; the researcher has
+      not endorsed the generalized statement.
+
+key_context:
+  - turn: 1
+    excerpt: >-
+      "check the remote issue tracker, is there anything we can work on now? the
+      multi-file compile linker is already in progress"
+  - turn: 2
+    excerpt: >-
+      "let's do both halves of 307, do it directly and open the pr" — taken as
+      adoption of the scheduling decision only, not of any interpretive reading;
+      half 2 had been marked optional and gate-separately on the issue.
+  - turn: 3
+    excerpt: >-
+      "address all, push and reply" — the whole review taken as work to do,
+      including the two process items (a tracking issue for the unscheduled
+      parser, and the CI issue that was closed while CI still has not run).
+  - turn: 3
+    excerpt: >-
+      The reviewer's blocking finding compiled `¬ BridgeObligations …` against the
+      branch. The docstring had defended stating the premise rather than
+      discharging it as "the honest shape"; it was in fact unsatisfiable, and no
+      StructuralBridge was exhibited anywhere in the PR.
+  - turn: 2
+    excerpt: >-
+      The planned four-way gap split was abandoned mid-work on finding
+      Grounded.statusC_gap_iff: statusC gaps exactly on empty complete support, and
+      CheckedNode.valid carries the empty obligation list, so an addressed claim
+      cannot gap. Recorded as a dead end and written into three documents rather
+      than quietly shipping a three-way split as if it were the planned four.
+
+open_threads:
+  - >-
+    PR 311 was reviewed with changes requested; all 17 inline findings and the
+    review body are addressed and pushed, awaiting re-review.
+  - >-
+    Issue 306 (paper displays for PW, parametricity, generic observation) is still open and was the other actionable item.
+  - >-
+    Issue 314: the surface has no concrete parser or wire format, and no Haskell
+    runtime to conform against. Unscheduled; now tracked rather than living only in
+    a doc table cell.
+  - >-
+    Issue 313: a declared BridgeId is unrelated to Naming.bridgeOf, so the two
+    authoring forms are joined at the status-atom level but not at the bridge
+    level.
+  - >-
+    Issue 225 reopened: CI has still not run since 2026-08-25, and four PRs have
+    now landed on local gates only.
+
+ai_suggestions_pending:
+  - >-
+    O164 — refine a frozen contract by a second constructor plus an erasure
+    theorem. Generalized reading unadopted. (Listed again below in its original
+    wording.)
+  - >-
+    O165, O166, O167 — vacuous-premise detection, judgment-vs-decider
+    independence, and retrofitting a located report onto a bare-none partial
+    function. All ai-suggested, none affirmed.
+  - >-
+    H18 (crystallized from O163) carries provenance ai-suggested; the researcher
+    has not endorsed the generalized statement, only the work that produced it.
+  - >-
+    O164 — refine a frozen contract by a second constructor plus an erasure theorem.
+    Generalized reading unadopted.
+  - >-
+    C55's generalized statement is ai-suggested; the researcher has not endorsed the
+    layering dichotomy as stated, only the work that produced it.

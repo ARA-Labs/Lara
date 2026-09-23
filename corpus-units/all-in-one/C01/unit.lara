@@ -1,0 +1,65 @@
+# Corpus unit all-in-one/C01 — gap (unmet mandatory variance CQ, annotator-optional)
+#
+# Source: m0/annotations/all-in-one.yaml C01 (comparative, controlled_comparison; corpus pin
+# 62e9b54). Headline: Simformer-dense reaches C2ST closer to 0.5 than NPE on 3 of 4 benchmark
+# tasks (Gaussian Mixture, Two Moons, SLCP) at all simulation budgets, tying on Gaussian Linear
+# except at 1e4 sims (E01, E06, Fig 4a).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * controlled_comparison family; conclusion better(simformer_dense, npe, c2st, benchmark_tasks).
+#     Nearest-competitor: single baseline NPE. The 3-of-4-tasks structure and the Gaussian-Linear
+#     tie stay in `nl` and the leaf refs (binding conjunct = the favorable comparison).
+#   * baseline_parity is annotated met (E01 Setup lists NPE, Procedure step 2 trains at each
+#     budget); measurement_validity holds via the premise (C2ST computed identically, 5-fold RF,
+#     100 trees).
+#   * variance_reported is annotated UNMET-GAP: E01 Metrics report per-cell C2ST with no error
+#     bars or seed count. The annotator rated this CQ OPTIONAL; corpus-v1 makes variance mandatory
+#     family-wide (uniform-standard rule, adaptive-pruning/C03), so the policy call wins and the
+#     mandatory obligation has no discharging leaf. No complete controlled_comparison instance is
+#     declarable — E2-style gap.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact all-in-one at sha256:62b9c8db2538
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c01
+  nl      = "Simformer-dense reaches C2ST closer to 0.5 than NPE on 3 of 4 benchmark tasks (Gaussian Mixture, Two Moons, SLCP) at all simulation budgets, tying on Gaussian Linear except at 1e4 sims"
+  formal  = better(simformer_dense, npe, c2st, benchmark_tasks)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E01's per-task C2ST cells (verified by the E06 eval-steps ablation), per
+# result cell in the annotation and folded into refs.
+leaf e1 : reports(e01, compares(simformer_dense, npe, c2st, benchmark_tasks, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01, logic/experiments.md#E06, Fig-4a, trace/exploration_tree.yaml#N07]
+
+leaf e2 : matched_setup(simformer_dense, npe, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Setup, logic/experiments.md#E01-Procedure-step-2]
+
+leaf e3 : valid_measurement(c2st, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Metrics]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e01) has no honest leaf — E01 reports single-run
+# per-cell C2ST — and corpus-v1 makes that obligation mandatory. Complete support is empty.)
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

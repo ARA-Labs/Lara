@@ -1,0 +1,397 @@
+session:
+  id: "2026-07-22_001"
+  date: "2026-07-22"
+  started: "2026-07-21T23:45"
+  last_turn: "2026-07-22T14:07"
+  turn_count: 18
+  summary: "M1 complete: v0.1 language spec frozen — TCB and Lean-4 host fixed (N38), port-as-we-lock adopted after the §6.1 D⊎H defect (N39), the §6.1/§7.1/§8 derivation chain frozen and mechanized (N40-N42), and the final versioning/rejection/backlog pass completed (N43). Earlier turns retain the M0 annotation and v0.1 scheme/adapter/leaf/defeat freeze history."
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N27"
+    routing: direct
+    provenance: ai-executed
+    summary: "Blind double-annotation (Opus second annotator): 14/18, kappa 0.73; 4 adjudications, codebook amended (precedence check first)."
+  - turn: 1
+    type: experiment
+    id: "N28"
+    routing: direct
+    provenance: ai-executed
+    summary: "8-field annotation of all 60 sampled claims; aggregates + coverage-flag adjudication in annotation-summary.md."
+  - turn: 1
+    type: observation
+    id: "O02"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Open-question answers: 9 scheme families (#2); arithmetic-recheck + code-inspection adapters, not LP (#1); per-result-cell leaves (#5)."
+  - turn: 1
+    type: observation
+    id: "O03"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Defeat layer (#3): attacks rare and all undercuts; walk whole trace, not just dead ends; dead-end-as-support exists; CQ gaps must be holes."
+  - turn: 1
+    type: observation
+    id: "O04"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Preliminary gate verdict PASS ~90% with 6-item construct wishlist; awaiting human review."
+
+ai_actions:
+  - turn: 1
+    action: "Launched 27 per-artifact annotation agents + blind typing agent (4 API-overload retries; blind pass completed on Opus); validated 27 YAMLs; adjudicated and propagated 4 type corrections; wrote annotation-summary.md; commit 6524e8c pushed to the PR."
+    provenance: ai-executed
+    files_changed: ["m0/annotations/ (28 files)", "m0/double-annotation.tsv", "m0/annotation-summary.md", "m0/claim-types.tsv", "m0/sample.tsv", "m0/README.md"]
+
+claims_touched: []
+
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: "User: 'can you do 1 and 2?' — authorized AI execution of both the double-annotation adjudication pass and the full 60-claim annotation."
+
+open_threads:
+  - "Human review of annotation-summary.md §3 (gate adjudication) and spot checks of attack decisions; full-schema double annotation still open."
+  - "Exercise rebut/undermine deliberately on the rebench reserve (e.g. fix_embedding C13) before defeat typing freezes."
+  - "Feed O02-O04 into the v0.1 calculus freeze once affirmed."
+  - "The PR (draft) now carries the entire M0 kickoff through annotation; ready for review/merge."
+  - "Parallel Lean candidate still open: grounded-labelling invariance under AF isomorphism (abstract half of result 9)."
+
+ai_suggestions_pending:
+  - "O01 (from 2026-07-21): coverage gate should be evaluated per benchmark population, not pooled."
+  - "O02-O04: open-question answers, defeat-layer constraints, gate verdict — all awaiting affirmation."
+
+# --- turn 2 (summary affirmation + crystallization) ---
+events_logged_turn2:
+  - turn: 2
+    type: decision
+    id: "N29"
+    routing: direct
+    provenance: user
+    summary: "Rebut/undermine exercised via self-authored adversarial reports at language-testing time; corpus mining rejected (top-venue published work has none)."
+  - turn: 2
+    type: crystallization
+    id: "C13"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O02: ~9 scheme families suffice (§8 #2)."
+  - turn: 2
+    type: crystallization
+    id: "C14"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O02: adapter portfolio = arithmetic-recheck + code-inspection, not LP (§8 #1)."
+  - turn: 2
+    type: crystallization
+    id: "C15"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O02: per-result-cell default leaf grain (§8 #5)."
+  - turn: 2
+    type: crystallization
+    id: "C16"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O03: defeat edges rare/undercut-dominant; CQ gaps are holes; whole-trace attack walk (+ constraints.md pipeline constraints)."
+  - turn: 2
+    type: crystallization
+    id: "C17"
+    routing: crystallized
+    provenance: user-revised
+    summary: "From O04: coverage gate PASS ~90%, finite wishlist."
+
+claims_touched_turn2:
+  - id: C13
+    action: crystallized
+    turn: 2
+  - id: C14
+    action: crystallized
+    turn: 2
+  - id: C15
+    action: crystallized
+    turn: 2
+  - id: C16
+    action: crystallized
+    turn: 2
+  - id: C17
+    action: crystallized
+    turn: 2
+
+key_context_turn2:
+  - turn: 2
+    excerpt: "User: 'm0/annotation-summary.md makes sense to me' — verbal affirmation of the M0 summary; and: rebut/undermine 'is not really possible to extract from the dataset ... we just need to write some reports on those ourselves' — decision N29."
+
+open_threads_turn2:
+  - "Spot checks of attack decisions; full-schema double annotation on a subset (only claim-type was double-annotated)."
+  - "Write kind-(a) annotation conventions and kind-(c) evidence-model decisions into spec §7/§8 for the v0.1 freeze, fed by C13-C16."
+  - "Author the adversarial attack-report suite (N29) when language testing starts."
+  - "O01 (per-population gate evaluation) still staged - not adopted by the affirmed summary."
+  - "Ready for review/merge."
+
+# --- turns 3-10 (v0.1 freeze session: C13-C16 -> spec, the PR) ---
+events_logged_turns3_10:
+  - turn: 3
+    type: decision
+    id: "N30"
+    routing: direct
+    provenance: user
+    summary: "dead_end lowers to support OR attack, elaborator per-node judgment; kernel-agnostic (dead-end-derived leaf = ordinary leaf)."
+  - turn: 3
+    type: decision
+    id: "N31"
+    routing: direct
+    provenance: user
+    summary: "Result-cell conflict: initially audit-only diagnostic (superseded turn 6)."
+  - turn: 5
+    type: observation
+    id: "(folded into N30)"
+    routing: direct
+    provenance: user-revised
+    summary: "User logic-theory check on dead-end leaf; refined: kernel-invisible but audit-distinguishable via refs binding; affirmed and committed (bd78a37)."
+  - turn: 6
+    type: decision
+    id: "N31"
+    routing: direct
+    provenance: user
+    summary: "REVISION: result-cell conflicts quarantine to gap (user challenged audit-only: 'data-integrity conflict is a huge bad'); duplicate-report groups, ≡ within group, quarantine whole group; policy may escalate to reject; contrary escape hatch removed (8a82d9e)."
+  - turn: 7
+    type: decision
+    id: "N32"
+    routing: direct
+    provenance: user
+    summary: "Spellings settled: descriptive snake_case + empirical-v1; deciding criterion user-supplied (audience = Python-literate researchers, not PL experts); short vocabulary documented (7eec3fb)."
+  - turn: 8
+    type: decision
+    id: "N32"
+    routing: direct
+    provenance: user
+    summary: "EXTENSION: short vocabulary RESERVED (no other construct may claim spellings); frontend naming co-decided with ARA maintainer (3002ed9)."
+  - turn: 9
+    type: decision
+    id: "N33"
+    routing: direct
+    provenance: user-revised
+    summary: "Reference-nd call split on annotation review: instances arithmetic; ≥N−1 lower bound = corpus's one ND-shaped derivation (theory-dependency-carried); C14 Conditions synced (5e2383f)."
+  - turn: 9
+    type: observation
+    id: "O05"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Corpus brackets ND reference backend both sides (arithmetic below, attested measure theory above); paper-facing reviewer answer."
+  - turn: 10
+    type: decision
+    id: "(no tree node — documentation act)"
+    routing: direct
+    provenance: user
+    summary: "M0-frozen marker added to spec header: five frozen decisions listed with flip-criteria re-litigation condition (13e0641)."
+
+ai_actions_turns3_10:
+  - turn: 3
+    action: "Executed the v0.1 freeze: C13-C16 + two decisions written into spec §3/§4.3/§4.5/§5.2/§7/§11; six-item residual wishlist into constraints.md; committed d3902a4."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "ara/logic/solution/constraints.md"]
+  - turn: 4
+    action: "Opened the PR (branch worktree-curious-frolicking-thimble); PR body updated at turn 6 to match the quarantine-to-gap revision."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 7
+    action: "Saved persistent memory lara-audience-python-readability (audience principle + maintainer-collab rule at turn 8)."
+    provenance: ai-executed
+    files_changed: ["<agent project memory directory>"]
+  - turn: 9
+    action: "Review walkthrough of nanogpt_chat_rl C04 certifier_note; corrected own earlier mischaracterization ('plausibly arithmetic' was in the affirmed summary, not AI-invented during spec editing)."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "ara/logic/claims.md"]
+
+claims_touched_turns3_10:
+  - id: C14
+    action: revised
+    turn: 9
+  - id: C17
+    action: revised
+    turn: 10
+
+logic_revisions_turns3_10:
+  - turn: 9
+    entry: C14
+    field: Conditions
+    before: "The single reference-nd call (tournament call-count arithmetic) is plausibly arithmetic too."
+    after: "The single reference-nd call (nanogpt_chat_rl C04) splits on review (2026-07-22): its counting instance identities are arithmetic, but its ≥ N−1 optimality lower bound is a genuine quantified derivation — the corpus's one ND-shaped demand, carried by the reference backend with the combinatorial content as a declared theory dependency (spec §5.2, N33)."
+    signal: verbal-declaration
+    provenance: user-revised
+    note: "User selected the split option after reviewing the annotation's certifier_note; portfolio conclusion (C14 Statement) unchanged."
+  - turn: 10
+    entry: C17
+    field: Statement
+    before: "the inexpressible residue is a closed six-item construct wishlist plus three evidence-model decisions, not an open-ended gap."
+    after: "the inexpressible residue is a closed six-item construct wishlist, not an open-ended gap."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "The three evidence-model decisions were resolved into the spec (N30, N31, whole-trace walk); resolution recorded in Conditions."
+  - turn: 10
+    entry: C17
+    field: Conditions
+    before: "...rebut/undermine exercise deferred to authored adversarial tests (N29)."
+    after: "...deferred to authored adversarial tests (N29). The three evidence-model decisions flagged at gate time (whole-trace attack walk, dead-end-as-support, result-cell conflict) were resolved into spec §7/§4.3/§11 on 2026-07-22 (N30, N31, the PR), leaving the six-item wishlist as the whole residue."
+    signal: artifact-commitment
+    provenance: ai-suggested
+
+key_context_turns3_10:
+  - turn: 6
+    excerpt: "User: 'data-integrity conflict is a huge bad in research artifacts (papers and ara). should we fail type check in this case?' — triggered the audit-only → quarantine-to-gap revision; AI counter-proposed localized quarantine over whole-program rejection."
+  - turn: 7
+    excerpt: "User: 'Remember who will be the target customers of ARA. researchers in different fields, not functional programming PL/SE experts. ... Python got pretty popular.' — the deciding criterion for snake_case; saved as durable design constraint."
+  - turn: 8
+    excerpt: "User: 'the short version is also reserved, when we are designing the frontend, we will colab with the ARA maintainer for that.'"
+
+open_threads_turns3_10:
+  - "The PR (8 commits incl. Epilogue) ready for review/merge — carries the entire v0.1 freeze."
+  - "O01 (per-population gate split) still staged — not adopted; O05 (ND-backend bracketing) newly staged, awaiting affirmation."
+  - "M1 now unblocked: result-6 full compile-step headline, gated on the concrete support-term layer the freeze defines."
+  - "Parallel Lean candidate still open: grounded-labelling invariance under AF isomorphism (abstract half of result 9)."
+  - "N29 adversarial attack-report suite authored at language-testing time; arithmetic + code-inspection adapters to be built (spec §5.2)."
+  - "Spot checks of attack decisions; full-schema double annotation on a subset still open (carried from turn 1)."
+
+ai_suggestions_pending_turns3_10:
+  - "O01 (2026-07-21): coverage gate per benchmark population, not pooled."
+  - "O05 (2026-07-22): ND-backend bracketing observation — in spec §5.2 text but unaffirmed as a standalone claim."
+
+# --- turns 11-18 (M1 lock pass + final v0.1 freeze) ---
+events_logged_turns11_18:
+  - turn: 11
+    type: decision
+    id: "N38"
+    routing: direct
+    provenance: user-revised
+    summary: "M1 entered; §8 #8 resolved: TCB enumerated in spec §1.1, Lean 4 fixed as host, and the row-by-row freeze checklist created."
+  - turn: 14
+    type: decision
+    id: "N39"
+    routing: direct
+    provenance: user-revised
+    summary: "Port-as-we-lock adopted after review found the §6.1 D⊎H defect: H had been mandatory-only despite §4.2 requiring optional holes."
+  - turn: 15
+    type: experiment
+    id: "N40"
+    routing: direct
+    provenance: ai-executed
+    summary: "§6.1 frozen with the D⊎H fix and ported to Lara.Support; six sorry-free theorems covered leaf accountability, typing uniqueness, question accounting, and strict assurance."
+  - turn: 16
+    type: experiment
+    id: "N41"
+    routing: direct
+    provenance: ai-executed
+    summary: "§7.1 frozen and ported to Lara.Attack; six sorry-free theorems covered checked sources, strict-unattackability, position kinds, and conclusion coherence."
+  - turn: 17
+    type: experiment
+    id: "N42"
+    routing: direct
+    provenance: ai-executed
+    summary: "§8 compilation frozen and ported to Lara.Compile; theorems covered result 4 and the oracle-parametric source-to-grounded bridge."
+  - turn: 18
+    type: decision
+    id: "N43"
+    routing: direct
+    provenance: user-revised
+    summary: "The v0.1 freeze completed: versioning/replay identity, R1-R14, remaining freeze rows, M2 backlog, and two-PR packaging."
+  - turn: 14
+    type: observation
+    id: "O07"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Port-as-we-lock may act as a defect-detection mechanism; staged because the evidence was a single defect caught by review before the port."
+  - turn: 17
+    type: observation
+    id: "O08"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Result 6 factors into a mechanized oracle-parametric equivalence and a residual executable edge-decider obligation."
+
+ai_actions_turns11_18:
+  - turn: 12
+    action: "Enumerated the TCB, fixed Lean 4 as host, resolved §8 #8, and drafted the M1 freeze checklist."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "plans/research-proposal.md", "docs/m1-freeze-checklist.md"]
+  - turn: 15
+    action: "Corrected §6.1 D⊎H accounting and added the initial Lara.Support mechanization plus AxCheck coverage."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "lean/Lara/Support.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 16
+    action: "Added the frozen §7.1 judgment and initial Lara.Attack mechanization plus AxCheck coverage."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "lean/Lara/Attack.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 17
+    action: "Added the frozen §8 compile rules and initial Lara.Compile bridge; updated the Grounded scope note and axiom audit."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "lean/Lara/Compile.lean", "lean/Lara/Attack.lean", "lean/Lara/Grounded.lean", "lean/Lara.lean", "lean/AxCheck.lean"]
+  - turn: 18
+    action: "Completed the final spec-freeze pass: versions, admission markers, §8.1, R1-R14, mechanization pointers, checklist exit, and M2 backlog."
+    provenance: ai-executed
+    files_changed: ["docs/spec.md", "docs/m1-freeze-checklist.md", "docs/engineering-plan.md"]
+
+claims_touched_turns11_18:
+  - id: C02
+    action: advanced
+    turn: 16
+    provenance: ai-suggested
+  - id: C07
+    action: advanced
+    turn: 17
+    provenance: ai-suggested
+  - id: C08
+    action: advanced
+    turn: 15
+    provenance: ai-suggested
+
+logic_revisions_turns11_18:
+  - turn: 16
+    entry: C02
+    field: Status
+    before: hypothesis
+    after: testing
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Attack typing, strict-unattackability, and position coherence compiled sorry-free; executable checking and adversarial coverage remained."
+  - turn: 17
+    entry: C07
+    field: Status
+    before: hypothesis
+    after: testing
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "Grounded stabilization was already mechanized and the compile bridge now composed source-level status with it."
+  - turn: 15
+    entry: C08
+    field: Status
+    before: hypothesis
+    after: testing
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "The leaf half was mechanized by leaves_declared; the certDeps half still required Backend.uses."
+  - turn: 12
+    entry: "solution/mechanization.md §2"
+    field: prover-choice paragraph
+    before: "Lean 4 was the default pending §8 #8, with proof work nominally gated on the whole M1 freeze."
+    after: "Lean 4 was resolved as host and the gate refined to port-as-we-lock for each individually frozen definition."
+    signal: dependency-change
+    provenance: ai-suggested
+
+key_context_turns11_18:
+  - turn: 14
+    excerpt: "Review found the D⊎H inconsistency; the port-as-we-lock recommendation was accepted with 'sure'."
+  - turn: 18
+    excerpt: "The user directed one docs pass over the remaining spec-only rows and asked whether to package it in this PR or the next; two-PR packaging was recommended."
+
+open_threads_turns11_18:
+  - "Open the lock-pass and freeze PRs, then tag spec-v0.1 on the freeze merge commit."
+  - "Build executable support/attack checkers and the general Compile.Faithful edge decider."
+  - "Complete certDeps accountability, result 7 consistency, result 9 backend replacement, shipped-adapter obligations, and codec round-trip."
+  - "Carry N29 authored adversarial attack reports into the M3/M5 golden-test assets."
+  - "Continue annotation spot checks and the full-schema double-annotation subset."
+
+ai_suggestions_pending_turns11_18:
+  - "Two-PR packaging and spec-v0.1 tag placement remained an AI recommendation pending execution."
+  - "O07 (port-as-we-lock as defect detection) remained staged with single-instance evidence."
+  - "O08 (result-6 oracle-parametric factoring) remained staged pending a constructive general Faithful decider or user affirmation."

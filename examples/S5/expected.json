@@ -1,0 +1,45 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "ord-ppl-v1",
+    "backends": [
+      "ord@1"
+    ],
+    "theories": [
+      "sha256:ord-ppl-v1-theory-0"
+    ],
+    "artifact": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "better(sys_new, sys_base, perplexity, wikitext103)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "num_lt(28.4, 31.6)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a2",
+        "index": 1,
+        "label": "in"
+      }
+    ]
+  }
+}

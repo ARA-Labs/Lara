@@ -1,0 +1,60 @@
+session:
+  id: "2026-09-05_001"
+  date: "2026-09-05"
+  started: "2026-09-05T00:00"
+  last_turn: "2026-09-05T00:00"
+  turn_count: 1
+  summary: >
+    PW-T8/PW-T9 follow-ups implemented as four PRs
+    per the eng-review-cleared plan: executable witnesses,
+    zipOpt traversal seam with byte-identical statements,
+    executable StatusBridge decider with soundness and completeness
+    (the PR, lane-B subagent worktree), declared-attack transport with
+    AttackBridge.toStatusBridge. T8 limitation 1 recorded as
+    NARROWED (extra Function.Injective lm hypothesis), not discharged.
+    All gates pass locally; coverage 2262 → 2304 across the stack.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N307"
+    routing: direct
+    provenance: ai-executed
+    summary: "Lane A and lane B run in parallel worktrees per plan; all four PRs open with the three local gates green each."
+  - turn: 1
+    type: decision
+    id: "N308"
+    routing: direct
+    provenance: ai-executed
+    summary: "Task 4 built ladder-first: 21 signatures elaborated with sorry before any proof (eng review 5A), then filled bottom-up; trAttackList routed through the zipOpt seam (3A)."
+  - turn: 1
+    type: decision
+    id: "N309"
+    routing: direct
+    provenance: ai-executed
+    summary: "T8 §9 limitation 1 written as narrowed, not discharged: AttackBridge.toStatusBridge assumes Function.Injective lm, which StatusBridge does not; PR body and docs use 'narrows' language (eng review 1A)."
+  - turn: 1
+    type: experiment
+    id: "N310"
+    routing: direct
+    provenance: ai-executed
+    summary: "The declared-attack ladder lands 23 theorems sorry-free in the standard trio; negatives pin atts-gap refutability and the collapsing-leaf-map containsB boundary (2A); ques-position commutation pinned (7A)."
+  - turn: 1
+    type: observation
+    id: "O137"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Lean's `cases h : e` substitutes e only in the goal, not in hypotheses: destructuring zipOpt-valued equalities needs the case equations rewritten into the hypothesis before simp only [zipOpt] fires."
+  - turn: 1
+    type: observation
+    id: "O138"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Scratch-verified plan blocks (Tasks 1-3, verbatim) compiled with zero deviations; the plan's stated-without-proof extensions (five cons lemmas, eight comp rewrites, six decider cells) also held — recompilation during eng review is a reliable filter."
+
+claims_touched:
+  - id: C50
+    action: revised
+    turn: 1
+
+open_threads: []

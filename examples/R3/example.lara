@@ -1,0 +1,86 @@
+# Example R3 — bad-attack-target (rejected: spec class R10)
+#
+# Witnesses: attack construction is inside the trust boundary — the checker refuses an ill-typed
+# edge rather than compiling it. Here a `rebut` targets an argument whose root is a LEAF. A rebut
+# must target a defeasible RULE occurrence (the root conclusion of a rule instance); a leaf root is
+# the wrong occurrence kind. The typed-attack check (Check.hs stage 5, Attack.checkAttackTarget)
+# rejects `RRebut _ (SLeaf _)` with CE_R10 (WrongOccurrenceKind OccRule OccLeaf), wire class R10.
+#
+# This is a WRONG-OCCURRENCE reject (R10), not a missing-contrary reject (R11): the two arguments'
+# conclusions improves / not_improves ARE a declared contrary pair, so the edge fails on the
+# occurrence KIND, not on the contrary relation. The typed-attack stage runs before the
+# missing-conflict scan, so R10 fires first.
+#
+# This is R3 of the M4a coverage matrix (docs/worked-examples-plan.md §3): spec class R10 (NOT the
+# spec's assurance class R7 — the earlier "R7" citation is superseded; see m4a-checklist §3).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bad_attack at sha256:cccc...
+policy empirical-v1
+use backends [nd@1]
+
+# --- A complete controlled_experiment argument (the rebut SOURCE) ------------------------------
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf e1 : reports(exp_1, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_1.csv#row=mean]
+
+leaf e2 : randomized(exp_1)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=4]
+
+leaf e3 : powered(exp_1)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=4]
+
+leaf e4 : generalizes(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper.pdf#sec=5]
+
+arg a1 : supports(c1) by controlled_experiment(M, accuracy, D, exp_1)
+  discharge randomization     with e2
+  discharge adequate_power    with e3
+  discharge external_validity with e4
+
+# --- A leaf-rooted argument (the illegal rebut TARGET) -----------------------------------------
+
+claim c_neg
+  nl      = "Method M does not improve accuracy on distribution D"
+  formal  = not_improves(M, accuracy, D)
+  binding = { author = bob, audit-status = unreviewed }
+
+# A bare assertion leaf: its conclusion not_improves(M, accuracy, D) is the declared contrary of
+# a1's conclusion, but the argument's ROOT is a leaf, not a rule.
+leaf en : not_improves(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [note.pdf#sec=1]
+
+arg d_leaf : supports(c_neg) by leaf(en)
+
+# THE ILLEGAL ATTACK: a1 rebuts d_leaf, but d_leaf's root is a leaf, so this is the wrong
+# occurrence kind for a rebut (which must target a defeasible rule occurrence) → R10.
+rebut a1 d_leaf
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# REJECT — spec class R10 (attack position: `rebut a1 d_leaf` targets a leaf-rooted argument; a
+#   rebut must hit a defeasible rule occurrence. Check.hs stage 5, CE_R10 WrongOccurrenceKind
+#   OccRule OccLeaf). Exit code 1. This is R10 (wrong occurrence), not R11 (missing contrary): the
+#   conclusions ARE contrary, so the failure is the occurrence kind.
+#
+# Teaching point: the checker refuses to compile an ill-typed edge — a rebut against a leaf is not
+# silently downgraded or ignored, it is a located rejection. Attack construction is trusted work.

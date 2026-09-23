@@ -1,0 +1,62 @@
+# Corpus unit stay-on-topic-with-classifier-free-guidance/C05 — gap (mandatory rater-power CQ unmet)
+#
+# Source: m0/annotations/stay-on-topic-with-classifier-free-guidance.yaml C05 (causal,
+# blind_paired_human_evaluation; corpus pin 62e9b54). Headline: CFG with negative prompting
+# improves assistant system-prompt following — at gamma=3 blind paired human evaluators prefer
+# CFG completions 75% of the time over vanilla, while user-prompt relevance preference stays near
+# 52% (approximately random), from 1,740 blindly judged prompt pairs (E05, Figure 5).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * The sample's single blind_paired_human_evaluation claim -> human_evaluation(S, B, Q, Exp),
+#     conclusion preferred(S, B, Q). Bundled/conjunctive claim: the binding conjunct is the
+#     positive system-prompt-following preference (the sample headline); the near-50% user-prompt
+#     relevance null conjunct stays in nl and refs.
+#   * human_evaluation's mandatory rater_power CQ (sufficient_raters) maps onto the annotation's
+#     mandatory "per-gamma vote counts and evaluator counts sufficient, with variability for the
+#     75/52 figures?" — annotated unmet-gap (E05 metrics list only total/unique vote counts; no
+#     per-gamma sample size, CI, or test). An open mandatory obligation is IncompleteArgument, so
+#     NO complete arg is declarable: E2-style gap.
+#   * blinding (mandatory) is annotated met and its leaf is supplied. Post-hoc gamma=3 selection
+#     maps to the OPTIONAL preregistration CQ (no status effect); the 52%-establishes-
+#     non-degradation CQ is the null conjunct's equivalence question, outside the binding atom.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact stay-on-topic-with-classifier-free-guidance at sha256:7d6532a2b09e
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, the positive preference conjunct --------------------------------------
+
+claim c05
+  nl      = "At gamma=3 blind paired human evaluators prefer CFG-with-negative-prompting completions for system-prompt following 75 percent of the time over vanilla, while user-prompt relevance preference stays near 52 percent; per-gamma vote counts and rater variability for the 75 and 52 figures are not reported and gamma=3 is the post hoc peak"
+  formal  = preferred(cfg_negative_prompting, vanilla, system_prompt_following)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E05's gamma=3 preference cell (75% system-prompt following), per result cell.
+leaf e1 : reports(e05, human_preference(cfg_negative_prompting, vanilla, system_prompt_following, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C05, logic/experiments.md#E05, trace/exploration_tree.yaml#N12, Figure-5]
+
+leaf e2 : blinded(e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Procedure-step-3, logic/experiments.md#E05-Setup]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: sufficient_raters(e05) has no honest leaf — E05 reports no per-gamma
+# vote counts, confidence intervals, or significance for the 75%/52% rates — and human_evaluation
+# makes that obligation mandatory. The complete-support set is therefore empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

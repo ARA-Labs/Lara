@@ -1,0 +1,9 @@
+# The policy of the pw-lara context (fixtures/pw/source): two nullary
+# predicates and the one contrary that licenses an undermine of a p report by
+# a q report. No rules, so every argument is a leaf.
+policy pw-lara
+
+pred p
+pred q
+
+contrary q p

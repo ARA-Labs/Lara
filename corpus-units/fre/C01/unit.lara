@@ -1,0 +1,80 @@
+# Corpus unit fre/C01 — justified (generalization; controlled_comparison)
+#
+# Source: m0/annotations/fre.yaml C01 (generalization, double-annotated; corpus pin 62e9b54).
+# Headline: using only K=32 (state, reward) pairs per task, FRE-all reaches an overall normalized
+# score of 57 +- 9 vs SF 33 +- 12, GC-IQL 24 +- 12, GC-BC 18 +- 5 (FB/SF use K=5120), competitive
+# or better across AntMaze/ExORL/Kitchen over 5 seeds.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: controlled_comparison. Nearest-competitor convention: B = SF, the strongest
+#     non-privileged baseline on the aggregate 'all' row (FRE 57 vs SF 33); GC-IQL, GC-BC, FB, and
+#     the privileged OPAL are dominated a fortiori and stay in `nl` and refs. Q = zero_shot_return,
+#     D = eval_suite (AntMaze/ExORL/Kitchen).
+#   * KEY judgment (uniform-standard rule, recorded per LOWERING.md). The annotation's mandatory
+#     CQ3 asks for a statistical significance TEST across the 5 seeds and is rated unmet-gap. Its
+#     nearest policy-mandatory CQ is variance_reported, whose bar is only that variance be reported
+#     — and FRE reports mean +- std over 5 seeds, so variance_reported(e01) is FACTUALLY MET and is
+#     discharged. corpus-v1 has no significance-test CQ; the annotator's stronger demand is a policy
+#     vocabulary gap, noted here, not a hole in an accepted unit. This is the mirror image of
+#     adaptive-pruning/C03 (no seeds AT ALL -> variance genuinely unmet -> gap): the policy call
+#     wins in both directions.
+#   * CQ1 (same datasets/episodes/normalization) discharges baseline_parity; CQ2 (K=32 vs K=5120
+#     budget asymmetry disclosed and, if anything, disadvantaging FRE) discharges measurement_
+#     validity. The optional scope_match has no annotated met basis (the only optional-scope CQ,
+#     reproducibility/hardware, is unmet), so it is declared an `open` hole — corpus-v1's question-
+#     coverage rule (Check.Support R5) requires every rule question to be discharged or open, and an
+#     open OPTIONAL question adds no obligation (openMandatory filters to mandatory), so a1 stays
+#     complete. The optional OPAL-privilege caveat (met) is subsumed in nl. All three mandatory CQs
+#     met -> complete support -> justified.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact fre at sha256:c1bb86743873
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c01
+  nl      = "Using only K=32 (state, reward) pairs per task, FRE-all reaches an overall normalized score of 57 +- 9 vs SF 33 +- 12, GC-IQL 24 +- 12, GC-BC 18 +- 5 (FB/SF use K=5120), competitive-or-better across AntMaze/ExORL/Kitchen over 5 seeds"
+  formal  = better(fre_all, sf, zero_shot_return, eval_suite)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+leaf e1 : reports(e01, compares(fre_all, sf, zero_shot_return, eval_suite, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table1_main_results.md, Table-1-row-all]
+
+leaf e2 : matched_setup(fre_all, sf, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-steps-1-7, Table-1-Conditions]
+
+leaf e3 : valid_measurement(zero_shot_return, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Procedure-steps-4-7, Table-1-caption]
+
+leaf e4 : variance_reported(e01)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table1_main_results.md, logic/experiments.md#E01-Metrics]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c01) by controlled_comparison(fre_all, sf, zero_shot_return, eval_suite, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  discharge variance_reported    with e4
+  open      scope_match
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c01 -> justified (its complete support a1 is `in`; spec §8 aggregation)

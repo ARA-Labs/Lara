@@ -1,0 +1,247 @@
+# Example E4 — reinstatement (justified UNDER attack, once per attack kind)
+#
+# Witnesses: the cells the E1–E3 suite leaves empty. In E1/E3 a claim is justified only when its
+# support argument has no attackers; here three claims stay JUSTIFIED while their support
+# arguments are attacked, because each attacker is itself defeated by an unattacked defender —
+# grounded reinstatement. Three independent (M, D) contexts on empirical-v2, one per defended
+# attack kind:
+#
+#   * REBUT reinstatement (context _r): a null replication rebuts the experiment (the mutual
+#     2-cycle attack completeness mandates), but a selective-reporting finding UNDERCUTS the
+#     replication, so the experiment's argument is reinstated: justified, not contested.
+#   * UNDERMINE reinstatement (context _u): a not_generalizes finding undermines the experiment's
+#     external_validity leaf, but a meta-review retraction UNDERMINES the finding's own leaf
+#     (via the one-directional contrary refuted_by_metareview -> not_generalizes), reinstating
+#     the experiment.
+#   * UNDERCUT reinstatement (context _x): a shift_report undercuts the experiment, and a
+#     miscalibration_report undercuts the shift_report. This is E5's context W WITHOUT the
+#     voluntary back edge: one declared undercut fewer turns the contested cycle into a
+#     reinstatement chain.
+#
+# The contrast with E3/E5 is the point: identical attack kinds, opposite outcomes, decided
+# entirely by whether the attacker is itself attacked under the policy's declared vocabulary.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact resnet_suite at sha256:e4e4...
+policy empirical-v2
+use backends [nd@1]
+
+# ===============================================================================================
+# CONTEXT R — rebut reinstated: the replication is undercut, the original claim survives
+# ===============================================================================================
+
+claim c_r
+  nl      = "Method M_r improves accuracy on distribution D_r"
+  formal  = improves(M_r, accuracy, D_r)
+  binding = { author = alice, audit-status = reviewed }
+
+claim c_rn
+  nl      = "Method M_r does not improve accuracy on distribution D_r"
+  formal  = not_improves(M_r, accuracy, D_r)
+  binding = { author = bob, audit-status = reviewed }
+
+leaf er1 : reports(exp_r, effect(M_r, accuracy, D_r, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/r_pos.csv#row=mean]
+
+leaf er2 : randomized(exp_r)
+  kind       = attested
+  provenance = user
+  refs       = [paper_r.pdf#sec=4]
+
+leaf er3 : powered(exp_r)
+  kind       = attested
+  provenance = user
+  refs       = [paper_r.pdf#sec=4]
+
+leaf er4 : generalizes(M_r, accuracy, D_r)
+  kind       = attested
+  provenance = user
+  refs       = [paper_r.pdf#sec=5]
+
+leaf ern1 : reports(exp_rn, effect(M_r, accuracy, D_r, negligible))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/r_null.csv#row=mean]
+
+leaf ern2 : randomized(exp_rn)
+  kind       = attested
+  provenance = user
+  refs       = [paper_rn.pdf#sec=3]
+
+leaf ern3 : powered(exp_rn)
+  kind       = attested
+  provenance = user
+  refs       = [paper_rn.pdf#sec=3]
+
+# The defense: the replication's null result was selectively reported — the declared
+# `exception` for null_result in empirical-v2.
+leaf er_sr : selective_reporting(M_r, accuracy, D_r)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [metareview_r.pdf#sec=2]
+
+arg a_r : supports(c_r) by controlled_experiment(M_r, accuracy, D_r, exp_r)
+  discharge randomization     with er2
+  discharge adequate_power    with er3
+  discharge external_validity with er4
+
+arg a_rn : supports(c_rn) by null_result(M_r, accuracy, D_r, exp_rn)
+  discharge randomization  with ern2
+  discharge adequate_power with ern3
+
+# The defender: an unattacked leaf argument undercutting the replication's rule application.
+arg d_sr : challenges(adequate_power(a_rn)) by leaf(er_sr)
+
+# The mutual rebut is mandated by attack completeness (both contrary orientations are declared
+# and both conclusions are present); the undercut is the voluntary defense that breaks the tie.
+rebut a_rn a_r
+rebut a_r a_rn
+undercut d_sr a_rn.rule
+
+# ===============================================================================================
+# CONTEXT U — undermine reinstated: the not_generalizes finding is itself undermined
+# ===============================================================================================
+
+claim c_u
+  nl      = "Method M_u improves accuracy on distribution D_u"
+  formal  = improves(M_u, accuracy, D_u)
+  binding = { author = carol, audit-status = reviewed }
+
+leaf eu1 : reports(exp_u, effect(M_u, accuracy, D_u, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/u.csv#row=mean]
+
+leaf eu2 : randomized(exp_u)
+  kind       = attested
+  provenance = user
+  refs       = [paper_u.pdf#sec=4]
+
+leaf eu3 : powered(exp_u)
+  kind       = attested
+  provenance = user
+  refs       = [paper_u.pdf#sec=4]
+
+leaf eu4 : generalizes(M_u, accuracy, D_u)
+  kind       = attested
+  provenance = user
+  refs       = [paper_u.pdf#sec=5]
+
+# The attacker's evidence: a robustness study finds the method does not generalize.
+leaf eu_ng : not_generalizes(M_u, accuracy, D_u)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [robustness_u.pdf#appendix=C]
+
+# The defense: a meta-review refutes that robustness study. The contrary
+# refuted_by_metareview -> not_generalizes is one-directional, so the defender is unattackable.
+leaf eu_rm : refuted_by_metareview(M_u, accuracy, D_u)
+  kind       = attested
+  provenance = user
+  refs       = [metareview_u.pdf#sec=3]
+
+arg a_u : supports(c_u) by controlled_experiment(M_u, accuracy, D_u, exp_u)
+  discharge randomization     with eu2
+  discharge adequate_power    with eu3
+  discharge external_validity with eu4
+
+arg n_ng : challenges(eu4) by leaf(eu_ng)
+arg n_rm : challenges(eu_ng) by leaf(eu_rm)
+
+# n_ng's undermine on a_u is voluntary; n_rm's undermine on n_ng covers the completeness-mandated
+# (refuted_by_metareview, not_generalizes) pair. No reverse pair is declared, so n_rm has no
+# attacker and the chain reinstates a_u.
+undermine n_ng a_u.external_validity.leaf
+undermine n_rm n_ng.leaf
+
+# ===============================================================================================
+# CONTEXT X — undercut reinstated: the shift report is undercut, the experiment survives
+# ===============================================================================================
+
+claim c_x
+  nl      = "Method M_x improves accuracy on distribution D_x"
+  formal  = improves(M_x, accuracy, D_x)
+  binding = { author = dave, audit-status = reviewed }
+
+leaf ex1 : reports(exp_x, effect(M_x, accuracy, D_x, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/x.csv#row=mean]
+
+leaf ex2 : randomized(exp_x)
+  kind       = attested
+  provenance = user
+  refs       = [paper_x.pdf#sec=4]
+
+leaf ex3 : powered(exp_x)
+  kind       = attested
+  provenance = user
+  refs       = [paper_x.pdf#sec=4]
+
+leaf ex4 : generalizes(M_x, accuracy, D_x)
+  kind       = attested
+  provenance = user
+  refs       = [paper_x.pdf#sec=5]
+
+leaf ex_rs : reports_shift(mon_x, M_x, accuracy, D_x)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [monitor_x.log#line=77]
+
+leaf ex_cal : calibrated(mon_x)
+  kind       = attested
+  provenance = user
+  refs       = [monitor_x.pdf#sec=2]
+
+leaf ex_aud : audits(aud_x, M_x, accuracy, D_x)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [audit_x.pdf#sec=4]
+
+arg a_x : supports(c_x) by controlled_experiment(M_x, accuracy, D_x, exp_x)
+  discharge randomization     with ex2
+  discharge adequate_power    with ex3
+  discharge external_validity with ex4
+
+arg x_shift : challenges(external_validity(a_x)) by shift_report(M_x, accuracy, D_x, mon_x)
+  discharge calibration with ex_cal
+
+arg x_aud : challenges(calibration(x_shift)) by miscalibration_report(M_x, accuracy, D_x, aud_x)
+
+# Both undercuts are voluntary. The circular exception pair of empirical-v2 would ALSO license
+# `undercut x_shift x_aud.rule` — declaring it is exactly E5's contested context W; leaving it
+# out is what makes this a reinstatement chain.
+undercut x_shift a_x.rule
+undercut x_aud x_shift.rule
+
+status c_r
+status c_rn
+status c_u
+status c_x
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# Arguments in declaration order (all complete):
+#   a_r     (0) -> in     (LIn; sole attacker a_rn is out — REINSTATED)
+#   a_rn    (1) -> out    (LOut; undercut by the unattacked d_sr)
+#   d_sr    (2) -> in     (LIn; unattacked)
+#   a_u     (3) -> in     (LIn; sole attacker n_ng is out — REINSTATED)
+#   n_ng    (4) -> out    (LOut; undermined by the unattacked n_rm)
+#   n_rm    (5) -> in     (LIn; unattacked)
+#   a_x     (6) -> in     (LIn; sole attacker x_shift is out — REINSTATED)
+#   x_shift (7) -> out    (LOut; undercut by the unattacked x_aud)
+#   x_aud   (8) -> in     (LIn; unattacked)
+# Claim statuses:
+#   c_r  -> justified   (support a_r is in, UNDER a rebut edge)
+#   c_rn -> defeated    (support a_rn is out)
+#   c_u  -> justified   (support a_u is in, UNDER an undermine edge)
+#   c_x  -> justified   (support a_x is in, UNDER an undercut edge)
+#
+# Teaching point: E3's defeats and E4's reinstatements use the same attack constructors; the
+# difference is one policy declaration each (an exception for null_result, a one-directional
+# contrary for the meta-review, a withheld back edge for the audit). Defense is policy
+# vocabulary, not a new mechanism.

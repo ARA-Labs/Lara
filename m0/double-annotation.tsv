@@ -1,0 +1,19 @@
+artifact	claim_id	label_a	label_b	agree	adjudicated	note
+adaptive-pruning	C04	causal	causal	yes	causal
+all-in-one	C05	descriptive	descriptive	yes	descriptive
+bam	C05	comparative	comparative	yes	comparative
+bam	C06	causal	causal	yes	causal
+bbox	C05	generalization	generalization	yes	generalization
+fre	C01	comparative	generalization	no	generalization	zero-shot breadth across reward families IS the claimed content; the 5120-sample comparison is the evidence standard, not the headline
+ftrl	C01	negative-result	negative-result	yes	negative-result
+lbcs	C05	generalization	comparative	no	comparative	"scales to ImageNet-1k" is routine bigger-dataset evaluation, not breadth-as-content; headline is highest-accuracy-among-methods
+pinn	C03	causal	causal	yes	causal
+robust-clip	C03	descriptive	descriptive	yes	descriptive
+robust-clip	C07	causal	negative-result	no	negative-result	both readings fit; precedence rule (negative-result > causal) decides — payload is attacks FAILING under robust encoders
+self-composing-policies	C04	comparative	comparative	yes	comparative
+semantic-self-consistency	C05	descriptive	descriptive	yes	descriptive
+sequential-neural-score-estimation	C04	comparative	comparative	yes	comparative
+test-time-model-adaptation	C04	negative-result	negative-result	yes	negative-result
+test-time-model-adaptation	C07	comparative	comparative	yes	comparative
+rebench-rust_codecontests	C02	implementation-behavioral	implementation-behavioral	yes	implementation-behavioral
+rebench-triton_cumsum	C09	implementation-behavioral	negative-result	no	negative-result	floor-above-reference in every run = cannot-reach-target; precedence (negative-result > implementation-behavioral); consistent with sibling C03

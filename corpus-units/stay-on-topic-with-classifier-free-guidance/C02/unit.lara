@@ -1,0 +1,70 @@
+# Corpus unit stay-on-topic-with-classifier-free-guidance/C02 — gap (mandatory power CQ unmet)
+#
+# Source: m0/annotations/stay-on-topic-with-classifier-free-guidance.yaml C02 (comparative,
+# compute_matched_equivalence; corpus pin 62e9b54). Headline: at equal inference FLOPs, CFG
+# models (which double FLOPs/token via two forward passes) match a roughly 2x-FLOP vanilla
+# model on zero-shot accuracy — ANCOVA at p=0.01 finds no significant gap on 5 of 9 benchmarks;
+# of the 4 significant tasks, 2 favor CFG and 2 favor vanilla (E01/E04, Table 4).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * compute_matched_equivalence is a controlled-comparison family scheme whose conclusion is a
+#     NULL finding (no difference at matched compute), so it lowers through the `null_comparison`
+#     dual: formal = not_better(cfg, vanilla_2x_flops, zero_shot_accuracy, lm_eval_9task). The
+#     claim_type is comparative but the headline is an equivalence, so the null dual is the honest
+#     conclusion (a controlled_comparison `better(...)` would over-claim CFG superiority).
+#   * null_comparison's mandatory adequate_power CQ maps onto the annotation's mandatory
+#     "non-significance backed by an equivalence test or power analysis?" — annotated unmet-gap
+#     (E04 runs only an ANCOVA significance test at p=0.01, no TOST/equivalence or power). An open
+#     mandatory obligation is an IncompleteArgument rejection, so NO complete arg is declarable:
+#     E2-style gap (see adaptive-pruning/C03).
+#   * Reinforcing (not decisive): the mandatory family-pooling CQ (GPT-2/Pythia/LLaMA regressed
+#     with no family covariate) is a second unmet baseline_parity aspect; the identical-benchmark
+#     match (CQ1) and method-neutral FLOP accounting (CQ4) are the two met CQs whose leaves the
+#     paper does supply. Multiplicity across the 9 tests is annotated optional-unmet, no effect.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact stay-on-topic-with-classifier-free-guidance at sha256:7d6532a2b09e
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, an equivalence at matched compute -------------------------------------
+
+claim c02
+  nl      = "On 5 of 9 benchmarks ANCOVA at p=0.01 finds no significant accuracy difference between CFG models at doubled inference FLOPs and vanilla models at equal FLOPs (of the 4 significant tasks 2 favor CFG and 2 favor vanilla), read as matching about 2x model size; no equivalence test or power analysis is reported"
+  formal  = not_better(cfg, vanilla_2x_flops, zero_shot_accuracy, lm_eval_9task)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E04's per-task ANCOVA verdicts (5/9 insignificant, 2+2 split), folded per
+# result cell into refs.
+leaf e1 : reports(e04, compares(cfg, vanilla_2x_flops, zero_shot_accuracy, lm_eval_9task, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C02, logic/experiments.md#E04, trace/exploration_tree.yaml#N06, Table-4]
+
+leaf e2 : matched_setup(cfg, vanilla_2x_flops, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01-Setup, logic/experiments.md#E04-Procedure-step-4]
+
+leaf e3 : valid_measurement(zero_shot_accuracy, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Procedure-step-4]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: adequate_power(e04) has no honest leaf — E04 runs only a p=0.01
+# significance test, never an equivalence/power procedure — and null_comparison makes that
+# obligation mandatory. The complete-support set is therefore empty.)
+
+status c02
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

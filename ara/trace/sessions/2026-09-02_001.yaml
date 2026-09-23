@@ -1,0 +1,482 @@
+session:
+  id: "2026-09-02_001"
+  date: "2026-09-02"
+  started: "2026-09-02T00:00"
+  last_turn: "2026-09-02T23:50"
+  turn_count: 5
+  summary: >
+    PW0 possible-world outer-model gate implemented and opened as the PR. Five
+    modules land under Lara.PW and Lara.Examples.PW carrying T0-T5 and the T7
+    non-preservation witness; the wrapper redefines nothing local and the diff
+    is pure insertion. Two independent post-implementation reviews found three
+    doc comments asserting more than their theorems; all were closed by
+    strengthening the proofs rather than narrowing the prose, adding five
+    theorems including t7_support_transported, which is the statement the
+    T7/T8 boundary actually rests on. C47 crystallized. The executable
+    comparison was then renamed compare -> crossCompare (N273) after measuring
+    that the Ord.compare collision breaks `unfold` in any module that opens
+    Lara.PW. Full build (127 jobs) and axiom audit (1612 declarations) clean.
+    After the PR merged, the researcher directed the PW track forward in
+    parallel with M4 (N275): T6 exact checked-support transport was mechanized
+    directly against the frozen interface — three insertion-only modules, the
+    three-clause StructuralBridge contract, support_transport with verbatim
+    obligations, target-registry occurrence replay via B0, and
+    Admits/admits_transport discharging PW0 limitation 1 — and opened as PR
+    (N276). Build 130 jobs, audit 1707 declarations (78 PW-T6), clean.
+    C48 crystallized; O113 crystallized into the PW-T6 translation-form
+    constraint. Then, on the researcher's directive to implement and finish the M4 plan, Theory M4 Part A was executed end to end (F0-F3 plus review fixes) and pushed to the PR: the fragment/linking calculus with a witnessed link guard, saturating linking, the structural merge proved semantically inert through a generic AF node-merging morphism, context composition, and the headline backend_replacement_congruence — an injective, acceptance-preserving certificate relabel is unobservable in every admissible context. The final review found both headline witnesses vacuous (assurance-free fixtures); repaired with a certificate-bearing split and a real backend swap. C49 crystallized. 1911 audited declarations, 204 M4.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N271"
+    routing: direct
+    provenance: ai-executed
+    summary: "PW0 mechanized from the compile-verified plan; 47 theorems registered; build and audit clean."
+  - turn: 1
+    type: decision
+    id: "N272"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Review findings closed by mechanizing the missing content, not by weakening doc comments."
+  - turn: 1
+    type: observation
+    id: "O111"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Outer-layer conservativity is cheap when the layer only imports; the cost moves to adequacy."
+  - turn: 1
+    type: observation
+    id: "O112"
+    routing: staged
+    provenance: ai-suggested
+    summary: "accept is an unconstrained Prop; T6 is the discharge of PW0's largest open hypothesis."
+  - turn: 1
+    type: observation
+    id: "O113"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Bridge-global Option translation cannot express target-world-dependent alias resolution."
+  - turn: 2
+    type: decision
+    id: "N273"
+    routing: direct
+    provenance: user
+    summary: "Executable comparison renamed compare -> crossCompare; compare_* theorem names kept."
+  - turn: 3
+    type: decision
+    id: "N274"
+    routing: direct
+    provenance: user
+    summary: "Axiom audit hardened: it could previously pass over a silently reduced declaration set."
+  - turn: 1
+    type: claim
+    id: "C47"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Support transport does not imply status preservation; crystallized via artifact commitment plus empirical resolution."
+  - turn: 4
+    type: decision
+    id: "N275"
+    routing: direct
+    provenance: user
+    summary: "PW track proceeds to T6 in parallel with M4."
+  - turn: 4
+    type: experiment
+    id: "N276"
+    routing: direct
+    provenance: ai-executed
+    summary: "T6 mechanized: three-clause contract, transport with verbatim obligations, occurrence replay, accept discharge; the PR; build 130 jobs, audit 1707."
+  - turn: 4
+    type: observation
+    id: "O114"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Obligations transport verbatim because question keys are rule-local; completeness is the O=[] special case."
+  - turn: 4
+    type: observation
+    id: "O115"
+    routing: staged
+    provenance: ai-suggested
+    summary: "The T6 induction rides two commuting facts with disjoint footprints (nf touches literals, translation touches names)."
+  - turn: 4
+    type: observation
+    id: "O116"
+    routing: staged
+    provenance: ai-suggested
+    summary: "trSupport is not total on checked supports (θDom allows unused out-of-vocabulary bindings); domain evidence is irreducible."
+  - turn: 4
+    type: claim
+    id: "C48"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Checked-support transport needs only environment-parameter correspondences and ties accept to the checker; from O112 via artifact commitment."
+  - turn: 4
+    type: constraint
+    id: "PW-T6 translation-form constraint"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Bridge-global Option translation cannot express world-dependent resolution; from O113 via artifact commitment."
+
+  - turn: 5
+    type: pivot
+    id: "N277"
+    routing: direct
+    provenance: user
+    summary: "Directive: implement the M4 plan and finish it; Part A executed F0-F3 in one session."
+  - turn: 5
+    type: decision
+    id: "N278"
+    routing: direct
+    provenance: ai-executed
+    summary: "F0 froze the carrier; rejection became a witnessed LinkFault sum, registry became a parameter rather than a rejection class."
+  - turn: 5
+    type: experiment
+    id: "N279"
+    routing: direct
+    provenance: ai-executed
+    summary: "F1 mechanized the calculus; spec review FAIL on five gaps, all closed; generic AF morphism split to Lara/Invariants/Merge.lean."
+  - turn: 5
+    type: experiment
+    id: "N280"
+    routing: direct
+    provenance: ai-executed
+    summary: "F2 proved backend_replacement_congruence over admissible contexts; the plan's unconditional phrasing is false under forward-only acceptance."
+  - turn: 5
+    type: dead_end
+    id: "N281"
+    routing: direct
+    provenance: ai-executed
+    summary: "Surface-pair witness unreachable: every accepted surface fixture rests on native_decide, which the axiom discipline bans."
+  - turn: 5
+    type: decision
+    id: "N282"
+    routing: direct
+    provenance: ai-executed
+    summary: "compose does not saturate; composition closed for hygiene, not linkability. SideOk_composed takes cross-coverage explicitly."
+  - turn: 5
+    type: dead_end
+    id: "N283"
+    routing: direct
+    provenance: ai-executed
+    summary: "First witness suite was assurance-free, so both headline witnesses reduced to reflexivity; two prior reviews passed it."
+  - turn: 5
+    type: experiment
+    id: "N284"
+    routing: direct
+    provenance: ai-executed
+    summary: "Certificate-bearing split plus renameCore/certSwap/registryWrapped: a real backend swap, with cert_relabel_moves proving non-identity."
+  - turn: 5
+    type: observation
+    id: "O117"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Admissibility is forced by forward-only acceptance plus a partial observation."
+  - turn: 5
+    type: observation
+    id: "O118"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A data-only composition operator cannot saturate; closure is two properties."
+  - turn: 5
+    type: observation
+    id: "O119"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A certificate theorem's witness is vacuous unless the fixture carries a certificate; gates do not detect it."
+  - turn: 5
+    type: observation
+    id: "O120"
+    routing: staged
+    provenance: ai-suggested
+    summary: "An axiom-discipline ban is paid when a new result wants to reuse old fixtures."
+  - turn: 5
+    type: observation
+    id: "O121"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Grounded observation is invariant under any node-merging AF morphism; framework vocabulary, not calculus vocabulary."
+  - turn: 5
+    type: claim
+    id: "C49"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Profile-preservation buys the context quantifier for free — crystallized via artifact commitment (merged branch, the PR, docs depend on it)."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Transcribed the plan's five compile-verified Lean blocks byte-identically
+      into new modules, wired both roots, and gated each task on lake build plus
+      a per-task #print axioms run.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Outer.lean"
+      - "lean/Lara/PW/Uniform.lean"
+      - "lean/Lara/PW/Compare.lean"
+      - "lean/Lara/PW/Instance.lean"
+      - "lean/Lara/Examples/PW.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+  - turn: 1
+    action: >
+      Wrote the landing record and added the
+      mechanization-plan inventory section that lean/Lara.lean already pointed at.
+    provenance: ai-executed
+    files_changed:
+      - "docs/theory-pw0-outer-model.md"
+      - "docs/mechanization-plan.md"
+  - turn: 1
+    action: >
+      Ran two independent reviews (spec compliance, code quality) over the full
+      diff, then applied their findings by adding t7_support_transported,
+      presentsT7, t7_dia_via_adequacy, overlap_local_gap and t7_no_two_status,
+      and by giving sigmaOverlap its own predicate r.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/Examples/PW.lean"
+      - "lean/Lara/PW/Outer.lean"
+      - "lean/Lara/PW/Compare.lean"
+      - "lean/AxCheck.lean"
+  - turn: 1
+    action: "Deleted the executed plan per repo rule, pushed the branch, opened the PR."
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-09-02-pw0-outer-model-gate.md"
+
+  - turn: 2
+    action: >
+      Measured the Ord.compare collision rather than assuming it, then renamed
+      Lara.PW.compare to crossCompare and re-ran the full build and audit. The
+      rename script's prefix guard wrongly renamed five AxCheck theorem lines;
+      the audit caught it (exit 1, 1607 instead of 1612) and it was reverted.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Compare.lean"
+      - "lean/Lara/PW/Outer.lean"
+      - "lean/Lara/Examples/PW.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-pw0-outer-model.md"
+      - "docs/mechanization-plan.md"
+
+  - turn: 3
+    action: >
+      Reproduced the audit-gate hole end to end (bad #print axioms names ->
+      "Axiom audit passed.", exit 0), then fixed it in two layers: CI now uses
+      the documented set -o pipefail form, and check-axioms.sh rejects Lean
+      error diagnostics in its input. Four regression cases added; 14/14 pass;
+      real audit re-run clean at 1612 declarations.
+    provenance: ai-executed
+    files_changed:
+      - "scripts/check-axioms.sh"
+      - "scripts/test-check-axioms.sh"
+      - ".github/workflows/ci.yml"
+
+  - turn: 4
+    action: >
+      Ran the research-foresight world model over the ARA for the next-step
+      question, verified the live tracker (the M4 PR open; the B0 item closed; the PW tracker at
+      1/4 sub-issues), and reported that the exit decision was the next
+      step with T6 as the recommended continuation.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
+    action: >
+      Implemented T6 end to end on theory/191-pw-t6-structural-transport:
+      Lara.PW.Translation (partial symbol map, instAPat_tr, equiv_tr),
+      Lara.PW.Structural (StructuralBridge, support_transport and corollaries,
+      Admits/admits_transport), Lara.Examples.PWStructural (identity
+      endobridge at T7, renaming bridge, domain negative), both roots wired,
+      78 new audit rows. lake build 130 jobs and the hardened audit at 1707
+      declarations both clean; diff pure insertion (2142 lines). Wrote
+      docs/theory-pw-t6-structural-transport.md; pushed and opened the PR.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Translation.lean"
+      - "lean/Lara/PW/Structural.lean"
+      - "lean/Lara/Examples/PWStructural.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-pw-t6-structural-transport.md"
+
+  - turn: 5
+    action: "Executed Theory M4 Part A phases F0-F3 plus review fixes; five commits on plan/m4-context-calculus, pushed; the PR updated; the issues filed; updated."
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Context/Fragment.lean
+      - lean/Lara/Context/Link.lean
+      - lean/Lara/Context/Merge.lean
+      - lean/Lara/Context/Compose.lean
+      - lean/Lara/Context/Equivalence.lean
+      - lean/Lara/Context/Surface.lean
+      - lean/Lara/Invariants/Merge.lean
+      - lean/Lara/Examples/Linking.lean
+      - lean/AxCheck.lean
+      - lean/Lara.lean
+      - docs/theory-m4-context-calculus-decision.md
+      - docs/theory-m4-contextual-adequacy.md
+      - docs/theory-m3-source-updates.md
+      - plans/2026-09-02-theory-m4-full-abstraction.md
+
+claims_touched:
+  - id: C47
+    action: crystallized
+    turn: 1
+  - id: C48
+    action: crystallized
+    turn: 4
+
+  - id: C49
+    action: crystallized
+    turn: 5
+
+logic_revisions:
+  - turn: 1
+    entry: C47
+    field: created
+    before: "(none — new claim)"
+    after: "C47: Transporting well-formed checked support across an accepted bridge does not transport grounded status"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      The T7 witness is committed, AxCheck-registered, and documented in
+      docs/theory-pw0-outer-model.md as the T6/T8 boundary; the decide-closed
+      fixtures are the empirical resolution. Status set to supported rather
+      than hypothesis because the proof IS the evidence and it is audited.
+  - turn: 1
+    entry: "logic/solution/mechanization.md §9"
+    field: created
+    before: "(none — file ended at §8)"
+    after: "§9 PW0 wraps the local layer without redefining it"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Mirrors the §8 precedent set for M5 by O110."
+  - turn: 4
+    entry: C48
+    field: created
+    before: "(none — new claim)"
+    after: "C48: Checked-support transport needs only environment-parameter correspondences, and it ties the outer model's applicability judgment to the checker"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      From O112. The committed, AxCheck-registered support_transport /
+      Admits / admits_transport theorems and the PR are the artifact
+      commitment; status set to supported on the C47 precedent — the audited
+      proof IS the evidence. The user has not yet commented on the result, so
+      provenance stays ai-suggested.
+  - turn: 4
+    entry: "logic/solution/constraints.md: PW-T6 translation-form constraint"
+    field: created
+    before: "(none — new constraint entry)"
+    after: "Bridge-global partial translation cannot express target-world-dependent resolution; adopting the edge-indexed form re-opens the adequacy layer and is budgeted as a contract change."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "From O113; docs/theory-pw-t6-structural-transport.md §8.1 now depends on it."
+  - turn: 4
+    entry: "logic/solution/mechanization.md §10"
+    field: created
+    before: "(none — file ended at §9)"
+    after: "§10 T6 transports the typing judgment, not the checker"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Mirrors the §9 precedent set for PW0 by N271/N272."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The plan's Lean was already compiled and axiom-audited during its
+      engineering review, and it explicitly warned against simplifying proofs
+      back toward obvious forms. Byte-identical transcription with lake build
+      and the axiom audit as gates was therefore stronger evidence than any
+      reviewer reading; both reviewers independently confirmed the transcription
+      was byte-exact and re-ran the audit themselves.
+  - turn: 1
+    excerpt: >
+      The plan's own prose claimed 45 registered theorems while its code block
+      listed 42; the implementation followed the block. After the review fixes
+      the set is 47. A count stated in a landing record must match the file, so
+      the doc now says 47 and asserts the stronger property that every theorem
+      the five modules declare has an audit line.
+  - turn: 1
+    excerpt: >
+      Both reviews converged on the same failure mode without coordination:
+      doc comments asserting more than the theorem beneath them.
+      t7_transport_wellFormed said only that leaf l1 was among the target's
+      arguments — which any coincidental argument satisfies — while its comment
+      claimed the source claim's complete checked support had transported.
+  - turn: 2
+    excerpt: >
+      The collision was measured before deciding, and the measurement changed
+      the argument. Ordinary applications of `compare` never broke -- argument
+      shape disambiguates -- so the risk was narrower than first reported. What
+      decided it was `unfold compare` failing with "ambiguous term" in any
+      module that opens Lara.PW, since the T5 proofs unfold this definition and
+      T6 will be such a module; plus the fact that
+      no paper display cites the key yet, which makes the rename free now and
+      costly later.
+
+  - turn: 3
+    excerpt: >
+      The audit gate could pass vacuously. A `#print axioms` naming a
+      nonexistent declaration does not remove a report -- Lean errors on that
+      line and every other line reports normally -- so the filter saw only
+      healthy reports and printed "Axiom audit passed." CI discarded Lean's
+      exit 1 by piping without pipefail, against the script's own documented
+      usage. A theorem could therefore leave the audited set unnoticed. This
+      matters beyond the one incident: every evidence file in this artifact
+      cites the audit as its verification.
+
+  - turn: 4
+    excerpt: >
+      The researcher's directive was "in parallel to M4" — a scheduling
+      decision, not a review waiver. The exit decision on the PW tracker was taken
+      forward by implementing T6 as a reviewable PR rather than by posting a
+      tracker comment; the PR is the vehicle through which the decision can
+      still be rejected. The plan-PR cadence was skipped this once because the
+      implementation itself was compile-verified and audit-gated end to end
+      in the session, making a separate compile-verified plan document
+      redundant with the artifact it would describe.
+  - turn: 4
+    excerpt: >
+      The design's conditional completeness clause dissolved during
+      mechanization: obligations are question-name lists, question names are
+      rule-local vocabulary the translation preserves, so the transported
+      obligation list is not merely empty-preserving but identical. Proving
+      the stronger exact statement was cheaper than the conditional one.
+
+  - turn: 5
+    excerpt: >
+      The plan said the congruence holds "for every compatible context". Mechanization showed that
+      statement is false under the plan's own forward-only acceptance hypothesis: obs is none on a
+      rejected program, so a second backend that accepts more would differ by definedness. The
+      theorem was taken over ADMISSIBLE contexts and the reason recorded as content, not as a
+      proof-engineering limitation.
+  - turn: 5
+    excerpt: >
+      Both headline witnesses were vacuous and passed two reviews: a fragment of bare evidence
+      leaves is a fixed point of every assurance relabel, so congruence_witness proved obs X = obs X
+      and the D6 witness discharged a certificate hypothesis on a fragment with no certificate. The
+      repair — a certificate-bearing split, a backend core that unwraps a renamed certificate before
+      replaying, and a proof that the relabel is not the identity — is the first concrete instance
+      of result 9's model in the development.
+
+open_threads:
+  - "The PR (T6) awaits CI and human review; the PR (M4 Part A, five commits) pushed and awaiting review. CI has not run on any branch since 2026-08-25, so every gate was run locally."
+  - "M4 Part B (full abstraction) is gated and unentered; stays open. The two F0 obstructions are unchanged: the semantic interface is wider than the declared imports, and completeness is policy-conditional."
+  - "Three follow-ups (native_decide-free surface fixture, private HasSupport inversion lemmas, compose does not saturate) are open from this session."
+  - "T8 must quantify over the target's attackers; T9 needs the composition laws. Both stay on the tracker, and both consume the PW-T6 translation-form constraint: choose the translation form first."
+  - "gap conflates out-of-vocabulary, ill-sorted, not-posed, and posed-but-unsupported until the M5 well-sortedness refinement of Query_κ lands."
+
+ai_suggestions_pending:
+  - "O111: outer-layer conservativity is structurally cheap; the real cost is the adequacy obligation. Not yet affirmed."
+  - "O114: obligations transport verbatim; completeness is the O=[] special case. Not yet affirmed."
+  - "O115: the T6 induction rides two disjoint-footprint commuting facts. Not yet affirmed."
+  - "O116: the transport's translation-domain hypothesis is irreducible. Not yet affirmed."
+  - "C48 crystallized ai-suggested with status supported on the C47 precedent; researcher has not yet commented on the T6 result."
+  - "O117: admissibility is forced, not scaffolding. Not yet affirmed."
+  - "O118: composition closure is two properties, hygiene and linkability. Not yet affirmed."
+  - "O119: a certificate theorem needs a certificate-bearing witness; gates do not catch this vacuity. Not yet affirmed."
+  - "O120: an axiom-discipline ban is paid at reuse time. Not yet affirmed."
+  - "O121: node-merging AF morphism as framework vocabulary. Not yet affirmed."
+  - "C49 crystallized ai-suggested with status supported on the C47/C48 precedent; researcher has not yet commented on the M4 result."

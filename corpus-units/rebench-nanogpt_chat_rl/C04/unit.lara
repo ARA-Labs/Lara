@@ -1,0 +1,68 @@
+# Corpus unit rebench-nanogpt_chat_rl/C04 — gap (mandatory-CQ-unmet path; batch: rebench)
+#
+# Source: m0/annotations/rebench-nanogpt_chat_rl.yaml C04 (implementation-behavioral,
+# analytic_proof; corpus pin 62e9b54). Headline: pairwise single-elimination tournament
+# selection is judge-call-optimal for best-of-N — at N=8 it uses N-1 = 7 judge calls per prompt
+# vs 28 for round-robin, with ceil(log2 N) = 3 dependent latency rounds under parallel dispatch.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * scheme = analytic_proof (annotated strict) -> corpus-v1 `analytic_argument(P, Prf)`
+#     (defeasible). Per LOWERING, the 6 strict-flavored annotations still lower through
+#     analytic_argument; the arithmetic/table-recheck strict adapter does not exist yet
+#     (migration to a strict rule + certificate is future work). Counting identities (7, 28, 3)
+#     stay in nl and refs; the formal atom is the instantiated conclusion
+#     holds_analytically(tournament_judge_call_optimal).
+#   * BOTH mandatory CQs are unmet-gap:
+#       - assumptions_hold (assumptions_established): annotation CQ2 — the N-1 lower bound presumes
+#         a consistent comparator, but the Llama-3-8b judge randomizes pair order and returns
+#         nondeterministic verdicts (N100 approach_context, N104: bit-identical weights scored
+#         differently), so the deterministic optimality argument's key assumption fails.
+#       - scope_licensed (scope_licensed): annotation CQ1 — no experiment inspects the tournament
+#         code path; E03, the only cited experiment, verifies C03 and covers generation-parameter
+#         alignment, so the code citation in C04's Proof stands in for an inspection nobody ran.
+#     A mandatory policy CQ with no honest discharging leaf is an IncompleteArgument rejection, so
+#     NO complete analytic_argument(...) instance is declarable: E2-style unit, `gap` on empty
+#     support.
+#   * Dead end N604 is annotated `decision: undercut` of the latency sub-claim's support (a
+#     tournament run stalled under a 429 judge storm, so within-round parallelism did not deliver
+#     round-bounded latency). Per LOWERING Attacks, with a mandatory CQ independently unmet the gap
+#     rule wins: there is no arg to undercut, so N604 is recorded here as a header note only.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-nanogpt_chat_rl at sha256:170bca122d75
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c04
+  nl      = "Pairwise single-elimination tournament selection is judge-call-optimal for best-of-N: at N=8 it uses N-1 = 7 judge calls per prompt vs 28 for round-robin, with ceil(log2 N) = 3 dependent latency rounds under parallel dispatch"
+  formal  = holds_analytically(tournament_judge_call_optimal)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- The derivation premise is present ... ------------------------------------------------------
+
+# Principal premise: the counting derivation (single-elim on 8 uses 4+2+1 = 7 = N-1 calls;
+# round-robin 28; depth ceil(log2 8) = 3), from the shipped tournament loop.
+leaf e1 : derives(tournament_counting_derivation, tournament_judge_call_optimal)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C04, rl_finetune_best_of_n.py#118-139, trace/exploration_tree.yaml#N05]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: assumptions_established(tournament_counting_derivation) has no honest
+# leaf — the judge is not a consistent comparator (N100/N104) — and scope_licensed is unmet — no
+# experiment inspects the tournament code path (E03 verifies only C03). Both are mandatory in
+# corpus-v1. Dead end N604 (decision: undercut of the latency sub-claim) is a header note; with
+# the arg undeclarable there is nothing to undercut. Complete support is empty.)
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

@@ -1,0 +1,146 @@
+artifact: self-composing-policies
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C01
+    claim_type: descriptive
+    proposition_shape:
+      sketch: "param_growth_order(componet, n_tasks, linear)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >
+        The claim's force comes from a structural arithmetic fact (per-module
+        parameter count is constant in n, so total is c0 + c1*n). An opaque
+        nullary atom would hide exactly the arity the strict certifier needs
+        (which architecture, which growth variable, which order), so nullary
+        is not sufficient here.
+    inference_scheme:
+      scheme: analytic_proof
+      strict_or_defeasible: strict
+      premises:
+        - "Each self-composing module contains exactly six linear transformations and one feed-forward block whose dimensions depend only on d_enc, d_model, |A| — all constants w.r.t. the number of tasks n (Appendix B, N07)"
+        - "Total parameter count is the sum of per-module counts, so constant per-module size entails total(n) = c0 + c1*n, i.e. O(n)"
+        - "Parameter counts of models instantiated for k=1..300 match the analytic formula (linear trend on the log-linear plot, Figure 3 right, Figure B.1)"
+      supporting_experiments: [E04]
+    strict_certifier: domain-checker(param-count-arithmetic)
+    certifier_note: >
+      Certify the arithmetic step: given the layer-size formulas (six linear
+      maps + FF block over fixed d_enc, d_model, |A|), re-compute the
+      per-module parameter count and verify total(n) = c0 + c1*n; counting
+      parameters of an instantiated model (E04 Procedure step 2) is fully
+      deterministic and algorithmic, not empirical.
+    critical_questions:
+      - cq: "Are d_enc, d_model, |A| held constant across the entire k sweep?"
+        mandatory: true
+        status: met
+        basis: "E04 Setup fixes d_enc=64, |A|=6, d_model=256 (Figure 3 caption) and d_enc=39, d_model=256, |A|=4 for Appendix B/C1 — each sweep uses one fixed configuration"
+      - cq: "Does the measurement cover the claimed range and count both total and trainable parameters?"
+        mandatory: true
+        status: met
+        basis: "E04 Procedure steps 1-2: instantiate for k=1..300, count total and trainable parameters for both models"
+      - cq: "Is the asymptotic O(n) statement licensed beyond the finite measured range (n <= 300)?"
+        mandatory: true
+        status: met
+        basis: "The finite sweep alone (E04 Expected outcome: linear trend) cannot establish asymptotics; the architectural constant-module-size argument (E04 Setup hyperparameters + Appendix B via N07) supplies the deductive license"
+    leaf_granularity: mixed
+    leaves:
+      - atom: "Each self-composing module has six linear transformations and a feed-forward block with sizes depending only on d_enc, d_model, |A|"
+        provenance: attested
+        refs: ["Appendix B", "trace/exploration_tree.yaml N07", "logic/experiments.md E04 Setup"]
+      - atom: "CompoNet total parameter count for k=1..300 follows a linear trend"
+        provenance: attested
+        refs: ["Figure 3 (right)", "Figure B.1", "logic/experiments.md E04 Procedure steps 1-2, 4"]
+      - atom: "CompoNet trainable parameter count for k=1..300 follows a linear trend"
+        provenance: attested
+        refs: ["Figure 3 (right)", "Figure B.1", "logic/experiments.md E04 Metrics"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "Rules out a rejected alternative design (ProgressiveNet-style hidden-layer lateral connections); it motivates C01's architecture rather than conflicting with its conclusion, scheme, or premises."
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rules out a rejected alternative (dedicated composer network, training instability); unrelated to the parameter-growth conclusion or its arithmetic support."
+    holes:
+      - "No raw parameter-count table is included in the artifact — only figure references — so the arithmetic re-check cannot be performed from the artifact's own data without re-instantiating the models."
+      - "The exact per-module count formula (the constants c0, c1) is deferred to Appendix B of the paper and not restated in logic/, leaving the strict certifier's input premise external."
+    coverage_flags: []
+    uncertain: false
+    note: >
+      Rare case of a strict-checkable claim backed by an executed experiment:
+      E04's parameter counting is deterministic (no seeds, no environment), so
+      the scheme is analytic_proof with E04 as an algorithmic confirmation
+      sweep rather than defeasible empirical evidence.
+
+  - claim_id: C04
+    claim_type: comparative
+    proposition_shape:
+      sketch: "grows_slower_empirically(inference_time(componet), inference_time(prognet), n_tasks_range(1, 300))"
+      arity: 3
+      phase0_nullary_sufficient: true
+      note: >
+        The comparison is settled by two measured timing curves, not by
+        structural decomposition of the proposition; the scope qualifier
+        ("up to 300 tasks tested") can be folded into an opaque nullary atom
+        without losing any step a checker could verify.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Both CompoNet and ProgressiveNet are instantiated for the same task counts k=1..300 with matched hyperparameters (E04 Procedure step 1, Setup)"
+        - "Inference time is measured identically for both models: run for 1 minute, average over at least 40 inferences, same hardware (AMD EPYC 7252 CPU + NVIDIA A5000 GPU)"
+        - "The measured range k=1..300 covers the claim's stated scope ('up to 300 tasks tested')"
+        - "CompoNet's per-module computation is constant-size (C01), so the timing comparison isolates composition mechanism rather than module size"
+      supporting_experiments: [E04]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Are both models measured on identical hardware with an identical timing protocol?"
+        mandatory: true
+        status: met
+        basis: "E04 Setup (AMD EPYC 7252 CPU + NVIDIA A5000 GPU for both models); Procedure step 3 applies the same 1-minute / >=40-inference averaging to both"
+      - cq: "Is the comparison baseline (ProgressiveNet) present over the full task-count sweep?"
+        mandatory: true
+        status: met
+        basis: "E04 Baselines lists ProgressiveNet; Procedure step 1 instantiates both models for k=1,2,...,300"
+      - cq: "Are both models given equivalent workloads (same batch size, same synthetic instantiation)?"
+        mandatory: true
+        status: met
+        basis: "E04 Setup: synthetic dataset (models instantiated with increasing task counts), batch size=8 for both (Figure 3 caption)"
+      - cq: "Is timing variance or a confidence interval reported for the averaged inference times?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E04 Procedure step 3 averages >=40 inferences but the Metrics section reports only point values (seconds vs number of tasks); no variance appears in the procedure or expected outcomes"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "CompoNet empirical inference time grows gradually as tasks increase from 1 to 300"
+        provenance: attested
+        refs: ["Figure 3 (left)", "Figure C.1", "logic/experiments.md E04 Expected outcome", "trace/exploration_tree.yaml N08"]
+      - atom: "ProgressiveNet empirical inference time shows clear quadratic growth over the same range"
+        provenance: attested
+        refs: ["Figure 3 (left)", "Figure C.1", "Appendix C.2", "logic/experiments.md E04 Expected outcome"]
+      - atom: "The speed advantage is caused by parallel computation of attention keys/values over previous module outputs rather than sequential layer-wise lateral connections"
+        provenance: assumed
+        refs: ["logic/claims.md C04 statement", "trace/exploration_tree.yaml N08 result"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "The abandoned hidden-layer lateral-connection design is exactly the mechanism ProgressiveNet uses; it explains why the baseline is slow but does not conflict with C04's conclusion, its measurement setup, or its premises."
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected composer-network alternative concerns training stability, not inference-time scaling; no bearing on C04."
+    holes:
+      - "The mechanistic 'because' clause (parallel attention computation) is asserted, not isolated — no experiment varies the parallelism while holding architecture fixed, so it remains an assumed leaf."
+      - "The claim concedes O(n^2) theoretical complexity, so a crossover point beyond n=300 must exist; the artifact leaves the crossover regime entirely unmeasured."
+      - "No timing variance across repetitions is reported, so 'substantially slower growth' has no stated margin."
+    coverage_flags: []
+    uncertain: false
+    note: >
+      The causal rider in the claim statement ("because ... parallel ...")
+      is representable as an assumed leaf plus a scheme premise, so no
+      vocabulary gap; only the observed curve comparison is what E04
+      actually establishes.

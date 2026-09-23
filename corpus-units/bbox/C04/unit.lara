@@ -1,0 +1,61 @@
+# Corpus unit bbox/C04 — gap (causal; component_ablation)
+#
+# Source: m0/annotations/bbox.yaml C04 (causal; corpus pin 62e9b54). Headline: ranking-based NCE
+# loss beats MLM loss for BBOX-ADAPTER by up to +10.10 points (StrategyQA 0.1B: 71.62 vs 61.52)
+# and +3.05 (GSM8K 0.3B: 73.86 vs 70.81), same datasets and adapter sizes.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: component_ablation. C = nce_loss (the swapped training objective),
+#     S = bbox_adapter, Q = reasoning_accuracy. Per-cell accuracies and deltas live in `nl`/refs.
+#   * E05 reports a single accuracy per cell, no seeds or repeats (CQ2, unmet-gap), so
+#     variance_reported (policy-mandatory) has no discharging leaf: the +3.05 GSM8K gap could be
+#     within run noise. An open mandatory obligation is an IncompleteArgument rejection, so no
+#     complete component_ablation is declarable -> E2-style gap (mirrors adaptive-pruning/C03).
+#   * CQ1 (only the loss varies; backbone, sizes, datasets, inference fixed) discharges both
+#     single_variable and protocol_parity — the leaves are on the page. The optional CQ3
+#     (MLM scoring rule untuned) is omitted (no status effect).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bbox at sha256:bb06e592cef6
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c04
+  nl      = "Ranking-based NCE loss beats MLM loss for the BBOX-ADAPTER by up to +10.10 points (StrategyQA 0.1B: 71.62 vs 61.52) and +3.05 (GSM8K 0.3B: 73.86 vs 70.81), same datasets and adapter sizes, single run per cell"
+  formal  = contributes(nce_loss, bbox_adapter, reasoning_accuracy)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e05, ablation_effect(nce_loss, bbox_adapter, reasoning_accuracy, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C04, Table-5, trace/exploration_tree.yaml#N08-N09]
+
+leaf e2 : isolated(nce_loss, e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Procedure]
+
+leaf e3 : matched_protocol(e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Procedure-steps-1-4]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e05) has no honest leaf — E05 reports single
+# accuracies per cell, no repetition — and corpus-v1 makes that obligation mandatory. The claim's
+# complete-support set is therefore empty.)
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

@@ -1,0 +1,127 @@
+# S9 — static code-inspection worked example (issue #260)
+#
+# The third strict-certificate worked example, and the first exercising the
+# insp@1 backend: the corpus's third measured strict shape — structural facts
+# about referenced source — carried end to end from two exhaustive inspections
+# to a scientific claim.
+#
+# The subject is the corpus unit rebench-rust_codecontests/C09
+# (m0/annotations/rebench-rust_codecontests.yaml, scheme `plan_vs_shipped_diff`):
+# a repair pass was planned but not shipped. C09 itself is a `gap` unit — its
+# version_match critical question has no honest discharging leaf, because
+# notes.md, the sole documentary basis for the "planned" half, ships nowhere in
+# the artifact tree. S9 supplies that attestation, so the same shape reaches
+# `justified`. Read the two together: the difference between them is exactly
+# the half a certificate cannot supply.
+#
+# Three arguments, in the layering the policy calls for:
+#
+#   a1  STRICT   the plan-vs-shipped diff, certified by insp@1 from a
+#                two-inventory certificate naming its two premise slots
+#   a3  STRICT   the pure negative existential over the shipped module's
+#                inventory alone — the closed-world step, one slot
+#   a2  DEFEASIBLE  the bridge, consuming a1 plus the version attestation
+#
+# THE FACTIVITY FIREWALL, CONCRETELY. Both certificates discharge exactly one
+# thing: that the conclusion follows from the enumerations the cited premises
+# declare. Neither asserts that either inspection is faithful to the bytes —
+# that it really covered the whole module, or that it read the version of the
+# source this claim is about. Byte-level evidence admission is not part of
+# v0.1 (spec §4.3), so an inventory is an `evidence declared` leaf like any
+# measurement and stays attackable, quarantinable, admission-governed. You
+# cannot argue with the closed-world step; you argue with the inspection and
+# with the version binding.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact insp_demo at sha256:9090909090909090909090909090909090909090909090909090909090909090
+policy insp-v1
+use backends [insp@1]
+
+# --- The scientific claim the bridge rule delivers --------------------------------------------
+
+claim c1
+  nl      = "Candidate repair was planned but not shipped: the planning notes list a repair pass and the shipped solver module contains no repair call site"
+  formal  = implementation_gap(solver_module, repair_pass)
+  binding = { author = alice, rationale = "Plan-versus-shipped inspection of the solver module.", audit-status = reviewed }
+
+# --- The two structural facts the certificates settle -----------------------------------------
+# c2 is the diff itself; c3 is its not-shipped half standing alone, which is
+# the pure negative existential. Both are queried below, so the report shows
+# the strict layer's own statuses rather than only the bridge's.
+
+claim c2
+  nl      = "The repair pass is enumerated in the planning notes and absent from the shipped solver module"
+  formal  = code_planned_not_shipped(plan_notes, solver_module, repair_pass)
+  binding = { author = alice, rationale = "Set difference over two exhaustive inspections.", audit-status = reviewed }
+
+claim c3
+  nl      = "The shipped solver module contains no repair call site anywhere"
+  formal  = code_absent(solver_module, repair_pass)
+  binding = { author = alice, rationale = "Negative existential over an exhaustive inspection.", audit-status = reviewed }
+
+# --- The two inspections the certificates consult ---------------------------------------------
+# Each leaf carries an `inv(Unit, Findings)` node: an EXHAUSTIVE enumeration of
+# what the inspection found in that unit. Exhaustiveness is the load-bearing
+# word and it is the leaf's claim, not the backend's — which is why these are
+# `observed` evidence with refs, and why an attack on the coverage of either
+# inspection lands here rather than on the certified step above it.
+
+leaf e1 : inspected_for(plan_notes, repair_pass, inv(plan_notes, finding(repair_pass, finding(python_translate, no_findings))))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [notes.md#line=22, notes.md#line=24]
+
+# The shipped module's whole inventory: the completion call sites are
+# generation, vote, and the commented-out python-translate block — and nothing
+# else. The absence of `repair_pass` from this list is not a separate
+# observation; it is what "exhaustive" means.
+
+leaf e2 : inspected_for(solver_module, repair_pass, inv(solver_module, finding(generation_call, finding(vote_call, finding(python_translate, no_findings)))))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [src/kernel/solve_code_contests_rust.py, logic/experiments.md#E08]
+
+# The half no certificate can supply: that the planning document inspected
+# above is the one this artifact shipped against. In C09 this leaf does not
+# exist, and the claim is a `gap` because of it.
+
+leaf e3 : version_matched(plan_notes)
+  kind       = attested
+  provenance = user
+  refs       = [notes.md#header, logic/experiments.md#E08]
+
+# --- The strict steps ------------------------------------------------------------------------
+# a1 cites both inventories: (prem 0) is the plan side, (prem 1) the shipped
+# side, in the rule's premise order. a3 cites one: (prem 0) is the shipped
+# inventory, and the certificate's arity is what selects the family member.
+
+arg a1 : supports(c2) by plan_vs_shipped_recheck from [e1, e2]
+  assurance = cert(insp@1, sha256:insp-v1-theory-0, (inspectdiff (prem 0) (prem 1)))
+
+arg a3 : supports(c3) by absence_recheck from [e2]
+  assurance = cert(insp@1, sha256:insp-v1-theory-0, (inspect (prem 0)))
+
+# --- The bridge ------------------------------------------------------------------------------
+# a2 consumes the strict argument a1 as its `diff` premise and the version
+# attestation as its `version` premise. Attacking the version binding — the
+# move examples/S4 makes against ord@1's comparison_setup leaf — would land
+# here and stop at the certified structural fact, which is the firewall doing
+# its job in the grounded semantics.
+
+arg a2 : supports(c1) by implementation_gap_claim from [a1, e3]
+
+status c1
+status c2
+status c3
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 (the strict insp@1 diff), a3 (the strict insp@1 negative
+# existential), and a2 (the defeasible bridge, with a1 as a sub-argument), all
+# unattacked -> in (grounded).
+# Claim status:
+#   c1 -> justified (a2 is a complete argument for it, with no attackers)
+#   c2 -> justified (a1)
+#   c3 -> justified (a3)

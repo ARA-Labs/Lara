@@ -1,0 +1,201 @@
+session:
+  id: "2026-09-08_001"
+  date: "2026-09-08"
+  started: "2026-09-08T10:00"
+  last_turn: "2026-09-08T15:40"
+  turn_count: 1
+  summary: >
+    Implemented end-to-end: M4's contextual representation-independence theorem
+    generalized from a function on certificates to a relation, with the acceptance
+    hypothesis localized to the fragment's own occurrences. Two new Lean modules,
+    1831 lines, sorry-free, all gates green. Naming decision (keep "parametricity")
+    taken by the user before any doc was written.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N337"
+    routing: direct
+    provenance: user
+    summary: "Keep the word `parametricity` despite the RelInj bound; amend the two `Not parametricity` doc bullets rather than deleting them."
+  - turn: 1
+    type: experiment
+    id: "N338"
+    routing: direct
+    provenance: ai-executed
+    summary: "The issue's own sizing question answered: the grounded fixpoint needs nothing — compileUnit_rel concludes a carrier EQUATION, so the relation is erased before any semantics runs."
+  - turn: 1
+    type: decision
+    id: "N339"
+    routing: direct
+    provenance: ai-executed
+    summary: "Ship occRel and the occurrence-local instances; without them the milestone would prove nothing the functional theorem does not."
+  - turn: 1
+    type: decision
+    id: "N340"
+    routing: direct
+    provenance: ai-executed
+    summary: "congruence_correspondence kept as a named `rfl` theorem — the mechanized guard that the relational development is an upgrade, not a fork."
+  - turn: 1
+    type: question
+    id: "N341"
+    routing: direct
+    provenance: ai-suggested
+    summary: "No observational separation witnesses a non-functional R; two of four M4 congruences still unrelationalized; two docstrings still describe the closed gap as open."
+  - turn: 1
+    type: observation
+    id: "O157"
+    routing: staged
+    provenance: ai-executed
+    summary: "Relationalizing costs a side condition exactly at lemmas whose functional statements name a computed image in the conclusion."
+  - turn: 1
+    type: observation
+    id: "O158"
+    routing: staged
+    provenance: ai-executed
+    summary: "A definitional equality in the functional development becomes load-bearing bookkeeping in the relational one, surfacing in dependent TYPES rather than in proofs."
+  - turn: 1
+    type: observation
+    id: "O159"
+    routing: staged
+    provenance: ai-executed
+    summary: "A planned theorem collapsed into one already shipped; the check is signature comparison, and the residue was at the obsSem level instead."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Implemented all 14 tasks of plans/2026-09-08-theory-m4-relational-parametricity.md
+      as 16 commits, one per plan step. Authored Lara.Forall₂ (core Lean 4.32.0 has no
+      List.Forall₂ — it is a Mathlib name), the structurally lifted RelTerm/RelTerms/RelDis/
+      RelAtt/RelFrag with side conditions RelInj and RelPreserving, the mirrored transport
+      chain (hasSupport_rel through compileUnit_rel), the headline obsGen_parametricity and
+      its five instances, the occurrence relation occRel and the occurrence-local congruence,
+      the decision record, and three deferred-work issues. Deleted the executed plan.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/ListRel.lean"
+      - "lean/Lara/Context/Parametricity.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - "docs/theory-m4-relational-parametricity.md"
+      - "docs/theory-m4-contextual-adequacy.md"
+      - "docs/theory-m4-generic-observation.md"
+      - "plans/2026-09-08-theory-m4-relational-parametricity.md (deleted)"
+      - "ara/evidence/proofs/m4_relational_parametricity.md"
+  - turn: 1
+    action: >
+      Filed three deferred-work issues per CLAUDE.md's issues-not-a-file rule:
+      a fragment-level observational witness for a collapsing relation, pointing
+      registry_swap_congruence's docstrings at the occurrence-local form, and
+      relational forms for the composed-context and whole-program congruences.
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C53
+    action: crystallized
+    turn: 1
+  - id: C54
+    action: crystallized
+    turn: 1
+  - id: C52
+    action: advanced
+    turn: 1
+  - id: C49
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C52
+    field: Status
+    before: "hypothesis"
+    after: "testing"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      A second instance of the mechanism landed in merged code this turn — compileUnit_rel
+      again concludes an equality, and the family generalizes along the relating structure
+      with no new hypothesis. Artifact commitment upgrades hypothesis→testing only; the
+      researcher did not comment on the result, so empirical resolution did not fire.
+  - turn: 1
+    entry: C52
+    field: Conditions
+    before: "Untested boundary: this is one instance in one development, and no claim is made that the equality/pointwise dichotomy exhausts the transport forms a shared lemma can take, nor that the equality case is always reachable by design rather than by luck."
+    after: "A second instance landed, along a different axis: the same shared lemma's relational counterpart `Lara.Context.compileUnit_rel` again concludes an equality of compiled carriers, and the M4 congruence generalizes from a *function* on certificates to a *relation* with no grounded-labelling lemma, no `AttackExtensional` hypothesis and no new fixpoint machinery — so the equality/pointwise dichotomy predicts the cost of generalizing along the relating structure as well as along the reader. Untested boundary: two instances in one development, both of which inherit the equality from the same original lemma, so they are not independent evidence that the dichotomy holds generally; and no claim is made that the equality/pointwise dichotomy exhausts the transport forms a shared lemma can take, nor that the equality case is always reachable by design rather than by luck."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      The second instance is recorded together with the reason it is weak evidence: both
+      instances inherit the equality from the same original lemma, so they are not
+      independent.
+  - turn: 1
+    entry: C52
+    field: Proof
+    before: "`docs/theory-m4-generic-observation.md` §2-§3; the PR; trace N327, N328]"
+    after: "`docs/theory-m4-generic-observation.md` §2-§3; the PR; trace N327, N328. Second instance: `Lara.Context.compileUnit_rel`, `obsGen_parametricity`, `backend_replacement_parametricity_sem`, `lean/Lara/Context/Parametricity.lean`; `ara/evidence/proofs/m4_relational_parametricity.md`; `docs/theory-m4-relational-parametricity.md` §5; trace N338]"
+    signal: artifact-commitment
+    provenance: ai-suggested
+  - turn: 1
+    entry: C49
+    field: Conditions
+    before: "Untested boundary: contexts carrying assurances moved by the relabel, two-way acceptance, relational quantification over related backends, how the *equivalence relations* at different semantics compare"
+    after: "Relational quantification over related backends is no longer an open boundary: replaced the function `f` with a relation `R` and re-derived this theorem as the `graphOf f` instance (`backend_replacement_congruence_of_parametricity`, guarded by `congruence_correspondence`), so nothing here is now stated more generally than what is proved. Untested boundary: contexts carrying assurances moved by the relabel, two-way acceptance, relational forms for the composed-context and whole-program congruences, how the *equivalence relations* at different semantics compare"
+    signal: dependency-change
+    provenance: ai-suggested
+    note: >
+      C49's Conditions named relational quantification over related backends as an open boundary; the boundary closed this turn.
+      Status stays `supported` — the relational form does not add evidence for C49, it
+      removes a caveat from it. The narrower remaining gap replaces it.
+  - turn: 1
+    entry: C49
+    field: Proof
+    before: "The PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
+    after: "The PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e. Relational instance: `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`, `backend_replacement_congruence_of_parametricity`, `congruence_correspondence`; `ara/evidence/proofs/m4_relational_parametricity.md`; `docs/theory-m4-relational-parametricity.md`; trace N337-N341]"
+    signal: dependency-change
+    provenance: ai-suggested
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The naming question was surfaced before any code was written and answered by the user:
+      keep `parametricity`. The plan named it the one judgement the proof cannot settle —
+      The issue's acceptance criterion asks for a relational quantifier, and RelInj forces the
+      relation to be a partial bijection, so what ships is parametricity over
+      partial-bijective certificate relations. The two `Not parametricity` doc bullets were
+      amended rather than deleted, and the generic-observation one was scoped to the two of
+      four congruences that actually gained a relational form.
+  - turn: 1
+    excerpt: >
+      The load-bearing argument for why the milestone is worth having is not the relational
+      quantifier. relInj_functional shows RelInj makes R a partial FUNCTION, so RelFrag R F₁ F₂
+      always exhibits some total injective f with F₂ = mapAssurFrag f F₁ — every conclusion is
+      already reachable through backend_replacement_congruence, EXCEPT that such an f must
+      satisfy AssurPreserving globally and no such extension need exist. That is the whole gap,
+      and backend_replacement_parametricity_local is what demonstrates it is non-empty.
+  - turn: 1
+    excerpt: >
+      Two plan statements were unprovable as written and had to gain a RelInj hypothesis:
+      attackOcc_rel and contains_rel. The functional originals get uniqueness of the image
+      occurrence for free because the image is a computed function value; a relation supplies
+      no such image. Both consumers already carry RelInj, so nothing downstream weakened —
+      but the diagnostic generalizes (O157).
+
+open_threads:
+  - "No observational separation witnesses a genuinely non-functional R; relInj_necessary separates at the coverage decider only. Same shape as the cycle and certificate-fixture instances."
+  - "Registry_swap_congruence and _sem docstrings still describe the global-hypothesis gap as open, with no pointer to backend_replacement_parametricity_local{,_sem}."
+  - "Backend_replacement_congruence_composed_sem and whole_program_replacement_sem still have no relational form; the M4 congruence family is half relational."
+  - "The total-injective-extension step behind §4's strength argument is prose, not proof; relInj_functional gives only the partial function. Nothing proved depends on it."
+  - "Context/Parametricity.lean uses no section/variable, unlike the two modules it mirrors; 63 repeated R binders. Deferred because hoisting moves every statement and would invalidate the spec review that verified all 82 are unweakened."
+  - ".2.2.2… projection chains into checkUnit_sound's 12-way conjunction, at the new site AND the pre-existing Equivalence.lean:602-604 it mirrors."
+  - "CI build-closure check still open; verified by hand again this turn (comm -23 over Lara/**.olean)."
+  - "Carried over from 2026-09-07, untouched."
+  - "PR opened on branch theory/m4-relational-parametricity."
+
+ai_suggestions_pending:
+  - "O152 — parameterize the projection rather than the concept (heuristic; now two instances, still unaffirmed)."
+  - "O153 — a generalization is non-trivial only if the pre-existing fixtures are proved unable to separate, at the level generalized (heuristic)."
+  - "O154 — convert eyeball-enforced acceptance criteria into build-breaking dependencies (heuristic; congruence_correspondence is a second instance)."
+  - "O157 — relationalizing costs a side condition exactly where the functional statement names a computed image (heuristic)."
+  - "O158 — definitional equalities become dependent-type bookkeeping under relationalization (heuristic)."
+  - "O159 — check whether a planned theorem has collapsed into a shipped one by comparing signatures, not intentions (heuristic)."

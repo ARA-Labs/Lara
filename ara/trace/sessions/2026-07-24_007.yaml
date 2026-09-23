@@ -1,0 +1,39 @@
+session:
+  id: "2026-07-24_007"
+  timestamp: "2026-07-24T17:20"
+  ended: "2026-07-24T17:20"
+  summary: "Constructed proof-bearing checked programs from raw support and attack declarations."
+
+events_logged:
+  - type: experiment
+    id: N53
+    provenance: ai-executed
+    summary: "Implemented exact whole-program checking with strengthened declared-endpoint and complete-node postconditions."
+  - type: heuristic
+    id: H04
+    provenance: ai-suggested
+    summary: "Retain one aligned proof-bearing support cache and transport its entries into attack checking."
+
+ai_actions:
+  - action: "Implemented structural certificate-sensitive SupportTerm equality for nested recursive lists."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Support.lean"]
+  - action: "Strengthened CheckedProgram with declared source and target endpoints and made direct-edge closure consume those invariants."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Compile.lean"]
+  - action: "Implemented deterministic proof-bearing whole-program checking, exact adequacy, and closed program diagnostics."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Check/Program.lean", "lean/Lara/Check/Error.lean", "lean/Lara/Check.lean"]
+  - action: "Converted PEx through checkProgram and added the complete raw success/rejection matrix."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+  - action: "Ran lake build, standalone AxCheck, no-hole/cache-path scans, and git diff integrity checks."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched: []
+
+open_threads:
+  - "The checker-built executable Compile.Faithful edge decider remains for the next step; issue-18 attack completeness remains intentionally out of scope."
+
+ai_suggestions_pending: []

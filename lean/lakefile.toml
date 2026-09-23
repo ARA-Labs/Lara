@@ -1,0 +1,72 @@
+name = "lara"
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "axiom-withdrawal"]
+
+# Mechanized reference semantics for the LARA claim-support calculus.
+# No Mathlib dependency yet: the frozen nf/≡ carve-out (spec §9 result 11) is
+# provable in core Lean 4. Mathlib is added later for result 5 (grounded
+# least-fixpoint), which needs its order-theory / Finset machinery.
+
+[[lean_lib]]
+name = "Lara"
+
+# The executable semantics driver (M3 plan, Task 0 Step 3 — the Lean side of
+# the N11 differential anchor). A thin decode → call → encode shim over the
+# theorem-bearing definitions of the `Lara` library.
+[[lean_exe]]
+name = "lara-driver"
+root = "Lara.DriverMain"
+
+# The multi-artifact map driver (the Lean side of
+# scripts/check-map-conformance.sh). Reads one `map-check-input@1` parity
+# envelope, performs the qualification, merge, cross-member saturation, check
+# and grounded evaluation itself, and prints `map-verdict@1` bytes that must
+# equal `lara check <map.laramap>`'s.
+[[lean_exe]]
+name = "lara-map-driver"
+root = "Lara.Map.DriverMain"
+
+# The admission differential driver (metatheory plan Task 3 — the Lean side
+# of scripts/admission-differential.sh). Reads one test-only fixture under
+# fixtures/admission/, runs the proved admission judgment, and prints the
+# canonical outcome encoding.
+[[lean_exe]]
+name = "admission-driver"
+root = "Lara.AdmissionDriverMain"
+
+# The presentation-shape parity driver (result-12 plan Task 2 — the Lean side of
+# scripts/check-presentation-parity.sh). Prints the normalized ordered TSV
+# inventory of the presentation AST's surface-reachable shape, which the gate
+# diffs against the Haskell inventory emitted by scripts/presentation-shape.hs.
+[[lean_exe]]
+name = "presentation-shape"
+root = "Lara.PresentationParityMain"
+
+# Manifest-driven verified surface conformance emitter (M5 Task 8).
+[[lean_exe]]
+name = "surface-conformance"
+root = "Lara.SurfaceConformanceMain"
+
+# Exhaustive cross-language parity driver for Lara.Update's four constructor-side
+# precondition deciders. scripts/update-differential.sh diffs its canonical TSV
+# against the Haskell emitter.
+[[lean_exe]]
+name = "update-preconditions"
+root = "Lara.UpdatePreconditionParityMain"
+
+# File-driven declared-bridge and modal-query example.
+[[lean_exe]]
+name = "pw-example"
+root = "Lara.PW.ExampleMain"
+
+# The finite executable reference for `pw-run 1` — the Lean side of
+# scripts/check-pw-conformance.py. Loads declared worlds, edges and the
+# embedded `pw-surface 1` document, and prints bytes that must equal
+# `lara pw <file>`'s.
+[[lean_exe]]
+name = "pw-run"
+root = "Lara.PW.RunMain"
+
+# Separate executable Lean structural-contract witness.
+[[lean_exe]]
+name = "axiom-withdrawal"
+root = "Lara.AxiomWithdrawalMain"

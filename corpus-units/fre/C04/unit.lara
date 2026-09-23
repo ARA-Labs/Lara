@@ -1,0 +1,92 @@
+# Corpus unit fre/C04 — defeated (causal; component_ablation, unmet-defeater -> within_noise undercut)
+#
+# Source: m0/annotations/fre.yaml C04 (causal, uncertain=true; corpus pin 62e9b54). Headline:
+# performance scales smoothly with reward diversity and FRE-all dominates all reward-subset
+# ablations — total AntMaze score FRE-all 47.3 +- 7, the argmax over 7 variants.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: component_ablation. C = reward_diversity (joint encoding of disparate reward
+#     families), S = fre_all, Q = antmaze_total_score. The 7-variant totals live in `nl`/refs.
+#   * unmet-defeater path (LOWERING.md "Attacks"). FIRST checked the other mandatory CQs, since a
+#     co-occurring unmet-gap would make the gap rule win instead: CQ1 discharges single_variable AND
+#     protocol_parity (same budget, all other hyperparameters identical); variance_reported is MET
+#     (Table 4 gives mean +- std over seeds). NONE is independently unmet-gap, so the defeater path
+#     applies and the arg is declared COMPLETE.
+#   * The defeater: CQ2 ("dominance supported at the reported seed variance") is unmet-defeater —
+#     FRE-all 47.3 +- 7 sits only 0.4 points above FRE-goal-lin 46.9 +- 7, inside overlapping +-7
+#     intervals, i.e. the margin is within noise. That is exactly the component_ablation exception
+#     within_noise(C, S, Q). A leaf-rooted challenge concludes within_noise and undercuts a1 at the
+#     rule (contesting the variance_reported discharge — the paper's own claimed basis for the
+#     ordering). The undercutter is unattacked, so a1 is out and the claim is defeated: the paper's
+#     own Table 4 numbers defeat the strict "dominates all subsets" reading (the weaker single-family
+#     falsification criterion still passes; annotation uncertain=true on gap-vs-defeater — defeater
+#     chosen because the table actively contradicts strict dominance rather than merely omitting a
+#     test). Optional CQs (sample-count confound met; scaling-smoothness trend unmet) omitted.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact fre at sha256:c1bb86743873
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c04
+  nl      = "On AntMaze, performance scales smoothly with reward diversity and FRE-all dominates all reward-subset ablations — total score FRE-all 47.3 +- 7 is the argmax over the 7 variants"
+  formal  = contributes(reward_diversity, fre_all, antmaze_total_score)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+leaf e1 : reports(e03, ablation_effect(reward_diversity, fre_all, antmaze_total_score, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table4_reward_subset_ablation.md, Table-4-row-total]
+
+leaf e2 : isolated(reward_diversity, e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Setup, logic/experiments.md#E03-Procedure-step-2]
+
+leaf e3 : matched_protocol(e03)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E03-Setup, logic/experiments.md#E03-Procedure-step-2]
+
+leaf e4 : variance_reported(e03)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table4_reward_subset_ablation.md, Table-4-row-total]
+
+# The defeater: FRE-all 47.3 +- 7 vs FRE-goal-lin 46.9 +- 7 — a 0.4-point argmax inside overlapping
+# +-7 seed intervals, so the strict-dominance ordering is within noise.
+leaf u1 : within_noise(reward_diversity, fre_all, antmaze_total_score)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/tables/table4_reward_subset_ablation.md, Table-4-row-total, evidence/figures/figure5_reward_diversity_scaling.md]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c04) by component_ablation(reward_diversity, fre_all, antmaze_total_score, e03)
+  discharge single_variable   with e2
+  discharge protocol_parity   with e3
+  discharge variance_reported with e4
+
+# --- The paper's own overlapping intervals undercut the dominance ------------------------------
+
+# Licensed by `exception component_ablation : within_noise(C, S, Q)` (corpus-v1). The challenge
+# contests the variance_reported discharge — the reported +-7 seed intervals overlap, so they do
+# not support the 0.4-point strict-dominance ordering.
+arg d1 : challenges(variance_reported(a1)) by leaf(u1)
+undercut d1 a1.rule
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF (declaration order): a1, d1.
+#   d1 -> in  (leaf-rooted, unattacked)
+#   a1 -> out (undercut by d1; undercuts always succeed, spec §7)
+# Claim status:
+#   c04 -> defeated (its only support a1 is `out`; spec §8 aggregation)

@@ -1,0 +1,71 @@
+# Corpus unit all-in-one/C06 — gap (unmet mandatory equivalence-margin CQ; null_comparison dual)
+#
+# Source: m0/annotations/all-in-one.yaml C06 (negative-result, component_ablation; corpus pin
+# 62e9b54). Headline: the all-in-one (all-conditionals) training objective does not hurt
+# posterior-only accuracy — all-conditionals Simformer posterior C2ST is comparable to the
+# posterior-only variant (which itself matches the NPSE baseline) across benchmark tasks, and
+# helps on SLCP (E01, E02, dead end N03b).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * This is a non-inferiority ('does not hurt') claim — genuinely the negation of a comparison
+#     conclusion — so it lowers through the null_comparison dual: conclusion
+#     not_better(all_conditionals, posterior_only, posterior_c2st, benchmark_tasks). Only the
+#     null side is instantiated; per the negative-result convention NO positive-side arg is
+#     declared, so the contrary pair forces no rebut edges (attack completeness is arg-level).
+#   * baseline_parity is met (the posterior-only variant was trained and measured as a comparison
+#     arm — dead end N03b, E01 NPSE baseline); measurement_validity holds via the premise (posterior
+#     C2ST is comparable between the two regimes on a shared protocol).
+#   * adequate_power is annotated UNMET-GAP and mandatory: E01/E02 assert "does not meaningfully
+#     hurt" with no equivalence margin, variance, or power analysis. The mandatory obligation has
+#     no discharging leaf, so no complete null_comparison instance is declarable — E2-style gap.
+#   * Policy vocabulary gap (annotation coverage_flag): LARA's support/attack edges have no native
+#     equivalence-margin construct. The null_comparison dual is the closest honest lowering; the
+#     missing margin is exactly what leaves adequate_power (powered) undischarged. N03b is the
+#     confirming ablation for this claim, not a defeater.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact all-in-one at sha256:62b9c8db2538
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c06
+  nl      = "The all-in-one (all-conditionals) training objective does not hurt posterior-only accuracy: all-conditionals Simformer posterior C2ST is comparable to the posterior-only variant (which matches the NPSE baseline) across benchmark tasks, and helps on SLCP"
+  formal  = not_better(all_conditionals, posterior_only, posterior_c2st, benchmark_tasks)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E01/E02's posterior-C2ST comparison cells for the two training regimes, per
+# result cell in the annotation and folded into refs.
+leaf e1 : reports(e01, compares(all_conditionals, posterior_only, posterior_c2st, benchmark_tasks, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01, logic/experiments.md#E02, trace/exploration_tree.yaml#N03b, trace/exploration_tree.yaml#N09]
+
+leaf e2 : matched_setup(all_conditionals, posterior_only, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [trace/exploration_tree.yaml#N03b, logic/experiments.md#E01-Baselines]
+
+leaf e3 : valid_measurement(posterior_c2st, e01)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E01, Appendix-A3]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: powered(e01) has no honest leaf — E01/E02 state "does not meaningfully
+# hurt" with no equivalence margin or variance — and corpus-v1 makes that obligation mandatory
+# for the null_comparison dual. No positive-side arg is declared either. Complete support is empty.)
+
+status c06
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

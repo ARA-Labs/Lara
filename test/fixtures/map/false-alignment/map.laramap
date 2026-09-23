@@ -1,0 +1,25 @@
+; A map whose members all load, link and check, and whose only defect is a
+; DECLARED ALIGNMENT THAT DOES NOT HOLD: the two claims are exact opposites, so
+; asserting they are `same` is false. This is the negative anchor whose parity
+; is observable, because the envelope IS derivable — the failure happens after
+; the checked boundary, so both drivers are handed the same bytes and must both
+; refuse them at exit 1 with nothing on stdout.
+;
+; The members are the agreement fixture's, named through a parent-relative path
+; rather than copied, which also exercises path resolution against the
+; MANIFEST's own directory rather than the process working directory.
+(lara-map@1
+  (policy empirical-v1 ../agreement/empirical-v1.policy.lara)
+  (backends (backend nd 1))
+  (members
+    (member paper_pos ../agreement/pos.lara)
+    (member paper_neg ../agreement/neg.lara))
+  (alignments
+    (alignment
+      (ref paper_pos c_pos whole)
+      (ref paper_neg c_neg whole)
+      same
+      (author reviewer_r)
+      (audit-status disputed)
+      (rationale "Deliberately false: improves(M, accuracy, D) is not not_improves(M, accuracy, D).")))
+  (questions))

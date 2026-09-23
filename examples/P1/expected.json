@@ -1,0 +1,101 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "philmath-v1",
+    "backends": [],
+    "theories": [],
+    "artifact": "sha256:p1-illustrative-snapshot"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "abstract_objects",
+        "status": "defeated",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "set_identity",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "structural_identity",
+        "status": "contested",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "dispensable",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "useful_without_truth",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "truth_required",
+        "status": "defeated",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "consistency_suffices",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a_realism",
+        "index": 0,
+        "label": "out"
+      },
+      {
+        "arg": "a_sets",
+        "index": 1,
+        "label": "undec"
+      },
+      {
+        "arg": "a_structure",
+        "index": 2,
+        "label": "undec"
+      },
+      {
+        "arg": "a_field",
+        "index": 3,
+        "label": "in"
+      },
+      {
+        "arg": "a_fiction",
+        "index": 4,
+        "label": "in"
+      },
+      {
+        "arg": "a_objection",
+        "index": 5,
+        "label": "out"
+      },
+      {
+        "arg": "a_reply",
+        "index": 6,
+        "label": "in"
+      }
+    ]
+  }
+}

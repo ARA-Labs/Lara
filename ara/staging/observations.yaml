@@ -1,0 +1,3946 @@
+observations:
+- id: O01
+  timestamp: 2026-07-21T23:15
+  provenance: ai-suggested
+  content: 'Claim-type mix is benchmark-group-dependent: all 31/31 implementation-behavioral claims live
+    in rebench/speedrun (agent-run artifacts); paperbench+extra (published-paper ARAs) is comparative/causal-heavy
+    (72+54 of 231). Implication: the frozen v0.1 construct set must be validated against BOTH populations
+    — an 80% coverage gate passed on paperbench alone would not certify coverage of implementation-behavioral
+    argument shapes.
+
+    '
+  context: 'Six-way typing pass over the full 231-claim frame (m0/claim-types.tsv, commit 1d57824); distribution
+    counted from the completed table.
+
+    '
+  potential_type: claim
+  bound_to:
+  - N25
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O02
+  timestamp: 2026-07-22T00:50
+  provenance: ai-suggested
+  content: 'Corpus-gated open-question answers from the 60-claim annotation: (#2) a scheme vocabulary
+    of ~9 families suffices, comparison+ablation carry 2/3 of claims; (#1) the smallest useful strict-adapter
+    portfolio is a rational-arithmetic/ table-recheck checker plus a static code-inspection checker —
+    LP is nearly absent (3 speculative calls); (#5) per-result-cell is the default leaf grain (75%).
+
+    '
+  context: m0/annotation-summary.md §2, aggregated from 27 annotation files.
+  potential_type: claim
+  bound_to:
+  - N28
+  promoted: true
+  promoted_to: logic/claims.md:C13,C14,C15
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O03
+  timestamp: 2026-07-22T00:50
+  provenance: ai-suggested
+  content: 'Defeat-layer findings (#3): real attacks are rare (4/194 decisions) and exclusively undercuts
+    in this sample; rebut/undermine unexercised. The attack-candidate walk must cover the WHOLE trace,
+    not only dead_end nodes (counter-evidence found in experiment nodes: fix_embedding; score-filtered
+    runs: triton_cumsum). Inverse phenomenon exists: dead-end-as-support (restricted_mlm C14). Mandatory-CQ
+    gaps are pervasive (39%) and must surface as holes, not defeat edges, or nearly every claim is spuriously
+    attacked.
+
+    '
+  context: m0/annotation-summary.md §2-§3.
+  potential_type: constraint
+  bound_to:
+  - N28
+  promoted: true
+  promoted_to: logic/claims.md:C16 + logic/solution/constraints.md (pipeline constraints)
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O04
+  timestamp: 2026-07-22T00:50
+  provenance: ai-suggested
+  content: 'Preliminary construct-coverage gate verdict: PASS (~90% of sampled argument shapes expressible)
+    conditional on (a) writing the scope/binding and claim-splitting conventions into the spec, (b) a
+    6-item construct wishlist (equivalence scheme, monotone-relationship propositions, parametric growth-rate
+    claims, stochastic measurand leaves, negative existentials over code, graded predicates via binding),
+    (c) evidence-model decisions for dead-end-as-support and result-cell conflicts.
+
+    '
+  context: m0/annotation-summary.md §3; awaiting human review of the adjudication.
+  potential_type: claim
+  bound_to:
+  - N27
+  - N28
+  promoted: true
+  promoted_to: logic/claims.md:C17
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O05
+  timestamp: 2026-07-22T11:47
+  provenance: ai-suggested
+  content: 'The corpus brackets the ND reference backend from both sides: below it, strict-step demand
+    is arithmetic re-checks (35 domain-checker calls); above it, derivations beyond its strength are correctly
+    left attested rather than certified (stochastic-interpolants'' measure-theoretic Theorem 3.1 step,
+    annotated "beyond reference-nd"). The one in-range demand is the nanogpt_chat_rl ≥N−1 lower bound
+    (N33). Paper-facing use: answers the reviewer question "does anything in your corpus need the ND backend?"
+    — the backend''s justification is the seam (result 10) plus exactly one corpus touchpoint, with clean
+    evidence the portfolio is neither under- nor over-powered.
+
+    '
+  context: 'Emerged during the user-requested review walkthrough of the §5.2 reference-nd extrapolation
+    (turn 9); written into spec §5.2 as part of the N33 split edit, but the spec sentence IS the observation''s
+    source, not a downstream dependent.
+
+    '
+  potential_type: claim
+  bound_to:
+  - N33
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O06
+  timestamp: 2026-07-22T22:08
+  provenance: ai-suggested
+  content: 'The remaining support/attack decision-procedure gap is an interface gap, not a corpus dependency:
+    `Strict.Backend.check` is modeled as an arbitrary proposition. A constructive checker needs the backend
+    seam to expose decidable replay acceptance; the checker-built `Faithful` edge oracle then composes
+    from that result.
+
+    '
+  context: 'Technical evaluation of review feedback during the lock-pass hardening.'
+  potential_type: constraint
+  bound_to:
+  - N34
+  promoted: true
+  promoted_to:
+  - N48
+  crystallized_via: Canon-indexed Backend.replay/replay_iff and certOkBOf_iff
+  stale: true
+- id: O07
+  timestamp: 2026-07-22T13:42
+  provenance: ai-suggested
+  content: 'Same-session mechanization can expose structural defects in a newly frozen definition. The
+    §6.1 D⊎H mismatch motivated port-as-we-lock, although that specific defect was found by review before
+    the port.
+
+    '
+  context: 'M1 lock pass; reconciled after the rebase.'
+  potential_type: heuristic
+  bound_to:
+  - N39
+  - N40
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O08
+  timestamp: 2026-07-22T13:59
+  provenance: ai-suggested
+  content: 'Result 6 factors into an oracle-parametric semantic equivalence and one constructive residual:
+    the checker-built Compile.Faithful edge decider. This localizes future preservation failures to executable
+    decision procedures rather than the grounded semantics.
+
+    '
+  context: 'M1 compile lock item; reconciled after the rebase.'
+  potential_type: claim
+  bound_to:
+  - N42
+  - N16
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O09
+  timestamp: 2026-07-24T08:14
+  provenance: ai-suggested
+  content: 'Result 9 is blocked at the statement-model boundary, not by proof scheduling: CheckedProgram
+    nodes are certificate-bearing SupportTerms with no stable argument id or certificate-erased skeleton,
+    so payload-varying programs lack the required explicit node bijection.
+
+    '
+  context: 'Technical evaluation of review feedback.'
+  potential_type: constraint
+  bound_to:
+  - N44
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O10
+  timestamp: 2026-07-24T08:14
+  provenance: ai-suggested
+  content: 'The remaining result-7 status theorem needs attack completeness in addition to the mechanized
+    Path-B validator. CheckedProgram.typed proves every declared attack is valid, but does not prove every
+    rebuttable contrary conflict generates a declared and compiled edge.
+
+    '
+  context: Technical evaluation and implementation of the §8.1 validator.
+  potential_type: constraint
+  bound_to:
+  - N44
+  promoted: true
+  promoted_to:
+  - N60
+  - N61
+  - N64
+  - logic/claims.md:C09
+  crystallized_via: checked-unit attack-completeness implementation + machine-checked result-7 theorem
+  stale: false
+- id: O11
+  timestamp: 2026-07-24T08:48
+  provenance: user
+  content: 'The original §8.1 validator compared APat syntax while ContraryMatch registers conflicts after
+    instAPat plus canonical equivalence. Therefore a strict CanFly(X) conclusion passed wf(Pi) against
+    a ground CanFly(tweety) contrary side even though their instances participate in the same conflict.
+
+    '
+  context: 'Additional review finding; verified and repaired before the spec-v0.1 tag.'
+  potential_type: claim
+  bound_to:
+  - N44
+  - N45
+  - C09
+  promoted: true
+  promoted_to:
+  - N45
+  - C09
+  crystallized_via: Lean counterexample and ground-instance overlap soundness proof
+  stale: false
+- id: O12
+  # CONFLICT: O37/N105 scopes the reusable integration to L2 replay and treats K-tier as paper design, not active source behavior.
+  timestamp: 2026-07-25T00:10
+  provenance: ai-suggested
+  content: 'rit and lara compose as engineering, not competition: rit''s portable Lean kernel certificates
+    and K-tier groundings match the opaque-certificate shape Lara.Strict accepts (its T0-K tiers map onto
+    leaf provenance), which would upgrade lara leaves from declared to machine-rechecked without widening
+    the TCB; conversely lara''s Dung compilation + grounded labelling is a proven aggregation semantics
+    for rit''s open honest-roll-up problem (rit DESIGN.md §7b#3), whose current AND/OR + collision + tier
+    machinery is an unproven shadow argumentation framework.
+
+    '
+  context: 'rit-vs-lara comparison session (user framing: complementary siblings, both formalizing agent-native
+    research artifacts); no code or milestone
+    depends on the integration yet.
+
+    '
+  potential_type: architecture
+  bound_to:
+  - N46
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O13
+  timestamp: 2026-07-25T12:30
+  provenance: user-revised
+  content: 'A kernel-attestation verifier''s real trust guarantee is the fixed point of its commit gate,
+    which can be strictly weaker than the architecture its write-up describes. Auditing rit''s shipping
+    path (admit.gate) found four advertised aggregate guarantees unwired, stubbed, or unreachable — one
+    Lean environment (actually per-file compilation), kernel-read claim->claim DAG (used_constants is
+    a return-[] stub; edges are declared), TCB-shrinking K-tier grounding (bind() only emits L1/L2), and
+    a falsifiability gate (never called at commit) — while the per-fact re-extraction core does hold.
+    The methodological rule: describe such a system by what its gate enforces, not its prose.
+
+    '
+  context: 'User directed (turn: "you should not just say what it claims in their write up ... I think
+    there is a little discrepancy") a code-vs-write-up audit of rit; I read the live commit path and confirmed
+    five discrepancies, committed as ba6c45e.
+
+    '
+  potential_type: claim
+  bound_to:
+  - N47
+  promoted: true
+  promoted_to: logic/claims.md:C19
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false
+- id: O14
+  timestamp: 2026-07-25T13:40
+  provenance: user-revised
+  content: 'Sharpening of the §11.5 audit into what rit''s "formal verification" means: it verifies NODES,
+    not the GRAPH. The weakest-link/status roll-up is arithmetically sound but is a CONDITIONAL guarantee
+    over an untrusted edge set (edges are proposer-declared, not read from proof terms). Failure mode
+    is asymmetric: a spurious edge only over-penalizes, but an OMITTED real edge launders a claim resting
+    on a weak/refuted fact into a falsely high grade, undetectable because the true dependency is never
+    derived. Node-level verification does not transfer to the composed artifact. Division of labor with
+    lara: nobody verifies NL->structure or the edges (irreducible, Hume''s fork), but the propagation
+    OVER a declared structure is the tractable target — rit leaves it ad hoc, lara proves it (grounded-labelling
+    soundness).
+
+    '
+  context: 'User asked "what is the meaning of their formal verification if the roll-up runs over a DAG
+    whose edges it never verifies", affirmed the answer ("this summary is very good, did you write it
+    down?"), prompting persistence as claim C20.
+
+    '
+  potential_type: claim
+  bound_to:
+  - N47
+  promoted: true
+  promoted_to: logic/claims.md:C20
+  crystallized_via: verbal-affirmation + artifact-commitment
+  stale: false
+- id: O15
+  timestamp: 2026-07-27T04:30
+  provenance: ai-executed
+  content: 'The M3 Haskell production runtime and the Lean reference driver agree on the wire verdict
+    byte-for-byte on every corpus fixture (19/19) EXCEPT under non-canonical numeric literals: the Haskell
+    core normalizes numbers via canonNum (Lara.Prop.nfTerm) while the Lean driver runs at canon = id and
+    does not canonicalize numbers (a documented deferred extension point in lean/Lara/Driver.lean). A
+    unit carrying a non-canonical numeric literal can therefore diverge between the two drivers. The differential
+    corpus avoids non-canonical numeric literals so the anchor stays exact; the caveat must persist into
+    any future differential work.
+
+    '
+  context: 'Surfaced by the Task 1 fidelity review and confirmed during the Task 4 differential closeout
+    while choosing conformance fixtures; referenced in the spec
+    §8 status note.
+
+    '
+  potential_type: constraint
+  bound_to:
+  - N66
+  promoted: true
+  promoted_to: logic/solution/constraints.md#m4a-surface-front-end-constraints
+  crystallized_via: artifact-commitment
+  stale: true
+- id: O16
+  timestamp: 2026-07-28T12:00
+  provenance: ai-executed
+  content: 'A hand-authored .lara file IS a certificate but NOT a self-checking one. Wiring the compiler
+    end-to-end surfaced that Example A (a committed paper motivating example with a human-computed inline
+    ''golden oracle'') did not actually pass the checker: it discharged the mandatory CQ external_validity
+    (policy answer pattern generalizes) with a measured(...) leaf -> R6, and separately declared only
+    one orientation of the improves/not_improves mutual rebut -> missing-conflict. The trusted checker
+    caught two latent inconsistencies the hand-computed oracle had missed. Concrete evidence for the trusted-checker
+    thesis (a checked certificate strictly dominates a hand-authored one even for the author''s own examples)
+    and for worked examples being load-bearing rather than illustrative.
+
+    '
+  context: 'A1b elaborator brought the surface->Unit->verdict path online; running it on the committed
+    examples/A rejected R6, then missing-conflict after the R6 fix. User approved correcting the example
+    (N71) to reach its unchanged golden. The finding is the compiler''s first act of catching a bug in
+    previously-trusted content.
+
+    '
+  potential_type: claim
+  bound_to:
+  - N71
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O17
+  timestamp: 2026-07-28T12:00
+  provenance: ai-executed
+  content: 'The M4a worked-examples suite is DEFEASIBLE-ONLY. The frozen .lara grammar has no support-term
+    assurance syntax (cert/trusted appear in the vocabulary table but no support-term production uses
+    them), so a strict argument instance cannot be authored; use backends [nd@1] is inert on the suite.
+    Consequences: (1) the strict-certificate frontend path (nd@1 replay from surface) is NOT exercised
+    by M4a — deferred to TODOS; (2) the three rejection reps are the defeasible-authorable R1/R12/R10,
+    not the plan''s speculative strict R3/''R7''. R12 is still reachable because a strict RULE DECLARATION
+    in the policy (with its conclusion in a contrary pair) is a policy-well-formedness reject independent
+    of any strict argument.
+
+    '
+  context: 'Surfaced while authoring the R-series (A1c-2) and scoping the elaborator (A1b, defeasible-only
+    forced AssuranceNone). Recorded as the honesty note in docs/m4a-checklist.md + examples/README, the
+    strict-cert TODO in TODOS.md, and the coverage-matrix test''s scope.
+
+    '
+  potential_type: constraint
+  bound_to:
+  - N69
+  - N72
+  promoted: true
+  promoted_to: logic/solution/constraints.md#m4a-surface-front-end-constraints
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O18
+  timestamp: 2026-07-28T12:00
+  provenance: ai-executed
+  content: 'Lean result 12 (parse.print=id, proved over the full presentation Program/Policy AST via a
+    structured S-expression codec, sorry-free) is a metatheory anchor for the frozen AST SHAPE: it certifies
+    that no field of the presentation AST loses information through a codec. It is NOT a proof that the
+    concrete-syntax Haskell parser is correct — a Lean re-implementation of a different codec cannot transfer.
+    The conformance evidence for the actual .lara surface syntax remains the Haskell QuickCheck parse.print==id
+    (SyntaxSpec, maxSuccess=2000). This split (Lean = frozen-shape codec anchor; QuickCheck = concrete-syntax
+    conformance) is the honest reading of result 12''s ''test-only, mechanize if cheap'' strength (mechanization-plan.md:55).
+
+    '
+  context: 'Scoping decision N73 before dispatching A3; documented in lean/Lara/Presentation.lean''s docstring,
+    the lean/Lara.lean comment, and the AxCheck Result-12 section.
+
+    '
+  potential_type: concept
+  bound_to:
+  - N73
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O19
+  timestamp: 2026-07-30T09:35
+  provenance: ai-executed
+  content: 'Mechanizing an "erasure-invariance" metatheorem the faithful way requires the erasure to be
+    a uniform INJECTIVE relabel, not a collapse-to-canonical- marker: any compiled quantity that keys
+    on exact structural equality (here containsB over cert-payload-bearing SupportTerms) is preserved
+    by an injective uniform map in both directions, but a non-injective collapse only preserves it forward
+    (it can merge distinct subterms and manufacture new structure). General pattern for isomorphism-under-erasure
+    claims: state the relation as an injective relabel and let "both artifacts are well-checked" discharge
+    the acceptance side, avoiding any re-typing transport. Instance: result 9 / Theorem 2, lean/Lara/Erase.lean.
+
+    '
+  context: 'Design of the result-9 statement model (N76 dead_end, N77 decision). Folded into C04 Conditions
+    this turn; staged here as a candidate methodological concept for future crystallization.
+
+    '
+  potential_type: concept
+  bound_to:
+  - N76
+  - N77
+  - N78
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O20
+  timestamp: 2026-07-30T17:10
+  provenance: ai-executed
+  content: 'LARA rejections fall in three architectural tiers, not one: (1) checkUnit''s six executable
+    stages (R1,R3-R7,R10-R12 + structural dup/missing outcomes); (2) driver-boundary rejects computed
+    from the Unit before checkUnit runs — R13 (replay preflight) and now R9 (escalated duplicate-report-group
+    conflict); (3) genuinely out-of-core (R2 signature, R8 admission, R14 codec-at-decode). R9 joining
+    tier 2 is what made §4.3 implementable without touching the executable core, and it keeps quarantine
+    (the default) off the rejection ladder entirely — a data conflict routes to gap, never a verdict.
+
+    '
+  context: 'Implementing the N84 decision (N86 experiment). Candidate concept: "driver-boundary rejection
+    tier" as a named part of the checker architecture. Staged pending a cleaner formulation / reuse.
+
+    '
+  potential_type: concept
+  bound_to:
+  - N84
+  - N86
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O21
+  timestamp: 2026-07-31T10:30
+  provenance: ai-suggested
+  content: 'A trusted checker with more than one front door must enforce every admission-tier well-formedness
+    invariant at EACH door (or behind a shared choke point), not only at one. LARA''s .sexp path validates
+    duplicate-report group R14 well-formedness at the wire decoder; the .lara path (parse → elaborate
+    → runCheck, no wire round-trip) omitted it, so a misspelled group member was silently dropped and
+    an intended R9 rejection became an accept — the two front doors disagreed on the same logical artifact.
+    For a data-integrity feature this is the worst failure mode (silent under-rejection). General rule:
+    an invariant enforced at one entry point is a per-door obligation, and a differential/CI check should
+    exercise every door on the same malformed input, not just the wire one.
+
+    '
+  context: 'review finding 1 (fenfenai, reproduced): fixed by Elaborate.validateGroups mirroring
+    Wire.checkGroupInvariants (N87). Candidate methodological concept ("front-door invariant parity");
+    no reuse/affirmation beyond this fix yet and the PR is unmerged, so staged pending a cleaner formulation.
+    Sibling of O20 (rejection tiers): R14 is the out-of-core codec tier that must hold at both doors.
+
+    '
+  potential_type: concept
+  bound_to:
+  - N84
+  - N87
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O22
+  timestamp: 2026-07-31T21:30
+  provenance: ai-suggested
+  content: 'In a dual-implementation (frozen-twin) architecture where one side carries the soundness proofs,
+    any semantic hardening of a shared definition must land on BOTH sides in the same change-set — and
+    the divergence class to watch is exactly the one no test can reach: inputs excluded by upstream validation.
+    The dangling-member defense (unresolvable member => conflict) went into Haskell groupConsistent but
+    not Lean consistentB, so the twins disagreed on a class of units unreachable past both R14-validating
+    doors; every fixture and property stayed green while three theorems mechanized the obsolete semantics.
+    Per the project rule that Lean proofs carry soundness for frozen definitions, the twin must agree
+    by construction, not by decoder gating. Practical rule: a semantics change to a mirrored definition
+    is incomplete until the twin definition and its affected theorems are updated, even when the behavior
+    difference is unobservable end-to-end.
+
+    '
+  context: 'second-round review finding (fenfenai) on remediation commit 7048b89; fixed in 9c85c3d
+    (N88): memberProps mapM/Option, consistentB none=>false, consistentB_iff re-proved. Sibling of O21
+    (per-door invariant parity) — this is per-TWIN definitional parity. Staged: single instance, no reuse/affirmation
+    yet, the PR unmerged.
+
+    '
+  potential_type: heuristic
+  bound_to:
+  - N87
+  - N88
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O23
+  timestamp: 2026-08-01T01:11
+  provenance: ai-suggested
+  content: 'Reinstatement vs contested is decided by the declared attack SET, not the attack kinds available,
+    and the lever is the completeness scan''s scope: attack completeness is arg-conclusion-level over
+    declared contrary pairs (firstMissingConflictInfo), so a symmetric contrary pair forces mutual edges
+    (any two args concluding the pair''s sides are locked into a 2-cycle -> contested), a ONE-directional
+    contrary permits an unattackable defender (-> reinstatement), and exceptions are outside the scan
+    entirely (undercut edges are always voluntary - the same vocabulary yields E4''s reinstatement chain
+    or E5''s contested cycle depending on one declared edge).
+
+    '
+  context: 'Discovered while designing E4/E5 (N90): the first undermine-reinstatement design used the
+    symmetric generalizes/not_generalizes pair and would have collapsed into a cycle; fixed with the one-directional
+    refuted_by_metareview contrary. E4 context X vs E5 context W differ by exactly one voluntary undercut
+    edge.
+
+    '
+  potential_type: claim
+  bound_to:
+  - N90
+  promoted: true
+  promoted_to: logic/claims.md:C22
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O24
+  timestamp: 2026-08-01T01:11
+  provenance: ai-suggested
+  content: 'The R7/R13 boundary for certificate defects: tampering with a cert''s theory digest lands
+    in R7 (CertifierUnallowlisted - the (backend, version, digest) triple is no longer in the rule''s
+    certifiers allowlist), not R13. R13 is reachable only when the certificate is allowlisted but replay
+    fails (payload corruption) or at the replay preflight (duplicate/unknown selected backend). Assurance
+    misuse and replay failure are different trust boundaries even though both involve certificates.
+
+    '
+  context: 'Pinned empirically by the T1 mutation suite (N91): cert-theory-swap mutants verify as R7,
+    cert-payload-tamper and duplicate/unknown-backend mutants verify as R13, across both drivers. Source:
+    assuranceError in Lara.SupportTerm (certAllowed check precedes the replay oracle).
+
+    '
+  potential_type: concept
+  bound_to:
+  - N91
+  promoted: true
+  promoted_to: logic/concepts.md:R7/R13 certificate-defect boundary
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O25
+  timestamp: 2026-08-01T01:11
+  provenance: ai-suggested
+  content: 'Verify-at-generation for specified-outcome corpora: a fixture generator that runs each artifact
+    through the production pipeline and ABORTS on any specification mismatch makes the committed suite
+    verified-by-construction, turning generation itself into the first experiment run (148/148 mutants
+    matched their specified class/status on the first full generation). Standing re-verification (MutationSpec)
+    plus seeded reproducibility (committed PRNG seed, byte-stable regeneration) then keep the suite honest
+    without trusting the generation event.
+
+    '
+  context: 'Design choice in scripts/gen-mutants.hs (N91), motivated by the risk of committing mutants
+    whose expected class was mis-specified (e.g. the R7-vs-R13 cert boundary would have been wrong a priori).
+
+    '
+  potential_type: heuristic
+  bound_to:
+  - N91
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H06
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O26
+  timestamp: 2026-08-01T18:50
+  provenance: ai-executed
+  content: 'R5 question accounting covers OPTIONAL critical questions: every rule question must be discharged
+    or explicitly opened (open <q> as <q>); an omitted optional CQ rejects (R5 Uncovered), while an OPEN
+    optional question adds no obligation (openMandatory filters to mandatory) so the arg stays complete
+    and claim status is unaffected. Surface consequence: ''optional'' means optional-to-SATISFY, never
+    optional-to-ACCOUNT-FOR.'
+  context: Discovered independently by two T2 lowering agents (bam/C05, fre/C01, restricted_mlm/C14, triton_cumsum/C09
+    all need open lines); LOWERING.md updated.
+  potential_type: concept
+  bound_to:
+  - N94
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O27
+  timestamp: 2026-08-01T18:55
+  provenance: ai-suggested
+  content: 'Under a uniform review policy, a polished top-venue corpus is gap-dominated, not defeat-dominated:
+    48/60 hand-lowered claim-support units land gap (cannot assemble a complete argument, dominated by
+    unreported variance/seeds/significance), 9 justified, only 3 defeated - and every defeat comes from
+    the paper''s OWN internal evidence (annotation unmet-defeater cases). The M0 finding (39% of mandatory
+    CQs unmet) materializes as computed verdicts; defeat pressure must come from authored adversarial
+    attacks (N29), never corpus mining.'
+  context: T2 corpus lowering complete (N94); status distribution from corpus-units/MANIFEST.tsv.
+  potential_type: claim
+  bound_to:
+  - N94
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O28
+  timestamp: 2026-08-01T18:55
+  provenance: ai-suggested
+  content: 'The C17 wishlist residue recurs at lowering time as concrete policy vocabulary gaps, still
+    finite: equivalence/non-inferiority margins (all-in-one/C06 - the missing margin IS the undischargeable
+    adequate_power), open-class generalization quantifiers (bbox/C05), significance-test CQ stronger than
+    variance_reported (fre/C01), a significance CQ for the measurement family (stay-on-topic/C06), and
+    a family-agnostic records-consistency CQ (restricted_mlm/C14). None blocked an honest lowering; candidates
+    for corpus-v2 / spec discussion.'
+  context: Aggregated from the 7 lowering agents' NOTES sections; recorded in corpus-units/LOWERING.md
+    and docs/m5-freeze-checklist.md.
+  potential_type: constraint
+  bound_to:
+  - N94
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O29
+  timestamp: 2026-08-01T21:45
+  provenance: ai-suggested
+  content: >
+    Single-defect mutation localization is a verification-style number, not a discriminating benchmark:
+    because each mutant seeds exactly one defect at a known constituent, the checker's first-failure
+    ordering localizes there by construction, so measured location-accuracy is 246/246 = 100% and any
+    deviation would be a diagnostic-ordering finding, not a detection failure. A discriminating
+    localization benchmark needs multi-defect / off-site mutants (recorded as the T6 follow-up).
+  context: T3 measurement smoke run (N96); eng review D10 realized empirically. Fresh unmerged numbers.
+  potential_type: claim
+  bound_to:
+  - N96
+  promoted: true
+  promoted_to: logic/claims.md:C23
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O30
+  timestamp: 2026-08-01T21:45
+  provenance: ai-suggested
+  content: >
+    In the v0.1 wire format the fixed policy image dominates certificate size: the ~7 KB corpus-v1 policy
+    inlined into every unit's .core.sexp makes total bytes (median 7520 B) nearly constant, so
+    payload = total - policy (median 841 B) is the distribution-bearing size number for the paper, not
+    total. Suggests a policy-by-reference wire optimization would shrink corpus artifacts ~9x.
+  context: T3 measurement smoke run (N96) certificate-size columns; eng review D11. Fresh unmerged numbers.
+  potential_type: claim
+  bound_to:
+  - N96
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O31
+  timestamp: 2026-08-01T21:45
+  provenance: ai-suggested
+  content: >
+    The two checking-time measurements are different protocols and not comparable: hs_check (in-process,
+    decode excluded, verdict forced) medians ~7 us while lean_wall (subprocess wall, startup + decode
+    included) medians ~2.6 ms - a ~370x gap that is process-startup, not semantics. Any cross-driver
+    speed claim must come from a same-protocol measurement, never this ratio; the harness labels them
+    separately for exactly this reason (D8/5A: an unforced lazy runCheck would instead read ~0 ns).
+  context: T3 measurement smoke run (N96) checking-time columns.
+  potential_type: constraint
+  bound_to:
+  - N96
+  promoted: true
+  promoted_to: logic/solution/constraints.md (timing-protocol bullet)
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O32
+  timestamp: 2026-08-01T23:50
+  provenance: ai-executed
+  content: >
+    Seeded-mutant ablations are surgical and monotone: disabling exactly one checker rule admits
+    exactly its mapped defect class and nothing else (no-cq: the 18 reject-IncompleteArgument rows;
+    no-typed: the 30 reject-R10/R11 rows; zero non-miss rows change; all full-accepts byte-identical).
+    This is rule-is-load-bearing evidence, confirmatory-by-construction - each seeded defect class is
+    caught only by its rule; it does not measure defect diversity or discovery.
+  context: T6 ablation smoke run (N97); pre-freeze numbers, the PR open.
+  potential_type: claim
+  bound_to:
+  - N97
+  promoted: true
+  promoted_to: logic/claims.md:C24
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O33
+  timestamp: 2026-08-01T23:50
+  provenance: ai-suggested
+  content: >
+    The dominant accept class on a missed reject is full justification, not a hedged status: 10/18
+    no-cq misses and 3/11 no-typed R10 misses land accept-justified - the ablated checker does not
+    merely pass the defective certificate, it certifies the claim as justified. This is the paper's
+    alarming case for both ablation columns.
+  context: T6 ablation smoke run (N97), accept-class breakdown in ablation.json aggregate.
+  potential_type: claim
+  bound_to:
+  - N97
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O34
+  timestamp: 2026-08-01T23:50
+  provenance: ai-suggested
+  content: >
+    An ablation measures nothing unless the mutation suite contains inputs that reach the ablated
+    check: the pre-T6 suite's open-obligation operator dropped a discharge without a hole, firing R5
+    Uncovered (a check every ablation keeps ON), so 0 of 340 mutants reached the obligation gate and
+    the original no-cq config would have reported a vacuous null result. Audit gate coverage of the
+    suite before trusting any ablation number; the fix belongs in the suite (a hole-seeding operator),
+    not in widening the ablation into the kernel.
+  context: Eng-review D8 confirmed empirically this turn (N97) - OpHoleObligation added, 18 mutants now
+    reach the gate and flip under no-cq.
+  potential_type: heuristic
+  bound_to:
+  - N97
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H07
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O35
+  timestamp: 2026-08-02T12:00
+  provenance: ai-executed
+  content: >
+    A frozen reproducibility anchor for a measurement corpus must hash the DETERMINISTIC PROJECTION of
+    the output, not the whole file: measure.hs report.tsv carries two wall-clock timing columns
+    (hs_check_ns, lean_wall_ns) that vary per run, so a whole-file hash is not reproducible. The T5
+    freeze hashes cut -f1-14 (drops timing) plus the fully-deterministic ablation.tsv, and pins the
+    frozen INPUTS by git-tree object SHA (which is itself a content hash) rather than per-file digests.
+    Timing is reported but explicitly excluded from the freeze anchors.
+  context: T5 freeze execution (N99); docs/m5-freeze-checklist.md determinism note + reproduce recipe.
+  potential_type: heuristic
+  bound_to:
+  - N99
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O36
+  timestamp: 2026-08-02T16:52
+  provenance: ai-suggested
+  content: >
+    The ra@1 Haskell/Lean pair achieves differential parity BY CONSTRUCTION despite different internal
+    representations: Haskell reduces to Rational, Lean keeps unreduced Dec and compares by
+    cross-multiplication, and the canonical-numeral / lowest-terms wire grammar makes the seam
+    byte-identical without importing Rat/Mathlib into Lean. The one representational asymmetry (Haskell
+    bounds slots by host Int at decode; Lean decodes unbounded Nat and rejects at replay) is
+    unobservable at the seam because both sides reject. Source: external review's branch-level
+    trace (fenfenai, confidence 78 review, found no accept/reject divergence); the Haskell half of the
+    asymmetry is now mechanically pinned by RASpec (prop_raHugeSlotRejected).
+  context: >
+    review-response turn (N101). The parity argument is the reviewer's interpretive analysis
+    plus the new RASpec pin; the repo's differential harness is the standing empirical check.
+  potential_type: claim
+  bound_to:
+  - N101
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O37
+  timestamp: 2026-08-04T23:48
+  provenance: ai-suggested
+  content: >
+    rit's current empirical gate is not uniformly byte-replaying: L2 declarative extractors replay,
+    but an L1 callable is discarded after bind and reextract later accepts the stored value on trust.
+    The CLI verify command is likewise report-integrity replay, not a proof-validity gate: a fresh
+    failing Lean report can be CLEAN when it byte-matches the archived failing report. Claims about
+    rit's shipping guarantee must therefore be scoped to the exact API and grounding tier.
+  context: >
+    Source-verified against rit commit 24a6140 (N104).
+    This narrows O12's K-tier integration wording and conflicts with C19 Conditions' unqualified
+    statement that the per-fact re-extraction core holds.
+  potential_type: claim
+  bound_to:
+  - N104
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O38
+  timestamp: 2026-08-04T23:48
+  provenance: ai-suggested
+  content: >
+    LARA should repair its presentation-to-core boundary before adding evidence features:
+    Elaborate currently admits every leaf into Gamma despite policyAdmission, while fullConfig
+    rejects an open-obligation argument although the frozen spec excludes that alternative and
+    reports gap. Correct quarantine must filter the leaf plus every dependent argument and attack
+    before checkUnit; deleting only the Gamma entry turns the occurrence into an R1 rejection.
+    A later leaf-certificate seam should extend this repaired admission boundary and remain separate
+    from strictCheck because byte-to-leaf replay and premise-to-conclusion checking certify different
+    relations.
+  context: >
+    Source-verified in Lara.Elaborate, Lara.Check, Lara.SupportTerm, Lara.Driver, Lara.Replay, and
+    docs/spec.md during the RIT/LARA comparison rewrite (N104). Recommendation is not user-approved.
+  potential_type: architecture
+  bound_to:
+  - N104
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O39
+  timestamp: 2026-08-04T23:48
+  provenance: ai-suggested
+  content: >
+    An append-only local goal/attempt log does not by itself resist HARKing because the producer can
+    create the goal after seeing the result and backfill the local order. A pre-registration claim
+    requires the goal event to be anchored in a trusted remote or transparency-log checkpoint before
+    run start; without that external ordering witness the guarantee is only tamper-evident recorded
+    chronology.
+  context: >
+    Design boundary identified while adapting the rit paper's Turn-0 blueprint for LARA (N104).
+    Recommendation is not user-approved.
+  potential_type: constraint
+  bound_to:
+  - N104
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O40
+  timestamp: 2026-08-05T00:44
+  provenance: ai-suggested
+  content: >
+    The RIT-informed evidence plan should preserve lara-core@0.1. The demonstrated conformance defect
+    is that Lara.Elaborate ignores policyAdmission; source quarantine must remove the leaf plus every
+    dependent argument and attack before core checking. IncompleteArgument is instead a frozen v0.1
+    rejection, with accepted corpus gaps represented by no submitted support argument (N93 and
+    corpus-units/LOWERING.md). Admitting partial alternatives would require a separate lara-core@0.2
+    decision and refreeze, not a bug-fix commit.
+  context: >
+    Corrects and supersedes O38's mixed recommendation after re-reading the frozen rejection table,
+    CheckConfig obligation gate, corpus lowering contract, and trace decision N93 while writing the
+    executable next-steps plan N106. Recommendation remains unapproved.
+  potential_type: architecture
+  bound_to:
+  - N106
+  - N93
+  promoted: true
+  promoted_to: logic/solution/calculus.md:3
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O41
+  timestamp: 2026-08-05T01:54
+  provenance: ai-suggested
+  content: >
+    Evidence quarantine should not be encoded as a fifth argumentation status or mapped directly to
+    gap. The admission layer should remove the quarantined leaf, every argument whose transitive
+    support contains it, and every attack with a removed endpoint before core checking; reporting may
+    conservatively overlay evidence-blocked on roots connected to the quarantined leaf in the
+    declared presentation graph while retaining any conditional core diagnostic.
+  context: >
+    Derived from the deep plan review in N107 by reconciling LARA's frozen four-state core,
+    IncompleteArgument rejection, structural support relation, and incomplete-argumentation
+    literature. The revised plan depends on this architecture, but researcher approval is absent.
+  potential_type: architecture
+  bound_to:
+  - N107
+  - N106
+  promoted: true
+  promoted_to: logic/solution/calculus.md:3
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O42
+  timestamp: 2026-08-05T01:54
+  provenance: ai-suggested
+  content: >
+    The evidence-admission paper theorem should quantify over an abstract deterministic checker
+    registry, immutable snapshot, successful leaf judgments, and complete dependency reports.
+    Concrete SHA-256 parsing and extractor correctness remain trusted implementation obligations.
+    Checker failure must preserve the exact read trace, which requires the error transformer outside
+    dependency state or an equivalent outcome carrying both error and log.
+  context: >
+    Derived from N107's proof-carrying-data and implementation-boundary review. The claim prevents the
+    mechanized calculus from overstating cryptographic, parser, or extractor guarantees.
+  potential_type: architecture
+  bound_to:
+  - N107
+  - N106
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O43
+  timestamp: 2026-08-05T15:45
+  provenance: ai-executed
+  content: >
+    The production quarantine path now has a checker-instantiated, corpus-independent non-promotion
+    theorem: compact justification plus absence from the exact production evidence-blocked list
+    implies declared-index justification after lifting completeClaimFor. The theorem is implication,
+    not status equality; equal status still needs statusC_agree's equal-support premise.
+  context: closure implementation and axiom/build/differential verification (N108-N111).
+  potential_type: claim
+  bound_to:
+  - N108
+  - N111
+  promoted: true
+  promoted_to: logic/claims.md:C25
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O44
+  timestamp: 2026-08-05T15:45
+  provenance: ai-suggested
+  content: >
+    Proof/production identity seams disappear when source declarations and derived checked values are
+    filtered as one aligned structure. Pair arguments with original indices before filtering and zip
+    raw/resolved attacks before selecting; do not recover identity later by term equality or re-resolution.
+  context: The first bridge draft used derived-value matching; duplicate declarations exposed that as insufficient, so the implementation pivoted to retainedView/selectAligned (N110).
+  potential_type: heuristic
+  bound_to:
+  - N110
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H08
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O45
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    A trusted boundary is only as narrow as its module's export list. If the wrapper enforces a
+    policy on an input that some other public function also produces, that function is an equal
+    entry point and the policy is unenforced. Admission is a property of the presentation-to-Unit
+    path, so the bare lowering must leave the public API entirely, not merely be documented as the
+    unsafe option.
+  context: >
+    Second-round review found elaborate -> mkReplayId -> mkCheckInput -> runCheck still accepted a
+    source that prepareSource rejects as R8, despite prepareSource being documented as the front
+    door (N120).
+  potential_type: heuristic
+  bound_to:
+  - N120
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H09
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O46
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    A differential harness that captures each driver's stderr to a temp directory must print it on
+    every failure branch, not only on the branches with a tailored message. The branch that fires
+    on an unanticipated failure shape is exactly the one without a message, and the cleanup trap
+    deletes the capture, so an unprinted stderr is a permanently lost diagnostic.
+  context: >
+    A valid-but-wrong fixture oracle made both drivers exit 1 with explanatory stderr and empty
+    stdout; the harness fell through to the "wrong outcome class" branch and printed nothing (N120).
+  potential_type: heuristic
+  bound_to:
+  - N120
+  - N121
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O47
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    Well-formedness a decoder already decides should be exported as a proof on its output rather
+    than discarded as a boolean and re-assumed downstream. R14 argument-id uniqueness is the
+    example: the prune decides retention per argument row but filters attacks by endpoint id, so
+    without uniqueness a surviving duplicate keeps an id "present" after the resolved row was
+    removed, retaining an attack whose semantic source is gone.
+  context: >
+    A compiled duplicate-ArgId witness showed evaluateAdmission accepting and retaining exactly
+    that attack; the wire decoder rejected duplicates but AlignedAttacks carried no such
+    invariant (N120).
+  potential_type: heuristic
+  bound_to:
+  - N118
+  - N120
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H10
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O48
+  timestamp: 2026-08-06T21:30
+  provenance: ai-suggested
+  content: >
+    A mechanized result must be restated in prose at the granularity its statement actually proves.
+    An "identity" claim that names pipeline stages outside the model -- here the R13 preflight, the
+    R9 group boundary, and the emitted public verdict -- is an overstatement even when the informal
+    argument for it is sound, because a reader cites the theorem, not the argument.
+  context: >
+    The all-admit docstring and metatheory plan claimed verdict identity while the theorem proved
+    prune plus blocked-query equalities and a separate theorem proved the checkUnit outcome (N120).
+  potential_type: claim
+  bound_to:
+  - N120
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O49
+  timestamp: 2026-08-06T23:45
+  provenance: ai-suggested
+  content: >
+    On the raw .sexp door the strict-backend theory table is artifact-supplied:
+    buildCertOk builds it from the unit's own wire theories section and replay
+    preflight validates digest ordering/duplicates, never content. Any backend
+    design that claims premise-backing must therefore enforce it inside its own
+    decoder/replay; only the .lara policy door pins theory content (registryOf).
+  context: >
+    Outside-voice finding during the ord@1 plan review, verified against
+    src/Lara/Driver/Internal.hs:244-245 and src/Lara/Replay.hs; drove the N123
+    premise-only-slots decision. Seam-wide resolution (ra@1 parity) deferred to
+    a TODOS.md entry.
+  potential_type: constraint
+  bound_to:
+  - N123
+  promoted: true
+  promoted_to: logic/claims.md:C27
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O50
+  timestamp: 2026-08-06T23:45
+  provenance: ai-suggested
+  content: >
+    Canonical decimal encoding is injective on representable rationals, and
+    parseDecimal accepts only the canonical image; hence a strict-backend
+    equality goal over two canonical numerals can only accept syntactic
+    identity, degenerating num_eq(A,B) to num_eq(A,A).
+  context: >
+    Outside-voice finding during the ord@1 plan review; the N122 decision to
+    drop num_eq cites it as its rationale and the plan records it as the
+    rejection reason in section 2.1.
+  potential_type: claim
+  bound_to:
+  - N122
+  promoted: true
+  promoted_to: logic/claims.md:C26
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O51
+  timestamp: 2026-08-07T02:10
+  provenance: ai-suggested
+  content: >
+    When a backend seam deliberately hides a distinction from the checker (here
+    the premise/theory split, erased into one context Gamma = Delta ++ T), a
+    guard that depends on that distinction cannot live in the checker. It has
+    to be pushed into whatever the seam DOES parameterize -- for ord@1, theory
+    resolution, made to return the empty theory so the erased boundary and the
+    context boundary coincide. The guard then survives as an
+    acceptance-preserving refinement on the concrete side rather than as a
+    divergence between the two implementations.
+  context: >
+    Discovered while mechanizing the premise-only slot decision (N123) in
+    lean/Lara/Ord.lean; resolved as N125 and pinned by
+    fixtures/corpus/ord-premise-only-{reject,accept}.sexp.
+  potential_type: heuristic
+  bound_to:
+  - N125
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O52
+  timestamp: 2026-08-07T02:10
+  provenance: ai-executed
+  content: >
+    A strict backend's goal grammar does not accept the canonical numeral image;
+    it accepts the PREIMAGE of that image under nf. Because parseGoal runs after
+    normalization, surface literals outside the canonical image ("2.", ".5",
+    "+0.50", "-0.0") are accepted at their normalized value, and only literals
+    whose NORMAL FORM is still not a decimal ("1e3", "1.2.3", "NaN") reject.
+    Two OrdSpec properties asserted the narrower reading and failed; the tests
+    were wrong and the adapter was right.
+  context: >
+    First run of test/OrdSpec.hs against src/Lara/Strict/Ord.hs; corrected by
+    rewriting prop_ordGoalMatrix to assert normalization-then-parse, matching
+    what ra@1 already does. Same run also corrected an assumption that a
+    negative slot reaches slot resolution -- it is rejected earlier, at decode,
+    by the canonical-natural sub-grammar.
+  potential_type: concept
+  bound_to:
+  - N126
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O53
+  timestamp: 2026-08-07T04:30
+  provenance: ai-suggested
+  content: >
+    A cross-implementation differential proves AGREEMENT, never correctness, so
+    it is weakest exactly where the two implementations were deliberately
+    modelled differently to make them agree. Such inputs need an independent
+    expected-value pin, not just the differential; and when the pin list is
+    hand-maintained while the harness glob-discovers its inputs, the two drift
+    silently -- so the coverage relation itself has to be asserted.
+  context: >
+    review: the four ord@1 fixtures were glob-discovered by
+    differential.sh but absent from corpusGoldens; auditing found two more
+    unpinned anchors. Closed by prop_goldensCoverAnchors in
+    test/DifferentialSpec.hs.
+  potential_type: heuristic
+  bound_to:
+  - N129
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+- id: O54
+  timestamp: 2026-08-07T04:30
+  provenance: ai-suggested
+  content: >
+    A pure-move refactor that introduces a parameter solely to PRESERVE
+    observable behaviour (here decodeSlot's backend label, keeping ra@1's
+    rejection strings byte-identical) creates a failure mode the pre-refactor
+    test suite cannot see: the old suite never asserted the strings, and the
+    new parameter can be mis-passed, swapped, or dropped with everything green.
+    The invariant a refactor claims to protect needs an assertion added in the
+    same change, and that assertion should be mutation-tested rather than
+    observed to pass.
+  context: >
+    review finding on test/RASpec.hs; the added
+    prop_raRejectionMessages was verified to fail under the exact mutation
+    (decodeSlot "RA" -> "ord") before being kept.
+  potential_type: heuristic
+  bound_to:
+  - N129
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O55
+  timestamp: "2026-08-08T03:10"
+  provenance: ai-suggested
+  content: >
+    A theorem that discharges by rfl/Iff.rfl, or whose proof script binds fewer
+    fields than the type has, invites the reader to assume it is vacuous. Neither
+    reading is settled by argument. Settle it by PERTURBATION: break the
+    definition the theorem is about and confirm the proof stops compiling. Done
+    twice this turn -- swapping goalOf's higherIsBetter operands broke
+    goalOf_iff_better, goalOf_polarity_swap and goalOf_polarity_mismatch_excl at
+    typecheck; making parsePolicy return [] for measurands left parse_printPolicy
+    with unsolved goals. Both took ~2 minutes and converted "I believe this is
+    non-vacuous" into evidence.
+  context: >
+    Reviewing D8+ (goalOf_iff_better closes by `cases rel <;> cases pol <;> exact
+    Iff.rfl`) and D8 (parse_printPolicy destructures a 9-field Policy with 5
+    binders, which reads as though it covers 5 fields).
+  potential_type: heuristic
+  bound_to: [N133, N136]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O56
+  timestamp: "2026-08-08T03:12"
+  provenance: ai-suggested
+  content: >
+    The direction-of-goodness contract ended up carried three independent ways by
+    agents that never coordinated: a Lean proof (goalOf_iff_better,
+    goalOf_polarity_mismatch_excl), a Haskell worked example (S5, perplexity
+    declared lower-is-better, generating the mirrored goal), and a Haskell<->Lean
+    differential golden pinning the FLIPPED numerals num_lt(28.4, 31.6) rather
+    than merely the accept outcome. A polarity error would have to survive a
+    proof, a test, and cross-implementation disagreement simultaneously. Only the
+    first was planned; the differential entry was added unprompted.
+  context: >
+    Emerged across D8+ (ca78131) and D6 (2045ef9), implemented by separate
+    subagents with no shared context.
+  potential_type: claim
+  bound_to: [N133, N135]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O57
+  timestamp: "2026-08-08T03:14"
+  provenance: ai-suggested
+  content: >
+    A mechanization can drift from the implementation it mirrors while its own
+    documentation keeps asserting parity, and nothing in the proof pipeline
+    detects it: every theorem still holds, the axiom audit still passes, CI stays
+    green -- the theorems are simply about a smaller language than the one the
+    production parser accepts. Here result 12's scope header and the README row
+    both claimed field-for-field parity with Lara.AST from M4a onward while five
+    constructs were never ported. The detection cost is one diff of the two type
+    definitions; the failure is silent until someone reads both files side by
+    side. Candidate mitigation: a parity check that enumerates constructor/field
+    counts on both sides, so drift fails a build rather than waiting on a reader.
+  context: >
+    Found while implementing D8; closed in 3cb391f (Policy 5->9 fields, Decl 5->7
+    arms) and 954214b (README).
+  potential_type: heuristic
+  bound_to: [N136]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O58
+  timestamp: "2026-08-09T00:56"
+  provenance: user-revised
+  content: >
+    The paper should receive a focused presentation-layer synchronization after
+    the merge: distinguish lara-syntax@0.3 elaboration from the frozen
+    lara-core@0.1 AST and checker anchor; state that cell interpolation removes
+    numeric transcription drift without verifying the prose-to-formal binding;
+    replace the S4 appendix's hand-written comparison expansion with the merged
+    comparison block and named binding-premise path; update the worked-example,
+    property, and positive-differential counts; and mention the unnumbered Lean
+    direction-of-goodness contract while preserving the verified-versus-
+    validated boundary. G1-G6, byte-level core behavior, frozen corpus outcomes,
+    and core performance do not change because S2/S3/S4 remain byte-identical
+    after elaboration.
+  context: >
+    Code-paper audit requested after the merge; user approved the sync
+    ('do these revisions?') and the eight-file paper edit was applied.
+  potential_type: constraint
+  bound_to: [N140, N141]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md (Surface/core boundary bullet)"
+  crystallized_via: verbal-affirmation + artifact-commitment
+  stale: false
+
+- id: O59
+  timestamp: "2026-08-10T18:40"
+  provenance: ai-suggested
+  content: >
+    A rejection class that no implementation enforces does not stay merely
+    under-exercised: its documented content drifts from reality undetectably.
+    R2 sat in the frozen spec table with zero mutants and zero examples;
+    docs/rejection-surface.md described it as "exercised only inside larger
+    worked cases", which was false; and one of its two documented triggers
+    ("non-ground term where ground required") was unsatisfiable by construction,
+    because Term has no variable constructor. Both errors survived every review
+    because nothing executable could contradict them.
+  context: >
+    Found while implementing D7/D1: the surface doc's note and the spec's
+    R2 row both had to be corrected, not merely extended.
+  potential_type: claim
+  bound_to: [N150, N152]
+  promoted: true
+  promoted_to: "logic/claims.md:C28"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O60
+  timestamp: "2026-08-10T18:42"
+  provenance: ai-suggested
+  content: >
+    When a checker gains a new EARLY stage, a seeded-defect suite silently
+    migrates to the new class wherever its operators synthesize fresh
+    vocabulary — so "the reclassification delta is zero" is a property of the
+    generators, not of the checker. Three operator groups here inject symbols
+    (hidden-contrary's mut_p/mut_q, the accept family's injected contraries and
+    premises, rebut-cycle's whole synthetic vocabulary); each had to be made
+    signature-aware before the delta could be zero. Two class-boundary
+    decisions carry the rest: a theta key off the parameter list stays R3, and
+    an instance whose rule id does not resolve stays R1.
+  context: >
+    The lara-syntax-03 surface plan §8 predicted the zero delta and required it be measured, not assumed.
+    Measured: the expected-column diff over the 369 pre-existing mutants is
+    empty, after the generators were changed.
+  potential_type: claim
+  bound_to: [N152]
+  promoted: true
+  promoted_to: "logic/claims.md:C29"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O61
+  timestamp: "2026-08-10T18:44"
+  provenance: ai-suggested
+  content: >
+    A per-instance check can be made thin by a substitution lemma rather than by
+    a judgement call: stage 2 validates a rule's patterns once, statically, and
+    each instance's theta range separately, and NOTHING validates the
+    instantiated atoms. wellSorted_subst is what licenses that gap. Without the
+    lemma the theta-range check looks arbitrarily scoped; with it, the thinness
+    is a result.
+  context: >
+    Mechanized as result 13(b)/(c) in lean/Lara/Sigma.lean and
+    lean/Lara/Check/Unit.lean; the plan called this the load-bearing metatheory
+    of the pass rather than a lemma-shaped afterthought.
+  potential_type: claim
+  bound_to: [N153]
+  promoted: true
+  promoted_to: "logic/claims.md:C30"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O62
+  timestamp: "2026-08-10T18:46"
+  provenance: ai-suggested
+  content: >
+    The ground vocabulary of a first-order corpus is dominated by nullary
+    constants, which surface grepping cannot see: inference over corpus-v1 found
+    196 constructors of which 187 are nullary. A nullary constant has no
+    argument positions, so its sort is only recoverable from the predicate and
+    constructor positions it occupies — which makes union-find over occurrences
+    the minimum viable census tool, not an optimisation over a sweep.
+  context: >
+    D0's first output. The plan's own head-token estimate was low by roughly 3x
+    exactly at the nullary term, which the plan itself flagged (OV-1A).
+  potential_type: claim
+  bound_to: [N151]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O63
+  timestamp: "2026-08-10T18:48"
+  provenance: ai-suggested
+  content: >
+    Declare what cannot be inferred; derive what the declaration would only let
+    the frontend get wrong. Sorts are declared because inferring them presumes
+    answers the corpus has not settled (whether imagenet_val is a Dataset or an
+    EvalSetting is the possible-worlds question). Rule PARAMETER sorts are
+    derived from the rule's own patterns, because under a validated signature
+    every parameter already occupies sorted positions — so declaring them adds a
+    wire field, a rule-grammar change, and a way for a declaration to disagree
+    with the patterns beside it, and buys nothing.
+  context: >
+    The lara-syntax-03 surface plan §2.1 (eng review OV-3) and its implementation: no ninth wire field, no
+    stored Rule field, no sort annotations in the rule grammar.
+  potential_type: heuristic
+  bound_to: [N150, N152]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H12"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O64
+  timestamp: "2026-08-10T22:10"
+  provenance: ai-suggested
+  content: >
+    Broad new proof mechanization is not the next paper-critical milestone: the
+    semantic headline theorems already pass AxCheck. Before the M7 draft claims
+    complete mechanization, close or explicitly narrow the one current
+    result-12 gap by bringing Lean Presentation parity to policySigma and the
+    current measurand representation, then add a mechanical AST-parity guard.
+  context: >
+    Post-PR roadmap audit. The tracker note said all 12 results are mechanized,
+    while docs/mechanization-plan.md and lean/Lara/Presentation.lean explicitly
+    record that the presentation round-trip models only a subset of the live
+    Haskell AST.
+  potential_type: constraint
+  bound_to: [N159]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H13"
+  crystallized_via: verbal-affirmation
+  stale: false
+
+- id: O65
+  timestamp: "2026-08-11T10:15"
+  provenance: ai-suggested
+  content: >
+    A cross-language AST shape guard that pairs per-language compiler
+    witnesses (exact constructor signatures plus exhaustive full-arity
+    eliminators) with per-language arity tripwires and an exact ordered
+    inventory diff fails closed on every observed drift class; the tripwire
+    specifically closes the update-the-witness-forget-the-row loophole that
+    witnesses alone leave open. Observed once, on the 68-row result-12 guard
+    across seven mutation classes plus one production-AST mutation.
+  context: >
+    Result-12 guard implementation and mutation matrix (N167). The plan
+    directed that this general drift-prevention claim stay staged unless the
+    researcher explicitly affirms it or a later artifact depends on it.
+  potential_type: claim
+  bound_to: [N167]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O66
+  timestamp: "2026-08-11T10:16"
+  provenance: ai-suggested
+  content: >
+    A desired-shape compile witness in Lean guards nothing unless autoImplicit
+    is disabled: an unknown type identifier in the witness signature is
+    otherwise auto-bound as an implicit and unifies with whatever the model
+    actually has, so the red test can pass vacuously. The result-12 witness
+    reported the true MeasurandSort-vs-TermSort mismatch only after
+    set_option autoImplicit false was pinned in the witness file.
+  context: >
+    Task 1 red run (N166): the first compilation auto-bound TermSort and would
+    have let the sort half of the pin pass vacuously had polarity already been
+    optional.
+  potential_type: heuristic
+  bound_to: [N166]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O67
+  timestamp: "2026-08-11T10:06"
+  provenance: ai-suggested
+  content: >
+    A hand-maintained cross-language shape inventory can still false-pass when
+    literal alias rows are only counted, sum arms are checked only for arity, or
+    exceptional field-name normalization is applied without declaration
+    context. A fail-closed guard must anchor aliases definitionally, ascribe
+    every payload-carrying constructor's exact type, compare real named
+    selectors in order, and scope non-mechanical normalizations to the specific
+    declarations that need them; positional semantic labels and swaps among
+    same-typed positions remain explicit assertions when constructors expose no
+    selector metadata.
+  context: >
+    external review plus independent re-review of the implemented fixes
+    (N169). The final guard code embodies the rule, but the researcher has not
+    explicitly affirmed it as a durable project heuristic.
+  potential_type: heuristic
+  bound_to: [N169]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O68
+  timestamp: "2026-08-11T10:29"
+  provenance: user-revised
+  content: >
+    After result-12 parity and strict Sigma have landed, the next bounded code
+    milestone should resume the deferred value-binding thread as a new presentation-syntax version. Stage
+    value bindings plus binding interpolation before named certificate-slot
+    references: the former is now safe under strict Sigma, while the latter
+    still needs an explicit layering decision because Cert payloads are opaque.
+    Any Program-shape extension must update the Haskell and Lean presentation
+    codecs, compiler witnesses, and the 68-row parity inventory together.
+  context: >
+    Post-merge roadmap audit after the merge. The live main branch and hosted
+    checks are green; that work has landed; plans/2026-08-08-lara-syntax-03-surface.md
+    leaves only D7 deferred, while docs/lara-surface-grammar.md explicitly says
+    named premise-slot references still cross an unresolved opaque-payload
+    boundary.
+  potential_type: architecture
+  bound_to: [N170]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N171"
+  crystallized_via: verbal-affirmation
+  stale: false
+
+- id: O69
+  timestamp: "2026-08-12T21:19"
+  provenance: ai-suggested
+  content: >
+    Task 7 locally verified the plain-argument theta inference through the
+    exact surface form `by rule from [refs]` (including stable D6 diagnostics),
+    `presentation parity: PASS (72 rows)`, and unchanged A/S1 source/core and
+    replay/tamper behavior. Hosted Haskell and Lean CI remain pending until the
+    implementation PR head runs them, so the completion claim is conditional on
+    that hosted verification.
+  context: >
+    Task 7 report for plans/2026-08-12-plain-arg-theta-inference.md; no
+    generated or frozen artifact bytes changed, and the Task 8 TODO/backlog
+    record must not imply that named certificate slots were implemented.
+  potential_type: claim
+  bound_to: [N175]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N176"
+  crystallized_via: empirical-resolution
+  stale: false
+- id: O70
+  timestamp: "2026-08-12T22:02"
+  provenance: ai-executed
+  content: >
+    Hosted Haskell and Lean CI passed on the implementation PR after the
+    local plain-argument theta inference matrix was complete. The final
+    verification state is clean: the PR merge state is CLEAN, presentation
+    parity remains 72 rows, and the local Haskell/Lean/AxCheck gates pass.
+  context: >
+    Implementation of plans/2026-08-12-plain-arg-theta-inference; the hosted jobs
+    were intentionally deferred until the implementation PR head existed.
+    The opaque certificate-layering work remains separate and open.
+  potential_type: claim
+  bound_to: [N176]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N176"
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false
+
+- id: O71
+  timestamp: "2026-08-12T17:02"
+  provenance: ai-executed
+  content: >
+    Final-head verification corrected the earlier intermediate record:
+    presentation parity is `PASS (73 rows)`, and the complete local
+    Haskell/Lean/AxCheck, differential, admission, replay, and tamper gates
+    pass on commit 2de1bcde. Hosted Actions run 31653193555 passed both
+    Haskell and Lean jobs on ARA-append head c9c59a6 before this metadata
+    correction commit was created.
+  context: >
+    The implementation PR remains open with merge state CLEAN. Its GitHub
+    review decision is still CHANGES_REQUESTED after the requested fixes were
+    pushed and re-review was requested. The repository-wide strict ARA check
+    remains blocked by the pre-existing N131 scalar at
+    ara/trace/exploration_tree.yaml:3249.
+  potential_type: claim
+  bound_to: [N177]
+  promoted: true
+  promoted_to: "trace/exploration_tree.yaml:N177"
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false
+
+- id: O72
+  timestamp: "2026-08-13T20:41"
+  provenance: ai-suggested
+  content: >
+    The lara-syntax surface cannot author premise lists (explicitRuleP
+    unconditionally stores none) and cannot attach an assurance to a nested
+    premise term, so every reachable resolved premise is constructed by
+    resolvePremises/inferTheta; a prior-argument premise is that argument's
+    elaborated term, while hand-built ASTs can carry the bare-SLeaf spelling
+    that elabTerm passes through unre-pointed. Locating citations against
+    both representations makes explicit and inferred spellings lower
+    identically, with no false ambiguity (a same-named leaf already errors
+    upstream in refMatches).
+  context: >
+    Discovered during Task 3 of the implementation when verifying the
+    D4 representation rule; drove the two-candidate locate in
+    certSlotResolver, pinned by prop_priorArgumentCitationBothSpellings and
+    prop_priorArgumentPremiseSpellingsAgree; accepted by adversarial spec
+    review.
+  potential_type: claim
+  bound_to: [N180]
+  promoted: true
+  promoted_to: "logic/claims.md:C31"
+  crystallized_via: artifact-commitment + empirical-resolution
+  stale: false
+
+- id: O73
+  timestamp: "2026-08-13T20:41"
+  provenance: ai-suggested
+  content: >
+    When mirroring an implementation in a prover under a coarser error model,
+    mirror the failure STRUCTURE - which refusals fire before which inputs
+    are consulted - not merely the failure/success partition; conformance
+    vectors over well-behaved resolvers cannot catch a refusal that was
+    reordered behind an input consultation, only an adversarial input
+    (all-resolving resolver) can.
+  context: >
+    Generalization of the N181 dead end (the Lean numeralTypo early-out fix
+    and guard V9b); candidate heuristic for the mechanization discipline.
+  potential_type: heuristic
+  bound_to: [N181]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H14"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O74
+  timestamp: "2026-08-17T23:27"
+  provenance: ai-suggested
+  content: >
+    A closed 97-key String vocabulary on the hot decode path paid enough linear
+    equality cost that a derived Data.Map.Strict CAF reduced the 60-unit median
+    parse row by 54.02% and end-to-end by 46.24%. An exhaustive inverse and
+    injectivity property, the corresponding Lean injectivity theorem, and the
+    independent Lean differential preserved the observable wire contract.
+  context: >
+    Implementation and same-session evaluation. A focused benchmark
+    over all 1052 head keywords measured the old association list at 233.56
+    microseconds and the Map at 38.733 microseconds. Full differential results
+    were 581 positive and 56 negative cases with zero failures.
+  potential_type: claim
+  bound_to: [N187]
+  promoted: true
+  promoted_to: "logic/claims.md:C32"
+  crystallized_via: artifact-commitment + empirical-resolution
+  stale: false
+
+- id: O75
+  timestamp: "2026-08-19T00:05"
+  provenance: ai-suggested
+  content: >
+    Replacing the wire reader's lazy String cursor with strict ByteString
+    slicing reduced the 60-unit median parse row by 45.5% and end-to-end by
+    33.0%, without a Haskell-Lean verdict, exit-code, replay, or frozen-byte
+    divergence. The observable contract survived because the cursor was made to
+    count code points rather than bytes, matching the Lean driver's List Char
+    semantics, and because both String entry points were retained as wrappers
+    so the frozen measurement projection kept its code-point byte count by
+    construction.
+  context: >
+    Implementation and same-session evaluation. The machine carried
+    a load average of 3.0 to 4.4 throughout, so every row ran about 1.4 times
+    the committed table and only the same-session pair is comparable. The
+    verbatim previous reader in test/WireSpec.hs asserted equal trees and exact
+    error positions over 581 committed inputs, printed generated trees, and
+    corrupted wire text.
+  potential_type: claim
+  bound_to: [N191, N192, N193]
+  promoted: true
+  promoted_to: "logic/claims.md:C33"
+  crystallized_via: artifact-commitment + empirical-resolution
+  stale: false
+
+- id: O76
+  timestamp: "2026-08-20T05:00"
+  provenance: ai-suggested
+  content: >
+    When a fix removes a silent no-op fall-through from a parser helper so the
+    rule cannot be bypassed, the same treatment has to reach every sibling
+    helper that shares the rejection condition - including siblings whose
+    rejection already worked, because those rely on the caller remembering to
+    check. In the @0.7 arg-body fold, the tracked fix named only addArgDischarge and
+    addArgHole; setArgAssurance kept `inst _ = inst` and left Appendix A.1's
+    already-correct ruling resting on a parser-side convention. Making the
+    helper total-with-error costs one equation and removes the whole class.
+  context: >
+    Independent spec review of commit 62e23f9 flagged it as a borderline D1
+    reading. Closed in commit 20a5bb8 in the same release, keeping the
+    diagnostic and its position unchanged by leaving argBody's bare-leaf check
+    ahead of assuranceP.
+  potential_type: heuristic
+  bound_to: [N196, N198]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H15"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O77
+  timestamp: "2026-08-20T04:30"
+  provenance: ai-executed
+  content: >
+    A presentation-layer restriction can be proven acceptance-preserving
+    without re-running any measurement, by pairing a namespace scan of the
+    authored sources with an explicit frozen-artifact pathspec diff. The scan
+    answers whether the new rejection can fire at all (here: zero of 120
+    discharge references name both a leaf and an argument id); the pathspec
+    diff answers whether anything derived moved. Source trees re-pin because
+    authored .lara bytes moved, which is a different fact from semantic
+    movement and needs recording separately or it reads as drift.
+  context: >
+    lara-syntax@0.7 corpus sweep across 109 tracked .lara files. Recorded in
+    grammar Appendix F.5 and the m5 freeze checklist.
+  potential_type: heuristic
+  bound_to: [N196, N197]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O78
+  timestamp: "2026-08-21T05:00"
+  provenance: ai-suggested
+  content: >
+    A presentation-layer name class that indexes the SLOT is strictly more
+    expressive than one that indexes the REFERENT, and the gap is exactly the
+    non-injective case. @0.6 resolves a citation by locating the referent's
+    term in the resolved premise sequence, which is undefined when one term
+    fills two slots - the leaf name occupies both and the author is forced back
+    to numerals. A premise label names the position in the rule that declares
+    it, so it needs no locate step and stays defined however the instance is
+    filled. The generalization: whenever a surface name must denote a position
+    in a sequence that may hold duplicates, referent-based naming has a
+    structural dead end that position-based naming does not, and adding the
+    position-based class beside it (rather than instead of it) costs only a
+    collision policy.
+  context: >
+    lara-syntax@0.8. Worked in examples/S7 argument a2, where one leaf
+    fills both premise slots of le_reflex; specified in grammar Appendix G.2
+    and G.4, which supersedes E.3's "cite a numeric slot" as the only exit.
+  potential_type: claim
+  bound_to: [N199, N200]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O79
+  timestamp: "2026-08-21T05:30"
+  provenance: ai-suggested
+  content: >
+    Parameterizing a mechanized pass over the decision procedures it consults -
+    rather than over a concrete instance of them - buys forward compatibility
+    that is checkable rather than argued. CertSlots.lean quantifies both of its
+    theorems over an abstract resolver `p : String -> Option Nat` and an
+    abstract identifier classifier, so @0.8's extension of the resolver's name
+    scope from two classes to three landed with zero Lean edits and the axiom
+    audit still green. The cost is paid once, at mechanization time, by
+    resisting the urge to model the resolver the implementation actually has;
+    the payoff is that a whole category of surface change - anything that
+    changes WHICH names resolve without changing HOW a resolved name is
+    substituted - is proof-neutral by construction.
+  context: >
+    lara-syntax@0.8. Recorded as grammar Appendix G.6 and in the
+    mechanization-plan row 12 note; verified by lake build + check-axioms.sh
+    against an unmodified lean/ tree.
+  potential_type: heuristic
+  bound_to: [N199, N200]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O80
+  timestamp: "2026-08-21T19:15"
+  provenance: ai-suggested
+  content: >
+    A seeded artifact generator can make its own refactors mechanically
+    checkable, but only if the seed key and the selection rule are wired to the
+    things a refactor is likely to disturb. Lara.Mutate keys its stream on
+    (base, operator) THROUGH opName, and picks sites from each enumerator's
+    output in list order. Both couplings are usually described as constraints -
+    do not rename an operator, do not reorder a list. Under an output-preserving
+    refactor they invert into a detector: the failure modes a large cut-and-paste
+    actually produces (a reordered sum-type constructor, a reordered entry in an
+    operator table, a reordered list comprehension, a renamed symbol) are exactly
+    the ones that move committed bytes, so a byte-diff of the regenerated corpus
+    is a near-complete test for move errors without a single new assertion. The
+    generalization: when a frozen artifact is derived deterministically from
+    source, the refactor gate is free, and its strength is a function of how much
+    of the source's structure the derivation is sensitive to. A generator keyed
+    on stable integers with order-independent selection would have caught none
+    of these.
+  context: >
+    Splitting Lara.Mutate moved 870 lines across six new modules with no
+    intended behavior change. 506 checksums (504 mutants + MANIFEST.tsv +
+    README.md) came back identical against a pre-split baseline, and the
+    differential held at 582/0 and 56/0.
+  potential_type: heuristic
+  bound_to: [N201, N202]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O81
+  timestamp: "2026-08-21T19:15"
+  provenance: ai-suggested
+  content: >
+    When a module is split and the ROOT is what owns the shared vocabulary its
+    new siblings consume, the usual source-compatibility move - leave the root
+    as a facade re-exporting everything - is structurally unavailable rather than
+    merely undesirable. Every sibling imports the root, so a root importing them
+    back closes a cycle; preserving the old import surface requires interposing a
+    further Core layer beneath both, which is new public surface bought for
+    compatibility alone. The consequence worth stating is a sequencing one: with
+    no facade available there is also no partially-split intermediate state that
+    compiles, so the move must land atomically, and reviewability has to come
+    from an explicit move map and output gates rather than from small commits.
+    The alternative shape - splitting so the shared vocabulary sinks into a leaf
+    and the root becomes the facade - keeps compatibility but inverts which
+    module names the namespace.
+  context: >
+    Design decision D1/D4 of the split plan, taken through gstack eng
+    review. The break was bounded first: exactly two files imported Lara.Mutate
+    wholesale, and the four selective importers took only names that stay in the
+    root, so they did not change at all.
+  potential_type: claim
+  bound_to: [N201]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O82
+  timestamp: "2026-08-22T23:50"
+  provenance: ai-suggested
+  content: >
+    A surface-to-kernel transformation with binders can be meaningfully
+    mechanized without formalizing the entire concrete parser and elaborator if
+    the proof boundary is the transformation's structured input and every
+    external decision is explicit data. For named nd@1 terms, abstracting the
+    source-identifier classifier and premise resolver leaves the binder stack,
+    index shifting, marker traversal and rejection-preserving Option boundary
+    inside Lean. This supports two load-bearing theorems: identity on kernel
+    terms and equality with an independent named-to-de-Bruijn translation. The
+    price is an honest validated-not-verified boundary around the production
+    classifier, resolver, dispatch and error taxonomy.
+  context: >
+    lara-syntax@0.9, lean/Lara/NDNamed.lean. The proof design was chosen
+    after the earlier N132 dead end established that this Lean development has
+    no concrete `.lara` elaborator to prove correct end to end.
+  potential_type: heuristic
+  bound_to: [N132, N203, N205]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O83
+  timestamp: "2026-08-23T00:05"
+  provenance: ai-suggested
+  content: >
+    A repair suggestion attached to an ambiguity is sound only if it works for
+    every candidate the ambiguity leaves open. Testing global availability
+    (`some label exists`) or only the candidates selected for display can both
+    advertise an impossible exit; the availability predicate belongs beside
+    candidate construction and quantifies over the complete candidate set.
+  context: >
+    Final review defect. The counterexamples are an unrelated labelled
+    slot beside two unlabelled matches and a three-match case whose first two
+    displayed witnesses are labelled but whose third match is not.
+  potential_type: heuristic
+  bound_to: [N206]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O84
+  timestamp: "2026-08-23T12:14"
+  provenance: ai-suggested
+  content: >
+    When a presentation layer must carry an existing concrete sub-language
+    inside a host grammar, embedding it as one opaque token of the host (a
+    quoted S-expression atom) and reusing the sub-language's single existing
+    parser/printer beats minting a parallel structural grammar. Equivalence
+    with the backend encoder then holds by construction - the authored
+    spelling and the encoder share one code path (parseProp then
+    encodeAtomKey . nf) - instead of requiring a proof that two independently
+    maintained grammars agree, and the printer (printProp) becomes a legal
+    authoring guide for free. The coverage boundary is inherited honestly:
+    the spelling expresses exactly what the sub-language's surface can
+    already declare.
+  context: >
+    lara-syntax@0.10 design choice. The rejected alternative was a
+    second S-expression-structural prop spelling; the byte-equivalence
+    property against encode_ND reduced to a shared-code-path argument plus
+    one QuickCheck oracle rather than a grammar-agreement proof.
+  potential_type: heuristic
+  bound_to: [N208, N209]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O85
+  timestamp: "2026-08-25T13:05"
+  provenance: ai-suggested
+  content: >
+    What caps a mutation-localization metric at ceiling is where the ground
+    truth is validated, not how the defects are structured. If the answer key
+    is gated against the system under test before it is published, the metric
+    is confirmatory by construction no matter how adversarial the inputs are:
+    a disagreement between key and system fails the generation gate rather
+    than lowering the score, so the failure mode the metric was built to
+    detect is precisely the one it cannot report. Enriching the input
+    distribution (off-site manifestation, multiple defects, cross-stage
+    composition) strengthens what the gate asserts but cannot make the number
+    move; only ground truth established independently of the system — or a
+    measured population admitted without that gate — can. The corollary for
+    reporting: such a suite's contribution is stated as the content of its
+    gate, and quoting its rate as accuracy evidence is a category error.
+  context: >
+    review of the discriminating-localization benchmark. C23
+    predicted the off-site and multi-defect families would detach
+    location_match from 100%; they do not, because prop_siteMatchesChecker
+    and prop_localizationSites gate every published site against the checker
+    before it reaches MANIFEST.tsv. Generalizes past the LARA harness and is
+    the honest replacement for C23's last Statement clause, so it is the
+    researcher's call — see the unresolved contradiction node N212.
+  potential_type: claim
+  bound_to: [N210, N212]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O86
+  timestamp: "2026-08-25T13:05"
+  provenance: ai-suggested
+  content: >
+    A composite test fixture built by composing component generators must
+    have its published expectation re-derived from the composed artifact, not
+    from the components that built it. A check that re-runs the component
+    enumerators with the same comprehension shape is an identity, not an
+    oracle: it catches ordering and typing drift between components but is
+    blind to whether the composition applied them at all. The workable
+    inverse is to subtract one component from the artifact and require the
+    system to report the next one — for a two-defect mutant, revert the head
+    defect and require the checker to reject at the tail — which reduces the
+    composite's obligation to a prediction the component is already
+    independently gated on.
+  context: >
+    review found that twin-support-defect and cross-stage-defect never
+    had their second rewrite applied by any property: changing mutJ . mutI to
+    mutI left the whole suite green, with the only failure
+    (prop_seededReproducibility) pointing the developer at the regeneration
+    that erases the evidence. The retract-rule clause was already sound
+    because it derives the manifestation set from the mutant. Implemented at
+    N211; one instance, no researcher evaluation of the generalized wording.
+  potential_type: heuristic
+  bound_to: [N211]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O87
+  timestamp: "2026-08-25T20:55"
+  provenance: ai-suggested
+  content: >
+    When a rate's denominator guard maps "not applicable" and "malformed" to
+    the same value, a malformed row leaves the denominator instead of
+    counting against the numerator, and the rate reports as healthier than
+    the data supports. The failure is silent because both paths render
+    identically downstream. The fix is in the type rather than in a check:
+    make the malformed case unrepresentable at the producer, so the guard's
+    remaining branch means only "not applicable". Distinguishing the two at
+    the metric boundary — asserting non-emptiness where the rate is computed
+    — is strictly weaker, because by then the producer has already discarded
+    which case it meant.
+  context: >
+    The second half. mutantSites :: [Constituent] let a site enumerator
+    publish [], which rendered "-", parsed back as [], and made withLocs
+    return Nothing for both location metrics — the same state as a row that
+    seeds no site by design (the codec, cycle and accept families), so the
+    row silently left the location-accuracy-rate denominator rather than
+    counting as a miss. Wrapping the field as Maybe SeededSites over NonEmpty
+    Constituent separates the two: Nothing is "seeds nothing", and an empty
+    publication cannot be built. Two tests already caught the condition, so it
+    was test-detected rather than live. One implementation instance, no
+    researcher evaluation of the generalized wording. Related to O85 (what
+    caps a localization metric) but distinct: O85 is about where ground truth
+    is validated, this is about what the metric's domain guard can express.
+  potential_type: heuristic
+  bound_to: [N214]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O88
+  timestamp: "2026-08-25T23:40"
+  provenance: ai-suggested
+  content: >
+    Provenance metadata inside a frozen artifact is the part nothing gates,
+    so it drifts silently while the measured content stays correct. Two
+    independent instances surfaced in one cycle. (1) The v4 snapshot's
+    claim-support.json was produced from a dirty tree (git-dirty true at
+    16fa55fa) while its sibling report.json recorded git-dirty false — the
+    freeze protocol checks that a clean-tree run happened, but nothing
+    checks that every file in the snapshot agrees about it, so a
+    half-dirty snapshot survived two freezes. (2) frozen-tag is a string
+    literal "m5-freeze-v2" in ClaimSupport.hs and BindingAudit.hs, pinned
+    by a golden test, and has misnamed the corpus since v3 — the golden
+    froze the wrong value rather than catching it. The generalization: a
+    field that describes the artifact rather than being computed from it
+    has no oracle, and pinning it in a golden converts an unchecked value
+    into a defended one.
+  context: >
+    Found while cutting m5-freeze-v5 — diffing the newly measured
+    claim-support.json against the committed frozen copy showed the only
+    delta was the environment block, which is what exposed the v4 dirty-tree
+    record. Filed (2) on the tracker rather than fixing it in the freeze PR, since
+    it rewrites a committed artifact and a golden.
+  potential_type: heuristic
+  bound_to: [N218]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: true
+
+- id: O89
+  timestamp: "2026-08-25T22:40"
+  provenance: user
+  content: >
+    Natural language meets the system at three layers and the three get
+    different answers, split by trust direction rather than by convenience:
+    the verified surface gets more readable but never natural (Isar, not CNL —
+    an invisible parse boundary makes every rejection read as arbitrary, and
+    the surface exists for auditability, which needs determinism); NL as input
+    belongs exclusively to the untrusted producer, where replay and the human
+    binding audit are what make it sound; NL as output is free, because it
+    derives from checked artifacts and feeds nothing back. The governing rule
+    is that every ease-of-use feature must remove transcription, never
+    checking — and at layer 1 that rule is executable, since the readable
+    spelling must lower to the terse spelling's exact bytes.
+  context: >
+    The researcher's own framing, directed into the
+    tree this turn alongside the v5 refreeze. Crystallized the same turn on
+    artifact commitment: docs/naturalness-boundary.md merged and
+    docs/lara-surface-grammar.md's intro now cites it as binding policy for
+    any surface addition. Two bounds were added at crystallization and are
+    marked ai-suggested inside the constraint: that layer 3's freedom covers
+    the prose but not the normative CertNd* templates, and that permissible is
+    not the same as worth building.
+  potential_type: constraint
+  bound_to: [N215]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:Naturalness boundary"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O90
+  timestamp: "2026-08-26T16:22"
+  provenance: ai-suggested
+  content: >
+    Fixing the signature, policy and backend registry makes the image of
+    compilation a proper subset of the finite argumentation frameworks: the
+    forced-edge invariant derives edges from the node labelling, so a
+    framework that labels two nodes with declared-contrary conclusions and
+    omits the edge between them is not compiled by any accepted unit. A
+    realizability theorem over this carrier therefore has content in both
+    directions -- the constraint is neither vacuous (some finite AFs are
+    excluded) nor total (the carrier is not just the set of checked programs).
+  context: >
+    Read off the frozen M0 invariant record while writing
+    docs/theory-m0-compilation-invariants.md section 3, as one of two things
+    M1 should know before its sufficiency direction is attempted.
+    Witnessed in Lean by unforcedConflictEx and, off the diagonal after the
+    review, by unforcedDistinctConflict_not_invariant.
+  potential_type: claim
+  bound_to: [N221, N223]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O91
+  timestamp: "2026-08-26T16:22"
+  provenance: ai-suggested
+  content: >
+    The forcing runs one way only. conflictComplete constrains which edges
+    must be present; it does not say an edge implies contrariety between its
+    endpoints' conclusions. Reading Attack.HasAttack: only rebut matches the
+    source conclusion against the target's conclusion. Undercut matches
+    against an exception pattern for a rule occurrence inside the target and
+    needs no contrary at all; undermine matches against a leaf proposition
+    inside the target. Both produce edges invisible to a conclusion labelling.
+    A sufficiency proof must therefore *construct* attacks behind an edge
+    rather than read them off the labels, which is a strictly harder
+    obligation than the necessity direction and is where an M1 attempt is
+    most likely to fail.
+  context: >
+    Same reading as O90, recorded in section 3 of the M0 record as the second
+    of the two findings handed to M1. Separated from O90 because they cut in
+    opposite directions: O90 says the theorem has content, O91 says the
+    expensive half is the construction.
+  potential_type: claim
+  bound_to: [N221]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O92
+  timestamp: "2026-08-26T17:00"
+  provenance: ai-suggested
+  content: >
+    A counterexample stated as a theorem conditional on a hypothesis is only
+    as strong as the witnesses supplied for that hypothesis, and a witness at
+    a degenerate instance can leave the general case untested while every
+    mechanized gate stays green. The failure is silent by construction: the
+    conditional theorem is provable, the axiom audit reports it, and nothing
+    distinguishes "holds generally" from "holds only where a neighbouring
+    invariant already bites". The check is to ask, for each conditional
+    rejection, whether its witnesses instantiate the hypothesis anywhere other
+    than the degenerate point -- and to supply one that does not if they do
+    not.
+  context: >
+    Generalized from the review's second-pass finding 2: both
+    conflict-completeness counterexamples were conditional on ContraryMatch,
+    and selfContrary at p = q was the only witness, which is the self-attack
+    diagonal the invariant table counts separately. Closed by sharedContrary
+    at distinct conclusions (N223). One instance so far.
+  potential_type: heuristic
+  bound_to: [N223]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O93
+  timestamp: "2026-08-26T17:46"
+  provenance: ai-suggested
+  content: >
+    For every fixed Lara context, the frozen carrier predicate
+    CompilerInvariant is necessary for realizability. A converse quantified
+    over all fixed contexts is false. Its ranged field constrains endpoints and
+    conflictComplete forces edges from contrary node conclusions, but neither
+    field requires a present optional edge to have a typed rebut, undercut or
+    undermine witness. With empty contraries and exceptions no typed attack
+    exists, while a ranged one-node self-edge framework satisfies
+    conflictComplete vacuously.
+  context: >
+    Source-derived while investigating the M1 theory before implementation.
+    Recorded as the failure mode in N225 and used to choose the corrected draft
+    plan in N226. The Lean counterexample is planned but has not been
+    mechanized, and the researcher has not yet reviewed the scope correction,
+    so the observation remains staged.
+  potential_type: claim
+  bound_to: [N225, N226]
+  promoted: true
+  promoted_to: "logic/claims.md:C34"
+  crystallized_via: empirical-resolution
+  stale: false
+- id: O94
+  timestamp: "2026-08-28T18:40"
+  provenance: ai-suggested
+  content: >
+    In a development where proofs are machine-checked and prose is not, the
+    errors concentrate in the prose that reasons ABOUT the code — counts,
+    "together with X", "which is why", dependency and location claims — and
+    not in the prose that reports what the code outputs. Across M2a's review
+    rounds every caught false statement was of the first kind and every
+    evaluation-backed claim, from every author, was correct. The remedy that
+    worked was to stop writing the sentence and state a theorem the gate
+    checks.
+  context: >
+    Observed across eight review rounds on M2a. Instances included a use count
+    ("three times" for two uses), a "together with X" naming a lemma that
+    played no part, "a different route for each of five" over three routes,
+    "without this the constructor is unreachable" (backwards — it was derived
+    from the theorem that proves reachability), an importer list falsified
+    twice by later commits in the same milestone, and a Lean theorem asserted
+    to exist that does not. Three were the orchestrator's own. The
+    mechanize-instead responses were mem_attacked_iff, claimDefeatedB_of_nil /
+    claimAcceptedB_of_nil, twoCycle_defeated_unreachable, and
+    allSemantics_complete.
+  potential_type: heuristic
+  bound_to: [N234, N236]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O95
+  timestamp: "2026-08-28T18:40"
+  provenance: ai-suggested
+  content: >
+    Anything printed during the Lean build shares a channel with the axiom
+    audit. scripts/check-axioms.sh extracts every bracketed run in its input
+    and treats the comma-separated contents as axiom names, reading the whole
+    stream rather than only declaration reports — so a list literal emitted by
+    a `#eval` during `lake build` fails the gate, and the reported token is
+    the bare digit, the brackets having been stripped before comparison.
+  context: >
+    Surfaced when the M2a golden emitter had to print Haskell list literals.
+    Guarded on LARA_EMIT_GOLDENS instead. Two consequences already in force:
+    renderObservation prints one word per cell rather than delegating to the
+    derived Repr, and the observation table carries no extension lists. The
+    hazard is latent rather than active — the gate loads the module from its
+    .olean and never re-runs the #eval — which is why it is invisible from
+    either side alone.
+  potential_type: constraint
+  bound_to: [N235]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O96
+  timestamp: "2026-08-28T18:40"
+  provenance: ai-suggested
+  content: >
+    When a new general layer is built over a frozen specific one, the
+    attractive framing — "the old theorem is the instance of the new one" —
+    is usually false, and the honest relation is an equivalence at best. The
+    general result typically acquires a hypothesis the specific one did not
+    need, so it asks for more rather than less, and the two often have
+    different subjects entirely.
+  context: >
+    The framing was wrong three times in M2a: in the plan's instruction for
+    the paper name map, in a Lara.lean header entry, and in a module header.
+    In each case what is actually true is stronger for the paper — the frozen
+    theorem is untouched and independently proved, so its existing citation
+    stands unmodified rather than being rewritten to route through the new
+    result.
+  potential_type: heuristic
+  bound_to: [N234]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O97
+  timestamp: "2026-08-29T01:18"
+  provenance: ai-suggested
+  content: >
+    A successful fresh and fully supported instance append is a sink extension
+    of the old grounded argumentation framework: old labels are preserved, a
+    justified source cannot degrade to refuted or both, and a both source cannot
+    become refuted.
+  context: >
+    Mechanized while closing every addInstance cell in Theory M3. The result
+    refuted the plan's proposed reachable-cell bound and is now consumed by the
+    typed matrix, durable documentation, and the PR.
+  potential_type: claim
+  bound_to: [N239, N240]
+  promoted: true
+  promoted_to: "logic/claims.md:C37"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O98
+  timestamp: "2026-08-29T01:18"
+  provenance: ai-suggested
+  content: >
+    Equality between an additive update's public report and its grounded core
+    report has an exact boundary: the accepted source must have an empty
+    quarantine seed. Off that boundary, adding an attack from a blocked source
+    can grow the blocked closure and move another query to evidence-blocked.
+  context: >
+    Proved and counter-witnessed in Theory M3. Typed clean-base public matrices,
+    the blocked-growth example, durable paper restrictions, and the PR all
+    depend on the boundary.
+  potential_type: claim
+  bound_to: [N239]
+  promoted: true
+  promoted_to: "logic/claims.md:C38"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O99
+  timestamp: "2026-08-29T01:18"
+  provenance: ai-suggested
+  content: >
+    Name freshness and complete support do not make rule-instance addition
+    unconditionally admissible. Adding one argument creates new contrary pairs,
+    so the extended argument list must still satisfy AttackComplete; otherwise
+    the real unit checker rejects the update for a missing conflict.
+  context: >
+    Theory M3 proves the sufficient condition and an exact rejection witness.
+    The constructor theorem, paper claim boundary, and the PR depend on this
+    distinction.
+  potential_type: claim
+  bound_to: [N239]
+  promoted: true
+  promoted_to: "logic/claims.md:C39"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O100
+  timestamp: "2026-08-29T15:10"
+  provenance: ai-suggested
+  content: >
+    A parent instance's side conditions reach its premise subterms only
+    through their lengths, so replacing a premise with any term of the same
+    conclusion and obligations preserves the parent's typing - and the parent
+    cannot express which backend certified the replacement. The check is
+    mechanical rather than a reading of the structure: the proof's structure
+    update over only the three length fields elaborating is the proof
+    assistant confirming no other field mentions the premise list.
+  context: >
+    Task 2 of the B0 plan, the milestone's one genuinely new theorem,
+    deliberately sequenced second so a wrong D5 would surface early.
+  potential_type: claim
+  bound_to: [N243, N248]
+  promoted: true
+  promoted_to: "logic/claims.md:C40"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O101
+  timestamp: "2026-08-29T16:30"
+  provenance: ai-suggested
+  content: >
+    A backend's dependency report is mechanically evaluable in settings where
+    its acceptance is not. Reporting needs only resolution plus the
+    certificate decoder, while acceptance additionally needs the domain
+    computation. For ord@1 the report path stops at String.toNat?, which
+    reduces per literal, while the acceptance path reaches String.splitOn and
+    String.startsWith, which do not.
+  context: >
+    Probed while deciding whether the cross-language certDeps golden had to
+    inherit the split-witness fixture core. It did not.
+  potential_type: claim
+  bound_to: [N244, N246]
+  promoted: true
+  promoted_to: "logic/claims.md:C41"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O102
+  timestamp: "2026-08-29T14:30"
+  provenance: ai-suggested
+  content: >
+    A sealed judgment type whose only constructor is reached from tests
+    carries no guarantee about the production path. Here the sealed
+    StrictJudgment retained the dependency report and the shipped checker,
+    which does not construct one, discarded it - so the mechanized accounting
+    result had no executable counterpart until the production oracle was
+    widened to retain what the adapter already returns.
+  context: >
+    Found during the Haskell survey for B0 Task 5; repaired via D9 and
+    tracked onward on the tracker.
+  potential_type: claim
+  bound_to: [N247, N248]
+  promoted: true
+  promoted_to: "logic/claims.md:C42"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O103
+  timestamp: "2026-08-29T17:00"
+  provenance: ai-suggested
+  content: >
+    Heterogeneous backend composition needs no relating binder: each
+    occurrence's formula type, theory data, and consequence relation are
+    bound inside its own existential, so conjoining two occurrences'
+    consequences asserts nothing connecting them. The content is the absence
+    of a relating binder, not the disjointness of the parts - a registry may
+    map two identities to the same core, so type disjointness is neither
+    provable nor claimed.
+  context: >
+    The B0 headline, hetero_occurrences_accounted, and the sentence the paper
+    is expected to quote.
+  potential_type: claim
+  bound_to: [N243, N248]
+  promoted: true
+  promoted_to: "logic/claims.md:C43"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O104
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    Short-circuiting separates three different grounded query notions that the
+    draft conflates: the universal per-instance floor is only quadratic, a
+    worst-case quartic lower bound needs an existential family whose every
+    attacked pair is successfully defended late in the scan, and pinnedAF does
+    not provide that family.
+  context: >
+    Found by executing the draft's proposed cost schedule before approving the
+    M2b implementation plan.
+  potential_type: claim
+  bound_to: [N250]
+  promoted: true
+  promoted_to: "logic/claims.md:C44"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O105
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    A tightness family over arbitrary Grounded.AF does not answer M2b's
+    restricted-class question. The lower-bound witness must carry an M1
+    Realization under the same parameter regime as the paper claim, or the
+    result must be labelled as tight only for the unrestricted evaluator.
+  context: >
+    The draft proves upper bounds for every AF but gives pinnedAF no
+    realizability witness while its goal and definition of done promise tight
+    results on the M1-realizable class.
+  potential_type: constraint
+  bound_to: [N221, N250, N251]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M2b fixed-context witness"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O106
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    Attack-oracle query complexity and classical hardness require separate
+    frozen representations and size measures. Node count plus claim-support
+    length can price the grounded oracle schedule, but it cannot justify a
+    polynomial reduction whose variable policy, atom labels, raw unit, and
+    checker witness have omitted encodings.
+  context: >
+    The draft uses D1-D3 for evaluator queries and then invokes NP-hardness with
+    the policy in the input without defining that input language or its size.
+  potential_type: constraint
+  bound_to: [N251]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M2b finite complexity input"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O107
+  timestamp: "2026-08-30T00:08"
+  provenance: ai-suggested
+  content: >
+    Failure of an arbitrary-digraph realization kit does not imply a
+    tractability-inducing invariant. A restricted class may reject that kit yet
+    remain hard through a specialized reduction, so the draft's hardness versus
+    structure-theorem fork is not exhaustive; allowing a fresh policy per graph
+    also risks making the advertised restricted class effectively unrestricted.
+  context: >
+    Motivation review of Tasks 5-6 against M1's fixed-context Realizable
+    predicate and the canonical restricted-class exit condition.
+  potential_type: claim
+  bound_to: [N221, N251]
+  promoted: true
+  promoted_to: "logic/claims.md:C45"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O108
+  timestamp: "2026-08-30T08:45"
+  provenance: ai-suggested
+  content: >
+    Formula-indexed fixed-policy realization needs compositional checker
+    lemmas over generated map/flatMap argument and attack families. Closed
+    checkUnit fixtures establish schema directionality and concrete
+    realizability, but they do not discharge family-wide Nodup, recursive
+    HasSupport, HasAttack, endpoint-membership, and exact AttackComplete
+    obligations.
+  context: >
+    The M2b Task 2 spike compiled its closed fixtures but stopped before
+    checkUnit_formula_ok and every dependent hardness obligation.
+  potential_type: constraint
+  bound_to: [N256, N257]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M2b follow-up realization constraints"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O109
+  timestamp: "2026-08-30T21:15"
+  provenance: ai-suggested
+  content: >
+    Family-wide decimal-numeral injectivity is already derivable in this
+    repository from the Lara.ND.decodeNat round-trip (Std.Data.String.ToNat),
+    so the residual mechanization risk of a fixed-policy realization closure
+    concentrates in the AttackComplete characterization over generated root
+    conclusions, not in numeral or leaf-identifier bookkeeping.
+  context: >
+    Discovered while risk-pricing the plan: the predecessor spike treated
+    family-wide injectivity as unpriced, but decodeNat_repr proves the
+    round-trip for all n, making Nodup and atom-inversion lemmas cheap.
+  potential_type: claim
+  bound_to: [N263, N257]
+  promoted: true
+  promoted_to: "logic/claims.md:C46"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O110
+  timestamp: "2026-08-30T00:13"
+  provenance: ai-suggested
+  content: >
+    M5 is the strongest core-spine concurrency candidate while M2b is active.
+    The tracker gates M5 on stable carrier, observations, and updates rather
+    than on M2b; main now contains the M0, M1, M2a, M3, and B0 deliveries. M5's
+    surface syntax, binding, independent surface checking, elaboration
+    correctness, and codec parity are separable from M2b's realizable-class
+    decision problems and complexity proofs if shared integration files remain
+    singly owned. PW0 is also gate-unblocked but is explicitly future-work.
+  context: >
+    Inferred from the tracker plus main at 816812c
+    while answering which work can run concurrently with another contributor's
+    M2b effort. No milestone was selected this turn.
+  potential_type: architecture
+  bound_to: [N236, N239, N248, N268]
+  promoted: true
+  promoted_to: "logic/solution/mechanization.md:§8"
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O111
+  timestamp: "2026-09-02T00:00"
+  provenance: ai-suggested
+  content: >
+    The possible-world wrapper is conservative over current Lara by
+    construction rather than by theorem-chasing: with a singleton context and
+    B := Empty the outer language contains no modal formula at all, and atomic
+    satisfaction is definitionally the unchanged local status judgment, so
+    both T0 directions close by Iff.rfl. Conservativity of an outer layer is
+    cheap when the layer only imports; the cost is paid instead by the
+    adequacy obligations that connect the executable interface back to the
+    model.
+  context: >
+    Observed while mechanizing PW0. t0_cmp and t0_src are Iff.rfl
+    and the diff is pure insertion touching no existing semantics module, which
+    together are gate 1's evidence.
+  potential_type: claim
+  bound_to: [N271]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O112
+  timestamp: "2026-09-02T00:00"
+  provenance: ai-suggested
+  content: >
+    PW0's accept field is an arbitrary Prop with no posited connection to any
+    checker, certificate, soundness condition, or even to the candidate
+    relation R. The outer model therefore names an applicability judgment it
+    does not constrain, and every T2 normality law holds regardless of what
+    accept means. Supplying that connection is exactly the structural-bridge
+    work of T6, so the T6 exit decision is not an extension of PW0 but
+    the discharge of PW0's largest open hypothesis.
+  context: >
+    Recorded as limitation 1 of the frozen PW0 contract while writing
+    docs/theory-pw0-outer-model.md; surfaced independently by the plan's
+    engineering review and by both post-implementation reviews.
+  potential_type: constraint
+  bound_to: [N271]
+  promoted: true
+  promoted_to: "logic/claims.md:C48"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O113
+  timestamp: "2026-09-02T00:00"
+  provenance: ai-suggested
+  content: >
+    A bridge-global partial translation (translate : B -> Query src -> Option
+    (Query tgt)) cannot express a resolution that depends on the target world.
+    Concrete breaking case: a source atom naming an entity by an obsolete
+    alias, where one target world under the bridge carries the ontology version
+    that resolves it and another does not; a single global Option must answer
+    once for both and is wrong at one. The edge-indexed successor is a relation
+    Translate b w v src tgt : Prop, which additionally admits the ambiguity
+    Option forbids. This is a contract change rather than a refinement:
+    mem_compare_iff_sat_dia and compare_translationUndefined_iff are both
+    stated against the Option form and the executable compare takes a single
+    Option as its first guard.
+  context: >
+    Recorded as limitation 3 and the T6 feasibility note in
+    docs/theory-pw0-outer-model.md, sizing the cost of T6 as input to the
+    PW0 exit decision.
+  potential_type: constraint
+  bound_to: [N271, N272]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:PW-T6 translation-form constraint"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O114
+  timestamp: "2026-09-02T23:55"
+  provenance: ai-suggested
+  content: >
+    Obligations transport verbatim across a structural bridge because
+    obligations are lists of question names, question names are rule-local
+    vocabulary the claim translation never touches, and discharge keys and
+    hole sets are carried unchanged. collectObligations therefore computes
+    identically on both sides, and the design's conditional completeness
+    clause ("transport of a complete support requires preservation of empty
+    obligations") is discharged by proving the stronger exact statement: the
+    same obligation list, with completeness the O = [] special case rather
+    than an extra hypothesis.
+  context: >
+    Observed while proving support_transport: the theorem's index is
+    the SAME O on both sides, via trRule_questionNames /
+    trRule_mandatoryNames / trSupportDis_fst.
+  potential_type: claim
+  bound_to: [N276]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O115
+  timestamp: "2026-09-02T23:55"
+  provenance: ai-suggested
+  content: >
+    The entire T6 induction rides on two commuting facts with disjoint
+    footprints: instantiation commutes with translation because variables are
+    untouched and the instantiated constructor name is the pattern's own
+    (instAPat_tr), and the trusted identity relation survives translation
+    because nf canonicalizes numeric literals only while the translation
+    renames predicate/constructor names only (equiv_tr). Disjointness of the
+    two footprints — nf touches literals, translation touches names — is what
+    makes the commutation lemmas one-line-per-case rather than semantic.
+  context: >
+    Design observation from Lara.PW.Translation; the 22-field InstSide
+    re-establishment consumes only these two facts plus verbatim-carrier
+    lemmas.
+  potential_type: heuristic
+  bound_to: [N276]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O116
+  timestamp: "2026-09-02T23:55"
+  provenance: ai-suggested
+  content: >
+    The transport's translation-domain hypothesis is irreducible: trSupport is
+    not total on checked supports, because InstSide.θDom forces the
+    substitution's domain to equal the rule's declared parameters, not that
+    every binding occurs in an instantiated pattern — so a checked support may
+    bind a declared-but-unused parameter to a term outside the bridge's
+    vocabulary. Definedness of the conclusion's translation is derivable;
+    definedness of the term's translation is genuine domain evidence the
+    caller must supply.
+  context: >
+    Found while deciding whether support_transport could conclude, rather
+    than assume, trSupport definedness.
+  potential_type: constraint
+  bound_to: [N276]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O117
+  timestamp: "2026-09-02T22:10"
+  provenance: ai-suggested
+  content: >
+    A contextual-adequacy theorem whose observation is undefined on rejected programs cannot be
+    unconditional in the context quantifier while the acceptance hypothesis is forward-only: the
+    second backend may accept what the first rejects, so the two sides differ by definedness
+    rather than by status. The admissibility hypothesis that rules this out constrains the
+    material, never the conclusion, which is what keeps the theorem non-vacuous while bounding it.
+    Removing it would need acceptance to be two-way plus a reflection lemma inverting the relabel
+    on derivations.
+  context: >
+    Discovered while stating backend_replacement_congruence in F2. The plan's phrasing was
+    unconditional ("for every compatible context"); mechanization showed that statement is false
+    under the hypothesis the plan also specified.
+  potential_type: claim
+  bound_to: [N280]
+  promoted: true
+  promoted_to: trace/exploration_tree.yaml:N287
+  crystallized_via: empirical-resolution + artifact-commitment
+  stale: false
+- id: O118
+  timestamp: "2026-09-02T22:45"
+  provenance: ai-suggested
+  content: >
+    A linking calculus whose composition operator is data-only (no registry, no environment)
+    cannot saturate, so composition is closed for identifier hygiene but not for linkability: a
+    composite of two contexts that attack each other across their own boundary has uncovered
+    conflicts no later step emits, and is therefore not well-formed for linking. Closure of a
+    context former under composition is two properties, not one.
+  context: >
+    Surfaced when the final review called backend_replacement_congruence_composed nominal.
+    Building sideOk_composed from the halves exposed the two uncovered quadrants. Filed on the tracker.
+  potential_type: constraint
+  bound_to: [N282]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O119
+  timestamp: "2026-09-02T23:10"
+  provenance: ai-suggested
+  content: >
+    A witness for a theorem about certificates is vacuous unless its fixture carries a
+    certificate: a term with no assurance is a fixed point of every assurance relabel, so the
+    witness reduces to reflexivity while still passing the axiom audit and reading as
+    non-vacuous. Machine-checked gates do not detect this class of vacuity; only a reviewer
+    asked to hunt for it did.
+  context: >
+    The first M4 witness suite used bare evidence leaves throughout. Two prior reviews passed it;
+    the final integration review, prompted explicitly to hunt vacuity, caught it.
+  potential_type: heuristic
+  bound_to: [N283, N284]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O120
+  timestamp: "2026-09-02T23:15"
+  provenance: ai-suggested
+  content: >
+    An axiom-discipline ban can make a milestone's own witnesses unreachable from the
+    development's existing fixtures even when the theorem is proved and audited: every accepted
+    surface fixture here rests on native_decide, so a witness built on one would import
+    ofReduceBool into the audit. The cost of a discipline is paid at the point where a new result
+    wants to reuse old evidence, not at the point where the discipline is adopted.
+  context: >
+    F3's surface-transport corollary shipped with documented hypotheses instead of an instance;
+    A tracker issue tracks a purpose-built native_decide-free surface fixture.
+  potential_type: constraint
+  bound_to: [N281]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md:M4 axiom-discipline witness constraint"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O121
+  timestamp: "2026-09-02T20:40"
+  provenance: ai-suggested
+  content: >
+    The grounded observation is invariant under any node-merging morphism of argumentation
+    frameworks — a map onto the target's nodes preserving the edge relation, not required to be
+    injective. Proving it over the iteration rather than the fixpoint lets frameworks of
+    different sizes be compared at one shared stage. This is framework vocabulary, independent of
+    the linking calculus that motivated it, and it is what makes a structural merge of argument
+    lists semantically inert.
+  context: >
+    Extracted to Lara/Invariants/Merge.lean during F1 after a review noted a generic AF module
+    sitting inside Lara/Context/.
+  potential_type: concept
+  bound_to: [N279]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O122
+  timestamp: "2026-09-03T04:53"
+  provenance: user-revised
+  content: >
+    Contextual observation must preserve the phase that stopped evaluation: structural link
+    incompatibility with its witnessed fault, checker rejection with its unit error, or accepted
+    exported statuses. A single undefined result collapses semantically distinct failures and makes
+    contextual equivalence unable to say which boundary was crossed.
+  context: >
+    review identified the collapse. The researcher explicitly selected the broader redesign:
+    change obs itself to a closed sum and enrich every LinkFault payload rather than add a diagnostic
+    wrapper or patch only two constructors.
+  potential_type: concept
+  bound_to: [N285, N286]
+  promoted: true
+  promoted_to: logic/concepts.md#contextual-observation-outcome
+  crystallized_via: verbal-affirmation + artifact-commitment
+  stale: false
+- id: O123
+  timestamp: "2026-09-03T01:30"
+  provenance: ai-suggested
+  content: >
+    A point-mass acceptance pair is the minimal inhabitation witness for a
+    translation-survival clause: defining CertOk on each side as exact
+    equality with the fixture's encoded step (source vocabulary at the
+    source, translated at the target) turns cert_ok into a computation —
+    substitute the pinned tuple, reduce the two translations, done — while
+    still being a genuine non-vacuous discharge that a contract-breaking
+    edit would fail. The same pattern should serve any future per-occurrence
+    side condition the bridge contract grows.
+  context: >
+    Fixture-design observation from closing the strict-certificate fixture (bridgeCert,
+    cert_accept_translated in Lara/Examples/PWStructural.lean).
+  potential_type: heuristic
+  bound_to: [N289]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O124
+  timestamp: "2026-09-03T00:50"
+  provenance: ai-suggested
+  content: >
+    A full-abstraction theorem is informative only when its logical relation is
+    coarser than syntax; in a calculus whose contexts are near-maximally
+    discriminating (all-pairs attack completeness, subargument-closed coverage,
+    a grounded fixpoint over the linked framework), contextual equivalence is
+    pushed toward syntactic identity up to contrary-invisible decoration, so
+    full abstraction risks being true but empty — the relation collapses to a
+    generalized certificate relabel (Erase.mapAssur). The discriminating power
+    of the context language, not proof difficulty, is what bounds the
+    scientific value of the theorem.
+  context: >
+    The load-bearing rationale for descoping M4 Part B (N291). The researcher
+    affirmed the descope decision built on it, but the mechanism itself is
+    untested — a G0 interface spike would test it, and was declined as not
+    required for an honest close.
+  potential_type: claim
+  bound_to: [N291, N277]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O125
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A composition theorem for the outer possible-world model must compose or
+    explicitly equate the accepted world relation, not merely the checker-tied
+    support-membership predicate Admits. Equality of support translations can
+    force equality of Admits while leaving Frame.R, Frame.accept, and therefore
+    Frame.A unconstrained.
+  context: >
+    Adversarial review of the PW-T9 implementation plan against
+    the canonical possible-world composition design.
+  potential_type: architecture
+  bound_to: [N292]
+  promoted: true
+  promoted_to: "logic/solution/mechanization.md §11"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O126
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    Making arbitrary BridgePath values first-class does not characterize
+    direct-versus-path agreement when the commuting predicate and agreement
+    theorem accept only two individual legs. The agreement API must quantify
+    over the same arbitrary path abstraction as the transport theorem, or the
+    claimed path-level result remains a binary special case.
+  context: >
+    Adversarial review of the PW-T9 implementation plan after excluding twelve
+    previously accepted review findings.
+  potential_type: architecture
+  bound_to: [N292]
+  promoted: true
+  promoted_to: "logic/solution/mechanization.md §11"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O127
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A mid-path translation-gap witness over two standalone SymMap values does
+    not witness failure along a typed path of StructuralBridge values. If the
+    milestone claims path-level incomparability, the fixture must inhabit the
+    path abstraction and connect its failed translation to the comparison
+    result.
+  context: >
+    The planned gapSym example invokes trAtom on a raw composed map and then the
+    generic compare_none theorem; it constructs no BridgePath or bridge.
+  potential_type: constraint
+  bound_to: [N292]
+  promoted: true
+  promoted_to: "logic/solution/constraints.md (PW-T9 path-witness constraint)"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O128
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A counterexample advertised as disagreement between checked transports must
+    contain the HasSupport judgments it claims. Computing unequal trSupport or
+    trAtom outputs alone does not establish that either output is a checked
+    derivation, even when suitable leaf typings exist elsewhere in the fixture.
+  context: >
+    The planned direct_ne_composed_support and direct_ne_composed_claim theorem
+    types contain only translation equalities and inequalities while their
+    comments and acceptance mapping claim checked transports and derivations.
+  potential_type: heuristic
+  bound_to: [N292]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H16"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O129
+  timestamp: "2026-09-03T08:38"
+  provenance: ai-suggested
+  content: >
+    A close-out invariant is not executable when it appears only in the final
+    audit prose. If a plan requires its own transient file to be deleted before
+    the PR, deletion, staging, verification, and commit must be an explicit
+    implementation step.
+  context: >
+    The PW-T9 plan says its plan file will be deleted in the PR, but Task 11 has
+    no deletion or deletion commit step.
+  potential_type: heuristic
+  bound_to: [N292]
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H17"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O130
+  timestamp: 2026-09-04T09:12
+  provenance: ai-suggested
+  content: >
+    Composition's failure to close for linkability is structural, not a missing saturation
+    step: SideOk.source_declared/target_declared force a side's declared attacks to have both
+    endpoints among its own arguments, so a cross-half contrary conflict in a composite can be
+    covered by the halves only vacuously (no such conflict) or through a term declared on both
+    sides. sideOk_composed's cross-coverage hypotheses are therefore satisfiable only in those
+    two cases; the saturating-compose option is the only route to genuine closure.
+  context: >
+    Surfaced while designing the witness (hostileHalf/thirdFrag): neither half could be
+    repaired by declaring the covering attack, because the attack's target lives in the other
+    half. Witnessed by hostile_composite_not_admissible; the general statement is unproved.
+  potential_type: claim
+  bound_to: [N282, N300]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O131
+  timestamp: 2026-09-04T09:12
+  provenance: ai-suggested
+  content: >
+    The conclusion cache link infers before checking and the conflict cache the checker builds
+    after acceptance agree on the nose: on any accepted unit, conclusionCache over the program's
+    arguments equals the (term, conclusion) projection of conflictCache
+    (Context.conclusionCache_eq_conflictCache), and on an accepted link each side's saturation
+    cache is that cache restricted to the side (link_cache_bridge). So the saturation link
+    performs is the one the checker would compute, and drift between the two caches under a
+    change to either side now fails a proof rather than going unnoticed.
+  context: >
+    The F0 aspiration, proved in the debt-clearance pass; nothing in the saturation
+    proofs consumes it. Cost turned out modest, as guessed.
+  potential_type: claim
+  bound_to: [N300, N301]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O132
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-suggested
+  content: >
+    Compiling every Lean block of an implementation plan in scratch before
+    dispatching its implementer converts mid-loop proof stalls into known
+    fixes; on PW-T8 it found 12 defect sites across 5 of 7 tasks, 10 of them
+    unflagged by the plan.
+  context: >
+    The plan skipped engineering review at the user's choice; pre-flight
+    compilation stood in for it during /implement.
+  potential_type: heuristic
+  bound_to: [N302, N303]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O133
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-suggested
+  content: >
+    A plan's self-flagged pitfalls were anti-correlated with its actual
+    failures: every flagged risk (generalize motive, trTerm.eq_def,
+    Option.bind_eq_some spelling, empty-registry acceptance) compiled as
+    written, while all 12 real defects sat in unflagged proof steps.
+  context: >
+    Observed across the PW-T8 pre-flight; single plan, so a regularity not a
+    law.
+  potential_type: heuristic
+  bound_to: [N303]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O134
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-executed
+  content: >
+    Policy.WellFormed does not forbid symmetric contraries: it constrains only
+    strict-reachable rule conclusions, so a rule-free policy declaring p and q
+    mutual contraries is accepted by checkUnit, and both arguments come out
+    grounded-undec (status contested).
+  context: >
+    Enabled the optional PW-T8 contested cell (unitS3_accepted,
+    t8_contested_cells).
+  potential_type: constraint
+  bound_to: [N305, N306]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O135
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-executed
+  content: >
+    In the PW-T8 rows Classical.choice enters only via Grounded.labelC_spec;
+    the bisimulation core (AttackBisim.symm, directIn/Out_bisim, the iff
+    forms, AFIso.toBisim, supportCorr_of_image) is axiom-free, and
+    statusC_congr needs only propext and Quot.sound.
+  context: >
+    Established by #print axioms during Task 9's quality review, correcting a
+    draft that blamed by_cases (a real Decidable instance exists).
+  potential_type: concept
+  bound_to: [N305]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O136
+  timestamp: "2026-09-04T13:10"
+  provenance: ai-suggested
+  content: >
+    Composition operators split by convention: StatusBridge.comp h₁ h₂ and
+    SymMap.Injective.comp h₁ h₂ take legs in path order (first leg first),
+    while T9's StructuralBridge.comp B₂ B₁ and SymMap.comp m₂ m₁ take
+    function-composition order.
+  context: >
+    Recorded in docs/theory-pw-t8-status-preservation.md §6 and the Status.lean
+    header; a reader cue, not a theorem.
+  potential_type: concept
+  bound_to: [N304]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O139
+  timestamp: "2026-09-06T12:20"
+  provenance: ai-suggested
+  content: >
+    A point-mass fixture judgment that is only ever applied at its own
+    witness point is mutation-blind: the positive theorem stays green when
+    the judgment is widened to ignore an argument. Closing that gap takes two
+    shapes together — off-point negatives that vary exactly one argument with
+    the rest held fixed, and an independently written mirror of the derived
+    object tied down by a rfl equation, so drift in the source object cannot
+    propagate into its own guard.
+  context: >
+    Extracted while writing the guards over the strict-certificate
+    fixture; validated by two mutation runs (N312), not yet applied to any
+    other fixture.
+  potential_type: heuristic
+  bound_to: [N311, N312]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O140
+  timestamp: "2026-09-06T12:20"
+  provenance: ai-executed
+  content: >
+    Both guards are axiom-cheap: cert_reject_mismatched_certifier and
+    cert_only_assurance depend on no axioms at all, and cert_target_rule on
+    propext alone — decide over the derived DecidableEq instances and
+    constructor inversion, with no nativeDecide anywhere.
+  context: >
+    Read off the AxCheck output for the three new rows during the
+    verification run.
+  potential_type: concept
+  bound_to: [N312]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O141
+  timestamp: "2026-09-06T14:25"
+  provenance: ai-suggested
+  content: >
+    A cost estimate recorded on a tracked theory issue encodes one proof
+    route, not a lower bound on the result. The tracked issue and preferredSem's docstring
+    both budgeted `Nodup` plus a subset-implies-shorter fact — i.e. the
+    Mathlib dependency — because both had the ⊆-maximal-element argument in
+    mind; re-deriving the statement's own geometry (compare a longest
+    candidate to a competitor as a sublist of the shared carrier, not as a
+    subset) dissolved the budgeted dependency entirely and left the theorem
+    hypothesis-free. Read a budgeted dependency as a claim about the route
+    that was imagined, and re-derive before paying it.
+  context: >
+    Extracted while closing that theory issue (N313, N314). One instance so far; the
+    counter-case would be an issue whose budgeted cost is a property of the
+    statement rather than of the route.
+  potential_type: heuristic
+  bound_to: [N313, N314]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O142
+  timestamp: "2026-09-06T14:25"
+  provenance: ai-executed
+  content: >
+    Spiking the candidate proof answered "does this need a plan?" faster than
+    reasoning about it: the whole development compiled standalone in two
+    attempts, and the axiom print settled scope, hypotheses and size before
+    any planning document could have been drafted. Same practice as O132
+    (compile a plan's Lean blocks before dispatching an implementer), applied
+    one step earlier — to the decision of whether to write the plan at all.
+  context: >
+    N314. Both slips were Lean v4.32.0 API drift (`List.not_mem_nil` takes the
+    membership proof; `List.mem_cons_self` takes no explicit arguments), not
+    defects in the mathematical argument.
+  potential_type: heuristic
+  bound_to: [N314]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O143
+  timestamp: "2026-09-06T16:15"
+  provenance: ai-suggested
+  content: >
+    When a mechanized definition already has a language mirror pinned by a
+    cross-language golden, the cheapest way to give it a production observable
+    is to call that mirror from the shipped path — not to reimplement it where
+    the production traversal happens to be. Reuse makes the shipped output the
+    same artifact the golden pins; a fused reimplementation would owe its own
+    agreement argument against the mechanization, adding a drift surface the
+    accountability claim then has to carry. The price paid instead is
+    recomputation, which is safe exactly when the recomputed oracle is a pure
+    function of arguments the checker already fixed.
+  context: >
+    N315. The tracker item's first phrasing was to fuse collection into
+    `inferSupport`'s traversal; the landed design calls
+    `Lara.Strict.Deps.certDeps` from `Lara.Driver.unitCertDeps` instead. The
+    same purity argument `assuranceError` uses for re-asking the oracle on the
+    rejection path is what licenses the extra replay here.
+  potential_type: heuristic
+  bound_to: [N315]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O144
+  timestamp: "2026-09-06T16:20"
+  provenance: ai-suggested
+  content: >
+    A frozen byte-level output is a design constraint on where a *new*
+    observable may appear, not merely on how the old one is formatted. Because
+    `lara check`'s stdout is a differential anchor against a second
+    mechanized implementation, any report added to it would have to be
+    reproduced by that implementation as well — so the cost of widening the
+    verdict is a second encoder in the other language, not a golden
+    regeneration. Giving the new observable its own subcommand converts an
+    obligation on the mechanization into an additive change with no anchor,
+    golden, or freeze-tag movement.
+  context: >
+    N315/N316. `scripts/differential.sh` byte-compares Haskell and Lean driver
+    stdout on 620 anchors; the Lean driver has no `CertDep` encoder outside
+    `Lara/Examples/BackendComposition.lean`, which is a witness module, not a
+    driver. After the change the differential is unchanged at pass=620 fail=0.
+  potential_type: heuristic
+  bound_to: [N315, N316]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O145
+  timestamp: "2026-09-06T16:35"
+  provenance: ai-suggested
+  content: >
+    An accountability report inherits the scope of the theorem it realizes, so
+    the shipped command must refuse to answer outside it. `certDeps` is
+    accounted only over checked terms (Lean `cert_node_accounted`); run on a
+    rejected term the collector still walks past the refused node and emits
+    what the accepted steps beneath it cited. That output is not wrong so much
+    as unmoored — it reads as an audit of evidence the verdict does not rest
+    on. The same scoping argument picks the *checked* (quarantine-pruned) unit
+    over the declared one.
+  context: >
+    N315. `lara deps` therefore prints nothing on stdout and exits 1 on a
+    rejection, and `unitCertDeps` documents both conditions as an input
+    contract met at its single call site (`runCheckReported`'s accepting
+    branch).
+  potential_type: heuristic
+  bound_to: [N315]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O146
+  timestamp: "2026-09-06T18:08"
+  provenance: ai-suggested
+  content: >
+    An issue filed during a close-out sweep can be moot at birth: the filed issue was
+    written against an earlier PR's tree while a later PR — merged seven minutes
+    before the filing — had already landed both work items and even the
+    factoring the issue recorded as moot. Verifying an issue's premises
+    against HEAD (grep for the named definitions, `git log -S`) before
+    executing it costs minutes and can dissolve the entire work item.
+    Kin to O141: there the issue's cost estimate encoded one imagined route;
+    here the issue's work description encoded a superseded tree.
+  context: >
+    N317. User directed "let's do [redacted]"; the pre-execution read of
+    StatusCheck.lean found `transportsB` and `Matched` already present,
+    which triggered the git archaeology instead of the edit.
+  potential_type: heuristic
+  bound_to: [N317]
+
+- id: O147
+  timestamp: "2026-09-07T11:00"
+  provenance: ai-executed
+  content: >
+    A build cache can make a verification pass for a reason the verification does not state. The
+    module sat outside the lake build closure, so `lake build` never compiled it, yet the
+    pinned axiom gate reported green because a hand-built olean from an earlier `lake build
+    Lara.Examples.SurfaceTransport` was still on disk for the audit to consume. Two independent
+    worktrees reproduced the identical contamination. Any gate whose result depends on a build is
+    evidence about the artifacts that existed when it ran, not about a clean checkout, so it must
+    be re-run from a wiped cache before being recorded as evidence.
+  context: >
+    Code review of the PR caught the missing Lara.lean import; re-running the four gates after
+    `git clean -xdf lean/.lake` moved the job count 148 -> 149 and built the module in 485 ms.
+    Second occurrence of the failure mode; a tracker issue tracks a closure check in CI.
+  potential_type: heuristic
+  bound_to: [N319, N320]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O148
+  timestamp: "2026-09-07T12:10"
+  provenance: ai-suggested
+  content: >
+    A witness can discharge every hypothesis of a theorem while exercising only the degenerate
+    case of the machinery the theorem is about. surfaceTransport_directAF_eq instantiates
+    surface_directAF_relabel unconditionally and its relabel is pinned non-identity by two
+    guards, but both frameworks are the one-node no-edge AF, so checkedAF_map's edge half
+    (coveredB_relabel) runs on an empty attack list and the equality would hold for any two
+    attack-free single-argument programs. Non-vacuity guards on the *input* relabel do not
+    establish non-degeneracy of the *conclusion* being witnessed; those are separate properties
+    and need separate guards.
+  context: >
+    Raised in review of the PR and filed as a tracker issue. The module's own defense — that having
+    no attacks "would not make the relabel any more genuine" — is true of the relabel and does
+    not address the AF equality.
+  potential_type: claim
+  bound_to: [N321]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O149
+  timestamp: "2026-09-07T16:20"
+  provenance: ai-executed
+  content: >
+    A repository's evidence surfaces are not uniformly cheap to extend. Here three are ordinary
+    (QuickCheck properties, hand-authored wire fixtures, worked examples) and one is a frozen
+    measurement input (the seeded mutation suite), so adding the same kind of coverage costs
+    nothing on three of them and a freeze-tag re-cut plus a full measurement re-run on the
+    fourth. Nothing in an issue's text distinguishes them; the distinction lives in the freeze
+    checklist's frozen-inputs row table. The check belongs before the evidence is built, not
+    after it passes its gates.
+  context: >
+    A tracker issue asked for property/golden/mutation evidence for insp@1. The mutation base was
+    implemented and fully verified (568 mutants, 27 new, all passing the generator's own gate,
+    differential 647/0) before the collision with m5-freeze-checklist.md row 1 was noticed, and
+    was then reverted. Cost budgeted into a follow-up tracker issue rather than left for a reviewer to find.
+  potential_type: heuristic
+  bound_to: [N325]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O150
+  timestamp: "2026-09-07T15:50"
+  provenance: ai-suggested
+  content: >
+    Whether a strict backend's goal family needs a declared contrary pair is decided by WHAT its
+    goals are settled against. A family settled against data carried in the goal itself — ord@1's
+    two numerals — cannot have two conflicting members accepted, so exclusivity is a theorem and
+    a contrary declaration would add nothing. A family settled against a value the PREMISE
+    supplies — insp@1's declared inventory — can, because two units may declare different
+    premises for the same subject, so the conflict is real and only the attack layer can carry
+    it. Under Path B the placement is then forced rather than chosen: a strict-reachable
+    conclusion may not overlap a contrary side, so the conflict must sit on a defeasible bridge's
+    conclusions one layer up.
+  context: >
+    Established while shipping insp@1 and mechanized in both directions:
+    Lara.Insp.inspModels_excl_of_same_entry and inspModels_absent_present_sat against
+    Lara.Ord.ordModels_excl_of_lt. Crystallized the same turn via artifact commitment — the
+    layering of examples/S9/insp-v1.policy.lara exists because of it.
+  potential_type: claim
+  bound_to: [N324, N322]
+  promoted: true
+  promoted_to: "logic/claims.md:C51"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O151
+  timestamp: "2026-09-07T16:30"
+  provenance: ai-suggested
+  content: >
+    Generalizing an observation along a parameter is free exactly when the underlying transport
+    concludes an *equality* of the observed object rather than a pointwise agreement between two
+    observed objects. The extensionality hypothesis a pointwise-agreement transport needs is
+    precisely what an equality transport does not, so a generic result that assumed it anyway
+    would be strictly weaker than the specific result it claims to generalize — and would not
+    deserve the same name. The corollary for design: locate the single lemma the whole family of
+    results funnels through, and check whether its conclusion is an equation. If it is, the family
+    generalizes along any reader of the object with no new hypotheses.
+  context: >
+    The milestone expected the generic congruence to be harder than its grounded ancestor. It is not.
+    Every M4 congruence funnels through compileUnit_link_relabel, whose conclusion is
+    `compileUnit acc₂ = compileUnit acc₁`; obsGen_congr therefore carries exactly
+    backend_replacement_congruence's hypotheses and takes no AttackExtensional, whereas
+    Observation.observe_congr does take it because its two frameworks are distinct.
+  potential_type: claim
+  bound_to: [N327, N328]
+  promoted: true
+  promoted_to: "logic/claims.md:C52"
+  crystallized_via: artifact-commitment
+  stale: false
+
+# SUPERSEDED IN PART: the "avoids touching the frozen type ... sits beside it rather
+# than replacing it" clause below was adjudicated wrong on 2026-09-07 (N335, resolved).
+# The rest of O152 stands and was reinforced by that turn. O155 carries the correction.
+- id: O152
+  timestamp: "2026-09-07T16:25"
+  provenance: ai-suggested
+  content: >
+    When a family of results is to be generalized along a parameter, parameterizing the
+    *projection* (what is read off the shared intermediate object) beats parameterizing the
+    concept the parameter belongs to. The projection form proves the family once and instantiates
+    it, and it states as a theorem the fact the copy form can only assert in a comment — that the
+    family was never about the specific reading. It also avoids touching the frozen type whose
+    exact shape decide-closed fixtures depend on, since the new parametric type sits beside it
+    rather than replacing it.
+  context: >
+    Implementing the generalization milestone. The plan's first draft duplicated Observation/obs into a semantics-aware
+    SemObservation/obsSem and copied four congruence proofs; eng review's outside voice built the
+    Outcome α + obsGen version against the real tree instead, and it compiled first try at ~75
+    lines with the parallel type and its compile blocker deleted.
+  potential_type: heuristic
+  bound_to: [N327]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O153
+  timestamp: "2026-09-07T16:40"
+  provenance: ai-suggested
+  content: >
+    A generalization milestone is non-trivial only if the pre-existing fixtures are *proved* to be
+    unable to separate the parameter's instances, not assumed to be. Asserting the agreement in a
+    module header is what forces promoting it to a theorem later, and until it is a theorem the
+    "we had to build new fixtures" justification is unbacked. The corresponding positive
+    obligation is that the parameter must be witnessed non-trivial at the same *level* the
+    milestone generalizes: framework-level separations do not establish that a context-level
+    observation observes anything new.
+  context: >
+    The milestone's carriers ctxEx/fragEx and symCtx/symFrag were believed to have all five semantics
+    agree; obsSem_linking_agrees and obsSem_sym_agrees now pin that for all five, which is what
+    justifies authoring the three-cycle and the sink. M2a had framework-level separations
+    (five_semantics_pairwise_distinct) but no context-level one existed before this turn.
+  potential_type: heuristic
+  bound_to: [N329]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O154
+  timestamp: "2026-09-07T16:45"
+  provenance: ai-suggested
+  content: >
+    An acceptance criterion enforced by a human reading a signature is not enforced. Convert each
+    into a build-breaking dependency: a separation stated as a conjunction of equalities gets a
+    disequality conjunct, so a collapse fails the build rather than leaving two values pinned
+    separately; an `iff` that must not weaken to an implication gets one downstream theorem
+    consuming each direction; a regression theorem that must be exercised rather than merely
+    stated gets a fixture derived *through* it instead of re-pinned by an independent rfl.
+  context: >
+    The milestone's acceptance criteria included "the separations must actually separate" and
+    "ctxEquivSem_grounded_iff must stay an iff", both originally enforceable only by eyeball.
+    Weakening the iff to an implication would otherwise keep both gates green.
+  potential_type: heuristic
+  bound_to: [N329, N328]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O155
+  timestamp: "2026-09-07T21:05"
+  provenance: ai-executed
+  content: >
+    Generalizing a frozen inductive by *replacing* it with a parametric one plus an
+    `abbrev` at the old instance costs the existing `decide`-closed fixtures nothing,
+    because an `abbrev` is definitionally transparent and `decide` reduces through it.
+    The alternative — introducing the parametric type beside the frozen one — buys no
+    fixture safety and forfeits something real: the collapse theorem relating the two
+    (`obs = obsGen (Invariants.status canon)`) does not typecheck across two distinct
+    types, so the design premise stays prose. When the generic and specific types would
+    otherwise be structurally identical, replace-and-abbreviate dominates sit-beside.
+    # Supersedes O152's "avoids touching the frozen type ... sits beside it rather than
+    # replacing it" clause; adjudicated in N335 (resolved), O152 otherwise stands.
+  context: >
+    Landing the milestone's §2A refactor (commit eb6e955) after the earlier PR had shipped the sit-beside
+    form. `Observation` became `abbrev Observation := ObservationOf Grounded.Status` and
+    `Outcome α` was deleted; `Examples/Linking.lean` was not edited at all and its
+    decide-closed `congruence_witness` / `registry_swap_witness` still compile.
+    `lake build Lara` 100 jobs, axiom trio held, coverage 90 declarations.
+  potential_type: heuristic
+  bound_to: [N333, N334, N335]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O156
+  timestamp: "2026-09-07T21:15"
+  provenance: ai-executed
+  content: >
+    A `file.lean:NNN` cross-reference in a docstring is a silent-rot citation: nothing
+    compiles it, so it survives any edit that shifts lines and goes on pointing at
+    whatever now sits there. Repairing a set of them by computing a line *delta* fails
+    the moment a later edit in the same session shifts lines again — the repair is
+    correct only against the tree state it was computed from. Repair by resolving each
+    citation to the declaration NAME it intends and re-reading that name's current line,
+    which is idempotent and survives further edits; then re-run the resolver after the
+    last edit, not before it.
+  context: >
+    The §2A refactor moved ~200 lines between two modules and later grew two module
+    headers. Both review stages caught citation rot: the spec review found 7 sites
+    re-numbered with the wrong delta (-202 where the true shift was -186), and after
+    fixing those, the docstring corrections shifted every line again. A name-based
+    resolver re-pointed all 23 Context citations and was re-run after the final edit;
+    an audit of all 66 cross-file citations then showed every one landing on the
+    declaration its prose names.
+  potential_type: heuristic
+  bound_to: [N333, N334]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O157
+  timestamp: "2026-09-08T13:15"
+  provenance: ai-executed
+  content: >
+    Replacing a computed image by a relation costs a side condition exactly at the lemmas whose
+    functional originals got uniqueness for free. `attackOcc_mapAssurAtt` and `contains_mapAssur`
+    take no injectivity hypothesis because they may write the image occurrence as `mapAssur f t`,
+    which is unique by construction. Their relational forms cannot: the occurrence has to be
+    produced existentially and then pinned to the one the caller already holds, which is exactly
+    equality reflection. So the diagnostic for "where will relationalizing cost a hypothesis" is
+    not "where does the proof use injectivity" but "where does the functional statement name a
+    computed image in its conclusion".
+  context: >
+    Found while relationalizing Task 9 of the plan, whose stated forms for `attackOcc_rel`
+    and `contains_rel` omitted `RelInj`. Both are unprovable as stated; both consumers already
+    carry `RelInj`, so nothing downstream weakened.
+  potential_type: heuristic
+  bound_to: [N338, N339]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O158
+  timestamp: "2026-09-08T14:35"
+  provenance: ai-executed
+  content: >
+    A propositional equality that was definitional in the functional development becomes
+    load-bearing bookkeeping in the relational one, and it surfaces in TYPES rather than in
+    proofs. `linkGamma C (mapAssurFrag f F)` is definitionally `linkGamma C F`, so the functional
+    statements name one Gamma throughout; relationally `linkGamma C F₂ = linkGamma C F₁` is only
+    propositional, and the accepted unit's TYPE mentions Gamma — so the two link-level lemmas
+    must `revert` the accepted unit and rewrite Gamma before doing any work. The same cause makes
+    the four `link*_rel` lemmas honest rewrites where their functional originals are `rfl`.
+    The general shape: when a transformation is replaced by a relation, every place the original
+    was definitionally transparent becomes a rewrite, and the ones that appear in dependent
+    positions are the expensive ones.
+  context: >
+    Encountered writing `exists_accepted_rel` and `compileUnit_link_rel`. The plan
+    anticipated the `link*_rel` half ("budget for that; it is the main place where 'just mirror
+    the original' is not literally true") but not the dependent-type half.
+  potential_type: heuristic
+  bound_to: [N338]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O159
+  timestamp: "2026-09-08T14:50"
+  provenance: ai-executed
+  content: >
+    A planned theorem can collapse into one already shipped, and the check is to compare
+    signatures rather than intentions. Task 11c's `registry_swap_parametricity` was specified as
+    the occurrence-local companion of `registry_swap_congruence`; written out, it is
+    character-for-character `backend_replacement_parametricity_local`, because
+    `registry_swap_congruence` differs from `backend_replacement_congruence` only by moving no
+    material and the occurrence-local form already moves no material. The useful residue was at
+    the other level entirely: `backend_replacement_parametricity_local_sem` (obsSem, not obs) is
+    genuinely distinct and is what the generic-observation doc actually needed.
+  context: >
+    Task 11c. The plan itself anticipated this ("if this is definitionally identical to
+    Task 11b's theorem, say so in one line and keep only one of the two names"), which is why
+    the collapse was caught rather than shipped as a duplicate.
+  potential_type: heuristic
+  bound_to: [N339]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O160
+  timestamp: "2026-09-09"
+  provenance: ai-suggested
+  content: >
+    Lean backlog assessment: one backlog item can replace checkUnit_sound's conjunction with
+    named Prop fields across its consumers; another can add an enumerate-based
+    conflict-freedom theorem while retaining the spec-based wrapper. A third needs
+    an enforced registration boundary, since a registry alone cannot discover
+    arbitrary ExtensionSemantics values. A fourth requires a substitution calculus
+    and transport proofs. The fifth remains a proof-or-counterexample task; failure
+    of decide on all contexts is not an undecidability result.
+  context: >
+    User asked whether all five issues can be resolved directly. Read
+    lean/Lara/Check/Unit.lean, lean/Lara/Context/{Fragment,Equivalence,Parametricity}.lean,
+    lean/Lara/Semantics.lean and the M2a/M4 theory documents. Feasibility assessment
+    only; no implementation or new proof, and no user adoption of this proposal.
+  potential_type: architecture
+  bound_to: []
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O161
+  timestamp: 2026-09-09T18:03-07:00
+  provenance: ai-suggested
+  content: An occurrence profile preserving identity only inside a fragment can miss observations caused
+    by a context copying an exact term. A candidate interface may need mixed equality and containment
+    against context material. This finite separation establishes no universal decorated-identity characterization.
+  context: 'G0; same-context-copy calculation in docs/theory-m4-g0-interface-spike.md. Generalized
+    interpretation remains unadopted.'
+  potential_type: constraint
+  bound_to:
+  - N305_g0_checks
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+
+- id: O162
+  timestamp: 2026-09-09T20:10-07:00
+  provenance: ai-suggested
+  content: >-
+    A wrapper layer built over an unchanged local judgment can only separate
+    reporting conditions that are decidable *before* the local judgment runs.
+    Refining the query type removed the two vocabulary-level conditions from
+    PW0's `gap` because well-sortedness is decided at the signature; the two
+    remaining conditions stayed collapsed because the local status function is a
+    total function of a projection that discards the distinction. Separating them
+    requires editing the local layer, which the wrapper's own discipline forbids.
+  context: >-
+    Issue 307 half 1. Discovered mid-work: the planned four-way `gap` split does
+    not exist, because `Grounded.statusC_gap_iff` plus the completeness of every
+    retained node makes "posed but unsupported" unreachable as a gap. Recorded as
+    a dead end (N307_gap_collapse) and written into three documents so no display
+    can claim closure.
+  potential_type: claim
+  bound_to:
+  - N307_sorted
+  - N307_gap_collapse
+  promoted: true
+  promoted_to: logic/claims.md:C55
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O163
+  timestamp: 2026-09-09T20:10-07:00
+  provenance: ai-suggested
+  content: >-
+    Which clauses of a contract an elaborator can check is decided by the
+    *representation* of the environment component each clause reads, not by the
+    clause's logical shape. T6's three clauses have the same universally
+    quantified form, yet `rule_ok` is decidable (a `Policy` carries its rules as a
+    finite list) while `leaf_ok`, `cert_ok` and the shared canonicalizer are not
+    (a function, an arbitrary `Prop`, and function equality). The design move is
+    to decide the checkable one and *name* the rest as declared premises rather
+    than pretending the elaborator verifies the contract.
+  context: >-
+    Issue 307 half 2. Drove `ruleOkB`/`ruleOkB_iff`,
+    `BridgeObligations`, and `BridgeEnv.canon_shared` being a field rather than a
+    check. Generalized reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N307_surface
+  - N307_clause_checkability
+  promoted: true
+  promoted_to: "logic/solution/heuristics.md:H18"
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O164
+  timestamp: 2026-09-09T20:10-07:00
+  provenance: ai-suggested
+  content: >-
+    A refinement of a frozen contract can leave the contract literally unedited by
+    being built as a *second constructor* over the same components plus an
+    erasure theorem between the two — here `SortedBridgeData.frame` beside
+    `BridgeData.frame`, related by `sat_erase`. The erasure is what converts "we
+    did not break it" from an assertion into a theorem, and it is cheap when the
+    two builders share every field the semantics reads.
+  context: >-
+    Issue 307 half 1. Chosen over editing `Frame.Query`/`Frame.translate` in
+    place, which would have invalidated every PW0/T6/T8/T9 statement. Generalized
+    reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N307_sorted
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O165
+  timestamp: 2026-09-10T09:30-07:00
+  provenance: ai-suggested
+  content: >-
+    A theorem whose premise is the property being exhibited proves nothing about
+    that property, and nothing in the type distinguishes a vacuous premise from a
+    satisfiable one. The failure is invisible to every gate the repository runs —
+    it builds, it is axiom-clean, it is AxCheck-covered — because vacuity is a
+    property of the fixture, not of the proof. The detection move is to try to
+    prove the *negation* of the premise at the fixture, which is cheap when the
+    fixture is concrete and decidable.
+  context: >-
+    review. `structuralBridge_declOK` took `BridgeObligations` as a
+    hypothesis over a fixture whose shared `Gamma` ranges outside the declared
+    symbol map; the reviewer compiled `¬ BridgeObligations …` against the branch.
+    Generalized reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N311_vacuous_obligations
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O166
+  timestamp: 2026-09-10T09:30-07:00
+  provenance: ai-suggested
+  content: >-
+    The M5 discipline's "independent judgment" has two distinct readings, and only
+    the weaker one is usually checked. A judgment can avoid naming the *elaborator*
+    and still name the *decider* — a field defined as `decider … = true` — in which
+    case the sound/complete pair reduces on the substantive clause to bookkeeping
+    over whatever scan surrounds it, and the real content lives entirely in the
+    decider's own `_iff` lemma. Stating the clause semantically and routing
+    sound/complete through that `_iff` restores the intended reading at no proof
+    cost, because the `_iff` already exists.
+  context: >-
+    review. Applied to `ElaboratesBridge.rule_ok` (was `ruleOkB … = true`,
+    now T6's clause) and `Elaborates.status` (was `pose … = .ok q`, now
+    `q.val = c`). Generalized reading not yet adopted by the researcher.
+  potential_type: heuristic
+  bound_to:
+  - N311_located_and_independent
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O167
+  timestamp: 2026-09-10T09:30-07:00
+  provenance: ai-suggested
+  content: >-
+    A located error report can be retrofitted onto a partial function whose `none`
+    carries no reason, without weakening any definedness theorem, by adding a
+    parallel scan over the same traversal and proving the scan's `none` equivalent
+    to the function's domain condition. The equivalence is what lets the fault
+    constructor carry a payload while the `X = none ↔ ∃ y, f x = some y` lemmas
+    keep their shape. Whether the retrofit is worth it tracks how likely the fault
+    is to reach an author, not how deep the traversal is.
+  context: >-
+    review. `PosingFault.bridgeVocabulary` was the one unlocated arm in a
+    module whose stated discipline is that faults are located; a surface-declared
+    bridge always has a finite vocabulary (`predMapOf_eq_none`), which makes it
+    the fault most likely to be hit. Generalized reading not yet adopted.
+  potential_type: heuristic
+  bound_to:
+  - N311_located_and_independent
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O168
+  timestamp: "2026-09-09T23:25"
+  provenance: ai-suggested
+  content: >
+    The multi-artifact build can use a flat content-pinned map and ordinary full source/link
+    checking, with Make as an optional command wrapper. The draft separates
+    source digests from declared paper identities, requires actual shared
+    policy/signature/theory identity, qualifies leaf references, and reuses
+    the existing Lean saturation/linking results. R12 is policy-pattern-level
+    in the current implementation, not dependent on newly added member claims.
+    Proposed v1 rejects nonempty admission/pruning audits rather than losing
+    their source semantics. These are review proposals, not adopted decisions.
+  context: >
+    User requested a review, assessment of Makefile-style builds, and a
+    draft plan. Grounding: src/Lara/Replay.hs, src/Lara/Policy.hs,
+    src/Lara/Elaborate.hs, lean/Lara/Context/Fragment.lean,
+    lean/Lara/Context/Link.lean, and
+    plans/2026-09-09-multi-artifact-build.md. No implementation or experiment.
+  potential_type: architecture
+  bound_to: []
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O169
+  timestamp: 2026-09-11T00:14-07:00
+  provenance: ai-suggested
+  content: Deriving both frame bridge indices and name resolution from one checked
+    declaration registry prevents an authored modal name from selecting a different
+    map than its declaration. The proof must retain membership in the original loaded
+    declaration list, rather than only reasserting agreement between independently
+    supplied environments.
+  context: 'Declared-wire and file-execution implemented: load_declarations and elabPosed_declared compose
+    the loader and modal elaborator; generalized design lesson remains unendorsed.'
+  potential_type: architecture
+  bound_to:
+  - N313_declared_wire
+  - N314_file_execution
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O170
+  timestamp: "2026-09-11T07:40"
+  provenance: ai-suggested
+  content: >
+    An incremental link (fold one member at a time, saturating each step's boundary)
+    and a one-shot batch link (saturate every cross-member pair of the merged material)
+    produce the same attacks and arguments whenever each member is well-formed on its own
+    and identities are hygienic. The reason is that a member's derivations keep their
+    conclusions in every environment extending the member's own, so the per-step and
+    whole-map conclusion caches agree on every member argument. The equivalence needs no
+    premise beyond what acceptance already needs.
+  context: >
+    Proved as batch_atts_mem_iff_fold / batch_args_mem_iff_fold in
+    lean/Lara/Map/Link.lean; the generalization beyond this calculus is not tested.
+  potential_type: claim
+  bound_to: [N321_batch_link]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O171
+  timestamp: "2026-09-11T07:40"
+  provenance: ai-suggested
+  content: >
+    A multi-artifact map's per-invocation cost is dominated by rechecking its members:
+    for the shipped four-member map, linking, the linked check, evaluation and rendering
+    are about a tenth of a full pass. One machine, one run, three different maps.
+  context: >
+    First make bench-map run at ad513b5
+    (ara/evidence/results/map_bench_2026-09-11.md).
+  potential_type: claim
+  bound_to: [N319_map_bench]
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O172
+  timestamp: 2026-09-11T01:52-07:00
+  provenance: ai-suggested
+  content: A proposition-valued modal semantics gets a proved executable instance
+    when the frame's relation is defined as membership in the computed candidate list
+    and acceptance as the computed test. Presents and mem_successors then hold by construction,
+    and the only remaining obligation is a separate index lemma that the frame at declared
+    worlds is the file's edges. That lemma needs world identity (distinct checked programs),
+    because Instance.World carries no name.
+  context: 'implemented: Model.evaluates_iff and compare_mem_iff_sat follow from
+    evalFinite_iff and mem_compare_iff_sat_dia with trivial presentation proofs; candidates_declared
+    carries the content. The generalized lesson is unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N322_finite_boundary
+  - N322_conformance
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O173
+  timestamp: 2026-09-11T12:45-07:00
+  provenance: ai-suggested
+  content: A byte-equality differential between two runtimes misses encoding divergences
+    unless each text boundary gets its own locale case on the path that reads it. Output,
+    the command-line argument, paths read from inside the input, and error details that
+    echo a path are separate boundaries, and an 8-bit locale fails differently from
+    LC_ALL=C.
+  context: 'reviews: the first gate''s only LC_ALL=C case used inline worlds,
+    so file-path encoding diverged unseen, and the first fix handled paths but not argv,
+    passing under C while failing under ISO-8859-1. Shown on one project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N322_review_divergence
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O174
+  timestamp: 2026-09-11T19:10-07:00
+  provenance: ai-suggested
+  content: Exit-code agreement between two runtimes is not refusal-category agreement. A
+    cross-runtime gate that pins only the exit code and an empty stdout is satisfied by
+    two implementations that refuse the same input for different stated reasons, at
+    different stages; what makes a shared reader a checkable contract is comparing the
+    located message — bound, column and wording — across drivers on the inputs where the
+    refusal is the contract rather than a diagnostic.
+  context: 'the Haskell reader capped nesting at 10000 and the Lean reader had no
+    bound, so past that depth both exited 2 while one said syntax and the other malformed.
+    Every gate was blind: the byte-equality families had no case at that depth and the
+    exit-2-only families would have passed anyway. Shown on one boundary of one project;
+    unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N331_shared_bound
+  - N331_gate_controls
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O175
+  timestamp: 2026-09-11T19:10-07:00
+  provenance: ai-suggested
+  content: 'A gate whose cases are derived from a constant duplicated across two
+    implementations should also read that constant out of both sources and compare them —
+    but for diagnosis, not detection. Whether the behavioural cases catch a one-sided
+    change turns on whether the constant is observable in the output: when the refusal
+    message prints its own bound, moving one copy alone changes the wording or the column
+    and the cases go red unaided; when it does not, the stricter side''s refusal genuinely
+    masks the relaxation and only the source comparison sees it. What the source check buys
+    unconditionally is a failure that is early and named rather than an opaque output
+    mismatch, and coverage of the case no generated input can reach: the constant renamed,
+    reformatted, or deleted.'
+  context: 'Designing the nesting-bound gates. First recorded as "the depth cases alone would have
+    survived raising only the Lean maxDepth"; the review traced both directions and
+    showed otherwise — the bound is interpolated into its own message, so each one-sided
+    raise produces a different message or a different column on the two sides and every
+    behavioural case goes red. The negative control in the same session agrees: with the
+    Lean bound declared-but-unenforced, the behavioural cases caught it. All three gates
+    still grep the constant out of src/Lara/Wire.hs and lean/Lara/Driver.lean, on the
+    corrected rationale. One project, one constant; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N331_gate_controls
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O176
+  timestamp: 2026-09-12T01:38+00:00
+  provenance: ai-suggested
+  content: A reader that can only report unconditional results can admit a pipeline
+    with a conditioning edit exactly on the inputs where that edit is provably the
+    identity; the proof obligation is that the edit's trigger set is empty and the edit
+    is the identity on an empty trigger set, not anything about the edited program.
+  context: 'PW status atoms are Boolean, §4.3 quarantine makes local status
+    conditional; accepting worlds whose groups all agree needed only quarantined_eq_nil
+    and the two *_nil identities. One project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N326_consistent_groups
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O177
+  timestamp: 2026-09-12T01:38+00:00
+  provenance: ai-suggested
+  content: A source form only one runtime can read joins a two-runtime differential
+    through a derivation door that prints the equivalent document in the shared form;
+    the gate then compares the reading runtime on the original with both on the derived
+    document, and the derived document must also be the identity on inputs both could
+    already read.
+  context: 'reused the lara map-input pattern as lara pw-input; the gate
+    reruns every envelope-only fixture through derivation to its golden. Second use of
+    the pattern; no user endorsement.'
+  potential_type: heuristic
+  bound_to:
+  - N327_lara_sources
+  - N326_327_conformance
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O176
+  timestamp: 2026-09-12T05:54+00:00
+  provenance: ai-suggested
+  content: A text boundary belongs to the process, not to the door. When two entry
+    points of one binary read the same file type, setting encodings per entry point
+    makes the binary disagree with itself about the same bytes, and a cross-driver
+    differential cannot see it because the doors that share the setting agree. The
+    boundary is set once before anything is read, and its output half — every handle
+    that will echo names or paths decoded there — is retargeted with it, or the fix
+    converts a read failure into an encoder failure one step later.
+  context: 'pwTextBoundary covered the PW doors only, so lara check
+    refused under LC_ALL=C a non-ASCII program lara pw accepted. Moving it to main
+    settled both directions and exposed a pre-existing stderr-encoder crash on a
+    non-UTF-8 path argument. Second boundary-shaped bug on this project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N334_cli_text_boundary
+  - N334_solo_locale_gate
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O177
+  timestamp: 2026-09-12T05:54+00:00
+  provenance: ai-suggested
+  content: A gate that reruns a child process under a second locale must decode the
+    child's streams itself; a harness that captures output through its own locale
+    tests the environment the suite runs in rather than the binary. The same applies
+    to the fixtures it writes and to any byte the case needs in argv, which the
+    runtime's own process spawner may not be able to carry.
+  context: 'readProcessWithExitCode offers no environment and decodes pipes
+    with the test process''s locale; GHC''s process drops a lone surrogate from argv,
+    so the non-UTF-8 path byte had to be spelled by sh. Discovered while giving the
+    solo door its first locale coverage. One project; unendorsed.'
+  potential_type: heuristic
+  bound_to:
+  - N334_solo_locale_gate
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O178
+  timestamp: 2026-09-12T07:10+00:00
+  provenance: ai-suggested
+  content: >-
+    A `partial def` in a mechanized reference is not an undocumented implementation choice
+    but an enforcement with no theorem attachable to it: the kernel has no reduction
+    behaviour for one, so nothing about its results is dischargeable. Totality is therefore
+    a precondition for the metatheory rather than a refinement of it, and a discipline of
+    "port it and prove its metatheory" cannot be satisfied incrementally over a partial
+    definition — the redesign comes first, or the theorem does not exist to defer.
+  context: >-
+    the nesting bound was enforced in Lean byte-for-byte with Haskell and covered
+    by three differentials, yet AxCheck.lean was correctly empty of it because
+    parseForm/parseList/parseQuoted were partial. One project, one instance; unendorsed.
+  potential_type: claim
+  bound_to:
+  - N335_reader_totalization
+  - N335_bound_proved
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O179
+  timestamp: 2026-09-12T07:10+00:00
+  provenance: ai-suggested
+  content: >-
+    When a mutually recursive consumer loop terminates only because its callee consumes
+    input, the termination fact belongs in the callee's result TYPE, not in a lemma proved
+    afterwards. Proving it afterwards is circular — the lemma would be about a function
+    whose definition needs the lemma — and the alternatives that avoid the subtype each pay
+    in contract rather than in proof effort. Explicit fuel introduces an exhaustion
+    behaviour the reference implementation does not have; a stack machine over a token
+    stream re-derives the refusal precedence and the located column instead of preserving
+    them. The subtype's cost stays bounded because it can be hidden at the top-level entry
+    point, leaving every consumer's type unchanged.
+  context: >-
+    parseList's element loop recurses on parseForm's output state. Closed by
+    `structure Parsed (p) where ... consumed : rest.input.length < p.input.length`, with
+    parseWire re-exporting `Except String Sx` so Lara.Map.Driver, Lara.PW.Wire, Lara.PW.Run
+    and Lara.AdmissionDriver were untouched. One instance; unendorsed.
+  potential_type: heuristic
+  bound_to:
+  - N335_reader_totalization
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O180
+  timestamp: 2026-09-12T07:10+00:00
+  provenance: ai-suggested
+  content: >-
+    A differential pins a shared boundary's wording tightly and its LOCATION only at the
+    cases it happens to try. A proof of where the refusal is located is what turns the
+    agreement of two implementations' columns from a coincidence over an anchor set into a
+    property of one of them. The theorem worth having is therefore not "the bound fires",
+    which the exit code already shows, but "the position reported is the post-skip state",
+    which is the half no exit-code-only family can see.
+  context: >-
+    parseList_error_of_parseForm_error states the located position is the
+    post-skipSpace state parseList handed to parseForm; parseWire_nested_error pins line 1,
+    column maxDepth+2 for the whole family of over-deep inputs. Relates to C12's recorded
+    bound on gate-visible divergence. One instance; unendorsed.
+  potential_type: claim
+  bound_to:
+  - N335_bound_proved
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

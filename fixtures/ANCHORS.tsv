@@ -1,0 +1,154 @@
+# Byte-parity anchors for scripts/differential.sh (issue #303 PR review).
+#
+# One committed path per line, sorted. The script requires the glob-discovered
+# set to equal this file EXACTLY: a stray .sexp under fixtures/, examples/,
+# bundles/ or corpus-units/ is a setup failure, not a free pass.
+#
+# Why a manifest and not a filename exclusion. The positive loop treats "both
+# drivers exit 2 with empty stdout" as agreement, so any .sexp that is not a
+# check-input@1 envelope decode-fails on both drivers and is counted as an
+# agreeing anchor. Two such files existed (a map's map.core.sexp and
+# map.verdict.sexp) and were excluded by name; the exclusion is correct for
+# those two names and does nothing about the next file to arrive under a third
+# name. The mutant half already pins itself against fixtures/mutants/MANIFEST.tsv
+# for the same reason, and this is that discipline applied to the globbed half.
+#
+# Regenerate after adding or removing an anchor:
+#
+#     bash scripts/gen-anchor-manifest.sh
+bundles/walking-skeleton/emitted.core.sexp
+corpus-units/adaptive-pruning/C03/unit.core.sexp
+corpus-units/adaptive-pruning/C04/unit.core.sexp
+corpus-units/all-in-one/C01/unit.core.sexp
+corpus-units/all-in-one/C03/unit.core.sexp
+corpus-units/all-in-one/C05/unit.core.sexp
+corpus-units/all-in-one/C06/unit.core.sexp
+corpus-units/bam/C05/unit.core.sexp
+corpus-units/bam/C06/unit.core.sexp
+corpus-units/bbox/C02/unit.core.sexp
+corpus-units/bbox/C04/unit.core.sexp
+corpus-units/bbox/C05/unit.core.sexp
+corpus-units/bbox/C06/unit.core.sexp
+corpus-units/bridging-data-gaps/C03/unit.core.sexp
+corpus-units/bridging-data-gaps/C05/unit.core.sexp
+corpus-units/fre/C01/unit.core.sexp
+corpus-units/fre/C03/unit.core.sexp
+corpus-units/fre/C04/unit.core.sexp
+corpus-units/ftrl/C01/unit.core.sexp
+corpus-units/lbcs/C03/unit.core.sexp
+corpus-units/lbcs/C05/unit.core.sexp
+corpus-units/mechanistic-understanding/C02/unit.core.sexp
+corpus-units/mechanistic-understanding/C04/unit.core.sexp
+corpus-units/pinn/C01/unit.core.sexp
+corpus-units/pinn/C03/unit.core.sexp
+corpus-units/pinn/C05/unit.core.sexp
+corpus-units/rebench-fix_embedding/C12/unit.core.sexp
+corpus-units/rebench-nanogpt_chat_rl/C04/unit.core.sexp
+corpus-units/rebench-restricted_mlm/C07/unit.core.sexp
+corpus-units/rebench-restricted_mlm/C14/unit.core.sexp
+corpus-units/rebench-rust_codecontests/C02/unit.core.sexp
+corpus-units/rebench-rust_codecontests/C09/unit.core.sexp
+corpus-units/rebench-triton_cumsum/C05/unit.core.sexp
+corpus-units/rebench-triton_cumsum/C09/unit.core.sexp
+corpus-units/rice/C01/unit.core.sexp
+corpus-units/robust-clip/C02/unit.core.sexp
+corpus-units/robust-clip/C03/unit.core.sexp
+corpus-units/robust-clip/C07/unit.core.sexp
+corpus-units/sample-specific-masks/C05/unit.core.sexp
+corpus-units/sample-specific-masks/C06/unit.core.sexp
+corpus-units/sapg/C01/unit.core.sexp
+corpus-units/sapg/C02/unit.core.sexp
+corpus-units/sapg/C06/unit.core.sexp
+corpus-units/self-composing-policies/C01/unit.core.sexp
+corpus-units/self-composing-policies/C04/unit.core.sexp
+corpus-units/self-expansion/C03/unit.core.sexp
+corpus-units/self-expansion/C04/unit.core.sexp
+corpus-units/semantic-self-consistency/C03/unit.core.sexp
+corpus-units/semantic-self-consistency/C05/unit.core.sexp
+corpus-units/semantic-self-consistency/C06/unit.core.sexp
+corpus-units/sequential-neural-score-estimation/C04/unit.core.sexp
+corpus-units/stay-on-topic-with-classifier-free-guidance/C02/unit.core.sexp
+corpus-units/stay-on-topic-with-classifier-free-guidance/C05/unit.core.sexp
+corpus-units/stay-on-topic-with-classifier-free-guidance/C06/unit.core.sexp
+corpus-units/stochastic-interpolants/C01/unit.core.sexp
+corpus-units/stochastic-interpolants/C03/unit.core.sexp
+corpus-units/test-time-model-adaptation/C04/unit.core.sexp
+corpus-units/test-time-model-adaptation/C05/unit.core.sexp
+corpus-units/test-time-model-adaptation/C07/unit.core.sexp
+corpus-units/what-will-my-model-forget/C01/unit.core.sexp
+corpus-units/what-will-my-model-forget/C03/unit.core.sexp
+examples/A/example.core.sexp
+examples/B/example.core.sexp
+examples/E1/example.core.sexp
+examples/E2/example.core.sexp
+examples/E3/example.core.sexp
+examples/E4/example.core.sexp
+examples/E5/example.core.sexp
+examples/P1/example.core.sexp
+examples/R1/example.core.sexp
+examples/R2-sort/example.core.sexp
+examples/R2/example.core.sexp
+examples/R3/example.core.sexp
+examples/S1/example.core.sexp
+examples/S2/example.core.sexp
+examples/S3/example.core.sexp
+examples/S4/example.core.sexp
+examples/S5/example.core.sexp
+examples/S6/example.core.sexp
+examples/S7/example.core.sexp
+examples/S8/example.core.sexp
+examples/S9/example.core.sexp
+examples/agreement-map-multi/paper-a/example.core.sexp
+examples/agreement-map-multi/paper-b/example.core.sexp
+examples/agreement-map-multi/paper-c/example.core.sexp
+examples/agreement-map-multi/paper-d/example.core.sexp
+examples/agreement-map/example.core.sexp
+examples/rebuttal-replay/round0/example.core.sexp
+examples/rebuttal-replay/round1/example.core.sexp
+examples/rebuttal-replay/round2/example.core.sexp
+examples/running-example/run1/example.core.sexp
+examples/running-example/run2/example.core.sexp
+fixtures/corpus/group-conflict-quarantine-attacker.sexp
+fixtures/corpus/group-conflict-quarantine.sexp
+fixtures/corpus/group-consistent-accept.sexp
+fixtures/corpus/group-quarantine-lost-edge.sexp
+fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp
+fixtures/corpus/independent-accept.sexp
+fixtures/corpus/insp-arity-mismatch-reject.sexp
+fixtures/corpus/insp-empty-inventory-accept.sexp
+fixtures/corpus/insp-premise-only-accept.sexp
+fixtures/corpus/insp-premise-only-reject.sexp
+fixtures/corpus/ord-le-boundary-accept.sexp
+fixtures/corpus/ord-lt-boundary-reject.sexp
+fixtures/corpus/ord-premise-only-accept.sexp
+fixtures/corpus/ord-premise-only-reject.sexp
+fixtures/corpus/ra-premise-only-accept.sexp
+fixtures/corpus/ra-premise-only-reject.sexp
+fixtures/corpus/rebut-program.sexp
+fixtures/corpus/reject-duplicate-argument.sexp
+fixtures/corpus/reject-duplicate-rule.sexp
+fixtures/corpus/reject-incomplete-argument.sexp
+fixtures/corpus/reject-missing-conflict.sexp
+fixtures/corpus/reject-preflight-duplicate-backend.sexp
+fixtures/corpus/reject-preflight-unknown-backend.sexp
+fixtures/corpus/reject-preflight-unselected-certificate.sexp
+fixtures/corpus/reject-r1.sexp
+fixtures/corpus/reject-r10.sexp
+fixtures/corpus/reject-r11.sexp
+fixtures/corpus/reject-r12.sexp
+fixtures/corpus/reject-r13.sexp
+fixtures/corpus/reject-r3.sexp
+fixtures/corpus/reject-r4.sexp
+fixtures/corpus/reject-r5.sexp
+fixtures/corpus/reject-r6.sexp
+fixtures/corpus/reject-r7.sexp
+fixtures/corpus/reject-r9.sexp
+fixtures/corpus/reject-undercut-bad-position.sexp
+fixtures/corpus/reject-undercut-missing-exception.sexp
+fixtures/corpus/stress-independent-120.sexp
+fixtures/corpus/strict-cert-accept.sexp
+fixtures/corpus/strict-cert-unicode-theory.sexp
+fixtures/corpus/strict-trusted-accept.sexp
+fixtures/corpus/undercut-accept.sexp
+fixtures/covered-self-edge.sexp
+fixtures/missing-self-edge.sexp

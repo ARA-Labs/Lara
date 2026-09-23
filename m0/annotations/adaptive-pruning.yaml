@@ -1,0 +1,153 @@
+artifact: adaptive-pruning
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null            # only 3 dead ends (N03, N06, N14) — all classified
+claims:
+  - claim_id: C03
+    claim_type: comparative
+    proposition_shape:
+      sketch: "on_par_with_lower_cost(apt, prune_distill_cofi, roberta_base, tasks={mnli,sst2}, acc_gap_max=0.9, train_mem_ratio=0.416, tta_speedup=2.5)"
+      arity: 7
+      phase0_nullary_sufficient: false
+      note: "A nullary atom would hide the two-method comparison, the accuracy-gap threshold, and the two cost dimensions (memory, convergence speed); the falsification criteria quantify exactly these arguments, so they are checkable structure."
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "APT and Prune+Distill (CoFi) are trained on the same tasks (MNLI, SST2), same model (RoBERTa-base), same hardware (single A100), at the same 60% target sparsity."
+        - "Task accuracy is measured on the same dev sets for both methods."
+        - "Peak training memory is measured the same way for both methods and normalized to the same FT baseline (E01 steps 4, 7)."
+        - "Convergence speed is measured with the same 97% TTA criterion for both methods."
+        - "The self-distillation cost accounting (E04) uses the same speed/memory normalization when comparing teacher strategies."
+      supporting_experiments: [E01, E04]
+    strict_certifier: lp
+    certifier_note: "The claim's numeric content is linear inequalities/equalities over reported table cells: |acc(APT) - acc(CoFi)| <= 0.9 on MNLI, equality on SST2, mem(APT)/mem(CoFi) = 0.416, TTA(CoFi)/TTA(APT) = 2.5. Given the cells as leaves, an LP/linear-arithmetic checker can certify the threshold checks; the empirical measurement itself stays defeasible."
+    critical_questions:
+      - cq: "Is the Prune+Distill (CoFi) baseline actually run under the same setup (same model, tasks, sparsity target, hardware)?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 6 runs Prune+Distill (CoFi, RoBERTa only) alongside APT; Setup fixes model, tasks, A100, 60% sparsity."
+      - cq: "Are training memory and speed normalized identically for both methods?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure steps 4 and 7: peak GPU memory and 97% TTA, all metrics normalized to FT."
+      - cq: "Is the claim's scope matched to where the baseline exists (RoBERTa only — CoFi is not run on T5)?"
+        mandatory: true
+        status: met
+        basis: "E01 Baselines list Prune+Distill as RoBERTa-only; the claim restricts itself to MNLI/SST2 on RoBERTa."
+      - cq: "Is run-to-run variance (seeds) reported, so that a 0.9-point gap is distinguishable from noise?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01/E04 Setup and Procedure specify no seeds or repeated runs; absence leaves the tightness of 'within 0.9 points' unestablished but does not defeat it."
+      - cq: "Does the memory accounting for Prune+Distill include its teacher model's memory on the same basis as APT's self-distillation accounting?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 measures peak training memory but does not spell out teacher-memory accounting for CoFi; E04/N15 detail it only for APT's own teacher variants."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "APT MNLI dev accuracy is within 0.9 points of Prune+Distill (CoFi) at 60% sparsity on RoBERTa-base."
+        provenance: attested
+        refs: ["logic/claims.md C03", "E01 (Table 2)"]
+      - atom: "APT SST2 dev accuracy equals Prune+Distill's at 60% sparsity on RoBERTa-base."
+        provenance: attested
+        refs: ["logic/claims.md C03", "E01 (Table 2)"]
+      - atom: "APT peak training memory is 41.6% of Prune+Distill's (normalized to FT)."
+        provenance: attested
+        refs: ["logic/claims.md C03", "E01 steps 4, 7"]
+      - atom: "APT reaches 97% TTA 2.5x faster than Prune+Distill."
+        provenance: attested
+        refs: ["logic/claims.md C03", "E01 step 4"]
+      - atom: "APT self-distillation costs 70.1% memory / 16.9% training speed vs 111.8% / 7.9% for a separate FT teacher."
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N15", "Table 10", "E04"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "Static-LoRA-then-prune (CPET) is a rejected alternative design that motivates APT; it does not contradict C03's conclusion, scheme, or leaves."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "Tuning-parameter-only salience (LRP) is a rejected alternative salience design; it bears on the method's design rationale, not on the C03 comparison."
+      - node: N14
+        decision: none
+        target: "n/a"
+        rationale: "Uniform rank increase is a rejected allocation alternative relevant to C05's ablation; no bearing on the C03 memory/accuracy comparison."
+    holes:
+      - "No seed/variance reporting for the 0.9-point accuracy gap or the 41.6% memory figure (single-run comparison)."
+      - "Teacher-memory accounting for the Prune+Distill baseline is unspecified, so the 41.6% ratio's denominator basis is open."
+      - "C03 depends on C01, but E01/E04 do not restate that the 60% sparsity operating point used for the comparison is the one C01 certifies."
+    coverage_flags: []
+    uncertain: false
+    note: "Claim conjoins an accuracy comparison (E01) with a cost comparison whose mechanism evidence lives in E04/N15; both legs fit controlled_comparison with shared normalization premises."
+
+  - claim_id: C04
+    claim_type: causal
+    proposition_shape:
+      sketch: "ablation_effect(component=kurtosis_salience_term, model=llama2_7b, sparsity=0.30, metric=openllm_avg, score_full=50.0, score_ablated=38.1)"
+      arity: 6
+      phase0_nullary_sufficient: false
+      note: "The causal content is the delta between two configurations differing in one component; a nullary atom would lose the ablated-component argument and the two score cells that the 5%-relative-drop falsification criterion is computed from."
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "The ablated run differs from full APT only in the salience score: activation-gradient salience without the kurtosis term (E03 step 6); all other training config is held fixed."
+        - "Both runs use the same model (LLaMA2-7B), same 30% target sparsity, same fine-tuning data (Alpaca) and hardware (single A100)."
+        - "Evaluation is identical: 25-shot ARC, 10-shot HellaSwag, 5-shot MMLU, 0-shot TruthfulQA via lm-eval-harness, averaged (E02 protocol reused by E03)."
+        - "The average-score drop is attributable to the removed component, not to run-to-run noise."
+      supporting_experiments: [E03]
+    strict_certifier: domain-checker(rational-arithmetic)
+    certifier_note: "The '23.8% reduction' is derived arithmetic over two leaf cells: (50.0 - 38.1) / 50.0 = 0.238; likewise the falsification threshold ('less than 5% relative drop') is a rational-arithmetic check over the same cells. Only this re-check is strict; the ablation inference itself is defeasible."
+    critical_questions:
+      - cq: "Is the ablation single-variable — is the kurtosis term the only difference from full APT?"
+        mandatory: true
+        status: met
+        basis: "E03 Setup (d) and Procedure step 6: 'use activation-gradient salience only, omit the kurtosis term'; separate ablations cover the other components."
+      - cq: "Is the full-APT reference trained and evaluated under the identical LLaMA2-7B 30%-sparsity configuration?"
+        mandatory: true
+        status: met
+        basis: "E03 Procedure step 7 tests LLaMA ablations at 30% sparsity against full APT; E02 fixes the training/eval configuration."
+      - cq: "Is the evaluation protocol identical across the two arms (same tasks, shot counts, harness)?"
+        mandatory: true
+        status: met
+        basis: "E03 step 8 measures ARC/HellaSwag/MMLU/TruthfulQA/avg; E02 step 5 fixes lm-eval-harness and shot counts."
+      - cq: "Is run variance reported, so the 11.9-point drop exceeds noise?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E03 specifies no seeds or repeats; the effect size (23.8% relative) makes noise an unlikely full explanation, but the artifact leaves it open."
+      - cq: "Is the claim's scope limited to large LMs rather than generalized to all models?"
+        mandatory: false
+        status: met
+        basis: "E03 Expected outcome: removing kurtosis 'should severely degrade LLaMA performance but have smaller impact on smaller models'; the claim is scoped to LLaMA2-7B at 30% sparsity."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Full APT LLaMA2-7B four-task average score is 50.0 at 30% sparsity."
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N09", "Table 5", "E03"]
+      - atom: "APT without the kurtosis term scores 38.1 average under the same configuration."
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N09", "Table 5", "E03"]
+      - atom: "The relative drop is 23.8% ((50.0 - 38.1) / 50.0)."
+        provenance: assumed
+        refs: ["derived by arithmetic from the two score leaves; certifiable by domain-checker(rational-arithmetic)"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "Rejected static-adapter design predates and is orthogonal to the salience-composition question C04 answers."
+      - node: N06
+        decision: none
+        target: "n/a"
+        rationale: "Rules out the alternative of tuning-parameter-only salience; it motivates combining frozen-weight proxies (the lineage leading to kurtosis) rather than attacking C04's conclusion, inference, or leaves."
+      - node: N14
+        decision: none
+        target: "n/a"
+        rationale: "Rejected uniform-rank-allocation alternative bears on adaptive tuning (C05), not on the kurtosis salience ablation."
+    holes:
+      - "Single-run ablation: no variance estimate behind the 50.0 vs 38.1 cells."
+      - "N10 lists unexplored salience alternatives (max activation magnitude, activation std); 'kurtosis is critical' is established against removal only, not against substitute outlier measures."
+      - "Per-task breakdown of the drop (which of ARC/HellaSwag/MMLU/TruthfulQA drives it) is not stated in experiments.md."
+    coverage_flags: []
+    uncertain: false
+    note: "Causal reading is the standard ablation counterfactual; the artifact's own trace (N09 -> N10) records the decision the ablation licensed."

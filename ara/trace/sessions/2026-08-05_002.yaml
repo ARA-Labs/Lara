@@ -1,0 +1,90 @@
+session:
+  id: "2026-08-05_002"
+  date: "2026-08-05"
+  started: "2026-08-05T16:00"
+  last_turn: "2026-08-05T16:35"
+  turn_count: 1
+  summary: >
+    Closed the quarantine follow-up findings. Lean now ports and uses Haskell canonNum;
+    a valid numeric fixture reproduces the old false-justified result and pins two blocked
+    queries positionally through both real drivers. The .lara front door rejects duplicate
+    ArgIds before retention/alignment. Directed tightness, renderer payload binding, and
+    mutation-family presence gained falsification coverage. C25 and stale public/docs wording
+    were corrected. All Haskell, Lean, axiom, and differential gates pass.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N112"
+    routing: child-of-N108
+    provenance: ai-executed
+    summary: "Replace the num-free workaround with shared production canonNum"
+  - turn: 1
+    type: experiment
+    id: "N113"
+    routing: child-of-N108
+    provenance: ai-executed
+    summary: "All parity and quarantine follow-up gates pass at 436/436 + 54/54"
+
+ai_actions:
+  - turn: 1
+    action: >
+      Ported canonNum to Lean, switched Driver.dcanon, added the numeric multi-blocked fixture
+      and goldens, and updated resolved numeric-caveat documentation.
+    provenance: ai-executed
+    files_changed:
+      - lean/Lara/Prop.lean
+      - lean/Lara/Driver.lean
+      - scripts/gen-corpus.hs
+      - fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp
+      - test/DifferentialSpec.hs
+      - ara/evidence/results/numeric_quarantine_parity.md
+      - ara/evidence/README.md
+  - turn: 1
+    action: >
+      Enforced .lara ArgId uniqueness and added production CLI coverage; added directed blocking
+      tightness, conditional-status payload binding, and quarantine-attacker mutation coverage.
+    provenance: ai-executed
+    files_changed:
+      - src/Lara/Elaborate.hs
+      - test/ElaborateSpec.hs
+      - test/CliSpec.hs
+      - test/BlockedSpec.hs
+      - src/Lara/MechReview.hs
+      - test/MechReviewSpec.hs
+      - test/MutationSpec.hs
+  - turn: 1
+    action: >
+      Corrected C25's unblocked-query scope, public Haddocks, and current numeric parity docs;
+      ran cabal test, lake build, the axiom audit, and the complete differential harness.
+    provenance: ai-executed
+    files_changed:
+      - ara/logic/claims.md
+      - ara/logic/solution/constraints.md
+      - src/Lara/Driver.hs
+      - src/Lara/AST.hs
+
+claims_touched:
+  - id: C12
+    action: advanced
+    provenance: ai-suggested
+  - id: C25
+    action: confirmed
+    provenance: user
+
+key_context:
+  - turn: 1
+    excerpt: >
+      User reported exact public-verdict divergence on valid numeric input and seven coverage or
+      documentation gaps, including duplicate ArgIds, positional production coverage, directed
+      tightness, renderer payload binding, mutation presence, C25 scope, and stale Haddocks.
+  - turn: 1
+    excerpt: >
+      The numeric regression uses attacked non-canonical supports plus unattacked exact supports.
+      Under canon=id each query appears safely justified; under canonNum the attacked supports are
+      part of the same claims, so both queries are evidence-blocked.
+
+open_threads:
+  - "The PR awaits reviewer re-review with this follow-up diff"
+
+ai_suggestions_pending: []

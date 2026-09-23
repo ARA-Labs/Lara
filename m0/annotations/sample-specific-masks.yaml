@@ -1,0 +1,153 @@
+artifact: sample-specific-masks
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C05
+    claim_type: causal
+    proposition_shape:
+      sketch: "component_necessary_for_best_avg_accuracy(smm, component, dataset_scope)"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >
+        The claim is a conjunction of three ablation sub-claims — necessity of fmask
+        (on feature-rich datasets), necessity of delta (on large-data datasets), and
+        three-channel > single-channel (esp. GTSRB, Flowers102). A nullary atom would
+        lose the per-component structure that each ablation arm independently checks;
+        instances are component in {fmask, delta, three_channel} with dataset_scope
+        qualifiers.
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Each ablated variant differs from full SMM only in the removed/reduced component (identical hyperparameters, seeds, datasets)"
+        - "Accuracy is measured identically across variants (same 11 datasets, mean ± std over 3 seeds)"
+        - "Observed accuracy degradation is attributable to the ablated component, not training noise"
+      supporting_experiments: [E05]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Are all four variants trained under identical hyperparameters, differing only in the ablated component?"
+        mandatory: true
+        status: met
+        basis: "E05 Setup ('same hyperparameters as E03; 3 random seeds') and Procedure step 1 defines the four variants as single-component edits of fin"
+      - cq: "Is seed variance reported so that variant gaps can be judged against noise?"
+        mandatory: true
+        status: met
+        basis: "E05 Metrics: 'mean ± std across 3 seeds' per dataset and on the 11-dataset average"
+      - cq: "Do the ablation arms cover every component the claim asserts is necessary (fmask, delta, channel count)?"
+        mandatory: true
+        status: met
+        basis: "E05 Procedure step 1: variants (i) only delta, (ii) only fmask, (iii) single-channel, (iv) full SMM"
+      - cq: "Are the dataset-class-conditional sub-claims (feature-rich vs large-data degradation) checked on named dataset subsets rather than only on the average?"
+        mandatory: false
+        status: met
+        basis: "E05 Procedure step 2 records per-dataset accuracy; Expected outcome names the subsets (CIFAR10/Flowers102/UCF101 vs CIFAR10/SVHN/GTSRB/SUN397)"
+      - cq: "Is the delta–fmask interaction tested beyond single-component removal (e.g., alternative combination operators for delta ⊙ fmask)?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E05 Procedure only removes components; no variant varies how delta and fmask are combined"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Only-fmask variant (no shared delta) averages 42.59% vs full SMM 52.53% across the 11 datasets"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N05 (Table 3)", "logic/experiments.md E05"]
+      - atom: "Single-channel f^s_mask averages 49.70% vs 52.53%; GTSRB 70.7% vs 80.4%, Flowers102 30.2% vs 38.7%"
+        provenance: observed
+        refs: ["trace/exploration_tree.yaml N07 (Table 3)", "logic/experiments.md E05"]
+      - atom: "Only-delta variant (no fmask) reduces accuracy on feature-rich datasets"
+        provenance: attested
+        refs: ["logic/claims.md C05 statement (i)", "logic/experiments.md E05 variant (i)"]
+      - atom: "Full SMM (shared delta + three-channel fmask) has the highest average accuracy of the four variants"
+        provenance: attested
+        refs: ["logic/claims.md C05 statement", "logic/experiments.md E05 Expected outcome"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design alternative (only fmask, no shared delta) whose measured failure is itself the ablation evidence for C05's delta-necessity arm — support, not an attack."
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "Rejected design alternative (single-channel mask) whose measured failure is the evidence for C05's three-channel arm — support, not an attack."
+    holes:
+      - "No numeric Table 3 cell for the only-delta arm appears in the trace; sub-claim (i) rests on the artifact's assertion"
+      - "No significance test that variant gaps exceed 3-seed noise (std reported but not compared)"
+      - "'Necessary' is asserted from one dataset suite and one backbone (ResNet-18); no cross-backbone ablation"
+    coverage_flags:
+      - "C05 bundles three conjunctive sub-claims scoped by informal dataset classes ('feature-rich', 'large-data'); the construct vocabulary has no typed representation for these qualitative dataset-class qualifiers"
+    uncertain: false
+    note: ""
+  - claim_id: C06
+    claim_type: comparative
+    proposition_shape:
+      sketch: "lower_cost(patch_wise, competitor, cost_metric, setup)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >
+        Instances: competitor in {bilinear, bicubic}, cost_metric in {pixel_accesses,
+        batch_time, needs_backprop}, setup = ResNet-18/50, batch 256, A100. A nullary
+        atom would lose the arithmetic inequality structure (0.151 < 0.602 < 2.408
+        ×10^6) that is mechanically re-checkable.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "All three interpolation methods upsample the same CNN mask outputs (H/2^l × W/2^l → H × W) on the same batch of 256 images and the same A100"
+        - "Pixel accesses are counted by one consistent convention across methods (4 neighbors bilinear, 16 bicubic, patch-constant patch-wise)"
+        - "Wall-clock timing conditions are equivalent across methods (mean ± std reported)"
+      supporting_experiments: [E06]
+    strict_certifier: domain-checker(pixel-access-count)
+    certifier_note: >
+      The pixel-access ordering is algorithmic, not empirical: per-output-pixel
+      neighbor counts (4 bilinear, 16 bicubic, 1 shared value per patch) follow from
+      the interpolation definitions, and the inequalities 0.151 < 0.602 < 2.408 (×10^6)
+      are arithmetic re-checks. The no-backprop property is a code-inspection fact
+      about the constant-within-patch upsampling. Wall-clock times remain empirical
+      and are not covered by the certifier.
+    critical_questions:
+      - cq: "Are all three methods measured on the same batch, hardware, and mask resolutions?"
+        mandatory: true
+        status: met
+        basis: "E06 Setup: batch of 256 images, single A100; Procedure step 1 applies each method to the same H/2^l × W/2^l → H × W upsampling"
+      - cq: "Is timing variance reported so the batch-time ordering exceeds noise?"
+        mandatory: true
+        status: met
+        basis: "E06 Metrics: time per batch mean ± std; reported stds (0.004/0.001/0.013) are far smaller than the gaps"
+      - cq: "Is the no-backprop property verified rather than merely asserted?"
+        mandatory: true
+        status: met
+        basis: "E06 Procedure step 4 explicitly verifies that patch-wise interpolation requires no gradients through the upsampling step (verification method not detailed)"
+      - cq: "Does the cheaper interpolation preserve downstream task quality (fair-comparison check)?"
+        mandatory: false
+        status: met
+        basis: "E03/E05 train SMM with patch-wise interpolation (l=3, patch 8) and it achieves the top accuracy, so efficiency is not bought with quality loss"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Pixel accesses: patch-wise 0.151×10^6 vs bilinear 0.602×10^6 vs bicubic 2.408×10^6"
+        provenance: observed
+        refs: ["logic/claims.md C06", "logic/experiments.md E06 Metrics"]
+      - atom: "Batch time (ResNet-18/50): patch-wise 0.026±0.004 s vs bilinear 0.062±0.001 s vs bicubic 0.195±0.013 s"
+        provenance: observed
+        refs: ["logic/claims.md C06", "logic/experiments.md E06 Metrics"]
+      - atom: "Patch-wise interpolation requires no backpropagation through the upsampling step"
+        provenance: attested
+        refs: ["logic/claims.md C06", "logic/experiments.md E06 Procedure step 4"]
+    attack_candidates:
+      - node: N05
+        decision: none
+        target: "n/a"
+        rationale: "Concerns the shared-delta ablation of the masking design; has no bearing on interpolation efficiency (C06)."
+      - node: N07
+        decision: none
+        target: "n/a"
+        rationale: "Concerns single- vs three-channel masks; has no bearing on interpolation efficiency (C06)."
+    holes:
+      - "The exploration tree has no node for E06 at all — the efficiency comparison leaves no trace-level provenance"
+      - "The pixel-access counting convention is not stated in the artifact; the certifier premise must be supplied externally"
+      - "Timing measured only on one A100; the wall-clock ordering is asserted per-setup but hardware generality is untested"
+    coverage_flags: []
+    uncertain: false
+    note: >
+      Claim scope is ResNet-18/50 numbers; E06 Setup also lists ViT-B32 but no ViT
+      figures appear in the claim, so the annotation keeps the narrower scope.

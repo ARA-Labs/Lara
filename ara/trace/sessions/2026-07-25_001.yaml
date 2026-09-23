@@ -1,0 +1,128 @@
+session:
+  id: "2026-07-25_001"
+  timestamp: "2026-07-25T00:00"
+  ended: "2026-07-25T14:05"
+  summary: "rit comparison hardened from analysis to source-verified evidence: C18 crystallized, §11 addendum + novelty row (d192047), the PR merged. Follow-up commit-path audit found five write-up-vs-code discrepancies (C19, §11.5); the PR's squash stranded that work, rebased + nitpicked onto the PR. Then C20 + §11.6: rit's formal verification is node-level only — the roll-up is a conditional guarantee over an untrusted edge set (missing-edge laundering)."
+
+events_logged:
+  - turn: 1
+    type: observation
+    id: null
+    routing: none
+    provenance: ai-executed
+    summary: "Boss-comment drafted articulating the rit/lara positioning (judges-claims vs judges-arguments, silent narrowing, composition points); positioning content, later grounded in docs — no separate record."
+  - turn: 2
+    type: experiment
+    id: N46
+    routing: direct
+    provenance: ai-executed
+    summary: "User hypothesis 'rit can only express numerical comparison' verified against rit's current source: five objects / six relations over log-extracted naturals, `by decide` grammar, own non-formalizability admission; confirmed with the ceiling relocated from Lean to the grounding interface + tactic portfolio."
+  - turn: 3
+    type: observation
+    id: O12
+    routing: staged
+    provenance: ai-suggested
+    summary: "Composition thesis staged: rit certificates fit the Lara.Strict opaque-certificate shape (leaf upgrade); lara grounded semantics answers rit's open honest-aggregation problem. No code depends on it yet."
+  - turn: 3
+    type: claim
+    id: C18
+    routing: crystallized
+    provenance: user-revised
+    summary: "C18 crystallized (empirical resolution + artifact commitment in the same turn): kernel-attestation verifiers are bounded by their grounding interface, not their kernel logic; paper claims enter through an unchecked defeasible narrowing."
+  - turn: 4
+    type: experiment
+    id: N47
+    routing: direct
+    provenance: ai-executed
+    summary: "User-directed code-vs-write-up audit of rit's shipping commit path: five advertised claims fail against code (not one Lean env; claim->claim DAG declared not kernel-read; K-tier unreachable; falsifiability gate uncalled; gate/* modules run over a cfg the push path never builds). Per-fact re-extraction + kernel sorry/rogue-axiom rejection do hold."
+  - turn: 4
+    type: observation
+    id: O13
+    routing: staged
+    provenance: user-revised
+    summary: "Staged the audit's interpretive finding (a verifier's guarantee is its gate's fixed point, weaker than its write-up here) and crystallized it same-turn to C19."
+  - turn: 4
+    type: claim
+    id: C19
+    routing: crystallized
+    provenance: user-revised
+    summary: "C19 crystallized (empirical resolution + artifact commitment): a kernel-attestation verifier's real guarantee is what its commit gate enforces, not its write-up; rit's aggregate guarantees are designed-but-unwired while its per-fact core holds."
+  - turn: 6
+    type: claim
+    id: C20
+    routing: crystallized
+    provenance: user-revised
+    summary: "C20 crystallized (verbal-affirmation + artifact-commitment): verified-node/declared-edge attestation graphs launder weak claims through omitted dependency edges; the roll-up is a conditional guarantee over an untrusted edge set, so node-level verification does not transfer to the composed artifact. Persisted as §11.6 + C20."
+
+ai_actions:
+  - turn: 2
+    action: "Read ../rit/src/rit/formal/{primitives,grammar}.py and notes/DESIGN.md; established rit's post-restructure layout and its implemented formal vocabulary; quoted source lines verbatim for number grounding."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 3
+    action: "Wrote the rit comparison addendum (expressible fragment, silent narrowing, shadow-AF, composition) and sharpened the rit row in docs/novelty-and-related-work.md §2; committed d192047 on user-created branch chore/update-comparison."
+    provenance: ai-executed
+    files_changed: ["docs/novelty-and-related-work.md"]
+  - turn: 4
+    action: "Pushed chore/update-comparison to origin and opened the PR (d192047 + 5307671)."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 4
+    action: "Read rit's live commit path (rit.py, action/push.py, admit/__init__.py, formal/{kernel,checker,uses,semantics,grammar,system}.py, gate/{solve,collision,grade}.py, grounding/{__init__,provenance}.py) + grep confirmations; wrote the rit commit-path audit plus a K-tier caveat; committed ba6c45e and pushed to the PR."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 5
+    action: "The PR merged into main (squash 29c7570) but captured only d192047+5307671; §11.5 (ba6c45e) + C19 capture (3692817) were stranded. Synced main, branched chore/comparison-nitpick, cherry-picked ba6c45e+3692817, added a doc-consistency nitpick (§4 K-tier row + 'deepest difference' prose forward-pointed to §11.5, since they asserted K-tier as fact), committed 2321a87, pushed, opened the PR."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 6
+    action: "Answered 'what does rit's formal verification mean' (verifies nodes not the graph; roll-up is a conditional guarantee over an untrusted edge set; missing-edge laundering; division of labor with lara). User affirmed; persisted as claim C20 on the PR."
+    provenance: ai-executed
+    files_changed: ["ara/logic/claims.md"]
+  - turn: 7
+    action: "The PR merged into main (squash a5328b5) but again stranded its final commit (0427cf7 = §11.6 + C20) — same partial-squash. Synced main, branched docs/comparison-formal-verification-meaning, cherry-picked 0427cf7 (clean; cc5307c), opened the PR with a note asking for a complete merge."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C18
+    action: created
+    turn: 3
+  - id: C19
+    action: created
+    turn: 4
+  - id: C20
+    action: created
+    turn: 6
+
+logic_revisions:
+  - turn: 3
+    entry: related_work.md (rit additional-citation line)
+    field: content
+    before: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction."
+    after: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction. Source-verified 2026-07-25 (C18): its world-facing fragment is five object kinds / six relations over log-extracted naturals discharged `by decide`, so paper claims enter through a silent defeasible narrowing LARA types; its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose open aggregation problem grounded semantics answers."
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: "rit entry updated from README-derived to source-verified; cross-ref to C18 and comparison doc §11."
+
+key_context:
+  - turn: 1
+    excerpt: "User: 'R&D is also a team sport, so we're not competing. We're supporting each other from different aspects... We're basically formalizing the agent-native research artifacts.' — frames every rit delta as complementarity, not rivalry; carried into the comparison doc's §11.4 composition framing."
+  - turn: 2
+    excerpt: "User: 'I feel like their approach can only express numerical comparison, right?' — the hypothesis C18 sharpens; confirmed for the implemented system, with the ceiling attributed to the grounding interface + auto-discharge portfolio rather than the kernel."
+  - turn: 4
+    excerpt: "User: 'when evaluating rit, you should not just say what it claims in their write up. I looking at the code think there is a little discrepancy.' — a first-person methodological directive (describe rit by what its gate enforces, not its prose) that became the core of C19; my audit found five discrepancies, not one."
+  - turn: 6
+    excerpt: "User: 'this summary is very good, did you write it down?' — verbal affirmation of the nodes-not-graph / missing-edge-laundering framing; the closure signal that crystallized C20 and prompted §11.6."
+
+open_threads:
+  - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
+  - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
+  - "The PR merged (squash a5328b5) — landed §11.5 + C19 + nitpick, but stranded its final commit (§11.6 + C20). RECURRING: both squash-merged before their last commit; §11.6 + C20 now on the PR (docs/comparison-formal-verification-meaning) — merge must capture cc5307c."
+  - "O12 (rit-lara composition) awaits a design commitment before crystallizing; its K-tier premise is now qualified by C19/N47 (K-tier designed but unwired in rit today)."
+  - "C19's generalization beyond rit (whether other kernel-attestation verifiers' gates under-enforce their write-ups) is argued from mechanism, not source-verified elsewhere."
+
+ai_suggestions_pending:
+  - "O12: the rit↔lara integration architecture (staged; K-tier premise now qualified by C19)."
+  - "C18's generalization beyond rit (EG-VAR and other kernel-attestation systems) is argued, not source-verified."
+  - "C19's generalization beyond rit is argued from mechanism, not source-verified elsewhere."

@@ -1,0 +1,33 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "ord-named-v1",
+    "backends": [
+      "ord@1"
+    ],
+    "theories": [
+      "sha256:ord-named-v1-theory-0"
+    ],
+    "artifact": "sha256:5656565656565656565656565656565656565656565656565656565656565656"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "num_lt(0.71, 0.74)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "label": "in"
+      }
+    ]
+  }
+}

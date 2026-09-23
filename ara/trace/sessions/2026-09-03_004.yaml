@@ -1,0 +1,198 @@
+session:
+  id: "2026-09-03_004"
+  date: "2026-09-03"
+  started: "2026-09-03T08:38"
+  last_turn: "2026-09-03T18:57"
+  turn_count: 2
+  summary: >
+    PW-T9 is implemented as a synchronized two-PR stack. The first PR freezes
+    first-leg-first partial-translation composition together with typed
+    structural-bridge composition, indexed paths, path coherence, and checked
+    path transport. The second PR adds applicability factorization, arbitrary-path
+    commuting triangles, explicit accepted-edge coherence, expanded witnesses,
+    durable documentation, and final Lean audit wiring. All findings from the
+    adversarial plan review are resolved, the executed plan is retired, and both
+    branch-specific gates pass.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N292"
+    routing: direct
+    provenance: ai-executed
+    summary: "PW-T9 plan checked against the issue, canonical design, landed PW0/T6 code, and Lean 4.32; six new gaps found."
+  - turn: 1
+    type: observation
+    id: "O125"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Admits equality does not compose or equate the outer accepted relation Frame.A."
+  - turn: 1
+    type: observation
+    id: "O126"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Direct agreement is binary despite arbitrary BridgePath being the milestone abstraction."
+  - turn: 1
+    type: observation
+    id: "O127"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Mid-path incomparability fixture uses raw SymMaps, not a typed bridge path."
+  - turn: 1
+    type: observation
+    id: "O128"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Negative witnesses omit the checked HasSupport judgments their comments claim."
+  - turn: 1
+    type: observation
+    id: "O129"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Required plan-file deletion is absent from the close-out task."
+  - turn: 2
+    type: decision
+    id: "N293"
+    routing: direct
+    provenance: user
+    summary: "Commit the reviewed PW-T9 contract as translation laws in the PR and typed path/triangle laws in the stacked PR."
+  - turn: 2
+    type: experiment
+    id: "N294"
+    routing: direct
+    provenance: ai-executed
+    summary: "Synchronized PW-T9 branches pass build, AxCheck coverage, and standard-axiom audit gates."
+  - turn: 2
+    type: observation
+    id: "O125"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Accepted-edge agreement now separates candidate-relation coherence from checker-tied applicability."
+  - turn: 2
+    type: observation
+    id: "O126"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Commutes and direct_transport_agrees now quantify over arbitrary BridgePath values."
+  - turn: 2
+    type: observation
+    id: "O127"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "The mid-path failure fixture now inhabits BridgePath and reaches comparison incomparability."
+  - turn: 2
+    type: observation
+    id: "O128"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Both negative triangle witnesses now carry the HasSupport judgments their prose names."
+  - turn: 2
+    type: observation
+    id: "O129"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "Plan retirement was executed and committed as an explicit close-out step."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Read the PW-T9 plan, landed PW0/T6 modules, the issue, and the canonical
+      composition design; ran a minimal Lean 4.32 elaboration probe for the
+      suspicious equality proof.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: >
+      Implemented and review-hardened the two-PR PW-T9 stack, synchronized the
+      first PR with main and the second with the first, opened the two
+      follow-up issues, retired the executed plan, and ran the
+      branch-specific Lean gates.
+    provenance: ai-executed
+    files_changed:
+      - "lean/Lara/PW/Compose.lean"
+      - "lean/Lara/Examples/PWCompose.lean"
+      - "lean/Lara.lean"
+      - "lean/AxCheck.lean"
+      - ".github/workflows/ci.yml"
+      - "docs/theory-pw-t9-path-composition.md"
+      - "docs/theory-pw-t6-structural-transport.md"
+      - "plans/2026-09-03-theory-pw-t9-path-composition.md (deleted)"
+
+claims_touched: [C48]
+
+logic_revisions:
+  - turn: 2
+    entry: "logic/solution/mechanization.md §11"
+    field: created
+    before: "(none — new architecture section)"
+    after: "T9 composes exact structural bridges along explicit paths"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Crystallizes O125 and O126; committed Lean declarations and the PR depend on the distinction."
+  - turn: 2
+    entry: "logic/solution/constraints.md#PW-T9-path-witness-constraint"
+    field: created
+    before: "(none — new constraint)"
+    after: "A path-level failure must be witnessed on a typed structural path."
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Crystallizes O127; gapPath and mid_path_translationUndefined are committed."
+  - turn: 2
+    entry: H16
+    field: created
+    before: "(none — new heuristic)"
+    after: "Require semantic witness types to carry the judgment their prose names"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Crystallizes O128; both negative triangle theorems now contain checked judgments."
+  - turn: 2
+    entry: H17
+    field: created
+    before: "(none — new heuristic)"
+    after: "Make close-out invariants executable plan steps"
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Crystallizes O129; commit 9e798df retires the executed plan before PR close-out."
+  - turn: 2
+    entry: C48
+    field: Conditions
+    before: >
+      Shown for a bridge-global, functional partial symbol translation
+      (predicate and constructor namespaces independent), a total leaf renaming,
+      question keys frozen across the bridge, and a canonicalizer shared by both
+      environments. Untested boundary: edge-indexed (world-dependent or
+      ambiguous) translation, partial leaf maps, bridges renaming question
+      vocabulary, attack correspondence (T8), and composition of bridges
+      (T9).
+    after: >
+      Shown for a bridge-global, functional partial symbol translation
+      (predicate and constructor namespaces independent), a total leaf renaming,
+      question keys frozen across the bridge, and a canonicalizer shared by both
+      environments. Untested boundary: edge-indexed (world-dependent or
+      ambiguous) translation, partial leaf maps, bridges renaming question
+      vocabulary, and attack correspondence (T8). Exact path composition
+      is now a separate T9 theorem package (Lara.PW.Compose;
+      ara/evidence/proofs/pw_t9_path_composition.md), not a remaining boundary of
+      this T6 claim.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: "Discharges the exact-composition boundary without changing the T6 contract or claim."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      The researcher requested a terse outside-voice review that reports only
+      issues missed by an earlier twelve-item review.
+  - turn: 2
+    excerpt: >
+      The researcher directed implementation of the approved PW-T9 plan as one PR
+      followed by a second PR on a new branch, and explicitly requested that the
+      resulting theory change be recorded in the ARA.
+
+open_threads:
+  - "Merge the first PR before its stacked dependent PR."
+  - "Tracks the deferred translation-traversal refactor."
+  - "Tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+
+ai_suggestions_pending: []

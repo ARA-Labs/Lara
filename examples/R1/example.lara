@@ -1,0 +1,41 @@
+# Example R1 — undeclared-leaf (rejected: spec class R1)
+#
+# Witnesses: the checker refuses a support term that references a leaf which is not in Γ. This is
+# a REJECTION, not a `gap`: an undeclared reference is ill-formed, whereas a gap is a well-formed
+# claim with empty complete support (E2). The support check (Check.hs stage 4) runs inferSupport
+# on a1's leaf term, looks e_missing up in Γ, finds nothing, and rejects with CE_R1 (MissingLeaf),
+# which maps to the wire class R1.
+#
+# Note the leaf is the ROOT of the argument, not a reconstructed premise: an unresolved *premise*
+# is an elaborator error (exit 2), whereas an undeclared *root leaf* passes through the elaborator
+# untouched (Elaborate.hs: `SLeaf l -> pure (SLeaf l)`) and is rejected by the checker as R1.
+#
+# This is R1 of the M4a coverage matrix (docs/worked-examples-plan.md §3): spec class R1.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact undeclared_ref at sha256:aaaa...
+policy empirical-v1
+use backends [nd@1]
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = unreviewed }
+
+# a1's support is a bare leaf `e_missing` — but no `leaf e_missing : …` is ever declared, so it is
+# absent from Γ. The elaborator carries the reference through; the checker rejects it R1.
+arg a1 : supports(c1) by leaf(e_missing)
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# REJECT — spec class R1 (leaf `e_missing` not in Γ; Check.hs stage 4 support, CE_R1 MissingLeaf).
+#   Exit code 1 (checker rejection). NOT a gap, NOT exit 2 (this is a checker verdict, not an
+#   elaborate/decode-boundary error).
+#
+# Teaching point: an undeclared reference and an unbuilt argument are different failures. R1 (this
+# file) references a leaf that does not exist — refused. E2 references nothing missing but never
+# assembles the argument — accepted with status gap. The calculus keeps them apart.

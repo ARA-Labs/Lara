@@ -1,0 +1,278 @@
+artifact: bbox
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null   # artifact has only 3 dead ends (N03, N06, N08); all classified for every sampled claim
+claims:
+  - claim_id: C02
+    claim_type: comparative
+    proposition_shape:
+      sketch: "cheaper_training(bbox_adapter_fullstep, azure_sft, factor=31.30, datasets={strategyqa, gsm8k})"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The headline 31.30x is an arithmetic derivative of four dollar cells; a nullary atom would hide the recheckable ratio structure and the per-dataset cost cells."
+    inference_scheme:
+      scheme: cost_accounting_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Both methods' costs are measured on the same datasets under the same pricing regime (gpt-3.5-turbo-1106 per-token pricing)."
+        - "Token consumption is tracked completely for both methods (E03 step 5)."
+        - "The cost reduction is not bought with an accuracy collapse (accuracy recorded under each regime, E03 step 7; dependency on C01)."
+        - "The aggregation rule producing the single 31.30x figure from per-dataset ratios is fixed and applied to both methods."
+      supporting_experiments: [E03]
+    strict_certifier: domain-checker(cost-ratio-arithmetic)
+    certifier_note: "Given the four attested dollar cells, the step '31.30x reduction' is a pure arithmetic re-check: mean(153.00/3.48, 216.50/11.58) = mean(43.97, 18.70) = 31.34 ~= 31.30. The dollar measurements themselves remain empirical/defeasible; only the ratio derivation is certified."
+    critical_questions:
+      - cq: "Are training costs for both methods computed under the same pricing snapshot and accounting method?"
+        mandatory: true
+        status: met
+        basis: "E03 Setup: 'Azure OpenAI API with gpt-3.5-turbo-1106 pricing; cost tracked via API token consumption statistics'; Procedure steps 1-5."
+      - cq: "Is accuracy under each cost regime recorded, so the cost comparison is not confounded by a quality drop?"
+        mandatory: true
+        status: met
+        basis: "E03 Procedure step 7 ('Record accuracy under each regime') and Metrics list accuracy alongside costs."
+      - cq: "Is the local GPU cost of adapter training (A100 listed in E03 Setup) included in the BBOX-ADAPTER training cost, or only Azure API token cost?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Procedure step 5 aggregates only 'total token consumption from Azure API'; the A100 adapter-training compute in Setup is never converted to dollars. Its omission leaves the total-cost premise unestablished but does not show the conclusion false."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "training_cost(bbox_fullstep, strategyqa) = $3.48"
+        provenance: attested
+        refs: ["logic/claims.md C02", "logic/experiments.md E03"]
+      - atom: "training_cost(bbox_fullstep, gsm8k) = $11.58"
+        provenance: attested
+        refs: ["logic/claims.md C02", "logic/experiments.md E03"]
+      - atom: "training_cost(azure_sft, strategyqa) = $153.00"
+        provenance: attested
+        refs: ["logic/claims.md C02", "logic/experiments.md E03"]
+      - atom: "training_cost(azure_sft, gsm8k) = $216.50"
+        provenance: attested
+        refs: ["logic/claims.md C02", "logic/experiments.md E03"]
+      - atom: "aggregation rule: 31.30x = mean of the two per-dataset training-cost ratios"
+        provenance: assumed
+        refs: ["logic/claims.md C02 ('approximately 31.30x')"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: n/a
+        rationale: "Rules out grey-box probability-based approaches — a rejected design alternative, not evidence bearing on the cost comparison."
+      - node: N06
+        decision: none
+        target: n/a
+        rationale: "Rules out MLE/MCMC EBM training — a rejected training design; no bearing on cost figures."
+      - node: N08
+        decision: none
+        target: n/a
+        rationale: "MLM-loss dead end concerns the loss ablation (C04), not the cost comparison."
+    holes:
+      - "GPU compute cost for adapter training is listed in Setup but never dollarized; the 31.30x ratio counts only API tokens for BBOX-ADAPTER."
+      - "The aggregation rule for the single 31.30x figure (mean of per-dataset ratios) is inferred, not stated."
+      - "Cost ratio is pinned to a single pricing snapshot (Nov 2023 gpt-3.5-turbo-1106); no sensitivity to pricing changes."
+    coverage_flags: []
+    uncertain: false
+    note: ""
+
+  - claim_id: C04
+    claim_type: causal
+    proposition_shape:
+      sketch: "loss_causes_accuracy_gain(nce_ranking, mlm, max_delta=10.10, cells={(strategyqa,0.1B),(gsm8k,0.3B)})"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim binds specific (dataset, adapter_size) cells to specific deltas; a nullary atom would lose the per-cell structure the falsification criterion quantifies over ('both StrategyQA and GSM8K under any adapter size')."
+    inference_scheme:
+      scheme: component_ablation
+      strict_or_defeasible: defeasible
+      premises:
+        - "Only the training objective (NCE vs MLM) varies between arms; adapter backbone, sizes, datasets, and inference procedure are held fixed (E05 step 1 vs step 2, 'full-step, k=3, standard settings')."
+        - "The MLM arm is a competent implementation of the alternative, not a strawman."
+        - "The observed deltas (+10.10, +3.05) exceed run-to-run variance."
+      supporting_experiments: [E05]
+    strict_certifier: domain-checker(delta-arithmetic)
+    certifier_note: "Given the four attested accuracy cells, the deltas are arithmetic re-checks: 71.62 - 61.52 = 10.10; 73.86 - 70.81 = 3.05. The accuracy measurements and the causal attribution to the loss function remain defeasible."
+    critical_questions:
+      - cq: "Is everything other than the loss function held fixed across the two arms?"
+        mandatory: true
+        status: met
+        basis: "E05 Procedure: NCE arm uses 'full-step, k=3, standard settings'; MLM arm differs only in training objective and scoring rule; same datasets and adapter sizes (steps 1-4)."
+      - cq: "Are runs repeated (seeds) with variance reported, so the +3.05% GSM8K gap exceeds noise?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E05 Procedure and Metrics report single accuracies per cell; no repetition or variance anywhere in experiments.md. Absence leaves the causal reading unestablished for the smaller gap, but nothing shown contradicts it."
+      - cq: "Is the MLM scoring rule (probability of one randomly masked word per beam candidate) a representative, tuned implementation of the MLM alternative?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E05 Setup/System describes exactly one MLM scoring variant; no tuning or alternative MLM scoring rules are explored."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "acc(nce, strategyqa, 0.1B) = 71.62"
+        provenance: attested
+        refs: ["logic/claims.md C04", "trace/exploration_tree.yaml N09", "Table 5"]
+      - atom: "acc(mlm, strategyqa, 0.1B) = 61.52"
+        provenance: attested
+        refs: ["logic/claims.md C04", "trace/exploration_tree.yaml N08", "Table 5"]
+      - atom: "acc(nce, gsm8k, 0.3B) = 73.86"
+        provenance: attested
+        refs: ["logic/claims.md C04", "Table 5"]
+      - atom: "acc(mlm, gsm8k, 0.3B) = 70.81"
+        provenance: attested
+        refs: ["logic/claims.md C04", "Table 5"]
+      - atom: "acc(nce, strategyqa, 0.3B) = 71.18 and acc(mlm, strategyqa, 0.3B) = 60.41 (consistency across sizes)"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N08 failure_mode"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: n/a
+        rationale: "Rejected grey-box approach; unrelated to the loss-function ablation."
+      - node: N06
+        decision: none
+        target: n/a
+        rationale: "Rules out MLE/MCMC as EBM training routes — a rejected design alternative motivating NCE, not an attack on any C04 premise or conclusion."
+      - node: N08
+        decision: none
+        target: n/a
+        rationale: "N08 is the losing arm of C04's own ablation; its numbers support C04's conclusion rather than conflict with it — rejected-alternative dead end, no edge."
+    holes:
+      - "No seed repetition or variance estimate; the GSM8K +3.05% gap could be within run noise."
+      - "MLM alternative tested in a single untuned configuration; 'NCE outperforms MLM' is established only for that instantiation."
+    coverage_flags: []
+    uncertain: false
+    note: "N08 and E05/N09 report the same measurement from failure and success perspectives; treated as one evidence source, not two."
+
+  - claim_id: C05
+    claim_type: generalization
+    proposition_shape:
+      sketch: "transfers_without_retraining(adapter_src=gpt35_turbo, target, avg_gain, datasets=3) for target in {davinci_002, mixtral_8x7b}"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: "The claim is implicitly universally quantified over target LLMs ('plug-and-play transfer to other black-box LLMs') but evidenced on exactly two instances; the per-target structure must survive in the atom."
+    inference_scheme:
+      scheme: cross_model_transfer_evaluation
+      strict_or_defeasible: defeasible
+      premises:
+        - "The adapter is frozen — trained once on gpt-3.5-turbo (E01) and applied with no retraining (E02 Setup: 'No retraining of adapter; direct plug-in')."
+        - "Base and adapted conditions for each target are evaluated on identical test sets with the stated protocols (E02 steps 2-5)."
+        - "The two targets are genuinely distinct from the source model (different provider generation / open-source MoE)."
+        - "The measured gain is attributable to the transferred adapter, not to the extra candidates sampled by adapted beam-search inference."
+      supporting_experiments: [E02]
+    strict_certifier: domain-checker(mean-delta-arithmetic)
+    certifier_note: "Given per-dataset base/adapted accuracy cells, the +6.85 and +4.50 average deltas are arithmetic re-checks (mean of three per-dataset deltas per target). The per-dataset cells themselves are empirical and, in this artifact, not itemized."
+    critical_questions:
+      - cq: "Is the adapter applied strictly without retraining or target-specific tuning?"
+        mandatory: true
+        status: met
+        basis: "E02 Setup ('No retraining of adapter; direct plug-in from E01') and Procedure step 1."
+      - cq: "Is each target's unadapted baseline measured under the same prompts and test sets as the adapted condition?"
+        mandatory: true
+        status: met
+        basis: "E02 Procedure steps 2-5: same three datasets, CoT prompts for base, adapted inference for plugged condition."
+      - cq: "Does the comparison control for the extra samples drawn by adapted inference (beam search k=3) — e.g. a self-consistency or no-adapter-beam baseline on the targets?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E02 Baselines list only 'davinci-002 (unadapted), Mixtral-8x7B (unadapted)'; no sampling-matched control. N13 alternatives mention self-consistency ('no improvement') but it is not run in E02. Absence leaves attribution to the adapter unestablished, not defeated."
+      - cq: "Is the tested scope (2 targets, 3 datasets) adequate for the claimed class 'other black-box LLMs'?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E02 Setup: only davinci-002 and Mixtral-8x7B; ScienceQA excluded with no reason given in E02."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "avg_delta(davinci_002, 3 datasets) = +6.85"
+        provenance: attested
+        refs: ["logic/claims.md C05", "logic/experiments.md E02"]
+      - atom: "avg_delta(mixtral_8x7b, 3 datasets) = +4.50"
+        provenance: attested
+        refs: ["logic/claims.md C05", "logic/experiments.md E02"]
+      - atom: "delta(target, dataset) > 0 for each of the 2x3 (target, dataset) cells"
+        provenance: assumed
+        refs: ["logic/claims.md C05 falsification criterion ('does not improve ... on any dataset')", "E02 Metrics (per-dataset delta specified but cells not reproduced in the artifact)"]
+      - atom: "adapter applied to targets is the E01 Combined-setting adapter, unmodified"
+        provenance: attested
+        refs: ["logic/experiments.md E02 Setup and Procedure step 1"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: n/a
+        rationale: "Grey-box dead end motivates the text-only design; it does not bear on transfer results."
+      - node: N06
+        decision: none
+        target: n/a
+        rationale: "Rejected EBM training route; no bearing on transferability."
+      - node: N08
+        decision: none
+        target: n/a
+        rationale: "MLM-loss dead end concerns the training objective, not cross-model transfer."
+    holes:
+      - "Per-dataset transfer deltas are not itemized in the artifact; only per-target averages are attested, so the falsification criterion (positivity on every dataset) rests on assumed leaves."
+      - "No sampling-matched control (beam/self-consistency without adapter) on the target models."
+      - "Two target models cannot establish the open-class claim 'other black-box LLMs'; GPT-4-class targets untested."
+    coverage_flags:
+      - "Open-class universal quantification: the conclusion ranges over 'other black-box LLMs' while evidence covers two named instances; the flat pred(args) proposition vocabulary encodes only the tested instances, with no construct to record claimed-class vs tested-set scope."
+    uncertain: false
+    note: ""
+
+  - claim_id: C06
+    claim_type: negative-result
+    proposition_shape:
+      sketch: "abs_diff_le(acc(ai_feedback, d), acc(ground_truth, d), 1.77) for all d in {strategyqa, gsm8k, truthfulqa, scienceqa}"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: "A bounded-difference (non-inferiority) claim: the epsilon bound and the per-dataset quantification are the checkable content; a nullary 'competitive' atom would erase both."
+    inference_scheme:
+      scheme: noninferiority_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "The two arms are identical except for positive-sample selection: ground-truth answer match vs GPT-4 judge (E01 steps 3-4)."
+        - "The AI Feedback arm uses no ground-truth labels (E01 step 4), so the comparison is genuinely label-free vs labeled."
+        - "The observed max gap (1.77%) and the falsification margin (5%) are meaningful relative to run-to-run variance."
+        - "Both arms are evaluated on the same test sets with the same metrics (E01 steps 6-7)."
+      supporting_experiments: [E01]
+    strict_certifier: domain-checker(bounded-diff-check)
+    certifier_note: "Given the Table 2 accuracy cells for both arms, 'differences <= 1.77% on any single dataset' is an algorithmic max-|diff| check over four dataset pairs; likewise the 5% falsification threshold. The cells themselves are empirical."
+    critical_questions:
+      - cq: "Are the two arms identical in training procedure except for the positive-sample selection mechanism?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 4: 'same as above but positive sample selection uses GPT-4 as judge'."
+      - cq: "Does the AI Feedback arm truly use no ground-truth labels (no leakage through the judge)?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 4: 'no ground-truth labels used'; judge criteria are coherency, reasonability, correctness, format."
+      - cq: "Is the equivalence margin justified against run variance (repeats, seeds, or confidence intervals)?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 reports single best-of-two-sizes numbers (step 7); no variance anywhere in experiments.md. A 1.77% max gap without noise bounds leaves 'competitive' unestablished rather than defeated."
+      - cq: "Does reporting 'best performance across 0.1B and 0.3B adapter sizes' (E01 step 7) bias the per-arm comparison (best-of-two selection per arm)?"
+        mandatory: false
+        status: unmet-gap
+        basis: "E01 Procedure step 7; the max-over-sizes is taken independently per variant, which can shrink or inflate apparent gaps."
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "max over 4 datasets of |acc(ai_feedback, d) - acc(ground_truth, d)| = 1.77"
+        provenance: attested
+        refs: ["logic/claims.md C06", "Table 2"]
+      - atom: "per-dataset accuracy pairs (ai_feedback, ground_truth) for StrategyQA, GSM8K, TruthfulQA, ScienceQA"
+        provenance: attested
+        refs: ["logic/experiments.md E01 Metrics", "Table 2"]
+      - atom: "ai_feedback arm trained with zero ground-truth labels"
+        provenance: attested
+        refs: ["logic/experiments.md E01 Procedure step 4"]
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: n/a
+        rationale: "Grey-box dead end is a rejected approach; irrelevant to the label-source comparison."
+      - node: N06
+        decision: none
+        target: n/a
+        rationale: "Rejected EBM training route; no bearing on AI-feedback vs ground-truth."
+      - node: N08
+        decision: none
+        target: n/a
+        rationale: "MLM-loss dead end concerns C04's ablation; both C06 arms use NCE."
+    holes:
+      - "No variance or repetition, so the <=1.77% gap and the 5% falsification margin are not calibrated against noise."
+      - "The 5% margin appears only in the falsification criterion, with no justification for why 5% (not, e.g., 2%) bounds 'competitive'."
+      - "Best-of-adapter-sizes reporting (E01 step 7) is a per-arm selection step not accounted for in the comparison."
+    coverage_flags: []
+    uncertain: false
+    note: "Classified as supported negative-result in the artifact's own terms ('no meaningful difference'); annotated as a non-inferiority claim with an explicit bound."

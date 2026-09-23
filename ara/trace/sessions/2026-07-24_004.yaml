@@ -1,0 +1,54 @@
+session:
+  id: "2026-07-24_004"
+  timestamp: "2026-07-24T15:23"
+  ended: "2026-07-24T15:23"
+  summary: "Replaced the temporary ND identity fixture with a proved executable replay adapter and an exact shared UTF-8 framed source-atom codec."
+
+events_logged:
+  - type: dead_end
+    id: N49
+    provenance: ai-executed
+    summary: "Removed native_decide from audited proof dependencies after it violated the standard-trio axiom policy."
+  - type: experiment
+    id: N50
+    provenance: ai-executed
+    summary: "Implemented and verified the concrete Lean/Haskell ND replay adapter, codec inverse, theory closure, and conformance matrices."
+  - type: heuristic
+    id: H01
+    provenance: ai-suggested
+    summary: "Factor the wire proof through one generic frame-list inverse."
+  - type: heuristic
+    id: H02
+    provenance: ai-suggested
+    summary: "Keep executable matrices separate from soundness-facing proofs."
+
+ai_actions:
+  - action: "Added closed Formula/Cert decoders, canonical Nat grammar, and universal arity/canonicality theorems."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/ND.lean"]
+  - action: "Implemented the UTF-8 framed Atom codec, proved its left inverse/injectivity, and built exact ND replay plus theory-closed backends."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Strict.lean"]
+  - action: "Replaced the temporary registry fixture with real ND resolution and added executable cross-language vectors and replay/decoder matrices."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+  - action: "Ported the exact wire format to Haskell, removed show . nf, tightened canonical indices, and expanded conformance properties."
+    provenance: ai-executed
+    files_changed: ["src/Lara/Strict/ND.hs", "test/StrictSpec.hs"]
+  - action: "Ran Lean build/AxCheck, Cabal build/tests, and diff-integrity gates."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C03
+    action: confirmed
+    provenance: ai-executed
+  - id: C05
+    action: confirmed
+    provenance: ai-executed
+
+open_threads:
+  - "Backend dependency reporting still needs the future Backend.uses/certDeps field."
+  - "The complete shared core S-expression codec remains distinct from this now-proved source Atom key codec."
+
+ai_suggestions_pending: []

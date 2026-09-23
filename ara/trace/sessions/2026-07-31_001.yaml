@@ -1,0 +1,174 @@
+session:
+  id: "2026-07-31_001"
+  date: "2026-07-31"
+  started: "2026-07-31T10:30"
+  last_turn: "2026-07-31T21:30"
+  turn_count: 2
+  summary: >
+    The PR (duplicate-report groups) review remediation, two rounds. Round 1
+    (N87): fixed the reviewer-reproduced .lara-door R9-evasion hole (R14 parity),
+    added the byte-identical R9 stderr diagnostic + differential anchor, made
+    rejectionClass total over R9, hardened coverage, corrected provenance docs.
+    Round 2 (N88): re-synced the Lean twin to the Haskell dangling-member
+    semantics (memberProps mapM, consistentB none⇒false, consistentB_iff
+    re-proved), added 4 ElaborateSpec validateGroups negatives, pinned R13-over-R9
+    stderr precedence, added 3 sibling malformed group fixtures (differential
+    negatives 9/9). All gates green both rounds. N87+N88 recorded; O21+O22
+    staged; C21 evidence extended twice.
+
+events_logged:
+  - turn: 1
+    type: experiment
+    id: "N87"
+    routing: direct
+    provenance: ai-executed
+    summary: >
+      Addressed all review findings; R9-evasion hole fixed (.lara R14
+      validation parity), R9 stderr diagnostic in both drivers + differential
+      anchor, rejectionClass total over R9, coverage + doc fixes; all gates green.
+  - turn: 1
+    type: observation
+    id: "O21"
+    routing: staged
+    provenance: ai-suggested
+    summary: >
+      Front-door invariant parity: a multi-entry trusted checker must enforce
+      every admission-tier invariant at each door (or a shared choke point); the
+      .lara path omitting R14 group validation let R9 be silently evaded.
+  - turn: 2
+    type: experiment
+    id: "N88"
+    routing: direct
+    provenance: ai-executed
+    summary: >
+      Second-round remediation (9c85c3d): Lean twin re-synced to Haskell
+      dangling-member semantics (consistentB_iff re-proved), validateGroups
+      negatives, R13-over-R9 stderr conjunct, 3 sibling malformed fixtures;
+      differential negatives 9/9, all gates green; 4 threads replied.
+  - turn: 2
+    type: observation
+    id: "O22"
+    routing: staged
+    provenance: ai-suggested
+    summary: >
+      Frozen-twin definitional parity: a semantic hardening of a mirrored
+      definition is incomplete until the twin definition + affected theorems are
+      updated — the divergence class is exactly the inputs upstream validation
+      makes unreachable, so no test goes red while the proofs mechanize obsolete
+      semantics.
+
+ai_actions:
+  - turn: 1
+    action: >
+      Added Elaborate.validateGroups (R14 group well-formedness on the .lara path,
+      mirroring Wire.checkGroupInvariants) + 4 located ElabError constructors;
+      defense-in-depth in Driver.groupConsistent (mapM: unresolvable member ⇒ conflict).
+    provenance: ai-executed
+    files_changed: ["src/Lara/Elaborate.hs", "src/Lara/Driver.hs"]
+  - turn: 1
+    action: >
+      Added groupConflictMessage (Haskell + Lean) + shared Driver.rejectionDiagnostics;
+      both CLI paths print it; extended scripts/differential.sh to byte-compare stderr
+      on reject-r9.sexp; new fixtures/malformed/group-dangling-member.sexp.
+    provenance: ai-executed
+    files_changed: ["src/Lara/Driver.hs", "lean/Lara/Driver.lean", "app/Main.hs", "scripts/differential.sh", "fixtures/malformed/group-dangling-member.sexp"]
+  - turn: 1
+    action: >
+      Made ExpectedJson.rejectionClass total over R9 (reuse Wire.rejectClassTag, now
+      exported); added GroupBoundaryStage + groupConflictDiagnostic so expectedJsonValue
+      renders the R9 boundary rejection directly instead of the unreachable rejectDiag.
+    provenance: ai-executed
+    files_changed: ["src/Lara/ExpectedJson.hs", "src/Lara/Wire.hs"]
+  - turn: 1
+    action: >
+      Test coverage: WireSpec group R14 decode matrix (8 cases); SyntaxSpec DeclGroup
+      round-trip + duplicate-reports=bogus negative; CheckSpec R13→R9 precedence,
+      quarantine arg+attack pruning over a rule-instance support term, 3-member
+      partial-agreement, multi-group independence, R9 stderr message pin;
+      WorkedExamplesSpec R9 expected.json.
+    provenance: ai-executed
+    files_changed: ["test/WireSpec.hs", "test/SyntaxSpec.hs", "test/CheckSpec.hs", "test/WorkedExamplesSpec.hs"]
+  - turn: 1
+    action: >
+      Doc/provenance corrections: AST GroupConflictMode haddock (drop-arg, not
+      Γ-removal/leaf-rule); Groups.lean quarantined_leaf_absent docstring; Wire
+      REJECTION grammar (+R9); plan wire format / N85 formulation / mechanization
+      theorem list; grammar §1.4 invariant + duplicate-reports closed-tag row.
+    provenance: ai-executed
+    files_changed: ["src/Lara/AST.hs", "lean/Lara/Groups.lean", "src/Lara/Wire.hs", "plans/2026-07-30-issue-38-duplicate-report-groups.md", "docs/lara-surface-grammar.md"]
+  - turn: 2
+    action: >
+      Lean twin parity (second-round finding): Groups.memberProps := mapM (leafProp)
+      (Option, none on unresolvable member), consistentB none ⇒ false, Consistent
+      restated (∃ resolved list + pairwise ≡); consistentB_iff re-proved;
+      mem_quarantined_iff / conflictReject_iff unchanged (treat consistentB opaquely).
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Groups.lean"]
+  - turn: 2
+    action: >
+      Coverage completion: 4 ElaborateSpec negatives pinning validateGroups' error
+      paths (duplicate id / repeated member / singleton / undeclared member); third
+      conjunct in prop_groupPrecedenceR13BeatsR9 (rejectionDiagnostics === [R13 line]);
+      3 sibling malformed fixtures → differential negatives 9/9. Commit 9c85c3d
+      pushed; replied in all 4 review threads.
+    provenance: ai-executed
+    files_changed: ["test/ElaborateSpec.hs", "test/CheckSpec.hs", "fixtures/malformed/group-duplicate-id.sexp", "fixtures/malformed/group-repeated-member.sexp", "fixtures/malformed/group-singleton.sexp"]
+
+claims_touched:
+  - id: C21
+    action: advanced
+    turn: 1
+  - id: C21
+    action: advanced
+    turn: 2
+
+logic_revisions:
+  - turn: 1
+    entry: C21
+    field: Proof
+    before: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), lean/Lara/Groups.lean, the PR]"
+    after: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), lean/Lara/Groups.lean, the PR]"
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: >
+      Confirming evidence only — the R9 stderr differential anchor and the closed
+      front-door evasion hole strengthen C21's grounding. Statement/Conditions/Status
+      unchanged (already supported); the routing model was never wrong, one front
+      door was under-enforced.
+  - turn: 2
+    entry: C21
+    field: Proof
+    before: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), lean/Lara/Groups.lean, the PR]"
+    after: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), lean/Lara/Groups.lean, the PR]"
+    signal: empirical-resolution
+    provenance: ai-suggested
+    note: >
+      Confirming evidence only — the mechanized twin now extensionally matches the
+      shipped Haskell definition on the dangling-member class, and every malformed
+      group shape is decode-parity-pinned end-to-end. Statement/Conditions/Status
+      unchanged.
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Review finding 1 (reproduced): via .lara a group with an undeclared member
+      accepted (exit 0, R9 evaded); the identical unit via .sexp exited 2 at the
+      codec boundary. The trusted checker's two front doors disagreed on the same
+      logical artifact — fixed by giving the .lara elaborator the same R14 checks.
+  - turn: 2
+    excerpt: >
+      Re-review resolved all 6 first-round threads (exploit re-reproduced as
+      fixed) but found the defense-in-depth had landed Haskell-only: Lean
+      consistentB still skipped missing members, so the frozen twins disagreed on
+      a class of units unreachable past both validated doors — "the Lean proofs
+      are supposed to carry soundness for these definitions, not the decoder
+      gating." Fixed by mirroring, not by documenting the divergence.
+
+open_threads:
+  - "The PR unmerged: C21 evidence + N87/N88 rest on the branch; second-round follow-ups addressed (9c85c3d, 4 threads replied) — awaiting re-review/merge."
+  - "O20 (three-tier rejection architecture), O21 (front-door invariant parity), O22 (frozen-twin definitional parity) staged, unpromoted — await reuse/affirmation or merge."
+  - "C21 untested boundary unchanged: groups spanning non-leaf occurrences, and interaction with strict-certificate leaves."
+
+ai_suggestions_pending:
+  - "O21: front-door invariant parity as a named methodological concept (staged, ai-suggested)."
+  - "O22: frozen-twin definitional parity as a working heuristic (staged, ai-suggested)."

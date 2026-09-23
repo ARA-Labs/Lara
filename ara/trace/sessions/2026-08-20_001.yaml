@@ -1,0 +1,154 @@
+session:
+  id: "2026-08-20_001"
+  date: "2026-08-20"
+  started: "2026-08-20T03:45"
+  last_turn: "2026-08-20T05:30"
+  turn_count: 1
+  summary: >
+    Executed the lara-syntax@0.7 surface-strictness batch end to end:
+    bare-leaf discharge/open parse errors, the sole `open q` hole spelling
+    with the `as` keyword retired, and a shadowed discharge target as a
+    hard AmbiguousDischarge. Migrated the ten affected corpus spellings in the
+    same commit as the restriction, proved acceptance-preservation and an empty
+    frozen-artifact diff across ten gates, wrote grammar Appendix F, and closed
+    a fall-through the issue had not named.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N196"
+    routing: direct
+    provenance: user
+    summary: "Ship as one removal-only surface release; no compatibility aliases since every .lara source is in-repo."
+  - turn: 1
+    type: experiment
+    id: "N197"
+    routing: direct
+    provenance: ai-executed
+    summary: "Acceptance-preserving on the frozen corpus: 0 of 120 discharge refs collide, 10 spellings in 7 of 109 files migrated, frozen-artifact diff empty, ten gates green."
+  - turn: 1
+    type: decision
+    id: "N198"
+    routing: direct
+    provenance: ai-suggested
+    summary: "Extended D1's totality-with-error discipline to setArgAssurance, the sibling the issue did not name."
+  - turn: 1
+    type: observation
+    id: "O76"
+    routing: crystallized
+    provenance: ai-suggested
+    summary: "A rejection rule is only as strong as its weakest sibling helper -> H15 via artifact-commitment (commit 20a5bb8)."
+  - turn: 1
+    type: observation
+    id: "O77"
+    routing: staged
+    provenance: ai-executed
+    summary: "Namespace scan + frozen pathspec diff proves a surface restriction acceptance-preserving without re-measuring; source-tree re-pins are a separate fact from semantic movement."
+
+ai_actions:
+  - turn: 1
+    action: "Implemented in the parser: Either-returning arg-body folds with no catch-all, `open q` as the sole hole spelling, `as` removed from the grammar vocabulary, printer updated, and all ten corpus spellings plus every test-side spelling migrated in the same commit."
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Syntax.hs"
+      - "src/Lara/Examples.hs"
+      - "docs/lara-surface-grammar.md"
+      - "test/SyntaxSpec.hs"
+      - "test/CliSpec.hs"
+      - "test/ThetaInferenceSpec.hs"
+      - "corpus-units/bam/C05/unit.lara"
+      - "corpus-units/fre/C01/unit.lara"
+      - "corpus-units/rebench-restricted_mlm/C14/unit.lara"
+      - "corpus-units/rebench-triton_cumsum/C09/unit.lara"
+      - "examples/rebuttal-replay/round0/example.lara"
+      - "examples/rebuttal-replay/round1/example.lara"
+      - "examples/rebuttal-replay/round2/example.lara"
+  - turn: 1
+    action: "Implemented the shadowed-discharge change: added AmbiguousDischarge, retyped UnresolvedDischarge's final field String -> ArgRef, and routed both discharge payload forms through one refMatches-based resolveDischargeRef. Verified by mutation - collapsing the resolver back to leaf-preference fails three distinct pins."
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Elaborate/Error.hs"
+      - "src/Lara/Elaborate/Internal.hs"
+      - "test/ElaborateSpec.hs"
+      - "test/CliSpec.hs"
+  - turn: 1
+    action: "Wrote grammar Appendix F (F.1 scope through F.5 migration), restated current-surface pointers at @0.7 across spec/README/plans/Lean roots while leaving historical @0.6 mentions intact, and recorded the source-tree re-pins in the freeze checklist."
+    provenance: ai-executed
+    files_changed:
+      - "docs/lara-surface-grammar.md"
+      - "docs/spec.md"
+      - "docs/rejection-surface.md"
+      - "docs/m5-freeze-checklist.md"
+      - "docs/engineering-plan.md"
+      - "docs/mechanization-plan.md"
+      - "docs/worked-examples-plan.md"
+      - "docs/m4a-checklist.md"
+      - "README.md"
+      - "bundles/README.md"
+      - "corpus-units/LOWERING.md"
+      - "lean/Lara.lean"
+      - "lean/Lara/Presentation.lean"
+      - "lean/README.md"
+      - "src/Lara/SupportTerm.hs"
+  - turn: 1
+    action: "Ran the full plan-section-7 gate set on the final tree: 428 property tests, presentation parity 73 rows, differential 581 pass / 56 negatives, admission 20/20, walking-skeleton golden, byte-identical replay, tamper, lake build, axiom audit with zero sorry, and the frozen-artifact pathspec diff against origin/main."
+    provenance: ai-executed
+    files_changed: []
+  - turn: 1
+    action: "Retired the executed plan file after moving its durable content into docs/."
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-20-lara-syntax-0.7-strictness-batch.md"
+
+claims_touched: []
+
+logic_revisions:
+  - turn: 1
+    entry: "concepts.md: Critical-question obligation and hole"
+    field: Notation
+    before: "`discharge q with w_q` | `open q as o`"
+    after: "`discharge q with w_q` | `open q`"
+    signal: terminology-drift
+    provenance: ai-suggested
+    note: "The two-identifier spelling is a parse error as of @0.7; the notation taught a form the language no longer accepts."
+  - turn: 1
+    entry: "concepts.md: Critical-question obligation and hole"
+    field: Boundary conditions
+    before: >
+      "Complete" means policy-relative: all premises and critical questions of an
+      instantiated scheme are discharged or reported as holes. Not mechanical
+      completeness of a scientific argument.
+    after: >
+      "Complete" means policy-relative: all premises and critical questions of an
+      instantiated scheme are discharged or reported as holes. Not mechanical
+      completeness of a scientific argument. A hole carries exactly one
+      identifier: 6.1 reads its obligation name *as* the question it leaves
+      open, so `open q` names that question once (`lara-syntax@0.7`, grammar
+      Appendix F.3; the retired `open q as o` form let an author write a second
+      name nothing downstream read).
+    signal: terminology-drift
+    provenance: ai-suggested
+    note: "Records the one-identity fact that motivated the hole-spelling restriction, which the concept had never stated."
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Independent spec review of the parser commit found the D1 totality
+      discipline incomplete: setArgAssurance still carried `inst _ = inst`. The
+      issue named only its two siblings, so the helper whose rejection already
+      worked was the one left resting on a parser-side convention. Fixed in the
+      same release rather than deferred.
+  - turn: 1
+    excerpt: >
+      The plan listed lean/Lara/Presentation.lean:47 as a stale @0.5 pointer.
+      It is not - that line is a historical label naming which surface version
+      introduced which identifier newtype, and is correct as written. The real
+      current-surface pointers in the Lean tree were Presentation.lean:5 and
+      :40 plus Lara.lean:5, the last of which the plan did not list at all.
+
+open_threads:
+  - "Follow-up stale-pointer sweep after merge, re-grepping for surviving @0.6 current-surface pointers (the d5b53f4 precedent)."
+  - "O77 staged: whether the namespace-scan + frozen-pathspec-diff pair generalizes into a standing procedure for future surface restrictions."
+
+ai_suggestions_pending:
+  - "H15 was crystallized on artifact commitment, not user affirmation; provenance stays ai-suggested until the researcher endorses or reverts it."

@@ -1,0 +1,91 @@
+artifact: ftrl
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C01
+    claim_type: negative-result
+    proposition_shape:
+      sketch: "final_perf_leq(vanilla_ft, from_scratch, env, forgetting_far_states)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a comparison between two training conditions (vanilla
+        fine-tuning vs. from scratch) per environment, with a causal attribution
+        (forgetting of FAR-state behavior). A nullary atom would collapse the
+        comparison and lose the per-environment instantiation that the three
+        experiments actually check.
+    inference_scheme:
+      scheme: controlled_comparison
+      strict_or_defeasible: defeasible
+      premises:
+        - "Vanilla fine-tuning and training from scratch are run under matched conditions (same algorithm, environment, budget) differing only in initialization"
+        - "Final performance is measured with the same metric for both conditions in each environment"
+        - "FAR-state performance under vanilla fine-tuning is directly measured and shown to collapse (Room 7 success rate, per-stage success, per-level score), grounding the 'due to FPC' attribution"
+        - "The three environments (NetHack, Montezuma's Revenge, RoboticSequence) are representative of 'most practical scenarios'"
+      supporting_experiments: [E01, E02, E03]
+    strict_certifier: none
+    certifier_note: ""
+    critical_questions:
+      - cq: "Is a training-from-scratch baseline actually run in each environment, under the same algorithm and budget as fine-tuning?"
+        mandatory: true
+        status: met
+        basis: "E01 Procedure step 4(a), E02 Procedure step 4(a), E03 Procedure step 4(a); Baselines sections of all three"
+      - cq: "Is the collapse of FAR-state behavior directly measured (not just inferred from aggregate return)?"
+        mandatory: true
+        status: met
+        basis: "E02 step 5 (Room 7 success rate every 5M steps); E03 step 5 (per-stage success rates); E01 end-of-training trajectory metrics"
+      - cq: "Are results reported over multiple seeds with uncertainty for every environment?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01 Setup: 5 seeds; E03 Setup: 20 seeds, 90% CIs; E02 states no seed count or interval — the Montezuma comparison is unestablished at the reported rigor, not defeated"
+      - cq: "Was the from-scratch baseline given equally careful hyperparameter tuning as the fine-tuning runs?"
+        mandatory: false
+        status: unmet-gap
+        basis: "No experiment documents per-condition tuning effort; E01–E03 Setup fix hyperparameters without stating how they were selected per condition"
+      - cq: "Do three environments license the scope 'most practical scenarios'?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E01–E03 cover exactly three environments; nothing in experiments.md samples or argues representativeness of the broader class"
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "NetHack: vanilla fine-tuning collapses to ~1K average return, far below the frozen pre-trained model (~5K)"
+        provenance: attested
+        refs: ["trace N06 (Figure 3a, Table 4, Table 5)", "E01 Expected outcome"]
+      - atom: "RoboticSequence: vanilla fine-tuning and training from scratch achieve indistinguishable overall success, with FAR stages collapsing to 0% success within 100K steps"
+        provenance: attested
+        refs: ["trace N11 (Figure 3c, Figure 7, Figure 8)", "E03 Expected outcome"]
+      - atom: "Montezuma's Revenge: vanilla fine-tuning's Room 7 success rate drops sharply in the first 20M steps before the agent re-reaches Room 7"
+        provenance: attested
+        refs: ["trace N09 (Figure 3b, Figure 6)", "E02 Expected outcome / step 5"]
+      - atom: "Montezuma's Revenge: all fine-tuning methods, including vanilla, end above training from scratch in final return"
+        provenance: attested
+        refs: ["E02 Expected outcome"]
+    attack_candidates:
+      - node: N08
+        decision: none
+        target: "n/a"
+        rationale: "Rejected mitigation variant (EWC deteriorating on NetHack) bears on retention-method claims (C04), not on whether vanilla fine-tuning fails; no edge to C01."
+      - node: N10
+        decision: none
+        target: "n/a"
+        rationale: "KS failing on Montezuma's Revenge is a rejected-method finding that feeds C05's method-selection argument; it neither conflicts with C01's conclusion nor attacks its comparison scheme or leaves."
+      - node: N13
+        decision: none
+        target: "n/a"
+        rationale: "Same as N10 for RoboticSequence: documents a limitation of KS under state coverage gap; irrelevant to the vanilla-FT-vs-scratch conclusion of C01."
+    holes:
+      - "Scope premise open: 'most practical scenarios' is asserted from three environments with no representativeness argument"
+      - "The 'comparable to or worse than scratch' relation is not uniform across the evidence: E02 expects vanilla FT to finish above scratch in final return, so the scratch-comparison leg rests on E01/E03 while E02 supports only the FAR-forgetting leg"
+      - "Seed count and uncertainty reporting for the Montezuma comparison (E02) are unspecified"
+      - "Matched tuning/compute budget for the from-scratch baseline is not documented in any experiment"
+    coverage_flags:
+      - "Majority quantification over an open class ('in most practical scenarios') has no direct construct: the atom can only be instantiated per environment, and no vocabulary expresses a graded 'most' over an unenumerated benchmark population"
+    uncertain: false
+    note: >-
+      Negative-result reading: the claim's conclusion is the absence of net
+      fine-tuning benefit under vanilla RL, established by controlled
+      comparison against scratch plus mechanism evidence (FAR-state collapse).
+      All three dead ends in the trace concern retention-method failures, so
+      none attacks C01; the tree contains 3 dead ends total, well under the
+      15-node cap.

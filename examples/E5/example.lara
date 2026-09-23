@@ -1,0 +1,173 @@
+# Example E5 — contested beyond rebut, and a gap amid attacks
+#
+# Witnesses: the remaining empty cells of the status × attack matrix. E3/B produce `contested`
+# only from a mutual-REBUT 2-cycle; here the same grounded `undec` fixpoint is reached through
+# each of the other two attack kinds, plus a gap claim coexisting with a unit that carries
+# attacks. Three independent (M, D) contexts on empirical-v2:
+#
+#   * CONTESTED via UNDERMINE (context _v): two evidence leaves with contrary propositions
+#     (generalizes / not_generalizes, declared in both directions) yield two leaf arguments that
+#     attack completeness locks into a mutual undermine 2-cycle; one of them also undermines the
+#     experiment's external_validity leaf, dragging the support argument to undec.
+#   * CONTESTED via UNDERCUT (context _w): a shift_report undercuts the experiment, a
+#     miscalibration_report undercuts the shift_report, and the circular exception pair of
+#     empirical-v2 lets the shift_report undercut the audit back — an undercut-native 2-cycle.
+#     Both cycle edges are voluntary declarations: exceptions do not participate in the
+#     completeness scan (contrast context _v, where the symmetric contrary pair mandates both).
+#   * GAP (context _g): a claim with no assembled argument stays `gap` even though the unit is
+#     saturated with attacks — gap is about missing support, not about conflict.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact resnet_suite at sha256:e5e5...
+policy empirical-v2
+use backends [nd@1]
+
+# ===============================================================================================
+# CONTEXT V — contested via a mutual UNDERMINE 2-cycle
+# ===============================================================================================
+
+claim c_v
+  nl      = "Method M_v improves accuracy on distribution D_v"
+  formal  = improves(M_v, accuracy, D_v)
+  binding = { author = alice, audit-status = reviewed }
+
+leaf ev1 : reports(exp_v, effect(M_v, accuracy, D_v, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/v.csv#row=mean]
+
+leaf ev2 : randomized(exp_v)
+  kind       = attested
+  provenance = user
+  refs       = [paper_v.pdf#sec=4]
+
+leaf ev3 : powered(exp_v)
+  kind       = attested
+  provenance = user
+  refs       = [paper_v.pdf#sec=4]
+
+leaf ev4 : generalizes(M_v, accuracy, D_v)
+  kind       = attested
+  provenance = user
+  refs       = [paper_v.pdf#sec=5]
+
+# Two contrary robustness findings of equal standing: neither side defeats the other.
+leaf ev_ng : not_generalizes(M_v, accuracy, D_v)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [robustness_v.pdf#appendix=C]
+
+leaf ev_g : generalizes(M_v, accuracy, D_v)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [replication_v.pdf#sec=6]
+
+arg a_v : supports(c_v) by controlled_experiment(M_v, accuracy, D_v, exp_v)
+  discharge randomization     with ev2
+  discharge adequate_power    with ev3
+  discharge external_validity with ev4
+
+arg m_ng : challenges(ev4) by leaf(ev_ng)
+arg m_g  : challenges(ev_ng) by leaf(ev_g)
+
+# Both cycle edges are MANDATED by attack completeness (the generalizes / not_generalizes
+# contrary is declared in both directions and both conclusions are present as arguments);
+# m_ng's edge into a_v is the voluntary attack that makes the cycle matter for c_v.
+undermine m_ng a_v.external_validity.leaf
+undermine m_ng m_g.leaf
+undermine m_g m_ng.leaf
+
+# ===============================================================================================
+# CONTEXT W — contested via a mutual UNDERCUT 2-cycle
+# ===============================================================================================
+
+claim c_w
+  nl      = "Method M_w improves accuracy on distribution D_w"
+  formal  = improves(M_w, accuracy, D_w)
+  binding = { author = bob, audit-status = reviewed }
+
+leaf ew1 : reports(exp_w, effect(M_w, accuracy, D_w, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/w.csv#row=mean]
+
+leaf ew2 : randomized(exp_w)
+  kind       = attested
+  provenance = user
+  refs       = [paper_w.pdf#sec=4]
+
+leaf ew3 : powered(exp_w)
+  kind       = attested
+  provenance = user
+  refs       = [paper_w.pdf#sec=4]
+
+leaf ew4 : generalizes(M_w, accuracy, D_w)
+  kind       = attested
+  provenance = user
+  refs       = [paper_w.pdf#sec=5]
+
+# The shift monitor's report and its calibration certificate.
+leaf ew_rs : reports_shift(mon_w, M_w, accuracy, D_w)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [monitor_w.log#line=1042]
+
+leaf ew_cal : calibrated(mon_w)
+  kind       = attested
+  provenance = user
+  refs       = [monitor_w.pdf#sec=2]
+
+# The audit that finds the monitor miscalibrated.
+leaf ew_aud : audits(aud_w, M_w, accuracy, D_w)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [audit_w.pdf#sec=4]
+
+arg a_w : supports(c_w) by controlled_experiment(M_w, accuracy, D_w, exp_w)
+  discharge randomization     with ew2
+  discharge adequate_power    with ew3
+  discharge external_validity with ew4
+
+arg w_shift : challenges(external_validity(a_w)) by shift_report(M_w, accuracy, D_w, mon_w)
+  discharge calibration with ew_cal
+
+arg w_aud : challenges(calibration(w_shift)) by miscalibration_report(M_w, accuracy, D_w, aud_w)
+
+# All three undercuts are voluntary (no contrary pair is involved); the last two form the
+# undercut-native 2-cycle licensed by empirical-v2's circular exception pair.
+undercut w_shift a_w.rule
+undercut w_aud w_shift.rule
+undercut w_shift w_aud.rule
+
+# ===============================================================================================
+# CONTEXT G — gap: a claim with no assembled argument, in a unit full of attacks
+# ===============================================================================================
+
+claim c_g
+  nl      = "Method M_g improves accuracy on distribution D_g"
+  formal  = improves(M_g, accuracy, D_g)
+  binding = { author = carol, audit-status = unreviewed }
+
+status c_v
+status c_w
+status c_g
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# Arguments in declaration order (all complete):
+#   a_v     (0) -> undec  (LUndec; sole attacker m_ng is undec)
+#   m_ng    (1) -> undec  (LUndec; 2-cycle with m_g)
+#   m_g     (2) -> undec  (LUndec; 2-cycle with m_ng)
+#   a_w     (3) -> undec  (LUndec; sole attacker w_shift is undec)
+#   w_shift (4) -> undec  (LUndec; 2-cycle with w_aud)
+#   w_aud   (5) -> undec  (LUndec; 2-cycle with w_shift)
+# Claim statuses:
+#   c_v -> contested  (support a_v is undec — via an UNDERMINE from the cycle)
+#   c_w -> contested  (support a_w is undec — via an UNDERCUT from the cycle)
+#   c_g -> gap        (no complete support at all)
+#
+# Teaching point: `contested` is not a rebut artifact — any attack kind that carries undec into
+# a support argument produces it. And `gap` is orthogonal to conflict: c_g sits untouched in a
+# unit whose every other argument is under attack.

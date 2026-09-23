@@ -1,0 +1,39 @@
+# GitHub's "Cite this repository" button reads this file. The button exports
+# the preferred-citation below (the paper); the top-level fields describe the
+# software itself.
+cff-version: 1.2.0
+message: >-
+  If you use Lara in your work, please cite the paper below
+  (or use this repository's "Cite this repository" button).
+title: Lara
+authors:
+  - family-names: He
+    given-names: Yifeng
+  - family-names: Liu
+    given-names: Jiachen
+type: software
+version: 0.1.0
+date-released: '2026-09-22'
+license: MIT
+repository-code: https://github.com/ARA-Labs/Lara
+abstract: >-
+  Lara is a small language for writing down the argument behind a research
+  claim — the evidence, the reasoning steps, and the caveats — so that a
+  program can check the argument automatically.
+keywords:
+  - argumentation
+  - proof-carrying code
+  - formal verification
+  - research automation
+preferred-citation:
+  type: article
+  title: 'Beyond Natural Language: An Agent-Native Language for Autonomous Science'
+  authors:
+    - family-names: He
+      given-names: Yifeng
+    - family-names: Liu
+      given-names: Jiachen
+  year: 2026
+  identifiers:
+    - type: url
+      value: https://arxiv.org/abs/2609.25421

@@ -1,0 +1,61 @@
+# Paper B of the D3 agreement map (issue #64), as an INDEPENDENTLY CHECKABLE
+# artifact (#303).
+#
+# An independent replication of paper A's comparison, at the SAME setting. On
+# its own this artifact accepts and its single claim `c_neg` is **justified**:
+# `pb` is unattacked here, because paper A's argument is not nameable from this
+# file.
+#
+# Under `../map.laramap` the two papers meet. Their conclusions —
+# `better(apt, cofi, accuracy, roberta_mnli_s60)` and `not_better(...)` on the
+# identical atoms — are a declared contrary instance, so the cross-member
+# saturation generates BOTH rebut edges and both claims become **contested**.
+# That is the honest verdict for an unresolved same-setting disagreement, and
+# here it is reached across two separately authored artifacts rather than
+# inside one file.
+#
+# The `binding` rationale below describes only this paper's own atom choice; the
+# cross-paper A3 alignment assertion is map-owned (`../map.laramap`).
+#
+# The paper contents and the declared `artifact` identity are illustrative
+# reconstructions, as everywhere in `examples/`: `sha256:bbbb...` is a
+# placeholder identity the author declares, not a checksum of these bytes.
+#
+# Write-up: docs/demos/d3-agreement-map.md.
+
+artifact paper_b_replication at sha256:bbbb...
+policy agreement-v1
+use backends [nd@1]
+
+claim c_neg
+  nl      = "An independent replication finds APT is not better than Prune+Distill (CoFi) in accuracy on RoBERTa-base MNLI at 60% sparsity"
+  formal  = not_better(apt, cofi, accuracy, roberta_mnli_s60)
+  binding = { author = bob, audit-status = reviewed,
+              rationale = "A3: this paper's own atom choice; the map manifest records the cross-paper alignment" }
+
+leaf b_e1 : reports(paperB_exp1, compares(apt, cofi, accuracy, roberta_mnli_s60, null))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperB/table_1.csv#row=mnli-60]
+
+leaf b_e2 : matched_setup(apt, cofi, paperB_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperB.pdf#sec=3-protocol]
+
+leaf b_e3 : valid_measurement(accuracy, paperB_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperB.pdf#sec=3-metrics]
+
+leaf b_e4 : powered(paperB_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperB.pdf#sec=3-power]
+
+arg pb : supports(c_neg) by null_comparison(apt, cofi, accuracy, roberta_mnli_s60, paperB_exp1)
+  discharge baseline_parity      with b_e2
+  discharge measurement_validity with b_e3
+  discharge adequate_power       with b_e4
+
+status c_neg

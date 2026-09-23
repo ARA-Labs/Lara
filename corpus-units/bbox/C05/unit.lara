@@ -1,0 +1,61 @@
+# Corpus unit bbox/C05 — gap (generalization; cross_model_transfer_evaluation -> controlled_comparison)
+#
+# Source: m0/annotations/bbox.yaml C05 (generalization, double-annotated; corpus pin 62e9b54).
+# Headline: the frozen BBOX-ADAPTER (trained on gpt-3.5-turbo) plugs into davinci-002 (+6.85 avg
+# over 3 datasets) and Mixtral-8x7B (+4.50) with no retraining.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Family map: cross_model_transfer_evaluation -> controlled_comparison. The binding comparison
+#     is adapted vs unadapted on the tested targets; S = bbox_adapter, B = unadapted_target,
+#     Q = transfer_accuracy, D = new_black_box_llms (the two named targets). The open-class
+#     quantifier "other black-box LLMs" (annotation coverage_flag) is not expressible in flat
+#     pred(args) vocabulary — recorded here; the atom encodes only the tested instances.
+#   * The annotation's mandatory CQ3 is unmet-gap: the adapted arm draws extra beam-search samples
+#     (k=3) with no sampling-matched control, so the +6.85/+4.50 gains are not validly attributable
+#     to the transferred adapter alone. Mapped onto policy-mandatory measurement_validity -> unmet.
+#     An open mandatory obligation is an IncompleteArgument rejection -> E2-style gap.
+#   * CQ1 (no retraining) and CQ2 (same prompts/test sets per target) discharge baseline_parity;
+#     that leaf is on the page. The optional scope-adequacy CQ4 is omitted.
+#   * variance_reported also has no leaf (only per-target averages, no per-dataset cells or repeats)
+#     — a second policy-mandatory blocker; measurement_validity is the annotation-grounded driver.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact bbox at sha256:bb06e592cef6
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c05
+  nl      = "The frozen BBOX-ADAPTER trained on gpt-3.5-turbo plugs into davinci-002 (+6.85 avg over 3 datasets) and Mixtral-8x7B (+4.50) with no retraining; per-dataset cells and a sampling-matched control are absent"
+  formal  = better(bbox_adapter, unadapted_target, transfer_accuracy, new_black_box_llms)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+leaf e1 : reports(e02, compares(bbox_adapter, unadapted_target, transfer_accuracy, new_black_box_llms, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C05, logic/experiments.md#E02]
+
+leaf e2 : matched_setup(bbox_adapter, unadapted_target, e02)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-Procedure-steps-1-5]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: measurement_validity(transfer_accuracy, e02) has no honest leaf — the
+# adapted arm's extra beam-search samples are never controlled (CQ3, unmet-gap) — and
+# variance_reported(e02) has none either (per-target averages only). Both are policy-mandatory, so
+# the claim's complete-support set is empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

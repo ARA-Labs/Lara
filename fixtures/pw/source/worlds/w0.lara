@@ -1,0 +1,32 @@
+# World w0 of the pw-lara context: p is supported by its second report l3,
+# which a duplicate-report group ties to l1. The two reports agree, so the
+# group quarantines nothing and p is justified.
+artifact pw-lara-w0 at sha256:pw-lara-w0
+policy pw-lara
+use backends []
+
+claim c1
+  nl      = "p holds"
+  formal  = p
+  binding = { author = author, audit-status = reviewed }
+
+leaf l1 : p
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf l2 : q
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf l3 : p
+  kind       = observed
+  provenance = user
+  refs       = []
+
+group g1 = [l1, l3]
+
+arg a1 : supports(c1) by leaf(l3)
+
+status c1

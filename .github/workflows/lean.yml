@@ -1,0 +1,55 @@
+name: Lean
+
+# Optional, reviewer-triggered. The required Haskell workflow gates the Haskell
+# compiler only (docs/ci-scope-decision.md). This one runs the Lean gate on a PR
+# when a reviewer adds the `lean` label — typically because the PR changes
+# proofs, or review found something that should be mechanized — and re-runs on
+# every later push while the label stays. It can also be started by hand:
+#
+#   gh workflow run lean.yml --ref <branch>
+#
+# Each step is a make target, so `make lean-gate` locally runs the same thing.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [labeled, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  lean:
+    name: Lean (lake build)
+    # On a PR: only while the `lean` label is present, and not when some other
+    # label is added to a PR that already carries it.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (contains(github.event.pull_request.labels.*.name, 'lean') &&
+       (github.event.action != 'labeled' || github.event.label.name == 'lean'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan (Lean toolchain manager)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain "$(cat lean/lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Cache lake build
+        uses: actions/cache@v4
+        with:
+          path: lean/.lake
+          key: ${{ runner.os }}-lake-${{ hashFiles('lean/lake-manifest.json', 'lean/lean-toolchain') }}
+          restore-keys: ${{ runner.os }}-lake-
+
+      - name: Build
+        run: make lean-build
+
+      - name: PW file-driven authoring and execution
+        run: make pw-example
+
+      - name: Axiom audit (no `sorry`, only standard axioms)
+        run: make axiom-audit
+
+      - name: Semantics registry coverage and regression tests
+        run: make semantics-registry semantics-registry-test

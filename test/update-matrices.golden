@@ -1,0 +1,46 @@
+addLeaf grounded core matrix
+reachable=4/16
+source \ target | justified                        | refuted                      | both                   | gap                  
+justified       | R addLeaf_justified_to_justified | U* addLeaf_core_fixed        | U* addLeaf_core_fixed  | U* addLeaf_core_fixed
+refuted         | U* addLeaf_core_fixed            | R addLeaf_refuted_to_refuted | U* addLeaf_core_fixed  | U* addLeaf_core_fixed
+both            | U* addLeaf_core_fixed            | U* addLeaf_core_fixed        | R addLeaf_both_to_both | U* addLeaf_core_fixed
+gap             | U* addLeaf_core_fixed            | U* addLeaf_core_fixed        | U* addLeaf_core_fixed  | R addLeaf_gap_to_gap 
+U* requires AddLeafFresh and admission of the new metadata key.
+
+tighten grounded core matrix
+reachable=13/16
+source \ target | justified                        | refuted                        | both                        | gap                       
+justified       | R tighten_justified_to_justified | R tighten_justified_to_refuted | R tighten_justified_to_both | R tighten_justified_to_gap
+refuted         | R tighten_refuted_to_justified   | R tighten_refuted_to_refuted   | R tighten_refuted_to_both   | R tighten_refuted_to_gap  
+both            | R tighten_both_to_justified      | R tighten_both_to_refuted      | R tighten_both_to_both      | R tighten_both_to_gap     
+gap             | U* nonInstance_gap_fixed         | U* nonInstance_gap_fixed       | U* nonInstance_gap_fixed    | R tighten_gap_to_gap      
+U* requires NonInstanceUpdate restrictiveness and retained-Gamma premises.
+
+addAttack grounded core matrix
+reachable=10/16
+source \ target | justified                          | refuted                          | both                          | gap                    
+justified       | R addAttack_justified_to_justified | R addAttack_justified_to_refuted | R addAttack_justified_to_both | U additive_no_gap_entry
+refuted         | R addAttack_refuted_to_justified   | R addAttack_refuted_to_refuted   | R addAttack_refuted_to_both   | U additive_no_gap_entry
+both            | R addAttack_both_to_justified      | R addAttack_both_to_refuted      | R addAttack_both_to_both      | U additive_no_gap_entry
+gap             | U addAttack_gap_fixed              | U addAttack_gap_fixed            | U addAttack_gap_fixed         | R addAttack_gap_to_gap 
+
+addInstance grounded core matrix
+reachable=10/16
+source \ target | justified                            | refuted                             | both                                | gap                     
+justified       | R addInstance_justified_to_justified | U* addInstance_sink_status_monotone | U* addInstance_sink_status_monotone | U additive_no_gap_entry 
+refuted         | R addInstance_refuted_to_justified   | R addInstance_refuted_to_refuted    | R addInstance_refuted_to_both       | U additive_no_gap_entry 
+both            | R addInstance_both_to_justified      | U* addInstance_sink_status_monotone | R addInstance_both_to_both          | U additive_no_gap_entry 
+gap             | R addInstance_gap_to_justified       | R addInstance_gap_to_refuted        | R addInstance_gap_to_both           | R addInstance_gap_to_gap
+U* requires InstanceSinkPremises freshness and complete support.
+
+additive public rows under CleanBase (via additive_public_eq_core)
+addLeaf reachable=4/20 (conditional exclusions); evidenceBlocked=0; addAttack reachable=10/20; evidenceBlocked=0; addInstance reachable=10/20; evidenceBlocked=0
+addLeaf conditional exclusions require AddLeafFresh and admission of the new metadata key.
+
+tighten five-valued public matrix under CleanBase
+reachable=13/20; evidenceBlocked=3
+source \ target | justified                                   | refuted                                | both                                    | gap                               | evidence-blocked                             
+justified       | R tighten_public_justified_to_justified     | R tighten_public_justified_to_defeated | R tighten_public_justified_to_contested | R tighten_public_justified_to_gap | R tighten_public_justified_to_evidenceBlocked
+refuted         | U tighten_public_justified_source_justified | R tighten_public_defeated_to_defeated  | U tighten_public_defeated_not_contested | R tighten_public_defeated_to_gap  | R tighten_public_defeated_to_evidenceBlocked 
+both            | U tighten_public_justified_source_justified | R tighten_public_contested_to_defeated | R tighten_public_contested_to_contested | R tighten_public_contested_to_gap | R tighten_public_contested_to_evidenceBlocked
+gap             | U tighten_public_gap_fixed                  | U tighten_public_gap_fixed             | U tighten_public_gap_fixed              | R tighten_public_gap_to_gap       | U tighten_public_gap_fixed                   

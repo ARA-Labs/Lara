@@ -1,0 +1,72 @@
+# Corpus unit rebench-restricted_mlm/C07 — gap (mandatory-CQ-unmet path; batch: rebench)
+#
+# Source: m0/annotations/rebench-restricted_mlm.yaml C07 (implementation-behavioral,
+# code_inspection; corpus pin 62e9b54). Headline: the single use of division lives outside the
+# forward pass — forward() of ConvMLMWithBiBigrams normalises only by multiplying with the
+# inverse_stds buffer, and the EMA division 1/std sits in update_inverse_stds, called only from
+# the training loop after optimizer.step.
+# (The upstream artifact labels this scheme `Evidence` rather than `Proof`; the YAML annotation
+# is standard.)
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * code_inspection -> corpus-v1 `code_inspection(P, Src, Insp)`; conclusion
+#     code_property(tao_solution, division_outside_forward).
+#   * version_match is MET: annotation CQ4 — E05 provenance instantiates ConvMLMWithBiBigrams at
+#     tao_train.py:73-75 and the result loss 4.6 is the official reference (O07). Folded into e2.
+#   * path_coverage (covers_paths) is UNMET-gap: annotation CQ1 (is update_inverse_stds reachable
+#     from forward?) is met for that ONE path, but CQ3 (is the EMA division really the SINGLE use
+#     of division?) is unmet — the shipped file also holds init-time log-odds divisions
+#     (:25,56,62,93) and a Python-int floor division pad=(k-1)//2 inside conv1d_same that runs
+#     during forward, so the inspection does not exhaustively cover division sites. The 'single
+#     use' wording is literally false at file granularity. A mandatory policy CQ with no honest
+#     discharging leaf is an IncompleteArgument rejection, so NO complete code_inspection(...)
+#     instance is declarable: E2-style unit, `gap` on empty support.
+#   * Annotation CQ2 (does the task no-division rule scope to forward only?) is ALSO unmet-gap
+#     (mandatory): the rule text is never quoted in-artifact; legality rests solely on the author
+#     code comment. It has no clean corpus-v1 home (an interpretation obligation), and it only
+#     reinforces the gap already forced by path_coverage.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rebench-restricted_mlm at sha256:d7b11148b949
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c07
+  nl      = "The single use of division lives outside the forward pass: forward() of ConvMLMWithBiBigrams normalises only by multiplying with the inverse_stds buffer, and the EMA division 1/std sits in update_inverse_stds, called only from the training loop after optimizer.step"
+  formal  = code_property(tao_solution, division_outside_forward)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the source inspection of forward() (multiply-only) and update_inverse_stds
+# (the EMA division, called from tao_train.py:123), per line-range in the annotation.
+leaf e1 : inspects(e04, tao_solution, division_outside_forward)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C07, src/kernel/tao_solution.py#239-297, src/kernel/tao_solution.py#363-367, src/kernel/tao_train.py#123, logic/experiments.md#E04, trace/exploration_tree.yaml#O06-O07]
+
+# version_match: the inspected module is the exact code that produced the loss-4.6 reference.
+leaf e2 : version_matched(tao_solution, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05, src/kernel/tao_train.py#73-75, trace/exploration_tree.yaml#O07]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: covers_paths(e04, tao_solution) has no honest leaf — the inspection
+# does not exhaustively cover the division sites (init-time :25,56,62,93; the floor division in
+# conv1d_same runs during forward), so the 'single use' property is unestablished at file
+# granularity — and corpus-v1 makes path_coverage mandatory. The no-division-rule scope (CQ2) is
+# likewise unquoted. Complete support is empty.)
+
+status c07
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c07 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

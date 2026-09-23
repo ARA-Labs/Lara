@@ -1,0 +1,66 @@
+# Corpus unit all-in-one/C05 — gap (unmet mandatory coverage CQ, annotator-optional)
+#
+# Source: m0/annotations/all-in-one.yaml C05 (descriptive, case_demonstration; corpus pin
+# 62e9b54). Headline: guided diffusion (Algorithm 1, c(x)=x-u, s(t)=1/sigma(t)^2) lets Simformer
+# condition on intervals at inference without retraining — constrained Hodgkin-Huxley
+# posterior-predictive energy stays below the 10% quantile threshold and voltage traces stay
+# consistent with observations (E05, Fig 7).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * case_demonstration lowers through the measurement family (scheme family map); conclusion
+#     holds(interval_conditioning, simformer). instrument_validity is annotated met (constrained
+#     samples quantitatively satisfy the interval constraint, energy below the 10% quantile). The
+#     optional confound_control is met (an unconstrained-posterior baseline shows the constraint
+#     has effect) and is retained as a present leaf.
+#   * coverage is annotated UNMET-GAP: E05 is the sole supporting experiment (single simulator,
+#     Hodgkin-Huxley). The annotator rated this CQ OPTIONAL ("shown on more than one system?");
+#     corpus-v1 makes coverage (covers_scope) mandatory (uniform-standard rule,
+#     adaptive-pruning/C03), so the policy call wins and the mandatory obligation has no
+#     discharging leaf. No complete measurement instance is declarable — E2-style gap.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact all-in-one at sha256:62b9c8db2538
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c05
+  nl      = "Guided diffusion (Algorithm 1, c(x)=x-u, s(t)=1/sigma(t)^2) lets Simformer condition on intervals at inference without retraining: constrained Hodgkin-Huxley posterior-predictive energy stays below the 10% quantile threshold and voltage traces stay consistent with observations"
+  formal  = holds(interval_conditioning, simformer)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: E05's guided-diffusion demonstration (energy threshold, voltage consistency),
+# mixed-grain in the annotation and folded into refs.
+leaf e1 : observes(e05, interval_conditioning, simformer)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05, Fig-7, trace/exploration_tree.yaml#N13-N14]
+
+leaf e2 : valid_instrument(interval_conditioning, e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Expected-outcome, Algorithm-1]
+
+leaf e3 : confounds_controlled(e05)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-Baselines]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: covers_scope(e05, simformer) has no honest leaf — the capability is
+# shown on one simulator only — and corpus-v1 makes that obligation mandatory. Complete support
+# is empty.)
+
+status c05
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

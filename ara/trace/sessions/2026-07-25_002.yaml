@@ -1,0 +1,42 @@
+session:
+  id: "2026-07-25_002"
+  timestamp: "2026-07-25T04:02"
+  ended: "2026-07-25T04:27"
+  summary: "Remediated every actionable review finding while preserving exact ND wire compatibility."
+
+events_logged:
+  - type: experiment
+    id: N58
+    provenance: ai-executed
+    summary: "Made six Lean matrices build-enforced and centralized the cross-language A/N/S/C/L frame vocabulary in closed sum types."
+  - type: heuristic
+    id: H02
+    provenance: ai-suggested
+    summary: "Refined executable-matrix guidance: Bool fixtures require #guard even when soundness theorems remain separate."
+
+ai_actions:
+  - action: "Added #guard commands for all six atom-key, decoder, and replay conformance matrices and removed meaningless axiom prints for raw Bool definitions."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Examples.lean", "lean/AxCheck.lean"]
+  - action: "Introduced closed FrameTag vocabularies with shared render/parse paths in Lean and Haskell, plus parse/render inverse checks."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Strict.lean", "src/Lara/Strict/ND.hs", "test/StrictSpec.hs"]
+  - action: "Corrected the retired show . nf description in the TCB documentation."
+    provenance: ai-executed
+    files_changed: ["README.md", "CLAUDE.md"]
+  - action: "Ran lake build, the standard-trio AxCheck audit, cabal build/test, and git diff integrity checks."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C03
+    action: confirmed
+    provenance: ai-executed
+  - id: C05
+    action: confirmed
+    provenance: ai-executed
+
+open_threads:
+  - "The two GitHub inline review threads remain unresolved until the local changes are committed/pushed and thread replies are explicitly authorized."
+
+ai_suggestions_pending: []

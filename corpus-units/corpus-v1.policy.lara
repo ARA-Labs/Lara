@@ -1,0 +1,479 @@
+# corpus-v1 — the shared claim-support policy for the T2 corpus units (tracker #48)
+#
+# One policy for all 60 units lowered from the M0 sample (`m0/sample.tsv`): a review policy is a
+# uniform standard, so per-claim disagreement with a policy call is recorded in the unit's header
+# comment, never by forking the policy (docs/m5-freeze-checklist.md).
+#
+# Vocabulary provenance: one defeasible rule per scheme family from the M0 aggregation
+# (`m0/annotation-summary.md` §2 — 22 raw annotator scheme names normalize to 9 families), plus
+# null-conclusion duals only where the sample's negative-result claims support through them
+# (null_comparison, null_benchmark, null_correlation). Critical questions are the recurring
+# per-family themes of the 249 annotated CQs; a CQ is mandatory here iff the annotators
+# predominantly marked that theme mandatory (e.g. variance/seeds: 27 mandatory vs 16 optional
+# annotations, so `variance_reported` is mandatory — the corpus's most systematic gap, 39% of
+# mandatory CQs unmet, surfaces as `gap` statuses exactly as the gap-vs-defeater design intends).
+#
+# Design notes:
+#   * All scheme-family rules are defeasible. The strict-flavored annotations (analytic proofs,
+#     arithmetic table re-checks) lower through `analytic_argument` by default; the smallest
+#     useful strict adapter — the rational-arithmetic re-check (`ra@1`, summary §2, issue #57) —
+#     now exists as Family 10 below, and `adaptive-pruning/C04` migrates its derived-arithmetic
+#     leg onto it. The remaining strict-flavored units await their own certifier backends.
+#   * Quantitative content (thresholds, ratios, table cells) lives in `nl` strings, bindings, and
+#     leaf refs — formal atoms use constants except for Family 10's certificate-checked
+#     atoms. Both production drivers now share `canonNum`; Family 10 retains canonical
+#     spellings (`50`, not `50.0`) as a presentation convention.
+#   * Contrary pairs are declared symmetric ONLY where the sample genuinely concludes both sides
+#     (comparison, benchmark, correlation). Attack completeness is arg-conclusion-level, so a
+#     symmetric pair forces mutual rebut edges whenever both sides appear in one unit — units
+#     that instantiate a dual must declare the forced edges or land R-missing-conflict.
+#   * Every rule carries at least one exception (component_ablation carries two:
+#     confounded_ablation and within_noise), so each family's undercut is licensed: the four dead-end
+#     undercuts (m0 annotations: nanogpt_chat_rl N604, fix_embedding N603/N759, ttma N03) and the
+#     unmet-defeater CQs lower as leaf-rooted challenge args concluding these exception atoms.
+#
+# Scheme variable conventions: S = subject system/method, B = baseline/comparand, Q = metric,
+# D = dataset/domain/scope, C = component/factor, P = property, Exp = experiment/evidence source,
+# Prf = proof/derivation, Src = source tree, Insp = inspection record, X/Y = correlated variables.
+
+policy corpus-v1
+
+# --- Signature (spec §2, §3.4; lara-core@0.2, issue #89) -------------------------------------------
+# The many-sorted proposition signature the checker enforces as R2 at stage 2. It is GENERATED,
+# not hand-written: `scripts/infer-sigma.hs` runs union-find over every predicate and constructor
+# argument occurrence in this policy and all 60 corpus units, and emits the FINEST consistent
+# partition. Regenerate with
+#
+#   cabal exec -- runghc --ghc-arg=-package --ghc-arg=lara scripts/infer-sigma.hs \
+#     corpus-units/corpus-v1.policy.lara corpus-units/*/*/unit.lara
+#
+# Sort names are deliberately OPAQUE (S1, S2, …). Naming them is a separate, tracked pass: whether
+# `imagenet_val` is a `Dataset` or an `EvalSetting` is precisely the possible-worlds question this
+# corpus does not yet answer, and an opaque name presumes no answer. The finest partition also
+# maximizes the corpus sites the `wrong-arg-sort` mutation operator can act on, which is what keeps
+# R2 non-vacuous on real data rather than only on hand-built examples.
+#
+# The 187 nullary constants are the dominant term: every bare identifier argument is a `TCon k []`,
+# so each needs a `con k : Sort` line and none of them is discoverable by grepping for `name(`.
+
+sort S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25, S26, S27
+
+con ablated_config(S8, S3) : S27
+con ablation_effect(S8, S3, S5, S9) : S2
+con absent : S21
+con accuracy_increase : S19
+con accurate_conditional_estimation : S22
+con activation_discrepancy_fitness : S8
+con adam : S4
+con adam_lbfgs : S3
+con adaptation_accuracy : S5
+con adaptation_collapse : S5
+con adversarial_noise : S8
+con advi : S4
+con ai_feedback : S3
+con all_conditionals : S3
+con allegro_kuka_hard : S6
+con antmaze_total_score : S5
+con appendix_b_arith : S12
+con apt : S3
+con apt_llama2_7b : S3
+con arbitrary_conditionals : S23
+con asymptotic_success : S5
+con avg_accuracy : S5
+con avg_bleu : S18
+con avg_seq_length : S18
+con azure_sft : S4
+con bam : S3
+con bandwidth_bound_floor : S10
+con batch_of_18_generations : S17
+con batch_size : S8
+con bbox_adapter : S3
+con bbox_datasets : S6
+con benchmark_result(S3, S14, S15, S9) : S2
+con benchmark_tasks : S6
+con best_accuracy : S5
+con bilinear : S4
+con c2st : S5
+con cfg : S3
+con cfg_lowers_sampling_entropy : S10
+con cfg_negative_prompting : S24
+con cma_es_prompt_tta : S3
+con cma_es_tta : S3
+con coco_captioning : S6
+con compares(S3, S4, S5, S6, S7) : S2
+con componet : S3
+con convergence_speed : S5
+con correlation(S18, S19, S20, S21) : S2
+con cross_family_return : S15
+con cross_run_scoring : S1
+con ddpm_tan : S3
+con dependent_coupling : S3
+con dexpbt : S4
+con division_outside_forward : S17
+con e01 : S1
+con e02 : S1
+con e03 : S1
+con e04 : S1
+con e05 : S1
+con e06 : S1
+con e08 : S1
+con em05 : S1
+con embedding_outlier_removal : S3
+con embedding_preservation : S5
+con entropy_only_fitness : S8
+con eval_suite : S6
+con falcon7b : S11
+con fare : S3
+con favorable : S7
+con ffhq_sunglasses_10shot : S6
+con fid : S5
+con fid_improvement : S5
+con final_return : S5
+con fix_embedding_scoring : S11
+con fixed_logit : S4
+con flan_t5_configs : S6
+con foa : S3
+con follower_entropy_reg : S8
+con forecasting_f1 : S5
+con forgetting_configs : S6
+con fre_all : S3
+con from_scratch : S4
+con full_config(S8, S3) : S27
+con full_finetune : S4
+con functional_adapter : S8
+con gc_baselines : S14
+con gpt2_dpo : S11
+con gpt2_medium : S6
+con ground_truth_labels : S4
+con hand_rolled_reciprocal_nan : S10
+con human_preference(S24, S25, S26, S7) : S2
+con ic_bc_components : S4
+con ill_conditioning : S5
+con imagenet1k : S6
+con imagenet256_inpainting : S6
+con imagenet_val : S6
+con incremental_accuracy : S5
+con inference_time_scaling : S5
+con instances(S22, S23, S9) : S2
+con interval_conditioning : S10
+con kurtosis_salience : S8
+con lbcs : S3
+con lbcs_eps_convergence : S13
+con linear_param_growth_componet : S13
+con lm_eval_9task : S6
+con low_loss_necessary_for_accuracy : S10
+con malt_runs : S1
+con masknet_bound_derivation : S12
+con min_l2re : S5
+con minimal_weight_change : S10
+con model_dataset_conditions : S6
+con model_dataset_pairs : S20
+con nce_loss : S8
+con negative : S9
+con new_black_box_llms : S6
+con no_op : S4
+con non_iid_shift : S6
+con nonrobust_shared_clip : S3
+con npe : S4
+con null : S7
+con on_demand_expansion : S8
+con openllm_avg : S5
+con original_clip : S14
+con parallel_env_scaling : S8
+con patch_wise : S3
+con performance_saturation : S5
+con pinn_benchmarks : S11
+con pinn_pdes : S6
+con positive : S9
+con posterior_c2st : S5
+con posterior_only : S4
+con ppo : S3
+con present : S21
+con probabilistic : S4
+con prognet : S4
+con prune_distill_cofi : S4
+con pyloric_budget_le_200k : S6
+con pytorch_two_cumsum : S11
+con quadratic_regression_minimizer : S13
+con reasoning_accuracy : S5
+con rebench_reference : S14
+con reorientation_performance : S5
+con repair_planned_not_shipped : S17
+con representation_with_prior : S3
+con residual_component : S3
+con restricted_primitive_mlm : S11
+con reward_diversity : S8
+con rice_mixed_tighter_bound : S13
+con rl_envs : S6
+con roberta_mnli_sst2 : S6
+con robust_clip : S4
+con rust_codecontests_solver : S16
+con sapg : S3
+con sar : S4
+con sc_baseline : S4
+con score_cell(S27, S5, Num) : S2
+con sema : S3
+con sf : S4
+con simformer : S11
+con simformer_dense : S3
+con smm : S3
+con smm_resnet_a100 : S6
+con strategyqa_gsm8k : S6
+con subtract_toxic : S3
+con superblock_atomic_pipeline : S3
+con system_prompt_following : S26
+con tao_solution : S16
+con targeted_attack_robustness : S15
+con tasks_up_to_300 : S6
+con tecoa : S4
+con theorem2_proof : S12
+con theorem_3_1 : S12
+con three_channel_mask : S8
+con threshold : S4
+con timeout_checkpoint_pathology : S10
+con top5_accuracy : S5
+con tournament_counting_derivation : S12
+con tournament_judge_call_optimal : S13
+con toxicity_at_matched_ppl : S5
+con train_cost_at_parity : S5
+con trainable_logit : S3
+con training_cost : S5
+con training_resource_cost : S5
+con transfer_accuracy : S5
+con transfer_vulnerability : S5
+con triton_cumsum_score : S15
+con tsnpe : S4
+con tsnpse_vp : S3
+con unadapted_target : S4
+con uncoupled_baseline : S4
+con upsampling_cost : S5
+con valid_summary_stats : S5
+con vanilla : S25
+con vanilla_2x_flops : S4
+con vanilla_ft : S3
+con vi_benchmarks : S6
+con zero_shot_accuracy : S5
+con zero_shot_return : S5
+
+pred assumptions_established(S12)
+pred better(S3, S4, S5, S6)
+pred biased_sample(S22, S23)
+pred blinded(S1)
+pred code_property(S16, S17)
+pred confounded_ablation(S8, S3, S5)
+pred confounded_comparison(S3, S4, S5, S6)
+pred confounding_variable(S18, S19, S20)
+pred confounds_controlled(S1)
+pred contributes(S8, S3, S5)
+pred correlated(S18, S19, S20)
+pred covers_paths(S1, S16)
+pred covers_scope(S1, S11)
+pred derives(S12, S13)
+pred environment_mismatch(S3, S14, S15)
+pred fixed_protocol(S3, S14, S1)
+pred generalizes_to(S22, S23)
+pred holds(S10, S11)
+pred holds_analytically(S13)
+pred independent_samples(S1)
+pred inspects(S1, S16, S17)
+pred isolated(S8, S1)
+pred matched_environment(S1)
+pred matched_protocol(S1)
+pred matched_setup(S3, S4, S1)
+pred measurement_artifact(S10, S11)
+pred not_better(S3, S4, S5, S6)
+pred not_correlated(S18, S19, S20)
+pred not_performs(S3, S14, S15)
+pred observes(S1, S10, S11)
+pred performs(S3, S14, S15)
+pred powered(S1)
+pred preferred(S24, S25, S26)
+pred preregistered(S1)
+pred protocol_deviation(S3, S14, S15)
+pred rater_bias(S24, S25, S26)
+pred rel_drop_ge(Num, Num, Num, Num)
+pred reports(S1, S2)
+pred representative_sample(S1, S23)
+pred scope_licensed(S13)
+pred scope_matched(S3, S5, S6)
+pred significance_reported(S1)
+pred sufficient_raters(S1)
+pred underpowered_correlation(S18, S19, S20)
+pred underpowered_null(S3, S4, S5, S6)
+pred unsound_assumption(S13)
+pred valid_benchmark(S14, S15)
+pred valid_instances(S1)
+pred valid_instrument(S10, S1)
+pred valid_measurement(S5, S1)
+pred variance_reported(S1)
+pred version_matched(S16, S1)
+pred version_skew(S16)
+pred within_noise(S8, S3, S5)
+
+# --- Family 1: controlled comparison (25 claims; merges cost-accounting, resource, spectral,
+# --- noninferiority, compute-matched, cross-model-transfer variants) ---------------------------
+
+rule controlled_comparison(S, B, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, compares(S, B, Q, D, favorable)) ]
+  conclusion = better(S, B, Q, D)
+  question baseline_parity      : matched_setup(S, B, Exp)   (mandatory)
+  question measurement_validity : valid_measurement(Q, Exp)  (mandatory)
+  question variance_reported    : variance_reported(Exp)     (mandatory)
+  question scope_match          : scope_matched(S, Q, D)     (optional)
+
+rule null_comparison(S, B, Q, D, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, compares(S, B, Q, D, null)) ]
+  conclusion = not_better(S, B, Q, D)
+  question baseline_parity      : matched_setup(S, B, Exp)   (mandatory)
+  question measurement_validity : valid_measurement(Q, Exp)  (mandatory)
+  question adequate_power       : powered(Exp)               (mandatory)
+
+# --- Family 2: intervention / ablation (14 claims; component_ablation, component_substitution,
+# --- dose_response) -----------------------------------------------------------------------------
+
+rule component_ablation(C, S, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, ablation_effect(C, S, Q, positive)) ]
+  conclusion = contributes(C, S, Q)
+  question single_variable   : isolated(C, Exp)        (mandatory)
+  question protocol_parity   : matched_protocol(Exp)   (mandatory)
+  question variance_reported : variance_reported(Exp)  (mandatory)
+
+# --- Family 3: observation / measurement (7 claims; cross_run_observation,
+# --- exhaustive_pairwise_measurement, case_demonstration) ---------------------------------------
+
+rule measurement(P, S, Exp)
+  mode       = defeasible
+  premises   = [ observes(Exp, P, S) ]
+  conclusion = holds(P, S)
+  question instrument_validity : valid_instrument(P, Exp)     (mandatory)
+  question coverage            : covers_scope(Exp, S)         (mandatory)
+  question confound_control    : confounds_controlled(Exp)    (optional)
+
+# --- Family 4: analytic (4 claims; analytic_proof, analytic_bound_with_consequence_check) -------
+
+rule analytic_argument(P, Prf)
+  mode       = defeasible
+  premises   = [ derives(Prf, P) ]
+  conclusion = holds_analytically(P)
+  question assumptions_hold : assumptions_established(Prf)  (mandatory)
+  question scope_licensed   : scope_licensed(P)             (mandatory)
+
+# --- Family 5: benchmark / stress evaluation (3 claims; benchmark_evaluation,
+# --- adversarial_stress_test) -------------------------------------------------------------------
+
+rule benchmark_evaluation(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, benchmark_result(S, B, Q, positive)) ]
+  conclusion = performs(S, B, Q)
+  question protocol_fixed    : fixed_protocol(S, B, Exp)   (mandatory)
+  question benchmark_valid   : valid_benchmark(B, Q)       (mandatory)
+  question environment_match : matched_environment(Exp)    (optional)
+
+rule null_benchmark(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, benchmark_result(S, B, Q, negative)) ]
+  conclusion = not_performs(S, B, Q)
+  question protocol_fixed    : fixed_protocol(S, B, Exp)   (mandatory)
+  question environment_match : matched_environment(Exp)    (mandatory)
+
+# --- Family 6: code inspection (3 claims; code_inspection, plan_vs_shipped_diff) ----------------
+
+rule code_inspection(P, Src, Insp)
+  mode       = defeasible
+  premises   = [ inspects(Insp, Src, P) ]
+  conclusion = code_property(Src, P)
+  question version_match : version_matched(Src, Insp)  (mandatory)
+  question path_coverage : covers_paths(Insp, Src)     (mandatory)
+
+# --- Family 7: statistical correlation (2 claims) -----------------------------------------------
+
+rule statistical_correlation(X, Y, S, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, correlation(X, Y, S, present)) ]
+  conclusion = correlated(X, Y, S)
+  question significance     : significance_reported(Exp)  (mandatory)
+  question independence     : independent_samples(Exp)    (mandatory)
+  question confound_control : confounds_controlled(Exp)   (optional)
+
+rule null_correlation(X, Y, S, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, correlation(X, Y, S, absent)) ]
+  conclusion = not_correlated(X, Y, S)
+  question significance   : significance_reported(Exp)  (mandatory)
+  question adequate_power : powered(Exp)                (mandatory)
+
+# --- Family 8: inductive generalization (1 claim) -----------------------------------------------
+
+rule inductive_generalization(P, C, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, instances(P, C, positive)) ]
+  conclusion = generalizes_to(P, C)
+  question sample_representative : representative_sample(Exp, C)  (mandatory)
+  question instance_validity     : valid_instances(Exp)           (mandatory)
+
+# --- Family 9: blind paired human evaluation (1 claim) ------------------------------------------
+
+rule human_evaluation(S, B, Q, Exp)
+  mode       = defeasible
+  premises   = [ reports(Exp, human_preference(S, B, Q, favorable)) ]
+  conclusion = preferred(S, B, Q)
+  question blinding        : blinded(Exp)            (mandatory)
+  question rater_power     : sufficient_raters(Exp)  (mandatory)
+  question preregistration : preregistered(Exp)      (optional)
+
+# --- Family 10: certificate-checked rational-arithmetic re-check (issue #57) --------------------
+# The strict leg of the strict-flavored annotations: derived arithmetic over two reported score
+# cells (`(F - A) / F = R`, `R >= T`), re-checked exactly by the registered `ra@1` backend
+# (src/Lara/Strict/RA.hs, lean/Lara/RA.lean). The certificate names its two consulted premise
+# slots and carries the claimed drop as an exact fraction in lowest terms; the checker recomputes
+# the drop in exact rational arithmetic — no floats. F = full-configuration cell, A = ablated
+# cell, R = claimed relative drop, T = falsification threshold; C/S/Q/Exp as above. The ablation
+# INFERENCE stays defeasible (component_ablation); only the arithmetic identity is strict.
+
+rule rational_drop_recheck(C, S, Q, Exp, F, A, R, T)
+  mode       = strict
+  premises   = [ reports(Exp, score_cell(full_config(C, S), Q, F)),
+                 reports(Exp, score_cell(ablated_config(C, S), Q, A)) ]
+  conclusion = rel_drop_ge(F, A, R, T)
+  allow-trusted = false
+  certifiers = [ (ra@1, sha256:corpus-v1-ra-theory-0) ]
+
+# The empty theory the ra@1 certificates cite: the certified identity is pure arithmetic, so the
+# theory contributes no entries — the digest is selection identity only (the S1 precedent).
+theory sha256:corpus-v1-ra-theory-0 = []
+
+# --- Conflict ------------------------------------------------------------------------------------
+# Symmetric pairs only where the sample concludes both sides through the duals above. Units
+# containing args on both sides of one pair must declare the mutual rebut edges (completeness).
+
+contrary better(S, B, Q, D)     not_better(S, B, Q, D)
+contrary not_better(S, B, Q, D) better(S, B, Q, D)
+
+contrary performs(S, B, Q)     not_performs(S, B, Q)
+contrary not_performs(S, B, Q) performs(S, B, Q)
+
+contrary correlated(X, Y, S)     not_correlated(X, Y, S)
+contrary not_correlated(X, Y, S) correlated(X, Y, S)
+
+# --- Exceptions (undercutting conditions), at least one per rule (component_ablation carries two) --
+
+exception controlled_comparison    : confounded_comparison(S, B, Q, D)
+exception null_comparison          : underpowered_null(S, B, Q, D)
+exception component_ablation       : confounded_ablation(C, S, Q)
+exception component_ablation       : within_noise(C, S, Q)
+exception measurement              : measurement_artifact(P, S)
+exception analytic_argument        : unsound_assumption(P)
+exception benchmark_evaluation     : protocol_deviation(S, B, Q)
+exception null_benchmark           : environment_mismatch(S, B, Q)
+exception code_inspection          : version_skew(Src)
+exception statistical_correlation  : confounding_variable(X, Y, S)
+exception null_correlation         : underpowered_correlation(X, Y, S)
+exception inductive_generalization : biased_sample(P, C)
+exception human_evaluation         : rater_bias(S, B, Q)
+
+# WELL-FORMEDNESS (spec §8.1, Path B): the only strict rule is rational_drop_recheck, whose
+# conclusion pattern rel_drop_ge(F, A, R, T) heads no contrary pair, so no contrary side is
+# strict-reachable and the policy passes the R12 check, as in empirical-v1/v2 and strict-v1.

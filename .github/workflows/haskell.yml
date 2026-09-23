@@ -1,0 +1,124 @@
+name: Haskell
+
+# The required gate: it covers the Haskell compiler only. Everything that needs a
+# Lean build — the proofs, the axiom audit, and every Haskell-Lean cross-check —
+# runs outside it: `make lean-gate` / `make cross-check` locally, and the
+# optional Lean workflow (.github/workflows/lean.yml) on a PR when a reviewer
+# asks for it. See docs/ci-scope-decision.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  haskell:
+    name: Haskell (cabal build + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up GHC and cabal
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.6'
+          cabal-version: '3.16.1.0'
+          cabal-update: false
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: '0.11.2'
+
+      - name: Update package index
+        run: |
+          cabal user-config update
+          cabal_config="$(cabal path --output-format=json | jq -r '."config-file"')"
+          sed -i 's|url: http://hackage.haskell.org/|url: https://hackage.haskell.org/|' "$cabal_config"
+          # Keep Hackage Security enabled: signed metadata provides index
+          # authenticity and rollback protection independently of HTTPS.
+          for attempt in 1 2 3; do
+            if cabal update; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
+
+      - name: Configure
+        run: cabal configure --enable-tests
+
+      - name: Freeze dependencies
+        run: cabal freeze
+
+      - name: Cache cabal store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal/store
+            dist-newstyle
+          key: ${{ runner.os }}-cabal-${{ hashFiles('cabal.project.freeze') }}
+          restore-keys: ${{ runner.os }}-cabal-
+
+      - name: Build
+        run: cabal build all
+
+      # `all` includes lara-doctest, which runs the `>>>` examples in Haddock
+      # comments; its doctest binary comes from the cached store.
+      - name: Test
+        run: cabal test all --test-show-details=direct
+
+      # The API docs are generated, never committed; this keeps them buildable.
+      - name: API docs build (Haddock)
+        run: make docs-haskell
+
+      - name: Elaborator unit tests
+        run: uv run --no-project python -m unittest discover -s elaborator -v
+
+      - name: Replay freezer unit tests
+        run: python3 -m unittest scripts/test_freeze_bundle.py -v
+
+      - name: Container benchmark runner unit tests
+        run: python3 -m unittest scripts/test_bench_container.py -v
+
+      - name: ARA source-span unit tests
+        run: python3 -m unittest scripts/test_check_ara_source_spans.py -v
+
+      - name: ARA source quotations match cited spans
+        run: make ara-source-spans
+
+      - name: ARA session-index unit tests
+        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_session_index.py -v
+
+      - name: ARA session index is total, unique, and agrees with its files
+        run: uv run --no-project --with pyyaml python scripts/check_ara_session_index.py
+
+      - name: Policy-copy authenticity (T7)
+        run: |
+          cmp -s \
+            examples/E1/empirical-v1.policy.lara \
+            bundles/walking-skeleton/empirical-v1.policy.lara
+          echo "PASS: bundle policy copy matches the canonical examples/E1 policy"
+
+      - name: Walking-skeleton golden and bundle-anchor freshness
+        run: |
+          lara_bin="$(cabal list-bin exe:lara)"
+          bash test/walking-skeleton-golden.sh "$lara_bin"
+
+      - name: Clean replay
+        run: |
+          lara_bin="$(cabal list-bin exe:lara)"
+          bash scripts/replay.sh bundles/walking-skeleton "$lara_bin"
+
+      - name: Replay tamper and schema gates
+        run: bash scripts/test-replay-tamper.sh
+
+      # The committed fixtures/mutants tree must be exactly what the generator
+      # emits today. test/MutationSpec.hs re-derives the mutant bytes and
+      # MANIFEST.tsv from the library, but README.md is rendered inside the
+      # script, so no test can reach it — which is how it shipped stale.
+      - name: Generated mutation suite is fresh
+        run: cabal exec -- runghc scripts/gen-mutants.hs --check

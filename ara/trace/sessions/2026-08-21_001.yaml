@@ -1,0 +1,247 @@
+session:
+  id: "2026-08-21_001"
+  date: "2026-08-21"
+  started: "2026-08-21T03:45"
+  last_turn: "2026-08-21T19:30"
+  turn_count: 2
+  summary: >
+    Executed Part A of the eng-reviewed named-certificate-authoring plan as
+    lara-syntax@0.8: a certificate premise reference gained a third name
+    class - the citing rule's declared premise label - with cross-class
+    collision a hard error and no carve-out for agreeing referents. Measured
+    byte-identity against the numeric twin rather than asserting it, confirmed
+    zero Lean re-proof was owed by the abstract-resolver parameterization, wrote
+    grammar Appendix G, added worked example S7, and opened the PR. Part B
+    deliberately left unstarted per the plan's no-combine constraint.
+    Turn 2 then executed a separate, unrelated plan: the split of the
+    1209-line Lara.Mutate into seven ownership modules, landed as one atomic
+    output-preserving commit and verified byte-identical against a pre-split
+    baseline (506 checksums, differential 582/0 and 56/0), so m5-freeze-v4
+    stands and no tag was cut.
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: "N199"
+    routing: direct
+    provenance: user
+    summary: "Land alone as @0.8 with premise labels as a third name class; cross-class collision hard-errors even when both classes agree on the slot."
+  - turn: 1
+    type: experiment
+    id: "N200"
+    routing: direct
+    provenance: ai-executed
+    summary: "S7 regenerated from its numeric twin diffs identical; differential 582/0; axiom audit and parity green against an unmodified lean/ tree."
+  - turn: 1
+    type: observation
+    id: "O78"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Slot-indexed naming is strictly more expressive than referent-indexed naming, and the gap is exactly the non-injective case."
+  - turn: 1
+    type: observation
+    id: "O79"
+    routing: staged
+    provenance: ai-suggested
+    summary: "Parameterizing a mechanized pass over its decision procedures makes name-scope extensions proof-neutral by construction."
+  - turn: 2
+    type: decision
+    id: "N201"
+    routing: direct
+    provenance: user
+    summary: "Split Lara.Mutate into seven ownership modules as a hard split with no re-export facade; one atomic commit because the root-first dependency direction admits no compiling intermediate state."
+  - turn: 2
+    type: experiment
+    id: "N202"
+    routing: direct
+    provenance: ai-executed
+    summary: "506 fixture checksums identical to the pre-split baseline; differential 582/0 and 56/0 unmoved; all seven modules <=400 lines; namespace sum +9.4%, headers only."
+  - turn: 2
+    type: observation
+    id: "O80"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A seeded generator keyed through its own vocabulary spelling, picking in list order, turns an output-preserving refactor into a free and near-complete mechanical gate."
+  - turn: 2
+    type: observation
+    id: "O81"
+    routing: staged
+    provenance: ai-suggested
+    summary: "A root that owns the shared vocabulary cannot be a re-export facade for its own siblings; the API break and the atomic landing both follow from the dependency direction."
+
+ai_actions:
+  - turn: 1
+    action: >
+      Extended certSlotResolver to a three-class case split over
+      (premiseLabelIndex rule name, refMatches env priors name), threaded the
+      citing Rule through lowerArgCert/certSlotError, added
+      CertSlotLabelAmbiguous, and gave CertSlotUnresolved a RuleId. Both
+      elaboration sites (explicit theta and inferred `by r from [...]`) already
+      had the rule bound.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Elaborate/CertSlots.hs"
+      - "src/Lara/Elaborate/Internal.hs"
+      - "src/Lara/Elaborate/Error.hs"
+  - turn: 1
+    action: >
+      Added six properties to CertSlotsSpec (label twin, multi-slot contrast,
+      cross-class collision, three-class unresolved wording, unlabelled-rule
+      conservativity control, per-rule label scoping under nesting) and one
+      end-to-end exact-stderr pin to CliSpec for the two reworded templates.
+    provenance: ai-executed
+    files_changed:
+      - "test/CertSlotsSpec.hs"
+      - "test/CliSpec.hs"
+  - turn: 1
+    action: >
+      Authored worked example S7 (artifact + ord-labeled-v1 policy), registered
+      it in the single worked-example registry, generated its goldens, verified
+      them byte-equal to the numeric twin's, and wired prop_S7 plus the
+      DifferentialSpec freshness row.
+    provenance: ai-executed
+    files_changed:
+      - "examples/S7/example.lara"
+      - "examples/S7/ord-labeled-v1.policy.lara"
+      - "examples/S7/example.core.sexp"
+      - "examples/S7/expected.json"
+      - "src/Lara/WorkedExamples.hs"
+      - "test/WorkedExamplesSpec.hs"
+      - "test/DifferentialSpec.hs"
+      - "examples/README.md"
+  - turn: 1
+    action: >
+      Wrote grammar Appendix G, banner-linked E.2/E.3/E.5/E.7, added the
+      rejection-surface rows, and swept the @0.7-as-current pointers in the
+      grammar title/preamble, spec.md, engineering-plan.md,
+      mechanization-plan.md and README.
+    provenance: ai-executed
+    files_changed:
+      - "docs/lara-surface-grammar.md"
+      - "docs/rejection-surface.md"
+      - "docs/spec.md"
+      - "docs/engineering-plan.md"
+      - "docs/mechanization-plan.md"
+      - "README.md"
+  - turn: 1
+    action: "Opened the issue (CertSlotMultiSlot advice no longer exhaustive) and the PR; added a status banner to the plan file so it carries Part B only."
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-21-named-certificate-authoring.md"
+
+  - turn: 2
+    action: >
+      Captured the pre-split baseline before touching source: confirmed the
+      tree already regenerates fixtures/mutants byte-identically, recorded
+      506 checksums, and recorded the differential counts (582/0, 56/0) as the
+      authority in place of the freeze checklist's stale 580 gate row.
+    provenance: ai-executed
+    files_changed: []
+  - turn: 2
+    action: >
+      Performed the split as one atomic change: cut nine source ranges out of
+      Mutate.hs by line range so every moved definition is textually identical,
+      wrote six new modules each with a responsibility-and-invariants Haddock
+      header, rewrote the root header as a namespace map, and added the four
+      exposed siblings plus the two internal ones to lara.cabal.
+    provenance: ai-executed
+    files_changed:
+      - "src/Lara/Mutate.hs"
+      - "src/Lara/Mutate/Manifest.hs"
+      - "src/Lara/Mutate/Seed.hs"
+      - "src/Lara/Mutate/Sites.hs"
+      - "src/Lara/Mutate/Suite.hs"
+      - "src/Lara/Mutate/Codec.hs"
+      - "src/Lara/Mutate/Cycle.hs"
+      - "lara.cabal"
+  - turn: 2
+    action: >
+      Updated the two wholesale importers to explicit per-owner imports and
+      swept the stale ownership prose: Accept's preamble, gen-mutants.hs's
+      Haddock, MutationSpec's reproducibility bullet, and the freeze
+      checklist's seed pointer (line number dropped). Left readmeFor's
+      Lara.Mutate namespace label untouched - its bytes are in the frozen
+      generated README.
+    provenance: ai-executed
+    files_changed:
+      - "scripts/gen-mutants.hs"
+      - "test/MutationSpec.hs"
+      - "src/Lara/Mutate/Accept.hs"
+      - "docs/m5-freeze-checklist.md"
+  - turn: 2
+    action: "Deleted the executed plan file per the project's plans/ rule; nothing in it was durable once the module headers carried the structure."
+    provenance: ai-executed
+    files_changed:
+      - "plans/2026-08-21-split-lara-mutate.md"
+
+claims_touched:
+  - id: C31
+    action: revised
+    turn: 1
+
+logic_revisions:
+  - turn: 1
+    entry: C31
+    field: Conditions
+    before: >
+      Holds for the current surface, where premise lists are not authorable
+      (`explicitRuleP` stores none) and nested assurances are not
+      surface-expressible - so every parsed premise is constructed by
+      `resolvePremises`/`inferTheta` - plus hand-built ASTs accepted by the
+      elaborator, which the second locate candidate covers. No false ambiguity:
+      a leaf sharing the cited name already fails upstream as
+      `SlotNameAmbiguous` in `refMatches` scope resolution. Untested boundary:
+      a future grammar extension making premise lists authorable would add new
+      reachable representations and must extend the candidate set.
+    after: >
+      [unchanged text] ... must extend the candidate set. Scope, from
+      `lara-syntax@0.8`: the claim is about the resolver's *locate*
+      step, and the resolver now has a class that has no locate step - a rule
+      premise label denotes its slot directly, so it is representation-invariant
+      by construction and neither confirms nor tests this claim. The claim
+      therefore covers two of the resolver's three name classes, and the
+      candidate-set obligation above applies to those two.
+    signal: artifact-commitment
+    provenance: ai-suggested
+    note: >
+      The merged @0.8 resolver is the very function C31 is about, and it gained
+      a path that reaches none of the representations the Conditions enumerate.
+      Left unsaid, the enumeration reads as exhaustive when it no longer is.
+      Statement, Status and Falsification are untouched - the locate-step
+      mechanism the claim asserts is unchanged and still supported.
+
+key_context:
+  - turn: 1
+    excerpt: >
+      Researcher scoped the session to Part A only when asked, endorsing the
+      plan's own no-combine constraint: Part A ships and merges before Part B
+      (named nd@1 proof terms) begins on the same branch.
+  - turn: 1
+    excerpt: >
+      The decisive design question was whether an agreeing-referent carve-out
+      should soften the cross-class collision rule. Rejected because the
+      condition is invisible from the citing line: whether `(prem base)` is
+      ambiguous would depend on which slot a leaf elsewhere in the artifact
+      happens to fill.
+  - turn: 2
+    excerpt: >
+      The plan's own G3 note proved load-bearing: it warned not to hardcode the
+      differential counts from the freeze checklist, whose gate table still says
+      pass=580 while a post-@0.6 note records the row rising with the S6 anchor.
+      The baseline run came back 582, one above even the plan's predicted 581 -
+      so the captured baseline, not any document, was the authority the
+      post-split run was compared against.
+
+open_threads:
+  - "Part B (lara-syntax@0.9 named nd@1 proof terms) - Tasks B1-B6 remain in plans/2026-08-21-named-certificate-authoring.md; starts after the PR merges."
+  - "CertSlotMultiSlot still advises 'cite a numeric slot', now one exit rather than the list. Fold into the next surface-version bump - it is a normative template change touching four places in lockstep."
+  - "The PR awaits review/merge."
+  - "Carried from 2026-08-20_001: O77's acceptance-preservation sweep procedure now has a second instance (@0.8) but is still staged; see pm_reasoning_log for why."
+  - "Lara.Mutate.Accept stays the one documented 400-line exception at 445; splitting it was explicitly out of the issue's scope. Now tracked as a follow-up (filed during review round 1), so the deferral is in the tracker rather than in prose."
+  - "RESOLVED in review round 1: docs/m5-freeze-checklist.md's gate table read pass=580 against a live 582. Re-measured independently (582/0 positive, 56/0 negative) and corrected in-PR rather than deferred, with a note pinning the row as live-tracking and guarding the tag-scoped 580 in the reproduce block."
+
+ai_suggestions_pending:
+  - "O78 - slot-indexed vs referent-indexed naming: the non-injective case is exactly the expressiveness gap. No closure signal yet."
+  - "O79 - abstract-resolver parameterization makes name-scope extensions proof-neutral. Demonstrated once at @0.8; no closure signal yet."
+  - "O80 - a deterministic derived corpus makes refactor gates free, in proportion to how much source structure the derivation is sensitive. One instance; no closure signal yet."
+  - "O81 - a vocabulary-owning root cannot facade its own siblings, which forces both the API break and the atomic landing. One instance; no closure signal yet."

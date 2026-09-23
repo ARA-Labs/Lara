@@ -1,0 +1,18 @@
+artifact capture_reject at sha256:capture
+policy surface-policy
+use backends [nd@1]
+
+claim claim-main
+  nl      = "captured binder"
+  formal  = score(7)
+  binding = { author = author, rationale = "negative", audit-status = reviewed }
+
+leaf proof : score(7)
+  kind       = certified
+  provenance = user
+  refs       = []
+
+arg arg-strict : supports(claim-main) by main(7)
+  assurance = cert(nd@1, sha256:theory, (app (lam evidence (prop "score(7)") (hyp evidence)) (prem evidence)))
+
+status claim-main

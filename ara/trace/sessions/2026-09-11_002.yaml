@@ -1,0 +1,299 @@
+session:
+  id: 2026-09-11_002
+  date: '2026-09-11'
+  started: 2026-09-11T00:14-07:00
+  last_turn: 2026-09-11T19:10-07:00
+  turn_count: 4
+  summary: 'Implemented (turn 1); implemented (turn 2): pw-run 1 contract,
+    Haskell lara pw runtime, and a finite Lean reference proved against PW.Sat, agreeing
+    byte for byte on 5 fixtures and 55 generated cases. Turn 3: review rounds
+    found and fixed a locale divergence at the path/argv boundary and proved the step
+    from edge names to positions; gate at 6 fixtures, 94 cases, 107 runs. Turn 4:
+    resolved — the shared reader''s nesting bound is now enforced identically by both
+    runtimes, with cases on both sides of it and a source-level constant check in all
+    three reader differentials; scripts/differential.sh, red on main,
+    unblocked by excluding fixtures/pw/ as a family owning its own harness.'
+events_logged:
+- turn: 1
+  type: decision
+  id: N313_declared_wire
+  routing: direct
+  provenance: user
+  summary: Join declared bridges and concrete authoring before the Haskell runtime
+- turn: 1
+  type: experiment
+  id: N314_file_execution
+  routing: direct
+  provenance: ai-executed
+  summary: File-authored maps determine comparison while modal operands retain their
+    target meaning
+- turn: 1
+  type: observation
+  id: O169
+  routing: staged
+  provenance: ai-suggested
+  summary: Registry-derived resolution as an architecture lesson; not promoted.
+- turn: 2
+  type: decision
+  id: N322_outer_runtime
+  routing: direct
+  provenance: user
+  summary: 'Finish in one PR: Haskell runtime, Lean reference, differential gate'
+- turn: 2
+  type: decision
+  id: N322_finite_boundary
+  routing: direct
+  provenance: ai-suggested
+  summary: A run evaluates exactly its declared frame; duplicate states and group-bearing
+    worlds refused; .lara sources deferred
+- turn: 2
+  type: experiment
+  id: N322_conformance
+  routing: direct
+  provenance: ai-executed
+  summary: lara pw and Lean pw-run agree byte for byte (5 fixtures, 55 cases); review
+    fixes applied
+- turn: 2
+  type: observation
+  id: O172
+  routing: staged
+  provenance: ai-suggested
+  summary: Relation-as-computed-membership makes adequacy trivial; content moves to
+    a declared-world index lemma. Not promoted.
+- turn: 3
+  type: experiment
+  id: N322_review_divergence
+  routing: direct
+  provenance: ai-executed
+  summary: Reviews found non-ASCII path divergence under non-UTF-8 locales (world path
+    under C, then argv under ISO-8859-1); fixed with negative controls; gate 6 fixtures,
+    94 cases, 107 runs
+- turn: 3
+  type: experiment
+  id: N322_names_to_positions
+  routing: direct
+  provenance: ai-executed
+  summary: Edge resolution from names to positions and per-context id uniqueness proved;
+    19 new AxCheck pins
+- turn: 3
+  type: decision
+  id: N322_result_tag
+  routing: direct
+  provenance: ai-suggested
+  summary: ResultTag closed table per runtime, separate from the input tag tables
+- turn: 3
+  type: observation
+  id: O173
+  routing: staged
+  provenance: ai-suggested
+  summary: Each text boundary needs its own locale case; an 8-bit locale fails differently
+    from C. Not promoted.
+- turn: 4
+  type: decision
+  id: N331_shared_bound
+  routing: direct
+  provenance: ai-suggested
+  summary: One nesting bound enforced by both readers, with the same message and column,
+    rather than a documented Haskell-only boundary
+- turn: 4
+  type: experiment
+  id: N331_gate_controls
+  routing: direct
+  provenance: ai-executed
+  summary: Both sides of the bound pinned in all three reader differentials, negative
+    controls confirm each catches the old divergence; depth scan puts the deepest committed
+    tree at 14 levels, so no corpus regeneration or freeze bump
+- turn: 4
+  type: decision
+  id: N331_pw_anchor_exclusion
+  routing: direct
+  provenance: ai-suggested
+  summary: fixtures/pw/ excluded from ANCHORS.tsv as a family with its own harness;
+    manifest byte-identical at 135 anchors, unblocking differential.sh
+- turn: 4
+  type: observation
+  id: O174
+  routing: staged
+  provenance: ai-suggested
+  summary: Exit-code agreement is not refusal-category agreement; the located message is
+    what makes a shared reader checkable. Not promoted.
+- turn: 4
+  type: observation
+  id: O175
+  routing: staged
+  provenance: ai-suggested
+  summary: A gate built from a duplicated constant must compare the constant in both
+    sources, else the stricter side masks a one-sided relaxation. Not promoted.
+ai_actions:
+- turn: 1
+  action: 'Created, branched feat/pw-declared-wire, implemented the checked registry,
+    outer wire codec, finite evaluator, example executable, fixtures, CI gate and
+    durable docs; independently reviewed and verified.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/PW/Declared.lean
+  - lean/Lara/PW/Wire.lean
+  - lean/Lara/PW/Finite.lean
+  - lean/Lara/PW/ExampleMain.lean
+  - lean/Lara/Examples/PWDeclared.lean
+  - lean/Lara/Examples/PWWire.lean
+  - lean/Lara/Examples/PWFinite.lean
+  - lean/Lara/Examples/PWFileHost.lean
+  - scripts/check-pw-example.py
+  - fixtures/pw/declared.sexp
+  - docs/theory-pw-declared-wire.md
+- turn: 2
+  action: 'Branched feat/pw-outer-runtime-322. Implemented the Lean reference (Lara.PW.Run
+    with 20 AxCheck-covered theorems, pw-run exe), the Haskell runtime (Lara.PW.{Surface,Sorted,Wire,Run},
+    lara pw), fixtures with goldens, the differential gate (make pw-conformance, CI
+    step), PWSpec, and the decision record. Renumbered the AxCheck line citations shifted
+    by the new import (including one in scripts/check-lean-citations.py). An independent review found no runtime divergence;
+    fixed its two gate/boundary findings.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/PW/Run.lean
+  - lean/Lara/PW/RunMain.lean
+  - lean/AxCheck.lean
+  - lean/lakefile.toml
+  - src/Lara/PW/Surface.hs
+  - src/Lara/PW/Sorted.hs
+  - src/Lara/PW/Wire.hs
+  - src/Lara/PW/Run.hs
+  - app/Main.hs
+  - test/PWSpec.hs
+  - scripts/check-pw-conformance.py
+  - fixtures/pw/run/
+  - docs/theory-pw-outer-runtime.md
+  - .github/workflows/ci.yml
+- turn: 3
+  action: 'Resolved the PR reviews in commits 3b865cb, e4c5e67 and 676de58: rebased
+    onto main a3a2054 (O170 collision renumbered O172; this session''s record moved
+    to _002); UTF-8 file paths and run-file argument in lara pw; ResultTag in both runtimes;
+    CtxIx/WorldIx/BridgeIx in Run.hs; names-to-positions theorems (by a forked agent,
+    reviewed here); renamed.sexp and 41 new gate cases (53 to 94) with locale reruns; PWSpec
+    rule-clause and keyword properties; citations repointed after the rebase. Filed
+    For the pre-existing reader nesting bound. Replied on every review thread.'
+  provenance: ai-executed
+  files_changed:
+  - app/Main.hs
+  - src/Lara/PW/Run.hs
+  - lean/Lara/PW/Run.lean
+  - lean/AxCheck.lean
+  - scripts/check-pw-conformance.py
+  - test/PWSpec.hs
+  - fixtures/pw/run/renamed.sexp
+  - docs/theory-pw-outer-runtime.md
+  - scripts/check-lean-citations.py
+  - ara/evidence/proofs/pw_outer_runtime_322.md
+  - ara/evidence/proofs/pw_outer_runtime_verification.txt
+- turn: 4
+  action: 'Resolved on branch fix/shared-reader-nesting-bound-331 (commit 965772b,
+    The PR): threaded a depth counter through Lara.Driver.parseForm / parseList with
+    Lara.Driver.maxDepth mirroring Lara.Wire.maxDepth (now exported); added a case on each
+    side of the bound plus a two-source constant-agreement check to check-pw-conformance.py
+    (new `exact` byte-equality option), differential.sh (generated section, located message
+    byte-compared across drivers) and check-map-conformance.sh, with prop_envelopeNestingBound
+    as the map''s Haskell half; recorded the bound in docs/spec.md §10.1 as part of R14.
+    Ran negative controls with the Lean bound first absent then declared-but-unenforced to
+    confirm both new gate families catch the divergence. Scanned 960 committed trees for
+    depth (max 14) and checked the freeze checklists and bundle-manifest provenance field to
+    confirm no corpus regeneration or tag bump is owed. Separately unblocked differential.sh,
+    red on main, by excluding fixtures/pw/ in gen-anchor-manifest.sh and the gate''s
+    discovery loop; the regenerated manifest is byte-identical at 135 anchors.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Driver.lean
+  - src/Lara/Wire.hs
+  - scripts/check-pw-conformance.py
+  - scripts/differential.sh
+  - scripts/check-map-conformance.sh
+  - scripts/gen-anchor-manifest.sh
+  - test/MapSpec.hs
+  - docs/spec.md
+claims_touched:
+- id: C12
+  action: revised
+  turn: 4
+logic_revisions:
+- turn: 4
+  entry: C12
+  field: Conditions
+  before: >-
+    Holds for the Haskell↔Lean cross-check once both share one serialized first-order core
+    AST; LARA's grounded status is deterministic (C07), so the single-interpretation
+    precondition holds by construction, with no undefined behavior to quotient out. The
+    shared serialized core is now built (`Lara.Wire` S-expr codec, the N11 anchor) and the
+    harness (`scripts/differential.sh`) runs both drivers byte-for-byte; the framing
+    localized one concrete Haskell-vs-Lean divergence to inconsistent driver identity
+    functions (non-canonical numeric literals: `canonNum` vs the former Lean `canon = id`,
+    O15), rather than a voting tie. The production Lean driver now uses `canonNum`, and the
+    numeric/multi-blocked differential fixture prevents that defect from recurring.
+  after: >-
+    [the text above, plus:] Bounded, by what the anchor set reaches: the
+    localizing power is the framing's, but a divergence outside every case is invisible to
+    it, and the gates' exit-code-only families do not see a divergence in the stated
+    *reason* at all. The reader's nesting bound was Haskell-only and unseen for that reason
+    — same exit code, different refusal category — and the remedy was both a case on each
+    side of the boundary and a source-level check that the two implementations agree on
+    where the boundary is, since the stricter side's refusal otherwise masks a one-sided
+    relaxation.
+  signal: empirical-resolution
+  provenance: ai-suggested
+  note: >-
+    scripts/differential.sh is in C12's Proof refs and produced a result this turn; the
+    Divergence sharpens the regime rather than contradicting the claim, so Status
+    stays testing.
+- turn: 4
+  entry: C12
+  field: Proof
+  before: '[E02, "scripts/differential.sh + test/DifferentialSpec.hs: corpus fixtures agree
+    byte-exact across the Haskell and Lean drivers; the numeric-literal divergence was
+    localized and is now a pinned production-driver regression"]'
+  after: '[E02, "…as before…", trace N331_gate_controls (the reader''s nesting bound: a
+    category divergence no gate had a case for, now pinned on both sides of the boundary in
+    all three reader differentials, with negative controls and a source-level constant
+    check)]'
+  signal: empirical-resolution
+  provenance: ai-suggested
+- turn: 4
+  entry: C12
+  field: Sources
+  before: '[…three entries…]'
+  after: '[…the same three, plus: "673 positive anchors, 66 negative and 2 depth cases agree
+    after the bound ← trace N331_gate_controls:result «scripts/differential.sh pass=673
+    fail=0, negative pass=66 fail=0, depth-bound pass=2 fail=0» [result]"]'
+  signal: empirical-resolution
+  provenance: ai-suggested
+key_context:
+- turn: 4
+  excerpt: 'User: let''s address [redacted], directly do it and pr.'
+- turn: 1
+  excerpt: User explicitly chose combined environment + codec + file-driven example
+    now, full Haskell outer runtime + differential gate later; requested new branch,
+    completed checks, research-manager record, and PR.
+- turn: 2
+  excerpt: 'User: let''s finish [redacted], directly
+    do it and submit a pr.'
+- turn: 3
+  excerpt: 'User: monitor the pr for incoming review comments, address all, push and
+    reply. wait for follow ups. stop the loop after the pr is approved'
+open_threads:
+- 'Haskell outer runtime, configurable finite execution, and Lean differential
+  conformance.'
+- 'Turn 2: is implemented and awaiting PR merge. Follow-ups filed: (PW reading
+  of worlds with duplicate-report groups) and (.lara world sources under the
+  differential).'
+- 'Turn 3: The PR at 676de58 awaits re-review after the locale-probe fix. Tracks
+  the Haskell-only nesting bound in the shared reader.'
+- 'Turn 4: The PR awaits review. The Lean reader''s bound is enforced but not
+  proved — parseWire and its mutual block are partial defs, so the evidence is the three
+  differentials rather than a theorem. Now tracked as a follow-up rather than left as a
+  research note; it becomes reachable only if the reader is made structurally recursive.'
+ai_suggestions_pending:
+- O169 remains staged; implementation authorization does not endorse the generalized
+  architecture lesson.
+- O172 remains staged; the proof-construction lesson is unendorsed.
+- O173 staged; one project, reviewer-driven, no user endorsement.
+- >-
+  O174 and O175 staged; "address [redacted], directly do it" authorizes the implementation and
+  does not endorse either generalized gate-design lesson.

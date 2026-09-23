@@ -1,0 +1,53 @@
+session:
+  id: "2026-07-24_002"
+  timestamp: "2026-07-24T08:48"
+  ended: "2026-07-24T08:48"
+  summary: "Additional review found a syntactic-vs-instance wf(Pi) gap; conservative overlap checking, ContraryMatch bridge proofs, and the exact regression now close it before v0.1."
+
+events_logged:
+  - type: experiment
+    id: N45
+    provenance: ai-executed
+    summary: "Reproduced the instance-level strict-contrary counterexample and mechanized a sound conservative overlap validator plus boundary proofs."
+  - type: observation
+    id: O11
+    provenance: user
+    summary: "Review identified that syntactic wf(Pi) did not exclude conflicts registered by instantiated ContraryMatch."
+  - type: claim
+    id: C09
+    provenance: ai-executed
+    summary: "Revised Path-B claim and proof binding from syntactic occurrence to canonically equivalent ground-instance overlap."
+
+ai_actions:
+  - action: "Replaced literal APat equality in wfB and located R12 diagnostics with a canon-parameterized conservative structural overlap check."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Policy.lean"]
+  - action: "Proved ground-instance overlap soundness and both ContraryMatch exclusion directions; added the exact Bird(X) / CanFly(tweety) regression and axiom-audit coverage."
+    provenance: ai-executed
+    files_changed: ["lean/Lara/Policy.lean", "lean/AxCheck.lean"]
+  - action: "Updated the frozen §8.1 semantics, R12 wording, mechanization plans, examples, and status documentation to state instance-level overlap and its conservative non-linear boundary."
+    provenance: ai-executed
+    files_changed:
+      - "docs/spec.md"
+      - "docs/gap-resolution.md"
+      - "docs/engineering-plan.md"
+      - "docs/m1-freeze-checklist.md"
+      - "docs/mechanization-plan.md"
+      - "docs/worked-examples-plan.md"
+      - "plans/research-proposal.md"
+      - "lean/README.md"
+  - action: "Ran the full Lean build, standard-trio axiom audit, all 22 Haskell property groups, and diff integrity checks."
+    provenance: ai-executed
+    files_changed: []
+
+claims_touched:
+  - id: C09
+    action: advanced
+    provenance: ai-executed
+
+open_threads:
+  - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
+  - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
+
+ai_suggestions_pending:
+  - "Exact non-linear unifiability would reduce false-positive R12 rejections but is not needed for Path-B safety."

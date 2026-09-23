@@ -1,0 +1,73 @@
+# Corpus unit self-expansion/C04 — gap (policy-mandatory variance + scope CQs unmet)
+#
+# Source: m0/annotations/self-expansion.yaml C04 (generalization, component_substitution;
+# corpus pin 62e9b54). Headline: SEMA generalises across functional adapter types -- swapping the
+# default Adapter for LoRA or Convpass inside the unchanged SEMA framework keeps A_N within ~2% on
+# both ImageNet-A and VTAB (gaps 1.03, 1.05 on ImageNet-A; LoRA +0.59, Convpass -0.58 on VTAB),
+# E04 Table 3.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Scheme family map: component_substitution lowers through component_ablation (Family 2). The
+#     substitution/invariance reading is imperfect against the rule's positive-contribution
+#     conclusion contributes(C, S, Q): here C = functional_adapter names the substituted component
+#     slot whose contribution persists across types. The class-level generalisation ("functional
+#     adapter types") is a kind-(a) absorbed scope (m0/annotation-summary.md S3): the atom
+#     instantiates per tested type, the claimed-class-vs-tested-set lives in nl/binding, and the
+#     annotation's own coverage flag (no inductive-step construct) is recorded here, not forced
+#     into vocabulary. POLICY VOCABULARY NOTE: corpus-v1 has no invariance/equivalence scheme, so
+#     substitution-invariance is carried by the closest family rule + nl.
+#   * Two policy-mandatory CQs are unmet, so no complete argument is declarable and the claim lands
+#     `gap` (E2-style): variance_reported (CQ3, no seeds/uncertainty; gaps sit near half the 2%
+#     tolerance) and -- mapped to sample_representative would need inductive_generalization, but
+#     under component_ablation the scope CQ has no home, so it too stays a gap in nl. Met CQs:
+#     single_variable <- CQ1 (all SEMA components but the adapter held identical); protocol_parity
+#     <- CQ1/CQ2 (both alternative types on both datasets, same metrics). The 2% figure and the
+#     abs-vs-relative ambiguity live in nl. Dead ends N03/N06/N12 concern expansion/routing, not
+#     adapter type -- no attacks.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact self-expansion at sha256:aa759bc10299
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c04
+  nl      = "SEMA generalises across functional adapter types: swapping the default Adapter for LoRA or Convpass inside the unchanged SEMA framework keeps A_N within about 2% on both ImageNet-A and VTAB (gaps 1.03 and 1.05 on ImageNet-A; LoRA +0.59 and Convpass -0.58 on VTAB)"
+  formal  = contributes(functional_adapter, sema, incremental_accuracy)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves are present ... ------------------------------------------------------------
+
+# Principal premise: the Table 3 adapter-variant cells (Adapter / LoRA / Convpass on both
+# datasets), per result cell in the annotation and folded into refs.
+leaf e1 : reports(e04, ablation_effect(functional_adapter, sema, incremental_accuracy, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/claims.md#C04, evidence/tables/table3_adapter_variants.md, logic/experiments.md#E04-Procedure-step-3]
+
+leaf e2 : isolated(functional_adapter, e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Procedure-step-2]
+
+leaf e3 : matched_protocol(e04)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E04-Procedure-step-1, logic/experiments.md#E04-Procedure-step-3]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: variance_reported(e04) has no honest leaf -- E04 reports single-run
+# point estimates -- and corpus-v1 makes that obligation mandatory. The class-scope obligation is
+# likewise unmet (two tested types, no representativeness argument). Complete support is empty.)
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

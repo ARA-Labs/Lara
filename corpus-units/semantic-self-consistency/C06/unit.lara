@@ -1,0 +1,61 @@
+# Corpus unit semantic-self-consistency/C06 — gap (both policy-mandatory null-correlation CQs unmet)
+#
+# Source: m0/annotations/semantic-self-consistency.yaml C06 (negative-result,
+# statistical_correlation; corpus pin 62e9b54). Headline: average BLEU score does NOT correlate
+# with the average accuracy increase from the semantic methods, over the 15 model-dataset pairs of
+# Table 3 (low-BLEU / highest-gain cells among them).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Negative result lowers through the null dual null_correlation(X, Y, S, Exp), conclusion
+#     not_correlated(X, Y, S) with X = avg_bleu, Y = accuracy_increase, S = model_dataset_pairs --
+#     a genuine negation of a correlation conclusion, so the null rule is the right target rather
+#     than a positive conclusion over negative-content constants.
+#   * Both mandatory corpus-v1 CQs are annotated unmet-gap, so no complete argument is declarable
+#     and the claim lands `gap` (E2-style): significance <- CQ1 (Table 3 notes assert "no
+#     correlation observed" but no test statistic / alpha appears; recomputed r = -0.234, t ~
+#     -0.87 confirms the direction only); adequate_power <- CQ2 (n = 15 fixed, no power analysis,
+#     so absence-is-informative is unbacked). No mandatory CQ met, so only the premise leaf is
+#     kept. The optional BLEU-reference CQ is also unmet; optional, no status effect.
+#   * The contrary pair correlated/not_correlated is symmetric in corpus-v1, but this unit
+#     concludes only not_correlated over the (avg_bleu, accuracy_increase) pair; C05's positive
+#     conclusion is over a different pair (avg_seq_length) in a separate unit, so no mutual rebut
+#     edge is forced here (attack completeness is arg-conclusion-level). Recomputed r lives in nl.
+#     Dead end N06 is corroboration-adjacent (its lesson parallels C06) but the attack vocabulary
+#     correctly yields no edge; N07/N12 are unrelated rejected alternatives.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact semantic-self-consistency at sha256:970cd14ac108
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+
+claim c06
+  nl      = "Average BLEU score does not correlate with the average accuracy increase from the semantic methods over the 15 model-dataset pairs of Table 3 (recomputed Pearson r ~= -0.234, not significant at n = 15)"
+  formal  = not_correlated(avg_bleu, accuracy_increase, model_dataset_pairs)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaf is present ... ---------------------------------------------------------------
+
+# Principal premise: the Table 3 (BLEU, accuracy_increase) pairs and the asserted no-correlation
+# note, folded into refs (including the low-BLEU / highest-gain counter-cell).
+leaf e1 : reports(e04, correlation(avg_bleu, accuracy_increase, model_dataset_pairs, absent))
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C06, evidence/tables/table3_sequence_length_bleu.md, trace/exploration_tree.yaml#N11]
+
+# --- ... but no complete argument is declarable -------------------------------------------------
+
+# (Intentionally no `arg`: significance_reported(e04) and powered(e04) have no honest leaves -- no
+# test/alpha is reported and there is no power analysis at n = 15 -- and corpus-v1 makes both
+# mandatory for the null dual. The claim's complete-support set is empty.)
+
+status c06
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: no arguments.
+# Claim status:
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)

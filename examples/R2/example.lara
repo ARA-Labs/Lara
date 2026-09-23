@@ -1,0 +1,37 @@
+# Example R2 — strict-contrary (rejected: spec class R12)
+#
+# Witnesses: policy well-formedness is enforced at compile time, not just proved. This artifact is
+# minimal and itself blameless — one stated claim, no arguments, no attacks. The rejection is about
+# its POLICY: `strict-bad-v1` declares a strict rule whose conclusion `derived(X)` also appears in
+# a `contrary` pair, violating spec §8.1 Path B. `checkUnit` runs the R12 validator
+# (Policy.firstViolation) at stage 2 — before touching any argument — so the whole unit is refused
+# R12 regardless of what the artifact contains.
+#
+# This is R2 of the M4a coverage matrix (docs/worked-examples-plan.md §3): spec class R12 (NOT the
+# spec's signature class R2 — the example label and the spec class differ; see m4a-checklist §3).
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact strict_contrary at sha256:bbbb...
+policy strict-bad-v1
+use backends [nd@1]
+
+# A blameless minimal artifact: a claim over the strict rule's conclusion, and a status query.
+# There is no argument here — the unit never gets far enough to check one.
+claim c1
+  nl      = "The derived proposition holds for x"
+  formal  = derived(x)
+  binding = { author = alice, audit-status = unreviewed }
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
+# ==============================================================================================
+# REJECT — spec class R12 (policy well-formedness: strict rule `s`'s conclusion `derived(X)` is a
+#   side of the declared `contrary derived(X) refuted(X)`; spec §8.1 Path B, Policy.firstViolation,
+#   checkUnit stage 2). Exit code 1.
+#
+# Teaching point: the strict/defeasible boundary is a policy-design obligation the compiler checks.
+# A field whose contested headline claims sit on strict chains is exactly the condition §8.1 flags;
+# empirical-v1 stays defeasible-only precisely to avoid this, and its closing comment says so.

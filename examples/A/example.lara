@@ -1,0 +1,128 @@
+# Example A — a single paper that rebuts and undercuts ITSELF
+#
+# Purpose: kill the intuition that "one paper cannot rebut itself." The unit of argumentation in
+# LARA is the support term (spec §6), NOT the paper. One honest empirical paper contributes
+# several support terms, several leaves, AND several attacks — its limitations section, its
+# robustness appendix, and its ablations are attacks the same paper mounts on its own headline
+# claim. All three attack kinds below originate inside `paper_17`.
+#
+# Expected verdict is at the bottom of this file (golden oracle, per worked-examples-plan §0).
+
+artifact paper_17 at sha256:aaaa...
+policy empirical-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c1
+  nl      = "Method M improves accuracy on distribution D"
+  formal  = improves(M, accuracy, D)
+  binding = { author = alice, audit-status = reviewed }
+
+# --- Evidence leaves (all from the SAME paper) -------------------------------------------------
+
+leaf e1 : reports(exp_3, effect(M, accuracy, D, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=mean]
+
+leaf e2 : randomized(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+leaf e3 : powered(exp_3)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=4.1]
+
+# The paper's OWN limitations section reports an eval-distribution shift...
+leaf e4 : distribution_shift(M, accuracy, D)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=7-limitations]
+
+# ...and the paper's OWN robustness appendix reports the result does NOT generalize (an
+# external-validity failure) — the declared contrary of the leaf that discharges a1's
+# external_validity critical question.
+leaf e5 : not_generalizes(M, accuracy, D)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paper_17.pdf#appendix=C]
+
+# The external-validity (generalization) leaf a1's external_validity CQ rests on — this is
+# what the undermine attacks. It answers the policy's external_validity question pattern
+# generalizes(M, Q, D), so a1 is a COMPLETE argument (all mandatory CQs discharged).
+leaf e6 : generalizes(M, accuracy, D)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_2.csv#row=raw]
+
+# --- The support argument for the headline claim -----------------------------------------------
+
+arg a1 : supports(c1) by controlled_experiment from [e1]
+  discharge randomization     with e2
+  discharge adequate_power    with e3
+  discharge external_validity with e6   # e6 : generalizes(...), answers the CQ pattern
+# NOTE: external_validity is discharged (not left open) so this example exercises DEFEAT, not a
+# gap. The planned E2 covers the open-hole/gap path; here we want live attacks.
+
+# --- Three attacks, ALL from the same paper ----------------------------------------------------
+
+# (1) UNDERCUT — the limitations section defeats external validity. Licensed by
+# `exception controlled_experiment : distribution_shift(...)`. Undercuts ALWAYS succeed
+# regardless of preference (spec §7): "the rule does not apply here."
+arg d1 : challenges(external_validity(a1)) by leaf(e4)
+undercut d1 a1.rule
+
+# (2) UNDERMINE — the robustness appendix attacks the generalization LEAF e6 that discharges
+# external_validity. `not_generalizes(...)` is a declared contrary of `generalizes(...)`.
+arg d2 : challenges(e6) by leaf(e5)
+undermine d2 a1.external_validity.leaf
+
+# (3) REBUT — a second in-paper experiment (a null ablation) concludes the contrary of the
+# headline claim. Rebut targets the defeasible root conclusion of a1.
+leaf e7 : reports(exp_9, effect(M, accuracy, D, negligible))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [evidence/table_5.csv#row=ablation]
+
+# The null ablation is its OWN experiment (exp_9), so it carries its own randomization and
+# power leaves — the null_result scheme's CQs are about exp_9, not exp_3.
+leaf e8 : randomized(exp_9)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=6-ablations]
+
+leaf e9 : powered(exp_9)
+  kind       = attested
+  provenance = user
+  refs       = [paper_17.pdf#sec=6-ablations]
+
+arg d3 : supports(c1_neg) by null_result from [e7]
+  discharge randomization  with e8
+  discharge adequate_power with e9
+rebut d3 a1
+# improves / not_improves are contrary in BOTH directions (empirical-v1), so the headline and
+# the null ablation genuinely conflict both ways; attack completeness (spec §8) requires the
+# reverse edge too. It does not change the verdict: a1 is already `out` (undercut+undermine+
+# rebut), so it cannot defeat d3 — d3 stays `in`.
+rebut a1 d3
+
+status c1
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Arguments in the compiled AF (all complete; a1 has its CQs discharged):
+#   a1  -> out    (attacked by d1 undercut, d2 undermine, and d3 rebut; each is unattacked, so
+#                  each is `in`, driving a1 to `out` under grounded semantics)
+#   d1  -> in
+#   d2  -> in
+#   d3  -> in
+# Claim status:
+#   c1  -> defeated   (its only support a1 is `out`; spec §8 aggregation)
+#
+# Teaching point: every edge here has source and target inside paper_17. "A paper cannot rebut
+# itself" is a category error — the paper is not a node. The self-attacks are exactly where the
+# paper is honest about its own limits, and LARA turns that honesty into a computed `defeated`.

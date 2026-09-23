@@ -1,0 +1,1 @@
+(pw-result 1 (queries (query (at w0 true) (at w1 false)) (query (at w0 true) (at w1 false)) (query (at w0 true) (at w1 true))) (comparisons (comparison e w0 (atom p) (comparable defeated)) (comparison e w1 (atom p) (incomparable no-candidate-world))))

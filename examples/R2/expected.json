@@ -1,0 +1,20 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "strict-bad-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:bbbb..."
+  },
+  "verdict-class": "reject R12",
+  "located-diagnostic": {
+    "kind": "reject",
+    "class": "R12",
+    "stage": "policy-well-formedness",
+    "constituent": {
+      "kind": "policy"
+    }
+  }
+}

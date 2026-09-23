@@ -1,0 +1,19 @@
+; See pos-dup.lara: its single claim block is declared twice. This is a
+; `pre-boundary` anchor -- the map never reaches the checked boundary, so no
+; envelope exists and there is nothing to hand the Lean driver. What the harness
+; compares is that both Haskell doors agree the map never got that far.
+;
+; The policy is copied in beside the member rather than shared with
+; ../agreement/, because a member resolves its policy CO-LOCATED with itself: a
+; parent-relative member would look for the policy next to itself and not find
+; it, and the map would then be refused for an unreadable policy instead of for
+; the duplicate claim -- the same exit code for the wrong reason, which the
+; conformance harness could not tell apart.
+(lara-map@1
+  (policy empirical-v1 empirical-v1.policy.lara)
+  (backends (backend nd 1))
+  (members
+    (member paper_pos pos-dup.lara)
+    (member paper_neg ../agreement/neg.lara))
+  (alignments)
+  (questions))

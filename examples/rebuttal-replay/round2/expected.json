@@ -1,0 +1,80 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.2",
+    "policy": "rebuttal-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [],
+    "artifact": "sha256:de3685165a53"
+  },
+  "verdict-class": "accept",
+  "located-diagnostic": {
+    "kind": "accept",
+    "statuses": [
+      {
+        "claim": "performs(apt, dense_baseline, openllm_avg)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "holds(low_memory_footprint, apt)",
+        "status": "defeated",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      },
+      {
+        "claim": "contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)",
+        "status": "justified",
+        "complete-support": 1,
+        "holes": 0,
+        "incomplete-alternative": false
+      }
+    ],
+    "labels": [
+      {
+        "arg": "a_bench",
+        "index": 0,
+        "label": "in"
+      },
+      {
+        "arg": "a_meas",
+        "index": 1,
+        "label": "out"
+      },
+      {
+        "arg": "d_um",
+        "index": 2,
+        "label": "out"
+      },
+      {
+        "arg": "d_rebut",
+        "index": 3,
+        "label": "out"
+      },
+      {
+        "arg": "d_meas",
+        "index": 4,
+        "label": "in"
+      },
+      {
+        "arg": "a_kurt",
+        "index": 5,
+        "label": "in"
+      },
+      {
+        "arg": "r_um",
+        "index": 6,
+        "label": "in"
+      },
+      {
+        "arg": "r_rebut",
+        "index": 7,
+        "label": "in"
+      }
+    ]
+  }
+}

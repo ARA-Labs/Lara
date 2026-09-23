@@ -1,0 +1,70 @@
+# Paper A of the D3 agreement map (issue #64), as an INDEPENDENTLY CHECKABLE
+# artifact (#303).
+#
+# This directory is an ordinary self-contained paper artifact — `example.lara`,
+# its co-located `agreement-v1.policy.lara`, and the two derived files every
+# worked example carries (`example.core.sexp`, `expected.json`). Checked on its
+# own it accepts and its single claim `c_pos` is **justified**: nothing here
+# attacks `pa`, because no other paper's argument is nameable from this file.
+#
+# `../map.laramap` composes it with papers B, C and D. There these same bytes
+# are reread and rechecked, this member's local identities are qualified by the
+# alias `paper_a`, and the cross-member saturation GENERATES the rebut 2-cycle
+# with paper B that turns `c_pos` **contested**. Neither edge is declared here,
+# and neither could be: `pb` belongs to another artifact. The legacy single-file
+# oracle `examples/agreement-map/example.lara` declares both by hand, because
+# there all four papers live in one file.
+#
+# The `binding` rationale below therefore describes only THIS paper's own atom
+# choice. The cross-paper A3 alignment rationale — the assertion that A and B
+# formalize to the same (system, baseline, measurand, setting) — is map-owned
+# and lives in `../map.laramap`'s `alignments`, where it can name both sides.
+#
+# The paper contents and the declared `artifact` identity are illustrative
+# reconstructions, as everywhere in `examples/`: `sha256:aaaa...` is a
+# placeholder identity the author declares, not a checksum of these bytes.
+#
+# Write-up: docs/demos/d3-agreement-map.md.
+
+artifact paper_a_apt at sha256:aaaa...
+policy agreement-v1
+use backends [nd@1]
+
+claim c_pos
+  nl      = "APT outperforms Prune+Distill (CoFi) in accuracy on RoBERTa-base MNLI at 60% sparsity"
+  formal  = better(apt, cofi, accuracy, roberta_mnli_s60)
+  binding = { author = alice, audit-status = reviewed,
+              rationale = "A3: this paper's own atom choice; the map manifest records the cross-paper alignment" }
+
+leaf a_e1 : reports(paperA_exp1, compares(apt, cofi, accuracy, roberta_mnli_s60, favorable))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperA/table_2.csv#row=mnli-60]
+
+leaf a_e2 : matched_setup(apt, cofi, paperA_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4-setup]
+
+leaf a_e3 : valid_measurement(accuracy, paperA_exp1)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4-metrics]
+
+leaf a_e4 : variance_reported(paperA_exp1)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [paperA/table_2.csv#col=stddev]
+
+leaf a_e5 : scope_matched(apt, accuracy, roberta_mnli_s60)
+  kind       = attested
+  provenance = user
+  refs       = [paperA.pdf#sec=4-scope]
+
+arg pa : supports(c_pos) by controlled_comparison(apt, cofi, accuracy, roberta_mnli_s60, paperA_exp1)
+  discharge baseline_parity      with a_e2
+  discharge measurement_validity with a_e3
+  discharge variance_reported    with a_e4
+  discharge scope_match          with a_e5
+
+status c_pos

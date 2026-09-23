@@ -1,0 +1,158 @@
+artifact: rice
+group: paperbench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null
+claims:
+  - claim_id: C01
+    claim_type: comparative
+    # 2. proposition shape
+    proposition_shape:
+      sketch: "tighter_bound(rice_masknet_mixed_init, random_expl_mixed_init, suboptimality_gap(pi_star, pi_refined, rho))"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: "A nullary atom loses the compared pair (MaskNet-mixed vs random-mixed) and
+        the bounded quantity (sub-optimality gap V^pi*(rho) - V^pi'(rho)); the baseline-presence
+        CQ and the direction of the inequality are only checkable with the comparative
+        structure exposed."
+    # 3. inference scheme
+    inference_scheme:
+      scheme: analytic_bound_with_consequence_check
+      strict_or_defeasible: defeasible
+      premises:
+        - "Assumption 3.1: blinding the agent cannot increase expected return (eta(pi_bar) <= eta(pi))"
+        - "Assumption 3.4: MaskNet blinding probabilities order states consistently with
+           state importance under Q^pi (the mask identifies genuinely critical states)"
+        - "Lemma 3.5: sampling initial states from MaskNet-identified critical states is
+           equivalent to sampling from d^pihat_rho of an improved policy pihat with
+           eta(pihat) >= eta(pi), hence ||d^pi*/d^pihat_rho||_inf <= ||d^pi*/d^pi_rho||_inf"
+        - "Theorem 3.6 derivation: the smaller mismatch coefficient yields a tighter upper
+           bound on the sub-optimality gap for the mixed initial distribution"
+        - "E03 controlled comparison: refining method held fixed (RICE Algorithm 2) while
+           only the explanation method varies, so final-reward differences trace to
+           explanation quality (the bound's observable consequence)"
+        - "E01: the optimized mask network's fidelity significantly exceeds the random
+           explanation baseline, grounding that MaskNet critical states are informative"
+      supporting_experiments: [E01, E03]
+    # 4. strict certifier
+    strict_certifier: domain-checker(rl-suboptimality-bound)
+    certifier_note: "Only the deductive core is certifiable: given Assumptions 3.1/3.4 and
+      Lemma 3.5, derive ||d^pi*/d^pihat_rho||_inf <= ||d^pi*/d^pi_rho||_inf and hence the
+      tighter Theorem 3.6 bound — an algebraic/measure-theoretic derivation checkable by a
+      proof assistant or a dedicated inequality checker. The empirical premises (Assumption
+      3.4 holding for trained networks, E01/E03 results) are never strict."
+    # 5. critical questions
+    critical_questions:
+      - cq: "Is the refining method held fixed while only the explanation method varies?"
+        mandatory: true
+        status: met
+        basis: "E03 Setup: 'Fixed refining method (RICE Algorithm 2) with hyperparameters
+          from Table 3; vary explanation method'; Procedure steps 1-3."
+      - cq: "Is the random-explanation mixed-distribution baseline (the claim's comparison
+          target) actually run?"
+        mandatory: true
+        status: met
+        basis: "E03 Baselines: 'Random explanation, original StateMask explanation';
+          Procedure step 1 trains Random state selection."
+      - cq: "Is RICE's improvement over the random baseline statistically significant, as
+          the claim's own falsification criterion requires?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E03 Procedure step 4 reports only mean and std over 3 seeds; no
+          significance test is specified. In Table 1 Group 2 several MuJoCo gaps (e.g.
+          Hopper 3663.91 (20.98) vs 3648.98 (39.06)) lie within one std, so without a test
+          the claim is unestablished there, though larger gaps (Cage, Auto Driving,
+          Malware) point the same way — a gap, not a defeater."
+      - cq: "Is the distribution mismatch coefficient ||d^pi*/d^pihat_rho||_inf ever
+          measured directly?"
+        mandatory: false
+        status: unmet-gap
+        basis: "Absent from E01/E03 Setup and Procedure; the bound comparison rests
+          entirely on the Lemma 3.5 / Theorem 3.6 derivation, with E03 checking only the
+          downstream reward consequence."
+      - cq: "Does Assumption 3.4 (mask confidence tracks state importance) hold for the
+          trained mask networks?"
+        mandatory: true
+        status: met
+        basis: "Indirectly via E01: fidelity of the optimized mask network significantly
+          exceeds the Random explanation baseline across 8 environments and K in
+          {10..40}% (E01 Expected outcome, Procedure steps 3-8). Fidelity is a proxy, not
+          a direct test of the Q-value ordering — see holes."
+    # 6. leaf granularity
+    leaf_granularity: per-result-cell
+    leaves:
+      - atom: "Fixed RICE refining: Ours explanation final reward 3663.91 (20.98) vs Random 3648.98 (39.06) on Hopper"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)", "Table 1 §4.3"]
+      - atom: "Fixed RICE refining: Ours 3982.79 (3.15) vs Random 3969.64 (6.38) on Walker2d"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Fixed RICE refining: Ours -2.66 (0.03) vs Random -3.11 (0.42) on Reacher"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Fixed RICE refining: Ours 2138.89 (3.22) vs Random 2132.01 (0.76) on HalfCheetah"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Fixed RICE refining: Ours 16.56 (0.63) vs Random 15.09 (0.28) on Selfish Mining"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Fixed RICE refining: Ours -20.02 (0.32) vs Random -25.94 (2.34) on Cage Challenge 2"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Fixed RICE refining: Ours 17.03 (1.65) vs Random 11.72 (1.77) on Auto Driving"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Fixed RICE refining: Ours 57.53 (8.71) vs Random 48.60 (7.60) evasion % on Malware Mutation"
+        provenance: observed
+        refs: ["evidence/tables/table1_refining_performance.md (Group 2)"]
+      - atom: "Optimized StateMask fidelity significantly exceeds Random explanation across
+          8 environments (grounds that MaskNet critical states are informative)"
+        provenance: observed
+        refs: ["logic/experiments.md E01", "evidence/tables/table4_efficiency.md"]
+      - atom: "Lemma 3.5 / Theorem 3.6: MaskNet-guided initial sampling equals sampling
+          from an improved policy pihat, giving the smaller mismatch coefficient and the
+          tighter bound"
+        provenance: attested
+        refs: ["trace/exploration_tree.yaml N10", "Lemma 3.5, Theorem 3.6, Appendix B.2"]
+      - atom: "Assumption 3.4: mask blinding probabilities order states consistently with
+          Q^pi for the trained networks"
+        provenance: assumed
+        refs: ["trace/exploration_tree.yaml N10 (Assumption 3.4)"]
+    # 7. typed-attack candidates (all dead_end nodes: N03, N04, N08)
+    attack_candidates:
+      - node: N03
+        decision: none
+        target: "n/a"
+        rationale: "StateMask-R overfitting rules out the rejected p=1 (critical-states-only)
+          design and motivates the mixed distribution C01 presumes; it does not contest
+          C01's MaskNet-vs-random comparison or its bound derivation."
+      - node: N04
+        decision: none
+        target: "n/a"
+        rationale: "JSRL's random-frontier failure rules out a rejected alternative approach
+          and if anything corroborates C01's direction (uninformed frontiers underperform);
+          no edge."
+      - node: N08
+        decision: none
+        target: "n/a"
+        rationale: "The naive max eta(pi_bar) trivial solution is a rejected intermediate
+          design fixed by the blinding bonus (N09) before the mask network C01 relies on
+          was trained; it attacks no premise or inference of the final claim."
+    # 8. holes
+    holes:
+      - "Assumption 3.4 is never directly tested; E01 fidelity is only a proxy for the
+        mask-confidence/Q-value ordering the strict derivation needs."
+      - "No statistical significance test for Ours vs Random (Table 1 Group 2) despite the
+        claim's falsification criterion naming significance; several MuJoCo gaps are
+        within one std of 3 seeds."
+      - "The mismatch coefficient ||d^pi*/d^pihat_rho||_inf named in the falsification
+        criterion is never measured; only the downstream reward consequence is checked."
+    coverage_flags:
+      - "Two-stage support structure — a strict analytic derivation whose key premise
+        (Assumption 3.4) is only empirically proxied, plus a separate defeasible
+        consequence-check experiment — does not fit a single scheme slot; had to coin the
+        composite scheme name analytic_bound_with_consequence_check to avoid flattening
+        the strict step into the empirical comparison."
+    uncertain: false
+    note: "Claim conclusion is about a theoretical bound; E03 tests an observable
+      consequence (final reward), not the bound itself. Scheme choice documented in
+      coverage_flags rather than marked uncertain."

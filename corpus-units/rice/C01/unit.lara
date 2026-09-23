@@ -1,0 +1,82 @@
+# Corpus unit rice/C01 — justified (the analytic-bound / consequence-check two-strand path)
+#
+# Source: m0/annotations/rice.yaml C01 (comparative, analytic_bound_with_consequence_check;
+# corpus pin 62e9b54). Headline: RICE achieves a tighter sub-optimality bound via an
+# explanation-guided mixed initial distribution — MaskNet-identified critical states give a
+# smaller distribution-mismatch coefficient (linf norm) than the random-explanation baseline
+# (Lemma 3.5, Theorem 3.6), yielding a tighter Theorem 3.6 bound; E03 checks the observable
+# consequence (final reward) across 8 environments.
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * Two support strands (M0 summary section 3(a): rice C01 is a heterogeneous-support case).
+#     Strand A is the analytic derivation (Lemma 3.5 / Theorem 3.6). Strand B is the E03
+#     controlled comparison of final reward. They conclude DIFFERENT predicates
+#     (holds_analytically vs better), so they cannot both conclude one claim formal; the
+#     "two complete args to the same formal" option is unavailable. Strand B is also
+#     incomplete at corpus-v1's bar (its significance/variance CQ is unmet-gap). So per the
+#     "pick the binding strand and note the other" rule I take the ANALYTIC strand as binding:
+#     the annotation scheme (analytic_bound_with_consequence_check) maps to analytic_argument,
+#     and the claim title is explicitly about the bound.
+#   * assumptions_hold is discharged from annotation CQ "Does Assumption 3.4 hold?" (met:
+#     E01 fidelity of the optimized mask network significantly exceeds Random across 8 envs,
+#     an empirical proxy the annotator rated met), together with Assumption 3.1.
+#   * scope_licensed has no matching annotated CQ; discharged on the honest basis that
+#     Theorem 3.6 / Lemma 3.5 derive the tighter bound for exactly the claimed mixed initial
+#     distribution (Appendix B.2) — recorded here per the no-matching-CQ rule.
+#   * Strand B and its gap are noted, not lowered: E03 reports mean and std over 3 seeds with
+#     no significance test (annotation CQ3, mandatory unmet-gap), and the mismatch coefficient
+#     is never measured directly (CQ4, optional unmet-gap). These bound the empirical
+#     consequence-check strand, not the binding analytic derivation. The strict arithmetic
+#     adapter for the derivation does not exist yet (policy design note); it lowers through the
+#     defeasible analytic_argument until then.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact rice at sha256:1198f69a94a0
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim -------------------------------------------------------------------------
+
+claim c01
+  nl      = "RICE achieves a tighter sub-optimality bound via an explanation-guided mixed initial distribution: MaskNet-identified critical states give a smaller distribution mismatch coefficient (linf norm) than the random-explanation baseline (Lemma 3.5, Theorem 3.6), so the mixed-distribution bound is tighter; E03 checks the observable consequence (final reward) but reports no significance test"
+  formal  = holds_analytically(rice_mixed_tighter_bound)
+  binding = { author = m0-annotator, audit-status = unreviewed }
+
+# --- Evidence leaves ----------------------------------------------------------------------------
+
+# Principal premise: the Lemma 3.5 / Theorem 3.6 derivation that MaskNet-guided initial sampling
+# equals sampling from an improved policy, giving the smaller mismatch coefficient and tighter bound.
+leaf e1 : derives(masknet_bound_derivation, rice_mixed_tighter_bound)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/claims.md#C01, Lemma-3-5, Theorem-3-6, Appendix-B-2, trace/exploration_tree.yaml#N10]
+
+# assumptions_hold: Assumption 3.1 (blinding cannot increase return) and Assumption 3.4 (mask
+# confidence tracks state importance), the latter met via the E01 fidelity proxy (annotation CQ met).
+leaf e2 : assumptions_established(masknet_bound_derivation)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [Assumption-3-1, Assumption-3-4, logic/experiments.md#E01]
+
+# scope_licensed: Theorem 3.6 derives the tighter bound for exactly the claimed mixed initial
+# distribution (no-matching-CQ honest basis).
+leaf e3 : scope_licensed(rice_mixed_tighter_bound)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [Theorem-3-6, Appendix-B-2]
+
+# --- The support argument (binding analytic strand) ---------------------------------------------
+
+arg a1 : supports(c01) by analytic_argument(rice_mixed_tighter_bound, masknet_bound_derivation)
+  discharge assumptions_hold with e2
+  discharge scope_licensed   with e3
+
+status c01
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF: a1 alone, unattacked -> in (grounded).
+# Claim status:
+#   c01 -> justified (its complete support a1 is `in`; spec section 8 aggregation)

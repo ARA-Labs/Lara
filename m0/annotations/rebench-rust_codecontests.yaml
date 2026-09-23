@@ -1,0 +1,200 @@
+artifact: rebench-rust_codecontests
+group: rebench
+annotator: "ai-executed (claude, 2026-07-21)"
+deadend_cap: null   # 7 dead ends total (N09, N10, M02, M06, M07, M08, M09) — under the 15 cap, all classified
+claims:
+  - claim_id: C02
+    claim_type: implementation-behavioral
+    proposition_shape:
+      sketch: "generation_batch_config(shipped_scaffold, n_per_call=18, max_global_loops=3, early_return_on_first_survivor=true)"
+      arity: 4
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim conjoins three independently checkable code facts (n=18 at the
+        generation call, loop cap of 3, early-return control flow) plus the
+        derived bound 18 x 3 = 54. A nullary atom would make the arithmetic
+        bound and the per-fact falsifiers ("different n", "more than 3 loops")
+        uncheckable as separate attack surfaces.
+    inference_scheme:
+      scheme: code_inspection
+      strict_or_defeasible: strict
+      premises:
+        - "The inspected src/kernel/solve_code_contests_rust.py is the module that was shipped and scored (same artifact as official_solution/score.log)"
+        - "tries=18 and num_global_loops=3 are module-level constants that reach the generation call site unmodified (n=tries in chat.completions.create)"
+        - "The loop body returns a survivor as soon as passed_evaluations is non-empty, so later batches execute only when earlier batches yield zero survivors"
+        - "No dynamic override (env var, CLI flag, monkey-patch) changes these constants at runtime"
+      supporting_experiments: [E01, E05]
+    strict_certifier: domain-checker(static-code-inspector)
+    certifier_note: >-
+      A static checker over the shipped module can certify all three facts
+      algorithmically: constant bindings tries=18 / num_global_loops=3, dataflow
+      from those constants to the n= and range() sites, and the early-return on
+      non-empty survivor set; the 18*3=54 candidate bound is arithmetic over
+      certified constants. Verified by direct inspection of the shipped source
+      in this annotation pass.
+    critical_questions:
+      - cq: "Is the inspected module identical to the one that produced the official reference score?"
+        mandatory: true
+        status: met
+        basis: "E10 runs 'the shipped solver' for score.log; src/kernel/solve_code_contests_rust.py is that shipped kernel, and E01 cites its line 25 directly"
+      - cq: "Is tries=18 actually bound at the generation call site rather than being dead configuration?"
+        mandatory: true
+        status: met
+        basis: "E01 evidence (line 25) plus the call site cited in claims.md proof (line 173); confirmed in the shipped source: n=tries inside chat.completions.create"
+      - cq: "Does anything mutate n or the loop count between iterations (would break the 54-candidate bound)?"
+        mandatory: false
+        status: met
+        basis: "E05 method shows a plain 'for i in range(num_global_loops)' with a time-based break; constants are module-level and never reassigned"
+      - cq: "Do runtime traces (API logs) confirm the provider returned 18 completions per call?"
+        mandatory: false
+        status: unmet-gap
+        basis: "No per-call API log appears in evidence/; E10's score.log records only the final score, so the runtime half rests on the static reading alone"
+    leaf_granularity: per-experiment-claim
+    leaves:
+      - atom: "solve_code_contests_rust.py binds tries = 18 at module level"
+        provenance: observed
+        refs: ["src/kernel/solve_code_contests_rust.py:25", "E01 evidence"]
+      - atom: "solve_code_contests_rust.py binds num_global_loops = 3 at module level"
+        provenance: observed
+        refs: ["src/kernel/solve_code_contests_rust.py:27", "E05 evidence"]
+      - atom: "The chat.completions.create call in generate_solution passes n=tries"
+        provenance: observed
+        refs: ["src/kernel/solve_code_contests_rust.py:173 (claims.md proof)", "verified in shipped source"]
+      - atom: "generate_solution returns (single survivor or vote result) as soon as passed_evaluations is non-empty, so later batches run only on the zero-survivor tail"
+        provenance: observed
+        refs: ["src/kernel/solve_code_contests_rust.py:188-194", "E05 result ('Exits the loop early as soon as any batch produces a surviving solution')"]
+    attack_candidates:
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "Rejected alternative generation path (Python-first, commented out); says nothing about the active n=18/3-loop configuration."
+      - node: N10
+        decision: none
+        target: "n/a"
+        rationale: "Unimplemented repair plan is a rejected design branch; it does not contest the shipped batch configuration."
+      - node: M02
+        decision: none
+        target: "n/a"
+        rationale: "MALT agents failing to rediscover filter-then-vote is an observation about other scaffolds, not about the shipped code's constants."
+      - node: M06
+        decision: none
+        target: "n/a"
+        rationale: "Context-trim replay loops afflict MALT harness runs; no bearing on the official module's control flow."
+      - node: M07
+        decision: none
+        target: "n/a"
+        rationale: "SyntaxError class in MALT-written scaffolds; the official module is not implicated."
+      - node: M08
+        decision: none
+        target: "n/a"
+        rationale: "Generator-ceiling plateau concerns MALT prompt variants; irrelevant to what n the shipped code requests."
+      - node: M09
+        decision: none
+        target: "n/a"
+        rationale: "Validation/test conflation is a MALT budget-accounting failure; no edge to C02."
+    holes:
+      - "Runtime confirmation is open: no API-side evidence that 18 completions were actually returned per call in the scoring run (static reading only)"
+    coverage_flags: []
+    uncertain: false
+    note: >-
+      All four leaves re-verified against the shipped source in this pass; C02's
+      cited facts hold exactly. Adjacent observation (affects C06/E05, not C02):
+      the shipped elapsed-time guard is 200 s ('> 200'), not the 80 s stated in
+      E05/C06 — evidence that line-cited constants in the prose can drift, though
+      C02's own constants do not.
+
+  - claim_id: C09
+    claim_type: implementation-behavioral
+    proposition_shape:
+      sketch: "planned_but_absent(candidate_repair, dev_notes(notes_md_22), shipped_module(solve_code_contests_rust_py))"
+      arity: 3
+      phase0_nullary_sufficient: false
+      note: >-
+        The claim is a conjunction of a positive documentary fact (repair listed
+        under 'Things to try now') and a negative code fact (no repair loop in
+        the shipped module), with distinct evidence bases and distinct
+        falsifiers. A nullary atom would fuse them and lose the ability to
+        attack the documentary half (notes.md authenticity) separately from the
+        absence half (code inspection).
+    inference_scheme:
+      scheme: plan_vs_shipped_diff
+      strict_or_defeasible: defeasible
+      premises:
+        - "notes.md:22 authentically lists 'Try doing repair on attempts that compiled' under 'Things to try now'"
+        - "notes.md:24's summary of what was shipped (chain-of-thought + 18 generations + filter + vote) is an exhaustive enumeration of the shipped mechanism"
+        - "The shipped solve_code_contests_rust.py contains no code path that feeds evaluator failure output back to GPT-3.5 for a second attempt"
+        - "notes.md reflects the actual development history of the shipped solution"
+      supporting_experiments: [E08]
+    strict_certifier: domain-checker(callsite-enumeration)
+    certifier_note: >-
+      The absence half admits a strict sub-step: a checker can certify that the
+      module's OpenAI completion call sites are exactly {generation, vote,
+      commented-out python-translate}, from which 'no repair call exists'
+      follows. The semantic judgment that none of these constitutes repair, and
+      the documentary half (notes.md reading), remain defeasible — hence the
+      scheme overall is defeasible with one certifiable step.
+    critical_questions:
+      - cq: "Is the primary planning document (notes.md) included in or independently verifiable from the artifact?"
+        mandatory: true
+        status: unmet-gap
+        basis: "E08 evidence cites only [notes.md:22] and claims.md proof adds notes.md:24, but no notes.md file ships anywhere in the artifact tree — the 'planned' half rests on citation, leaving the claim attested rather than defeated"
+      - cq: "Was the whole shipped module inspected for a repair path, rather than relying on the notes.md:24 summary alone?"
+        mandatory: true
+        status: met
+        basis: "E08 result states 'Not implemented in the shipped solution'; independently checkable because src/kernel/solve_code_contests_rust.py ships with the artifact (re-verified: no repair identifier, no failure-feedback call site)"
+      - cq: "Could repair exist in disabled/commented form, as the Python-first path does?"
+        mandatory: false
+        status: met
+        basis: "E07 documents the only commented-out block (lines 195-216) as the Python-translate path; no commented repair code exists in the module"
+    leaf_granularity: per-experiment-claim
+    leaves:
+      - atom: "notes.md:22 lists 'Try doing repair on attempts that compiled' under 'Things to try now'"
+        provenance: attested
+        refs: ["E08 provenance (notes.md:22)", "trace/exploration_tree.yaml node N10 hypothesis/source"]
+      - atom: "notes.md:24's final summary names only chain-of-thought, 18 generations, 6 evaluations, and vote — no repair"
+        provenance: attested
+        refs: ["claims.md C09 proof (notes.md:24)", "trace node N10 failure_mode"]
+      - atom: "The shipped solve_code_contests_rust.py contains no repair loop: no identifier or call site feeds compile/test failure output back into a second completion request"
+        provenance: observed
+        refs: ["src/kernel/solve_code_contests_rust.py (full-module inspection: completion call sites are generation, vote, and the commented python-translate block only)"]
+    attack_candidates:
+      - node: N09
+        decision: none
+        target: "n/a"
+        rationale: "Parallel explored-not-shipped branch (Python-first); documents a sibling dead end and neither contests the repair plan nor its absence."
+      - node: N10
+        decision: none
+        target: "n/a"
+        rationale: "N10 is the documentary basis of C09 itself — a dead end recording planned-not-shipped status supports the claim; support is not an attack edge."
+      - node: M02
+        decision: none
+        target: "n/a"
+        rationale: "MALT failure to rediscover filter-then-vote says nothing about repair in the official solution; also consistent with C09's falsifier never firing."
+      - node: M06
+        decision: none
+        target: "n/a"
+        rationale: "MALT context-trim replay is a harness pathology; no bearing on official dev history or the shipped module."
+      - node: M07
+        decision: none
+        target: "n/a"
+        rationale: "MALT scaffold SyntaxErrors concern agent-written Python; irrelevant to the presence or absence of repair in the official module."
+      - node: M08
+        decision: none
+        target: "n/a"
+        rationale: "Generator-ceiling plateau is about GPT-3.5 sampling limits in MALT runs, not about the official solution's feature set."
+      - node: M09
+        decision: none
+        target: "n/a"
+        rationale: "Validation/test conflation is a MALT accounting failure; no edge to C09."
+    holes:
+      - "notes.md, the sole documentary source for the 'planned' half, is not included in the artifact; leaves 1-2 are citation-only"
+      - "The artifact's proof for the absence half cites only notes.md:22,24 — no line-range or call-site enumeration of the module is given in-artifact (the absence is verifiable from the shipped source but is not evidenced by the artifact itself)"
+    coverage_flags:
+      - "Negative existential over a code artifact ('no repair loop exists anywhere in the module') has no per-locus construct: it can only be expressed as one opaque inspected-absence leaf, not as a quantified, checkable enumeration of the module's call sites"
+    uncertain: false
+    note: >-
+      'Planned' and 'not implemented' were both re-checked in this pass: grep
+      for repair over src/kernel/*.py returns nothing and the only completion
+      call sites are generation, vote, and the commented python-translate block;
+      notes.md itself could not be checked because it is absent from the
+      artifact.

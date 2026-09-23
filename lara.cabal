@@ -1,0 +1,264 @@
+cabal-version:      3.0
+name:               lara
+version:            0.1.0.0
+synopsis:           A checker for the arguments behind research claims
+description:        LARA is a small language for writing down the argument
+                    behind a research claim: the evidence, the reasoning
+                    steps, and the caveats. A program then checks the
+                    argument automatically.
+                    .
+                    This package is the trusted Haskell checker: parser,
+                    elaborator, claim-support compiler, grounded evaluator,
+                    strict backends, and CLI. The language is specified in
+                    docs/spec.md (frozen v0.1; current core lara-core@0.2);
+                    the Lean mechanization lives in lean/.
+license:            MIT
+license-file:       LICENSE
+author:             Yifeng He, Jiachen Liu
+maintainer:         Yifeng He <yfhe.prsn@gmail.com>
+build-type:         Simple
+extra-doc-files:    README.md
+
+common warnings
+    ghc-options: -Wall -Werror=missing-fields
+
+library
+    import:           warnings
+    hs-source-dirs:   src
+    other-modules:    Lara.Admission.Internal
+                      Lara.Driver.Internal
+                      Lara.Mutate.Accept.Build
+                      Lara.Mutate.Accept.Ops
+                      Lara.Mutate.Outcome
+                      Lara.Mutate.Seed
+                      Lara.Mutate.Sites
+                      Lara.Mutate.Sites.Cert
+                      Lara.Mutate.Sites.Conflict
+                      Lara.Mutate.Sites.Localize
+                      Lara.Mutate.Sites.Nav
+    exposed-modules:  Lara.Prop
+                      Lara.Strict
+                      Lara.Strict.Cell
+                      Lara.Strict.Deps
+                      Lara.Strict.Insp
+                      Lara.Strict.ND
+                      Lara.Strict.ND.Internal
+                      Lara.Strict.Ord
+                      Lara.Strict.RA
+                      Lara.AST
+                      Lara.Sigma
+                      Lara.Sigma.WellSorted
+                      Lara.Admission
+                      Lara.Replay
+                      Lara.Syntax
+                      Lara.Elaborate
+                      Lara.Source.Load
+                      Lara.Elaborate.Internal
+                      Lara.Elaborate.Error
+                      Lara.Elaborate.CertSlots
+                      Lara.Elaborate.FormulaNames
+                      Lara.Elaborate.NDNamed
+                      Lara.Elaborate.SlotNames
+                      Lara.Elaborate.Subst
+                      Lara.Elaborate.Comparison
+                      Lara.Elaborate.ValueBinding
+                      Lara.Examples
+                      Lara.Negatives
+                      Lara.Term
+                      Lara.Formula
+                      Lara.ConstantSpec
+                      Lara.Kernel
+                      Lara.Wire
+                      Lara.Map.Types
+                      Lara.Map.Wire
+                      Lara.Map.Load
+                      Lara.Map.Load.Internal
+                      Lara.Map.Qualify
+                      Lara.Map.Qualify.Internal
+                      Lara.Map.Link
+                      Lara.Map.Driver
+                      Lara.PW.Surface
+                      Lara.PW.Sorted
+                      Lara.PW.Wire
+                      Lara.PW.Run
+                      Lara.Policy
+                      Lara.SupportTerm
+                      Lara.SupportTerm.Internal
+                      Lara.Attack
+                      Lara.Compile
+                      Lara.Compile.Internal
+                      Lara.Grounded
+                      Lara.Semantics
+                      Lara.Update
+                      Lara.Runtime
+                      Lara.Check
+                      Lara.Blocked
+                      Lara.Check.Internal
+                      Lara.Reporting
+                      Lara.Diagnostics
+                      Lara.Driver
+                      Lara.ExpectedJson
+                      Lara.Mutate
+                      Lara.Mutate.Accept
+                      Lara.Mutate.Codec
+                      Lara.Mutate.Cycle
+                      Lara.Mutate.Manifest
+                      Lara.Mutate.Sorts
+                      Lara.Mutate.Suite
+                      Lara.Measure
+                      Lara.ClaimSupport
+                      Lara.BindingAudit
+                      Lara.BindingAudit.Tsv
+                      Lara.BindingAudit.Types
+                      Lara.AtomicWrite
+                      Lara.ClaimSupport.Load
+                      Lara.MechReview
+                      Lara.MechReview.Load
+                      Lara.RunningExample
+                      Lara.WorkedExamples
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , containers
+                    , directory
+                    , filepath
+                    , process
+                    , text
+                    , unix
+    default-language: GHC2021
+
+executable lara
+    import:           warnings
+    hs-source-dirs:   app
+    main-is:          Main.hs
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , filepath
+                    , lara
+    default-language: GHC2021
+
+executable lara-bench
+    import:           warnings
+    hs-source-dirs:   scripts
+    main-is:          bench.hs
+    ghc-options:      -O2
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , directory
+                    , filepath
+                    , lara
+                    , process
+    default-language: GHC2021
+
+executable surface-conformance
+    import:           warnings
+    hs-source-dirs:   scripts
+    main-is:          surface-conformance.hs
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , directory
+                    , filepath
+                    , lara
+                    , text
+    default-language: GHC2021
+
+-- The Haskell half of the envelope's cross-decoder differential, built here
+-- rather than as a `lara` subcommand for the reason surface-conformance is: it
+-- is a harness door, not a CLI the frontend contract owes anyone. See
+-- scripts/map-envelope-differential.hs.
+executable map-envelope-differential
+    import:           warnings
+    hs-source-dirs:   scripts
+    main-is:          map-envelope-differential.hs
+    build-depends:    base >=4 && <5
+                    , containers
+                    , directory
+                    , filepath
+                    , lara
+    default-language: GHC2021
+
+test-suite lara-test
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Spec.hs
+    other-modules:    SigmaFixture
+                      CorpusUnitsSpec
+                      AdmissionSpec
+                      BindingAuditSpec
+                      Lara.AdmissionFixture
+                      Lara.TempTree
+                      ClaimSupportSpec
+                      MechReviewSpec
+                      RunningExampleSpec
+                      PropSpec
+                      ReplaySpec
+                      TestReplay
+                      StrictSpec
+                      RASpec
+                      OrdSpec
+                      InspSpec
+                      WireSpec
+                      MapWireSpec
+                      MapLoadSpec
+                      MapLinkSpec
+                      MapSpec
+                      MapExampleSpec
+                      PWSpec
+                      SyntaxSpec
+                      ThetaInferenceSpec
+                      CertSlotsSpec
+                      NDNamedSpec
+                      ValueBindingsSpec
+                      ElaborateSpec
+                      WorkedExamplesSpec
+                      SurfaceRewriteSpec
+                      SurfaceConformanceSpec
+                      CheckSpec
+                      BlockedSpec
+                      DifferentialSpec
+                      MutationSpec
+                      MeasureSpec
+                      AblationSpec
+                      RuntimeSpec
+                      ReportingSpec
+                      CliSpec
+                      FormulaNamesSpec
+                      SlotNamesSpec
+                      SemanticsSpec
+                      UpdateSpec
+                      TestAF
+    build-depends:    base >=4 && <5
+                    , lara
+                    , aeson
+                    , bytestring
+                    , containers
+                    , directory
+                    , filepath
+                    , process
+                    , text
+                    , unix
+                    , QuickCheck
+    build-tool-depends: lara:lara
+                      , lara:surface-conformance
+    default-language: GHC2021
+
+-- The `>>>` examples in the library's Haddock comments. The driver,
+-- test/doctest/Main.hs, exports the lib:lara repl session with
+-- `cabal repl --repl-multi-file` and runs the doctest build-tool over it
+-- (see the comment there for why doctest is not stood up as the repl
+-- compiler). The build-tool dependency is what makes doctest part of the
+-- package's own build plan rather than a tool each machine installs by
+-- hand; >= 0.25 is the first release with the `--no-magic` + `-unit @file`
+-- entry points that mode needs.
+test-suite lara-doctest
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test/doctest
+    main-is:          Main.hs
+    build-depends:    base >=4 && <5
+                    , directory
+                    , filepath
+                    , process
+                    , temporary
+    build-tool-depends: doctest:doctest >=0.25
+    default-language: GHC2021

@@ -1,0 +1,37 @@
+; The structural merge, reached through a real map.
+;
+; paper_adopt and paper_critic both declare an argument `conv` built by the
+; premise-less rule `community_convention(accuracy, glue)`. A leaf-free term has
+; nothing for qualification to rename, so the two members' terms are equal and
+; the linked unit carries ONE argument for them: the composite's `nodes` section
+; has two handles, `(paper_adopt conv …)` and `(paper_critic conv …)`, naming the
+; same index. That "many handles per one index" shape is what no map could
+; produce before, because neither shipped policy has a premise-less rule.
+;
+; Three things the merge forces are exercised here too: paper_critic's declared
+; rebuttals are re-pointed at the argument the merge kept (paper_adopt's, which
+; was declared first); the saturation's cross-member pair {paper_adopt,
+; paper_critic} against {paper_critic} generates the same two rebuttals, which
+; the attack dedupe folds into the transported ones; and paper_adopt's claim,
+; justified on its own, is contested in the map, where the objection it never
+; saw now attacks the argument it shares.
+;
+; Committed beside this manifest, regenerated with `lara` (never by hand; see
+; scripts/check-map-conformance.sh): map.core.sexp, the parity envelope handed
+; to the Lean driver, and map.verdict.sexp, the composite verdict both drivers
+; must print.
+(lara-map@1
+  (policy convention-v1 convention-v1.policy.lara)
+  (backends (backend nd 1))
+  (members
+    (member paper_adopt adopter.lara)
+    (member paper_critic critic.lara))
+  (alignments
+    (alignment
+      (ref paper_adopt c_std whole)
+      (ref paper_critic c_convention whole)
+      same
+      (author reviewer_r)
+      (audit-status reviewed)
+      (rationale "Both papers state the same convention about the same metric and benchmark, which is why their arguments for it are one argument in the map.")))
+  (questions))

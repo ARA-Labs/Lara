@@ -1,0 +1,15 @@
+# Only the policy name and admission decision differ between the three policies.
+policy withdrawn
+pred parallel_postulate()
+
+admission { (assumed, ai-executed) = quarantine }
+
+rule citation()
+  mode = strict
+  premises = [parallel_postulate()]
+  conclusion = parallel_postulate()
+  allow-trusted = false
+  certifiers = [(nd@1, sha256:empty)]
+
+# The certificate must use the premise; no conclusion is supplied by the theory.
+theory sha256:empty = []

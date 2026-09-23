@@ -1,0 +1,94 @@
+# Corpus unit test-time-model-adaptation/C04 — defeated (T2 exemplar: the undercut path)
+#
+# Source: m0/annotations/test-time-model-adaptation.yaml C04 (negative-result,
+# component_ablation; corpus pin 62e9b54). Headline: entropy-only fitness cannot provide stable
+# CMA-ES learning signals for test-time adaptation — norm-layer + entropy collapses to ~0.1%
+# average accuracy on ImageNet-C severity 5 (exp5) and prompts + entropy reaches only 44.9% vs
+# NoAdapt 55.5% (E05/E06, Table 9).
+#
+# Lowering notes (conventions: corpus-units/LOWERING.md):
+#   * A negative-result claim lowers as a POSITIVE ablation conclusion over a negative-content
+#     effect constant: contributes(entropy_only_fitness, cma_es_tta, adaptation_collapse).
+#   * variance_reported has no annotated CQ; discharged on the margins basis (0.1% vs 44.9% vs
+#     55.5% — orders of magnitude beyond plausible run noise), judgment recorded here per the
+#     no-matching-CQ rule. single_variable and protocol_parity are annotated met (E06's
+#     factorial grid swaps only the fitness; NoAdapt runs the identical protocol).
+#   * The defeat: the annotation's mandatory CQ "does the norm-layer instance isolate entropy?"
+#     is unmet-DEFEATER — E06 exp4 (norm + CMA + Eq. 5 fitness) collapses to ~0.1% just like
+#     exp5, so the norm-layer collapse occurs regardless of fitness; dead end N03 supplies the
+#     same alternative cause (CMA-ES cannot handle high-dimensional targets). This is an
+#     alternative-cause confound: a leaf-rooted challenge concluding the policy's
+#     confounded_ablation exception undercuts the support at the rule. The attacker is
+#     unattacked, so a1 is out and the claim is defeated — the paper's own factorial grid
+#     defeats its attribution sentence.
+#
+# Expected verdict is at the bottom of this file (golden oracle).
+
+artifact test-time-model-adaptation at sha256:59da7e38fd9f
+policy corpus-v1
+use backends [nd@1]
+
+# --- The headline claim ------------------------------------------------------------------------
+
+claim c04
+  nl      = "Entropy-only fitness cannot provide stable CMA-ES learning signals for online TTA: norm-layer + entropy collapses to 0.1% and prompts + entropy reaches 44.9% vs NoAdapt 55.5% on ImageNet-C severity 5"
+  formal  = contributes(entropy_only_fitness, cma_es_tta, adaptation_collapse)
+  binding = { author = m0-annotator, audit-status = reviewed }
+
+# --- Evidence leaves ---------------------------------------------------------------------------
+
+# Principal premise: the E05/E06 ablation cells (exp5 0.1%, exp6 44.9%, NoAdapt 55.5%), per
+# result cell in the annotation, folded into refs.
+leaf e1 : reports(e06, ablation_effect(entropy_only_fitness, cma_es_tta, adaptation_collapse, positive))
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05, logic/experiments.md#E06, Table-9, Table-5, trace/exploration_tree.yaml#N05-N06]
+
+leaf e2 : isolated(entropy_only_fitness, e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06]
+
+leaf e3 : matched_protocol(e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E05-setup, logic/experiments.md#E06-baselines]
+
+leaf e4 : variance_reported(e06)
+  kind       = attested
+  provenance = ai-executed
+  refs       = [Table-9, Table-5]
+
+# The confound: exp4 (norm + CMA + Eq. 5) collapses to ~0.1% WITHOUT entropy fitness, and N03
+# attributes the norm-layer collapse to CMA-ES dimensionality — an alternative cause for the
+# claim's key instance.
+leaf u1 : confounded_ablation(entropy_only_fitness, cma_es_tta, adaptation_collapse)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [logic/experiments.md#E06-exp4, trace/exploration_tree.yaml#N02-N03, Table-9]
+
+# --- The support argument ----------------------------------------------------------------------
+
+arg a1 : supports(c04) by component_ablation(entropy_only_fitness, cma_es_tta, adaptation_collapse, e06)
+  discharge single_variable   with e2
+  discharge protocol_parity   with e3
+  discharge variance_reported with e4
+
+# --- The paper's own grid undercuts the attribution --------------------------------------------
+
+# Licensed by `exception component_ablation : confounded_ablation(C, S, Q)` (corpus-v1). The
+# challenge contests the single_variable discharge — the swapped component is not the only
+# live difference once exp4 shows the collapse is fitness-independent on norm layers.
+arg d1 : challenges(single_variable(a1)) by leaf(u1)
+undercut d1 a1.rule
+
+status c04
+
+# ==============================================================================================
+# EXPECTED VERDICT (golden oracle)
+# ==============================================================================================
+# Compiled AF (declaration order): a1, d1.
+#   d1 -> in  (leaf-rooted, unattacked)
+#   a1 -> out (undercut by d1; undercuts always succeed, spec §7)
+# Claim status:
+#   c04 -> defeated (its only support a1 is `out`; spec §8 aggregation)

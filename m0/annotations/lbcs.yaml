@@ -1,0 +1,196 @@
+artifact: lbcs
+group: paperbench
+annotator: ai-executed (claude, 2026-07-21)
+deadend_cap: null
+claims:
+- claim_id: C03
+  claim_type: descriptive
+  proposition_shape:
+    sketch: converges_eps_optimal(lbcs, cond_progressable, cond_stable_moving, eps, f2_star)
+    arity: 5
+    phase0_nullary_sufficient: false
+    note: The claim is conditional (Conditions 1-2 => almost-sure convergence of f2 to f2*). A nullary
+      atom would hide the condition premises that undercutters and C04's dependency need to target, and
+      the eps parameter that defines f2*.
+  inference_scheme:
+    scheme: dose_response
+    strict_or_defeasible: defeasible
+    premises:
+    - Increasing search time T yields test accuracy that rises then plateaus (around T=500) and coreset
+      size that keeps shrinking before plateauing at larger T (E03 trend).
+    - The finite-T plateau (T <= 2000) is representative of the t -> infinity limit asserted by Theorem
+      2.
+    - Conditions 1 (Progressable) and 2 (Stable Moving) hold in the tested F-MNIST/LeNet setting.
+    - 'E06 corroborates joint reduction: after LBCS both f1(m) and f2(m) fall below their initial values,
+      and larger eps gives smaller f2 in expectation.'
+    supporting_experiments:
+    - E03
+    - E06
+  strict_certifier: domain-checker(proof-assistant)
+  certifier_note: The claim is Theorem 2, a deductive derivation from Conditions 1-2; a mechanized proof
+    checker (e.g. Lean) is the smallest strict certifier for that step. The artifact never exercises it
+    — its cited proof [E03] (plus E06) is empirical corroboration only, so no strict step is actually
+    discharged inside the artifact.
+  critical_questions:
+  - cq: Are Conditions 1 (Progressable) and 2 (Stable Moving) verified — or even operationalized as checkable
+      — in the experimental setting?
+    mandatory: true
+    status: unmet-gap
+    basis: E03 setup/procedure never states or tests the conditions; they appear only in the claim statement.
+  - cq: Does the finite-T sweep (T in {100,...,2000}) license the asymptotic, probability-1 conclusion?
+    mandatory: true
+    status: unmet-gap
+    basis: E03 procedure stops at T=2000 and reports plateaus; nothing in experiments.md bridges finite-T
+      plateau to the t -> infinity statement.
+  - cq: How many repetitions back the reported trend, and is run-to-run variance small relative to the
+      plateau effect?
+    mandatory: false
+    status: unmet-gap
+    basis: E03 procedure step 3 says 'repeat and average results across repetitions' without a count;
+      metrics list no std.
+  - cq: Is a single dataset/model pair (F-MNIST + LeNet, k in {1000, 2000}) sufficient to corroborate
+      a general convergence theorem?
+    mandatory: false
+    status: unmet-gap
+    basis: E03 setup fixes one dataset, one proxy/eval model, and two k values.
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: On F-MNIST (k=1000 and k=2000), test accuracy plateaus at roughly T >= 500 while coreset size
+      continues to decrease before plateauing at larger T (Table 7).
+    provenance: attested
+    refs:
+    - E03
+    - Table 7 (appendix)
+    - trace N12 evidence
+  - atom: On MNIST-S, final f1(m) and f2(m) are both lower than their initialization values over 20 repetitions
+      (Table 1).
+    provenance: attested
+    refs:
+    - E06
+    - Table 1
+    - trace N08
+  - atom: On MNIST-S, larger eps yields smaller mean f2(m) and larger mean f1(m) across runs (Table 1).
+    provenance: attested
+    refs:
+    - E06
+    - Table 1
+  attack_candidates:
+  - node: N03
+    decision: none
+    target: n/a
+    rationale: Rejected design alternative (re-running fixed-size Eq. 3 at many k values); it motivates
+      joint optimization and bears on no conclusion, inference, or premise of C03.
+  - node: N05
+    decision: none
+    target: n/a
+    rationale: Rules out the scalarization alternative (no universal lambda exists); this motivates the
+      lexicographic formulation rather than attacking C03's convergence conclusion or its support.
+  holes:
+  - Theorem 2's actual proof is not in the artifact; the claim's Proof field points only at empirical
+    E03.
+  - Conditions 1-2 are never operationalized or checked in any experiment.
+  - No bridge from finite-T plateau evidence to the t -> infinity probability-1 statement.
+  - Repetition count and variance for E03 are unstated.
+  coverage_flags:
+  - Asymptotic probabilistic modality P_{t->inf}[f2(mt) <= f2*] = 1 (almost-sure limit) has no direct
+    construct in the vocabulary; it collapses into an opaque predicate, losing the quantifier/limit structure.
+  uncertain: true
+  note: 'Scheme choice is the coin-flip: the claim is an analytic theorem, but the artifact''s support
+    is an empirical T-sweep. dose_response names the evidence actually offered (vary T, observe plateau);
+    analytic_proof would name the paper''s appendix proof, which the artifact does not contain.'
+- claim_id: C05
+  claim_type: comparative
+  proposition_shape:
+    sketch: best_top5_and_ratio_reduced(lbcs, imagenet1k, ratio_pre, ratio_opt, baseline_set)
+    arity: 5
+    phase0_nullary_sufficient: false
+    note: Conjunction of (a) argmax of Top-5 accuracy over the compared method set at each predefined
+      ratio and (b) the arithmetic inequality ratio_opt < ratio_pre (68.53 < 70, 77.82 < 80). A nullary
+      atom would hide the arithmetically checkable conjunct (b) and the method set that scopes conjunct
+      (a).
+  inference_scheme:
+    scheme: controlled_comparison
+    strict_or_defeasible: defeasible
+    premises:
+    - All methods select from the same ImageNet-1k training set at the same predefined ratios (70%, 80%).
+    - Post-selection training is identical across methods (ResNet-50 from scratch; SGD lr=0.01, batch
+      256, momentum 0.9, weight decay 0.001, 100 epochs), so Top-5 differences are attributable to the
+      selected coreset.
+    - The grouping trick (G=100 shared masks) is applied to both LBCS and the Probabilistic baseline,
+      so it does not asymmetrically advantage LBCS among mask-based methods.
+    - Reported optimized ratios equal final coreset size / n as defined in E05 procedure step 5.
+    supporting_experiments:
+    - E05
+  strict_certifier: lp
+  certifier_note: 'Two sub-steps are algorithmic over reported Table 4 cells: (i) the ratio-reduction
+    conjunct 68.53 < 70 and 77.82 < 80; (ii) the argmax check that LBCS''s Top-5 cell exceeds every other
+    method''s cell at each ratio. Both are linear-arithmetic comparisons over the leaf values. The step
+    from table cells to the empirical superiority conclusion stays defeasible.'
+  critical_questions:
+  - cq: Is the post-selection training protocol identical for all compared methods?
+    mandatory: true
+    status: met
+    basis: 'E05 procedure steps 2-4: the same ResNet-50/SGD protocol is applied to every method''s selected
+      coreset.'
+  - cq: Does the grouping acceleration trick treat comparable (mask-based) methods equally?
+    mandatory: true
+    status: met
+    basis: 'E05 setup and procedure step 2: grouping applied to the Probabilistic baseline as well as
+      LBCS.'
+  - cq: Are all baselines from the small-scale comparison present at ImageNet scale?
+    mandatory: false
+    status: unmet-gap
+    basis: 'E05 baselines: ''Influential not reported for ImageNet'' — the ''among all methods'' quantifier
+      in C05 silently shrinks by one method.'
+  - cq: Are repetitions and variance reported so the Top-5 margin exceeds run-to-run noise?
+    mandatory: true
+    status: unmet-gap
+    basis: E05 metrics list Top-5 accuracy and optimized ratio with no repetition count or std, unlike
+      E01's explicit 10-run mean +/- std.
+  leaf_granularity: per-result-cell
+  leaves:
+  - atom: At predefined ratio 70%, LBCS's Top-5 accuracy is the highest cell among {Uniform, EL2N, GraNd,
+      Moderate, CCS, Probabilistic, LBCS} (Table 4).
+    provenance: attested
+    refs:
+    - E05
+    - Table 4
+    - trace N11
+  - atom: At predefined ratio 80%, LBCS's Top-5 accuracy is the highest cell among the same method set
+      (Table 4).
+    provenance: attested
+    refs:
+    - E05
+    - Table 4
+    - trace N11
+  - atom: LBCS's optimized selection ratio at predefined ratio 70% is 68.53% (Table 4).
+    provenance: attested
+    refs:
+    - E05
+    - Table 4
+    - trace N11
+  - atom: LBCS's optimized selection ratio at predefined ratio 80% is 77.82% (Table 4).
+    provenance: attested
+    refs:
+    - E05
+    - Table 4
+    - trace N11
+  attack_candidates:
+  - node: N03
+    decision: none
+    target: n/a
+    rationale: Rejected multi-k alternative from the method-design phase; no bearing on the ImageNet result
+      or its inference.
+  - node: N05
+    decision: none
+    target: n/a
+    rationale: Rules out lambda-tuned scalarization as an alternative formulation; a motivational dead
+      end, not an attack on C05's conclusion, scheme, or premises.
+  holes:
+  - No repetition/variance reporting at ImageNet scale; the Top-5 margins may be within run noise.
+  - Influential baseline absent, so the 'all methods' scope is narrower than in C01/C02.
+  - Effect of the G=100 grouping on the achievable optimized ratio is not analyzed (selection granularity
+    is 100-example blocks).
+  coverage_flags: []
+  uncertain: false
+  note: claim_type adjudicated via double-annotation 2026-07-22.
